@@ -27,38 +27,38 @@ Read back from GitHub with `gh` and from `docker ps` on 2026-10-31.
 
 Each story fills in its own row in its pull request. The next story marks the row before it as merged.
 
-| Story | Branch                           | Pull request | State             | Notes                                                                                                |
-| ----- | -------------------------------- | ------------ | ----------------- | ---------------------------------------------------------------------------------------------------- |
-| P-1   | `docs/ground-rules`              | Pending      | Pull request open | Docs and repository files only, so there are no `pnpm` results. Its traceability row is due with P-3 |
-| P-2   | `chore/github-process`           |              | Not started       |                                                                                                      |
-| P-3   | `docs/problem-and-questions`     |              | Not started       |                                                                                                      |
-| P-4   | `docs/areas`                     |              | Not started       |                                                                                                      |
-| P-5   | `chore/monorepo-tooling`         |              | Not started       |                                                                                                      |
-| P-6   | `ci/verify-and-scan`             |              | Not started       |                                                                                                      |
-| P-7   | `feat/platform-shared-contracts` |              | Not started       |                                                                                                      |
-| P-8   | `feat/platform-api-shell`        |              | Not started       |                                                                                                      |
-| P-9   | `feat/platform-database`         |              | Not started       |                                                                                                      |
-| P-10  | `feat/platform-auth`             |              | Not started       |                                                                                                      |
-| P-11  | `feat/platform-web-shell`        |              | Not started       |                                                                                                      |
-| P-12  | `feat/platform-web-components`   |              | Not started       |                                                                                                      |
-| P-13  | `ci/docker`                      |              | Not started       |                                                                                                      |
-| P-14  | `test/e2e-smoke`                 |              | Not started       |                                                                                                      |
-| P-15  | `feat/platform-events`           |              | Not started       |                                                                                                      |
-| P-16  | `docs/diagrams`                  |              | Not started       |                                                                                                      |
-| P-17  | `feat/area1-ai-gateway`          |              | Not started       |                                                                                                      |
-| P-18  | `feat/area1-document-intake`     |              | Not started       |                                                                                                      |
-| P-19  | `feat/area1-mock-navision`       |              | Not started       |                                                                                                      |
-| P-20  | `feat/area1-connectors`          |              | Not started       |                                                                                                      |
-| P-21  | `feat/area1-synthetic-documents` |              | Not started       |                                                                                                      |
-| C-1   |                                  |              | Not started       | Area 2 base                                                                                          |
-| D-1   |                                  |              | Not started       | Area 3 base                                                                                          |
-| F-1   |                                  |              | Not started       | Area 4 base: access policy and masking                                                               |
-| F-2   |                                  |              | Not started       | Area 4 base: the audit viewer                                                                        |
-| G-1   |                                  |              | Not started       | Area 4 base: monitoring                                                                              |
-| P-22  | `feat/platform-design-system`    |              | Not started       | Only once Richie says the repository is private and the keys are in place                            |
-| P-23  | `feat/area1-order-constellation` |              | Not started       |                                                                                                      |
-| P-24  | `feat/platform-deploy`           |              | Not started       | Only once Richie confirms step 8 of his guide                                                        |
-| P-25  | `docs/slides`                    |              | Not started       |                                                                                                      |
+| Story | Branch                           | Pull request                                              | State             | Notes                                                                                                |
+| ----- | -------------------------------- | --------------------------------------------------------- | ----------------- | ---------------------------------------------------------------------------------------------------- |
+| P-1   | `docs/ground-rules`              | [#3](https://github.com/xiu2809xiu-rgb/orderpilot/pull/3) | Pull request open | Docs and repository files only, so there are no `pnpm` results. Its traceability row is due with P-3 |
+| P-2   | `chore/github-process`           |                                                           | Not started       |                                                                                                      |
+| P-3   | `docs/problem-and-questions`     |                                                           | Not started       |                                                                                                      |
+| P-4   | `docs/areas`                     |                                                           | Not started       |                                                                                                      |
+| P-5   | `chore/monorepo-tooling`         |                                                           | Not started       |                                                                                                      |
+| P-6   | `ci/verify-and-scan`             |                                                           | Not started       |                                                                                                      |
+| P-7   | `feat/platform-shared-contracts` |                                                           | Not started       |                                                                                                      |
+| P-8   | `feat/platform-api-shell`        |                                                           | Not started       |                                                                                                      |
+| P-9   | `feat/platform-database`         |                                                           | Not started       |                                                                                                      |
+| P-10  | `feat/platform-auth`             |                                                           | Not started       |                                                                                                      |
+| P-11  | `feat/platform-web-shell`        |                                                           | Not started       |                                                                                                      |
+| P-12  | `feat/platform-web-components`   |                                                           | Not started       |                                                                                                      |
+| P-13  | `ci/docker`                      |                                                           | Not started       |                                                                                                      |
+| P-14  | `test/e2e-smoke`                 |                                                           | Not started       |                                                                                                      |
+| P-15  | `feat/platform-events`           |                                                           | Not started       |                                                                                                      |
+| P-16  | `docs/diagrams`                  |                                                           | Not started       |                                                                                                      |
+| P-17  | `feat/area1-ai-gateway`          |                                                           | Not started       |                                                                                                      |
+| P-18  | `feat/area1-document-intake`     |                                                           | Not started       |                                                                                                      |
+| P-19  | `feat/area1-mock-navision`       |                                                           | Not started       |                                                                                                      |
+| P-20  | `feat/area1-connectors`          |                                                           | Not started       |                                                                                                      |
+| P-21  | `feat/area1-synthetic-documents` |                                                           | Not started       |                                                                                                      |
+| C-1   |                                  |                                                           | Not started       | Area 2 base                                                                                          |
+| D-1   |                                  |                                                           | Not started       | Area 3 base                                                                                          |
+| F-1   |                                  |                                                           | Not started       | Area 4 base: access policy and masking                                                               |
+| F-2   |                                  |                                                           | Not started       | Area 4 base: the audit viewer                                                                        |
+| G-1   |                                  |                                                           | Not started       | Area 4 base: monitoring                                                                              |
+| P-22  | `feat/platform-design-system`    |                                                           | Not started       | Only once Richie says the repository is private and the keys are in place                            |
+| P-23  | `feat/area1-order-constellation` |                                                           | Not started       |                                                                                                      |
+| P-24  | `feat/platform-deploy`           |                                                           | Not started       | Only once Richie confirms step 8 of his guide                                                        |
+| P-25  | `docs/slides`                    |                                                           | Not started       |                                                                                                      |
 
 ### Notes
 
