@@ -1,0 +1,69 @@
+# Build report
+
+One short section per prompt.
+
+## Prompt 001: Build the OrderPilot base
+
+The brief is [Prompt 001](ai/prompts/001-build-the-base.md). The base started on 2026-10-31.
+
+### Step 0
+
+Read back from GitHub with `gh` and from `docker ps` on 2026-10-31.
+
+| Item                                   | Result                                                                                                                                                                                                                                       |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ruleset `Protect main`                 | Active on the default branch, id 26237777. Rules: deletion, non-fast-forward, and pull requests (0 approvals, stale reviews dismissed, threads resolved, merge commits or squash). Admin bypass in pull request mode. No required checks yet |
+| Delete head branches after merge       | On                                                                                                                                                                                                                                           |
+| Merge methods                          | Merge commits and squash only                                                                                                                                                                                                                |
+| Default workflow permissions           | Read-only                                                                                                                                                                                                                                    |
+| Dependabot alerts and security updates | On                                                                                                                                                                                                                                           |
+| Secret scanning with push protection   | On                                                                                                                                                                                                                                           |
+| Private vulnerability reporting        | On                                                                                                                                                                                                                                           |
+| Issues, Projects and wiki              | On, and the wiki repository already exists                                                                                                                                                                                                   |
+| Containers                             | None running                                                                                                                                                                                                                                 |
+| First two issues                       | #1 for P-1 and #2 for P-2                                                                                                                                                                                                                    |
+
+### Stories
+
+Each story fills in its own row in its pull request. The next story marks the row before it as merged.
+
+| Story | Branch                           | Pull request | State             | Notes                                                                                                |
+| ----- | -------------------------------- | ------------ | ----------------- | ---------------------------------------------------------------------------------------------------- |
+| P-1   | `docs/ground-rules`              | Pending      | Pull request open | Docs and repository files only, so there are no `pnpm` results. Its traceability row is due with P-3 |
+| P-2   | `chore/github-process`           |              | Not started       |                                                                                                      |
+| P-3   | `docs/problem-and-questions`     |              | Not started       |                                                                                                      |
+| P-4   | `docs/areas`                     |              | Not started       |                                                                                                      |
+| P-5   | `chore/monorepo-tooling`         |              | Not started       |                                                                                                      |
+| P-6   | `ci/verify-and-scan`             |              | Not started       |                                                                                                      |
+| P-7   | `feat/platform-shared-contracts` |              | Not started       |                                                                                                      |
+| P-8   | `feat/platform-api-shell`        |              | Not started       |                                                                                                      |
+| P-9   | `feat/platform-database`         |              | Not started       |                                                                                                      |
+| P-10  | `feat/platform-auth`             |              | Not started       |                                                                                                      |
+| P-11  | `feat/platform-web-shell`        |              | Not started       |                                                                                                      |
+| P-12  | `feat/platform-web-components`   |              | Not started       |                                                                                                      |
+| P-13  | `ci/docker`                      |              | Not started       |                                                                                                      |
+| P-14  | `test/e2e-smoke`                 |              | Not started       |                                                                                                      |
+| P-15  | `feat/platform-events`           |              | Not started       |                                                                                                      |
+| P-16  | `docs/diagrams`                  |              | Not started       |                                                                                                      |
+| P-17  | `feat/area1-ai-gateway`          |              | Not started       |                                                                                                      |
+| P-18  | `feat/area1-document-intake`     |              | Not started       |                                                                                                      |
+| P-19  | `feat/area1-mock-navision`       |              | Not started       |                                                                                                      |
+| P-20  | `feat/area1-connectors`          |              | Not started       |                                                                                                      |
+| P-21  | `feat/area1-synthetic-documents` |              | Not started       |                                                                                                      |
+| C-1   |                                  |              | Not started       | Area 2 base                                                                                          |
+| D-1   |                                  |              | Not started       | Area 3 base                                                                                          |
+| F-1   |                                  |              | Not started       | Area 4 base: access policy and masking                                                               |
+| F-2   |                                  |              | Not started       | Area 4 base: the audit viewer                                                                        |
+| G-1   |                                  |              | Not started       | Area 4 base: monitoring                                                                              |
+| P-22  | `feat/platform-design-system`    |              | Not started       | Only once Richie says the repository is private and the keys are in place                            |
+| P-23  | `feat/area1-order-constellation` |              | Not started       |                                                                                                      |
+| P-24  | `feat/platform-deploy`           |              | Not started       | Only once Richie confirms step 8 of his guide                                                        |
+| P-25  | `docs/slides`                    |              | Not started       |                                                                                                      |
+
+### Notes
+
+- **Node.** `.node-version` is 24.22.0. The machine's own Node is 24.15.0, and Richie needs to upgrade it. The build used a portable 24.22.0 instead.
+- **Git identity.** The repository's local git config uses the GitHub no-reply address.
+- **A second ruleset.** `protect-main`, id 26237858, is also active on the default branch. Step 0 did not ask for it. It has the same deletion, non-fast-forward and pull request rules, but allows rebase, does not require threads to be resolved and has no bypass. GitHub applies both, so the stricter rule wins and merging still works as step 0 intends. It stays in place until Richie decides, because removing it is his call. P-2's `rulesets/main.json` has to know the answer.
+- **The board.** A private board called OrderPilot delivery already exists, with Status, Sprint, Estimate and Area fields. Its 51 earlier items all come from another repository, and this story left them alone. Issue #1 is on it, at In Progress. P-2 has to adopt it or replace it, and clearing those items needs Richie's yes.
+- **For P-5.** `.claude/settings.json` has no final newline and stays byte for byte, so it fails Prettier as it is and must go in `.prettierignore`. The prompt stays unchanged too, though it already passes.
