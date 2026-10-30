@@ -1,0 +1,18 @@
+# https://editorconfig.org
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# PEP 8, for the Blender scripts in assets-src/3d/.
+[*.py]
+indent_size = 4
+
+# Committed exactly as Richie placed it, which is without a final newline.
+[.claude/settings.json]
+insert_final_newline = unset
