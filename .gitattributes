@@ -1,0 +1,28 @@
+# Every text file is LF in the repository and in every working tree, whatever
+# core.autocrlf says. Windows machines default it to true here, which would
+# otherwise check files out as CRLF and turn small edits into whole-file diffs.
+* text=auto eol=lf
+
+# Binary formats: never normalise them and never diff them as text.
+*.7z    binary
+*.avif  binary
+*.blend binary
+*.exr   binary
+*.gif   binary
+*.glb   binary
+*.gz    binary
+*.hdr   binary
+*.ico   binary
+*.jpeg  binary
+*.jpg   binary
+*.otf   binary
+*.pdf   binary
+*.png   binary
+*.pptx  binary
+*.tgz   binary
+*.ttf   binary
+*.webp  binary
+*.woff  binary
+*.woff2 binary
+*.xlsx  binary
+*.zip   binary
