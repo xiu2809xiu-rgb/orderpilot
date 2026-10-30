@@ -1,0 +1,56 @@
+# Environment files hold secrets. Only the documented example is tracked.
+.env*
+!.env.example
+
+# Client samples never enter Git. Only the folder's README is tracked.
+samples/*
+!samples/README.md
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+build/
+dist/
+.turbo/
+.vite/
+*.tsbuildinfo
+
+# Test and coverage output
+blob-report/
+coverage/
+playwright-report/
+test-results/
+
+# AI tool folders stay on each person's machine. settings.json is the one
+# exception: it turns attribution off for everyone who clones the repository.
+.claude/*
+!.claude/settings.json
+.aider*
+.amazonq/
+.augment/
+.cline/
+.clinerules/
+.codex/
+.continue/
+.copilot/
+.cursor/
+.gemini/
+.junie/
+.kiro/
+.opencode/
+.qodo/
+.roo/
+.tabnine/
+.windsurf/
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
