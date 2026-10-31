@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useThemeStore, type ThemePreference } from "@/lib/theme";
 import { useSessionStore } from "@/stores/session";
-import { PageHeader } from "../PageHeader";
+import { PageHeader } from "@/components/common/PageHeader";
 import { ServiceChecksCard } from "./ServiceChecksCard";
 
 const THEMES: { value: ThemePreference; icon: LucideIcon }[] = [

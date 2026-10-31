@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useRouteError } from "react-router";
 import { Button } from "@/components/ui/button";
 import { traceIdOf } from "@/lib/api/errors";
-import { ErrorState } from "./ErrorState";
+import { StatePanel } from "@/components/common/StatePanel";
 
 /**
  * The crash page. It uses plain links, not the router's, so that it also works
@@ -19,7 +19,7 @@ export function CrashView({ error }: { error: unknown }) {
   );
   return (
     <main id="main" className="p-s3">
-      <ErrorState
+      <StatePanel
         icon={OctagonAlert}
         title={t("errors.crash.title")}
         description={t("errors.crash.description")}
@@ -36,7 +36,7 @@ export function CrashView({ error }: { error: unknown }) {
         <Button variant="outline" asChild>
           <a href="/">{t("errors.crash.home")}</a>
         </Button>
-      </ErrorState>
+      </StatePanel>
     </main>
   );
 }
