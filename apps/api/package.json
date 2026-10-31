@@ -9,6 +9,7 @@
     "dev": "node scripts/dev.mjs",
     "build": "tsc -p tsconfig.build.json",
     "start": "node dist/main.js",
+    "openapi": "node scripts/export-openapi.mjs",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run",
     "test:unit": "vitest run --project unit",

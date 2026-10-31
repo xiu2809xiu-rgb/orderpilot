@@ -717,6 +717,7 @@ Acceptance criteria:
 - LCP and a Lighthouse run on the production build, with the figures recorded next to the screenshots.
 - A collapsible sidebar that remembers its state, and a list of keyboard shortcuts.
 - The refresh timer that runs a minute before the access token ends has a test with fake timers.
+- P-26 left out: generated hooks check each answer at run time with zod schemas generated from the OpenAPI file, and the error envelope is a documented response on every route, so a hook's error type is typed.
 
 ## Epic A: Document intake and AI extraction
 
