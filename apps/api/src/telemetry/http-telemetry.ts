@@ -15,7 +15,9 @@ import { rememberTraceId } from "./trace-context.js";
 export function routePatternOf(req: Request): string {
   const matched = req.route as { path?: unknown } | undefined;
   const path = matched?.path;
-  return typeof path === "string" ? `${req.baseUrl}${path}` : "unmatched";
+  // Nest's catch-all for a path no route takes (/api*path) is not a pattern anyone chose.
+  if (typeof path !== "string" || path.includes("*")) return "unmatched";
+  return `${req.baseUrl}${path}`;
 }
 
 /**

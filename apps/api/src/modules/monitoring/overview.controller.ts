@@ -15,7 +15,7 @@ import { mockClickstream, mockObservability } from "./observability.mock.js";
  */
 @ApiTags("Monitoring")
 @Controller("monitoring")
-export class ObservabilityController {
+export class OverviewController {
   @Get("observability")
   @RequirePermission("aiUsage.read")
   @ApiOperation({ summary: "Service health and recent traces (mock data)" })

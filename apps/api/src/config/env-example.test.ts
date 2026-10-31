@@ -87,7 +87,7 @@ describe("docker-compose.yml", () => {
     const images = [...compose.matchAll(/^\s+image: (\S+)$/gm)].map(
       (m) => m[1] ?? "",
     );
-    expect(images).toHaveLength(4);
+    expect(images).toHaveLength(5);
     for (const image of images)
       expect(image, image).toMatch(/:v?\d[\w.-]*$|:RELEASE\.[\w.-]+$/);
     for (const [, port] of compose.matchAll(/^\s+- "([^"]+:\d+:\d+)"$/gm)) {
@@ -96,8 +96,13 @@ describe("docker-compose.yml", () => {
   });
 
   it("has a health check for each service and a named volume for each store", () => {
-    expect(compose.match(/^\s+healthcheck:$/gm)).toHaveLength(4);
-    for (const volume of ["postgres-data", "redis-data", "minio-data"]) {
+    expect(compose.match(/^\s+healthcheck:$/gm)).toHaveLength(5);
+    for (const volume of [
+      "postgres-data",
+      "redis-data",
+      "minio-data",
+      "lgtm-data",
+    ]) {
       expect(compose).toContain(`  ${volume}:`);
     }
   });
@@ -122,5 +127,28 @@ describe("the pgvector and Mailpit additions", () => {
 describe("the database roles", () => {
   it("match the roles in @orderpilot/shared", () => {
     expect(Object.values(Role).sort()).toEqual([...ROLES].sort());
+  });
+});
+
+describe("the observability profile", () => {
+  it("runs otel-lgtm at one exact tag, only under the observability profile", () => {
+    expect(compose).toContain("image: grafana/otel-lgtm:0.38.0");
+    expect(compose).toMatch(/otel-lgtm:\n\s+profiles: \["observability"\]/);
+  });
+
+  it("puts Grafana on its own port, never 3000 which the API may use", () => {
+    const raw = parse(example);
+    expect(raw.GRAFANA_PORT).toBeDefined();
+    expect(raw.GRAFANA_PORT).not.toBe("3000");
+    expect(compose).toContain("${GRAFANA_PORT:-3300}:3000");
+  });
+
+  it("leaves every monitoring setting off in the example file", () => {
+    const config = AppConfig.fromEnv(expanded());
+    expect(config.monitoring).toEqual({
+      otlpEndpoint: null,
+      metricsToken: null,
+      sentryDsn: null,
+    });
   });
 });
