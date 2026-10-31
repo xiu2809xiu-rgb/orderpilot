@@ -98,7 +98,7 @@ describe("the test harness", () => {
       "seed workflows",
     ]);
     expect(lines.join("\n")).toContain(
-      "Synthetic demo data: 5 customers, 3 vendors, 30 items, 10 orders",
+      "Synthetic demo data: 40 customers, 12 vendors, 300 items, 120 orders",
     );
     expect(lines[1]).toContain("started already");
   });
