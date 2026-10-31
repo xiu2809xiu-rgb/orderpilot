@@ -7,7 +7,7 @@ import {
   type OrderFlow,
   type OrderStep,
   type OrderTimelineEvent,
-  type PaymentConfirmation,
+  type PaymentRecord,
   type Role,
 } from "@orderpilot/shared";
 import type {
@@ -109,13 +109,13 @@ function paymentOf(
 ): OrderFlow["payment"] {
   const percent = order.header.prepaymentPercent;
   const paymentStep = steps.find((step) => step.key === "payment-confirmed");
-  const confirmations: PaymentConfirmation[] = [];
+  const confirmations: PaymentRecord[] = [];
   if (compareDecimal(percent, "0") > 0 && paymentStep?.state === "done") {
     const share = (Number(percent) / 100).toFixed(4);
     confirmations.push({
       id: mockId(300_000 + Number(order.header.no.slice(3))),
       orderNo: order.header.no,
-      paymentType: "PREPAYMENT",
+      paymentType: "prepayment",
       amount: multiplyDecimal(linesTotal(order), share),
       currencyCode: "USD",
       reference: `TT-${order.header.no.slice(3)}-PRE`,

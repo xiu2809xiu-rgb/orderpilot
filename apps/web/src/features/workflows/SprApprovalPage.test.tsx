@@ -54,13 +54,13 @@ function spr(decision: null | { outcome: "approved"; by: string }) {
       approver: {
         displayName: "Anita Rao",
         setup: {
-          userId: "approver@example.test",
-          approverId: "management@example.test",
+          userId: "00000000-0000-4000-8000-000000000385",
+          approverId: "00000000-0000-4000-8000-000000000386",
           salesAmountApprovalLimit: "20000.00",
           purchaseAmountApprovalLimit: "5000.00",
           unlimitedSalesApproval: false,
           unlimitedPurchaseApproval: false,
-          substitute: "product.manager@example.test",
+          substituteUserId: "00000000-0000-4000-8000-000000000387",
         },
       },
       substituteName: "Prakash Menon",

@@ -2,7 +2,7 @@ import { z } from "zod";
 import { decimalStringSchema } from "../money.js";
 import { roleSchema } from "../roles.js";
 import { orderNoSchema } from "./common.js";
-import { paymentConfirmationSchema } from "./payment.js";
+import { paymentRecordSchema } from "./payment.js";
 
 /**
  * A step on the way an order takes. `state` says where the order is on that
@@ -48,7 +48,7 @@ export type OrderTimelineEvent = z.infer<typeof orderTimelineEventSchema>;
 export const orderPaymentSchema = z.object({
   prepaymentPercent: decimalStringSchema,
   amountDue: decimalStringSchema.nullable(),
-  confirmations: z.array(paymentConfirmationSchema),
+  confirmations: z.array(paymentRecordSchema),
 });
 export type OrderPayment = z.infer<typeof orderPaymentSchema>;
 

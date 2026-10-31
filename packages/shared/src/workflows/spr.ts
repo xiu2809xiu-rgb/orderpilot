@@ -2,8 +2,8 @@ import { z } from "zod";
 import { decimalStringSchema } from "../money.js";
 import { recordRefSchema } from "../record-number.js";
 import { roleSchema } from "../roles.js";
-import { approvalUserSetupSchema } from "./approval.js";
-import { PAYMENT_TYPES } from "./payment.js";
+import { approvalUserSetupSchema } from "../governance/approval.js";
+import { paymentTypeSchema } from "../governance/payment.js";
 import { notAppliedSchema, orderNoSchema } from "./common.js";
 
 export const sprNumberSchema = z
@@ -90,6 +90,6 @@ export type SprDecisionResult = z.infer<typeof sprDecisionResultSchema>;
 
 export const paymentResultSchema = notAppliedSchema.extend({
   orderNo: orderNoSchema,
-  paymentType: z.enum(PAYMENT_TYPES),
+  paymentType: paymentTypeSchema,
 });
 export type PaymentResult = z.infer<typeof paymentResultSchema>;

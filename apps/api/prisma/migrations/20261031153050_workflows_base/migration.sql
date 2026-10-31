@@ -2,7 +2,7 @@
 CREATE TYPE "TaskStatus" AS ENUM ('OPEN', 'DONE', 'CANCELLED');
 
 -- CreateEnum
-CREATE TYPE "PaymentType" AS ENUM ('PREPAYMENT', 'BALANCE', 'FULL_PAYMENT', 'REFUND', 'OTHER');
+CREATE TYPE "PaymentType" AS ENUM ('prepayment', 'deposit', 'balance', 'full-payment');
 
 -- CreateEnum
 CREATE TYPE "NotificationKind" AS ENUM ('REMINDER', 'ESCALATION', 'INFO');

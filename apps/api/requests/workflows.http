@@ -24,7 +24,7 @@ POST {{baseUrl}}/api/v1/workflows/orders/SO-0004/payments
 Content-Type: application/json
 X-CSRF-Token: {{csrf}}
 
-{ "paymentType": "PREPAYMENT", "amount": "1250.00", "currencyCode": "USD", "reference": "TT-0004", "paidOn": "2026-11-02" }
+{ "paymentType": "prepayment", "amount": "1250.00", "currencyCode": "USD", "reference": "TT-0004", "paidOn": "2026-11-02" }
 
 ### An SPR with its suggested fields, the stock figures and the approver's setup.
 GET {{baseUrl}}/api/v1/workflows/sprs/SPR-20261102-0001

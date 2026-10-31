@@ -121,11 +121,10 @@
     "confirmed": "Confirmed payments",
     "noneConfirmed": "No payment confirmed yet.",
     "types": {
-      "PREPAYMENT": "Prepayment",
-      "BALANCE": "Balance",
-      "FULL_PAYMENT": "Full payment",
-      "REFUND": "Refund",
-      "OTHER": "Other"
+      "prepayment": "Prepayment",
+      "deposit": "Deposit",
+      "balance": "Balance",
+      "full-payment": "Full payment"
     },
     "form": {
       "heading": "Confirm a payment",

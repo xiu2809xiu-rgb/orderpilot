@@ -159,7 +159,6 @@ describe("reminders", () => {
       pageSize: 25,
       total: 1,
       mock: true,
-      dataLabel: "Synthetic demo data",
     },
   });
 
@@ -188,7 +187,6 @@ describe("reminders", () => {
             pageSize: 25,
             total: 0,
             mock: true,
-            dataLabel: "Synthetic demo data",
           },
         }),
       ),

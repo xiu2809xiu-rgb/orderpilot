@@ -23,7 +23,7 @@ export function PaymentPanel({
   canConfirm: boolean;
 }) {
   const { t } = useTranslation("workflows");
-  const [type, setType] = useState<string>("PREPAYMENT");
+  const [type, setType] = useState<string>("prepayment");
   const [amount, setAmount] = useState("");
   const [reference, setReference] = useState("");
   const [paidOn, setPaidOn] = useState("");

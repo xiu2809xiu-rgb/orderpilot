@@ -31,7 +31,7 @@ describe("SPR approval within limits", () => {
 
 describe("the payment gate", () => {
   it.todo(
-    "holds a prepayment order until a PREPAYMENT confirmation covers the amount due",
+    "holds a prepayment order until a prepayment confirmation covers the amount due",
   );
   it.todo("does not release the order on a BALANCE or OTHER payment type");
   it.todo(

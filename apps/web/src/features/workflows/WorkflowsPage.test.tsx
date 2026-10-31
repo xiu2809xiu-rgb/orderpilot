@@ -46,7 +46,6 @@ function page(data: unknown[]) {
       pageSize: 25,
       total: data.length,
       mock: true,
-      dataLabel: "Synthetic demo data",
     },
   });
 }
@@ -144,7 +143,6 @@ describe("the task inbox", () => {
             pageSize: 25,
             total: 1,
             mock: true,
-            dataLabel: "Synthetic demo data",
           },
         });
       }),

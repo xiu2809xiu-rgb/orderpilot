@@ -1,20 +1,9 @@
 import { z } from "zod";
+import { paymentTypeSchema } from "../governance/payment.js";
 import { decimalStringSchema } from "../money.js";
 
-/**
- * The business type of a payment. Prepayment is the one the payment gate will
- * watch (Azri builds the gate); the others are here so a confirmation never has
- * to guess. The list is data for the form and the table, and it may grow.
- */
-export const PAYMENT_TYPES = [
-  "PREPAYMENT",
-  "BALANCE",
-  "FULL_PAYMENT",
-  "REFUND",
-  "OTHER",
-] as const;
-export const paymentTypeSchema = z.enum(PAYMENT_TYPES);
-export type PaymentType = z.infer<typeof paymentTypeSchema>;
+// The payment types are F-1's (area 4 owns the policy that reads them), so
+// they are imported here, never defined a second time.
 
 /** What Finance enters when confirming that money arrived. */
 export const paymentConfirmationInputSchema = z.object({
@@ -31,10 +20,10 @@ export type PaymentConfirmationInput = z.infer<
   typeof paymentConfirmationInputSchema
 >;
 
-export const paymentConfirmationSchema = paymentConfirmationInputSchema.extend({
+export const paymentRecordSchema = paymentConfirmationInputSchema.extend({
   id: z.uuid(),
   orderNo: z.string().min(1),
   confirmedAt: z.iso.datetime(),
   confirmedBy: z.string().min(1),
 });
-export type PaymentConfirmation = z.infer<typeof paymentConfirmationSchema>;
+export type PaymentRecord = z.infer<typeof paymentRecordSchema>;

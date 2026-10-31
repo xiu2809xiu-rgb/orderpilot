@@ -17,11 +17,10 @@ enum TaskStatus {
 }
 
 enum PaymentType {
-  PREPAYMENT
-  BALANCE
-  FULL_PAYMENT
-  REFUND
-  OTHER
+  PREPAYMENT   @map("prepayment")
+  DEPOSIT      @map("deposit")
+  BALANCE      @map("balance")
+  FULL_PAYMENT @map("full-payment")
 }
 
 enum NotificationKind {

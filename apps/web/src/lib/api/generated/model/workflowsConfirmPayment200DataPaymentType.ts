@@ -10,9 +10,8 @@ export type WorkflowsConfirmPayment200DataPaymentType = typeof WorkflowsConfirmP
 
 
 export const WorkflowsConfirmPayment200DataPaymentType = {
-  PREPAYMENT: 'PREPAYMENT',
-  BALANCE: 'BALANCE',
-  FULL_PAYMENT: 'FULL_PAYMENT',
-  REFUND: 'REFUND',
-  OTHER: 'OTHER',
+  prepayment: 'prepayment',
+  deposit: 'deposit',
+  balance: 'balance',
+  'full-payment': 'full-payment',
 } as const;

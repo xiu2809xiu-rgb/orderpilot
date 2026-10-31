@@ -5,7 +5,6 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { WorkflowsMyTasks200MetaDataLabel } from './workflowsMyTasks200MetaDataLabel.ts';
 
 export type WorkflowsMyTasks200Meta = {
   /**
@@ -24,5 +23,4 @@ export type WorkflowsMyTasks200Meta = {
      */
   total: number;
   mock: true;
-  dataLabel: WorkflowsMyTasks200MetaDataLabel;
 };

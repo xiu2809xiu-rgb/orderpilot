@@ -7,28 +7,22 @@
  */
 
 export type WorkflowsSpr200DataApproverSetup = {
-  /** @minLength 1 */
+  /** @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */
   userId: string;
   /**
-     * @minLength 1
      * @nullable
+     * @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
      */
   approverId: string | null;
-  /**
-     * @nullable
-     * @pattern ^-?\d{1,15}(\.\d{1,4})?$
-     */
-  salesAmountApprovalLimit: string | null;
-  /**
-     * @nullable
-     * @pattern ^-?\d{1,15}(\.\d{1,4})?$
-     */
-  purchaseAmountApprovalLimit: string | null;
+  /** @pattern ^-?\d{1,15}(\.\d{1,4})?$ */
+  salesAmountApprovalLimit: string;
+  /** @pattern ^-?\d{1,15}(\.\d{1,4})?$ */
+  purchaseAmountApprovalLimit: string;
   unlimitedSalesApproval: boolean;
   unlimitedPurchaseApproval: boolean;
   /**
-     * @minLength 1
      * @nullable
+     * @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
      */
-  substitute: string | null;
+  substituteUserId: string | null;
 };

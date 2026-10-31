@@ -200,7 +200,7 @@ describe("the area 2 routes", () => {
 
   describe("payments", () => {
     const body = {
-      paymentType: "PREPAYMENT",
+      paymentType: "prepayment",
       amount: "1000.00",
       currencyCode: "USD",
       reference: "TT-0004",
