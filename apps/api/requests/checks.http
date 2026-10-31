@@ -1,0 +1,25 @@
+### Area 3: the tracker, an order's timeline, the exceptions queue and the KPIs.
+### Every answer is mock data built from the synthetic data and says so in
+### meta.mock. Sign in first (see auth.http): REST Client keeps the cookies.
+@baseUrl = http://localhost:3000
+
+### Sign in as Management, who may read all four.
+POST {{baseUrl}}/api/v1/auth/demo-login
+Content-Type: application/json
+
+{ "role": "MANAGEMENT" }
+
+### The tracker, a page at a time. Sort by orderNo, customerName, orderDate or shipmentDate.
+GET {{baseUrl}}/api/v1/tracker/orders?page=1&pageSize=10&sort=orderDate&direction=desc
+
+### Only the overdue orders, found by a search.
+GET {{baseUrl}}/api/v1/tracker/orders?overdue=true&search=SO
+
+### One order's timeline: pick an order No. from the list above.
+GET {{baseUrl}}/api/v1/tracker/orders/SO-0001
+
+### The exceptions queue.
+GET {{baseUrl}}/api/v1/exceptions?page=1&pageSize=25
+
+### Spectra's five measures, as mock lab estimates.
+GET {{baseUrl}}/api/v1/insights/kpis

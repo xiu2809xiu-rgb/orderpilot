@@ -1039,6 +1039,7 @@ Acceptance criteria:
 - D-1's queue screen filters by type, owner, state and age, with the common data table's quick search and saved filters (P-12).
 - An AI summary may explain an exception, labelled as AI, and the logs stay the source of truth.
 - Tests cover each state change, a change refused for want of a reason, and the overdue flag.
+- The KPI dashboard shows trends over a period, and each of the five measures is a tested formula over events (D-1 shows fixed mock lab estimates).
 
 ### D-4: The tracker's status, owner and overdue flags from workflow events
 
@@ -1062,6 +1063,9 @@ Acceptance criteria:
 - It filters by status, owner, area and overdue, with the common data table (P-12).
 - The overdue count feeds the KPI dashboard's overdue-orders measure.
 - Tests cover a status change from an event, a change of owner, the overdue boundary, and the same event received twice.
+- An order's page lists the documents behind each check side by side, with the differing line marked (D-1 leaves this out).
+- The operation log at the foot of an order's page is fed from the audit trail once F-2 lands (D-1 shows mock rows).
+- Role home tiles show real counts, such as orders waiting on me, and an end-to-end spec covers the tracker (D-1 leaves both out).
 
 ## Epic E: AI with a person in the loop
 
