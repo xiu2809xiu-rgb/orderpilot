@@ -186,8 +186,8 @@ Each row says whether it exists today or which story brings it. Everything marke
 | Dependency updates      | Dependabot for npm and Actions, weekly on Monday 06:00 Singapore time, a 7-day cooldown, grouped                                                                         | Today                                |
 | CI and scans            | GitHub Actions: `ci.yml` (verify) and `security.yml` (Semgrep, gitleaks, OSV), then Trivy (P-13)                                                                         | Today (P-6), P-13                    |
 | Shared contracts        | `packages/shared`: zod schemas and types                                                                                                                                 | Built: P-7 (draft order contract)    |
-| API                     | NestJS in layers, with Swagger "OrderPilot API" at `/api/docs`                                                                                                           | Planned: P-8                         |
-| Logging                 | pino with correlation ids                                                                                                                                                | Planned: P-8                         |
+| API                     | NestJS in layers, with Swagger "OrderPilot API" at `/api/docs`                                                                                                           | Today (P-8)                          |
+| Logging                 | pino with correlation ids                                                                                                                                                | Today (P-8)                          |
 | Database                | Prisma with PostgreSQL                                                                                                                                                   | Planned: P-9                         |
 | Queues                  | Redis with BullMQ                                                                                                                                                        | Planned: P-9, worker process in P-15 |
 | Document storage        | MinIO behind a storage service that uses the S3 API, so AWS S3 drops in later                                                                                            | Planned: P-9                         |
@@ -198,7 +198,7 @@ Each row says whether it exists today or which story brings it. Everything marke
 | Forms                   | React Hook Form with zod                                                                                                                                                 | Planned: P-11                        |
 | Icons and type          | Lucide only, and the Geist font with tabular numbers                                                                                                                     | Planned: P-11                        |
 | Containers              | Docker Compose under project name `orderpilot`: PostgreSQL, Redis and MinIO, then `api`, `worker` and `web`                                                              | Planned: P-9, P-13                   |
-| Tests                   | Vitest, Testing Library, and Playwright with axe                                                                                                                         | Planned: P-8, P-11, P-14             |
+| Tests                   | Vitest, Testing Library, and Playwright with axe                                                                                                                         | Today (P-8), P-11, P-14              |
 | Events and live updates | A typed domain event bus, a transactional outbox, idempotency keys and SSE                                                                                               | Planned: P-15                        |
 | Diagrams                | Mermaid sources rendered to SVG                                                                                                                                          | Planned: P-16                        |
 | AI                      | `LlmGateway` with three providers: mock (the default), OpenAI-compatible, and optional Bedrock                                                                           | Planned: P-17                        |
@@ -214,7 +214,7 @@ Each row says whether it exists today or which story brings it. Everything marke
 
 | Path                           | Holds                                                                                                            | Status                            |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------- | --------------------------------- |
-| `apps/api`                     | The NestJS API, with a worker entry                                                                              | Planned: P-8, P-13                |
+| `apps/api`                     | The NestJS API, with a worker entry                                                                              | Today (P-8), P-13                 |
 | `apps/web`                     | The web app                                                                                                      | Planned: P-11                     |
 | `services/mock-navision`       | The mock of Navision                                                                                             | Planned: P-19                     |
 | `packages/tsconfig`            | The strict TypeScript config                                                                                     | Today                             |
@@ -238,7 +238,7 @@ These apply from the first line of code. The tooling that enforces them arrives 
 
 ### OOP layers and patterns
 
-The API is NestJS, in layers (planned: P-8). Controllers call services, and services call repositories and domain classes.
+The API is NestJS, in layers ([ADR 0008](docs/adr/0008-nestjs-layered-modules.md)). Controllers call services, and services call repositories and domain classes.
 
 | Layer          | Its job                                                    | Its limit                       |
 | -------------- | ---------------------------------------------------------- | ------------------------------- |
@@ -247,8 +247,8 @@ The API is NestJS, in layers (planned: P-8). Controllers call services, and serv
 | Repositories   | Reading and writing data                                   | The only place Prisma is called |
 | Domain classes | Business rules, as classes that can be tested on their own | No HTTP and no Prisma           |
 
-- Use a named pattern where it earns its place, and record it in `docs/architecture/patterns.md` (planned: P-8).
-- The plan already names these: repositories (P-8), a transactional outbox (P-15), a gateway over AI providers (P-17), a factory and an adapter for connectors (P-20), a Strategy interface for check rules (D-1), and the state machine Azri writes after C-1.
+- Use a named pattern where it earns its place, and record it in [`docs/architecture/patterns.md`](docs/architecture/patterns.md).
+- The plan already names these: repositories (built in P-8), a transactional outbox (P-15), a gateway over AI providers (P-17), a factory and an adapter for connectors (P-20), a Strategy interface for check rules (D-1), and the state machine Azri writes after C-1.
 - On the web, shared behaviour lives in classes too: `ApiClient` (P-11) and `AnalyticsTracker` (G-1).
 - Keep components under 200 lines, with one component per file.
 
@@ -267,7 +267,7 @@ The API is NestJS, in layers (planned: P-8). Controllers call services, and serv
 ### One error envelope
 
 - Every API error has one shape: `{ error: { code, message, details, traceId } }`.
-- The global exception filter produces it (planned: P-8), and the codes live in `packages/shared` (planned: P-7).
+- The global exception filter produces it, and the codes live in `packages/shared`.
 - The web app shows the `traceId` on its error state, so that a person can quote it.
 
 ### Comments that explain why
@@ -277,7 +277,7 @@ The API is NestJS, in layers (planned: P-8). Controllers call services, and serv
 
 ### Configuration
 
-- Typed configuration, checked by a zod schema (planned: P-8).
+- Typed configuration, checked by a zod schema (`apps/api/src/config`).
 - **One root `.env` is enough.** Load `apps/api/.env`, then the root `.env`, never overriding what the shell, CI or Docker set, and skipping missing files quietly. When something required is missing, the message names the file to create.
 - `.env.example` is one root file documenting every variable with a safe default (planned: P-9).
 - Ports come from `.env` (`POSTGRES_PORT`, `REDIS_PORT` and `MINIO_PORT`), and the URLs are built from them, so changing one line moves them all (planned: P-9).
@@ -288,7 +288,7 @@ The API is NestJS, in layers (planned: P-8). Controllers call services, and serv
 
 - **Authorisation is enforced on the server.** Area 4's policy decides, and endpoints call it. The permissions guard calls the role-permission matrix, which area 4 owns (planned: P-10, F-1). Hiding a button is never the control. Every refusal is audited.
 - **Sessions (planned: P-10):** argon2 password hashing; a JWT access token in an httpOnly, Secure, SameSite cookie; refresh-token rotation with reuse detection; CSRF protection.
-- **API hardening (planned: P-8):** helmet with a strict CSP, a CORS allow-list and rate limiting.
+- **API hardening:** helmet with a strict CSP, a CORS allow-list and rate limiting.
 - **Financial controls (planned: F-1 is the base, and Angelyn builds the rules):** no self-approval, approval limits, bank-detail change control, and masking of bank details and prices by role, with a reason.
 - **Audit (planned: P-9):** `AuditEvent` is append-only, held by a database trigger. The audit writer chains each event's hash to the one before it, verifies the chain, and joins the business transaction. Every sign-in, sign-out and change is audited (planned: P-10).
 - **Uploads (planned: P-18):** PDF, PNG, JPEG, XLSX and CSV only, with size limits, type sniffing and a zip-bomb guard. Nothing executable is accepted.
@@ -311,7 +311,7 @@ The API is NestJS, in layers (planned: P-8). Controllers call services, and serv
 
 | Level           | What it covers                                                    | Tool                | Status                                 |
 | --------------- | ----------------------------------------------------------------- | ------------------- | -------------------------------------- |
-| Unit            | Domain logic, at 80% or more                                      | Vitest              | Planned: P-8                           |
+| Unit            | Domain logic, at 80% or more                                      | Vitest              | Today (P-8)                            |
 | Scripts         | The pure logic of `scripts/github/`, against a simulated GitHub   | `node --test`       | Today, in `pnpm test`                  |
 | API integration | Every endpoint, with 401, 403 and validation cases                | Vitest              | Planned: P-10, with its harness in P-9 |
 | Component       | Components in each of their states                                | Testing Library     | Planned: P-11                          |

@@ -4,9 +4,9 @@ What works so far. Each story that adds a step updates this page when it merges.
 
 ## What works today
 
-There is no app yet, so getting started means setting up Git and reading the docs. There is nothing to install, build, test or start. `pnpm install` does not work yet: it arrives with P-5.
+The workspace installs, checks and builds, and the API starts. There is no database or web app yet.
 
-1. Install Git and Node 24.22.0, the version in [`.node-version`](https://github.com/xiu2809xiu-rgb/orderpilot/blob/main/.node-version).
+1. Install Git, Node 24.22.0 (the version in [`.node-version`](https://github.com/xiu2809xiu-rgb/orderpilot/blob/main/.node-version)) and pnpm 12: `npm install -g pnpm@12.14.0`.
 2. Clone the repository:
 
    ```sh
@@ -25,6 +25,22 @@ There is no app yet, so getting started means setting up Git and reading the doc
    - [AGENTS.md](https://github.com/xiu2809xiu-rgb/orderpilot/blob/main/AGENTS.md): the rules for your AI tool.
    - [The working agreement](https://github.com/xiu2809xiu-rgb/orderpilot/blob/main/docs/agile/working-agreement.md): how the team works.
    - [The backlog](https://github.com/xiu2809xiu-rgb/orderpilot/blob/main/docs/agile/backlog.md): what is planned.
+
+5. Install and check:
+
+   ```sh
+   pnpm install
+   pnpm lint && pnpm typecheck && pnpm test && pnpm build
+   ```
+
+6. Run the API. It needs one root `.env`, copied from the example:
+
+   ```sh
+   cp .env.example .env        # PowerShell: Copy-Item .env.example .env
+   pnpm --filter @orderpilot/api dev
+   ```
+
+   Then open <http://localhost:3000/health> and <http://localhost:3000/api/docs>. If a required setting is missing, the API stops and names the file to create. A variable set in your shell always wins over the files.
 
 Line endings need no set-up. `.gitattributes` keeps text files LF on every machine.
 
@@ -45,10 +61,8 @@ node --test "scripts/github/**/*.test.mjs"
 
 ## What later stories bring
 
-| Step                                                                     | Story |
-| ------------------------------------------------------------------------ | ----- |
-| `pnpm install`, and the root scripts for lint, typecheck, test and build | P-5   |
-| The Git hooks, installed with the workspace                              | P-5   |
-| `cp .env.example .env`, then PostgreSQL, Redis and MinIO in Docker       | P-9   |
-| The full stack with `docker compose up --build`                          | P-13  |
-| End-to-end tests with Playwright and axe                                 | P-14  |
+| Step                                                              | Story |
+| ----------------------------------------------------------------- | ----- |
+| PostgreSQL, Redis and MinIO in Docker, with the ports from `.env` | P-9   |
+| The full stack with `docker compose up --build`                   | P-13  |
+| End-to-end tests with Playwright and axe                          | P-14  |
