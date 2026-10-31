@@ -14,7 +14,7 @@ export function cellClass(column: Shape, first: boolean): string {
   return cn(
     "px-3 py-2",
     alignsEnd(column) && "text-right tabular-nums",
-    column.wrap ? "min-w-56 whitespace-normal" : "whitespace-nowrap",
+    column.wrap ? "min-w-[26rem] whitespace-normal" : "whitespace-nowrap",
     first &&
       "sticky left-0 z-[1] bg-card group-hover/row:bg-muted max-md:border-r",
   );
