@@ -19,4 +19,9 @@ export const AuthMe200DataPermissionsItem = {
   documentsread: 'documents.read',
   documentsupload: 'documents.upload',
   ordersread: 'orders.read',
+  workflowsread: 'workflows.read',
+  sprread: 'spr.read',
+  sprdecide: 'spr.decide',
+  paymentsconfirm: 'payments.confirm',
+  workflowsinboxesany: 'workflows.inboxes.any',
 } as const;

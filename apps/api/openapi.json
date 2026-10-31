@@ -423,7 +423,12 @@
                               "aiUsage.read",
                               "documents.read",
                               "documents.upload",
-                              "orders.read"
+                              "orders.read",
+                              "workflows.read",
+                              "spr.read",
+                              "spr.decide",
+                              "payments.confirm",
+                              "workflows.inboxes.any"
                             ]
                           }
                         },
@@ -514,7 +519,12 @@
                               "aiUsage.read",
                               "documents.read",
                               "documents.upload",
-                              "orders.read"
+                              "orders.read",
+                              "workflows.read",
+                              "spr.read",
+                              "spr.decide",
+                              "payments.confirm",
+                              "workflows.inboxes.any"
                             ]
                           }
                         },
@@ -640,7 +650,12 @@
                               "aiUsage.read",
                               "documents.read",
                               "documents.upload",
-                              "orders.read"
+                              "orders.read",
+                              "workflows.read",
+                              "spr.read",
+                              "spr.decide",
+                              "payments.confirm",
+                              "workflows.inboxes.any"
                             ]
                           }
                         },
@@ -759,7 +774,12 @@
                               "aiUsage.read",
                               "documents.read",
                               "documents.upload",
-                              "orders.read"
+                              "orders.read",
+                              "workflows.read",
+                              "spr.read",
+                              "spr.decide",
+                              "payments.confirm",
+                              "workflows.inboxes.any"
                             ]
                           }
                         },
@@ -785,6 +805,1799 @@
         },
         "summary": "Sign in as one of the nine roles. Present only when DEMO_MODE is on",
         "tags": ["Auth"]
+      }
+    },
+    "/api/v1/workflows/tasks": {
+      "get": {
+        "operationId": "Workflows_myTasks",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 25,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          },
+          {
+            "name": "overdue",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["true", "false"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          "kind": {
+                            "type": "string",
+                            "enum": [
+                              "REVIEW_FIELDS",
+                              "RAISE_SPR",
+                              "APPROVE_SPR",
+                              "SEND_PI",
+                              "CONFIRM_PAYMENT",
+                              "PACK_ORDER",
+                              "ADD_SHIPPING_DOCUMENTS"
+                            ]
+                          },
+                          "title": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "assigneeRole": {
+                            "type": "string",
+                            "enum": [
+                              "SYSTEM_ADMIN",
+                              "PRODUCT_MANAGER",
+                              "APPROVER",
+                              "SUPPORT",
+                              "WAREHOUSE",
+                              "FINANCE",
+                              "LOGISTICS",
+                              "MANAGEMENT",
+                              "AUDITOR"
+                            ]
+                          },
+                          "orderNo": {
+                            "nullable": true,
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9-]{1,30}$"
+                          },
+                          "ref": {
+                            "nullable": true,
+                            "type": "object",
+                            "properties": {
+                              "recordNo": {
+                                "type": "string",
+                                "pattern": "^(SPR|PI|EXC)-\\d{8}-\\d{4,}$"
+                              },
+                              "navisionNo": {
+                                "nullable": true,
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            },
+                            "required": ["recordNo", "navisionNo"],
+                            "additionalProperties": false
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": ["OPEN", "DONE", "CANCELLED"]
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "dueAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "overdue": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "kind",
+                          "title",
+                          "assigneeRole",
+                          "orderNo",
+                          "ref",
+                          "status",
+                          "createdAt",
+                          "dueAt",
+                          "overdue"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        "pageSize": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 200
+                        },
+                        "total": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "mock": {
+                          "type": "boolean",
+                          "enum": [true]
+                        },
+                        "dataLabel": {
+                          "type": "string",
+                          "enum": ["Synthetic demo data"]
+                        }
+                      },
+                      "required": [
+                        "page",
+                        "pageSize",
+                        "total",
+                        "mock",
+                        "dataLabel"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "The caller's own task inbox (mock data)",
+        "tags": ["Workflows"]
+      }
+    },
+    "/api/v1/workflows/inboxes/{role}/tasks": {
+      "get": {
+        "operationId": "Workflows_inboxTasks",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 25,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          },
+          {
+            "name": "overdue",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["true", "false"]
+            }
+          },
+          {
+            "name": "role",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "example": "WAREHOUSE"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          "kind": {
+                            "type": "string",
+                            "enum": [
+                              "REVIEW_FIELDS",
+                              "RAISE_SPR",
+                              "APPROVE_SPR",
+                              "SEND_PI",
+                              "CONFIRM_PAYMENT",
+                              "PACK_ORDER",
+                              "ADD_SHIPPING_DOCUMENTS"
+                            ]
+                          },
+                          "title": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "assigneeRole": {
+                            "type": "string",
+                            "enum": [
+                              "SYSTEM_ADMIN",
+                              "PRODUCT_MANAGER",
+                              "APPROVER",
+                              "SUPPORT",
+                              "WAREHOUSE",
+                              "FINANCE",
+                              "LOGISTICS",
+                              "MANAGEMENT",
+                              "AUDITOR"
+                            ]
+                          },
+                          "orderNo": {
+                            "nullable": true,
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9-]{1,30}$"
+                          },
+                          "ref": {
+                            "nullable": true,
+                            "type": "object",
+                            "properties": {
+                              "recordNo": {
+                                "type": "string",
+                                "pattern": "^(SPR|PI|EXC)-\\d{8}-\\d{4,}$"
+                              },
+                              "navisionNo": {
+                                "nullable": true,
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            },
+                            "required": ["recordNo", "navisionNo"],
+                            "additionalProperties": false
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": ["OPEN", "DONE", "CANCELLED"]
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "dueAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "overdue": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "kind",
+                          "title",
+                          "assigneeRole",
+                          "orderNo",
+                          "ref",
+                          "status",
+                          "createdAt",
+                          "dueAt",
+                          "overdue"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        "pageSize": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 200
+                        },
+                        "total": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "mock": {
+                          "type": "boolean",
+                          "enum": [true]
+                        },
+                        "dataLabel": {
+                          "type": "string",
+                          "enum": ["Synthetic demo data"]
+                        }
+                      },
+                      "required": [
+                        "page",
+                        "pageSize",
+                        "total",
+                        "mock",
+                        "dataLabel"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Any role's task inbox, for roles that oversee (mock data)",
+        "tags": ["Workflows"]
+      }
+    },
+    "/api/v1/workflows/reminders": {
+      "get": {
+        "operationId": "Workflows_myReminders",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 25,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          "kind": {
+                            "type": "string",
+                            "enum": [
+                              "TASK_DUE",
+                              "PAYMENT_DUE",
+                              "SHIPPING_DOCUMENT_MISSING",
+                              "IMPORT_PERMIT_MISSING"
+                            ]
+                          },
+                          "stage": {
+                            "type": "string",
+                            "enum": ["scheduled", "sent", "escalated"]
+                          },
+                          "orderNo": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9-]{1,30}$"
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "toRole": {
+                            "type": "string",
+                            "enum": [
+                              "SYSTEM_ADMIN",
+                              "PRODUCT_MANAGER",
+                              "APPROVER",
+                              "SUPPORT",
+                              "WAREHOUSE",
+                              "FINANCE",
+                              "LOGISTICS",
+                              "MANAGEMENT",
+                              "AUDITOR"
+                            ]
+                          },
+                          "dueAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "remindAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "escalatesAt": {
+                            "nullable": true,
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "escalatedTo": {
+                            "nullable": true,
+                            "type": "string",
+                            "enum": [
+                              "SYSTEM_ADMIN",
+                              "PRODUCT_MANAGER",
+                              "APPROVER",
+                              "SUPPORT",
+                              "WAREHOUSE",
+                              "FINANCE",
+                              "LOGISTICS",
+                              "MANAGEMENT",
+                              "AUDITOR"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "kind",
+                          "stage",
+                          "orderNo",
+                          "message",
+                          "toRole",
+                          "dueAt",
+                          "remindAt",
+                          "escalatesAt",
+                          "escalatedTo"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        "pageSize": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 200
+                        },
+                        "total": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "mock": {
+                          "type": "boolean",
+                          "enum": [true]
+                        },
+                        "dataLabel": {
+                          "type": "string",
+                          "enum": ["Synthetic demo data"]
+                        }
+                      },
+                      "required": [
+                        "page",
+                        "pageSize",
+                        "total",
+                        "mock",
+                        "dataLabel"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "The caller's own reminders (mock data)",
+        "tags": ["Workflows"]
+      }
+    },
+    "/api/v1/workflows/inboxes/{role}/reminders": {
+      "get": {
+        "operationId": "Workflows_inboxReminders",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 25,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          },
+          {
+            "name": "role",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "example": "WAREHOUSE"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          "kind": {
+                            "type": "string",
+                            "enum": [
+                              "TASK_DUE",
+                              "PAYMENT_DUE",
+                              "SHIPPING_DOCUMENT_MISSING",
+                              "IMPORT_PERMIT_MISSING"
+                            ]
+                          },
+                          "stage": {
+                            "type": "string",
+                            "enum": ["scheduled", "sent", "escalated"]
+                          },
+                          "orderNo": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9-]{1,30}$"
+                          },
+                          "message": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "toRole": {
+                            "type": "string",
+                            "enum": [
+                              "SYSTEM_ADMIN",
+                              "PRODUCT_MANAGER",
+                              "APPROVER",
+                              "SUPPORT",
+                              "WAREHOUSE",
+                              "FINANCE",
+                              "LOGISTICS",
+                              "MANAGEMENT",
+                              "AUDITOR"
+                            ]
+                          },
+                          "dueAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "remindAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "escalatesAt": {
+                            "nullable": true,
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "escalatedTo": {
+                            "nullable": true,
+                            "type": "string",
+                            "enum": [
+                              "SYSTEM_ADMIN",
+                              "PRODUCT_MANAGER",
+                              "APPROVER",
+                              "SUPPORT",
+                              "WAREHOUSE",
+                              "FINANCE",
+                              "LOGISTICS",
+                              "MANAGEMENT",
+                              "AUDITOR"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "kind",
+                          "stage",
+                          "orderNo",
+                          "message",
+                          "toRole",
+                          "dueAt",
+                          "remindAt",
+                          "escalatesAt",
+                          "escalatedTo"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        "pageSize": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 200
+                        },
+                        "total": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "mock": {
+                          "type": "boolean",
+                          "enum": [true]
+                        },
+                        "dataLabel": {
+                          "type": "string",
+                          "enum": ["Synthetic demo data"]
+                        }
+                      },
+                      "required": [
+                        "page",
+                        "pageSize",
+                        "total",
+                        "mock",
+                        "dataLabel"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Any role's reminders, for roles that oversee (mock data)",
+        "tags": ["Workflows"]
+      }
+    },
+    "/api/v1/workflows/orders/{orderNo}/flow": {
+      "get": {
+        "operationId": "Workflows_orderFlow",
+        "parameters": [
+          {
+            "name": "orderNo",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "example": "SO-0003"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "order": {
+                          "type": "object",
+                          "properties": {
+                            "no": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9-]{1,30}$"
+                            },
+                            "sellToCustomerNo": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "customerName": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "externalDocumentNo": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "orderDate": {
+                              "type": "string",
+                              "format": "date",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                            }
+                          },
+                          "required": [
+                            "no",
+                            "sellToCustomerNo",
+                            "customerName",
+                            "externalDocumentNo",
+                            "orderDate"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "steps": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "key": {
+                                "type": "string",
+                                "pattern": "^[a-z][a-z0-9-]*$"
+                              },
+                              "ownerRole": {
+                                "type": "string",
+                                "enum": [
+                                  "SYSTEM_ADMIN",
+                                  "PRODUCT_MANAGER",
+                                  "APPROVER",
+                                  "SUPPORT",
+                                  "WAREHOUSE",
+                                  "FINANCE",
+                                  "LOGISTICS",
+                                  "MANAGEMENT",
+                                  "AUDITOR"
+                                ]
+                              },
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "done",
+                                  "current",
+                                  "upcoming",
+                                  "skipped"
+                                ]
+                              },
+                              "optional": {
+                                "type": "boolean"
+                              },
+                              "dueAt": {
+                                "nullable": true,
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              "completedAt": {
+                                "nullable": true,
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              "overdue": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "key",
+                              "ownerRole",
+                              "state",
+                              "optional",
+                              "dueAt",
+                              "completedAt",
+                              "overdue"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "timeline": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "format": "uuid",
+                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                              },
+                              "at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              "kind": {
+                                "type": "string",
+                                "enum": [
+                                  "order.received",
+                                  "step.completed",
+                                  "task.created",
+                                  "reminder.sent",
+                                  "payment.confirmed"
+                                ]
+                              },
+                              "actor": {
+                                "type": "object",
+                                "properties": {
+                                  "kind": {
+                                    "type": "string",
+                                    "enum": ["user", "system"]
+                                  },
+                                  "name": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  }
+                                },
+                                "required": ["kind", "name"],
+                                "additionalProperties": false
+                              },
+                              "summary": {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "at",
+                              "kind",
+                              "actor",
+                              "summary"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "payment": {
+                          "type": "object",
+                          "properties": {
+                            "prepaymentPercent": {
+                              "type": "string",
+                              "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                            },
+                            "amountDue": {
+                              "nullable": true,
+                              "type": "string",
+                              "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                            },
+                            "confirmations": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "paymentType": {
+                                    "type": "string",
+                                    "enum": [
+                                      "PREPAYMENT",
+                                      "BALANCE",
+                                      "FULL_PAYMENT",
+                                      "REFUND",
+                                      "OTHER"
+                                    ]
+                                  },
+                                  "amount": {
+                                    "type": "string",
+                                    "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                                  },
+                                  "currencyCode": {
+                                    "type": "string",
+                                    "minLength": 3,
+                                    "maxLength": 3
+                                  },
+                                  "reference": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 60
+                                  },
+                                  "paidOn": {
+                                    "type": "string",
+                                    "format": "date",
+                                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                                  },
+                                  "id": {
+                                    "type": "string",
+                                    "format": "uuid",
+                                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                                  },
+                                  "orderNo": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "confirmedAt": {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                  },
+                                  "confirmedBy": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  }
+                                },
+                                "required": [
+                                  "paymentType",
+                                  "amount",
+                                  "currencyCode",
+                                  "reference",
+                                  "paidOn",
+                                  "id",
+                                  "orderNo",
+                                  "confirmedAt",
+                                  "confirmedBy"
+                                ],
+                                "additionalProperties": false
+                              }
+                            }
+                          },
+                          "required": [
+                            "prepaymentPercent",
+                            "amountDue",
+                            "confirmations"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": ["order", "steps", "timeline", "payment"],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "mock": {
+                          "type": "boolean",
+                          "enum": [true]
+                        },
+                        "dataLabel": {
+                          "type": "string",
+                          "enum": ["Synthetic demo data"]
+                        }
+                      },
+                      "required": ["mock", "dataLabel"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "An order's steps and timeline (mock data)",
+        "tags": ["Workflows"]
+      }
+    },
+    "/api/v1/workflows/orders/{orderNo}/payments": {
+      "post": {
+        "operationId": "Workflows_confirmPayment",
+        "parameters": [
+          {
+            "name": "orderNo",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "example": "SO-0003"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "paymentType": {
+                    "type": "string",
+                    "enum": [
+                      "PREPAYMENT",
+                      "BALANCE",
+                      "FULL_PAYMENT",
+                      "REFUND",
+                      "OTHER"
+                    ]
+                  },
+                  "amount": {
+                    "type": "string",
+                    "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                  },
+                  "currencyCode": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 3
+                  },
+                  "reference": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 60
+                  },
+                  "paidOn": {
+                    "type": "string",
+                    "format": "date",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                  }
+                },
+                "required": [
+                  "paymentType",
+                  "amount",
+                  "currencyCode",
+                  "reference",
+                  "paidOn"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "applied": {
+                          "type": "boolean",
+                          "enum": [false]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "orderNo": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9-]{1,30}$"
+                        },
+                        "paymentType": {
+                          "type": "string",
+                          "enum": [
+                            "PREPAYMENT",
+                            "BALANCE",
+                            "FULL_PAYMENT",
+                            "REFUND",
+                            "OTHER"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "applied",
+                        "message",
+                        "orderNo",
+                        "paymentType"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "mock": {
+                          "type": "boolean",
+                          "enum": [true]
+                        },
+                        "dataLabel": {
+                          "type": "string",
+                          "enum": ["Synthetic demo data"]
+                        }
+                      },
+                      "required": ["mock", "dataLabel"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Confirm a payment, with its type. Checked only: nothing is stored",
+        "tags": ["Workflows"]
+      }
+    },
+    "/api/v1/workflows/sprs/{recordNo}": {
+      "get": {
+        "operationId": "Workflows_spr",
+        "parameters": [
+          {
+            "name": "recordNo",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "example": "SPR-20261102-0001"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "ref": {
+                          "type": "object",
+                          "properties": {
+                            "recordNo": {
+                              "type": "string",
+                              "pattern": "^(SPR|PI|EXC)-\\d{8}-\\d{4,}$"
+                            },
+                            "navisionNo": {
+                              "nullable": true,
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          },
+                          "required": ["recordNo", "navisionNo"],
+                          "additionalProperties": false
+                        },
+                        "orderNo": {
+                          "nullable": true,
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9-]{1,30}$"
+                        },
+                        "requestedBy": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "role": {
+                              "type": "string",
+                              "enum": [
+                                "SYSTEM_ADMIN",
+                                "PRODUCT_MANAGER",
+                                "APPROVER",
+                                "SUPPORT",
+                                "WAREHOUSE",
+                                "FINANCE",
+                                "LOGISTICS",
+                                "MANAGEMENT",
+                                "AUDITOR"
+                              ]
+                            }
+                          },
+                          "required": ["name", "role"],
+                          "additionalProperties": false
+                        },
+                        "requestedAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "vendor": {
+                          "type": "object",
+                          "properties": {
+                            "no": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "name": {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          },
+                          "required": ["no", "name"],
+                          "additionalProperties": false
+                        },
+                        "item": {
+                          "type": "object",
+                          "properties": {
+                            "no": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "description": {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          },
+                          "required": ["no", "description"],
+                          "additionalProperties": false
+                        },
+                        "quantity": {
+                          "type": "string",
+                          "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                        },
+                        "unitCost": {
+                          "type": "string",
+                          "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                        },
+                        "amount": {
+                          "type": "string",
+                          "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                        },
+                        "currencyCode": {
+                          "type": "string",
+                          "minLength": 3,
+                          "maxLength": 3
+                        },
+                        "basis": {
+                          "type": "object",
+                          "properties": {
+                            "ordered": {
+                              "type": "string",
+                              "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                            },
+                            "inventory": {
+                              "type": "string",
+                              "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                            },
+                            "qtyOnSalesOrder": {
+                              "type": "string",
+                              "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                            },
+                            "qtyOnPurchOrder": {
+                              "type": "string",
+                              "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                            },
+                            "availableStock": {
+                              "type": "string",
+                              "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                            },
+                            "shortfall": {
+                              "type": "string",
+                              "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                            }
+                          },
+                          "required": [
+                            "ordered",
+                            "inventory",
+                            "qtyOnSalesOrder",
+                            "qtyOnPurchOrder",
+                            "availableStock",
+                            "shortfall"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "fields": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "key": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "label": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "value": {
+                                "type": "string"
+                              },
+                              "origin": {
+                                "type": "string",
+                                "enum": ["suggested", "default", "person"]
+                              },
+                              "required": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "key",
+                              "label",
+                              "value",
+                              "origin",
+                              "required"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "approver": {
+                          "type": "object",
+                          "properties": {
+                            "displayName": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "setup": {
+                              "type": "object",
+                              "properties": {
+                                "userId": {
+                                  "type": "string",
+                                  "minLength": 1
+                                },
+                                "approverId": {
+                                  "nullable": true,
+                                  "type": "string",
+                                  "minLength": 1
+                                },
+                                "salesAmountApprovalLimit": {
+                                  "nullable": true,
+                                  "type": "string",
+                                  "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                                },
+                                "purchaseAmountApprovalLimit": {
+                                  "nullable": true,
+                                  "type": "string",
+                                  "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                                },
+                                "unlimitedSalesApproval": {
+                                  "type": "boolean"
+                                },
+                                "unlimitedPurchaseApproval": {
+                                  "type": "boolean"
+                                },
+                                "substitute": {
+                                  "nullable": true,
+                                  "type": "string",
+                                  "minLength": 1
+                                }
+                              },
+                              "required": [
+                                "userId",
+                                "approverId",
+                                "salesAmountApprovalLimit",
+                                "purchaseAmountApprovalLimit",
+                                "unlimitedSalesApproval",
+                                "unlimitedPurchaseApproval",
+                                "substitute"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "required": ["displayName", "setup"],
+                          "additionalProperties": false
+                        },
+                        "substituteName": {
+                          "nullable": true,
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "decision": {
+                          "nullable": true,
+                          "type": "object",
+                          "properties": {
+                            "outcome": {
+                              "type": "string",
+                              "enum": ["approved", "rejected"]
+                            },
+                            "by": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "comment": {
+                              "type": "string"
+                            },
+                            "at": {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            }
+                          },
+                          "required": ["outcome", "by", "comment", "at"],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "ref",
+                        "orderNo",
+                        "requestedBy",
+                        "requestedAt",
+                        "vendor",
+                        "item",
+                        "quantity",
+                        "unitCost",
+                        "amount",
+                        "currencyCode",
+                        "basis",
+                        "fields",
+                        "approver",
+                        "substituteName",
+                        "decision"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "mock": {
+                          "type": "boolean",
+                          "enum": [true]
+                        },
+                        "dataLabel": {
+                          "type": "string",
+                          "enum": ["Synthetic demo data"]
+                        }
+                      },
+                      "required": ["mock", "dataLabel"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "A stock purchase request, with its suggested fields (mock data)",
+        "tags": ["Workflows"]
+      }
+    },
+    "/api/v1/workflows/sprs/{recordNo}/approve": {
+      "post": {
+        "operationId": "Workflows_approve",
+        "parameters": [
+          {
+            "name": "recordNo",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "example": "SPR-20261102-0001"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 500
+                  }
+                },
+                "required": ["comment"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "applied": {
+                          "type": "boolean",
+                          "enum": [false]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "recordNo": {
+                          "type": "string",
+                          "pattern": "^SPR-\\d{8}-\\d{4,}$"
+                        },
+                        "outcome": {
+                          "type": "string",
+                          "enum": ["approved", "rejected"]
+                        },
+                        "comment": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "applied",
+                        "message",
+                        "recordNo",
+                        "outcome",
+                        "comment"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "mock": {
+                          "type": "boolean",
+                          "enum": [true]
+                        },
+                        "dataLabel": {
+                          "type": "string",
+                          "enum": ["Synthetic demo data"]
+                        }
+                      },
+                      "required": ["mock", "dataLabel"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Approve a stock purchase request, with a comment. Checked only: nothing is changed",
+        "tags": ["Workflows"]
+      }
+    },
+    "/api/v1/workflows/sprs/{recordNo}/reject": {
+      "post": {
+        "operationId": "Workflows_reject",
+        "parameters": [
+          {
+            "name": "recordNo",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "example": "SPR-20261102-0001"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 500
+                  }
+                },
+                "required": ["comment"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "applied": {
+                          "type": "boolean",
+                          "enum": [false]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "recordNo": {
+                          "type": "string",
+                          "pattern": "^SPR-\\d{8}-\\d{4,}$"
+                        },
+                        "outcome": {
+                          "type": "string",
+                          "enum": ["approved", "rejected"]
+                        },
+                        "comment": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "applied",
+                        "message",
+                        "recordNo",
+                        "outcome",
+                        "comment"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "mock": {
+                          "type": "boolean",
+                          "enum": [true]
+                        },
+                        "dataLabel": {
+                          "type": "string",
+                          "enum": ["Synthetic demo data"]
+                        }
+                      },
+                      "required": ["mock", "dataLabel"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Reject a stock purchase request, with a comment. Checked only: nothing is changed",
+        "tags": ["Workflows"]
+      }
+    },
+    "/api/v1/workflows/document-config": {
+      "get": {
+        "operationId": "Workflows_documentConfig",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "documentType": {
+                            "type": "string",
+                            "enum": [
+                              "SPR",
+                              "CUSTOMER_PO",
+                              "PROFORMA_INVOICE",
+                              "VENDOR_PI",
+                              "SALES_INVOICE",
+                              "PACKING_LIST",
+                              "AWB",
+                              "BILL_OF_LADING",
+                              "IMPORT_PERMIT",
+                              "PAYMENT_ADVICE",
+                              "OTHER"
+                            ]
+                          },
+                          "label": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "fields": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "key": {
+                                  "type": "string",
+                                  "pattern": "^[a-z][A-Za-z0-9]*$"
+                                },
+                                "label": {
+                                  "type": "string",
+                                  "minLength": 1
+                                },
+                                "kind": {
+                                  "type": "string",
+                                  "enum": ["text", "number", "date", "choice"]
+                                },
+                                "required": {
+                                  "type": "boolean"
+                                },
+                                "visible": {
+                                  "type": "boolean"
+                                },
+                                "defaultValue": {
+                                  "nullable": true,
+                                  "type": "string"
+                                },
+                                "choices": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "required": [
+                                "key",
+                                "label",
+                                "kind",
+                                "required",
+                                "visible",
+                                "defaultValue",
+                                "choices"
+                              ],
+                              "additionalProperties": false
+                            }
+                          }
+                        },
+                        "required": ["documentType", "label", "fields"],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Field settings and defaults for each document type",
+        "tags": ["Workflows"]
       }
     },
     "/api/v1/users": {
