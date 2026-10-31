@@ -118,6 +118,30 @@ async function readPlan(github, target) {
   return planFromPull(data.repository.pullRequest);
 }
 
+// Two runs (issues and pull_request_target) race to set the same milestone. If
+// our write fails for good but the milestone is already right, the twin won and
+// there is nothing to do. Any other failure still fails the run.
+async function setMilestone(github, kind, number, milestone) {
+  const path = `repos/${github.repo}/issues/${number}`;
+  try {
+    await github.write(
+      `set ${kind} #${number} to "${milestone.title}"`,
+      "PATCH",
+      path,
+      { milestone: milestone.number },
+    );
+  } catch (error) {
+    let now;
+    try {
+      now = await github.get(path);
+    } catch {
+      throw error;
+    }
+    if (now?.milestone?.number !== milestone.number) throw error;
+    github.log(`${kind} #${number} already has "${milestone.title}"`);
+  }
+}
+
 export async function record(github, target) {
   const plan = await readPlan(github, target);
   if (!plan) {
@@ -130,12 +154,7 @@ export async function record(github, target) {
     return [];
   }
   for (const { kind, number } of updates) {
-    await github.write(
-      `set ${kind} #${number} to "${milestone.title}"`,
-      "PATCH",
-      `repos/${github.repo}/issues/${number}`,
-      { milestone: milestone.number },
-    );
+    await setMilestone(github, kind, number, milestone);
   }
   github.log(`recorder: ${updates.length} change(s)`);
   return updates;

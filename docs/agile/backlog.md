@@ -2,13 +2,13 @@
 
 Rendered from [`scripts/github/data/backlog.json`](../../scripts/github/data/backlog.json) by `node scripts/github/render-docs.mjs`. Change the data, not this file. The same data seeds the issues. The board shows where each story stands.
 
-There are 9 epics and 72 stories. Estimates are story points: a first guess, for the team to change at planning.
+There are 9 epics and 74 stories. Estimates are story points: a first guess, for the team to change at planning.
 
 ## Epics
 
 | Epic   | Title                             | Area                                    | Stories | Points |
 | ------ | --------------------------------- | --------------------------------------- | ------- | ------ |
-| Epic P | The platform base                 | `area: 1 document AI and integration`   | 28      | 170    |
+| Epic P | The platform base                 | `area: 1 document AI and integration`   | 30      | 175    |
 | Epic A | Document intake and AI extraction | `area: 1 document AI and integration`   | 5       | 31     |
 | Epic B | Master data and Navision          | `area: 1 document AI and integration`   | 4       | 14     |
 | Epic C | Order workflows and approvals     | `area: 2 order workflows and approvals` | 5       | 29     |
@@ -94,6 +94,8 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | E-2   | The accuracy harness, with a 95% target and a comparison of models | must     | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | C-5   | Area 2 polish left out of the base                                 | should   | 3      | `area: 2 order workflows and approvals` | M4 best practices                                              |
 | P-22  | The design system with the Pro kits                                | should   | 8      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-29  | A unit coverage threshold on domain logic                          | should   | 2      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-30  | A k6 smoke load test                                               | should   | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | A-3   | Layout mapping, proposed by AI and approved by a person            | should   | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | A-4   | Learning from corrections, one layout at a time                    | should   | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | A-5   | Email intake through a mock mailbox with signed webhooks           | should   | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
@@ -748,6 +750,44 @@ Acceptance criteria:
 - From 2026-11-03, a pnpm override moves glob to 14 with its reason and a review date in pnpm-workspace.yaml, and `pnpm install` and `pnpm build` still pass.
 - The GHSA-3g3m-2fjr-6pw4 entry is removed from osv-scanner.toml and from the table in docs/security/security-testing.md, and the OSV scan passes without it.
 - Done and merged by 2026-11-05, a day before the accepted advisory expires.
+
+### P-29: A unit coverage threshold on domain logic
+
+Phase B. Prompt 001 section 11 asks for unit tests at 80 percent or more on domain logic. No threshold is enforced yet.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** should
+- **Estimate:** 2 points
+- **Requirements:** M4 best practices
+- **Branch:** `chore/domain-coverage-threshold`
+- **Planned for:** Sprint 03 (W4)
+- **Depends on:** P-6
+
+Acceptance criteria:
+
+- The domain folders are named in the test config (the API's domain services and rules, and the shared package's schemas and pure functions), so the threshold applies to logic and not to wiring.
+- Vitest enforces 80 percent or more on lines, branches, functions and statements for those folders, and a run below it exits non-zero.
+- The verify job runs the coverage check, and the coverage report is kept as a build artifact.
+- docs/agile/test-plan.md names the folders and the threshold, and the practice is ticked in the build report.
+
+### P-30: A k6 smoke load test
+
+Phase B. Prompt 001 section 11 asks for a k6 smoke load test of the extraction queue and the order endpoints.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** should
+- **Estimate:** 3 points
+- **Requirements:** M4 best practices
+- **Branch:** `test/k6-smoke`
+- **Planned for:** Sprint 03 (W4)
+- **Depends on:** P-18
+
+Acceptance criteria:
+
+- A k6 script in the repository sends a small, steady load at the order endpoints and enqueues documents on the extraction queue, using synthetic data only and the mock AI provider.
+- Thresholds fail the run on a high error rate or a slow 95th percentile, with the numbers written down in docs/agile/test-plan.md.
+- It runs against the Docker stack with one documented command, and its result is recorded in the build report.
+- It is not a required check: it runs on demand or on a schedule, so a slow runner cannot block a merge.
 
 ## Epic A: Document intake and AI extraction
 

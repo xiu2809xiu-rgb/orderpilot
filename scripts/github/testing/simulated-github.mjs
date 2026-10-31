@@ -55,6 +55,9 @@ export class SimulatedGitHub {
     this.rulesets = rulesets;
     this.dueTime = dueTime;
     this.writes = [];
+    // Replies handed out before the real answer: [{ match: /PATCH/, reply }].
+    this.faults = [];
+    this.attempts = [];
     this.nextIssue = 1 + Math.max(0, ...issues.map((item) => item.number));
     this.nextIssue = Math.max(
       this.nextIssue,
@@ -78,6 +81,11 @@ export class SimulatedGitHub {
   }
 
   exec(args, input) {
+    this.attempts.push(args.join(" "));
+    const fault = this.faults.findIndex((item) =>
+      item.match.test(args.join(" ")),
+    );
+    if (fault !== -1) return this.faults.splice(fault, 1)[0].reply;
     if (args[1] === "graphql") {
       const { query, variables } = JSON.parse(input);
       return this.graphql(query, variables);
@@ -99,6 +107,13 @@ export class SimulatedGitHub {
     const ruleset = path.match(/rulesets\/(\d+)$/);
     if (ruleset) {
       return reply(this.rulesets.find((r) => r.id === Number(ruleset[1])));
+    }
+    const issue = path.match(/\/issues\/(\d+)$/);
+    if (issue) {
+      const found = [...this.issues, ...this.pulls].find(
+        (item) => item.number === Number(issue[1]),
+      );
+      if (found) return reply(found);
     }
     return failure(`HTTP 404: ${url}`);
   }
