@@ -26,7 +26,7 @@ Conventions for every area:
 - **API module:** `apps/api/src/modules/<module>/`, with its controllers, services, repositories and domain classes, and its unit tests (`*.spec.ts`) beside them.
 - **Prisma schema:** the area's own file in `apps/api/prisma/schema/` (a multi-file schema, planned: P-9). Each migration belongs to the area whose schema it changes.
 - **API integration tests:** `apps/api/test/<module>.int-spec.ts`. **Request files:** `apps/api/requests/<module>.http`.
-- **Web feature:** `apps/web/src/features/<feature>/`, with its pages, components, hooks and component tests (`*.test.tsx`).
+- **Web feature:** `apps/web/src/features/<feature>/`, with its pages, components, hooks and component tests (`*.test.tsx`). Its `index.ts` exports one `defineFeature` object (path, menu entry, permission, role home tiles, lazy page), and `features/registry.ts` lists it: that one line is the only change outside the folder. [ADR 0013](../adr/0013-the-web-stack.md) has the details.
 - **Text:** the area's own i18n namespace, `apps/web/src/locales/en/<namespace>.json`, loaded lazily.
 - **End-to-end tests:** `apps/web/e2e/<feature>.spec.ts`.
 - **Docs:** the area's guide in `docs/team/`, its rows in the shared tables, and its prompts in `docs/ai/prompts/` as `areaN-NNN-…`.

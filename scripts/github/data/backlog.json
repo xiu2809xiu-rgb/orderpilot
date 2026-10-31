@@ -946,6 +946,26 @@
       ]
     },
     {
+      "key": "P-26",
+      "title": "Web shell polish",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "could",
+      "estimate": 3,
+      "reqs": ["M4"],
+      "branch": "feat/platform-web-polish",
+      "sprints": [3],
+      "dependsOn": ["P-11"],
+      "summary": "What P-11 left out because no teammate needs it in its first week.",
+      "acceptance": [
+        "Unsaved form input also survives a page reload, through one small draft helper that forms can opt into. P-11 keeps it only across an ended session.",
+        "A phone-width pass: screenshots at 390 px wide, light and dark, and the fixes they show. The sidebar already becomes a sheet, but spacing has not been reviewed on a phone.",
+        "LCP and a Lighthouse run on the production build, with the figures recorded next to the screenshots.",
+        "A collapsible sidebar that remembers its state, and a list of keyboard shortcuts.",
+        "The refresh timer that runs a minute before the access token ends has a test with fake timers."
+      ]
+    },
+    {
       "key": "T-1",
       "title": "Owners, backups and reviews",
       "epic": "T",

@@ -2,13 +2,13 @@
 
 Rendered from [`scripts/github/data/backlog.json`](../../scripts/github/data/backlog.json) by `node scripts/github/render-docs.mjs`. Change the data, not this file. The same data seeds the issues. The board shows where each story stands.
 
-There are 9 epics and 63 stories. Estimates are story points: a first guess, for the team to change at planning.
+There are 9 epics and 64 stories. Estimates are story points: a first guess, for the team to change at planning.
 
 ## Epics
 
 | Epic   | Title                             | Area                                    | Stories | Points |
 | ------ | --------------------------------- | --------------------------------------- | ------- | ------ |
-| Epic P | The platform base                 | `area: 1 document AI and integration`   | 25      | 163    |
+| Epic P | The platform base                 | `area: 1 document AI and integration`   | 26      | 166    |
 | Epic A | Document intake and AI extraction | `area: 1 document AI and integration`   | 5       | 31     |
 | Epic B | Master data and Navision          | `area: 1 document AI and integration`   | 4       | 14     |
 | Epic C | Order workflows and approvals     | `area: 2 order workflows and approvals` | 4       | 26     |
@@ -99,6 +99,7 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | B-3   | The template engine for PIs, invoices, packing lists and Excel     | should   | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | E-3   | Prompt-injection tests                                             | should   | 3      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | P-23  | The 3D order constellation                                         | could    | 13     | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-26  | Web shell polish                                                   | could    | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | B-4   | QR codes on generated documents and carton labels                  | could    | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | E-4   | Passkeys to confirm risky approvals                                | could    | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | E-5   | A first-run guided tour for each role                              | could    | 3      | `area: 1 document AI and integration`   | M1 design thinking, M4 best practices                          |
@@ -670,6 +671,26 @@ Acceptance criteria:
 - A Marp deck for the Week 5 proposal: 12 to 14 slides, one idea each, themed with the app's tokens, using real screenshots and diagrams, with speaker notes.
 - `pnpm slides:build` exports PDF, HTML and PPTX.
 - `slides:check` runs in CI.
+
+### P-26: Web shell polish
+
+What P-11 left out because no teammate needs it in its first week.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** could
+- **Estimate:** 3 points
+- **Requirements:** M4 best practices
+- **Branch:** `feat/platform-web-polish`
+- **Planned for:** Sprint 03 (W4)
+- **Depends on:** P-11
+
+Acceptance criteria:
+
+- Unsaved form input also survives a page reload, through one small draft helper that forms can opt into. P-11 keeps it only across an ended session.
+- A phone-width pass: screenshots at 390 px wide, light and dark, and the fixes they show. The sidebar already becomes a sheet, but spacing has not been reviewed on a phone.
+- LCP and a Lighthouse run on the production build, with the figures recorded next to the screenshots.
+- A collapsible sidebar that remembers its state, and a list of keyboard shortcuts.
+- The refresh timer that runs a minute before the access token ends has a test with fake timers.
 
 ## Epic A: Document intake and AI extraction
 
