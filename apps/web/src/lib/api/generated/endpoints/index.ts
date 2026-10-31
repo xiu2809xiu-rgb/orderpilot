@@ -1,4 +1,5 @@
 export * from './analytics/analytics.ts';
+export * from './audit/audit.ts';
 export * from './auth/auth.ts';
 export * from './exceptions/exceptions.ts';
 export * from './governance/governance.ts';

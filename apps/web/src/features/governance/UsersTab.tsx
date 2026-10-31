@@ -25,6 +25,7 @@ import {
 } from "@/lib/api/generated/endpoints/users/users";
 import { hasPermission, useSessionStore } from "@/stores/session";
 import { RefusalPanel } from "./RefusalPanel";
+import { UserHistoryDialog } from "./UserHistoryDialog";
 
 /**
  * Users come from P-10's routes. They are disabled or enabled, never deleted:
@@ -78,7 +79,7 @@ export function UsersTab() {
                 <TableHead>{t("users.role")}</TableHead>
                 <TableHead>{t("users.status")}</TableHead>
                 <TableHead>
-                  <span className="sr-only">{t("users.disable")}</span>
+                  <span className="sr-only">{t("users.actions")}</span>
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -93,7 +94,11 @@ export function UsersTab() {
                       {user.disabled ? t("users.disabled") : t("users.active")}
                     </StatusBadge>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="space-x-1 text-right">
+                    <UserHistoryDialog
+                      userId={user.id}
+                      name={user.displayName}
+                    />
                     {canManage ? (
                       <Button
                         variant="outline"

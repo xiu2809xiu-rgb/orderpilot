@@ -1,0 +1,26 @@
+### Area 4: the audit viewer. Read-only over the hash-chained trail.
+### Sign in first (requests/auth.http). Every route needs audit.read: SYSTEM_ADMIN
+### and AUDITOR hold it. Any other role gets 403 FORBIDDEN with a traceId, and the
+### refusal is audited. There is no route that writes, edits or deletes an event.
+@baseUrl = http://localhost:3000
+
+### Newest events first. Filters are optional and combine with "and":
+### actorKind (user, system, ai), actorUserId, role, action (starts with),
+### entityType, entityId, from and to (ISO times, inclusive), refusalsOnly,
+### search (words in the summary), page and pageSize (1 to 200).
+GET {{baseUrl}}/api/v1/audit/events?pageSize=10
+
+### Only refusals: a refused sign-in, permission, CSRF check or reused token.
+GET {{baseUrl}}/api/v1/audit/events?refusalsOnly=true
+
+### The history of one record. This is what an operation log under a record reads.
+GET {{baseUrl}}/api/v1/audit/events?entityType=User&entityId=paste-a-user-id-here
+
+### A time range, and everything under one action prefix.
+GET {{baseUrl}}/api/v1/audit/events?action=governance.&from=2026-11-01T00:00:00.000Z&to=2026-11-30T23:59:59.999Z
+
+### One event, with its changes masked for your role.
+GET {{baseUrl}}/api/v1/audit/events/paste-an-event-id-here
+
+### Walk the whole chain: verified up to a sequence, or broken at one.
+GET {{baseUrl}}/api/v1/audit/chain
