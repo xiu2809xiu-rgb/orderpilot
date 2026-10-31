@@ -7,6 +7,7 @@
  */
 import type { WorkflowsMyTasks200DataItemAssigneeRole } from './workflowsMyTasks200DataItemAssigneeRole.ts';
 import type { WorkflowsMyTasks200DataItemKind } from './workflowsMyTasks200DataItemKind.ts';
+import type { WorkflowsMyTasks200DataItemPriority } from './workflowsMyTasks200DataItemPriority.ts';
 import type { WorkflowsMyTasks200DataItemRef } from './workflowsMyTasks200DataItemRef.ts';
 import type { WorkflowsMyTasks200DataItemStatus } from './workflowsMyTasks200DataItemStatus.ts';
 
@@ -30,4 +31,18 @@ export type WorkflowsMyTasks200DataItem = {
   /** @pattern ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z))$ */
   dueAt: string;
   overdue: boolean;
+  /** @minLength 1 */
+  customerNo?: string;
+  /** @minLength 1 */
+  customerName?: string;
+  /** @pattern ^-?\d{1,15}(\.\d{1,4})?$ */
+  amount?: string;
+  /**
+     * @minLength 3
+     * @maxLength 3
+     */
+  currencyCode?: string;
+  priority?: WorkflowsMyTasks200DataItemPriority;
+  /** @minLength 1 */
+  assigneeName?: string;
 };

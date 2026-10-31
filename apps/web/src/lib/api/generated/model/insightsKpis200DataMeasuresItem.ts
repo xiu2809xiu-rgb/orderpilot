@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.0.0
  */
 import type { InsightsKpis200DataMeasuresItemId } from './insightsKpis200DataMeasuresItemId.ts';
+import type { InsightsKpis200DataMeasuresItemWeeklyItem } from './insightsKpis200DataMeasuresItemWeeklyItem.ts';
 
 export type InsightsKpis200DataMeasuresItem = {
   id: InsightsKpis200DataMeasuresItemId;
@@ -18,4 +19,6 @@ export type InsightsKpis200DataMeasuresItem = {
   lowerIsBetter: boolean;
   /** @minLength 1 */
   definition: string;
+  target?: number;
+  weekly?: InsightsKpis200DataMeasuresItemWeeklyItem[];
 };

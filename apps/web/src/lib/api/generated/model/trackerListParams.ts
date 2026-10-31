@@ -7,6 +7,7 @@
  */
 import type { TrackerListDirection } from './trackerListDirection.ts';
 import type { TrackerListOverdue } from './trackerListOverdue.ts';
+import type { TrackerListOwnerRole } from './trackerListOwnerRole.ts';
 import type { TrackerListSort } from './trackerListSort.ts';
 
 export type TrackerListParams = {
@@ -27,4 +28,10 @@ search?: string;
 sort?: TrackerListSort;
 direction?: TrackerListDirection;
 overdue?: TrackerListOverdue;
+/**
+ * @minLength 1
+ * @maxLength 60
+ */
+status?: string;
+ownerRole?: TrackerListOwnerRole;
 };

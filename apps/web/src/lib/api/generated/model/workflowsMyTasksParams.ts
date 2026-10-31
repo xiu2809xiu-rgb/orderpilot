@@ -5,7 +5,9 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
+import type { WorkflowsMyTasksKind } from './workflowsMyTasksKind.ts';
 import type { WorkflowsMyTasksOverdue } from './workflowsMyTasksOverdue.ts';
+import type { WorkflowsMyTasksPriority } from './workflowsMyTasksPriority.ts';
 
 export type WorkflowsMyTasksParams = {
 /**
@@ -19,4 +21,6 @@ page?: number;
  */
 pageSize?: number;
 overdue?: WorkflowsMyTasksOverdue;
+kind?: WorkflowsMyTasksKind;
+priority?: WorkflowsMyTasksPriority;
 };
