@@ -15,12 +15,12 @@ Each area's owner and what it builds are in [The areas](../../CLAUDE.md#the-area
 
 ## Sprints
 
-- **One sprint is one week, Monday to Sunday.** Sprint 1 is 26 Oct to 1 Nov 2026 (the module's Week 2), and Sprint _n_ is module Week _n_ + 1. The milestones run from `Sprint 01 (W2)` to `Sprint 18 (W19)`.
+- **One sprint is one week, Monday to Sunday.** Sprint 1 is 26 Oct to 1 Nov 2026 (the module's Week 2), and Sprint _n_ is module Week _n_ + 1. The milestones will run from `Sprint 01 (W2)` to `Sprint 18 (W19)` (planned: P-2).
 - **Sprints are a rhythm, not a limit.** They set when we plan, review, reflect and report. Work never waits for a sprint. Whoever is free pulls the next ready story from the top of the backlog: Must, then Should, then Could, then continuous work.
 - **Continuous work keeps every sprint busy:** tests, accessibility, performance, security fixes, docs, refactoring, research spikes and client feedback.
 - **During the base,** work through the stories in order, without waiting between them.
-- **Record when work was done.** A story goes into the milestone of the week it was finished. P-2 automates this, and adds a sprint report for the end-of-day update.
-- **At the end of each day you work,** add a short note to the current milestone: what merged and what is in progress.
+- **Record when work was done.** A story goes into the milestone of the week it was finished. P-2 automates this, and adds a sprint report for the end-of-day update. Work finished before the milestones exist is back-filled into them by hand.
+- **At the end of each day you work,** add a short note to the current milestone: what merged and what is in progress. Until the milestones exist, the note goes on the story's issue.
 - **Stop when the base is done,** or when you are blocked.
 - **If your context is compacted, or a new session picks this up,** re-read [CLAUDE.md](../../CLAUDE.md) and [AGENTS.md](../../AGENTS.md), work out where you are from the board, the open pull requests and [the build report](../BUILD_REPORT.md), and carry on.
 
@@ -28,12 +28,12 @@ Each area's owner and what it builds are in [The areas](../../CLAUDE.md#the-area
 
 The team fixes the exact days and times at its first sprint planning after T-1.
 
-| Ceremony        | When                 | What happens                                                                           | What it leaves behind                     |
-| --------------- | -------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------- |
-| Sprint planning | Start of each sprint | Order the top of the backlog, check the Definition of Ready, and set the reviewer rota | Ready stories at the top, and a rota      |
-| Daily note      | Each day you work    | Add a short note to the current milestone: what merged and what is in progress         | A dated note in the milestone             |
-| Sprint review   | End of each sprint   | Show what merged, and run the sprint report (planned: P-2)                             | The sprint report, and feedback as issues |
-| Retrospective   | After the review     | Say what went well and what to change, and choose one or two actions                   | Actions as tasks in the backlog           |
+| Ceremony        | When                 | What happens                                                                                                                            | What it leaves behind                      |
+| --------------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| Sprint planning | Start of each sprint | Order the top of the backlog, check the Definition of Ready, and set the reviewer rota                                                  | Ready stories at the top, and a rota       |
+| Daily note      | Each day you work    | Add a short note to the current milestone, or to the story's issue until P-2 brings the milestones: what merged and what is in progress | A dated note in the milestone or the issue |
+| Sprint review   | End of each sprint   | Show what merged, and run the sprint report (planned: P-2)                                                                              | The sprint report, and feedback as issues  |
+| Retrospective   | After the review     | Say what went well and what to change, and choose one or two actions                                                                    | Actions as tasks in the backlog            |
 
 ## The board
 
@@ -61,7 +61,7 @@ Each person holds **at most two** pieces of work in progress. At the limit, fini
 | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | What a story needs and decisions on it  | Its issue, so that the decision stays with the work                                                                   |
 | Discussion of code                      | Review threads on the pull request                                                                                    |
-| What happened today                     | The daily note on the current milestone                                                                               |
+| What happened today                     | The daily note on the current milestone, or on the story's issue until P-2 brings the milestones                      |
 | A decision someone will ask about later | An ADR                                                                                                                |
 | Being blocked                           | Say so the same day: the `status: blocked` label (planned: P-2) and a message to the team                             |
 | Waiting on Spectra                      | The `status: needs client input` label (planned: P-2) and `docs/client/questions-for-client.md` (planned: P-3)        |

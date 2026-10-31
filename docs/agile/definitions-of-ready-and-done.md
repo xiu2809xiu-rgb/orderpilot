@@ -22,7 +22,7 @@ A story is ready to start when all of this is true.
 
 A sprint is ready to start when all of this is true.
 
-1. Its milestone exists.
+1. Its milestone exists (planned: P-2).
 2. The top of the backlog is in order: Must, then Should, then Could, then continuous work.
 3. There are enough ready stories for everyone to pull from.
 4. The reviewer rota is set.
@@ -54,14 +54,14 @@ A story is done when all of this is true. [CLAUDE.md](../../CLAUDE.md#10-definit
 8. Every required check is green and every review thread is resolved.
 9. The pull request is merged with a merge commit, the branch is deleted, the issue is closed, and the story is at Done on the board, in the milestone of the week it finished.
 
-Items that depend on something not yet built apply from the story that brings it: no `pnpm` command exists until P-5, and the traceability matrix and patterns file arrive in P-3 and P-8. Until then, the pull request says so plainly.
+Items that depend on something not yet built apply from the story that brings it: the milestones arrive in P-2, no `pnpm` command exists until P-5, and the traceability matrix and patterns file arrive in P-3 and P-8. Until then, the pull request says so plainly.
 
 ### Sprint
 
 A sprint is done when all of this is true. Sprints never cap the work, so unfinished work simply stays on the board.
 
-1. Every story finished this week is in this sprint's milestone.
-2. Each day worked has its daily note on the milestone.
+1. Every story finished this week is in this sprint's milestone (planned: P-2).
+2. Each day worked has its daily note on the milestone (planned: P-2; until then, on the story's issue).
 3. The sprint report has been run and shared (planned: P-2).
 4. The sprint review and the retrospective have been held.
 5. The retrospective's actions are tasks in the backlog.
