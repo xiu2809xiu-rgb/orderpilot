@@ -1,87 +1,69 @@
 import { addDecimal, multiplyDecimal } from "@orderpilot/shared";
+import {
+  BRANDS,
+  CUSTOMER_NAMES,
+  PAYMENT_TERMS,
+  PRICE_GROUPS,
+  PRODUCTS,
+  TEAM,
+  VARIANTS,
+  VENDOR_NAMES,
+} from "./names.js";
 import type { SeededRandom } from "./random.js";
 import type {
+  Brand,
   Customer,
   Item,
   OpeningBalances,
+  Person,
   Vendor,
   VendorBankAccount,
 } from "./types.js";
 
-// Every name below is invented. Nothing is taken from a real company, brand or
-// person. The numbers around them come from the seeded generator.
-
-const CUSTOMERS = [
-  {
-    name: "Quillon Harbour Traders",
-    country: "IN",
-    terms: "30 DAYS",
-    group: "DIST-A",
-  },
-  {
-    name: "Brindle Coast Imports",
-    country: "LK",
-    terms: "PREPAID",
-    group: "DIST-B",
-  },
-  {
-    name: "Tamarell Palm Wholesale",
-    country: "BD",
-    terms: "LC AT SIGHT",
-    group: "DIST-B",
-  },
-  {
-    name: "Verrick Bazaar Distribution",
-    country: "PK",
-    terms: "50% ADVANCE",
-    group: "RETAIL",
-  },
-  {
-    name: "Ostrel Ridge Trading",
-    country: "AE",
-    terms: "30 DAYS",
-    group: "DIST-A",
-  },
-] as const;
-
-const VENDORS = [
-  { name: "Halvorn Components Ltd", terms: "30 DAYS" },
-  { name: "Pelagia Source Co", terms: "60 DAYS" },
-  { name: "Quenby Origin Works", terms: "PREPAID" },
-] as const;
-
-const BRANDS = [
-  "Norvale",
-  "Kelmora",
-  "Tessaro",
-  "Brindlewick",
-  "Ashgrove",
-  "Vantora",
-] as const;
-
-const PRODUCTS = [
-  { name: "Wireless Mouse", price: [14, 22], cost: 0.55 },
-  { name: "USB-C Cable 1 m", price: [4, 8], cost: 0.45 },
-  { name: "Power Bank 10000 mAh", price: [18, 30], cost: 0.6 },
-  { name: "LED Desk Lamp", price: [12, 25], cost: 0.5 },
-  { name: "Bluetooth Speaker", price: [20, 45], cost: 0.58 },
-] as const;
-
-/** The item whose stock is set low on purpose, so one sample order is short. */
-export const SHORT_STOCK_ITEM_INDEX = 7;
-
 const pad = (n: number, width = 4): string => String(n).padStart(width, "0");
 
+const ITEMS_PER_BRAND = 25;
+
+/**
+ * Every sixth item is kept low on purpose: an order for a lot of one of them
+ * is short, so the stock purchase requests have something to follow from.
+ * Ordinary order lines never use them.
+ */
+export function isLowStockIndex(itemIndex: number): boolean {
+  return itemIndex % 6 === 3;
+}
+
+export function makePeople(): Person[] {
+  return TEAM.map((member) => ({
+    name: member.name,
+    role: member.role,
+    brands: member.category
+      ? BRANDS.filter((b) => b.category === member.category).map((b) => b.name)
+      : [],
+  }));
+}
+
+export function makeBrands(): Brand[] {
+  return BRANDS.map((brand) => {
+    const owner = TEAM.find(
+      (member) =>
+        member.role === "PRODUCT_MANAGER" && member.category === brand.category,
+    );
+    if (!owner) throw new Error(`No product manager for ${brand.category}`);
+    return { ...brand, owner: owner.name };
+  });
+}
+
 export function makeCustomers(random: SeededRandom): Customer[] {
-  return CUSTOMERS.map((c, i) => {
-    const limit = random.int(20, 80) * 1_000;
+  return CUSTOMER_NAMES.map(([name, country], i) => {
+    const limit = random.int(50, 300) * 1_000;
     return {
       no: `C-${pad(i + 1)}`,
-      name: c.name,
-      countryRegionCode: c.country,
+      name,
+      countryRegionCode: country,
       currencyCode: "USD",
-      paymentTermsCode: c.terms,
-      customerPriceGroup: c.group,
+      paymentTermsCode: PAYMENT_TERMS[i % PAYMENT_TERMS.length] ?? "30 DAYS",
+      customerPriceGroup: PRICE_GROUPS[i % PRICE_GROUPS.length] ?? "DIST-A",
       creditLimitLcy: `${String(limit)}.00`,
       balanceLcy: random.money(0, Math.floor(limit / 2)),
     };
@@ -89,11 +71,11 @@ export function makeCustomers(random: SeededRandom): Customer[] {
 }
 
 export function makeVendors(random: SeededRandom): Vendor[] {
-  return VENDORS.map((v, i) => ({
+  return VENDOR_NAMES.map((name, i) => ({
     no: `V-${pad(i + 1)}`,
-    name: v.name,
+    name,
     currencyCode: "USD",
-    paymentTermsCode: v.terms,
+    paymentTermsCode: ["30 DAYS", "60 DAYS", "PREPAID"][i % 3] ?? "30 DAYS",
     balanceLcy: random.money(0, 40_000),
   }));
 }
@@ -118,27 +100,33 @@ export function makeItems(
 ): Item[] {
   const items: Item[] = [];
   for (const [b, brand] of BRANDS.entries()) {
-    for (const [p, product] of PRODUCTS.entries()) {
+    const products = PRODUCTS[brand.category];
+    for (let j = 0; j < ITEMS_PER_BRAND; j++) {
       const index = items.length;
-      const vendor = vendors[(b + p) % vendors.length];
-      if (!vendor) throw new Error("Items need at least one vendor");
-      const price = random.money(product.price[0], product.price[1]);
-      const cost = (Number(price) * product.cost).toFixed(2);
+      const product = products[j % products.length];
+      const variant = VARIANTS[Math.floor(j / products.length)];
+      const vendor = vendors[(b + (j % 2)) % vendors.length];
+      if (!product || !variant || !vendor)
+        throw new Error("Items need a product");
+      const base = random.int(product.price[0] * 100, product.price[1] * 100);
+      const price = ((base * variant.price) / 100).toFixed(2);
+      const low = isLowStockIndex(index);
+      const inventory = low ? random.int(10, 60) : random.int(150, 900);
+      const prefix = brand.name.slice(0, 3).toUpperCase();
       items.push({
         no: `I-${pad(index + 1)}`,
-        description: `${brand} ${product.name}`,
-        brand,
+        description: `${brand.name} ${product.name}${variant.label}`,
+        brand: brand.name,
+        category: brand.category,
+        partNumber: `${prefix}-${product.code}-${variant.code}-${String(2400 + index)}`,
         baseUnitOfMeasure: "PCS",
         unitPrice: price,
-        unitCost: cost,
-        inventory:
-          index === SHORT_STOCK_ITEM_INDEX
-            ? "20"
-            : String(random.int(150, 900)),
-        qtyOnSalesOrder: String(random.int(0, 60)),
-        qtyOnPurchOrder: String(random.int(0, 400)),
+        unitCost: (Number(price) * product.cost).toFixed(2),
+        inventory: String(inventory),
+        qtyOnSalesOrder: String(random.int(0, low ? (inventory / 2) | 0 : 60)),
+        qtyOnPurchOrder: String(random.int(0, low ? 20 : 400)),
         vendorNo: vendor.no,
-        vendorItemNo: `${brand.slice(0, 3).toUpperCase()}-${pad(index + 100)}`,
+        vendorItemNo: `${prefix}-${pad(index + 100)}`,
       });
     }
   }

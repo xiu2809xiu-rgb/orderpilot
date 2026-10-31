@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { pageQuerySchema } from "../envelope.js";
+import { decimalStringSchema } from "../money.js";
 import { recordRefSchema } from "../record-number.js";
 import { roleSchema } from "../roles.js";
 import { orderNoSchema } from "./common.js";
@@ -26,6 +27,10 @@ export const TASK_STATUSES = ["OPEN", "DONE", "CANCELLED"] as const;
 export const taskStatusSchema = z.enum(TASK_STATUSES);
 export type TaskStatus = z.infer<typeof taskStatusSchema>;
 
+export const TASK_PRIORITIES = ["high", "normal", "low"] as const;
+export const taskPrioritySchema = z.enum(TASK_PRIORITIES);
+export type TaskPriority = z.infer<typeof taskPrioritySchema>;
+
 /** One task in a role's inbox. A task's status is not the order's status. */
 export const workflowTaskSchema = z.object({
   id: z.uuid(),
@@ -40,11 +45,23 @@ export const workflowTaskSchema = z.object({
   createdAt: z.iso.datetime(),
   dueAt: z.iso.datetime(),
   overdue: z.boolean(),
+  // What a person needs to pick the task up. The mock read model fills these;
+  // they are optional so a read model that cannot say them yet still parses.
+  customerNo: z.string().min(1).optional(),
+  customerName: z.string().min(1).optional(),
+  /** The order's value, in `currencyCode`. */
+  amount: decimalStringSchema.optional(),
+  currencyCode: z.string().length(3).optional(),
+  priority: taskPrioritySchema.optional(),
+  /** The person in the role who holds the task. */
+  assigneeName: z.string().min(1).optional(),
 });
 export type WorkflowTask = z.infer<typeof workflowTaskSchema>;
 
 export const tasksQuerySchema = pageQuerySchema.extend({
   /** "true" keeps only overdue tasks. */
   overdue: z.enum(["true", "false"]).optional(),
+  kind: taskKindSchema.optional(),
+  priority: taskPrioritySchema.optional(),
 });
 export type TasksQuery = z.infer<typeof tasksQuerySchema>;

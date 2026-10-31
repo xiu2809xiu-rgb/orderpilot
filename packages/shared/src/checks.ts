@@ -164,6 +164,9 @@ export const trackerQuerySchema = z.object({
   sort: z.enum(TRACKER_SORT_COLUMNS).optional(),
   direction: z.enum(["asc", "desc"]).optional(),
   overdue: z.enum(["true", "false"]).optional(),
+  /** The status code to keep, such as the one a tile or a flow step opens. */
+  status: z.string().trim().min(1).max(60).optional(),
+  ownerRole: roleSchema.optional(),
 });
 export type TrackerQuery = z.infer<typeof trackerQuerySchema>;
 
@@ -230,6 +233,8 @@ export const exceptionQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(200).default(25),
   search: z.string().trim().max(100).optional(),
+  /** Leave out for the open ones: the queue is the work waiting. */
+  state: exceptionStateSchema.optional(),
 });
 export type ExceptionQuery = z.infer<typeof exceptionQuerySchema>;
 
@@ -260,6 +265,12 @@ export const kpiSchema = z.object({
   lowerIsBetter: z.boolean(),
   /** How it is calculated, in words. Draft wording for area 3 to own. */
   definition: z.string().min(1),
+  /** Where the team wants it to be. A fixture value. */
+  target: z.number().optional(),
+  /** One value per week, oldest first, for the twelve weeks to the reference date. */
+  weekly: z
+    .array(z.object({ weekStart: z.iso.date(), value: z.number() }))
+    .optional(),
 });
 export type Kpi = z.infer<typeof kpiSchema>;
 
