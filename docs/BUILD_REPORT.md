@@ -29,6 +29,7 @@ Questions never block the build. Each one below has a safer default that the bui
 | ai  | **Analytics consent banner (G-1).** Every signed-in role sees a consent banner on first use, and nothing is counted until someone presses Allow. Do Not Track and Global Privacy Control win over a yes. Say if the panel would rather have the choice in a settings page only                                                                                                                                                                                                                                                                                                                                                                                  |
 | ad  | **Masking of an event's changes (F-2).** I applied F-1's masking to the values in `changes`, with one sample rule: a refusal's `reason` is shown to the auditor and hidden from the system admin, so the mechanism shows on real events. The summary line is not masked (ADR 0027, points 5 to 7). Say if Angelyn would rather ship no sample rule, or hide something else. Until you answer, the sample stays and is marked `sample`.                                                                                                                                                                                                                          |
 | aj  | **Test the macOS steps (issue 102).** CONTRIBUTING.md and the wiki's Getting started are written for macOS (zsh) and tested only on Windows 11. Someone with a Mac should follow them once before Monday and fix anything that differs                                                                                                                                                                                                                                                                                                                                                                                                                          | The macOS steps stay marked as not tested                                             | Getting started (#105) |
+| ak  | **Should the consent card ever return (P-32)?** It is shown once per browser and an ignored card never comes back.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | No: the choice stays in Settings, Analytics                                           | Consent card (#118)    |
 
 **Answered on 31 Oct** ([prompt 002, section 7](ai/prompts/002-finish-the-base-by-sunday.md#7-addendum-31-oct-evening)):
 
@@ -202,6 +203,25 @@ Ticked means it exists on `main` and I found it with a command. Planned means th
 - Say when the repository is private and the official keys are in `apps/web/.env.local` (unblocks P-22, the one Phase A story still open), and confirm step 8 of the deployment guide (unblocks P-24).
 - Group the board's Backlog view by Sprint, and tag the releases after a feature freeze.
 - Confirm or change the role defaults owners proposed (items r, w, y) and the audit sample rule (item ad).
+
+## Prompt 003: the product pass
+
+[Prompt 003](ai/prompts/003-product-pass.md) raises the bar after Richie's walk-through on 1 Nov: real numbers, real lists and no placeholder a reviewer can reach, before the handover on Monday evening, 2 Nov. The handover prompt is now prompt 004.
+
+Phase B is paused at P-13 until the product pass is done. P-13's first builder stopped at a usage limit, and its work is uncommitted in its worktree. Richie said yes to the recorder and to coverage being recorded.
+
+| Story | Branch                                | Issue                                                           | State       |
+| ----- | ------------------------------------- | --------------------------------------------------------------- | ----------- |
+| P-31  | `feat/product-pass-data`              | [#117](https://github.com/xiu2809xiu-rgb/orderpilot/issues/117) | Not started |
+| P-32  | `feat/area4-consent-card`             | [#118](https://github.com/xiu2809xiu-rgb/orderpilot/issues/118) | In review   |
+| P-33  | `feat/product-pass-home`              | [#119](https://github.com/xiu2809xiu-rgb/orderpilot/issues/119) | Not started |
+| P-34  | `feat/product-pass-signin`            | [#120](https://github.com/xiu2809xiu-rgb/orderpilot/issues/120) | Not started |
+| P-35  | `feat/product-pass-master-data`       | [#121](https://github.com/xiu2809xiu-rgb/orderpilot/issues/121) | Not started |
+| P-36  | `feat/product-pass-orders`            | [#122](https://github.com/xiu2809xiu-rgb/orderpilot/issues/122) | Not started |
+| P-37  | `feat/product-pass-documents`         | [#123](https://github.com/xiu2809xiu-rgb/orderpilot/issues/123) | Not started |
+| P-38  | `feat/product-pass-inherited-screens` | [#124](https://github.com/xiu2809xiu-rgb/orderpilot/issues/124) | Not started |
+| P-39  | `feat/product-pass-hide-planned`      | [#125](https://github.com/xiu2809xiu-rgb/orderpilot/issues/125) | Not started |
+| P-40  | `feat/product-pass-bar`               | [#126](https://github.com/xiu2809xiu-rgb/orderpilot/issues/126) | Not started |
 
 ## Prompt 002: Finish the base by Sunday night
 

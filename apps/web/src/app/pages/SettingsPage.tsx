@@ -1,3 +1,4 @@
+import { Suspense, lazy } from "react";
 import { Monitor, Moon, Sun, type LucideIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +8,11 @@ import { useThemeStore, type ThemePreference } from "@/lib/theme";
 import { useSessionStore } from "@/stores/session";
 import { PageHeader } from "@/components/common/PageHeader";
 import { ServiceChecksCard } from "./ServiceChecksCard";
+
+// A separate chunk with the tracker, so the entry bundle does not grow.
+const AnalyticsSettingsCard = lazy(
+  () => import("@/features/monitoring/AnalyticsSettingsCard"),
+);
 
 const THEMES: { value: ThemePreference; icon: LucideIcon }[] = [
   { value: "light", icon: Sun },
@@ -80,6 +86,10 @@ export function SettingsPage() {
             <Badge variant="secondary">{t("settings.languageEnglish")}</Badge>
           </CardContent>
         </Card>
+
+        <Suspense fallback={null}>
+          <AnalyticsSettingsCard />
+        </Suspense>
 
         <ServiceChecksCard />
 

@@ -117,10 +117,22 @@
     }
   },
   "consent": {
-    "title": "Help us improve OrderPilot",
-    "description": "May we count which screens are used? We record the screen, your role and the time. Never your name, your email or anything you type. Your choice is kept in this browser.",
+    "label": "Usage counting",
+    "description": "May we count which screens are used? Never your name or anything you type.",
     "allow": "Allow",
     "decline": "No thanks"
+  },
+  "analyticsSettings": {
+    "title": "Analytics",
+    "hint": "OrderPilot can count which screens are used: the screen, your role and the time. Never your name, your email or anything you type. The choice is kept in this browser.",
+    "current": "Current choice",
+    "allowed": "Counting is on",
+    "declined": "Counting is off",
+    "unset": "Not chosen yet, so nothing is counted",
+    "overridden": "Your browser sends Do Not Track or Global Privacy Control, so nothing is counted, whatever is chosen here.",
+    "overriddenYes": "Your saved choice is Allow, but your browser sends Do Not Track or Global Privacy Control, so nothing is counted.",
+    "allow": "Allow",
+    "decline": "Do not allow"
   },
   "denied": "Your role cannot see monitoring data."
 }

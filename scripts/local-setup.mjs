@@ -24,11 +24,12 @@ const REPO_ROOT = join(import.meta.dirname, "..");
  */
 
 /**
- * Works out how to start a fixed command line without a shell. pnpm is
- * pnpm.cmd on Windows, which Node cannot start directly, so when this script
- * runs under pnpm the command is run through Node on pnpm's own script
- * (npm_execpath). Run by hand with plain node, Windows falls back to cmd.exe
- * with separate arguments. Every command line here is fixed text.
+ * Works out how to start a fixed command line without a shell. Under pnpm,
+ * npm_execpath says which pnpm is running, and it comes in three forms: a
+ * JavaScript file (run through Node), a native executable such as pnpm.exe (run
+ * directly), or a .cmd wrapper, which Node cannot start without a shell. Run by
+ * hand with plain node, Windows has only the wrapper. Those last two go through
+ * cmd.exe with separate arguments. Every command line here is fixed text.
  *
  * @param {string} commandLine
  * @param {NodeJS.ProcessEnv} [env]
@@ -43,8 +44,10 @@ export function resolveCommand(
   const [program = "", ...args] = commandLine.split(" ");
   if (program === "pnpm") {
     const script = env.npm_execpath;
-    if (script && /pnpm/i.test(script)) {
-      return { file: process.execPath, args: [script, ...args] };
+    if (script && /pnpm/i.test(script) && !/\.(cmd|bat)$/i.test(script)) {
+      return /\.[cm]?js$/i.test(script)
+        ? { file: process.execPath, args: [script, ...args] }
+        : { file: script, args };
     }
     if (platform === "win32") {
       return { file: "cmd.exe", args: ["/d", "/c", "pnpm", ...args] };

@@ -1,8 +1,10 @@
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { useLocation, useMatches } from "react-router";
 import { Button } from "@/components/ui/button";
 import { routePattern } from "./AnalyticsTracker";
+import { useConsentCardVisible } from "./consentCard";
 import { tracker, useConsent } from "./tracker";
 
 /**
@@ -10,8 +12,14 @@ import { tracker, useConsent } from "./tracker";
  * page view per screen once consent is given. The route is turned into a
  * pattern here, so a record id never leaves the page.
  */
-export default function AnalyticsRoot() {
+export default function AnalyticsRoot({
+  dock,
+}: {
+  /** The shell's dock. The card is drawn inside it, never over the page. */
+  dock: HTMLElement | null;
+}) {
   const consent = useConsent();
+  const cardVisible = useConsentCardVisible();
   const { pathname } = useLocation();
   const matches = useMatches();
   const params = matches.at(-1)?.params ?? {};
@@ -33,24 +41,21 @@ export default function AnalyticsRoot() {
     };
   }, []);
 
-  return consent === "unset" ? <ConsentBanner /> : null;
+  return dock && cardVisible ? createPortal(<ConsentCard />, dock) : null;
 }
 
-function ConsentBanner() {
+function ConsentCard() {
   const { t } = useTranslation("monitoring");
   return (
     <section
-      aria-labelledby="consent-title"
-      className="fixed inset-x-s2 bottom-s2 z-40 mx-auto max-w-xl rounded-lg border bg-card p-s3 text-card-foreground shadow-lg"
+      data-consent-card=""
+      aria-label={t("consent.label")}
+      className="flex w-full flex-col gap-s2 border bg-card p-s2 text-card-foreground max-sm:border-x-0 max-sm:border-b-0 sm:w-80 sm:rounded-lg sm:shadow-md"
     >
-      <h2 id="consent-title" className="text-base font-semibold">
-        {t("consent.title")}
-      </h2>
-      <p className="mt-1 text-sm text-muted-foreground">
-        {t("consent.description")}
-      </p>
-      <div className="mt-s2 flex flex-wrap gap-2">
+      <p className="text-sm">{t("consent.description")}</p>
+      <div className="flex gap-2">
         <Button
+          size="sm"
           onClick={() => {
             tracker.grant();
           }}
@@ -58,6 +63,7 @@ function ConsentBanner() {
           {t("consent.allow")}
         </Button>
         <Button
+          size="sm"
           variant="outline"
           onClick={() => {
             tracker.deny();
