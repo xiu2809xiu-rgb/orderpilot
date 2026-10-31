@@ -51,3 +51,7 @@ audit:
     # major inside the release-age window. Same entry as osv-scanner.toml.
     # Review: 2026-11-14.
     - GHSA-g3hv-75wg-m249
+
+# A transitive dependency may not come from a git URL or a tarball link, only
+# from the registry. Semgrep's pnpm rules check for this.
+blockExoticSubdeps: true
