@@ -124,7 +124,7 @@ test("a story's labels are its type, area, priority and requirements", () => {
   const story = backlog.stories.find((item) => item.key === "D-1");
   assert.deepEqual(storyLabels(story, loadLabels()), [
     "type: story",
-    "area: 3 checks, tracker and insights",
+    "area: 3 checks tracker and insights",
     "priority: must",
     "req: M4 best practices",
   ]);

@@ -27,9 +27,9 @@ const isMutation = (document) => /^\s*mutation\b/.test(document);
 // in one place: with dryRun set, write() and mutate() print and return null, and
 // only GET requests and GraphQL queries ever reach `gh`.
 //
-// JSON bodies travel on stdin, never as arguments. A label such as
-// "area: 3 checks, tracker and insights" holds a comma, and `gh --label` splits
-// on commas.
+// JSON bodies travel on stdin, never as arguments. `gh --label` splits on
+// commas and quoting differs between shells; GitHub refuses a comma in a label
+// name anyway, but titles and bodies may hold one.
 export class GitHub {
   constructor({
     repo = process.env.GITHUB_REPOSITORY ?? DEFAULT_REPO,

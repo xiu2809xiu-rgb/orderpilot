@@ -46,10 +46,10 @@ test("wanted items start with the epics, so that parents exist first", () => {
   assert.equal(items[9].parentKey, "Epic P");
 });
 
-test("the label with a comma is kept whole on its stories", () => {
+test("the area label is kept whole on its stories", () => {
   const items = wantedItems(loadBacklog(), loadLabels());
   const story = items.find((item) => item.key === "D-1");
-  assert.ok(story.labels.includes("area: 3 checks, tracker and insights"));
+  assert.ok(story.labels.includes("area: 3 checks tracker and insights"));
 });
 
 test("issues are matched by key, with the oldest winning", () => {

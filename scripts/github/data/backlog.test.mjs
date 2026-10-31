@@ -18,7 +18,7 @@ const byKey = new Map(backlog.stories.map((story) => [story.key, story]));
 // Prompt 002, section 3, item 8: three starter stories each for areas 2, 3 and 4.
 const STARTERS_BY_AREA = {
   "area: 2 order workflows and approvals": ["C-2", "C-3", "C-4"],
-  "area: 3 checks, tracker and insights": ["D-2", "D-3", "D-4"],
+  "area: 3 checks tracker and insights": ["D-2", "D-3", "D-4"],
   "area: 4 controls and monitoring": ["F-3", "F-4", "F-5"],
 };
 const STARTERS = Object.values(STARTERS_BY_AREA).flat();
@@ -298,7 +298,7 @@ test("section 10's Could list is what the data calls could", () => {
 
 test("each story's area is the owner's, as the brief assigns them", () => {
   assert.equal(byKey.get("C-1").area, "area: 2 order workflows and approvals");
-  assert.equal(byKey.get("D-1").area, "area: 3 checks, tracker and insights");
+  assert.equal(byKey.get("D-1").area, "area: 3 checks tracker and insights");
   for (const key of ["F-1", "F-2", "G-1"]) {
     assert.equal(byKey.get(key).area, "area: 4 controls and monitoring", key);
   }

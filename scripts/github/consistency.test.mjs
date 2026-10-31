@@ -15,7 +15,7 @@ const names = labels.map((label) => label.name);
 const BRIEF_AREAS = [
   "area: 1 document AI and integration",
   "area: 2 order workflows and approvals",
-  "area: 3 checks, tracker and insights",
+  "area: 3 checks tracker and insights",
   "area: 4 controls and monitoring",
   "area: team",
 ];
@@ -86,7 +86,7 @@ test("each form offers exactly the area labels, in order", () => {
   }
 });
 
-test("no form sets an area as a label, where a comma could split it", () => {
+test("no form sets an area as a label, where the CLI could split it", () => {
   for (const name of FORMS) {
     const header = form(name).split(/^body:/m)[0];
     assert.equal(header.includes("area:"), false, name);
@@ -213,4 +213,10 @@ test("the wiki has the pages the brief lists", () => {
     "Team-and-areas.md",
     "_Sidebar.md",
   ]);
+});
+
+test("no label has a comma, because GitHub refuses it", () => {
+  for (const { name } of labels) {
+    assert.equal(name.includes(","), false, name);
+  }
 });

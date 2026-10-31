@@ -81,7 +81,7 @@ node scripts/github/sprint-recorder.mjs --dry-run --pull 3
 - **A closed issue is never reopened.** A story finished before the seed first ran gets its block once, with every criterion ticked. After that its body is left as it was finished.
 - **Status belongs to whoever holds the story.** The board sets Status only on an item that has none, puts a ready story at Ready rather than Todo, and puts closed work at Done in the sprint it finished.
 - **The board is found only through this repository's links.** Project #2, `OrderPilot delivery (port attempt)`, is an abandoned board that is never touched, even if someone links it here.
-- **Labels travel as JSON, never as `gh --label`.** `area: 3 checks, tracker and insights` keeps its comma.
+- **Labels travel as JSON, never as `gh --label`.** GitHub refuses a comma in a label name, so none has one (a test checks).
 - **Nothing is deleted by default.** `sync-labels.mjs --prune` deletes labels outside the catalogue, such as GitHub's defaults. That is destructive, so it needs Richie's yes.
 
 ## Tests

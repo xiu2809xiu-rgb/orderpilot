@@ -22,6 +22,8 @@ Questions never block the build. Each one below has a safer default that the bui
 
 The brief is [prompt 002](ai/prompts/002-finish-the-base-by-sunday.md). It changes the order, the pace and a few decisions, and adds domain notes. Where it differs from prompt 001, it wins. Phase A is everything a teammate needs, merged by Sunday 1 Nov, 23:59 Singapore time.
 
+The brief's label name `area: 3 checks, tracker and insights` holds a comma and GitHub refuses it, so the label is now `area: 3 checks tracker and insights`, the nearest alternative (issue #10).
+
 Its answers to the open points on P-1, as checked on 2026-10-31:
 
 | Point                    | State                                                                                                                                                                                                                               |

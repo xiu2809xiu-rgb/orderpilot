@@ -5,6 +5,7 @@
 // - a milestone's due time is rewritten, as a date with no time of day;
 // - a new project starts with default fields, one "View 1" table and three
 //   Status options, and an item added to it gets Status "Todo";
+// - a label name with a comma is refused with a 422, as GitHub does;
 // - project 2 has the board's title and blows up on any contact.
 
 const reply = (data) => ({
@@ -13,6 +14,10 @@ const reply = (data) => ({
   stderr: "",
 });
 const failure = (message) => ({ status: 1, stdout: "", stderr: message });
+const commaLabel = (name) =>
+  typeof name === "string" && name.includes(",")
+    ? failure("gh: Validation Failed (HTTP 422): name is invalid")
+    : null;
 
 const OPTION_STATUS = [
   { id: "todo", name: "Todo", color: "GREEN", description: "" },
@@ -103,6 +108,8 @@ export class SimulatedGitHub {
     if (label)
       return this.writeLabel(method, decodeURIComponent(label[1]), body);
     if (path.endsWith("/labels")) {
+      const refused = commaLabel(body.name);
+      if (refused) return refused;
       this.labels.push({ ...body });
       return reply(body);
     }
@@ -132,6 +139,8 @@ export class SimulatedGitHub {
   }
 
   writeLabel(method, name, body) {
+    const refused = commaLabel(body?.new_name ?? body?.name);
+    if (refused) return refused;
     const index = this.labels.findIndex(
       (item) => item.name.toLowerCase() === name.toLowerCase(),
     );

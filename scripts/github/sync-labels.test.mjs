@@ -68,16 +68,16 @@ test("--prune is what deletes them", () => {
   );
 });
 
-test("a label's name is encoded for the URL, comma included", () => {
+test("a label's name is encoded for the URL", () => {
   assert.equal(
-    labelPath("owner/name", "area: 3 checks, tracker and insights"),
-    "repos/owner/name/labels/area%3A%203%20checks%2C%20tracker%20and%20insights",
+    labelPath("owner/name", "area: 3 checks tracker and insights"),
+    "repos/owner/name/labels/area%3A%203%20checks%20tracker%20and%20insights",
   );
 });
 
-test("a real sync keeps the comma in the label, and the defaults", async () => {
+test("a real sync keeps the area label, and the defaults", async () => {
   const simulated = new SimulatedGitHub({
-    labels: [label("bug"), label("area: 3 checks, tracker and insights")],
+    labels: [label("bug"), label("area: 3 checks tracker and insights")],
   });
   const lines = [];
   const github = new GitHub({
@@ -91,10 +91,20 @@ test("a real sync keeps the comma in the label, and the defaults", async () => {
   const names = simulated.labels.map((item) => item.name);
   assert.ok(names.includes("bug"));
   assert.equal(
-    names.filter((name) => name === "area: 3 checks, tracker and insights")
+    names.filter((name) => name === "area: 3 checks tracker and insights")
       .length,
     1,
   );
   assert.equal(simulated.labels.length, loadLabels().length + 1);
   assert.ok(lines.some((line) => line.includes("outside the catalogue: bug")));
+});
+
+test("the simulated GitHub refuses a label name with a comma, as the real one does", () => {
+  const simulated = new SimulatedGitHub({ labels: [] });
+  const result = simulated.exec([
+    "api", "--method", "POST", "repos/owner/name/labels", "--input", "-",
+  ], JSON.stringify({ name: "a, b", color: "ffffff" }));
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /422/);
+  assert.equal(simulated.labels.length, 0);
 });
