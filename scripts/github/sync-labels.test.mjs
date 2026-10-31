@@ -101,9 +101,10 @@ test("a real sync keeps the area label, and the defaults", async () => {
 
 test("the simulated GitHub refuses a label name with a comma, as the real one does", () => {
   const simulated = new SimulatedGitHub({ labels: [] });
-  const result = simulated.exec([
-    "api", "--method", "POST", "repos/owner/name/labels", "--input", "-",
-  ], JSON.stringify({ name: "a, b", color: "ffffff" }));
+  const result = simulated.exec(
+    ["api", "--method", "POST", "repos/owner/name/labels", "--input", "-"],
+    JSON.stringify({ name: "a, b", color: "ffffff" }),
+  );
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /422/);
   assert.equal(simulated.labels.length, 0);

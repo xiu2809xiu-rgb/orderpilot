@@ -1,0 +1,7 @@
+#!/bin/sh
+# OrderPilot's pre-commit hook. The logic lives in scripts/git-hooks/pre-commit.mjs.
+command -v node >/dev/null 2>&1 || {
+  echo "OrderPilot's Git hooks need Node 24 on PATH. See CONTRIBUTING.md." >&2
+  exit 1
+}
+exec node "$(dirname -- "$0")/../scripts/git-hooks/pre-commit.mjs" "$@"

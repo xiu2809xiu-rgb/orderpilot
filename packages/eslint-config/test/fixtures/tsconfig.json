@@ -1,0 +1,7 @@
+{
+  "extends": "@orderpilot/tsconfig/react.json",
+  "compilerOptions": {
+    "allowJs": true
+  },
+  "include": ["*.ts", "*.tsx", "*.js"]
+}

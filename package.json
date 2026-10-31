@@ -1,0 +1,40 @@
+{
+  "name": "orderpilot",
+  "version": "0.0.0",
+  "private": true,
+  "description": "AI reads, rules decide, people approve. The OrderPilot workspace.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "packageManager": "pnpm@12.14.0",
+  "engines": {
+    "node": ">=24.22.0 <25",
+    "pnpm": ">=12.14.0 <13"
+  },
+  "scripts": {
+    "prepare": "node scripts/install-hooks.mjs",
+    "lint": "eslint . --max-warnings 0",
+    "typecheck": "tsc -p tsconfig.json && pnpm -r --if-present typecheck",
+    "test": "node --test \"scripts/**/*.test.mjs\" && pnpm -r --if-present test",
+    "build": "pnpm -r --if-present build",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check:dashes": "node scripts/check-dashes.mjs",
+    "check:samples": "node scripts/check-samples.mjs",
+    "check:samples:history": "node scripts/check-samples.mjs --history",
+    "check:licence-key": "node scripts/check-licence-key.mjs",
+    "check:secrets": "secretlint --maskSecrets \"**/*\""
+  },
+  "devDependencies": {
+    "@commitlint/cli": "21.2.4",
+    "@commitlint/config-conventional": "21.2.4",
+    "@orderpilot/eslint-config": "workspace:*",
+    "@orderpilot/tsconfig": "workspace:*",
+    "@secretlint/secretlint-rule-preset-recommend": "13.0.7",
+    "@types/node": "24.19.2",
+    "eslint": "10.13.0",
+    "lint-staged": "17.6.0",
+    "prettier": "3.9.10",
+    "secretlint": "13.0.7",
+    "typescript": "6.0.3"
+  }
+}

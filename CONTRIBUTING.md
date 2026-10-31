@@ -4,11 +4,18 @@ Everyone on the team follows this guide, whichever tools they use. [CLAUDE.md](C
 
 ## Set-up
 
-There is no app yet, so set-up is short. Each later story adds its own steps here when it merges.
+There is no app yet, so set-up is short. Each later story adds its own steps here when it merges. These steps work on Windows (in Git Bash or PowerShell) and on macOS.
 
 ### What works today
 
-1. Install Git and Node 24.22.0, the version in [`.node-version`](.node-version).
+1. Install Git, Node 24.22.0 (the version in [`.node-version`](.node-version)) and pnpm 12:
+
+   ```sh
+   npm install -g pnpm@12.14.0
+   ```
+
+   On macOS, `corepack enable` works too. On Windows it needs an administrator prompt, so use the line above.
+
 2. Clone the repository:
 
    ```sh
@@ -22,22 +29,72 @@ There is no app yet, so set-up is short. Each later story adds its own steps her
    git config user.email "<your GitHub no-reply address>"
    ```
 
-4. Read [CLAUDE.md](CLAUDE.md), [AGENTS.md](AGENTS.md) and the [working agreement](docs/agile/working-agreement.md).
+4. Install the workspace. This also installs the Git hooks:
+
+   ```sh
+   pnpm install
+   ```
+
+   It prints `Git hooks installed: core.hooksPath is .githooks.` If you installed before the hooks existed, pnpm skips that step when nothing else changed, so run `pnpm run prepare` once.
+
+5. Check that everything passes:
+
+   ```sh
+   pnpm lint
+   pnpm typecheck
+   pnpm test
+   pnpm build
+   ```
+
+6. Read [CLAUDE.md](CLAUDE.md), [AGENTS.md](AGENTS.md) and the [working agreement](docs/agile/working-agreement.md).
 
 Line endings need no set-up. [`.gitattributes`](.gitattributes) keeps text files LF on every machine, even with `core.autocrlf` on.
 
-There is nothing to install, build, test or start yet.
+There is no app to build or start yet: `pnpm build` has nothing to build until P-8.
+
+### The root scripts
+
+| Command                  | What it does                                                                      |
+| ------------------------ | --------------------------------------------------------------------------------- |
+| `pnpm lint`              | ESLint over the whole repository, failing on any warning                          |
+| `pnpm typecheck`         | TypeScript over the scripts, then each package's own `typecheck`                  |
+| `pnpm test`              | The repository's `node --test` tests, then each package's own `test`              |
+| `pnpm build`             | Each package's own `build`                                                        |
+| `pnpm format`            | Prettier writes every file. Mass formatting: ask first (AGENTS.md, rule 4)        |
+| `pnpm format:check`      | Prettier checks every file and writes nothing                                     |
+| `pnpm check:dashes`      | No em dash in any tracked text file                                               |
+| `pnpm check:samples`     | No client sample in any tracked file; `check:samples:history` checks every commit |
+| `pnpm check:licence-key` | No licence key value and no env file in any tracked file                          |
+| `pnpm check:secrets`     | secretlint over the whole working tree                                            |
+
+### The Git hooks
+
+`pnpm install` points Git at [`.githooks/`](.githooks). They run with Git Bash on Windows and with sh on macOS, and need Node on `PATH`.
+
+| Hook       | What it checks                                                                                                    |
+| ---------- | ----------------------------------------------------------------------------------------------------------------- |
+| commit-msg | [Conventional Commits](https://www.conventionalcommits.org/) through commitlint, and no em dash                   |
+| pre-commit | No licence key, no client sample and no em dash in the staged files, then secretlint, ESLint and Prettier on them |
+| pre-push   | Nothing is pushed to `main`, whatever the command, and no client sample is in any commit being pushed             |
+
+If a hook stops you, it says why and what to do. When it refuses a push to `main`, push your branch instead (`git push -u origin <branch>`) and open a pull request. Never skip a hook with `--no-verify`. [Security testing](docs/security/security-testing.md) lists every check.
+
+#### Several worktrees, or a tree that has not installed yet
+
+`core.hooksPath` is stored in the repository's shared `.git/config`, so every worktree of a clone gets it. The path is relative to each tree, which gives three cases:
+
+- A tree that has not merged `main` yet has no `.githooks/` folder. Git then runs no hooks there, so it can still commit. Merge `main` to get the hooks.
+- A tree with `.githooks/` but no `node_modules` stops the commit with `<package> is not installed. Run pnpm install at the repository root, then try again.` We chose a loud stop over a silent skip, so nobody commits unchecked work by accident. Run `pnpm install` in that tree.
+- No Node on `PATH` stops the commit with a message that names this guide.
 
 ### What later stories bring
 
-| Step                                                                     | Story |
-| ------------------------------------------------------------------------ | ----- |
-| `pnpm install`, and the root scripts for lint, typecheck, test and build | P-5   |
-| The Git hooks, installed with the workspace                              | P-5   |
-| `cp .env.example .env`, then PostgreSQL, Redis and MinIO in Docker       | P-9   |
-| The full stack with `docker compose up --build`                          | P-13  |
-| End-to-end tests with Playwright and axe                                 | P-14  |
-| The troubleshooting guide: ports in use, PostgreSQL and Docker           | P-9   |
+| Step                                                               | Story |
+| ------------------------------------------------------------------ | ----- |
+| `cp .env.example .env`, then PostgreSQL, Redis and MinIO in Docker | P-9   |
+| The full stack with `docker compose up --build`                    | P-13  |
+| End-to-end tests with Playwright and axe                           | P-14  |
+| The troubleshooting guide: ports in use, PostgreSQL and Docker     | P-9   |
 
 ## Workflow
 
@@ -60,7 +117,7 @@ The full version is in [the path from a story to main](AGENTS.md#the-path-from-a
 5. **Open one pull request** from the [template](.github/PULL_REQUEST_TEMPLATE.md), with `Closes #N`. It covers:
    - what and why;
    - the acceptance criteria with evidence;
-   - the real results of `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm build`, plus `docker compose up --build` once it exists. Before P-5 no `pnpm` command exists, so say that instead;
+   - the real results of `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm build`, plus `docker compose up --build` once it exists;
    - for UI changes, screenshots in light and dark from a Docker build of the branch, saved in `docs/design/screenshots/<area>/`.
 6. **Get a review.** The reviewer of the day responds within one working day. Resolve every thread.
 7. **Merge with a merge commit** once every required check is green. The branch is then deleted and the story moves to Done.
@@ -89,7 +146,7 @@ This applies from P-11, when `apps/web` exists. Before that there is nowhere to 
    No React Bits Pro or ReUI Pro code goes into a public repository, because their licences need a private one. Once it is private, adding a Pro component goes through Richie.
 
 3. **Add it from `apps/web`,** with the shadcn CLI for a registry item. P-11 records the exact command. The component becomes code in this repository, so nobody needs a key to run or build it.
-4. **Pin what it brings.** Registry items can declare caret ranges. Re-pin every new dependency to an exact version, and respect the release-age rule that P-5 sets.
+4. **Pin what it brings.** Registry items can declare caret ranges. Re-pin every new dependency to an exact version, and respect the 7-day release-age rule in `pnpm-workspace.yaml` ([ADR 0003](docs/adr/0003-pnpm-monorepo.md)).
 5. **Make it ours:**
    - one component per file, under 200 lines;
    - a header comment stating its origin;
