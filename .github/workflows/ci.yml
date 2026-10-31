@@ -1,7 +1,7 @@
 # The verify job. Its name, "Lint, typecheck, test, build", is a required
 # check on main, so it never changes. Later stories add steps to it: the
 # diagrams check (P-16) and the slides check (P-25). The bundle budget (P-11)
-# is in, after the build.
+# is in, after the build, and so is the generated API code check (P-26).
 #
 # No path filters: a required workflow that does not run leaves its check
 # pending forever. Heavy jobs skip with job-level conditions instead.
@@ -71,6 +71,9 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+      - name: Generated API code is current (OpenAPI file, hooks, mocks)
+        run: pnpm api:check
 
       - name: Bundle budget (initial JS, 250 KB gzip)
         run: pnpm budget

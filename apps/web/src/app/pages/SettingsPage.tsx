@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { useThemeStore, type ThemePreference } from "@/lib/theme";
 import { useSessionStore } from "@/stores/session";
 import { PageHeader } from "../PageHeader";
+import { ServiceChecksCard } from "./ServiceChecksCard";
 
 const THEMES: { value: ThemePreference; icon: LucideIcon }[] = [
   { value: "light", icon: Sun },
@@ -79,6 +80,8 @@ export function SettingsPage() {
             <Badge variant="secondary">{t("settings.languageEnglish")}</Badge>
           </CardContent>
         </Card>
+
+        <ServiceChecksCard />
 
         {session ? (
           <Card>
