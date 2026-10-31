@@ -3,7 +3,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import type { RequestHandler } from "express";
 import pino, { type DestinationStream, type Logger as PinoLogger } from "pino";
 import { pinoHttp } from "pino-http";
-import { resolveRequestId } from "../common/request-id.js";
+import { requestIdOf, resolveRequestId } from "../common/request-id.js";
 import type { AppConfig } from "../config/app-config.js";
 
 /**
@@ -52,7 +52,8 @@ export function requestLogging(root: PinoLogger): RequestHandler[] {
     logger: root,
     genReqId: (req: IncomingMessage, res: ServerResponse) =>
       resolveRequestId(req, res),
-    customAttributeKeys: { reqId: "requestId" },
+    // The request id as a top-level field, easy to search for in any log tool.
+    customProps: (req) => ({ requestId: requestIdOf(req) }),
     customLogLevel: (_req, res, error) => {
       if (error || res.statusCode >= 500) return "error";
       if (res.statusCode >= 400) return "warn";
@@ -60,7 +61,7 @@ export function requestLogging(root: PinoLogger): RequestHandler[] {
     },
   });
   const bind: RequestHandler = (req, _res, next) => {
-    requestLogger.run(req.log, next);
+    requestLogger.run(req.log.child({ requestId: requestIdOf(req) }), next);
   };
   return [http as RequestHandler, bind];
 }

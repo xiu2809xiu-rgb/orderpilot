@@ -10,4 +10,15 @@ export default defineConfig(
   orderpilot({ tsconfigRootDir: import.meta.dirname }),
   // Modules and controllers are classes that only carry a decorator.
   nest({ files: ["apps/api/**/*.ts"] }),
+  {
+    name: "orderpilot/api-http-tests",
+    files: ["apps/api/test/**/*.ts"],
+    // supertest types a response body as any. These tests assert on its
+    // exact shape, so a wrong access fails the test; narrowing every body
+    // with a schema would only repeat the assertions.
+    rules: {
+      "@typescript-eslint/no-unsafe-member-access": "off",
+      "@typescript-eslint/no-unsafe-assignment": "off",
+    },
+  },
 );

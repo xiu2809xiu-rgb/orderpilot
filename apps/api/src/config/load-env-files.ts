@@ -49,7 +49,35 @@ export function loadEnvFiles(
   for (const [key, value] of Object.entries(fromFiles)) {
     if (!(key in env)) parsed[key] = value;
   }
-  const result = expand({ processEnv: env as Record<string, string>, parsed });
+  const result = expand({
+    processEnv: env as Record<string, string>,
+    parsed: inDependencyOrder(parsed),
+  });
   if (result.error) throw result.error;
   return read;
+}
+
+/**
+ * dotenv-expand resolves a value from the entries it has already handled, so a
+ * variable must come after the ones it refers to. Files are read in an order
+ * that has nothing to do with that (apps/api/.env before the root .env), so
+ * sort first. A cycle is left in its given order and expands to empty.
+ */
+function inDependencyOrder(
+  parsed: Record<string, string>,
+): Record<string, string> {
+  const ordered: Record<string, string> = {};
+  const visiting = new Set<string>();
+  const visit = (key: string): void => {
+    if (key in ordered || visiting.has(key)) return;
+    visiting.add(key);
+    const value = parsed[key] ?? "";
+    for (const match of value.matchAll(/\$\{?([A-Za-z_][A-Za-z0-9_]*)/g)) {
+      const dependency = match[1];
+      if (dependency !== undefined && dependency in parsed) visit(dependency);
+    }
+    ordered[key] = value;
+  };
+  for (const key of Object.keys(parsed)) visit(key);
+  return ordered;
 }

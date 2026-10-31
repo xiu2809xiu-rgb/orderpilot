@@ -17,6 +17,7 @@ export function setupSwagger(
       .build(),
   );
   SwaggerModule.setup(DOCS_PATH, app, document, {
+    customSiteTitle: "OrderPilot API",
     jsonDocumentUrl: `${DOCS_PATH}-json`,
   });
 }
