@@ -20,6 +20,9 @@ export function databaseNameOf(url: string): string {
   return decodeURIComponent(new URL(url).pathname.replace(/^\//, ""));
 }
 
+/** The password of every seeded account under test. Not a secret. */
+export const TEST_DEMO_PASSWORD = "test-demo-password-1";
+
 /** The environment the API runs on under test. */
 export function testInfrastructureEnv(): NodeJS.ProcessEnv {
   return {
@@ -32,6 +35,7 @@ export function testInfrastructureEnv(): NodeJS.ProcessEnv {
     S3_FORCE_PATH_STYLE: process.env.S3_FORCE_PATH_STYLE,
     S3_BUCKET: need("TEST_S3_BUCKET"),
     S3_CREATE_BUCKET: "true",
+    DEMO_PASSWORD: TEST_DEMO_PASSWORD,
   };
 }
 

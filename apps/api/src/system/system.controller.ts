@@ -1,6 +1,7 @@
 import { Controller, Get, Inject, Query } from "@nestjs/common";
 import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { pageQuerySchema, type PageQuery } from "@orderpilot/shared";
+import { Public } from "../auth/decorators.js";
 import { openApiQuery, openApiSchema } from "../common/openapi.js";
 import { ZodValidationPipe } from "../common/zod-validation.pipe.js";
 import { checkListResponseSchema } from "./system.schemas.js";
@@ -16,6 +17,8 @@ export class SystemController {
   constructor(@Inject(SystemService) private readonly system: SystemService) {}
 
   @Get("checks")
+  // The same names /health already lists without a session.
+  @Public()
   @ApiOperation({
     summary: "The readiness checks that are registered, a page at a time",
   })

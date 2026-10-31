@@ -14,6 +14,7 @@ import {
 } from "@nestjs/swagger";
 import { SkipThrottle } from "@nestjs/throttler";
 import type { Response } from "express";
+import { Public } from "../auth/decorators.js";
 import { openApiSchema } from "../common/openapi.js";
 import { HealthService } from "./health.service.js";
 import {
@@ -28,6 +29,7 @@ import {
  */
 @ApiTags("Health")
 @SkipThrottle()
+@Public()
 @Controller({ path: "health", version: VERSION_NEUTRAL })
 export class HealthController {
   constructor(@Inject(HealthService) private readonly health: HealthService) {}

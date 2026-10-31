@@ -1,35 +1,14 @@
 import {
+  DEFAULT_ROLE_PERMISSIONS,
   DEMO_PERSONAS,
   ROLES,
   type AuthOptions,
   type ErrorCode,
-  type Permission,
   type Role,
   type Session,
   ERROR_HTTP_STATUS,
 } from "@orderpilot/shared";
 import { vi } from "vitest";
-
-// Synthetic. Which role holds which permission is area 4's matrix; these are
-// stand-ins that give each role a different menu.
-const PERMISSIONS: Record<Role, Permission[]> = {
-  SYSTEM_ADMIN: [
-    "users.read",
-    "users.manage",
-    "roles.manage",
-    "settings.manage",
-    "audit.read",
-    "aiUsage.read",
-  ],
-  PRODUCT_MANAGER: ["orders.read", "documents.read"],
-  APPROVER: ["orders.read", "documents.read"],
-  SUPPORT: ["orders.read", "documents.read", "documents.upload"],
-  WAREHOUSE: ["orders.read", "documents.read"],
-  FINANCE: ["orders.read", "documents.read"],
-  LOGISTICS: ["orders.read", "documents.read"],
-  MANAGEMENT: ["orders.read", "documents.read", "aiUsage.read"],
-  AUDITOR: ["orders.read", "audit.read", "aiUsage.read"],
-};
 
 export function sessionFor(role: Role, expiresInMs = 15 * 60_000): Session {
   const index = ROLES.indexOf(role) + 1;
@@ -40,7 +19,7 @@ export function sessionFor(role: Role, expiresInMs = 15 * 60_000): Session {
       email: `${role.toLowerCase().replaceAll("_", ".")}@example.test`,
       role,
     },
-    permissions: PERMISSIONS[role],
+    permissions: [...DEFAULT_ROLE_PERMISSIONS[role]],
     expiresAt: new Date(Date.now() + expiresInMs).toISOString(),
     demo: true,
   };
