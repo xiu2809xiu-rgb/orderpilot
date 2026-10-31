@@ -27,7 +27,7 @@ describe("bundle budget", () => {
   it("sums gzip sizes of the initial files and ignores other chunks", () => {
     const dist = mkdtempSync(path.join(tmpdir(), "op-budget-"));
     mkdirSync(path.join(dist, "assets"));
-    // nosemgrep: javascript.lang.security.audit.unknown-value-with-script-tag -- test fixture written to a fresh temp dir, never served
+    // nosemgrep - test fixture written to a fresh temp dir, never served
     writeFileSync(path.join(dist, "index.html"), html);
     writeFileSync(path.join(dist, "assets/index-abc.js"), "a".repeat(5000));
     writeFileSync(path.join(dist, "assets/vendor-def.js"), "b".repeat(5000));
@@ -41,7 +41,7 @@ describe("bundle budget", () => {
   it("is over budget for a big initial chunk", () => {
     const dist = mkdtempSync(path.join(tmpdir(), "op-budget-"));
     mkdirSync(path.join(dist, "assets"));
-    // nosemgrep: javascript.lang.security.audit.unknown-value-with-script-tag -- test fixture written to a fresh temp dir, never served
+    // nosemgrep - test fixture written to a fresh temp dir, never served
     writeFileSync(path.join(dist, "index.html"), html);
     // Random-looking bytes do not compress, so this is over 250 KB gzipped.
     const noise = randomBytes(400_000);
