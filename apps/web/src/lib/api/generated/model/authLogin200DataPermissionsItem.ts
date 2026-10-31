@@ -12,6 +12,7 @@ export type AuthLogin200DataPermissionsItem = typeof AuthLogin200DataPermissions
 export const AuthLogin200DataPermissionsItem = {
   usersread: 'users.read',
   usersmanage: 'users.manage',
+  rolesread: 'roles.read',
   rolesmanage: 'roles.manage',
   settingsmanage: 'settings.manage',
   auditread: 'audit.read',
@@ -19,9 +20,10 @@ export const AuthLogin200DataPermissionsItem = {
   documentsread: 'documents.read',
   documentsupload: 'documents.upload',
   ordersread: 'orders.read',
-  workflowsread: 'workflows.read',
-  sprread: 'spr.read',
-  sprdecide: 'spr.decide',
+  trackerread: 'tracker.read',
+  exceptionsread: 'exceptions.read',
+  insightsread: 'insights.read',
+  approvalsdecide: 'approvals.decide',
   paymentsconfirm: 'payments.confirm',
-  workflowsinboxesany: 'workflows.inboxes.any',
+  paymentspost: 'payments.post',
 } as const;

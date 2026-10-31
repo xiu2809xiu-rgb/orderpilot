@@ -417,6 +417,7 @@
                             "enum": [
                               "users.read",
                               "users.manage",
+                              "roles.read",
                               "roles.manage",
                               "settings.manage",
                               "audit.read",
@@ -424,11 +425,12 @@
                               "documents.read",
                               "documents.upload",
                               "orders.read",
-                              "workflows.read",
-                              "spr.read",
-                              "spr.decide",
+                              "tracker.read",
+                              "exceptions.read",
+                              "insights.read",
+                              "approvals.decide",
                               "payments.confirm",
-                              "workflows.inboxes.any"
+                              "payments.post"
                             ]
                           }
                         },
@@ -513,6 +515,7 @@
                             "enum": [
                               "users.read",
                               "users.manage",
+                              "roles.read",
                               "roles.manage",
                               "settings.manage",
                               "audit.read",
@@ -520,11 +523,12 @@
                               "documents.read",
                               "documents.upload",
                               "orders.read",
-                              "workflows.read",
-                              "spr.read",
-                              "spr.decide",
+                              "tracker.read",
+                              "exceptions.read",
+                              "insights.read",
+                              "approvals.decide",
                               "payments.confirm",
-                              "workflows.inboxes.any"
+                              "payments.post"
                             ]
                           }
                         },
@@ -644,6 +648,7 @@
                             "enum": [
                               "users.read",
                               "users.manage",
+                              "roles.read",
                               "roles.manage",
                               "settings.manage",
                               "audit.read",
@@ -651,11 +656,12 @@
                               "documents.read",
                               "documents.upload",
                               "orders.read",
-                              "workflows.read",
-                              "spr.read",
-                              "spr.decide",
+                              "tracker.read",
+                              "exceptions.read",
+                              "insights.read",
+                              "approvals.decide",
                               "payments.confirm",
-                              "workflows.inboxes.any"
+                              "payments.post"
                             ]
                           }
                         },
@@ -768,6 +774,7 @@
                             "enum": [
                               "users.read",
                               "users.manage",
+                              "roles.read",
                               "roles.manage",
                               "settings.manage",
                               "audit.read",
@@ -775,11 +782,12 @@
                               "documents.read",
                               "documents.upload",
                               "orders.read",
-                              "workflows.read",
-                              "spr.read",
-                              "spr.decide",
+                              "tracker.read",
+                              "exceptions.read",
+                              "insights.read",
+                              "approvals.decide",
                               "payments.confirm",
-                              "workflows.inboxes.any"
+                              "payments.post"
                             ]
                           }
                         },
@@ -807,9 +815,9 @@
         "tags": ["Auth"]
       }
     },
-    "/api/v1/workflows/tasks": {
+    "/api/v1/tracker/orders": {
       "get": {
-        "operationId": "Workflows_myTasks",
+        "operationId": "Tracker_list",
         "parameters": [
           {
             "name": "page",
@@ -831,6 +839,33 @@
               "type": "integer",
               "minimum": 1,
               "maximum": 200
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 100
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["orderNo", "customerName", "orderDate", "shipmentDate"]
+            }
+          },
+          {
+            "name": "direction",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["asc", "desc"]
             }
           },
           {
@@ -856,224 +891,38 @@
                       "items": {
                         "type": "object",
                         "properties": {
-                          "id": {
-                            "type": "string",
-                            "format": "uuid",
-                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-                          },
-                          "kind": {
-                            "type": "string",
-                            "enum": [
-                              "REVIEW_FIELDS",
-                              "RAISE_SPR",
-                              "APPROVE_SPR",
-                              "SEND_PI",
-                              "CONFIRM_PAYMENT",
-                              "PACK_ORDER",
-                              "ADD_SHIPPING_DOCUMENTS"
-                            ]
-                          },
-                          "title": {
+                          "orderNo": {
                             "type": "string",
                             "minLength": 1
                           },
-                          "assigneeRole": {
+                          "externalDocumentNo": {
                             "type": "string",
-                            "enum": [
-                              "SYSTEM_ADMIN",
-                              "PRODUCT_MANAGER",
-                              "APPROVER",
-                              "SUPPORT",
-                              "WAREHOUSE",
-                              "FINANCE",
-                              "LOGISTICS",
-                              "MANAGEMENT",
-                              "AUDITOR"
-                            ]
+                            "minLength": 1
                           },
-                          "orderNo": {
-                            "nullable": true,
+                          "customerNo": {
                             "type": "string",
-                            "pattern": "^[A-Za-z0-9-]{1,30}$"
+                            "minLength": 1
                           },
-                          "ref": {
-                            "nullable": true,
+                          "customerName": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "status": {
                             "type": "object",
                             "properties": {
-                              "recordNo": {
+                              "code": {
                                 "type": "string",
-                                "pattern": "^(SPR|PI|EXC)-\\d{8}-\\d{4,}$"
+                                "minLength": 1
                               },
-                              "navisionNo": {
-                                "nullable": true,
+                              "label": {
                                 "type": "string",
                                 "minLength": 1
                               }
                             },
-                            "required": ["recordNo", "navisionNo"],
+                            "required": ["code", "label"],
                             "additionalProperties": false
                           },
-                          "status": {
-                            "type": "string",
-                            "enum": ["OPEN", "DONE", "CANCELLED"]
-                          },
-                          "createdAt": {
-                            "type": "string",
-                            "format": "date-time",
-                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                          },
-                          "dueAt": {
-                            "type": "string",
-                            "format": "date-time",
-                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                          },
-                          "overdue": {
-                            "type": "boolean"
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "kind",
-                          "title",
-                          "assigneeRole",
-                          "orderNo",
-                          "ref",
-                          "status",
-                          "createdAt",
-                          "dueAt",
-                          "overdue"
-                        ],
-                        "additionalProperties": false
-                      }
-                    },
-                    "meta": {
-                      "type": "object",
-                      "properties": {
-                        "page": {
-                          "type": "integer",
-                          "minimum": 1,
-                          "maximum": 9007199254740991
-                        },
-                        "pageSize": {
-                          "type": "integer",
-                          "minimum": 1,
-                          "maximum": 200
-                        },
-                        "total": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 9007199254740991
-                        },
-                        "mock": {
-                          "type": "boolean",
-                          "enum": [true]
-                        },
-                        "dataLabel": {
-                          "type": "string",
-                          "enum": ["Synthetic demo data"]
-                        }
-                      },
-                      "required": [
-                        "page",
-                        "pageSize",
-                        "total",
-                        "mock",
-                        "dataLabel"
-                      ],
-                      "additionalProperties": false
-                    }
-                  },
-                  "required": ["data", "meta"],
-                  "additionalProperties": false
-                }
-              }
-            }
-          }
-        },
-        "summary": "The caller's own task inbox (mock data)",
-        "tags": ["Workflows"]
-      }
-    },
-    "/api/v1/workflows/inboxes/{role}/tasks": {
-      "get": {
-        "operationId": "Workflows_inboxTasks",
-        "parameters": [
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "default": 1,
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 9007199254740991
-            }
-          },
-          {
-            "name": "pageSize",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "default": 25,
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 200
-            }
-          },
-          {
-            "name": "overdue",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "enum": ["true", "false"]
-            }
-          },
-          {
-            "name": "role",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string",
-              "example": "WAREHOUSE"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string",
-                            "format": "uuid",
-                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-                          },
-                          "kind": {
-                            "type": "string",
-                            "enum": [
-                              "REVIEW_FIELDS",
-                              "RAISE_SPR",
-                              "APPROVE_SPR",
-                              "SEND_PI",
-                              "CONFIRM_PAYMENT",
-                              "PACK_ORDER",
-                              "ADD_SHIPPING_DOCUMENTS"
-                            ]
-                          },
-                          "title": {
-                            "type": "string",
-                            "minLength": 1
-                          },
-                          "assigneeRole": {
+                          "ownerRole": {
                             "type": "string",
                             "enum": [
                               "SYSTEM_ADMIN",
@@ -1087,57 +936,53 @@
                               "AUDITOR"
                             ]
                           },
-                          "orderNo": {
-                            "nullable": true,
-                            "type": "string",
-                            "pattern": "^[A-Za-z0-9-]{1,30}$"
-                          },
-                          "ref": {
-                            "nullable": true,
+                          "overdue": {
                             "type": "object",
                             "properties": {
-                              "recordNo": {
-                                "type": "string",
-                                "pattern": "^(SPR|PI|EXC)-\\d{8}-\\d{4,}$"
+                              "overdue": {
+                                "type": "boolean"
                               },
-                              "navisionNo": {
+                              "daysOverdue": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              "reason": {
                                 "nullable": true,
-                                "type": "string",
-                                "minLength": 1
+                                "type": "string"
                               }
                             },
-                            "required": ["recordNo", "navisionNo"],
+                            "required": ["overdue", "daysOverdue", "reason"],
                             "additionalProperties": false
                           },
-                          "status": {
-                            "type": "string",
-                            "enum": ["OPEN", "DONE", "CANCELLED"]
+                          "openExceptions": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
                           },
-                          "createdAt": {
+                          "shipmentDate": {
+                            "nullable": true,
                             "type": "string",
-                            "format": "date-time",
-                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            "format": "date",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
                           },
-                          "dueAt": {
+                          "orderDate": {
                             "type": "string",
-                            "format": "date-time",
-                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                          },
-                          "overdue": {
-                            "type": "boolean"
+                            "format": "date",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
                           }
                         },
                         "required": [
-                          "id",
-                          "kind",
-                          "title",
-                          "assigneeRole",
                           "orderNo",
-                          "ref",
+                          "externalDocumentNo",
+                          "customerNo",
+                          "customerName",
                           "status",
-                          "createdAt",
-                          "dueAt",
-                          "overdue"
+                          "ownerRole",
+                          "overdue",
+                          "openExceptions",
+                          "shipmentDate",
+                          "orderDate"
                         ],
                         "additionalProperties": false
                       }
@@ -1163,19 +1008,9 @@
                         "mock": {
                           "type": "boolean",
                           "enum": [true]
-                        },
-                        "dataLabel": {
-                          "type": "string",
-                          "enum": ["Synthetic demo data"]
                         }
                       },
-                      "required": [
-                        "page",
-                        "pageSize",
-                        "total",
-                        "mock",
-                        "dataLabel"
-                      ],
+                      "required": ["page", "pageSize", "total", "mock"],
                       "additionalProperties": false
                     }
                   },
@@ -1186,380 +1021,20 @@
             }
           }
         },
-        "summary": "Any role's task inbox, for roles that oversee (mock data)",
-        "tags": ["Workflows"]
+        "summary": "The order tracker: status, owner and overdue flags, a page at a time. Mock data",
+        "tags": ["Tracker"]
       }
     },
-    "/api/v1/workflows/reminders": {
+    "/api/v1/tracker/orders/{orderNo}": {
       "get": {
-        "operationId": "Workflows_myReminders",
-        "parameters": [
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "default": 1,
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 9007199254740991
-            }
-          },
-          {
-            "name": "pageSize",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "default": 25,
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 200
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string",
-                            "format": "uuid",
-                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-                          },
-                          "kind": {
-                            "type": "string",
-                            "enum": [
-                              "TASK_DUE",
-                              "PAYMENT_DUE",
-                              "SHIPPING_DOCUMENT_MISSING",
-                              "IMPORT_PERMIT_MISSING"
-                            ]
-                          },
-                          "stage": {
-                            "type": "string",
-                            "enum": ["scheduled", "sent", "escalated"]
-                          },
-                          "orderNo": {
-                            "type": "string",
-                            "pattern": "^[A-Za-z0-9-]{1,30}$"
-                          },
-                          "message": {
-                            "type": "string",
-                            "minLength": 1
-                          },
-                          "toRole": {
-                            "type": "string",
-                            "enum": [
-                              "SYSTEM_ADMIN",
-                              "PRODUCT_MANAGER",
-                              "APPROVER",
-                              "SUPPORT",
-                              "WAREHOUSE",
-                              "FINANCE",
-                              "LOGISTICS",
-                              "MANAGEMENT",
-                              "AUDITOR"
-                            ]
-                          },
-                          "dueAt": {
-                            "type": "string",
-                            "format": "date-time",
-                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                          },
-                          "remindAt": {
-                            "type": "string",
-                            "format": "date-time",
-                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                          },
-                          "escalatesAt": {
-                            "nullable": true,
-                            "type": "string",
-                            "format": "date-time",
-                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                          },
-                          "escalatedTo": {
-                            "nullable": true,
-                            "type": "string",
-                            "enum": [
-                              "SYSTEM_ADMIN",
-                              "PRODUCT_MANAGER",
-                              "APPROVER",
-                              "SUPPORT",
-                              "WAREHOUSE",
-                              "FINANCE",
-                              "LOGISTICS",
-                              "MANAGEMENT",
-                              "AUDITOR"
-                            ]
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "kind",
-                          "stage",
-                          "orderNo",
-                          "message",
-                          "toRole",
-                          "dueAt",
-                          "remindAt",
-                          "escalatesAt",
-                          "escalatedTo"
-                        ],
-                        "additionalProperties": false
-                      }
-                    },
-                    "meta": {
-                      "type": "object",
-                      "properties": {
-                        "page": {
-                          "type": "integer",
-                          "minimum": 1,
-                          "maximum": 9007199254740991
-                        },
-                        "pageSize": {
-                          "type": "integer",
-                          "minimum": 1,
-                          "maximum": 200
-                        },
-                        "total": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 9007199254740991
-                        },
-                        "mock": {
-                          "type": "boolean",
-                          "enum": [true]
-                        },
-                        "dataLabel": {
-                          "type": "string",
-                          "enum": ["Synthetic demo data"]
-                        }
-                      },
-                      "required": [
-                        "page",
-                        "pageSize",
-                        "total",
-                        "mock",
-                        "dataLabel"
-                      ],
-                      "additionalProperties": false
-                    }
-                  },
-                  "required": ["data", "meta"],
-                  "additionalProperties": false
-                }
-              }
-            }
-          }
-        },
-        "summary": "The caller's own reminders (mock data)",
-        "tags": ["Workflows"]
-      }
-    },
-    "/api/v1/workflows/inboxes/{role}/reminders": {
-      "get": {
-        "operationId": "Workflows_inboxReminders",
-        "parameters": [
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "default": 1,
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 9007199254740991
-            }
-          },
-          {
-            "name": "pageSize",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "default": 25,
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 200
-            }
-          },
-          {
-            "name": "role",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string",
-              "example": "WAREHOUSE"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string",
-                            "format": "uuid",
-                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-                          },
-                          "kind": {
-                            "type": "string",
-                            "enum": [
-                              "TASK_DUE",
-                              "PAYMENT_DUE",
-                              "SHIPPING_DOCUMENT_MISSING",
-                              "IMPORT_PERMIT_MISSING"
-                            ]
-                          },
-                          "stage": {
-                            "type": "string",
-                            "enum": ["scheduled", "sent", "escalated"]
-                          },
-                          "orderNo": {
-                            "type": "string",
-                            "pattern": "^[A-Za-z0-9-]{1,30}$"
-                          },
-                          "message": {
-                            "type": "string",
-                            "minLength": 1
-                          },
-                          "toRole": {
-                            "type": "string",
-                            "enum": [
-                              "SYSTEM_ADMIN",
-                              "PRODUCT_MANAGER",
-                              "APPROVER",
-                              "SUPPORT",
-                              "WAREHOUSE",
-                              "FINANCE",
-                              "LOGISTICS",
-                              "MANAGEMENT",
-                              "AUDITOR"
-                            ]
-                          },
-                          "dueAt": {
-                            "type": "string",
-                            "format": "date-time",
-                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                          },
-                          "remindAt": {
-                            "type": "string",
-                            "format": "date-time",
-                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                          },
-                          "escalatesAt": {
-                            "nullable": true,
-                            "type": "string",
-                            "format": "date-time",
-                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                          },
-                          "escalatedTo": {
-                            "nullable": true,
-                            "type": "string",
-                            "enum": [
-                              "SYSTEM_ADMIN",
-                              "PRODUCT_MANAGER",
-                              "APPROVER",
-                              "SUPPORT",
-                              "WAREHOUSE",
-                              "FINANCE",
-                              "LOGISTICS",
-                              "MANAGEMENT",
-                              "AUDITOR"
-                            ]
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "kind",
-                          "stage",
-                          "orderNo",
-                          "message",
-                          "toRole",
-                          "dueAt",
-                          "remindAt",
-                          "escalatesAt",
-                          "escalatedTo"
-                        ],
-                        "additionalProperties": false
-                      }
-                    },
-                    "meta": {
-                      "type": "object",
-                      "properties": {
-                        "page": {
-                          "type": "integer",
-                          "minimum": 1,
-                          "maximum": 9007199254740991
-                        },
-                        "pageSize": {
-                          "type": "integer",
-                          "minimum": 1,
-                          "maximum": 200
-                        },
-                        "total": {
-                          "type": "integer",
-                          "minimum": 0,
-                          "maximum": 9007199254740991
-                        },
-                        "mock": {
-                          "type": "boolean",
-                          "enum": [true]
-                        },
-                        "dataLabel": {
-                          "type": "string",
-                          "enum": ["Synthetic demo data"]
-                        }
-                      },
-                      "required": [
-                        "page",
-                        "pageSize",
-                        "total",
-                        "mock",
-                        "dataLabel"
-                      ],
-                      "additionalProperties": false
-                    }
-                  },
-                  "required": ["data", "meta"],
-                  "additionalProperties": false
-                }
-              }
-            }
-          }
-        },
-        "summary": "Any role's reminders, for roles that oversee (mock data)",
-        "tags": ["Workflows"]
-      }
-    },
-    "/api/v1/workflows/orders/{orderNo}/flow": {
-      "get": {
-        "operationId": "Workflows_orderFlow",
+        "operationId": "Tracker_timeline",
         "parameters": [
           {
             "name": "orderNo",
             "required": true,
             "in": "path",
             "schema": {
-              "type": "string",
-              "example": "SO-0003"
+              "type": "string"
             }
           }
         ],
@@ -1574,38 +1049,68 @@
                     "data": {
                       "type": "object",
                       "properties": {
-                        "order": {
+                        "orderNo": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "externalDocumentNo": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "customerNo": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "customerName": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "status": {
                           "type": "object",
                           "properties": {
-                            "no": {
-                              "type": "string",
-                              "pattern": "^[A-Za-z0-9-]{1,30}$"
-                            },
-                            "sellToCustomerNo": {
+                            "code": {
                               "type": "string",
                               "minLength": 1
                             },
-                            "customerName": {
+                            "label": {
                               "type": "string",
                               "minLength": 1
-                            },
-                            "externalDocumentNo": {
-                              "type": "string",
-                              "minLength": 1
-                            },
-                            "orderDate": {
-                              "type": "string",
-                              "format": "date",
-                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
                             }
                           },
-                          "required": [
-                            "no",
-                            "sellToCustomerNo",
-                            "customerName",
-                            "externalDocumentNo",
-                            "orderDate"
-                          ],
+                          "required": ["code", "label"],
+                          "additionalProperties": false
+                        },
+                        "ownerRole": {
+                          "type": "string",
+                          "enum": [
+                            "SYSTEM_ADMIN",
+                            "PRODUCT_MANAGER",
+                            "APPROVER",
+                            "SUPPORT",
+                            "WAREHOUSE",
+                            "FINANCE",
+                            "LOGISTICS",
+                            "MANAGEMENT",
+                            "AUDITOR"
+                          ]
+                        },
+                        "overdue": {
+                          "type": "object",
+                          "properties": {
+                            "overdue": {
+                              "type": "boolean"
+                            },
+                            "daysOverdue": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "reason": {
+                              "nullable": true,
+                              "type": "string"
+                            }
+                          },
+                          "required": ["overdue", "daysOverdue", "reason"],
                           "additionalProperties": false
                         },
                         "steps": {
@@ -1613,11 +1118,573 @@
                           "items": {
                             "type": "object",
                             "properties": {
-                              "key": {
+                              "id": {
                                 "type": "string",
-                                "pattern": "^[a-z][a-z0-9-]*$"
+                                "minLength": 1
                               },
-                              "ownerRole": {
+                              "at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              "actor": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "title": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "effect": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "current": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "at",
+                              "actor",
+                              "title",
+                              "effect",
+                              "current"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "checks": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "ruleId": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "ruleLabel": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "orderNo": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "outcome": {
+                                "type": "string",
+                                "enum": ["pass", "fail"]
+                              },
+                              "expected": {
+                                "type": "string"
+                              },
+                              "actual": {
+                                "type": "string"
+                              },
+                              "tolerance": {
+                                "type": "object",
+                                "properties": {
+                                  "label": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "value": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  }
+                                },
+                                "required": ["label", "value"],
+                                "additionalProperties": false
+                              },
+                              "evidence": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "documentId": {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    "documentType": {
+                                      "type": "string",
+                                      "enum": [
+                                        "CUSTOMER_PO",
+                                        "PROFORMA_INVOICE",
+                                        "VENDOR_PI",
+                                        "SALES_INVOICE",
+                                        "PACKING_LIST",
+                                        "AWB",
+                                        "BILL_OF_LADING",
+                                        "IMPORT_PERMIT",
+                                        "PAYMENT_ADVICE",
+                                        "OTHER"
+                                      ]
+                                    },
+                                    "location": {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    "value": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "documentId",
+                                    "documentType",
+                                    "location",
+                                    "value"
+                                  ],
+                                  "additionalProperties": false
+                                }
+                              },
+                              "checkedAt": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "ruleId",
+                              "ruleLabel",
+                              "orderNo",
+                              "outcome",
+                              "expected",
+                              "actual",
+                              "tolerance",
+                              "evidence",
+                              "checkedAt"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "matches": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "kind": {
+                                "type": "string",
+                                "enum": ["customer", "item"]
+                              },
+                              "printedNo": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "printedName": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "matchedNo": {
+                                "nullable": true,
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "matchedName": {
+                                "nullable": true,
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "possibleMatches": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "no": {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    "name": {
+                                      "type": "string",
+                                      "minLength": 1
+                                    }
+                                  },
+                                  "required": ["no", "name"],
+                                  "additionalProperties": false
+                                }
+                              }
+                            },
+                            "required": [
+                              "kind",
+                              "printedNo",
+                              "printedName",
+                              "matchedNo",
+                              "matchedName",
+                              "possibleMatches"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "orderNo",
+                        "externalDocumentNo",
+                        "customerNo",
+                        "customerName",
+                        "status",
+                        "ownerRole",
+                        "overdue",
+                        "steps",
+                        "checks",
+                        "matches"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "mock": {
+                          "type": "boolean",
+                          "enum": [true]
+                        }
+                      },
+                      "required": ["mock"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "One order's timeline: each step and its effect, check results and master-data matches. Mock data",
+        "tags": ["Tracker"]
+      }
+    },
+    "/api/v1/exceptions": {
+      "get": {
+        "operationId": "Exceptions_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 25,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "orderNo": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "customerNo": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "customerName": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "ruleId": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "ruleLabel": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "summary": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "expected": {
+                            "type": "string"
+                          },
+                          "actual": {
+                            "type": "string"
+                          },
+                          "difference": {
+                            "type": "string"
+                          },
+                          "tolerance": {
+                            "type": "object",
+                            "properties": {
+                              "label": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "value": {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            },
+                            "required": ["label", "value"],
+                            "additionalProperties": false
+                          },
+                          "fixBy": {
+                            "type": "string",
+                            "enum": [
+                              "SYSTEM_ADMIN",
+                              "PRODUCT_MANAGER",
+                              "APPROVER",
+                              "SUPPORT",
+                              "WAREHOUSE",
+                              "FINANCE",
+                              "LOGISTICS",
+                              "MANAGEMENT",
+                              "AUDITOR"
+                            ]
+                          },
+                          "state": {
+                            "type": "string",
+                            "enum": ["OPEN", "RESOLVED"]
+                          },
+                          "openedAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "orderNo",
+                          "customerNo",
+                          "customerName",
+                          "ruleId",
+                          "ruleLabel",
+                          "summary",
+                          "expected",
+                          "actual",
+                          "difference",
+                          "tolerance",
+                          "fixBy",
+                          "state",
+                          "openedAt"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        "pageSize": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 200
+                        },
+                        "total": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "mock": {
+                          "type": "boolean",
+                          "enum": [true]
+                        }
+                      },
+                      "required": ["page", "pageSize", "total", "mock"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "The exceptions queue, newest first, a page at a time. Mock data",
+        "tags": ["Exceptions"]
+      }
+    },
+    "/api/v1/insights/kpis": {
+      "get": {
+        "operationId": "Insights_kpis",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "labEstimate": {
+                          "type": "boolean",
+                          "enum": [true]
+                        },
+                        "note": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "measures": {
+                          "minItems": 5,
+                          "maxItems": 5,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "enum": [
+                                  "processingTime",
+                                  "manualTouches",
+                                  "dataEntryErrors",
+                                  "approvalTurnaround",
+                                  "overdueOrders"
+                                ]
+                              },
+                              "label": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "unit": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "manual": {
+                                "type": "number"
+                              },
+                              "withOrderPilot": {
+                                "type": "number"
+                              },
+                              "lowerIsBetter": {
+                                "type": "boolean"
+                              },
+                              "definition": {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "label",
+                              "unit",
+                              "manual",
+                              "withOrderPilot",
+                              "lowerIsBetter",
+                              "definition"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": ["labEstimate", "note", "measures"],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "mock": {
+                          "type": "boolean",
+                          "enum": [true]
+                        }
+                      },
+                      "required": ["mock"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Spectra's five measures, as mock lab estimates",
+        "tags": ["Insights"]
+      }
+    },
+    "/api/v1/governance/matrix": {
+      "get": {
+        "operationId": "Matrix_read",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "permissions": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": [
+                              "users.read",
+                              "users.manage",
+                              "roles.read",
+                              "roles.manage",
+                              "settings.manage",
+                              "audit.read",
+                              "aiUsage.read",
+                              "documents.read",
+                              "documents.upload",
+                              "orders.read",
+                              "tracker.read",
+                              "exceptions.read",
+                              "insights.read",
+                              "approvals.decide",
+                              "payments.confirm",
+                              "payments.post"
+                            ]
+                          }
+                        },
+                        "roles": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "role": {
                                 "type": "string",
                                 "enum": [
                                   "SYSTEM_ADMIN",
@@ -1631,230 +1698,223 @@
                                   "AUDITOR"
                                 ]
                               },
-                              "state": {
+                              "permissions": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string",
+                                  "enum": [
+                                    "users.read",
+                                    "users.manage",
+                                    "roles.read",
+                                    "roles.manage",
+                                    "settings.manage",
+                                    "audit.read",
+                                    "aiUsage.read",
+                                    "documents.read",
+                                    "documents.upload",
+                                    "orders.read",
+                                    "tracker.read",
+                                    "exceptions.read",
+                                    "insights.read",
+                                    "approvals.decide",
+                                    "payments.confirm",
+                                    "payments.post"
+                                  ]
+                                }
+                              },
+                              "dataScope": {
                                 "type": "string",
-                                "enum": [
-                                  "done",
-                                  "current",
-                                  "upcoming",
-                                  "skipped"
-                                ]
-                              },
-                              "optional": {
-                                "type": "boolean"
-                              },
-                              "dueAt": {
-                                "nullable": true,
-                                "type": "string",
-                                "format": "date-time",
-                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                              },
-                              "completedAt": {
-                                "nullable": true,
-                                "type": "string",
-                                "format": "date-time",
-                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                              },
-                              "overdue": {
-                                "type": "boolean"
+                                "enum": ["all", "brands", "own"]
                               }
                             },
-                            "required": [
-                              "key",
-                              "ownerRole",
-                              "state",
-                              "optional",
-                              "dueAt",
-                              "completedAt",
-                              "overdue"
-                            ],
+                            "required": ["role", "permissions", "dataScope"],
                             "additionalProperties": false
                           }
                         },
-                        "timeline": {
+                        "locked": {
                           "type": "array",
                           "items": {
                             "type": "object",
                             "properties": {
-                              "id": {
+                              "role": {
                                 "type": "string",
-                                "format": "uuid",
-                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                                "enum": [
+                                  "SYSTEM_ADMIN",
+                                  "PRODUCT_MANAGER",
+                                  "APPROVER",
+                                  "SUPPORT",
+                                  "WAREHOUSE",
+                                  "FINANCE",
+                                  "LOGISTICS",
+                                  "MANAGEMENT",
+                                  "AUDITOR"
+                                ]
                               },
-                              "at": {
+                              "permission": {
                                 "type": "string",
-                                "format": "date-time",
-                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                "enum": [
+                                  "users.read",
+                                  "users.manage",
+                                  "roles.read",
+                                  "roles.manage",
+                                  "settings.manage",
+                                  "audit.read",
+                                  "aiUsage.read",
+                                  "documents.read",
+                                  "documents.upload",
+                                  "orders.read",
+                                  "tracker.read",
+                                  "exceptions.read",
+                                  "insights.read",
+                                  "approvals.decide",
+                                  "payments.confirm",
+                                  "payments.post"
+                                ]
                               },
                               "kind": {
                                 "type": "string",
-                                "enum": [
-                                  "order.received",
-                                  "step.completed",
-                                  "task.created",
-                                  "reminder.sent",
-                                  "payment.confirmed"
-                                ]
+                                "enum": ["never", "always"]
                               },
-                              "actor": {
-                                "type": "object",
-                                "properties": {
-                                  "kind": {
-                                    "type": "string",
-                                    "enum": ["user", "system"]
-                                  },
-                                  "name": {
-                                    "type": "string",
-                                    "minLength": 1
-                                  }
-                                },
-                                "required": ["kind", "name"],
-                                "additionalProperties": false
-                              },
-                              "summary": {
+                              "reason": {
                                 "type": "string",
                                 "minLength": 1
                               }
                             },
                             "required": [
-                              "id",
-                              "at",
+                              "role",
+                              "permission",
                               "kind",
-                              "actor",
-                              "summary"
+                              "reason"
                             ],
                             "additionalProperties": false
                           }
-                        },
-                        "payment": {
-                          "type": "object",
-                          "properties": {
-                            "prepaymentPercent": {
-                              "type": "string",
-                              "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
-                            },
-                            "amountDue": {
-                              "nullable": true,
-                              "type": "string",
-                              "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
-                            },
-                            "confirmations": {
-                              "type": "array",
-                              "items": {
-                                "type": "object",
-                                "properties": {
-                                  "paymentType": {
-                                    "type": "string",
-                                    "enum": [
-                                      "PREPAYMENT",
-                                      "BALANCE",
-                                      "FULL_PAYMENT",
-                                      "REFUND",
-                                      "OTHER"
-                                    ]
-                                  },
-                                  "amount": {
-                                    "type": "string",
-                                    "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
-                                  },
-                                  "currencyCode": {
-                                    "type": "string",
-                                    "minLength": 3,
-                                    "maxLength": 3
-                                  },
-                                  "reference": {
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "maxLength": 60
-                                  },
-                                  "paidOn": {
-                                    "type": "string",
-                                    "format": "date",
-                                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
-                                  },
-                                  "id": {
-                                    "type": "string",
-                                    "format": "uuid",
-                                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-                                  },
-                                  "orderNo": {
-                                    "type": "string",
-                                    "minLength": 1
-                                  },
-                                  "confirmedAt": {
-                                    "type": "string",
-                                    "format": "date-time",
-                                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                                  },
-                                  "confirmedBy": {
-                                    "type": "string",
-                                    "minLength": 1
-                                  }
-                                },
-                                "required": [
-                                  "paymentType",
-                                  "amount",
-                                  "currencyCode",
-                                  "reference",
-                                  "paidOn",
-                                  "id",
-                                  "orderNo",
-                                  "confirmedAt",
-                                  "confirmedBy"
-                                ],
-                                "additionalProperties": false
-                              }
-                            }
-                          },
-                          "required": [
-                            "prepaymentPercent",
-                            "amountDue",
-                            "confirmations"
-                          ],
-                          "additionalProperties": false
                         }
                       },
-                      "required": ["order", "steps", "timeline", "payment"],
-                      "additionalProperties": false
-                    },
-                    "meta": {
-                      "type": "object",
-                      "properties": {
-                        "mock": {
-                          "type": "boolean",
-                          "enum": [true]
-                        },
-                        "dataLabel": {
-                          "type": "string",
-                          "enum": ["Synthetic demo data"]
-                        }
-                      },
-                      "required": ["mock", "dataLabel"],
+                      "required": ["permissions", "roles", "locked"],
                       "additionalProperties": false
                     }
                   },
-                  "required": ["data", "meta"],
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The role does not hold the permission. Audited.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "VALIDATION_FAILED",
+                            "UNAUTHENTICATED",
+                            "INVALID_CREDENTIALS",
+                            "SESSION_EXPIRED",
+                            "REFRESH_REUSED",
+                            "FORBIDDEN",
+                            "CSRF_INVALID",
+                            "DEMO_MODE_DISABLED",
+                            "NOT_FOUND",
+                            "CONFLICT",
+                            "RATE_LIMITED",
+                            "UPSTREAM_UNAVAILABLE",
+                            "INTERNAL_ERROR"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "nullable": true,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "path": {
+                                "type": "string"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "required": ["path", "message"],
+                            "additionalProperties": false
+                          }
+                        },
+                        "traceId": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": ["code", "message", "details", "traceId"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
             }
           }
         },
-        "summary": "An order's steps and timeline (mock data)",
-        "tags": ["Workflows"]
+        "summary": "Read the role-permission matrix",
+        "tags": ["Governance"]
       }
     },
-    "/api/v1/workflows/orders/{orderNo}/payments": {
-      "post": {
-        "operationId": "Workflows_confirmPayment",
+    "/api/v1/governance/matrix/{role}/permissions/{permission}": {
+      "put": {
+        "operationId": "Matrix_setPermission",
         "parameters": [
           {
-            "name": "orderNo",
+            "name": "permission",
             "required": true,
             "in": "path",
             "schema": {
               "type": "string",
-              "example": "SO-0003"
+              "enum": [
+                "users.read",
+                "users.manage",
+                "roles.read",
+                "roles.manage",
+                "settings.manage",
+                "audit.read",
+                "aiUsage.read",
+                "documents.read",
+                "documents.upload",
+                "orders.read",
+                "tracker.read",
+                "exceptions.read",
+                "insights.read",
+                "approvals.decide",
+                "payments.confirm",
+                "payments.post"
+              ]
+            }
+          },
+          {
+            "name": "role",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "SYSTEM_ADMIN",
+                "PRODUCT_MANAGER",
+                "APPROVER",
+                "SUPPORT",
+                "WAREHOUSE",
+                "FINANCE",
+                "LOGISTICS",
+                "MANAGEMENT",
+                "AUDITOR"
+              ]
             }
           }
         ],
@@ -1865,43 +1925,11 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "paymentType": {
-                    "type": "string",
-                    "enum": [
-                      "PREPAYMENT",
-                      "BALANCE",
-                      "FULL_PAYMENT",
-                      "REFUND",
-                      "OTHER"
-                    ]
-                  },
-                  "amount": {
-                    "type": "string",
-                    "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
-                  },
-                  "currencyCode": {
-                    "type": "string",
-                    "minLength": 3,
-                    "maxLength": 3
-                  },
-                  "reference": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 60
-                  },
-                  "paidOn": {
-                    "type": "string",
-                    "format": "date",
-                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                  "granted": {
+                    "type": "boolean"
                   }
                 },
-                "required": [
-                  "paymentType",
-                  "amount",
-                  "currencyCode",
-                  "reference",
-                  "paidOn"
-                ],
+                "required": ["granted"],
                 "additionalProperties": false
               }
             }
@@ -1918,77 +1946,169 @@
                     "data": {
                       "type": "object",
                       "properties": {
-                        "applied": {
-                          "type": "boolean",
-                          "enum": [false]
+                        "role": {
+                          "type": "string",
+                          "enum": [
+                            "SYSTEM_ADMIN",
+                            "PRODUCT_MANAGER",
+                            "APPROVER",
+                            "SUPPORT",
+                            "WAREHOUSE",
+                            "FINANCE",
+                            "LOGISTICS",
+                            "MANAGEMENT",
+                            "AUDITOR"
+                          ]
+                        },
+                        "permissions": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": [
+                              "users.read",
+                              "users.manage",
+                              "roles.read",
+                              "roles.manage",
+                              "settings.manage",
+                              "audit.read",
+                              "aiUsage.read",
+                              "documents.read",
+                              "documents.upload",
+                              "orders.read",
+                              "tracker.read",
+                              "exceptions.read",
+                              "insights.read",
+                              "approvals.decide",
+                              "payments.confirm",
+                              "payments.post"
+                            ]
+                          }
+                        },
+                        "dataScope": {
+                          "type": "string",
+                          "enum": ["all", "brands", "own"]
+                        }
+                      },
+                      "required": ["role", "permissions", "dataScope"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The role does not hold the permission. Audited.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "VALIDATION_FAILED",
+                            "UNAUTHENTICATED",
+                            "INVALID_CREDENTIALS",
+                            "SESSION_EXPIRED",
+                            "REFRESH_REUSED",
+                            "FORBIDDEN",
+                            "CSRF_INVALID",
+                            "DEMO_MODE_DISABLED",
+                            "NOT_FOUND",
+                            "CONFLICT",
+                            "RATE_LIMITED",
+                            "UPSTREAM_UNAVAILABLE",
+                            "INTERNAL_ERROR"
+                          ]
                         },
                         "message": {
                           "type": "string"
                         },
-                        "orderNo": {
-                          "type": "string",
-                          "pattern": "^[A-Za-z0-9-]{1,30}$"
+                        "details": {
+                          "nullable": true,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "path": {
+                                "type": "string"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "required": ["path", "message"],
+                            "additionalProperties": false
+                          }
                         },
-                        "paymentType": {
+                        "traceId": {
                           "type": "string",
-                          "enum": [
-                            "PREPAYMENT",
-                            "BALANCE",
-                            "FULL_PAYMENT",
-                            "REFUND",
-                            "OTHER"
-                          ]
+                          "minLength": 1
                         }
                       },
-                      "required": [
-                        "applied",
-                        "message",
-                        "orderNo",
-                        "paymentType"
-                      ],
-                      "additionalProperties": false
-                    },
-                    "meta": {
-                      "type": "object",
-                      "properties": {
-                        "mock": {
-                          "type": "boolean",
-                          "enum": [true]
-                        },
-                        "dataLabel": {
-                          "type": "string",
-                          "enum": ["Synthetic demo data"]
-                        }
-                      },
-                      "required": ["mock", "dataLabel"],
+                      "required": ["code", "message", "details", "traceId"],
                       "additionalProperties": false
                     }
                   },
-                  "required": ["data", "meta"],
+                  "required": ["error"],
                   "additionalProperties": false
                 }
               }
             }
           }
         },
-        "summary": "Confirm a payment, with its type. Checked only: nothing is stored",
-        "tags": ["Workflows"]
+        "summary": "Grant or revoke one permission of a role",
+        "tags": ["Governance"]
       }
     },
-    "/api/v1/workflows/sprs/{recordNo}": {
-      "get": {
-        "operationId": "Workflows_spr",
+    "/api/v1/governance/matrix/{role}/data-scope": {
+      "put": {
+        "operationId": "Matrix_setDataScope",
         "parameters": [
           {
-            "name": "recordNo",
+            "name": "role",
             "required": true,
             "in": "path",
             "schema": {
               "type": "string",
-              "example": "SPR-20261102-0001"
+              "enum": [
+                "SYSTEM_ADMIN",
+                "PRODUCT_MANAGER",
+                "APPROVER",
+                "SUPPORT",
+                "WAREHOUSE",
+                "FINANCE",
+                "LOGISTICS",
+                "MANAGEMENT",
+                "AUDITOR"
+              ]
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "dataScope": {
+                    "type": "string",
+                    "enum": ["all", "brands", "own"]
+                  }
+                },
+                "required": ["dataScope"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "",
@@ -2000,148 +2120,326 @@
                     "data": {
                       "type": "object",
                       "properties": {
-                        "ref": {
-                          "type": "object",
-                          "properties": {
-                            "recordNo": {
-                              "type": "string",
-                              "pattern": "^(SPR|PI|EXC)-\\d{8}-\\d{4,}$"
-                            },
-                            "navisionNo": {
-                              "nullable": true,
-                              "type": "string",
-                              "minLength": 1
-                            }
-                          },
-                          "required": ["recordNo", "navisionNo"],
-                          "additionalProperties": false
+                        "role": {
+                          "type": "string",
+                          "enum": [
+                            "SYSTEM_ADMIN",
+                            "PRODUCT_MANAGER",
+                            "APPROVER",
+                            "SUPPORT",
+                            "WAREHOUSE",
+                            "FINANCE",
+                            "LOGISTICS",
+                            "MANAGEMENT",
+                            "AUDITOR"
+                          ]
                         },
-                        "orderNo": {
+                        "permissions": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": [
+                              "users.read",
+                              "users.manage",
+                              "roles.read",
+                              "roles.manage",
+                              "settings.manage",
+                              "audit.read",
+                              "aiUsage.read",
+                              "documents.read",
+                              "documents.upload",
+                              "orders.read",
+                              "tracker.read",
+                              "exceptions.read",
+                              "insights.read",
+                              "approvals.decide",
+                              "payments.confirm",
+                              "payments.post"
+                            ]
+                          }
+                        },
+                        "dataScope": {
+                          "type": "string",
+                          "enum": ["all", "brands", "own"]
+                        }
+                      },
+                      "required": ["role", "permissions", "dataScope"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The role does not hold the permission. Audited.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "VALIDATION_FAILED",
+                            "UNAUTHENTICATED",
+                            "INVALID_CREDENTIALS",
+                            "SESSION_EXPIRED",
+                            "REFRESH_REUSED",
+                            "FORBIDDEN",
+                            "CSRF_INVALID",
+                            "DEMO_MODE_DISABLED",
+                            "NOT_FOUND",
+                            "CONFLICT",
+                            "RATE_LIMITED",
+                            "UPSTREAM_UNAVAILABLE",
+                            "INTERNAL_ERROR"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
                           "nullable": true,
-                          "type": "string",
-                          "pattern": "^[A-Za-z0-9-]{1,30}$"
-                        },
-                        "requestedBy": {
-                          "type": "object",
-                          "properties": {
-                            "name": {
-                              "type": "string",
-                              "minLength": 1
-                            },
-                            "role": {
-                              "type": "string",
-                              "enum": [
-                                "SYSTEM_ADMIN",
-                                "PRODUCT_MANAGER",
-                                "APPROVER",
-                                "SUPPORT",
-                                "WAREHOUSE",
-                                "FINANCE",
-                                "LOGISTICS",
-                                "MANAGEMENT",
-                                "AUDITOR"
-                              ]
-                            }
-                          },
-                          "required": ["name", "role"],
-                          "additionalProperties": false
-                        },
-                        "requestedAt": {
-                          "type": "string",
-                          "format": "date-time",
-                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                        },
-                        "vendor": {
-                          "type": "object",
-                          "properties": {
-                            "no": {
-                              "type": "string",
-                              "minLength": 1
-                            },
-                            "name": {
-                              "type": "string",
-                              "minLength": 1
-                            }
-                          },
-                          "required": ["no", "name"],
-                          "additionalProperties": false
-                        },
-                        "item": {
-                          "type": "object",
-                          "properties": {
-                            "no": {
-                              "type": "string",
-                              "minLength": 1
-                            },
-                            "description": {
-                              "type": "string",
-                              "minLength": 1
-                            }
-                          },
-                          "required": ["no", "description"],
-                          "additionalProperties": false
-                        },
-                        "quantity": {
-                          "type": "string",
-                          "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
-                        },
-                        "unitCost": {
-                          "type": "string",
-                          "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
-                        },
-                        "amount": {
-                          "type": "string",
-                          "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
-                        },
-                        "currencyCode": {
-                          "type": "string",
-                          "minLength": 3,
-                          "maxLength": 3
-                        },
-                        "basis": {
-                          "type": "object",
-                          "properties": {
-                            "ordered": {
-                              "type": "string",
-                              "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
-                            },
-                            "inventory": {
-                              "type": "string",
-                              "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
-                            },
-                            "qtyOnSalesOrder": {
-                              "type": "string",
-                              "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
-                            },
-                            "qtyOnPurchOrder": {
-                              "type": "string",
-                              "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
-                            },
-                            "availableStock": {
-                              "type": "string",
-                              "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
-                            },
-                            "shortfall": {
-                              "type": "string",
-                              "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
-                            }
-                          },
-                          "required": [
-                            "ordered",
-                            "inventory",
-                            "qtyOnSalesOrder",
-                            "qtyOnPurchOrder",
-                            "availableStock",
-                            "shortfall"
-                          ],
-                          "additionalProperties": false
-                        },
-                        "fields": {
                           "type": "array",
                           "items": {
                             "type": "object",
                             "properties": {
-                              "key": {
+                              "path": {
+                                "type": "string"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "required": ["path", "message"],
+                            "additionalProperties": false
+                          }
+                        },
+                        "traceId": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": ["code", "message", "details", "traceId"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Set the data scope of a role (which records it may see)",
+        "tags": ["Governance"]
+      }
+    },
+    "/api/v1/governance/matrix/copy": {
+      "post": {
+        "operationId": "Matrix_copy",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "fromRole": {
+                    "type": "string",
+                    "enum": [
+                      "SYSTEM_ADMIN",
+                      "PRODUCT_MANAGER",
+                      "APPROVER",
+                      "SUPPORT",
+                      "WAREHOUSE",
+                      "FINANCE",
+                      "LOGISTICS",
+                      "MANAGEMENT",
+                      "AUDITOR"
+                    ]
+                  },
+                  "toRole": {
+                    "type": "string",
+                    "enum": [
+                      "SYSTEM_ADMIN",
+                      "PRODUCT_MANAGER",
+                      "APPROVER",
+                      "SUPPORT",
+                      "WAREHOUSE",
+                      "FINANCE",
+                      "LOGISTICS",
+                      "MANAGEMENT",
+                      "AUDITOR"
+                    ]
+                  }
+                },
+                "required": ["fromRole", "toRole"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "role": {
+                          "type": "string",
+                          "enum": [
+                            "SYSTEM_ADMIN",
+                            "PRODUCT_MANAGER",
+                            "APPROVER",
+                            "SUPPORT",
+                            "WAREHOUSE",
+                            "FINANCE",
+                            "LOGISTICS",
+                            "MANAGEMENT",
+                            "AUDITOR"
+                          ]
+                        },
+                        "permissions": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": [
+                              "users.read",
+                              "users.manage",
+                              "roles.read",
+                              "roles.manage",
+                              "settings.manage",
+                              "audit.read",
+                              "aiUsage.read",
+                              "documents.read",
+                              "documents.upload",
+                              "orders.read",
+                              "tracker.read",
+                              "exceptions.read",
+                              "insights.read",
+                              "approvals.decide",
+                              "payments.confirm",
+                              "payments.post"
+                            ]
+                          }
+                        },
+                        "dataScope": {
+                          "type": "string",
+                          "enum": ["all", "brands", "own"]
+                        }
+                      },
+                      "required": ["role", "permissions", "dataScope"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The role does not hold the permission. Audited.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "VALIDATION_FAILED",
+                            "UNAUTHENTICATED",
+                            "INVALID_CREDENTIALS",
+                            "SESSION_EXPIRED",
+                            "REFRESH_REUSED",
+                            "FORBIDDEN",
+                            "CSRF_INVALID",
+                            "DEMO_MODE_DISABLED",
+                            "NOT_FOUND",
+                            "CONFLICT",
+                            "RATE_LIMITED",
+                            "UPSTREAM_UNAVAILABLE",
+                            "INTERNAL_ERROR"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "nullable": true,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "path": {
+                                "type": "string"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "required": ["path", "message"],
+                            "additionalProperties": false
+                          }
+                        },
+                        "traceId": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": ["code", "message", "details", "traceId"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Copy a role's permissions and data scope to another role",
+        "tags": ["Governance"]
+      }
+    },
+    "/api/v1/governance/masking/sample": {
+      "get": {
+        "operationId": "Policy_maskingSample",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "rules": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "field": {
                                 "type": "string",
                                 "minLength": 1
                               },
@@ -2149,130 +2447,117 @@
                                 "type": "string",
                                 "minLength": 1
                               },
-                              "value": {
-                                "type": "string"
-                              },
-                              "origin": {
+                              "classification": {
                                 "type": "string",
-                                "enum": ["suggested", "default", "person"]
+                                "enum": [
+                                  "public",
+                                  "internal",
+                                  "confidential",
+                                  "restricted"
+                                ]
                               },
-                              "required": {
+                              "reason": {
+                                "type": "string",
+                                "enum": [
+                                  "role",
+                                  "bankDetails",
+                                  "price",
+                                  "policy"
+                                ]
+                              },
+                              "visibleTo": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string",
+                                  "enum": [
+                                    "SYSTEM_ADMIN",
+                                    "PRODUCT_MANAGER",
+                                    "APPROVER",
+                                    "SUPPORT",
+                                    "WAREHOUSE",
+                                    "FINANCE",
+                                    "LOGISTICS",
+                                    "MANAGEMENT",
+                                    "AUDITOR"
+                                  ]
+                                }
+                              },
+                              "sample": {
                                 "type": "boolean"
                               }
                             },
                             "required": [
-                              "key",
+                              "field",
                               "label",
-                              "value",
-                              "origin",
-                              "required"
+                              "classification",
+                              "reason",
+                              "visibleTo",
+                              "sample"
                             ],
                             "additionalProperties": false
                           }
                         },
-                        "approver": {
-                          "type": "object",
-                          "properties": {
-                            "displayName": {
-                              "type": "string",
-                              "minLength": 1
-                            },
-                            "setup": {
-                              "type": "object",
-                              "properties": {
-                                "userId": {
-                                  "type": "string",
-                                  "minLength": 1
-                                },
-                                "approverId": {
-                                  "nullable": true,
-                                  "type": "string",
-                                  "minLength": 1
-                                },
-                                "salesAmountApprovalLimit": {
-                                  "nullable": true,
-                                  "type": "string",
-                                  "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
-                                },
-                                "purchaseAmountApprovalLimit": {
-                                  "nullable": true,
-                                  "type": "string",
-                                  "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
-                                },
-                                "unlimitedSalesApproval": {
-                                  "type": "boolean"
-                                },
-                                "unlimitedPurchaseApproval": {
-                                  "type": "boolean"
-                                },
-                                "substitute": {
-                                  "nullable": true,
-                                  "type": "string",
-                                  "minLength": 1
-                                }
+                        "records": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "customerNo": {
+                                "type": "string"
                               },
-                              "required": [
-                                "userId",
-                                "approverId",
-                                "salesAmountApprovalLimit",
-                                "purchaseAmountApprovalLimit",
-                                "unlimitedSalesApproval",
-                                "unlimitedPurchaseApproval",
-                                "substitute"
-                              ],
-                              "additionalProperties": false
-                            }
-                          },
-                          "required": ["displayName", "setup"],
-                          "additionalProperties": false
-                        },
-                        "substituteName": {
-                          "nullable": true,
-                          "type": "string",
-                          "minLength": 1
-                        },
-                        "decision": {
-                          "nullable": true,
-                          "type": "object",
-                          "properties": {
-                            "outcome": {
-                              "type": "string",
-                              "enum": ["approved", "rejected"]
+                              "customerName": {
+                                "type": "string"
+                              },
+                              "note": {
+                                "type": "object",
+                                "properties": {
+                                  "field": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "classification": {
+                                    "type": "string",
+                                    "enum": [
+                                      "public",
+                                      "internal",
+                                      "confidential",
+                                      "restricted"
+                                    ]
+                                  },
+                                  "masked": {
+                                    "type": "boolean"
+                                  },
+                                  "value": {
+                                    "nullable": true,
+                                    "type": "string"
+                                  },
+                                  "reason": {
+                                    "nullable": true,
+                                    "type": "string",
+                                    "enum": [
+                                      "role",
+                                      "bankDetails",
+                                      "price",
+                                      "policy"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "field",
+                                  "classification",
+                                  "masked",
+                                  "value",
+                                  "reason"
+                                ],
+                                "additionalProperties": false
+                              }
                             },
-                            "by": {
-                              "type": "string",
-                              "minLength": 1
-                            },
-                            "comment": {
-                              "type": "string"
-                            },
-                            "at": {
-                              "type": "string",
-                              "format": "date-time",
-                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                            }
-                          },
-                          "required": ["outcome", "by", "comment", "at"],
-                          "additionalProperties": false
+                            "required": ["customerNo", "customerName", "note"],
+                            "additionalProperties": false
+                          }
                         }
                       },
-                      "required": [
-                        "ref",
-                        "orderNo",
-                        "requestedBy",
-                        "requestedAt",
-                        "vendor",
-                        "item",
-                        "quantity",
-                        "unitCost",
-                        "amount",
-                        "currencyCode",
-                        "basis",
-                        "fields",
-                        "approver",
-                        "substituteName",
-                        "decision"
-                      ],
+                      "required": ["rules", "records"],
                       "additionalProperties": false
                     },
                     "meta": {
@@ -2281,13 +2566,9 @@
                         "mock": {
                           "type": "boolean",
                           "enum": [true]
-                        },
-                        "dataLabel": {
-                          "type": "string",
-                          "enum": ["Synthetic demo data"]
                         }
                       },
-                      "required": ["mock", "dataLabel"],
+                      "required": ["mock"],
                       "additionalProperties": false
                     }
                   },
@@ -2298,211 +2579,13 @@
             }
           }
         },
-        "summary": "A stock purchase request, with its suggested fields (mock data)",
-        "tags": ["Workflows"]
+        "summary": "Synthetic customers with the sample masking rule applied for the caller's role",
+        "tags": ["Governance"]
       }
     },
-    "/api/v1/workflows/sprs/{recordNo}/approve": {
-      "post": {
-        "operationId": "Workflows_approve",
-        "parameters": [
-          {
-            "name": "recordNo",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string",
-              "example": "SPR-20261102-0001"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "comment": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 500
-                  }
-                },
-                "required": ["comment"],
-                "additionalProperties": false
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "applied": {
-                          "type": "boolean",
-                          "enum": [false]
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "recordNo": {
-                          "type": "string",
-                          "pattern": "^SPR-\\d{8}-\\d{4,}$"
-                        },
-                        "outcome": {
-                          "type": "string",
-                          "enum": ["approved", "rejected"]
-                        },
-                        "comment": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "applied",
-                        "message",
-                        "recordNo",
-                        "outcome",
-                        "comment"
-                      ],
-                      "additionalProperties": false
-                    },
-                    "meta": {
-                      "type": "object",
-                      "properties": {
-                        "mock": {
-                          "type": "boolean",
-                          "enum": [true]
-                        },
-                        "dataLabel": {
-                          "type": "string",
-                          "enum": ["Synthetic demo data"]
-                        }
-                      },
-                      "required": ["mock", "dataLabel"],
-                      "additionalProperties": false
-                    }
-                  },
-                  "required": ["data", "meta"],
-                  "additionalProperties": false
-                }
-              }
-            }
-          }
-        },
-        "summary": "Approve a stock purchase request, with a comment. Checked only: nothing is changed",
-        "tags": ["Workflows"]
-      }
-    },
-    "/api/v1/workflows/sprs/{recordNo}/reject": {
-      "post": {
-        "operationId": "Workflows_reject",
-        "parameters": [
-          {
-            "name": "recordNo",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string",
-              "example": "SPR-20261102-0001"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "comment": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 500
-                  }
-                },
-                "required": ["comment"],
-                "additionalProperties": false
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "applied": {
-                          "type": "boolean",
-                          "enum": [false]
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "recordNo": {
-                          "type": "string",
-                          "pattern": "^SPR-\\d{8}-\\d{4,}$"
-                        },
-                        "outcome": {
-                          "type": "string",
-                          "enum": ["approved", "rejected"]
-                        },
-                        "comment": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "applied",
-                        "message",
-                        "recordNo",
-                        "outcome",
-                        "comment"
-                      ],
-                      "additionalProperties": false
-                    },
-                    "meta": {
-                      "type": "object",
-                      "properties": {
-                        "mock": {
-                          "type": "boolean",
-                          "enum": [true]
-                        },
-                        "dataLabel": {
-                          "type": "string",
-                          "enum": ["Synthetic demo data"]
-                        }
-                      },
-                      "required": ["mock", "dataLabel"],
-                      "additionalProperties": false
-                    }
-                  },
-                  "required": ["data", "meta"],
-                  "additionalProperties": false
-                }
-              }
-            }
-          }
-        },
-        "summary": "Reject a stock purchase request, with a comment. Checked only: nothing is changed",
-        "tags": ["Workflows"]
-      }
-    },
-    "/api/v1/workflows/document-config": {
+    "/api/v1/governance/ai-destinations": {
       "get": {
-        "operationId": "Workflows_documentConfig",
+        "operationId": "Policy_aiDestinations",
         "parameters": [],
         "responses": {
           "200": {
@@ -2517,74 +2600,31 @@
                       "items": {
                         "type": "object",
                         "properties": {
-                          "documentType": {
+                          "provider": {
                             "type": "string",
-                            "enum": [
-                              "SPR",
-                              "CUSTOMER_PO",
-                              "PROFORMA_INVOICE",
-                              "VENDOR_PI",
-                              "SALES_INVOICE",
-                              "PACKING_LIST",
-                              "AWB",
-                              "BILL_OF_LADING",
-                              "IMPORT_PERMIT",
-                              "PAYMENT_ADVICE",
-                              "OTHER"
-                            ]
+                            "enum": ["mock", "openai-compatible", "bedrock"]
                           },
-                          "label": {
-                            "type": "string",
-                            "minLength": 1
-                          },
-                          "fields": {
+                          "origins": {
                             "type": "array",
                             "items": {
-                              "type": "object",
-                              "properties": {
-                                "key": {
-                                  "type": "string",
-                                  "pattern": "^[a-z][A-Za-z0-9]*$"
-                                },
-                                "label": {
-                                  "type": "string",
-                                  "minLength": 1
-                                },
-                                "kind": {
-                                  "type": "string",
-                                  "enum": ["text", "number", "date", "choice"]
-                                },
-                                "required": {
-                                  "type": "boolean"
-                                },
-                                "visible": {
-                                  "type": "boolean"
-                                },
-                                "defaultValue": {
-                                  "nullable": true,
-                                  "type": "string"
-                                },
-                                "choices": {
-                                  "type": "array",
-                                  "items": {
-                                    "type": "string"
-                                  }
-                                }
-                              },
-                              "required": [
-                                "key",
-                                "label",
-                                "kind",
-                                "required",
-                                "visible",
-                                "defaultValue",
-                                "choices"
-                              ],
-                              "additionalProperties": false
+                              "type": "string",
+                              "enum": ["synthetic", "real"]
+                            }
+                          },
+                          "classifications": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "enum": [
+                                "public",
+                                "internal",
+                                "confidential",
+                                "restricted"
+                              ]
                             }
                           }
                         },
-                        "required": ["documentType", "label", "fields"],
+                        "required": ["provider", "origins", "classifications"],
                         "additionalProperties": false
                       }
                     }
@@ -2596,8 +2636,76 @@
             }
           }
         },
-        "summary": "Field settings and defaults for each document type",
-        "tags": ["Workflows"]
+        "summary": "What data may go to which AI provider",
+        "tags": ["Governance"]
+      }
+    },
+    "/api/v1/governance/ai-destinations/check": {
+      "post": {
+        "operationId": "Policy_checkAiDestination",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "provider": {
+                    "type": "string",
+                    "enum": ["mock", "openai-compatible", "bedrock"]
+                  },
+                  "classification": {
+                    "type": "string",
+                    "enum": ["public", "internal", "confidential", "restricted"]
+                  },
+                  "origin": {
+                    "type": "string",
+                    "enum": ["synthetic", "real"]
+                  }
+                },
+                "required": ["provider", "classification", "origin"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "allowed": {
+                          "type": "boolean"
+                        },
+                        "rule": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "reason": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": ["allowed", "rule", "reason"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Ask whether one kind of data may go to one AI provider",
+        "tags": ["Governance"]
       }
     },
     "/api/v1/users": {

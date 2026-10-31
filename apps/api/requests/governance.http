@@ -1,0 +1,53 @@
+### Area 4: the role-permission matrix, masking and the rules for data sent to AI.
+### Sign in first (requests/auth.http), then paste the op_csrf cookie value below.
+### Reading the matrix needs roles.read; changing it needs roles.manage (SYSTEM_ADMIN
+### holds both, AUDITOR holds roles.read). Any other role gets 403 FORBIDDEN with a
+### traceId, and the refusal is audited.
+@baseUrl = http://localhost:3000
+@csrf = paste the op_csrf cookie value here after signing in
+
+### Every role with its permissions and data scope, the permissions in display order,
+### and the cells that cannot change (the system admin never approves, posts or pays).
+GET {{baseUrl}}/api/v1/governance/matrix
+
+### Grant or revoke one permission. Audited. Granting twice changes and audits nothing.
+PUT {{baseUrl}}/api/v1/governance/matrix/FINANCE/permissions/orders.read
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "granted": true }
+
+### A locked cell: the system admin cannot be given payments.post. Answers 409.
+PUT {{baseUrl}}/api/v1/governance/matrix/SYSTEM_ADMIN/permissions/payments.post
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "granted": true }
+
+### Which records a role may see: all, brands or own. Stored and shown; not enforced yet.
+PUT {{baseUrl}}/api/v1/governance/matrix/PRODUCT_MANAGER/data-scope
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "dataScope": "brands" }
+
+### Make one role hold exactly what another holds, with its data scope.
+POST {{baseUrl}}/api/v1/governance/matrix/copy
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "fromRole": "FINANCE", "toRole": "LOGISTICS" }
+
+### Synthetic customers with the sample masking rule applied for YOUR role.
+### Sign in as WAREHOUSE and the note comes back as null, with the reason.
+GET {{baseUrl}}/api/v1/governance/masking/sample
+
+### What data may go to which AI provider. The default is synthetic data only.
+GET {{baseUrl}}/api/v1/governance/ai-destinations
+
+### Ask about one request, as the AI gateway will. Real data is refused with a reason.
+POST {{baseUrl}}/api/v1/governance/ai-destinations/check
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "provider": "bedrock", "classification": "internal", "origin": "real" }

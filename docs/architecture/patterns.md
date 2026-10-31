@@ -18,10 +18,6 @@ The named patterns used in the code, where each one lives, and why it earns its 
 | Hash chain                  | `audit/domain/audit-chain.ts`, `audit/audit.service.ts`               | Each audit event covers the one before it, so tampering shows                            | P-9   |
 | Abstract class as a port    | `storage/object-storage.ts`, `storage/s3-object-storage.ts`           | Services use put, get, head and delete; MinIO or AWS S3 sits behind it                   | P-9   |
 | Seeder                      | `database/seed/seeders.ts`                                            | Each seed step is idempotent; later stories add theirs to one list                       | P-9   |
-| Port with a mock            | `workflows/workflow-read-model.ts`, `mock-workflow-read-model.ts`     | The routes read through one abstract class; Azri binds a database-backed one             | C-1   |
-| Port to another area        | `workflows/domain/approval-policy.ts`, `mock/mock-approval-policy.ts` | Area 2 asks area 4's approval policy and acts on the answer; the mock stands in          | C-1   |
-| Atomic counter              | `workflows/record-number.repository.ts`                               | One upsert hands out each running number once, with no lock                              | C-1   |
-| Configuration as data       | `DocumentTypeConfig`, `workflows/document-config.repository.ts`       | A default is a row to edit, not a code change                                            | C-1   |
 | Unit of work                | `database/database.ts`                                                | A business change and its audit event commit or roll back together                       | P-9   |
 | Hash chain                  | `audit/domain/audit-chain.ts`, `audit/audit.service.ts`               | Each audit event covers the one before it, so tampering shows                            | P-9   |
 | Abstract class as a port    | `storage/object-storage.ts`, `storage/s3-object-storage.ts`           | Services use put, get, head and delete; MinIO or AWS S3 sits behind it                   | P-9   |
@@ -33,8 +29,14 @@ The named patterns used in the code, where each one lives, and why it earns its 
 | Transactional outbox        | planned                                                               | Events leave the system only if the business transaction commits                         | P-15  |
 | Gateway                     | planned: `LlmGateway`                                                 | One interface over the mock, OpenAI-compatible and Bedrock providers                     | P-17  |
 | Factory and adapter         | planned: `SystemConnector` and the Navision adapter                   | Connectors are chosen by name and hide each system's quirks                              | P-20  |
-| Strategy                    | planned: check rules                                                  | Each check rule is a class behind one interface                                          | D-1   |
+| Strategy                    | `checks/domain/check-rule.ts` (the rules are planned)                 | Each check rule is a class behind one interface                                          | D-1   |
+| Port with a mock adapter    | `checks/domain/order-status-reader.ts`                                | Area 3 reads order status through one interface; area 2 replaces the mock                | D-1   |
+| Lazy-loaded chart           | `features/insights/KpiBars.tsx`                                       | The charts load as their own chunk, so the entry stays small                             | D-1   |
 | State machine               | planned: order and exception lifecycles                               | Legal transitions in one place                                                           | C-1   |
+| Port with a mock            | `workflows/workflow-read-model.ts`, `mock-workflow-read-model.ts`     | The routes read through one abstract class; Azri binds a database-backed one             | C-1   |
+| Port to another area        | `workflows/domain/approval-policy.ts`, `mock/mock-approval-policy.ts` | Area 2 asks area 4's approval policy and acts on the answer; the mock stands in          | C-1   |
+| Atomic counter              | `workflows/record-number.repository.ts`                               | One upsert hands out each running number once, with no lock                              | C-1   |
+| Configuration as data       | `DocumentTypeConfig`, `workflows/document-config.repository.ts`       | A default is a row to edit, not a code change                                            | C-1   |
 
 ## Layers
 
@@ -150,3 +152,14 @@ export class UsersController {
 The permission check is `PermissionPolicy.decide(request)`. The default, `MatrixPermissionPolicy`, looks the role up in the `RolePermission` table. A richer rule (an approval limit, segregation of duties, data scope) replaces it by providing another class under the `PermissionPolicy` token; the request it receives holds the user, the permission, the method, the path and the route parameters. `test/http/auth-guards.test.ts` swaps one in as the example.
 
 A service that changes something on behalf of a user takes the `AuthContext` and writes its audit event in the same transaction (`UsersService.disable` is the example), as in the previous section.
+
+## Governance: the matrix, masking and the rule for AI
+
+`apps/api/src/modules/governance/` follows the layers. The controllers (`matrix`, `policy`) validate and call a service; the services (`MatrixService`, `PolicyService`) write the change and its audit event in one transaction; `RolePermissionRepository` and `DataScopeRepository` are the only code that touches the tables; `domain/` holds the rules as plain functions with their own tests.
+
+| Pattern              | Where                                              | Why                                                                                             | Story |
+| -------------------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ----- |
+| Domain rules, no I/O | `governance/domain/matrix-rules.ts`, `masking.ts`  | The locked cells, the copy plan and masking are tested without a database or HTTP               | F-1   |
+| Policy as a function | `domain/ai-destination-policy.ts`                  | One place answers what data may go to which provider; the gateway calls it, the owner widens it | F-1   |
+| Mask on the server   | `domain/masking.ts`, `PolicyService.maskingSample` | A hidden value is null in the response, so it cannot be read from the page                      | F-1   |
+| Shared contract      | `packages/shared/src/governance`                   | The web app and the API read one set of schemas; the owner's policy returns `PolicyDecision`    | F-1   |

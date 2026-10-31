@@ -1,0 +1,39 @@
+// Area 3 models: check results and the exceptions queue. Owner: Iok Teck.
+// The base ships the exceptions model empty: nothing writes to it yet, and the
+// routes return mock data. Order status is area 2's and is never stored here.
+
+/// The first and last states of an exception. Area 3 adds the ones between
+/// (assigned, escalated) when it writes the exceptions flow.
+enum CheckExceptionState {
+  OPEN
+  RESOLVED
+}
+
+/// One failed check waiting for a person. Orders are matched by Navision
+/// numbers, so `orderNo` and `customerNo` are the sales order and customer
+/// numbers, not names.
+model CheckException {
+  id             String              @id @default(uuid(7)) @db.Uuid
+  orderNo        String
+  customerNo     String
+  /// The rule's stable name, such as the one that compares quantities.
+  ruleId         String
+  summary        String
+  expected       String
+  actual         String
+  /// The tolerance applied, with its label, as the rule used it.
+  toleranceLabel String
+  toleranceValue String
+  /// Links to the documents and fields behind the result.
+  evidence       Json
+  /// The role who should fix it.
+  fixBy          Role
+  state          CheckExceptionState @default(OPEN)
+  openedAt       DateTime            @default(now()) @db.Timestamptz(3)
+  resolvedAt     DateTime?           @db.Timestamptz(3)
+  createdAt      DateTime            @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime            @updatedAt @db.Timestamptz(3)
+
+  @@index([state, openedAt])
+  @@index([orderNo])
+}

@@ -722,7 +722,8 @@
         "Resolving an exception reports pass to area 2, so that the order can move on.",
         "D-1's queue screen filters by type, owner, state and age, with the common data table's quick search and saved filters (P-12).",
         "An AI summary may explain an exception, labelled as AI, and the logs stay the source of truth.",
-        "Tests cover each state change, a change refused for want of a reason, and the overdue flag."
+        "Tests cover each state change, a change refused for want of a reason, and the overdue flag.",
+        "The KPI dashboard shows trends over a period, and each of the five measures is a tested formula over events (D-1 shows fixed mock lab estimates)."
       ]
     },
     {
@@ -745,7 +746,10 @@
         "Until P-15's event bus exists, it works from the typed events in the order and event contract (P-7).",
         "It filters by status, owner, area and overdue, with the common data table (P-12).",
         "The overdue count feeds the KPI dashboard's overdue-orders measure.",
-        "Tests cover a status change from an event, a change of owner, the overdue boundary, and the same event received twice."
+        "Tests cover a status change from an event, a change of owner, the overdue boundary, and the same event received twice.",
+        "An order's page lists the documents behind each check side by side, with the differing line marked (D-1 leaves this out).",
+        "The operation log at the foot of an order's page is fed from the audit trail once F-2 lands (D-1 shows mock rows).",
+        "Role home tiles show real counts, such as orders waiting on me, and an end-to-end spec covers the tracker (D-1 leaves both out)."
       ]
     },
     {
@@ -1425,6 +1429,24 @@
         "The sign-in rate limit keeps its counters in Redis, so it holds with more than one API process, and also limits by account as well as by address.",
         "A one-time command creates the first real administrator in production, where the seeded accounts have no password, and audits it.",
         "The JWT secret can be rotated with an overlap, so a change does not sign everyone out."
+      ]
+    },
+    {
+      "epic": "F",
+      "area": "area: 4 controls and monitoring",
+      "reqs": ["M2", "M4"],
+      "dependsOn": ["F-1"],
+      "key": "F-8",
+      "title": "Governance base polish",
+      "priority": "could",
+      "estimate": 3,
+      "sprints": [3],
+      "summary": "Follow-ups to F-1 that nobody needs this week: they make the matrix easier to use and the controls easier to prove.",
+      "acceptance": [
+        "The matrix has a search box and a filter by role or by permission group, and a change can be undone from the page.",
+        "A browser test of E2E #3: a script calls an action endpoint without the right, gets the envelope with a trace id, and the refusal shows in the audit viewer.",
+        "The seed no longer re-adds a permission the owner revoked on purpose (ADR 0012, point 12 and ADR 0024, point 1), with a test.",
+        "The masking sample reads its rule from the matrix screen, so a rule can be shown or hidden for a role without a code change."
       ]
     }
   ]

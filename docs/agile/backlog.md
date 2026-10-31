@@ -14,7 +14,7 @@ There are 9 epics and 68 stories. Estimates are story points: a first guess, for
 | Epic C | Order workflows and approvals     | `area: 2 order workflows and approvals` | 5       | 29     |
 | Epic D | Checks, the tracker and insights  | `area: 3 checks tracker and insights`   | 4       | 23     |
 | Epic E | AI with a person in the loop      | `area: 1 document AI and integration`   | 6       | 29     |
-| Epic F | Financial controls and governance | `area: 4 controls and monitoring`       | 7       | 32     |
+| Epic F | Financial controls and governance | `area: 4 controls and monitoring`       | 8       | 35     |
 | Epic G | Monitoring                        | `area: 4 controls and monitoring`       | 1       | 8      |
 | Epic T | Team stories                      | `area: team`                            | 9       | 36     |
 
@@ -108,6 +108,7 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | E-5   | A first-run guided tour for each role                              | could    | 3      | `area: 1 document AI and integration`   | M1 design thinking, M4 best practices                          |
 | E-6   | An "Ask OrderPilot" help panel that answers from our docs          | could    | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M3 AI-assisted coding                        |
 | F-7   | Session hardening                                                  | could    | 5      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
+| F-8   | Governance base polish                                             | could    | 3      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
 
 ## Epic P: The platform base
 
@@ -1056,6 +1057,7 @@ Acceptance criteria:
 - D-1's queue screen filters by type, owner, state and age, with the common data table's quick search and saved filters (P-12).
 - An AI summary may explain an exception, labelled as AI, and the logs stay the source of truth.
 - Tests cover each state change, a change refused for want of a reason, and the overdue flag.
+- The KPI dashboard shows trends over a period, and each of the five measures is a tested formula over events (D-1 shows fixed mock lab estimates).
 
 ### D-4: The tracker's status, owner and overdue flags from workflow events
 
@@ -1079,6 +1081,9 @@ Acceptance criteria:
 - It filters by status, owner, area and overdue, with the common data table (P-12).
 - The overdue count feeds the KPI dashboard's overdue-orders measure.
 - Tests cover a status change from an event, a change of owner, the overdue boundary, and the same event received twice.
+- An order's page lists the documents behind each check side by side, with the differing line marked (D-1 leaves this out).
+- The operation log at the foot of an order's page is fed from the audit trail once F-2 lands (D-1 shows mock rows).
+- Role home tiles show real counts, such as orders waiting on me, and an end-to-end spec covers the tracker (D-1 leaves both out).
 
 ## Epic E: AI with a person in the loop
 
@@ -1334,6 +1339,24 @@ Acceptance criteria:
 - The sign-in rate limit keeps its counters in Redis, so it holds with more than one API process, and also limits by account as well as by address.
 - A one-time command creates the first real administrator in production, where the seeded accounts have no password, and audits it.
 - The JWT secret can be rotated with an overlap, so a change does not sign everyone out.
+
+### F-8: Governance base polish
+
+Follow-ups to F-1 that nobody needs this week: they make the matrix easier to use and the controls easier to prove.
+
+- **Area:** `area: 4 controls and monitoring`
+- **Priority:** could
+- **Estimate:** 3 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Planned for:** Sprint 03 (W4)
+- **Depends on:** F-1
+
+Acceptance criteria:
+
+- The matrix has a search box and a filter by role or by permission group, and a change can be undone from the page.
+- A browser test of E2E #3: a script calls an action endpoint without the right, gets the envelope with a trace id, and the refusal shows in the audit viewer.
+- The seed no longer re-adds a permission the owner revoked on purpose (ADR 0012, point 12 and ADR 0024, point 1), with a test.
+- The masking sample reads its rule from the matrix screen, so a rule can be shown or hidden for a role without a code change.
 
 ## Epic G: Monitoring
 

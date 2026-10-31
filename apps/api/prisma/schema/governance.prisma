@@ -1,0 +1,15 @@
+// Area 4 models: access policy. Owner: Angelyn. Never edit another area's file.
+//
+// The role-permission matrix itself is RolePermission in platform.prisma (P-10
+// created it, area 4 owns its contents). What area 4 adds here is the data
+// scope of a role. Approval limits and substitutes are contracts only for now
+// (packages/shared governance/approval.ts): F-3 gives them a table.
+
+/// Which records a role may see: "all", "brands" or "own" (the names are in
+/// @orderpilot/shared). A role with no row reads as its default. The base
+/// stores and shows this; area 4 enforces it.
+model RoleDataScope {
+  role      Role     @id
+  scope     String
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+}
