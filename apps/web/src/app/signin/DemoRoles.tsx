@@ -61,17 +61,17 @@ export function DemoRoles({
         {roles.map(({ role, displayName }) => {
           const Icon = ICONS[role];
           return (
-            <li key={role}>
+            <li key={role} className="flex">
               <Button
                 type="button"
                 variant="outline"
-                className="h-auto w-full justify-start gap-2 px-2 py-2 text-left"
+                className="h-full min-h-12 w-full justify-start gap-2 px-2 py-2 text-left"
                 disabled={disabled}
                 onClick={() => {
                   onPick(role);
                 }}
               >
-                <span className="grid size-8 shrink-0 place-items-center rounded-md bg-accent text-accent-foreground">
+                <span className="grid size-7 shrink-0 place-items-center rounded-md bg-accent text-accent-foreground">
                   <Icon className="size-4" aria-hidden="true" />
                 </span>
                 <span className="min-w-0 flex-1 whitespace-normal">

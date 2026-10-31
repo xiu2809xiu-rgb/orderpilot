@@ -102,7 +102,7 @@ export function PasswordForm({
       {alert}
       <Button
         type="submit"
-        variant={secondary ? "secondary" : "default"}
+        variant={secondary ? "outline" : "default"}
         className="w-full"
         disabled={busy || isSubmitting}
       >

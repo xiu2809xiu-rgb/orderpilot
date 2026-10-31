@@ -22,7 +22,7 @@ export function LoginPage() {
           <Logo />
           <ThemeSwitch />
         </header>
-        <div className="mx-auto my-s4 w-full max-w-md space-y-s3 lg:my-auto">
+        <div className="mx-auto my-s4 w-full max-w-xl space-y-s3 lg:my-auto">
           <div className="space-y-1">
             <h1 className="text-2xl font-semibold tracking-tight">
               {t("login.title")}
