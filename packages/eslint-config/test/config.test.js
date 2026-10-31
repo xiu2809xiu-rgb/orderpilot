@@ -44,6 +44,21 @@ describe("@orderpilot/eslint-config", () => {
     assertError(messages, "@typescript-eslint/no-unsafe-member-access");
   });
 
+  it("bans Prisma's unsafe raw SQL calls", async () => {
+    const hits = (await lint("raw-sql.ts")).filter(
+      (message) => message.ruleId === "no-restricted-properties",
+    );
+    assert.deepEqual(
+      hits.map((hit) => [hit.severity, hit.message.includes("tagged")]),
+      [
+        [2, true],
+        [2, true],
+      ],
+    );
+    assert.match(hits[0]?.message ?? "", /queryRaw/);
+    assert.match(hits[1]?.message ?? "", /executeRaw/);
+  });
+
   it("rejects inaccessible JSX with jsx-a11y", async () => {
     const messages = await lint("inaccessible.tsx");
     assertError(messages, "jsx-a11y/alt-text");

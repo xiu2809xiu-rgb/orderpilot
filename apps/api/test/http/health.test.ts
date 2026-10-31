@@ -23,24 +23,47 @@ describe("health probes", () => {
     expect(res.body).toEqual({ data: { status: "ok" } });
   });
 
-  it("GET /health reports build, environment and checks", async () => {
+  it("GET /health shows only the status and the checks, each up", async () => {
     const res = await request(t.app.getHttpServer()).get("/health");
     expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({
+    expect(res.body).toEqual({
       data: {
         status: "ok",
-        name: "@orderpilot/api",
-        appEnv: "local",
-        checks: [],
+        checks: [
+          { name: "database", status: "up" },
+          { name: "redis", status: "up" },
+          { name: "storage", status: "up" },
+        ],
       },
     });
-    expect(res.body.data.uptimeSeconds).toBeTypeOf("number");
   });
 
-  it("GET /health/ready is ready with no checks registered", async () => {
+  it("GET /health does not reveal the environment, version, uptime or timings", async () => {
+    const res = await request(t.app.getHttpServer()).get("/health");
+    const text = JSON.stringify(res.body);
+    for (const secret of [
+      "appEnv",
+      "version",
+      "gitSha",
+      "uptime",
+      "durationMs",
+      "@orderpilot",
+    ]) {
+      expect(text).not.toContain(secret);
+    }
+  });
+
+  it("GET /health/ready is ready when the database, Redis and storage answer", async () => {
     const res = await request(t.app.getHttpServer()).get("/health/ready");
     expect(res.status).toBe(200);
-    expect(res.body.data).toEqual({ status: "ok", checks: [] });
+    expect(res.body.data.status).toBe("ok");
+    expect(
+      (res.body.data.checks as CheckBody[]).map((c) => [c.name, c.status]),
+    ).toEqual([
+      ["database", "up"],
+      ["redis", "up"],
+      ["storage", "up"],
+    ]);
   });
 
   it("serves the probes outside /api, so a version change never moves them", async () => {
@@ -77,7 +100,10 @@ describe("readiness with checks registered", () => {
       (res.body.data.checks as CheckBody[]).map((c) => [c.name, c.status]),
     ).toEqual([
       ["bad", "down"],
+      ["database", "up"],
       ["good", "up"],
+      ["redis", "up"],
+      ["storage", "up"],
     ]);
     expect(JSON.stringify(res.body)).not.toContain("hunter2");
     // The reason is in the log, against the request.
@@ -89,10 +115,6 @@ describe("GET /api/v1/system/checks (the list pattern)", () => {
   let t: TestApp;
   beforeAll(async () => {
     t = await createTestApp();
-    const registry = t.app.get(ReadinessRegistry);
-    for (const name of ["database", "redis", "storage"]) {
-      registry.register({ name, check: () => Promise.resolve() });
-    }
   });
   afterAll(async () => {
     await t.close();
@@ -119,5 +141,39 @@ describe("GET /api/v1/system/checks (the list pattern)", () => {
       { path: "page", message: expect.any(String) },
     ]);
     expect(res.body.error.traceId).toBe("req-validate-1");
+  });
+});
+
+describe("readiness when a service is unreachable", () => {
+  let t: TestApp;
+  beforeAll(async () => {
+    // Nothing listens on port 1. The password is set apart so that no
+    // connection string with a password sits in the file.
+    const unreachable = new URL("postgresql://127.0.0.1:1/none");
+    unreachable.username = "nobody";
+    unreachable.password = "nothing";
+    t = await createTestApp({
+      DATABASE_URL: unreachable.toString(),
+      REDIS_URL: "redis://127.0.0.1:1/0",
+    });
+  });
+  afterAll(async () => {
+    await t.close();
+  });
+
+  it("answers 503 and names what is down, without the reason or the address", async () => {
+    const res = await request(t.app.getHttpServer()).get("/health/ready");
+    expect(res.status).toBe(503);
+    const down = (res.body.data.checks as CheckBody[])
+      .filter((c) => c.status === "down")
+      .map((c) => c.name);
+    expect(down).toEqual(["database", "redis"]);
+    expect(JSON.stringify(res.body)).not.toContain("127.0.0.1");
+    expect(JSON.stringify(res.body)).not.toContain("nothing");
+  });
+
+  it("keeps liveness up: a dead database never restarts the process", async () => {
+    const res = await request(t.app.getHttpServer()).get("/health/live");
+    expect(res.status).toBe(200);
   });
 });

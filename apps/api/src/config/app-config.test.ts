@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
+import { baseEnv } from "../../test/support/base-env.js";
 import { AppConfig } from "./app-config.js";
 import { ConfigError } from "./config-error.js";
 
-const valid = { APP_ENV: "local" };
+const valid = baseEnv();
 
 function messageFor(
   env: NodeJS.ProcessEnv,
@@ -72,13 +73,55 @@ describe("AppConfig.fromEnv", () => {
 
   it("reports every problem at once and never repeats a value", () => {
     const message = messageFor({
-      APP_ENV: "local",
+      ...valid,
       API_PORT: "not-a-port-SECRET",
       LOG_LEVEL: "loud-SECRET",
     });
     expect(message).toContain("API_PORT");
     expect(message).toContain("LOG_LEVEL");
     expect(message).not.toContain("SECRET");
+  });
+
+  it("requires the database, Redis and storage settings, and names them", () => {
+    const message = messageFor({ APP_ENV: "local" });
+    for (const name of [
+      "DATABASE_URL",
+      "REDIS_URL",
+      "S3_ACCESS_KEY_ID",
+      "S3_SECRET_ACCESS_KEY",
+      "S3_BUCKET",
+    ]) {
+      expect(message).toContain(`${name}: is missing.`);
+    }
+  });
+
+  it("checks the shape of the URLs and the bucket name without repeating them", () => {
+    const message = messageFor({
+      ...valid,
+      DATABASE_URL: "mysql://u:SECRET@h/db",
+      REDIS_URL: "http://SECRET",
+      S3_BUCKET: "Bad_Bucket_SECRET",
+    });
+    expect(message).toContain("DATABASE_URL");
+    expect(message).toContain("REDIS_URL");
+    expect(message).toContain("S3_BUCKET");
+    expect(message).not.toContain("SECRET");
+  });
+
+  it("reads the infrastructure settings, with path-style on when an endpoint is set", () => {
+    const config = AppConfig.fromEnv(valid);
+    expect(config.database.url).toBe(valid.DATABASE_URL);
+    expect(config.redis.url).toBe(valid.REDIS_URL);
+    expect(config.storage).toMatchObject({
+      endpoint: "http://127.0.0.1:5997",
+      region: "us-east-1",
+      bucket: "unit-bucket",
+      forcePathStyle: true,
+      createBucket: false,
+    });
+    const aws = AppConfig.fromEnv({ ...valid, S3_ENDPOINT: undefined });
+    expect(aws.storage.endpoint).toBeNull();
+    expect(aws.storage.forcePathStyle).toBe(false);
   });
 
   it("rejects an origin with a path, and a wildcard", () => {
@@ -92,10 +135,10 @@ describe("AppConfig.fromEnv", () => {
 });
 
 describe("production safety rules key off APP_ENV", () => {
-  const production = {
+  const production = baseEnv({
     APP_ENV: "production",
     CORS_ORIGINS: "https://app.example.com",
-  };
+  });
 
   it("accepts a sound production setting, with Swagger off by default", () => {
     const config = AppConfig.fromEnv(production);
@@ -121,11 +164,9 @@ describe("production safety rules key off APP_ENV", () => {
 
   it("does not treat NODE_ENV=production as APP_ENV=production", () => {
     // A demo stack runs NODE_ENV=production with DEMO_MODE=true.
-    const config = AppConfig.fromEnv({
-      APP_ENV: "demo",
-      NODE_ENV: "production",
-      DEMO_MODE: "true",
-    });
+    const config = AppConfig.fromEnv(
+      baseEnv({ APP_ENV: "demo", NODE_ENV: "production", DEMO_MODE: "true" }),
+    );
     expect(config.isProduction).toBe(false);
     expect(config.demoMode).toBe(true);
   });
