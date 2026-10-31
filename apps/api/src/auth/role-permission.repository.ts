@@ -31,6 +31,31 @@ export class RolePermissionRepository {
     return count > 0;
   }
 
+  /** Every pair in the table, for the matrix screen. Unknown names are ignored. */
+  async all(): Promise<{ role: Role; permission: Permission }[]> {
+    const rows = await this.database.client.rolePermission.findMany({
+      orderBy: [{ role: "asc" }, { permission: "asc" }],
+    });
+    return rows.flatMap((row) => {
+      const parsed = permissionSchema.safeParse(row.permission);
+      return parsed.success
+        ? [{ role: row.role, permission: parsed.data }]
+        : [];
+    });
+  }
+
+  /** Grants one permission. Granting twice changes nothing. */
+  async grant(role: Role, permission: Permission): Promise<void> {
+    await this.addMissing([{ role, permission }]);
+  }
+
+  /** Revokes one permission. Revoking what is not held changes nothing. */
+  async revoke(role: Role, permission: Permission): Promise<void> {
+    await this.database.client.rolePermission.deleteMany({
+      where: { role, permission },
+    });
+  }
+
   /** Adds the pairs that are missing and leaves the rest. Returns how many it added. */
   async addMissing(
     pairs: readonly { role: Role; permission: Permission }[],
