@@ -29,7 +29,11 @@ interface EmptyStateProps {
   action?: ReactNode;
 }
 
-/** Nothing to show yet, and what to do about it. */
+/**
+ * Nothing to show yet, and what to do about it. A compact strip, never a big
+ * empty card. It always names a next step: your `action`, or your words, or
+ * a plain line saying records appear here as they are added.
+ */
 export function EmptyState({
   icon,
   title,
@@ -42,7 +46,7 @@ export function EmptyState({
       variant="inline"
       icon={icon ?? Inbox}
       title={title ?? t("states.emptyTitle")}
-      description={description}
+      description={description ?? (action ? undefined : t("states.emptyNext"))}
     >
       {action}
     </StatePanel>

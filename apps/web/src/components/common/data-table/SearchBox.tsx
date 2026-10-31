@@ -61,8 +61,17 @@ export function SearchBox({
         }}
         aria-label={label ?? t("table.search")}
         placeholder={t("table.searchPlaceholder")}
-        className="pl-9"
+        // The slash key finds this field (see app/shell/shortcuts.ts).
+        data-quick-search=""
+        aria-keyshortcuts="/"
+        className="peer pr-8 pl-9"
       />
+      <kbd
+        aria-hidden="true"
+        className="pointer-events-none absolute top-1/2 right-2 hidden -translate-y-1/2 rounded border px-1.5 font-mono text-xs text-muted-foreground peer-focus:opacity-0 peer-not-placeholder-shown:opacity-0 md:block"
+      >
+        /
+      </kbd>
     </div>
   );
 }

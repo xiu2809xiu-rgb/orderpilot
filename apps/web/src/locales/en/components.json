@@ -48,12 +48,24 @@
     "copied": "Copied",
     "failed": "Could not copy. Select the text and copy it by hand."
   },
+  "toast": {
+    "region": "Messages",
+    "undo": "Undo",
+    "undone": "Undone",
+    "undoFailed": "Could not undo. Try again from the record.",
+    "dismiss": "Close message"
+  },
+  "header": {
+    "total": "{{count}} records"
+  },
   "section": {
     "actions": "Actions"
   },
   "states": {
     "loading": "Loading",
     "emptyTitle": "Nothing here yet",
+    "emptyNext": "Records appear here as they are added. Reload in a moment to check.",
+    "reload": "Reload",
     "noMatchesTitle": "No results match",
     "noMatchesDescription": "Change or clear the search and filters to see more.",
     "clearFilters": "Clear search and filters",

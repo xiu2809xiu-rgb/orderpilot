@@ -144,17 +144,21 @@ export function DataTable<Row>({
         <PartialNotice description={partialNotice} onRetry={onRetry} />
       ) : null}
 
-      <ScrollRegion label={t("table.region", { caption })}>
+      <ScrollRegion
+        label={t("table.region", { caption })}
+        className="max-h-[min(70dvh,48rem)]"
+      >
         <Table aria-busy={status === "loading"}>
           <caption className="sr-only">{caption}</caption>
           <TableHeader>
             <TableRow className="hover:bg-transparent">
-              {shown.map((column) => (
+              {shown.map((column, position) => (
                 <SortHeader
                   key={column.id}
                   column={column}
                   sort={query.sort}
                   onSort={sortBy}
+                  first={position === 0}
                 />
               ))}
             </TableRow>
