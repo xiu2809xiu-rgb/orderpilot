@@ -1020,6 +1020,24 @@
       ]
     },
     {
+      "key": "P-28",
+      "title": "Replace the accepted glob advisory with an override",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 1,
+      "reqs": ["M4"],
+      "branch": "chore/glob-override",
+      "sprints": [2],
+      "dependsOn": ["P-6"],
+      "summary": "Due between 2026-11-03 and 2026-11-05. GHSA-3g3m-2fjr-6pw4 is accepted in osv-scanner.toml until 2026-11-06, after which the OSV check fails on every pull request. The fix, glob 14.0.2, is inside the 7-day release-age window until 2026-11-03.",
+      "acceptance": [
+        "From 2026-11-03, a pnpm override moves glob to 14 with its reason and a review date in pnpm-workspace.yaml, and `pnpm install` and `pnpm build` still pass.",
+        "The GHSA-3g3m-2fjr-6pw4 entry is removed from osv-scanner.toml and from the table in docs/security/security-testing.md, and the OSV scan passes without it.",
+        "Done and merged by 2026-11-05, a day before the accepted advisory expires."
+      ]
+    },
+    {
       "key": "T-1",
       "title": "Owners, backups and reviews",
       "epic": "T",
