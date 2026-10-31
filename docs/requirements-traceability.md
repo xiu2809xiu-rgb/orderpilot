@@ -61,8 +61,8 @@ Every feature traces to at least one of the six module requirements. Each row sa
 ## M4 Best practices
 
 | orval: typed TanStack Query hooks and MSW mocks from the API's OpenAPI spec (version to be pinned on install, ADR 0019) | `apps/api` exports the spec; `apps/web` holds the generated code | A CI step fails when the generated code is out of date; every area base uses the hooks and mocks | P-26 | Planned |
-| The `pgvector/pgvector` PostgreSQL image with the `pgvector` and `pg_trgm` extensions (version to be pinned on install, ADR 0017) | `docker-compose.yml` | The extensions are present in a fresh stack | P-9 | Planned |
-| Mailpit as the only place OrderPilot sends email in development and demos (version to be pinned on install, ADR 0018) | `docker-compose.yml` | A test email shows in Mailpit; nothing leaves the stack | P-9 | Planned |
+| The `pgvector/pgvector` PostgreSQL image with the `pgvector` and `pg_trgm` extensions (`0.8.6-pg18-trixie`, [ADR 0017](adr/0017-pgvector-postgres-image.md)) | `docker-compose.yml` | `apps/api/test/database/extensions.test.ts`: both extensions are present in a fresh stack | P-9 | On its way |
+| Mailpit as the only place OrderPilot sends email in development and demos (`axllent/mailpit:v1.32.0`, [ADR 0018](adr/0018-mailpit-for-development-email.md)) | `docker-compose.yml` | Mailpit starts healthy with the stack and listens on its two ports; nothing leaves the stack | P-9 | On its way |
 | Vercel AI SDK under `LlmGateway`, with the gateway keeping cost tracking and the data-to-AI policy (version to be pinned on install, ADR in P-17) | `apps/api/src/modules/ai` | Gateway tests; usage records for every call | P-17 | Planned |
 | promptfoo for the accuracy set and the prompt-injection tests in CI (version to be pinned on install, ADR in E-2) | The AI test suite and `ci.yml` | The promptfoo report in CI | E-2, E-3 | Planned |
 | React-PDF and ExcelJS for the template engine (versions to be pinned on install, ADR in B-3) | `apps/api/src/modules/templates` | Generated PDF and Excel files in the template tests | B-3 | Planned |

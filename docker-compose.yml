@@ -1,9 +1,9 @@
-# The local stack: PostgreSQL, Redis and MinIO. The API, worker and web app join
+# The local stack: PostgreSQL (with pgvector), Redis, MinIO and Mailpit. The API, worker and web app join
 # in P-13. Every port, name and password comes from the root .env (copy
 # .env.example to .env), with the same safe defaults, so `docker compose up -d`
 # works on a fresh clone.
 #
-#   docker compose up -d --wait     start and wait until all three are healthy
+#   docker compose up -d --wait     start and wait until all four are healthy
 #   docker compose down             stop and remove the containers, keep the data
 #
 # Never add -v to `down`: it deletes the named volumes, and the data with them.
@@ -11,7 +11,9 @@ name: orderpilot
 
 services:
   postgres:
-    image: postgres:18.1-alpine
+    # PostgreSQL 18 with the pgvector extension (ADR 0017). The migrations enable
+    # vector and pg_trgm.
+    image: pgvector/pgvector:0.8.6-pg18-trixie
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-orderpilot}
@@ -26,7 +28,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "pg_isready -U ${POSTGRES_USER:-orderpilot} -d ${POSTGRES_DB:-orderpilot}",
+          "pg_isready -h 127.0.0.1 -U ${POSTGRES_USER:-orderpilot} -d ${POSTGRES_DB:-orderpilot}",
         ]
       interval: 5s
       timeout: 3s
@@ -67,6 +69,20 @@ services:
           "CMD-SHELL",
           "wget -q -O /dev/null http://127.0.0.1:9000/minio/health/live",
         ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # The only place OrderPilot sends email in development and demos (ADR 0018):
+  # it catches every message and shows it in a web page. Nothing leaves the stack.
+  mailpit:
+    image: axllent/mailpit:v1.32.0
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${MAILPIT_SMTP_PORT:-1025}:1025"
+      - "127.0.0.1:${MAILPIT_UI_PORT:-8025}:8025"
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
       interval: 5s
       timeout: 3s
       retries: 20

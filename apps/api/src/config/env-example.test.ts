@@ -87,19 +87,35 @@ describe("docker-compose.yml", () => {
     const images = [...compose.matchAll(/^\s+image: (\S+)$/gm)].map(
       (m) => m[1] ?? "",
     );
-    expect(images).toHaveLength(3);
+    expect(images).toHaveLength(4);
     for (const image of images)
-      expect(image, image).toMatch(/:\d[\w.-]*$|:RELEASE\.[\w.-]+$/);
+      expect(image, image).toMatch(/:v?\d[\w.-]*$|:RELEASE\.[\w.-]+$/);
     for (const [, port] of compose.matchAll(/^\s+- "([^"]+:\d+:\d+)"$/gm)) {
       expect(port, port).toMatch(/^127\.0\.0\.1:/);
     }
   });
 
   it("has a health check for each service and a named volume for each store", () => {
-    expect(compose.match(/^\s+healthcheck:$/gm)).toHaveLength(3);
+    expect(compose.match(/^\s+healthcheck:$/gm)).toHaveLength(4);
     for (const volume of ["postgres-data", "redis-data", "minio-data"]) {
       expect(compose).toContain(`  ${volume}:`);
     }
+  });
+});
+
+describe("the pgvector and Mailpit additions", () => {
+  it("runs PostgreSQL from the pgvector image at one exact tag, and checks it over TCP", () => {
+    expect(compose).toContain("image: pgvector/pgvector:0.8.6-pg18-trixie");
+    expect(compose).toContain("pg_isready -h 127.0.0.1");
+  });
+
+  it("runs Mailpit, with SMTP settings built from its two ports", () => {
+    expect(compose).toContain("image: axllent/mailpit:v1.32.0");
+    const raw = parse(example);
+    expect(raw.MAILPIT_SMTP_PORT).toBeDefined();
+    expect(raw.MAILPIT_UI_PORT).toBeDefined();
+    expect(raw.SMTP_PORT).toBe("${MAILPIT_SMTP_PORT}");
+    expect(raw.SMTP_HOST).toBe("127.0.0.1");
   });
 });
 

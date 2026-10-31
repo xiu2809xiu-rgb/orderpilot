@@ -30,7 +30,7 @@ The workspace installs, checks and builds. The API and the web app start, and th
 
    ```sh
    cp .env.example .env        # Git Bash, macOS, Linux. PowerShell: Copy-Item .env.example .env
-   pnpm stack:up               # PostgreSQL, Redis and MinIO; the first run compiles MinIO and takes a few minutes
+   pnpm stack:up               # PostgreSQL, Redis, MinIO and Mailpit; the first run compiles MinIO and takes a few minutes
    ```
 
 6. Install and check. The tests use the stack, so start it first:
@@ -48,7 +48,7 @@ The workspace installs, checks and builds. The API and the web app start, and th
    pnpm --filter @orderpilot/api dev
    ```
 
-   Then open <http://localhost:3000/health/ready> (database, Redis and storage should all say `up`) and <http://localhost:3000/api/docs>. The ports are the first lines of `.env` (`POSTGRES_PORT`, `REDIS_PORT`, `MINIO_PORT`): change one and every URL built from it moves. `pnpm stack:down` stops the containers and keeps your data. If a required setting is missing, the API stops and names the file to create. A variable set in your shell always wins over the files.
+   Then open <http://localhost:3000/health/ready> (database, Redis and storage should all say `up`) and <http://localhost:3000/api/docs>. The ports are the first lines of `.env` (`POSTGRES_PORT`, `REDIS_PORT`, `MINIO_PORT`): change one and every URL built from it moves. Mailpit is the only place OrderPilot sends email in development and demos: nothing leaves your machine, and the messages show at <http://127.0.0.1:8025>. `pnpm stack:down` stops the containers and keeps your data. If a required setting is missing, the API stops and names the file to create. A variable set in your shell always wins over the files.
 
 8. Look at the web app:
 
@@ -79,7 +79,7 @@ node --test "scripts/github/**/*.test.mjs"
 
 **Docker is not running.** `docker compose up` says it cannot connect to the Docker daemon, or the tests say that nothing answers on the database port. Start Docker Desktop (Windows and macOS) and wait until it says it is running, then run `docker compose up -d --wait` again. On Linux: `sudo systemctl start docker`.
 
-**Port already in use.** `docker compose up` says a port is already allocated or already in use. Something else on your machine has 5432 (PostgreSQL), 6379 (Redis), 9000 or 9001 (MinIO). Either stop it, or move the stack: change one line in your `.env`, for example `POSTGRES_PORT=5433`, and run `docker compose up -d --wait` again. The database URLs are built from the port, so nothing else needs to change. To see who holds a port: `netstat -ano | findstr :5432` (PowerShell and Command Prompt) or `lsof -i :5432` (macOS and Linux).
+**Port already in use.** `docker compose up` says a port is already allocated or already in use. Something else on your machine has 5432 (PostgreSQL), 6379 (Redis), 9000 or 9001 (MinIO), 1025 or 8025 (Mailpit). Either stop it, or move the stack: change one line in your `.env`, for example `POSTGRES_PORT=5433`, and run `docker compose up -d --wait` again. The database URLs are built from the port, so nothing else needs to change. To see who holds a port: `netstat -ano | findstr :5432` (PowerShell and Command Prompt) or `lsof -i :5432` (macOS and Linux).
 
 **`role "orderpilot" does not exist`** (or `password authentication failed`). Another PostgreSQL is answering on the port, usually one installed on your machine, not the one in Docker. Our database never saw the request. Stop the other one, or give ours a free port with `POSTGRES_PORT=5433` in `.env` and run `docker compose up -d --wait` again. `docker compose ps` shows which ports our containers hold.
 
