@@ -54,14 +54,20 @@ function write(key: string, prefs: Prefs) {
 export function useTablePrefs(tableId: string) {
   const viewerId = useSessionStore((state) => state.session?.user.id);
   const key = `op.table.${tableId}.${viewerId ?? "anonymous"}`;
-  const [prefs, setPrefs] = useState(() => read(key));
+  // The state remembers which key it was read for. When the key moves (the
+  // session hydrates, or another person signs in), the stored copy is for
+  // someone else, so this render reads the new key instead. Nothing is written
+  // under the new key until the viewer changes something.
+  const [state, setState] = useState(() => ({ key, prefs: read(key) }));
+  const prefs = state.key === key ? state.prefs : read(key);
 
   const update = useCallback(
     (change: (current: Prefs) => Prefs) => {
-      setPrefs((current) => {
+      setState((previous) => {
+        const current = previous.key === key ? previous.prefs : read(key);
         const next = change(current);
         write(key, next);
-        return next;
+        return { key, prefs: next };
       });
     },
     [key],

@@ -80,4 +80,22 @@ describe("toXlsx", () => {
     expect(sheet?.getCell("B2").value).toBe(-3);
     expect(sheet?.getCell("A3").value).toBe("Plain");
   });
+
+  it("neutralises formula-like headers", async () => {
+    const bytes = await toXlsx(
+      [
+        {
+          id: "name",
+          header: "=HYPERLINK(1)",
+          cell: (r: Row) => r.name,
+          exportValue: (r: Row) => r.name,
+        },
+      ],
+      [],
+      "Sheet",
+    );
+    const book = new ExcelJS.Workbook();
+    await book.xlsx.load(bytes);
+    expect(book.worksheets[0]?.getCell("A1").value).toBe("'=HYPERLINK(1)");
+  });
 });
