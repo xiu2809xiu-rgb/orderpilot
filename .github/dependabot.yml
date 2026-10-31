@@ -1,0 +1,60 @@
+# Dependabot version updates. ADR 0003 records why it is set up this way.
+# Security updates are switched on in the repository settings and do not wait
+# for the schedule or the cooldown.
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Asia/Singapore
+    # Matches minimumReleaseAge in pnpm-workspace.yaml, so every version
+    # proposed here is old enough for pnpm to install.
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: build
+      include: scope
+    labels:
+      - "type: chore"
+      - dependencies
+    groups:
+      # One pull request a week for everything that should not break.
+      npm-minor-and-patch:
+        update-types:
+          - minor
+          - patch
+    ignore:
+      # Node stays on 24 (.node-version), so its types stay on 24 too.
+      - dependency-name: "@types/node"
+        update-types:
+          - version-update:semver-major
+      # typescript-eslint 8.72 supports TypeScript below 6.1. Review when it
+      # widens that range. Review: 2026-12-01.
+      - dependency-name: typescript
+        versions:
+          - ">=6.1.0"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Asia/Singapore
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: ci
+    labels:
+      - "type: chore"
+      - dependencies
+    groups:
+      github-actions:
+        patterns:
+          - "*"
