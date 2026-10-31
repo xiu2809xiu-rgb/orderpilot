@@ -1,3 +1,4 @@
+import { spawnSync } from "node:child_process";
 import assert from "node:assert/strict";
 import {
   mkdtempSync,
@@ -159,6 +160,36 @@ describe("resolveCommand", () => {
     );
     assert.equal(out.file, process.execPath);
     assert.deepEqual(out.args, ["/x/pnpm.cjs", "db:seed"]);
+  });
+
+  it("runs a native pnpm directly, never through node", () => {
+    for (const script of ["C:\\npm\\pnpm.exe", "/usr/local/bin/pnpm"]) {
+      assert.deepEqual(
+        resolveCommand("pnpm db:seed", { npm_execpath: script }, "win32"),
+        { file: script, args: ["db:seed"] },
+      );
+    }
+  });
+
+  it("goes through cmd.exe for a .cmd wrapper, which Node cannot start", () => {
+    assert.deepEqual(
+      resolveCommand(
+        "pnpm db:seed",
+        { npm_execpath: "C:\\npm\\pnpm.cmd" },
+        "win32",
+      ),
+      { file: "cmd.exe", args: ["/d", "/c", "pnpm", "db:seed"] },
+    );
+  });
+
+  // The cases above are made-up paths. This one starts whichever pnpm is really
+  // running, which is what a made-up pnpm.cjs path failed to catch.
+  it("really starts pnpm", () => {
+    const { file, args } = resolveCommand("pnpm --version");
+    const result = spawnSync(file, args, { encoding: "utf8" });
+    assert.equal(result.error, undefined);
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /^\d+\.\d+\.\d+/);
   });
 
   it("falls back to cmd.exe on Windows and plain pnpm elsewhere", () => {

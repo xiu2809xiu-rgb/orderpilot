@@ -125,7 +125,7 @@ export function renderBacklog(backlog, labels) {
     "",
     "## Ready to pull",
     "",
-    "The starter stories for areas 2, 3 and 4. Their owners start on them on Monday 2 Nov and refine them, and at the handover prompt 003 writes the rest from the owners' notes. They sit at Ready on the board.",
+    "The starter stories for areas 2, 3 and 4. Their owners start on them on Monday 2 Nov and refine them, and at the handover prompt 004 writes the rest from the owners' notes. They sit at Ready on the board.",
     "",
     readyTable(backlog),
     "",

@@ -72,7 +72,7 @@ test("every story the brief names is here, in the expected groups", () => {
     "E-6",
   ];
   for (const key of expected) assert.ok(keys.includes(key), key);
-  assert.equal(keys.length, expected.length + 23);
+  assert.equal(keys.length, expected.length + 33);
 });
 
 test("titles and branches match the brief's headings", () => {
@@ -272,7 +272,7 @@ test("the stories prompt 002 touches carry its additions", () => {
   has("P-19", /business partners, each with a type and a price level/);
   has("P-19", /Opening stock and opening balances/);
   has("P-22", /landing, sign-in, the app shell and the 3D view/);
-  has("T-9", /Prompt 003/);
+  has("T-9", /Prompt 004/);
 });
 
 test("the sprints follow prompt 002's order", () => {

@@ -55,6 +55,7 @@ export function AppShell() {
   useTranslation(["common", "components", ...featureNamespaces]);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [paletteUsed, setPaletteUsed] = useState(false);
+  const [dock, setDock] = useState<HTMLElement | null>(null);
   useScheduledRefresh();
   useGlobalShortcuts();
   usePaletteShortcut(() => {
@@ -64,20 +65,31 @@ export function AppShell() {
 
   return (
     <TooltipProvider>
-      <div className="flex min-h-dvh">
+      {/* While the consent card is in the dock the shell is one screen tall and the page scrolls
+          inside it, so the card ends the scrolling area instead of covering it. */}
+      <div className="flex min-h-dvh has-[[data-consent-card]]:h-dvh">
         <Sidebar />
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <Topbar
             onOpenPalette={() => {
               setPaletteUsed(true);
               setPaletteOpen(true);
             }}
           />
-          <main id="main" tabIndex={-1} className="flex-1 p-s3 outline-none">
+          <main
+            id="main"
+            tabIndex={-1}
+            className="min-h-0 flex-1 overflow-y-auto p-s3 outline-none"
+          >
             <Suspense fallback={<ListPageSkeleton />}>
               <Outlet />
             </Suspense>
           </main>
+          <div
+            ref={setDock}
+            data-testid="consent-dock"
+            className="flex shrink-0 justify-end empty:hidden sm:px-s3 sm:pb-s3"
+          />
         </div>
       </div>
       {paletteUsed ? (
@@ -87,7 +99,7 @@ export function AppShell() {
       ) : null}
       <Toaster />
       <Suspense fallback={null}>
-        <AnalyticsRoot />
+        <AnalyticsRoot dock={dock} />
       </Suspense>
     </TooltipProvider>
   );
