@@ -4,7 +4,7 @@
 
 OrderPilot is an AI-assisted order-automation layer beside Microsoft Dynamics Navision, never instead of it.
 
-Spectra Innovations is a Singapore distributor of IT products and computer peripherals. Six groups handle every order by hand, re-typing data from POs, proforma invoices, invoices, packing lists and AWB/BL into Navision, then chasing approvals, payments and shipping papers. OrderPilot reads those documents, routes the work to each role and tracks every order. A person approves anything that matters, and that is audited. The AI never approves, buys, posts, releases goods or pays.
+Spectra Innovations is a Singapore distributor of IT products and computer peripherals. Six groups handle every order by hand, re-typing data from POs, proforma invoices, invoices, packing lists and AWB/BL into Navision, then chasing approvals, payments and shipping papers. OrderPilot will read those documents, route the work to each role and track every order. A person will approve anything that matters, and that will be audited. The AI will never approve, buy, post, release goods or pay.
 
 OrderPilot is our product for Problem Statement #11 in the IT2134 IT Innovation Project (SCCCI x NYP AI Innovation Challenge, AY2026 Semester 2). All its data is synthetic.
 
