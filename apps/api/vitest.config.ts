@@ -30,7 +30,7 @@ export default defineConfig({
         test: {
           // No database, Redis or storage needed. `pnpm test:unit` runs only these.
           name: "unit",
-          include: ["src/**/*.test.ts"],
+          include: ["src/**/*.test.ts", "scripts/**/*.test.mjs"],
         },
       },
       {
