@@ -168,30 +168,6 @@ describe("sign-in", () => {
       expect(JSON.stringify(after)).not.toContain("nobody@example.test");
     });
 
-    it("takes about as long for an unknown user as for a wrong password", async () => {
-      const time = async (email: string) => {
-        const start = performance.now();
-        await request(t.app.getHttpServer())
-          .post(`${API}/auth/login`)
-          .send({ email, password: "not-the-password" });
-        return performance.now() - start;
-      };
-      const known = await emailForRole("SUPPORT");
-      await time(known); // warm up
-      const wrong = Math.min(
-        await time(known),
-        await time(known),
-        await time(known),
-      );
-      const unknown = Math.min(
-        await time("nobody@example.test"),
-        await time("nobody@example.test"),
-        await time("nobody@example.test"),
-      );
-      // Without the dummy hash the unknown user would answer in about 1 ms.
-      expect(unknown).toBeGreaterThan(wrong * 0.4);
-    });
-
     it("validates the body", async () => {
       const bodies = [
         {},

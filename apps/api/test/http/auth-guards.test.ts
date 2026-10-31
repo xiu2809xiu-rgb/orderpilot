@@ -8,6 +8,7 @@ import {
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { AuditService } from "../../src/audit/audit.service.js";
+import { UserRepository } from "../../src/users/user.repository.js";
 import {
   Authenticated,
   Public,
@@ -361,6 +362,24 @@ describe("the guards", () => {
       expect(actions).toEqual(
         expect.arrayContaining(["user.disabled", "user.enabled"]),
       );
+    });
+
+    it("stops a user whose flag was set without revoking their tokens (the guard checks the user itself)", async () => {
+      const victim = await demoSignIn(t, "APPROVER");
+      const users = t.app.get(UserRepository);
+      await users.setDisabledAt(victim.session.user.id, new Date());
+      try {
+        const res = await call(t, victim, "get", `${API}/auth/me`);
+        expect(res.status).toBe(401);
+        const events = (await auditEvents(t)).filter(
+          (e) => e.action === "auth.access.refused",
+        );
+        expect(events.at(-1)?.changes).toMatchObject({
+          reason: "user-disabled",
+        });
+      } finally {
+        await users.setDisabledAt(victim.session.user.id, null);
+      }
     });
 
     it("does not let an administrator disable themselves", async () => {

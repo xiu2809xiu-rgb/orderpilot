@@ -105,6 +105,10 @@ describe("Swagger", () => {
     const prod = await createTestApp({
       APP_ENV: "production",
       CORS_ORIGINS: "https://app.example.com",
+      DEMO_MODE: "false",
+      DEMO_PASSWORD: undefined,
+      COOKIE_SECURE: "true",
+      JWT_SECRET: "a-long-random-secret-for-this-test-only-0123456789",
     });
     try {
       const res = await request(prod.app.getHttpServer()).get("/api/docs");

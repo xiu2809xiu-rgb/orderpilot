@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { baseEnv } from "../../test/support/base-env.js";
 import { AppConfig } from "./app-config.js";
 import { ConfigError } from "./config-error.js";
+import { DEFAULT_JWT_SECRET } from "./env.schema.js";
 
 const valid = baseEnv();
 
@@ -138,6 +139,23 @@ describe("production safety rules key off APP_ENV", () => {
   const production = baseEnv({
     APP_ENV: "production",
     CORS_ORIGINS: "https://app.example.com",
+    JWT_SECRET: "a-long-random-secret-for-this-test-only-0123456789",
+  });
+
+  it("refuses the default or a short JWT secret, and demo passwords, in production", () => {
+    const withoutSecret = Object.fromEntries(
+      Object.entries(production).filter(([name]) => name !== "JWT_SECRET"),
+    );
+    expect(messageFor(withoutSecret)).toContain("JWT_SECRET");
+    expect(
+      messageFor({ ...production, JWT_SECRET: DEFAULT_JWT_SECRET }),
+    ).toContain("JWT_SECRET");
+    expect(messageFor({ ...production, JWT_SECRET: "too-short" })).toContain(
+      "JWT_SECRET",
+    );
+    expect(
+      messageFor({ ...production, DEMO_PASSWORD: "demo-password-1" }),
+    ).toContain("DEMO_PASSWORD");
   });
 
   it("accepts a sound production setting, with Swagger off by default", () => {
@@ -169,5 +187,39 @@ describe("production safety rules key off APP_ENV", () => {
     );
     expect(config.isProduction).toBe(false);
     expect(config.demoMode).toBe(true);
+  });
+});
+
+describe("session settings", () => {
+  it("defaults to a 15 minute access token, a 7 day refresh token and Secure cookies", () => {
+    const { auth } = AppConfig.fromEnv(baseEnv());
+    expect(auth.accessTokenTtlSeconds).toBe(900);
+    expect(auth.refreshTokenTtlSeconds).toBe(604_800);
+    expect(auth.cookieSecure).toBe(true);
+    expect(auth.demoPassword).toBeNull();
+  });
+
+  it("lets only APP_ENV=local switch off Secure cookies", () => {
+    expect(
+      AppConfig.fromEnv(baseEnv({ COOKIE_SECURE: "false" })).auth.cookieSecure,
+    ).toBe(false);
+    for (const appEnv of ["demo", "production"]) {
+      expect(
+        messageFor(
+          baseEnv({
+            APP_ENV: appEnv,
+            COOKIE_SECURE: "false",
+            CORS_ORIGINS: "https://app.example.com",
+            JWT_SECRET: "a-long-random-secret-for-this-test-only-0123456789",
+          }),
+        ),
+      ).toContain("COOKIE_SECURE");
+    }
+  });
+
+  it("refuses a JWT secret shorter than 32 characters anywhere", () => {
+    expect(messageFor(baseEnv({ JWT_SECRET: "short" }))).toContain(
+      "JWT_SECRET",
+    );
   });
 });
