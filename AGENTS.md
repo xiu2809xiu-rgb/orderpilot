@@ -20,7 +20,7 @@ This has happened twice before. It must not happen again.
 ### 2. Write only in your own area
 
 - Each person writes in their own area. The owners are in [The areas](CLAUDE.md#the-areas).
-- `docs/team/module-ownership.md` will list the paths each area owns, the shared files and who reviews them (planned: P-4). Until then, if you are not sure a path is yours, ask before you touch it.
+- [`docs/team/module-ownership.md`](docs/team/module-ownership.md) lists the paths each area owns, the shared files and who reviews them. If you are not sure a path is yours, ask before you touch it.
 - If your task needs a change in another area, stop. Tell the person, and let them raise it with that area's owner.
 
 ### 3. No force pushes

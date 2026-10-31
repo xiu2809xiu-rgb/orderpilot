@@ -98,7 +98,7 @@ This applies from P-11, when `apps/web` exists. Before that there is nowhere to 
    - text through react-i18next, with no hard-coded strings.
 6. **Cover every state and WCAG 2.2 AA.** Handle loading, empty, error with retry and a trace id, partial, success and permission denied, wherever they apply. See the [UI rules](CLAUDE.md#8-ui-rules).
 7. **Test it** with Testing Library, and add its screenshots in light and dark to the pull request.
-8. **Stay in your area.** Shared components need a review from their owners, listed in `docs/team/module-ownership.md` (planned: P-4).
+8. **Stay in your area.** Shared components need a review from their owners, listed in [module ownership](docs/team/module-ownership.md#shared-files-and-who-reviews-them).
 
 ## Using AI tools
 

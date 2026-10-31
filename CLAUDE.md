@@ -9,7 +9,7 @@ This file and [`AGENTS.md`](AGENTS.md) are the source of truth. This file holds 
 - **Every piece is merged the normal way:** one story, one issue, one branch, one pull request, green checks.
 - **Kiro is only the IDE.** Don't use Kiro specs, steering or hooks.
 - **Spectra's documents never go into Git.**
-- **Richie's ERP notes.** Richie studied a third-party ERP and may add domain notes in his own words under `docs/research/` (planned: P-3). Use them for realism: document types, fields, numbering and statuses. Never ask for, open, commit or send to an AI service any screenshot or data from that ERP.
+- **Richie's ERP notes.** Richie studied a third-party ERP and may add domain notes in his own words under [`docs/research/`](docs/research/README.md). Use them for realism: document types, fields, numbering and statuses. Never ask for, open, commit or send to an AI service any screenshot or data from that ERP.
 
 **Status words.** "Today" means it is in the repository now. "Planned" names the story that brings it. Until that story merges the thing does not exist, so never describe it as if it did.
 
@@ -223,7 +223,7 @@ Each row says whether it exists today or which story brings it. Everything marke
 | `packages/synthetic-documents` | Generated PDFs with planted mistakes and ground truth                                                                   | Planned: P-21      |
 | `scripts/`                     | Repository checks and build scripts                                                                                     | Planned: P-5, P-16 |
 | `scripts/github/`              | Idempotent scripts for labels, the sprint calendar, the board, the backlog and the wiki                                 | Planned: P-2       |
-| `docs/`                        | All documentation. Today: `adr/`, `agile/`, `ai/` and `BUILD_REPORT.md`. Later stories add the rest                     | Today, growing     |
+| `docs/`                        | All documentation: `adr/`, `agile/`, `ai/`, `client/`, `design-thinking/`, `grs/`, `research/`, `team/` and more        | Today, growing     |
 | `samples/`                     | Client samples tried on one machine. Git-ignored except its README. The ignore rule exists; the README arrives with P-5 | Today (rule), P-5  |
 | `assets-src/3d/`               | Parametric Blender scripts                                                                                              | Planned: P-23      |
 | `infra/deploy/`                | The server bootstrap, Caddy, `docker-compose.prod.yml` and backups                                                      | Planned: P-24      |

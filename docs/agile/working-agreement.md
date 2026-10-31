@@ -64,7 +64,7 @@ Each person holds **at most two** pieces of work in progress. At the limit, fini
 | What happened today                     | The daily note on the current milestone, or on the story's issue until P-2 brings the milestones                      |
 | A decision someone will ask about later | An ADR                                                                                                                |
 | Being blocked                           | Say so the same day: the `status: blocked` label (planned: P-2) and a message to the team                             |
-| Waiting on Spectra                      | The `status: needs client input` label (planned: P-2) and `docs/client/questions-for-client.md` (planned: P-3)        |
+| Waiting on Spectra                      | The `status: needs client input` label (planned: P-2) and [client questions](../client/questions-for-client.md)       |
 | Quick questions                         | The team chat. The team confirms the channel at its first sprint planning. Anything decided there goes into the issue |
 | A security problem                      | Privately, through [SECURITY.md](../../SECURITY.md), never in a public issue                                          |
 
