@@ -308,15 +308,15 @@ The API is NestJS, in layers (planned: P-8). Controllers call services, and serv
 
 ## 7. Testing
 
-| Level           | What it covers                                                    | Tool                | Status                                |
-| --------------- | ----------------------------------------------------------------- | ------------------- | ------------------------------------- |
-| Unit            | Domain logic, at 80% or more                                      | Vitest              | Planned: P-8                          |
-| API integration | Every endpoint, with 401, 403 and validation cases                | Vitest              | Planned: P-8, with its harness in P-9 |
-| Component       | Components in each of their states                                | Testing Library     | Planned: P-11                         |
-| Contract        | Connectors against the mock                                       | Vitest              | Planned: P-20                         |
-| End-to-end      | The smoke test first, then E2E #1 to #4, with WCAG 2.2 AA checked | Playwright with axe | Planned: P-14                         |
-| Load            | The extraction queue and the order endpoints                      | k6                  | Planned, not yet in a story           |
-| Manual requests | `.http` request files in `apps/api/requests/`                     | Any REST client     | Planned: P-8                          |
+| Level           | What it covers                                                    | Tool                | Status                                 |
+| --------------- | ----------------------------------------------------------------- | ------------------- | -------------------------------------- |
+| Unit            | Domain logic, at 80% or more                                      | Vitest              | Planned: P-8                           |
+| API integration | Every endpoint, with 401, 403 and validation cases                | Vitest              | Planned: P-10, with its harness in P-9 |
+| Component       | Components in each of their states                                | Testing Library     | Planned: P-11                          |
+| Contract        | Connectors against the mock                                       | Vitest              | Planned: P-20                          |
+| End-to-end      | The smoke test first, then E2E #1 to #4, with WCAG 2.2 AA checked | Playwright with axe | Planned: P-14                          |
+| Load            | The extraction queue and the order endpoints                      | k6                  | Planned, not yet in a story            |
+| Manual requests | `.http` request files in `apps/api/requests/`                     | Any REST client     | Planned: P-8                           |
 
 - Tests use synthetic data only.
 - 100% of workflow tests pass. A failing test is fixed or reported, never skipped to get a green run.
