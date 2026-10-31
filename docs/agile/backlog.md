@@ -2,7 +2,7 @@
 
 Rendered from [`scripts/github/data/backlog.json`](../../scripts/github/data/backlog.json) by `node scripts/github/render-docs.mjs`. Change the data, not this file. The same data seeds the issues. The board shows where each story stands.
 
-There are 9 epics and 67 stories. Estimates are story points: a first guess, for the team to change at planning.
+There are 9 epics and 68 stories. Estimates are story points: a first guess, for the team to change at planning.
 
 ## Epics
 
@@ -14,7 +14,7 @@ There are 9 epics and 67 stories. Estimates are story points: a first guess, for
 | Epic C | Order workflows and approvals     | `area: 2 order workflows and approvals` | 4       | 26     |
 | Epic D | Checks, the tracker and insights  | `area: 3 checks tracker and insights`   | 4       | 23     |
 | Epic E | AI with a person in the loop      | `area: 1 document AI and integration`   | 6       | 29     |
-| Epic F | Financial controls and governance | `area: 4 controls and monitoring`       | 7       | 32     |
+| Epic F | Financial controls and governance | `area: 4 controls and monitoring`       | 8       | 35     |
 | Epic G | Monitoring                        | `area: 4 controls and monitoring`       | 1       | 8      |
 | Epic T | Team stories                      | `area: team`                            | 9       | 36     |
 
@@ -107,6 +107,7 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | E-5   | A first-run guided tour for each role                              | could    | 3      | `area: 1 document AI and integration`   | M1 design thinking, M4 best practices                          |
 | E-6   | An "Ask OrderPilot" help panel that answers from our docs          | could    | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M3 AI-assisted coding                        |
 | F-7   | Session hardening                                                  | could    | 5      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
+| F-8   | Governance base polish                                             | could    | 3      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
 
 ## Epic P: The platform base
 
@@ -1316,6 +1317,24 @@ Acceptance criteria:
 - The sign-in rate limit keeps its counters in Redis, so it holds with more than one API process, and also limits by account as well as by address.
 - A one-time command creates the first real administrator in production, where the seeded accounts have no password, and audits it.
 - The JWT secret can be rotated with an overlap, so a change does not sign everyone out.
+
+### F-8: Governance base polish
+
+Follow-ups to F-1 that nobody needs this week: they make the matrix easier to use and the controls easier to prove.
+
+- **Area:** `area: 4 controls and monitoring`
+- **Priority:** could
+- **Estimate:** 3 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Planned for:** Sprint 03 (W4)
+- **Depends on:** F-1
+
+Acceptance criteria:
+
+- The matrix has a search box and a filter by role or by permission group, and a change can be undone from the page.
+- A browser test of E2E #3: a script calls an action endpoint without the right, gets the envelope with a trace id, and the refusal shows in the audit viewer.
+- The seed no longer re-adds a permission the owner revoked on purpose (ADR 0012, point 12 and ADR 0024, point 1), with a test.
+- The masking sample reads its rule from the matrix screen, so a rule can be shown or hidden for a role without a code change.
 
 ## Epic G: Monitoring
 
