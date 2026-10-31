@@ -1,12 +1,164 @@
 {
   "title": "Governance",
-  "description": "Who may do what, and the limits that apply.",
+  "description": "Who may do what, and what data may go where.",
   "arrives": [
-    "The role and permission matrix",
     "Approval limits and delegation",
-    "Rules for bank-detail changes and data sent to AI"
+    "Segregation of duties and the bank-detail control",
+    "The real masking rules"
   ],
   "cues": {
     "roles": "Roles and permissions"
+  },
+  "tabs": {
+    "label": "Governance sections",
+    "matrix": "Role matrix",
+    "users": "Users",
+    "masking": "Masking",
+    "ai": "Data sent to AI",
+    "refusals": "Refusals"
+  },
+  "matrix": {
+    "title": "Role and permission matrix",
+    "description": "Each cell is a row in the live role-permission table. A change is saved at once and written to the audit log.",
+    "readOnly": "You can read the matrix. Changing it needs the roles.manage permission.",
+    "tableLabel": "Permissions by role",
+    "scrollHint": "Scroll sideways to see every role.",
+    "permission": "Permission",
+    "dataScope": "Data scope",
+    "dataScopeHint": "Which records a role may see. It is stored and shown here, but no list is filtered by it yet.",
+    "scopes": {
+      "all": "All records",
+      "brands": "Own brands",
+      "own": "Own records"
+    },
+    "locked": {
+      "never": "Cannot be granted: {{reason}}",
+      "always": "Cannot be revoked: {{reason}}"
+    },
+    "cell": "{{permission}} for {{role}}",
+    "saved": "Saved.",
+    "saving": "Saving",
+    "failed": "Could not save that change.",
+    "emptyTitle": "No roles to show",
+    "emptyDescription": "The role table is empty. Restart the API to load the default roles.",
+    "emptyAction": "Reload",
+    "copy": {
+      "open": "Copy a role",
+      "title": "Copy a role's permissions",
+      "description": "Makes the target hold exactly what the source holds, with the same data scope. A copy that would break a locked cell is refused, so copying onto the system admin only works from a role that never approves, posts or pays.",
+      "from": "Copy from",
+      "to": "Copy to",
+      "submit": "Copy",
+      "cancel": "Cancel",
+      "same": "Pick two different roles.",
+      "done": "Copied."
+    }
+  },
+  "permissions": {
+    "users": {
+      "read": "See users",
+      "manage": "Add and disable users"
+    },
+    "roles": {
+      "read": "See the role matrix",
+      "manage": "Change the role matrix"
+    },
+    "settings": {
+      "manage": "Change settings"
+    },
+    "audit": {
+      "read": "Read the audit log"
+    },
+    "aiUsage": {
+      "read": "See AI usage and cost"
+    },
+    "documents": {
+      "read": "Read documents",
+      "upload": "Upload documents"
+    },
+    "orders": {
+      "read": "Read orders"
+    },
+    "approvals": {
+      "decide": "Approve or reject"
+    },
+    "payments": {
+      "confirm": "Confirm a payment",
+      "post": "Post a payment"
+    }
+  },
+  "users": {
+    "title": "Users",
+    "description": "Users are disabled, never deleted, so the audit trail keeps its names.",
+    "tableLabel": "Users",
+    "name": "Name",
+    "email": "Email",
+    "role": "Role",
+    "status": "Status",
+    "active": "Active",
+    "disabled": "Disabled",
+    "disable": "Disable",
+    "enable": "Enable",
+    "disableFor": "Disable {{name}}",
+    "enableFor": "Enable {{name}}",
+    "emptyTitle": "No users yet",
+    "emptyDescription": "Users appear here once they exist.",
+    "failed": "Could not change that user.",
+    "forbiddenTitle": "You cannot see users",
+    "forbiddenDescription": "Your role does not include the users.read permission."
+  },
+  "masking": {
+    "title": "Masking",
+    "description": "The server decides what each role sees. A hidden value is never sent, so it is not in the page or the network tab. This is one neutral sample rule, not your organisation's masking policy.",
+    "rulesTitle": "Rule",
+    "rulesLabel": "Masking rules",
+    "field": "Field",
+    "classification": "Classification",
+    "visibleTo": "Shown in full to",
+    "customer": "Customer",
+    "note": "Note (sample rule)",
+    "viewing": "You are seeing this as {{role}}.",
+    "recordsLabel": "Synthetic customers with the sample rule applied",
+    "emptyTitle": "No sample records",
+    "emptyDescription": "The synthetic customers could not be listed."
+  },
+  "ai": {
+    "title": "Data sent to AI",
+    "description": "The AI gateway asks this rule before it sends anything. The default is synthetic data only, so real data goes nowhere until the access policy allows it.",
+    "rulesLabel": "What each provider may receive",
+    "provider": "Provider",
+    "origins": "Data origin",
+    "classifications": "Classification",
+    "none": "Nothing",
+    "origin": {
+      "synthetic": "Synthetic",
+      "real": "Real"
+    },
+    "providers": {
+      "mock": "Mock",
+      "openai-compatible": "OpenAI-compatible",
+      "bedrock": "Bedrock"
+    },
+    "checkTitle": "Try a request",
+    "check": "Check",
+    "checking": "Checking",
+    "allowed": "Allowed",
+    "refused": "Refused",
+    "reasonLabel": "Rule: {{rule}}",
+    "emptyTitle": "No provider rules",
+    "emptyDescription": "The rule list is empty, which means nothing may be sent."
+  },
+  "refusals": {
+    "title": "How a refusal looks",
+    "description": "A refused action is the same everywhere. The server answers 403 with a short message and a trace id. The reason goes to the audit log, so someone probing learns nothing about the rules.",
+    "exampleLabel": "On screen",
+    "envelopeLabel": "In the API response",
+    "exampleTitle": "You do not have access",
+    "exampleDescription": "Your role does not include this action. If you think it should, ask a system admin and quote the trace id.",
+    "traceLabel": "Trace id",
+    "sample": "Sample, not a real refusal"
+  },
+  "badges": {
+    "mock": "The masking sample uses synthetic customers."
   }
 }

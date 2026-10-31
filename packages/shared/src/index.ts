@@ -4,6 +4,7 @@ export * from "./checks.js";
 export * from "./envelope.js";
 export * from "./errors.js";
 export * from "./events.js";
+export * from "./governance/index.js";
 export * from "./identity.js";
 export * from "./money.js";
 export * from "./order.js";

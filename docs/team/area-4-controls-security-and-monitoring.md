@@ -61,16 +61,19 @@ sequenceDiagram
 
 ## What the base gives you
 
-All planned. Each item lands with the story named, and F-1, F-2 and G-1 fill this section in with what actually landed.
+F-1 has landed. F-2 and G-1 fill in their items when they do.
 
-- **From F-1, access policy and masking:**
-  - the role-permission matrix screen;
-  - the masking mechanism, with a neutral sample rule;
-  - the classification contracts, the contract for what data may go to which AI provider, and how a refusal looks;
-  - room for function permissions (screens and actions) plus a data scope, copying a role, and disabling users rather than deleting them;
-  - a payment record with its type, prepayment among them (with C-1);
-  - routes that return typed mock data, in Swagger, and screens covering every state;
-  - `it.todo` tests naming the key cases: approval limits, no self-approval, the bank-detail hold, masking for each role, and a direct API call being refused (E2E #3).
+- **From F-1, access policy and masking** (landed, [ADR 0024](../adr/0024-governance-base.md)):
+  - **The matrix screen** at `/governance` (`apps/web/src/features/governance/`): a switch per role and permission over the real `RolePermission` table, a data scope per role, "Copy a role", and the users tab (disable and enable, never delete, on P-10's routes). Changes are saved at once and audited. Reading needs `roles.read`, changing needs `roles.manage`; an auditor can read and cannot change.
+  - **The system admin never approves, posts or pays.** `NEVER_FOR_SYSTEM_ADMIN` and `LOCKED_CELLS` in `packages/shared/src/governance/matrix.ts`; the default matrix leaves the three permissions off and the server refuses to grant them (409). `roles.manage` is locked on.
+  - **New permissions** in `packages/shared/src/permissions.ts`: `roles.read`, `approvals.decide`, `payments.confirm`, `payments.post`. Who holds the last three is a sample (Approver decides, Finance confirms and posts): settle it in your policy.
+  - **Masking** in `apps/api/src/modules/governance/domain/masking.ts`: `mask(rules, role, field, value)` returns a `MaskedField` whose value is `null` for a role the rule does not list, so the value never reaches the browser. One neutral sample rule, `sample.customerNote`, shown on the Masking tab through P-12's `MaskedValue` with the reason. `GET /governance/masking/sample`.
+  - **Classification and the AI rule:** the four levels and the mask reasons are in `packages/shared/src/governance/classification.ts`. `decideAiDestination` (`domain/ai-destination-policy.ts`) answers what data may go to which provider; the default is synthetic data only. `GET /governance/ai-destinations`, `POST /governance/ai-destinations/check`: P-17's gateway calls the second.
+  - **How a refusal looks:** the standard error envelope with a trace id (403 `FORBIDDEN`, a generic message; the reason goes to the audit trail), drawn by `RefusalPanel`. The Refusals tab shows both. `PolicyRequest` and `PolicyDecision` in `governance/decision.ts` are the shape for your policy.
+  - **Contracts only, no table and no rule:** approval limits and a substitute in the shape of Navision's Approval User Setup (`governance/approval.ts`), and the payment type, prepayment among them, for payment confirmation (`governance/payment.ts`, for C-1's payment step to record).
+  - **Data scope:** `RoleDataScope` in `governance.prisma` holds `all`, `brands` or `own` per role. It is stored and shown. Nothing filters a list by it yet.
+  - **Routes and requests:** `apps/api/src/modules/governance/` (controllers, services, `domain/` with its own unit tests), `apps/api/requests/governance.http`, generated hooks in `apps/web/src/lib/api/generated/endpoints/governance`. Component tests use MSW and `test/http/governance.test.ts` runs against the real database.
+  - **`it.todo` tests** in `apps/api/test/http/governance-controls.test.ts`, named by control: approval limits, no self-approval, the bank-detail hold, masking for each role, a direct API call being refused (E2E #3), and payment confirmation.
 - **From F-2, the audit viewer:** the audit log viewer over the real hash chain, with filters and a chain check; the audit trail at the foot of every detail page (with P-12's audit link); and `it.todo` tests for export and retention.
 - **From G-1, monitoring:**
   - OpenTelemetry traces and metrics, and `/metrics` with prom-client;
@@ -88,6 +91,18 @@ All planned. Each item lands with the story named, and F-1, F-2 and G-1 fill thi
 - **F-3: the authorisation policy with approval limits,** enforced on the server.
 - **F-4: no self-approval and segregation of duties.**
 - **F-5: the bank-detail hold,** cleared only by Finance and a second approver.
+
+**What F-1 deliberately leaves to you** (nothing below is written, so none of it is half-done):
+
+- the real matrix for all nine roles: the base's sample grants for approvals and payments are a starting point;
+- enforcing the data scope (filtering lists by brand or by owner), and the brand ownership question (Q-17);
+- the masking rules for bank details and prices, and the classification of each field;
+- the real rules for data sent to AI: the base only has the safe default;
+- approval limits, substitutes, no self-approval and segregation of duties (F-3, F-4): the contracts exist, the rules do not;
+- the bank-detail control (F-5);
+- a policy class under the `PermissionPolicy` token that runs your rules in a chain (ADR 0012, point 7);
+- the seed adds missing pairs back, so a permission you revoke returns on the next seed: decide whether it should;
+- polish nobody needs this week: a search box and filters on the matrix, an undo for a change, and a browser test of E2E #3 (backlog F-8).
 
 **The deeper work,** for the A-level depth:
 

@@ -1413,6 +1413,24 @@
         "A one-time command creates the first real administrator in production, where the seeded accounts have no password, and audits it.",
         "The JWT secret can be rotated with an overlap, so a change does not sign everyone out."
       ]
+    },
+    {
+      "epic": "F",
+      "area": "area: 4 controls and monitoring",
+      "reqs": ["M2", "M4"],
+      "dependsOn": ["F-1"],
+      "key": "F-8",
+      "title": "Governance base polish",
+      "priority": "could",
+      "estimate": 3,
+      "sprints": [3],
+      "summary": "Follow-ups to F-1 that nobody needs this week: they make the matrix easier to use and the controls easier to prove.",
+      "acceptance": [
+        "The matrix has a search box and a filter by role or by permission group, and a change can be undone from the page.",
+        "A browser test of E2E #3: a script calls an action endpoint without the right, gets the envelope with a trace id, and the refusal shows in the audit viewer.",
+        "The seed no longer re-adds a permission the owner revoked on purpose (ADR 0012, point 12 and ADR 0024, point 1), with a test.",
+        "The masking sample reads its rule from the matrix screen, so a rule can be shown or hidden for a role without a code change."
+      ]
     }
   ]
 }

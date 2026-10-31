@@ -9,6 +9,7 @@ import type { Role } from "./roles.js";
 export const PERMISSIONS = [
   "users.read",
   "users.manage",
+  "roles.read",
   "roles.manage",
   "settings.manage",
   "audit.read",
@@ -20,6 +21,12 @@ export const PERMISSIONS = [
   "tracker.read",
   "exceptions.read",
   "insights.read",
+  // Acting on money and approvals. The system admin role never holds these
+  // (see governance/matrix.ts). No role holds them by default: who approves
+  // and who pays is area 4's call, made in the matrix.
+  "approvals.decide",
+  "payments.confirm",
+  "payments.post",
 ] as const;
 
 export const permissionSchema = z.enum(PERMISSIONS);
@@ -35,6 +42,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
   SYSTEM_ADMIN: [
     "users.read",
     "users.manage",
+    "roles.read",
     "roles.manage",
     "settings.manage",
     "audit.read",
@@ -79,6 +87,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "orders.read",
     "audit.read",
     "aiUsage.read",
+    "roles.read",
     "tracker.read",
     "exceptions.read",
     "insights.read",
