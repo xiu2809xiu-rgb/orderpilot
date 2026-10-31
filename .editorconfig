@@ -15,4 +15,4 @@ indent_size = 4
 
 # Committed exactly as Richie placed it, which is without a final newline.
 [.claude/settings.json]
-insert_final_newline = unset
+insert_final_newline = false
