@@ -173,7 +173,25 @@ If something destructive or irreversible seems necessary, ask Richie first.
 
 `apps/web` exists since P-11. The shadcn components it needs so far are in `apps/web/src/components/ui`.
 
-1. **Look first.** P-12 brings the common components: the data table, every page state, badges, masked values and more. Use those before you add anything.
+1. **Look first.** The common components are in `apps/web/src/components/common`: import them from `@/components/common`. In demo mode and in development, `/gallery` shows each one with synthetic data. Which one do I use?
+
+   | I need                                      | Use                                                                                                     |
+   | ------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+   | A list with paging, sorting, search, export | `DataTable`. The page owns the query and fetches; the table never sorts or slices                       |
+   | The top of a page, or a titled block        | `PageHeader`, `SectionCard`                                                                             |
+   | A page that is not built yet                | `PlannedPage`                                                                                           |
+   | Loading, empty, error, partial, denied      | `LoadingState`, `EmptyState` (give it a next action), `ErrorPanel`, `PartialNotice`, `PermissionDenied` |
+   | A whole-route 403, 404 or crash             | `StatePanel` (page variant), or the existing pages                                                      |
+   | A demo or mock label                        | `DemoBadge` ("Mock", "Mock AI", "Synthetic demo data")                                                  |
+   | A status, or how sensitive a record is      | `StatusBadge` (a tone plus your own label), `ClassificationBadge`                                       |
+   | A value hidden by role                      | `MaskedValue` (pass no value when masked, and a reason)                                                 |
+   | An AI value and its score                   | `ConfidenceBadge` (says "Requires approval" until a person approves)                                    |
+   | A link to a record's audit trail            | `AuditLink` (hides itself without `audit.read`)                                                         |
+   | A time, a copyable id                       | `RelativeTime`, `CopyButton`                                                                            |
+   | The change history under a detail page      | `OperationLog` (rows as props)                                                                          |
+
+   Their text lives in the `components` namespace; your own goes in your area's namespace. If one is missing something, extend it there with a test. Do not copy it into your area.
+
 2. **Choose a free source.** While the repository is public, use only:
    - shadcn/ui;
    - Magic UI (free);
