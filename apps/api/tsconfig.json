@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "@orderpilot/tsconfig/node.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "experimentalDecorators": true,
+    // Off on purpose: Vitest compiles with esbuild, which does not emit
+    // decorator metadata. Every injection names its token with @Inject, so
+    // tsc and the tests behave the same.
+    "emitDecoratorMetadata": false,
+    // CI lints and type-checks before it builds, so @orderpilot/shared has no
+    // dist yet. Point at its source for type checking. tsconfig.build.json
+    // turns this off, because an emit would pull shared's files into this
+    // package's dist.
+    "paths": {
+      "@orderpilot/shared": ["../../packages/shared/src/index.ts"]
+    }
+  },
+  "include": ["src", "test", "vitest.config.ts"]
+}

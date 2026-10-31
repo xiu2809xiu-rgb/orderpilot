@@ -96,10 +96,12 @@ test("the sidebar reaches every page", () => {
   }
 });
 
-test("Getting started says what does not work yet", () => {
+test("Getting started says how to run the API and what is not there yet", () => {
   const text = wikiPage("Getting-started.md");
-  assert.ok(text.includes("`pnpm install` does not work yet"));
-  assert.ok(text.includes("P-5"));
+  assert.ok(text.includes("cp .env.example .env"));
+  assert.ok(text.includes("pnpm --filter @orderpilot/api dev"));
+  assert.ok(text.includes("There is no database or web app yet"));
+  assert.ok(text.includes("P-9"));
 });
 
 test("Team and areas names every area label", () => {

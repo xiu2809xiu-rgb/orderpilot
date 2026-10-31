@@ -1,0 +1,16 @@
+### Health probes. Open in VS Code with the REST Client extension, or in a JetBrains IDE.
+### Start the API first: pnpm --filter @orderpilot/api dev
+@baseUrl = http://localhost:3000
+
+### Liveness: the process is up. Never touches the database.
+GET {{baseUrl}}/health/live
+
+### Readiness: 200 when every registered check is up, 503 when one is down.
+GET {{baseUrl}}/health/ready
+
+### Health: build, environment, uptime and the checks.
+GET {{baseUrl}}/health
+
+### Send your own request id: it comes back in X-Request-Id and in every log line.
+GET {{baseUrl}}/health
+X-Request-Id: my-first-request-001

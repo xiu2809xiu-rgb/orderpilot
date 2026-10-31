@@ -7,7 +7,7 @@ import { describe, it } from "node:test";
 
 import { ESLint } from "eslint";
 
-import { orderpilot, warningsAsErrors } from "../index.js";
+import { nest, orderpilot, warningsAsErrors } from "../index.js";
 
 const fixtures = join(import.meta.dirname, "fixtures");
 
@@ -49,6 +49,23 @@ describe("@orderpilot/eslint-config", () => {
     assertError(messages, "jsx-a11y/alt-text");
     assertError(messages, "jsx-a11y/click-events-have-key-events");
     assertError(messages, "jsx-a11y/no-static-element-interactions");
+  });
+
+  it("allows decorated empty classes only with the nest preset", async () => {
+    assertError(
+      await lint("decorated.ts"),
+      "@typescript-eslint/no-extraneous-class",
+    );
+    const withNest = new ESLint({
+      cwd: fixtures,
+      overrideConfigFile: true,
+      overrideConfig: [
+        ...orderpilot({ tsconfigRootDir: fixtures }),
+        ...nest({ files: ["**/*.ts"] }),
+      ],
+    });
+    const [result] = await withNest.lintFiles([join(fixtures, "decorated.ts")]);
+    assert.deepEqual(result?.messages, []);
   });
 
   it("accepts clean TypeScript and JavaScript", async () => {

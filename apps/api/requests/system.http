@@ -1,0 +1,11 @@
+### The versioned routes live under /api/v1. This one lists the readiness checks
+### that are registered, a page at a time: the reference for list endpoints.
+@baseUrl = http://localhost:3000
+
+### A page of registered checks (empty until P-9 registers the database).
+GET {{baseUrl}}/api/v1/system/checks?page=1&pageSize=25
+
+### A validation error: page 0 is refused with VALIDATION_FAILED and a field list.
+### The traceId in the body is the X-Request-Id of this request.
+GET {{baseUrl}}/api/v1/system/checks?page=0
+X-Request-Id: bad-page-001
