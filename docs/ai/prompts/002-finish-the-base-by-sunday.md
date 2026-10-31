@@ -106,8 +106,9 @@ These notes are in our own words. They come from:
 
 They inform names, fields and flows only.
 
-- **No copying.** Never copy another product's screens, layout, wording, icons or branding.
-- **No screenshots.** Never add screenshots of any other product.
+- Use proven patterns freely. Sidebars, data tables with filters, KPI tiles, document pages with line items, timelines and role home pages are standard conventions, and nobody owns them. Borrow the best of them from Linear, Stripe, Navision's Role Centers and the inventory system's flows, and aim for the UI bar in prompt 001, section 9.
+- Make it ours. Build every screen from our own design system: our tokens and components, Lucide icons, and our own wording for Spectra's users. Don't reproduce another product's icons, images, logos, brand colours or text, and don't make a screen a recognisable clone of another product's.
+- No screenshots of any other product in the repository.
 - **Confirm first.** Spectra's Navision may be older or customised. Every Navision detail below is an assumption to confirm at the briefing call.
 
 ### 5.1 What standard Navision keeps, and how OrderPilot uses it

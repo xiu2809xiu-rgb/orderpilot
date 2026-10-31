@@ -11,7 +11,9 @@ Domain research that makes OrderPilot realistic: document types, fields, numberi
 Richie studied a third-party ERP. His notes on it go in this folder, as Markdown, **in his own words only**.
 
 - **Names, fields and flows only.** The notes say which documents exist, which fields they carry, how they are numbered and which statuses they move through.
-- **No copying.** Never copy another product's screens, layout, wording, icons or branding.
+- Use proven patterns freely. Sidebars, data tables with filters, KPI tiles, document pages with line items, timelines and role home pages are standard conventions, and nobody owns them. Borrow the best of them from Linear, Stripe, Navision's Role Centers and the inventory system's flows, and aim for the UI bar in prompt 001, section 9.
+- Make it ours. Build every screen from our own design system: our tokens and components, Lucide icons, and our own wording for Spectra's users. Don't reproduce another product's icons, images, logos, brand colours or text, and don't make a screen a recognisable clone of another product's.
+- No screenshots of any other product in the repository.
 - **No screenshots or data.** Never ask for, open, commit or send to an AI service any screenshot or data from that ERP.
 - **No product names** beyond what a note needs to make sense, and nothing that would read as an endorsement.
 - **One topic per file,** named for the topic, for example `document-numbering.md`. Add each new file to the table above.
