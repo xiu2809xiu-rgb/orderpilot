@@ -16,6 +16,8 @@ type Role = MatrixRead200Data["roles"][number]["role"];
 type Permission = MatrixRead200Data["permissions"][number];
 type Scope = MatrixRead200Data["roles"][number]["dataScope"];
 
+const ROW_HEAD =
+  "sticky left-0 z-10 w-56 min-w-56 bg-card font-normal whitespace-normal";
 const SCOPES: readonly Scope[] = ["all", "brands", "own"];
 
 interface MatrixTableProps {
@@ -41,7 +43,9 @@ export function MatrixTable({
       <Table aria-label={t("matrix.tableLabel")}>
         <TableHeader>
           <TableRow>
-            <TableHead scope="col">{t("matrix.permission")}</TableHead>
+            <TableHead scope="col" className="sticky left-0 z-10 bg-card">
+              {t("matrix.permission")}
+            </TableHead>
             {matrix.roles.map(({ role }) => (
               <TableHead key={role} scope="col" className="text-center">
                 {tc(`roles.${role}`)}
@@ -52,7 +56,7 @@ export function MatrixTable({
         <TableBody>
           {matrix.permissions.map((permission) => (
             <TableRow key={permission}>
-              <TableHead scope="row" className="font-normal">
+              <TableHead scope="row" className={ROW_HEAD}>
                 {t(`permissions.${permission}`)}
                 <span className="block font-mono text-xs text-muted-foreground">
                   {permission}
@@ -100,9 +104,9 @@ export function MatrixTable({
             </TableRow>
           ))}
           <TableRow>
-            <TableHead scope="row" className="font-normal">
+            <TableHead scope="row" className={ROW_HEAD}>
               {t("matrix.dataScope")}
-              <span className="block max-w-56 text-xs text-muted-foreground">
+              <span className="block text-xs text-muted-foreground">
                 {t("matrix.dataScopeHint")}
               </span>
             </TableHead>

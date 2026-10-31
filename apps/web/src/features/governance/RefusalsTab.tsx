@@ -1,7 +1,7 @@
 import { ShieldAlert } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
-import { SectionCard, StatePanel } from "@/components/common";
+import { ScrollRegion, SectionCard, StatePanel } from "@/components/common";
 
 // A made-up trace id, so the example never looks like a real refusal.
 const SAMPLE_TRACE_ID = "00000000-0000-4000-8000-000000000000";
@@ -43,10 +43,10 @@ export function RefusalsTab() {
         </div>
         <div className="space-y-2">
           <h3 className="text-sm font-medium">{t("refusals.envelopeLabel")}</h3>
-          <pre className="overflow-x-auto rounded-lg bg-muted p-s2 font-mono text-xs">
-            HTTP 403{"\n"}
-            {envelope}
-          </pre>
+          <ScrollRegion label={t("refusals.envelopeLabel")}>
+            <pre className="overflow-x-auto rounded-lg bg-muted p-s2 font-mono text-xs">{`HTTP 403
+${envelope}`}</pre>
+          </ScrollRegion>
         </div>
       </div>
     </SectionCard>
