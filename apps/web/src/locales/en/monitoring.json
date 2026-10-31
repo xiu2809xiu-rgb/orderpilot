@@ -1,6 +1,11 @@
 {
   "title": "Monitoring",
   "description": "AI usage and cost, system health and usage analytics.",
+  "arrives": [
+    "Real dashboards for traces, metrics and logs",
+    "Budgets and alerts for AI cost",
+    "A usage summary read from the clickstream table"
+  ],
   "cues": {
     "aiUsage": "AI usage this month"
   },
