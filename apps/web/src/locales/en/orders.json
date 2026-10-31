@@ -1,0 +1,13 @@
+{
+  "title": "Orders",
+  "description": "Sales orders from the customer's PO to delivery.",
+  "arrives": [
+    "A list of orders with status and filters",
+    "An order's lines, checks and documents on one page",
+    "Draft sales orders and vendor POs, ready for the ERP"
+  ],
+  "cues": {
+    "open": "Open orders",
+    "readyToShip": "Ready to ship"
+  }
+}
