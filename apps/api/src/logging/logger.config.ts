@@ -5,6 +5,7 @@ import pino, { type DestinationStream, type Logger as PinoLogger } from "pino";
 import { pinoHttp } from "pino-http";
 import { requestIdOf, resolveRequestId } from "../common/request-id.js";
 import type { AppConfig } from "../config/app-config.js";
+import { traceIdOf } from "../telemetry/trace-context.js";
 
 /**
  * Headers and cookies that must never reach a log line. Paths use pino's
@@ -52,8 +53,12 @@ export function requestLogging(root: PinoLogger): RequestHandler[] {
     logger: root,
     genReqId: (req: IncomingMessage, res: ServerResponse) =>
       resolveRequestId(req, res),
-    // The request id as a top-level field, easy to search for in any log tool.
-    customProps: (req) => ({ requestId: requestIdOf(req) }),
+    // The request id as a top-level field, easy to search for in any log tool,
+    // and the trace id beside it so a log line finds its trace in Grafana.
+    customProps: (req) => ({
+      requestId: requestIdOf(req),
+      ...traceFields(traceIdOf(req)),
+    }),
     customLogLevel: (_req, res, error) => {
       if (error || res.statusCode >= 500) return "error";
       if (res.statusCode >= 400) return "warn";
@@ -61,7 +66,17 @@ export function requestLogging(root: PinoLogger): RequestHandler[] {
     },
   });
   const bind: RequestHandler = (req, _res, next) => {
-    requestLogger.run(req.log.child({ requestId: requestIdOf(req) }), next);
+    requestLogger.run(
+      req.log.child({
+        requestId: requestIdOf(req),
+        ...traceFields(traceIdOf(req)),
+      }),
+      next,
+    );
   };
   return [http as RequestHandler, bind];
+}
+
+function traceFields(traceId: string | undefined): { traceId?: string } {
+  return traceId === undefined ? {} : { traceId };
 }

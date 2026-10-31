@@ -13,6 +13,7 @@ import {
 } from "@orderpilot/shared";
 import type { Request, Response } from "express";
 import { DomainError } from "./domain-error.js";
+import { captureServerError } from "../telemetry/sentry.js";
 import { requestIdOf } from "./request-id.js";
 
 const GENERIC_MESSAGE = "Something went wrong. Quote the trace id to support.";
@@ -55,6 +56,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     if (status >= 500) {
       // The caller gets a generic message; the cause is logged against the trace id.
       this.logger.error({ traceId, err: exception }, "Request failed");
+      captureServerError(exception, traceId);
     }
     if (res.headersSent) return;
     res.status(status).json(body);

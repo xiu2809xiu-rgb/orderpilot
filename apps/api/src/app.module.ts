@@ -11,7 +11,9 @@ import type { AppConfig } from "./config/app-config.js";
 import { ConfigModule } from "./config/config.module.js";
 import { DatabaseModule } from "./database/database.module.js";
 import { HealthModule } from "./health/health.module.js";
+import { AnalyticsModule } from "./modules/analytics/analytics.module.js";
 import { GovernanceModule } from "./modules/governance/governance.module.js";
+import { MonitoringModule } from "./modules/monitoring/monitoring.module.js";
 import { QueueModule } from "./queue/queue.module.js";
 import { RedisModule } from "./redis/redis.module.js";
 import { StorageModule } from "./storage/storage.module.js";
@@ -54,6 +56,8 @@ export class AppModule {
         SystemModule,
         AuthModule.register(config),
         GovernanceModule,
+        MonitoringModule,
+        AnalyticsModule,
       ],
       // The order is the rule: throttle, then who are you, then is the
       // request really from our page, then may you. Every route is covered;

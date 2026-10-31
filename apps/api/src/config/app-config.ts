@@ -39,6 +39,15 @@ export class AppConfig {
 
   readonly logLevel: Env["LOG_LEVEL"];
 
+  readonly monitoring: {
+    /** Null means traces and metrics are made but never leave the process. */
+    readonly otlpEndpoint: string | null;
+    /** Null means /metrics is switched off. */
+    readonly metricsToken: string | null;
+    /** Null means no error is ever sent to Sentry. */
+    readonly sentryDsn: string | null;
+  };
+
   readonly database: { readonly url: string };
   readonly redis: { readonly url: string };
 
@@ -78,6 +87,12 @@ export class AppConfig {
       demoPassword: env.DEMO_PASSWORD ?? null,
     };
     this.logLevel = env.LOG_LEVEL;
+    this.monitoring = {
+      otlpEndpoint:
+        env.OTEL_EXPORTER_OTLP_ENDPOINT?.replace(/\/+$/, "") ?? null,
+      metricsToken: env.METRICS_TOKEN ?? null,
+      sentryDsn: env.SENTRY_DSN ?? null,
+    };
     this.database = { url: env.DATABASE_URL };
     this.redis = { url: env.REDIS_URL };
     this.storage = {

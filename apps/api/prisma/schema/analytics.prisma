@@ -1,0 +1,19 @@
+// Area 4 models: clickstream. Owner: Angelyn. Never edit another area's file.
+
+/// One interaction the browser reported, after the user gave consent. It holds
+/// four facts and nothing that names a person: no user id, no address, no
+/// query string and no record id. The role is read from the session on the
+/// server, so the browser cannot claim another one.
+model ClickstreamEvent {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  role       Role
+  /// A route pattern such as /orders/:id, never a raw URL.
+  route      String
+  /// page_view, action or error_shown (@orderpilot/shared).
+  name       String
+  occurredAt DateTime @db.Timestamptz(3)
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([occurredAt])
+  @@index([route, name])
+}
