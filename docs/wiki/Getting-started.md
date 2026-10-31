@@ -30,14 +30,18 @@ Line endings need no set-up. `.gitattributes` keeps text files LF on every machi
 
 ## The GitHub scripts
 
-The labels, milestones, backlog, board and wiki are kept as code in [`scripts/github/`](https://github.com/xiu2809xiu-rgb/orderpilot/tree/main/scripts/github). They need Node 24 and the GitHub CLI, and nothing else. Two of them are for every day:
+The labels, milestones, backlog, board and wiki are kept as code in [`scripts/github/`](https://github.com/xiu2809xiu-rgb/orderpilot/tree/main/scripts/github). They need Node 24 and the [GitHub CLI](https://cli.github.com/), signed in with `gh auth login`, and nothing else. Two of them are for every day:
 
 ```sh
 node scripts/github/sprint-report.mjs
 node scripts/github/day-note.mjs "Merged P-3. P-4 in progress."
 ```
 
-The first prints what closed this sprint and what is in progress, by area. The second adds the daily note to the current milestone.
+The first prints what closed this sprint and what is in progress, by area. The second adds the daily note to the current milestone. The [scripts' README](https://github.com/xiu2809xiu-rgb/orderpilot/blob/main/scripts/github/README.md) has the rest, and their tests run with:
+
+```sh
+node --test "scripts/github/**/*.test.mjs"
+```
 
 ## What later stories bring
 

@@ -2,11 +2,12 @@
 // separately. These tests fail if any of them drifts from the brief's words.
 
 import assert from "node:assert/strict";
+import { readdirSync } from "node:fs";
 import { test } from "node:test";
 
 import { wantedAreaOptions } from "./lib/board.mjs";
 import { areaLabels, loadBacklog, loadLabels } from "./lib/catalogue.mjs";
-import { readRepoFile } from "./lib/files.mjs";
+import { readRepoFile, repoPath } from "./lib/files.mjs";
 
 const labels = loadLabels();
 const names = labels.map((label) => label.name);
@@ -183,4 +184,33 @@ test("CODEOWNERS shows what T-1 has to fill in", () => {
     assert.ok(text.includes(`@<area ${area} backup owner>`), `area ${area}`);
   }
   assert.ok(text.includes("T-1"));
+});
+
+test("every wiki link to another page names a page that exists", () => {
+  const pages = readdirSync(repoPath("docs/wiki")).filter((name) =>
+    name.endsWith(".md"),
+  );
+  const known = new Set(pages.map((name) => name.replace(/\.md$/, "")));
+  for (const page of pages) {
+    const text = readRepoFile(`docs/wiki/${page}`);
+    // GitHub's wiki links pages by name, without `.md` and without a path.
+    for (const [, target] of text.matchAll(/\]\(([^)#\s]+)(?:#[^)]*)?\)/g)) {
+      if (/^(https?:|mailto:)/.test(target)) continue;
+      assert.ok(known.has(target), `${page} links to ${target}`);
+    }
+  }
+});
+
+test("the wiki has the pages the brief lists", () => {
+  const pages = readdirSync(repoPath("docs/wiki")).sort();
+  assert.deepEqual(pages, [
+    "Definition-of-Done.md",
+    "Getting-started.md",
+    "Home.md",
+    "How-we-work.md",
+    "Security.md",
+    "Sprint-calendar.md",
+    "Team-and-areas.md",
+    "_Sidebar.md",
+  ]);
 });

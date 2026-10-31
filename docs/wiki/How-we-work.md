@@ -21,6 +21,7 @@ The short version. The full one is the [working agreement](https://github.com/xi
 ## The board and the labels
 
 - Every piece of work is an issue on the board **OrderPilot delivery**, which has Status, Sprint, Estimate and Area fields, and Backlog and Sprint views.
+- Status runs Todo, Ready, In Progress, Done. Ready means refined and free to pull: it meets the Definition of Ready.
 - Stories sit under epics as sub-issues, and carry acceptance criteria.
 - Issue forms cover stories, tasks, epics, spikes and bugs.
 - Labels say the type, the area, the priority and the module requirement. `status: blocked` and `status: needs client input` say why something has stopped.
