@@ -12,5 +12,5 @@
     "packages/eslint-config/**/*.js",
     "packages/eslint-config/types/*.d.ts"
   ],
-  "exclude": ["packages/eslint-config/test/fixtures"]
+  "exclude": ["packages/eslint-config/test/fixtures", "scripts/github"]
 }

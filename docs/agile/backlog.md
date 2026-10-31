@@ -233,6 +233,7 @@ Acceptance criteria:
 - Scripts: `scripts/check-licence-key.mjs`, `scripts/check-samples.mjs`, `scripts/check-dashes.mjs`, and `samples/README.md`.
 - Supply-chain settings: exact version pins; `minimumReleaseAge`; reviewed `allowBuilds`; and overrides and ignored advisories, each with a reason and a review date.
 - ADRs: pnpm monorepo; TypeScript and ESM.
+- Type-check `scripts/github` under `checkJs`: the P-2 scripts are plain Node ESM with no types, so the root `tsconfig.json` excludes them today (about 800 errors). Add JSDoc types or move them to TypeScript, then remove the exclusion.
 
 ### P-6: CI and the security baseline
 
