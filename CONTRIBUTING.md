@@ -194,6 +194,17 @@ If something destructive or irreversible seems necessary, ask Richie first.
 7. **Test it** with Testing Library, and add its screenshots in light and dark to the pull request.
 8. **Stay in your area.** Shared components need a review from their owners, listed in [module ownership](docs/team/module-ownership.md#shared-files-and-who-reviews-them).
 
+## Adding an API route
+
+The web app never hand-writes a call to the API. It uses hooks and mock handlers that orval generates from the API's OpenAPI file ([ADR 0019](docs/adr/0019-generated-api-hooks-and-mocks.md)).
+
+1. Add the route in `apps/api` with its zod schemas from `packages/shared`: `@ApiOkResponse({ schema: openApiSchema(responseSchema) })` for the answer, `@openApiQuery(querySchema)` for query parameters.
+2. Run `pnpm api:generate`. It rewrites `apps/api/openapi.json` and `apps/web/src/lib/api/generated/`.
+3. Commit the result with the route. CI runs `pnpm api:check` and fails if the generated files are out of date.
+4. In the web app, import the hook (`useSystemChecks`) from `@/lib/api/generated/endpoints/<tag>/<tag>`. In a test, add the generated handler with `server.use(getSystemChecksMockHandler(...))` from `@/test/server`. `ServiceChecksCard` and its test are the example.
+
+Never edit the generated folder by hand.
+
 ## Using AI tools
 
 - Paste the [starter prompt](AGENTS.md#starter-prompt) at the start of each session.

@@ -8,3 +8,7 @@ docs/ai/prompts/**
 
 # pnpm writes the lockfile in its own format.
 pnpm-lock.yaml
+
+# Written by orval (pnpm api:generate, ADR 0019); pnpm api:check compares it byte
+# for byte, so no formatter may touch it.
+apps/web/src/lib/api/generated/
