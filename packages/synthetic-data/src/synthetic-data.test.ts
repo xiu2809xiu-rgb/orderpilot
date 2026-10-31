@@ -1,4 +1,5 @@
 import {
+  addDecimal,
   compareDecimal,
   decimalStringSchema,
   salesHeaderSchema,
@@ -151,11 +152,19 @@ describe("the synthetic dataset", () => {
       (o) => o.scenario.kind === "short-stock",
     )?.scenario;
     if (scenario?.kind !== "short-stock") throw new Error("missing");
-    expect(scenario.shortBy).toBe("100.00");
+    expect(scenario.shortBy).toBe("98.00");
     expect(scenario.suggestedSpr.quantity).toBe(scenario.shortBy);
     const item = data.items.find((i) => i.no === scenario.itemNo);
     if (!item) throw new Error("missing");
     expect(compareDecimal(item.inventory, scenario.ordered)).toBe(-1);
+    // Inventory minus Qty. on Sales Order plus Qty. on Purch. Order.
+    const available = addDecimal(
+      addDecimal(item.inventory, `-${item.qtyOnSalesOrder}`),
+      item.qtyOnPurchOrder,
+    );
+    expect(addDecimal(scenario.ordered, `-${available}`)).toBe(
+      scenario.shortBy,
+    );
     expect(scenario.suggestedSpr.vendorNo).toBe(item.vendorNo);
   });
 

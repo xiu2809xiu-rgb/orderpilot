@@ -2,7 +2,7 @@
 
 Rendered from [`scripts/github/data/backlog.json`](../../scripts/github/data/backlog.json) by `node scripts/github/render-docs.mjs`. Change the data, not this file. The same data seeds the issues. The board shows where each story stands.
 
-There are 9 epics and 68 stories. Estimates are story points: a first guess, for the team to change at planning.
+There are 9 epics and 69 stories. Estimates are story points: a first guess, for the team to change at planning.
 
 ## Epics
 
@@ -716,6 +716,7 @@ What P-11 and P-12 left out because no teammate needs it in its first week.
 
 Acceptance criteria:
 
+- orval generates mutation hooks for POST, PUT, PATCH and DELETE, so screens stop wrapping the generated functions in `useMutation` (found by area 2, C-1).
 - Unsaved form input also survives a page reload, through one small draft helper that forms can opt into. P-11 keeps it only across an ended session.
 - A phone-width pass: screenshots at 390 px wide, light and dark, and the fixes they show. The sidebar already becomes a sheet, but spacing has not been reviewed on a phone.
 - LCP and a Lighthouse run on the production build, with the figures recorded next to the screenshots.
