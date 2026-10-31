@@ -58,6 +58,13 @@ overrides:
   # 2026-10-15). orval only reads the local OpenAPI file at generate time. Drop
   # this when orval depends on undici 7.30.1 or later. Review: 2026-11-14.
   "undici@<7.30.1": 7.30.1
+  # exceljs 4.4.0 (the data table'"'"'s Excel export, ADR 0023) depends on uuid 8.3.2,
+  # which has a high-severity advisory (GHSA-w5hq-g745-h8pq: no bounds check when
+  # a caller passes its own buffer to v3, v5 or v6; fixed in 11.1.1). exceljs only
+  # calls v4 without a buffer, so it was not exposed, and its browser file is
+  # prebuilt, but the scan is right to refuse it. Drop this when exceljs moves to
+  # uuid 11.1.1 or later. Review: 2026-11-14.
+  "uuid@<11.1.1": 11.1.1
 
 # `pnpm audit` in the verify job fails on high or critical advisories. An
 # accepted advisory goes under `ignore` by its GHSA id, with a reason and a

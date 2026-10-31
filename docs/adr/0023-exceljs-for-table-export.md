@@ -21,7 +21,7 @@ The web app has a gzipped budget of 250 KB for the JavaScript a first visit down
 ## Consequences
 
 - The first Excel export downloads about 256 KB gzipped once, then the browser caches it.
-- ExcelJS has not had a release since December 2024 and its Node-side dependencies (archiver, unzipper, fast-csv, tmp) include some deprecated packages (`uuid` 8, `glob` 7). Vite uses ExcelJS's prebuilt browser file, so none of them ship to the browser. The dependency scan still sees them: if it raises an advisory that no fix reaches, it is triaged as `docs/security/security-testing.md` says.
+- ExcelJS has not had a release since December 2024, and some of its Node-side dependencies (archiver, unzipper, fast-csv, tmp) are deprecated. Vite uses ExcelJS's prebuilt browser file, so none of them ship to the browser as separate packages. The dependency scan still reads them: it refused `uuid` 8.3.2 (GHSA-w5hq-g745-h8pq, fixed in 11.1.1; ExcelJS only calls the v4 form that the advisory does not touch). `pnpm-workspace.yaml` overrides `uuid` below 11.1.1 to 11.1.1, with a review date of 2026-11-14, and the export tests read a real `.xlsx` back to show ExcelJS still works with it. Another advisory with no fix is triaged as `docs/security/security-testing.md` says.
 - A strict CSP (ADR 0015) does not block it. The screenshot run downloads a real `.xlsx` from a production build with the CSP on and sees no violation.
 - Replacing it later means changing `excel.ts` only.
 - Not done: styled columns, number formats and column widths. Add them when a client asks for them.
