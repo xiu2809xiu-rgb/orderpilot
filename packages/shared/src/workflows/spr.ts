@@ -3,6 +3,7 @@ import { decimalStringSchema } from "../money.js";
 import { recordRefSchema } from "../record-number.js";
 import { roleSchema } from "../roles.js";
 import { approvalUserSetupSchema } from "./approval.js";
+import { PAYMENT_TYPES } from "./payment.js";
 import { notAppliedSchema, orderNoSchema } from "./common.js";
 
 export const sprNumberSchema = z
@@ -82,10 +83,13 @@ export type SprDecisionInput = z.infer<typeof sprDecisionInputSchema>;
 export const sprDecisionResultSchema = notAppliedSchema.extend({
   recordNo: sprNumberSchema,
   outcome: z.enum(SPR_DECISIONS),
+  /** The comment as it was understood, so the screen can show it was heard. */
+  comment: z.string(),
 });
 export type SprDecisionResult = z.infer<typeof sprDecisionResultSchema>;
 
 export const paymentResultSchema = notAppliedSchema.extend({
   orderNo: orderNoSchema,
+  paymentType: z.enum(PAYMENT_TYPES),
 });
 export type PaymentResult = z.infer<typeof paymentResultSchema>;

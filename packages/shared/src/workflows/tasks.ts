@@ -2,7 +2,7 @@ import { z } from "zod";
 import { pageQuerySchema } from "../envelope.js";
 import { recordRefSchema } from "../record-number.js";
 import { roleSchema } from "../roles.js";
-import { inboxRoleSchema, orderNoSchema } from "./common.js";
+import { orderNoSchema } from "./common.js";
 
 /**
  * The kinds of task a step can give a role. A starter list for the sales flow:
@@ -44,8 +44,6 @@ export const workflowTaskSchema = z.object({
 export type WorkflowTask = z.infer<typeof workflowTaskSchema>;
 
 export const tasksQuerySchema = pageQuerySchema.extend({
-  /** Defaults to the caller's own role. Roles without an inbox may name one. */
-  role: inboxRoleSchema.optional(),
   /** "true" keeps only overdue tasks. */
   overdue: z.enum(["true", "false"]).optional(),
 });

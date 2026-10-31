@@ -20,6 +20,7 @@ export const PERMISSIONS = [
   "spr.read",
   "spr.decide",
   "payments.confirm",
+  "workflows.inboxes.any",
 ] as const;
 
 export const permissionSchema = z.enum(PERMISSIONS);
@@ -73,6 +74,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "aiUsage.read",
     "workflows.read",
     "spr.read",
+    "workflows.inboxes.any",
   ],
   AUDITOR: [
     "orders.read",
@@ -80,5 +82,6 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "aiUsage.read",
     "workflows.read",
     "spr.read",
+    "workflows.inboxes.any",
   ],
 };

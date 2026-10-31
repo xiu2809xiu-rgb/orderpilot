@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { pageQuerySchema } from "../envelope.js";
 import { roleSchema } from "../roles.js";
 import { orderNoSchema } from "./common.js";
 
@@ -28,3 +29,6 @@ export const workflowReminderSchema = z.object({
   escalatedTo: roleSchema.nullable(),
 });
 export type WorkflowReminder = z.infer<typeof workflowReminderSchema>;
+
+export const remindersQuerySchema = pageQuerySchema;
+export type RemindersQuery = z.infer<typeof remindersQuerySchema>;

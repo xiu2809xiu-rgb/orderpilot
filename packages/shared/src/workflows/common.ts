@@ -57,3 +57,6 @@ export const notAppliedSchema = z.object({
 });
 export const NOT_APPLIED_MESSAGE =
   "Nothing was changed. The workflow engine is not built yet, so this was only checked.";
+
+/** The path of the routes that open one role's inbox: `/workflows/inboxes/WAREHOUSE/tasks`. */
+export const inboxParamsSchema = z.object({ role: inboxRoleSchema });
