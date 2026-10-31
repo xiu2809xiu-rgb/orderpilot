@@ -105,11 +105,12 @@ One `.env` at the repository root is enough. Its values are safe for a laptop an
 
 The ports are lines in `.env`. Change one line and every URL built from it moves with it.
 
-| Line                                                                                                      | What it moves                                 |
-| --------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| `API_PORT`                                                                                                | The API. The web app's proxy follows it       |
-| `WEB_PORT`                                                                                                | The web app. `CORS_ORIGINS` follows it        |
-| `POSTGRES_PORT`, `REDIS_PORT`, `MINIO_PORT`, `MINIO_CONSOLE_PORT`, `MAILPIT_SMTP_PORT`, `MAILPIT_UI_PORT` | The containers, and every URL built from them |
+| Line                                                                                                      | What it moves                                                                                      |
+| --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `API_PORT`                                                                                                | The API. The web app's proxy follows it                                                            |
+| `WEB_PORT`                                                                                                | The web app. `CORS_ORIGINS` follows it                                                             |
+| `POSTGRES_PORT`, `REDIS_PORT`, `MINIO_PORT`, `MINIO_CONSOLE_PORT`, `MAILPIT_SMTP_PORT`, `MAILPIT_UI_PORT` | The containers, and every URL built from them                                                      |
+| `GRAFANA_PORT`, `OTLP_GRPC_PORT`, `OTLP_HTTP_PORT`                                                        | The optional observability profile only (`docker compose --profile observability up -d otel-lgtm`) |
 
 - **Before your first run** (a port is already taken): copy `.env.example` to `.env` yourself, edit the line, then run `pnpm local:setup`. It keeps the `.env` you made. The copy is `cp .env.example .env` in Git Bash and macOS (zsh), and `Copy-Item .env.example .env` in PowerShell.
 - **After a first run:** edit the line. `API_PORT` and `WEB_PORT` apply when you restart `pnpm dev`. A container port applies when the container is recreated, and `pnpm local:setup` deliberately never recreates containers, so run `docker compose up -d --wait` once. It recreates only the containers whose port changed, and their data stays in the Docker volumes.
@@ -291,9 +292,9 @@ If something destructive or irreversible seems necessary, ask Richie first.
    | An AI value and its score                   | `ConfidenceBadge` (says "Requires approval" until a person approves)                                    |
    | A link to a record's audit trail            | `AuditLink` (hides itself without `audit.read`)                                                         |
    | A time, a copyable id                       | `RelativeTime`, `CopyButton`                                                                            |
-   | The change history under a detail page      | `OperationLog` (rows as props)                                                                          |
+   | The change history under a detail page      | `OperationLog` (rows as props), or `EntityOperationLog` to fill it from the audit trail (F-2)           |
 
-   Their text lives in the `components` namespace; your own goes in your area's namespace. If one is missing something, extend it there with a test. Do not copy it into your area.
+   Their text lives in the `components` namespace; your own goes in your area's namespace. If one is missing something, extend it there with a test. Do not copy it into your area. To show the operation log under a record, write its audit events with the record's type and id, then add `<EntityOperationLog entityType="Order" entityId={order.id} />` from `@/features/audit/EntityOperationLog` (steps in [area 4's guide](docs/team/area-4-controls-security-and-monitoring.md#how-another-area-feeds-the-operation-log)).
 
 2. **Choose a free source.** While the repository is public, use only:
    - shadcn/ui;

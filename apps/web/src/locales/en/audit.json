@@ -1,12 +1,95 @@
 {
   "title": "Audit log",
-  "description": "A record of every sign-in, decision and change.",
-  "arrives": [
-    "A searchable log with who, what and when",
-    "Links from an order to its audit trail",
-    "Export and retention settings"
-  ],
+  "description": "Who did what, when and from where, over a hash chain that shows any change.",
+  "arrives": ["Export of the filtered trail", "Retention per record type"],
   "cues": {
     "events": "Audit events today"
+  },
+  "filters": {
+    "region": "Filter the audit log",
+    "kind": "Actor type",
+    "kinds": {
+      "any": "Any",
+      "user": "A person",
+      "system": "The system",
+      "ai": "The AI"
+    },
+    "role": "Role",
+    "anyRole": "Any role",
+    "action": "Action starts with",
+    "actionHint": "For example auth.",
+    "entity": "Record type",
+    "entityHint": "For example User",
+    "entityId": "Record ID",
+    "actor": "Person ID",
+    "actorHint": "Paste a user ID",
+    "from": "From",
+    "to": "To",
+    "refusals": "Refusals only",
+    "searchLabel": "Search the summary",
+    "problems": {
+      "actor": "The person ID is not a valid ID, so nothing was searched.",
+      "range": "The start date is after the end date, so nothing was searched.",
+      "date": "A date is not valid, so nothing was searched."
+    }
+  },
+  "table": {
+    "caption": "Audit events, newest first",
+    "sequence": "Seq.",
+    "time": "Time",
+    "actor": "Who",
+    "action": "Action",
+    "record": "Record",
+    "summary": "What happened",
+    "ip": "IP address",
+    "open": "Details",
+    "openFor": "Details of event {{sequence}}",
+    "refused": "Refused",
+    "emptyTitle": "No audit events yet",
+    "emptyDescription": "Every sign-in, decision and change is recorded here as it happens.",
+    "system": "System",
+    "ai": "AI"
+  },
+  "detail": {
+    "title": "Event {{sequence}}",
+    "description": "One entry in the hash chain. It cannot be edited or deleted.",
+    "actor": "Who",
+    "time": "When",
+    "action": "Action",
+    "record": "Record",
+    "ip": "IP address",
+    "noIp": "Not recorded",
+    "trace": "Trace ID",
+    "hash": "Hash",
+    "prevHash": "Previous hash",
+    "firstEvent": "None, this is the first event",
+    "changes": "What changed",
+    "noChanges": "This event records no field changes.",
+    "before": "Before",
+    "after": "After",
+    "value": "Value",
+    "seeRecord": "All events for this record",
+    "seeActor": "All events by this person",
+    "notFound": "This event does not exist.",
+    "summary": "Summary",
+    "hashes": "Chain"
+  },
+  "chain": {
+    "title": "Hash chain",
+    "description": "Each event's hash covers the one before it, so a changed, removed or reordered event shows here.",
+    "check": "Check the chain",
+    "checking": "Checking",
+    "never": "Not checked yet. Checking reads the whole trail, so it runs when you ask.",
+    "ok": "Verified up to sequence {{n}}",
+    "okEmpty": "Nothing to verify yet: the trail is empty.",
+    "okDetail": "{{count}} events checked. None has been changed, removed or reordered.",
+    "broken": "Broken at sequence {{n}}",
+    "brokenDetail": "{{problem}} Events up to sequence {{through}} still verify.",
+    "problems": {
+      "hash-mismatch": "The event no longer matches its own hash.",
+      "prevHash-mismatch": "The event does not follow the one before it."
+    },
+    "checkedAt": "Checked",
+    "seeBroken": "Find the event"
   }
 }

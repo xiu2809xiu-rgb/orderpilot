@@ -1,9 +1,16 @@
-import { Component, useMemo, type ErrorInfo, type ReactNode } from "react";
+import {
+  Component,
+  useEffect,
+  useMemo,
+  type ErrorInfo,
+  type ReactNode,
+} from "react";
 import { OctagonAlert } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useRouteError } from "react-router";
 import { Button } from "@/components/ui/button";
 import { traceIdOf } from "@/lib/api/errors";
+import { reportWebError } from "@/lib/monitoring/sentry";
 import { StatePanel } from "@/components/common/StatePanel";
 
 /**
@@ -17,6 +24,10 @@ export function CrashView({ error }: { error: unknown }) {
     () => traceIdOf(error) ?? `local-${crypto.randomUUID().slice(0, 8)}`,
     [error],
   );
+  // Sent to Sentry only when a DSN is set (ADR 0022); otherwise this does nothing.
+  useEffect(() => {
+    reportWebError(error);
+  }, [error]);
   return (
     <main id="main" className="p-s3">
       <StatePanel

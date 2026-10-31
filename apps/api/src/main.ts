@@ -10,6 +10,8 @@ import {
   ROOT_ENV_FILE,
   loadEnvFiles,
 } from "./config/load-env-files.js";
+import { initSentry } from "./telemetry/sentry.js";
+import { initTelemetry } from "./telemetry/telemetry.js";
 
 async function bootstrap(): Promise<void> {
   loadEnvFiles();
@@ -18,12 +20,19 @@ async function bootstrap(): Promise<void> {
     readFiles: ENV_FILES,
   });
 
+  // Before anything else runs, so the first request already has a trace id.
+  // Both are off at the edge unless configured: see ADRs 0021 and 0022.
+  initSentry(config);
+  const telemetry = initTelemetry(config);
+
   const app = await NestFactory.create<NestExpressApplication>(
     AppModule.register(config),
     { bufferLogs: true },
   );
   await configureApp(app, config);
   app.enableShutdownHooks();
+  // Spans and metrics still in the queue are sent before the process ends.
+  process.once("SIGTERM", () => void telemetry.shutdown());
   await app.listen(config.http.port, config.http.host);
 }
 

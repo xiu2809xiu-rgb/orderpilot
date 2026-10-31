@@ -163,3 +163,25 @@ A service that changes something on behalf of a user takes the `AuthContext` and
 | Policy as a function | `domain/ai-destination-policy.ts`                  | One place answers what data may go to which provider; the gateway calls it, the owner widens it | F-1   |
 | Mask on the server   | `domain/masking.ts`, `PolicyService.maskingSample` | A hidden value is null in the response, so it cannot be read from the page                      | F-1   |
 | Shared contract      | `packages/shared/src/governance`                   | The web app and the API read one set of schemas; the owner's policy returns `PolicyDecision`    | F-1   |
+
+## Monitoring: telemetry, errors and the clickstream
+
+`apps/api/src/telemetry/` holds the wiring (OpenTelemetry, prom-client, Sentry) and `apps/api/src/modules/monitoring` and `analytics` hold the routes. Everything that leaves the process is off unless its setting is present.
+
+| Pattern                 | Where                                                         | Why                                                                                                 | Story |
+| ----------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ----- |
+| Off unless configured   | `telemetry.ts`, `sentry.ts`, `lib/monitoring/sentry.ts`       | No endpoint or DSN means no export, no client and no network call; a test proves it                 | G-1   |
+| Scrub twice             | `scrubSentryEvent`, `scrubBrowserEvent`                       | The SDK is told not to collect personal data, and `beforeSend` removes it again                     | G-1   |
+| Route pattern, not URL  | `routePatternOf`, `routePattern`, `routePatternSchema`        | Metrics, spans and clickstream events carry `/orders/:id`, never an id or a query string            | G-1   |
+| Consent first           | `AnalyticsTracker`                                            | Nothing is queued before a yes, and Do Not Track or Global Privacy Control wins over it             | G-1   |
+| Strict schema           | `clickstreamBatchSchema`                                      | A field nobody planned, such as a user id, is refused rather than dropped                           | G-1   |
+| Token-guarded scrape    | `MetricsController`                                           | `/metrics` answers only to a bearer token and does not exist without one (ADR 0028)                 | G-1   |
+| Pattern                 | Where                                                         | Why                                                                                                 | Story |
+| ----------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ----- |
+| Domain rules, no I/O    | `governance/domain/matrix-rules.ts`, `masking.ts`             | The locked cells, the copy plan and masking are tested without a database or HTTP                   | F-1   |
+| Policy as a function    | `domain/ai-destination-policy.ts`                             | One place answers what data may go to which provider; the gateway calls it, the owner widens it     | F-1   |
+| Mask on the server      | `domain/masking.ts`, `PolicyService.maskingSample`            | A hidden value is null in the response, so it cannot be read from the page                          | F-1   |
+| Shared contract         | `packages/shared/src/governance`                              | The web app and the API read one set of schemas; the owner's policy returns `PolicyDecision`        | F-1   |
+| Read-only viewer        | `apps/api/src/modules/audit`                                  | A controller with only `GET` routes over P-9's repository, so nothing can write an event through it | F-2   |
+| Validated filters       | `auditEventQuerySchema` in `packages/shared/src/audit-viewer` | One zod schema validates the list's filters for the API and types them for the web app              | F-2   |
+| Feed a common component | `EntityOperationLog`, `toOperationRows`                       | One hook and one mapper turn the audit list into P-12's `OperationLog`, so any page can add it      | F-2   |

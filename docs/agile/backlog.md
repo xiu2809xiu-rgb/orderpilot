@@ -2,7 +2,7 @@
 
 Rendered from [`scripts/github/data/backlog.json`](../../scripts/github/data/backlog.json) by `node scripts/github/render-docs.mjs`. Change the data, not this file. The same data seeds the issues. The board shows where each story stands.
 
-There are 9 epics and 69 stories. Estimates are story points: a first guess, for the team to change at planning.
+There are 9 epics and 71 stories. Estimates are story points: a first guess, for the team to change at planning.
 
 ## Epics
 
@@ -14,8 +14,8 @@ There are 9 epics and 69 stories. Estimates are story points: a first guess, for
 | Epic C | Order workflows and approvals     | `area: 2 order workflows and approvals` | 5       | 29     |
 | Epic D | Checks, the tracker and insights  | `area: 3 checks tracker and insights`   | 4       | 23     |
 | Epic E | AI with a person in the loop      | `area: 1 document AI and integration`   | 6       | 29     |
-| Epic F | Financial controls and governance | `area: 4 controls and monitoring`       | 8       | 35     |
-| Epic G | Monitoring                        | `area: 4 controls and monitoring`       | 1       | 8      |
+| Epic F | Financial controls and governance | `area: 4 controls and monitoring`       | 9       | 38     |
+| Epic G | Monitoring                        | `area: 4 controls and monitoring`       | 2       | 11     |
 | Epic T | Team stories                      | `area: team`                            | 9       | 36     |
 
 ## Ready to pull
@@ -109,6 +109,8 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | E-6   | An "Ask OrderPilot" help panel that answers from our docs          | could    | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M3 AI-assisted coding                        |
 | F-7   | Session hardening                                                  | could    | 5      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
 | F-8   | Governance base polish                                             | could    | 3      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
+| G-2   | Monitoring base polish                                             | could    | 3      | `area: 4 controls and monitoring`       | M2 GRS by design, M6 deploy and monitor                        |
+| F-9   | Audit viewer polish                                                | could    | 3      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
 
 ## Epic P: The platform base
 
@@ -445,6 +447,7 @@ Acceptance criteria:
 - Playwright with axe, plus helpers for the demo session and the layout.
 - A smoke test that signs in as each role, opens the shell and signs out, with WCAG 2.2 AA checked on every page.
 - The CI job "End-to-end smoke" runs it against the compose stack, uploads the report and shows the service logs on failure. It becomes required.
+- Left out of the Getting started fix (issue 102), which proved the same walk by hand: the nine-role sign-in walk as a repeatable test, a CI job that runs `pnpm local:setup` on a clean runner, and a run of Getting started on macOS (written, not yet tested there).
 
 ### P-15: Events, queues and live updates
 
@@ -1359,6 +1362,25 @@ Acceptance criteria:
 - The seed no longer re-adds a permission the owner revoked on purpose (ADR 0012, point 12 and ADR 0024, point 1), with a test.
 - The masking sample reads its rule from the matrix screen, so a rule can be shown or hidden for a role without a code change.
 
+### F-9: Audit viewer polish
+
+Follow-ups to F-2 that nobody needs this week: they make the audit log quicker to search and the chain check easier to trust.
+
+- **Area:** `area: 4 controls and monitoring`
+- **Priority:** could
+- **Estimate:** 3 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Planned for:** Sprint 03 (W4)
+- **Depends on:** F-2
+
+Acceptance criteria:
+
+- The actor filter is a picker of people by name, not a pasted ID, and the action filter offers the action names that exist.
+- A filtered view can be saved by name on the server and shared, not only kept in the address bar.
+- The chain check runs in the background for a long trail and shows progress, instead of one request that reads everything.
+- A broken chain shows the event it breaks at, with a link to open it and the events around it.
+- A browser test: an auditor filters to refusals, opens one, and sees a masked value with its reason.
+
 ## Epic G: Monitoring
 
 Tracing, metrics, clickstream analytics, and the AI cost per document.
@@ -1382,6 +1404,24 @@ Acceptance criteria:
 - Left to Angelyn: the real dashboards, budgets and alerts, in Weeks 14 to 16 (Sprints 13 to 15).
 - Angelyn's review is requested on the pull request once they are a collaborator, and Richie is told when it merges, so he can hand it over.
 - Grafana's `otel-lgtm` image as an optional compose profile for traces, metrics and logs, and Sentry for errors in the web app and the API. Both stay off unless configured with an ADR, a pinned version and a traceability row (ADRs 0021 and 0022).
+
+### G-2: Monitoring base polish
+
+Follow-ups to G-1 that nobody needs this week: they close small gaps between the base and a deployed stack.
+
+- **Area:** `area: 4 controls and monitoring`
+- **Priority:** could
+- **Estimate:** 3 points
+- **Requirements:** M2 GRS by design, M6 deploy and monitor
+- **Planned for:** Sprint 03 (W4)
+- **Depends on:** G-1
+
+Acceptance criteria:
+
+- The production nginx image adds the Sentry origin to its content security policy when a DSN is set at build time, as `vite preview` already does.
+- The observability profile's Prometheus scrapes the API's `/metrics` with the bearer token, and the compose file documents how.
+- A person can change their analytics choice from a settings page as well as the clickstream tab.
+- A browser test records a page view only after consent is given, and sends nothing when Do Not Track is on.
 
 ## Epic T: Team stories
 

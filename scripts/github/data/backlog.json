@@ -395,7 +395,8 @@
       "acceptance": [
         "Playwright with axe, plus helpers for the demo session and the layout.",
         "A smoke test that signs in as each role, opens the shell and signs out, with WCAG 2.2 AA checked on every page.",
-        "The CI job \"End-to-end smoke\" runs it against the compose stack, uploads the report and shows the service logs on failure. It becomes required."
+        "The CI job \"End-to-end smoke\" runs it against the compose stack, uploads the report and shows the service logs on failure. It becomes required.",
+        "Left out of the Getting started fix (issue 102), which proved the same walk by hand: the nine-role sign-in walk as a repeatable test, a CI job that runs `pnpm local:setup` on a clean runner, and a run of Getting started on macOS (written, not yet tested there)."
       ]
     },
     {
@@ -1448,6 +1449,43 @@
         "A browser test of E2E #3: a script calls an action endpoint without the right, gets the envelope with a trace id, and the refusal shows in the audit viewer.",
         "The seed no longer re-adds a permission the owner revoked on purpose (ADR 0012, point 12 and ADR 0024, point 1), with a test.",
         "The masking sample reads its rule from the matrix screen, so a rule can be shown or hidden for a role without a code change."
+      ]
+    },
+    {
+      "key": "G-2",
+      "title": "Monitoring base polish",
+      "epic": "G",
+      "area": "area: 4 controls and monitoring",
+      "priority": "could",
+      "estimate": 3,
+      "reqs": ["M2", "M6"],
+      "sprints": [3],
+      "dependsOn": ["G-1"],
+      "summary": "Follow-ups to G-1 that nobody needs this week: they close small gaps between the base and a deployed stack.",
+      "acceptance": [
+        "The production nginx image adds the Sentry origin to its content security policy when a DSN is set at build time, as `vite preview` already does.",
+        "The observability profile's Prometheus scrapes the API's `/metrics` with the bearer token, and the compose file documents how.",
+        "A person can change their analytics choice from a settings page as well as the clickstream tab.",
+        "A browser test records a page view only after consent is given, and sends nothing when Do Not Track is on."
+      ]
+    },
+    {
+      "epic": "F",
+      "area": "area: 4 controls and monitoring",
+      "reqs": ["M2", "M4"],
+      "dependsOn": ["F-2"],
+      "key": "F-9",
+      "title": "Audit viewer polish",
+      "priority": "could",
+      "estimate": 3,
+      "sprints": [3],
+      "summary": "Follow-ups to F-2 that nobody needs this week: they make the audit log quicker to search and the chain check easier to trust.",
+      "acceptance": [
+        "The actor filter is a picker of people by name, not a pasted ID, and the action filter offers the action names that exist.",
+        "A filtered view can be saved by name on the server and shared, not only kept in the address bar.",
+        "The chain check runs in the background for a long trail and shows progress, instead of one request that reads everything.",
+        "A broken chain shows the event it breaks at, with a link to open it and the events around it.",
+        "A browser test: an auditor filters to refusals, opens one, and sees a masked value with its reason."
       ]
     }
   ]

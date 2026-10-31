@@ -25,6 +25,10 @@ describe("the OpenAPI document (what orval reads)", () => {
   it("is built with no database, Redis or .env, from the real routes", async () => {
     const document = await documentOf();
     expect(Object.keys(document.paths).sort()).toEqual([
+      "/api/v1/analytics/clickstream",
+      "/api/v1/audit/chain",
+      "/api/v1/audit/events",
+      "/api/v1/audit/events/{id}",
       "/api/v1/auth/demo-login",
       "/api/v1/auth/login",
       "/api/v1/auth/logout",
@@ -40,6 +44,9 @@ describe("the OpenAPI document (what orval reads)", () => {
       "/api/v1/governance/matrix/{role}/data-scope",
       "/api/v1/governance/matrix/{role}/permissions/{permission}",
       "/api/v1/insights/kpis",
+      "/api/v1/monitoring/ai-usage",
+      "/api/v1/monitoring/clickstream",
+      "/api/v1/monitoring/observability",
       "/api/v1/system/checks",
       "/api/v1/tracker/orders",
       "/api/v1/tracker/orders/{orderNo}",
