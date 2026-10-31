@@ -1,0 +1,34 @@
+name: Epic
+description: A large piece of work, made of stories.
+title: "Epic <letter>: "
+labels:
+  - "type: epic"
+body:
+  - type: markdown
+    attributes:
+      value: Start the title with `Epic` and its letter, such as `Epic C:`. The backlog scripts match epics by that key. Its stories are sub-issues of this issue.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - "area: 1 document AI and integration"
+        - "area: 2 order workflows and approvals"
+        - "area: 3 checks, tracker and insights"
+        - "area: 4 controls and monitoring"
+        - "area: team"
+    validations:
+      required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What the team and Spectra get when this epic is done.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: In and out of scope
+    validations:
+      required: true

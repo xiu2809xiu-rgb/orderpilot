@@ -10,19 +10,19 @@ OrderPilot is our product for Problem Statement #11 in the IT2134 IT Innovation 
 
 ## Status
 
-**The base is being built. There is no app to run yet.** This repository holds documents and configuration only, with no `pnpm` commands and no `docker compose` stack so far.
+**The base is being built. There is no app to run yet.** This repository holds documents, configuration and the GitHub scripts, with no `pnpm` commands and no `docker compose` stack so far.
 
 ### What works today
 
 - **The ground rules:** this README, [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), [AGENTS.md](AGENTS.md), [CLAUDE.md](CLAUDE.md), the ADRs and the agile docs.
 - **Repository files:** LF line endings, ignore rules for secrets, samples and AI tool folders, and the Node version.
+- **GitHub as code:** issue forms, the pull request template, labels, the sprint milestones, the backlog, the board and the wiki, all kept as code in [`.github/`](.github/) and [`scripts/github/`](scripts/github/README.md), and a sprint recorder that files each finished story under its sprint.
 - **GitHub protection on `main`:** the `Protect main` ruleset, secret scanning with push protection, Dependabot alerts and security updates, and private vulnerability reporting.
 
 ### What later stories bring
 
 | Stories                 | What they bring                                                                                     |
 | ----------------------- | --------------------------------------------------------------------------------------------------- |
-| P-2                     | Issue forms, the pull request template, labels, the backlog and board as code, and the wiki pages   |
 | P-3, P-4                | The problem statement, research, client questions, and a guide for each area                        |
 | P-5, P-6                | The pnpm workspace, `pnpm` commands, Git hooks, CI and security scans                               |
 | P-7 to P-16             | The app: shared contracts, API, database, sign-in, web shell, Docker images, events and diagrams    |
@@ -54,9 +54,10 @@ Richie, the team lead, builds the base for every area. Each owner then takes ove
 
 **How we work**
 
-- [Agile docs](docs/agile/README.md): the working agreement and the Definitions of Ready and Done.
+- [Agile docs](docs/agile/README.md): the working agreement, the Definitions of Ready and Done, and the [backlog](docs/agile/backlog.md).
 - [ADR 0001](docs/adr/0001-record-architecture-decisions.md): why we record decisions.
 - [ADR 0002](docs/adr/0002-a-clean-repository-for-ps11.md): why this repository started clean.
+- [ADR 0016](docs/adr/0016-github-process-as-code.md): why the GitHub process is code.
 
 **The record**
 
@@ -65,7 +66,8 @@ Richie, the team lead, builds the base for every area. Each owner then takes ove
 
 **On GitHub**
 
-- [Issues](https://github.com/xiu2809xiu-rgb/orderpilot/issues) and [pull requests](https://github.com/xiu2809xiu-rgb/orderpilot/pulls).
+- [Issues](https://github.com/xiu2809xiu-rgb/orderpilot/issues), [pull requests](https://github.com/xiu2809xiu-rgb/orderpilot/pulls) and [milestones](https://github.com/xiu2809xiu-rgb/orderpilot/milestones).
+- [The board](https://github.com/xiu2809xiu-rgb/orderpilot/projects) and [the wiki](https://github.com/xiu2809xiu-rgb/orderpilot/wiki).
 - [Report a vulnerability](https://github.com/xiu2809xiu-rgb/orderpilot/security/advisories/new).
 
-The board and the wiki pages arrive with P-2, and the live demo with P-24.
+The live demo arrives with P-24.

@@ -1,0 +1,40 @@
+name: Sprint recorder
+
+on:
+  issues:
+    types: [closed]
+  # pull_request_target and not pull_request: a pull request from a fork gets a
+  # read-only token, and could not record anything. This event runs the workflow
+  # as it is on main, and the job below checks out main, so no code from the pull
+  # request ever runs. Keep it that way: never check out the pull request's head.
+  pull_request_target:
+    types: [closed]
+
+permissions: {}
+
+concurrency:
+  group: sprint-recorder-${{ github.event.issue.number || github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  record:
+    name: Record the sprint
+    if: github.event_name == 'issues' || github.event.pull_request.merged == true
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+      - name: Set the milestone
+        run: node scripts/github/sprint-recorder.mjs
+        env:
+          GH_TOKEN: ${{ github.token }}

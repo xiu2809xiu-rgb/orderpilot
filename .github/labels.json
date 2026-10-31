@@ -1,0 +1,127 @@
+[
+  {
+    "name": "type: epic",
+    "color": "3e4b9e",
+    "description": "A large piece of work, made of stories"
+  },
+  {
+    "name": "type: story",
+    "color": "1d76db",
+    "description": "One piece of work: one issue, one branch, one pull request"
+  },
+  {
+    "name": "type: task",
+    "color": "5319e7",
+    "description": "A small piece of work inside a sprint"
+  },
+  {
+    "name": "type: bug",
+    "color": "d73a4a",
+    "description": "Something that should work and does not"
+  },
+  {
+    "name": "type: spike",
+    "color": "c5def5",
+    "description": "Time-boxed research that ends in a decision"
+  },
+  {
+    "name": "type: chore",
+    "color": "bfd4f2",
+    "description": "Upkeep: tooling, settings and dependencies"
+  },
+  {
+    "name": "type: docs",
+    "color": "0075ca",
+    "description": "Documentation only"
+  },
+  {
+    "name": "type: security",
+    "color": "b60205",
+    "description": "A security fix or hardening. Report real problems through SECURITY.md"
+  },
+  {
+    "name": "area: 1 document AI and integration",
+    "color": "0e8a16",
+    "description": "Area 1, Richie: the AI pipeline, intake, master data, connectors and the platform"
+  },
+  {
+    "name": "area: 2 order workflows and approvals",
+    "color": "006b75",
+    "description": "Area 2, Azri: workflows, tasks, SPR approval, the payment gate and reminders"
+  },
+  {
+    "name": "area: 3 checks, tracker and insights",
+    "color": "fbca04",
+    "description": "Area 3, Iok Teck: the checks engine, exceptions queue, tracker and KPIs"
+  },
+  {
+    "name": "area: 4 controls and monitoring",
+    "color": "e99695",
+    "description": "Area 4, Angelyn: policy, bank-detail control, masking, audit and monitoring"
+  },
+  {
+    "name": "area: team",
+    "color": "ededed",
+    "description": "Belongs to the whole team: ways of working, planning and assessments"
+  },
+  {
+    "name": "priority: must",
+    "color": "b60205",
+    "description": "Pulled first"
+  },
+  {
+    "name": "priority: should",
+    "color": "d93f0b",
+    "description": "Pulled after the Must stories"
+  },
+  {
+    "name": "priority: could",
+    "color": "fef2c0",
+    "description": "Pulled after the Should stories"
+  },
+  {
+    "name": "req: M1 design thinking",
+    "color": "d4c5f9",
+    "description": "Module requirement M1: design thinking"
+  },
+  {
+    "name": "req: M2 GRS by design",
+    "color": "d4c5f9",
+    "description": "Module requirement M2: GRS by design"
+  },
+  {
+    "name": "req: M3 AI-assisted coding",
+    "color": "d4c5f9",
+    "description": "Module requirement M3: AI-assisted coding"
+  },
+  {
+    "name": "req: M4 best practices",
+    "color": "d4c5f9",
+    "description": "Module requirement M4: best practices"
+  },
+  {
+    "name": "req: M5 team Git workflow",
+    "color": "d4c5f9",
+    "description": "Module requirement M5: team Git workflow"
+  },
+  {
+    "name": "req: M6 deploy and monitor",
+    "color": "d4c5f9",
+    "description": "Module requirement M6: deploy and monitor"
+  },
+  {
+    "name": "status: blocked",
+    "color": "000000",
+    "description": "Cannot move until something else happens. Say what in a comment"
+  },
+  {
+    "name": "status: needs client input",
+    "color": "f9d0c4",
+    "description": "Waiting on an answer from Spectra"
+  },
+  {
+    "name": "dependencies",
+    "color": "0366d6",
+    "description": "Updates a dependency"
+  }
+]
