@@ -1,14 +1,14 @@
 ### Health probes. Open in VS Code with the REST Client extension, or in a JetBrains IDE.
-### Start the API first: pnpm --filter @orderpilot/api dev
+### Start the stack and the API first: docker compose up -d --wait, then pnpm --filter @orderpilot/api dev
 @baseUrl = http://localhost:3000
 
 ### Liveness: the process is up. Never touches the database.
 GET {{baseUrl}}/health/live
 
-### Readiness: 200 when every registered check is up, 503 when one is down.
+### Readiness: 200 when the database, Redis and storage answer, 503 when one is down.
 GET {{baseUrl}}/health/ready
 
-### Health: build, environment, uptime and the checks.
+### Health: the status and the name and status of each check. Nothing about the build or the environment.
 GET {{baseUrl}}/health
 
 ### Send your own request id: it comes back in X-Request-Id and in every log line.

@@ -23,7 +23,9 @@ jobs:
   verify:
     name: Lint, typecheck, test, build
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    # MinIO is built from source (docker/minio), which takes a few minutes the
+    # first time. It builds in the background while the checks below run.
+    timeout-minutes: 25
     steps:
       - name: Check out the full history
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -40,6 +42,15 @@ jobs:
         with:
           node-version-file: .node-version
           cache: pnpm
+
+      # The integration tests need PostgreSQL, Redis and MinIO. They run from the
+      # same docker-compose.yml as on a laptop, so the versions cannot drift
+      # apart, with the safe defaults from .env.example. This only starts the
+      # build; "Wait for the local stack" below waits for it.
+      - name: Start the local stack in the background
+        run: |
+          cp .env.example .env
+          nohup docker compose up -d --build > "$RUNNER_TEMP/stack.log" 2>&1 &
 
       - name: Samples history check
         run: node scripts/check-samples.mjs --history
@@ -65,8 +76,21 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
+      - name: Wait for the local stack
+        run: |
+          docker compose up -d --wait
+          docker compose ps
+
+      # Unit tests and the integration tests (real database, Redis and storage).
+      # A failed connection fails the job: nothing is skipped.
       - name: Test
         run: pnpm test
+
+      - name: Local stack logs (when a step failed)
+        if: failure()
+        run: |
+          cat "$RUNNER_TEMP/stack.log" || true
+          docker compose logs --tail 40 || true
 
       - name: Build
         run: pnpm build
