@@ -1,5 +1,11 @@
 import { randomBytes } from "node:crypto";
-import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import {
+  copyFileSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
@@ -9,12 +15,8 @@ import {
   measureInitialJs,
 } from "./check-bundle-budget.mjs";
 
-const html = `<!doctype html><html><head>
-<script type="module" crossorigin src="/assets/index-abc.js"></script>
-<link rel="modulepreload" crossorigin href="/assets/vendor-def.js">
-<link rel="stylesheet" crossorigin href="/assets/index-abc.css">
-<script src="/theme-init.js"></script>
-</head><body></body></html>`;
+const fixture = path.join(import.meta.dirname, "fixtures/budget-index.html");
+const html = readFileSync(fixture, "utf8");
 
 describe("bundle budget", () => {
   it("counts only the module script and preloads as initial", () => {
@@ -27,8 +29,7 @@ describe("bundle budget", () => {
   it("sums gzip sizes of the initial files and ignores other chunks", () => {
     const dist = mkdtempSync(path.join(tmpdir(), "op-budget-"));
     mkdirSync(path.join(dist, "assets"));
-    // nosemgrep - test fixture written to a fresh temp dir, never served
-    writeFileSync(path.join(dist, "index.html"), html);
+    copyFileSync(fixture, path.join(dist, "index.html"));
     writeFileSync(path.join(dist, "assets/index-abc.js"), "a".repeat(5000));
     writeFileSync(path.join(dist, "assets/vendor-def.js"), "b".repeat(5000));
     writeFileSync(path.join(dist, "assets/three-lazy.js"), "c".repeat(900_000));
@@ -41,8 +42,7 @@ describe("bundle budget", () => {
   it("is over budget for a big initial chunk", () => {
     const dist = mkdtempSync(path.join(tmpdir(), "op-budget-"));
     mkdirSync(path.join(dist, "assets"));
-    // nosemgrep - test fixture written to a fresh temp dir, never served
-    writeFileSync(path.join(dist, "index.html"), html);
+    copyFileSync(fixture, path.join(dist, "index.html"));
     // Random-looking bytes do not compress, so this is over 250 KB gzipped.
     const noise = randomBytes(400_000);
     writeFileSync(path.join(dist, "assets/index-abc.js"), noise);
