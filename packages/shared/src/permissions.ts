@@ -18,7 +18,8 @@ export const PERMISSIONS = [
   "documents.upload",
   "orders.read",
   // Acting on money and approvals. The system admin role never holds these
-  // (see governance/matrix.ts). Which other roles hold them is area 4's call.
+  // (see governance/matrix.ts). No role holds them by default: who approves
+  // and who pays is area 4's call, made in the matrix.
   "approvals.decide",
   "payments.confirm",
   "payments.post",
@@ -44,15 +45,10 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "aiUsage.read",
   ],
   PRODUCT_MANAGER: ["orders.read", "documents.read"],
-  APPROVER: ["orders.read", "documents.read", "approvals.decide"],
+  APPROVER: ["orders.read", "documents.read"],
   SUPPORT: ["orders.read", "documents.read", "documents.upload"],
   WAREHOUSE: ["orders.read", "documents.read"],
-  FINANCE: [
-    "orders.read",
-    "documents.read",
-    "payments.confirm",
-    "payments.post",
-  ],
+  FINANCE: ["orders.read", "documents.read"],
   LOGISTICS: ["orders.read", "documents.read"],
   MANAGEMENT: ["orders.read", "documents.read", "aiUsage.read"],
   AUDITOR: ["orders.read", "audit.read", "aiUsage.read", "roles.read"],
