@@ -1,0 +1,60 @@
+### Sign-in, sessions and the users routes. Run the requests top to bottom.
+### The API sets three cookies (op_access, op_refresh, op_csrf). REST Client
+### keeps them for you, but it does not copy op_csrf into a header: the
+### @csrf variable below does, once you paste the cookie's value into it.
+@baseUrl = http://localhost:3000
+@csrf = paste the op_csrf cookie value here after signing in
+@demoPassword = orderpilot-demo-password
+
+### What the sign-in page offers. Public. With DEMO_MODE=false, demoRoles is empty.
+GET {{baseUrl}}/api/v1/auth/options
+
+### Demo sign-in as one of the nine roles. Only with DEMO_MODE=true: otherwise this
+### route does not exist and answers 404. Roles: SYSTEM_ADMIN, PRODUCT_MANAGER,
+### APPROVER, SUPPORT, WAREHOUSE, FINANCE, LOGISTICS, MANAGEMENT, AUDITOR.
+POST {{baseUrl}}/api/v1/auth/demo-login
+Content-Type: application/json
+
+{ "role": "SYSTEM_ADMIN" }
+
+### Sign in with the seeded email and the DEMO_PASSWORD from your .env.
+### An unknown email and a wrong password get the same answer (INVALID_CREDENTIALS).
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+
+{ "email": "system.admin@example.test", "password": "{{demoPassword}}" }
+
+### Validation: a bad email is refused with VALIDATION_FAILED and a field list.
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+
+{ "email": "not-an-email", "password": "x" }
+
+### Who am I, what may I do, and when does the access token end.
+### Without a session: 401 UNAUTHENTICATED.
+GET {{baseUrl}}/api/v1/auth/me
+
+### Exchange the refresh cookie for a new pair. Each refresh token works once:
+### sending an old one again revokes the whole sign-in (REFRESH_REUSED).
+### Needs the CSRF header; without it: 403 CSRF_INVALID.
+POST {{baseUrl}}/api/v1/auth/refresh
+X-CSRF-Token: {{csrf}}
+
+### Sign out. Needs the CSRF header too.
+POST {{baseUrl}}/api/v1/auth/logout
+X-CSRF-Token: {{csrf}}
+
+### Users. Reading needs users.read, changing needs users.manage (SYSTEM_ADMIN
+### holds both). Another role gets 403 FORBIDDEN, and the refusal is audited.
+GET {{baseUrl}}/api/v1/users?page=1&pageSize=25
+
+### One user. Replace the id with one from the list.
+GET {{baseUrl}}/api/v1/users/00000000-0000-7000-8000-000000000000
+
+### Disable a user (never deleted). Their sessions end at their next request.
+POST {{baseUrl}}/api/v1/users/00000000-0000-7000-8000-000000000000/disable
+X-CSRF-Token: {{csrf}}
+
+### Enable them again.
+POST {{baseUrl}}/api/v1/users/00000000-0000-7000-8000-000000000000/enable
+X-CSRF-Token: {{csrf}}

@@ -8,7 +8,12 @@ import {
   Query,
   Req,
 } from "@nestjs/common";
-import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import {
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from "@nestjs/swagger";
 import { pageQuerySchema, type PageQuery } from "@orderpilot/shared";
 import type { Request } from "express";
 import type { AuthContext } from "../auth/auth-context.js";
@@ -24,6 +29,10 @@ import {
 import { UsersService, type RequestInfo } from "./users.service.js";
 
 const idParam = new ZodValidationPipe(userParamsSchema);
+const idDoc = ApiParam({
+  name: "id",
+  schema: { type: "string", format: "uuid" },
+});
 
 function infoOf(req: Request): RequestInfo {
   return { ip: req.ip ?? null, traceId: requestIdOf(req) };
@@ -46,6 +55,7 @@ export class UsersController {
 
   @Get(":id")
   @RequirePermission("users.read")
+  @idDoc
   @ApiOperation({ summary: "Read one user" })
   @ApiOkResponse({ schema: openApiSchema(userResponseSchema) })
   async get(@Param(idParam) params: { id: string }) {
@@ -55,6 +65,7 @@ export class UsersController {
   @Post(":id/disable")
   @HttpCode(200)
   @RequirePermission("users.manage")
+  @idDoc
   @ApiOperation({
     summary: "Disable a user and end their sessions. Users are never deleted",
   })
@@ -70,6 +81,7 @@ export class UsersController {
   @Post(":id/enable")
   @HttpCode(200)
   @RequirePermission("users.manage")
+  @idDoc
   @ApiOperation({ summary: "Enable a disabled user" })
   @ApiOkResponse({ schema: openApiSchema(userResponseSchema) })
   async enable(

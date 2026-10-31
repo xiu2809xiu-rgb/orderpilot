@@ -7,6 +7,8 @@ export interface MutatorConfig {
   method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   params?: object;
   data?: unknown;
+  /** Generated for a route with a JSON body. Not forwarded: the ApiClient sets its own headers. */
+  headers?: Record<string, string>;
   signal?: AbortSignal;
 }
 
