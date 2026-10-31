@@ -78,6 +78,8 @@ All planned. Each item lands with the story named, and F-1, F-2 and G-1 fill thi
   - the AI usage and cost screen, reading real usage records;
   - the observability and clickstream screens, on mock data, with `it.todo` tests.
 - **From the platform:** the shared roles and permissions (P-7); helmet, CORS and rate limiting (P-8); `AuditEvent` with its append-only trigger and the hash-chained writer (P-9); sessions, the permissions guard and the default matrix (P-10); the masked value, confidence badge and audit link components (P-12); and the AI usage records (P-17).
+- **Generated hooks and mocks (planned: P-26):** the base's screens use the typed TanStack Query hooks and MSW mocks that orval generates from the API's OpenAPI spec, through the web app's `ApiClient`. Regenerate them when your routes change; CI fails when they are out of date.
+- **Optional, off unless configured (planned: G-1):** Grafana's `otel-lgtm` image as a compose profile for traces, metrics and logs, and Sentry for errors in the web app and the API. Each comes with an ADR, a pinned version and a traceability row.
 
 ## What's yours to build
 
@@ -97,6 +99,13 @@ All planned. Each item lands with the story named, and F-1, F-2 and G-1 fill thi
 - E2E #3 and the area 4 half of E2E #4, end to end;
 - the real dashboards, budgets and alerts for traces, metrics, clickstream and AI cost, in Weeks 14 to 16 (Sprints 13 to 15);
 - the PDPA framing in [GRS by design](../grs/grs-by-design.md#risk-register) (R-04), kept current. Never claim that the prototype is PDPA compliant.
+
+## Options to consider, not built
+
+Tools that may suit this area. None is installed, pinned or built ([ADR 0020](../adr/0020-options-left-to-the-owners.md)). If you adopt one, bring its ADR, an exact pinned version and a row in the traceability matrix with that story.
+
+- **CASL** for expressing permissions in the web app. The authorisation policy stays on the server; CASL could only mirror its decisions for the UI.
+- **PostHog** for product analytics. `AnalyticsTracker` and the clickstream screens are the plan; PostHog would need a decision about consent and about where the data is stored.
 
 ## At the Week 7 interview
 

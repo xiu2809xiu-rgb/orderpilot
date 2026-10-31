@@ -66,6 +66,8 @@ All planned. Area 1's core is part of the base itself, so these stories are Rich
 - **The way of working:** the ground rules (P-1, merged), GitHub as code (P-2), these docs (P-3, P-4), the tooling (P-5) and CI with the security scans (P-6).
 - **The app:** shared contracts (P-7), the API shell (P-8), the database, queues, storage and audit writer (P-9), sign-in and sessions (P-10), the web shell (P-11), common components (P-12), Docker images (P-13), the end-to-end smoke test (P-14), events and live updates (P-15) and diagrams as code (P-16).
 - **Area 1's core:** the AI gateway with usage tracking and the destination check (P-17), document intake and storage (P-18), mock Navision and synthetic master data (P-19), the connector framework and the Navision adapter (P-20), and synthetic documents with planted mistakes and ground truth (P-21).
+- **Planned work in area 1's stories:** the Vercel AI SDK under `LlmGateway` in P-17, with the gateway keeping cost tracking and the data-to-AI policy; promptfoo for the accuracy set (E-2) and the prompt-injection tests (E-3) in CI; React-PDF and ExcelJS for the template engine (B-3). Each comes with an ADR, a pinned version and a traceability row.
+- **Generated hooks and mocks (planned: P-26):** orval generates typed TanStack Query hooks and MSW mocks from the API's OpenAPI spec, through the web app's `ApiClient`, and every area base uses them. CI fails when the generated code is out of date.
 - **Later:** the design system with the Pro kits (P-22), the 3D order constellation (P-23), cloud deployment (P-24) and the slides (P-25).
 
 ## What's yours to build
