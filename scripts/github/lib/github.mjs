@@ -5,7 +5,10 @@ export const DEFAULT_REPO = "xiu2809xiu-rgb/orderpilot";
 
 const MAX_ATTEMPTS = 5;
 const RATE_LIMITED = /secondary rate limit|rate limit exceeded|abuse|HTTP 429/i;
-const FLAKY = /HTTP 50[234]|was submitted too quickly/i;
+// A 5xx, a dropped connection, or gh choking on an empty reply
+// ("unexpected end of JSON input"). A 4xx is a real refusal and never matches.
+const FLAKY =
+  /HTTP 5\d\d|was submitted too quickly|unexpected end of JSON input|unexpected EOF|connection reset|timed? ?out|ECONNRESET|ETIMEDOUT/i;
 
 // Past this GitHub starts refusing content-creating requests, and a seed makes
 // a few hundred of them in a row.
@@ -19,6 +22,15 @@ export function runGh(args, input) {
   });
   if (result.error) throw result.error;
   return result;
+}
+
+function isJson(text) {
+  try {
+    JSON.parse(text);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 const isMutation = (document) => /^\s*mutation\b/.test(document);
@@ -48,10 +60,21 @@ export class GitHub {
     this.paceMs = paceMs;
   }
 
-  async #call(args, input) {
+  // With expectJson, a clean exit with an empty or non-JSON body counts as a
+  // transient failure too, because the caller is about to parse it.
+  async #call(args, input, { expectJson = false } = {}) {
     for (let attempt = 1; ; attempt += 1) {
       const { status, stdout, stderr } = this.exec(args, input);
-      if (status === 0) return stdout;
+      if (status === 0 && !(expectJson && !isJson(stdout))) return stdout;
+      if (status === 0) {
+        if (attempt === MAX_ATTEMPTS) {
+          throw new Error(
+            `gh ${args.join(" ")} failed: empty or non-JSON reply`,
+          );
+        }
+        await this.sleep(5_000 * attempt);
+        continue;
+      }
       const message = `${stderr ?? ""}${stdout ?? ""}`;
       const limited = RATE_LIMITED.test(message);
       if (attempt === MAX_ATTEMPTS || (!limited && !FLAKY.test(message))) {
@@ -62,19 +85,25 @@ export class GitHub {
   }
 
   async get(path) {
-    return JSON.parse(await this.#call(["api", path]));
+    return JSON.parse(
+      await this.#call(["api", path], undefined, { expectJson: true }),
+    );
   }
 
   async getAll(path) {
     const separator = path.includes("?") ? "&" : "?";
     const url = `${path}${separator}per_page=100`;
     const args = ["api", "--paginate", "--slurp", url];
-    return JSON.parse(await this.#call(args)).flat();
+    return JSON.parse(
+      await this.#call(args, undefined, { expectJson: true }),
+    ).flat();
   }
 
   async #graphql(document, variables) {
     const body = JSON.stringify({ query: document, variables });
-    const stdout = await this.#call(["api", "graphql", "--input", "-"], body);
+    const stdout = await this.#call(["api", "graphql", "--input", "-"], body, {
+      expectJson: true,
+    });
     const reply = JSON.parse(stdout);
     if (reply.errors?.length) {
       throw new Error(`GraphQL: ${JSON.stringify(reply.errors)}`);

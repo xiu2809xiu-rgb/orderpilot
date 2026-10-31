@@ -1038,6 +1038,44 @@
       ]
     },
     {
+      "key": "P-29",
+      "title": "A unit coverage threshold on domain logic",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "should",
+      "estimate": 2,
+      "reqs": ["M4"],
+      "branch": "chore/domain-coverage-threshold",
+      "sprints": [3],
+      "dependsOn": ["P-6"],
+      "summary": "Phase B. Prompt 001 section 11 asks for unit tests at 80 percent or more on domain logic. No threshold is enforced yet.",
+      "acceptance": [
+        "The domain folders are named in the test config (the API's domain services and rules, and the shared package's schemas and pure functions), so the threshold applies to logic and not to wiring.",
+        "Vitest enforces 80 percent or more on lines, branches, functions and statements for those folders, and a run below it exits non-zero.",
+        "The verify job runs the coverage check, and the coverage report is kept as a build artifact.",
+        "docs/agile/test-plan.md names the folders and the threshold, and the practice is ticked in the build report."
+      ]
+    },
+    {
+      "key": "P-30",
+      "title": "A k6 smoke load test",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "should",
+      "estimate": 3,
+      "reqs": ["M4"],
+      "branch": "test/k6-smoke",
+      "sprints": [3],
+      "dependsOn": ["P-18"],
+      "summary": "Phase B. Prompt 001 section 11 asks for a k6 smoke load test of the extraction queue and the order endpoints.",
+      "acceptance": [
+        "A k6 script in the repository sends a small, steady load at the order endpoints and enqueues documents on the extraction queue, using synthetic data only and the mock AI provider.",
+        "Thresholds fail the run on a high error rate or a slow 95th percentile, with the numbers written down in docs/agile/test-plan.md.",
+        "It runs against the Docker stack with one documented command, and its result is recorded in the build report.",
+        "It is not a required check: it runs on demand or on a schedule, so a slow runner cannot block a merge."
+      ]
+    },
+    {
       "key": "T-1",
       "title": "Owners, backups and reviews",
       "epic": "T",

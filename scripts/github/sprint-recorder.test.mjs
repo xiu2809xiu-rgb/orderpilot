@@ -54,7 +54,7 @@ const merged = (overrides = {}) => ({
   ...overrides,
 });
 
-function stub({ issue, pullRequest, list = milestones }) {
+function stub({ issue, pullRequest, list = milestones, write, current }) {
   const writes = [];
   const lines = [];
   return {
@@ -67,9 +67,12 @@ function stub({ issue, pullRequest, list = milestones }) {
       log: (line) => lines.push(line),
       query: async () => ({ repository: { issue, pullRequest } }),
       getAll: async () => list,
-      write: async (summary, method, path, body) => {
-        writes.push({ method, path, body });
-      },
+      get: async () => ({ milestone: current ?? null }),
+      write:
+        write ??
+        (async (summary, method, path, body) => {
+          writes.push({ method, path, body });
+        }),
     },
   };
 }
@@ -278,4 +281,30 @@ test("work that was not finished is a no-op", async () => {
   });
   await record(github, { kind: "issue", number: 8 });
   assert.deepEqual(writes, []);
+});
+
+test("a failed write is harmless when the twin run already set the milestone", async () => {
+  const { github, lines } = stub({
+    issue: closedByHand(),
+    current: { number: 11 },
+    write: async () => {
+      throw new Error("gh failed: unexpected end of JSON input");
+    },
+  });
+  await record(github, { kind: "issue", number: 8 });
+  assert.ok(lines.some((line) => line.includes("already has")));
+});
+
+test("a failed write still fails the run when the milestone is not set", async () => {
+  const { github } = stub({
+    issue: closedByHand(),
+    current: null,
+    write: async () => {
+      throw new Error("gh failed: unexpected end of JSON input");
+    },
+  });
+  await assert.rejects(
+    () => record(github, { kind: "issue", number: 8 }),
+    /unexpected end of JSON input/,
+  );
 });

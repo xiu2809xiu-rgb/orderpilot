@@ -154,3 +154,74 @@ test("the repository comes from the Actions environment when it is set", () => {
     else process.env.GITHUB_REPOSITORY = saved;
   }
 });
+
+// The simulator hands out the faults first, then answers for real.
+import { SimulatedGitHub } from "../testing/simulated-github.mjs";
+
+function simulated(faults) {
+  const sim = new SimulatedGitHub({
+    milestones: [{ number: 1, title: "Sprint 1" }],
+    issues: [{ number: 5, milestone: null }],
+  });
+  sim.faults = faults;
+  const sleeps = [];
+  const github = new GitHub({
+    repo: "owner/name",
+    exec: sim.exec,
+    sleep: async (ms) => sleeps.push(ms),
+    log: () => {},
+    paceMs: 0,
+  });
+  return { sim, github, sleeps };
+}
+
+const patch = (github) =>
+  github.write("set", "PATCH", "repos/owner/name/issues/5", { milestone: 1 });
+const gone = {
+  status: 1,
+  stdout: "",
+  stderr: "gh: unexpected end of JSON input",
+};
+
+test("an empty reply then success passes, after a pause", async () => {
+  const { sim, github, sleeps } = simulated([{ match: /PATCH/, reply: gone }]);
+  const issue = await patch(github);
+  assert.equal(issue.milestone.number, 1);
+  assert.equal(sim.attempts.length, 2);
+  assert.ok(sleeps[0] > 0);
+});
+
+test("a 502 then success passes", async () => {
+  const bad = { status: 1, stdout: "", stderr: "gh: Bad Gateway (HTTP 502)" };
+  const { github } = simulated([{ match: /PATCH/, reply: bad }]);
+  assert.equal((await patch(github)).milestone.number, 1);
+});
+
+test("a clean exit with an empty body is retried when JSON is expected", async () => {
+  const empty = { status: 0, stdout: "", stderr: "" };
+  const { sim, github } = simulated([{ match: /milestones/, reply: empty }]);
+  const list = await github.getAll("repos/owner/name/milestones");
+  assert.equal(list.length, 1);
+  assert.equal(sim.attempts.length, 2);
+});
+
+test("repeated failure still fails, with the real error", async () => {
+  const { sim, github } = simulated(
+    Array(9).fill({ match: /PATCH/, reply: gone }),
+  );
+  await assert.rejects(() => patch(github), /unexpected end of JSON input/);
+  assert.equal(sim.attempts.length, 5);
+});
+
+test("a 422 is a real refusal and is not retried", async () => {
+  const refused = {
+    status: 1,
+    stdout: "",
+    stderr: "gh: Validation Failed (HTTP 422)",
+  };
+  const { sim, github } = simulated(
+    Array(9).fill({ match: /PATCH/, reply: refused }),
+  );
+  await assert.rejects(() => patch(github), /HTTP 422/);
+  assert.equal(sim.attempts.length, 1);
+});
