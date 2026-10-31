@@ -1,0 +1,40 @@
+name: Spike
+description: Time-boxed research that ends in a decision.
+labels:
+  - "type: spike"
+body:
+  - type: markdown
+    attributes:
+      value: After you create the issue, add the `area:` label you pick below. A decision someone will ask about later becomes an ADR.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - "area: 1 document AI and integration"
+        - "area: 2 order workflows and approvals"
+        - "area: 3 checks, tracker and insights"
+        - "area: 4 controls and monitoring"
+        - "area: team"
+    validations:
+      required: true
+  - type: textarea
+    id: question
+    attributes:
+      label: The question
+      description: What we need to find out, and which decision it unblocks.
+    validations:
+      required: true
+  - type: input
+    id: time-box
+    attributes:
+      label: Time-box
+      description: When we stop and report what we found, even if the answer is partial.
+      placeholder: Half a day
+    validations:
+      required: true
+  - type: textarea
+    id: findings
+    attributes:
+      label: What we found
+      description: Fill this in as you go. Use synthetic data only.

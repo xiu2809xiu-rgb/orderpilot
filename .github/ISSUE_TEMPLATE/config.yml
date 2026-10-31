@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security problem
+    url: https://github.com/xiu2809xiu-rgb/orderpilot/security/advisories/new
+    about: Report it privately. Never open a public issue about a security problem.
+  - name: Read the docs
+    url: https://github.com/xiu2809xiu-rgb/orderpilot/tree/main/docs
+    about: The agile docs, the ADRs and the build report.
