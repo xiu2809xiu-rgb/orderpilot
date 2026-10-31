@@ -32,6 +32,14 @@ allowBuilds:
   # Install-time telemetry that swagger-ui-dist pulls in. No functional effect,
   # so it stays denied. Reviewed: 2026-10-31
   "@scarf/scarf": false
+  # Optional native speed-up for msgpackr (BullMQ). The pure JavaScript fallback
+  # is used without it. Reviewed: 2026-10-31
+  msgpackr-extract: false
+  # Downloads the schema engine binary (migrations) from Prisma, which checks it
+  # against a published checksum. Needed by `prisma migrate`. Reviewed: 2026-10-31
+  "@prisma/engines": true
+  # Prisma CLI install step. Reviewed: 2026-10-31
+  prisma: true
 
 # eslint-plugin-jsx-a11y 6.10.2, its latest release, declares ESLint up to 9.
 # Its rules run correctly on ESLint 10: packages/eslint-config's tests lint a

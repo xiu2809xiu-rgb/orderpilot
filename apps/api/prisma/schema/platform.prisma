@@ -1,0 +1,107 @@
+// Platform models: users, sessions, the role-permission matrix and the audit
+// trail. Owner: Richie (platform). Area 4 owns the matrix contents.
+//
+// Conventions for every area's file:
+// - Primary keys are UUID v7, so they sort by creation time.
+// - Money and quantities are Decimal, never Float. (None here yet.)
+// - Timestamps are timestamptz with millisecond precision.
+
+enum Role {
+  SYSTEM_ADMIN
+  PRODUCT_MANAGER
+  APPROVER
+  SUPPORT
+  WAREHOUSE
+  FINANCE
+  LOGISTICS
+  MANAGEMENT
+  AUDITOR
+}
+
+/// A person who signs in. Users are disabled, never deleted: the audit trail
+/// and every record they touched keep pointing at them.
+model User {
+  id           String    @id @default(uuid(7)) @db.Uuid
+  email        String    @unique
+  displayName  String
+  /// An argon2 hash (P-10). Null for a demo account that signs in by persona.
+  passwordHash String?
+  role         Role
+  /// Set when the user is disabled. A disabled user cannot sign in, and every
+  /// refresh token of theirs is revoked.
+  disabledAt   DateTime? @db.Timestamptz(3)
+  createdAt    DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime  @updatedAt @db.Timestamptz(3)
+
+  refreshTokens RefreshToken[]
+
+  @@index([role])
+}
+
+/// One refresh token. Tokens of one sign-in share a family. Each use rotates the
+/// token: the old one gets usedAt and a successor. Presenting a token that was
+/// used already means it was stolen, so the whole family is revoked.
+model RefreshToken {
+  id                String    @id @default(uuid(7)) @db.Uuid
+  familyId          String    @db.Uuid
+  userId            String    @db.Uuid
+  /// SHA-256 of the token. The token itself is never stored.
+  tokenHash         String    @unique
+  expiresAt         DateTime  @db.Timestamptz(3)
+  /// Set when this token was exchanged for the next one.
+  usedAt            DateTime? @db.Timestamptz(3)
+  replacedByTokenId String?   @unique @db.Uuid
+  /// Set when the token, or its whole family, is no longer valid.
+  revokedAt         DateTime? @db.Timestamptz(3)
+  /// Why: "logout", "reuse-detected", "user-disabled", "password-changed".
+  revokedReason     String?
+  createdAt         DateTime  @default(now()) @db.Timestamptz(3)
+  ip                String?
+  userAgent         String?
+
+  user       User          @relation(fields: [userId], references: [id])
+  replacedBy RefreshToken? @relation("Rotation", fields: [replacedByTokenId], references: [id])
+  replaces   RefreshToken? @relation("Rotation")
+
+  @@index([familyId])
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+/// Which role holds which permission. The names come from @orderpilot/shared;
+/// area 4 owns the matrix and P-10 seeds the default.
+model RolePermission {
+  role       Role
+  permission String
+
+  @@id([role, permission])
+}
+
+/// One append-only audit event. A trigger refuses UPDATE, DELETE and TRUNCATE.
+/// Each hash covers the event and the hash before it (see audit.chain.ts).
+model AuditEvent {
+  /// Gives the chain its order. The database assigns it under the chain lock.
+  sequence    BigInt   @unique @default(autoincrement())
+  id          String   @id @default(uuid(7)) @db.Uuid
+  occurredAt  DateTime @db.Timestamptz(3)
+  /// "user", "system" or "ai".
+  actorKind   String
+  actorUserId String?  @db.Uuid
+  actorRole   Role?
+  /// The system component's name, or the AI model.
+  actorLabel  String?
+  action      String
+  entityType  String
+  entityId    String
+  summary     String
+  /// What changed. Never a secret, a token or a whole document.
+  changes     Json?
+  ip          String?
+  traceId     String
+  prevHash    String?
+  hash        String   @unique
+
+  @@index([entityType, entityId])
+  @@index([actorUserId])
+  @@index([occurredAt])
+}

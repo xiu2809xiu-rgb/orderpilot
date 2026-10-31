@@ -16,5 +16,5 @@
       "@orderpilot/shared": ["../../packages/shared/src/index.ts"]
     }
   },
-  "include": ["src", "test", "vitest.config.ts"]
+  "include": ["src", "test", "vitest.config.ts", "prisma.config.ts"]
 }
