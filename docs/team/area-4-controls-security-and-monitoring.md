@@ -1,6 +1,6 @@
 # Area 4: Controls, security and monitoring
 
-**Owner:** Angelyn. **Backup:** TBD until T-1. **Capabilities:** F and G. Paths and reviewers are in [module ownership](module-ownership.md#area-4-controls-security-and-monitoring-angelyn).
+**Owner:** Angelyn. **Backup:** Richie. **Capabilities:** F and G. Paths and reviewers are in [module ownership](module-ownership.md#area-4-controls-security-and-monitoring-angelyn).
 
 ## Goal
 

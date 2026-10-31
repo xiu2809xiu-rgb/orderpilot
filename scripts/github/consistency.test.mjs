@@ -170,20 +170,59 @@ test("the backlog only uses area labels that exist", () => {
   }
 });
 
-test("CODEOWNERS has one live rule, for the only safe handle", () => {
-  const rules = readRepoFile(".github/CODEOWNERS")
+const OWNER_HANDLES = [
+  "@xiu2809xiu-rgb",
+  "@MaineJermaine",
+  "@ITnyp",
+  "@angelynnmr",
+];
+
+const codeownersRules = () =>
+  readRepoFile(".github/CODEOWNERS")
     .split("\n")
-    .filter((line) => line.trim() && !line.startsWith("#"));
-  assert.deepEqual(rules, ["* @xiu2809xiu-rgb"]);
+    .filter((line) => line.trim() && !line.startsWith("#"))
+    .map((line) => line.trim().split(/\s+/));
+
+// Enough of CODEOWNERS matching for the paths tested here: a leading slash
+// anchors the pattern, a trailing slash means a folder, and * stays in a segment.
+const patternMatches = (pattern, path) => {
+  const source = pattern
+    .replace(/[.+^${}()|[\]\\]/g, "\\$&")
+    .replace(/\*/g, "[^/]*");
+  return new RegExp(`^${source}`).test(path);
+};
+
+test("CODEOWNERS starts with a catch-all for area 1 and uses only the four handles", () => {
+  const rules = codeownersRules();
+  assert.deepEqual(rules[0], ["*", "@xiu2809xiu-rgb", "@angelynnmr"]);
+  for (const [, ...owners] of rules) {
+    for (const owner of owners) assert.ok(OWNER_HANDLES.includes(owner), owner);
+  }
 });
 
-test("CODEOWNERS shows what T-1 has to fill in", () => {
-  const text = readRepoFile(".github/CODEOWNERS");
-  for (const area of [1, 2, 3, 4]) {
-    assert.ok(text.includes(`# <area ${area} paths>`), `area ${area}`);
-    assert.ok(text.includes(`@<area ${area} backup owner>`), `area ${area}`);
+test("every CODEOWNERS rule has at least two distinct owners", () => {
+  for (const [path, ...owners] of codeownersRules()) {
+    assert.ok(new Set(owners).size >= 2, path);
   }
-  assert.ok(text.includes("T-1"));
+});
+
+test("CODEOWNERS has no placeholders left", () => {
+  const text = readRepoFile(".github/CODEOWNERS");
+  assert.ok(!/<[^>]*>/.test(text));
+  assert.ok(!text.includes("TBD"));
+});
+
+test("each area's own guide resolves to that area's owners (last match wins)", () => {
+  const rules = codeownersRules().slice(1);
+  const ownersOf = (path) =>
+    [...rules]
+      .reverse()
+      .find(([pattern]) => patternMatches(pattern, path))
+      .slice(1);
+  assert.ok(ownersOf("/docs/team/area-2-x.md").includes("@MaineJermaine"));
+  assert.ok(ownersOf("/docs/team/area-3-x.md").includes("@ITnyp"));
+  assert.ok(ownersOf("/docs/team/area-4-x.md").includes("@angelynnmr"));
+  assert.equal(ownersOf("/docs/adr/0001.md").length, 4);
 });
 
 test("every wiki link to another page names a page that exists", () => {

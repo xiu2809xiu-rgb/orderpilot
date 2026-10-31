@@ -1,6 +1,6 @@
 # Area 2: Order workflows and approvals
 
-**Owner:** Azri. **Backup:** TBD until T-1. **Capability:** C, with parts of E. Paths and reviewers are in [module ownership](module-ownership.md#area-2-order-workflows-and-approvals-azri).
+**Owner:** Azri. **Backup:** Iok Teck. **Capability:** C, with parts of E. Paths and reviewers are in [module ownership](module-ownership.md#area-2-order-workflows-and-approvals-azri).
 
 ## Goal
 

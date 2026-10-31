@@ -4,12 +4,12 @@ Richie, the team lead, builds the base for every area. Each owner then takes ove
 
 ## The areas
 
-| Area                                 | Label                                   | Owner    | Backup owner  | Builds                                                                                                                  |
-| ------------------------------------ | --------------------------------------- | -------- | ------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| 1. Document AI and integration       | `area: 1 document AI and integration`   | Richie   | TBD until T-1 | The whole AI pipeline, intake, documents and orders data, master data, connectors, the platform and the 3D scene        |
-| 2. Order workflows and approvals     | `area: 2 order workflows and approvals` | Azri     | TBD until T-1 | The workflows on his state machine, tasks, SPR approval, the payment gate, reminders and generated documents            |
-| 3. Checks, tracker and insights      | `area: 3 checks tracker and insights`   | Iok Teck | TBD until T-1 | The checks engine, the exceptions queue, the tracker and the KPIs                                                       |
-| 4. Controls, security and monitoring | `area: 4 controls and monitoring`       | Angelyn  | TBD until T-1 | The authorisation policy, bank-detail control, masking, audit, data-to-AI rules, observability, clickstream and AI cost |
+| Area                                 | Label                                   | Owner    | Backup owner | Builds                                                                                                                  |
+| ------------------------------------ | --------------------------------------- | -------- | ------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| 1. Document AI and integration       | `area: 1 document AI and integration`   | Richie   | Angelyn      | The whole AI pipeline, intake, documents and orders data, master data, connectors, the platform and the 3D scene        |
+| 2. Order workflows and approvals     | `area: 2 order workflows and approvals` | Azri     | Iok Teck     | The workflows on his state machine, tasks, SPR approval, the payment gate, reminders and generated documents            |
+| 3. Checks, tracker and insights      | `area: 3 checks tracker and insights`   | Iok Teck | Azri         | The checks engine, the exceptions queue, the tracker and the KPIs                                                       |
+| 4. Controls, security and monitoring | `area: 4 controls and monitoring`       | Angelyn  | Richie       | The authorisation policy, bank-detail control, masking, audit, data-to-AI rules, observability, clickstream and AI cost |
 
 Work that belongs to the whole team carries `area: team`.
 
@@ -33,7 +33,7 @@ Each of areas 2, 3 and 4 starts with three stories at Ready on the board, planne
 
 ## Code owners
 
-`.github/CODEOWNERS` holds placeholders until T-1. Then each area's paths go to its owner, its backup owner and Richie, and shared files go to Richie and the backup owners, so that nobody ever waits on their own approval.
+`.github/CODEOWNERS` is filled in (T-1). Each area's paths go to its owner, its backup owner and Richie (area 1: Richie and Angelyn), and shared files go to all four. The handles are `xiu2809xiu-rgb` (Richie), `MaineJermaine` (Azri), `ITnyp` (Iok Teck) and `angelynnmr` (Angelyn).
 
 ## The module
 

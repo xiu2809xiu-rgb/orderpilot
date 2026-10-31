@@ -1,6 +1,6 @@
 # Area 3: Checks, tracker and insights
 
-**Owner:** Iok Teck. **Backup:** TBD until T-1. **Capability:** D, with parts of E. Paths and reviewers are in [module ownership](module-ownership.md#area-3-checks-tracker-and-insights-iok-teck).
+**Owner:** Iok Teck. **Backup:** Azri. **Capability:** D, with parts of E. Paths and reviewers are in [module ownership](module-ownership.md#area-3-checks-tracker-and-insights-iok-teck).
 
 ## Goal
 

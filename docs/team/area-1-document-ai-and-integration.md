@@ -1,6 +1,6 @@
 # Area 1: Document AI and integration
 
-**Owner:** Richie. **Backup:** TBD until T-1. **Capabilities:** A, B and E, plus the platform. Paths and reviewers are in [module ownership](module-ownership.md#area-1-document-ai-and-integration-richie).
+**Owner:** Richie. **Backup:** Angelyn. **Capabilities:** A, B and E, plus the platform. Paths and reviewers are in [module ownership](module-ownership.md#area-1-document-ai-and-integration-richie).
 
 ## Goal
 
