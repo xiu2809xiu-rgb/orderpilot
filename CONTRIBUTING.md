@@ -79,6 +79,14 @@ There is no app to build or start yet: `pnpm build` has nothing to build until P
 
 If a hook stops you, it says why and what to do. When it refuses a push to `main`, push your branch instead (`git push -u origin <branch>`) and open a pull request. Never skip a hook with `--no-verify`. [Security testing](docs/security/security-testing.md) lists every check.
 
+#### Several worktrees, or a tree that has not installed yet
+
+`core.hooksPath` is stored in the repository's shared `.git/config`, so every worktree of a clone gets it. The path is relative to each tree, which gives three cases:
+
+- A tree that has not merged `main` yet has no `.githooks/` folder. Git then runs no hooks there, so it can still commit. Merge `main` to get the hooks.
+- A tree with `.githooks/` but no `node_modules` stops the commit with `<package> is not installed. Run pnpm install at the repository root, then try again.` We chose a loud stop over a silent skip, so nobody commits unchecked work by accident. Run `pnpm install` in that tree.
+- No Node on `PATH` stops the commit with a message that names this guide.
+
 ### What later stories bring
 
 | Step                                                               | Story |
