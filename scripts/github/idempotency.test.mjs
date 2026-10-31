@@ -373,7 +373,7 @@ test("board values come from the data", async () => {
   const item = linkedBoard(simulated).items.find(
     (entry) => entry.number === issue.number,
   );
-  assert.equal(item.area, "3 checks, tracker and insights");
+  assert.equal(item.area, "3 checks tracker and insights");
   assert.equal(item.estimate, 8);
   const team = simulated.issues.find((entry) => entry.title.startsWith("T-2:"));
   const planned = linkedBoard(simulated).items.find(

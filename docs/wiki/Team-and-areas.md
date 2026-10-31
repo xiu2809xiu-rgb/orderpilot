@@ -8,7 +8,7 @@ Richie, the team lead, builds the base for every area. Each owner then takes ove
 | ------------------------------------ | --------------------------------------- | -------- | ------------- | ----------------------------------------------------------------------------------------------------------------------- |
 | 1. Document AI and integration       | `area: 1 document AI and integration`   | Richie   | TBD until T-1 | The whole AI pipeline, intake, documents and orders data, master data, connectors, the platform and the 3D scene        |
 | 2. Order workflows and approvals     | `area: 2 order workflows and approvals` | Azri     | TBD until T-1 | The workflows on his state machine, tasks, SPR approval, the payment gate, reminders and generated documents            |
-| 3. Checks, tracker and insights      | `area: 3 checks, tracker and insights`  | Iok Teck | TBD until T-1 | The checks engine, the exceptions queue, the tracker and the KPIs                                                       |
+| 3. Checks, tracker and insights      | `area: 3 checks tracker and insights`  | Iok Teck | TBD until T-1 | The checks engine, the exceptions queue, the tracker and the KPIs                                                       |
 | 4. Controls, security and monitoring | `area: 4 controls and monitoring`       | Angelyn  | TBD until T-1 | The authorisation policy, bank-detail control, masking, audit, data-to-AI rules, observability, clickstream and AI cost |
 
 Work that belongs to the whole team carries `area: team`.

@@ -14,7 +14,7 @@ Some constraints shaped how:
 
 - **No pnpm yet.** The workspace arrives with P-5, after this story. The scripts have to run on Node alone.
 - **Nothing may write to GitHub before the merge.** The logic has to be provable without changing the repository.
-- **A label holds a comma.** `area: 3 checks, tracker and insights` is the brief's exact name, and `gh issue create --label` splits on commas.
+- **The brief's area 3 label held a comma.** GitHub refuses a comma in a label name (HTTP 422), so see the note at the end of this record.
 - **An abandoned board shares the title.** Project #2, now `OrderPilot delivery (port attempt)` and closed, belongs to the owner, not to this repository, and must never be touched.
 - **Issues #1, #2 and #4 to #7 already exist.** They were made by hand so that their pull requests had something to close.
 
@@ -35,3 +35,7 @@ Some constraints shaped how:
 - GitHub's API cannot group a board view, so the Backlog view's grouping by Sprint stays a manual step for Richie.
 - The scripts depend on `gh` being signed in with the `project` scope. A teammate without it can still run every dry run that does not need the board.
 - About 70 issues created in a row hit GitHub's secondary rate limit, so writes are paced at about one a second and retried with back-off. A full first run takes a few minutes.
+
+## Note, 2026-10-31: the area 3 label
+
+The brief names the label `area: 3 checks, tracker and insights`. GitHub answers HTTP 422 for a comma in a label name, and the first live setup run stopped there. The label is now `area: 3 checks tracker and insights` and the board's Area option is `3 checks tracker and insights`. A test checks that no label has a comma, and the simulated GitHub refuses one with a 422. Tracked in issue #10.

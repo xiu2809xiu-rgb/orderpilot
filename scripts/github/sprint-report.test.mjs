@@ -20,19 +20,19 @@ const issue = (number, overrides = {}) => ({
 const closed = (number, closedAt, overrides = {}) =>
   issue(number, { state: "CLOSED", closedAt, ...overrides });
 
-test("the area comes from the label, comma and all", () => {
+test("the area comes from the label", () => {
   const story = issue(1, {
-    labels: ["type: story", "area: 3 checks, tracker and insights"],
+    labels: ["type: story", "area: 3 checks tracker and insights"],
   });
-  assert.equal(areaOf(story, areas), "area: 3 checks, tracker and insights");
+  assert.equal(areaOf(story, areas), "area: 3 checks tracker and insights");
 });
 
 test("an issue form's area counts until someone adds the label", () => {
   const body =
-    "### Epic\n\nEpic C\n\n### Area\n\narea: 3 checks, tracker and insights\n\n### Priority\n\npriority: must";
+    "### Epic\n\nEpic C\n\n### Area\n\narea: 3 checks tracker and insights\n\n### Priority\n\npriority: must";
   assert.equal(
     areaOf(issue(1, { body }), areas),
-    "area: 3 checks, tracker and insights",
+    "area: 3 checks tracker and insights",
   );
 });
 
@@ -98,7 +98,7 @@ test("the report lists closed and in-progress work by area", () => {
     issues: [
       closed(1, "2026-10-31T07:52:44Z", { labels: ["area: team"] }),
       closed(4, "2026-10-31T08:00:00Z", {
-        labels: ["area: 3 checks, tracker and insights"],
+        labels: ["area: 3 checks tracker and insights"],
       }),
       issue(2, { labels: ["area: team"], assignees: ["someone"] }),
       issue(3, { labels: ["area: team"] }),
@@ -111,7 +111,7 @@ test("the report lists closed and in-progress work by area", () => {
       "Goal: Build the base.",
       "",
       "Closed this sprint (2)",
-      "  area: 3 checks, tracker and insights",
+      "  area: 3 checks tracker and insights",
       "    #4 P-4: Story 4",
       "  area: team",
       "    #1 P-1: Story 1",
