@@ -2,13 +2,13 @@
 
 Rendered from [`scripts/github/data/backlog.json`](../../scripts/github/data/backlog.json) by `node scripts/github/render-docs.mjs`. Change the data, not this file. The same data seeds the issues. The board shows where each story stands.
 
-There are 9 epics and 71 stories. Estimates are story points: a first guess, for the team to change at planning.
+There are 9 epics and 72 stories. Estimates are story points: a first guess, for the team to change at planning.
 
 ## Epics
 
 | Epic   | Title                             | Area                                    | Stories | Points |
 | ------ | --------------------------------- | --------------------------------------- | ------- | ------ |
-| Epic P | The platform base                 | `area: 1 document AI and integration`   | 27      | 169    |
+| Epic P | The platform base                 | `area: 1 document AI and integration`   | 28      | 170    |
 | Epic A | Document intake and AI extraction | `area: 1 document AI and integration`   | 5       | 31     |
 | Epic B | Master data and Navision          | `area: 1 document AI and integration`   | 4       | 14     |
 | Epic C | Order workflows and approvals     | `area: 2 order workflows and approvals` | 5       | 29     |
@@ -78,6 +78,7 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | P-24  | Cloud deployment                                                   | must     | 8      | `area: 1 document AI and integration`   | M4 best practices, M6 deploy and monitor                       |
 | P-25  | Slides as code                                                     | must     | 3      | `area: team`                            | M4 best practices                                              |
 | P-26  | Generated API hooks and mocks                                      | must     | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-28  | Replace the accepted glob advisory with an override                | must     | 1      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | T-1   | Owners, backups and reviews                                        | must     | 2      | `area: team`                            | M5 team Git workflow                                           |
 | T-2   | The briefing call with Spectra                                     | must     | 2      | `area: team`                            | M1 design thinking                                             |
 | T-3   | The project plan                                                   | must     | 3      | `area: team`                            | M5 team Git workflow                                           |
@@ -729,6 +730,24 @@ Acceptance criteria:
 - Saved table filters on the server, so they follow a person to another device, plus a filter shared with a team. P-12 keeps them in the browser for one viewer.
 - Retake docs/design/screenshots/platform/components-small-pieces-dark.png: it is clipped and its popover covers a neighbouring field.
 - P-26 left out: generated hooks check each answer at run time with zod schemas generated from the OpenAPI file, and the error envelope is a documented response on every route, so a hook's error type is typed.
+
+### P-28: Replace the accepted glob advisory with an override
+
+Due between 2026-11-03 and 2026-11-05. GHSA-3g3m-2fjr-6pw4 is accepted in osv-scanner.toml until 2026-11-06, after which the OSV check fails on every pull request. The fix, glob 14.0.2, is inside the 7-day release-age window until 2026-11-03.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 1 points
+- **Requirements:** M4 best practices
+- **Branch:** `chore/glob-override`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-6
+
+Acceptance criteria:
+
+- From 2026-11-03, a pnpm override moves glob to 14 with its reason and a review date in pnpm-workspace.yaml, and `pnpm install` and `pnpm build` still pass.
+- The GHSA-3g3m-2fjr-6pw4 entry is removed from osv-scanner.toml and from the table in docs/security/security-testing.md, and the OSV scan passes without it.
+- Done and merged by 2026-11-05, a day before the accepted advisory expires.
 
 ## Epic A: Document intake and AI extraction
 
