@@ -46,7 +46,7 @@ Read from GitHub and the repository on Sunday 1 Nov 2026 at about 02:45 Singapor
 
 ### 1. Status
 
-Phase A's stories are merged: the last one, [#105](https://github.com/xiu2809xiu-rgb/orderpilot/pull/105) (Getting started), merged at 02:40 SGT on Sun 1 Nov (`2026-10-31T18:40:28Z`), about 21 hours before the deadline of Sunday 1 Nov, 23:59 SGT. All 21 pull requests that Phase A needed are merged (`gh pr list --state all`: 21 merged, none open before this one).
+Phase A is merged except P-22 (the Pro kits), which waits on Richie (section 7). Every other story is merged: the last one, [#105](https://github.com/xiu2809xiu-rgb/orderpilot/pull/105) (Getting started), merged at 02:40 SGT on Sun 1 Nov (`2026-10-31T18:40:28Z`), about 21 hours before the deadline of Sunday 1 Nov, 23:59 SGT. All 21 pull requests that Phase A needed are merged (`gh pr list --state all`: 21 merged, none open before this one).
 
 ### 2. What each owner gets
 
@@ -174,6 +174,7 @@ Ticked means it exists on `main` and I found it with a command. Planned means th
 
 ### 7. Still open
 
+- **P-22 (the Pro kits) is not done.** It waits for Richie to say the repository is private and the official keys are in `apps/web/.env.local` (section 9). Until then, free kits only.
 - **Ready to hand over:** areas 2, 3 and 4 are ready: base merged, screens, routes, tests named, guide, three starter stories each at Ready. Area 1 is Richie's own and continues in Phase B.
 - **Screens run on mock data by design.** Areas 2, 3 and parts of 4 return typed mock data stamped `meta.mock` until the owners replace it story by story.
 - **Screenshots** are from local production builds, not Docker, until P-13 (#28). F-1's screenshots predate its permission change, so they may differ slightly from what runs today.
@@ -198,7 +199,7 @@ Ticked means it exists on `main` and I found it with a command. Planned means th
 - Decide on Swagger in the live demo (item m), MSW 3 (item q), MinIO and the demo's document store (items t, u), Prisma 7.10 (item v).
 - Make sure the three teammates accept their invitations (item n); have someone test the macOS steps (item aj).
 - Create the Sentry project and decide who sees errors (item ah); decide on `/metrics` exposure (item ag) and the consent banner (item ai).
-- Say when the repository is private and the official keys are in `apps/web/.env.local` (unblocks P-22), and confirm step 8 of the deployment guide (unblocks P-24).
+- Say when the repository is private and the official keys are in `apps/web/.env.local` (unblocks P-22, the one Phase A story still open), and confirm step 8 of the deployment guide (unblocks P-24).
 - Group the board's Backlog view by Sprint, and tag the releases after a feature freeze.
 - Confirm or change the role defaults owners proposed (items r, w, y) and the audit sample rule (item ad).
 
