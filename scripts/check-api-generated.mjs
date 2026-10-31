@@ -46,7 +46,7 @@ const before = snapshot();
 // pnpm sets npm_execpath to itself (a script, or a binary), so no shell is
 // needed. Run directly, "pnpm" is looked up on the PATH.
 const pnpm = process.env.npm_execpath ?? "pnpm";
-const isScript = /.[cm]?js$/.test(pnpm);
+const isScript = /\.[cm]?js$/.test(pnpm);
 const run = spawnSync(
   isScript ? process.execPath : pnpm,
   isScript ? [pnpm, "api:generate"] : ["api:generate"],
