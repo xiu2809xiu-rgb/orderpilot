@@ -1,6 +1,6 @@
 # Area 3: Checks, tracker and insights
 
-**Owner:** Iok Teck. **Backup:** TBD until T-1. **Capability:** D, with parts of E. Paths and reviewers are in [module ownership](module-ownership.md#area-3-checks-tracker-and-insights-iok-teck).
+**Owner:** Iok Teck. **Backup:** Azri. **Capability:** D, with parts of E. Paths and reviewers are in [module ownership](module-ownership.md#area-3-checks-tracker-and-insights-iok-teck).
 
 ## Goal
 
@@ -67,6 +67,7 @@ All planned. Each item lands with the story named, and D-1 fills this section in
   - the master-data screens' price checks, with P-19's data;
   - `it.todo` tests naming the key cases: the MVP mismatch (the packing list's quantity against the PO), tolerances and the KPI formulas.
 - **From the platform:** the shared contracts (P-7); the API shell (P-8); the database and seed orders in different states (P-9); sign-in and the permissions guard (P-10); the web shell (P-11) and the common data table with quick search, saved filters, column settings and export (P-12); the event bus and live updates (P-15); mock Navision's master data (P-19); and the synthetic documents with planted mistakes (P-21).
+- **Generated hooks and mocks (planned: P-26):** the base's screens use the typed TanStack Query hooks and MSW mocks that orval generates from the API's OpenAPI spec, through the web app's `ApiClient`. Regenerate them when your routes change; CI fails when they are out of date.
 
 ## What's yours to build
 
@@ -85,6 +86,12 @@ All planned. Each item lands with the story named, and D-1 fills this section in
 - the KPIs: each of the five measures as a tested formula, with its lab estimate labelled;
 - role home tiles with counts, such as orders waiting on me or orders ready to ship, in our own design, on the shell's home pages;
 - full test coverage: every planted mistake in the synthetic documents flagged, and no false alarm on the clean ones.
+
+## Options to consider, not built
+
+Tools that may suit this area. None is installed, pinned or built ([ADR 0020](../adr/0020-options-left-to-the-owners.md)). If you adopt one, bring its ADR, an exact pinned version and a row in the traceability matrix with that story.
+
+- **json-rules-engine** for the check rules. The plan is plain check classes with data-driven settings; adopt the library only if it makes rules easier to read and to change than that.
 
 ## At the Week 7 interview
 

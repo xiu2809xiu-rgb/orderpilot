@@ -2,13 +2,13 @@
 
 Rendered from [`scripts/github/data/backlog.json`](../../scripts/github/data/backlog.json) by `node scripts/github/render-docs.mjs`. Change the data, not this file. The same data seeds the issues. The board shows where each story stands.
 
-There are 9 epics and 64 stories. Estimates are story points: a first guess, for the team to change at planning.
+There are 9 epics and 65 stories. Estimates are story points: a first guess, for the team to change at planning.
 
 ## Epics
 
 | Epic   | Title                             | Area                                    | Stories | Points |
 | ------ | --------------------------------- | --------------------------------------- | ------- | ------ |
-| Epic P | The platform base                 | `area: 1 document AI and integration`   | 26      | 166    |
+| Epic P | The platform base                 | `area: 1 document AI and integration`   | 27      | 169    |
 | Epic A | Document intake and AI extraction | `area: 1 document AI and integration`   | 5       | 31     |
 | Epic B | Master data and Navision          | `area: 1 document AI and integration`   | 4       | 14     |
 | Epic C | Order workflows and approvals     | `area: 2 order workflows and approvals` | 4       | 26     |
@@ -77,6 +77,7 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | G-1   | Area 4 base, monitoring                                            | must     | 8      | `area: 4 controls and monitoring`       | M2 GRS by design, M6 deploy and monitor                        |
 | P-24  | Cloud deployment                                                   | must     | 8      | `area: 1 document AI and integration`   | M4 best practices, M6 deploy and monitor                       |
 | P-25  | Slides as code                                                     | must     | 3      | `area: team`                            | M4 best practices                                              |
+| P-26  | Generated API hooks and mocks                                      | must     | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | T-1   | Owners, backups and reviews                                        | must     | 2      | `area: team`                            | M5 team Git workflow                                           |
 | T-2   | The briefing call with Spectra                                     | must     | 2      | `area: team`                            | M1 design thinking                                             |
 | T-3   | The project plan                                                   | must     | 3      | `area: team`                            | M5 team Git workflow                                           |
@@ -99,7 +100,7 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | B-3   | The template engine for PIs, invoices, packing lists and Excel     | should   | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | E-3   | Prompt-injection tests                                             | should   | 3      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | P-23  | The 3D order constellation                                         | could    | 13     | `area: 1 document AI and integration`   | M4 best practices                                              |
-| P-26  | Web shell polish                                                   | could    | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-27  | Web shell polish                                                   | could    | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | B-4   | QR codes on generated documents and carton labels                  | could    | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | E-4   | Passkeys to confirm risky approvals                                | could    | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | E-5   | A first-run guided tour for each role                              | could    | 3      | `area: 1 document AI and integration`   | M1 design thinking, M4 best practices                          |
@@ -333,6 +334,7 @@ Acceptance criteria:
 - Getting started and `CONTRIBUTING.md` say `cp .env.example .env`, and troubleshooting covers "port already in use", "role does not exist" (another PostgreSQL answered) and Docker not running.
 - Proved from a clean clone with nothing loaded in the shell, on the default ports and again with `POSTGRES_PORT=5433`.
 - ADRs: Prisma with PostgreSQL; S3-compatible document storage.
+- The local stack runs the `pgvector/pgvector` PostgreSQL image with the `pgvector` and `pg_trgm` extensions enabled, and Mailpit as the only place OrderPilot sends email in development and demos with an ADR, a pinned version and a traceability row (ADRs 0017 and 0018).
 
 ### P-10: Sign-in and sessions
 
@@ -501,6 +503,7 @@ Acceptance criteria:
 - A destination check: area 4's policy decides what data may go to which provider. The default is synthetic data only.
 - Keys: Richie adds `GROQ_API_KEY` and `GEMINI_API_KEY` to the root `.env` himself.
 - ADR: the AI gateway and the person in the loop.
+- The Vercel AI SDK sits under `LlmGateway`, and the gateway keeps cost tracking and the data-to-AI policy with an ADR, a pinned version and a traceability row.
 
 ### P-18: Document intake and storage
 
@@ -585,7 +588,7 @@ Acceptance criteria:
 
 ### P-22: The design system with the Pro kits
 
-The licensed kits, set up as soon as the keys work and Richie says Pro code may go in, and Richie's own pages upgraded with them.
+The licensed kits, set up once Richie says the repository is private and the official keys are in `apps/web/.env.local`, and Richie's own pages upgraded with them.
 
 - **Area:** `area: 1 document AI and integration`
 - **Priority:** should
@@ -594,7 +597,7 @@ The licensed kits, set up as soon as the keys work and Richie says Pro code may 
 - **Branch:** `feat/platform-design-system`
 - **Planned for:** Sprint 02 (W3)
 - **Depends on:** P-11, P-12
-- **Condition:** As soon as the Pro keys work (prompt 002, section 4). Rule 8 of prompt 001 forbids Pro code while the repository is public, and the repository is public: which applies is waiting for Richie. Until he says, free kits only.
+- **Condition:** Only once Richie says the repository is private and official keys are in `apps/web/.env.local` (rule 8 of prompt 001, confirmed in prompt 002, section 7). Until he says, free kits only.
 
 Acceptance criteria:
 
@@ -673,7 +676,27 @@ Acceptance criteria:
 - `pnpm slides:build` exports PDF, HTML and PPTX.
 - `slides:check` runs in CI.
 
-### P-26: Web shell polish
+### P-26: Generated API hooks and mocks
+
+orval generates typed TanStack Query hooks and MSW mocks from the API's OpenAPI spec, so every area base starts from the same typed client.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 3 points
+- **Requirements:** M4 best practices
+- **Branch:** `feat/platform-orval`
+- **Planned for:** Sprint 01 (W2)
+- **Depends on:** P-8, P-11
+
+Acceptance criteria:
+
+- The API exports its OpenAPI spec to a file with no database running.
+- orval, at an exact pinned version, generates typed TanStack Query hooks and MSW mocks from that file, through the web app's `ApiClient`.
+- A CI step fails when the generated code is out of date.
+- Every area base uses the generated hooks and mocks.
+- An ADR (0019), a pinned version and a traceability row.
+
+### P-27: Web shell polish
 
 What P-11 left out because no teammate needs it in its first week.
 
@@ -819,6 +842,7 @@ Acceptance criteria:
 
 - The template engine produces PIs, invoices, packing lists and Excel.
 - Areas 2 and 3 use it.
+- React-PDF and ExcelJS render the template engine's PDF and Excel output with an ADR, a pinned version and a traceability row.
 
 ### B-4: QR codes on generated documents and carton labels
 
@@ -1064,6 +1088,7 @@ Acceptance criteria:
 
 - The harness measures extraction accuracy on the synthetic test set, against a target of 95% or more.
 - It compares models.
+- promptfoo runs the accuracy set in CI with an ADR, a pinned version and a traceability row.
 
 ### E-3: Prompt-injection tests
 
@@ -1078,6 +1103,7 @@ Tests that prove a hostile document cannot steer the AI.
 Acceptance criteria:
 
 - Tests show that documents are treated as data, the model only returns fields, and no model output triggers an action.
+- promptfoo runs the prompt-injection tests in CI with an ADR, a pinned version and a traceability row.
 
 ### E-4: Passkeys to confirm risky approvals
 
@@ -1267,6 +1293,7 @@ Acceptance criteria:
 - Screens: AI usage and cost, reading real records; observability and clickstream, on mock data with to-do tests.
 - Left to Angelyn: the real dashboards, budgets and alerts, in Weeks 14 to 16 (Sprints 13 to 15).
 - Angelyn's review is requested on the pull request once they are a collaborator, and Richie is told when it merges, so he can hand it over.
+- Grafana's `otel-lgtm` image as an optional compose profile for traces, metrics and logs, and Sentry for errors in the web app and the API. Both stay off unless configured with an ADR, a pinned version and a traceability row (ADRs 0021 and 0022).
 
 ## Epic T: Team stories
 

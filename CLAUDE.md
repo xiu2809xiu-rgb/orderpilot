@@ -173,7 +173,7 @@ Spectra's own five measures sit alongside these: order-processing time, manual t
 
 ## 2. The stack
 
-Each row says whether it exists today or which story brings it. Everything marked planned is the plan, not a fact. The story that delivers a row changes it to Today, and pins the exact versions when it installs them.
+Each row says whether it exists today or which story brings it. Everything marked planned is the plan, not a fact. The story that delivers a row changes it to Today, and pins the exact versions when it installs them. Each tool added by Richie's addendum of 31 Oct (prompt 002, section 7) comes with an ADR, a pinned version and a traceability row. XState, json-rules-engine, CASL and PostHog are options for the area owners, not built ([ADR 0020](docs/adr/0020-options-left-to-the-owners.md)).
 
 | Concern                 | Choice                                                                                                                                                                   | Status                               |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------ |
@@ -209,6 +209,13 @@ Each row says whether it exists today or which story brings it. Everything marke
 | Deployment              | Amazon Lightsail in Singapore, Caddy for HTTPS, images on GHCR, and OWASP ZAP against the live URL                                                                       | Planned: P-24                        |
 | Slides                  | Marp                                                                                                                                                                     | Planned: P-25                        |
 | Monitoring              | OpenTelemetry for traces and metrics, `/metrics` with prom-client, and an `AnalyticsTracker` class                                                                       | Planned: G-1                         |
+| Generated API client    | orval turns the API's OpenAPI spec into typed TanStack Query hooks and MSW mocks, used by every area base                                                                | Planned: P-26 (ADR 0019)             |
+| Database image          | The `pgvector/pgvector` PostgreSQL image, with the `pgvector` and `pg_trgm` extensions                                                                                   | Planned: P-9 (ADR 0017)              |
+| Email in development    | Mailpit, the only place OrderPilot sends email in development and demos                                                                                                  | Planned: P-9 (ADR 0018)              |
+| AI SDK                  | The Vercel AI SDK under `LlmGateway`, which keeps cost tracking and the data-to-AI policy                                                                                | Planned: P-17                        |
+| AI evaluation           | promptfoo for the accuracy set and the prompt-injection tests, run in CI                                                                                                 | Planned: E-2, E-3                    |
+| Document output         | React-PDF and ExcelJS for the template engine                                                                                                                            | Planned: B-3                         |
+| Optional observability  | Grafana's `otel-lgtm` image as a compose profile for traces, metrics and logs, and Sentry for errors in the web app and the API. Both stay off unless configured         | Planned: G-1 (ADRs 0021 and 0022)    |
 
 ## 3. Repository layout
 
