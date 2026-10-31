@@ -69,7 +69,7 @@ export function ErrorPanel({ error, onRetry }: ErrorPanelProps) {
         description={message}
         traceLabel={traceId ? tc("errors.traceId") : undefined}
         traceId={traceId}
-        footer={
+        traceAction={
           traceId ? (
             <CopyButton value={traceId} what={tc("errors.traceId")} />
           ) : null

@@ -1,4 +1,5 @@
 import type { Permission } from "@orderpilot/shared";
+import { Suspense, lazy } from "react";
 import { Navigate, Outlet, useLocation, useSearchParams } from "react-router";
 import { safeNext } from "@/lib/errors";
 import { hasPermission, useSessionStore } from "@/stores/session";
@@ -35,4 +36,23 @@ export function PublicOnly() {
 export function RequirePermission({ permission }: { permission?: Permission }) {
   const session = useSessionStore((state) => state.session);
   return hasPermission(session, permission) ? <Outlet /> : <ForbiddenPage />;
+}
+
+// Only the gallery needs it here, so it stays out of the entry bundle.
+const NotFoundPage = lazy(async () => ({
+  default: (await import("./pages/NotFoundPage")).NotFoundPage,
+}));
+
+/**
+ * The component gallery is for demos and development. In a real deployment
+ * (no demo session, a production build) the address is simply not found.
+ */
+export function RequireDemo() {
+  const demo = useSessionStore((state) => state.session?.demo ?? false);
+  if (import.meta.env.DEV || demo) return <Outlet />;
+  return (
+    <Suspense fallback={<Splash />}>
+      <NotFoundPage />
+    </Suspense>
+  );
 }

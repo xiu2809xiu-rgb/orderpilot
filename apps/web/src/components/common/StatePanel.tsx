@@ -16,8 +16,8 @@ interface StatePanelProps {
   headingLevel?: 1 | 2 | 3;
   /** Buttons: the next action, or retry. */
   children?: ReactNode;
-  /** Extra content under the description, such as a trace id with a copy button. */
-  footer?: ReactNode;
+  /** Sits beside the trace id, such as a copy button. */
+  traceAction?: ReactNode;
 }
 
 /**
@@ -33,7 +33,7 @@ export function StatePanel({
   variant = "page",
   headingLevel,
   children,
-  footer,
+  traceAction,
 }: StatePanelProps) {
   const Heading = HEADINGS[headingLevel ?? (variant === "page" ? 1 : 2)];
   return (
@@ -60,14 +60,14 @@ export function StatePanel({
         <p className="measure text-muted-foreground">{description}</p>
       ) : null}
       {traceId ? (
-        <p className="text-xs text-muted-foreground">
+        <p className="flex items-center gap-1 text-xs text-muted-foreground">
           {traceLabel}{" "}
           <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-foreground">
             {traceId}
           </code>
+          {traceAction}
         </p>
       ) : null}
-      {footer}
       {children ? <div className="flex gap-2 pt-2">{children}</div> : null}
     </div>
   );

@@ -41,8 +41,10 @@ export function ExportMenu<Row>({
 }: ExportMenuProps<Row>) {
   const { t } = useTranslation("components");
   const [message, setMessage] = useState("");
+  const [failed, setFailed] = useState(false);
 
   async function run(format: "csv" | "xlsx") {
+    setFailed(false);
     setMessage(t("table.exporting"));
     try {
       const data = loadRows ? await loadRows() : rows;
@@ -62,6 +64,7 @@ export function ExportMenu<Row>({
       }
       setMessage(t("table.exportDone"));
     } catch {
+      setFailed(true);
       setMessage(t("table.exportFailed"));
     }
   }
@@ -97,7 +100,10 @@ export function ExportMenu<Row>({
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <span role="status" className="sr-only">
+      <span
+        role="status"
+        className={failed ? "text-sm text-destructive" : "sr-only"}
+      >
         {message}
       </span>
     </>

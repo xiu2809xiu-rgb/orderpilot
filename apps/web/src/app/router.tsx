@@ -6,7 +6,12 @@ import {
 } from "react-router";
 import { features } from "@/features/registry";
 import type { Feature } from "@/features/define";
-import { PublicOnly, RequireAuth, RequirePermission } from "./guards";
+import {
+  PublicOnly,
+  RequireAuth,
+  RequireDemo,
+  RequirePermission,
+} from "./guards";
 import { RouteCrashPage } from "./pages/CrashPage";
 import { RootLayout } from "./RootLayout";
 import { Splash } from "./Splash";
@@ -73,6 +78,20 @@ export function buildRoutes(
                       .SettingsPage,
                   }),
                   handle: { crumb: "common:nav.settings" },
+                },
+                {
+                  path: "gallery",
+                  element: <RequireDemo />,
+                  handle: { crumb: "common:nav.gallery" },
+                  children: [
+                    {
+                      index: true,
+                      lazy: async () => ({
+                        Component: (await import("./gallery/GalleryPage"))
+                          .GalleryPage,
+                      }),
+                    },
+                  ],
                 },
                 ...list.map(featureRoute),
                 {
