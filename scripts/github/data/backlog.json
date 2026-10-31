@@ -375,7 +375,8 @@
         "Images: multi-stage, running as non-root, with health checks; one for the API (with a worker entry); one for the web app (nginx with security headers and an SPA fallback); a generic one for the mock services.",
         "Compose: `api`, `worker` and `web` services, each waiting on its dependencies' health checks; `.dockerignore`; a samples override (a throwaway stack that only this machine can reach, for trying a client sample, deleted afterwards).",
         "CI: \"Docker images\" builds every image, then a Trivy image scan fails on fixable HIGH or CRITICAL findings; \"IaC and Dockerfile scan\" runs Trivy config. Both become required.",
-        "ADR: Docker and the deployment target."
+        "ADR: Docker and the deployment target.",
+        "Cache the MinIO source build (`docker/minio`) between CI runs and between rebuilds, so `docker compose up --build` does not compile it again. Left out of P-9 because the first build runs once per machine (ADR 0011)."
       ]
     },
     {
@@ -765,7 +766,8 @@
       "acceptance": [
         "The audit log viewer over the real hash chain, with filters and a chain check.",
         "To-do tests, as `it.todo`, for export and retention.",
-        "Angelyn's review is requested on the pull request once they are a collaborator, and Richie is told when it merges, so he can hand it over."
+        "Angelyn's review is requested on the pull request once they are a collaborator, and Richie is told when it merges, so he can hand it over.",
+        "Anchor the latest audit hash outside the database (a signed daily export) and verify the trail on a schedule, so tampering by someone with the database owner's rights is caught early. P-9 provides `AuditService.verify` (ADR 0010)."
       ]
     },
     {
@@ -925,7 +927,8 @@
         "`docs/deploy.md`: deploy, roll back, rotate secrets, read logs, restore a backup, and shut everything down after the module.",
         "The README gets the live demo link and a deployment table.",
         "A DAST job: an OWASP ZAP baseline scan of the live URL, weekly and on demand, with its report kept.",
-        "ADR: the deployment."
+        "ADR: the deployment.",
+        "Decide where the live demo keeps documents: AWS S3 or a maintained S3 store instead of the source-built MinIO, which gets no upstream fixes. Only `S3_ENDPOINT`, the keys and the bucket change (ADR 0011)."
       ]
     },
     {

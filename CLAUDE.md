@@ -188,16 +188,16 @@ Each row says whether it exists today or which story brings it. Everything marke
 | Shared contracts        | `packages/shared`: zod schemas and types                                                                                                                                 | Built: P-7 (draft order contract)    |
 | API                     | NestJS in layers, with Swagger "OrderPilot API" at `/api/docs`                                                                                                           | Today (P-8)                          |
 | Logging                 | pino with correlation ids                                                                                                                                                | Today (P-8)                          |
-| Database                | Prisma with PostgreSQL                                                                                                                                                   | Planned: P-9                         |
-| Queues                  | Redis with BullMQ                                                                                                                                                        | Planned: P-9, worker process in P-15 |
-| Document storage        | MinIO behind a storage service that uses the S3 API, so AWS S3 drops in later                                                                                            | Planned: P-9                         |
+| Database                | Prisma with PostgreSQL                                                                                                                                                   | Today (P-9)                          |
+| Queues                  | Redis with BullMQ                                                                                                                                                        | Today (P-9), worker process in P-15. |
+| Document storage        | MinIO behind a storage service that uses the S3 API, so AWS S3 drops in later                                                                                            | Today (P-9)                          |
 | Sessions                | argon2, a JWT access token in a cookie, refresh-token rotation and CSRF protection                                                                                       | Planned: P-10                        |
 | Web                     | Vite, React 19, TypeScript, Tailwind v4 and shadcn/ui                                                                                                                    | Planned: P-11                        |
 | Web plumbing            | React Router, an `ApiClient` class, TanStack Query and a minimal Zustand store                                                                                           | Planned: P-11                        |
 | Text                    | react-i18next: English, with no hard-coded strings                                                                                                                       | Planned: P-11                        |
 | Forms                   | React Hook Form with zod                                                                                                                                                 | Planned: P-11                        |
 | Icons and type          | Lucide only, and the Geist font with tabular numbers                                                                                                                     | Planned: P-11                        |
-| Containers              | Docker Compose under project name `orderpilot`: PostgreSQL, Redis and MinIO, then `api`, `worker` and `web`                                                              | Planned: P-9, P-13                   |
+| Containers              | Docker Compose under project name `orderpilot`: PostgreSQL, Redis and MinIO, then `api`, `worker` and `web`                                                              | Today (P-9), P-13                    |
 | Tests                   | Vitest, Testing Library, and Playwright with axe                                                                                                                         | Today (P-8), P-11, P-14              |
 | Events and live updates | A typed domain event bus, a transactional outbox, idempotency keys and SSE                                                                                               | Planned: P-15                        |
 | Diagrams                | Mermaid sources rendered to SVG                                                                                                                                          | Planned: P-16                        |
@@ -280,7 +280,7 @@ The API is NestJS, in layers ([ADR 0008](docs/adr/0008-nestjs-layered-modules.md
 - Typed configuration, checked by a zod schema (`apps/api/src/config`).
 - **One root `.env` is enough.** Load `apps/api/.env`, then the root `.env`, never overriding what the shell, CI or Docker set, and skipping missing files quietly. When something required is missing, the message names the file to create.
 - `.env.example` is one root file documenting every variable with a safe default (planned: P-9).
-- Ports come from `.env` (`POSTGRES_PORT`, `REDIS_PORT` and `MINIO_PORT`), and the URLs are built from them, so changing one line moves them all (planned: P-9).
+- Ports come from `.env` (`POSTGRES_PORT`, `REDIS_PORT` and `MINIO_PORT`), and the URLs are built from them, so changing one line moves them all (P-9).
 
 ## 5. Security
 

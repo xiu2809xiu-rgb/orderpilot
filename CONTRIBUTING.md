@@ -50,15 +50,20 @@ Set-up is short. Each story adds its own steps here when it merges. These steps 
 
 Line endings need no set-up. [`.gitattributes`](.gitattributes) keeps text files LF on every machine, even with `core.autocrlf` on.
 
-### Running the API
+### Running the stack and the API
 
-The API needs one setting before it starts, so copy the example file. One `.env` at the repository root is enough:
+The API needs PostgreSQL, Redis and MinIO, and one setting file. One `.env` at the repository root is enough, and its defaults are safe for a laptop. You need [Docker Desktop](https://www.docker.com/products/docker-desktop/) running (Windows, macOS) or Docker Engine (Linux).
 
 ```sh
-cp .env.example .env        # PowerShell: Copy-Item .env.example .env
-pnpm build                  # once: the API runs against the built @orderpilot/shared
+cp .env.example .env        # Git Bash, macOS, Linux. PowerShell: Copy-Item .env.example .env
+pnpm stack:up               # docker compose up -d --wait: PostgreSQL, Redis, MinIO
+pnpm db:migrate             # applies the migrations to the development database
+pnpm db:seed                # safe to run again
+pnpm build                  # once: the API runs against the built workspace packages
 pnpm --filter @orderpilot/api dev
 ```
+
+The first `pnpm stack:up` compiles MinIO, which takes a few minutes. `pnpm stack:down` stops the containers and keeps your data. The ports are the first lines of `.env` (`POSTGRES_PORT`, `REDIS_PORT`, `MINIO_PORT`); every URL is built from them, so changing one line moves them all. If something is wrong, see [Troubleshooting](#troubleshooting).
 
 `pnpm dev` rebuilds and restarts when you save a file. To run the built output instead, use `pnpm --filter @orderpilot/api start`.
 
@@ -68,22 +73,28 @@ Then try:
 - <http://localhost:3000/api/docs>, the Swagger page for "OrderPilot API";
 - the `.http` files in [`apps/api/requests`](apps/api/requests), in VS Code (REST Client) or a JetBrains IDE.
 
-The API reads `apps/api/.env`, then the root `.env`, and never overrides a variable your shell, CI or Docker already set. If something required is missing, it stops and names the file to create. To change the port for one run: `API_PORT=3100 pnpm --filter @orderpilot/api dev` (PowerShell: `$env:API_PORT=3100` first). The layers and patterns are in [docs/architecture](docs/architecture/README.md). There is no database yet: PostgreSQL, Redis and MinIO arrive with P-9.
+The API reads `apps/api/.env`, then the root `.env`, and never overrides a variable your shell, CI or Docker already set. If something required is missing, it stops and names the file to create. To change the port for one run: `API_PORT=3100 pnpm --filter @orderpilot/api dev` (PowerShell: `$env:API_PORT=3100` first). The layers and patterns are in [docs/architecture](docs/architecture/README.md). The database, and how to change it, is in [ADR 0010](docs/adr/0010-prisma-with-postgresql.md): edit your area's file in `apps/api/prisma/schema/`, run `pnpm db:migrate:dev`, and commit the schema and the new migration together.
 
 ### The root scripts
 
-| Command                  | What it does                                                                      |
-| ------------------------ | --------------------------------------------------------------------------------- |
-| `pnpm lint`              | ESLint over the whole repository, failing on any warning                          |
-| `pnpm typecheck`         | TypeScript over the scripts, then each package's own `typecheck`                  |
-| `pnpm test`              | The repository's `node --test` tests, then each package's own `test`              |
-| `pnpm build`             | Each package's own `build`                                                        |
-| `pnpm format`            | Prettier writes every file. Mass formatting: ask first (AGENTS.md, rule 4)        |
-| `pnpm format:check`      | Prettier checks every file and writes nothing                                     |
-| `pnpm check:dashes`      | No em dash in any tracked text file                                               |
-| `pnpm check:samples`     | No client sample in any tracked file; `check:samples:history` checks every commit |
-| `pnpm check:licence-key` | No licence key value and no env file in any tracked file                          |
-| `pnpm check:secrets`     | secretlint over the whole working tree                                            |
+| Command                  | What it does                                                                                                        |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| `pnpm lint`              | ESLint over the whole repository, failing on any warning                                                            |
+| `pnpm typecheck`         | TypeScript over the scripts, then each package's own `typecheck`                                                    |
+| `pnpm test`              | The repository's `node --test` tests, then each package's own `test`. The API's integration tests need the stack up |
+| `pnpm build`             | Each package's own `build`                                                                                          |
+| `pnpm format`            | Prettier writes every file. Mass formatting: ask first (AGENTS.md, rule 4)                                          |
+| `pnpm format:check`      | Prettier checks every file and writes nothing                                                                       |
+| `pnpm check:dashes`      | No em dash in any tracked text file                                                                                 |
+| `pnpm check:samples`     | No client sample in any tracked file; `check:samples:history` checks every commit                                   |
+| `pnpm check:licence-key` | No licence key value and no env file in any tracked file                                                            |
+| `pnpm check:secrets`     | secretlint over the whole working tree                                                                              |
+| `pnpm stack:up`          | `docker compose up -d --wait`: PostgreSQL, Redis and MinIO, healthy before it returns                               |
+| `pnpm stack:down`        | `docker compose down`: stops and removes the containers, keeps the data                                             |
+| `pnpm db:migrate`        | Applies pending migrations to the development database                                                              |
+| `pnpm db:migrate:dev`    | Creates a migration after you edit a `.prisma` file                                                                 |
+| `pnpm db:generate`       | Rebuilds the Prisma client (`pnpm install` does it too)                                                             |
+| `pnpm db:seed`           | Seeds the development database; safe to run again                                                                   |
 
 ### The Git hooks
 
@@ -105,14 +116,26 @@ If a hook stops you, it says why and what to do. When it refuses a push to `main
 - A tree with `.githooks/` but no `node_modules` stops the commit with `<package> is not installed. Run pnpm install at the repository root, then try again.` We chose a loud stop over a silent skip, so nobody commits unchecked work by accident. Run `pnpm install` in that tree.
 - No Node on `PATH` stops the commit with a message that names this guide.
 
+### Troubleshooting
+
+**Docker is not running.** `docker compose up` says it cannot connect to the Docker daemon, or the tests say that nothing answers on the database port. Start Docker Desktop (Windows and macOS) and wait until it says it is running, then run `docker compose up -d --wait` again. On Linux: `sudo systemctl start docker`.
+
+**Port already in use.** `docker compose up` says a port is already allocated or already in use. Something else on your machine has 5432 (PostgreSQL), 6379 (Redis), 9000 or 9001 (MinIO). Either stop it, or move the stack: change one line in your `.env`, for example `POSTGRES_PORT=5433`, and run `docker compose up -d --wait` again. The database URLs are built from the port, so nothing else needs to change. To see who holds a port: `netstat -ano | findstr :5432` (PowerShell and Command Prompt) or `lsof -i :5432` (macOS and Linux).
+
+**`role "orderpilot" does not exist`** (or `password authentication failed`). Another PostgreSQL is answering on the port, usually one installed on your machine, not the one in Docker. Our database never saw the request. Stop the other one, or give ours a free port with `POSTGRES_PORT=5433` in `.env` and run `docker compose up -d --wait` again. `docker compose ps` shows which ports our containers hold.
+
+**Changed `.env` and nothing moved.** A variable set in your shell wins over the file, and the API never overrides it. Check with `echo $POSTGRES_PORT` (PowerShell: `$env:POSTGRES_PORT`), and unset it. Then run `docker compose up -d --wait` so the containers pick up the new ports.
+
+**The first `docker compose up` takes minutes.** It compiles MinIO from its source once. Later starts use the cached image.
+
+**Start again from nothing.** `docker compose down` stops and removes the containers and keeps your data. Removing the data too (`docker compose down -v`) deletes the volumes: ask first, and know that it cannot be undone.
+
 ### What later stories bring
 
-| Step                                                              | Story |
-| ----------------------------------------------------------------- | ----- |
-| PostgreSQL, Redis and MinIO in Docker, with the ports from `.env` | P-9   |
-| The full stack with `docker compose up --build`                   | P-13  |
-| End-to-end tests with Playwright and axe                          | P-14  |
-| The troubleshooting guide: ports in use, PostgreSQL and Docker    | P-9   |
+| Step                                            | Story |
+| ----------------------------------------------- | ----- |
+| The full stack with `docker compose up --build` | P-13  |
+| End-to-end tests with Playwright and axe        | P-14  |
 
 ## Workflow
 

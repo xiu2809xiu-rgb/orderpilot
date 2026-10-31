@@ -2,7 +2,7 @@
 ### that are registered, a page at a time: the reference for list endpoints.
 @baseUrl = http://localhost:3000
 
-### A page of registered checks (empty until P-9 registers the database).
+### A page of registered checks (the database, Redis and storage).
 GET {{baseUrl}}/api/v1/system/checks?page=1&pageSize=25
 
 ### A validation error: page 0 is refused with VALIDATION_FAILED and a field list.

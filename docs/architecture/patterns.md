@@ -14,6 +14,10 @@ The named patterns used in the code, where each one lives, and why it earns its 
 | Pipe (validate at the edge) | `common/zod-validation.pipe.ts`                                   | Nothing crosses a boundary before a zod schema parses it                      | P-8   |
 | Exception filter            | `common/all-exceptions.filter.ts`                                 | One error envelope for every failure                                          | P-8   |
 | Adapter                     | `logging/app-logger.ts`                                           | Nest's `LoggerService` on top of pino, so all logs share one format           | P-8   |
+| Unit of work                | `database/database.ts`                                            | A business change and its audit event commit or roll back together            | P-9   |
+| Hash chain                  | `audit/domain/audit-chain.ts`, `audit/audit.service.ts`           | Each audit event covers the one before it, so tampering shows                 | P-9   |
+| Abstract class as a port    | `storage/object-storage.ts`, `storage/s3-object-storage.ts`       | Services use put, get, head and delete; MinIO or AWS S3 sits behind it        | P-9   |
+| Seeder                      | `database/seed/seeders.ts`                                        | Each seed step is idempotent; later stories add theirs to one list            | P-9   |
 | Transactional outbox        | planned                                                           | Events leave the system only if the business transaction commits              | P-15  |
 | Gateway                     | planned: `LlmGateway`                                             | One interface over the mock, OpenAI-compatible and Bedrock providers          | P-17  |
 | Factory and adapter         | planned: `SystemConnector` and the Navision adapter               | Connectors are chosen by name and hide each system's quirks                   | P-20  |
@@ -22,13 +26,13 @@ The named patterns used in the code, where each one lives, and why it earns its 
 
 ## Layers
 
-Controllers call services. Services call repositories and domain classes. Repositories are the only place Prisma is called (from P-9). Domain classes know no HTTP and no Prisma. See [README](README.md#where-things-live-and-what-may-call-what).
+Controllers call services. Services call repositories and domain classes. Repositories are the only place Prisma is called; a lint rule fails the build if a service or controller imports it. Domain classes know no HTTP and no Prisma. See [README](README.md#where-things-live-and-what-may-call-what).
 
 ## Repository
 
 `Repository<TEntity, TId>` is what a service may ask of a data source: `findById` and a paged `list`. `BaseRepository` adds `getById`, which throws `NotFoundError` so the 404 rule is written once, and `toPage`, which builds the `{ items, meta }` the API returns. `InMemoryRepository` implements it over a `Map`, for service tests and for pieces with no table yet.
 
-P-9 adds Prisma repositories that extend `BaseRepository`. A service never imports Prisma, so a service test uses an `InMemoryRepository` and needs no database.
+`AuditEventRepository` is the first Prisma repository and extends `BaseRepository`. A service never imports Prisma, so a service test uses an `InMemoryRepository` and needs no database. A repository gets its client from `Database.client`, which is the open transaction when there is one.
 
 `BuildInfoRepository` shows that a repository need not be a database: it is the one place the build's name and version are read.
 
@@ -67,25 +71,43 @@ The pipe returns the parsed value, so defaults and coercions apply. A failure th
 
 ## Readiness checks
 
-```ts
-@Injectable()
-export class DatabaseHealth implements OnModuleInit {
-  constructor(
-    @Inject(ReadinessRegistry) private readonly readiness: ReadinessRegistry,
-    @Inject(PrismaClient) private readonly db: PrismaClient,
-  ) {}
+`DatabaseModule`, `RedisModule` and `StorageModule` each register their check in `onModuleInit`:
 
-  onModuleInit(): void {
-    this.readiness.register({
-      name: "database",
-      check: () => this.db.$queryRaw`SELECT 1`.then(() => undefined),
-    });
-  }
+```ts
+onModuleInit(): void {
+  this.readiness.register({
+    name: "database",
+    check: () => this.database.ping(),
+  });
 }
 ```
 
-(That is the shape P-9 follows; the database does not exist yet.) `/health/ready` runs all checks at once with a two-second limit each and answers 503 if any is down.
+`/health/ready` runs all checks at once with a two-second limit each and answers 503 if any is down.
 
 ## Logging
 
 Every log call goes to one pino instance. A call made while a request is handled carries that request's `requestId`, through an async-local store set by the request logger. Nest's `Logger` works as usual: `new Logger(MyService.name)`; pass fields first for structured data: `this.logger.warn({ orderId }, "Mismatch found")`.
+
+## Transactions and the audit trail
+
+A service wraps a business change in `Database.transaction(...)`. Every repository call inside it, and the audit writer, use that one transaction through `Database.client` (an async-local store carries it), so nothing is passed around:
+
+```ts
+await this.database.transaction(async () => {
+  await this.users.disable(id);
+  await this.audit.record({
+    actor,
+    action: "user.disabled",
+    entityType: "User",
+    entityId: id,
+    summary: "User disabled",
+    traceId,
+  });
+});
+```
+
+A throw rolls both back, so the trail never records work that did not happen. `AuditService.record` takes a Postgres advisory lock for the rest of the transaction, reads the last hash, and writes the new event with a hash over its fields and that one. A trigger refuses `UPDATE`, `DELETE` and `TRUNCATE`. `AuditService.verify` walks the trail and names the first event that does not fit. See [ADR 0010](../adr/0010-prisma-with-postgresql.md).
+
+## Seeding
+
+`pnpm db:seed` runs every `Seeder` in `database/seed/seeders.ts`, in order, through the same modules the API uses. Each one looks before it writes, so running it again changes nothing, and says in one line what it did. The test set-up runs the same seed. P-10 adds the users and the role-permission matrix; later stories load the synthetic dataset (`packages/synthetic-data`) into their tables.
