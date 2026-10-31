@@ -18,7 +18,7 @@ export async function toXlsx<Row>(
   const sheet = workbook.addWorksheet(
     sheetName.replaceAll(/[:\\/?*[\]]/g, " ").slice(0, 31),
   );
-  sheet.addRow(exportable.map((column) => column.header));
+  sheet.addRow(exportable.map((column) => exportCell(column.header)));
   for (const row of rows) {
     sheet.addRow(
       exportable.map((column) => exportCell(column.exportValue?.(row))),
