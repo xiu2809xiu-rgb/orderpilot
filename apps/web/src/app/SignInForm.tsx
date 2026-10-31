@@ -157,7 +157,7 @@ export function SignInForm({
           </div>
           <ul
             aria-label={t("login.demoRolesLabel")}
-            className={cn("grid gap-2 sm:grid-cols-2")}
+            className={cn("grid gap-2 sm:grid-cols-3")}
           >
             {demo.demoRoles.map(({ role, displayName }) => (
               <li key={role}>

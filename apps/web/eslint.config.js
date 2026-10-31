@@ -16,4 +16,10 @@ export default defineConfig(
     files: ["public/**/*.js"],
     languageOptions: { sourceType: "script", globals: browser },
   },
+  {
+    // The init script runs in the page, not in Node.
+    name: "orderpilot-web/screenshot-script",
+    files: ["scripts/screenshots.mjs"],
+    languageOptions: { globals: { document: "readonly" } },
+  },
 );

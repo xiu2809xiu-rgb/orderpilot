@@ -1,5 +1,6 @@
 import { StrictMode, Suspense } from "react";
 import { createRoot } from "react-dom/client";
+import "./zod-setup";
 import { App } from "./app/App";
 import { Splash } from "./app/Splash";
 import { i18nReady } from "./i18n";

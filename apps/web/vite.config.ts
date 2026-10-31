@@ -46,6 +46,14 @@ export default defineConfig(({ mode }) => {
       // A font inlined as a data: URI would be blocked by font-src 'self'.
       assetsInlineLimit: 0,
       sourcemap: false,
+      // The entry is one big chunk on purpose; scripts/check-bundle-budget.mjs
+      // is the measure that matters, so the generic warning is raised.
+      chunkSizeWarningLimit: 800,
+      rolldownOptions: {
+        // zod-setup must run before any shared schema is built, even when the
+        // bundler puts the two in different chunks (ADR 0015).
+        output: { strictExecutionOrder: true },
+      },
     },
     test: {
       environment: "jsdom",

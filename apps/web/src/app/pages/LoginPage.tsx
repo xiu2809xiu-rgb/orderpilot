@@ -11,7 +11,7 @@ export function LoginPage() {
       tabIndex={-1}
       className="grid min-h-dvh place-items-center px-s2 py-s4"
     >
-      <div className="w-full max-w-md space-y-s3">
+      <div className="w-full max-w-xl space-y-s3">
         <div className="space-y-2">
           <Logo />
           <h1 className="text-2xl font-semibold tracking-tight">
