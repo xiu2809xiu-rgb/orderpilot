@@ -1,0 +1,16 @@
+# Advisories the OSV dependency scan accepts for now. Each entry needs a reason
+# and a review date (ignoreUntil): after that date the scan fails on it again,
+# so it is fixed or reviewed, never forgotten. docs/security/security-testing.md
+# describes the triage, and lists the same entries.
+
+[[IgnoredVulns]]
+id = "GHSA-g3hv-75wg-m249"
+ignoreUntil = 2026-11-14T00:00:00Z
+reason = """
+minimatch below 11.0.1: CPU and memory exhaustion from an attacker-supplied \
+glob pattern. Reached only through ESLint, Prettier and other dev tools, which \
+match patterns we write ourselves; nothing from it ships. The fix is a new \
+major, published on 2026-10-27, inside our 7-day release-age window, and the \
+tools still ask for minimatch 3 and 10. Accepted on 2026-10-31; recheck once \
+the tools move to 11.\
+"""

@@ -45,4 +45,9 @@ overrides: {}
 # review date on the line above it.
 audit:
   level: high
-  ignore: []
+  ignore:
+    # minimatch below 11.0.1 (moderate): CPU exhaustion from an attacker's glob
+    # pattern. Only dev tools reach it, with patterns we write; the fix is a new
+    # major inside the release-age window. Same entry as osv-scanner.toml.
+    # Review: 2026-11-14.
+    - GHSA-g3hv-75wg-m249
