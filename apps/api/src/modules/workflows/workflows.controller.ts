@@ -239,11 +239,7 @@ export class WorkflowsController {
   }
 
   private async tasksOf(role: InboxRole, query: TasksQuery) {
-    const page = await this.workflows.tasks(
-      role,
-      query,
-      query.overdue === "true",
-    );
+    const page = await this.workflows.tasks(role, query);
     return { data: page.items, meta: { ...page.meta, ...MOCK } };
   }
 

@@ -1,8 +1,5 @@
 import type { INestApplicationContext } from "@nestjs/common";
-import {
-  createSyntheticDataset,
-  describeDataset,
-} from "@orderpilot/synthetic-data";
+import { describeDataset, syntheticDataset } from "@orderpilot/synthetic-data";
 import {
   DEFAULT_ROLE_PERMISSIONS,
   ROLES,
@@ -145,14 +142,15 @@ const demoUsers: Seeder = {
 };
 
 /**
- * The synthetic dataset has no tables yet: the order tables arrive with P-18
- * and the workflow tables with C-1, and they will load it here. For now this
- * checks that it builds and says what is in it.
+ * The synthetic dataset, built for today in Asia/Singapore, and the same set
+ * the mock read models answer from. The workflow tables below load their part
+ * of it; the order tables arrive with P-18 and will load the rest. Here it
+ * checks that the set builds and says what is in it.
  */
 const syntheticData: Seeder = {
   name: "synthetic data",
   run() {
-    return Promise.resolve(describeDataset(createSyntheticDataset()));
+    return Promise.resolve(describeDataset(syntheticDataset()));
   },
 };
 

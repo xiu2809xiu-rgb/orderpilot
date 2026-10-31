@@ -302,6 +302,7 @@ export function makeOrders(inputs: OrderInputs): SampleOrder[] {
       owners,
       documents,
       step: { enteredOn: j.enteredOn, dueOn },
+      milestones: { ...j.done },
       stockShortfall: shortfall,
     };
   });

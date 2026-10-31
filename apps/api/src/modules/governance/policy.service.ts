@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { createSyntheticDataset } from "@orderpilot/synthetic-data";
+import { syntheticDataset } from "@orderpilot/synthetic-data";
 import type {
   AiDestinationDecision,
   AiDestinationRequest,
@@ -29,7 +29,7 @@ const SAMPLE_NOTES = [
 @Injectable()
 export class PolicyService {
   maskingSample(role: Role) {
-    const customers = createSyntheticDataset().customers.slice(
+    const customers = syntheticDataset().customers.slice(
       0,
       SAMPLE_NOTES.length,
     );

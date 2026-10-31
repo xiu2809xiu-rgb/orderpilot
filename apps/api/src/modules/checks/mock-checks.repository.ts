@@ -6,45 +6,74 @@ import type {
   SampleOrder,
   SyntheticDataset,
 } from "@orderpilot/synthetic-data";
+import {
+  SYNTHETIC_SOURCE,
+  type DatasetSource,
+} from "../../common/synthetic-source.js";
 import { mockExceptions } from "./domain/mock-samples.js";
-import { SYNTHETIC_DATASET } from "./synthetic-dataset.js";
+
+interface Indexes {
+  readonly dataset: SyntheticDataset;
+  readonly orders: ReadonlyMap<string, SampleOrder>;
+  readonly customerNames: ReadonlyMap<string, string>;
+  readonly exceptions: readonly CheckException[];
+}
 
 /**
  * The mock data source behind the tracker and the exceptions queue: the
  * synthetic data, read-only. Services depend on this class and never on the
  * dataset, so a real repository (Prisma, over the read model and the
- * `CheckException` table) replaces it without touching them.
+ * `CheckException` table) replaces it without touching them. It looks the
+ * dataset up on each call (it is built once a day) and re-indexes only when
+ * the set changes.
  */
 @Injectable()
 export class MockChecksRepository {
+  private cached: Indexes | null = null;
+
   constructor(
-    @Inject(SYNTHETIC_DATASET) private readonly dataset: SyntheticDataset,
+    @Inject(SYNTHETIC_SOURCE) private readonly source: DatasetSource,
   ) {}
 
+  private indexes(): Indexes {
+    const dataset = this.source();
+    if (this.cached?.dataset !== dataset) {
+      this.cached = {
+        dataset,
+        orders: new Map(dataset.orders.map((o) => [o.header.no, o])),
+        customerNames: new Map(dataset.customers.map((c) => [c.no, c.name])),
+        exceptions: mockExceptions(dataset.exceptions, dataset.customers),
+      };
+    }
+    return this.cached;
+  }
+
+  /** The reference date the data counts "today" from. */
+  asOf(): string {
+    return this.indexes().dataset.asOf;
+  }
+
   orders(): readonly SampleOrder[] {
-    return this.dataset.orders;
+    return this.indexes().dataset.orders;
   }
 
   findOrder(orderNo: string): SampleOrder | undefined {
-    return this.dataset.orders.find((o) => o.header.no === orderNo);
+    return this.indexes().orders.get(orderNo);
   }
 
   customers(): readonly Customer[] {
-    return this.dataset.customers;
+    return this.indexes().dataset.customers;
   }
 
   items(): readonly Item[] {
-    return this.dataset.items;
+    return this.indexes().dataset.items;
   }
 
   customerName(customerNo: string): string {
-    return (
-      this.dataset.customers.find((c) => c.no === customerNo)?.name ??
-      customerNo
-    );
+    return this.indexes().customerNames.get(customerNo) ?? customerNo;
   }
 
   exceptions(): readonly CheckException[] {
-    return mockExceptions(this.dataset.orders, this.dataset.customers);
+    return this.indexes().exceptions;
   }
 }

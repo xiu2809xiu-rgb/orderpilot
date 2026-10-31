@@ -1,4 +1,7 @@
-import { createSyntheticDataset } from "@orderpilot/synthetic-data";
+import {
+  SAMPLE_SCREEN_STATES,
+  createSyntheticDataset,
+} from "@orderpilot/synthetic-data";
 import {
   checkResultSchema,
   exceptionSchema,
@@ -6,6 +9,7 @@ import {
   trackerOrderSchema,
 } from "@orderpilot/shared";
 import { describe, expect, it } from "vitest";
+import { SAMPLE_STEPS } from "./domain/mock-status.js";
 import { NotFoundError } from "../../common/domain-error.js";
 import { ExceptionsService } from "./exceptions.service.js";
 import { MockChecksRepository } from "./mock-checks.repository.js";
@@ -13,8 +17,8 @@ import { MockOrderStatusReader } from "./mock-order-status-reader.js";
 import { TrackerService } from "./tracker.service.js";
 
 const dataset = createSyntheticDataset();
-const repo = new MockChecksRepository(dataset);
-const reader = new MockOrderStatusReader(dataset);
+const repo = new MockChecksRepository(() => dataset);
+const reader = new MockOrderStatusReader(() => dataset);
 const tracker = new TrackerService(repo, reader);
 const exceptions = new ExceptionsService(repo);
 
@@ -99,6 +103,67 @@ describe("the tracker over mock data", () => {
   });
 });
 
+describe("the tracker over the bigger set", () => {
+  it("lists the newest orders first and pages through all 120", async () => {
+    const first = await tracker.list({ page: 1, pageSize: 50 });
+    const dates = first.items.map((o) => o.orderDate);
+    expect(dates).toEqual([...dates].sort().reverse());
+    const seen = new Set<string>();
+    for (let page = 1; page <= 3; page++) {
+      const rows = await tracker.list({ page, pageSize: 50 });
+      for (const row of rows.items) seen.add(row.orderNo);
+    }
+    expect(seen.size).toBe(120);
+    expect(first.total).toBe(120);
+  });
+
+  it("filters by status and by owner, and a count equals the list it opens", async () => {
+    for (const state of SAMPLE_SCREEN_STATES) {
+      const expected = dataset.orders.filter(
+        (o) => o.sampleScreenState === state,
+      ).length;
+      const page = await tracker.list({ page: 1, pageSize: 5, status: state });
+      expect(page.total, state).toBe(expected);
+      expect(page.items.every((o) => o.status.code === state)).toBe(true);
+    }
+    const warehouse = await tracker.list({
+      page: 1,
+      pageSize: 200,
+      ownerRole: "WAREHOUSE",
+    });
+    expect(warehouse.total).toBeGreaterThan(0);
+    expect(warehouse.items.every((o) => o.ownerRole === "WAREHOUSE")).toBe(
+      true,
+    );
+  });
+
+  it("flags late orders from the dataset's own due dates, and counts open exceptions per order", async () => {
+    const late = await tracker.list({
+      page: 1,
+      pageSize: 200,
+      overdue: "true",
+    });
+    const expected = dataset.orders.filter(
+      (o) => o.step.dueOn !== null && o.step.dueOn < dataset.asOf,
+    ).length;
+    expect(late.total).toBe(expected);
+    const withExceptions = (
+      await tracker.list({ page: 1, pageSize: 200 })
+    ).items
+      .filter((o) => o.openExceptions > 0)
+      .reduce((sum, o) => sum + o.openExceptions, 0);
+    expect(withExceptions).toBe(
+      dataset.exceptions.filter((e) => e.state === "OPEN").length,
+    );
+  });
+
+  it("keeps the sample steps in the order of the sample states", () => {
+    expect(SAMPLE_STEPS.map((entry) => entry.state)).toEqual([
+      ...SAMPLE_SCREEN_STATES,
+    ]);
+  });
+});
+
 describe("matching on Navision numbers", () => {
   it("matches the customer by its number", async () => {
     const order = firstOrder();
@@ -119,6 +184,31 @@ describe("the exceptions queue over mock data", () => {
       .list({ page: 1, pageSize: 50 })
       .items.map((e) => e.openedAt);
     expect(times).toEqual([...times].sort().reverse());
+  });
+});
+
+describe("the exceptions queue over the bigger set", () => {
+  it("lists the open ones by default and the resolved ones on request", () => {
+    const open = exceptions.list({ page: 1, pageSize: 200 });
+    expect(open.total).toBe(
+      dataset.exceptions.filter((e) => e.state === "OPEN").length,
+    );
+    expect(open.items.every((e) => e.state === "OPEN")).toBe(true);
+    const resolved = exceptions.list({
+      page: 1,
+      pageSize: 200,
+      state: "RESOLVED",
+    });
+    expect(resolved.total).toBeGreaterThan(0);
+    expect(resolved.items.every((e) => e.state === "RESOLVED")).toBe(true);
+  });
+
+  it("shows the expected and found values of a packing-list mismatch", () => {
+    const row = exceptions
+      .list({ page: 1, pageSize: 200 })
+      .items.find((e) => e.ruleId === "mock.sample-quantity");
+    expect(row?.expected).not.toBe(row?.actual);
+    expect(row?.id).toMatch(/^EXC-\d{8}-\d{4}$/);
   });
 });
 

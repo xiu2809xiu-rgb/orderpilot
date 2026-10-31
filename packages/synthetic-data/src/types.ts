@@ -10,6 +10,7 @@ import type {
   WorkflowReminder,
   WorkflowTask,
 } from "@orderpilot/shared";
+import type { Milestone } from "./journey.js";
 
 /** Stamped on every dataset, and shown wherever the data is shown. */
 export const SYNTHETIC_LABEL = "Synthetic demo data" as const;
@@ -207,6 +208,8 @@ export interface SampleOrder {
   owners: OrderOwners;
   documents: OrderDocument[];
   step: OrderStep;
+  /** The day each fixture step was done, as far as the order has come. */
+  milestones: Partial<Record<Milestone, string>>;
   /** Set when a line wants more than the item has: the SPR follows from it. */
   stockShortfall: {
     itemNo: string;

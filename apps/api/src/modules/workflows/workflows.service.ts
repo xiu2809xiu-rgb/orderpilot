@@ -10,6 +10,7 @@ import {
   type PaymentResult,
   type SprDecisionResult,
   type SprDetail,
+  type TasksQuery,
   type WorkflowReminder,
   type WorkflowTask,
 } from "@orderpilot/shared";
@@ -31,10 +32,15 @@ function paged<T>(all: readonly T[], query: PageQuery): Page<T> {
   };
 }
 
-/** Overdue first, then the soonest due. */
+const PRIORITY_RANK = { high: 0, normal: 1, low: 2 } as const;
+
+/** Overdue first, then high priority, then the soonest due. */
 function byUrgency(a: WorkflowTask, b: WorkflowTask): number {
   if (a.overdue !== b.overdue) return a.overdue ? -1 : 1;
-  return a.dueAt.localeCompare(b.dueAt);
+  const byPriority =
+    PRIORITY_RANK[a.priority ?? "normal"] -
+    PRIORITY_RANK[b.priority ?? "normal"];
+  return byPriority || a.dueAt.localeCompare(b.dueAt);
 }
 
 /**
@@ -52,14 +58,15 @@ export class WorkflowsService {
     private readonly config: DocumentConfigRepository,
   ) {}
 
-  async tasks(
-    role: InboxRole,
-    query: PageQuery,
-    overdueOnly: boolean,
-  ): Promise<Page<WorkflowTask>> {
-    const tasks = await this.model.tasksFor(role);
-    const shown = overdueOnly ? tasks.filter((task) => task.overdue) : tasks;
-    return paged([...shown].sort(byUrgency), query);
+  /** A role's tasks, filtered and paged on the server so a long inbox stays quick. */
+  async tasks(role: InboxRole, query: TasksQuery): Promise<Page<WorkflowTask>> {
+    const shown = (await this.model.tasksFor(role)).filter(
+      (task) =>
+        (query.overdue !== "true" || task.overdue) &&
+        (!query.kind || task.kind === query.kind) &&
+        (!query.priority || task.priority === query.priority),
+    );
+    return paged(shown.sort(byUrgency), query);
   }
 
   async reminders(

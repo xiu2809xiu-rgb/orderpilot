@@ -1,7 +1,7 @@
-import { AS_OF } from "@orderpilot/synthetic-data";
-
-/** "Now" for every mock date, so a screen and a test see the same overdue flags. */
-export const MOCK_NOW = new Date(`${AS_OF}T02:00:00.000Z`);
+/** "Now" for a mock answer: 10:00 in Singapore on the dataset's reference date. */
+export function mockNow(asOf: string): Date {
+  return new Date(`${asOf}T02:00:00.000Z`);
+}
 
 export function isoAt(date: string, hour = 1): string {
   return `${date}T${hour.toString().padStart(2, "0")}:00:00.000Z`;
@@ -22,8 +22,8 @@ export function mockId(n: number): string {
 }
 
 /**
- * Days after the order date by which each sample step falls due. These are
- * fixtures that make the overdue flag show on a screen. They are not a
+ * Days after the order date by which a step that is neither done nor current
+ * would fall due. These are fixtures that fill in a screen. They are not a
  * service-level rule: the SLA logic is Azri's (C-2 and the reminders story).
  */
 export const MOCK_STEP_DUE_DAYS: Readonly<Record<string, number>> = {

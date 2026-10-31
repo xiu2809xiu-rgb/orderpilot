@@ -48,11 +48,13 @@ export class TrackerService {
 
   async list(query: TrackerQuery): Promise<TrackerPage> {
     const orders = this.repo.orders();
+    const asOf = this.repo.asOf();
     const reported = await this.statuses.statusOfMany(
       orders.map((o) => o.header.no),
     );
     const openByOrder = new Map<string, number>();
     for (const exception of this.repo.exceptions()) {
+      if (exception.state !== "OPEN") continue;
       openByOrder.set(
         exception.orderNo,
         (openByOrder.get(exception.orderNo) ?? 0) + 1,
@@ -70,7 +72,7 @@ export class TrackerService {
           customerName: this.repo.customerName(order.header.sellToCustomerNo),
           status: status.status,
           ownerRole: status.ownerRole,
-          overdue: mockOverdue(order),
+          overdue: mockOverdue(order, asOf),
           openExceptions: openByOrder.get(order.header.no) ?? 0,
           shipmentDate: order.header.shipmentDate,
           orderDate: order.header.orderDate,
@@ -87,10 +89,22 @@ export class TrackerService {
           .includes(search),
       );
     }
+    if (query.status) {
+      rows = rows.filter((row) => row.status.code === query.status);
+    }
+    if (query.ownerRole) {
+      rows = rows.filter((row) => row.ownerRole === query.ownerRole);
+    }
     if (query.overdue) {
       const want = query.overdue === "true";
       rows = rows.filter((row) => row.overdue.overdue === want);
     }
+    // The newest orders first, unless the screen asks for another order.
+    rows = [...rows].sort(
+      (a, b) =>
+        b.orderDate.localeCompare(a.orderDate) ||
+        b.orderNo.localeCompare(a.orderNo),
+    );
     if (query.sort) {
       const key = SORT_KEY[query.sort];
       const sign = query.direction === "desc" ? -1 : 1;
@@ -121,7 +135,7 @@ export class TrackerService {
       customerName: this.repo.customerName(order.header.sellToCustomerNo),
       status: status.status,
       ownerRole: status.ownerRole,
-      overdue: mockOverdue(order),
+      overdue: mockOverdue(order, this.repo.asOf()),
       steps: mockTimeline(order),
       checks: mockChecks(order),
       matches: mockMatches(order, this.repo.customers(), this.repo.items()),

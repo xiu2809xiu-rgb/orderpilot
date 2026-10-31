@@ -3,7 +3,7 @@ import {
   parseRecordNumber,
   type RecordType,
 } from "@orderpilot/shared";
-import { createSyntheticDataset } from "@orderpilot/synthetic-data";
+import { syntheticDataset } from "@orderpilot/synthetic-data";
 import type { DbClient } from "../../database/database.js";
 import {
   SALES_FLOW_KEY,
@@ -12,18 +12,17 @@ import {
 } from "./domain/sales-flow.js";
 import { mockId } from "./mock/fixtures.js";
 import { MOCK_CURRENT_STEP } from "./mock/mock-flows.js";
-import { MOCK_REMINDERS } from "./mock/mock-reminders.js";
-import { buildTasks, MOCK_SPR_REFS } from "./mock/mock-tasks.js";
 
 /**
  * The area 2 sample rows, safe to run again. This is the one place the base
  * writes a workflow instance's `status`, and it writes the dataset's
  * `sample-` label, never a real status: the values are the state machine's to
  * decide (C-2). Every row has a fixed id, so a second run finds what the first
- * left and adds nothing.
+ * left and adds nothing, even on another day (the rows keep the dates of the
+ * day they were first written).
  */
 export async function seedWorkflows(client: DbClient): Promise<string> {
-  const dataset = createSyntheticDataset();
+  const dataset = syntheticDataset();
   const definitionId = mockId(600_001);
 
   await client.workflowDefinition.createMany({
@@ -81,9 +80,9 @@ export async function seedWorkflows(client: DbClient): Promise<string> {
     skipDuplicates: true,
   });
 
-  const tasks = buildTasks(dataset.orders);
+  // Where a task is about a record (an SPR, a PI), the task points at its number.
   await client.workflowTask.createMany({
-    data: tasks.map((task) => ({
+    data: dataset.tasks.map((task) => ({
       id: task.id,
       instanceId: instanceIds.get(task.orderNo ?? "") ?? "",
       kind: task.kind,
@@ -97,7 +96,7 @@ export async function seedWorkflows(client: DbClient): Promise<string> {
   });
 
   await client.workflowNotification.createMany({
-    data: MOCK_REMINDERS.map((reminder) => ({
+    data: dataset.reminders.map((reminder) => ({
       id: reminder.id,
       instanceId: instanceIds.get(reminder.orderNo) ?? null,
       kind:
@@ -115,28 +114,43 @@ export async function seedWorkflows(client: DbClient): Promise<string> {
     skipDuplicates: true,
   });
 
-  // The SPR numbers the mock answers use, so the database and the screens agree.
-  const records = Object.entries(MOCK_SPR_REFS).flatMap(([orderNo, ref]) => {
-    const parsed = parseRecordNumber(ref.recordNo);
-    return parsed
-      ? [
-          {
-            orderNo,
-            ref,
-            type: parsed.type,
-            day: parsed.date,
-            sequence: parsed.sequence,
-          },
-        ]
-      : [];
+  // OrderPilot's own record numbers (SPR, PI, EXC), so the database and the screens agree.
+  const numbers: {
+    orderNo: string;
+    recordNo: string;
+    navisionNo: string | null;
+  }[] = [
+    ...dataset.sprs.map((s) => ({
+      orderNo: s.orderNo,
+      recordNo: s.recordNo,
+      navisionNo: s.navisionNo,
+    })),
+    ...dataset.orders.flatMap((order) =>
+      order.documents
+        .filter((d) => d.type === "PROFORMA_INVOICE" && d.number)
+        .map((d) => ({
+          orderNo: order.header.no,
+          recordNo: d.number ?? "",
+          navisionNo: null,
+        })),
+    ),
+    ...dataset.exceptions.map((e) => ({
+      orderNo: e.orderNo,
+      recordNo: e.recordNo,
+      navisionNo: null,
+    })),
+  ];
+  const records = numbers.flatMap((entry, index) => {
+    const parsed = parseRecordNumber(entry.recordNo);
+    return parsed ? [{ ...entry, ...parsed, index }] : [];
   });
   await client.workflowRecord.createMany({
-    data: records.map(({ orderNo, ref, type }) => ({
-      id: mockId(520_000 + Number(orderNo.slice(3))),
-      recordNo: ref.recordNo,
-      recordType: type,
-      navisionNo: ref.navisionNo,
-      instanceId: instanceIds.get(orderNo) ?? null,
+    data: records.map((record) => ({
+      id: mockId(520_000 + record.index),
+      recordNo: record.recordNo,
+      recordType: record.type,
+      navisionNo: record.navisionNo,
+      instanceId: instanceIds.get(record.orderNo) ?? null,
     })),
     skipDuplicates: true,
   });
@@ -144,11 +158,11 @@ export async function seedWorkflows(client: DbClient): Promise<string> {
     string,
     { type: RecordType; day: string; value: number }
   >();
-  for (const { type, day, sequence } of records) {
-    const key = `${type}-${day}`;
+  for (const { type, date, sequence } of records) {
+    const key = `${type}-${date}`;
     const seen = highest.get(key);
     if (!seen || seen.value < sequence)
-      highest.set(key, { type, day, value: sequence });
+      highest.set(key, { type, day: date, value: sequence });
   }
   for (const { type, day, value } of highest.values()) {
     await client.recordCounter.upsert({
@@ -159,5 +173,5 @@ export async function seedWorkflows(client: DbClient): Promise<string> {
     });
   }
 
-  return `${String(instances.length)} sample orders, ${String(tasks.length)} tasks, ${String(MOCK_REMINDERS.length)} reminders, ${String(records.length)} SPR numbers and ${String(DEFAULT_DOCUMENT_CONFIG.length)} document types`;
+  return `${String(instances.length)} sample orders, ${String(dataset.tasks.length)} tasks, ${String(dataset.reminders.length)} reminders, ${String(records.length)} record numbers and ${String(DEFAULT_DOCUMENT_CONFIG.length)} document types`;
 }

@@ -5,6 +5,7 @@ export {
   describeDataset,
   syntheticDataset,
 } from "./dataset.js";
+export type { Milestone } from "./journey.js";
 export type { DatasetOptions } from "./dataset.js";
 export { addDays, daysBetween, todayInSingapore } from "./dates.js";
 export { SeededRandom } from "./random.js";

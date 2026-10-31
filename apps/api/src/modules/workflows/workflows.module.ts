@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { syntheticSourceProvider } from "../../common/synthetic-source.js";
 import { ApprovalPolicy } from "./domain/approval-policy.js";
 import { DocumentConfigRepository } from "./document-config.repository.js";
 import { MockApprovalPolicy } from "./mock/mock-approval-policy.js";
@@ -18,6 +19,7 @@ import { WorkflowsService } from "./workflows.service.js";
   controllers: [WorkflowsController],
   providers: [
     WorkflowsService,
+    syntheticSourceProvider,
     DocumentConfigRepository,
     RecordNumberRepository,
     RecordNumberService,
