@@ -418,9 +418,24 @@ export class SimulatedGitHub {
   }
 }
 
+const handMade = (number, title) => ({
+  id: `I-${number}`,
+  number,
+  title,
+  body: "Written by hand.",
+  state: "OPEN",
+  stateReason: null,
+  closedAt: null,
+  milestone: null,
+  labels: [],
+  assignees: [],
+  parent: null,
+});
+
 // Today's live repository, as read on 2026-10-31: GitHub's default labels, no
-// milestones, the two hand-made issues, P-1's merged pull request, and the
-// abandoned project that must stay untouched.
+// milestones, the hand-made issues #1, #2 and #4 to #7, P-1's merged pull
+// request, and the abandoned project, renamed and closed, that must stay
+// untouched.
 export function liveRepository(overrides = {}) {
   return new SimulatedGitHub({
     labels: [
@@ -454,6 +469,10 @@ export function liveRepository(overrides = {}) {
         assignees: [],
         parent: null,
       },
+      handMade(4, "P-3: The problem, the research and the questions"),
+      handMade(5, "P-4: The four areas"),
+      handMade(6, "P-5: Monorepo and tooling"),
+      handMade(7, "P-6: CI and the security baseline"),
     ],
     pulls: [
       {
@@ -469,8 +488,8 @@ export function liveRepository(overrides = {}) {
       {
         id: "PVT-abandoned",
         number: 2,
-        title: "OrderPilot delivery",
-        closed: false,
+        title: "OrderPilot delivery (port attempt)",
+        closed: true,
         linked: false,
         url: "https://example.test/abandoned",
         shortDescription: "",

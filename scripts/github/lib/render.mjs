@@ -65,6 +65,18 @@ function pullOrderTable(backlog, labels) {
   );
 }
 
+function readyTable(backlog) {
+  const rows = backlog.stories
+    .filter((story) => story.ready)
+    .map((story) => [
+      story.key,
+      story.title,
+      `\`${story.area}\``,
+      story.estimate,
+    ]);
+  return markdownTable(["Story", "Title", "Area", "Points"], rows);
+}
+
 function renderStory(story, backlog, labels) {
   const facts = storyFacts(story, backlog, labels)
     .filter(([name]) => name !== "Epic")
@@ -110,6 +122,12 @@ export function renderBacklog(backlog, labels) {
     "## Epics",
     "",
     epicSummaryTable(backlog),
+    "",
+    "## Ready to pull",
+    "",
+    "The starter stories for areas 2, 3 and 4. Their owners start on them on Monday 2 Nov and refine them, and at the handover prompt 003 writes the rest from the owners' notes. They sit at Ready on the board.",
+    "",
+    readyTable(backlog),
     "",
     "## In pull order",
     "",

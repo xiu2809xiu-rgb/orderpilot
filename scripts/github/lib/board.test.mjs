@@ -4,6 +4,7 @@ import { test } from "node:test";
 import {
   ABANDONED_PROJECT_NUMBER,
   BOARD_TITLE,
+  closedBoard,
   iterationConfiguration,
   iterationsMatch,
   pickBoard,
@@ -13,6 +14,7 @@ import {
   planViews,
   readBoardItems,
   readBoardShape,
+  statusOptionsWithReady,
   wantedAreaOptions,
   wantedBoardItems,
   wantedIterations,
@@ -39,8 +41,28 @@ const sprintField = (iterations, completedIterations = []) => ({
 const withIds = (iterations) =>
   iterations.map((item, index) => ({ id: `it-${index}`, ...item }));
 
+// A new project's Status, as GitHub makes it.
+const defaultStatus = () => ({
+  id: "F-status",
+  name: "Status",
+  dataType: "SINGLE_SELECT",
+  options: [
+    { id: "s-todo", name: "Todo", color: "GREEN", description: "" },
+    { id: "s-doing", name: "In Progress", color: "YELLOW", description: "" },
+    { id: "s-done", name: "Done", color: "PURPLE", description: "" },
+  ],
+});
+
+const readyStatus = () => {
+  const status = defaultStatus();
+  status.options = statusOptionsWithReady(status.options).map(
+    (option, index) => ({ id: option.id ?? `s-new-${index}`, ...option }),
+  );
+  return status;
+};
+
 const allFields = () => [
-  { id: "F-status", name: "Status", dataType: "SINGLE_SELECT", options: [] },
+  readyStatus(),
   sprintField(withIds(wantedIterations())),
   { id: "F-estimate", name: "Estimate", dataType: "NUMBER" },
   {
@@ -95,9 +117,34 @@ test("a board that turns out to be project 2 is refused on read", async () => {
   await assert.rejects(() => readBoardShape(github, project(7)), /untouched/);
 });
 
-test("a new board needs Sprint, Estimate and Area", () => {
-  const types = planFields([], labels).map((action) => action.type);
-  assert.deepEqual(types, ["create-sprint", "create-estimate", "create-area"]);
+test("a new board needs Ready in Status, then Sprint, Estimate and Area", () => {
+  const types = planFields([defaultStatus()], labels).map(
+    (action) => action.type,
+  );
+  assert.deepEqual(types, [
+    "update-status",
+    "create-sprint",
+    "create-estimate",
+    "create-area",
+  ]);
+});
+
+test("Ready goes after Todo, and the existing options keep their ids", () => {
+  const options = statusOptionsWithReady(defaultStatus().options);
+  assert.deepEqual(
+    options.map((option) => [option.id, option.name]),
+    [
+      ["s-todo", "Todo"],
+      [undefined, "Ready"],
+      ["s-doing", "In Progress"],
+      ["s-done", "Done"],
+    ],
+  );
+  assert.ok(options.every((option) => option.color && "description" in option));
+});
+
+test("a board without a Status field stops the script", () => {
+  assert.throws(() => planFields([], labels), /no Status field/);
 });
 
 test("a complete board needs no field changes", () => {
@@ -153,7 +200,7 @@ test("Area options keep the comma in the name", () => {
 
 test("a changed Area option is planned as an update", () => {
   const fields = allFields();
-  fields[3].options[2].name = "3 checks";
+  fields.find((field) => field.name === "Area").options[2].name = "3 checks";
   assert.deepEqual(
     planFields(fields, labels).map((action) => action.type),
     ["update-area"],
@@ -161,7 +208,10 @@ test("a changed Area option is planned as an update", () => {
 });
 
 test("a field of the wrong type stops the script", () => {
-  const fields = [{ id: "F", name: "Estimate", dataType: "TEXT" }];
+  const fields = [
+    readyStatus(),
+    { id: "F", name: "Estimate", dataType: "TEXT" },
+  ];
   assert.throws(() => planFields(fields, labels), /Fix it by hand/);
 });
 
@@ -204,6 +254,7 @@ const wanted = (overrides = {}) => ({
   area: "team",
   estimate: 8,
   plannedSprint: null,
+  ready: false,
   ...overrides,
 });
 
@@ -257,6 +308,24 @@ test("an open item with no Status gets Todo", () => {
   ]);
 });
 
+test("a ready story moves from Todo, or from nothing, to Ready", () => {
+  for (const status of ["Todo", null]) {
+    assert.deepEqual(
+      planItemValues(wanted({ ready: true }), item({ status })),
+      [{ field: "Status", option: "Ready" }],
+    );
+  }
+});
+
+test("a ready story someone has started stays where they put it", () => {
+  for (const status of ["Ready", "In Progress"]) {
+    assert.deepEqual(
+      planItemValues(wanted({ ready: true }), item({ status })),
+      [],
+    );
+  }
+});
+
 test("a closed item is Done, in the sprint of its milestone", () => {
   const changes = planItemValues(
     wanted({ closed: true, milestone: "Sprint 01 (W2)" }),
@@ -301,4 +370,21 @@ test("every epic and story that has an issue is wanted on the board", () => {
   assert.equal(list[1].closed, true);
   assert.equal(list[1].milestone, "Sprint 01 (W2)");
   assert.equal(list[2].plannedSprint, "Sprint 02 (W3)");
+  assert.equal(list[2].ready, false);
+});
+
+test("the starter stories are wanted at Ready", () => {
+  const backlog = loadBacklog();
+  const issuesByKey = new Map([
+    ["C-2", { id: "I-20", number: 20, state: "OPEN", milestone: null }],
+  ]);
+  const [entry] = wantedBoardItems({ backlog, issuesByKey });
+  assert.equal(entry.ready, true);
+  assert.equal(entry.plannedSprint, "Sprint 02 (W3)");
+});
+
+test("a closed board is reported, never replaced", () => {
+  assert.equal(closedBoard([project(7)]), null);
+  assert.equal(closedBoard([project(2, { closed: true })]), null);
+  assert.equal(closedBoard([project(7, { closed: true })]).number, 7);
 });

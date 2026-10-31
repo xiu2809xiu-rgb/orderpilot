@@ -10,6 +10,10 @@ const MANAGED_LABEL = /^(type|area|priority|req): /;
 
 const TICKED = /^- \[[xX]\] /;
 const UNTICKED = "- [ ] ";
+const TICK = "- [x] ";
+
+// A starter story is refined enough to pull, so it starts at Ready on the board.
+export const READY_FACT = "Ready to pull, at Ready on the board";
 
 export const epicKey = (epic) => `Epic ${epic.key}`;
 export const epicTitle = (epic) => `${epicKey(epic)}: ${epic.title}`;
@@ -73,6 +77,7 @@ export function storyFacts(story, backlog, labels) {
   ];
   if (story.branch) facts.push(["Branch", `\`${story.branch}\``]);
   if (story.sprints) facts.push(["Planned for", sprintList(story)]);
+  if (story.ready) facts.push(["Ready", READY_FACT]);
   if (story.dependsOn.length > 0) {
     facts.push(["Depends on", story.dependsOn.join(", ")]);
   }
@@ -86,10 +91,17 @@ const factLines = (facts) =>
 const FOOTER =
   "The block above comes from `scripts/github/data/backlog.json`. Change it there. Anything you add below it stays.";
 
-export function renderStoryBlock(story, backlog, labels) {
-  const criteria = story.acceptance
-    .map((line) => `${UNTICKED}${line}`)
-    .join("\n");
+// `done` ticks every criterion, for a story finished before the seed adopted
+// its issue: its pull request met them, and an unticked list on a closed issue
+// would read as work left undone.
+export function renderStoryBlock(
+  story,
+  backlog,
+  labels,
+  { done = false } = {},
+) {
+  const box = done ? TICK : UNTICKED;
+  const criteria = story.acceptance.map((line) => `${box}${line}`).join("\n");
   return [
     BLOCK_START,
     story.summary,
@@ -146,6 +158,11 @@ function keepTicks(current, next) {
 
 // Issue bodies belong to people as well as to the data: a ticked box or a note
 // must survive every re-run. Only the block between the markers is ours.
+export function hasBlock(body) {
+  const text = body ?? "";
+  return text.includes(BLOCK_START) && text.includes(BLOCK_END);
+}
+
 export function mergeBody(existing, block) {
   const body = (existing ?? "").replace(/\r\n/g, "\n");
   const start = body.indexOf(BLOCK_START);

@@ -17,7 +17,8 @@ const wanted = {
   key: "P-1",
   title: "P-1: Ground rules",
   labels: ["type: story"],
-  block: "<!-- backlog:start -->\ntext\n<!-- backlog:end -->",
+  block: "<!-- backlog:start -->\n- [ ] text\n<!-- backlog:end -->",
+  doneBlock: "<!-- backlog:start -->\n- [x] text\n<!-- backlog:end -->",
   parentKey: "Epic P",
 };
 
@@ -37,7 +38,7 @@ const issue = (overrides = {}) => ({
 
 test("wanted items start with the epics, so that parents exist first", () => {
   const items = wantedItems(loadBacklog(), loadLabels());
-  assert.equal(items.length, 61);
+  assert.equal(items.length, 72);
   assert.equal(items[0].title, "Epic P: The platform base");
   assert.equal(items[0].parentKey, null);
   assert.ok(items.slice(0, 9).every((item) => item.key.startsWith("Epic ")));
@@ -79,7 +80,7 @@ test("a hand-written open issue gains the block and keeps its words", () => {
   assert.ok(action.patch.body.includes("By hand."));
 });
 
-test("a closed issue never gets a state change, or a new body", () => {
+test("a closed issue adopted for the first time gets its block once, ticked", () => {
   const action = planIssue(
     wanted,
     issue({
@@ -91,8 +92,44 @@ test("a closed issue never gets a state change, or a new body", () => {
     }),
     milestones,
   );
-  assert.deepEqual(Object.keys(action.patch).sort(), ["labels", "milestone"]);
+  assert.deepEqual(Object.keys(action.patch).sort(), [
+    "body",
+    "labels",
+    "milestone",
+  ]);
+  assert.ok(action.patch.body.startsWith(wanted.doneBlock));
+  assert.ok(action.patch.body.includes("By hand."));
   assert.equal(action.patch.milestone, 1);
+});
+
+test("a closed issue that has its block never gets a new body or a state", () => {
+  const changed = "<!-- backlog:start -->\n- [ ] changed\n<!-- backlog:end -->";
+  const action = planIssue(
+    { ...wanted, block: changed },
+    issue({
+      body: `${wanted.doneBlock}\n`,
+      state: "CLOSED",
+      stateReason: "COMPLETED",
+      closedAt: "2026-10-31T07:52:44Z",
+      milestone: { number: 1, title: "Sprint 01 (W2)" },
+    }),
+    milestones,
+  );
+  assert.equal(action, null);
+});
+
+test("an issue closed as not planned keeps its body", () => {
+  const action = planIssue(
+    wanted,
+    issue({
+      body: "By hand.",
+      state: "CLOSED",
+      stateReason: "NOT_PLANNED",
+      closedAt: "2026-10-31T07:52:44Z",
+    }),
+    milestones,
+  );
+  assert.equal(action, null);
 });
 
 test("a closed story with no matching milestone yet is left for later", () => {
@@ -100,7 +137,6 @@ test("a closed story with no matching milestone yet is left for later", () => {
     state: "CLOSED",
     stateReason: "COMPLETED",
     closedAt: "2026-10-31T07:52:44Z",
-    body: "By hand.",
   });
   assert.equal(planIssue(wanted, closed, []), null);
 });

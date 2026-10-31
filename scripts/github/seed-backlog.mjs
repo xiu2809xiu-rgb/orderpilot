@@ -3,14 +3,18 @@
 // of the week it finished, for anything closed before the recorder could.
 // Usage: node scripts/github/seed-backlog.mjs [--dry-run]
 //
-// Issues are matched by the key in their title, so #1 and #2 are adopted and a
-// renamed story keeps its issue. A closed issue is never reopened, and its body
-// is left as it was finished.
+// Issues are matched by the key in their title, so the hand-made #1, #2 and #4
+// to #7 are adopted and a
+// renamed story keeps its issue. A closed issue is never reopened. If it was
+// finished before the seed first ran, it gets its block once, with every
+// criterion ticked, above what was written by hand. After that its body is left
+// as it was finished.
 
 import {
   epicKey,
   epicLabels,
   epicTitle,
+  hasBlock,
   keyFromTitle,
   mergeBody,
   mergeLabels,
@@ -38,6 +42,7 @@ export function wantedItems(backlog, labels) {
     title: epicTitle(epic),
     labels: epicLabels(backlog, epic, labels),
     block: renderEpicBlock(epic, backlog, labels),
+    doneBlock: renderEpicBlock(epic, backlog, labels),
     parentKey: null,
   }));
   const stories = backlog.stories.map((story) => ({
@@ -45,6 +50,7 @@ export function wantedItems(backlog, labels) {
     title: storyTitle(story),
     labels: storyLabels(story, labels),
     block: renderStoryBlock(story, backlog, labels),
+    doneBlock: renderStoryBlock(story, backlog, labels, { done: true }),
     parentKey: `Epic ${story.epic}`,
   }));
   return [...epics, ...stories];
@@ -90,6 +96,9 @@ export function planIssue(wanted, issue, milestones) {
     const body = mergeBody(issue.body, wanted.block);
     if (!sameBody(body, issue.body)) patch.body = body;
   } else if (wasFinished(issue.stateReason)) {
+    if (!hasBlock(issue.body)) {
+      patch.body = mergeBody(issue.body, wanted.doneBlock);
+    }
     const milestone = closedMilestone(issue, issue.closedAt, milestones);
     if (milestone) patch.milestone = milestone.number;
   }

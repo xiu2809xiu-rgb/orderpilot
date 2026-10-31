@@ -5,14 +5,24 @@ export const BOARD_TITLE = "OrderPilot delivery";
 export const BOARD_DESCRIPTION =
   "OrderPilot's delivery board, kept as code in scripts/github.";
 
-// Project 2 is an abandoned board with this same title, holding another
-// repository's items. That is why the board is only ever found through this
-// repository's links and never by title among the owner's projects, and why
-// this number is refused even if someone links it here by mistake.
+// Project 2 is an abandoned board, once titled like this one and now
+// "OrderPilot delivery (port attempt)" and closed, holding another repository's
+// items. That is why the board is only ever found through this repository's
+// links and never by title among the owner's projects, and why this number is
+// refused even if someone links it here by mistake.
 export const ABANDONED_PROJECT_NUMBER = 2;
 
 const SPRINT_DAYS = 7;
 const AREA_COLOURS = ["BLUE", "PURPLE", "YELLOW", "RED", "GRAY"];
+
+// A new project's Status has Todo, In Progress and Done. Ready sits between
+// Todo and In Progress: refined and free to pull, but not started.
+export const READY = "Ready";
+const READY_OPTION = {
+  name: READY,
+  color: "BLUE",
+  description: "Refined and ready to pull",
+};
 
 export const VIEWS = [
   {
@@ -117,6 +127,19 @@ export function pickBoard(linkedProjects) {
     );
   }
   return matches[0] ?? null;
+}
+
+// A closed board is still the board. Making a fresh one beside it would break
+// "a second run creates nothing", so the sync stops and says so instead.
+export function closedBoard(linkedProjects) {
+  return (
+    linkedProjects.find(
+      (project) =>
+        project.title === BOARD_TITLE &&
+        project.closed &&
+        project.number !== ABANDONED_PROJECT_NUMBER,
+    ) ?? null
+  );
 }
 
 export async function readRepository(github) {
@@ -232,6 +255,19 @@ export function areaOptionsMatch(field, wanted) {
   );
 }
 
+// The existing options keep their ids, so no item loses the Status it has.
+export function statusOptionsWithReady(options) {
+  const kept = options.map(({ id, name, color, description }) => ({
+    id,
+    name,
+    color,
+    description: description ?? "",
+  }));
+  const todo = kept.findIndex((option) => option.name === "Todo");
+  kept.splice(todo + 1, 0, READY_OPTION);
+  return kept;
+}
+
 export function planFields(fields, labels) {
   const byName = new Map(fields.map((field) => [field.name, field]));
   const actions = [];
@@ -244,6 +280,18 @@ export function planFields(fields, labels) {
     }
     return field;
   };
+
+  const status = need("Status", "SINGLE_SELECT");
+  if (!status) {
+    throw new Error("The board has no Status field. Fix it by hand.");
+  }
+  if (!status.options.some((option) => option.name === READY)) {
+    actions.push({
+      type: "update-status",
+      field: status,
+      options: statusOptionsWithReady(status.options),
+    });
+  }
 
   const sprint = need("Sprint", "ITERATION");
   if (!sprint) actions.push({ type: "create-sprint" });
@@ -282,7 +330,7 @@ export function planViews(views) {
 
 export function wantedBoardItems({ backlog, issuesByKey }) {
   const wanted = [];
-  const add = (key, area, estimate, plannedSprint) => {
+  const add = (key, area, estimate, plannedSprint, ready) => {
     const issue = issuesByKey.get(key);
     if (!issue) return;
     wanted.push({
@@ -294,10 +342,11 @@ export function wantedBoardItems({ backlog, issuesByKey }) {
       area: areaOption(area),
       estimate,
       plannedSprint,
+      ready,
     });
   };
   for (const epic of backlog.epics)
-    add(`Epic ${epic.key}`, epic.area, null, null);
+    add(`Epic ${epic.key}`, epic.area, null, null, false);
   for (const story of backlog.stories) {
     const planned = story.sprints?.[0];
     add(
@@ -305,9 +354,22 @@ export function wantedBoardItems({ backlog, issuesByKey }) {
       story.area,
       story.estimate,
       planned ? sprintTitle(planned) : null,
+      Boolean(story.ready),
     );
   }
   return wanted;
+}
+
+// Status is the holder's to keep true, so an open item keeps whatever it has,
+// with two exceptions. An item with none gets Todo. A story the data calls ready
+// never sits at Todo, which means "not yet refined": GitHub puts every new item
+// at Todo, so this is also what lifts the starter stories to Ready.
+export function wantedStatus(wanted, item) {
+  if (wanted.closed) return "Done";
+  if (wanted.ready && (item.status === null || item.status === "Todo")) {
+    return READY;
+  }
+  return item.status ?? "Todo";
 }
 
 export function planItemAdds(wanted, items) {
@@ -315,9 +377,8 @@ export function planItemAdds(wanted, items) {
   return wanted.filter((item) => !present.has(item.contentId));
 }
 
-// Status is the holder's to keep true, so an open item only gets one if it has
-// none. A closed item is Done whatever it says, and its Sprint follows the
-// milestone, which records when it really finished.
+// A closed item is Done whatever it says, and its Sprint follows the milestone,
+// which records when it really finished.
 export function planItemValues(wanted, item) {
   const changes = [];
   if (item.area !== wanted.area) {
@@ -326,7 +387,7 @@ export function planItemValues(wanted, item) {
   if (wanted.estimate !== null && item.estimate !== wanted.estimate) {
     changes.push({ field: "Estimate", number: wanted.estimate });
   }
-  const status = wanted.closed ? "Done" : (item.status ?? "Todo");
+  const status = wantedStatus(wanted, item);
   if (item.status !== status) changes.push({ field: "Status", option: status });
   const sprint = wanted.closed
     ? wanted.milestone

@@ -81,7 +81,7 @@ test("a dry run against the live shape writes nothing", async () => {
   await runAll(client(simulated, true));
   assert.deepEqual(simulated.writes, []);
   assert.equal(simulated.milestones.length, 0);
-  assert.equal(simulated.issues.length, 2);
+  assert.equal(simulated.issues.length, 6);
 });
 
 test("a dry run before the milestones exist shows the back-fill", async () => {
@@ -90,7 +90,9 @@ test("a dry run before the milestones exist shows the back-fill", async () => {
   const github = client(simulated, true);
   github.log = (line) => lines.push(line);
   await runAll(github);
-  assert.ok(lines.includes("would update issue #1 (P-1): labels, milestone"));
+  assert.ok(
+    lines.includes("would update issue #1 (P-1): labels, body, milestone"),
+  );
   assert.ok(lines.includes('would set pull request #3 to "Sprint 01 (W2)"'));
 });
 
@@ -106,25 +108,71 @@ test("a dry run after a real run still finds nothing to do", async () => {
   );
 });
 
-test("issues 1 and 2 are adopted, never duplicated", async () => {
+test("issues 1, 2 and 4 to 7 are adopted, never duplicated", async () => {
   const simulated = await firstRun();
   const keyed = (prefix) =>
     simulated.issues.filter((issue) => issue.title.startsWith(prefix));
-  assert.deepEqual(
-    keyed("P-1:").map((issue) => issue.number),
-    [1],
-  );
-  assert.deepEqual(
-    keyed("P-2:").map((issue) => issue.number),
-    [2],
-  );
+  const adopted = {
+    "P-1": 1,
+    "P-2": 2,
+    "P-3": 4,
+    "P-4": 5,
+    "P-5": 6,
+    "P-6": 7,
+  };
+  for (const [key, number] of Object.entries(adopted)) {
+    const found = keyed(`${key}:`);
+    assert.deepEqual(
+      found.map((issue) => issue.number),
+      [number],
+      key,
+    );
+    assert.ok(found[0].labels.includes("type: story"), key);
+    assert.ok(found[0].body.includes("<!-- backlog:start -->"), key);
+    assert.equal(found[0].parent, keyed("Epic P:")[0].number, key);
+  }
 });
 
-test("a closed story is not reopened, and keeps its body", async () => {
+test("the starter stories sit at Ready on the board, in Sprint 02", async () => {
+  const simulated = await firstRun();
+  const board = linkedBoard(simulated);
+  const ready = ["C-2", "C-3", "C-4", "D-2", "D-3", "D-4", "F-3", "F-4", "F-5"];
+  for (const key of ready) {
+    const issue = simulated.issues.find((entry) =>
+      entry.title.startsWith(`${key}:`),
+    );
+    const item = board.items.find((entry) => entry.number === issue.number);
+    assert.equal(item.status, "Ready", key);
+    assert.equal(item.sprint, "Sprint 02 (W3)", key);
+    assert.ok(issue.labels.includes("priority: must"), key);
+  }
+  const status = board.fields.find((field) => field.name === "Status");
+  assert.deepEqual(
+    status.options.map((option) => option.name),
+    ["Todo", "Ready", "In Progress", "Done"],
+  );
+  const atReady = board.items.filter(
+    (entry) => entry.status === "Ready",
+  ).length;
+  assert.equal(atReady, ready.length);
+});
+
+test("a closed board is reported, and no second board is made", async () => {
+  const simulated = await firstRun();
+  linkedBoard(simulated).closed = true;
+  const count = simulated.projects.length;
+  await assert.rejects(() => syncBoard(client(simulated)), /Reopen it/);
+  assert.equal(simulated.projects.length, count);
+});
+
+test("a closed story is not reopened, and is adopted once, ticked", async () => {
   const simulated = await firstRun();
   const [first] = simulated.issues;
   assert.equal(first.state, "CLOSED");
-  assert.equal(first.body, "Written by hand.");
+  assert.ok(first.body.startsWith("<!-- backlog:start -->"));
+  assert.ok(first.body.endsWith("Written by hand.\n"));
+  assert.equal(first.body.includes("- [ ] "), false);
+  assert.ok(first.body.includes("- [x] "));
   assert.ok(first.labels.includes("type: story"));
   assert.ok(first.labels.includes("area: team"));
 });
@@ -219,16 +267,16 @@ test("ticks, notes and working labels survive a re-run", async () => {
 test("a pull request titled like a story is not taken for its issue", async () => {
   const simulated = liveRepository();
   simulated.pulls.push({
-    number: 4,
-    title: "P-3: something",
+    number: 8,
+    title: "P-7: something",
     state: "OPEN",
     mergedAt: null,
     milestone: null,
     closes: [],
   });
   await runAll(client(simulated));
-  const issue = simulated.issues.find((item) => item.title.startsWith("P-3:"));
-  assert.ok(issue.number > 4);
+  const issue = simulated.issues.find((item) => item.title.startsWith("P-7:"));
+  assert.ok(issue.number > 8);
 });
 
 test("a second issue for a key is left alone and reported", async () => {
@@ -266,7 +314,12 @@ test("the abandoned project is never touched, on any run", async () => {
 
 test("the abandoned project is not used even if linked here by mistake", async () => {
   const simulated = liveRepository();
-  simulated.projects[0].linked = true;
+  // The worst case: linked here, open again, and under the board's own title.
+  Object.assign(simulated.projects[0], {
+    linked: true,
+    closed: false,
+    title: "OrderPilot delivery",
+  });
   await runAll(client(simulated));
   await runAll(client(simulated));
   assert.equal(simulated.projects.length, 2);

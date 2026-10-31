@@ -9,6 +9,7 @@ import {
   BOARD_DESCRIPTION,
   BOARD_TITLE,
   VIEWS,
+  closedBoard,
   configuredIterations,
   iterationConfiguration,
   pickBoard,
@@ -61,7 +62,13 @@ const SET_VALUE = `mutation($input: UpdateProjectV2ItemFieldValueInput!) {
 
 async function ensureBoard(github, repository) {
   const existing = pickBoard(repository.projects);
-  if (existing) return existing;
+  if (existing) return { board: existing, created: false };
+  const closed = closedBoard(repository.projects);
+  if (closed) {
+    throw new Error(
+      `"${BOARD_TITLE}" (#${closed.number}) is closed. Reopen it rather than make a second board.`,
+    );
+  }
   const data = await github.mutate(
     `create the project "${BOARD_TITLE}", linked to ${github.repo}`,
     CREATE_PROJECT,
@@ -73,11 +80,12 @@ async function ensureBoard(github, repository) {
       },
     },
   );
-  return data?.createProjectV2.projectV2 ?? null;
+  return { board: data?.createProjectV2.projectV2 ?? null, created: true };
 }
 
 // Without this link the next run could not find the board, and would make
-// another one.
+// another one. A board made this run was linked as it was made, and GitHub can
+// take a moment to list a new link, so only an older board is checked.
 async function ensureLinked(github, board) {
   const { projects, id } = await readRepository(github);
   if (pickBoard(projects)?.id === board.id) return;
@@ -108,6 +116,10 @@ async function applyFieldAction(github, board, action) {
           configuredIterations(field),
         ),
       },
+    });
+  } else if (type === "update-status") {
+    await github.mutate("add the Ready option to Status", UPDATE_FIELD, {
+      input: { fieldId: field.id, singleSelectOptions: options },
     });
   } else if (type === "create-estimate") {
     await github.mutate("create the Estimate field", CREATE_FIELD, {
@@ -229,9 +241,10 @@ async function applyChange(github, board, item, wanted, change, lookups) {
 
 function describePlan(wanted) {
   return [
-    `would give the board the fields Status, Sprint (18 iterations), Estimate and Area`,
+    `would give the board the fields Status (with Ready), Sprint (18 iterations), Estimate and Area`,
     `would give the board the views ${VIEWS.map((view) => view.name).join(" and ")}`,
-    `would add the ${wanted.length} backlog issue(s) that exist so far`,
+    `would add every backlog issue: the ${wanted.length} that exist now, and those the seed creates`,
+    `would put the ready starter stories at Ready, and closed work at Done in the sprint it finished`,
   ];
 }
 
@@ -267,13 +280,13 @@ export async function syncBoard(github) {
   const { byKey } = matchIssues(issues);
   const wanted = wantedBoardItems({ backlog, issuesByKey: byKey });
 
-  const board = await ensureBoard(github, repository);
+  const { board, created } = await ensureBoard(github, repository);
   if (!board) {
     for (const line of describePlan(wanted)) github.log(line);
     github.log("board: does not exist yet");
     return { created: true };
   }
-  await ensureLinked(github, board);
+  if (!created) await ensureLinked(github, board);
 
   let shape = await readBoardShape(github, board);
   if (shape.shortDescription !== BOARD_DESCRIPTION) {
