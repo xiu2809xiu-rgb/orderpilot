@@ -23,10 +23,12 @@ coverage/
 playwright-report/
 test-results/
 
-# AI tool folders stay on each person's machine. settings.json is the one
-# exception: it turns attribution off for everyone who clones the repository.
-.claude/*
-!.claude/settings.json
+# AI tool folders stay on each person's machine. The root .claude/settings.json
+# is the one exception: it turns attribution off for everyone who clones the
+# repository. A slash inside a pattern ties it to the root, so **/ is what keeps
+# .claude out at any depth, as the plain names below already do.
+**/.claude/*
+!/.claude/settings.json
 .aider*
 .amazonq/
 .augment/
