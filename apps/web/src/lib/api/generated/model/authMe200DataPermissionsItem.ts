@@ -12,6 +12,7 @@ export type AuthMe200DataPermissionsItem = typeof AuthMe200DataPermissionsItem[k
 export const AuthMe200DataPermissionsItem = {
   usersread: 'users.read',
   usersmanage: 'users.manage',
+  rolesread: 'roles.read',
   rolesmanage: 'roles.manage',
   settingsmanage: 'settings.manage',
   auditread: 'audit.read',
@@ -19,4 +20,7 @@ export const AuthMe200DataPermissionsItem = {
   documentsread: 'documents.read',
   documentsupload: 'documents.upload',
   ordersread: 'orders.read',
+  approvalsdecide: 'approvals.decide',
+  paymentsconfirm: 'payments.confirm',
+  paymentspost: 'payments.post',
 } as const;

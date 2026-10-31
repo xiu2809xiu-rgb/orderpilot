@@ -417,13 +417,17 @@
                             "enum": [
                               "users.read",
                               "users.manage",
+                              "roles.read",
                               "roles.manage",
                               "settings.manage",
                               "audit.read",
                               "aiUsage.read",
                               "documents.read",
                               "documents.upload",
-                              "orders.read"
+                              "orders.read",
+                              "approvals.decide",
+                              "payments.confirm",
+                              "payments.post"
                             ]
                           }
                         },
@@ -508,13 +512,17 @@
                             "enum": [
                               "users.read",
                               "users.manage",
+                              "roles.read",
                               "roles.manage",
                               "settings.manage",
                               "audit.read",
                               "aiUsage.read",
                               "documents.read",
                               "documents.upload",
-                              "orders.read"
+                              "orders.read",
+                              "approvals.decide",
+                              "payments.confirm",
+                              "payments.post"
                             ]
                           }
                         },
@@ -634,13 +642,17 @@
                             "enum": [
                               "users.read",
                               "users.manage",
+                              "roles.read",
                               "roles.manage",
                               "settings.manage",
                               "audit.read",
                               "aiUsage.read",
                               "documents.read",
                               "documents.upload",
-                              "orders.read"
+                              "orders.read",
+                              "approvals.decide",
+                              "payments.confirm",
+                              "payments.post"
                             ]
                           }
                         },
@@ -753,13 +765,17 @@
                             "enum": [
                               "users.read",
                               "users.manage",
+                              "roles.read",
                               "roles.manage",
                               "settings.manage",
                               "audit.read",
                               "aiUsage.read",
                               "documents.read",
                               "documents.upload",
-                              "orders.read"
+                              "orders.read",
+                              "approvals.decide",
+                              "payments.confirm",
+                              "payments.post"
                             ]
                           }
                         },
@@ -785,6 +801,1053 @@
         },
         "summary": "Sign in as one of the nine roles. Present only when DEMO_MODE is on",
         "tags": ["Auth"]
+      }
+    },
+    "/api/v1/governance/matrix": {
+      "get": {
+        "operationId": "Matrix_read",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "permissions": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": [
+                              "users.read",
+                              "users.manage",
+                              "roles.read",
+                              "roles.manage",
+                              "settings.manage",
+                              "audit.read",
+                              "aiUsage.read",
+                              "documents.read",
+                              "documents.upload",
+                              "orders.read",
+                              "approvals.decide",
+                              "payments.confirm",
+                              "payments.post"
+                            ]
+                          }
+                        },
+                        "roles": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "role": {
+                                "type": "string",
+                                "enum": [
+                                  "SYSTEM_ADMIN",
+                                  "PRODUCT_MANAGER",
+                                  "APPROVER",
+                                  "SUPPORT",
+                                  "WAREHOUSE",
+                                  "FINANCE",
+                                  "LOGISTICS",
+                                  "MANAGEMENT",
+                                  "AUDITOR"
+                                ]
+                              },
+                              "permissions": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string",
+                                  "enum": [
+                                    "users.read",
+                                    "users.manage",
+                                    "roles.read",
+                                    "roles.manage",
+                                    "settings.manage",
+                                    "audit.read",
+                                    "aiUsage.read",
+                                    "documents.read",
+                                    "documents.upload",
+                                    "orders.read",
+                                    "approvals.decide",
+                                    "payments.confirm",
+                                    "payments.post"
+                                  ]
+                                }
+                              },
+                              "dataScope": {
+                                "type": "string",
+                                "enum": ["all", "brands", "own"]
+                              }
+                            },
+                            "required": ["role", "permissions", "dataScope"],
+                            "additionalProperties": false
+                          }
+                        },
+                        "locked": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "role": {
+                                "type": "string",
+                                "enum": [
+                                  "SYSTEM_ADMIN",
+                                  "PRODUCT_MANAGER",
+                                  "APPROVER",
+                                  "SUPPORT",
+                                  "WAREHOUSE",
+                                  "FINANCE",
+                                  "LOGISTICS",
+                                  "MANAGEMENT",
+                                  "AUDITOR"
+                                ]
+                              },
+                              "permission": {
+                                "type": "string",
+                                "enum": [
+                                  "users.read",
+                                  "users.manage",
+                                  "roles.read",
+                                  "roles.manage",
+                                  "settings.manage",
+                                  "audit.read",
+                                  "aiUsage.read",
+                                  "documents.read",
+                                  "documents.upload",
+                                  "orders.read",
+                                  "approvals.decide",
+                                  "payments.confirm",
+                                  "payments.post"
+                                ]
+                              },
+                              "kind": {
+                                "type": "string",
+                                "enum": ["never", "always"]
+                              },
+                              "reason": {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            },
+                            "required": [
+                              "role",
+                              "permission",
+                              "kind",
+                              "reason"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": ["permissions", "roles", "locked"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The role does not hold the permission. Audited.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "VALIDATION_FAILED",
+                            "UNAUTHENTICATED",
+                            "INVALID_CREDENTIALS",
+                            "SESSION_EXPIRED",
+                            "REFRESH_REUSED",
+                            "FORBIDDEN",
+                            "CSRF_INVALID",
+                            "DEMO_MODE_DISABLED",
+                            "NOT_FOUND",
+                            "CONFLICT",
+                            "RATE_LIMITED",
+                            "UPSTREAM_UNAVAILABLE",
+                            "INTERNAL_ERROR"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "nullable": true,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "path": {
+                                "type": "string"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "required": ["path", "message"],
+                            "additionalProperties": false
+                          }
+                        },
+                        "traceId": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": ["code", "message", "details", "traceId"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Read the role-permission matrix",
+        "tags": ["Governance"]
+      }
+    },
+    "/api/v1/governance/matrix/{role}/permissions/{permission}": {
+      "put": {
+        "operationId": "Matrix_setPermission",
+        "parameters": [
+          {
+            "name": "permission",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "users.read",
+                "users.manage",
+                "roles.read",
+                "roles.manage",
+                "settings.manage",
+                "audit.read",
+                "aiUsage.read",
+                "documents.read",
+                "documents.upload",
+                "orders.read",
+                "approvals.decide",
+                "payments.confirm",
+                "payments.post"
+              ]
+            }
+          },
+          {
+            "name": "role",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "SYSTEM_ADMIN",
+                "PRODUCT_MANAGER",
+                "APPROVER",
+                "SUPPORT",
+                "WAREHOUSE",
+                "FINANCE",
+                "LOGISTICS",
+                "MANAGEMENT",
+                "AUDITOR"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "granted": {
+                    "type": "boolean"
+                  }
+                },
+                "required": ["granted"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "role": {
+                          "type": "string",
+                          "enum": [
+                            "SYSTEM_ADMIN",
+                            "PRODUCT_MANAGER",
+                            "APPROVER",
+                            "SUPPORT",
+                            "WAREHOUSE",
+                            "FINANCE",
+                            "LOGISTICS",
+                            "MANAGEMENT",
+                            "AUDITOR"
+                          ]
+                        },
+                        "permissions": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": [
+                              "users.read",
+                              "users.manage",
+                              "roles.read",
+                              "roles.manage",
+                              "settings.manage",
+                              "audit.read",
+                              "aiUsage.read",
+                              "documents.read",
+                              "documents.upload",
+                              "orders.read",
+                              "approvals.decide",
+                              "payments.confirm",
+                              "payments.post"
+                            ]
+                          }
+                        },
+                        "dataScope": {
+                          "type": "string",
+                          "enum": ["all", "brands", "own"]
+                        }
+                      },
+                      "required": ["role", "permissions", "dataScope"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The role does not hold the permission. Audited.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "VALIDATION_FAILED",
+                            "UNAUTHENTICATED",
+                            "INVALID_CREDENTIALS",
+                            "SESSION_EXPIRED",
+                            "REFRESH_REUSED",
+                            "FORBIDDEN",
+                            "CSRF_INVALID",
+                            "DEMO_MODE_DISABLED",
+                            "NOT_FOUND",
+                            "CONFLICT",
+                            "RATE_LIMITED",
+                            "UPSTREAM_UNAVAILABLE",
+                            "INTERNAL_ERROR"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "nullable": true,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "path": {
+                                "type": "string"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "required": ["path", "message"],
+                            "additionalProperties": false
+                          }
+                        },
+                        "traceId": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": ["code", "message", "details", "traceId"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Grant or revoke one permission of a role",
+        "tags": ["Governance"]
+      }
+    },
+    "/api/v1/governance/matrix/{role}/data-scope": {
+      "put": {
+        "operationId": "Matrix_setDataScope",
+        "parameters": [
+          {
+            "name": "role",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "SYSTEM_ADMIN",
+                "PRODUCT_MANAGER",
+                "APPROVER",
+                "SUPPORT",
+                "WAREHOUSE",
+                "FINANCE",
+                "LOGISTICS",
+                "MANAGEMENT",
+                "AUDITOR"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "dataScope": {
+                    "type": "string",
+                    "enum": ["all", "brands", "own"]
+                  }
+                },
+                "required": ["dataScope"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "role": {
+                          "type": "string",
+                          "enum": [
+                            "SYSTEM_ADMIN",
+                            "PRODUCT_MANAGER",
+                            "APPROVER",
+                            "SUPPORT",
+                            "WAREHOUSE",
+                            "FINANCE",
+                            "LOGISTICS",
+                            "MANAGEMENT",
+                            "AUDITOR"
+                          ]
+                        },
+                        "permissions": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": [
+                              "users.read",
+                              "users.manage",
+                              "roles.read",
+                              "roles.manage",
+                              "settings.manage",
+                              "audit.read",
+                              "aiUsage.read",
+                              "documents.read",
+                              "documents.upload",
+                              "orders.read",
+                              "approvals.decide",
+                              "payments.confirm",
+                              "payments.post"
+                            ]
+                          }
+                        },
+                        "dataScope": {
+                          "type": "string",
+                          "enum": ["all", "brands", "own"]
+                        }
+                      },
+                      "required": ["role", "permissions", "dataScope"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The role does not hold the permission. Audited.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "VALIDATION_FAILED",
+                            "UNAUTHENTICATED",
+                            "INVALID_CREDENTIALS",
+                            "SESSION_EXPIRED",
+                            "REFRESH_REUSED",
+                            "FORBIDDEN",
+                            "CSRF_INVALID",
+                            "DEMO_MODE_DISABLED",
+                            "NOT_FOUND",
+                            "CONFLICT",
+                            "RATE_LIMITED",
+                            "UPSTREAM_UNAVAILABLE",
+                            "INTERNAL_ERROR"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "nullable": true,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "path": {
+                                "type": "string"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "required": ["path", "message"],
+                            "additionalProperties": false
+                          }
+                        },
+                        "traceId": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": ["code", "message", "details", "traceId"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Set the data scope of a role (which records it may see)",
+        "tags": ["Governance"]
+      }
+    },
+    "/api/v1/governance/matrix/copy": {
+      "post": {
+        "operationId": "Matrix_copy",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "fromRole": {
+                    "type": "string",
+                    "enum": [
+                      "SYSTEM_ADMIN",
+                      "PRODUCT_MANAGER",
+                      "APPROVER",
+                      "SUPPORT",
+                      "WAREHOUSE",
+                      "FINANCE",
+                      "LOGISTICS",
+                      "MANAGEMENT",
+                      "AUDITOR"
+                    ]
+                  },
+                  "toRole": {
+                    "type": "string",
+                    "enum": [
+                      "SYSTEM_ADMIN",
+                      "PRODUCT_MANAGER",
+                      "APPROVER",
+                      "SUPPORT",
+                      "WAREHOUSE",
+                      "FINANCE",
+                      "LOGISTICS",
+                      "MANAGEMENT",
+                      "AUDITOR"
+                    ]
+                  }
+                },
+                "required": ["fromRole", "toRole"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "role": {
+                          "type": "string",
+                          "enum": [
+                            "SYSTEM_ADMIN",
+                            "PRODUCT_MANAGER",
+                            "APPROVER",
+                            "SUPPORT",
+                            "WAREHOUSE",
+                            "FINANCE",
+                            "LOGISTICS",
+                            "MANAGEMENT",
+                            "AUDITOR"
+                          ]
+                        },
+                        "permissions": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": [
+                              "users.read",
+                              "users.manage",
+                              "roles.read",
+                              "roles.manage",
+                              "settings.manage",
+                              "audit.read",
+                              "aiUsage.read",
+                              "documents.read",
+                              "documents.upload",
+                              "orders.read",
+                              "approvals.decide",
+                              "payments.confirm",
+                              "payments.post"
+                            ]
+                          }
+                        },
+                        "dataScope": {
+                          "type": "string",
+                          "enum": ["all", "brands", "own"]
+                        }
+                      },
+                      "required": ["role", "permissions", "dataScope"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The role does not hold the permission. Audited.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "VALIDATION_FAILED",
+                            "UNAUTHENTICATED",
+                            "INVALID_CREDENTIALS",
+                            "SESSION_EXPIRED",
+                            "REFRESH_REUSED",
+                            "FORBIDDEN",
+                            "CSRF_INVALID",
+                            "DEMO_MODE_DISABLED",
+                            "NOT_FOUND",
+                            "CONFLICT",
+                            "RATE_LIMITED",
+                            "UPSTREAM_UNAVAILABLE",
+                            "INTERNAL_ERROR"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "nullable": true,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "path": {
+                                "type": "string"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "required": ["path", "message"],
+                            "additionalProperties": false
+                          }
+                        },
+                        "traceId": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": ["code", "message", "details", "traceId"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Copy a role's permissions and data scope to another role",
+        "tags": ["Governance"]
+      }
+    },
+    "/api/v1/governance/masking/sample": {
+      "get": {
+        "operationId": "Policy_maskingSample",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "rules": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "field": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "label": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "classification": {
+                                "type": "string",
+                                "enum": [
+                                  "public",
+                                  "internal",
+                                  "confidential",
+                                  "restricted"
+                                ]
+                              },
+                              "reason": {
+                                "type": "string",
+                                "enum": [
+                                  "role",
+                                  "bankDetails",
+                                  "price",
+                                  "policy"
+                                ]
+                              },
+                              "visibleTo": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string",
+                                  "enum": [
+                                    "SYSTEM_ADMIN",
+                                    "PRODUCT_MANAGER",
+                                    "APPROVER",
+                                    "SUPPORT",
+                                    "WAREHOUSE",
+                                    "FINANCE",
+                                    "LOGISTICS",
+                                    "MANAGEMENT",
+                                    "AUDITOR"
+                                  ]
+                                }
+                              },
+                              "sample": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "field",
+                              "label",
+                              "classification",
+                              "reason",
+                              "visibleTo",
+                              "sample"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "records": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "customerNo": {
+                                "type": "string"
+                              },
+                              "customerName": {
+                                "type": "string"
+                              },
+                              "note": {
+                                "type": "object",
+                                "properties": {
+                                  "field": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "classification": {
+                                    "type": "string",
+                                    "enum": [
+                                      "public",
+                                      "internal",
+                                      "confidential",
+                                      "restricted"
+                                    ]
+                                  },
+                                  "masked": {
+                                    "type": "boolean"
+                                  },
+                                  "value": {
+                                    "nullable": true,
+                                    "type": "string"
+                                  },
+                                  "reason": {
+                                    "nullable": true,
+                                    "type": "string",
+                                    "enum": [
+                                      "role",
+                                      "bankDetails",
+                                      "price",
+                                      "policy"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "field",
+                                  "classification",
+                                  "masked",
+                                  "value",
+                                  "reason"
+                                ],
+                                "additionalProperties": false
+                              }
+                            },
+                            "required": ["customerNo", "customerName", "note"],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": ["rules", "records"],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "mock": {
+                          "type": "boolean",
+                          "enum": [true]
+                        }
+                      },
+                      "required": ["mock"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Synthetic customers with the sample masking rule applied for the caller's role",
+        "tags": ["Governance"]
+      }
+    },
+    "/api/v1/governance/ai-destinations": {
+      "get": {
+        "operationId": "Policy_aiDestinations",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "provider": {
+                            "type": "string",
+                            "enum": ["mock", "openai-compatible", "bedrock"]
+                          },
+                          "origins": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "enum": ["synthetic", "real"]
+                            }
+                          },
+                          "classifications": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "enum": [
+                                "public",
+                                "internal",
+                                "confidential",
+                                "restricted"
+                              ]
+                            }
+                          }
+                        },
+                        "required": ["provider", "origins", "classifications"],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "What data may go to which AI provider",
+        "tags": ["Governance"]
+      }
+    },
+    "/api/v1/governance/ai-destinations/check": {
+      "post": {
+        "operationId": "Policy_checkAiDestination",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "provider": {
+                    "type": "string",
+                    "enum": ["mock", "openai-compatible", "bedrock"]
+                  },
+                  "classification": {
+                    "type": "string",
+                    "enum": ["public", "internal", "confidential", "restricted"]
+                  },
+                  "origin": {
+                    "type": "string",
+                    "enum": ["synthetic", "real"]
+                  }
+                },
+                "required": ["provider", "classification", "origin"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "allowed": {
+                          "type": "boolean"
+                        },
+                        "rule": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "reason": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": ["allowed", "rule", "reason"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Ask whether one kind of data may go to one AI provider",
+        "tags": ["Governance"]
       }
     },
     "/api/v1/users": {
