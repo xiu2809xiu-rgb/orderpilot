@@ -2,7 +2,7 @@
 
 Rendered from [`scripts/github/data/backlog.json`](../../scripts/github/data/backlog.json) by `node scripts/github/render-docs.mjs`. Change the data, not this file. The same data seeds the issues. The board shows where each story stands.
 
-There are 9 epics and 52 stories. Estimates are story points: a first guess, for the team to change at planning.
+There are 9 epics and 63 stories. Estimates are story points: a first guess, for the team to change at planning.
 
 ## Epics
 
@@ -11,12 +11,28 @@ There are 9 epics and 52 stories. Estimates are story points: a first guess, for
 | Epic P | The platform base                 | `area: 1 document AI and integration`   | 25      | 163    |
 | Epic A | Document intake and AI extraction | `area: 1 document AI and integration`   | 5       | 31     |
 | Epic B | Master data and Navision          | `area: 1 document AI and integration`   | 4       | 14     |
-| Epic C | Order workflows and approvals     | `area: 2 order workflows and approvals` | 1       | 8      |
-| Epic D | Checks, the tracker and insights  | `area: 3 checks, tracker and insights`  | 1       | 8      |
-| Epic E | AI with a person in the loop      | `area: 1 document AI and integration`   | 4       | 21     |
-| Epic F | Financial controls and governance | `area: 4 controls and monitoring`       | 2       | 11     |
+| Epic C | Order workflows and approvals     | `area: 2 order workflows and approvals` | 4       | 26     |
+| Epic D | Checks, the tracker and insights  | `area: 3 checks, tracker and insights`  | 4       | 23     |
+| Epic E | AI with a person in the loop      | `area: 1 document AI and integration`   | 6       | 29     |
+| Epic F | Financial controls and governance | `area: 4 controls and monitoring`       | 5       | 24     |
 | Epic G | Monitoring                        | `area: 4 controls and monitoring`       | 1       | 8      |
 | Epic T | Team stories                      | `area: team`                            | 9       | 36     |
+
+## Ready to pull
+
+The starter stories for areas 2, 3 and 4. Their owners start on them on Monday 2 Nov and refine them, and at the handover prompt 003 writes the rest from the owners' notes. They sit at Ready on the board.
+
+| Story | Title                                                              | Area                                    | Points |
+| ----- | ------------------------------------------------------------------ | --------------------------------------- | ------ |
+| C-2   | The order state machine for the sales flow                         | `area: 2 order workflows and approvals` | 8      |
+| C-3   | SPR approval within limits                                         | `area: 2 order workflows and approvals` | 5      |
+| C-4   | Reminders and escalations                                          | `area: 2 order workflows and approvals` | 5      |
+| D-2   | The packing-list quantity check against the PO                     | `area: 3 checks, tracker and insights`  | 5      |
+| D-3   | The exceptions queue flow                                          | `area: 3 checks, tracker and insights`  | 5      |
+| D-4   | The tracker's status, owner and overdue flags from workflow events | `area: 3 checks, tracker and insights`  | 5      |
+| F-3   | The authorisation policy with approval limits                      | `area: 4 controls and monitoring`       | 5      |
+| F-4   | No self-approval and segregation of duties                         | `area: 4 controls and monitoring`       | 3      |
+| F-5   | The bank-detail hold                                               | `area: 4 controls and monitoring`       | 5      |
 
 ## In pull order
 
@@ -46,9 +62,18 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | P-20  | The connector framework and the Navision adapter                   | must     | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-21  | Synthetic documents                                                | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | C-1   | Area 2 base, the workflow module                                   | must     | 8      | `area: 2 order workflows and approvals` | M4 best practices                                              |
+| C-2   | The order state machine for the sales flow                         | must     | 8      | `area: 2 order workflows and approvals` | M4 best practices                                              |
+| C-3   | SPR approval within limits                                         | must     | 5      | `area: 2 order workflows and approvals` | M2 GRS by design, M4 best practices                            |
+| C-4   | Reminders and escalations                                          | must     | 5      | `area: 2 order workflows and approvals` | M4 best practices                                              |
 | D-1   | Area 3 base, checks and the tracker                                | must     | 8      | `area: 3 checks, tracker and insights`  | M4 best practices                                              |
+| D-2   | The packing-list quantity check against the PO                     | must     | 5      | `area: 3 checks, tracker and insights`  | M4 best practices                                              |
+| D-3   | The exceptions queue flow                                          | must     | 5      | `area: 3 checks, tracker and insights`  | M2 GRS by design, M4 best practices                            |
+| D-4   | The tracker's status, owner and overdue flags from workflow events | must     | 5      | `area: 3 checks, tracker and insights`  | M4 best practices                                              |
 | F-1   | Area 4 base, access policy and masking                             | must     | 8      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
 | F-2   | Area 4 base, the audit viewer                                      | must     | 3      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
+| F-3   | The authorisation policy with approval limits                      | must     | 5      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
+| F-4   | No self-approval and segregation of duties                         | must     | 3      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
+| F-5   | The bank-detail hold                                               | must     | 5      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
 | G-1   | Area 4 base, monitoring                                            | must     | 8      | `area: 4 controls and monitoring`       | M2 GRS by design, M6 deploy and monitor                        |
 | P-24  | Cloud deployment                                                   | must     | 8      | `area: 1 document AI and integration`   | M4 best practices, M6 deploy and monitor                       |
 | P-25  | Slides as code                                                     | must     | 3      | `area: team`                            | M4 best practices                                              |
@@ -76,6 +101,8 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | P-23  | The 3D order constellation                                         | could    | 13     | `area: 1 document AI and integration`   | M4 best practices                                              |
 | B-4   | QR codes on generated documents and carton labels                  | could    | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | E-4   | Passkeys to confirm risky approvals                                | could    | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| E-5   | A first-run guided tour for each role                              | could    | 3      | `area: 1 document AI and integration`   | M1 design thinking, M4 best practices                          |
+| E-6   | An "Ask OrderPilot" help panel that answers from our docs          | could    | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M3 AI-assisted coding                        |
 
 ## Epic P: The platform base
 
@@ -90,6 +117,7 @@ The front matter, the rules for every AI tool, the repository files, the first A
 - **Estimate:** 5 points
 - **Requirements:** M3 AI-assisted coding, M4 best practices, M5 team Git workflow
 - **Branch:** `docs/ground-rules`
+- **Planned for:** Sprint 01 (W2)
 
 Acceptance criteria:
 
@@ -112,6 +140,7 @@ The labels, sprint calendar, board, backlog and wiki kept as code, and the sprin
 - **Estimate:** 8 points
 - **Requirements:** M4 best practices, M5 team Git workflow
 - **Branch:** `chore/github-process`
+- **Planned for:** Sprint 01 (W2)
 - **Depends on:** P-1
 
 Acceptance criteria:
@@ -124,14 +153,16 @@ Acceptance criteria:
 - Labels: `priority:` must, should and could; `req: M1` to `M6`, each with its name; `status: blocked`, `status: needs client input`, and `dependencies`.
 - `scripts/github/`, all idempotent: labels.
 - `scripts/github/`, all idempotent: the sprint calendar (Sprint 1 starts Monday 26 Oct 2026; each sprint is due Sunday 23:59 Singapore time).
-- `scripts/github/`, all idempotent: the board **OrderPilot delivery**, with Status, a Sprint iteration, Estimate and Area, and Backlog and Sprint views.
-- `scripts/github/`, all idempotent: the backlog as data: epics P, A to G and T, with the stories in Prompt 001 and their acceptance criteria, estimates, priorities and areas, seeded as sub-issues of their epics.
+- `scripts/github/`, all idempotent: a fresh board **OrderPilot delivery**, linked to this repository and found again only through that link, with Status (including Ready), a Sprint iteration, Estimate and Area, and Backlog and Sprint views. Project #2, `OrderPilot delivery (port attempt)`, is never touched.
+- `scripts/github/`, all idempotent: the backlog as data: epics P, A to G and T, with the stories in prompts 001 and 002 and their acceptance criteria, estimates, priorities and areas, seeded as sub-issues of their epics, with every issue on the board.
+- Existing issues are adopted by key, never duplicated: #1 P-1 (kept closed, in `Sprint 01 (W2)`), #2 P-2, #4 P-3, #5 P-4, #6 P-5 and #7 P-6. Adopting sets the body, the labels, the epic and the board fields.
+- Three ready-to-pull starter stories each for areas 2, 3 and 4 (C-2 to C-4, D-2 to D-4 and F-3 to F-5), each with its acceptance criteria, at Ready on the board.
 - `scripts/github/`, all idempotent: the rendered `docs/agile/backlog.md` and the wiki's sprint calendar.
 - `scripts/github/`, all idempotent: wiki publishing.
 - `.github/workflows/sprint-recorder.yml` sets an issue's milestone to the sprint of the day it closes, or of the day its pull request merges.
 - `scripts/github/sprint-report.mjs` prints what closed this sprint and what is in progress, by area.
 - `docs/wiki/`: Home, Getting started (what works so far), How we work, Definition of Done, Team and areas, Sprint calendar, Security, and the sidebar.
-- After the merge, the scripts are run and then the wiki is published. Richie groups the board's Backlog view by Sprint, which the API cannot do.
+- After the merge, the scripts are run and the wiki is published. Richie groups the board's Backlog view by Sprint, which the API cannot do.
 
 ### P-3: The problem, the research and the questions
 
@@ -142,6 +173,7 @@ The problem in our words, what we assume, what we must ask Spectra, and the star
 - **Estimate:** 8 points
 - **Requirements:** M1 design thinking, M2 GRS by design
 - **Branch:** `docs/problem-and-questions`
+- **Planned for:** Sprint 01 (W2)
 - **Depends on:** P-2
 
 Acceptance criteria:
@@ -149,6 +181,8 @@ Acceptance criteria:
 - `docs/problem-statement.md`: the brief in our words, stakeholders, pain points, root cause, constraints, scope, success metrics and open questions.
 - `docs/assumptions.md`.
 - `docs/client/questions-for-client.md`: the three items to ask for first (anonymised samples of every document type including the SPR form; a Navision export; and the timeline of one real order), then the questions in priority order, and a note to send the priority questions before the briefing call.
+- `docs/client/questions-for-client.md`: the six new questions in section 5.3 of prompt 002, after the existing priority questions.
+- `docs/research/domain-notes.md`: section 5 of prompt 002, the domain notes, with every Navision detail marked as an assumption to confirm at the briefing call.
 - `docs/data-formats.md`: the assumed formats of every document and Navision export, each to confirm, and how to try a client sample safely.
 - `docs/agile/hero-journey.md`: the sales-pilot demo story, E2E #1 to #4, and a presenter slot for each area.
 - `docs/requirements-traceability.md`: M1 to M6, planned features, where, and evidence.
@@ -166,6 +200,7 @@ Who owns which paths, and a guide that lets each owner take over their area.
 - **Estimate:** 5 points
 - **Requirements:** M4 best practices, M5 team Git workflow
 - **Branch:** `docs/areas`
+- **Planned for:** Sprint 01 (W2)
 - **Depends on:** P-3
 
 Acceptance criteria:
@@ -183,6 +218,7 @@ The pnpm workspace, the strict shared configs, the Git hooks and the supply-chai
 - **Estimate:** 5 points
 - **Requirements:** M4 best practices, M5 team Git workflow
 - **Branch:** `chore/monorepo-tooling`
+- **Planned for:** Sprint 01 (W2)
 - **Depends on:** P-2
 
 Acceptance criteria:
@@ -193,6 +229,7 @@ Acceptance criteria:
 - Commit-message hook: commitlint.
 - Pre-commit hook: the licence-key guard (the values of `REACTBITS_LICENSE_KEY` and `REUI_LICENSE_KEY` never in staged files), the samples guard, a secretlint scan, the em-dash check, and lint-staged.
 - Pre-push hook: the samples guard on every commit being pushed.
+- Pre-push hook: a guard that refuses any push to `main`, so the pull request rule holds on every teammate's machine, whatever GitHub enforces.
 - Scripts: `scripts/check-licence-key.mjs`, `scripts/check-samples.mjs`, `scripts/check-dashes.mjs`, and `samples/README.md`.
 - Supply-chain settings: exact version pins; `minimumReleaseAge`; reviewed `allowBuilds`; and overrides and ignored advisories, each with a reason and a review date.
 - ADRs: pnpm monorepo; TypeScript and ESM.
@@ -206,6 +243,7 @@ The verify job and the three security scans, required on every pull request from
 - **Estimate:** 5 points
 - **Requirements:** M2 GRS by design, M4 best practices, M5 team Git workflow
 - **Branch:** `ci/verify-and-scan`
+- **Planned for:** Sprint 01 (W2)
 - **Depends on:** P-5
 
 Acceptance criteria:
@@ -230,6 +268,7 @@ One package of zod schemas and types that the API, the web app and the owners al
 - **Estimate:** 3 points
 - **Requirements:** M4 best practices
 - **Branch:** `feat/platform-shared-contracts`
+- **Planned for:** Sprint 01 (W2)
 - **Depends on:** P-5
 
 Acceptance criteria:
@@ -237,6 +276,7 @@ Acceptance criteria:
 - `packages/shared`, with zod schemas and types: the response envelope and the error envelope `{ error: { code, message, details, traceId } }`, and the error codes.
 - `packages/shared`: the nine roles; the permissions the platform checks so far; the session and user reference; and the audit and AI-usage types.
 - The first draft of the order and event contract: order headers and lines; documents and their types; field values with confidence and provenance; domain event names.
+- OrderPilot's own record numbers: a type prefix, the date and a running number, like `SPR-20261102-0001`, shown beside Navision's numbers, which stay the official ones.
 - The contract is marked "draft for the team to agree in Week 3", and status stays in area 2.
 - ADR: shared contracts.
 
@@ -249,6 +289,7 @@ A layered NestJS API with typed configuration, security headers, logging, health
 - **Estimate:** 5 points
 - **Requirements:** M4 best practices, M6 deploy and monitor
 - **Branch:** `feat/platform-api-shell`
+- **Planned for:** Sprint 01 (W2)
 - **Depends on:** P-7
 
 Acceptance criteria:
@@ -271,6 +312,7 @@ PostgreSQL with an append-only audit trail, Redis queues, S3-compatible storage 
 - **Estimate:** 8 points
 - **Requirements:** M2 GRS by design, M4 best practices
 - **Branch:** `feat/platform-database`
+- **Planned for:** Sprint 01 (W2)
 - **Depends on:** P-8
 
 Acceptance criteria:
@@ -283,6 +325,7 @@ Acceptance criteria:
 - `docker-compose.yml`: PostgreSQL, Redis and MinIO, under compose project name `orderpilot`.
 - Ports from `.env`: `POSTGRES_PORT`, `REDIS_PORT` and `MINIO_PORT`, with `DATABASE_URL`, `REDIS_URL` and the test URLs built from them (dotenv-expand). Changing one line moves them all.
 - `.env.example`: one root file documenting every variable with a safe default.
+- The seed starts `packages/synthetic-data`: about 5 fictional customers in the brief's countries, 3 vendors, 30 items from fictional brands, opening stock, and 10 orders in different states. Every area base uses this set, and P-19 grows it.
 - Getting started and `CONTRIBUTING.md` say `cp .env.example .env`, and troubleshooting covers "port already in use", "role does not exist" (another PostgreSQL answered) and Docker not running.
 - Proved from a clean clone with nothing loaded in the shell, on the default ports and again with `POSTGRES_PORT=5433`.
 - ADRs: Prisma with PostgreSQL; S3-compatible document storage.
@@ -296,11 +339,13 @@ Sessions, guards and a demo sign-in for all nine roles, with every sign-in and c
 - **Estimate:** 8 points
 - **Requirements:** M2 GRS by design, M4 best practices
 - **Branch:** `feat/platform-auth`
+- **Planned for:** Sprint 01 (W2)
 - **Depends on:** P-9
 
 Acceptance criteria:
 
 - Credentials and tokens: argon2 password hashing; a JWT access token in an httpOnly, Secure, SameSite cookie; refresh-token rotation with reuse detection; CSRF protection.
+- When a session does end, the API lets the user sign back in without losing their place, so the web app can keep unsaved form input (P-11).
 - A demo sign-in (`DEMO_MODE`) offering the nine roles, with synthetic names.
 - Guards: a users module, plus auth, CSRF and permissions guards. The permissions guard calls the role-permission matrix, which area 4 owns.
 - Seeds: a user for every role, and the default matrix.
@@ -317,6 +362,7 @@ The web app's stack, tokens, plumbing, shell and first pages, within the bundle 
 - **Estimate:** 8 points
 - **Requirements:** M4 best practices
 - **Branch:** `feat/platform-web-shell`
+- **Planned for:** Sprint 01 (W2)
 - **Depends on:** P-7
 
 Acceptance criteria:
@@ -324,6 +370,7 @@ Acceptance criteria:
 - The stack: Vite, React 19, TypeScript and Tailwind v4, with shadcn/ui set up by its Vite guide.
 - Design tokens: a warm neutral base with a deep jade accent; light and dark themes; an 8-pt spacing grid; radius and motion values; the Geist font, with tabular numbers.
 - App plumbing: React Router with route guards; an `ApiClient` class; TanStack Query; a minimal Zustand store; react-i18next (English, with no hard-coded strings); React Hook Form with zod.
+- When a session ends, unsaved form input is kept, and the user signs back in and carries on where they were.
 - The shell: a sidebar for each role; breadcrumbs; a command palette; a theme switch; the demo role switcher; notifications and a user menu.
 - Pages: the login page, plain for now; settings; a "planned" page for each area; error pages.
 - Assets: a theme script that stops the wrong theme flashing, and an OrderPilot favicon.
@@ -340,11 +387,13 @@ The shared table, page states, badges and small pieces every area's screens use.
 - **Estimate:** 8 points
 - **Requirements:** M2 GRS by design, M4 best practices
 - **Branch:** `feat/platform-web-components`
+- **Planned for:** Sprint 01 (W2)
 - **Depends on:** P-11
 
 Acceptance criteria:
 
-- Data and layout: a data table with server-side paging, sorting, filtering and column visibility; the page header and section cards.
+- Data and layout: a data table with server-side paging, sorting, filtering and column visibility, one quick search, saved filters, column settings, and CSV and Excel export; the page header and section cards.
+- The operation log at the foot of each detail page: time, user, IP and what changed, built with F-2.
 - Every state: loading skeleton, empty with a next action, error with retry and a trace id, partial, and permission denied.
 - Badges: "Mock", "Mock AI", "Synthetic demo data", status, and classification.
 - Small pieces, with tests: a masked value with "why is this hidden"; a confidence badge that says "Requires approval"; an audit link; relative time; a copy button; the planned page.
@@ -358,6 +407,7 @@ Non-root images for the API, the web app and the mocks, scanned in CI.
 - **Estimate:** 5 points
 - **Requirements:** M2 GRS by design, M4 best practices, M6 deploy and monitor
 - **Branch:** `ci/docker`
+- **Planned for:** Sprint 02 (W3)
 - **Depends on:** P-8, P-11
 
 Acceptance criteria:
@@ -376,6 +426,7 @@ A signed-in smoke test for every role, with accessibility checked, required in C
 - **Estimate:** 5 points
 - **Requirements:** M4 best practices
 - **Branch:** `test/e2e-smoke`
+- **Planned for:** Sprint 02 (W3)
 - **Depends on:** P-10, P-11, P-13
 
 Acceptance criteria:
@@ -393,6 +444,7 @@ Typed domain events, a worker process and live updates in the web app.
 - **Estimate:** 5 points
 - **Requirements:** M4 best practices
 - **Branch:** `feat/platform-events`
+- **Planned for:** Sprint 02 (W3)
 - **Depends on:** P-9
 
 Acceptance criteria:
@@ -411,6 +463,7 @@ Mermaid sources rendered to SVG and checked in CI.
 - **Estimate:** 3 points
 - **Requirements:** M2 GRS by design, M4 best practices
 - **Branch:** `docs/diagrams`
+- **Planned for:** Sprint 02 (W3)
 - **Depends on:** P-9
 
 Acceptance criteria:
@@ -432,6 +485,7 @@ One gateway over the AI providers, with usage tracking, a prompt-injection defen
 - **Estimate:** 8 points
 - **Requirements:** M2 GRS by design, M4 best practices
 - **Branch:** `feat/area1-ai-gateway`
+- **Planned for:** Sprint 02 (W3)
 - **Depends on:** P-8
 
 Acceptance criteria:
@@ -453,6 +507,7 @@ A safe upload API, text and image extraction, the start of area 1's order data, 
 - **Estimate:** 8 points
 - **Requirements:** M2 GRS by design, M4 best practices
 - **Branch:** `feat/area1-document-intake`
+- **Planned for:** Sprint 02 (W3)
 - **Depends on:** P-9, P-17
 
 Acceptance criteria:
@@ -472,12 +527,16 @@ An OData-style mock of Navision and the synthetic master data behind it.
 - **Estimate:** 8 points
 - **Requirements:** M2 GRS by design, M4 best practices
 - **Branch:** `feat/area1-mock-navision`
+- **Planned for:** Sprint 02 (W3)
 - **Depends on:** P-5
 
 Acceptance criteria:
 
 - `services/mock-navision`: an OData-style API with paging and `$filter`, behind an API key, for Items, Customers, Vendors, PriceLists and StockLevels, and for SalesOrders, PurchaseOrders and Receipts.
 - `packages/synthetic-data`: a seeded random generator; a Spectra-like catalogue of fictional brands' IT, surveillance and accessory products, with part numbers; customers in India, Sri Lanka, Bangladesh, Pakistan and the UAE; vendors, stock, and USD prices.
+- Customers and vendors in one list of business partners, each with a type and a price level, for the master-data screens and the price checks.
+- Opening stock and opening balances (receivables and payables), growing the set P-9 starts.
+- The mock speaks OData-style JSON with Navision's names in camelCase, as `docs/research/domain-notes.md` lists them.
 - Realism: document numbering and statuses from Richie's notes when present.
 - Tests, a compose service, `docs/api/mock-systems.md`, and a "Mock" label wherever it's used.
 - ADR: mock external systems.
@@ -491,6 +550,7 @@ A connector framework, and the adapter that makes a stock lookup work end to end
 - **Estimate:** 5 points
 - **Requirements:** M4 best practices
 - **Branch:** `feat/area1-connectors`
+- **Planned for:** Sprint 02 (W3)
 - **Depends on:** P-19
 
 Acceptance criteria:
@@ -509,6 +569,7 @@ Generated PDFs with planted mistakes and ground truth, for the demo and the accu
 - **Estimate:** 8 points
 - **Requirements:** M2 GRS by design, M4 best practices
 - **Branch:** `feat/area1-synthetic-documents`
+- **Planned for:** Sprint 02 (W3)
 - **Depends on:** P-19
 
 Acceptance criteria:
@@ -520,25 +581,28 @@ Acceptance criteria:
 
 ### P-22: The design system with the Pro kits
 
-The licensed kits, added once the repository is private, and the screens upgraded with them.
+The licensed kits, set up as soon as the keys work and Richie says Pro code may go in, and Richie's own pages upgraded with them.
 
 - **Area:** `area: 1 document AI and integration`
 - **Priority:** should
 - **Estimate:** 8 points
 - **Requirements:** M4 best practices
 - **Branch:** `feat/platform-design-system`
+- **Planned for:** Sprint 02 (W3)
 - **Depends on:** P-11, P-12
-- **Condition:** Only once Richie says the repository is private and the keys are in `apps/web/.env.local`.
+- **Condition:** As soon as the Pro keys work (prompt 002, section 4). Rule 8 of prompt 001 forbids Pro code while the repository is public, and the repository is public: which applies is waiting for Richie. Until he says, free kits only.
 
 Acceptance criteria:
 
 - Registries in `apps/web/components.json`: `@reactbits-starter`, `@reactbits-pro`, `@reui` and `@magicui`, with the licence keys sent as bearer headers from the environment.
+- The keys stay in `apps/web/.env.local` as `REUI_LICENSE_KEY` and `REACTBITS_LICENSE_KEY`, and `components.json` refers to them only as `${...}`. No key is ever written into a file, commit or message.
+- Pro parts stay in Richie's own pages: landing, sign-in, the app shell and the 3D view. The four areas' screens use the free kits unless Richie confirms a team licence.
 - Each source verified with a test install, and exact errors reported.
 - Tools: the React Bits skill read in full before any item is used; the shadcn MCP; ReUI's MCP server, with its token kept out of Git.
 - `docs/design/reactbits-usage.md`: a plan for every page, saying which React Bits, ReUI and Magic UI items it uses, and why; 20 or more distinct items across the app; at least one item on every page; Pro blocks on landing and login; Application UI wherever it matches; only subtle items on dense work screens.
 - `docs/design/design-system.md`.
 - `CONTRIBUTING.md`: teammates never need the keys to run or build, because added components are code in the repository. Adding a new Pro component goes through Richie.
-- Login and landing are upgraded with Pro blocks, and the screens where items fit. Every item is adapted to the tokens, one component per file, with a header comment stating its origin.
+- Login and landing are upgraded with Pro blocks, then the app shell and the 3D view. Every item is adapted to the tokens, one component per file, with a header comment stating its origin.
 - ADR: component registries, and why licensed code needs a private repository.
 
 ### P-23: The 3D order constellation
@@ -550,6 +614,7 @@ A live 3D view of orders moving between the six teams, on landing, login and as 
 - **Estimate:** 13 points
 - **Requirements:** M4 best practices
 - **Branch:** `feat/area1-order-constellation`
+- **Planned for:** Sprint 02 (W3)
 - **Depends on:** P-11, P-15
 
 Acceptance criteria:
@@ -570,6 +635,7 @@ The app live on a Lightsail server over HTTPS, deployed on each merge to `main`,
 - **Estimate:** 8 points
 - **Requirements:** M4 best practices, M6 deploy and monitor
 - **Branch:** `feat/platform-deploy`
+- **Planned for:** Sprint 02 (W3)
 - **Depends on:** P-13
 - **Condition:** Only once Richie confirms step 8 of his guide.
 
@@ -756,17 +822,94 @@ Azri's head start: the models, contracts, screens and test skeletons, never the 
 - **Priority:** must
 - **Estimate:** 8 points
 - **Requirements:** M4 best practices
+- **Planned for:** Sprint 01 (W2)
 - **Depends on:** P-10, P-11, P-12
 
 Acceptance criteria:
 
 - Models: workflow definitions, instances, tasks, events and notifications.
+- OrderPilot's own numbers for its records, like `SPR-20261102-0001`, beside Navision's.
+- Payment confirmation records the payment type, and prepayment drives the payment gate.
+- Configurable fields and default values for each document type, as configuration, not code.
+- The SPR pre-fill is a suggestion from stock levels that a person approves.
 - Contracts, with routes returning typed mock data in Swagger.
 - Screens wired to those routes, covering every state: each role's task inbox; an order's steps and timeline; the SPR approval page (approve or reject, with a comment); reminders.
 - To-do tests, as `it.todo` with the key cases named: transitions, SPR limits, the payment gate, reminders and escalations, and retries with idempotency.
 - The "What the base gives you" and "What's yours to build" sections of the guide are filled in.
 - Left to Azri: his state machine, which he writes again himself as his first story, so it stays his work; Spectra's sales and purchase flows, the SPR rules, the payment gate and the SLA logic.
 - Azri's review is requested on the pull request once he is a collaborator, and Richie is told when it merges, so he can hand it over.
+
+### C-2: The order state machine for the sales flow
+
+Azri writes his own state machine, with the sales flow's states and transitions, so that order status lives in one place and stays his work.
+
+- **Area:** `area: 2 order workflows and approvals`
+- **Priority:** must
+- **Estimate:** 8 points
+- **Requirements:** M4 best practices
+- **Planned for:** Sprint 02 (W3)
+- **Ready:** Ready to pull, at Ready on the board
+- **Depends on:** C-1
+
+Acceptance criteria:
+
+- Azri writes the state machine himself, as his first story, so that it stays his work (C-1 leaves it to him).
+- Its states and transitions follow the sales flow: the PO arrives; stock is checked and an SPR raised when needed; Support generates the PI; the customer pays; the warehouse packs; the invoice and packing list are made; the goods go to the forwarder; the customer gets the shipping details; the AWB/BL and import permit are followed up.
+- Where they meet, its states map to Navision's Sales Header Status (Open, Released, Pending Approval, Pending Prepayment), as an assumption to confirm at the briefing call.
+- Order status lives only in this state machine. Other areas read it or send events, and never set status themselves.
+- Each transition names the role that may make it, and area 4's policy is called on the server before it happens.
+- The payment gate guards packing: with the prepayment type, packing waits for Finance's confirmation.
+- Area 3's checks report pass or fail, and a failure holds the order rather than moving it on.
+- Every transition is a domain event with who, when, and the state before and after, for the tracker and the audit trail.
+- An illegal transition is refused with the one error envelope, and audited.
+- Unit tests cover every legal and every illegal transition, replacing C-1's `it.todo` cases for transitions, and all of them pass.
+- The states and transitions are written down in area 2's guide.
+
+### C-3: SPR approval within limits
+
+An SPR goes to an approver who may decide it within their limit, set up in the shape of Navision's Approval User Setup.
+
+- **Area:** `area: 2 order workflows and approvals`
+- **Priority:** must
+- **Estimate:** 5 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Planned for:** Sprint 02 (W3)
+- **Ready:** Ready to pull, at Ready on the board
+- **Depends on:** C-1
+
+Acceptance criteria:
+
+- The approval setup has the shape of Navision's Approval User Setup: user, approver, Sales Amount Approval Limit, Purchase Amount Approval Limit, Unlimited Sales Approval, Unlimited Purchase Approval, and a substitute.
+- Approvers, limits and delegation are configuration, not code, until Spectra confirms them.
+- An approver approves or rejects an SPR within their limit, with a comment, on C-1's SPR approval page.
+- An SPR above the approver's limit goes on to an approver whose limit covers it, or one with an unlimited approval, and is never approved below it.
+- While an approver is away, their substitute receives the SPR.
+- Area 4's policy is called on the server for each decision, and enforces no self-approval: whoever raised an SPR never approves it.
+- The AI may pre-fill an SPR, but only a person approves it, and every decision is audited.
+- Tests cover approval within the limit, above it and exactly at it, unlimited approvers, a substitute, and a refused self-approval, replacing C-1's `it.todo` cases for SPR limits.
+
+### C-4: Reminders and escalations
+
+A task that waits too long reminds its owner, then escalates, so that no follow-up goes overdue unseen.
+
+- **Area:** `area: 2 order workflows and approvals`
+- **Priority:** must
+- **Estimate:** 5 points
+- **Requirements:** M4 best practices
+- **Planned for:** Sprint 02 (W3)
+- **Ready:** Ready to pull, at Ready on the board
+- **Depends on:** C-1
+
+Acceptance criteria:
+
+- Each task type has a due time from configurable SLA settings, not code.
+- A reminder goes to the task's owner before the due time, and an escalation goes to whoever the configuration names once the task is overdue.
+- Reminders and escalations run as queued jobs with idempotency keys, so a retried job never sends one twice.
+- Each reminder and escalation is an in-app notification, and a workflow event the tracker uses for its overdue flag (D-4).
+- A reminder to a customer or a vendor is a draft that a person sends, never sent on its own.
+- Every overdue follow-up is visible.
+- The reminder in E2E #1, the sales pilot, comes from this story.
+- Tests cover a reminder before the due time, an escalation after it, a task finished in time getting neither, and a retried job sending once, replacing C-1's `it.todo` cases for reminders, escalations and retries.
 
 ## Epic D: Checks, the tracker and insights
 
@@ -780,6 +923,7 @@ Iok Teck's head start: the models, contracts, screens and test skeletons, never 
 - **Priority:** must
 - **Estimate:** 8 points
 - **Requirements:** M4 best practices
+- **Planned for:** Sprint 01 (W2)
 - **Depends on:** P-10, P-11, P-12
 
 Acceptance criteria:
@@ -787,10 +931,80 @@ Acceptance criteria:
 - The checks module: a check-rule Strategy interface; check-result and exception contracts; an empty exceptions model.
 - Contracts, with routes returning typed mock data in Swagger.
 - Screens wired to those routes, covering every state: the order tracker (status, owner, overdue flags); an order's detail timeline; the exceptions queue; a KPI dashboard of Spectra's five measures.
+- An order's page in the tracker shows each step and its effect, such as "payment confirmed: packing released". Money postings stay in Navision.
 - To-do tests, as `it.todo` with the key cases named: the MVP mismatch (the packing list's quantity against the PO), tolerances, and the KPI formulas.
 - The "What the base gives you" and "What's yours to build" sections of the guide are filled in.
 - Left to Iok Teck: every check and its tolerance, the exceptions flow, the tracker's logic and the KPIs.
 - Iok Teck's review is requested on the pull request once they are a collaborator, and Richie is told when it merges, so he can hand it over.
+
+### D-2: The packing-list quantity check against the PO
+
+The MVP mismatch: a packing list whose quantity differs from the PO is flagged, and the result goes to area 2.
+
+- **Area:** `area: 3 checks, tracker and insights`
+- **Priority:** must
+- **Estimate:** 5 points
+- **Requirements:** M4 best practices
+- **Planned for:** Sprint 02 (W3)
+- **Ready:** Ready to pull, at Ready on the board
+- **Depends on:** D-1
+
+Acceptance criteria:
+
+- A check rule on D-1's Strategy interface compares each packing-list line's quantity with the matching PO line.
+- Lines match on the item's Navision number, never on its name. A look-alike name is shown as a possible match.
+- A difference outside the tolerance fails the check. The tolerance is configuration, and zero until Spectra says otherwise.
+- The result, pass or fail with each differing line, is reported to area 2, which decides what happens to the order.
+- A failure raises an exception in the exceptions queue (D-3), linked to both documents.
+- It is a fixed rule, not AI. The AI may explain the exception, but never decides it.
+- Every seeded quantity mismatch in the synthetic documents is flagged.
+- Tests cover equal quantities, a short and an over quantity, a missing line, an extra line and the tolerance's edge, replacing D-1's `it.todo` cases for the MVP mismatch and tolerances.
+
+### D-3: The exceptions queue flow
+
+Exceptions are worked from one queue: assigned, explained, and resolved or waived, with every step recorded.
+
+- **Area:** `area: 3 checks, tracker and insights`
+- **Priority:** must
+- **Estimate:** 5 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Planned for:** Sprint 02 (W3)
+- **Ready:** Ready to pull, at Ready on the board
+- **Depends on:** D-1
+
+Acceptance criteria:
+
+- Each exception gets OrderPilot's own number, like `EXC-20261102-0001`.
+- An exception moves through its states (a first proposal: open, assigned, resolved and waived), and each step records who made it and when.
+- Each exception has an owner and a due time, and an overdue one is flagged.
+- Resolving or waiving an exception needs a reason, and every step is audited.
+- Resolving an exception reports pass to area 2, so that the order can move on.
+- D-1's queue screen filters by type, owner, state and age, with the common data table's quick search and saved filters (P-12).
+- An AI summary may explain an exception, labelled as AI, and the logs stay the source of truth.
+- Tests cover each state change, a change refused for want of a reason, and the overdue flag.
+
+### D-4: The tracker's status, owner and overdue flags from workflow events
+
+One tracker shows every order's status, owner and overdue flags, fed by area 2's workflow events and never set by hand.
+
+- **Area:** `area: 3 checks, tracker and insights`
+- **Priority:** must
+- **Estimate:** 5 points
+- **Requirements:** M4 best practices
+- **Planned for:** Sprint 02 (W3)
+- **Ready:** Ready to pull, at Ready on the board
+- **Depends on:** D-1
+
+Acceptance criteria:
+
+- The tracker takes each order's status from area 2's workflow events. It never stores or sets a status of its own.
+- Each order shows its current step, the role and the person who hold it, and how long it has waited.
+- An order or a follow-up past its due time is flagged overdue, and every overdue follow-up is visible.
+- An order's page shows each step and its effect, such as "payment confirmed: packing released". Money postings stay in Navision.
+- Until P-15's event bus exists, it works from the typed events in the order and event contract (P-7).
+- It filters by status, owner, area and overdue, with the common data table (P-12).
+- The overdue count feeds the KPI dashboard's overdue-orders measure.
+- Tests cover a status change from an event, a change of owner, the overdue boundary, and the same event received twice.
 
 ## Epic E: AI with a person in the loop
 
@@ -856,6 +1070,44 @@ Acceptance criteria:
 - A passkey confirms a risky approval.
 - Area 4's policy decides when one is needed.
 
+### E-5: A first-run guided tour for each role
+
+A short tour of the menu the first time each role signs in, which also walks the demo.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** could
+- **Estimate:** 3 points
+- **Requirements:** M1 design thinking, M4 best practices
+- **Depends on:** P-11
+
+Acceptance criteria:
+
+- A first-run tour of the menu for each of the nine roles, showing that role's own tasks.
+- It can be skipped, and restarted from the user menu.
+- It meets WCAG 2.2 AA: full keyboard use, focus kept in place, and reduced motion respected.
+- Its text comes from react-i18next, with no hard-coded strings.
+- It is in our own design and words, copied from no other product.
+- It helps the demo: the tour for each role follows the sales pilot.
+
+### E-6: An "Ask OrderPilot" help panel that answers from our docs
+
+A help panel that answers questions from OrderPilot's own docs, labelled as AI-generated and for reference only.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** could
+- **Estimate:** 5 points
+- **Requirements:** M2 GRS by design, M3 AI-assisted coding
+- **Depends on:** P-11, P-17
+
+Acceptance criteria:
+
+- The panel answers from OrderPilot's own docs only, and links the pages it used.
+- Every answer is labelled as AI-generated and for reference only.
+- It goes through the AI gateway (P-17), with the mock provider by default, and each answer is tracked like any other AI call.
+- It never acts: it cannot approve, change data or call another endpoint.
+- Questions and docs are treated as data, and the prompt-injection tests cover it (E-3).
+- Area 4's policy decides which provider may receive a question, and no business data goes with it.
+
 ## Epic F: Financial controls and governance
 
 No self-approval; approval limits; bank-detail change control; masking of bank details and prices by role; a tamper-evident audit trail.
@@ -868,11 +1120,15 @@ Angelyn's head start on policy and masking: the mechanism and contracts, never t
 - **Priority:** must
 - **Estimate:** 8 points
 - **Requirements:** M2 GRS by design, M4 best practices
+- **Planned for:** Sprint 01 (W2)
 - **Depends on:** P-10, P-11, P-12
 
 Acceptance criteria:
 
 - Policy and masking: a role-permission matrix screen; the masking mechanism, with a neutral sample rule; classification contracts; the contract for what data may go to which AI provider; how a refusal looks.
+- Role permissions plus a data scope, such as a Product Manager seeing only their brands' orders.
+- A role's permissions can be copied to another role, and users are disabled, never deleted.
+- Payment confirmation records the payment type, for the policy to use.
 - Contracts, with routes returning typed mock data in Swagger, and screens covering every state.
 - To-do tests, as `it.todo` with the key cases named: approval limits; no self-approval; the bank-detail hold; masking for each role; a direct API call being refused (E2E #3).
 - The "What the base gives you" and "What's yours to build" sections of the guide are filled in.
@@ -887,6 +1143,7 @@ The audit log viewer over the real hash chain.
 - **Priority:** must
 - **Estimate:** 3 points
 - **Requirements:** M2 GRS by design, M4 best practices
+- **Planned for:** Sprint 01 (W2)
 - **Depends on:** P-9, P-10, P-11, P-12
 
 Acceptance criteria:
@@ -894,6 +1151,75 @@ Acceptance criteria:
 - The audit log viewer over the real hash chain, with filters and a chain check.
 - To-do tests, as `it.todo`, for export and retention.
 - Angelyn's review is requested on the pull request once they are a collaborator, and Richie is told when it merges, so he can hand it over.
+
+### F-3: The authorisation policy with approval limits
+
+Area 4's policy decides on the server who may do what, up to which amount, and every endpoint calls it.
+
+- **Area:** `area: 4 controls and monitoring`
+- **Priority:** must
+- **Estimate:** 5 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Planned for:** Sprint 02 (W3)
+- **Ready:** Ready to pull, at Ready on the board
+- **Depends on:** F-1
+
+Acceptance criteria:
+
+- One policy, called on the server by every endpoint that acts. Hiding a button is never the control.
+- Role permissions plus a data scope, on F-1's matrix: for example, a Product Manager sees only their brands' orders.
+- Approval limits in the shape of Navision's Approval User Setup (approver, Sales Amount Approval Limit, Purchase Amount Approval Limit, Unlimited Sales Approval, Unlimited Purchase Approval, substitute), the same shape area 2's SPR approval uses (C-3).
+- Limits and approvers are configuration until Spectra confirms them.
+- An action above the actor's limit is refused, the way F-1 shows a refusal.
+- Every refusal is audited: who, what, when and why.
+- A direct API call without the permission is refused (E2E #3).
+- Tests cover each role's allowed and refused actions, the data scope, each limit's edge and unlimited approvers, replacing F-1's `it.todo` cases for approval limits.
+
+### F-4: No self-approval and segregation of duties
+
+Nobody approves their own request, and the duties that must stay apart stay apart, on the server.
+
+- **Area:** `area: 4 controls and monitoring`
+- **Priority:** must
+- **Estimate:** 3 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Planned for:** Sprint 02 (W3)
+- **Ready:** Ready to pull, at Ready on the board
+- **Depends on:** F-1
+
+Acceptance criteria:
+
+- Whoever raised a request never approves it, whatever their role or limit.
+- A substitute who raised the request is refused too.
+- `SYSTEM_ADMIN` configures the platform, and never approves, posts or pays.
+- The duties to keep apart are configuration. They start with: raising and approving an SPR; confirming a payment and clearing a payment hold; changing a vendor's bank details and approving a payment to that vendor.
+- Every refusal is audited, and shown the way F-1 shows a refusal.
+- Segregation of duties holds in E2E #3.
+- Tests cover self-approval through the API, through a substitute and after a change of role, replacing F-1's `it.todo` cases for no self-approval.
+
+### F-5: The bank-detail hold
+
+A vendor PI whose bank details differ from the vendor's bank account record holds the payment until Finance and a second approver clear it.
+
+- **Area:** `area: 4 controls and monitoring`
+- **Priority:** must
+- **Estimate:** 5 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Planned for:** Sprint 02 (W3)
+- **Ready:** Ready to pull, at Ready on the board
+- **Depends on:** F-1
+
+Acceptance criteria:
+
+- The bank details on a vendor PI are compared with the vendor's Vendor Bank Account record: Bank Account No., SWIFT Code and IBAN.
+- Vendors match on their Navision number, never on their name.
+- Any difference holds the payment, and nobody can pay the vendor while the hold is on.
+- Only Finance and a second approver clear the hold: two different people, each with a reason, and neither of them the person who changed the details.
+- Bank details are masked by role, with a reason, and the hold shows which field differs without showing the full number to a role that may not see it.
+- Every hold, clearance and refusal is audited.
+- The bank details are synthetic and obviously fake.
+- It is the check behind E2E #4: a vendor PI with changed bank details holds the payment.
+- Tests cover matching details, each field differing on its own, a clearance by one person alone, and a clearance by the person who made the change, replacing F-1's `it.todo` cases for the bank-detail hold.
 
 ## Epic G: Monitoring
 
@@ -907,6 +1233,7 @@ The monitoring wiring and first screens, with the real dashboards left to Angely
 - **Priority:** must
 - **Estimate:** 8 points
 - **Requirements:** M2 GRS by design, M6 deploy and monitor
+- **Planned for:** Sprint 01 (W2)
 - **Depends on:** P-10, P-11, P-12
 
 Acceptance criteria:
@@ -1062,6 +1389,6 @@ Each owner takes over their area, and the team moves to planning by tasks.
 Acceptance criteria:
 
 - Each owner takes over their area.
-- Prompt 002 writes epics A to G's stories from the owners' planning notes.
+- Prompt 003 writes the rest of epics A to G's stories from the owners' planning notes.
 - One approving review plus code-owner review is switched on, only on Richie's yes.
 - The first sprint is planned by tasks.

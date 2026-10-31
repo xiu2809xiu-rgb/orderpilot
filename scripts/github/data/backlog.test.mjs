@@ -1,5 +1,5 @@
-// Holds the backlog to the brief: Prompt 001 is read here, so a story that drifts
-// from its title or branch fails a test rather than a review.
+// Holds the backlog to the brief: prompts 001 and 002 are read here, so a story
+// that drifts from its title or branch fails a test rather than a review.
 
 import assert from "node:assert/strict";
 import { test } from "node:test";
@@ -10,7 +10,18 @@ import { readRepoFile } from "../lib/files.mjs";
 const backlog = loadBacklog();
 const labels = loadLabels();
 const brief = readRepoFile("docs/ai/prompts/001-build-the-base.md");
+const prompt002 = readRepoFile(
+  "docs/ai/prompts/002-finish-the-base-by-sunday.md",
+);
 const byKey = new Map(backlog.stories.map((story) => [story.key, story]));
+
+// Prompt 002, section 3, item 8: three starter stories each for areas 2, 3 and 4.
+const STARTERS_BY_AREA = {
+  "area: 2 order workflows and approvals": ["C-2", "C-3", "C-4"],
+  "area: 3 checks, tracker and insights": ["D-2", "D-3", "D-4"],
+  "area: 4 controls and monitoring": ["F-3", "F-4", "F-5"],
+};
+const STARTERS = Object.values(STARTERS_BY_AREA).flat();
 
 const POINTS = [1, 2, 3, 5, 8, 13];
 const PRIORITIES = ["must", "should", "could"];
@@ -55,6 +66,9 @@ test("every story the brief names is here, in the expected groups", () => {
     "F-2",
     "G-1",
     ...Array.from({ length: 9 }, (_, index) => `T-${index + 1}`),
+    ...STARTERS,
+    "E-5",
+    "E-6",
   ];
   for (const key of expected) assert.ok(keys.includes(key), key);
   assert.equal(keys.length, expected.length + 13);
@@ -137,7 +151,8 @@ test("area 1's own stories sit under epics A, B and E", () => {
   const own = backlog.stories.filter((story) =>
     ["A", "B", "E"].includes(story.epic),
   );
-  assert.equal(own.length, 13);
+  // 13 from prompt 001, section 10, and E-5 and E-6 from prompt 002.
+  assert.equal(own.length, 15);
   for (const story of own) {
     assert.equal(story.area, "area: 1 document AI and integration", story.key);
   }
@@ -156,9 +171,124 @@ test("area 1's own stories sit under epics A, B and E", () => {
     "The template engine for PIs, invoices, packing lists and Excel",
     "QR codes on generated documents and carton labels",
     "Passkeys to confirm risky approvals",
+    "A first-run guided tour for each role",
+    'An "Ask OrderPilot" help panel that answers from our docs',
   ]) {
     assert.ok(titles.includes(phrase), phrase);
   }
+});
+
+test("prompt 002's starter stories: three ready Musts for each of areas 2, 3 and 4", () => {
+  for (const [area, keys] of Object.entries(STARTERS_BY_AREA)) {
+    for (const key of keys) {
+      const story = byKey.get(key);
+      assert.ok(story, key);
+      assert.equal(story.area, area, key);
+      assert.equal(story.priority, "must", key);
+      assert.equal(story.ready, true, key);
+      assert.deepEqual(story.sprints, [2], key);
+      assert.ok(story.acceptance.length >= 5, key);
+    }
+  }
+  assert.ok(
+    prompt002.includes(
+      "three ready-to-pull stories for each of areas 2, 3 and 4",
+    ),
+  );
+  const ready = backlog.stories.filter((story) => story.ready);
+  assert.deepEqual(
+    ready.map((story) => story.key),
+    STARTERS,
+  );
+});
+
+test("the starter stories carry prompt 002's own words", () => {
+  const text = (key) =>
+    [byKey.get(key).title, ...byKey.get(key).acceptance].join(" ");
+  assert.match(text("C-2"), /Azri writes the state machine himself/);
+  assert.match(text("C-3"), /Approval User Setup/);
+  assert.match(text("C-3"), /substitute/);
+  assert.match(text("C-3"), /no self-approval/);
+  assert.match(text("C-4"), /Reminders and escalations/);
+  assert.match(text("D-2"), /packing-list quantity check against the PO/);
+  assert.match(text("D-2"), /reported to area 2/);
+  assert.match(text("D-3"), /exceptions queue flow/);
+  assert.match(
+    text("D-4"),
+    /status, owner and overdue flags from workflow events/,
+  );
+  assert.match(text("F-3"), /approval limits/);
+  assert.match(text("F-4"), /segregation of duties/);
+  for (const field of ["Bank Account No.", "SWIFT Code", "IBAN"]) {
+    assert.ok(text("F-5").includes(field), field);
+  }
+  assert.match(text("F-5"), /Finance and a second approver/);
+});
+
+test("E-5 and E-6 are prompt 002's two Could stories under epic E", () => {
+  for (const key of ["E-5", "E-6"]) {
+    assert.equal(byKey.get(key).epic, "E", key);
+    assert.equal(byKey.get(key).priority, "could", key);
+  }
+  assert.ok(
+    byKey
+      .get("E-6")
+      .acceptance.some((line) =>
+        line.includes("labelled as AI-generated and for reference only"),
+      ),
+  );
+});
+
+test("the stories prompt 002 touches carry its additions", () => {
+  const has = (key, pattern) =>
+    assert.ok(
+      byKey.get(key).acceptance.some((line) => pattern.test(line)),
+      `${key}: ${pattern}`,
+    );
+  has("P-3", /docs\/research\/domain-notes\.md/);
+  has(
+    "P-3",
+    /section 5\.3 of prompt 002, after the existing priority questions/,
+  );
+  has("P-5", /refuses any push to `main`/);
+  has("P-9", /about 5 fictional customers.*3 vendors, 30 items.*10 orders/);
+  has("P-7", /SPR-20261102-0001/);
+  has("P-10", /session does end/);
+  has("P-11", /unsaved form input is kept/);
+  has(
+    "P-12",
+    /quick search, saved filters, column settings, and CSV and Excel export/,
+  );
+  has("P-12", /operation log at the foot of each detail page/);
+  has("C-1", /own numbers/);
+  has("C-1", /prepayment drives the payment gate/);
+  has("C-1", /Configurable fields and default values/);
+  has("C-1", /SPR pre-fill is a suggestion/);
+  has("D-1", /payment confirmed: packing released/);
+  has("F-1", /data scope/);
+  has("F-1", /disabled, never deleted/);
+  has("F-1", /payment type/);
+  has("P-19", /business partners, each with a type and a price level/);
+  has("P-19", /Opening stock and opening balances/);
+  has("P-22", /landing, sign-in, the app shell and the 3D view/);
+  has("T-9", /Prompt 003/);
+});
+
+test("the sprints follow prompt 002's order", () => {
+  const phaseA = ["P-2", "P-3", "P-4", "P-5", "P-6", "P-7", "P-8", "P-9"];
+  phaseA.push("P-10", "P-11", "P-12", "C-1", "D-1", "F-1", "F-2", "G-1");
+  for (const key of phaseA) assert.deepEqual(byKey.get(key).sprints, [1], key);
+  for (const key of ["P-13", "P-17", "P-21", "P-22", "P-23", "P-24"]) {
+    assert.deepEqual(byKey.get(key).sprints, [2], key);
+  }
+  const goal = (sprint) => loadSprintGoals()[sprint - 1].goal;
+  assert.match(goal(1), /Sunday 1 Nov, 23:59 Singapore time/);
+  assert.match(goal(2), /Monday 2 Nov/);
+  assert.match(
+    goal(2),
+    /P-13, P-14, P-15, P-16, P-17 to P-21, P-22 if not done, P-23, P-24 and P-25/,
+  );
+  assert.ok(goal(2).includes("C-2 to C-4, D-2 to D-4 and F-3 to F-5"));
 });
 
 test("section 10's Could list is what the data calls could", () => {
@@ -230,7 +360,10 @@ test("planned sprints are inside the calendar", () => {
 });
 
 test("conditional stories state their condition", () => {
-  assert.match(byKey.get("P-22").condition, /private/);
+  // Prompt 002 says "as soon as the keys work"; prompt 001's rule 8 forbids Pro
+  // code in a public repository. The condition names both until Richie decides.
+  assert.match(byKey.get("P-22").condition, /keys work/);
+  assert.match(byKey.get("P-22").condition, /public/);
   assert.match(byKey.get("P-24").condition, /step 8/);
   assert.match(byKey.get("T-9").condition, /base is done/);
 });
