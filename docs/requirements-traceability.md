@@ -7,14 +7,14 @@ Every feature traces to at least one of the six module requirements. Each row sa
 
 ## The six requirements
 
-| #   | Requirement        | What it asks                                                                           |
-| --- | ------------------ | -------------------------------------------------------------------------------------- |
-| M1  | Design thinking    | A problem grounded in real user and stakeholder needs, with clear solution objectives  |
-| M2  | GRS by design      | Governance, risk and sustainability built into the design and the UI prototype         |
-| M3  | AI-assisted coding | Building with AI tools responsibly, knowing what they can and cannot do                |
-| M4  | Best practices     | Application security, performance and testing                                          |
-| M5  | Team Git workflow  | Branches and pull requests to integrate everyone's code                                |
-| M6  | Deploy and monitor | Cloud deployment with observability, clickstream analytics and AI token usage tracking |
+| #   | Requirement        | What it asks                                                                              |
+| --- | ------------------ | ----------------------------------------------------------------------------------------- |
+| M1  | Design thinking    | Start from what Spectra's staff and other stakeholders need, and set clear objectives     |
+| M2  | GRS by design      | Governance, risk and sustainability designed in, and visible in the UI prototype          |
+| M3  | AI-assisted coding | Use AI tools to build, responsibly, aware of where they help and where they fail          |
+| M4  | Best practices     | Secure, fast and well-tested code                                                         |
+| M5  | Team Git workflow  | Everyone's work merged through branches and pull requests                                 |
+| M6  | Deploy and monitor | Run it in the cloud and watch it: observability, clickstream analytics and AI token usage |
 
 ## M1 Design thinking
 
@@ -54,7 +54,7 @@ Every feature traces to at least one of the six module requirements. Each row sa
 | Prompts kept                                             | [docs/ai/prompts/](ai/prompts/001-build-the-base.md)                  | Prompt 001; prompt 002 moves in with P-2    | P-1, P-2         | Today      |
 | Rules for every teammate's AI tool, and a starter prompt | [AGENTS.md](../AGENTS.md)                                             | The file                                    | P-1              | Today      |
 | No AI attribution                                        | `.claude/settings.json`, the house rules                              | The house scan over files and commits       | P-1              | Today      |
-| Where we use AI, and where we don't                      | [problem-statement.md](problem-statement.md#1-the-brief-in-our-words) | The table                                   | P-3              | On its way |
+| Where AI is used, and where it is not                    | [problem-statement.md](problem-statement.md#1-the-brief-in-our-words) | The table                                   | P-3              | On its way |
 | The AI gateway, with usage and cost per call             | `apps/api/src/modules/ai`                                             | Usage records; the "Mock AI" badge          | P-17             | Planned    |
 | Extraction accuracy of 95% or more                       | The accuracy harness                                                  | The harness report against the ground truth | P-21, area 1     | Planned    |
 

@@ -1,6 +1,6 @@
 # Personas
 
-Started from the role table in [CLAUDE.md](../../CLAUDE.md#roles): each role, what it does today, and what would help. These are proto-personas, built from the brief before we have met anyone at Spectra. The names are invented, except Janet, whom the brief names as the approver.
+We began from the role table in [CLAUDE.md](../../CLAUDE.md#roles), listing for each role its work today and what would make that work easier. These are proto-personas, built from the brief before we have met anyone at Spectra. The names are invented, except Janet, whom the brief names as the approver.
 
 ## The roles
 
@@ -9,7 +9,7 @@ Started from the role table in [CLAUDE.md](../../CLAUDE.md#roles): each role, wh
 | Product Manager      | Watches their brands' stock, raises SPRs, and chases the approver                                   | An SPR pre-filled from a shortfall, its approval visible, and only their brands' orders and stock        |
 | Approver (Janet)     | Approves or rejects SPRs and requests, from emails and paper                                        | Each request with its checks done and documents attached, within the approval limit, and fewer reminders |
 | Support              | Re-types POs into Navision, makes PIs, invoices and packing lists, and answers "where is my order?" | Fields read for them, only doubtful ones to confirm, drafts to send, and one list of what waits on them  |
-| Warehouse            | Packs paid orders, and checks incoming goods against the invoice, packing list and AWB/BL by eye    | A packing task only after payment, and documents side by side with differences flagged, on a tablet      |
+| Warehouse            | Packs paid orders, and compares deliveries by eye with the paperwork: invoice, packing list, AWB/BL | A packing task only after payment, and documents side by side with differences flagged, on a tablet      |
 | Finance              | Confirms customers' payments, pays vendors on the due date, and checks vendors' bank details        | Payment status per order, vendor payments due, and a hold whenever bank details change                   |
 | Logistics            | Books forwarders, and follows shipment dates, AWB/BL and import permits                             | Shipments by status, with overdue papers flagged and shipping details sent without re-typing             |
 | Management           | Asks around to learn how orders are going                                                           | One tracker, and the five measures measured                                                              |
@@ -40,7 +40,7 @@ Four of the roles carry the sales pilot, so they get a fuller sketch. The others
 - **Day:** approves SPRs and requests between other work, from emails that each need context.
 - **Goal:** approve quickly, and never approve something wrong.
 - **Frustrations:** requests that arrive without the documents or the stock picture; reminders from several people about the same request.
-- **What OrderPilot gives the approver:** each request with its checks done and its documents beside it; only what is within the approval limit; one reminder, not five; a substitute during absences (Q-6).
+- **What OrderPilot gives the approver:** every request arriving already checked, with its documents attached; only what is within the approval limit; one reminder, not five; a substitute during absences (Q-6).
 
 ### Ahmad, Warehouse
 

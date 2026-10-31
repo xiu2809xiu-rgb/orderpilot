@@ -104,7 +104,7 @@ Fields: the permit number, the country, the issue and expiry dates, the importer
 ### Vendor PI
 
 - **From:** the vendor, by email, quoting our PO number. **Format:** PDF.
-- **OrderPilot's part:** checked against the vendor PO, and its bank details against the Vendor Bank Account on record. Any difference holds the payment until Finance and a second approver clear it (planned: phase 2, area 4, E2E #4).
+- **OrderPilot's part:** checked against the vendor PO, and its bank details against the Vendor Bank Account on record. Any difference holds the payment until Finance and a second approver release it (planned: phase 2, area 4, E2E #4).
 
 | Field on the vendor PI   | Navision field                                          |
 | ------------------------ | ------------------------------------------------------- |

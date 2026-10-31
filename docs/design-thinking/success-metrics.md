@@ -4,13 +4,13 @@ How we will know OrderPilot helps, and how we measure it. Spectra's five measure
 
 ## Spectra's five measures
 
-| Measure                  | Definition                                                                    | Source in OrderPilot                                           | Lab estimate                                 | Spectra's baseline |
-| ------------------------ | ----------------------------------------------------------------------------- | -------------------------------------------------------------- | -------------------------------------------- | ------------------ |
-| Order-processing time    | Minutes of staff work from a PO's arrival to the goods' release, step by step | The order's workflow events and the protocol's stopwatch times | From the protocol, manual against OrderPilot | To ask (Q-7)       |
-| Manual touches per order | Fields typed or corrected by hand, plus hand-offs between groups              | Field edits on the review screen, and task hand-offs           | From the protocol                            | To ask             |
-| Data-entry errors        | Confirmed values that differ from the truth, per 100 fields                   | The ground truth of the synthetic documents (planned: P-21)    | From the protocol                            | To ask             |
-| Approval turnaround      | Time from an SPR raised to its decision                                       | The SPR's workflow events                                      | Only meaningful with real users              | To ask             |
-| Overdue orders           | Orders past a step's deadline, by step and owner                              | The tracker's overdue flags                                    | Counted on the synthetic orders              | Not visible today  |
+| Measure                  | Definition                                                         | Source in OrderPilot                                           | Lab estimate                                 | Spectra's baseline |
+| ------------------------ | ------------------------------------------------------------------ | -------------------------------------------------------------- | -------------------------------------------- | ------------------ |
+| Order-processing time    | Minutes of staff work per step, from PO received to goods released | The order's workflow events and the protocol's stopwatch times | From the protocol, manual against OrderPilot | To ask (Q-7)       |
+| Manual touches per order | Hand-typed or hand-corrected fields, plus hand-offs between groups | Field edits on the review screen, and task hand-offs           | From the protocol                            | To ask             |
+| Data-entry errors        | Confirmed values that differ from the truth, per 100 fields        | The ground truth of the synthetic documents (planned: P-21)    | From the protocol                            | To ask             |
+| Approval turnaround      | Hours between an SPR being raised and decided                      | The SPR's workflow events                                      | Only meaningful with real users              | To ask             |
+| Overdue orders           | Orders late on any step, counted by step and owner                 | The tracker's overdue flags                                    | Counted on the synthetic orders              | Not visible today  |
 
 Approval turnaround and overdue orders depend on how people behave over days, so the lab can only show that OrderPilot measures them. Their real values need Spectra's staff.
 

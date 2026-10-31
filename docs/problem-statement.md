@@ -1,6 +1,6 @@
 # Problem statement
 
-Problem Statement #11, Spectra Innovations. Written on 31 Oct 2026, before the briefing call with Spectra (T-2, in Sprint 2). The brief is summarised here in our own words: Spectra's own documents never go into Git. Anything beyond the brief is an assumption, listed in [assumptions.md](assumptions.md), and the questions that will settle it are in [the questions for the client](client/questions-for-client.md).
+Problem Statement #11, Spectra Innovations. Written on 31 Oct 2026, before the briefing call with Spectra (T-2, in Sprint 2). The brief is summarised here in our own words: Spectra's own documents never go into Git. Anything beyond the brief is an assumption: see [the assumptions](assumptions.md). [The questions for the client](client/questions-for-client.md) are how we will settle them.
 
 ## Contents
 
@@ -15,19 +15,19 @@ Problem Statement #11, Spectra Innovations. Written on 31 Oct 2026, before the b
 
 ## 1. The brief in our words
 
-**Who Spectra is.** A Singapore company that distributes IT products and computer peripherals, and is the master distributor for some brands. It sells mostly to South Asia (India, Sri Lanka, Bangladesh and Pakistan) and the Middle East. Most customers pay up front, before anything ships. Orders and stock live in Microsoft Dynamics Navision.
+**Who Spectra is.** Spectra, based in Singapore, distributes computer peripherals and IT products, and holds master distribution rights for certain brands. Its buyers are mainly in India, Sri Lanka, Bangladesh, Pakistan and the Middle East, and most of them pay up front, before anything ships. Orders and stock live in Microsoft Dynamics Navision.
 
 **What goes wrong today.** An order passes through six groups: Product Managers, the approver (Janet), Support, Warehouse, Finance and Logistics. Each group keys in data that already exists in a document someone else received: the customer's PO, the proforma invoice (PI), the invoice, the packing list and the AWB/BL. Then they chase each other for approvals, payments and shipping papers.
 
-**The sales flow.** The customer's PO arrives. Stock is checked, and an SPR (Sales Purchase Requisition) is raised when stock is needed. Support sends a PI carrying Spectra's bank details. The customer pays. The warehouse packs. The invoice and packing list are made. The goods go to the forwarder, and the customer receives the shipping details. Finally the AWB/BL and the import permit are followed up.
+**The sales flow.** The customer's PO arrives. Stock is checked, and an SPR (Sales Purchase Requisition) is raised when stock is needed. Support sends a PI carrying Spectra's bank details. The customer pays. The warehouse packs. The invoice and packing list are made. The goods go to the forwarder, and the customer receives the shipping details. Last, Logistics chases the AWB/BL and the import permit.
 
-**The purchase flow.** A Product Manager raises an SPR and the approver approves it. Support creates the vendor PO in Navision. The vendor's PI comes back with the vendor's bank details. A forwarder is arranged. The warehouse checks what arrives against the invoice, the packing list and the AWB/BL, and the goods are received into Navision. The customer is told, and Finance pays the vendor on the due date.
+**The purchase flow.** A Product Manager raises an SPR and the approver approves it. Support creates the vendor PO in Navision. The vendor's PI comes back with the vendor's bank details. A forwarder is arranged. The warehouse compares what arrives with its paperwork (invoice, packing list, AWB/BL), and the goods are received into Navision. The customer is told, and Finance pays the vendor on the due date.
 
-**What the brief asks for.** A tool that reads the part numbers, quantities, prices and shipping details from these documents; compares the documents with each other and raises disagreements for a person; sends each approval and task to the right group, with reminders; and shows every order's status, owner, open actions and exceptions in one place. It suggests starting with one flow, probably sales, while staff keep posting in Navision. Human approvals and the financial controls stay.
+**What the brief asks for.** A tool that pulls part numbers, quantities, prices and shipment details out of these documents; compares the documents with each other and raises disagreements for a person; sends each approval and task to the right group, with reminders; and shows every order's status, owner, open actions and exceptions in one place. It suggests starting with one flow, probably sales, while staff keep posting in Navision. Human approvals and the financial controls stay.
 
-**Spectra's own idea.** AI handles the reading and the variety of documents; a workflow engine applies the business rules, the limits and the order of the steps. Spectra names five measures: order-processing time, manual touches per order, data-entry errors, approval turnaround and overdue orders.
+**Spectra's own idea.** AI handles the reading and the variety of documents; a workflow engine applies the business rules, the limits and the order of the steps. Spectra would judge success by five measures: order-processing time, manual touches per order, data-entry errors, approval turnaround and overdue orders.
 
-**Our answer: OrderPilot.** An order-automation layer that sits beside Navision and never replaces it, on one line: **AI reads, rules decide, people approve.** A document is read once, a person confirms what the AI is unsure of, and the confirmed data feeds every group's tasks and one tracker. Fixed rules do the comparing and routing. People approve, release, post and pay, and every one of those actions is audited.
+**Our answer: OrderPilot.** An order-automation layer that sits beside Navision and never replaces it, under one tagline: **AI reads, rules decide, people approve.** A document is read once, a person confirms what the AI is unsure of, and the confirmed data feeds every group's tasks and one tracker. Fixed rules do the comparing and routing. People approve, release, post and pay, and every one of those actions is audited.
 
 | Task                                                     | Approach                                              |
 | -------------------------------------------------------- | ----------------------------------------------------- |
@@ -65,16 +65,16 @@ The approver, Finance and Management hold the most influence over whether OrderP
 
 Each pain point is from the brief. What it costs is our hypothesis until Spectra confirms it.
 
-| #   | Pain point                                                     | What it probably costs                                                                  | Felt by                     | Capability |
-| --- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------- | --------------------------- | ---------- |
-| 1   | The same data is typed again for each step                     | Hours of keying, and every copy is a chance to mistype a part number, quantity or price | Support, Warehouse, Finance | A, B       |
-| 2   | Documents are compared by eye                                  | A short shipment or a wrong price is found late, sometimes only by the customer         | Support, Warehouse, Finance | D          |
-| 3   | Approvals are chased                                           | An SPR sits unanswered while the sales order waits for its stock                        | Product Managers, approver  | C          |
-| 4   | Payments are chased                                            | Packing waits for news of the payment, and a vendor's due date can slip                 | Finance, Support, Warehouse | C          |
-| 5   | Shipping papers are chased                                     | A missing AWB/BL or import permit holds goods at the border after the customer has paid | Logistics                   | C, D       |
-| 6   | Six hand-offs and no shared view                               | Nobody can say where an order is or who holds it without asking around                  | Everyone, Management        | D          |
-| 7   | A vendor's bank details arrive on each PI                      | A changed account, by mistake or by fraud, is easy to miss by eye. Our inference        | Finance                     | F          |
-| 8   | Who approves what, and up to which limit, is in people's heads | The rules are applied unevenly and are hard to show an auditor                          | Approver, auditors          | C, F       |
+| #   | Pain point                                                     | What it probably costs                                                                      | Felt by                     | Capability |
+| --- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | --------------------------- | ---------- |
+| 1   | The same data is typed again for each step                     | Hours of keying, and every copy is a chance to mistype a part number, quantity or price     | Support, Warehouse, Finance | A, B       |
+| 2   | Documents are compared by eye                                  | A short shipment or a wrong price is found late, sometimes only when the customer complains | Support, Warehouse, Finance | D          |
+| 3   | Approvals are chased                                           | An SPR sits unanswered while the sales order waits for its stock                            | Product Managers, approver  | C          |
+| 4   | Payments are chased                                            | Packing waits for news of the payment, and a vendor's due date can slip                     | Finance, Support, Warehouse | C          |
+| 5   | Shipping papers are chased                                     | A missing AWB/BL or import permit holds goods at the border after the customer has paid     | Logistics                   | C, D       |
+| 6   | Six hand-offs and no shared view                               | Nobody can say where an order is or who holds it without asking around                      | Everyone, Management        | D          |
+| 7   | A vendor's bank details arrive on each PI                      | A changed account, by mistake or by fraud, is easy to miss by eye. Our inference            | Finance                     | F          |
+| 8   | Who approves what, and up to which limit, is in people's heads | The rules are applied unevenly and are hard to show an auditor                              | Approver, auditors          | C, F       |
 
 Because customers pay in advance, every delay between payment and shipment lands on someone who has already paid.
 
@@ -85,10 +85,10 @@ Asking why, five times:
 1. **Why is data typed more than once?** It arrives as PDFs, scans and spreadsheets that no system reads, so a person keys it in.
 2. **Why are mismatches found late?** Each group checks only the documents in front of it, by eye.
 3. **Why does everyone chase?** The order of the steps and who owns each one is known by people, not held by a system that could route work and remind.
-4. **Why is there no shared status?** Each group sees its own step, and nothing joins the steps into one order.
-5. **Why has Navision not fixed it?** Our hypothesis, to test at the briefing call: Navision records orders well, but it does not read incoming documents, compare them across parties or route work between groups.
+4. **Why is there no shared status?** Every group sees only its own step, and no system ties the steps together into one order.
+5. **Why has Navision not fixed it?** Our hypothesis, to test at the briefing call: Navision records orders well, but it was not built to read incoming documents, to cross-check one party's papers against another's, or to hand work from one group to the next.
 
-**The root cause.** An order's facts arrive in documents that nothing reads, and the rules that connect them live in people's heads and inboxes. So every hand-off means re-typing, re-checking and chasing. The missing piece is a layer that reads each document once with a person confirming the doubtful parts, checks the documents against each other and against Navision, routes the work under explicit rules, and shows each order's full trail. Navision stays the system of record: OrderPilot prepares and checks, and staff post.
+**The root cause.** An order's facts arrive in documents that nothing reads, and the rules that connect them are known by people and kept in inboxes, not in a system. Each hand-off therefore means re-typing, re-checking and chasing. The missing piece is a layer that reads each document once with a person confirming the doubtful parts, cross-checks the documents with one another and with Navision, routes the work under explicit rules, and shows each order's full trail. Navision stays the system of record: OrderPilot prepares and checks, and staff post.
 
 ## 5. Constraints
 
@@ -108,11 +108,11 @@ Not legal advice: Spectra and its advisers decide what applies. The prototype ru
 
 - **Navision is unknown.** Its version, hosting, customisation and interfaces are all open. OrderPilot reaches it only through a connector (planned: P-20), against an OData-style mock until we know more (planned: P-19). [The domain notes](research/domain-notes.md) list what standard Navision keeps.
 - **Every customer and vendor has its own layout.** Mappings are proposed by AI and approved by a person, so a new layout needs no code.
-- **Extraction is never certain.** Every field carries a confidence score and a link to its source, and a person confirms anything doubtful.
-- **Documents must agree.** Customers, vendors and items are matched on their Navision numbers, never on names, with a stated tolerance for each check.
+- **Extraction is never certain.** Each field gets a confidence score and points back to where it was read, and doubtful fields wait for a person.
+- **Documents must agree.** Customers, vendors and items are identified by their Navision numbers, not their names, and each check states its tolerance.
 - **Money.** Prices are in USD. Totals, freight and rounding differ between documents, so checks state their tolerance.
 - **Email is messy.** The same PO can arrive twice or forwarded, so duplicates are found by content hash.
-- **The books must stay clean.** Any write to Navision needs a preview and an approval, and goes only to the mock until Spectra agrees.
+- **The books must stay clean.** A write to Navision would need a preview and an approval, and stays against the mock until Spectra agrees.
 - **Rules not yet confirmed** (the SPR trigger, the PI sequence, approvers and limits, delegation) are configuration, never code.
 - **Volumes are unknown,** so work runs on queues, and every list is paged and indexed.
 
@@ -125,10 +125,10 @@ Not legal advice: Spectra and its advisers decide what applies. The prototype ru
 ### Project
 
 - Four Year-2 students, one semester: proposal in Week 5, mock interview in Week 7, technical review in Week 13, final in Week 18.
-- 85% of the marks are individual, so the work is split into four areas with clear owners ([module ownership](team/module-ownership.md)).
+- Most of the marks (85%) are individual, so the work is split into four areas with clear owners ([module ownership](team/module-ownership.md)).
 - Synthetic data only, labelled "Synthetic demo data". Every external system is a mock, labelled "Mock", until Spectra's samples arrive. Client samples never enter Git.
 - No access to Spectra's systems is assumed. No client branding without permission.
-- The mock AI provider is the default, so a demo needs no paid key, and the AI's cost is measured per document.
+- The mock AI provider is the default, so a demo needs no paid key, and we measure what the AI costs for each document.
 
 ## 6. Scope
 
@@ -149,11 +149,11 @@ Not legal advice: Spectra and its advisers decide what applies. The prototype ru
 1. The payment gate: no packing until Finance confirms the payment (areas 2 and 4).
 2. A PI draft that Support reviews (area 2, on area 1's template engine).
 3. Full matching of invoices and packing lists (area 3).
-4. AWB/BL and import-permit follow-ups, with reminders and escalations (area 2).
+4. Follow-ups for the AWB/BL and import permits, with reminders and escalation (area 2).
 5. Email intake, with updates that AI drafts and a person sends (areas 1 and 2).
 6. More check rules (area 3).
 
-**Phase 2, built in Weeks 8 to 12, shown at the Week 18 final:** the purchase flow. An SPR becomes a vendor PO draft, the vendor's PI is checked against the vendor's bank details on record, a changed account holds the payment, the goods receipt is matched against the documents, and a reminder fires when payment falls due.
+**Phase 2, built in Weeks 8 to 12, shown at the Week 18 final:** the purchase flow. An SPR becomes a vendor PO draft, the vendor's PI is checked against the vendor's bank details on record, a changed account holds the payment, the received goods are compared with their documents, and a reminder fires when payment falls due.
 
 **Throughout:** layout mappings, master data from mock Navision, the template engine, governance (roles, segregation of duties, limits, masking, audit, retention and the rules for data sent to AI), monitoring (logs, traces, metrics, clickstream and AI cost), and an English UI in light and dark themes that meets WCAG 2.2 AA.
 
@@ -166,10 +166,10 @@ Not legal advice: Spectra and its advisers decide what applies. The prototype ru
 | Replacing Navision                              | It is the system of record                                 |
 | Posting transactions automatically              | People post, and keep control of the books                 |
 | Real payments                                   | Finance pays through its own bank                          |
-| Real emails to customers or vendors             | OrderPilot drafts; a person sends                          |
-| Booking forwarders or filing permits            | Each forwarder and country has its own system              |
+| Real emails to customers or vendors             | Drafts only; a person sends them                           |
+| Booking forwarders or filing permits            | Forwarders and every country run their own systems         |
 | Accounting, stocktakes and financial statements | Navision does these                                        |
-| Real customer, vendor, price or bank data       | Synthetic data only, shaped like Spectra's formats         |
+| Real customer, vendor, price or bank data       | Only synthetic data, in Spectra's formats                  |
 | Customer or vendor log-ins                      | OrderPilot is for Spectra's staff                          |
 | Single sign-on                                  | Demo accounts for now; the auth module can take it later   |
 | Legal, tax and export-control decisions         | OrderPilot provides controls and evidence; Spectra decides |
@@ -178,37 +178,37 @@ Not legal advice: Spectra and its advisers decide what applies. The prototype ru
 
 Spectra's five measures come first. There are no baselines yet, so each is a lab estimate on synthetic data until Spectra gives real numbers. [The measurement protocol](design-thinking/success-metrics.md) says how each is measured, manual against OrderPilot.
 
-| Spectra's measure        | How OrderPilot measures it                                              | Baseline |
-| ------------------------ | ----------------------------------------------------------------------- | -------- |
-| Order-processing time    | From a PO's arrival to the goods' release, step by step, from the trail | To ask   |
-| Manual touches per order | Fields typed or corrected by hand, plus hand-offs between groups        | To ask   |
-| Data-entry errors        | Confirmed values later found wrong, per 100 fields                      | To ask   |
-| Approval turnaround      | From an SPR raised to its decision                                      | To ask   |
-| Overdue orders           | Orders past a step's deadline, by step and owner                        | To ask   |
+| Spectra's measure        | How OrderPilot measures it                                                         | Baseline |
+| ------------------------ | ---------------------------------------------------------------------------------- | -------- |
+| Order-processing time    | Elapsed time per step, PO received to goods released, read from the order's events | To ask   |
+| Manual touches per order | Hand-typed or hand-corrected fields, plus hand-offs between groups                 | To ask   |
+| Data-entry errors        | Confirmed values later found wrong, per 100 fields                                 | To ask   |
+| Approval turnaround      | Hours between an SPR being raised and decided                                      | To ask   |
+| Overdue orders           | Orders late on any step, counted by step and owner                                 | To ask   |
 
 Our own targets, each with a test:
 
-| Target                                         | Test                                                                    | Area |
-| ---------------------------------------------- | ----------------------------------------------------------------------- | ---- |
-| Extraction accuracy of 95% or more             | Correct fields on the synthetic test set (planned: P-21's ground truth) | 1    |
-| Every seeded mismatch flagged                  | The planted mistakes in the synthetic documents                         | 3    |
-| No duplicate orders                            | The same PO submitted twice                                             | 1    |
-| 100% of workflow tests passing                 | The workflow test cases                                                 | 2    |
-| Time and touches per order measured            | The measurement protocol, manual against OrderPilot                     | 1, 2 |
-| Every overdue follow-up visible                | Overdue payments, AWB/BL and permits on the tracker                     | 2, 3 |
-| Every unauthorised call refused and audited    | Direct API calls by the wrong role (E2E #3)                             | 4    |
-| A changed bank detail always holds the payment | A vendor PI with a different account (E2E #4)                           | 4    |
-| No AI output acts without a person             | Every AI suggestion and draft traced in the audit trail                 | 1, 4 |
-| AI cost per document known                     | Token usage and cost per document and feature                           | 4    |
+| Target                                         | Test                                                                         | Area |
+| ---------------------------------------------- | ---------------------------------------------------------------------------- | ---- |
+| Extraction accuracy of 95% or more             | Correct fields on the synthetic test set (planned: P-21's ground truth)      | 1    |
+| Every seeded mismatch flagged                  | The planted mistakes in the synthetic documents                              | 3    |
+| No duplicate orders                            | The same PO submitted twice                                                  | 1    |
+| 100% of workflow tests passing                 | The workflow test cases                                                      | 2    |
+| Time and touches per order measured            | The measurement protocol, manual against OrderPilot                          | 1, 2 |
+| Every overdue follow-up visible                | Overdue payments, AWB/BL and permits on the tracker                          | 2, 3 |
+| Every unauthorised call refused and audited    | Direct API calls by the wrong role (E2E #3)                                  | 4    |
+| A changed bank detail always holds the payment | A vendor PI with a different account (E2E #4)                                | 4    |
+| No AI output acts without a person             | Each AI suggestion or draft traced to a person's decision in the audit trail | 1, 4 |
+| AI cost per document known                     | Token usage and cost per document and feature                                | 4    |
 
 ## 8. Open questions
 
 These change the design most. They are written out in full, in priority order, in [the questions for the client](client/questions-for-client.md).
 
 - Navision: version, cloud or on-premise, interfaces, customisation, and a test company.
-- How documents arrive, in which formats, and how many a month.
+- How documents reach Spectra, their formats, and the monthly volume.
 - Which flow is the pilot, and which step wastes the most time.
-- The PI sequence: when the PI goes to the warehouse, and when to the customer.
+- The PI sequence: does the customer or the warehouse get the PI first?
 - When an SPR is raised in a sale.
 - Approvers, limits and delegation.
 - What counts as a mismatch, and what happens next.
@@ -219,4 +219,4 @@ These change the design most. They are written out in full, in priority order, i
 - Whether an AI service may be used, in which region, and what it must never see.
 - Who signs off the results.
 
-The four open business rules (the SPR trigger, the PI sequence, approvers and limits, and delegation) stay configurable until Spectra answers.
+Until Spectra answers, four rules stay as configuration: when an SPR is raised, the PI sequence, who approves up to what limit, and delegation.

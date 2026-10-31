@@ -98,8 +98,8 @@ A shared file is one that more than one area depends on. Its change goes in a sm
 
 The contracts between the areas are in each guide's **Contracts** section. In short:
 
-- **Order status lives only in area 2's state machine.** Area 1 owns the order's data and documents, and area 3 reads the status and keeps no status logic of its own.
-- **Area 3 reports pass or fail to area 2,** and area 2 decides what a failure blocks.
+- **Only area 2's state machine holds order status.** The order's data and documents are area 1's; area 3 reads the status and computes none itself.
+- **Area 3 sends its check results to area 2,** whose state machine decides what a failed check holds up.
 - **Area 4's policy is enforced on the server.** Endpoints call it, through area 1's guard.
 - **The AI pipeline stays whole in area 1.** Area 4 sets what data may go to which AI provider, and audits the AI's decisions.
 - **The order and event contract** is drafted in P-7 and agreed by the team in Week 3, with every owner reviewing it.

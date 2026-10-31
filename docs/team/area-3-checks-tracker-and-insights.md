@@ -4,7 +4,7 @@
 
 ## Goal
 
-Catch every disagreement between an order's documents before goods ship, and show every order in one place. Area 3 owns the checks engine and its tolerances, the check results and the exceptions queue, the order tracker with each order's full trail, and the KPIs, Spectra's five measures among them.
+Catch every disagreement between an order's documents before goods ship, and show every order in one place. Area 3 owns the checks engine and its tolerances, the check results and the exceptions queue, the tracker showing every order's complete history, and the KPIs, Spectra's five measures among them.
 
 ### User stories
 
@@ -78,7 +78,7 @@ All planned. Each item lands with the story named, and D-1 fills this section in
 
 **The deeper work,** for the A-level depth:
 
-- full matching (Should 3): the PO against the PI, the invoice, the packing list and the AWB/BL, line by line;
+- full matching (Should 3): the PO compared with the PI, invoice, packing list and AWB/BL, line by line;
 - more rules (Should 6): prices against the customer's price group, currency, totals, PO references, part numbers and stock;
 - partial shipments and substitutions, once Spectra says how they work (Q-8);
 - the AI explanation of each exception, through area 1's gateway, labelled as AI;

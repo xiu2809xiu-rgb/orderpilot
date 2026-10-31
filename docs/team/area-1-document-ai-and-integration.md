@@ -4,7 +4,7 @@
 
 ## Goal
 
-Read each document once, and carry its data to every team and system that needs it. Area 1 owns the whole AI pipeline (intake, classification, extraction, confidence and its thresholds, and the review screen), layout mapping, the order's data and its documents with their provenance, master data, the Navision connector, and the platform the other areas build on, including the 3D scene.
+Read each document once, and pass its data on to every team and system that uses it. Area 1 owns the whole AI pipeline (intake, classification, extraction, confidence and its thresholds, and the review screen), layout mapping, the order's data and its documents with their provenance, master data, the Navision connector, and the platform the other areas build on, including the 3D scene.
 
 ### User stories
 
@@ -25,7 +25,7 @@ How area 1 meets the others ([How the areas connect](../../CLAUDE.md#how-the-are
 | Area 3 | Documents with every field's value, confidence and source (`document.extracted`, `fields.confirmed`); master data and prices; AI explanations of exceptions            | Requests for explanations                                                     |
 | Area 4 | AI usage records; the permissions guard, which calls area 4's policy; the audit writer; vendor PIs' bank details for the bank-detail check                             | The policy's decisions; which data may go to which AI provider; masking rules |
 
-- **The AI pipeline stays whole in area 1:** classification, extraction, the confidence thresholds (which confidence needs a person, and which fields always do) and the review screen.
+- **The AI pipeline stays whole in area 1:** classification, extraction, the thresholds that decide when a person must check a field (and the fields a person always checks), and the review screen.
 - **Area 1 owns the order's data, never its status,** which lives only in area 2's state machine.
 - **Match on Navision numbers,** never on names. A look-alike name is shown as a possible match only.
 - **Navision stays the system of record.** OrderPilot reads it, and any write-back needs a preview and an approval, against the mock only until Spectra agrees.

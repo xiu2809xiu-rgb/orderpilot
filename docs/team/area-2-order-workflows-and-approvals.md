@@ -26,7 +26,7 @@ How area 2 meets the others ([How the areas connect](../../CLAUDE.md#how-the-are
 | Area 3 | Every status change (`order.status-changed`) and task event (`task.overdue`), for the tracker and the KPIs | Check results (`check.completed`, pass or fail). Area 2 decides what a failure blocks                  |
 | Area 4 | Each approval, release and payment action, to be checked before it happens                                 | The policy's decision on each action; payment holds (`payment.held`, `payment.hold-cleared`)           |
 
-- **Order status lives only here.** No other area stores or computes an order's status. Area 1 owns the order's data, and area 3 reads the status.
+- **Order status lives only here.** No other area stores or computes an order's status. The order's data belongs to area 1; area 3 only reads the status.
 - **Every transition is checked by area 4's policy,** on the server, before it runs. A refusal leaves the order as it was.
 - **Every transition is audited,** with who, when, from which state to which, and why.
 - **Open rules are configuration:** the SPR trigger, the PI sequence, approvers and limits, and delegation ([assumptions](../assumptions.md) A-21 to A-24).

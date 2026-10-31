@@ -4,7 +4,7 @@
 
 ## Goal
 
-Make sure the right person, and only the right person, does each thing, and that it can be proved afterwards. Area 4 owns the authorisation policy (who may do what, up to which limit, with segregation of duties), the bank-detail control, masking, the audit viewer, the rules for what data may go to which AI provider, and monitoring: traces, metrics, clickstream and the AI's cost.
+Make sure the right person, and only the right person, does each thing, and that it can be proved afterwards. Area 4 is responsible for the authorisation policy (who may do what, up to which limit, with segregation of duties), the bank-detail control, masking, the audit viewer, the rules for what data may go to which AI provider, and monitoring: traces, metrics, clickstream and the AI's cost.
 
 ### User stories
 
@@ -28,7 +28,7 @@ How area 4 meets the others ([How the areas connect](../../CLAUDE.md#how-the-are
 | Area 3 | The decision on who may see and resolve each exception; masking of prices                                                                       | Exceptions that need a controlled decision                                                     |
 
 - **The policy is enforced on the server.** Every endpoint that acts calls it, through area 1's guard (planned: P-10). Hiding a button is never the control.
-- **One shape for every decision:** allowed or refused, the rule that decided, and a reason a person can read. A refusal returns the one error envelope `{ error: { code, message, details, traceId } }` and is audited.
+- **One shape for every decision:** allowed or refused, the rule that decided, and a reason a person can read. A refusal returns the standard error envelope `{ error: { code, message, details, traceId } }` and is audited.
 - **Approval limits and delegation** follow the shape of Navision's Approval User Setup (User ID, Approver ID, Sales and Purchase Amount Approval Limits, Unlimited flags, Substitute), shared with area 2 ([domain notes](../research/domain-notes.md)).
 - **Bank details are compared with the Vendor Bank Account on record** (Bank Account No., SWIFT Code, IBAN). Any difference holds the payment. Area 2's state machine shows the hold and blocks the payment until it is cleared.
 - **AI destinations:** area 1's gateway asks area 4's policy whether a piece of data may go to a provider. The default is synthetic data only.

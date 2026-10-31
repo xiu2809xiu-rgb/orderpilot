@@ -48,11 +48,11 @@ Area 1. Built in area 1's layout-mapping story, after P-17 and P-18.
 
 Area 4, on area 1's permissions guard. Built in P-10, F-1, F-3 and F-4.
 
-## E2E #4: the purchase flow (phase 2)
+## E2E #4: the purchase flow
 
 1. An approved SPR becomes a vendor PO draft, which a person approves.
-2. The vendor's PI arrives with bank details that differ from the Vendor Bank Account on record. The payment is held until Finance and a second approver clear it.
-3. The goods arrive, and the receipt is matched against the invoice, the packing list and the AWB/BL.
+2. The vendor's PI carries bank details that do not match the Vendor Bank Account on record, so the payment stops until Finance and a second approver release the hold.
+3. The goods arrive, and the receipt is compared with the invoice, packing list and AWB/BL.
 4. The payment-due reminder fires.
 
 Areas 2, 3 and 4, on area 1's documents. Built in Weeks 8 to 12: F-5 brings the bank-detail hold, and the rest comes from the owners' phase 2 stories.
