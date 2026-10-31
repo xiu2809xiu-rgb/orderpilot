@@ -132,4 +132,27 @@ export function orderpilot({ tsconfigRootDir }) {
   return configs.map(warningsAsErrors);
 }
 
+/**
+ * Extra rules for a NestJS app, applied to the files given. Nest declares
+ * modules and controllers as classes that hold nothing but a decorator, which
+ * the stricter preset flags as "extraneous". Everything else stays as strict.
+ *
+ * @param {{ files: string[] }} options
+ * @returns {import("eslint").Linter.Config[]}
+ */
+export function nest({ files }) {
+  return [
+    {
+      name: "orderpilot/nest",
+      files,
+      rules: {
+        "@typescript-eslint/no-extraneous-class": [
+          "error",
+          { allowWithDecorator: true },
+        ],
+      },
+    },
+  ];
+}
+
 export default orderpilot;

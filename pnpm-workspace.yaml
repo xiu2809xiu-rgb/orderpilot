@@ -26,7 +26,12 @@ trustPolicy: no-downgrade
 # fails the install on any unreviewed build (strictDepBuilds is on by default).
 # Each entry says what the script does and why it may or may not run:
 #   <package>: true # <what it does>. Reviewed: <date>
-allowBuilds: {}
+allowBuilds:
+  # Checks the platform binary that tsx and Vitest use. Reviewed: 2026-10-31
+  esbuild: true
+  # Install-time telemetry that swagger-ui-dist pulls in. No functional effect,
+  # so it stays denied. Reviewed: 2026-10-31
+  "@scarf/scarf": false
 
 # eslint-plugin-jsx-a11y 6.10.2, its latest release, declares ESLint up to 9.
 # Its rules run correctly on ESLint 10: packages/eslint-config's tests lint a

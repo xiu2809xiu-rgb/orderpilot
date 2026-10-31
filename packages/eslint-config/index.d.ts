@@ -11,4 +11,6 @@ export declare function orderpilot(options: {
   tsconfigRootDir: string;
 }): Linter.Config[];
 
+export declare function nest(options: { files: string[] }): Linter.Config[];
+
 export default orderpilot;
