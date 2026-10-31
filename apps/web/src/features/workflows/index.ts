@@ -1,6 +1,7 @@
 import { Workflow } from "lucide-react";
 import { lazy } from "react";
 import { defineFeature } from "../define";
+import { workflowRoutes } from "./routes";
 
 export default defineFeature({
   id: "workflows",
@@ -8,7 +9,7 @@ export default defineFeature({
   path: "workflows",
   group: "operations",
   icon: Workflow,
-  permission: "orders.read",
+  permission: "workflows.read",
   cues: [
     {
       id: "myTasks",
@@ -25,4 +26,5 @@ export default defineFeature({
     { id: "paymentsToConfirm", roles: ["FINANCE"] },
   ],
   Page: lazy(() => import("./WorkflowsPage")),
+  children: workflowRoutes,
 });

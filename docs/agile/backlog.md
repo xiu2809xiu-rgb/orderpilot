@@ -2,7 +2,7 @@
 
 Rendered from [`scripts/github/data/backlog.json`](../../scripts/github/data/backlog.json) by `node scripts/github/render-docs.mjs`. Change the data, not this file. The same data seeds the issues. The board shows where each story stands.
 
-There are 9 epics and 69 stories. Estimates are story points: a first guess, for the team to change at planning.
+There are 9 epics and 70 stories. Estimates are story points: a first guess, for the team to change at planning.
 
 ## Epics
 
@@ -11,7 +11,7 @@ There are 9 epics and 69 stories. Estimates are story points: a first guess, for
 | Epic P | The platform base                 | `area: 1 document AI and integration`   | 27      | 169    |
 | Epic A | Document intake and AI extraction | `area: 1 document AI and integration`   | 5       | 31     |
 | Epic B | Master data and Navision          | `area: 1 document AI and integration`   | 4       | 14     |
-| Epic C | Order workflows and approvals     | `area: 2 order workflows and approvals` | 4       | 26     |
+| Epic C | Order workflows and approvals     | `area: 2 order workflows and approvals` | 5       | 29     |
 | Epic D | Checks, the tracker and insights  | `area: 3 checks tracker and insights`   | 4       | 23     |
 | Epic E | AI with a person in the loop      | `area: 1 document AI and integration`   | 6       | 29     |
 | Epic F | Financial controls and governance | `area: 4 controls and monitoring`       | 8       | 35     |
@@ -91,6 +91,7 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | A-2   | Extraction with confidence and provenance                          | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | E-1   | The review screen, with source highlighting                        | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | E-2   | The accuracy harness, with a 95% target and a comparison of models | must     | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| C-5   | Area 2 polish left out of the base                                 | should   | 3      | `area: 2 order workflows and approvals` | M4 best practices                                              |
 | P-22  | The design system with the Pro kits                                | should   | 8      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | A-3   | Layout mapping, proposed by AI and approved by a person            | should   | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | A-4   | Learning from corrections, one layout at a time                    | should   | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
@@ -716,6 +717,7 @@ What P-11 and P-12 left out because no teammate needs it in its first week.
 
 Acceptance criteria:
 
+- orval generates mutation hooks for POST, PUT, PATCH and DELETE, so screens stop wrapping the generated functions in `useMutation` (found by area 2, C-1).
 - Unsaved form input also survives a page reload, through one small draft helper that forms can opt into. P-11 keeps it only across an ended session.
 - A phone-width pass: screenshots at 390 px wide, light and dark, and the fixes they show. The sidebar already becomes a sheet, but spacing has not been reviewed on a phone.
 - LCP and a Lighthouse run on the production build, with the figures recorded next to the screenshots.
@@ -968,6 +970,23 @@ Acceptance criteria:
 - Every overdue follow-up is visible.
 - The reminder in E2E #1, the sales pilot, comes from this story.
 - Tests cover a reminder before the due time, an escalation after it, a task finished in time getting neither, and a retried job sending once, replacing C-1's `it.todo` cases for reminders, escalations and retries.
+
+### C-5: Area 2 polish left out of the base
+
+What the base left out because no teammate needs it this week.
+
+- **Area:** `area: 2 order workflows and approvals`
+- **Priority:** should
+- **Estimate:** 3 points
+- **Requirements:** M4 best practices
+- **Planned for:** Sprint 03 (W4)
+- **Depends on:** C-1
+
+Acceptance criteria:
+
+- The cue tiles on each role's home page show live counts (my tasks, SPRs awaiting approval, payments to confirm) from the workflow routes, once the tile system can take a count.
+- A document settings screen edits the field settings and defaults held in DocumentTypeConfig, with an audit event for each change.
+- The mock read model is replaced by one that reads WorkflowInstance, WorkflowTask and WorkflowNotification, and the routes drop meta.mock.
 
 ## Epic D: Checks, the tracker and insights
 

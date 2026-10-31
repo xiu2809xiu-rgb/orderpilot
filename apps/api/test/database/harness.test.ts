@@ -93,6 +93,7 @@ describe("the test harness", () => {
       "seed role permissions",
       "seed users",
       "seed synthetic data",
+      "seed workflows",
     ]);
     expect(lines.join("\n")).toContain(
       "Synthetic demo data: 5 customers, 3 vendors, 30 items, 10 orders",

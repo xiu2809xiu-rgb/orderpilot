@@ -1,0 +1,229 @@
+// Area 2 models: workflow definitions, instances, tasks, events, notifications,
+// payment confirmations, OrderPilot's own record numbers and the configuration
+// of each document type. Owner: Azri (the base is C-1).
+//
+// Two rules for this file:
+// - A workflow instance's `status` is plain text on purpose. Only the state
+//   machine (Azri's C-2) ever writes it, and it decides the values. The base
+//   writes it in one place only: the demo seed, with `sample-` labels.
+// - No relation points at another area's table (User, orders), because a
+//   relation needs a field on that table and this file may not edit theirs.
+//   The ids are plain UUIDs or Navision numbers, checked by the service.
+
+enum TaskStatus {
+  OPEN
+  DONE
+  CANCELLED
+}
+
+enum PaymentType {
+  PREPAYMENT   @map("prepayment")
+  DEPOSIT      @map("deposit")
+  BALANCE      @map("balance")
+  FULL_PAYMENT @map("full-payment")
+}
+
+enum NotificationKind {
+  REMINDER
+  ESCALATION
+  INFO
+}
+
+/// A flow as data: its steps, who owns each, and the schedule of each step's
+/// reminders. A change is a new version, never an edit, so an instance keeps
+/// the definition it started on.
+model WorkflowDefinition {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  /// Stable name, such as `sales-order`.
+  key         String
+  version     Int
+  name        String
+  description String   @default("")
+  /// Steps and their settings. The shape is the state machine's to define.
+  config      Json
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+
+  instances WorkflowInstance[]
+
+  @@unique([key, version])
+}
+
+/// One order's run through a definition. The only place an order's status is
+/// kept, and only the state machine writes it.
+model WorkflowInstance {
+  id           String    @id @default(uuid(7)) @db.Uuid
+  definitionId String    @db.Uuid
+  /// Navision's sales order number (SO-0003). The order itself is area 1's.
+  orderRef     String
+  /// Area 1's order id, once the order table exists.
+  orderId      String?   @db.Uuid
+  /// Plain text. See the note at the top of this file.
+  status       String
+  currentStep  String?
+  /// Counts writes, so two commands on one instance never both win (optimistic lock).
+  version      Int       @default(0)
+  startedAt    DateTime  @default(now()) @db.Timestamptz(3)
+  completedAt  DateTime? @db.Timestamptz(3)
+  updatedAt    DateTime  @updatedAt @db.Timestamptz(3)
+
+  definition    WorkflowDefinition     @relation(fields: [definitionId], references: [id])
+  tasks         WorkflowTask[]
+  events        WorkflowEvent[]
+  notifications WorkflowNotification[]
+  records       WorkflowRecord[]
+  payments      PaymentConfirmation[]
+
+  @@unique([definitionId, orderRef])
+  @@index([orderRef])
+  /// The tracker and the KPIs read by status.
+  @@index([status, updatedAt])
+}
+
+/// A job for a role (or one person) on an instance.
+model WorkflowTask {
+  id             String     @id @default(uuid(7)) @db.Uuid
+  instanceId     String     @db.Uuid
+  /// A starter list lives in packages/shared (TASK_KINDS). Plain text here.
+  kind           String
+  title          String
+  assigneeRole   Role
+  /// Set when a task is taken or given to one person. No relation, see the top.
+  assigneeUserId String?    @db.Uuid
+  status         TaskStatus @default(OPEN)
+  /// The OrderPilot number of the record the task is about, such as an SPR.
+  recordNo       String?
+  dueAt          DateTime   @db.Timestamptz(3)
+  completedAt    DateTime?  @db.Timestamptz(3)
+  createdAt      DateTime   @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime   @updatedAt @db.Timestamptz(3)
+
+  instance WorkflowInstance @relation(fields: [instanceId], references: [id])
+
+  /// A role's inbox: open tasks, most overdue first.
+  @@index([assigneeRole, status, dueAt])
+  /// One person's inbox.
+  @@index([assigneeUserId, status, dueAt])
+  @@index([instanceId])
+  /// The overdue sweep (reminders and escalations) reads by due date.
+  @@index([status, dueAt])
+}
+
+/// What happened to an instance, one row per fact. Append only by convention:
+/// the state machine inserts, nothing updates or deletes.
+model WorkflowEvent {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  instanceId     String   @db.Uuid
+  /// `step.completed`, `task.created`, `status.changed` and so on.
+  type           String
+  fromStatus     String?
+  toStatus       String?
+  actorKind      String
+  actorUserId    String?  @db.Uuid
+  actorName      String
+  summary        String
+  data           Json?
+  /// The caller's key, so a retried command finds its first result instead of
+  /// running twice. Null for events nobody asked for.
+  idempotencyKey String?
+  occurredAt     DateTime @default(now()) @db.Timestamptz(3)
+
+  instance WorkflowInstance @relation(fields: [instanceId], references: [id])
+
+  @@unique([instanceId, idempotencyKey])
+  @@index([instanceId, occurredAt])
+  @@index([type, occurredAt])
+}
+
+/// A reminder, an escalation or a notice to a role or a person.
+model WorkflowNotification {
+  id              String           @id @default(uuid(7)) @db.Uuid
+  instanceId      String?          @db.Uuid
+  taskId          String?          @db.Uuid
+  kind            NotificationKind
+  recipientRole   Role
+  recipientUserId String?          @db.Uuid
+  orderRef        String?
+  message         String
+  /// When the notice goes out. A worker sends what is due and not yet sent.
+  scheduledFor    DateTime         @db.Timestamptz(3)
+  /// When the next person is told if nobody acts.
+  escalatesAt     DateTime?        @db.Timestamptz(3)
+  sentAt          DateTime?        @db.Timestamptz(3)
+  readAt          DateTime?        @db.Timestamptz(3)
+  createdAt       DateTime         @default(now()) @db.Timestamptz(3)
+
+  instance WorkflowInstance? @relation(fields: [instanceId], references: [id])
+
+  /// A role's unread notices, newest first.
+  @@index([recipientRole, readAt, scheduledFor])
+  @@index([recipientUserId, readAt, scheduledFor])
+  /// The worker's sweep: due and not sent.
+  @@index([sentAt, scheduledFor])
+  @@index([instanceId])
+}
+
+/// Finance's confirmation that money arrived, with its business type.
+/// Prepayment is the type the payment gate will watch.
+model PaymentConfirmation {
+  id                String      @id @default(uuid(7)) @db.Uuid
+  instanceId        String      @db.Uuid
+  orderRef          String
+  paymentType       PaymentType
+  amount            Decimal     @db.Decimal(18, 4)
+  currencyCode      String      @db.Char(3)
+  /// The bank's reference for the transfer.
+  reference         String
+  paidOn            DateTime    @db.Date
+  confirmedByUserId String      @db.Uuid
+  confirmedAt       DateTime    @default(now()) @db.Timestamptz(3)
+
+  instance WorkflowInstance @relation(fields: [instanceId], references: [id])
+
+  @@index([instanceId])
+  @@index([orderRef])
+  @@index([paymentType, confirmedAt])
+}
+
+/// OrderPilot's own number for a record, beside Navision's. `recordNo` is
+/// `SPR-20261102-0001`; `navisionNo` stays null until Navision has the record.
+model WorkflowRecord {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  recordNo   String   @unique
+  /// SPR, PI or EXC (RECORD_TYPES in packages/shared).
+  recordType String
+  navisionNo String?
+  instanceId String?  @db.Uuid
+  /// The record's fields as the person last saw them, with where each came from.
+  data       Json?
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt  DateTime @updatedAt @db.Timestamptz(3)
+
+  instance WorkflowInstance? @relation(fields: [instanceId], references: [id])
+
+  @@index([recordType, createdAt])
+  @@index([navisionNo])
+  @@index([instanceId])
+}
+
+/// The running number behind WorkflowRecord.recordNo: one row per type and
+/// Singapore day. Taken with one atomic upsert, so two requests never share a number.
+model RecordCounter {
+  recordType String
+  /// YYYYMMDD in Singapore time.
+  day        String
+  lastValue  Int      @default(0)
+  updatedAt  DateTime @updatedAt @db.Timestamptz(3)
+
+  @@id([recordType, day])
+}
+
+/// Field settings and defaults for one document type, as configuration. The
+/// fields column holds the list of fields (see documentTypeConfigSchema).
+model DocumentTypeConfig {
+  documentType    String   @id
+  fields          Json
+  updatedByUserId String?  @db.Uuid
+  updatedAt       DateTime @updatedAt @db.Timestamptz(3)
+}
