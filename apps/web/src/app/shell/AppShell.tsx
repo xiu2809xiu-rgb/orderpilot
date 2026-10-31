@@ -14,6 +14,10 @@ const CommandPalette = lazy(async () => ({
   default: (await import("./CommandPalette")).CommandPalette,
 }));
 
+// Usage analytics (G-1): the consent banner and the page-view recorder. A separate
+// chunk, so the entry bundle does not grow.
+const AnalyticsRoot = lazy(() => import("@/features/monitoring/AnalyticsRoot"));
+
 /** Refreshes a minute before the access token ends, so a page never trips on it. */
 function useScheduledRefresh() {
   const expiresAt = useSessionStore((state) => state.session?.expiresAt);
@@ -79,6 +83,9 @@ export function AppShell() {
           <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
         </Suspense>
       ) : null}
+      <Suspense fallback={null}>
+        <AnalyticsRoot />
+      </Suspense>
     </TooltipProvider>
   );
 }
