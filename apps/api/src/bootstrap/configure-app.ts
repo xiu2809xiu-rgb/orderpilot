@@ -11,6 +11,8 @@ import type { AppConfig } from "../config/app-config.js";
 import { BuildInfoRepository } from "../health/build-info.repository.js";
 import { AppLogger } from "../logging/app-logger.js";
 import { createRootLogger, requestLogging } from "../logging/logger.config.js";
+import { httpTelemetry } from "../telemetry/http-telemetry.js";
+import { MetricsService } from "../telemetry/metrics.service.js";
 import { applyRouting } from "./routing.js";
 import { applySecurity } from "./security.js";
 import { setupSwagger } from "./swagger.js";
@@ -34,7 +36,10 @@ export async function configureApp(
   app.useLogger(new AppLogger(rootLogger));
 
   // First, so it sees every request and its line is written once.
-  app.use(...requestLogging(rootLogger));
+  // The telemetry sits between the request logger and the logger it binds to
+  // the request, so a service's log line carries the trace id too.
+  const [logRequest, bindLogger] = requestLogging(rootLogger);
+  app.use(logRequest, httpTelemetry(app.get(MetricsService)), bindLogger);
   applySecurity(app, config);
 
   applyRouting(app);

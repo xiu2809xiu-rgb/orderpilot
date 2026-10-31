@@ -1,7 +1,8 @@
-# The local stack: PostgreSQL (with pgvector), Redis, MinIO and Mailpit. The API, worker and web app join
-# in P-13. Every port, name and password comes from the root .env (copy
-# .env.example to .env), with the same safe defaults, so `docker compose up -d`
-# works on a fresh clone.
+# The local stack: PostgreSQL (with pgvector), Redis, MinIO and Mailpit. The API,
+# worker and web app join in P-13. Every port, name and password comes from the
+# root .env (copy .env.example to .env), with the same safe defaults, so
+# `docker compose up -d` works on a fresh clone. Grafana's otel-lgtm is a fifth
+# service under the profile "observability": it starts only when asked for.
 #
 #   docker compose up -d --wait     start and wait until all four are healthy
 #   docker compose down             stop and remove the containers, keep the data
@@ -87,7 +88,31 @@ services:
       timeout: 3s
       retries: 20
 
+  # Traces, metrics and logs in one container (ADR 0021): the OpenTelemetry
+  # collector, Tempo, Prometheus, Loki and Grafana. Off unless asked for:
+  #   docker compose --profile observability up -d otel-lgtm
+  # The API sends to it when OTEL_EXPORTER_OTLP_ENDPOINT is set. Grafana then
+  # opens at http://127.0.0.1:${GRAFANA_PORT} (user admin, password admin: a
+  # laptop only, the port is bound to this machine).
+  otel-lgtm:
+    profiles: ["observability"]
+    image: grafana/otel-lgtm:0.38.0
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${GRAFANA_PORT:-3300}:3000"
+      - "127.0.0.1:${OTLP_GRPC_PORT:-4317}:4317"
+      - "127.0.0.1:${OTLP_HTTP_PORT:-4318}:4318"
+    volumes:
+      - lgtm-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://127.0.0.1:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
 volumes:
   postgres-data:
   redis-data:
   minio-data:
+  lgtm-data:

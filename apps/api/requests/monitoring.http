@@ -1,0 +1,43 @@
+### Area 4: AI usage, the clickstream and /metrics.
+### Sign in first (requests/auth.http), then paste the op_csrf cookie value below.
+### AI usage needs aiUsage.read (System admin, Management and Auditor hold it).
+@baseUrl = http://localhost:3000
+@csrf = paste the op_csrf cookie value here after signing in
+@metricsToken = paste METRICS_TOKEN from your .env here
+
+### Totals, cost per feature and the latest calls, read from the AiUsageRecord table.
+### Empty until the AI gateway (P-17) writes records.
+GET {{baseUrl}}/api/v1/monitoring/ai-usage?page=1&pageSize=10
+
+### Service health and recent traces. Mock data: the response says meta.mock is true.
+GET {{baseUrl}}/api/v1/monitoring/observability
+
+### Clickstream summary. Mock data until the real summary is built.
+GET {{baseUrl}}/api/v1/monitoring/clickstream
+
+### Record a batch of page views. Any signed-in role may send; the role is taken from
+### the session. A route is a pattern such as /orders/:id, never a raw URL.
+POST {{baseUrl}}/api/v1/analytics/clickstream
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{
+  "events": [
+    { "name": "page_view", "route": "/orders/:id", "at": "2026-11-01T10:00:00.000Z" }
+  ]
+}
+
+### Refused (400): a user id is not a field, and a raw URL is not a route pattern.
+POST {{baseUrl}}/api/v1/analytics/clickstream
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{
+  "events": [
+    { "name": "page_view", "route": "/orders/1234?x=1", "at": "2026-11-01T10:00:00.000Z", "userId": "abc" }
+  ]
+}
+
+### Prometheus text. Needs the bearer token; with METRICS_TOKEN unset the route is a 404.
+GET {{baseUrl}}/metrics
+Authorization: Bearer {{metricsToken}}

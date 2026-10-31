@@ -2,7 +2,7 @@
 
 Rendered from [`scripts/github/data/backlog.json`](../../scripts/github/data/backlog.json) by `node scripts/github/render-docs.mjs`. Change the data, not this file. The same data seeds the issues. The board shows where each story stands.
 
-There are 9 epics and 70 stories. Estimates are story points: a first guess, for the team to change at planning.
+There are 9 epics and 71 stories. Estimates are story points: a first guess, for the team to change at planning.
 
 ## Epics
 
@@ -15,7 +15,7 @@ There are 9 epics and 70 stories. Estimates are story points: a first guess, for
 | Epic D | Checks, the tracker and insights  | `area: 3 checks tracker and insights`   | 4       | 23     |
 | Epic E | AI with a person in the loop      | `area: 1 document AI and integration`   | 6       | 29     |
 | Epic F | Financial controls and governance | `area: 4 controls and monitoring`       | 9       | 38     |
-| Epic G | Monitoring                        | `area: 4 controls and monitoring`       | 1       | 8      |
+| Epic G | Monitoring                        | `area: 4 controls and monitoring`       | 2       | 11     |
 | Epic T | Team stories                      | `area: team`                            | 9       | 36     |
 
 ## Ready to pull
@@ -109,6 +109,7 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | E-6   | An "Ask OrderPilot" help panel that answers from our docs          | could    | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M3 AI-assisted coding                        |
 | F-7   | Session hardening                                                  | could    | 5      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
 | F-8   | Governance base polish                                             | could    | 3      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
+| G-2   | Monitoring base polish                                             | could    | 3      | `area: 4 controls and monitoring`       | M2 GRS by design, M6 deploy and monitor                        |
 | F-9   | Audit viewer polish                                                | could    | 3      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
 
 ## Epic P: The platform base
@@ -1402,6 +1403,24 @@ Acceptance criteria:
 - Left to Angelyn: the real dashboards, budgets and alerts, in Weeks 14 to 16 (Sprints 13 to 15).
 - Angelyn's review is requested on the pull request once they are a collaborator, and Richie is told when it merges, so he can hand it over.
 - Grafana's `otel-lgtm` image as an optional compose profile for traces, metrics and logs, and Sentry for errors in the web app and the API. Both stay off unless configured with an ADR, a pinned version and a traceability row (ADRs 0021 and 0022).
+
+### G-2: Monitoring base polish
+
+Follow-ups to G-1 that nobody needs this week: they close small gaps between the base and a deployed stack.
+
+- **Area:** `area: 4 controls and monitoring`
+- **Priority:** could
+- **Estimate:** 3 points
+- **Requirements:** M2 GRS by design, M6 deploy and monitor
+- **Planned for:** Sprint 03 (W4)
+- **Depends on:** G-1
+
+Acceptance criteria:
+
+- The production nginx image adds the Sentry origin to its content security policy when a DSN is set at build time, as `vite preview` already does.
+- The observability profile's Prometheus scrapes the API's `/metrics` with the bearer token, and the compose file documents how.
+- A person can change their analytics choice from a settings page as well as the clickstream tab.
+- A browser test records a page view only after consent is given, and sends nothing when Do Not Track is on.
 
 ## Epic T: Team stories
 

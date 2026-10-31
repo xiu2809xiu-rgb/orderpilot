@@ -2,11 +2,125 @@
   "title": "Monitoring",
   "description": "AI usage and cost, system health and usage analytics.",
   "arrives": [
-    "AI calls, tokens and cost by feature",
-    "Health and latency of the services",
-    "Usage analytics for the screens"
+    "Real dashboards for traces, metrics and logs",
+    "Budgets and alerts for AI cost",
+    "A usage summary read from the clickstream table"
   ],
   "cues": {
     "aiUsage": "AI usage this month"
-  }
+  },
+  "tabs": {
+    "label": "Monitoring views",
+    "aiUsage": "AI usage and cost",
+    "observability": "Observability",
+    "clickstream": "Clickstream"
+  },
+  "aiUsage": {
+    "tiles": {
+      "calls": "Calls",
+      "tokens": "Tokens in and out",
+      "cost": "Cost (USD)",
+      "failed": "Failed or refused"
+    },
+    "byFeature": {
+      "title": "Cost per feature",
+      "description": "Where the AI spend goes, largest first.",
+      "feature": "Feature",
+      "calls": "Calls",
+      "cost": "Cost (USD)"
+    },
+    "records": {
+      "title": "Latest calls",
+      "description": "One row per model call, newest first.",
+      "label": "Latest AI calls",
+      "time": "When",
+      "feature": "Feature",
+      "model": "Model",
+      "tokens": "Tokens in / out",
+      "cost": "Cost (USD)",
+      "latency": "Latency",
+      "status": "Status",
+      "trace": "Trace id",
+      "page": "Page {{page}} of {{pages}}",
+      "previous": "Previous page",
+      "next": "Next page"
+    },
+    "status": {
+      "ok": "OK",
+      "error": "Error",
+      "refused": "Refused",
+      "timeout": "Timed out"
+    },
+    "empty": {
+      "title": "No AI calls recorded yet",
+      "description": "The AI gateway writes one record for every model call, and nothing has called a model yet. Cost and usage appear here as soon as the first call is made.",
+      "action": "See what data may go to AI"
+    }
+  },
+  "observability": {
+    "services": {
+      "title": "Services",
+      "description": "Health of what the app runs on.",
+      "label": "Service health",
+      "name": "Service",
+      "status": "Status",
+      "p95": "p95 latency",
+      "errorRate": "Error rate",
+      "rate": "Requests a minute"
+    },
+    "status": {
+      "healthy": "Healthy",
+      "degraded": "Degraded",
+      "down": "Down"
+    },
+    "traces": {
+      "title": "Recent traces",
+      "description": "The latest requests, by route pattern. Search the trace id in Grafana.",
+      "label": "Recent traces",
+      "traceId": "Trace id",
+      "route": "Route",
+      "duration": "Duration",
+      "status": "HTTP status"
+    },
+    "partial": "{{names}} is degraded, so the figures for it may be incomplete.",
+    "mockNote": "These figures are made up. The real dashboards, budgets and alerts are built in Weeks 14 to 16."
+  },
+  "clickstream": {
+    "consent": {
+      "title": "Consent",
+      "description": "Whether this browser lets OrderPilot count which screens are used. Rate across all visits is shown below.",
+      "rate": "{{rate}}% allowed"
+    },
+    "routes": {
+      "title": "Most viewed screens",
+      "description": "Page views by route pattern. No record id ever reaches this table.",
+      "label": "Most viewed screens",
+      "route": "Route",
+      "views": "Views"
+    },
+    "roles": {
+      "title": "Events by role",
+      "description": "The role comes from the session. There is no user id.",
+      "label": "Events by role",
+      "role": "Role",
+      "events": "Events"
+    },
+    "mockNote": "These figures are made up. The real summary reads the ClickstreamEvent table.",
+    "preference": {
+      "title": "This browser",
+      "allowed": "Usage analytics are on for this browser.",
+      "declined": "Usage analytics are off for this browser.",
+      "unset": "You have not chosen yet.",
+      "blocked": "Your browser sends Do Not Track or Global Privacy Control, so nothing is recorded.",
+      "withdraw": "Turn off",
+      "enable": "Turn on"
+    }
+  },
+  "consent": {
+    "title": "Help us improve OrderPilot",
+    "description": "May we count which screens are used? We record the screen, your role and the time. Never your name, your email or anything you type. Your choice is kept in this browser.",
+    "allow": "Allow",
+    "decline": "No thanks"
+  },
+  "denied": "Your role cannot see monitoring data."
 }

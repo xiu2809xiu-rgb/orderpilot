@@ -146,6 +146,14 @@ export const envSchema = z
 
     // Set by the image build (P-13). Shown by /health.
     GIT_SHA: z.string().min(1).optional(),
+
+    // Monitoring (G-1). Each is off unless set (ADRs 0021, 0022 and 0028).
+    // Traces and metrics go over OTLP/HTTP to this collector, such as http://127.0.0.1:4318.
+    OTEL_EXPORTER_OTLP_ENDPOINT: z.url().optional(),
+    // /metrics answers only to this bearer token, and not at all without one.
+    METRICS_TOKEN: z.string().min(24).optional(),
+    // Errors go to Sentry only when this is set.
+    SENTRY_DSN: z.url().optional(),
   })
   .superRefine((env, ctx) => {
     if (env.APP_ENV !== "local" && !env.COOKIE_SECURE) {

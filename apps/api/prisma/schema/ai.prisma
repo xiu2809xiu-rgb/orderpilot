@@ -1,0 +1,31 @@
+// Area 1 models: documents and the AI pipeline. Owner: Richie.
+//
+// G-1 (area 4) added AiUsageRecord here, additively, because its AI usage and
+// cost screen reads it. The gateway (P-17) writes it: until then the table is
+// empty and the screen says so.
+
+/// One model call: what was asked for, what it cost, how long it took. The
+/// fields follow aiUsageSchema in @orderpilot/shared.
+model AiUsageRecord {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  occurredAt    DateTime @db.Timestamptz(3)
+  /// The product feature that asked, such as "document-extraction".
+  feature       String
+  provider      String
+  model         String
+  promptVersion String
+  inputTokens   Int
+  outputTokens  Int
+  /// USD, four places like every amount in the app.
+  costUsd       Decimal  @db.Decimal(14, 4)
+  latencyMs     Int
+  /// ok, error, refused or timeout.
+  status        String
+  /// The person on whose action the call ran. Null for a background job.
+  userId        String?  @db.Uuid
+  traceId       String
+  createdAt     DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([occurredAt])
+  @@index([feature])
+}

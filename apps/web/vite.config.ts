@@ -2,17 +2,18 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import path from "node:path";
 import { defineConfig, loadEnv, type Plugin } from "vite";
-import { SECURITY_HEADERS } from "./security-headers.ts";
+import { securityHeaders } from "./security-headers.ts";
 
 const repoRoot = path.resolve(import.meta.dirname, "../..");
 
 /** Sends the production security headers from `vite preview`. */
-function previewHeaders(): Plugin {
+function previewHeaders(sentryDsn: string | undefined): Plugin {
+  const headers = securityHeaders(sentryDsn);
   return {
     name: "orderpilot-preview-headers",
     configurePreviewServer(server) {
       server.middlewares.use((_req, res, next) => {
-        for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
+        for (const [name, value] of Object.entries(headers)) {
           res.setHeader(name, value);
         }
         next();
@@ -24,6 +25,8 @@ function previewHeaders(): Plugin {
 export default defineConfig(({ mode }) => {
   // Only these two names are read from the root .env, never its secrets.
   const env = loadEnv(mode, repoRoot, ["API_PORT", "WEB_PORT"]);
+  // The web app's own env file may hold VITE_SENTRY_DSN; without it the policy stays strict.
+  const sentryDsn = loadEnv(mode, import.meta.dirname, "VITE_").VITE_SENTRY_DSN;
   // loadEnv also parses the root .env's NODE_ENV=development and hands it to
   // Vite as the user's choice, which turns a production build into a
   // development one (dev JSX runtime, 282 KB instead of 215 KB). Only the two
@@ -34,7 +37,7 @@ export default defineConfig(({ mode }) => {
   const proxy = { "/api": { target: apiTarget, changeOrigin: false } };
 
   return {
-    plugins: [react(), tailwindcss(), previewHeaders()],
+    plugins: [react(), tailwindcss(), previewHeaders(sentryDsn)],
     resolve: {
       alias: {
         "@": path.resolve(import.meta.dirname, "src"),

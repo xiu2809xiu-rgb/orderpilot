@@ -1451,6 +1451,24 @@
       ]
     },
     {
+      "key": "G-2",
+      "title": "Monitoring base polish",
+      "epic": "G",
+      "area": "area: 4 controls and monitoring",
+      "priority": "could",
+      "estimate": 3,
+      "reqs": ["M2", "M6"],
+      "sprints": [3],
+      "dependsOn": ["G-1"],
+      "summary": "Follow-ups to G-1 that nobody needs this week: they close small gaps between the base and a deployed stack.",
+      "acceptance": [
+        "The production nginx image adds the Sentry origin to its content security policy when a DSN is set at build time, as `vite preview` already does.",
+        "The observability profile's Prometheus scrapes the API's `/metrics` with the bearer token, and the compose file documents how.",
+        "A person can change their analytics choice from a settings page as well as the clickstream tab.",
+        "A browser test records a page view only after consent is given, and sends nothing when Do Not Track is on."
+      ]
+    },
+    {
       "epic": "F",
       "area": "area: 4 controls and monitoring",
       "reqs": ["M2", "M4"],

@@ -14,3 +14,16 @@ major, published on 2026-10-27, inside our 7-day release-age window, and the \
 tools still ask for minimatch 3 and 10. Accepted on 2026-10-31; recheck once \
 the tools move to 11.\
 """
+
+[[IgnoredVulns]]
+id = "GHSA-3g3m-2fjr-6pw4"
+ignoreUntil = 2026-11-06T00:00:00Z
+reason = """
+glob 13.0.6: an aborted walk keeps reading directories in the background. \
+Reached only through @sentry/bundler-plugins, Sentry's build-time source-map \
+tooling, which @sentry/node lists as a dependency. We never call it and never \
+call glob with an AbortSignal; nothing from it runs in the API. The fix is \
+glob 14.0.2, published 2026-10-27, inside our 7-day release-age window until \
+2026-11-03. Then an override to glob 14 replaces this entry. Accepted on \
+2026-11-01.\
+"""
