@@ -1,0 +1,110 @@
+{
+  "badges": {
+    "mock": "Mock",
+    "mockHint": "A stand-in for a real system. Nothing here reaches the real one.",
+    "mockAi": "Mock AI",
+    "mockAiHint": "A stand-in for the AI model. Its answers are canned, not generated.",
+    "synthetic": "Synthetic demo data",
+    "syntheticHint": "Made-up records for the demo. None of it is real.",
+    "classification": {
+      "label": "Classification",
+      "public": "Public",
+      "internal": "Internal",
+      "confidential": "Confidential",
+      "restricted": "Restricted"
+    }
+  },
+  "masked": {
+    "hidden": "Hidden",
+    "why": "Why is this hidden?",
+    "title": "Why this is hidden",
+    "visibleTo": "Who can see it: {{who}}",
+    "reasons": {
+      "role": "Your role does not include this detail.",
+      "bankDetails": "Bank details are hidden unless your role handles payments.",
+      "price": "Prices are hidden unless your role works with pricing.",
+      "policy": "A data policy hides this from the screen."
+    }
+  },
+  "confidence": {
+    "label": "Confidence {{percent}}",
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low",
+    "requiresApproval": "Requires approval",
+    "approved": "Approved by a person",
+    "hint": "The AI proposed this value. A person must confirm it."
+  },
+  "audit": {
+    "link": "View audit trail",
+    "linkFor": "View audit trail for {{subject}}"
+  },
+  "time": {
+    "unknown": "Unknown time"
+  },
+  "copy": {
+    "copy": "Copy",
+    "copyNamed": "Copy {{what}}",
+    "copied": "Copied",
+    "failed": "Could not copy. Select the text and copy it by hand."
+  },
+  "section": {
+    "actions": "Actions"
+  },
+  "states": {
+    "loading": "Loading",
+    "emptyTitle": "Nothing here yet",
+    "noMatchesTitle": "No results match",
+    "noMatchesDescription": "Change or clear the search and filters to see more.",
+    "clearFilters": "Clear search and filters",
+    "errorTitle": "This could not be loaded",
+    "partialTitle": "Some of this is missing",
+    "partialDescription": "Part of the data could not be loaded. What you see may be incomplete.",
+    "retry": "Try again",
+    "deniedTitle": "You do not have access to this",
+    "deniedDescription": "Your role does not include it. If you think it should, ask a system admin."
+  },
+  "table": {
+    "region": "{{caption}}, scrollable table",
+    "search": "Search",
+    "searchPlaceholder": "Search",
+    "filters": "Filters",
+    "columns": "Columns",
+    "columnsTitle": "Show columns",
+    "columnsReset": "Show all columns",
+    "export": "Export",
+    "exportCsv": "Export as CSV",
+    "exportExcel": "Export as Excel",
+    "exportPageNote": "Exports the rows on this page.",
+    "exporting": "Preparing the file",
+    "exportFailed": "The export failed. Try again.",
+    "exportDone": "The file was downloaded.",
+    "saved": "Saved filters",
+    "savedNone": "No saved filters yet.",
+    "savedName": "Name for this filter",
+    "savedSave": "Save current filter",
+    "savedApply": "Apply {{name}}",
+    "savedDelete": "Delete {{name}}",
+    "savedHint": "Saved on this device, for you only.",
+    "sortBy": "Sort by {{column}}",
+    "sortedAsc": "Sorted by {{column}}, ascending",
+    "sortedDesc": "Sorted by {{column}}, descending",
+    "range": "Showing {{from}} to {{to}} of {{total}}",
+    "rangeNone": "No rows",
+    "page": "Page {{page}} of {{pages}}",
+    "previous": "Previous page",
+    "next": "Next page",
+    "pageSize": "Rows per page"
+  },
+  "log": {
+    "title": "Operation log",
+    "region": "Operation log entries, scrollable",
+    "description": "Who changed this record, and when.",
+    "time": "Time",
+    "user": "User",
+    "ip": "IP address",
+    "change": "What changed",
+    "empty": "No changes recorded yet.",
+    "emptyHint": "Edits to this record will be listed here."
+  }
+}

@@ -61,6 +61,7 @@ Richie, the team lead, builds the base for every area. Each owner then takes ove
 - [ADR 0001](docs/adr/0001-record-architecture-decisions.md): why we record decisions.
 - [ADR 0002](docs/adr/0002-a-clean-repository-for-ps11.md): why this repository started clean.
 - [ADR 0016](docs/adr/0016-github-process-as-code.md): why the GitHub process is code.
+- [ADR 0023](docs/adr/0023-exceljs-for-table-export.md): why Excel export uses ExcelJS, loaded on demand.
 
 **The record**
 

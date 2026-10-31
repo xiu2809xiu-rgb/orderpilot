@@ -2,12 +2,12 @@ import { FileQuestion } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
-import { ErrorState } from "./ErrorState";
+import { StatePanel } from "@/components/common/StatePanel";
 
 export function NotFoundPage() {
   const { t } = useTranslation();
   return (
-    <ErrorState
+    <StatePanel
       icon={FileQuestion}
       title={t("errors.notFound.title")}
       description={t("errors.notFound.description")}
@@ -15,6 +15,6 @@ export function NotFoundPage() {
       <Button asChild>
         <Link to="/">{t("errors.notFound.action")}</Link>
       </Button>
-    </ErrorState>
+    </StatePanel>
   );
 }

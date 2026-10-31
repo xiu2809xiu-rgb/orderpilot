@@ -17,6 +17,7 @@
   "nav": {
     "home": "Home",
     "settings": "Settings",
+    "gallery": "Component gallery",
     "groups": {
       "operations": "Operations",
       "data": "Data",

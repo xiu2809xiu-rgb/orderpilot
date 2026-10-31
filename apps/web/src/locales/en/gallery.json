@@ -1,0 +1,76 @@
+{
+  "title": "Component gallery",
+  "description": "Every common component in one place, with synthetic data. Shown in demo mode and in development only.",
+  "sections": {
+    "table": "Data table",
+    "tableHint": "Paging, sorting and filtering happen on the server. This page fakes the server in the browser.",
+    "states": "Page states",
+    "badges": "Badges",
+    "pieces": "Small pieces",
+    "log": "Operation log",
+    "badgesHint": "Labels that keep a demo honest, and show how sensitive a record is.",
+    "piecesHint": "Used inside tables and detail pages."
+  },
+  "table": {
+    "caption": "Orders",
+    "order": "Order",
+    "customer": "Customer",
+    "status": "Status",
+    "total": "Total (USD)",
+    "updated": "Updated",
+    "activeOnly": "Show active only",
+    "emptyTitle": "No orders yet",
+    "emptyDescription": "Orders appear here once documents are confirmed.",
+    "emptyAction": "Upload a document",
+    "partial": "Prices for two customers could not be loaded."
+  },
+  "status": {
+    "draft": "Draft",
+    "waiting": "Waiting for approval",
+    "released": "Released",
+    "blocked": "Blocked"
+  },
+  "demo": {
+    "data": "Show data",
+    "loading": "Show loading",
+    "error": "Show an error",
+    "forbidden": "Show denied",
+    "empty": "Show empty",
+    "partial": "Show partial"
+  },
+  "pieces": {
+    "bank": "Bank account",
+    "visibleTo": "Finance",
+    "price": "Unit price",
+    "confidence": "Extracted value",
+    "when": "Last change",
+    "reference": "Reference",
+    "referenceCopy": "reference",
+    "audit": "Audit"
+  },
+  "log": {
+    "created": "Created the draft",
+    "price": "Changed the unit price from 4.20 to 4.35",
+    "approved": "Approved the release"
+  },
+  "users": {
+    "one": "Priya Nair",
+    "two": "Janet Lim",
+    "three": "Daniel Koh"
+  },
+  "badges": {
+    "status": "Status",
+    "classification": "Classification"
+  },
+  "states": {
+    "loading": "Loading",
+    "empty": "Empty",
+    "error": "Error",
+    "partial": "Partial",
+    "denied": "Permission denied",
+    "emptyTitle": "No documents yet",
+    "emptyDescription": "Upload a purchase order to start.",
+    "emptyAction": "Upload a document",
+    "partialDescription": "The supplier list is still loading."
+  }
+}

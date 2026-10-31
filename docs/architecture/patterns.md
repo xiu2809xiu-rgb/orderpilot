@@ -2,23 +2,27 @@
 
 The named patterns used in the code, where each one lives, and why it earns its place. A pattern goes in when a story uses it. Each story adds its rows; planned ones are marked with the story.
 
-| Pattern                     | Where                                                             | Why                                                                           | Story |
-| --------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------- | ----- |
-| Layered architecture        | every module under `apps/api/src`                                 | Rules, I/O and HTTP stay apart, so each can be tested and changed alone       | P-8   |
-| Repository                  | `common/repository.ts`, `health/build-info.repository.ts`         | The only place data is read or written; services stay testable                | P-8   |
-| Template method             | `BaseRepository.getById`, `toPage`                                | The not-found rule and the page shape are written once                        | P-8   |
-| Domain class                | `health/domain/readiness-report.ts`                               | A business rule as a plain class with its own tests                           | P-8   |
-| Domain error                | `common/domain-error.ts`                                          | A rule says no without knowing HTTP; the filter picks the status              | P-8   |
-| Static factory              | `AppConfig.fromEnv`, `ConfigModule.forRoot`, `AppModule.register` | A named, validated way to build the one config and the module that uses it    | P-8   |
-| Registry                    | `health/readiness-registry.ts`                                    | Modules add their own readiness checks without the health module knowing them | P-8   |
-| Pipe (validate at the edge) | `common/zod-validation.pipe.ts`                                   | Nothing crosses a boundary before a zod schema parses it                      | P-8   |
-| Exception filter            | `common/all-exceptions.filter.ts`                                 | One error envelope for every failure                                          | P-8   |
-| Adapter                     | `logging/app-logger.ts`                                           | Nest's `LoggerService` on top of pino, so all logs share one format           | P-8   |
-| Transactional outbox        | planned                                                           | Events leave the system only if the business transaction commits              | P-15  |
-| Gateway                     | planned: `LlmGateway`                                             | One interface over the mock, OpenAI-compatible and Bedrock providers          | P-17  |
-| Factory and adapter         | planned: `SystemConnector` and the Navision adapter               | Connectors are chosen by name and hide each system's quirks                   | P-20  |
-| Strategy                    | planned: check rules                                              | Each check rule is a class behind one interface                               | D-1   |
-| State machine               | planned: order and exception lifecycles                           | Legal transitions in one place                                                | C-1   |
+| Pattern                     | Where                                                             | Why                                                                                      | Story |
+| --------------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ----- |
+| Layered architecture        | every module under `apps/api/src`                                 | Rules, I/O and HTTP stay apart, so each can be tested and changed alone                  | P-8   |
+| Repository                  | `common/repository.ts`, `health/build-info.repository.ts`         | The only place data is read or written; services stay testable                           | P-8   |
+| Template method             | `BaseRepository.getById`, `toPage`                                | The not-found rule and the page shape are written once                                   | P-8   |
+| Domain class                | `health/domain/readiness-report.ts`                               | A business rule as a plain class with its own tests                                      | P-8   |
+| Domain error                | `common/domain-error.ts`                                          | A rule says no without knowing HTTP; the filter picks the status                         | P-8   |
+| Static factory              | `AppConfig.fromEnv`, `ConfigModule.forRoot`, `AppModule.register` | A named, validated way to build the one config and the module that uses it               | P-8   |
+| Registry                    | `health/readiness-registry.ts`                                    | Modules add their own readiness checks without the health module knowing them            | P-8   |
+| Pipe (validate at the edge) | `common/zod-validation.pipe.ts`                                   | Nothing crosses a boundary before a zod schema parses it                                 | P-8   |
+| Exception filter            | `common/all-exceptions.filter.ts`                                 | One error envelope for every failure                                                     | P-8   |
+| Adapter                     | `logging/app-logger.ts`                                           | Nest's `LoggerService` on top of pino, so all logs share one format                      | P-8   |
+| Controlled component        | `components/common/data-table/DataTable.tsx`                      | The table holds no paging, sort or filter state: the page owns it and the server answers | P-12  |
+| Render prop (slot)          | `DataTable` `filterSlot`                                          | An area adds its own filter control without the table knowing it                         | P-12  |
+| Lazy loading                | `data-table/export/excel.ts`, the gallery route                   | A large library or a demo page loads only when asked for, so the entry stays small       | P-12  |
+| Barrel (one public entry)   | `components/common/index.ts`                                      | Areas import every common component from one place                                       | P-12  |
+| Transactional outbox        | planned                                                           | Events leave the system only if the business transaction commits                         | P-15  |
+| Gateway                     | planned: `LlmGateway`                                             | One interface over the mock, OpenAI-compatible and Bedrock providers                     | P-17  |
+| Factory and adapter         | planned: `SystemConnector` and the Navision adapter               | Connectors are chosen by name and hide each system's quirks                              | P-20  |
+| Strategy                    | planned: check rules                                              | Each check rule is a class behind one interface                                          | D-1   |
+| State machine               | planned: order and exception lifecycles                           | Legal transitions in one place                                                           | C-1   |
 
 ## Layers
 

@@ -47,7 +47,7 @@ function usePaletteShortcut(toggle: () => void) {
 
 export function AppShell() {
   // Loads every area's text once, so the menu and the palette can name them.
-  useTranslation(["common", ...featureNamespaces]);
+  useTranslation(["common", "components", ...featureNamespaces]);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [paletteUsed, setPaletteUsed] = useState(false);
   useScheduledRefresh();

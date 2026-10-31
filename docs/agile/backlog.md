@@ -698,7 +698,7 @@ Acceptance criteria:
 
 ### P-27: Web shell polish
 
-What P-11 left out because no teammate needs it in its first week.
+What P-11 and P-12 left out because no teammate needs it in its first week.
 
 - **Area:** `area: 1 document AI and integration`
 - **Priority:** could
@@ -715,6 +715,8 @@ Acceptance criteria:
 - LCP and a Lighthouse run on the production build, with the figures recorded next to the screenshots.
 - A collapsible sidebar that remembers its state, and a list of keyboard shortcuts.
 - The refresh timer that runs a minute before the access token ends has a test with fake timers.
+- Common components polish (P-12): keep the table's own query in the URL so a sorted, filtered page can be shared; keep the previous rows on screen while the next page loads; row selection with bulk actions; column order, resizing and density; a sticky header; money and number formatting with `Intl`; and export styling (number formats, column widths) once a client asks for it.
+- Saved table filters on the server, so they follow a person to another device, plus a filter shared with a team. P-12 keeps them in the browser for one viewer.
 - P-26 left out: generated hooks check each answer at run time with zod schemas generated from the OpenAPI file, and the error envelope is a documented response on every route, so a hook's error type is typed.
 
 ## Epic A: Document intake and AI extraction

@@ -4,7 +4,7 @@ import { Link } from "react-router";
 import { Badge } from "@/components/ui/badge";
 import { cuesFor, featureNamespaces, featuresFor } from "@/features/nav";
 import { useSessionStore } from "@/stores/session";
-import { PageHeader } from "../PageHeader";
+import { PageHeader } from "@/components/common/PageHeader";
 
 /**
  * Each role lands here: tiles ("cues") with counts, then lists. There is no

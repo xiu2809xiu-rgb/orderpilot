@@ -22,7 +22,7 @@ export default defineConfig(
   {
     // The init script runs in the page, not in Node.
     name: "orderpilot-web/screenshot-script",
-    files: ["scripts/screenshots.mjs"],
+    files: ["scripts/screenshots.mjs", "scripts/screenshots-components.mjs"],
     languageOptions: { globals: { document: "readonly" } },
   },
 );
