@@ -26,4 +26,7 @@ export const AuthRefresh200DataPermissionsItem = {
   approvalsdecide: 'approvals.decide',
   paymentsconfirm: 'payments.confirm',
   paymentspost: 'payments.post',
+  workflowsread: 'workflows.read',
+  sprread: 'spr.read',
+  workflowsinboxesany: 'workflows.inboxes.any',
 } as const;

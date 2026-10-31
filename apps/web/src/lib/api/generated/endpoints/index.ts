@@ -7,3 +7,4 @@ export * from './insights/insights.ts';
 export * from './system/system.ts';
 export * from './tracker/tracker.ts';
 export * from './users/users.ts';
+export * from './workflows/workflows.ts';

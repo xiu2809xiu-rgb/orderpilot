@@ -54,8 +54,10 @@ describe("the test harness", () => {
   it("flushes only the test Redis database number, never the development one", async () => {
     const config = testConfig();
     const test = new Redis(config.redis.url);
-    // A different number from the test one, on the same server.
-    const other = new Redis(config.redis.url.replace(/\/\d+$/, "/5"));
+    // A different number from the test one, on the same server. The test
+    // number is configurable, so a fixed choice here could be that same one.
+    const otherDb = config.redis.url.endsWith("/5") ? "/6" : "/5";
+    const other = new Redis(config.redis.url.replace(/\/\d+$/, otherDb));
     try {
       await test.set("harness:sentinel", "1");
       await other.set("harness:sentinel", "1");
@@ -93,6 +95,7 @@ describe("the test harness", () => {
       "seed role permissions",
       "seed users",
       "seed synthetic data",
+      "seed workflows",
     ]);
     expect(lines.join("\n")).toContain(
       "Synthetic demo data: 5 customers, 3 vendors, 30 items, 10 orders",

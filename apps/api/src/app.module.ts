@@ -18,6 +18,7 @@ import { GovernanceModule } from "./modules/governance/governance.module.js";
 import { QueueModule } from "./queue/queue.module.js";
 import { RedisModule } from "./redis/redis.module.js";
 import { StorageModule } from "./storage/storage.module.js";
+import { WorkflowsModule } from "./modules/workflows/workflows.module.js";
 import { SystemModule } from "./system/system.module.js";
 
 @Module({})
@@ -56,6 +57,7 @@ export class AppModule {
         AuditModule,
         SystemModule,
         AuthModule.register(config),
+        WorkflowsModule,
         ChecksModule,
         InsightsModule,
         GovernanceModule,

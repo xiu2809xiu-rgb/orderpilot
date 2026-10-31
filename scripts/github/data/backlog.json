@@ -641,6 +641,23 @@
       ]
     },
     {
+      "key": "C-5",
+      "title": "Area 2 polish left out of the base",
+      "epic": "C",
+      "area": "area: 2 order workflows and approvals",
+      "priority": "should",
+      "estimate": 3,
+      "reqs": ["M4"],
+      "sprints": [3],
+      "dependsOn": ["C-1"],
+      "summary": "What the base left out because no teammate needs it this week.",
+      "acceptance": [
+        "The cue tiles on each role's home page show live counts (my tasks, SPRs awaiting approval, payments to confirm) from the workflow routes, once the tile system can take a count.",
+        "A document settings screen edits the field settings and defaults held in DocumentTypeConfig, with an audit event for each change.",
+        "The mock read model is replaced by one that reads WorkflowInstance, WorkflowTask and WorkflowNotification, and the routes drop meta.mock."
+      ]
+    },
+    {
       "key": "D-1",
       "title": "Area 3 base, checks and the tracker",
       "epic": "D",
@@ -989,6 +1006,7 @@
       "dependsOn": ["P-11"],
       "summary": "What P-11 and P-12 left out because no teammate needs it in its first week.",
       "acceptance": [
+        "orval generates mutation hooks for POST, PUT, PATCH and DELETE, so screens stop wrapping the generated functions in `useMutation` (found by area 2, C-1).",
         "Unsaved form input also survives a page reload, through one small draft helper that forms can opt into. P-11 keeps it only across an ended session.",
         "A phone-width pass: screenshots at 390 px wide, light and dark, and the fixes they show. The sidebar already becomes a sheet, but spacing has not been reviewed on a phone.",
         "LCP and a Lighthouse run on the production build, with the figures recorded next to the screenshots.",

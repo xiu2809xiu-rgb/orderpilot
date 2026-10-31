@@ -17,6 +17,7 @@ import { Database } from "../database.js";
 import { UserRepository } from "../../users/user.repository.js";
 import { AuditEventRepository } from "../../audit/audit-event.repository.js";
 import { AuditService } from "../../audit/audit.service.js";
+import { seedWorkflows } from "../../modules/workflows/workflows-seed.js";
 import { ObjectStorage } from "../../storage/object-storage.js";
 
 /**
@@ -155,6 +156,14 @@ const syntheticData: Seeder = {
   },
 };
 
+/** Area 2's sample rows: the sales flow, document settings, instances, tasks and reminders. */
+const workflowSamples: Seeder = {
+  name: "workflows",
+  async run(app) {
+    return seedWorkflows(app.get(Database).client);
+  },
+};
+
 /**
  * In the order they run. The audit trail starts first, so the users' creation
  * lands after its first link; later stories load the synthetic data into their
@@ -166,4 +175,5 @@ export const SEEDERS: readonly Seeder[] = [
   rolePermissions,
   demoUsers,
   syntheticData,
+  workflowSamples,
 ];

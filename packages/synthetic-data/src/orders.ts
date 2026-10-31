@@ -116,10 +116,14 @@ export function makeOrders(
     let scenario: SampleScenario = { kind: "none" };
 
     if (p.state === "sample-short-stock") {
-      const shortBy = addDecimal(
-        SHORT_STOCK_ORDERED,
-        `-${shortItem.inventory}`,
+      // Prompt 002's formula: Inventory minus Qty. on Sales Order plus Qty. on
+      // Purch. Order is what is available, and the shortfall is measured
+      // against that, so the SPR screen and the data agree.
+      const available = addDecimal(
+        addDecimal(shortItem.inventory, `-${shortItem.qtyOnSalesOrder}`),
+        shortItem.qtyOnPurchOrder,
       );
+      const shortBy = addDecimal(SHORT_STOCK_ORDERED, `-${available}`);
       lines.push(line(shortItem, SHORT_STOCK_ORDERED, false));
       scenario = {
         kind: "short-stock",

@@ -2,14 +2,200 @@
   "title": "Workflows",
   "description": "Tasks, approvals and the steps every order passes through.",
   "arrives": [
-    "A task inbox for the steps waiting on you",
-    "Each order's steps and timeline",
+    "The state machine behind every order, written by the area owner",
     "SPR approval within limits, with a second approver where one is needed",
-    "Reminders and escalations"
+    "The payment gate for prepayment orders",
+    "Reminders and escalations on a schedule"
   ],
   "cues": {
     "myTasks": "My tasks",
     "sprApproval": "SPRs awaiting approval",
     "paymentsToConfirm": "Payments to confirm"
+  },
+  "nav": {
+    "label": "Workflow pages",
+    "inbox": "Task inbox",
+    "reminders": "Reminders"
+  },
+  "notice": {
+    "mock": "These screens read mock data. Approving, rejecting and confirming only check the request: nothing is saved until the workflow engine is built.",
+    "notApplied": "Nothing was changed"
+  },
+  "inbox": {
+    "heading": "Task inbox",
+    "forRole": "Tasks for {{role}}",
+    "ownDescription": "The steps waiting on you, most urgent first.",
+    "otherDescription": "You can look at any role's inbox. Pick one.",
+    "pickRole": "Show the inbox of",
+    "overdueOnly": "Overdue only",
+    "emptyTitle": "No tasks waiting",
+    "emptyDescription": "Nothing needs this role right now. New tasks appear here as orders move.",
+    "emptyOverdue": "Nothing is overdue.",
+    "showAll": "Show all tasks",
+    "count_one": "{{count}} task",
+    "count_other": "{{count}} tasks",
+    "noInboxTitle": "Your role has no task inbox",
+    "noInboxDescription": "Ask for the permission to open other roles' inboxes, or sign in as a role that has tasks."
+  },
+  "task": {
+    "dueOn": "Due {{date}}",
+    "overdue": "Overdue",
+    "onTime": "On time",
+    "order": "Order",
+    "request": "Request",
+    "navision": "Navision",
+    "navisionNone": "none yet",
+    "openOrder": "Open order",
+    "openRequest": "Open request",
+    "kinds": {
+      "REVIEW_FIELDS": "Review fields",
+      "RAISE_SPR": "Raise SPR",
+      "APPROVE_SPR": "Approve SPR",
+      "SEND_PI": "Send pro forma invoice",
+      "CONFIRM_PAYMENT": "Confirm payment",
+      "PACK_ORDER": "Pack order",
+      "ADD_SHIPPING_DOCUMENTS": "Add shipping documents"
+    }
+  },
+  "reminders": {
+    "heading": "Reminders",
+    "description": "What is due, who has been told, and where it goes if nobody acts.",
+    "emptyTitle": "No reminders",
+    "emptyDescription": "Reminders appear here when a task is close to its due date.",
+    "remindOn": "Reminder {{date}}",
+    "dueOn": "Due {{date}}",
+    "escalatesOn": "Passes up {{date}} if nobody acts",
+    "escalatedTo": "Passed up to {{role}}",
+    "stages": {
+      "scheduled": "Scheduled",
+      "sent": "Sent",
+      "escalated": "Escalated"
+    },
+    "kinds": {
+      "TASK_DUE": "Task due",
+      "PAYMENT_DUE": "Payment due",
+      "SHIPPING_DOCUMENT_MISSING": "Shipping document missing",
+      "IMPORT_PERMIT_MISSING": "Import permit missing"
+    }
+  },
+  "steps": {
+    "po-received": "PO received",
+    "fields-confirmed": "Fields confirmed",
+    "stock-checked": "Stock checked",
+    "spr-approval": "SPR approval",
+    "pi-sent": "Pro forma invoice sent",
+    "payment-confirmed": "Payment confirmed",
+    "packed": "Packed",
+    "invoiced": "Invoiced",
+    "shipping-documents": "Shipping documents"
+  },
+  "order": {
+    "heading": "Order {{orderNo}}",
+    "description": "{{customer}}, customer PO {{po}}, ordered {{date}}.",
+    "navisionNote": "{{orderNo}} is Navision's sales order number.",
+    "stepsHeading": "Steps",
+    "stepsDescription": "Where the order is on its way. The state machine will decide the real status.",
+    "timelineHeading": "Timeline",
+    "timelineEmpty": "Nothing has happened to this order yet.",
+    "optional": "Only some orders",
+    "owner": "Owner: {{role}}",
+    "doneOn": "Done {{date}}",
+    "stepState": {
+      "done": "Done",
+      "current": "Waiting here",
+      "upcoming": "To come",
+      "skipped": "Not needed"
+    },
+    "by": "{{name}}",
+    "notFoundTitle": "This order is not in the sample data",
+    "notFoundDescription": "Check the order number, or go back to the task inbox.",
+    "backToInbox": "Back to the task inbox",
+    "crumb": "Order"
+  },
+  "payment": {
+    "heading": "Payment",
+    "description": "The prepayment asked for and what Finance has confirmed.",
+    "prepaymentPercent": "Prepayment asked for",
+    "amountDue": "Amount due",
+    "noneDue": "None outstanding",
+    "confirmed": "Confirmed payments",
+    "noneConfirmed": "No payment confirmed yet.",
+    "types": {
+      "prepayment": "Prepayment",
+      "deposit": "Deposit",
+      "balance": "Balance",
+      "full-payment": "Full payment"
+    },
+    "form": {
+      "heading": "Confirm a payment",
+      "type": "Payment type",
+      "amount": "Amount (USD)",
+      "reference": "Bank reference",
+      "paidOn": "Paid on",
+      "submit": "Confirm payment",
+      "submitting": "Checking",
+      "invalid": "Fill in every field. The amount must be more than zero."
+    }
+  },
+  "spr": {
+    "heading": "Stock purchase request {{recordNo}}",
+    "description": "Requested by {{name}} on {{date}} for {{orderNo}}.",
+    "navision": "Navision number",
+    "navisionNone": "none yet",
+    "ourNumber": "OrderPilot number",
+    "summaryHeading": "The request",
+    "vendor": "Vendor",
+    "item": "Item",
+    "quantity": "Quantity",
+    "unitCost": "Unit cost",
+    "amount": "Amount",
+    "basisHeading": "Why this quantity",
+    "basisDescription": "Available stock is Inventory, minus Qty. on Sales Order, plus Qty. on Purch. Order. The suggestion is the shortfall.",
+    "ordered": "Ordered",
+    "inventory": "Inventory",
+    "qtyOnSalesOrder": "Qty. on Sales Order",
+    "qtyOnPurchOrder": "Qty. on Purch. Order",
+    "availableStock": "Available stock",
+    "shortfall": "Shortfall (suggested quantity)",
+    "fieldsHeading": "Fields",
+    "fieldsDescription": "Suggested values are the system's proposal. They are not final until you approve.",
+    "field": "Field",
+    "value": "Value",
+    "source": "Source",
+    "required": "Required",
+    "emptyValue": "Empty",
+    "origin": {
+      "suggested": "Suggested",
+      "default": "Default",
+      "person": "Entered by a person"
+    },
+    "approverHeading": "Approver",
+    "approverDescription": "From the approval setup, in the shape of Navision's Approval User Setup. Area 4 owns the limits.",
+    "approverName": "Approver",
+    "approverId": "Escalates to",
+    "salesLimit": "Sales limit",
+    "purchaseLimit": "Purchase limit",
+    "unlimited": "Unlimited",
+    "limited": "Limited",
+    "noLimit": "No limit set",
+    "substitute": "Substitute",
+    "noSubstitute": "None",
+    "decisionHeading": "Your decision",
+    "decisionDone": "Decided: {{outcome}} by {{name}} on {{date}}",
+    "outcomes": {
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "comment": "Comment",
+    "commentHint": "Say why. The comment is kept with the decision.",
+    "commentRequired": "Write a comment before you decide.",
+    "approve": "Approve",
+    "reject": "Reject",
+    "sending": "Checking",
+    "readOnly": "Your role can read this request but not decide it.",
+    "resultTitle": "{{outcome}} was checked",
+    "notFoundTitle": "This request is not in the sample data",
+    "notFoundDescription": "Check the number, or go back to the task inbox.",
+    "crumb": "Stock purchase request"
   }
 }
