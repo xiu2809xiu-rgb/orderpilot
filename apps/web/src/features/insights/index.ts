@@ -8,7 +8,7 @@ export default defineFeature({
   path: "insights",
   group: "insight",
   icon: ChartColumn,
-  permission: "orders.read",
+  permission: "insights.read",
   cues: [{ id: "kpis", roles: ["MANAGEMENT"] }],
   Page: lazy(() => import("./InsightsPage")),
 });

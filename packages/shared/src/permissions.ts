@@ -17,6 +17,10 @@ export const PERMISSIONS = [
   "documents.read",
   "documents.upload",
   "orders.read",
+  // Area 3 (D-1): the tracker and an order's timeline, the exceptions queue and the KPIs.
+  "tracker.read",
+  "exceptions.read",
+  "insights.read",
   // Acting on money and approvals. The system admin role never holds these
   // (see governance/matrix.ts). No role holds them by default: who approves
   // and who pays is area 4's call, made in the matrix.
@@ -44,12 +48,48 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "audit.read",
     "aiUsage.read",
   ],
-  PRODUCT_MANAGER: ["orders.read", "documents.read"],
-  APPROVER: ["orders.read", "documents.read"],
-  SUPPORT: ["orders.read", "documents.read", "documents.upload"],
-  WAREHOUSE: ["orders.read", "documents.read"],
-  FINANCE: ["orders.read", "documents.read"],
-  LOGISTICS: ["orders.read", "documents.read"],
-  MANAGEMENT: ["orders.read", "documents.read", "aiUsage.read"],
-  AUDITOR: ["orders.read", "audit.read", "aiUsage.read", "roles.read"],
+  PRODUCT_MANAGER: [
+    "orders.read",
+    "documents.read",
+    "tracker.read",
+    "insights.read",
+  ],
+  APPROVER: ["orders.read", "documents.read", "tracker.read"],
+  SUPPORT: [
+    "orders.read",
+    "documents.read",
+    "documents.upload",
+    "tracker.read",
+    "exceptions.read",
+  ],
+  WAREHOUSE: [
+    "orders.read",
+    "documents.read",
+    "tracker.read",
+    "exceptions.read",
+  ],
+  FINANCE: ["orders.read", "documents.read", "tracker.read", "exceptions.read"],
+  LOGISTICS: [
+    "orders.read",
+    "documents.read",
+    "tracker.read",
+    "exceptions.read",
+  ],
+  MANAGEMENT: [
+    "orders.read",
+    "documents.read",
+    "aiUsage.read",
+    "tracker.read",
+    "exceptions.read",
+    "insights.read",
+  ],
+  AUDITOR: [
+    "orders.read",
+    "audit.read",
+    "aiUsage.read",
+    "roles.read",
+    "tracker.read",
+    "exceptions.read",
+    "insights.read",
+  ],
 };

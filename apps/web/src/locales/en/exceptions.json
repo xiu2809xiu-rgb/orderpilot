@@ -2,11 +2,34 @@
   "title": "Exceptions",
   "description": "Orders that failed a check and need a person.",
   "arrives": [
-    "A queue of failed checks, newest first",
-    "The rule that failed and what to do about it",
-    "Resolve, escalate or accept with a reason"
+    "Assign, escalate and resolve an exception, with every step audited",
+    "An AI explanation of each exception, marked as AI",
+    "Tolerances set from Spectra answers"
   ],
   "cues": {
     "open": "Open exceptions"
+  },
+  "list": {
+    "caption": "Exceptions waiting for a person",
+    "emptyTitle": "No exceptions",
+    "emptyDescription": "When a check finds a difference between documents, it is listed here with who should fix it.",
+    "emptyAction": "Open the order tracker",
+    "columns": {
+      "order": "Order",
+      "customer": "Customer",
+      "rule": "Check",
+      "summary": "What differs",
+      "expected": "Expected",
+      "actual": "Found",
+      "difference": "Difference",
+      "tolerance": "Tolerance",
+      "fixBy": "Fix by",
+      "state": "State",
+      "opened": "Opened"
+    },
+    "state": {
+      "OPEN": "Open",
+      "RESOLVED": "Resolved"
+    }
   }
 }

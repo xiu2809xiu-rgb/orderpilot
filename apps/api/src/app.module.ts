@@ -12,6 +12,8 @@ import { ConfigModule } from "./config/config.module.js";
 import { DatabaseModule } from "./database/database.module.js";
 import { HealthModule } from "./health/health.module.js";
 import { AnalyticsModule } from "./modules/analytics/analytics.module.js";
+import { ChecksModule } from "./modules/checks/checks.module.js";
+import { InsightsModule } from "./modules/insights/insights.module.js";
 import { GovernanceModule } from "./modules/governance/governance.module.js";
 import { MonitoringModule } from "./modules/monitoring/monitoring.module.js";
 import { QueueModule } from "./queue/queue.module.js";
@@ -55,6 +57,8 @@ export class AppModule {
         AuditModule,
         SystemModule,
         AuthModule.register(config),
+        ChecksModule,
+        InsightsModule,
         GovernanceModule,
         MonitoringModule,
         AnalyticsModule,
