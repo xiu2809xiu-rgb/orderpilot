@@ -423,7 +423,10 @@
                               "aiUsage.read",
                               "documents.read",
                               "documents.upload",
-                              "orders.read"
+                              "orders.read",
+                              "tracker.read",
+                              "exceptions.read",
+                              "insights.read"
                             ]
                           }
                         },
@@ -514,7 +517,10 @@
                               "aiUsage.read",
                               "documents.read",
                               "documents.upload",
-                              "orders.read"
+                              "orders.read",
+                              "tracker.read",
+                              "exceptions.read",
+                              "insights.read"
                             ]
                           }
                         },
@@ -640,7 +646,10 @@
                               "aiUsage.read",
                               "documents.read",
                               "documents.upload",
-                              "orders.read"
+                              "orders.read",
+                              "tracker.read",
+                              "exceptions.read",
+                              "insights.read"
                             ]
                           }
                         },
@@ -759,7 +768,10 @@
                               "aiUsage.read",
                               "documents.read",
                               "documents.upload",
-                              "orders.read"
+                              "orders.read",
+                              "tracker.read",
+                              "exceptions.read",
+                              "insights.read"
                             ]
                           }
                         },
@@ -785,6 +797,822 @@
         },
         "summary": "Sign in as one of the nine roles. Present only when DEMO_MODE is on",
         "tags": ["Auth"]
+      }
+    },
+    "/api/v1/tracker/orders": {
+      "get": {
+        "operationId": "Tracker_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 25,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 100
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["orderNo", "customerName", "orderDate", "shipmentDate"]
+            }
+          },
+          {
+            "name": "direction",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["asc", "desc"]
+            }
+          },
+          {
+            "name": "overdue",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["true", "false"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "orderNo": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "externalDocumentNo": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "customerNo": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "customerName": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "status": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "label": {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            },
+                            "required": ["code", "label"],
+                            "additionalProperties": false
+                          },
+                          "ownerRole": {
+                            "type": "string",
+                            "enum": [
+                              "SYSTEM_ADMIN",
+                              "PRODUCT_MANAGER",
+                              "APPROVER",
+                              "SUPPORT",
+                              "WAREHOUSE",
+                              "FINANCE",
+                              "LOGISTICS",
+                              "MANAGEMENT",
+                              "AUDITOR"
+                            ]
+                          },
+                          "overdue": {
+                            "type": "object",
+                            "properties": {
+                              "overdue": {
+                                "type": "boolean"
+                              },
+                              "daysOverdue": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              "reason": {
+                                "nullable": true,
+                                "type": "string"
+                              }
+                            },
+                            "required": ["overdue", "daysOverdue", "reason"],
+                            "additionalProperties": false
+                          },
+                          "openExceptions": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "shipmentDate": {
+                            "nullable": true,
+                            "type": "string",
+                            "format": "date",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                          },
+                          "orderDate": {
+                            "type": "string",
+                            "format": "date",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                          }
+                        },
+                        "required": [
+                          "orderNo",
+                          "externalDocumentNo",
+                          "customerNo",
+                          "customerName",
+                          "status",
+                          "ownerRole",
+                          "overdue",
+                          "openExceptions",
+                          "shipmentDate",
+                          "orderDate"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        "pageSize": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 200
+                        },
+                        "total": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "mock": {
+                          "type": "boolean",
+                          "enum": [true]
+                        }
+                      },
+                      "required": ["page", "pageSize", "total", "mock"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "The order tracker: status, owner and overdue flags, a page at a time. Mock data",
+        "tags": ["Tracker"]
+      }
+    },
+    "/api/v1/tracker/orders/{orderNo}": {
+      "get": {
+        "operationId": "Tracker_timeline",
+        "parameters": [
+          {
+            "name": "orderNo",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "orderNo": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "externalDocumentNo": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "customerNo": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "customerName": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "status": {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "label": {
+                              "type": "string",
+                              "minLength": 1
+                            }
+                          },
+                          "required": ["code", "label"],
+                          "additionalProperties": false
+                        },
+                        "ownerRole": {
+                          "type": "string",
+                          "enum": [
+                            "SYSTEM_ADMIN",
+                            "PRODUCT_MANAGER",
+                            "APPROVER",
+                            "SUPPORT",
+                            "WAREHOUSE",
+                            "FINANCE",
+                            "LOGISTICS",
+                            "MANAGEMENT",
+                            "AUDITOR"
+                          ]
+                        },
+                        "overdue": {
+                          "type": "object",
+                          "properties": {
+                            "overdue": {
+                              "type": "boolean"
+                            },
+                            "daysOverdue": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 9007199254740991
+                            },
+                            "reason": {
+                              "nullable": true,
+                              "type": "string"
+                            }
+                          },
+                          "required": ["overdue", "daysOverdue", "reason"],
+                          "additionalProperties": false
+                        },
+                        "steps": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              "actor": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "title": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "effect": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "current": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "at",
+                              "actor",
+                              "title",
+                              "effect",
+                              "current"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "checks": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "ruleId": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "ruleLabel": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "orderNo": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "outcome": {
+                                "type": "string",
+                                "enum": ["pass", "fail"]
+                              },
+                              "expected": {
+                                "type": "string"
+                              },
+                              "actual": {
+                                "type": "string"
+                              },
+                              "tolerance": {
+                                "type": "object",
+                                "properties": {
+                                  "label": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "value": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  }
+                                },
+                                "required": ["label", "value"],
+                                "additionalProperties": false
+                              },
+                              "evidence": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "documentId": {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    "documentType": {
+                                      "type": "string",
+                                      "enum": [
+                                        "CUSTOMER_PO",
+                                        "PROFORMA_INVOICE",
+                                        "VENDOR_PI",
+                                        "SALES_INVOICE",
+                                        "PACKING_LIST",
+                                        "AWB",
+                                        "BILL_OF_LADING",
+                                        "IMPORT_PERMIT",
+                                        "PAYMENT_ADVICE",
+                                        "OTHER"
+                                      ]
+                                    },
+                                    "location": {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    "value": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "documentId",
+                                    "documentType",
+                                    "location",
+                                    "value"
+                                  ],
+                                  "additionalProperties": false
+                                }
+                              },
+                              "checkedAt": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "ruleId",
+                              "ruleLabel",
+                              "orderNo",
+                              "outcome",
+                              "expected",
+                              "actual",
+                              "tolerance",
+                              "evidence",
+                              "checkedAt"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "matches": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "kind": {
+                                "type": "string",
+                                "enum": ["customer", "item"]
+                              },
+                              "printedNo": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "printedName": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "matchedNo": {
+                                "nullable": true,
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "matchedName": {
+                                "nullable": true,
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "possibleMatches": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "no": {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    "name": {
+                                      "type": "string",
+                                      "minLength": 1
+                                    }
+                                  },
+                                  "required": ["no", "name"],
+                                  "additionalProperties": false
+                                }
+                              }
+                            },
+                            "required": [
+                              "kind",
+                              "printedNo",
+                              "printedName",
+                              "matchedNo",
+                              "matchedName",
+                              "possibleMatches"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "orderNo",
+                        "externalDocumentNo",
+                        "customerNo",
+                        "customerName",
+                        "status",
+                        "ownerRole",
+                        "overdue",
+                        "steps",
+                        "checks",
+                        "matches"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "mock": {
+                          "type": "boolean",
+                          "enum": [true]
+                        }
+                      },
+                      "required": ["mock"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "One order's timeline: each step and its effect, check results and master-data matches. Mock data",
+        "tags": ["Tracker"]
+      }
+    },
+    "/api/v1/exceptions": {
+      "get": {
+        "operationId": "Exceptions_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 25,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "orderNo": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "customerNo": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "customerName": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "ruleId": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "ruleLabel": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "summary": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "expected": {
+                            "type": "string"
+                          },
+                          "actual": {
+                            "type": "string"
+                          },
+                          "difference": {
+                            "type": "string"
+                          },
+                          "tolerance": {
+                            "type": "object",
+                            "properties": {
+                              "label": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "value": {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            },
+                            "required": ["label", "value"],
+                            "additionalProperties": false
+                          },
+                          "fixBy": {
+                            "type": "string",
+                            "enum": [
+                              "SYSTEM_ADMIN",
+                              "PRODUCT_MANAGER",
+                              "APPROVER",
+                              "SUPPORT",
+                              "WAREHOUSE",
+                              "FINANCE",
+                              "LOGISTICS",
+                              "MANAGEMENT",
+                              "AUDITOR"
+                            ]
+                          },
+                          "state": {
+                            "type": "string",
+                            "enum": ["OPEN", "RESOLVED"]
+                          },
+                          "openedAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "orderNo",
+                          "customerNo",
+                          "customerName",
+                          "ruleId",
+                          "ruleLabel",
+                          "summary",
+                          "expected",
+                          "actual",
+                          "difference",
+                          "tolerance",
+                          "fixBy",
+                          "state",
+                          "openedAt"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        "pageSize": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 200
+                        },
+                        "total": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "mock": {
+                          "type": "boolean",
+                          "enum": [true]
+                        }
+                      },
+                      "required": ["page", "pageSize", "total", "mock"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "The exceptions queue, newest first, a page at a time. Mock data",
+        "tags": ["Exceptions"]
+      }
+    },
+    "/api/v1/insights/kpis": {
+      "get": {
+        "operationId": "Insights_kpis",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "labEstimate": {
+                          "type": "boolean",
+                          "enum": [true]
+                        },
+                        "note": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "measures": {
+                          "minItems": 5,
+                          "maxItems": 5,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "enum": [
+                                  "processingTime",
+                                  "manualTouches",
+                                  "dataEntryErrors",
+                                  "approvalTurnaround",
+                                  "overdueOrders"
+                                ]
+                              },
+                              "label": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "unit": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "manual": {
+                                "type": "number"
+                              },
+                              "withOrderPilot": {
+                                "type": "number"
+                              },
+                              "lowerIsBetter": {
+                                "type": "boolean"
+                              },
+                              "definition": {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "label",
+                              "unit",
+                              "manual",
+                              "withOrderPilot",
+                              "lowerIsBetter",
+                              "definition"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": ["labEstimate", "note", "measures"],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "mock": {
+                          "type": "boolean",
+                          "enum": [true]
+                        }
+                      },
+                      "required": ["mock"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Spectra's five measures, as mock lab estimates",
+        "tags": ["Insights"]
       }
     },
     "/api/v1/users": {

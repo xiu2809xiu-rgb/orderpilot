@@ -19,4 +19,7 @@ export const AuthLogin200DataPermissionsItem = {
   documentsread: 'documents.read',
   documentsupload: 'documents.upload',
   ordersread: 'orders.read',
+  trackerread: 'tracker.read',
+  exceptionsread: 'exceptions.read',
+  insightsread: 'insights.read',
 } as const;
