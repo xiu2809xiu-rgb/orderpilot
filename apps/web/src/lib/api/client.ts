@@ -8,7 +8,7 @@ import {
   type ErrorCode,
   type Session,
 } from "@orderpilot/shared";
-import type { z } from "zod";
+import { z } from "zod";
 import { ApiError, ContractError, NetworkError } from "./errors";
 import { readCookie as readDocumentCookie } from "./cookies";
 
@@ -19,6 +19,10 @@ export interface RouteLike<
 > {
   method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   path: string;
+  /** True when `path` is already the full URL (a generated hook has it). */
+  absolute?: boolean;
+  /** Cancels the call (TanStack Query passes one when a query is dropped). */
+  signal?: AbortSignal;
   csrf: boolean;
   request: Req;
   response: Res;
@@ -120,6 +124,33 @@ export class ApiClient {
     }
   }
 
+  /**
+   * A call by URL, for generated hooks (src/lib/api/mutator.ts). It takes the
+   * same road as `call`: CSRF, refresh, request id, typed errors. The answer
+   * is typed by the OpenAPI document and is not parsed again.
+   */
+  request<T>(options: {
+    method: RouteLike<z.ZodType, z.ZodType>["method"];
+    url: string;
+    body?: unknown;
+    signal?: AbortSignal;
+  }): Promise<T> {
+    const route = {
+      method: options.method,
+      path: options.url,
+      absolute: true,
+      signal: options.signal,
+      csrf: options.method !== "GET",
+      request: options.body === undefined ? null : z.unknown(),
+      response: z.unknown(),
+    };
+    return (
+      options.body === undefined
+        ? this.call(route)
+        : this.call(route, options.body)
+    ) as Promise<T>;
+  }
+
   /** Refreshes the session. Callers at the same time share one request. */
   refresh(): Promise<boolean> {
     this.#refreshing ??= this.#send(authRoutes.refresh, undefined)
@@ -180,13 +211,19 @@ export class ApiClient {
 
     let response: Response;
     try {
-      response = await this.#fetch(apiPath(route.path), {
-        method: route.method,
-        headers,
-        body: payload,
-        credentials: "same-origin",
-        signal: AbortSignal.timeout(this.#options.timeoutMs ?? 15_000),
-      });
+      response = await this.#fetch(
+        route.absolute ? route.path : apiPath(route.path),
+        {
+          method: route.method,
+          headers,
+          body: payload,
+          credentials: "same-origin",
+          signal: AbortSignal.any([
+            AbortSignal.timeout(this.#options.timeoutMs ?? 15_000),
+            ...(route.signal ? [route.signal] : []),
+          ]),
+        },
+      );
     } catch (cause) {
       throw new NetworkError("The API did not answer.", requestId, { cause });
     }

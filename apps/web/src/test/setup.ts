@@ -1,18 +1,27 @@
 import "@testing-library/jest-dom/vitest";
 import { cleanup, configure } from "@testing-library/react";
-import { afterEach, beforeAll, vi } from "vitest";
+import { afterAll, afterEach, beforeAll, vi } from "vitest";
 import i18n, { i18nReady } from "@/i18n";
+import { server } from "./server";
 
 // Page tests time out under the full parallel run, so wait longer for async UI.
 configure({ asyncUtilTimeout: 5_000 });
 
+// Tests that name no handler keep their own fetch stubs: bypass lets anything
+// unhandled through, and a stub replaces the patched fetch anyway.
 beforeAll(async () => {
+  server.listen({ onUnhandledRequest: "bypass" });
   await i18nReady;
   // The common components read this namespace; load it so tests render at once.
   await i18n.loadNamespaces(["components", "gallery"]);
 });
 
+afterAll(() => {
+  server.close();
+});
+
 afterEach(() => {
+  server.resetHandlers();
   cleanup();
   vi.unstubAllGlobals();
 });

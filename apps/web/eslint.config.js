@@ -1,7 +1,7 @@
 // The shared OrderPilot config, plus browser globals for the files that run in
 // the browser. The root config is not read for files in this folder.
 import { orderpilot } from "@orderpilot/eslint-config";
-import { defineConfig } from "eslint/config";
+import { defineConfig, globalIgnores } from "eslint/config";
 
 const browser = {
   window: "readonly",
@@ -10,6 +10,9 @@ const browser = {
 };
 
 export default defineConfig(
+  // Written by orval (ADR 0019) and compared byte for byte by pnpm api:check.
+  // This folder is the only path the checks skip.
+  globalIgnores(["src/lib/api/generated/"]),
   orderpilot({ tsconfigRootDir: import.meta.dirname }),
   {
     name: "orderpilot-web/browser-scripts",

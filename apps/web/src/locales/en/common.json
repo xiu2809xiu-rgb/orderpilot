@@ -154,6 +154,11 @@
     "email": "Email",
     "role": "Role",
     "access": "Your permissions",
-    "accessNone": "No permissions are granted to this role yet."
+    "accessNone": "No permissions are granted to this role yet.",
+    "checks": "Service checks",
+    "checksHint": "The readiness checks the API runs before it takes traffic.",
+    "checksLoading": "Loading the checks.",
+    "checksFailed": "The checks could not be loaded. Quote this reference to support:",
+    "checksNone": "No checks are registered yet."
   }
 }

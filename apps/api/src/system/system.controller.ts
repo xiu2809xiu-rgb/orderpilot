@@ -1,7 +1,7 @@
 import { Controller, Get, Inject, Query } from "@nestjs/common";
 import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { pageQuerySchema, type PageQuery } from "@orderpilot/shared";
-import { openApiSchema } from "../common/openapi.js";
+import { openApiQuery, openApiSchema } from "../common/openapi.js";
 import { ZodValidationPipe } from "../common/zod-validation.pipe.js";
 import { checkListResponseSchema } from "./system.schemas.js";
 import { SystemService } from "./system.service.js";
@@ -19,6 +19,7 @@ export class SystemController {
   @ApiOperation({
     summary: "The readiness checks that are registered, a page at a time",
   })
+  @openApiQuery(pageQuerySchema)
   @ApiOkResponse({ schema: openApiSchema(checkListResponseSchema) })
   checks(@Query(new ZodValidationPipe(pageQuerySchema)) query: PageQuery) {
     const page = this.system.listChecks(query);

@@ -1,4 +1,4 @@
-import { NotFoundException, VersioningType } from "@nestjs/common";
+import { NotFoundException } from "@nestjs/common";
 import type { NestExpressApplication } from "@nestjs/platform-express";
 import type { Request, Response } from "express";
 import type { DestinationStream } from "pino";
@@ -6,16 +6,12 @@ import {
   renderError,
   AllExceptionsFilter,
 } from "../common/all-exceptions.filter.js";
-import {
-  DEFAULT_VERSION,
-  GLOBAL_PREFIX,
-  PROBE_PATHS,
-} from "../common/api-paths.js";
 import { requestIdOf } from "../common/request-id.js";
 import type { AppConfig } from "../config/app-config.js";
 import { BuildInfoRepository } from "../health/build-info.repository.js";
 import { AppLogger } from "../logging/app-logger.js";
 import { createRootLogger, requestLogging } from "../logging/logger.config.js";
+import { applyRouting } from "./routing.js";
 import { applySecurity } from "./security.js";
 import { setupSwagger } from "./swagger.js";
 
@@ -41,11 +37,7 @@ export async function configureApp(
   app.use(...requestLogging(rootLogger));
   applySecurity(app, config);
 
-  app.setGlobalPrefix(GLOBAL_PREFIX, { exclude: [...PROBE_PATHS] });
-  app.enableVersioning({
-    type: VersioningType.URI,
-    defaultVersion: DEFAULT_VERSION,
-  });
+  applyRouting(app);
   app.useGlobalFilters(new AllExceptionsFilter());
   if (config.http.swaggerEnabled) {
     setupSwagger(app, app.get(BuildInfoRepository).read().version);
