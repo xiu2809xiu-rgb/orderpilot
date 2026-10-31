@@ -124,9 +124,9 @@ Not legal advice: Spectra and its advisers decide what applies. The prototype ru
 
 ### Project
 
-- Four Year-2 students, one semester: proposal in Week 5, mock interview in Week 7, technical review in Week 13, final in Week 18.
+- Four students, one semester: proposal in Week 5, mock interview in Week 7, technical review in Week 13, final in Week 18.
 - Most of the marks (85%) are individual, so the work is split into four areas with clear owners ([module ownership](team/module-ownership.md)).
-- Synthetic data only, labelled "Synthetic demo data". Every external system is a mock, labelled "Mock", until Spectra's samples arrive. Client samples never enter Git.
+- Synthetic data only, labelled "Synthetic demo data". Every external system is a mock, labelled "Mock". Client samples never enter Git.
 - No access to Spectra's systems is assumed. No client branding without permission.
 - The mock AI provider is the default, so a demo needs no paid key, and we measure what the AI costs for each document.
 
