@@ -211,9 +211,9 @@ If something destructive or irreversible seems necessary, ask Richie first.
    | An AI value and its score                   | `ConfidenceBadge` (says "Requires approval" until a person approves)                                    |
    | A link to a record's audit trail            | `AuditLink` (hides itself without `audit.read`)                                                         |
    | A time, a copyable id                       | `RelativeTime`, `CopyButton`                                                                            |
-   | The change history under a detail page      | `OperationLog` (rows as props)                                                                          |
+   | The change history under a detail page      | `OperationLog` (rows as props), or `EntityOperationLog` to fill it from the audit trail (F-2)           |
 
-   Their text lives in the `components` namespace; your own goes in your area's namespace. If one is missing something, extend it there with a test. Do not copy it into your area.
+   Their text lives in the `components` namespace; your own goes in your area's namespace. If one is missing something, extend it there with a test. Do not copy it into your area. To show the operation log under a record, write its audit events with the record's type and id, then add `<EntityOperationLog entityType="Order" entityId={order.id} />` from `@/features/audit/EntityOperationLog` (steps in [area 4's guide](docs/team/area-4-controls-security-and-monitoring.md#how-another-area-feeds-the-operation-log)).
 
 2. **Choose a free source.** While the repository is public, use only:
    - shadcn/ui;
