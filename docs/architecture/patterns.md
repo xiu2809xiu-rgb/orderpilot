@@ -146,3 +146,14 @@ export class UsersController {
 The permission check is `PermissionPolicy.decide(request)`. The default, `MatrixPermissionPolicy`, looks the role up in the `RolePermission` table. A richer rule (an approval limit, segregation of duties, data scope) replaces it by providing another class under the `PermissionPolicy` token; the request it receives holds the user, the permission, the method, the path and the route parameters. `test/http/auth-guards.test.ts` swaps one in as the example.
 
 A service that changes something on behalf of a user takes the `AuthContext` and writes its audit event in the same transaction (`UsersService.disable` is the example), as in the previous section.
+
+## Governance: the matrix, masking and the rule for AI
+
+`apps/api/src/modules/governance/` follows the layers. The controllers (`matrix`, `policy`) validate and call a service; the services (`MatrixService`, `PolicyService`) write the change and its audit event in one transaction; `RolePermissionRepository` and `DataScopeRepository` are the only code that touches the tables; `domain/` holds the rules as plain functions with their own tests.
+
+| Pattern              | Where                                              | Why                                                                                             | Story |
+| -------------------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ----- |
+| Domain rules, no I/O | `governance/domain/matrix-rules.ts`, `masking.ts`  | The locked cells, the copy plan and masking are tested without a database or HTTP               | F-1   |
+| Policy as a function | `domain/ai-destination-policy.ts`                  | One place answers what data may go to which provider; the gateway calls it, the owner widens it | F-1   |
+| Mask on the server   | `domain/masking.ts`, `PolicyService.maskingSample` | A hidden value is null in the response, so it cannot be read from the page                      | F-1   |
+| Shared contract      | `packages/shared/src/governance`                   | The web app and the API read one set of schemas; the owner's policy returns `PolicyDecision`    | F-1   |

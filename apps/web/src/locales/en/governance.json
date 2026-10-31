@@ -44,7 +44,7 @@
     "copy": {
       "open": "Copy a role",
       "title": "Copy a role's permissions",
-      "description": "Replaces the permissions and the data scope of the target with those of the source. The system admin keeps the rows that cannot be changed.",
+      "description": "Makes the target hold exactly what the source holds, with the same data scope. A copy that would break a locked cell is refused, so copying onto the system admin only works from a role that never approves, posts or pays.",
       "from": "Copy from",
       "to": "Copy to",
       "submit": "Copy",
