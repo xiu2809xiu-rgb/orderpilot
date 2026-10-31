@@ -54,6 +54,35 @@ describe(".env.example", () => {
     expect(values?.S3_ENDPOINT).toBe("http://127.0.0.1:9100");
   });
 
+  it("shows the nine role buttons on a local run, and says production refuses them", () => {
+    const values = expanded();
+    expect(values.DEMO_MODE).toBe("true");
+    expect(values.APP_ENV).toBe("local");
+    expect(example).toMatch(/APP_ENV=production refuses it/);
+    // The example turns it on; the API's own default, with no variable, is off.
+    expect(envSchema.shape.DEMO_MODE.parse(undefined)).toBe(false);
+    // And production does refuse it.
+    expect(() =>
+      AppConfig.fromEnv({
+        ...values,
+        APP_ENV: "production",
+        COOKIE_SECURE: "true",
+        JWT_SECRET: "x".repeat(48),
+        CORS_ORIGINS: "https://orderpilot.example.test",
+      }),
+    ).toThrow(/DEMO_MODE/);
+  });
+
+  it("lets the web port move the allowed origin", () => {
+    const raw = parse(example);
+    expect(raw.CORS_ORIGINS).toContain("${WEB_PORT}");
+    const values = expand({
+      processEnv: {},
+      parsed: { ...raw, WEB_PORT: "5900" },
+    }).parsed;
+    expect(values?.CORS_ORIGINS).toBe("http://localhost:5900");
+  });
+
   it("gives the tests their own database, Redis database and bucket", () => {
     const values = expanded();
     expect(values.TEST_POSTGRES_DB).not.toBe(values.POSTGRES_DB);

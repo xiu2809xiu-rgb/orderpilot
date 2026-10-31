@@ -395,7 +395,8 @@
       "acceptance": [
         "Playwright with axe, plus helpers for the demo session and the layout.",
         "A smoke test that signs in as each role, opens the shell and signs out, with WCAG 2.2 AA checked on every page.",
-        "The CI job \"End-to-end smoke\" runs it against the compose stack, uploads the report and shows the service logs on failure. It becomes required."
+        "The CI job \"End-to-end smoke\" runs it against the compose stack, uploads the report and shows the service logs on failure. It becomes required.",
+        "Left out of the Getting started fix (issue 102), which proved the same walk by hand: the nine-role sign-in walk as a repeatable test, a CI job that runs `pnpm local:setup` on a clean runner, and a run of Getting started on macOS (written, not yet tested there)."
       ]
     },
     {

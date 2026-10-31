@@ -7,17 +7,17 @@
   "type": "module",
   "scripts": {
     "dev": "node scripts/dev.mjs",
-    "build": "tsc -p tsconfig.build.json",
+    "build": "node scripts/prepare.mjs && tsc -p tsconfig.build.json",
     "start": "node dist/main.js",
     "openapi": "node scripts/export-openapi.mjs",
-    "typecheck": "tsc -p tsconfig.json",
-    "test": "vitest run",
-    "test:unit": "vitest run --project unit",
+    "typecheck": "node scripts/prepare.mjs client && tsc -p tsconfig.json",
+    "test": "node scripts/prepare.mjs client && vitest run",
+    "test:unit": "node scripts/prepare.mjs client && vitest run --project unit",
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
     "db:migrate:dev": "prisma migrate dev",
-    "db:seed": "tsc -p tsconfig.build.json && node dist/database/seed/seed.js"
+    "db:seed": "node scripts/prepare.mjs && tsc -p tsconfig.build.json && node dist/database/seed/seed.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.1156.0",

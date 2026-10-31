@@ -96,12 +96,28 @@ test("the sidebar reaches every page", () => {
   }
 });
 
-test("Getting started says how to run the API and what is not there yet", () => {
+test("Getting started gives the steps in order and says macOS is untested", () => {
   const text = wikiPage("Getting-started.md");
-  assert.ok(text.includes("cp .env.example .env"));
-  assert.ok(text.includes("pnpm --filter @orderpilot/api dev"));
-  assert.ok(text.includes("local PostgreSQL, Redis and MinIO"));
-  assert.ok(text.includes("P-10"));
+  const steps = [
+    "## Prerequisites",
+    "git clone",
+    "git config user.email",
+    "pnpm install",
+    "pnpm local:setup",
+    "pnpm dev",
+    "DEMO_MODE=true",
+    "## Change a port",
+    "## After a pull",
+    "## Troubleshooting",
+  ];
+  let at = -1;
+  for (const step of steps) {
+    const found = text.indexOf(step);
+    assert.ok(found > at, `${step} comes after the step before it`);
+    at = found;
+  }
+  assert.ok(/macOS[^.]*not tested|nobody has run them there/.test(text));
+  assert.ok(text.includes("Copy-Item .env.example .env"));
 });
 
 test("Team and areas names every area label", () => {
