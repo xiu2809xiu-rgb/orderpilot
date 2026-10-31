@@ -9,6 +9,7 @@ import type { Role } from "./roles.js";
 export const PERMISSIONS = [
   "users.read",
   "users.manage",
+  "roles.read",
   "roles.manage",
   "settings.manage",
   "audit.read",
@@ -16,6 +17,11 @@ export const PERMISSIONS = [
   "documents.read",
   "documents.upload",
   "orders.read",
+  // Acting on money and approvals. The system admin role never holds these
+  // (see governance/matrix.ts). Which other roles hold them is area 4's call.
+  "approvals.decide",
+  "payments.confirm",
+  "payments.post",
 ] as const;
 
 export const permissionSchema = z.enum(PERMISSIONS);
@@ -31,17 +37,23 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
   SYSTEM_ADMIN: [
     "users.read",
     "users.manage",
+    "roles.read",
     "roles.manage",
     "settings.manage",
     "audit.read",
     "aiUsage.read",
   ],
   PRODUCT_MANAGER: ["orders.read", "documents.read"],
-  APPROVER: ["orders.read", "documents.read"],
+  APPROVER: ["orders.read", "documents.read", "approvals.decide"],
   SUPPORT: ["orders.read", "documents.read", "documents.upload"],
   WAREHOUSE: ["orders.read", "documents.read"],
-  FINANCE: ["orders.read", "documents.read"],
+  FINANCE: [
+    "orders.read",
+    "documents.read",
+    "payments.confirm",
+    "payments.post",
+  ],
   LOGISTICS: ["orders.read", "documents.read"],
   MANAGEMENT: ["orders.read", "documents.read", "aiUsage.read"],
-  AUDITOR: ["orders.read", "audit.read", "aiUsage.read"],
+  AUDITOR: ["orders.read", "audit.read", "aiUsage.read", "roles.read"],
 };
