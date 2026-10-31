@@ -12,6 +12,8 @@
   },
   "scripts": {
     "prepare": "node scripts/install-hooks.mjs",
+    "local:setup": "node scripts/local-setup.mjs",
+    "dev": "pnpm --parallel --filter @orderpilot/api --filter @orderpilot/web dev",
     "lint": "eslint . --max-warnings 0",
     "typecheck": "tsc -p tsconfig.json && pnpm -r --if-present typecheck",
     "test": "node --test \"scripts/**/*.test.mjs\" && pnpm -r --if-present test",
