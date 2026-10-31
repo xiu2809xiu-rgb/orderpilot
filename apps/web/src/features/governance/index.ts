@@ -8,7 +8,7 @@ export default defineFeature({
   path: "governance",
   group: "control",
   icon: ShieldCheck,
-  permission: "roles.manage",
-  cues: [{ id: "roles", roles: ["SYSTEM_ADMIN"] }],
+  permission: "roles.read",
+  cues: [{ id: "roles", roles: ["SYSTEM_ADMIN", "AUDITOR"] }],
   Page: lazy(() => import("./GovernancePage")),
 });
