@@ -6,6 +6,7 @@ import {
   LoadingState,
   PermissionDenied,
   SectionCard,
+  toast,
   StatusBadge,
 } from "@/components/common";
 import { Button } from "@/components/ui/button";
@@ -111,10 +112,33 @@ export function UsersTab() {
                           { name: user.displayName },
                         )}
                         onClick={() => {
-                          change.mutate({
-                            id: user.id,
-                            disable: !user.disabled,
-                          });
+                          const disable = !user.disabled;
+                          change.mutate(
+                            { id: user.id, disable },
+                            {
+                              onSuccess: () =>
+                                toast.done(
+                                  t(
+                                    disable
+                                      ? "users.toast.disabled"
+                                      : "users.toast.enabled",
+                                    { name: user.displayName },
+                                  ),
+                                  {
+                                    undo: async () => {
+                                      await (disable
+                                        ? usersEnable(user.id)
+                                        : usersDisable(user.id));
+                                      await queryClient.invalidateQueries({
+                                        queryKey: getUsersListQueryKey(),
+                                      });
+                                    },
+                                  },
+                                ),
+                              onError: () =>
+                                toast.failed(t("users.toast.failed")),
+                            },
+                          );
                         }}
                       >
                         {user.disabled ? t("users.enable") : t("users.disable")}
