@@ -175,39 +175,40 @@ Spectra's own five measures sit alongside these: order-processing time, manual t
 
 Each row says whether it exists today or which story brings it. Everything marked planned is the plan, not a fact. The story that delivers a row changes it to Today, and pins the exact versions when it installs them.
 
-| Concern                 | Choice                                                                                                                                                       | Status                               |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------ |
-| Runtime                 | Node 24.22.0, set in `.node-version`                                                                                                                         | Today                                |
-| Workspace               | pnpm workspace (`apps/*`, `services/*`, `packages/*`) with root scripts                                                                                      | Planned: P-5                         |
-| Language                | TypeScript, strict, ESM, from `packages/tsconfig`                                                                                                            | Planned: P-5                         |
-| Lint and format         | ESLint flat config from `packages/eslint-config` (type-aware, with jsx-a11y, failing on any warning), Prettier and commitlint (config-conventional)          | Planned: P-5                         |
-| Git hooks               | Commit message: commitlint. Pre-commit: licence-key guard, samples guard, secretlint, em-dash check and lint-staged. Pre-push: samples guard on every commit | Planned: P-5                         |
-| Dependency updates      | Dependabot for npm and Actions, weekly on Monday 06:00 Singapore time, a 7-day cooldown, grouped                                                             | Planned: P-5                         |
-| CI and scans            | GitHub Actions: `ci.yml` (verify) and `security.yml` (Semgrep, gitleaks, OSV), then Trivy                                                                    | Planned: P-6, P-13                   |
-| Shared contracts        | `packages/shared`: zod schemas and types                                                                                                                     | Planned: P-7                         |
-| API                     | NestJS in layers, with Swagger "OrderPilot API" at `/api/docs`                                                                                               | Planned: P-8                         |
-| Logging                 | pino with correlation ids                                                                                                                                    | Planned: P-8                         |
-| Database                | Prisma with PostgreSQL                                                                                                                                       | Planned: P-9                         |
-| Queues                  | Redis with BullMQ                                                                                                                                            | Planned: P-9, worker process in P-15 |
-| Document storage        | MinIO behind a storage service that uses the S3 API, so AWS S3 drops in later                                                                                | Planned: P-9                         |
-| Sessions                | argon2, a JWT access token in a cookie, refresh-token rotation and CSRF protection                                                                           | Planned: P-10                        |
-| Web                     | Vite, React 19, TypeScript, Tailwind v4 and shadcn/ui                                                                                                        | Planned: P-11                        |
-| Web plumbing            | React Router, an `ApiClient` class, TanStack Query and a minimal Zustand store                                                                               | Planned: P-11                        |
-| Text                    | react-i18next: English, with no hard-coded strings                                                                                                           | Planned: P-11                        |
-| Forms                   | React Hook Form with zod                                                                                                                                     | Planned: P-11                        |
-| Icons and type          | Lucide only, and the Geist font with tabular numbers                                                                                                         | Planned: P-11                        |
-| Containers              | Docker Compose under project name `orderpilot`: PostgreSQL, Redis and MinIO, then `api`, `worker` and `web`                                                  | Planned: P-9, P-13                   |
-| Tests                   | Vitest, Testing Library, and Playwright with axe                                                                                                             | Planned: P-8, P-11, P-14             |
-| Events and live updates | A typed domain event bus, a transactional outbox, idempotency keys and SSE                                                                                   | Planned: P-15                        |
-| Diagrams                | Mermaid sources rendered to SVG                                                                                                                              | Planned: P-16                        |
-| AI                      | `LlmGateway` with three providers: mock (the default), OpenAI-compatible, and optional Bedrock                                                               | Planned: P-17                        |
-| Document processing     | pdfjs-dist for PDF text, plus page images for the vision models                                                                                              | Planned: P-18                        |
-| Mock ERP                | `services/mock-navision`: an OData-style API, labelled "Mock" wherever it's used                                                                             | Planned: P-19                        |
-| Integration             | A `SystemConnector` framework and the Navision adapter                                                                                                       | Planned: P-20                        |
-| 3D                      | Blender scripts, glTF Transform, and React Three Fiber with drei and postprocessing                                                                          | Planned: P-23                        |
-| Deployment              | Amazon Lightsail in Singapore, Caddy for HTTPS, images on GHCR, and OWASP ZAP against the live URL                                                           | Planned: P-24                        |
-| Slides                  | Marp                                                                                                                                                         | Planned: P-25                        |
-| Monitoring              | OpenTelemetry for traces and metrics, `/metrics` with prom-client, and an `AnalyticsTracker` class                                                           | Planned: G-1                         |
+| Concern                 | Choice                                                                                                                                                                   | Status                               |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------ |
+| Runtime                 | Node 24.22.0, set in `.node-version`                                                                                                                                     | Today                                |
+| GitHub scripts          | `scripts/github/`: plain Node ESM with no dependencies, calling GitHub through `gh api`, tested with `node --test` ([ADR 0016](docs/adr/0016-github-process-as-code.md)) | Today                                |
+| Workspace               | pnpm workspace (`apps/*`, `services/*`, `packages/*`) with root scripts                                                                                                  | Planned: P-5                         |
+| Language                | TypeScript, strict, ESM, from `packages/tsconfig`                                                                                                                        | Planned: P-5                         |
+| Lint and format         | ESLint flat config from `packages/eslint-config` (type-aware, with jsx-a11y, failing on any warning), Prettier and commitlint (config-conventional)                      | Planned: P-5                         |
+| Git hooks               | Commit message: commitlint. Pre-commit: licence-key guard, samples guard, secretlint, em-dash check and lint-staged. Pre-push: samples guard on every commit             | Planned: P-5                         |
+| Dependency updates      | Dependabot for npm and Actions, weekly on Monday 06:00 Singapore time, a 7-day cooldown, grouped                                                                         | Planned: P-5                         |
+| CI and scans            | GitHub Actions: `ci.yml` (verify) and `security.yml` (Semgrep, gitleaks, OSV), then Trivy                                                                                | Planned: P-6, P-13                   |
+| Shared contracts        | `packages/shared`: zod schemas and types                                                                                                                                 | Planned: P-7                         |
+| API                     | NestJS in layers, with Swagger "OrderPilot API" at `/api/docs`                                                                                                           | Planned: P-8                         |
+| Logging                 | pino with correlation ids                                                                                                                                                | Planned: P-8                         |
+| Database                | Prisma with PostgreSQL                                                                                                                                                   | Planned: P-9                         |
+| Queues                  | Redis with BullMQ                                                                                                                                                        | Planned: P-9, worker process in P-15 |
+| Document storage        | MinIO behind a storage service that uses the S3 API, so AWS S3 drops in later                                                                                            | Planned: P-9                         |
+| Sessions                | argon2, a JWT access token in a cookie, refresh-token rotation and CSRF protection                                                                                       | Planned: P-10                        |
+| Web                     | Vite, React 19, TypeScript, Tailwind v4 and shadcn/ui                                                                                                                    | Planned: P-11                        |
+| Web plumbing            | React Router, an `ApiClient` class, TanStack Query and a minimal Zustand store                                                                                           | Planned: P-11                        |
+| Text                    | react-i18next: English, with no hard-coded strings                                                                                                                       | Planned: P-11                        |
+| Forms                   | React Hook Form with zod                                                                                                                                                 | Planned: P-11                        |
+| Icons and type          | Lucide only, and the Geist font with tabular numbers                                                                                                                     | Planned: P-11                        |
+| Containers              | Docker Compose under project name `orderpilot`: PostgreSQL, Redis and MinIO, then `api`, `worker` and `web`                                                              | Planned: P-9, P-13                   |
+| Tests                   | Vitest, Testing Library, and Playwright with axe                                                                                                                         | Planned: P-8, P-11, P-14             |
+| Events and live updates | A typed domain event bus, a transactional outbox, idempotency keys and SSE                                                                                               | Planned: P-15                        |
+| Diagrams                | Mermaid sources rendered to SVG                                                                                                                                          | Planned: P-16                        |
+| AI                      | `LlmGateway` with three providers: mock (the default), OpenAI-compatible, and optional Bedrock                                                                           | Planned: P-17                        |
+| Document processing     | pdfjs-dist for PDF text, plus page images for the vision models                                                                                                          | Planned: P-18                        |
+| Mock ERP                | `services/mock-navision`: an OData-style API, labelled "Mock" wherever it's used                                                                                         | Planned: P-19                        |
+| Integration             | A `SystemConnector` framework and the Navision adapter                                                                                                                   | Planned: P-20                        |
+| 3D                      | Blender scripts, glTF Transform, and React Three Fiber with drei and postprocessing                                                                                      | Planned: P-23                        |
+| Deployment              | Amazon Lightsail in Singapore, Caddy for HTTPS, images on GHCR, and OWASP ZAP against the live URL                                                                       | Planned: P-24                        |
+| Slides                  | Marp                                                                                                                                                                     | Planned: P-25                        |
+| Monitoring              | OpenTelemetry for traces and metrics, `/metrics` with prom-client, and an `AnalyticsTracker` class                                                                       | Planned: G-1                         |
 
 ## 3. Repository layout
 
@@ -221,13 +222,13 @@ Each row says whether it exists today or which story brings it. Everything marke
 | `packages/shared`              | Shared zod schemas and types: envelopes, error codes, roles, permissions, and the order and event contract              | Planned: P-7       |
 | `packages/synthetic-data`      | The seeded generator and synthetic master data                                                                          | Planned: P-19      |
 | `packages/synthetic-documents` | Generated PDFs with planted mistakes and ground truth                                                                   | Planned: P-21      |
-| `scripts/`                     | Repository checks and build scripts                                                                                     | Planned: P-5, P-16 |
-| `scripts/github/`              | Idempotent scripts for labels, the sprint calendar, the board, the backlog and the wiki                                 | Planned: P-2       |
+| `scripts/`                     | Repository checks and build scripts, beside `scripts/github/`                                                           | Planned: P-5, P-16 |
+| `scripts/github/`              | Idempotent scripts for labels, the sprint calendar, the board, the backlog and the wiki                                 | Today              |
 | `docs/`                        | All documentation: `adr/`, `agile/`, `ai/`, `client/`, `design-thinking/`, `grs/`, `research/`, `team/` and more        | Today, growing     |
 | `samples/`                     | Client samples tried on one machine. Git-ignored except its README. The ignore rule exists; the README arrives with P-5 | Today (rule), P-5  |
 | `assets-src/3d/`               | Parametric Blender scripts                                                                                              | Planned: P-23      |
 | `infra/deploy/`                | The server bootstrap, Caddy, `docker-compose.prod.yml` and backups                                                      | Planned: P-24      |
-| `.github/`                     | Issue forms, the pull request template, `CODEOWNERS`, `labels.json`, `rulesets/main.json` and workflows                 | Planned: P-2, P-6  |
+| `.github/`                     | Issue forms, the pull request template, `CODEOWNERS`, `labels.json`, `rulesets/main.json` and workflows                 | Today, CI in P-6   |
 
 Today's root files are `README.md`, `CONTRIBUTING.md`, `SECURITY.md`, `AGENTS.md`, `CLAUDE.md`, `.claude/settings.json`, `.editorconfig`, `.gitattributes`, `.gitignore` and `.node-version`.
 
@@ -311,6 +312,7 @@ The API is NestJS, in layers (planned: P-8). Controllers call services, and serv
 | Level           | What it covers                                                    | Tool                | Status                                 |
 | --------------- | ----------------------------------------------------------------- | ------------------- | -------------------------------------- |
 | Unit            | Domain logic, at 80% or more                                      | Vitest              | Planned: P-8                           |
+| Scripts         | The pure logic of `scripts/github/`, against a simulated GitHub   | `node --test`       | Today; P-5 adds it to `pnpm test`      |
 | API integration | Every endpoint, with 401, 403 and validation cases                | Vitest              | Planned: P-10, with its harness in P-9 |
 | Component       | Components in each of their states                                | Testing Library     | Planned: P-11                          |
 | Contract        | Connectors against the mock                                       | Vitest              | Planned: P-20                          |
@@ -365,7 +367,7 @@ Planned with P-11:
    - The pull request closes its issue (`Closes #N`) and is merged with a merge commit once every required check is green.
    - The branch is then deleted and the story moves to Done.
 2. **Names:** branches `feat/<area>-…`, `fix/…`, `docs/…`, `chore/…`, `ci/…` or `test/…`. Conventional Commits, small commits. Types: `feat`, `fix`, `docs`, `chore`, `ci`, `test`, `refactor`, `style`, `perf` and `build`.
-3. **The pull request follows the template** (planned: P-2; until then, cover the same points by hand):
+3. **The pull request follows the template:**
    - what and why;
    - the acceptance criteria with evidence;
    - the real results of `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm build`, plus `docker compose up --build` once it exists;
@@ -387,7 +389,7 @@ Planned with P-11:
 
 ### The main branch
 
-- The `Protect main` ruleset blocks deletion and force pushes, and requires a pull request: 0 approvals for now, stale reviews dismissed, review threads resolved, merge commits or squash. Repository admins can bypass it in pull request mode only.
+- The `Protect main` ruleset blocks deletion and force pushes, and requires a pull request: 0 approvals for now, stale reviews dismissed, review threads resolved, merge commits or squash. Repository admins can bypass it in pull request mode only. [`.github/rulesets/main.json`](.github/rulesets/main.json) mirrors it, and `scripts/github/check-ruleset.mjs` says if the two drift apart.
 - It has no required checks yet. P-6, P-13 and P-14 add theirs, and a required check's name stays fixed once it is required.
 - One approving review plus code-owner review is switched on at T-9, only on Richie's yes.
 - Never force push and never commit straight to `main`.

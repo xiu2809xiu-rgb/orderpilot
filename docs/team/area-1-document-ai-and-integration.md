@@ -90,13 +90,13 @@ Be ready to explain, in your own code:
 
 ## Risks
 
-| Risk                                         | What to do                                                                                     |
-| -------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| Extraction accuracy falls short of 95%       | Measure per field and layout; tune mappings and thresholds; compare models                     |
-| Spectra's Navision differs from the standard | Keep Navision behind the connector; update [the data formats](../data-formats.md) from samples |
-| A client document reaches a third-party AI   | The mock is the default; area 4's destination check; samples only on the throwaway stack       |
-| The base is late and teammates wait          | Phase A of prompt 002: everything a teammate needs merges first                                |
-| The platform changes under the other areas   | Small shared pull requests, reviewed by the owners they affect                                 |
+| Risk                                         | What to do                                                                                                        |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Extraction accuracy falls short of 95%       | Measure per field and layout; tune mappings and thresholds; compare models                                        |
+| Spectra's Navision differs from the standard | Keep Navision behind the connector; update [the data formats](../data-formats.md) from samples                    |
+| A client document reaches a third-party AI   | The mock is the default; area 4's destination check; samples only on the throwaway stack                          |
+| The base is late and teammates wait          | Phase A of [prompt 002](../ai/prompts/002-finish-the-base-by-sunday.md): everything a teammate needs merges first |
+| The platform changes under the other areas   | Small shared pull requests, reviewed by the owners they affect                                                    |
 
 ## Module requirements
 

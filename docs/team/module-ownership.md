@@ -17,7 +17,7 @@ Most paths below do not exist yet. They are the planned layout, consistent with 
 | 3. Checks, tracker and insights      | Iok Teck | TBD until T-1 | [Area 3 guide](area-3-checks-tracker-and-insights.md)      |
 | 4. Controls, security and monitoring | Angelyn  | TBD until T-1 | [Area 4 guide](area-4-controls-security-and-monitoring.md) |
 
-T-1 names a backup owner for each area and fills `.github/CODEOWNERS` (planned: P-2 brings it with placeholders) so that every path has at least two owners and nobody waits on their own approval: each area's paths go to its owner, its backup and Richie, and shared files go to Richie and the backups.
+T-1 names a backup owner for each area and fills [`.github/CODEOWNERS`](../../.github/CODEOWNERS) (P-2 brought it with placeholders) so that every path has at least two owners and nobody waits on their own approval: each area's paths go to its owner, its backup and Richie, and shared files go to Richie and the backups.
 
 ## The paths each area owns
 
@@ -87,7 +87,7 @@ A shared file is one that more than one area depends on. Its change goes in a sm
 | `apps/web/src/app/`: the router, the shell, the sidebar and the role home pages                                                                         | Richie        | The owner whose routes or menu entries change                                       |
 | `apps/web/src/components/`: the common components (planned: P-12), design tokens and the common i18n namespace                                          | Richie        | Any owner who asked for the change                                                  |
 | Tooling: root `package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`, `packages/tsconfig`, `packages/eslint-config`, formatter and commit-lint configs | Richie        | Backup owners                                                                       |
-| `.github/`: workflows, issue forms, the pull request template, `CODEOWNERS`, `labels.json`, `rulesets/`                                                 | Richie        | Backup owners                                                                       |
+| `.github/`: workflows, issue forms, the pull request template, [`CODEOWNERS`](../../.github/CODEOWNERS), `labels.json`, `rulesets/`                     | Richie        | Backup owners                                                                       |
 | `docker-compose*.yml`, the Dockerfiles, `.env.example`, `infra/`, `scripts/`                                                                            | Richie        | The owner whose service or variable changes                                         |
 | `CLAUDE.md`, `AGENTS.md`, `README.md`, `CONTRIBUTING.md`, `SECURITY.md`                                                                                 | Richie        | All owners, for a change to a rule                                                  |
 | Shared tables: `docs/BUILD_REPORT.md`, `docs/ai/ai-usage-log.md`, `docs/requirements-traceability.md`, `docs/architecture/patterns.md`                  | Richie        | Each owner adds rows for their own work. On a merge conflict, keep both sides' rows |

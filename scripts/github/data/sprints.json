@@ -1,0 +1,74 @@
+[
+  {
+    "sprint": 1,
+    "goal": "Phase A of prompt 002: everything a teammate needs, merged by Sunday 1 Nov, 23:59 Singapore time. The platform base from P-1 to P-12, the area bases C-1, D-1, F-1, F-2 and G-1, three starter stories each for areas 2, 3 and 4 on the board, and T-1 as soon as Richie gives the usernames."
+  },
+  {
+    "sprint": 2,
+    "goal": "The teammates start on their areas on Monday 2 Nov, with their starter stories: C-2 to C-4, D-2 to D-4 and F-3 to F-5. T-2: the briefing call with Spectra. T-3: the project plan. T-6: design thinking starts. The team agrees the order and event contract together. Phase B on Richie's track, in order: P-13, P-14, P-15, P-16, P-17 to P-21, P-22 if not done, P-23, P-24 and P-25."
+  },
+  {
+    "sprint": 3,
+    "goal": "T-4: the UI prototype across the four areas, for the Week 4 prototype of the sales pilot. T-6: design thinking finishes. T-7: GRS by design starts."
+  },
+  {
+    "sprint": 4,
+    "goal": "Week 5 proposal (25%). T-5: the proposal deck and presentation, tagged `v0.1-proposal` after a feature freeze. T-7: GRS by design finishes."
+  },
+  {
+    "sprint": 5,
+    "goal": "T-8: preparing for the mock interview starts."
+  },
+  {
+    "sprint": 6,
+    "goal": "Week 7 mock job interview (15%, individual): each member explains their own code. T-8: preparing for it finishes."
+  },
+  {
+    "sprint": 7,
+    "goal": "Phase 2 starts (Weeks 8 to 12): the purchase flow, with the bank-detail check. The Should list continues, in order."
+  },
+  {
+    "sprint": 8,
+    "goal": "Phase 2 continues: the purchase flow, with the bank-detail check. The Should list continues, in order."
+  },
+  {
+    "sprint": 9,
+    "goal": "Phase 2 continues: the purchase flow, with the bank-detail check. The Should list continues, in order."
+  },
+  {
+    "sprint": 10,
+    "goal": "Phase 2 continues: the purchase flow, with the bank-detail check. The Should list continues, in order."
+  },
+  {
+    "sprint": 11,
+    "goal": "Phase 2 finishes (Weeks 8 to 12): the purchase flow, with the bank-detail check. The Should list continues, in order."
+  },
+  {
+    "sprint": 12,
+    "goal": "Week 13 technical review (25%), tagged `v0.2-technical-review` after a feature freeze. The Should list is done by this week."
+  },
+  {
+    "sprint": 13,
+    "goal": "Area 4's real dashboards, budgets and alerts start (Weeks 14 to 16)."
+  },
+  {
+    "sprint": 14,
+    "goal": "Area 4's real dashboards, budgets and alerts continue (Weeks 14 to 16)."
+  },
+  {
+    "sprint": 15,
+    "goal": "Area 4's real dashboards, budgets and alerts finish (Weeks 14 to 16)."
+  },
+  {
+    "sprint": 16,
+    "goal": "Get ready for the Week 18 final, with the feature freeze before `v1.0-final`."
+  },
+  {
+    "sprint": 17,
+    "goal": "Week 18 final (35%), with Phase 2 in it, tagged `v1.0-final` after a feature freeze."
+  },
+  {
+    "sprint": 18,
+    "goal": "No assessment this week. Continuous work only, and shut everything down after the module."
+  }
+]

@@ -76,7 +76,7 @@ Explain what the command will do and what it could lose, then wait. An earlier y
 
 3. **Build it.** Write only in your area, in small [Conventional Commits](https://www.conventionalcommits.org/). The story brings its own tests, docs and pieces, as listed in [rule 4 of `CLAUDE.md`](CLAUDE.md#rules-for-every-story).
 4. **Check it.** Run the real commands. No `pnpm` command exists until P-5. After that, run `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm build`, plus `docker compose up --build` once it exists.
-5. **Open one pull request.** It closes its issue with `Closes #N` and follows the template (planned: P-2; until then, cover [rule 3 of `CLAUDE.md`](CLAUDE.md#rules-for-every-story) by hand): what and why, the acceptance criteria with evidence, the real results, and screenshots for UI changes.
+5. **Open one pull request.** It closes its issue with `Closes #N` and follows the [template](.github/PULL_REQUEST_TEMPLATE.md): what and why, the acceptance criteria with evidence, the real results, and screenshots for UI changes.
 6. **Get it reviewed.** The reviewer of the day responds within one working day. Resolve every thread.
 7. **Merge it.** Once every required check is green, it is merged with a merge commit.
 8. **Finish it.** The branch is deleted, the issue closes, and the story moves to Done. The [Definition of Done](CLAUDE.md#10-definition-of-done) is the full list.
