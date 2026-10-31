@@ -19,10 +19,11 @@ const sharedDist = new URL(
 if (!existsSync(sharedDist)) {
   // The API imports @orderpilot/shared from its build output at run time.
   console.log("Building @orderpilot/shared first...");
-  const built = spawnSync("pnpm", ["--filter", "@orderpilot/shared", "build"], {
-    stdio: "inherit",
-    shell: true,
-  });
+  const built = spawnSync(
+    process.execPath,
+    [tsc, "-p", "../../packages/shared/tsconfig.build.json"],
+    { stdio: "inherit" },
+  );
   if (built.status !== 0) process.exit(built.status ?? 1);
 }
 
