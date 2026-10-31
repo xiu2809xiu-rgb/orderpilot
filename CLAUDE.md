@@ -173,7 +173,7 @@ Spectra's own five measures sit alongside these: order-processing time, manual t
 
 ## 2. The stack
 
-Each row says whether it exists today or which story brings it. Everything marked planned is the plan, not a fact. The story that delivers a row changes it to Today, and pins the exact versions when it installs them.
+Each row says whether it exists today or which story brings it. Everything marked planned is the plan, not a fact. The story that delivers a row changes it to Today, and pins the exact versions when it installs them. Each tool added by Richie's addendum of 31 Oct (prompt 002, section 7) comes with an ADR, a pinned version and a traceability row. XState, json-rules-engine, CASL and PostHog are options for the area owners, not built ([ADR 0020](docs/adr/0020-options-left-to-the-owners.md)).
 
 | Concern                 | Choice                                                                                                                                                                   | Status                               |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------ |
@@ -192,13 +192,13 @@ Each row says whether it exists today or which story brings it. Everything marke
 | Queues                  | Redis with BullMQ                                                                                                                                                        | Today (P-9), worker process in P-15. |
 | Document storage        | MinIO behind a storage service that uses the S3 API, so AWS S3 drops in later                                                                                            | Today (P-9)                          |
 | Sessions                | argon2, a JWT access token in a cookie, refresh-token rotation and CSRF protection                                                                                       | Planned: P-10                        |
-| Web                     | Vite, React 19, TypeScript, Tailwind v4 and shadcn/ui                                                                                                                    | Planned: P-11                        |
-| Web plumbing            | React Router, an `ApiClient` class, TanStack Query and a minimal Zustand store                                                                                           | Planned: P-11                        |
-| Text                    | react-i18next: English, with no hard-coded strings                                                                                                                       | Planned: P-11                        |
-| Forms                   | React Hook Form with zod                                                                                                                                                 | Planned: P-11                        |
-| Icons and type          | Lucide only, and the Geist font with tabular numbers                                                                                                                     | Planned: P-11                        |
+| Web                     | Vite, React 19, TypeScript, Tailwind v4 and shadcn/ui ([ADR 0013](docs/adr/0013-the-web-stack.md))                                                                       | Built: P-11                          |
+| Web plumbing            | React Router, an `ApiClient` class, TanStack Query and a minimal Zustand store                                                                                           | Built: P-11                          |
+| Text                    | react-i18next: English, with no hard-coded strings ([ADR 0014](docs/adr/0014-i18n-with-english-first.md))                                                                | Built: P-11                          |
+| Forms                   | React Hook Form with zod                                                                                                                                                 | Built: P-11                          |
+| Icons and type          | Lucide only, and the Geist font with tabular numbers                                                                                                                     | Built: P-11                          |
 | Containers              | Docker Compose under project name `orderpilot`: PostgreSQL, Redis and MinIO, then `api`, `worker` and `web`                                                              | Today (P-9), P-13                    |
-| Tests                   | Vitest, Testing Library, and Playwright with axe                                                                                                                         | Today (P-8), P-11, P-14              |
+| Tests                   | Vitest, Testing Library, and Playwright with axe                                                                                                                         | Today (P-8, P-11), P-14              |
 | Events and live updates | A typed domain event bus, a transactional outbox, idempotency keys and SSE                                                                                               | Planned: P-15                        |
 | Diagrams                | Mermaid sources rendered to SVG                                                                                                                                          | Planned: P-16                        |
 | AI                      | `LlmGateway` with three providers: mock (the default), OpenAI-compatible, and optional Bedrock                                                                           | Planned: P-17                        |
@@ -209,13 +209,20 @@ Each row says whether it exists today or which story brings it. Everything marke
 | Deployment              | Amazon Lightsail in Singapore, Caddy for HTTPS, images on GHCR, and OWASP ZAP against the live URL                                                                       | Planned: P-24                        |
 | Slides                  | Marp                                                                                                                                                                     | Planned: P-25                        |
 | Monitoring              | OpenTelemetry for traces and metrics, `/metrics` with prom-client, and an `AnalyticsTracker` class                                                                       | Planned: G-1                         |
+| Generated API client    | orval turns the API's OpenAPI spec into typed TanStack Query hooks and MSW mocks, used by every area base                                                                | Planned: P-26 (ADR 0019)             |
+| Database image          | The `pgvector/pgvector` PostgreSQL image, with the `pgvector` and `pg_trgm` extensions                                                                                   | Planned: P-9 (ADR 0017)              |
+| Email in development    | Mailpit, the only place OrderPilot sends email in development and demos                                                                                                  | Planned: P-9 (ADR 0018)              |
+| AI SDK                  | The Vercel AI SDK under `LlmGateway`, which keeps cost tracking and the data-to-AI policy                                                                                | Planned: P-17                        |
+| AI evaluation           | promptfoo for the accuracy set and the prompt-injection tests, run in CI                                                                                                 | Planned: E-2, E-3                    |
+| Document output         | React-PDF and ExcelJS for the template engine                                                                                                                            | Planned: B-3                         |
+| Optional observability  | Grafana's `otel-lgtm` image as a compose profile for traces, metrics and logs, and Sentry for errors in the web app and the API. Both stay off unless configured         | Planned: G-1 (ADRs 0021 and 0022)    |
 
 ## 3. Repository layout
 
 | Path                           | Holds                                                                                                            | Status                            |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------- | --------------------------------- |
 | `apps/api`                     | The NestJS API, with a worker entry                                                                              | Today (P-8), P-13                 |
-| `apps/web`                     | The web app                                                                                                      | Planned: P-11                     |
+| `apps/web`                     | The web app                                                                                                      | Built: P-11                       |
 | `services/mock-navision`       | The mock of Navision                                                                                             | Planned: P-19                     |
 | `packages/tsconfig`            | The strict TypeScript config                                                                                     | Today                             |
 | `packages/eslint-config`       | The flat, type-aware ESLint config                                                                               | Today                             |
@@ -314,7 +321,7 @@ The API is NestJS, in layers ([ADR 0008](docs/adr/0008-nestjs-layered-modules.md
 | Unit            | Domain logic, at 80% or more                                      | Vitest              | Today (P-8)                            |
 | Scripts         | The pure logic of `scripts/github/`, against a simulated GitHub   | `node --test`       | Today, in `pnpm test`                  |
 | API integration | Every endpoint, with 401, 403 and validation cases                | Vitest              | Planned: P-10, with its harness in P-9 |
-| Component       | Components in each of their states                                | Testing Library     | Planned: P-11                          |
+| Component       | Components in each of their states                                | Testing Library     | Built: P-11                            |
 | Contract        | Connectors against the mock                                       | Vitest              | Planned: P-20                          |
 | End-to-end      | The smoke test first, then E2E #1 to #4, with WCAG 2.2 AA checked | Playwright with axe | Planned: P-14                          |
 | Load            | The extraction queue and the order endpoints                      | k6                  | Planned, not yet in a story            |

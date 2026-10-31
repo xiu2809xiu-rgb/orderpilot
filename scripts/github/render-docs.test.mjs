@@ -100,7 +100,7 @@ test("Getting started says how to run the API and what is not there yet", () => 
   const text = wikiPage("Getting-started.md");
   assert.ok(text.includes("cp .env.example .env"));
   assert.ok(text.includes("pnpm --filter @orderpilot/api dev"));
-  assert.ok(text.includes("There is no database or web app yet"));
+  assert.ok(text.includes("There is no database yet"));
   assert.ok(text.includes("P-9"));
 });
 

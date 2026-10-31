@@ -1,6 +1,6 @@
 # Area 2: Order workflows and approvals
 
-**Owner:** Azri. **Backup:** TBD until T-1. **Capability:** C, with parts of E. Paths and reviewers are in [module ownership](module-ownership.md#area-2-order-workflows-and-approvals-azri).
+**Owner:** Azri. **Backup:** Iok Teck. **Capability:** C, with parts of E. Paths and reviewers are in [module ownership](module-ownership.md#area-2-order-workflows-and-approvals-azri).
 
 ## Goal
 
@@ -77,6 +77,7 @@ All planned. Each item lands with the story named, and C-1 fills this section in
   - configurable fields and default values for each document type, as configuration, not code;
   - the SPR pre-fill from a shortfall: the system suggests and a person approves (area 1 deepens it later).
 - **From the platform:** the shared contracts, roles and permissions (P-7); the API shell (P-8); the database, queues and audit writer (P-9); sign-in and the permissions guard (P-10); the web shell (P-11) and common components (P-12); the event bus, outbox, worker and live updates (P-15); and synthetic orders in different states (P-9's seed).
+- **Generated hooks and mocks (planned: P-26):** the base's screens use the typed TanStack Query hooks and MSW mocks that orval generates from the API's OpenAPI spec, through the web app's `ApiClient`. Regenerate them when your routes change; CI fails when they are out of date.
 
 ## What's yours to build
 
@@ -95,6 +96,12 @@ All planned. Each item lands with the story named, and C-1 fills this section in
 - delegation and substitutes while the approver is away;
 - the purchase flow (phase 2): an SPR becomes a vendor PO draft, payment holds from area 4 block it, and a reminder fires when payment falls due;
 - full test coverage: every legal transition, every illegal one refused, retries and duplicate commands, and timeouts that escalate. 100% of workflow tests pass.
+
+## Options to consider, not built
+
+Tools that may suit this area. None is installed, pinned or built ([ADR 0020](../adr/0020-options-left-to-the-owners.md)). If you adopt one, bring its ADR, an exact pinned version and a row in the traceability matrix with that story.
+
+- **XState** for the order state machine's transitions. Azri's transition table as data is the plan; XState is worth it only if it makes the machine easier to test and explain. The state machine stays the only holder of order status either way.
 
 ## At the Week 7 interview
 

@@ -1,6 +1,7 @@
 # The verify job. Its name, "Lint, typecheck, test, build", is a required
 # check on main, so it never changes. Later stories add steps to it: the
-# bundle budget (P-11), the diagrams check (P-16) and the slides check (P-25).
+# diagrams check (P-16) and the slides check (P-25). The bundle budget (P-11)
+# is in, after the build.
 #
 # No path filters: a required workflow that does not run leaves its check
 # pending forever. Heavy jobs skip with job-level conditions instead.
@@ -94,3 +95,6 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+      - name: Bundle budget (initial JS, 250 KB gzip)
+        run: pnpm budget

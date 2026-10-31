@@ -168,3 +168,23 @@ Add these to `docs/client/questions-for-client.md`, after the existing priority 
 - **End-of-day note:** as prompt 001 asks.
 - **The build report's story table:** keep it current.
 - **The handover report:** when Phase A is done, then go straight on to Phase B.
+
+## 7. Addendum, 31 Oct evening
+
+Answers for the Waiting for Richie list. Add this message to prompt 002 as section 7, "Addendum, 31 Oct evening", in your next pull request.
+
+a. I'm turning on Keep my email addresses private now. Use the no-reply address for merges once GitHub accepts it.
+b. Rule 8 holds: free kits only until I say the repository is private and official keys are in apps/web/.env.local.
+c. T-1: MaineJermaine is Azri (area 2), ITnyp is Iok Teck (area 3), angelynnmr is Angelyn (area 4). They are already collaborators. Backup owners: Azri and Iok Teck back each other up, Angelyn backs up area 1, and I back up area 4. Fill in CODEOWNERS.
+d. I'm grouping the Backlog view by Sprint myself.
+e. I'll upgrade Node later; keep using the portable one.
+f. Yes, delete GitHub's default labels with --prune.
+g, h, i. Fine as written.
+j. Yes, apply the four required checks to the live Protect main ruleset now. If auto mode blocks it, ask me to approve.
+k. Done: all three are collaborators, and I'm adding them to the board.
+
+Tech additions. Each one gets an ADR, a pinned version and a row in the traceability matrix:
+- Phase A: orval in P-8 and P-11, generating typed TanStack Query hooks and MSW mocks from the Swagger spec, used by every area base. The pgvector/pgvector Postgres image with the pgvector and pg_trgm extensions in P-9. Mailpit in P-9's local stack, as the only place OrderPilot sends email in development and demos.
+- Phase B, area 1: the Vercel AI SDK under LlmGateway in P-17, with the gateway keeping cost tracking and the data-to-AI policy. promptfoo for the accuracy set and the prompt-injection tests in CI. React-PDF and ExcelJS for the template engine.
+- Area 4 (G-1, and Angelyn's Week 14 to 16 stories): Grafana's otel-lgtm image as an optional compose profile for traces, metrics and logs, and Sentry for errors in the web app and the API. Both stay off unless configured.
+- Owners' options, listed in their area guides as options to consider, not built: XState for area 2, json-rules-engine for area 3, CASL and PostHog for area 4.

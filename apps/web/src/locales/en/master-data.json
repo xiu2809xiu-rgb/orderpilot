@@ -1,0 +1,10 @@
+{
+  "title": "Master data",
+  "description": "Customers, items, vendors and stock, read from the ERP.",
+  "arrives": [
+    "Searchable customers, items and vendors",
+    "Available stock from inventory and open orders",
+    "Where each record came from"
+  ],
+  "cues": {}
+}

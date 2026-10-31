@@ -60,6 +60,7 @@ test("every story the brief names is here, in the expected groups", () => {
   const keys = backlog.stories.map((story) => story.key);
   const expected = [
     ...Array.from({ length: 25 }, (_, index) => `P-${index + 1}`),
+    "P-26",
     "C-1",
     "D-1",
     "F-1",
@@ -71,7 +72,7 @@ test("every story the brief names is here, in the expected groups", () => {
     "E-6",
   ];
   for (const key of expected) assert.ok(keys.includes(key), key);
-  assert.equal(keys.length, expected.length + 13);
+  assert.equal(keys.length, expected.length + 14);
 });
 
 test("titles and branches match the brief's headings", () => {
@@ -286,7 +287,7 @@ test("the sprints follow prompt 002's order", () => {
   assert.match(goal(2), /Monday 2 Nov/);
   assert.match(
     goal(2),
-    /P-13, P-14, P-15, P-16, P-17 to P-21, P-22 if not done, P-23, P-24 and P-25/,
+    /P-13, P-14, P-15, P-16, P-17 to P-21, P-22 once Richie says the repository is private, P-23, P-24 and P-25/,
   );
   assert.ok(goal(2).includes("C-2 to C-4, D-2 to D-4 and F-3 to F-5"));
 });
@@ -360,10 +361,11 @@ test("planned sprints are inside the calendar", () => {
 });
 
 test("conditional stories state their condition", () => {
-  // Prompt 002 says "as soon as the keys work"; prompt 001's rule 8 forbids Pro
-  // code in a public repository. The condition names both until Richie decides.
-  assert.match(byKey.get("P-22").condition, /keys work/);
-  assert.match(byKey.get("P-22").condition, /public/);
+  // Rule 8 holds (prompt 002, section 7): P-22 waits for a private repository
+  // and the official keys in apps/web/.env.local.
+  assert.match(byKey.get("P-22").condition, /private/);
+  assert.match(byKey.get("P-22").condition, /\.env\.local/);
+  assert.doesNotMatch(byKey.get("P-22").condition, /keys work/);
   assert.match(byKey.get("P-24").condition, /step 8/);
   assert.match(byKey.get("T-9").condition, /base is done/);
 });

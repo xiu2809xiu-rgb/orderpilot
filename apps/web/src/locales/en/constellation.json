@@ -1,0 +1,10 @@
+{
+  "title": "Constellation",
+  "description": "A three-dimensional view of orders in flight.",
+  "arrives": [
+    "Orders as points, grouped by stage",
+    "Click a point to open the order",
+    "A plain list for anyone who prefers it"
+  ],
+  "cues": {}
+}

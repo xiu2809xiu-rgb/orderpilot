@@ -1,0 +1,12 @@
+{
+  "title": "Monitoring",
+  "description": "AI usage and cost, system health and usage analytics.",
+  "arrives": [
+    "AI calls, tokens and cost by feature",
+    "Health and latency of the services",
+    "Usage analytics for the screens"
+  ],
+  "cues": {
+    "aiUsage": "AI usage this month"
+  }
+}

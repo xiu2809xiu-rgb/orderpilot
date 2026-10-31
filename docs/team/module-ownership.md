@@ -10,14 +10,14 @@ Most paths below do not exist yet. They are the planned layout, consistent with 
 
 ## Owners
 
-| Area                                 | Owner    | Backup owner  | Guide                                                      |
-| ------------------------------------ | -------- | ------------- | ---------------------------------------------------------- |
-| 1. Document AI and integration       | Richie   | TBD until T-1 | [Area 1 guide](area-1-document-ai-and-integration.md)      |
-| 2. Order workflows and approvals     | Azri     | TBD until T-1 | [Area 2 guide](area-2-order-workflows-and-approvals.md)    |
-| 3. Checks, tracker and insights      | Iok Teck | TBD until T-1 | [Area 3 guide](area-3-checks-tracker-and-insights.md)      |
-| 4. Controls, security and monitoring | Angelyn  | TBD until T-1 | [Area 4 guide](area-4-controls-security-and-monitoring.md) |
+| Area                                 | Owner    | Backup owner | Guide                                                      |
+| ------------------------------------ | -------- | ------------ | ---------------------------------------------------------- |
+| 1. Document AI and integration       | Richie   | Angelyn      | [Area 1 guide](area-1-document-ai-and-integration.md)      |
+| 2. Order workflows and approvals     | Azri     | Iok Teck     | [Area 2 guide](area-2-order-workflows-and-approvals.md)    |
+| 3. Checks, tracker and insights      | Iok Teck | Azri         | [Area 3 guide](area-3-checks-tracker-and-insights.md)      |
+| 4. Controls, security and monitoring | Angelyn  | Richie       | [Area 4 guide](area-4-controls-security-and-monitoring.md) |
 
-T-1 names a backup owner for each area and fills [`.github/CODEOWNERS`](../../.github/CODEOWNERS) (P-2 brought it with placeholders) so that every path has at least two owners and nobody waits on their own approval: each area's paths go to its owner, its backup and Richie, and shared files go to Richie and the backups.
+T-1 named a backup owner for each area (Azri and Iok Teck back each other up, Angelyn backs up area 1 and Richie backs up area 4) and filled [`.github/CODEOWNERS`](../../.github/CODEOWNERS), so that every path has at least two owners and nobody waits on their own approval: each area's paths go to its owner, its backup and Richie (area 1: Richie and Angelyn), and shared files go to all four. The handles are `xiu2809xiu-rgb` (Richie), `MaineJermaine` (Azri), `ITnyp` (Iok Teck) and `angelynnmr` (Angelyn).
 
 ## The paths each area owns
 
@@ -26,7 +26,7 @@ Conventions for every area:
 - **API module:** `apps/api/src/modules/<module>/`, with its controllers, services, repositories and domain classes, and its unit tests (`*.spec.ts`) beside them.
 - **Prisma schema:** the area's own file in `apps/api/prisma/schema/` (a multi-file schema, planned: P-9). Each migration belongs to the area whose schema it changes.
 - **API integration tests:** `apps/api/test/<module>.int-spec.ts`. **Request files:** `apps/api/requests/<module>.http`.
-- **Web feature:** `apps/web/src/features/<feature>/`, with its pages, components, hooks and component tests (`*.test.tsx`).
+- **Web feature:** `apps/web/src/features/<feature>/`, with its pages, components, hooks and component tests (`*.test.tsx`). Its `index.ts` exports one `defineFeature` object (path, menu entry, permission, role home tiles, lazy page), and `features/registry.ts` lists it: that one line is the only change outside the folder. [ADR 0013](../adr/0013-the-web-stack.md) has the details.
 - **Text:** the area's own i18n namespace, `apps/web/src/locales/en/<namespace>.json`, loaded lazily.
 - **End-to-end tests:** `apps/web/e2e/<feature>.spec.ts`.
 - **Docs:** the area's guide in `docs/team/`, its rows in the shared tables, and its prompts in `docs/ai/prompts/` as `areaN-NNN-…`.

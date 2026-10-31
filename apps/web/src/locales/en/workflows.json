@@ -1,0 +1,15 @@
+{
+  "title": "Workflows",
+  "description": "Tasks, approvals and the steps every order passes through.",
+  "arrives": [
+    "A task inbox for the steps waiting on you",
+    "Each order's steps and timeline",
+    "SPR approval within limits, with a second approver where one is needed",
+    "Reminders and escalations"
+  ],
+  "cues": {
+    "myTasks": "My tasks",
+    "sprApproval": "SPRs awaiting approval",
+    "paymentsToConfirm": "Payments to confirm"
+  }
+}

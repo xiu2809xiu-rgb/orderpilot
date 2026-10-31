@@ -4,7 +4,7 @@ What works so far. Each story that adds a step updates this page when it merges.
 
 ## What works today
 
-The workspace installs, checks and builds, and the API starts against a local PostgreSQL, Redis and MinIO. There is no web app yet.
+The workspace installs, checks and builds. The API and the web app start, and the API runs against a local PostgreSQL, Redis and MinIO from Docker Compose. The web app's real sign-in comes with P-10.
 
 1. Install Git, Node 24.22.0 (the version in [`.node-version`](https://github.com/xiu2809xiu-rgb/orderpilot/blob/main/.node-version)) and pnpm 12: `npm install -g pnpm@12.14.0`.
 2. Clone the repository:
@@ -49,6 +49,14 @@ The workspace installs, checks and builds, and the API starts against a local Po
    ```
 
    Then open <http://localhost:3000/health/ready> (database, Redis and storage should all say `up`) and <http://localhost:3000/api/docs>. The ports are the first lines of `.env` (`POSTGRES_PORT`, `REDIS_PORT`, `MINIO_PORT`): change one and every URL built from it moves. `pnpm stack:down` stops the containers and keeps your data. If a required setting is missing, the API stops and names the file to create. A variable set in your shell always wins over the files.
+
+8. Look at the web app:
+
+   ```sh
+   pnpm --filter @orderpilot/web dev
+   ```
+
+   Open http://localhost:5173. The login page shows the demo roles when the API is running with demo mode on. `CONTRIBUTING.md` lists every web command, the ports and where each area's screens go.
 
 Line endings need no set-up. `.gitattributes` keeps text files LF on every machine.
 

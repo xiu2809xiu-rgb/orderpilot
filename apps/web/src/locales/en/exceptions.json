@@ -1,0 +1,12 @@
+{
+  "title": "Exceptions",
+  "description": "Orders that failed a check and need a person.",
+  "arrives": [
+    "A queue of failed checks, newest first",
+    "The rule that failed and what to do about it",
+    "Resolve, escalate or accept with a reason"
+  ],
+  "cues": {
+    "open": "Open exceptions"
+  }
+}

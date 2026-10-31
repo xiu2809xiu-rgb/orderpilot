@@ -288,7 +288,8 @@
         "The seed starts `packages/synthetic-data`: about 5 fictional customers in the brief's countries, 3 vendors, 30 items from fictional brands, opening stock, and 10 orders in different states. Every area base uses this set, and P-19 grows it.",
         "Getting started and `CONTRIBUTING.md` say `cp .env.example .env`, and troubleshooting covers \"port already in use\", \"role does not exist\" (another PostgreSQL answered) and Docker not running.",
         "Proved from a clean clone with nothing loaded in the shell, on the default ports and again with `POSTGRES_PORT=5433`.",
-        "ADRs: Prisma with PostgreSQL; S3-compatible document storage."
+        "ADRs: Prisma with PostgreSQL; S3-compatible document storage.",
+        "The local stack runs the `pgvector/pgvector` PostgreSQL image with the `pgvector` and `pg_trgm` extensions enabled, and Mailpit as the only place OrderPilot sends email in development and demos with an ADR, a pinned version and a traceability row (ADRs 0017 and 0018)."
       ]
     },
     {
@@ -457,7 +458,8 @@
         "Prompt-injection defence: documents are treated as data; the model only returns fields; no model output triggers an action.",
         "A destination check: area 4's policy decides what data may go to which provider. The default is synthetic data only.",
         "Keys: Richie adds `GROQ_API_KEY` and `GEMINI_API_KEY` to the root `.env` himself.",
-        "ADR: the AI gateway and the person in the loop."
+        "ADR: the AI gateway and the person in the loop.",
+        "The Vercel AI SDK sits under `LlmGateway`, and the gateway keeps cost tracking and the data-to-AI policy with an ADR, a pinned version and a traceability row."
       ]
     },
     {
@@ -855,7 +857,8 @@
         "Wiring: an `AnalyticsTracker` class (batching, consent, no PII), a clickstream endpoint and a `ClickstreamEvent` model.",
         "Screens: AI usage and cost, reading real records; observability and clickstream, on mock data with to-do tests.",
         "Left to Angelyn: the real dashboards, budgets and alerts, in Weeks 14 to 16 (Sprints 13 to 15).",
-        "Angelyn's review is requested on the pull request once they are a collaborator, and Richie is told when it merges, so he can hand it over."
+        "Angelyn's review is requested on the pull request once they are a collaborator, and Richie is told when it merges, so he can hand it over.",
+        "Grafana's `otel-lgtm` image as an optional compose profile for traces, metrics and logs, and Sentry for errors in the web app and the API. Both stay off unless configured with an ADR, a pinned version and a traceability row (ADRs 0021 and 0022)."
       ]
     },
     {
@@ -868,9 +871,9 @@
       "reqs": ["M4"],
       "branch": "feat/platform-design-system",
       "sprints": [2],
-      "condition": "As soon as the Pro keys work (prompt 002, section 4). Rule 8 of prompt 001 forbids Pro code while the repository is public, and the repository is public: which applies is waiting for Richie. Until he says, free kits only.",
+      "condition": "Only once Richie says the repository is private and official keys are in `apps/web/.env.local` (rule 8 of prompt 001, confirmed in prompt 002, section 7). Until he says, free kits only.",
       "dependsOn": ["P-11", "P-12"],
-      "summary": "The licensed kits, set up as soon as the keys work and Richie says Pro code may go in, and Richie's own pages upgraded with them.",
+      "summary": "The licensed kits, set up once Richie says the repository is private and the official keys are in `apps/web/.env.local`, and Richie's own pages upgraded with them.",
       "acceptance": [
         "Registries in `apps/web/components.json`: `@reactbits-starter`, `@reactbits-pro`, `@reui` and `@magicui`, with the licence keys sent as bearer headers from the environment.",
         "The keys stay in `apps/web/.env.local` as `REUI_LICENSE_KEY` and `REACTBITS_LICENSE_KEY`, and `components.json` refers to them only as `${...}`. No key is ever written into a file, commit or message.",
@@ -947,6 +950,46 @@
         "A Marp deck for the Week 5 proposal: 12 to 14 slides, one idea each, themed with the app's tokens, using real screenshots and diagrams, with speaker notes.",
         "`pnpm slides:build` exports PDF, HTML and PPTX.",
         "`slides:check` runs in CI."
+      ]
+    },
+    {
+      "key": "P-26",
+      "title": "Generated API hooks and mocks",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 3,
+      "reqs": ["M4"],
+      "branch": "feat/platform-orval",
+      "sprints": [1],
+      "dependsOn": ["P-8", "P-11"],
+      "summary": "orval generates typed TanStack Query hooks and MSW mocks from the API's OpenAPI spec, so every area base starts from the same typed client.",
+      "acceptance": [
+        "The API exports its OpenAPI spec to a file with no database running.",
+        "orval, at an exact pinned version, generates typed TanStack Query hooks and MSW mocks from that file, through the web app's `ApiClient`.",
+        "A CI step fails when the generated code is out of date.",
+        "Every area base uses the generated hooks and mocks.",
+        "An ADR (0019), a pinned version and a traceability row."
+      ]
+    },
+    {
+      "key": "P-27",
+      "title": "Web shell polish",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "could",
+      "estimate": 3,
+      "reqs": ["M4"],
+      "branch": "feat/platform-web-polish",
+      "sprints": [3],
+      "dependsOn": ["P-11"],
+      "summary": "What P-11 left out because no teammate needs it in its first week.",
+      "acceptance": [
+        "Unsaved form input also survives a page reload, through one small draft helper that forms can opt into. P-11 keeps it only across an ended session.",
+        "A phone-width pass: screenshots at 390 px wide, light and dark, and the fixes they show. The sidebar already becomes a sheet, but spacing has not been reviewed on a phone.",
+        "LCP and a Lighthouse run on the production build, with the figures recorded next to the screenshots.",
+        "A collapsible sidebar that remembers its state, and a list of keyboard shortcuts.",
+        "The refresh timer that runs a minute before the access token ends has a test with fake timers."
       ]
     },
     {
@@ -1208,7 +1251,8 @@
       "summary": "One engine for every generated document, used by areas 2 and 3.",
       "acceptance": [
         "The template engine produces PIs, invoices, packing lists and Excel.",
-        "Areas 2 and 3 use it."
+        "Areas 2 and 3 use it.",
+        "React-PDF and ExcelJS render the template engine's PDF and Excel output with an ADR, a pinned version and a traceability row."
       ]
     },
     {
@@ -1253,7 +1297,8 @@
       "summary": "Extraction accuracy measured against the synthetic documents' ground truth.",
       "acceptance": [
         "The harness measures extraction accuracy on the synthetic test set, against a target of 95% or more.",
-        "It compares models."
+        "It compares models.",
+        "promptfoo runs the accuracy set in CI with an ADR, a pinned version and a traceability row."
       ]
     },
     {
@@ -1267,7 +1312,8 @@
       "dependsOn": ["P-17"],
       "summary": "Tests that prove a hostile document cannot steer the AI.",
       "acceptance": [
-        "Tests show that documents are treated as data, the model only returns fields, and no model output triggers an action."
+        "Tests show that documents are treated as data, the model only returns fields, and no model output triggers an action.",
+        "promptfoo runs the prompt-injection tests in CI with an ADR, a pinned version and a traceability row."
       ]
     },
     {

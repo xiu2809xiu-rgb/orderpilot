@@ -1,0 +1,12 @@
+{
+  "title": "Audit log",
+  "description": "A record of every sign-in, decision and change.",
+  "arrives": [
+    "A searchable log with who, what and when",
+    "Links from an order to its audit trail",
+    "Export and retention settings"
+  ],
+  "cues": {
+    "events": "Audit events today"
+  }
+}

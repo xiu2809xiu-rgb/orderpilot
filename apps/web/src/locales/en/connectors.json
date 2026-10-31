@@ -1,0 +1,12 @@
+{
+  "title": "Connectors",
+  "description": "The links between OrderPilot and other systems.",
+  "arrives": [
+    "The status of each connector",
+    "Settings and a connection test",
+    "A log of recent calls"
+  ],
+  "cues": {
+    "health": "Connector health"
+  }
+}
