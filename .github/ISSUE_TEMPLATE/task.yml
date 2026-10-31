@@ -1,0 +1,40 @@
+name: Task
+description: A small piece of work inside a sprint, often a part of a story.
+labels:
+  - "type: task"
+body:
+  - type: markdown
+    attributes:
+      value: After you create the issue, add the `area:` label you pick below.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - "area: 1 document AI and integration"
+        - "area: 2 order workflows and approvals"
+        - "area: 3 checks, tracker and insights"
+        - "area: 4 controls and monitoring"
+        - "area: team"
+    validations:
+      required: true
+  - type: input
+    id: story
+    attributes:
+      label: Story
+      description: The story this task belongs to, if there is one.
+      placeholder: "#12"
+  - type: textarea
+    id: what
+    attributes:
+      label: What to do
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: Done when
+      value: |
+        - [ ]
+    validations:
+      required: true

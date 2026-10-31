@@ -1,0 +1,26 @@
+# Who owns what. GitHub reads this file from top to bottom, and the last match
+# wins.
+#
+# Placeholders until T-1. GitHub reports an error for any handle it cannot find,
+# so only Richie's handle is live today. T-1 replaces each <placeholder> below
+# with a real handle and removes the leading "# " from each rule, so that every
+# path has at least two owners and nobody ever waits on their own approval:
+#
+#   - each area's paths go to its owner, its backup owner and Richie;
+#   - shared files go to Richie and the backup owners.
+#
+# docs/team/module-ownership.md (planned: P-4) lists the paths behind each
+# <area N paths> placeholder. Review only becomes required at T-9, on Richie's
+# yes.
+
+* @xiu2809xiu-rgb
+
+# <area 1 paths>  @xiu2809xiu-rgb @<area 1 backup owner>
+# <area 2 paths>  @<area 2 owner> @<area 2 backup owner> @xiu2809xiu-rgb
+# <area 3 paths>  @<area 3 owner> @<area 3 backup owner> @xiu2809xiu-rgb
+# <area 4 paths>  @<area 4 owner> @<area 4 backup owner> @xiu2809xiu-rgb
+
+# Shared files.
+# /.github/       @xiu2809xiu-rgb @<backup owners>
+# /docs/          @xiu2809xiu-rgb @<backup owners>
+# /scripts/       @xiu2809xiu-rgb @<backup owners>

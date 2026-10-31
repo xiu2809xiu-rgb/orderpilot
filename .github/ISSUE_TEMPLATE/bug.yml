@@ -1,0 +1,49 @@
+name: Bug
+description: Something that should work and does not.
+labels:
+  - "type: bug"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A security problem does not belong here: report it privately through the [security advisories page](https://github.com/xiu2809xiu-rgb/orderpilot/security/advisories/new).
+
+        Use synthetic data only. Never paste a key or a Spectra document. After you create the issue, add the `area:` label you pick below.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - "area: 1 document AI and integration"
+        - "area: 2 order workflows and approvals"
+        - "area: 3 checks, tracker and insights"
+        - "area: 4 controls and monitoring"
+        - "area: team"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      value: |
+        1.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What should happen
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happens instead
+      description: Include the trace id from the error state, if there is one.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Commit or environment
+      placeholder: main at abc1234, on Chrome
