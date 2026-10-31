@@ -187,12 +187,12 @@ test("updating iterations keeps the ids of the ones that exist", () => {
   assert.equal("id" in iterations[2], false);
 });
 
-test("Area options keep the comma in the name", () => {
+test("Area options are the area labels without the prefix", () => {
   const names = wantedAreaOptions(labels).map((option) => option.name);
   assert.deepEqual(names, [
     "1 document AI and integration",
     "2 order workflows and approvals",
-    "3 checks, tracker and insights",
+    "3 checks tracker and insights",
     "4 controls and monitoring",
     "team",
   ]);

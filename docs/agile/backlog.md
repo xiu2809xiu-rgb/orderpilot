@@ -12,7 +12,7 @@ There are 9 epics and 63 stories. Estimates are story points: a first guess, for
 | Epic A | Document intake and AI extraction | `area: 1 document AI and integration`   | 5       | 31     |
 | Epic B | Master data and Navision          | `area: 1 document AI and integration`   | 4       | 14     |
 | Epic C | Order workflows and approvals     | `area: 2 order workflows and approvals` | 4       | 26     |
-| Epic D | Checks, the tracker and insights  | `area: 3 checks, tracker and insights`  | 4       | 23     |
+| Epic D | Checks, the tracker and insights  | `area: 3 checks tracker and insights`   | 4       | 23     |
 | Epic E | AI with a person in the loop      | `area: 1 document AI and integration`   | 6       | 29     |
 | Epic F | Financial controls and governance | `area: 4 controls and monitoring`       | 5       | 24     |
 | Epic G | Monitoring                        | `area: 4 controls and monitoring`       | 1       | 8      |
@@ -27,9 +27,9 @@ The starter stories for areas 2, 3 and 4. Their owners start on them on Monday 2
 | C-2   | The order state machine for the sales flow                         | `area: 2 order workflows and approvals` | 8      |
 | C-3   | SPR approval within limits                                         | `area: 2 order workflows and approvals` | 5      |
 | C-4   | Reminders and escalations                                          | `area: 2 order workflows and approvals` | 5      |
-| D-2   | The packing-list quantity check against the PO                     | `area: 3 checks, tracker and insights`  | 5      |
-| D-3   | The exceptions queue flow                                          | `area: 3 checks, tracker and insights`  | 5      |
-| D-4   | The tracker's status, owner and overdue flags from workflow events | `area: 3 checks, tracker and insights`  | 5      |
+| D-2   | The packing-list quantity check against the PO                     | `area: 3 checks tracker and insights`   | 5      |
+| D-3   | The exceptions queue flow                                          | `area: 3 checks tracker and insights`   | 5      |
+| D-4   | The tracker's status, owner and overdue flags from workflow events | `area: 3 checks tracker and insights`   | 5      |
 | F-3   | The authorisation policy with approval limits                      | `area: 4 controls and monitoring`       | 5      |
 | F-4   | No self-approval and segregation of duties                         | `area: 4 controls and monitoring`       | 3      |
 | F-5   | The bank-detail hold                                               | `area: 4 controls and monitoring`       | 5      |
@@ -65,10 +65,10 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | C-2   | The order state machine for the sales flow                         | must     | 8      | `area: 2 order workflows and approvals` | M4 best practices                                              |
 | C-3   | SPR approval within limits                                         | must     | 5      | `area: 2 order workflows and approvals` | M2 GRS by design, M4 best practices                            |
 | C-4   | Reminders and escalations                                          | must     | 5      | `area: 2 order workflows and approvals` | M4 best practices                                              |
-| D-1   | Area 3 base, checks and the tracker                                | must     | 8      | `area: 3 checks, tracker and insights`  | M4 best practices                                              |
-| D-2   | The packing-list quantity check against the PO                     | must     | 5      | `area: 3 checks, tracker and insights`  | M4 best practices                                              |
-| D-3   | The exceptions queue flow                                          | must     | 5      | `area: 3 checks, tracker and insights`  | M2 GRS by design, M4 best practices                            |
-| D-4   | The tracker's status, owner and overdue flags from workflow events | must     | 5      | `area: 3 checks, tracker and insights`  | M4 best practices                                              |
+| D-1   | Area 3 base, checks and the tracker                                | must     | 8      | `area: 3 checks tracker and insights`   | M4 best practices                                              |
+| D-2   | The packing-list quantity check against the PO                     | must     | 5      | `area: 3 checks tracker and insights`   | M4 best practices                                              |
+| D-3   | The exceptions queue flow                                          | must     | 5      | `area: 3 checks tracker and insights`   | M2 GRS by design, M4 best practices                            |
+| D-4   | The tracker's status, owner and overdue flags from workflow events | must     | 5      | `area: 3 checks tracker and insights`   | M4 best practices                                              |
 | F-1   | Area 4 base, access policy and masking                             | must     | 8      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
 | F-2   | Area 4 base, the audit viewer                                      | must     | 3      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
 | F-3   | The authorisation policy with approval limits                      | must     | 5      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
@@ -149,7 +149,7 @@ Acceptance criteria:
 - `.github/`: the pull request template (rule 3, the areas, M1 to M6, a UI checklist, docs, data and security, and the Definition of Done).
 - `.github/`: `CODEOWNERS`, with placeholders until T-1; `labels.json`; and `rulesets/main.json`, mirroring the live ruleset after every change.
 - Labels: `type:` epic, story, task, bug, spike, chore, docs and security.
-- Labels: `area: 1 document AI and integration`, `area: 2 order workflows and approvals`, `area: 3 checks, tracker and insights`, `area: 4 controls and monitoring`, and `area: team`.
+- Labels: `area: 1 document AI and integration`, `area: 2 order workflows and approvals`, `area: 3 checks tracker and insights`, `area: 4 controls and monitoring`, and `area: team`.
 - Labels: `priority:` must, should and could; `req: M1` to `M6`, each with its name; `status: blocked`, `status: needs client input`, and `dependencies`.
 - `scripts/github/`, all idempotent: labels.
 - `scripts/github/`, all idempotent: the sprint calendar (Sprint 1 starts Monday 26 Oct 2026; each sprint is due Sunday 23:59 Singapore time).
@@ -920,7 +920,7 @@ Documents checked against each other with tolerances; an exceptions queue; one t
 
 Iok Teck's head start: the models, contracts, screens and test skeletons, never the area's core logic.
 
-- **Area:** `area: 3 checks, tracker and insights`
+- **Area:** `area: 3 checks tracker and insights`
 - **Priority:** must
 - **Estimate:** 8 points
 - **Requirements:** M4 best practices
@@ -942,7 +942,7 @@ Acceptance criteria:
 
 The MVP mismatch: a packing list whose quantity differs from the PO is flagged, and the result goes to area 2.
 
-- **Area:** `area: 3 checks, tracker and insights`
+- **Area:** `area: 3 checks tracker and insights`
 - **Priority:** must
 - **Estimate:** 5 points
 - **Requirements:** M4 best practices
@@ -965,7 +965,7 @@ Acceptance criteria:
 
 Exceptions are worked from one queue: assigned, explained, and resolved or waived, with every step recorded.
 
-- **Area:** `area: 3 checks, tracker and insights`
+- **Area:** `area: 3 checks tracker and insights`
 - **Priority:** must
 - **Estimate:** 5 points
 - **Requirements:** M2 GRS by design, M4 best practices
@@ -988,7 +988,7 @@ Acceptance criteria:
 
 One tracker shows every order's status, owner and overdue flags, fed by area 2's workflow events and never set by hand.
 
-- **Area:** `area: 3 checks, tracker and insights`
+- **Area:** `area: 3 checks tracker and insights`
 - **Priority:** must
 - **Estimate:** 5 points
 - **Requirements:** M4 best practices

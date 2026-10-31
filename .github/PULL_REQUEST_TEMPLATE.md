@@ -11,7 +11,7 @@ Closes #
 
 - [ ] `area: 1 document AI and integration`
 - [ ] `area: 2 order workflows and approvals`
-- [ ] `area: 3 checks, tracker and insights`
+- [ ] `area: 3 checks tracker and insights`
 - [ ] `area: 4 controls and monitoring`
 - [ ] `area: team`
 

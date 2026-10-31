@@ -62,9 +62,9 @@ test("query() refuses a mutation, so none can pass as a read", async () => {
   assert.deepEqual(calls, []);
 });
 
-test("a label with a comma travels in the JSON body, never as an argument", async () => {
+test("a label with odd characters travels in the JSON body, never as an argument", async () => {
   const { github, calls } = recording();
-  const label = "area: 3 checks, tracker and insights";
+  const label = "test: a, b and c";
   await github.write("label", "POST", "repos/x/issues", { labels: [label] });
   const [{ args, input }] = calls;
   assert.equal(args.join(" ").includes(label), false);

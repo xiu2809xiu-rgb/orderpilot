@@ -9,7 +9,7 @@ This file and [`AGENTS.md`](AGENTS.md) are the source of truth. This file holds 
 - **Every piece is merged the normal way:** one story, one issue, one branch, one pull request, green checks.
 - **Kiro is only the IDE.** Don't use Kiro specs, steering or hooks.
 - **Spectra's documents never go into Git.**
-- **Richie's ERP notes.** Richie studied a third-party ERP and may add domain notes in his own words under `docs/research/` (planned: P-3). Use them for realism: document types, fields, numbering and statuses. Never ask for, open, commit or send to an AI service any screenshot or data from that ERP.
+- **Richie's ERP notes.** Richie studied a third-party ERP and may add domain notes in his own words under [`docs/research/`](docs/research/README.md). Use them for realism: document types, fields, numbering and statuses. Never ask for, open, commit or send to an AI service any screenshot or data from that ERP.
 
 **Status words.** "Today" means it is in the repository now. "Planned" names the story that brings it. Until that story merges the thing does not exist, so never describe it as if it did.
 
@@ -212,23 +212,23 @@ Each row says whether it exists today or which story brings it. Everything marke
 
 ## 3. Repository layout
 
-| Path                           | Holds                                                                                                        | Status             |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------ | ------------------ |
-| `apps/api`                     | The NestJS API, with a worker entry                                                                          | Planned: P-8, P-13 |
-| `apps/web`                     | The web app                                                                                                  | Planned: P-11      |
-| `services/mock-navision`       | The mock of Navision                                                                                         | Planned: P-19      |
-| `packages/tsconfig`            | The strict TypeScript config                                                                                 | Today              |
-| `packages/eslint-config`       | The flat, type-aware ESLint config                                                                           | Today              |
-| `packages/shared`              | Shared zod schemas and types: envelopes, error codes, roles, permissions, and the order and event contract   | Planned: P-7       |
-| `packages/synthetic-data`      | The seeded generator and synthetic master data                                                               | Planned: P-19      |
-| `packages/synthetic-documents` | Generated PDFs with planted mistakes and ground truth                                                        | Planned: P-21      |
-| `scripts/`                     | Repository checks and build scripts, beside `scripts/github/`                                                | Today, P-16        |
-| `scripts/github/`              | Idempotent scripts for labels, the sprint calendar, the board, the backlog and the wiki                      | Today              |
-| `docs/`                        | All documentation. Today: `adr/`, `agile/`, `ai/`, `wiki/` and `BUILD_REPORT.md`. Later stories add the rest | Today, growing     |
-| `samples/`                     | Client samples tried on one machine. Git-ignored except its README. The ignore rule and the README exist     | Today              |
-| `assets-src/3d/`               | Parametric Blender scripts                                                                                   | Planned: P-23      |
-| `infra/deploy/`                | The server bootstrap, Caddy, `docker-compose.prod.yml` and backups                                           | Planned: P-24      |
-| `.github/`                     | Issue forms, the pull request template, `CODEOWNERS`, `labels.json`, `rulesets/main.json` and workflows      | Today              |
+| Path                           | Holds                                                                                                            | Status             |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------- | ------------------ |
+| `apps/api`                     | The NestJS API, with a worker entry                                                                              | Planned: P-8, P-13 |
+| `apps/web`                     | The web app                                                                                                      | Planned: P-11      |
+| `services/mock-navision`       | The mock of Navision                                                                                             | Planned: P-19      |
+| `packages/tsconfig`            | The strict TypeScript config                                                                                     | Today              |
+| `packages/eslint-config`       | The flat, type-aware ESLint config                                                                               | Today              |
+| `packages/shared`              | Shared zod schemas and types: envelopes, error codes, roles, permissions, and the order and event contract       | Planned: P-7       |
+| `packages/synthetic-data`      | The seeded generator and synthetic master data                                                                   | Planned: P-19      |
+| `packages/synthetic-documents` | Generated PDFs with planted mistakes and ground truth                                                            | Planned: P-21      |
+| `scripts/`                     | Repository checks and build scripts, beside `scripts/github/`                                                    | Today, P-16        |
+| `scripts/github/`              | Idempotent scripts for labels, the sprint calendar, the board, the backlog and the wiki                          | Today              |
+| `docs/`                        | All documentation: `adr/`, `agile/`, `ai/`, `client/`, `design-thinking/`, `grs/`, `research/`, `team/` and more | Today, growing     |
+| `samples/`                     | Client samples tried on one machine. Git-ignored except its README. The ignore rule and the README exist         | Today              |
+| `assets-src/3d/`               | Parametric Blender scripts                                                                                       | Planned: P-23      |
+| `infra/deploy/`                | The server bootstrap, Caddy, `docker-compose.prod.yml` and backups                                               | Planned: P-24      |
+| `.github/`                     | Issue forms, the pull request template, `CODEOWNERS`, `labels.json`, `rulesets/main.json` and workflows          | Today              |
 
 Today's root files are `README.md`, `CONTRIBUTING.md`, `SECURITY.md`, `AGENTS.md`, `CLAUDE.md`, `.claude/settings.json`, `.editorconfig`, `.gitattributes`, `.gitignore` and `.node-version`.
 

@@ -50,7 +50,7 @@
     "description": "Area 2, Azri: workflows, tasks, SPR approval, the payment gate and reminders"
   },
   {
-    "name": "area: 3 checks, tracker and insights",
+    "name": "area: 3 checks tracker and insights",
     "color": "fbca04",
     "description": "Area 3, Iok Teck: the checks engine, exceptions queue, tracker and KPIs"
   },

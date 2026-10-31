@@ -15,6 +15,7 @@ OrderPilot is our product for Problem Statement #11 in the IT2134 IT Innovation 
 ### What works today
 
 - **The ground rules:** this README, [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), [AGENTS.md](AGENTS.md), [CLAUDE.md](CLAUDE.md), the ADRs and the agile docs.
+- **The problem and the areas:** [the problem statement](docs/problem-statement.md), research, client questions, design thinking, GRS, and [who owns what](docs/team/module-ownership.md), with a guide for each area.
 - **Repository files:** LF line endings, ignore rules for secrets, samples and AI tool folders, and the Node version.
 - **GitHub as code:** issue forms, the pull request template, labels, the sprint milestones, the backlog, the board and the wiki, all kept as code in [`.github/`](.github/) and [`scripts/github/`](scripts/github/README.md), and a sprint recorder that files each finished story under its sprint.
 - **The workspace and its checks:** `pnpm install`, then `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm build`, with Git hooks that check every commit and refuse a push to `main`. See [CONTRIBUTING.md](CONTRIBUTING.md).
@@ -25,6 +26,7 @@ OrderPilot is our product for Problem Statement #11 in the IT2134 IT Innovation 
 
 | Stories                 | What they bring                                                                                     |
 | ----------------------- | --------------------------------------------------------------------------------------------------- |
+| P-2                     | Issue forms, the pull request template, labels, the backlog and board as code, and the wiki pages   |
 | P-3, P-4                | The problem statement, research, client questions, and a guide for each area                        |
 | P-7 to P-16             | The app: shared contracts, API, database, sign-in, web shell, Docker images, events and diagrams    |
 | P-17 to P-21            | The core of area 1: the AI gateway, document intake, mock Navision, connectors, synthetic documents |
