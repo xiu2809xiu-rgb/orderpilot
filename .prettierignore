@@ -1,0 +1,10 @@
+# Prettier also skips everything in .gitignore.
+
+# Committed exactly as Richie placed it, with no final newline.
+.claude/settings.json
+
+# Richie's prompts are kept byte for byte, as he wrote them.
+docs/ai/prompts/**
+
+# pnpm writes the lockfile in its own format.
+pnpm-lock.yaml

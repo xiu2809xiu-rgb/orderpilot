@@ -1,0 +1,48 @@
+packages:
+  - apps/*
+  - services/*
+  - packages/*
+
+# Supply chain. ADR 0003 records why each setting is here.
+
+# Exact pins: `pnpm add` writes 1.2.3, never ^1.2.3.
+saveExact: true
+savePrefix: ""
+
+# Refuse any version published less than 7 days (10080 minutes) ago. Most
+# malicious releases are found and pulled within days. Seven days also matches
+# Dependabot's cooldown, so every version Dependabot proposes can install.
+minimumReleaseAge: 10080
+# A fix that cannot wait 7 days goes here by exact version, with a reason and a
+# review date, and comes out once it is old enough:
+#   - <package>@<version> # <reason>. Review: <date>
+minimumReleaseAgeExclude: []
+
+# Fail when a new version of a package has weaker publish evidence (such as
+# lost provenance) than the versions before it, a common sign of a takeover.
+trustPolicy: no-downgrade
+
+# Dependency build scripts are denied unless reviewed and listed here. pnpm
+# fails the install on any unreviewed build (strictDepBuilds is on by default).
+# Each entry says what the script does and why it may or may not run:
+#   <package>: true # <what it does>. Reviewed: <date>
+allowBuilds: {}
+
+# eslint-plugin-jsx-a11y 6.10.2, its latest release, declares ESLint up to 9.
+# Its rules run correctly on ESLint 10: packages/eslint-config's tests lint a
+# file with known accessibility faults and expect every one. Drop this when the
+# plugin declares ESLint 10. Review: 2026-12-01.
+peerDependencyRules:
+  allowedVersions:
+    eslint-plugin-jsx-a11y>eslint: "10"
+
+# Forced versions. Each entry needs a reason and a review date:
+#   <selector>: <version> # <reason>. Review: <date>
+overrides: {}
+
+# `pnpm audit` in the verify job fails on high or critical advisories. An
+# accepted advisory goes under `ignore` by its GHSA id, with a reason and a
+# review date on the line above it.
+audit:
+  level: high
+  ignore: []

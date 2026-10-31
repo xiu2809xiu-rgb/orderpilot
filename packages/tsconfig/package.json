@@ -1,0 +1,18 @@
+{
+  "name": "@orderpilot/tsconfig",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The strict TypeScript configs every OrderPilot package extends.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "files": [
+    "base.json",
+    "node.json",
+    "react.json"
+  ],
+  "exports": {
+    "./base.json": "./base.json",
+    "./node.json": "./node.json",
+    "./react.json": "./react.json"
+  }
+}

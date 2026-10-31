@@ -1,0 +1,36 @@
+{
+  "name": "@orderpilot/eslint-config",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The flat, type-aware ESLint config every OrderPilot package uses.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    }
+  },
+  "files": [
+    "index.js",
+    "index.d.ts"
+  ],
+  "scripts": {
+    "test": "node --test \"test/**/*.test.js\""
+  },
+  "dependencies": {
+    "@eslint/js": "10.0.1",
+    "eslint-plugin-jsx-a11y": "6.10.2",
+    "globals": "17.13.0",
+    "typescript-eslint": "8.72.0"
+  },
+  "devDependencies": {
+    "@orderpilot/tsconfig": "workspace:*",
+    "eslint": "10.13.0",
+    "typescript": "6.0.3"
+  },
+  "peerDependencies": {
+    "eslint": ">=10.13.0 <11",
+    "typescript": ">=6.0.3 <6.1"
+  }
+}

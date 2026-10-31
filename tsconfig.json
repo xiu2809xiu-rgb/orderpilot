@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "@orderpilot/tsconfig/node.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true
+  },
+  "include": [
+    "*.js",
+    "scripts/**/*.mjs",
+    "packages/eslint-config/**/*.js",
+    "packages/eslint-config/types/*.d.ts"
+  ],
+  "exclude": ["packages/eslint-config/test/fixtures"]
+}
