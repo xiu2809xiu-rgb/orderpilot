@@ -8,6 +8,7 @@ import { Reflector } from "@nestjs/core";
 import { COOKIES } from "@orderpilot/shared";
 import type { Request } from "express";
 import { DomainError } from "../../common/domain-error.js";
+import { AppConfig } from "../../config/app-config.js";
 import { RefreshTokenRepository } from "../../sessions/refresh-token.repository.js";
 import { UserRepository } from "../../users/user.repository.js";
 import { AuthAuditor } from "../auth-auditor.js";
@@ -32,6 +33,7 @@ export class AuthGuard implements CanActivate {
     @Inject(RefreshTokenRepository)
     private readonly tokens: RefreshTokenRepository,
     @Inject(AuthAuditor) private readonly auditor: AuthAuditor,
+    @Inject(AppConfig) private readonly config: AppConfig,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -51,7 +53,7 @@ export class AuthGuard implements CanActivate {
       );
     }
     if (verdict.kind === "invalid") {
-      await this.refuse(req, "invalid-token");
+      await this.refuse(req, "invalid-token", undefined, true);
       throw unauthenticated();
     }
 
@@ -61,7 +63,12 @@ export class AuthGuard implements CanActivate {
       await this.refuse(req, user ? "user-disabled" : "unknown-user", user?.id);
       throw unauthenticated();
     }
-    if (!(await this.tokens.hasLiveToken(claims.sessionId))) {
+    // A sign-in taken with no password must not outlive the switch.
+    if (claims.demo && !this.config.demoMode) {
+      await this.refuse(req, "demo-mode-off", user.id);
+      throw unauthenticated();
+    }
+    if (!(await this.tokens.hasLiveToken(claims.sessionId, user.id))) {
       await this.refuse(req, "session-ended", user.id);
       throw new DomainError(
         "SESSION_EXPIRED",
@@ -83,12 +90,18 @@ export class AuthGuard implements CanActivate {
     return true;
   }
 
-  private refuse(req: Request, reason: string, userId?: string): Promise<void> {
+  private refuse(
+    req: Request,
+    reason: string,
+    userId?: string,
+    sampled = false,
+  ): Promise<void> {
     return this.auditor.refused(req, {
       action: "auth.access.refused",
       reason,
       summary: "A request with a session that is not valid was refused",
       ...(userId ? { entity: { type: "User", id: userId } } : {}),
+      ...(sampled ? { sampled } : {}),
     });
   }
 }

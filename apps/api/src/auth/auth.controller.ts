@@ -16,6 +16,7 @@ import {
   type LoginRequest,
 } from "@orderpilot/shared";
 import type { Request, Response } from "express";
+import { DomainError } from "../common/domain-error.js";
 import { openApiSchema } from "../common/openapi.js";
 import { ZodValidationPipe } from "../common/zod-validation.pipe.js";
 import type { AuthContext } from "./auth-context.js";
@@ -85,7 +86,9 @@ export class AuthController {
       );
     } catch (error) {
       // A refused refresh ends the session: do not leave dead cookies behind.
-      this.cookies.clear(res);
+      // A fault of ours (a database error) says nothing about the session, so
+      // the cookies stay and the browser can try again.
+      if (error instanceof DomainError) this.cookies.clear(res);
       throw error;
     }
   }
@@ -96,7 +99,11 @@ export class AuthController {
   @ApiOperation({ summary: "Sign out and revoke the refresh token" })
   @ApiOkResponse({ schema: openApiSchema(authRoutes.logout.response) })
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    await this.auth.logout(req, readCookie(req, COOKIES.refresh));
+    await this.auth.logout(
+      req,
+      readCookie(req, COOKIES.refresh),
+      readCookie(req, COOKIES.access),
+    );
     this.cookies.clear(res);
     return { data: { ok: true as const } };
   }

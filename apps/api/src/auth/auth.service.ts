@@ -143,18 +143,46 @@ export class AuthService {
     return outcome.signedIn;
   }
 
-  /** Ends the sign-in the refresh token belongs to. Calling it twice, or with a bad token, is harmless. */
-  async logout(req: Request, presented: string | undefined): Promise<void> {
-    if (!presented) return;
+  /**
+   * Ends the sign-in the refresh token belongs to, or, with no refresh cookie,
+   * the one a valid access token names. Calling it twice, or with a bad
+   * token, is harmless.
+   */
+  async logout(
+    req: Request,
+    presented: string | undefined,
+    presentedAccess: string | undefined,
+  ): Promise<void> {
     await this.database.transaction(async () => {
-      const token = await this.tokens.findByHashForUpdate(
-        hashRefreshToken(presented),
-      );
-      if (token?.revokedAt !== null) return;
-      const user = await this.users.findById(token.userId);
+      let found: { familyId: string; userId: string; demo: boolean } | null =
+        null;
+      if (presented) {
+        const token = await this.tokens.findByHashForUpdate(
+          hashRefreshToken(presented),
+        );
+        if (token?.revokedAt === null) found = token;
+      }
+      if (!found && presentedAccess) {
+        const verdict = await this.access.verify(presentedAccess);
+        if (verdict.kind === "valid") {
+          found = {
+            familyId: verdict.claims.sessionId,
+            userId: verdict.claims.userId,
+            demo: verdict.claims.demo,
+          };
+        }
+      }
+      if (!found) return;
+      const user = await this.users.findById(found.userId);
       const now = new Date();
-      await this.tokens.revokeFamily(token.familyId, "logout", now);
-      if (!user) return;
+      const revoked = await this.tokens.revokeFamily(
+        found.familyId,
+        "logout",
+        now,
+      );
+      // The access token's family may be someone else's or already over.
+      if (!user || revoked === 0) return;
+      const token = found;
       await this.audit.record({
         actor: { kind: "user", userId: user.id, role: user.role },
         action: "auth.logout",
@@ -183,6 +211,17 @@ export class AuthService {
       return fail("UNAUTHENTICATED", "Sign in to continue.");
     }
     const user = await this.users.findById(token.userId);
+
+    if (token.demo && !this.config.demoMode) {
+      await this.tokens.revokeFamily(token.familyId, "demo-mode-off", now);
+      await this.auditor.refused(req, {
+        action: "auth.refresh.refused",
+        reason: "demo-mode-off",
+        summary: "A demo sign-in was ended because DEMO_MODE is off",
+        entity: { type: "User", id: token.userId },
+      });
+      return fail("UNAUTHENTICATED", "Sign in to continue.");
+    }
 
     if (verdict === "reused") {
       const revoked = await this.tokens.revokeFamily(

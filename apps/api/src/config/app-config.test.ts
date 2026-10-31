@@ -142,6 +142,20 @@ describe("production safety rules key off APP_ENV", () => {
     JWT_SECRET: "a-long-random-secret-for-this-test-only-0123456789",
   });
 
+  it("refuses the public default JWT secret on a demo stack, and allows it locally", () => {
+    const demo = { ...valid, APP_ENV: "demo", COOKIE_SECURE: "true" };
+    const withoutSecret = Object.fromEntries(
+      Object.entries(demo).filter(([name]) => name !== "JWT_SECRET"),
+    );
+    expect(messageFor(withoutSecret)).toContain("JWT_SECRET");
+    expect(messageFor({ ...demo, JWT_SECRET: DEFAULT_JWT_SECRET })).toContain(
+      "JWT_SECRET",
+    );
+    expect(() =>
+      AppConfig.fromEnv({ ...valid, JWT_SECRET: DEFAULT_JWT_SECRET }),
+    ).not.toThrow();
+  });
+
   it("refuses the default or a short JWT secret, and demo passwords, in production", () => {
     const withoutSecret = Object.fromEntries(
       Object.entries(production).filter(([name]) => name !== "JWT_SECRET"),
@@ -183,7 +197,12 @@ describe("production safety rules key off APP_ENV", () => {
   it("does not treat NODE_ENV=production as APP_ENV=production", () => {
     // A demo stack runs NODE_ENV=production with DEMO_MODE=true.
     const config = AppConfig.fromEnv(
-      baseEnv({ APP_ENV: "demo", NODE_ENV: "production", DEMO_MODE: "true" }),
+      baseEnv({
+        APP_ENV: "demo",
+        NODE_ENV: "production",
+        DEMO_MODE: "true",
+        JWT_SECRET: "a-long-random-secret-for-this-test-only-0123456789",
+      }),
     );
     expect(config.isProduction).toBe(false);
     expect(config.demoMode).toBe(true);

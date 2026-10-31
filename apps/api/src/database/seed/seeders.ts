@@ -97,7 +97,19 @@ const demoUsers: Seeder = {
           password !== null &&
           !(await hasher.check(existing.passwordHash, password))
         ) {
-          await users.setPasswordHash(existing.id, await hasher.hash(password));
+          const hash = await hasher.hash(password);
+          await database.transaction(async () => {
+            await users.setPasswordHash(existing.id, hash);
+            await audit.record({
+              actor: { kind: "system", name: "seed" },
+              action: "user.password-reset",
+              entityType: "User",
+              entityId: existing.id,
+              summary: `${account.displayName} had the password reset from DEMO_PASSWORD`,
+              changes: { source: "DEMO_PASSWORD" },
+              traceId: "seed",
+            });
+          });
           passwords += 1;
         }
         continue;

@@ -58,10 +58,14 @@ export class RefreshTokenRepository {
     });
   }
 
-  /** True while any token of the sign-in is not revoked. Sign-out and reuse revoke them all. */
-  async hasLiveToken(familyId: string): Promise<boolean> {
+  /**
+   * True while any token of the sign-in is not revoked. Sign-out and reuse
+   * revoke them all. The sign-in must also belong to `userId`, so a token
+   * naming one user's id and another user's session is not accepted.
+   */
+  async hasLiveToken(familyId: string, userId: string): Promise<boolean> {
     const live = await this.database.client.refreshToken.findFirst({
-      where: { familyId, revokedAt: null },
+      where: { familyId, userId, revokedAt: null },
       select: { id: true },
     });
     return live !== null;

@@ -155,15 +155,17 @@ export const envSchema = z
         message: "Cookies must be Secure unless APP_ENV is local",
       });
     }
-    if (env.APP_ENV !== "production") return;
-    if (env.JWT_SECRET === DEFAULT_JWT_SECRET) {
+    // The default is public, and anyone who can sign a token can be anyone.
+    // A demo stack is reachable by others, so only a laptop may use it.
+    if (env.APP_ENV !== "local" && env.JWT_SECRET === DEFAULT_JWT_SECRET) {
       ctx.addIssue({
         code: "custom",
         path: ["JWT_SECRET"],
         message:
-          "Set your own JWT secret when APP_ENV is production: the default is public",
+          "Set your own JWT secret unless APP_ENV is local: the default is public",
       });
     }
+    if (env.APP_ENV !== "production") return;
     if (env.DEMO_PASSWORD !== undefined) {
       ctx.addIssue({
         code: "custom",
