@@ -24,6 +24,11 @@ function previewHeaders(): Plugin {
 export default defineConfig(({ mode }) => {
   // Only these two names are read from the root .env, never its secrets.
   const env = loadEnv(mode, repoRoot, ["API_PORT", "WEB_PORT"]);
+  // loadEnv also parses the root .env's NODE_ENV=development and hands it to
+  // Vite as the user's choice, which turns a production build into a
+  // development one (dev JSX runtime, 282 KB instead of 215 KB). Only the two
+  // names above are wanted from that file.
+  delete process.env.VITE_USER_NODE_ENV;
   const apiTarget = `http://127.0.0.1:${env.API_PORT ?? "3000"}`;
   const webPort = Number(env.WEB_PORT ?? "5173");
   const proxy = { "/api": { target: apiTarget, changeOrigin: false } };
