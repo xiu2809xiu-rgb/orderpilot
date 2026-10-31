@@ -43,11 +43,14 @@ function snapshot() {
 }
 
 const before = snapshot();
-const run = spawnSync("pnpm api:generate", {
-  cwd: root,
-  stdio: "inherit",
-  shell: true,
-});
+// pnpm sets npm_execpath to its own script, so no shell is needed.
+const pnpm = process.env.npm_execpath;
+const run = pnpm
+  ? spawnSync(process.execPath, [pnpm, "api:generate"], {
+      cwd: root,
+      stdio: "inherit",
+    })
+  : spawnSync("pnpm", ["api:generate"], { cwd: root, stdio: "inherit" });
 if (run.status !== 0) {
   console.error("api:check: pnpm api:generate failed.");
   process.exit(run.status ?? 1);
