@@ -22,7 +22,16 @@ const version = (
   ) as { version: string }
 ).version;
 
-const config = AppConfig.fromEnv({ APP_ENV: "local" });
+// Made-up values: the config requires them, but with `preview: true` nothing
+// connects to them.
+const config = AppConfig.fromEnv({
+  APP_ENV: "local",
+  DATABASE_URL: "postgresql://spec:spec@127.0.0.1:5999/spec",
+  REDIS_URL: "redis://127.0.0.1:5998/0",
+  S3_ACCESS_KEY_ID: "spec",
+  S3_SECRET_ACCESS_KEY: "spec",
+  S3_BUCKET: "spec",
+});
 const app = await NestFactory.create<NestExpressApplication>(
   AppModule.register(config),
   { preview: true, logger: false },

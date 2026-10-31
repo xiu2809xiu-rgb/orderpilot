@@ -49,7 +49,7 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
 };
 
 /**
- * @summary Service health: build, environment and checks
+ * @summary Service health: status and the names of the checks
  */
 export const healthSummary = (
 
@@ -120,7 +120,7 @@ export function useHealthSummary<TData = Awaited<ReturnType<typeof healthSummary
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary Service health: build, environment and checks
+ * @summary Service health: status and the names of the checks
  */
 
 export function useHealthSummary<TData = Awaited<ReturnType<typeof healthSummary>>, TError = ErrorType<unknown>>(

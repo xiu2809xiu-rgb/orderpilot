@@ -24,7 +24,7 @@ import type {
 } from '../../model';
 
 
-export const getHealthSummaryResponseMock = (overrideResponse: Partial<Extract<HealthSummary200, object>> = {}): HealthSummary200 => ({data: {status: faker.helpers.arrayElement(['ok','unavailable'] as const), name: faker.string.alpha({length: {min: 10, max: 20}}), version: faker.string.alpha({length: {min: 10, max: 20}}), gitSha: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), appEnv: faker.helpers.arrayElement(['local','demo','production'] as const), uptimeSeconds: faker.number.int({min: 0, max: 9007199254740991}), checks: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({name: faker.string.alpha({length: {min: 10, max: 20}}), status: faker.helpers.arrayElement(['up','down'] as const), durationMs: faker.number.int({min: 0, max: 9007199254740991})}))}, ...overrideResponse})
+export const getHealthSummaryResponseMock = (overrideResponse: Partial<Extract<HealthSummary200, object>> = {}): HealthSummary200 => ({data: {status: faker.helpers.arrayElement(['ok','unavailable'] as const), checks: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({name: faker.string.alpha({length: {min: 10, max: 20}}), status: faker.helpers.arrayElement(['up','down'] as const)}))}, ...overrideResponse})
 
 export const getHealthLiveResponseMock = (overrideResponse: Partial<Extract<HealthLive200, object>> = {}): HealthLive200 => ({data: {status: faker.helpers.arrayElement(['ok'] as const)}, ...overrideResponse})
 

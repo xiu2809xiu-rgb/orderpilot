@@ -3,13 +3,14 @@ import { NestFactory } from "@nestjs/core";
 import type { NestExpressApplication } from "@nestjs/platform-express";
 import { describe, expect, it } from "vitest";
 import { AppModule } from "../app.module.js";
+import { baseEnv } from "../../test/support/base-env.js";
 import { AppConfig } from "../config/app-config.js";
 import { buildOpenApiDocument } from "./openapi-document.js";
 import { applyRouting } from "./routing.js";
 
 async function documentOf() {
   const app = await NestFactory.create<NestExpressApplication>(
-    AppModule.register(AppConfig.fromEnv({ APP_ENV: "local" })),
+    AppModule.register(AppConfig.fromEnv(baseEnv())),
     { preview: true, logger: false },
   );
   applyRouting(app);

@@ -10,9 +10,4 @@ import type { HealthSummary200DataChecksItemStatus } from './healthSummary200Dat
 export type HealthSummary200DataChecksItem = {
   name: string;
   status: HealthSummary200DataChecksItemStatus;
-  /**
-     * @minimum 0
-     * @maximum 9007199254740991
-     */
-  durationMs: number;
 };
