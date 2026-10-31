@@ -22,9 +22,10 @@
     "description": "Each cell is a row in the live role-permission table. A change is saved at once and written to the audit log.",
     "readOnly": "You can read the matrix. Changing it needs the roles.manage permission.",
     "tableLabel": "Permissions by role",
+    "scrollHint": "Scroll sideways to see every role.",
     "permission": "Permission",
     "dataScope": "Data scope",
-    "dataScopeHint": "Which records a role may see. The base stores and shows this; area 4 enforces it.",
+    "dataScopeHint": "Which records a role may see. It is stored and shown here, but no list is filtered by it yet.",
     "scopes": {
       "all": "All records",
       "brands": "Own brands",
@@ -108,7 +109,7 @@
   },
   "masking": {
     "title": "Masking",
-    "description": "The server decides what each role sees. A hidden value is never sent, so it is not in the page or the network tab. This is one neutral sample rule; the real rules are area 4's.",
+    "description": "The server decides what each role sees. A hidden value is never sent, so it is not in the page or the network tab. This is one neutral sample rule, not your organisation's masking policy.",
     "rulesTitle": "Rule",
     "rulesLabel": "Masking rules",
     "field": "Field",
@@ -123,7 +124,7 @@
   },
   "ai": {
     "title": "Data sent to AI",
-    "description": "The AI gateway asks this rule before it sends anything. The default is synthetic data only, so real data goes nowhere until area 4 says otherwise.",
+    "description": "The AI gateway asks this rule before it sends anything. The default is synthetic data only, so real data goes nowhere until the access policy allows it.",
     "rulesLabel": "What each provider may receive",
     "provider": "Provider",
     "origins": "Data origin",

@@ -27,6 +27,7 @@ import { RefusalPanel } from "./RefusalPanel";
 export function MaskingTab() {
   const { t } = useTranslation("governance");
   const { t: tc } = useTranslation();
+  const { t: tm } = useTranslation("components");
   const role = useSessionStore((state) => state.session?.user.role);
   const sample = usePolicyMaskingSample();
 
@@ -106,14 +107,21 @@ export function MaskingTab() {
                     </span>
                   </TableCell>
                   <TableCell>
-                    <MaskedValue
-                      masked={record.note.masked}
-                      value={record.note.value ?? undefined}
-                      reason={record.note.reason ?? "role"}
-                      visibleTo={rules[0]?.visibleTo
-                        .map((r) => tc(`roles.${r}`))
-                        .join(", ")}
-                    />
+                    <span className="inline-flex flex-wrap items-center gap-x-2">
+                      <MaskedValue
+                        masked={record.note.masked}
+                        value={record.note.value ?? undefined}
+                        reason={record.note.reason ?? "role"}
+                        visibleTo={rules[0]?.visibleTo
+                          .map((r) => tc(`roles.${r}`))
+                          .join(", ")}
+                      />
+                      {record.note.masked ? (
+                        <span className="text-xs text-muted-foreground">
+                          {tm(`masked.reasons.${record.note.reason ?? "role"}`)}
+                        </span>
+                      ) : null}
+                    </span>
                   </TableCell>
                 </TableRow>
               ))}

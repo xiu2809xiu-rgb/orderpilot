@@ -22,7 +22,12 @@ const matrix = {
   permissions: [...PERMISSIONS],
   roles: ROLES.map((role) => ({
     role,
-    permissions: [...DEFAULT_ROLE_PERMISSIONS[role]],
+    // No role holds the money permissions by default; this fixture gives
+    // Finance one so the page has a granted cell to draw.
+    permissions: [
+      ...DEFAULT_ROLE_PERMISSIONS[role],
+      ...(role === "FINANCE" ? (["payments.confirm"] as const) : []),
+    ],
     dataScope: DEFAULT_DATA_SCOPES[role],
   })),
   locked: [...LOCKED_CELLS],
@@ -62,6 +67,9 @@ describe("GovernancePage", () => {
       name: "Confirm a payment for Finance",
     });
     expect(cell).toBeChecked();
+    expect(
+      screen.getByText("Scroll sideways to see every role."),
+    ).toBeVisible();
     expect(await axeViolations(container)).toEqual([]);
   });
 
