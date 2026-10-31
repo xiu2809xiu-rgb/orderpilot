@@ -32,6 +32,9 @@ allowBuilds:
   # Install-time telemetry that swagger-ui-dist pulls in. No functional effect,
   # so it stays denied. Reviewed: 2026-10-31
   "@scarf/scarf": false
+  # Copies the browser service worker into a public folder. Tests run msw in
+  # Node and the app never starts it, so it stays denied. Reviewed: 2026-10-31
+  msw: false
 
 # eslint-plugin-jsx-a11y 6.10.2, its latest release, declares ESLint up to 9.
 # Its rules run correctly on ESLint 10: packages/eslint-config's tests lint a
