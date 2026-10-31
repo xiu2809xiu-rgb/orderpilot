@@ -51,7 +51,8 @@ jobs:
       - name: Start the local stack in the background
         run: |
           cp .env.example .env
-          nohup docker compose up -d --build > "$RUNNER_TEMP/stack.log" 2>&1 &
+          rm -f "$RUNNER_TEMP/stack.exit"
+          nohup sh -c 'docker compose up -d --build > "$RUNNER_TEMP/stack.log" 2>&1; echo $? > "$RUNNER_TEMP/stack.exit"' > /dev/null 2>&1 &
 
       - name: Samples history check
         run: node scripts/check-samples.mjs --history
@@ -79,6 +80,17 @@ jobs:
 
       - name: Wait for the local stack
         run: |
+          # The background start must finish first: a second `up` while it is
+          # still building would race it for the same container names.
+          for _ in $(seq 1 120); do
+            [ -f "$RUNNER_TEMP/stack.exit" ] && break
+            sleep 5
+          done
+          if [ "$(cat "$RUNNER_TEMP/stack.exit" 2>/dev/null)" != "0" ]; then
+            cat "$RUNNER_TEMP/stack.log" || true
+            echo "The background start of the stack failed or timed out."
+            exit 1
+          fi
           docker compose up -d --wait
           docker compose ps
 
