@@ -11,10 +11,10 @@
   },
   "kpi": {
     "labEstimate": "Mock lab estimates",
-    "labEstimateHint": "No real run has happened. These numbers only show how the dashboard will read.",
+    "labEstimateHint": "No real run has happened. These numbers only show how the dashboard will read. They are not linked to the order tracker.",
     "manual": "By hand today",
     "withOrderPilot": "With OrderPilot",
-    "definition": "How it is calculated",
+    "definition": "Draft definition",
     "chartTitle": "By hand against OrderPilot",
     "chartDescription": "One chart for each measure, because each has its own unit.",
     "chartLabel": "{{label}}: {{manual}} by hand, {{withOrderPilot}} with OrderPilot, in {{unit}}",

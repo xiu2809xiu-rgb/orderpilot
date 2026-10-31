@@ -63,7 +63,7 @@ D-1 landed. Everything below runs today on mock data built from the synthetic da
   - `domain/check-rule.ts`: the `CheckRule` Strategy interface (`id`, `label`, `appliesTo`, `evaluate(context)`) and the context a rule is given. No rule is written.
   - `domain/order-status-reader.ts`: the `OrderStatusReader` port, the only way area 3 learns an order's status, and the `CheckReporter` port that carries `check.completed` to area 2. `mock-order-status-reader.ts` answers from the synthetic data's sample states. Area 2's API replaces it in `checks.module.ts`, and nothing else changes.
   - `domain/mock-samples.ts`, `domain/mock-status.ts`: the sample timelines, check results, exceptions and overdue flags the screens show. Every rule id starts with `mock.`. They go when your engine and read model exist.
-  - `domain/name-match.ts`: lists look-alike names as possible matches. A match is made on the Navision number alone.
+  - The base compares no names: its possible matches are fixed sample records, and what counts as a look-alike is yours. A match is made on the Navision number alone.
   - `mock-checks.repository.ts`, `tracker.service.ts`, `exceptions.service.ts` and the two controllers: layered as the platform expects. The services page, search and sort the mock list on the server and decide nothing else.
 - **The insights module** (`apps/api/src/modules/insights/`): one route that returns Spectra's five measures with placeholder lab estimates.
 - **The model** (`apps/api/prisma/schema/checks.prisma`, migration `20261101090000_checks_exceptions`): `CheckException`, empty. Nothing writes to it, and no order status is stored anywhere in area 3.

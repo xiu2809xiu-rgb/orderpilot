@@ -1,6 +1,4 @@
 import {
-  addDecimal,
-  multiplyDecimal,
   type CheckException,
   type CheckResult,
   type MasterMatch,
@@ -9,7 +7,6 @@ import {
   type Tolerance,
 } from "@orderpilot/shared";
 import type { Customer, Item, SampleOrder } from "@orderpilot/synthetic-data";
-import { lookAlikes } from "./name-match.js";
 import { SAMPLE_STEPS } from "./mock-status.js";
 
 // Mock builders for the base's screens. They read the synthetic data's sample
@@ -21,6 +18,11 @@ export const MOCK_TOLERANCE: Tolerance = {
   label: "Quantity difference in units (sample value)",
   value: "0",
 };
+
+/** "5.00" and "25" print the same way: no trailing zero decimals. */
+function plainQuantity(value: string): string {
+  return value.replace(/\.0+$/, "");
+}
 
 function stepTime(order: SampleOrder, index: number): string {
   const hour = String(8 + index).padStart(2, "0");
@@ -83,7 +85,9 @@ export function mockChecks(order: SampleOrder): CheckResult[] {
     });
   }
   if (order.scenario.kind === "packing-list-mismatch") {
-    const { ordered, packed, itemNo } = order.scenario;
+    const { itemNo } = order.scenario;
+    const ordered = plainQuantity(order.scenario.ordered);
+    const packed = plainQuantity(order.scenario.packed);
     results.push({
       id: `mock-${no}-2`,
       ruleId: "mock.sample-quantity",
@@ -136,17 +140,16 @@ export function mockExceptions(
     };
     const { scenario } = order;
     if (scenario.kind === "packing-list-mismatch") {
+      const ordered = plainQuantity(scenario.ordered);
+      const packed = plainQuantity(scenario.packed);
       rows.push({
         ...base,
         ruleId: "mock.sample-quantity",
         ruleLabel: "Packing list quantity against the PO (sample result)",
-        summary: `Item ${scenario.itemNo}: the packing list says ${scenario.packed}, the PO says ${scenario.ordered}`,
-        expected: scenario.ordered,
-        actual: scenario.packed,
-        difference: addDecimal(
-          scenario.packed,
-          multiplyDecimal(scenario.ordered, "-1"),
-        ),
+        summary: `Item ${scenario.itemNo}: the packing list says ${packed}, the PO says ${ordered}`,
+        expected: ordered,
+        actual: packed,
+        difference: "sample difference",
         tolerance: MOCK_TOLERANCE,
         fixBy: "SUPPORT",
       });
@@ -168,10 +171,27 @@ export function mockExceptions(
 }
 
 /**
+ * Stand-in for the possible matches: the next records in the master data
+ * after the one at hand, in file order. It compares no names. Area 3 (Iok
+ * Teck) decides what counts as a look-alike. A possible match is for a
+ * person to look at and is never used to match.
+ */
+function samplePossibleMatches<T extends { no: string }>(
+  records: readonly T[],
+  ownNo: string,
+  nameOf: (record: T) => string,
+  limit: number,
+): MasterMatch["possibleMatches"] {
+  const at = records.findIndex((r) => r.no === ownNo);
+  return records
+    .filter((r) => r.no !== ownNo)
+    .slice(Math.max(at, 0), Math.max(at, 0) + limit)
+    .map((r) => ({ no: r.no, name: nameOf(r) }));
+}
+
+/**
  * The customer and every item line matched on their Navision numbers. The
  * printed name is shown beside the matched one and is never used to match.
- * Records with a similar name but another number are listed as possible
- * matches, for a person to look at.
  */
 export function mockMatches(
   order: SampleOrder,
@@ -192,10 +212,11 @@ export function mockMatches(
       printedName: printedCustomer,
       matchedNo: customer?.no ?? null,
       matchedName: customer?.name ?? null,
-      possibleMatches: lookAlikes(
-        printedCustomer,
-        customers.map((c) => ({ no: c.no, name: c.name })),
+      possibleMatches: samplePossibleMatches(
+        customers,
         order.header.sellToCustomerNo,
+        (c) => c.name,
+        2,
       ),
     },
   ];
@@ -208,11 +229,11 @@ export function mockMatches(
       printedName: line.description,
       matchedNo: item?.no ?? null,
       matchedName: item?.description ?? null,
-      possibleMatches: lookAlikes(
-        line.description,
-        items.map((i) => ({ no: i.no, name: i.description })),
+      possibleMatches: samplePossibleMatches(
+        items,
         line.no,
-        { limit: 2 },
+        (i) => i.description,
+        2,
       ),
     });
   }

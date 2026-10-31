@@ -7,7 +7,6 @@ import {
 } from "@orderpilot/shared";
 import { describe, expect, it } from "vitest";
 import { NotFoundError } from "../../common/domain-error.js";
-import { lookAlikes } from "./domain/name-match.js";
 import { ExceptionsService } from "./exceptions.service.js";
 import { MockChecksRepository } from "./mock-checks.repository.js";
 import { MockOrderStatusReader } from "./mock-order-status-reader.js";
@@ -107,20 +106,6 @@ describe("matching on Navision numbers", () => {
     const customer = matches.find((m) => m.kind === "customer");
     expect(customer?.matchedNo).toBe(order.header.sellToCustomerNo);
     expect(customer?.printedNo).toBe(order.header.sellToCustomerNo);
-  });
-
-  it("lists a look-alike name as a possible match and never the record itself", () => {
-    const found = lookAlikes(
-      "Harbour Marine Supply",
-      [
-        { no: "C0001", name: "Harbour Marine Supply" },
-        { no: "C0002", name: "Harbour Marine Supplies Pte" },
-        { no: "C0003", name: "Orchard Fittings" },
-      ],
-      "C0001",
-      { threshold: 0.3 },
-    );
-    expect(found.map((m) => m.no)).toEqual(["C0002"]);
   });
 });
 
