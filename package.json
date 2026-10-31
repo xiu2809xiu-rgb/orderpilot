@@ -16,6 +16,7 @@
     "typecheck": "tsc -p tsconfig.json && pnpm -r --if-present typecheck",
     "test": "node --test \"scripts/**/*.test.mjs\" && pnpm -r --if-present test",
     "build": "pnpm -r --if-present build",
+    "budget": "pnpm --filter @orderpilot/web budget",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check:dashes": "node scripts/check-dashes.mjs",
