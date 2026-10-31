@@ -2,13 +2,13 @@
 
 Rendered from [`scripts/github/data/backlog.json`](../../scripts/github/data/backlog.json) by `node scripts/github/render-docs.mjs`. Change the data, not this file. The same data seeds the issues. The board shows where each story stands.
 
-There are 9 epics and 74 stories. Estimates are story points: a first guess, for the team to change at planning.
+There are 9 epics and 84 stories. Estimates are story points: a first guess, for the team to change at planning.
 
 ## Epics
 
 | Epic   | Title                             | Area                                    | Stories | Points |
 | ------ | --------------------------------- | --------------------------------------- | ------- | ------ |
-| Epic P | The platform base                 | `area: 1 document AI and integration`   | 30      | 175    |
+| Epic P | The platform base                 | `area: 1 document AI and integration`   | 40      | 232    |
 | Epic A | Document intake and AI extraction | `area: 1 document AI and integration`   | 5       | 31     |
 | Epic B | Master data and Navision          | `area: 1 document AI and integration`   | 4       | 14     |
 | Epic C | Order workflows and approvals     | `area: 2 order workflows and approvals` | 5       | 29     |
@@ -20,7 +20,7 @@ There are 9 epics and 74 stories. Estimates are story points: a first guess, for
 
 ## Ready to pull
 
-The starter stories for areas 2, 3 and 4. Their owners start on them on Monday 2 Nov and refine them, and at the handover prompt 003 writes the rest from the owners' notes. They sit at Ready on the board.
+The starter stories for areas 2, 3 and 4. Their owners start on them on Monday 2 Nov and refine them, and at the handover prompt 004 writes the rest from the owners' notes. They sit at Ready on the board.
 
 | Story | Title                                                              | Area                                    | Points |
 | ----- | ------------------------------------------------------------------ | --------------------------------------- | ------ |
@@ -79,6 +79,16 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | P-25  | Slides as code                                                     | must     | 3      | `area: team`                            | M4 best practices                                              |
 | P-26  | Generated API hooks and mocks                                      | must     | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-28  | Replace the accepted glob advisory with an override                | must     | 1      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-31  | Data that looks real                                               | must     | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-32  | The consent card                                                   | must     | 2      | `area: 4 controls and monitoring`       | M4 best practices, M6 deploy and monitor                       |
+| P-33  | Home pages that work                                               | must     | 8      | `area: 1 document AI and integration`   | M4 best practices, M5 team Git workflow                        |
+| P-34  | Sign-in that sells it                                              | must     | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-35  | Master data                                                        | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-36  | Orders and the one order page                                      | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-37  | Documents and the review screen                                    | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-38  | The screens the teammates inherit                                  | must     | 8      | `area: 1 document AI and integration`   | M4 best practices, M5 team Git workflow                        |
+| P-39  | Hide what is not real yet                                          | must     | 2      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-40  | The bar for every screen: dense tables, keys and actions           | must     | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | T-1   | Owners, backups and reviews                                        | must     | 2      | `area: team`                            | M5 team Git workflow                                           |
 | T-2   | The briefing call with Spectra                                     | must     | 2      | `area: team`                            | M1 design thinking                                             |
 | T-3   | The project plan                                                   | must     | 3      | `area: team`                            | M5 team Git workflow                                           |
@@ -535,6 +545,7 @@ Acceptance criteria:
 - Data model: the start of area 1's order data: orders, order lines, documents, and field values with confidence and provenance. Status stays in area 2.
 - UI: an upload screen with drag and drop, and a documents list.
 - Queue: a job that marks each document "awaiting AI" until the extraction stories.
+- Prompt 003 brings forward upload, the documents list and 12 synthetic documents (P-37); this story keeps the rest: the safe upload API, extraction, content-hash duplicate detection, the data model and the queue.
 
 ### P-19: Mock Navision and synthetic master data
 
@@ -558,6 +569,7 @@ Acceptance criteria:
 - Realism: document numbering and statuses from Richie's notes when present.
 - Tests, a compose service, `docs/api/mock-systems.md`, and a "Mock" label wherever it's used.
 - ADR: mock external systems.
+- Prompt 003 brings forward reading master data through a port labelled Mock Navision (P-35); this story still brings the OData service, its paging and `$filter`, and the compose service.
 
 ### P-20: The connector framework and the Navision adapter
 
@@ -596,6 +608,7 @@ Acceptance criteria:
 - Planted mistakes: quantity, price, PO reference, part number and changed bank details.
 - Ground truth: a JSON file for every document, for the accuracy harness.
 - Delivery: a CLI (`pnpm docs:generate`), with a set copied to `apps/web/public/demo-documents/` for demo uploads, not a folder called `samples`.
+- Prompt 003 brings forward 12 synthetic documents in `apps/web/public/demo-documents/` (P-37); this story keeps the generator, the four layouts, the planted mistakes, the ground-truth files and the CLI.
 
 ### P-22: The design system with the Pro kits
 
@@ -788,6 +801,209 @@ Acceptance criteria:
 - Thresholds fail the run on a high error rate or a slow 95th percentile, with the numbers written down in docs/agile/test-plan.md.
 - It runs against the Docker stack with one documented command, and its result is recorded in the build report.
 - It is not a required check: it runs on demand or on a schedule, so a slow runner cannot block a merge.
+
+### P-31: Data that looks real
+
+Grow the synthetic data so every list looks like a working business. Prompt 003; finished before the handover on Monday evening, 2 Nov.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 5 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/product-pass-data`
+- **Planned for:** Sprint 01 (W2) and Sprint 02 (W3)
+- **Depends on:** P-9
+
+Acceptance criteria:
+
+- Grow `packages/synthetic-data` with the same fictional brands and the brief's countries: about 40 customers and 12 vendors.
+- 300 items across IT, surveillance and accessories, each with a part number, brand, price, stock, quantity on sales order and quantity on purchase order.
+- 120 orders spread across every state over the last 60 days, each with lines, amounts, documents, owners and dates.
+- Payments, SPRs, tasks, reminders and exceptions to match.
+- Every area's seed uses it, so the screens agree with each other.
+- Keep the seed deterministic and under 30 seconds.
+- Check: screenshots as every role it touches, at 1440 by 900 and 390 by 844 in `docs/design/screenshots/product-pass/`, looked at before merging: no "Planned", no tiles showing only a dash, no popups over content, no empty-looking lists, no text cut off.
+
+### P-32: The consent card
+
+One small consent card that never covers content. Prompt 003; finished before the handover on Monday evening, 2 Nov.
+
+- **Area:** `area: 4 controls and monitoring`
+- **Priority:** must
+- **Estimate:** 2 points
+- **Requirements:** M4 best practices, M6 deploy and monitor
+- **Branch:** `feat/product-pass-consent`
+- **Planned for:** Sprint 01 (W2) and Sprint 02 (W3)
+- **Depends on:** F-1
+
+Acceptance criteria:
+
+- Make it one small card at the bottom right, shown once per browser and never over content.
+- Remember the choice, and let Settings change it later.
+- Change only its placement and frequency, not area 4's logic. Ask Angelyn to review.
+- Check: screenshots as every role it touches, at 1440 by 900 and 390 by 844 in `docs/design/screenshots/product-pass/`, looked at before merging: no "Planned", no tiles showing only a dash, no popups over content, no empty-looking lists, no text cut off.
+
+### P-33: Home pages that work
+
+A home page for every role with real counts and the work waiting. Prompt 003; finished before the handover on Monday evening, 2 Nov.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 8 points
+- **Requirements:** M4 best practices, M5 team Git workflow
+- **Branch:** `feat/product-pass-home`
+- **Planned for:** Sprint 01 (W2) and Sprint 02 (W3)
+- **Depends on:** P-31
+
+Acceptance criteria:
+
+- Tiles with real counts from the existing endpoints: my tasks, documents to confirm, open orders, open exceptions, overdue, awaiting approval, awaiting payment and ready to ship. Each tile opens the filtered list.
+- Needs you: the role's top five items, with customer, amount and due date, and a one-click action on each.
+- Quick actions for the role.
+- The sales flow as a chain of steps with a live count at each step, and the purchase flow beside it marked phase 2. Clicking a step opens the tracker filtered to that step.
+- For Management: the five KPIs with small trend charts (shadcn charts).
+- Check: screenshots of the home page as every role, at 1440 by 900 and 390 by 844 in `docs/design/screenshots/product-pass/`, looked at before merging: no "Planned", no tiles showing only a dash, no popups over content, no empty-looking lists, no text cut off.
+
+### P-34: Sign-in that sells it
+
+A sign-in page that states OrderPilot's promise. Prompt 003; finished before the handover on Monday evening, 2 Nov.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 3 points
+- **Requirements:** M4 best practices
+- **Branch:** `feat/product-pass-signin`
+- **Planned for:** Sprint 01 (W2) and Sprint 02 (W3)
+- **Depends on:** P-12
+
+Acceptance criteria:
+
+- A split layout: the form on one side, and OrderPilot's promise on the other.
+- That side has the tagline, the three-step "AI reads, rules decide, people approve" and a subtle animated order flow (React Bits free or Magic UI free).
+- Demo sign-in stays one click per role.
+- Check: screenshots at 1440 by 900 and 390 by 844 in `docs/design/screenshots/product-pass/`, looked at before merging: no "Planned", no tiles showing only a dash, no popups over content, no empty-looking lists, no text cut off.
+
+### P-35: Master data
+
+Lists and detail pages for customers, vendors and items, brought forward from P-19. Prompt 003; finished before the handover on Monday evening, 2 Nov.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 8 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/product-pass-master-data`
+- **Planned for:** Sprint 01 (W2) and Sprint 02 (W3)
+- **Depends on:** P-31
+
+Acceptance criteria:
+
+- Lists and detail pages for customers, vendors and items, read from the mock Navision data and labelled "Mock Navision".
+- An item shows stock, quantity on sales order, quantity on purchase order, available stock, price, brand and vendor.
+- A customer shows country, currency, payment terms, price group, open orders and overdue items.
+- A vendor shows its bank accounts (masked by role) and its open purchase orders.
+- Check: screenshots as every role it touches, at 1440 by 900 and 390 by 844 in `docs/design/screenshots/product-pass/`, looked at before merging: no "Planned", no tiles showing only a dash, no popups over content, no empty-looking lists, no text cut off.
+
+### P-36: Orders and the one order page
+
+The orders list, a New order form and one order page for every area. Prompt 003; finished before the handover on Monday evening, 2 Nov.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 8 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/product-pass-orders`
+- **Planned for:** Sprint 01 (W2) and Sprint 02 (W3)
+- **Depends on:** P-31, P-35
+
+Acceptance criteria:
+
+- The orders list, with filters for status, customer, owner, date and amount.
+- A New order form: customer, PO number, and lines with item search, quantity and price. It shows availability live as you type, and flags a shortfall with "Raise SPR".
+- One order page is the single place for an order: area 1's header, lines, amounts, availability and documents; area 2's steps; area 3's checks and tracker view; the next actions for the role. Each section stays a component in its owner's folder.
+- Writes go to OrderPilot only, never to Navision.
+- Check: screenshots as every role it touches, at 1440 by 900 and 390 by 844 in `docs/design/screenshots/product-pass/`, looked at before merging: no "Planned", no tiles showing only a dash, no popups over content, no empty-looking lists, no text cut off.
+
+### P-37: Documents and the review screen
+
+Upload, the documents list and the review screen, brought forward from P-18 and P-21. Prompt 003; finished before the handover on Monday evening, 2 Nov.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 8 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/product-pass-documents`
+- **Planned for:** Sprint 01 (W2) and Sprint 02 (W3)
+- **Depends on:** P-31
+
+Acceptance criteria:
+
+- Upload with drag and drop (PDF, images, Excel), and the documents list.
+- Each document's page shows the preview beside the fields read from it. Each field has its confidence, and clicking a field highlights where it came from on the page.
+- Confirm and Correct actions, with the corrections audited.
+- Until P-17's gateway is ready, Mock AI fills the fields from the synthetic ground truth.
+- Ship 12 synthetic documents (POs in different layouts, PIs and packing lists, including one scanned-looking PO) in `apps/web/public/demo-documents/`, so anyone can try the demo story's first two steps.
+- Check: screenshots as every role it touches, at 1440 by 900 and 390 by 844 in `docs/design/screenshots/product-pass/`, looked at before merging: no "Planned", no tiles showing only a dash, no popups over content, no empty-looking lists, no text cut off.
+
+### P-38: The screens the teammates inherit
+
+UI only for the task inbox, SPR approval, exceptions and insights; never their logic. Prompt 003; finished before the handover on Monday evening, 2 Nov.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 8 points
+- **Requirements:** M4 best practices, M5 team Git workflow
+- **Branch:** `feat/product-pass-inherited-screens`
+- **Planned for:** Sprint 01 (W2) and Sprint 02 (W3)
+- **Depends on:** P-31
+
+Acceptance criteria:
+
+- Task inbox: a compact list with customer, amount, age, due date and priority, and filters by type. Inline actions (approve, reject with a comment, open), and bulk select where it's safe.
+- SPR approval: the request, the stock picture, the customer's order, the approver's limit, and the decision with a comment.
+- Exceptions: severity, expected and found side by side, assign, and resolve with a reason.
+- Insights: the five KPIs with trend and target, by week.
+- Keep every area's core logic as `it.todo` for its owner. In each pull request, say what changed, and ask that area's owner to review.
+- Check: screenshots as every role it touches, at 1440 by 900 and 390 by 844 in `docs/design/screenshots/product-pass/`, looked at before merging: no "Planned", no tiles showing only a dash, no popups over content, no empty-looking lists, no text cut off.
+
+### P-39: Hide what is not real yet
+
+No placeholder a reviewer can reach. Prompt 003; finished before the handover on Monday evening, 2 Nov.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 2 points
+- **Requirements:** M4 best practices
+- **Branch:** `feat/product-pass-hide-planned`
+- **Planned for:** Sprint 01 (W2) and Sprint 02 (W3)
+- **Depends on:** P-12
+
+Acceptance criteria:
+
+- Remove Mapping, Connectors and the 3D view from the menu until their stories land.
+- Hide a menu item until it has something real to show.
+- Keep `PlannedPage` only behind a development flag.
+- Check: screenshots as every role it touches, at 1440 by 900 and 390 by 844 in `docs/design/screenshots/product-pass/`, looked at before merging: no "Planned", no tiles showing only a dash, no popups over content, no empty-looking lists, no text cut off.
+
+### P-40: The bar for every screen: dense tables, keys and actions
+
+The efficiency and density rules every list and detail page meets. Prompt 003; finished before the handover on Monday evening, 2 Nov.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 5 points
+- **Requirements:** M4 best practices
+- **Branch:** `feat/product-pass-bar`
+- **Planned for:** Sprint 01 (W2) and Sprint 02 (W3)
+- **Depends on:** P-12
+
+Acceptance criteria:
+
+- Compact table rows (36 to 40 px), with numbers right-aligned in tabular figures and amounts with their currency.
+- Skeletons that match the final layout, and no large empty cards.
+- Ctrl+K runs actions as well as navigation.
+- "/" focuses search, and "N" starts a new record on lists that have one.
+- Every action ends with a toast, with Undo where it can be undone.
+- Check: screenshots as every role it touches, at 1440 by 900 and 390 by 844 in `docs/design/screenshots/product-pass/`, looked at before merging: no "Planned", no tiles showing only a dash, no popups over content, no empty-looking lists, no text cut off.
 
 ## Epic A: Document intake and AI extraction
 
@@ -1627,6 +1843,6 @@ Each owner takes over their area, and the team moves to planning by tasks.
 Acceptance criteria:
 
 - Each owner takes over their area.
-- Prompt 003 writes the rest of epics A to G's stories from the owners' planning notes.
+- Prompt 004 writes the rest of epics A to G's stories from the owners' planning notes.
 - One approving review plus code-owner review is switched on, only on Richie's yes.
 - The first sprint is planned by tasks.

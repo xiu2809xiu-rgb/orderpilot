@@ -15,7 +15,7 @@ Work that belongs to the whole team carries `area: team`.
 
 ## Your first stories
 
-Each of areas 2, 3 and 4 starts with three stories at Ready on the board, planned for `Sprint 02 (W3)`. Their owners start on Monday 2 Nov, refine them, and at the handover prompt 003 writes the rest of each area's stories from the owners' notes. The [backlog](https://github.com/xiu2809xiu-rgb/orderpilot/blob/main/docs/agile/backlog.md#ready-to-pull) has their acceptance criteria.
+Each of areas 2, 3 and 4 starts with three stories at Ready on the board, planned for `Sprint 02 (W3)`. Their owners start on Monday 2 Nov, refine them, and at the handover prompt 004 writes the rest of each area's stories from the owners' notes. The [backlog](https://github.com/xiu2809xiu-rgb/orderpilot/blob/main/docs/agile/backlog.md#ready-to-pull) has their acceptance criteria.
 
 | Area        | Stories                                                                                                                                                   |
 | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |

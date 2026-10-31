@@ -203,6 +203,25 @@ Ticked means it exists on `main` and I found it with a command. Planned means th
 - Group the board's Backlog view by Sprint, and tag the releases after a feature freeze.
 - Confirm or change the role defaults owners proposed (items r, w, y) and the audit sample rule (item ad).
 
+## Prompt 003: the product pass
+
+[Prompt 003](ai/prompts/003-product-pass.md) raises the bar after Richie's walk-through on 1 Nov: real numbers, real lists and no placeholder a reviewer can reach, before the handover on Monday evening, 2 Nov. The handover prompt is now prompt 004.
+
+Phase B is paused at P-13 until the product pass is done. P-13's first builder stopped at a usage limit, and its work is uncommitted in its worktree. Richie said yes to the recorder and to coverage being recorded.
+
+| Story | Branch                                | Issue                                                           | State       |
+| ----- | ------------------------------------- | --------------------------------------------------------------- | ----------- |
+| P-31  | `feat/product-pass-data`              | [#117](https://github.com/xiu2809xiu-rgb/orderpilot/issues/117) | Not started |
+| P-32  | `feat/product-pass-consent`           | [#118](https://github.com/xiu2809xiu-rgb/orderpilot/issues/118) | Not started |
+| P-33  | `feat/product-pass-home`              | [#119](https://github.com/xiu2809xiu-rgb/orderpilot/issues/119) | Not started |
+| P-34  | `feat/product-pass-signin`            | [#120](https://github.com/xiu2809xiu-rgb/orderpilot/issues/120) | Not started |
+| P-35  | `feat/product-pass-master-data`       | [#121](https://github.com/xiu2809xiu-rgb/orderpilot/issues/121) | Not started |
+| P-36  | `feat/product-pass-orders`            | [#122](https://github.com/xiu2809xiu-rgb/orderpilot/issues/122) | Not started |
+| P-37  | `feat/product-pass-documents`         | [#123](https://github.com/xiu2809xiu-rgb/orderpilot/issues/123) | Not started |
+| P-38  | `feat/product-pass-inherited-screens` | [#124](https://github.com/xiu2809xiu-rgb/orderpilot/issues/124) | Not started |
+| P-39  | `feat/product-pass-hide-planned`      | [#125](https://github.com/xiu2809xiu-rgb/orderpilot/issues/125) | Not started |
+| P-40  | `feat/product-pass-bar`               | [#126](https://github.com/xiu2809xiu-rgb/orderpilot/issues/126) | Not started |
+
 ## Prompt 002: Finish the base by Sunday night
 
 The brief is [prompt 002](ai/prompts/002-finish-the-base-by-sunday.md). It changes the order, the pace and a few decisions, and adds domain notes. Where it differs from prompt 001, it wins. Phase A is everything a teammate needs, merged by Sunday 1 Nov, 23:59 Singapore time. **Phase A is done**: every story merged by 02:40 on 1 Nov, and the [handover report](#phase-a-handover) is above. Phase B follows.

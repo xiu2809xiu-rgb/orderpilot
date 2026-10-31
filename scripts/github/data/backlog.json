@@ -480,7 +480,8 @@
         "Processing: PDF text extraction (pdfjs-dist) plus page images for the vision models; duplicate detection by content hash.",
         "Data model: the start of area 1's order data: orders, order lines, documents, and field values with confidence and provenance. Status stays in area 2.",
         "UI: an upload screen with drag and drop, and a documents list.",
-        "Queue: a job that marks each document \"awaiting AI\" until the extraction stories."
+        "Queue: a job that marks each document \"awaiting AI\" until the extraction stories.",
+        "Prompt 003 brings forward upload, the documents list and 12 synthetic documents (P-37); this story keeps the rest: the safe upload API, extraction, content-hash duplicate detection, the data model and the queue."
       ]
     },
     {
@@ -503,7 +504,8 @@
         "The mock speaks OData-style JSON with Navision's names in camelCase, as `docs/research/domain-notes.md` lists them.",
         "Realism: document numbering and statuses from Richie's notes when present.",
         "Tests, a compose service, `docs/api/mock-systems.md`, and a \"Mock\" label wherever it's used.",
-        "ADR: mock external systems."
+        "ADR: mock external systems.",
+        "Prompt 003 brings forward reading master data through a port labelled Mock Navision (P-35); this story still brings the OData service, its paging and `$filter`, and the compose service."
       ]
     },
     {
@@ -541,7 +543,8 @@
         "`packages/synthetic-documents` generates PDFs from the synthetic master data: POs in at least four customer layouts; PIs, invoices, packing lists and AWB/BL; scanned-looking variants (rotated and noisy).",
         "Planted mistakes: quantity, price, PO reference, part number and changed bank details.",
         "Ground truth: a JSON file for every document, for the accuracy harness.",
-        "Delivery: a CLI (`pnpm docs:generate`), with a set copied to `apps/web/public/demo-documents/` for demo uploads, not a folder called `samples`."
+        "Delivery: a CLI (`pnpm docs:generate`), with a set copied to `apps/web/public/demo-documents/` for demo uploads, not a folder called `samples`.",
+        "Prompt 003 brings forward 12 synthetic documents in `apps/web/public/demo-documents/` (P-37); this story keeps the generator, the four layouts, the planted mistakes, the ground-truth files and the CLI."
       ]
     },
     {
@@ -1076,6 +1079,209 @@
       ]
     },
     {
+      "key": "P-31",
+      "title": "Data that looks real",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 5,
+      "reqs": ["M2", "M4"],
+      "branch": "feat/product-pass-data",
+      "sprints": [1, 2],
+      "dependsOn": ["P-9"],
+      "summary": "Grow the synthetic data so every list looks like a working business. Prompt 003; finished before the handover on Monday evening, 2 Nov.",
+      "acceptance": [
+        "Grow `packages/synthetic-data` with the same fictional brands and the brief's countries: about 40 customers and 12 vendors.",
+        "300 items across IT, surveillance and accessories, each with a part number, brand, price, stock, quantity on sales order and quantity on purchase order.",
+        "120 orders spread across every state over the last 60 days, each with lines, amounts, documents, owners and dates.",
+        "Payments, SPRs, tasks, reminders and exceptions to match.",
+        "Every area's seed uses it, so the screens agree with each other.",
+        "Keep the seed deterministic and under 30 seconds.",
+        "Check: screenshots as every role it touches, at 1440 by 900 and 390 by 844 in `docs/design/screenshots/product-pass/`, looked at before merging: no \"Planned\", no tiles showing only a dash, no popups over content, no empty-looking lists, no text cut off."
+      ]
+    },
+    {
+      "key": "P-32",
+      "title": "The consent card",
+      "epic": "P",
+      "area": "area: 4 controls and monitoring",
+      "priority": "must",
+      "estimate": 2,
+      "reqs": ["M4", "M6"],
+      "branch": "feat/product-pass-consent",
+      "sprints": [1, 2],
+      "dependsOn": ["F-1"],
+      "summary": "One small consent card that never covers content. Prompt 003; finished before the handover on Monday evening, 2 Nov.",
+      "acceptance": [
+        "Make it one small card at the bottom right, shown once per browser and never over content.",
+        "Remember the choice, and let Settings change it later.",
+        "Change only its placement and frequency, not area 4's logic. Ask Angelyn to review.",
+        "Check: screenshots as every role it touches, at 1440 by 900 and 390 by 844 in `docs/design/screenshots/product-pass/`, looked at before merging: no \"Planned\", no tiles showing only a dash, no popups over content, no empty-looking lists, no text cut off."
+      ]
+    },
+    {
+      "key": "P-33",
+      "title": "Home pages that work",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 8,
+      "reqs": ["M4", "M5"],
+      "branch": "feat/product-pass-home",
+      "sprints": [1, 2],
+      "dependsOn": ["P-31"],
+      "summary": "A home page for every role with real counts and the work waiting. Prompt 003; finished before the handover on Monday evening, 2 Nov.",
+      "acceptance": [
+        "Tiles with real counts from the existing endpoints: my tasks, documents to confirm, open orders, open exceptions, overdue, awaiting approval, awaiting payment and ready to ship. Each tile opens the filtered list.",
+        "Needs you: the role's top five items, with customer, amount and due date, and a one-click action on each.",
+        "Quick actions for the role.",
+        "The sales flow as a chain of steps with a live count at each step, and the purchase flow beside it marked phase 2. Clicking a step opens the tracker filtered to that step.",
+        "For Management: the five KPIs with small trend charts (shadcn charts).",
+        "Check: screenshots of the home page as every role, at 1440 by 900 and 390 by 844 in `docs/design/screenshots/product-pass/`, looked at before merging: no \"Planned\", no tiles showing only a dash, no popups over content, no empty-looking lists, no text cut off."
+      ]
+    },
+    {
+      "key": "P-34",
+      "title": "Sign-in that sells it",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 3,
+      "reqs": ["M4"],
+      "branch": "feat/product-pass-signin",
+      "sprints": [1, 2],
+      "dependsOn": ["P-12"],
+      "summary": "A sign-in page that states OrderPilot's promise. Prompt 003; finished before the handover on Monday evening, 2 Nov.",
+      "acceptance": [
+        "A split layout: the form on one side, and OrderPilot's promise on the other.",
+        "That side has the tagline, the three-step \"AI reads, rules decide, people approve\" and a subtle animated order flow (React Bits free or Magic UI free).",
+        "Demo sign-in stays one click per role.",
+        "Check: screenshots at 1440 by 900 and 390 by 844 in `docs/design/screenshots/product-pass/`, looked at before merging: no \"Planned\", no tiles showing only a dash, no popups over content, no empty-looking lists, no text cut off."
+      ]
+    },
+    {
+      "key": "P-35",
+      "title": "Master data",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 8,
+      "reqs": ["M2", "M4"],
+      "branch": "feat/product-pass-master-data",
+      "sprints": [1, 2],
+      "dependsOn": ["P-31"],
+      "summary": "Lists and detail pages for customers, vendors and items, brought forward from P-19. Prompt 003; finished before the handover on Monday evening, 2 Nov.",
+      "acceptance": [
+        "Lists and detail pages for customers, vendors and items, read from the mock Navision data and labelled \"Mock Navision\".",
+        "An item shows stock, quantity on sales order, quantity on purchase order, available stock, price, brand and vendor.",
+        "A customer shows country, currency, payment terms, price group, open orders and overdue items.",
+        "A vendor shows its bank accounts (masked by role) and its open purchase orders.",
+        "Check: screenshots as every role it touches, at 1440 by 900 and 390 by 844 in `docs/design/screenshots/product-pass/`, looked at before merging: no \"Planned\", no tiles showing only a dash, no popups over content, no empty-looking lists, no text cut off."
+      ]
+    },
+    {
+      "key": "P-36",
+      "title": "Orders and the one order page",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 8,
+      "reqs": ["M2", "M4"],
+      "branch": "feat/product-pass-orders",
+      "sprints": [1, 2],
+      "dependsOn": ["P-31", "P-35"],
+      "summary": "The orders list, a New order form and one order page for every area. Prompt 003; finished before the handover on Monday evening, 2 Nov.",
+      "acceptance": [
+        "The orders list, with filters for status, customer, owner, date and amount.",
+        "A New order form: customer, PO number, and lines with item search, quantity and price. It shows availability live as you type, and flags a shortfall with \"Raise SPR\".",
+        "One order page is the single place for an order: area 1's header, lines, amounts, availability and documents; area 2's steps; area 3's checks and tracker view; the next actions for the role. Each section stays a component in its owner's folder.",
+        "Writes go to OrderPilot only, never to Navision.",
+        "Check: screenshots as every role it touches, at 1440 by 900 and 390 by 844 in `docs/design/screenshots/product-pass/`, looked at before merging: no \"Planned\", no tiles showing only a dash, no popups over content, no empty-looking lists, no text cut off."
+      ]
+    },
+    {
+      "key": "P-37",
+      "title": "Documents and the review screen",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 8,
+      "reqs": ["M2", "M4"],
+      "branch": "feat/product-pass-documents",
+      "sprints": [1, 2],
+      "dependsOn": ["P-31"],
+      "summary": "Upload, the documents list and the review screen, brought forward from P-18 and P-21. Prompt 003; finished before the handover on Monday evening, 2 Nov.",
+      "acceptance": [
+        "Upload with drag and drop (PDF, images, Excel), and the documents list.",
+        "Each document's page shows the preview beside the fields read from it. Each field has its confidence, and clicking a field highlights where it came from on the page.",
+        "Confirm and Correct actions, with the corrections audited.",
+        "Until P-17's gateway is ready, Mock AI fills the fields from the synthetic ground truth.",
+        "Ship 12 synthetic documents (POs in different layouts, PIs and packing lists, including one scanned-looking PO) in `apps/web/public/demo-documents/`, so anyone can try the demo story's first two steps.",
+        "Check: screenshots as every role it touches, at 1440 by 900 and 390 by 844 in `docs/design/screenshots/product-pass/`, looked at before merging: no \"Planned\", no tiles showing only a dash, no popups over content, no empty-looking lists, no text cut off."
+      ]
+    },
+    {
+      "key": "P-38",
+      "title": "The screens the teammates inherit",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 8,
+      "reqs": ["M4", "M5"],
+      "branch": "feat/product-pass-inherited-screens",
+      "sprints": [1, 2],
+      "dependsOn": ["P-31"],
+      "summary": "UI only for the task inbox, SPR approval, exceptions and insights; never their logic. Prompt 003; finished before the handover on Monday evening, 2 Nov.",
+      "acceptance": [
+        "Task inbox: a compact list with customer, amount, age, due date and priority, and filters by type. Inline actions (approve, reject with a comment, open), and bulk select where it's safe.",
+        "SPR approval: the request, the stock picture, the customer's order, the approver's limit, and the decision with a comment.",
+        "Exceptions: severity, expected and found side by side, assign, and resolve with a reason.",
+        "Insights: the five KPIs with trend and target, by week.",
+        "Keep every area's core logic as `it.todo` for its owner. In each pull request, say what changed, and ask that area's owner to review.",
+        "Check: screenshots as every role it touches, at 1440 by 900 and 390 by 844 in `docs/design/screenshots/product-pass/`, looked at before merging: no \"Planned\", no tiles showing only a dash, no popups over content, no empty-looking lists, no text cut off."
+      ]
+    },
+    {
+      "key": "P-39",
+      "title": "Hide what is not real yet",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 2,
+      "reqs": ["M4"],
+      "branch": "feat/product-pass-hide-planned",
+      "sprints": [1, 2],
+      "dependsOn": ["P-12"],
+      "summary": "No placeholder a reviewer can reach. Prompt 003; finished before the handover on Monday evening, 2 Nov.",
+      "acceptance": [
+        "Remove Mapping, Connectors and the 3D view from the menu until their stories land.",
+        "Hide a menu item until it has something real to show.",
+        "Keep `PlannedPage` only behind a development flag.",
+        "Check: screenshots as every role it touches, at 1440 by 900 and 390 by 844 in `docs/design/screenshots/product-pass/`, looked at before merging: no \"Planned\", no tiles showing only a dash, no popups over content, no empty-looking lists, no text cut off."
+      ]
+    },
+    {
+      "key": "P-40",
+      "title": "The bar for every screen: dense tables, keys and actions",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 5,
+      "reqs": ["M4"],
+      "branch": "feat/product-pass-bar",
+      "sprints": [1, 2],
+      "dependsOn": ["P-12"],
+      "summary": "The efficiency and density rules every list and detail page meets. Prompt 003; finished before the handover on Monday evening, 2 Nov.",
+      "acceptance": [
+        "Compact table rows (36 to 40 px), with numbers right-aligned in tabular figures and amounts with their currency.",
+        "Skeletons that match the final layout, and no large empty cards.",
+        "Ctrl+K runs actions as well as navigation.",
+        "\"/\" focuses search, and \"N\" starts a new record on lists that have one.",
+        "Every action ends with a toast, with Undo where it can be undone.",
+        "Check: screenshots as every role it touches, at 1440 by 900 and 390 by 844 in `docs/design/screenshots/product-pass/`, looked at before merging: no \"Planned\", no tiles showing only a dash, no popups over content, no empty-looking lists, no text cut off."
+      ]
+    },
+    {
       "key": "T-1",
       "title": "Owners, backups and reviews",
       "epic": "T",
@@ -1215,7 +1421,7 @@
       "summary": "Each owner takes over their area, and the team moves to planning by tasks.",
       "acceptance": [
         "Each owner takes over their area.",
-        "Prompt 003 writes the rest of epics A to G's stories from the owners' planning notes.",
+        "Prompt 004 writes the rest of epics A to G's stories from the owners' planning notes.",
         "One approving review plus code-owner review is switched on, only on Richie's yes.",
         "The first sprint is planned by tasks."
       ]
