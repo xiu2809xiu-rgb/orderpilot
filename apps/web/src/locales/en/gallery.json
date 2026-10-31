@@ -1,0 +1,58 @@
+{
+  "title": "Component gallery",
+  "description": "Every common component in one place, with synthetic data. Shown in demo mode and in development only.",
+  "sections": {
+    "table": "Data table",
+    "tableHint": "Paging, sorting and filtering happen on the server. This page fakes the server in the browser.",
+    "states": "Page states",
+    "badges": "Badges",
+    "pieces": "Small pieces",
+    "log": "Operation log"
+  },
+  "table": {
+    "caption": "Orders",
+    "order": "Order",
+    "customer": "Customer",
+    "status": "Status",
+    "total": "Total (USD)",
+    "updated": "Updated",
+    "activeOnly": "Show active only",
+    "emptyTitle": "No orders yet",
+    "emptyDescription": "Orders appear here once documents are confirmed.",
+    "emptyAction": "Upload a document"
+  },
+  "status": {
+    "draft": "Draft",
+    "waiting": "Waiting for approval",
+    "released": "Released",
+    "blocked": "Blocked"
+  },
+  "demo": {
+    "error": "Show an error",
+    "loading": "Show loading",
+    "forbidden": "Show denied",
+    "empty": "Show empty",
+    "partial": "Show partial",
+    "reset": "Show data"
+  },
+  "pieces": {
+    "bank": "Bank account",
+    "bankValue": "000-000000-0 (synthetic)",
+    "price": "Unit price",
+    "confidence": "Extracted value",
+    "when": "Last change",
+    "reference": "Reference",
+    "referenceCopy": "reference",
+    "audit": "Audit"
+  },
+  "log": {
+    "created": "Created the draft",
+    "price": "Changed the unit price from 4.20 to 4.35",
+    "approved": "Approved the release"
+  },
+  "users": {
+    "one": "Priya Nair",
+    "two": "Janet Lim",
+    "three": "Daniel Koh"
+  }
+}
