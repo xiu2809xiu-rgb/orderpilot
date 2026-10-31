@@ -1,26 +1,142 @@
 # Who owns what. GitHub reads this file from top to bottom, and the last match
-# wins.
+# wins, so each area's own docs and code come after the shared rules and
+# resolve to that area.
 #
-# Placeholders until T-1. GitHub reports an error for any handle it cannot find,
-# so only Richie's handle is live today. T-1 replaces each <placeholder> below
-# with a real handle and removes the leading "# " from each rule, so that every
-# path has at least two owners and nobody ever waits on their own approval:
+# Every path has at least two owners, so nobody waits on their own approval:
 #
-#   - each area's paths go to its owner, its backup owner and Richie;
-#   - shared files go to Richie and the backup owners.
+#   - area 1 (Richie, backup Angelyn): Richie and Angelyn;
+#   - area 2 (Azri, backup Iok Teck): MaineJermaine, ITnyp and Richie;
+#   - area 3 (Iok Teck, backup Azri): ITnyp, MaineJermaine and Richie;
+#   - area 4 (Angelyn, backup Richie): angelynnmr and Richie;
+#   - shared files: all four.
 #
-# docs/team/module-ownership.md (planned: P-4) lists the paths behind each
-# <area N paths> placeholder. Review only becomes required at T-9, on Richie's
-# yes.
+# Handles: MaineJermaine is Azri, ITnyp is Iok Teck, angelynnmr is Angelyn,
+# xiu2809xiu-rgb is Richie. GitHub reports an error for a handle that is not
+# yet a collaborator, so the three teammates' invitations must be accepted
+# first.
+#
+# docs/team/module-ownership.md lists the paths behind each area. Review only
+# becomes required at T-9, on Richie's yes.
 
-* @xiu2809xiu-rgb
+# Area 1, and anything not listed below.
+* @xiu2809xiu-rgb @angelynnmr
 
-# <area 1 paths>  @xiu2809xiu-rgb @<area 1 backup owner>
-# <area 2 paths>  @<area 2 owner> @<area 2 backup owner> @xiu2809xiu-rgb
-# <area 3 paths>  @<area 3 owner> @<area 3 backup owner> @xiu2809xiu-rgb
-# <area 4 paths>  @<area 4 owner> @<area 4 backup owner> @xiu2809xiu-rgb
+# Area 1 paths.
+/apps/api/src/modules/documents/                                  @xiu2809xiu-rgb @angelynnmr
+/apps/api/src/modules/orders/                                     @xiu2809xiu-rgb @angelynnmr
+/apps/api/src/modules/master-data/                                @xiu2809xiu-rgb @angelynnmr
+/apps/api/src/modules/connectors/                                 @xiu2809xiu-rgb @angelynnmr
+/apps/api/src/modules/mapping/                                    @xiu2809xiu-rgb @angelynnmr
+/apps/api/src/modules/ai/                                         @xiu2809xiu-rgb @angelynnmr
+/apps/api/src/modules/auth/                                       @xiu2809xiu-rgb @angelynnmr
+/apps/api/src/modules/users/                                      @xiu2809xiu-rgb @angelynnmr
+/apps/api/src/modules/health/                                     @xiu2809xiu-rgb @angelynnmr
+/apps/api/src/modules/storage/                                    @xiu2809xiu-rgb @angelynnmr
+/apps/api/src/modules/queue/                                      @xiu2809xiu-rgb @angelynnmr
+/apps/api/src/modules/events/                                     @xiu2809xiu-rgb @angelynnmr
+/apps/api/src/modules/templates/                                  @xiu2809xiu-rgb @angelynnmr
+/apps/api/prisma/schema/documents.prisma                          @xiu2809xiu-rgb @angelynnmr
+/apps/api/prisma/schema/orders.prisma                             @xiu2809xiu-rgb @angelynnmr
+/apps/api/prisma/schema/master-data.prisma                        @xiu2809xiu-rgb @angelynnmr
+/apps/api/prisma/schema/connectors.prisma                         @xiu2809xiu-rgb @angelynnmr
+/apps/api/prisma/schema/ai.prisma                                 @xiu2809xiu-rgb @angelynnmr
+/apps/api/prisma/schema/platform.prisma                           @xiu2809xiu-rgb @angelynnmr
+/apps/web/src/features/documents/                                 @xiu2809xiu-rgb @angelynnmr
+/apps/web/src/features/orders/                                    @xiu2809xiu-rgb @angelynnmr
+/apps/web/src/features/master-data/                               @xiu2809xiu-rgb @angelynnmr
+/apps/web/src/features/connectors/                                @xiu2809xiu-rgb @angelynnmr
+/apps/web/src/features/mapping/                                   @xiu2809xiu-rgb @angelynnmr
+/apps/web/src/features/constellation/                             @xiu2809xiu-rgb @angelynnmr
+/apps/api/test/documents.int-spec.ts                              @xiu2809xiu-rgb @angelynnmr
+/apps/api/test/orders.int-spec.ts                                 @xiu2809xiu-rgb @angelynnmr
+/apps/api/test/master-data.int-spec.ts                            @xiu2809xiu-rgb @angelynnmr
+/apps/api/test/connectors.int-spec.ts                             @xiu2809xiu-rgb @angelynnmr
+/apps/api/test/mapping.int-spec.ts                                @xiu2809xiu-rgb @angelynnmr
+/apps/api/test/ai.int-spec.ts                                     @xiu2809xiu-rgb @angelynnmr
+/apps/web/e2e/documents.spec.ts                                   @xiu2809xiu-rgb @angelynnmr
+/apps/web/e2e/orders.spec.ts                                      @xiu2809xiu-rgb @angelynnmr
+/apps/web/e2e/master-data.spec.ts                                 @xiu2809xiu-rgb @angelynnmr
+/apps/web/e2e/connectors.spec.ts                                  @xiu2809xiu-rgb @angelynnmr
+/apps/web/e2e/mapping.spec.ts                                     @xiu2809xiu-rgb @angelynnmr
+/apps/web/e2e/constellation.spec.ts                               @xiu2809xiu-rgb @angelynnmr
+/services/mock-navision/                                          @xiu2809xiu-rgb @angelynnmr
+/packages/synthetic-data/                                         @xiu2809xiu-rgb @angelynnmr
+/packages/synthetic-documents/                                    @xiu2809xiu-rgb @angelynnmr
+/assets-src/3d/                                                   @xiu2809xiu-rgb @angelynnmr
+/apps/web/public/demo-documents/                                  @xiu2809xiu-rgb @angelynnmr
+/docs/team/area-1-*.md                                            @xiu2809xiu-rgb @angelynnmr
+/docs/ai/prompts/area1-*                                          @xiu2809xiu-rgb @angelynnmr
 
 # Shared files.
-# /.github/       @xiu2809xiu-rgb @<backup owners>
-# /docs/          @xiu2809xiu-rgb @<backup owners>
-# /scripts/       @xiu2809xiu-rgb @<backup owners>
+/.github/                                                         @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/docs/                                                            @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/scripts/                                                         @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/packages/shared/                                                 @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/packages/tsconfig/                                               @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/packages/eslint-config/                                          @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/infra/                                                           @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/samples/                                                         @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/.githooks/                                                       @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/.claude/                                                         @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/package.json                                                     @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/pnpm-workspace.yaml                                              @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/pnpm-lock.yaml                                                   @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/tsconfig.json                                                    @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/eslint.config.js                                                 @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/commitlint.config.js                                             @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/lint-staged.config.js                                            @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/osv-scanner.toml                                                 @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/.env.example                                                     @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/.editorconfig                                                    @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/.gitattributes                                                   @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/.gitignore                                                       @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/.node-version                                                    @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/.prettierignore                                                  @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/.prettierrc.json                                                 @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/.secretlintrc.json                                               @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/docker-compose*.yml                                              @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/Dockerfile*                                                      @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/apps/*/Dockerfile                                                @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/apps/api/src/app.module.ts                                       @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/apps/api/src/main.ts                                             @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/CLAUDE.md                                                        @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/AGENTS.md                                                        @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/README.md                                                        @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/CONTRIBUTING.md                                                  @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+/SECURITY.md                                                      @xiu2809xiu-rgb @MaineJermaine @ITnyp @angelynnmr
+
+# Area 2 paths.
+/apps/api/src/modules/workflows/                                  @MaineJermaine @ITnyp @xiu2809xiu-rgb
+/apps/api/prisma/schema/workflows.prisma                          @MaineJermaine @ITnyp @xiu2809xiu-rgb
+/apps/web/src/features/workflows/                                 @MaineJermaine @ITnyp @xiu2809xiu-rgb
+/apps/api/test/workflows.int-spec.ts                              @MaineJermaine @ITnyp @xiu2809xiu-rgb
+/apps/web/e2e/workflows.spec.ts                                   @MaineJermaine @ITnyp @xiu2809xiu-rgb
+/docs/team/area-2-*.md                                            @MaineJermaine @ITnyp @xiu2809xiu-rgb
+/docs/ai/prompts/area2-*                                          @MaineJermaine @ITnyp @xiu2809xiu-rgb
+
+# Area 3 paths.
+/apps/api/src/modules/checks/                                     @ITnyp @MaineJermaine @xiu2809xiu-rgb
+/apps/api/src/modules/insights/                                   @ITnyp @MaineJermaine @xiu2809xiu-rgb
+/apps/api/prisma/schema/checks.prisma                             @ITnyp @MaineJermaine @xiu2809xiu-rgb
+/apps/web/src/features/order-tracker/                             @ITnyp @MaineJermaine @xiu2809xiu-rgb
+/apps/web/src/features/exceptions/                                @ITnyp @MaineJermaine @xiu2809xiu-rgb
+/apps/web/src/features/insights/                                  @ITnyp @MaineJermaine @xiu2809xiu-rgb
+/apps/api/test/checks.int-spec.ts                                 @ITnyp @MaineJermaine @xiu2809xiu-rgb
+/apps/web/e2e/order-tracker.spec.ts                               @ITnyp @MaineJermaine @xiu2809xiu-rgb
+/docs/team/area-3-*.md                                            @ITnyp @MaineJermaine @xiu2809xiu-rgb
+/docs/ai/prompts/area3-*                                          @ITnyp @MaineJermaine @xiu2809xiu-rgb
+
+# Area 4 paths.
+/apps/api/src/modules/governance/                                 @angelynnmr @xiu2809xiu-rgb
+/apps/api/src/modules/audit/                                      @angelynnmr @xiu2809xiu-rgb
+/apps/api/src/modules/analytics/                                  @angelynnmr @xiu2809xiu-rgb
+/apps/api/src/modules/monitoring/                                 @angelynnmr @xiu2809xiu-rgb
+/apps/api/prisma/schema/governance.prisma                         @angelynnmr @xiu2809xiu-rgb
+/apps/api/prisma/schema/analytics.prisma                          @angelynnmr @xiu2809xiu-rgb
+/apps/web/src/features/governance/                                @angelynnmr @xiu2809xiu-rgb
+/apps/web/src/features/audit/                                     @angelynnmr @xiu2809xiu-rgb
+/apps/web/src/features/monitoring/                                @angelynnmr @xiu2809xiu-rgb
+/apps/api/test/governance.int-spec.ts                             @angelynnmr @xiu2809xiu-rgb
+/apps/web/e2e/governance.spec.ts                                  @angelynnmr @xiu2809xiu-rgb
+/docs/team/area-4-*.md                                            @angelynnmr @xiu2809xiu-rgb
+/docs/ai/prompts/area4-*                                          @angelynnmr @xiu2809xiu-rgb
