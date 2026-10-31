@@ -2,8 +2,8 @@ import { Controller, Get, Inject, Query } from "@nestjs/common";
 import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import {
   exceptionQueueSchema,
-  pageQuerySchema,
-  type PageQuery,
+  exceptionQuerySchema,
+  type ExceptionQuery,
 } from "@orderpilot/shared";
 import { RequirePermission } from "../../auth/decorators.js";
 import { openApiQuery, openApiSchema } from "../../common/openapi.js";
@@ -22,9 +22,11 @@ export class ExceptionsController {
   @ApiOperation({
     summary: "The exceptions queue, newest first, a page at a time. Mock data",
   })
-  @openApiQuery(pageQuerySchema)
+  @openApiQuery(exceptionQuerySchema)
   @ApiOkResponse({ schema: openApiSchema(exceptionQueueSchema) })
-  list(@Query(new ZodValidationPipe(pageQuerySchema)) query: PageQuery) {
+  list(
+    @Query(new ZodValidationPipe(exceptionQuerySchema)) query: ExceptionQuery,
+  ) {
     const page = this.exceptions.list(query);
     return {
       data: page.items,

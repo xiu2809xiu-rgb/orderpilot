@@ -1,12 +1,78 @@
 {
   "title": "Order tracker",
-  "description": "Where every order stands, from confirmation to delivery.",
+  "description": "Where every order stands, who holds it and what is overdue.",
   "arrives": [
-    "A tracker of every order with its current stage",
-    "Shipment dates, AWB or BL numbers and permits",
-    "A timeline on each order"
+    "Status, owner and overdue flags computed from workflow events",
+    "Open actions on each order",
+    "Shipment dates, AWB or BL numbers and permits"
   ],
   "cues": {
     "inTransit": "Shipments in transit"
+  },
+  "list": {
+    "caption": "Orders in the tracker",
+    "overdueOnly": "Overdue only",
+    "emptyTitle": "No orders to track yet",
+    "emptyDescription": "Orders appear here once a customer PO has been received.",
+    "emptyAction": "Open the orders list",
+    "columns": {
+      "orderNo": "Order No.",
+      "customer": "Customer",
+      "status": "Status",
+      "owner": "Owner",
+      "overdue": "Overdue",
+      "exceptions": "Open exceptions",
+      "orderDate": "Order date",
+      "shipmentDate": "Shipment date",
+      "externalDocumentNo": "PO number"
+    },
+    "overdueDays_one": "{{count}} day overdue",
+    "overdueDays_other": "{{count}} days overdue",
+    "onTime": "On time",
+    "noShipmentDate": "Not set"
+  },
+  "detail": {
+    "back": "Back to the tracker",
+    "notFoundTitle": "That order is not in the tracker",
+    "notFoundDescription": "Check the order number, or go back to the list.",
+    "externalDocumentNo": "PO number",
+    "customer": "Customer",
+    "status": "Status",
+    "owner": "Owner",
+    "overdue": "Overdue",
+    "steps": {
+      "title": "What happened, step by step",
+      "description": "Each step with its effect on the order. Postings to the ledger are made in Navision; this page only shows the result.",
+      "current": "Current step",
+      "effect": "Effect",
+      "empty": "No steps recorded yet."
+    },
+    "checks": {
+      "title": "Checks",
+      "description": "Sample results. Each says what was expected, what was found and the tolerance it used.",
+      "empty": "No checks have run on this order yet.",
+      "expected": "Expected",
+      "found": "Found",
+      "tolerance": "Tolerance",
+      "pass": "Pass",
+      "fail": "Fail",
+      "evidence": "Evidence"
+    },
+    "matches": {
+      "title": "Customer and items, matched on Navision numbers",
+      "description": "A match is made on the number only. A similar name with another number is shown as a possible match for a person to look at.",
+      "region": "Matches on Navision numbers",
+      "kind": "Kind",
+      "printed": "On the document",
+      "matched": "In master data",
+      "possible": "Possible matches (not matched)",
+      "customer": "Customer",
+      "item": "Item",
+      "noMatch": "No record with this number",
+      "none": "None"
+    },
+    "log": {
+      "ip": "10.0.0.0"
+    }
   }
 }

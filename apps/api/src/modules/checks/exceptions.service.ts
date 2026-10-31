@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import type { CheckException, PageQuery } from "@orderpilot/shared";
+import type { CheckException, ExceptionQuery } from "@orderpilot/shared";
 import { MockChecksRepository } from "./mock-checks.repository.js";
 
 /**
@@ -13,15 +13,24 @@ export class ExceptionsService {
     @Inject(MockChecksRepository) private readonly repo: MockChecksRepository,
   ) {}
 
-  list(query: PageQuery): {
+  list(query: ExceptionQuery): {
     items: CheckException[];
     page: number;
     pageSize: number;
     total: number;
   } {
-    const all = [...this.repo.exceptions()].sort((a, b) =>
-      b.openedAt.localeCompare(a.openedAt),
-    );
+    const search = query.search?.toLowerCase();
+    const all = this.repo
+      .exceptions()
+      .filter(
+        (e) =>
+          !search ||
+          [e.orderNo, e.customerNo, e.customerName, e.ruleLabel, e.summary]
+            .join(" ")
+            .toLowerCase()
+            .includes(search),
+      )
+      .sort((a, b) => b.openedAt.localeCompare(a.openedAt));
     const start = (query.page - 1) * query.pageSize;
     return {
       items: all.slice(start, start + query.pageSize),

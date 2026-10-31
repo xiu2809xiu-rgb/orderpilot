@@ -17,4 +17,8 @@ page?: number;
  * @maximum 200
  */
 pageSize?: number;
+/**
+ * @maxLength 100
+ */
+search?: string;
 };

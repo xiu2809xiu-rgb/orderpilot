@@ -137,6 +137,24 @@ describe("the exceptions queue over mock data", () => {
   });
 });
 
+describe("the exceptions search", () => {
+  it("narrows the queue to rows that mention the text", () => {
+    const all = exceptions.list({ page: 1, pageSize: 50 });
+    const first = all.items[0];
+    if (!first) throw new Error("No sample exceptions");
+    const found = exceptions.list({
+      page: 1,
+      pageSize: 50,
+      search: first.orderNo,
+    });
+    expect(found.items.map((e) => e.orderNo)).toContain(first.orderNo);
+    expect(found.total).toBeLessThan(all.total);
+    expect(
+      exceptions.list({ page: 1, pageSize: 50, search: "zzz" }).total,
+    ).toBe(0);
+  });
+});
+
 describe("the status port", () => {
   it("answers from the sample states and knows nothing of unknown orders", async () => {
     const order = firstOrder();

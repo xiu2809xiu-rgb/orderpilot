@@ -225,6 +225,14 @@ export const orderTimelineResponseSchema = mockEnvelope(orderTimelineSchema);
 
 // ---- The exceptions queue ---------------------------------------------------
 
+/** A page of the queue, with a quick search over order, customer, rule and summary. */
+export const exceptionQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(200).default(25),
+  search: z.string().trim().max(100).optional(),
+});
+export type ExceptionQuery = z.infer<typeof exceptionQuerySchema>;
+
 export const exceptionQueueSchema = mockPageEnvelope(exceptionSchema);
 
 // ---- The five KPIs ----------------------------------------------------------

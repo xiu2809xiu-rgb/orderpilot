@@ -1366,6 +1366,15 @@
               "minimum": 1,
               "maximum": 200
             }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 100
+            }
           }
         ],
         "responses": {
