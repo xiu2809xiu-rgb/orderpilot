@@ -1,0 +1,43 @@
+# Sprint calendar
+
+Rendered from [`scripts/github/data/sprints.json`](https://github.com/xiu2809xiu-rgb/orderpilot/blob/main/scripts/github/data/sprints.json) by `node scripts/github/render-docs.mjs`. Change the data, not this page.
+
+One sprint is one week, Monday to Sunday. Sprint _n_ is module Week _n_ + 1. Each sprint is a milestone, due Sunday 23:59 Singapore time. Sprints are a rhythm, not a limit: work never waits for a sprint.
+
+| Sprint          | Week | Monday          | Sunday          | Planned stories | Goal                                                                                                                                                |
+| --------------- | ---- | --------------- | --------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sprint 01 (W2)  | 2    | Mon 26 Oct 2026 | Sun 1 Nov 2026  | T-1             | Build the base, story by story in order, without waiting between them. T-1: owners, backups and reviews.                                            |
+| Sprint 02 (W3)  | 3    | Mon 2 Nov 2026  | Sun 8 Nov 2026  | T-2, T-3, T-6   | T-2: the briefing call with Spectra. T-3: the project plan. T-6: design thinking starts. The team agrees the order and event contract together.     |
+| Sprint 03 (W4)  | 4    | Mon 9 Nov 2026  | Sun 15 Nov 2026 | T-4, T-6, T-7   | T-4: the UI prototype across the four areas, for the Week 4 prototype of the sales pilot. T-6: design thinking finishes. T-7: GRS by design starts. |
+| Sprint 04 (W5)  | 5    | Mon 16 Nov 2026 | Sun 22 Nov 2026 | P-25, T-5, T-7  | Week 5 proposal (25%). T-5: the proposal deck and presentation, tagged `v0.1-proposal` after a feature freeze. T-7: GRS by design finishes.         |
+| Sprint 05 (W6)  | 6    | Mon 23 Nov 2026 | Sun 29 Nov 2026 | T-8             | T-8: preparing for the mock interview starts.                                                                                                       |
+| Sprint 06 (W7)  | 7    | Mon 30 Nov 2026 | Sun 6 Dec 2026  | T-8             | Week 7 mock job interview (15%, individual): each member explains their own code. T-8: preparing for it finishes.                                   |
+| Sprint 07 (W8)  | 8    | Mon 7 Dec 2026  | Sun 13 Dec 2026 | -               | Phase 2 starts (Weeks 8 to 12): the purchase flow, with the bank-detail check. The Should list continues, in order.                                 |
+| Sprint 08 (W9)  | 9    | Mon 14 Dec 2026 | Sun 20 Dec 2026 | -               | Phase 2 continues: the purchase flow, with the bank-detail check. The Should list continues, in order.                                              |
+| Sprint 09 (W10) | 10   | Mon 21 Dec 2026 | Sun 27 Dec 2026 | -               | Phase 2 continues: the purchase flow, with the bank-detail check. The Should list continues, in order.                                              |
+| Sprint 10 (W11) | 11   | Mon 28 Dec 2026 | Sun 3 Jan 2027  | -               | Phase 2 continues: the purchase flow, with the bank-detail check. The Should list continues, in order.                                              |
+| Sprint 11 (W12) | 12   | Mon 4 Jan 2027  | Sun 10 Jan 2027 | -               | Phase 2 finishes (Weeks 8 to 12): the purchase flow, with the bank-detail check. The Should list continues, in order.                               |
+| Sprint 12 (W13) | 13   | Mon 11 Jan 2027 | Sun 17 Jan 2027 | -               | Week 13 technical review (25%), tagged `v0.2-technical-review` after a feature freeze. The Should list is done by this week.                        |
+| Sprint 13 (W14) | 14   | Mon 18 Jan 2027 | Sun 24 Jan 2027 | -               | Area 4's real dashboards, budgets and alerts start (Weeks 14 to 16).                                                                                |
+| Sprint 14 (W15) | 15   | Mon 25 Jan 2027 | Sun 31 Jan 2027 | -               | Area 4's real dashboards, budgets and alerts continue (Weeks 14 to 16).                                                                             |
+| Sprint 15 (W16) | 16   | Mon 1 Feb 2027  | Sun 7 Feb 2027  | -               | Area 4's real dashboards, budgets and alerts finish (Weeks 14 to 16).                                                                               |
+| Sprint 16 (W17) | 17   | Mon 8 Feb 2027  | Sun 14 Feb 2027 | -               | Get ready for the Week 18 final, with the feature freeze before `v1.0-final`.                                                                       |
+| Sprint 17 (W18) | 18   | Mon 15 Feb 2027 | Sun 21 Feb 2027 | -               | Week 18 final (35%), with Phase 2 in it, tagged `v1.0-final` after a feature freeze.                                                                |
+| Sprint 18 (W19) | 19   | Mon 22 Feb 2027 | Sun 28 Feb 2027 | -               | No assessment this week. Continuous work only, and shut everything down after the module.                                                           |
+
+## How the calendar is used
+
+- **A story goes into the milestone of the week it finished.** The sprint recorder does this when an issue closes or its pull request merges, using the date in Singapore.
+- **At the end of each day you work,** add a short note to the current milestone: what merged and what is in progress. `node scripts/github/day-note.mjs "Merged P-3. P-4 in progress."` adds it for you.
+- **For the end-of-day update and the sprint review,** `node scripts/github/sprint-report.mjs` prints what closed this sprint and what is in progress, by area.
+
+## Assessments
+
+| Sprint          | Week | Assessment         | Weight          | Release tag             |
+| --------------- | ---- | ------------------ | --------------- | ----------------------- |
+| Sprint 04 (W5)  | 5    | Proposal           | 25%             | `v0.1-proposal`         |
+| Sprint 06 (W7)  | 7    | Mock job interview | 15%, individual | None                    |
+| Sprint 12 (W13) | 13   | Technical review   | 25%             | `v0.2-technical-review` |
+| Sprint 17 (W18) | 18   | Final              | 35%             | `v1.0-final`            |
+
+The first milestone is due 2026-11-01 and the last 2027-02-28. Each tag follows a feature freeze.
