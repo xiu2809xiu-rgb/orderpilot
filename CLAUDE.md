@@ -185,7 +185,7 @@ Each row says whether it exists today or which story brings it. Everything marke
 | Git hooks               | Commit message: commitlint. Pre-commit: licence-key guard, samples guard, secretlint, em-dash check and lint-staged. Pre-push: samples guard on every commit             | Today                                |
 | Dependency updates      | Dependabot for npm and Actions, weekly on Monday 06:00 Singapore time, a 7-day cooldown, grouped                                                                         | Today                                |
 | CI and scans            | GitHub Actions: `ci.yml` (verify) and `security.yml` (Semgrep, gitleaks, OSV), then Trivy (P-13)                                                                         | Today (P-6), P-13                    |
-| Shared contracts        | `packages/shared`: zod schemas and types                                                                                                                                 | Planned: P-7                         |
+| Shared contracts        | `packages/shared`: zod schemas and types                                                                                                                                 | Built: P-7 (draft order contract)    |
 | API                     | NestJS in layers, with Swagger "OrderPilot API" at `/api/docs`                                                                                                           | Planned: P-8                         |
 | Logging                 | pino with correlation ids                                                                                                                                                | Planned: P-8                         |
 | Database                | Prisma with PostgreSQL                                                                                                                                                   | Planned: P-9                         |
@@ -212,23 +212,23 @@ Each row says whether it exists today or which story brings it. Everything marke
 
 ## 3. Repository layout
 
-| Path                           | Holds                                                                                                            | Status             |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------------- | ------------------ |
-| `apps/api`                     | The NestJS API, with a worker entry                                                                              | Planned: P-8, P-13 |
-| `apps/web`                     | The web app                                                                                                      | Planned: P-11      |
-| `services/mock-navision`       | The mock of Navision                                                                                             | Planned: P-19      |
-| `packages/tsconfig`            | The strict TypeScript config                                                                                     | Today              |
-| `packages/eslint-config`       | The flat, type-aware ESLint config                                                                               | Today              |
-| `packages/shared`              | Shared zod schemas and types: envelopes, error codes, roles, permissions, and the order and event contract       | Planned: P-7       |
-| `packages/synthetic-data`      | The seeded generator and synthetic master data                                                                   | Planned: P-19      |
-| `packages/synthetic-documents` | Generated PDFs with planted mistakes and ground truth                                                            | Planned: P-21      |
-| `scripts/`                     | Repository checks and build scripts, beside `scripts/github/`                                                    | Today, P-16        |
-| `scripts/github/`              | Idempotent scripts for labels, the sprint calendar, the board, the backlog and the wiki                          | Today              |
-| `docs/`                        | All documentation: `adr/`, `agile/`, `ai/`, `client/`, `design-thinking/`, `grs/`, `research/`, `team/` and more | Today, growing     |
-| `samples/`                     | Client samples tried on one machine. Git-ignored except its README. The ignore rule and the README exist         | Today              |
-| `assets-src/3d/`               | Parametric Blender scripts                                                                                       | Planned: P-23      |
-| `infra/deploy/`                | The server bootstrap, Caddy, `docker-compose.prod.yml` and backups                                               | Planned: P-24      |
-| `.github/`                     | Issue forms, the pull request template, `CODEOWNERS`, `labels.json`, `rulesets/main.json` and workflows          | Today              |
+| Path                           | Holds                                                                                                            | Status                            |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| `apps/api`                     | The NestJS API, with a worker entry                                                                              | Planned: P-8, P-13                |
+| `apps/web`                     | The web app                                                                                                      | Planned: P-11                     |
+| `services/mock-navision`       | The mock of Navision                                                                                             | Planned: P-19                     |
+| `packages/tsconfig`            | The strict TypeScript config                                                                                     | Today                             |
+| `packages/eslint-config`       | The flat, type-aware ESLint config                                                                               | Today                             |
+| `packages/shared`              | Shared zod schemas and types: envelopes, error codes, roles, permissions, and the order and event contract       | Built: P-7 (draft order contract) |
+| `packages/synthetic-data`      | The seeded generator and synthetic master data                                                                   | Planned: P-19                     |
+| `packages/synthetic-documents` | Generated PDFs with planted mistakes and ground truth                                                            | Planned: P-21                     |
+| `scripts/`                     | Repository checks and build scripts, beside `scripts/github/`                                                    | Today, P-16                       |
+| `scripts/github/`              | Idempotent scripts for labels, the sprint calendar, the board, the backlog and the wiki                          | Today                             |
+| `docs/`                        | All documentation: `adr/`, `agile/`, `ai/`, `client/`, `design-thinking/`, `grs/`, `research/`, `team/` and more | Today, growing                    |
+| `samples/`                     | Client samples tried on one machine. Git-ignored except its README. The ignore rule and the README exist         | Today                             |
+| `assets-src/3d/`               | Parametric Blender scripts                                                                                       | Planned: P-23                     |
+| `infra/deploy/`                | The server bootstrap, Caddy, `docker-compose.prod.yml` and backups                                               | Planned: P-24                     |
+| `.github/`                     | Issue forms, the pull request template, `CODEOWNERS`, `labels.json`, `rulesets/main.json` and workflows          | Today                             |
 
 Today's root files are `README.md`, `CONTRIBUTING.md`, `SECURITY.md`, `AGENTS.md`, `CLAUDE.md`, `.claude/settings.json`, `.editorconfig`, `.gitattributes`, `.gitignore` and `.node-version`.
 

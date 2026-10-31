@@ -280,6 +280,7 @@ Acceptance criteria:
 - OrderPilot's own record numbers: a type prefix, the date and a running number, like `SPR-20261102-0001`, shown beside Navision's numbers, which stay the official ones.
 - The contract is marked "draft for the team to agree in Week 3", and status stays in area 2.
 - ADR: shared contracts.
+- Contract polish: publish the schemas as JSON Schema for the Swagger page and the mock Navision, add a contract test that fails on a breaking change, and prove the `exports` map through a Vite build once P-11 lands.
 
 ### P-8: The API shell
 
