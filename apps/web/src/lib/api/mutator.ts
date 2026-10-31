@@ -28,11 +28,19 @@ export function apiMutator<T>(config: MutatorConfig): Promise<T> {
 /** The error type of a generated hook. */
 export type ErrorType<Body> = ApiError & { readonly body?: Body };
 
-function withQuery(url: string, params: MutatorConfig["params"]): string {
+/** An array becomes repeated keys, the form a list filter expects. */
+export function withQuery(
+  url: string,
+  params: MutatorConfig["params"],
+): string {
   if (!params) return url;
   const query = new URLSearchParams();
   for (const [name, value] of Object.entries(params)) {
     if (value === undefined || value === null) continue;
+    if (Array.isArray(value)) {
+      for (const item of value) query.append(name, String(item));
+      continue;
+    }
     query.set(
       name,
       typeof value === "object" ? JSON.stringify(value) : String(value),
