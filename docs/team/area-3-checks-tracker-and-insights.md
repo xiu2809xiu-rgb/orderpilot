@@ -57,25 +57,52 @@ sequenceDiagram
 
 ## What the base gives you
 
-All planned. Each item lands with the story named, and D-1 fills this section in with what actually landed.
+D-1 landed. Everything below runs today on mock data built from the synthetic data, and every answer says so in `meta.mock` and on screen with the Mock badge.
 
-- **From D-1, the area 3 base:**
-  - the check-rule Strategy interface, the check-result and exception contracts, and an empty exceptions model;
-  - routes that return typed mock data, in Swagger;
-  - screens wired to them, covering every state: the order tracker (status, owner, overdue flags), an order's detail timeline, the exceptions queue and a KPI dashboard of Spectra's five measures;
-  - an order's page that shows each step as a chain, with what each one changed, such as "payment confirmed: packing released" (money postings stay in Navision);
-  - the master-data screens' price checks, with P-19's data;
-  - `it.todo` tests naming the key cases: the MVP mismatch (the packing list's quantity against the PO), tolerances and the KPI formulas.
-- **From the platform:** the shared contracts (P-7); the API shell (P-8); the database and seed orders in different states (P-9); sign-in and the permissions guard (P-10); the web shell (P-11) and the common data table with quick search, saved filters, column settings and export (P-12); the event bus and live updates (P-15); mock Navision's master data (P-19); and the synthetic documents with planted mistakes (P-21).
-- **Generated hooks and mocks (planned: P-26):** the base's screens use the typed TanStack Query hooks and MSW mocks that orval generates from the API's OpenAPI spec, through the web app's `ApiClient`. Regenerate them when your routes change; CI fails when they are out of date.
+- **The checks module** (`apps/api/src/modules/checks/`):
+  - `domain/check-rule.ts`: the `CheckRule` Strategy interface (`id`, `label`, `appliesTo`, `evaluate(context)`) and the context a rule is given. No rule is written.
+  - `domain/order-status-reader.ts`: the `OrderStatusReader` port, the only way area 3 learns an order's status, and the `CheckReporter` port that carries `check.completed` to area 2. `mock-order-status-reader.ts` answers from the synthetic data's sample states. Area 2's API replaces it in `checks.module.ts`, and nothing else changes.
+  - `domain/mock-samples.ts`, `domain/mock-status.ts`: the sample timelines, check results, exceptions and overdue flags the screens show. Every rule id starts with `mock.`. They go when your engine and read model exist.
+  - `domain/name-match.ts`: lists look-alike names as possible matches. A match is made on the Navision number alone.
+  - `mock-checks.repository.ts`, `tracker.service.ts`, `exceptions.service.ts` and the two controllers: layered as the platform expects. The services page, search and sort the mock list on the server and decide nothing else.
+- **The insights module** (`apps/api/src/modules/insights/`): one route that returns Spectra's five measures with placeholder lab estimates.
+- **The model** (`apps/api/prisma/schema/checks.prisma`, migration `20261101090000_checks_exceptions`): `CheckException`, empty. Nothing writes to it, and no order status is stored anywhere in area 3.
+- **The contracts** (`packages/shared/src/checks.ts`): check result, evidence, tolerance, `check.completed`, exception (open and resolved only), the tracker row, the timeline, the master-data match and the five KPIs. Three new permissions: `tracker.read`, `exceptions.read` and `insights.read`, in the default role matrix that the seed loads.
+- **Routes** (all in Swagger, `apps/api/requests/checks.http` has a request for each):
+
+  | Route                          | Permission        | Returns                                                                  |
+  | ------------------------------ | ----------------- | ------------------------------------------------------------------------ |
+  | `GET /tracker/orders`          | `tracker.read`    | The tracker, with server-side paging, search, sort and an overdue filter |
+  | `GET /tracker/orders/:orderNo` | `tracker.read`    | One order's timeline, check results and master-data matches              |
+  | `GET /exceptions`              | `exceptions.read` | The exceptions queue, newest first, with paging and search               |
+  | `GET /insights/kpis`           | `insights.read`   | The five measures, labelled as lab estimates                             |
+
+- **Screens** (`apps/web/src/features/order-tracker/`, `exceptions/`, `insights/`), on the generated hooks and the common components, each with loading, empty, error with a trace id, and permission-denied states:
+  - **The order tracker** (`/order-tracker`): the common data table with server-side paging, status, owner and overdue flags.
+  - **An order's page** (`/order-tracker/:orderNo`): each step as a chain with its effect in our own words ("Payment confirmed: packing released"), the check results, the customer and items matched on Navision numbers (a look-alike name appears only as a possible match), and the operation log at the foot with mock rows until F-2 feeds it. Money postings stay in Navision, and the page says so.
+  - **The exceptions queue** (`/exceptions`): what differs, by how much, against which tolerance, and who should fix it.
+  - **The KPI dashboard** (`/insights`): the five measures, labelled as mock lab estimates, with a lazy-loaded chart for each and a table view. Screenshots, light and dark, are in `docs/design/screenshots/area-3/`.
+- **Tests:** passing tests for the mock routes (unit, HTTP and component), and `it.todo` cases named for the MVP mismatch, tolerances, the exceptions flow and the KPI formulas in `domain/check-rules.todo.test.ts` and `insights/kpi-formulas.todo.test.ts`.
+- **From the platform:** the shared contracts (P-7); the API shell (P-8); the database and seed orders in different states (P-9); sign-in and the permissions guard (P-10); the web shell (P-11) and the common data table, page states and operation log (P-12); the event bus and live updates (planned: P-15); mock Navision's master data (planned: P-19); and the synthetic documents with planted mistakes (planned: P-21).
+- **Generated hooks and mocks (P-26):** the screens use the typed TanStack Query hooks and MSW handlers that orval generates (`useTrackerList`, `useTrackerTimeline`, `useExceptionsList`, `useInsightsKpis`). Run `pnpm api:generate` when your routes change; CI fails when the output is out of date. See [ADR 0025](../adr/0025-area-3-reads-status-through-a-port.md) for the design.
 
 ## What's yours to build
 
-**Starter stories,** ready to pull on the board (planned: P-2 seeds them):
+D-1 left all of this to you: every check and its tolerance, the exceptions flow, the tracker's logic and the KPIs.
 
-- **D-2: the packing-list quantity check against the PO,** the Must mismatch.
-- **D-3: the exceptions queue flow:** open, assign, resolve or escalate, with every step audited.
-- **D-4: the tracker's status, owner and overdue flags,** from area 2's workflow events.
+**Starter stories,** ready to pull on the board:
+
+- **D-2: the packing-list quantity check against the PO,** the Must mismatch. Write the first `CheckRule`, a small engine that runs the rules for an order, and the tolerance configuration. Replace the `it.todo` cases in `check-rules.todo.test.ts`.
+- **D-3: the exceptions queue flow:** open, assign, resolve or escalate, with every step audited. Start from the empty `CheckException` model and the queue screen.
+- **D-4: the tracker's status, owner and overdue flags,** from area 2's workflow events. Replace `MockOrderStatusReader` with a read model, and the mock overdue flag with your rule.
+
+**Deliberately left out of the base** (each is on the backlog under D-3 or D-4):
+
+- every check rule, tolerance and the engine that runs them, and what a check reports to area 2 (`CheckReporter` has no implementation);
+- the exceptions flow: states beyond open and resolved, assignment, escalation, due times and audit;
+- the tracker's logic: statuses from events, owners, overdue rules and open actions;
+- the KPI formulas, trends over a period and real figures (the five measures are fixed mock lab estimates);
+- the documents shown side by side with the differing line marked, role home tiles with counts, the operation log fed from the audit trail (F-2), and an end-to-end spec.
 
 **The deeper work,** for the A-level depth:
 
@@ -84,7 +111,6 @@ All planned. Each item lands with the story named, and D-1 fills this section in
 - partial shipments and substitutions, once Spectra says how they work (Q-8);
 - the AI explanation of each exception, through area 1's gateway, labelled as AI;
 - the KPIs: each of the five measures as a tested formula, with its lab estimate labelled;
-- role home tiles with counts, such as orders waiting on me or orders ready to ship, in our own design, on the shell's home pages;
 - full test coverage: every planted mistake in the synthetic documents flagged, and no false alarm on the clean ones.
 
 ## Options to consider, not built

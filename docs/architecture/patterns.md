@@ -29,7 +29,9 @@ The named patterns used in the code, where each one lives, and why it earns its 
 | Transactional outbox        | planned                                                           | Events leave the system only if the business transaction commits                         | P-15  |
 | Gateway                     | planned: `LlmGateway`                                             | One interface over the mock, OpenAI-compatible and Bedrock providers                     | P-17  |
 | Factory and adapter         | planned: `SystemConnector` and the Navision adapter               | Connectors are chosen by name and hide each system's quirks                              | P-20  |
-| Strategy                    | planned: check rules                                              | Each check rule is a class behind one interface                                          | D-1   |
+| Strategy                    | `checks/domain/check-rule.ts` (the rules are planned)             | Each check rule is a class behind one interface                                          | D-1   |
+| Port with a mock adapter    | `checks/domain/order-status-reader.ts`                            | Area 3 reads order status through one interface; area 2 replaces the mock                | D-1   |
+| Lazy-loaded chart           | `features/insights/KpiBars.tsx`                                   | The charts load as their own chunk, so the entry stays small                             | D-1   |
 | State machine               | planned: order and exception lifecycles                           | Legal transitions in one place                                                           | C-1   |
 
 ## Layers

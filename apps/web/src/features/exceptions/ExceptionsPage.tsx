@@ -39,7 +39,7 @@ export default function ExceptionsPage() {
         cell: (row) => (
           <Link
             to={`/order-tracker/${row.orderNo}`}
-            className="font-mono font-medium text-primary underline-offset-4 hover:underline"
+            className="whitespace-nowrap font-mono font-medium text-primary underline-offset-4 hover:underline"
           >
             {row.orderNo}
           </Link>

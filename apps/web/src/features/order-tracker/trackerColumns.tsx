@@ -33,9 +33,9 @@ export function trackerColumns(
       id: "customerName",
       header: t("list.columns.customer"),
       cell: (row) => (
-        <span>
-          {row.customerName}{" "}
-          <span className="font-mono text-xs text-muted-foreground">
+        <span className="block min-w-40">
+          {row.customerName}
+          <span className="block font-mono text-xs text-muted-foreground">
             {row.customerNo}
           </span>
         </span>
