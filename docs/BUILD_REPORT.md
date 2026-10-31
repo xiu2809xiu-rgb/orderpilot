@@ -214,7 +214,7 @@ Phase B is paused at P-13 until the product pass is done. P-13's first builder s
 | P-31  | `feat/product-pass-data`              | [#117](https://github.com/xiu2809xiu-rgb/orderpilot/issues/117) | Not started |
 | P-32  | `feat/product-pass-consent`           | [#118](https://github.com/xiu2809xiu-rgb/orderpilot/issues/118) | Not started |
 | P-33  | `feat/product-pass-home`              | [#119](https://github.com/xiu2809xiu-rgb/orderpilot/issues/119) | Not started |
-| P-34  | `feat/product-pass-signin`            | [#120](https://github.com/xiu2809xiu-rgb/orderpilot/issues/120) | Not started |
+| P-34  | `feat/platform-sign-in`               | [#120](https://github.com/xiu2809xiu-rgb/orderpilot/issues/120) | In review   |
 | P-35  | `feat/product-pass-master-data`       | [#121](https://github.com/xiu2809xiu-rgb/orderpilot/issues/121) | Not started |
 | P-36  | `feat/product-pass-orders`            | [#122](https://github.com/xiu2809xiu-rgb/orderpilot/issues/122) | Not started |
 | P-37  | `feat/product-pass-documents`         | [#123](https://github.com/xiu2809xiu-rgb/orderpilot/issues/123) | Not started |
