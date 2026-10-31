@@ -11,6 +11,7 @@ import type { AppConfig } from "./config/app-config.js";
 import { ConfigModule } from "./config/config.module.js";
 import { DatabaseModule } from "./database/database.module.js";
 import { HealthModule } from "./health/health.module.js";
+import { AuditViewerModule } from "./modules/audit/audit-viewer.module.js";
 import { ChecksModule } from "./modules/checks/checks.module.js";
 import { InsightsModule } from "./modules/insights/insights.module.js";
 import { GovernanceModule } from "./modules/governance/governance.module.js";
@@ -60,6 +61,7 @@ export class AppModule {
         ChecksModule,
         InsightsModule,
         GovernanceModule,
+        AuditViewerModule,
       ],
       // The order is the rule: throttle, then who are you, then is the
       // request really from our page, then may you. Every route is covered;

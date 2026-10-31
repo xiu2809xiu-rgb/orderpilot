@@ -105,7 +105,12 @@
     "emptyDescription": "Users appear here once they exist.",
     "failed": "Could not change that user.",
     "forbiddenTitle": "You cannot see users",
-    "forbiddenDescription": "Your role does not include the users.read permission."
+    "forbiddenDescription": "Your role does not include the users.read permission.",
+    "actions": "Actions",
+    "history": "History",
+    "historyFor": "History of {{name}}",
+    "historyTitle": "History of {{name}}",
+    "historyDescription": "What changed on this user, from the audit trail."
   },
   "masking": {
     "title": "Masking",

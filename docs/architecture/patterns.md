@@ -157,9 +157,12 @@ A service that changes something on behalf of a user takes the `AuthContext` and
 
 `apps/api/src/modules/governance/` follows the layers. The controllers (`matrix`, `policy`) validate and call a service; the services (`MatrixService`, `PolicyService`) write the change and its audit event in one transaction; `RolePermissionRepository` and `DataScopeRepository` are the only code that touches the tables; `domain/` holds the rules as plain functions with their own tests.
 
-| Pattern              | Where                                              | Why                                                                                             | Story |
-| -------------------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ----- |
-| Domain rules, no I/O | `governance/domain/matrix-rules.ts`, `masking.ts`  | The locked cells, the copy plan and masking are tested without a database or HTTP               | F-1   |
-| Policy as a function | `domain/ai-destination-policy.ts`                  | One place answers what data may go to which provider; the gateway calls it, the owner widens it | F-1   |
-| Mask on the server   | `domain/masking.ts`, `PolicyService.maskingSample` | A hidden value is null in the response, so it cannot be read from the page                      | F-1   |
-| Shared contract      | `packages/shared/src/governance`                   | The web app and the API read one set of schemas; the owner's policy returns `PolicyDecision`    | F-1   |
+| Pattern                 | Where                                                         | Why                                                                                                 | Story |
+| ----------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ----- |
+| Domain rules, no I/O    | `governance/domain/matrix-rules.ts`, `masking.ts`             | The locked cells, the copy plan and masking are tested without a database or HTTP                   | F-1   |
+| Policy as a function    | `domain/ai-destination-policy.ts`                             | One place answers what data may go to which provider; the gateway calls it, the owner widens it     | F-1   |
+| Mask on the server      | `domain/masking.ts`, `PolicyService.maskingSample`            | A hidden value is null in the response, so it cannot be read from the page                          | F-1   |
+| Shared contract         | `packages/shared/src/governance`                              | The web app and the API read one set of schemas; the owner's policy returns `PolicyDecision`        | F-1   |
+| Read-only viewer        | `apps/api/src/modules/audit`                                  | A controller with only `GET` routes over P-9's repository, so nothing can write an event through it | F-2   |
+| Validated filters       | `auditEventQuerySchema` in `packages/shared/src/audit-viewer` | One zod schema validates the list's filters for the API and types them for the web app              | F-2   |
+| Feed a common component | `EntityOperationLog`, `toOperationRows`                       | One hook and one mapper turn the audit list into P-12's `OperationLog`, so any page can add it      | F-2   |

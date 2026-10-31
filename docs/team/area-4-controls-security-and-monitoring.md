@@ -74,7 +74,13 @@ F-1 has landed. F-2 and G-1 fill in their items when they do.
   - **Data scope:** `RoleDataScope` in `governance.prisma` holds `all`, `brands` or `own` per role. It is stored and shown. Nothing filters a list by it yet.
   - **Routes and requests:** `apps/api/src/modules/governance/` (controllers, services, `domain/` with its own unit tests), `apps/api/requests/governance.http`, generated hooks in `apps/web/src/lib/api/generated/endpoints/governance`. Component tests use MSW and `test/http/governance.test.ts` runs against the real database.
   - **`it.todo` tests** in `apps/api/test/http/governance-controls.test.ts`, named by control: approval limits, no self-approval, the bank-detail hold, masking for each role, a direct API call being refused (E2E #3), and payment confirmation.
-- **From F-2, the audit viewer:** the audit log viewer over the real hash chain, with filters and a chain check; the audit trail at the foot of every detail page (with P-12's audit link); and `it.todo` tests for export and retention.
+- **From F-2, the audit viewer** (landed, [ADR 0027](../adr/0027-audit-viewer-base.md)):
+  - **The audit log** at `/audit` (`apps/web/src/features/audit/`): P-12's data table over the real hash-chained trail, newest first, paged on the server, with filters for the kind of actor, role, a person's id, an action prefix, record type and id, a date range, refusals only, and words in the summary. The filters live in the address bar, so P-12's `AuditLink` (`/audit?entity=Order&id=...`) opens the right view. There is no export. The Synthetic demo data label shows.
+  - **An event in full:** the Details button opens a side panel with who, when, where from (IP), the trace id, what changed and the hashes. Values in `changes` are masked on the server by F-1's `mask()`: a value the caller may not see is not in the response, and the panel shows the reason through `MaskedValue`. One neutral sample rule hides a refusal's `reason` from the system admin and shows it to the auditor (`modules/audit/domain/audit-masking.ts`).
+  - **The chain check:** a button that walks the whole chain through `AuditService.verify` and answers "Verified up to sequence N" or "Broken at sequence N", with the problem and the last sequence that still verifies.
+  - **Routes** in `apps/api/src/modules/audit/`, all `GET`, all needing `audit.read` (the system admin and the auditor hold it): `/audit/events` (filters and paging), `/audit/events/:id` and `/audit/chain`. There is no route that writes, edits or deletes an event. They read only through P-9's `AuditEventRepository` and `AuditService`, to which F-2 added read methods (`search`, `findRecordById`, `lastSequence`, `sequenceOf`, `sequenceBefore`). Requests: `apps/api/requests/audit.http`. Generated hooks: `apps/web/src/lib/api/generated/endpoints/audit`. `test/http/audit-viewer.test.ts` runs against the real database, including a tampered chain.
+  - **The operation log under a record,** fed from the audit trail. `EntityOperationLog` (`apps/web/src/features/audit/EntityOperationLog.tsx`) is the list filtered by record type and id, drawn with P-12's `OperationLog` and an `AuditLink`. It is shown once, as a History button on each user in the Users tab of `/governance`. To add it to another page, see [How another area feeds the operation log](#how-another-area-feeds-the-operation-log).
+  - **`it.todo` tests** in `apps/api/test/http/audit-controls.test.ts`: export and retention.
 - **From G-1, monitoring:**
   - OpenTelemetry traces and metrics, and `/metrics` with prom-client;
   - the `AnalyticsTracker` class (batching, consent, no personal data), a clickstream endpoint and a `ClickstreamEvent` model;
@@ -84,6 +90,15 @@ F-1 has landed. F-2 and G-1 fill in their items when they do.
 - **Generated hooks and mocks (planned: P-26):** the base's screens use the typed TanStack Query hooks and MSW mocks that orval generates from the API's OpenAPI spec, through the web app's `ApiClient`. Regenerate them when your routes change; CI fails when they are out of date.
 - **Optional, off unless configured (planned: G-1):** Grafana's `otel-lgtm` image as a compose profile for traces, metrics and logs, and Sentry for errors in the web app and the API. Each comes with an ADR, a pinned version and a traceability row.
 
+## How another area feeds the operation log
+
+Area 2 and area 3 wire their own detail pages; F-2 does not edit them. Two steps:
+
+1. **Write events with a record type and id** when the record changes: `AuditService.record({ entityType: "Order", entityId: order.id, summary: "...", ... })`. The summary is the sentence the log shows as "what changed", so write it as one ("Janet Lim approved SO-20261102-0001"), and keep any value a masking rule would hide in `changes`, not in the summary.
+2. **Drop the component at the foot of the page:** `<EntityOperationLog entityType="Order" entityId={order.id} subject="order SO-20261102-0001" />` from `@/features/audit/EntityOperationLog`. It reads `GET /audit/events?entityType=...&entityId=...` through the generated hook, maps each event to a row of P-12's `OperationLog` (`toOperationRows`), adds the `AuditLink` and the Synthetic demo data label, and renders nothing for a role without `audit.read`.
+
+If you need a different layout, call `useAuditViewerList({ entityType, entityId, pageSize })` yourself and pass `toOperationRows(data.data)` to `OperationLog`.
+
 ## What's yours to build
 
 **Starter stories,** ready to pull on the board (planned: P-2 seeds them):
@@ -91,6 +106,11 @@ F-1 has landed. F-2 and G-1 fill in their items when they do.
 - **F-3: the authorisation policy with approval limits,** enforced on the server.
 - **F-4: no self-approval and segregation of duties.**
 - **F-5: the bank-detail hold,** cleared only by Finance and a second approver.
+
+**What F-2 deliberately leaves to you,** and what is queued:
+
+- **F-9: audit viewer polish** (backlog): a picker for the actor and the action, saved views, a chain check that runs in the background, a link to the broken event, and a browser test.
+- Export, retention, anchoring and scheduled verification, and the dashboards: see the deeper work below. None is started, so none is half-done.
 
 **What F-1 deliberately leaves to you** (nothing below is written, so none of it is half-done):
 
@@ -110,7 +130,10 @@ F-1 has landed. F-2 and G-1 fill in their items when they do.
 - the masking rules for each role, each with its reason;
 - classification of every sensitive field, and the rules for what may go to which AI provider (R-03 in [GRS by design](../grs/grs-by-design.md));
 - delegation: a substitute approver while the approver is away, with the same limits;
-- audit export and retention per record type;
+- audit export and retention per record type (F-2 left both out: the `it.todo` tests name the cases);
+- anchoring the latest audit hash outside the database, and scheduling the chain check (both are in the backlog under F-2);
+- the real masking rules for an event's `changes`, in place of the one sample rule;
+- the audit dashboards;
 - E2E #3 and the area 4 half of E2E #4, end to end;
 - the real dashboards, budgets and alerts for traces, metrics, clickstream and AI cost, in Weeks 14 to 16 (Sprints 13 to 15);
 - the PDPA framing in [GRS by design](../grs/grs-by-design.md#risk-register) (R-04), kept current. Never claim that the prototype is PDPA compliant.

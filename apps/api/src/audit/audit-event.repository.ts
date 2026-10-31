@@ -1,5 +1,11 @@
 import { Inject, Injectable } from "@nestjs/common";
-import type { AuditActor, AuditEvent, PageQuery } from "@orderpilot/shared";
+import {
+  REFUSAL_ACTION_SUFFIXES,
+  type AuditActor,
+  type AuditEvent,
+  type PageQuery,
+  type Role,
+} from "@orderpilot/shared";
 import { BaseRepository, type Page } from "../common/repository.js";
 import { Database } from "../database/database.js";
 import { Prisma } from "../generated/prisma/client.js";
@@ -7,6 +13,28 @@ import type { AuditEvent as AuditEventRow } from "../generated/prisma/client.js"
 
 /** One fixed number names the audit chain's advisory lock. */
 const CHAIN_LOCK_KEY = 7_340_289_113_070_251n;
+
+/** What a search narrows the trail by. Every field is optional and they combine with "and". */
+export interface AuditSearch {
+  readonly actorKind?: "user" | "system" | "ai";
+  readonly actorUserId?: string;
+  readonly role?: Role;
+  /** An action that starts with this text. */
+  readonly action?: string;
+  readonly entityType?: string;
+  readonly entityId?: string;
+  readonly from?: Date;
+  readonly to?: Date;
+  readonly refusalsOnly?: boolean;
+  /** Words in the summary, ignoring case. */
+  readonly search?: string;
+}
+
+/** An event with its place in the chain, which the viewer shows. */
+export interface AuditRecord {
+  readonly sequence: number;
+  readonly event: AuditEvent;
+}
 
 /** The only place the audit table is read or written. */
 @Injectable()
@@ -87,6 +115,61 @@ export class AuditEventRepository extends BaseRepository<AuditEvent, string> {
     return this.toPage(rows.map(toEvent), total, query);
   }
 
+  /** Newest first, narrowed by the filters. Read-only: the viewer never writes. */
+  async search(
+    filters: AuditSearch,
+    query: PageQuery,
+  ): Promise<Page<AuditRecord>> {
+    const where = toWhere(filters);
+    const [rows, total] = await Promise.all([
+      this.database.client.auditEvent.findMany({
+        where,
+        orderBy: { sequence: "desc" },
+        skip: (query.page - 1) * query.pageSize,
+        take: query.pageSize,
+      }),
+      this.database.client.auditEvent.count({ where }),
+    ]);
+    return {
+      items: rows.map(toRecord),
+      meta: { page: query.page, pageSize: query.pageSize, total },
+    };
+  }
+
+  async findRecordById(id: string): Promise<AuditRecord | null> {
+    const row = await this.database.client.auditEvent.findUnique({
+      where: { id },
+    });
+    return row ? toRecord(row) : null;
+  }
+
+  /** The newest sequence, or null for an empty trail. */
+  async lastSequence(): Promise<number | null> {
+    const last = await this.database.client.auditEvent.findFirst({
+      orderBy: { sequence: "desc" },
+      select: { sequence: true },
+    });
+    return last ? Number(last.sequence) : null;
+  }
+
+  async sequenceOf(id: string): Promise<number | null> {
+    const row = await this.database.client.auditEvent.findUnique({
+      where: { id },
+      select: { sequence: true },
+    });
+    return row ? Number(row.sequence) : null;
+  }
+
+  /** The newest sequence below this one, or null when there is none. */
+  async sequenceBefore(sequence: number): Promise<number | null> {
+    const row = await this.database.client.auditEvent.findFirst({
+      where: { sequence: { lt: BigInt(sequence) } },
+      orderBy: { sequence: "desc" },
+      select: { sequence: true },
+    });
+    return row ? Number(row.sequence) : null;
+  }
+
   async existsByAction(action: string): Promise<boolean> {
     const count = await this.database.client.auditEvent.count({
       where: { action },
@@ -111,6 +194,41 @@ export class AuditEventRepository extends BaseRepository<AuditEvent, string> {
       after = last.sequence;
     }
   }
+}
+
+function toWhere(filters: AuditSearch): Prisma.AuditEventWhereInput {
+  const range =
+    filters.from || filters.to
+      ? {
+          occurredAt: {
+            ...(filters.from ? { gte: filters.from } : {}),
+            ...(filters.to ? { lte: filters.to } : {}),
+          },
+        }
+      : {};
+  return {
+    ...(filters.actorKind ? { actorKind: filters.actorKind } : {}),
+    ...(filters.actorUserId ? { actorUserId: filters.actorUserId } : {}),
+    ...(filters.role ? { actorRole: filters.role } : {}),
+    ...(filters.action ? { action: { startsWith: filters.action } } : {}),
+    ...(filters.entityType ? { entityType: filters.entityType } : {}),
+    ...(filters.entityId ? { entityId: filters.entityId } : {}),
+    ...(filters.search
+      ? { summary: { contains: filters.search, mode: "insensitive" } }
+      : {}),
+    ...(filters.refusalsOnly
+      ? {
+          OR: REFUSAL_ACTION_SUFFIXES.map((suffix) => ({
+            action: { endsWith: suffix },
+          })),
+        }
+      : {}),
+    ...range,
+  };
+}
+
+function toRecord(row: AuditEventRow): AuditRecord {
+  return { sequence: Number(row.sequence), event: toEvent(row) };
 }
 
 function toActor(row: AuditEventRow): AuditActor {

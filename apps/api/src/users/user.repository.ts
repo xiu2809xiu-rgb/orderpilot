@@ -55,6 +55,16 @@ export class UserRepository extends BaseRepository<UserRecord, string> {
     return this.toPage(rows.map(toRecord), total, query);
   }
 
+  /** Display names by id, for screens that show who did something. Unknown ids are left out. */
+  async namesByIds(ids: readonly string[]): Promise<Map<string, string>> {
+    if (ids.length === 0) return new Map();
+    const rows = await this.database.client.user.findMany({
+      where: { id: { in: [...ids] } },
+      select: { id: true, displayName: true },
+    });
+    return new Map(rows.map((row) => [row.id, row.displayName]));
+  }
+
   async create(user: NewUser): Promise<UserRecord> {
     const row = await this.database.client.user.create({
       data: { ...user, email: user.email.toLowerCase() },
