@@ -78,7 +78,7 @@ export default function SprApprovalPage() {
               <SectionCard title={t("spr.decisionHeading")}>
                 <SprDecisionForm
                   spr={spr}
-                  canDecide={hasPermission(session, "spr.decide")}
+                  canDecide={hasPermission(session, "approvals.decide")}
                 />
               </SectionCard>
               <SectionCard

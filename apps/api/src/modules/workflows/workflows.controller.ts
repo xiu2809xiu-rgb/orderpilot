@@ -45,7 +45,7 @@ import {
 } from "./workflows.schemas.js";
 import { WorkflowsService } from "./workflows.service.js";
 
-const MOCK = { mock: true, dataLabel: "Synthetic demo data" } as const;
+const MOCK = { mock: true } as const;
 
 const orderParam = ApiParam({
   name: "orderNo",
@@ -180,7 +180,7 @@ export class WorkflowsController {
 
   @Post("sprs/:recordNo/approve")
   @HttpCode(200)
-  @RequirePermission("spr.decide")
+  @RequirePermission("approvals.decide")
   @recordParam
   @ApiOperation({
     summary:
@@ -205,7 +205,7 @@ export class WorkflowsController {
 
   @Post("sprs/:recordNo/reject")
   @HttpCode(200)
-  @RequirePermission("spr.decide")
+  @RequirePermission("approvals.decide")
   @recordParam
   @ApiOperation({
     summary:
