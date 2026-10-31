@@ -14,7 +14,7 @@ export async function runSeed(
 ): Promise<void> {
   const app = await NestFactory.createApplicationContext(
     AppModule.register(config),
-    { logger: false },
+    { logger: false, abortOnError: false },
   );
   try {
     for (const seeder of SEEDERS) {

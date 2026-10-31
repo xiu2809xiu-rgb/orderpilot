@@ -100,8 +100,8 @@ test("Getting started says how to run the API and what is not there yet", () => 
   const text = wikiPage("Getting-started.md");
   assert.ok(text.includes("cp .env.example .env"));
   assert.ok(text.includes("pnpm --filter @orderpilot/api dev"));
-  assert.ok(text.includes("There is no database yet"));
-  assert.ok(text.includes("P-9"));
+  assert.ok(text.includes("local PostgreSQL, Redis and MinIO"));
+  assert.ok(text.includes("P-10"));
 });
 
 test("Team and areas names every area label", () => {
