@@ -23,21 +23,22 @@ coverage/
 playwright-report/
 test-results/
 
-# AI tool folders stay on each person's machine. The root .claude/settings.json
-# is the one exception: it turns attribution off for everyone who clones the
-# repository. A slash inside a pattern ties it to the root, so **/ is what keeps
-# .claude out at any depth, as the plain names below already do.
+# AI tool folders and config files stay on each person's machine. The root
+# .claude/settings.json is the one exception: it turns attribution off for
+# everyone who clones the repository. A slash inside a pattern ties it to the
+# root, so **/ is what keeps .claude out at any depth, as the plain names do.
 **/.claude/*
 !/.claude/settings.json
 .aider*
 .amazonq/
 .augment/
 .cline/
-.clinerules/
+.clinerules
 .codex/
 .continue/
 .copilot/
 .cursor/
+.cursorrules
 .gemini/
 .junie/
 .kiro/
@@ -46,6 +47,12 @@ test-results/
 .roo/
 .tabnine/
 .windsurf/
+.windsurfrules
+CLAUDE.local.md
+
+# MCP config can hold a token, and tokens stay out of Git. P-22 decides whether
+# a version without one is tracked.
+.mcp.json
 
 # Editors and operating systems
 .idea/
