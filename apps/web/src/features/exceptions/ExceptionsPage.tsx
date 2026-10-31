@@ -124,6 +124,7 @@ export default function ExceptionsPage() {
         title={t("title")}
         description={t("description")}
         meta={<DemoBadge kind="mock" />}
+        total={list.data?.meta.total}
       />
       <DataTable
         tableId="exceptions"

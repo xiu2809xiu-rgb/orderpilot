@@ -2,6 +2,7 @@ import type { TFunction } from "i18next";
 import { Link } from "react-router";
 import type { TrackerOrder } from "@orderpilot/shared";
 import { StatusBadge, type DataTableColumn } from "@/components/common";
+import { formatDay } from "@/lib/format";
 
 /**
  * The tracker's columns. Only the four the API can sort are sortable. The
@@ -12,7 +13,8 @@ export function trackerColumns(
   t: TFunction,
   roleLabel: (role: TrackerOrder["ownerRole"]) => string,
 ): DataTableColumn<TrackerOrder>[] {
-  const day = (value: string | null) => value ?? t("list.noShipmentDate");
+  const day = (value: string | null) =>
+    value ? formatDay(value) : t("list.noShipmentDate");
   return [
     {
       id: "orderNo",
@@ -34,8 +36,8 @@ export function trackerColumns(
       header: t("list.columns.customer"),
       cell: (row) => (
         <span className="block min-w-40">
-          {row.customerName}
-          <span className="block font-mono text-xs text-muted-foreground">
+          {row.customerName}{" "}
+          <span className="font-mono text-xs text-muted-foreground">
             {row.customerNo}
           </span>
         </span>
@@ -83,14 +85,15 @@ export function trackerColumns(
       header: t("list.columns.exceptions"),
       cell: (row) => row.openExceptions,
       exportValue: (row) => row.openExceptions,
-      align: "end",
+      kind: "number",
     },
     {
       id: "orderDate",
       header: t("list.columns.orderDate"),
-      cell: (row) => row.orderDate,
+      cell: (row) => formatDay(row.orderDate),
       exportValue: (row) => row.orderDate,
       sortable: true,
+      kind: "date",
     },
     {
       id: "shipmentDate",
@@ -98,6 +101,7 @@ export function trackerColumns(
       cell: (row) => day(row.shipmentDate),
       exportValue: (row) => row.shipmentDate,
       sortable: true,
+      kind: "date",
     },
   ];
 }

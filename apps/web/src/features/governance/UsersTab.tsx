@@ -70,6 +70,7 @@ export function UsersTab() {
             icon={Users}
             title={t("users.emptyTitle")}
             description={t("users.emptyDescription")}
+            onRetry={() => void users.refetch()}
           />
         ) : (
           <Table aria-label={t("users.tableLabel")}>

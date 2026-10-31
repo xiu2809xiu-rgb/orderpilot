@@ -35,13 +35,13 @@ function ShortcutHelp() {
       className="flex flex-wrap gap-x-s3 gap-y-1 border-t px-s2 py-s1 text-xs text-muted-foreground"
     >
       <li className="flex items-center gap-1.5">
-        <Key>/</Key> {t("palette.helpSearch")}
+        <Key>{"/"}</Key> {t("palette.helpSearch")}
       </li>
       <li className="flex items-center gap-1.5">
-        <Key>N</Key> {t("palette.helpNew")}
+        <Key>{"N"}</Key> {t("palette.helpNew")}
       </li>
       <li className="flex items-center gap-1.5">
-        <Key>Ctrl K</Key> {t("palette.helpPalette")}
+        <Key>{t("palette.keys")}</Key> {t("palette.helpPalette")}
       </li>
     </ul>
   );

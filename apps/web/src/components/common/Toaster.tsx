@@ -118,7 +118,9 @@ function ToastCard({ item }: { item: ToastItem }) {
 /**
  * Where toasts appear: bottom right, small and still. The two containers are
  * always mounted so that a screen reader is already listening when a message
- * arrives: done messages are polite, errors are an alert.
+ * arrives: done messages are polite, errors are assertive. They are live
+ * regions without a role, so they never clash with a page's own status or
+ * alert.
  */
 export function Toaster() {
   const { t } = useTranslation("components");
@@ -128,14 +130,14 @@ export function Toaster() {
       aria-label={t("toast.region")}
       className="pointer-events-none fixed inset-x-s2 bottom-s2 z-50 flex flex-col items-end gap-2 sm:left-auto sm:w-96"
     >
-      <div role="status" className="flex w-full flex-col gap-2">
+      <div aria-live="polite" className="flex w-full flex-col gap-2">
         {items
           .filter((item) => item.kind === "done")
           .map((item) => (
             <ToastCard key={item.id} item={item} />
           ))}
       </div>
-      <div role="alert" className="flex w-full flex-col gap-2">
+      <div aria-live="assertive" className="flex w-full flex-col gap-2">
         {items
           .filter((item) => item.kind === "error")
           .map((item) => (

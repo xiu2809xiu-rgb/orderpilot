@@ -22,7 +22,11 @@ export function CheckResults({ checks }: { checks: readonly CheckResult[] }) {
       actions={<DemoBadge kind="mock" />}
     >
       {checks.length === 0 ? (
-        <EmptyState icon={ShieldCheck} title={t("detail.checks.empty")} />
+        <EmptyState
+          icon={ShieldCheck}
+          title={t("detail.checks.empty")}
+          description={t("detail.checks.emptyHint")}
+        />
       ) : (
         <ul className="space-y-s2">
           {checks.map((check) => (

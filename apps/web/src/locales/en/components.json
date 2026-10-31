@@ -64,7 +64,7 @@
   "states": {
     "loading": "Loading",
     "emptyTitle": "Nothing here yet",
-    "emptyNext": "Records appear here as they are added. Reload in a moment to check.",
+    "emptyNext": "Records appear here as they are added. Check again in a moment.",
     "reload": "Reload",
     "noMatchesTitle": "No results match",
     "noMatchesDescription": "Change or clear the search and filters to see more.",

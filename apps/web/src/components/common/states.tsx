@@ -27,6 +27,8 @@ interface EmptyStateProps {
   description?: string;
   /** The next step, such as a button to create the first record. Always give one. */
   action?: ReactNode;
+  /** When there is no other next step, a Reload button that asks again. */
+  onRetry?: () => void;
 }
 
 /**
@@ -39,16 +41,24 @@ export function EmptyState({
   title,
   description,
   action,
+  onRetry,
 }: EmptyStateProps) {
   const { t } = useTranslation("components");
+  const next =
+    action ??
+    (onRetry ? (
+      <Button variant="outline" onClick={onRetry}>
+        {t("states.reload")}
+      </Button>
+    ) : null);
   return (
     <StatePanel
       variant="inline"
       icon={icon ?? Inbox}
       title={title ?? t("states.emptyTitle")}
-      description={description ?? (action ? undefined : t("states.emptyNext"))}
+      description={description ?? (next ? undefined : t("states.emptyNext"))}
     >
-      {action}
+      {next}
     </StatePanel>
   );
 }
