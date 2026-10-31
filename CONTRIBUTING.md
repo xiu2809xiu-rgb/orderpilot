@@ -70,6 +70,25 @@ Then try:
 
 The API reads `apps/api/.env`, then the root `.env`, and never overrides a variable your shell, CI or Docker already set. If something required is missing, it stops and names the file to create. To change the port for one run: `API_PORT=3100 pnpm --filter @orderpilot/api dev` (PowerShell: `$env:API_PORT=3100` first). The layers and patterns are in [docs/architecture](docs/architecture/README.md). There is no database yet: PostgreSQL, Redis and MinIO arrive with P-9.
 
+### Run the web app
+
+The web app is `apps/web` (`@orderpilot/web`). It needs no database, but its pages need the API for a real sign-in, which arrives with P-10.
+
+```sh
+pnpm --filter @orderpilot/web dev        # http://localhost:5173, with /api proxied to the API
+pnpm --filter @orderpilot/web build      # type-check, then a production build in apps/web/dist
+pnpm --filter @orderpilot/web preview    # serve that build with the production security headers
+pnpm budget                              # initial JS must be 250 KB gzip or less (run after a build)
+pnpm --filter @orderpilot/web test       # component and unit tests
+```
+
+- **Ports:** `WEB_PORT` (default 5173) and `API_PORT` (default 3000) are in [`.env.example`](.env.example). Vite reads only those two names from the root `.env`.
+- **Demo sign-in:** with the API's demo mode on, the login page lists the nine roles. Without the API running, the page loads but cannot sign in.
+- **Where things are:** each area's screens go in `apps/web/src/features/<feature>/`; the shell, router and guards are in `src/app/`; text is in `src/locales/en/`. [ADR 0013](docs/adr/0013-the-web-stack.md) explains the layout.
+- **Screenshots** for a pull request come from `apps/web/scripts/screenshots.mjs`, which needs Playwright installed outside the repository (the top of the file says how) until P-14 adds it.
+
+There is no Docker image of the web app until P-13.
+
 ### The root scripts
 
 | Command                  | What it does                                                                      |
@@ -152,7 +171,7 @@ If something destructive or irreversible seems necessary, ask Richie first.
 
 ## How to add a component
 
-This applies from P-11, when `apps/web` exists. Before that there is nowhere to add one.
+`apps/web` exists since P-11. The shadcn components it needs so far are in `apps/web/src/components/ui`.
 
 1. **Look first.** P-12 brings the common components: the data table, every page state, badges, masked values and more. Use those before you add anything.
 2. **Choose a free source.** While the repository is public, use only:
@@ -163,14 +182,14 @@ This applies from P-11, when `apps/web` exists. Before that there is nowhere to 
 
    No React Bits Pro or ReUI Pro code goes into a public repository, because their licences need a private one. Once it is private, adding a Pro component goes through Richie.
 
-3. **Add it from `apps/web`,** with the shadcn CLI for a registry item. P-11 records the exact command. The component becomes code in this repository, so nobody needs a key to run or build it.
+3. **Add it from `apps/web`,** with the shadcn CLI for a registry item, for example `npx shadcn@latest add tabs` (not `pnpm dlx`, which pnpm's trust policy refuses; see [ADR 0013](docs/adr/0013-the-web-stack.md)). The CLI writes the component into `src/components/ui` and imports `cn` from `cn`, a different package: change that import to `@/lib/utils` and remove the `cn` dependency it added. The component becomes code in this repository, so nobody needs a key to run or build it.
 4. **Pin what it brings.** Registry items can declare caret ranges. Re-pin every new dependency to an exact version, and respect the 7-day release-age rule in `pnpm-workspace.yaml` ([ADR 0003](docs/adr/0003-pnpm-monorepo.md)).
 5. **Make it ours:**
    - one component per file, under 200 lines;
    - a header comment stating its origin;
    - design tokens only, with no hard-coded colours or sizes;
    - Lucide icons only;
-   - text through react-i18next, with no hard-coded strings.
+   - text through react-i18next, with no hard-coded strings (`i18n.test.ts` fails on a literal in JSX; the CLI's English "Close" or "Search" labels need `t()`).
 6. **Cover every state and WCAG 2.2 AA.** Handle loading, empty, error with retry and a trace id, partial, success and permission denied, wherever they apply. See the [UI rules](CLAUDE.md#8-ui-rules).
 7. **Test it** with Testing Library, and add its screenshots in light and dark to the pull request.
 8. **Stay in your area.** Shared components need a review from their owners, listed in [module ownership](docs/team/module-ownership.md#shared-files-and-who-reviews-them).

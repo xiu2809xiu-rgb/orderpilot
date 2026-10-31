@@ -1,0 +1,158 @@
+{
+  "app": {
+    "name": "OrderPilot",
+    "tagline": "AI reads, rules decide, people approve."
+  },
+  "shell": {
+    "skipToContent": "Skip to main content",
+    "primaryNav": "Main navigation",
+    "openMenu": "Open navigation menu",
+    "breadcrumb": "Breadcrumb",
+    "search": "Search or jump to",
+    "loading": "Loading",
+    "close": "Close",
+    "mobileNavTitle": "Navigation",
+    "mobileNavDescription": "Choose an area of OrderPilot."
+  },
+  "nav": {
+    "home": "Home",
+    "settings": "Settings",
+    "groups": {
+      "operations": "Operations",
+      "data": "Data",
+      "insight": "Insight",
+      "control": "Control"
+    }
+  },
+  "roles": {
+    "SYSTEM_ADMIN": "System admin",
+    "PRODUCT_MANAGER": "Product manager",
+    "APPROVER": "Approver",
+    "SUPPORT": "Support",
+    "WAREHOUSE": "Warehouse",
+    "FINANCE": "Finance",
+    "LOGISTICS": "Logistics",
+    "MANAGEMENT": "Management",
+    "AUDITOR": "Auditor"
+  },
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "palette": {
+    "title": "Command palette",
+    "description": "Search for an area or an action.",
+    "placeholder": "Type an area or an action",
+    "empty": "Nothing matches.",
+    "goTo": "Go to",
+    "actions": "Actions",
+    "keys": "Ctrl K"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications yet",
+    "emptyHint": "Reminders and approval requests will appear here when workflows are built."
+  },
+  "userMenu": {
+    "label": "Account menu",
+    "signedInAs": "Signed in as",
+    "signOut": "Sign out"
+  },
+  "demo": {
+    "switcher": "Demo role",
+    "switcherHint": "Switch to another role to see its home page.",
+    "current": "Current role"
+  },
+  "login": {
+    "title": "Sign in to OrderPilot",
+    "subtitle": "Use your work email and password.",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Sign in",
+    "submitting": "Signing in",
+    "demoTitle": "Demo sign-in",
+    "demoHint": "Pick a role to look around with synthetic data. No password is needed.",
+    "demoRolesLabel": "Demo roles",
+    "optionsFailed": "The demo sign-in could not be checked. You can still sign in with your email."
+  },
+  "sessionEnded": {
+    "title": "Your session ended",
+    "description": "Sign in again to carry on. This page stays as you left it, and anything you typed is kept."
+  },
+  "validation": {
+    "required": "This field is required.",
+    "email": "Enter a valid email address."
+  },
+  "errors": {
+    "traceId": "Trace ID",
+    "retry": "Try again",
+    "network": "OrderPilot could not reach the server. Check your connection and try again.",
+    "contract": "The server sent an answer this version of the app does not understand.",
+    "unknown": "Something went wrong.",
+    "codes": {
+      "VALIDATION_FAILED": "Some of the details are not valid.",
+      "UNAUTHENTICATED": "You need to sign in.",
+      "INVALID_CREDENTIALS": "The email or password is not right.",
+      "SESSION_EXPIRED": "Your session has ended.",
+      "REFRESH_REUSED": "Your session was closed for your safety. Sign in again.",
+      "FORBIDDEN": "You do not have access to this.",
+      "CSRF_INVALID": "The request could not be verified. Reload the page and try again.",
+      "DEMO_MODE_DISABLED": "The demo sign-in is switched off.",
+      "NOT_FOUND": "That could not be found.",
+      "CONFLICT": "Someone else changed this first. Reload and try again.",
+      "RATE_LIMITED": "Too many attempts. Wait a moment and try again.",
+      "UPSTREAM_UNAVAILABLE": "A connected system is not answering. Try again soon.",
+      "INTERNAL_ERROR": "The server had a problem. Try again, and quote the trace ID if it continues."
+    },
+    "notFound": {
+      "title": "Page not found",
+      "description": "The page you asked for does not exist or has moved.",
+      "action": "Go to home"
+    },
+    "forbidden": {
+      "title": "You do not have access",
+      "description": "Your role does not include this area. If you think it should, ask a system admin.",
+      "action": "Go to home"
+    },
+    "crash": {
+      "title": "Something went wrong",
+      "description": "This page hit an error. Quote the trace ID if you ask for help.",
+      "reload": "Reload the page",
+      "home": "Go to home"
+    }
+  },
+  "home": {
+    "welcome": "Welcome, {{name}}",
+    "roleHome": "{{role}} home",
+    "atAGlance": "At a glance",
+    "atAGlanceHint": "Counts appear as each area is built.",
+    "noCues": "No tiles for your role yet.",
+    "lists": "Lists",
+    "listsEmptyTitle": "Your lists will appear here",
+    "listsEmptyHint": "Task lists, recent orders and documents for your role arrive with their areas.",
+    "noValue": "–",
+    "noCount": "No count yet"
+  },
+  "planned": {
+    "badge": "Planned",
+    "arrives": "What arrives here",
+    "backHome": "Back to home"
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "How OrderPilot looks and who you are signed in as.",
+    "appearance": "Appearance",
+    "appearanceHint": "Choose a theme. System follows your device.",
+    "language": "Language",
+    "languageHint": "OrderPilot is available in English.",
+    "languageEnglish": "English",
+    "account": "Your account",
+    "name": "Name",
+    "email": "Email",
+    "role": "Role",
+    "access": "Your permissions",
+    "accessNone": "No permissions are granted to this role yet."
+  }
+}

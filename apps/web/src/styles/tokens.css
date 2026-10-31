@@ -1,0 +1,89 @@
+/* Design tokens. Colours are hex so the contrast test (tokens.test.ts) can
+   read them. A warm neutral base with a deep jade accent, in light and dark.
+   Components use these names through Tailwind, never raw values. */
+
+:root {
+  --background: #faf9f7;
+  --foreground: #1c1b19;
+  --card: #ffffff;
+  --card-foreground: #1c1b19;
+  --popover: #ffffff;
+  --popover-foreground: #1c1b19;
+  --primary: #0f5b4a;
+  --primary-foreground: #ffffff;
+  --secondary: #f1efeb;
+  --secondary-foreground: #2a2824;
+  --muted: #f1efeb;
+  --muted-foreground: #66625a;
+  --accent: #e7f1ee;
+  --accent-foreground: #0b4a3c;
+  --destructive: #b3261e;
+  --destructive-foreground: #ffffff;
+  --success: #0f5b4a;
+  --warning: #7a4e00;
+  --warning-surface: #fbf0d9;
+  --border: #e4e0d9;
+  --input: #cfc9be;
+  --ring: #0f7a64;
+  --sidebar: #f4f2ee;
+  --sidebar-foreground: #2a2824;
+  --sidebar-border: #e4e0d9;
+  --sidebar-accent: #e7f1ee;
+  --sidebar-accent-foreground: #0b4a3c;
+
+  /* Radius */
+  --radius: 0.5rem;
+
+  /* Spacing: an 8-pt grid. Tailwind's own scale stays at 4 px for the fine
+     detail inside controls; layout uses these. */
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2rem;
+  --space-5: 2.5rem;
+  --space-6: 3rem;
+  --space-8: 4rem;
+
+  /* Motion: 150 to 250 ms ease-out for UI. */
+  --motion-fast: 150ms;
+  --motion-base: 200ms;
+  --motion-slow: 250ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* Elevation */
+  --shadow-card: 0 1px 2px rgb(28 27 25 / 0.05), 0 0 0 1px rgb(28 27 25 / 0.04);
+  --shadow-pop: 0 8px 24px rgb(28 27 25 / 0.12), 0 0 0 1px rgb(28 27 25 / 0.06);
+}
+
+.dark {
+  --background: #141311;
+  --foreground: #f2efe9;
+  --card: #1b1a17;
+  --card-foreground: #f2efe9;
+  --popover: #1f1d1a;
+  --popover-foreground: #f2efe9;
+  --primary: #46b898;
+  --primary-foreground: #06241d;
+  --secondary: #24221f;
+  --secondary-foreground: #e8e4dc;
+  --muted: #24221f;
+  --muted-foreground: #a8a297;
+  --accent: #12332b;
+  --accent-foreground: #8fe0c6;
+  --destructive: #f2877e;
+  --destructive-foreground: #2a0805;
+  --success: #46b898;
+  --warning: #e9b95a;
+  --warning-surface: #2e2410;
+  --border: #302e2a;
+  --input: #46433d;
+  --ring: #46b898;
+  --sidebar: #181714;
+  --sidebar-foreground: #e8e4dc;
+  --sidebar-border: #2a2825;
+  --sidebar-accent: #12332b;
+  --sidebar-accent-foreground: #8fe0c6;
+
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4), 0 0 0 1px rgb(255 255 255 / 0.04);
+  --shadow-pop: 0 8px 24px rgb(0 0 0 / 0.5), 0 0 0 1px rgb(255 255 255 / 0.08);
+}

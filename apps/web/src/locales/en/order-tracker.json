@@ -1,0 +1,12 @@
+{
+  "title": "Order tracker",
+  "description": "Where every order stands, from confirmation to delivery.",
+  "arrives": [
+    "A tracker of every order with its current stage",
+    "Shipment dates, AWB or BL numbers and permits",
+    "A timeline on each order"
+  ],
+  "cues": {
+    "inTransit": "Shipments in transit"
+  }
+}

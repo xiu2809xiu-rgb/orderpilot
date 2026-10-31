@@ -192,13 +192,13 @@ Each row says whether it exists today or which story brings it. Everything marke
 | Queues                  | Redis with BullMQ                                                                                                                                                        | Planned: P-9, worker process in P-15 |
 | Document storage        | MinIO behind a storage service that uses the S3 API, so AWS S3 drops in later                                                                                            | Planned: P-9                         |
 | Sessions                | argon2, a JWT access token in a cookie, refresh-token rotation and CSRF protection                                                                                       | Planned: P-10                        |
-| Web                     | Vite, React 19, TypeScript, Tailwind v4 and shadcn/ui                                                                                                                    | Planned: P-11                        |
-| Web plumbing            | React Router, an `ApiClient` class, TanStack Query and a minimal Zustand store                                                                                           | Planned: P-11                        |
-| Text                    | react-i18next: English, with no hard-coded strings                                                                                                                       | Planned: P-11                        |
-| Forms                   | React Hook Form with zod                                                                                                                                                 | Planned: P-11                        |
-| Icons and type          | Lucide only, and the Geist font with tabular numbers                                                                                                                     | Planned: P-11                        |
+| Web                     | Vite, React 19, TypeScript, Tailwind v4 and shadcn/ui ([ADR 0013](docs/adr/0013-the-web-stack.md))                                                                       | Built: P-11                          |
+| Web plumbing            | React Router, an `ApiClient` class, TanStack Query and a minimal Zustand store                                                                                           | Built: P-11                          |
+| Text                    | react-i18next: English, with no hard-coded strings ([ADR 0014](docs/adr/0014-i18n-with-english-first.md))                                                                | Built: P-11                          |
+| Forms                   | React Hook Form with zod                                                                                                                                                 | Built: P-11                          |
+| Icons and type          | Lucide only, and the Geist font with tabular numbers                                                                                                                     | Built: P-11                          |
 | Containers              | Docker Compose under project name `orderpilot`: PostgreSQL, Redis and MinIO, then `api`, `worker` and `web`                                                              | Planned: P-9, P-13                   |
-| Tests                   | Vitest, Testing Library, and Playwright with axe                                                                                                                         | Today (P-8), P-11, P-14              |
+| Tests                   | Vitest, Testing Library, and Playwright with axe                                                                                                                         | Today (P-8, P-11), P-14              |
 | Events and live updates | A typed domain event bus, a transactional outbox, idempotency keys and SSE                                                                                               | Planned: P-15                        |
 | Diagrams                | Mermaid sources rendered to SVG                                                                                                                                          | Planned: P-16                        |
 | AI                      | `LlmGateway` with three providers: mock (the default), OpenAI-compatible, and optional Bedrock                                                                           | Planned: P-17                        |
@@ -222,7 +222,7 @@ Each row says whether it exists today or which story brings it. Everything marke
 | Path                           | Holds                                                                                                            | Status                            |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------- | --------------------------------- |
 | `apps/api`                     | The NestJS API, with a worker entry                                                                              | Today (P-8), P-13                 |
-| `apps/web`                     | The web app                                                                                                      | Planned: P-11                     |
+| `apps/web`                     | The web app                                                                                                      | Built: P-11                       |
 | `services/mock-navision`       | The mock of Navision                                                                                             | Planned: P-19                     |
 | `packages/tsconfig`            | The strict TypeScript config                                                                                     | Today                             |
 | `packages/eslint-config`       | The flat, type-aware ESLint config                                                                               | Today                             |
@@ -321,7 +321,7 @@ The API is NestJS, in layers ([ADR 0008](docs/adr/0008-nestjs-layered-modules.md
 | Unit            | Domain logic, at 80% or more                                      | Vitest              | Today (P-8)                            |
 | Scripts         | The pure logic of `scripts/github/`, against a simulated GitHub   | `node --test`       | Today, in `pnpm test`                  |
 | API integration | Every endpoint, with 401, 403 and validation cases                | Vitest              | Planned: P-10, with its harness in P-9 |
-| Component       | Components in each of their states                                | Testing Library     | Planned: P-11                          |
+| Component       | Components in each of their states                                | Testing Library     | Built: P-11                            |
 | Contract        | Connectors against the mock                                       | Vitest              | Planned: P-20                          |
 | End-to-end      | The smoke test first, then E2E #1 to #4, with WCAG 2.2 AA checked | Playwright with axe | Planned: P-14                          |
 | Load            | The extraction queue and the order endpoints                      | k6                  | Planned, not yet in a story            |

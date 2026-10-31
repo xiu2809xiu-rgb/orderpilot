@@ -1,0 +1,12 @@
+{
+  "title": "Insights",
+  "description": "Measures of how orders flow and where they wait.",
+  "arrives": [
+    "KPIs for cycle time, touch time and exceptions",
+    "Trends over a period you choose",
+    "Export for reports"
+  ],
+  "cues": {
+    "kpis": "KPI dashboard"
+  }
+}

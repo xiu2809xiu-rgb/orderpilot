@@ -1,0 +1,13 @@
+{
+  "title": "Documents",
+  "description": "Customer purchase orders and the documents around them.",
+  "arrives": [
+    "Upload a customer PO and see what the AI read",
+    "Field-by-field confidence, with the source highlighted",
+    "Confirm or correct before anything reaches the ERP"
+  ],
+  "cues": {
+    "toConfirm": "Documents to confirm",
+    "received": "Received today"
+  }
+}

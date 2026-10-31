@@ -1,0 +1,12 @@
+{
+  "title": "Governance",
+  "description": "Who may do what, and the limits that apply.",
+  "arrives": [
+    "The role and permission matrix",
+    "Approval limits and delegation",
+    "Rules for bank-detail changes and data sent to AI"
+  ],
+  "cues": {
+    "roles": "Roles and permissions"
+  }
+}
