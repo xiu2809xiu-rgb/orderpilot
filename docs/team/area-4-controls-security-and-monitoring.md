@@ -61,7 +61,7 @@ sequenceDiagram
 
 ## What the base gives you
 
-F-1 has landed. F-2 and G-1 fill in their items when they do.
+F-1 and G-1 have landed. F-2 fills in its item when it does.
 
 - **From F-1, access policy and masking** (landed, [ADR 0024](../adr/0024-governance-base.md)):
   - **The matrix screen** at `/governance` (`apps/web/src/features/governance/`): a switch per role and permission over the real `RolePermission` table, a data scope per role, "Copy a role", and the users tab (disable and enable, never delete, on P-10's routes). Changes are saved at once and audited. Reading needs `roles.read`, changing needs `roles.manage`; an auditor can read and cannot change.
@@ -75,14 +75,15 @@ F-1 has landed. F-2 and G-1 fill in their items when they do.
   - **Routes and requests:** `apps/api/src/modules/governance/` (controllers, services, `domain/` with its own unit tests), `apps/api/requests/governance.http`, generated hooks in `apps/web/src/lib/api/generated/endpoints/governance`. Component tests use MSW and `test/http/governance.test.ts` runs against the real database.
   - **`it.todo` tests** in `apps/api/test/http/governance-controls.test.ts`, named by control: approval limits, no self-approval, the bank-detail hold, masking for each role, a direct API call being refused (E2E #3), and payment confirmation.
 - **From F-2, the audit viewer:** the audit log viewer over the real hash chain, with filters and a chain check; the audit trail at the foot of every detail page (with P-12's audit link); and `it.todo` tests for export and retention.
-- **From G-1, monitoring:**
-  - OpenTelemetry traces and metrics, and `/metrics` with prom-client;
-  - the `AnalyticsTracker` class (batching, consent, no personal data), a clickstream endpoint and a `ClickstreamEvent` model;
-  - the AI usage and cost screen, reading real usage records;
-  - the observability and clickstream screens, on mock data, with `it.todo` tests.
+- **From G-1, monitoring** (landed, [ADR 0021](../adr/0021-otel-lgtm-observability-profile.md), [0022](../adr/0022-sentry-for-errors.md) and [0028](../adr/0028-metrics-endpoint-protection-and-clickstream.md)):
+  - **The screens** at `/monitoring` (`apps/web/src/features/monitoring/`), in three tabs. _AI usage and cost_ reads the real `AiUsageRecord` table (`GET /monitoring/ai-usage`, needs `aiUsage.read`): totals, cost per feature and the latest calls, with an honest empty state until P-17's gateway writes records. _Observability_ and _Clickstream_ show labelled mock data (`GET /monitoring/observability`, `GET /monitoring/clickstream`, both `meta.mock: true`, with the Mock badge) and carry `it.todo` tests in `MonitoringPage.test.tsx`.
+  - **Telemetry** in `apps/api/src/telemetry/`: OpenTelemetry traces and metrics for every request under the service name `orderpilot-api`, sent over OTLP only when `OTEL_EXPORTER_OTLP_ENDPOINT` is set. A log line carries the request id and the trace id; the span carries the request id as `orderpilot.request_id`.
+  - **`/metrics`** with prom-client (`modules/monitoring/metrics.controller.ts`): bearer token `METRICS_TOKEN`, and a 404 when none is set.
+  - **The clickstream:** `POST /analytics/clickstream` (any signed-in role, 30 batches a minute, 20 events a batch) stores role, route pattern, event name and time in `ClickstreamEvent` (`analytics.prisma`), and nothing that names a person. In the web app, `AnalyticsTracker.ts` is the class (batching, consent, Do Not Track, Global Privacy Control, route patterns), `AnalyticsRoot.tsx` shows the consent banner and records one page view per screen, and `tracker.ts` is the one instance.
+  - **Optional, off unless configured:** `docker compose --profile observability up -d otel-lgtm` starts Grafana's otel-lgtm 0.38.0 (Grafana on `GRAFANA_PORT`, 3300 by default). Sentry 11.9.0 reports errors from the API when `SENTRY_DSN` is set and from the web app when `VITE_SENTRY_DSN` is set; cookies, headers, bodies and the user are scrubbed. With neither set, nothing is sent.
+  - **Tests:** `apps/api/src/telemetry/telemetry.test.ts`, `apps/api/test/http/monitoring.test.ts` (against the real database), `AnalyticsTracker.test.ts`, `lib/monitoring/sentry.test.ts`, `MonitoringPage.test.tsx`, and the shared schemas in `packages/shared/src/monitoring`. Requests: `apps/api/requests/monitoring.http`.
 - **From the platform:** the shared roles and permissions (P-7); helmet, CORS and rate limiting (P-8); `AuditEvent` with its append-only trigger and the hash-chained writer (P-9); sessions, the permissions guard and the default matrix (P-10); the masked value, confidence badge and audit link components (P-12); and the AI usage records (P-17).
 - **Generated hooks and mocks (planned: P-26):** the base's screens use the typed TanStack Query hooks and MSW mocks that orval generates from the API's OpenAPI spec, through the web app's `ApiClient`. Regenerate them when your routes change; CI fails when they are out of date.
-- **Optional, off unless configured (planned: G-1):** Grafana's `otel-lgtm` image as a compose profile for traces, metrics and logs, and Sentry for errors in the web app and the API. Each comes with an ADR, a pinned version and a traceability row.
 
 ## What's yours to build
 
@@ -103,6 +104,14 @@ F-1 has landed. F-2 and G-1 fill in their items when they do.
 - a policy class under the `PermissionPolicy` token that runs your rules in a chain (ADR 0012, point 7);
 - the seed adds missing pairs back, so a permission you revoke returns on the next seed: decide whether it should;
 - polish nobody needs this week: a search box and filters on the matrix, an undo for a change, and a browser test of E2E #3 (backlog F-8).
+
+**What G-1 deliberately leaves to you** (the monitoring wiring works; the work that needs judgement is yours):
+
+- the real dashboards in Grafana for traces, metrics and logs, and the budgets and alerts for the AI's cost (Weeks 14 to 16, Sprints 13 to 15);
+- replacing the mock observability and clickstream summaries with real reads (the clickstream summary reads `ClickstreamEvent`), and filling in the `it.todo` tests;
+- which events beyond `page_view` the product should count, and what an alert should wake someone for;
+- deciding whether Prometheus should scrape the API, and how the token is given to it;
+- polish nobody needs this week: the nginx policy for the Sentry origin, a settings page for the analytics choice and a browser test of the consent flow (backlog G-2).
 
 **The deeper work,** for the A-level depth:
 
