@@ -87,7 +87,7 @@ export function buildSteps(options = {}) {
       hint: "Copy .env.example to .env by hand, then run pnpm local:setup again.",
     },
     {
-      name: "Docker is running",
+      name: "Check that Docker is running",
       run: () => {
         const result = exec("docker info", true);
         if (!result.ok) {
@@ -150,7 +150,9 @@ export async function runSteps(steps, log = console.log) {
       result = { ok: false };
     }
     if (!result.ok) {
-      log(`\nStopped at step ${index + 1}: ${step.name} failed.`);
+      log("");
+      log(`Stopped at step ${index + 1} of ${steps.length}: ${step.name}.`);
+      log("That step failed.");
       log(`What to do: ${step.hint}`);
       return 1;
     }

@@ -68,7 +68,8 @@ describe("runSteps", () => {
     assert.equal(code, 1);
     assert.deepEqual(ran, ["one", "two"]);
     const text = lines.join("\n");
-    assert.match(text, /Stopped at step 2: two failed\./);
+    assert.match(text, /Stopped at step 2 of 3: two./);
+    assert.match(text, /That step failed./);
     assert.match(text, /What to do: do the thing/);
   });
 

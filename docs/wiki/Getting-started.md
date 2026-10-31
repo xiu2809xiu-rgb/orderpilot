@@ -158,6 +158,8 @@ node --test "scripts/github/**/*.test.mjs"
 
 **`pnpm local:setup` says Docker is not running.** Start Docker Desktop (Windows, macOS) and wait until it says it is running, then run it again. On Linux: `sudo systemctl start docker`.
 
+**`The system cannot find the path specified` from pnpm (Windows).** Windows stops paths at 260 characters, and pnpm writes long file names under `node_modules`. Clone into a short folder such as `C:Users<you>orderpilot`, not deep inside OneDrive or Documents.
+
 **`TS2307: Cannot find module '@orderpilot/shared'`** (or `synthetic-data`). The shared packages are not built. The API's `build`, `dev` and `db:seed` commands build them when needed, so this means a package ran without them: run `pnpm local:setup`, or `pnpm --filter @orderpilot/shared --filter @orderpilot/synthetic-data build`.
 
 **`TS2339: Property ... does not exist` after a pull.** The Prisma schema changed and the generated client is old. The API's `build`, `dev`, `typecheck` and `test` regenerate it when a schema file is newer. If you see this anyway, run `pnpm db:generate`.
