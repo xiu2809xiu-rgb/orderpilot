@@ -59,13 +59,22 @@ test("the mirror is Protect main, with the rules step 0 set", () => {
   assert.deepEqual(ruleset.conditions.ref_name.include, ["~DEFAULT_BRANCH"]);
   assert.deepEqual(
     ruleset.rules.map((rule) => rule.type),
-    ["deletion", "non_fast_forward", "pull_request"],
+    ["deletion", "non_fast_forward", "pull_request", "required_status_checks"],
   );
   const { parameters } = ruleset.rules[2];
   assert.equal(parameters.required_approving_review_count, 0);
   assert.equal(parameters.dismiss_stale_reviews_on_push, true);
   assert.equal(parameters.required_review_thread_resolution, true);
   assert.deepEqual(parameters.allowed_merge_methods, ["merge", "squash"]);
+  assert.deepEqual(
+    ruleset.rules[3].parameters.required_status_checks.map((c) => c.context),
+    [
+      "Lint, typecheck, test, build",
+      "SAST (Semgrep)",
+      "Secret scan (gitleaks)",
+      "Dependency scan (OSV)",
+    ],
+  );
   assert.deepEqual(ruleset.bypass_actors, [
     { actor_id: 5, actor_type: "RepositoryRole", bypass_mode: "pull_request" },
   ]);

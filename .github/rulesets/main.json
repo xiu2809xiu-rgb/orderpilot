@@ -34,6 +34,27 @@
         "require_extra_approval_for_unattributed_changes": true,
         "allowed_merge_methods": ["merge", "squash"]
       }
+    },
+    {
+      "type": "required_status_checks",
+      "parameters": {
+        "strict_required_status_checks_policy": false,
+        "do_not_enforce_on_create": false,
+        "required_status_checks": [
+          {
+            "context": "Lint, typecheck, test, build"
+          },
+          {
+            "context": "SAST (Semgrep)"
+          },
+          {
+            "context": "Secret scan (gitleaks)"
+          },
+          {
+            "context": "Dependency scan (OSV)"
+          }
+        ]
+      }
     }
   ]
 }
