@@ -10,7 +10,12 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, it } from "node:test";
 
-import { buildSteps, ensureEnvFile, runSteps } from "./local-setup.mjs";
+import {
+  buildSteps,
+  ensureEnvFile,
+  resolveCommand,
+  runSteps,
+} from "./local-setup.mjs";
 
 /** @type {string} */
 let root;
@@ -142,5 +147,35 @@ describe("buildSteps", () => {
     assert.deepEqual(commands, ["docker info"]);
     assert.deepEqual(errors, ["Docker is not running."]);
     assert.match(lines.join("\n"), /start it.*run pnpm local:setup again/s);
+  });
+});
+
+describe("resolveCommand", () => {
+  it("runs pnpm through node on pnpm's own script, without a shell", () => {
+    const out = resolveCommand(
+      "pnpm db:seed",
+      { npm_execpath: "/x/pnpm.cjs" },
+      "win32",
+    );
+    assert.equal(out.file, process.execPath);
+    assert.deepEqual(out.args, ["/x/pnpm.cjs", "db:seed"]);
+  });
+
+  it("falls back to cmd.exe on Windows and plain pnpm elsewhere", () => {
+    assert.deepEqual(resolveCommand("pnpm db:seed", {}, "win32"), {
+      file: "cmd.exe",
+      args: ["/d", "/c", "pnpm", "db:seed"],
+    });
+    assert.deepEqual(resolveCommand("pnpm db:seed", {}, "linux"), {
+      file: "pnpm",
+      args: ["db:seed"],
+    });
+  });
+
+  it("splits other commands into a program and arguments", () => {
+    assert.deepEqual(resolveCommand("docker info", {}, "linux"), {
+      file: "docker",
+      args: ["info"],
+    });
   });
 });

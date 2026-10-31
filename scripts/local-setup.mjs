@@ -24,18 +24,46 @@ const REPO_ROOT = join(import.meta.dirname, "..");
  */
 
 /**
- * Runs a command line in the repository root, with its output shown. A shell
- * is used because pnpm is pnpm.cmd on Windows, which Node cannot start
- * directly. Every command line here is fixed text.
+ * Works out how to start a fixed command line without a shell. pnpm is
+ * pnpm.cmd on Windows, which Node cannot start directly, so when this script
+ * runs under pnpm the command is run through Node on pnpm's own script
+ * (npm_execpath). Run by hand with plain node, Windows falls back to cmd.exe
+ * with separate arguments. Every command line here is fixed text.
+ *
+ * @param {string} commandLine
+ * @param {NodeJS.ProcessEnv} [env]
+ * @param {string} [platform]
+ * @returns {{ file: string, args: string[] }}
+ */
+export function resolveCommand(
+  commandLine,
+  env = process.env,
+  platform = process.platform,
+) {
+  const [program = "", ...args] = commandLine.split(" ");
+  if (program === "pnpm") {
+    const script = env.npm_execpath;
+    if (script && /pnpm/i.test(script)) {
+      return { file: process.execPath, args: [script, ...args] };
+    }
+    if (platform === "win32") {
+      return { file: "cmd.exe", args: ["/d", "/c", "pnpm", ...args] };
+    }
+  }
+  return { file: program, args };
+}
+
+/**
+ * Runs a command line in the repository root, with its output shown.
  *
  * @param {string} commandLine
  * @param {boolean} [quiet]
  * @returns {CommandResult}
  */
 export function runCommandLine(commandLine, quiet = false) {
-  const result = spawnSync(commandLine, {
+  const { file, args } = resolveCommand(commandLine);
+  const result = spawnSync(file, args, {
     cwd: REPO_ROOT,
-    shell: true,
     stdio: quiet ? "ignore" : "inherit",
   });
   return {
