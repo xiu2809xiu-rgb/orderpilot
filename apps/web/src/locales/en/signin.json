@@ -1,0 +1,30 @@
+{
+  "promise": {
+    "eyebrow": "How OrderPilot works",
+    "lead": "OrderPilot helps Spectra's teams take a customer order from the first document to a checked, approved order. Every decision stays with a person.",
+    "stepsLabel": "The three steps",
+    "steps": {
+      "read": {
+        "title": "AI reads",
+        "body": "It reads each customer document and picks out the customer, the items, the quantities and the prices."
+      },
+      "decide": {
+        "title": "Rules decide",
+        "body": "Clear business rules check the order against prices, stock and limits. The AI does not make this call."
+      },
+      "approve": {
+        "title": "People approve",
+        "body": "The right person reviews what needs a decision. Navision stays the system of record."
+      }
+    },
+    "demoNote": "In this demo the AI and Navision are stand-ins, and every record is made up."
+  },
+  "flow": {
+    "read": "Read",
+    "decide": "Decide",
+    "approve": "Approve",
+    "ai": "AI",
+    "rules": "Rules",
+    "people": "People"
+  }
+}
