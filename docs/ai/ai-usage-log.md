@@ -37,8 +37,9 @@ Never paste a key or a Spectra document into a prompt, and keep real data out of
 
 ## Area 3: Checks, tracker and insights (Iok Teck)
 
-| Date | Story or task | Tool | What the AI did | What the person did | Prompt |
-| ---- | ------------- | ---- | --------------- | ------------------- | ------ |
+| Date       | Story or task                           | Tool        | What the AI did                                                                                                                                                                                                                                                 | What the person did                                                                                                                                                                        | Prompt                                                                                              |
+| ---------- | --------------------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| 2026-11-01 | D-1 Area 3 base, checks and the tracker | Claude Code | Wrote the contracts, the check-rule interface and ports, the mock tracker, exceptions and KPI routes, the four screens, the tests and the `it.todo` cases, the guide and ADR 0025; ran the screens against the running API in a real browser, in light and dark | Richie set the brief and the line between the base and Iok Teck's work, reviews and merges. Iok Teck reviews and owns the real checks, tolerances, exceptions flow, tracker logic and KPIs | [Prompt 001](prompts/001-build-the-base.md), [prompt 002](prompts/002-finish-the-base-by-sunday.md) |
 
 ## Area 4: Controls, security and monitoring (Angelyn)
 

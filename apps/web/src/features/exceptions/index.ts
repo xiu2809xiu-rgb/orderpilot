@@ -8,7 +8,7 @@ export default defineFeature({
   path: "exceptions",
   group: "operations",
   icon: TriangleAlert,
-  permission: "orders.read",
+  permission: "exceptions.read",
   cues: [{ id: "open", roles: ["APPROVER", "SUPPORT", "MANAGEMENT"] }],
   Page: lazy(() => import("./ExceptionsPage")),
 });
