@@ -118,4 +118,31 @@ A throw rolls both back, so the trail never records work that did not happen. `A
 
 ## Seeding
 
-`pnpm db:seed` runs every `Seeder` in `database/seed/seeders.ts`, in order, through the same modules the API uses. Each one looks before it writes, so running it again changes nothing, and says in one line what it did. The test set-up runs the same seed. P-10 adds the users and the role-permission matrix; later stories load the synthetic dataset (`packages/synthetic-data`) into their tables.
+`pnpm db:seed` runs every `Seeder` in `database/seed/seeders.ts`, in order, through the same modules the API uses. Each one looks before it writes, so running it again changes nothing, and says in one line what it did. The test set-up runs the same seed. P-10 added the role-permission matrix and the nine users (with `DEMO_PASSWORD` as their password and one `user.created` audit event each); later stories load the synthetic dataset (`packages/synthetic-data`) into their tables.
+
+## Guards: who may call a route
+
+Four global guards run on every request, in this order (`app.module.ts`): the rate limiter, `AuthGuard` (reads the `op_access` cookie, verifies the JWT, loads the user and checks the sign-in is live), `CsrfGuard` (unsafe methods need the `X-CSRF-Token` header to match the `op_csrf` cookie) and `PermissionsGuard`. A route says what it needs with one decorator from `auth/decorators.ts`, and a route with none is refused:
+
+```ts
+@Controller("users")
+export class UsersController {
+  @Get()
+  @RequirePermission("users.read") // or @Authenticated(), or @Public()
+  list(@Query(new ZodValidationPipe(pageQuerySchema)) query: PageQuery) {
+    /* ... */
+  }
+
+  @Post(":id/disable")
+  @RequirePermission("users.manage")
+  disable(@Param(idParam) p: { id: string }, @Auth() auth: AuthContext) {
+    /* ... */
+  }
+}
+```
+
+`@Auth()` hands the handler the caller (`auth.user.id`, `auth.user.role`, `auth.demo`). The guards write the 401 and 403 answers in the error envelope and the audit event for each refusal; a controller never does.
+
+The permission check is `PermissionPolicy.decide(request)`. The default, `MatrixPermissionPolicy`, looks the role up in the `RolePermission` table. A richer rule (an approval limit, segregation of duties, data scope) replaces it by providing another class under the `PermissionPolicy` token; the request it receives holds the user, the permission, the method, the path and the route parameters. `test/http/auth-guards.test.ts` swaps one in as the example.
+
+A service that changes something on behalf of a user takes the `AuthContext` and writes its audit event in the same transaction (`UsersService.disable` is the example), as in the previous section.

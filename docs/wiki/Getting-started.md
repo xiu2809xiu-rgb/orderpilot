@@ -4,7 +4,7 @@ What works so far. Each story that adds a step updates this page when it merges.
 
 ## What works today
 
-The workspace installs, checks and builds. The API and the web app start, and the API runs against a local PostgreSQL, Redis and MinIO from Docker Compose. The web app's real sign-in comes with P-10.
+The workspace installs, checks and builds. The API and the web app start, and the API runs against a local PostgreSQL, Redis and MinIO from Docker Compose. Sign-in works end to end: the API has sessions, guards and a demo sign-in for the nine roles.
 
 1. Install Git, Node 24.22.0 (the version in [`.node-version`](https://github.com/xiu2809xiu-rgb/orderpilot/blob/main/.node-version)) and pnpm 12: `npm install -g pnpm@12.14.0`.
 2. Clone the repository:
@@ -56,7 +56,18 @@ The workspace installs, checks and builds. The API and the web app start, and th
    pnpm --filter @orderpilot/web dev
    ```
 
-   Open http://localhost:5173. The login page shows the demo roles when the API is running with demo mode on. `CONTRIBUTING.md` lists every web command, the ports and where each area's screens go.
+   Open http://localhost:5173. `CONTRIBUTING.md` lists every web command, the ports and where each area's screens go. To sign in, see the next section.
+
+## Signing in
+
+The seed (`pnpm db:seed`) creates nine accounts, one per role, with the synthetic names from `packages/shared` and addresses like `system.admin@example.test`. There are two ways in:
+
+- **The demo sign-in:** set `DEMO_MODE=true` in `.env`, restart the API, and the login page shows one button per role. No password. With `DEMO_MODE=false` the buttons and the route are gone.
+- **A password:** the email of a role (`system.admin`, `product.manager`, `approver`, `support`, `warehouse`, `finance`, `logistics`, `management` or `auditor`, then `@example.test`) and the `DEMO_PASSWORD` from your `.env`. It is a laptop and demo password, not a secret: the API refuses it in production.
+
+If your `.env` is older than P-10, copy the new "Sign-in and sessions" block from `.env.example` into it (`JWT_SECRET`, the two token lifetimes, `COOKIE_SECURE`, `AUTH_RATE_LIMIT_MAX_REQUESTS` and `DEMO_PASSWORD`), run `pnpm db:migrate` and `pnpm db:seed` again, and restart the API. `COOKIE_SECURE=false` is for plain `http://localhost` only and only with `APP_ENV=local`.
+
+To try the API by hand, open `apps/api/requests/auth.http`. To see what a role may do, read `DEFAULT_ROLE_PERMISSIONS` in `packages/shared/src/permissions.ts`. Refused calls and every sign-in appear in the audit trail.
 
 Line endings need no set-up. `.gitattributes` keeps text files LF on every machine.
 

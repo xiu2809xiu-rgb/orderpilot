@@ -1372,6 +1372,43 @@
         "Questions and docs are treated as data, and the prompt-injection tests cover it (E-3).",
         "Area 4's policy decides which provider may receive a question, and no business data goes with it."
       ]
+    },
+    {
+      "epic": "F",
+      "area": "area: 4 controls and monitoring",
+      "reqs": ["M2", "M4"],
+      "dependsOn": ["P-10"],
+      "key": "F-6",
+      "title": "A non-owner runtime database role",
+      "priority": "should",
+      "estimate": 3,
+      "sprints": [3],
+      "summary": "The API connects as the owner of its tables, and a table owner or a superuser can switch off the audit trail's append-only trigger (ADR 0010). A runtime role that owns nothing closes that door.",
+      "acceptance": [
+        "Migrations run as an owner role; the API runs as a second role that can read and write the tables but cannot alter them, disable triggers or truncate.",
+        "The role is created by a migration or the compose set-up, with its password in `.env.example` for laptops and a required secret in production.",
+        "An integration test connects as the runtime role and shows that `ALTER TABLE ... DISABLE TRIGGER` and `TRUNCATE` on the audit table are refused, and that the API still passes its tests.",
+        "The test harness keeps its own owner connection for resets, and says so."
+      ]
+    },
+    {
+      "epic": "F",
+      "area": "area: 4 controls and monitoring",
+      "reqs": ["M2", "M4"],
+      "dependsOn": ["P-10"],
+      "key": "F-7",
+      "title": "Session hardening",
+      "priority": "could",
+      "estimate": 5,
+      "sprints": [4],
+      "summary": "Follow-ups to ADR 0012 that nobody needs this week: they make long-lived sessions and production set-up safer.",
+      "acceptance": [
+        "A short grace window for the previous refresh token, so two browser tabs that refresh at the same moment do not end the sign-in as a reuse; the window is audited and off by default in production.",
+        "An absolute lifetime for a sign-in (for example 30 days) on top of the sliding refresh, and a \"sign out everywhere\" action that revokes every family of one user.",
+        "The sign-in rate limit keeps its counters in Redis, so it holds with more than one API process, and also limits by account as well as by address.",
+        "A one-time command creates the first real administrator in production, where the seeded accounts have no password, and audits it.",
+        "The JWT secret can be rotated with an overlap, so a change does not sign everyone out."
+      ]
     }
   ]
 }

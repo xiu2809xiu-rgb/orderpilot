@@ -240,9 +240,20 @@ If something destructive or irreversible seems necessary, ask Richie first.
 The web app never hand-writes a call to the API. It uses hooks and mock handlers that orval generates from the API's OpenAPI file ([ADR 0019](docs/adr/0019-generated-api-hooks-and-mocks.md)).
 
 1. Add the route in `apps/api` with its zod schemas from `packages/shared`: `@ApiOkResponse({ schema: openApiSchema(responseSchema) })` for the answer, `@openApiQuery(querySchema)` for query parameters.
-2. Run `pnpm api:generate`. It rewrites `apps/api/openapi.json` and `apps/web/src/lib/api/generated/`.
-3. Commit the result with the route. CI runs `pnpm api:check` and fails if the generated files are out of date.
-4. In the web app, import the hook (`useSystemChecks`) from `@/lib/api/generated/endpoints/<tag>/<tag>`. In a test, add the generated handler with `server.use(getSystemChecksMockHandler(...))` from `@/test/server`. `ServiceChecksCard` and its test are the example.
+2. **Say who may call it.** Every route is refused until it says one of three things ([ADR 0012](docs/adr/0012-sessions-and-rbac.md)); a route that says nothing is refused (401 without a session, 403 with one):
+
+   ```ts
+   @Get(":id")
+   @RequirePermission("orders.read") // a signed-in user whose role holds it
+   get(@Param(idParam) params: { id: string }, @Auth() auth: AuthContext) {}
+   // @Authenticated()  any signed-in user      @Public()  no session at all
+   ```
+
+   The permission name comes from `packages/shared` (`PERMISSIONS`); a new one is added there and to `DEFAULT_ROLE_PERMISSIONS`, and area 4 edits the live matrix. The CSRF check, the 401 and 403 answers and their audit events come with the decorator: write nothing else. Test the 401 and the 403 (copy `apps/api/test/http/auth-guards.test.ts`).
+
+3. Run `pnpm api:generate`. It rewrites `apps/api/openapi.json` and `apps/web/src/lib/api/generated/`.
+4. Commit the result with the route. CI runs `pnpm api:check` and fails if the generated files are out of date.
+5. In the web app, import the hook (`useSystemChecks`) from `@/lib/api/generated/endpoints/<tag>/<tag>`. In a test, add the generated handler with `server.use(getSystemChecksMockHandler(...))` from `@/test/server`. `ServiceChecksCard` and its test are the example.
 
 Never edit the generated folder by hand.
 

@@ -2,8 +2,10 @@ import { Controller, Get } from "@nestjs/common";
 import { errorEnvelopeSchema, HEADERS } from "@orderpilot/shared";
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { Public } from "../../src/auth/decorators.js";
 import { createTestApp, type TestApp } from "../support/test-app.js";
 
+@Public()
 @Controller("boom")
 class BoomController {
   @Get()

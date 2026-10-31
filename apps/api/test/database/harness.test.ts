@@ -81,14 +81,17 @@ describe("the test harness", () => {
     const events = t.app.get(AuditEventRepository);
     const count = async () =>
       (await events.list({ page: 1, pageSize: 50 })).meta.total;
-    expect(await count()).toBe(1);
+    // The first link of the chain, then one event for each of the nine users.
+    expect(await count()).toBe(10);
     const lines: string[] = [];
     await runSeed(testConfig(), (line) => lines.push(line));
     await runSeed(testConfig());
-    expect(await count()).toBe(1);
+    expect(await count()).toBe(10);
     expect(lines.map((l) => l.split(":")[0])).toEqual([
       "seed storage",
       "seed audit",
+      "seed role permissions",
+      "seed users",
       "seed synthetic data",
     ]);
     expect(lines.join("\n")).toContain(

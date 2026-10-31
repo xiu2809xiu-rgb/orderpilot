@@ -27,6 +27,16 @@ export class AppConfig {
     readonly maxRequests: number;
   };
 
+  readonly auth: {
+    readonly jwtSecret: string;
+    readonly accessTokenTtlSeconds: number;
+    readonly refreshTokenTtlSeconds: number;
+    readonly cookieSecure: boolean;
+    readonly rateLimitMaxRequests: number;
+    /** Null means the seeded accounts have no password. */
+    readonly demoPassword: string | null;
+  };
+
   readonly logLevel: Env["LOG_LEVEL"];
 
   readonly database: { readonly url: string };
@@ -58,6 +68,14 @@ export class AppConfig {
     this.rateLimit = {
       windowSeconds: env.RATE_LIMIT_WINDOW_SECONDS,
       maxRequests: env.RATE_LIMIT_MAX_REQUESTS,
+    };
+    this.auth = {
+      jwtSecret: env.JWT_SECRET,
+      accessTokenTtlSeconds: env.ACCESS_TOKEN_TTL_SECONDS,
+      refreshTokenTtlSeconds: env.REFRESH_TOKEN_TTL_SECONDS,
+      cookieSecure: env.COOKIE_SECURE,
+      rateLimitMaxRequests: env.AUTH_RATE_LIMIT_MAX_REQUESTS,
+      demoPassword: env.DEMO_PASSWORD ?? null,
     };
     this.logLevel = env.LOG_LEVEL;
     this.database = { url: env.DATABASE_URL };

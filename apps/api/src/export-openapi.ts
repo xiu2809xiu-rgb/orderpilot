@@ -26,6 +26,9 @@ const version = (
 // connects to them.
 const config = AppConfig.fromEnv({
   APP_ENV: "local",
+  // On, so the document lists the demo sign-in. A running API with DEMO_MODE
+  // off does not serve that one route.
+  DEMO_MODE: "true",
   DATABASE_URL: "postgresql://spec:spec@127.0.0.1:5999/spec",
   REDIS_URL: "redis://127.0.0.1:5998/0",
   S3_ACCESS_KEY_ID: "spec",

@@ -58,6 +58,8 @@ model RefreshToken {
   createdAt         DateTime  @default(now()) @db.Timestamptz(3)
   ip                String?
   userAgent         String?
+  /// True when the sign-in was the demo sign-in, so a refresh keeps saying so.
+  demo              Boolean   @default(false)
 
   user       User          @relation(fields: [userId], references: [id])
   replacedBy RefreshToken? @relation("Rotation", fields: [replacedByTokenId], references: [id])

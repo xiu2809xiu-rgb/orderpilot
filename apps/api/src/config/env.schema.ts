@@ -37,6 +37,13 @@ function isOrigin(value: string): boolean {
 }
 
 /**
+ * The JWT secret the API falls back to outside production, and the value
+ * `.env.example` ships. It is public, so production refuses it.
+ */
+export const DEFAULT_JWT_SECRET =
+  "local-development-secret-not-for-production-use";
+
+/**
  * Every environment variable the API reads, with its safe default. A variable
  * with no default is required: the API refuses to start without it.
  *
@@ -107,11 +114,65 @@ export const envSchema = z
     S3_FORCE_PATH_STYLE: booleanFlag.optional(),
     S3_CREATE_BUCKET: booleanFlag.default(false),
 
+    // Sessions (P-10). The secret signs the access token (HS256). Production
+    // refuses the default and anything shorter than 32 characters.
+    JWT_SECRET: z.string().min(32).default(DEFAULT_JWT_SECRET),
+    ACCESS_TOKEN_TTL_SECONDS: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(3600)
+      .default(900),
+    REFRESH_TOKEN_TTL_SECONDS: z.coerce
+      .number()
+      .int()
+      .min(60)
+      .max(2_592_000)
+      .default(604_800),
+    // Secure cookies. Only APP_ENV=local may turn it off, for plain http on
+    // a laptop. Decided after parsing.
+    COOKIE_SECURE: booleanFlag.default(true),
+    // Sign-in attempts per client in each rate-limit window: stricter than
+    // the rest of the API.
+    AUTH_RATE_LIMIT_MAX_REQUESTS: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(100_000)
+      .default(20),
+    // The password of every seeded account, for local and demo use only.
+    // Without it the seeded accounts have no password.
+    DEMO_PASSWORD: z.string().min(8).max(128).optional(),
+
     // Set by the image build (P-13). Shown by /health.
     GIT_SHA: z.string().min(1).optional(),
   })
   .superRefine((env, ctx) => {
+    if (env.APP_ENV !== "local" && !env.COOKIE_SECURE) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["COOKIE_SECURE"],
+        message: "Cookies must be Secure unless APP_ENV is local",
+      });
+    }
+    // The default is public, and anyone who can sign a token can be anyone.
+    // A demo stack is reachable by others, so only a laptop may use it.
+    if (env.APP_ENV !== "local" && env.JWT_SECRET === DEFAULT_JWT_SECRET) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["JWT_SECRET"],
+        message:
+          "Set your own JWT secret unless APP_ENV is local: the default is public",
+      });
+    }
     if (env.APP_ENV !== "production") return;
+    if (env.DEMO_PASSWORD !== undefined) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["DEMO_PASSWORD"],
+        message: "Demo passwords are for local and demo use, not production",
+      });
+    }
     if (env.DEMO_MODE) {
       ctx.addIssue({
         code: "custom",

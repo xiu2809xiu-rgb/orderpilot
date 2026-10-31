@@ -2,7 +2,7 @@ import "reflect-metadata";
 import type { INestApplicationContext, Type } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import type { NestExpressApplication } from "@nestjs/platform-express";
-import { Test } from "@nestjs/testing";
+import { Test, type TestingModuleBuilder } from "@nestjs/testing";
 import { AppModule } from "../../src/app.module.js";
 import { configureApp } from "../../src/bootstrap/configure-app.js";
 import { AppConfig } from "../../src/config/app-config.js";
@@ -21,6 +21,10 @@ export function testEnv(overrides: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv {
     NODE_ENV: "test",
     LOG_LEVEL: "info",
     CORS_ORIGINS: "http://localhost:5173",
+    DEMO_MODE: "true",
+    COOKIE_SECURE: "false",
+    // High enough that no test hits the sign-in limiter by accident.
+    AUTH_RATE_LIMIT_MAX_REQUESTS: "10000",
     // High enough that no test hits the limiter by accident.
     RATE_LIMIT_MAX_REQUESTS: "10000",
     ...overrides,
@@ -43,13 +47,17 @@ export interface TestApp {
 export async function createTestApp(
   env: NodeJS.ProcessEnv = {},
   controllers: Type[] = [],
+  /** Swap a provider, such as the PermissionPolicy, before the app is built. */
+  override: (builder: TestingModuleBuilder) => TestingModuleBuilder = (b) => b,
 ): Promise<TestApp> {
   const config = AppConfig.fromEnv(testEnv(env));
   const chunks: string[] = [];
-  const moduleRef = await Test.createTestingModule({
-    imports: [AppModule.register(config)],
-    controllers,
-  }).compile();
+  const moduleRef = await override(
+    Test.createTestingModule({
+      imports: [AppModule.register(config)],
+      controllers,
+    }),
+  ).compile();
   const app = moduleRef.createNestApplication<NestExpressApplication>({
     logger: false,
   });
