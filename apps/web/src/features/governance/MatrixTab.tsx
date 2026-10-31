@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import {
   EmptyState,
   LoadingState,
+  PartialNotice,
   PermissionDenied,
   SectionCard,
 } from "@/components/common";
@@ -53,7 +54,7 @@ export function MatrixTab() {
   const failure = toggle.error ?? scope.error ?? copy.error;
 
   if (matrix.isPending) return <LoadingState />;
-  if (matrix.isError) {
+  if (matrix.isError && !matrix.data) {
     return (
       <RefusalPanel
         error={matrix.error}
@@ -95,6 +96,9 @@ export function MatrixTab() {
         {canManage ? null : (
           <PermissionDenied description={t("matrix.readOnly")} />
         )}
+        {matrix.isError ? (
+          <PartialNotice onRetry={() => void matrix.refetch()} />
+        ) : null}
         {failure ? <RefusalPanel error={failure} /> : null}
         <p role="status" className="sr-only">
           {busy ? t("matrix.saving") : ""}

@@ -173,6 +173,34 @@ describe("GovernancePage", () => {
     ).toBeInTheDocument();
   });
 
+  it("keeps the matrix on screen and says it may be out of date when a reload fails", async () => {
+    signIn("SYSTEM_ADMIN");
+    let reads = 0;
+    server.use(
+      http.get("*/api/v1/governance/matrix", () => {
+        reads += 1;
+        return reads === 1
+          ? HttpResponse.json({ data: matrix })
+          : HttpResponse.json(errorBody("FORBIDDEN", "trace-late"), {
+              status: 403,
+            });
+      }),
+      http.put("*/api/v1/governance/matrix/:role/permissions/:permission", () =>
+        HttpResponse.json({ data: matrix.roles[0] }),
+      ),
+    );
+    renderPage();
+    await userEvent.click(
+      await screen.findByRole("switch", { name: "Read orders for Warehouse" }),
+    );
+    expect(
+      await screen.findByText(/Some of this is missing/),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("table", { name: "Permissions by role" }),
+    ).toBeInTheDocument();
+  });
+
   it("shows an empty state with a next action", async () => {
     signIn("SYSTEM_ADMIN");
     server.use(
