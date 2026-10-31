@@ -185,11 +185,28 @@ const codeownersRules = () =>
 
 // Enough of CODEOWNERS matching for the paths tested here: a leading slash
 // anchors the pattern, a trailing slash means a folder, and * stays in a segment.
+const segmentMatches = (part, text) => {
+  const pieces = part.split("*");
+  if (pieces.length === 1) return part === text;
+  if (!text.startsWith(pieces[0])) return false;
+  let at = pieces[0].length;
+  for (const piece of pieces.slice(1, -1)) {
+    const found = text.indexOf(piece, at);
+    if (found < 0) return false;
+    at = found + piece.length;
+  }
+  const last = pieces[pieces.length - 1];
+  return text.length - last.length >= at && text.endsWith(last);
+};
+
 const patternMatches = (pattern, path) => {
-  const source = pattern
-    .replace(/[.+^${}()|[\]\\]/g, "\\$&")
-    .replace(/\*/g, "[^/]*");
-  return new RegExp(`^${source}`).test(path);
+  const wanted = pattern.replace(/^\//, "").split("/");
+  const folder = wanted[wanted.length - 1] === "";
+  if (folder) wanted.pop();
+  const actual = path.replace(/^\//, "").split("/");
+  if (actual.length < wanted.length) return false;
+  if (!folder && actual.length > wanted.length) return false;
+  return wanted.every((part, i) => segmentMatches(part, actual[i]));
 };
 
 test("CODEOWNERS starts with a catch-all for area 1 and uses only the four handles", () => {
