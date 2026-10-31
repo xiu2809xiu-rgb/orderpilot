@@ -16,7 +16,7 @@ There is no app yet, so set-up is short. Each later story adds its own steps her
    cd orderpilot
    ```
 
-3. Commit with your GitHub no-reply email, never a school email. You will find it on GitHub under Settings, Emails. Set it for this repository:
+3. Commit with your GitHub no-reply email, never a school email. You will find it on GitHub under Settings, Emails. On that page, also turn on **Keep my email addresses private**: GitHub writes merge commits itself, so the local setting below does not reach them. Then set the address for this repository:
 
    ```sh
    git config user.email "<your GitHub no-reply address>"
