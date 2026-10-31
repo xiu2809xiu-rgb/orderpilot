@@ -279,20 +279,30 @@ If something destructive or irreversible seems necessary, ask Richie first.
 
 1. **Look first.** The common components are in `apps/web/src/components/common`: import them from `@/components/common`. In demo mode and in development, `/gallery` shows each one with synthetic data. Which one do I use?
 
-   | I need                                      | Use                                                                                                     |
-   | ------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-   | A list with paging, sorting, search, export | `DataTable`. The page owns the query and fetches; the table never sorts or slices                       |
-   | The top of a page, or a titled block        | `PageHeader`, `SectionCard`                                                                             |
-   | A page that is not built yet                | `PlannedPage`                                                                                           |
-   | Loading, empty, error, partial, denied      | `LoadingState`, `EmptyState` (give it a next action), `ErrorPanel`, `PartialNotice`, `PermissionDenied` |
-   | A whole-route 403, 404 or crash             | `StatePanel` (page variant), or the existing pages                                                      |
-   | A demo or mock label                        | `DemoBadge` ("Mock", "Mock AI", "Synthetic demo data")                                                  |
-   | A status, or how sensitive a record is      | `StatusBadge` (a tone plus your own label), `ClassificationBadge`                                       |
-   | A value hidden by role                      | `MaskedValue` (pass no value when masked, and a reason)                                                 |
-   | An AI value and its score                   | `ConfidenceBadge` (says "Requires approval" until a person approves)                                    |
-   | A link to a record's audit trail            | `AuditLink` (hides itself without `audit.read`)                                                         |
-   | A time, a copyable id                       | `RelativeTime`, `CopyButton`                                                                            |
-   | The change history under a detail page      | `OperationLog` (rows as props), or `EntityOperationLog` to fill it from the audit trail (F-2)           |
+   | I need                                           | Use                                                                                                     |
+   | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+   | A list with paging, sorting, search, export      | `DataTable`. The page owns the query and fetches; the table never sorts or slices                       |
+   | The top of a page, or a titled block             | `PageHeader`, `SectionCard`                                                                             |
+   | A page that is not built yet                     | `PlannedPage`                                                                                           |
+   | Loading, empty, error, partial, denied           | `LoadingState`, `EmptyState` (give it a next action), `ErrorPanel`, `PartialNotice`, `PermissionDenied` |
+   | A whole-route 403, 404 or crash                  | `StatePanel` (page variant), or the existing pages                                                      |
+   | A demo or mock label                             | `DemoBadge` ("Mock", "Mock AI", "Synthetic demo data")                                                  |
+   | A status, or how sensitive a record is           | `StatusBadge` (a tone plus your own label), `ClassificationBadge`                                       |
+   | A value hidden by role                           | `MaskedValue` (pass no value when masked, and a reason)                                                 |
+   | An AI value and its score                        | `ConfidenceBadge` (says "Requires approval" until a person approves)                                    |
+   | A link to a record's audit trail                 | `AuditLink` (hides itself without `audit.read`)                                                         |
+   | A time, a copyable id                            | `RelativeTime`, `CopyButton`                                                                            |
+   | The change history under a detail page           | `OperationLog` (rows as props), or `EntityOperationLog` to fill it from the audit trail (F-2)           |
+   | An amount, a list's main button, a message       | `Money`, `PageHeader`'s `primaryAction`, `toast.done` / `toast.failed`                                  |
+   | A loading shape, or something to run from Ctrl+K | `ListPageSkeleton`, `TableSkeleton`, `PageHeaderSkeleton`, `SectionCardSkeleton`; `registerAction`      |
+
+   **Lists, keys, actions and toasts.** Every screen gets these without extra work; use them the same way.
+
+   - **Column kinds.** Give each `DataTable` column a `kind`: `"text"` (the default), `"number"`, `"money"` or `"date"`. Number and money columns sit on the right in tabular figures; every cell stays on one line, so rows are 36 to 40 px, unless the column says `wrap: true` (use it only for long text such as a summary). Show amounts with `<Money value="12340" />` from the decimal string, never a float: it prints `USD 12,340.00`. Dates go through `formatDay` from `@/lib/format` ("2 Nov 2026"). The heading stays at the top of the table's own scroll area, and the first column stays in view on a phone, so a table never makes the page scroll sideways.
+   - **Primary action and keys.** A list declares its one primary action in its header: `<PageHeader title={t("title")} total={total} primaryAction={{ label: t("new"), icon: Upload, onRun: openUpload }} />`. It becomes the button on the right, shows a small `N` label, and the N key runs it. The common table's search box takes the `/` key by itself. Neither key fires while someone types in a field, holds Ctrl, Alt or Command, or has a dialog open. A page with no record to start passes no `primaryAction`. An empty list offers that action as its next step, so give `empty.action` only when the next step is something else.
+   - **Loading and empty.** A page's loading shape matches its final layout: `PageHeaderSkeleton`, `SectionCardSkeleton` and the table's own placeholder rows (same columns, same row height). An empty list is a compact strip that names the next action: pass `action`, or `onRetry` to `EmptyState`, or words that say what to do. Never draw a large empty card.
+   - **Ctrl+K actions.** A feature adds an action to the palette with one call in its `index.ts`: `registerAction({ id: "documents.upload", label: "palette.uploadPo", namespace: "documents", icon: Plus, keywords: ["purchase order", "new"], permission: "documents.upload", run: ({ navigate }) => navigate("/documents?upload=1") })`. `label` is an i18n key in `namespace` (default `common`). The palette lists the actions the session's permissions allow above the places to go. `actionsForRole(role)` reads the actions a role holds by default, for its quick actions on the home page.
+   - **Toasts.** Every action ends with a toast: `toast.done(t("approved", { ref }), { undo })` when it worked, `toast.failed(t("notSaved"))` when it did not. Pass `undo` (a function that reverses the action) only where the action can really be undone; the toast then shows Undo, and undoing ends with its own "Undone" message. Words are yours, already translated. The `Toaster` in the shell shows and announces it; a toast never takes focus.
 
    Their text lives in the `components` namespace; your own goes in your area's namespace. If one is missing something, extend it there with a test. Do not copy it into your area. To show the operation log under a record, write its audit events with the record's type and id, then add `<EntityOperationLog entityType="Order" entityId={order.id} />` from `@/features/audit/EntityOperationLog` (steps in [area 4's guide](docs/team/area-4-controls-security-and-monitoring.md#how-another-area-feeds-the-operation-log)).
 

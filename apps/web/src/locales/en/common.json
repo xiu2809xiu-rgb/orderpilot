@@ -49,6 +49,12 @@
     "empty": "Nothing matches.",
     "goTo": "Go to",
     "actions": "Actions",
+    "themeLight": "Use the light theme",
+    "themeDark": "Use the dark theme",
+    "helpLabel": "Keyboard shortcuts",
+    "helpSearch": "search this list",
+    "helpNew": "start a new record",
+    "helpPalette": "open this palette",
     "keys": "Ctrl K"
   },
   "notifications": {

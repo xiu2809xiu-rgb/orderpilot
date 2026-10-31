@@ -1282,6 +1282,25 @@
       ]
     },
     {
+      "key": "P-41",
+      "title": "Finish the bar on every list and detail page",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "should",
+      "estimate": 3,
+      "reqs": ["M4"],
+      "sprints": [3],
+      "dependsOn": ["P-40"],
+      "summary": "What P-40 left out so the product pass could close: the pieces every screen inherits but each page still has to adopt.",
+      "acceptance": [
+        "Every list that has a primary action declares it through `PageHeader`, and its title shows the total.",
+        "Undo on the SPR decision and on payment confirmation, once the mock overlay records them (the toast already ends each action).",
+        "Each feature registers its quick actions (Upload PO, New order, Raise SPR) with `registerAction`, and each role's home page reads them with `actionsForRole`.",
+        "The role matrix and the other plain tables keep their first column in view on a phone, as the common table does.",
+        "A setting to turn the `/` and `N` keys off for people who use a screen reader or their own keys."
+      ]
+    },
+    {
       "key": "T-1",
       "title": "Owners, backups and reviews",
       "epic": "T",

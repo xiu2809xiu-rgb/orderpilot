@@ -7,6 +7,7 @@ import {
   SectionCard,
 } from "@/components/common";
 import { GALLERY_NOW } from "./galleryData";
+import { GalleryFeedback } from "./GalleryFeedback";
 import { GalleryPieces } from "./GalleryPieces";
 import { GalleryTable } from "./GalleryTable";
 
@@ -53,6 +54,7 @@ export function GalleryPage() {
         <GalleryTable />
       </SectionCard>
       <GalleryPieces />
+      <GalleryFeedback />
       <OperationLog
         rows={rows}
         demo

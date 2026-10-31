@@ -7,6 +7,7 @@ import {
   PartialNotice,
   PermissionDenied,
   SectionCard,
+  toast,
 } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,6 +30,7 @@ type Scope = Parameters<typeof matrixSetDataScope>[1]["dataScope"];
 /** The live matrix: reads the RolePermission table and writes each change back. */
 export function MatrixTab() {
   const { t } = useTranslation("governance");
+  const { t: tc } = useTranslation();
   const queryClient = useQueryClient();
   const session = useSessionStore((state) => state.session);
   const canManage = hasPermission(session, "roles.manage");
@@ -108,10 +110,58 @@ export function MatrixTab() {
           canManage={canManage}
           busy={busy}
           onToggle={(role, permission, granted) => {
-            toggle.mutate({ role, permission, granted });
+            toggle.mutate(
+              { role, permission, granted },
+              {
+                onSuccess: () =>
+                  toast.done(
+                    t(
+                      granted ? "matrix.toast.granted" : "matrix.toast.revoked",
+                      {
+                        permission: t(`permissions.${permission}`),
+                        role: tc(`roles.${role}`),
+                      },
+                    ),
+                    {
+                      undo: async () => {
+                        await matrixSetPermission(role, permission, {
+                          granted: !granted,
+                        });
+                        await refresh();
+                      },
+                    },
+                  ),
+                onError: () => toast.failed(t("matrix.toast.failed")),
+              },
+            );
           }}
           onScope={(role, dataScope) => {
-            scope.mutate({ role, dataScope });
+            const before = data.roles.find(
+              (access) => access.role === role,
+            )?.dataScope;
+            scope.mutate(
+              { role, dataScope },
+              {
+                onSuccess: () =>
+                  toast.done(
+                    t("matrix.toast.scope", {
+                      role: tc(`roles.${role}`),
+                      scope: t(`matrix.scopes.${dataScope}`),
+                    }),
+                    before
+                      ? {
+                          undo: async () => {
+                            await matrixSetDataScope(role, {
+                              dataScope: before,
+                            });
+                            await refresh();
+                          },
+                        }
+                      : {},
+                  ),
+                onError: () => toast.failed(t("matrix.toast.failed")),
+              },
+            );
           }}
         />
       </div>

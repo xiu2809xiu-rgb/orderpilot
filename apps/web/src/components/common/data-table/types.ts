@@ -33,6 +33,12 @@ export const DEFAULT_QUERY: TableQuery = {
 
 export type ExportValue = string | number | boolean | null | undefined;
 
+/**
+ * What a column holds. Number and money columns sit on the right in tabular
+ * figures; date columns stay on one line. Text is the default.
+ */
+export type ColumnKind = "text" | "number" | "money" | "date";
+
 export interface DataTableColumn<Row> {
   /** Sent to the server as the sort column. */
   id: string;
@@ -45,7 +51,23 @@ export interface DataTableColumn<Row> {
   /** False keeps the column on screen, such as the record number. */
   hideable?: boolean;
   defaultHidden?: boolean;
+  /** The kind of value. It sets the side and the figures; `align` overrides the side. */
+  kind?: ColumnKind;
+  /**
+   * Long text that may run over several lines, such as a summary. Every other
+   * column stays on one line, so rows stay compact and the table scrolls
+   * inside its own container when the screen is narrow.
+   */
+  wrap?: boolean;
   align?: "start" | "end";
+}
+
+/** True when the column sits on the right: numbers and money, or an explicit `align`. */
+export function alignsEnd(
+  column: Pick<DataTableColumn<unknown>, "kind" | "align">,
+): boolean {
+  if (column.align) return column.align === "end";
+  return column.kind === "number" || column.kind === "money";
 }
 
 /** A yes/no filter shown as a switch, such as "Show active only". */

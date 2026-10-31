@@ -2,7 +2,7 @@ import { PAYMENT_TYPES, type OrderPayment } from "@orderpilot/shared";
 import { useMutation } from "@tanstack/react-query";
 import { useState, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
-import { EmptyState, ErrorPanel } from "@/components/common";
+import { EmptyState, ErrorPanel, toast } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,6 +37,11 @@ export function PaymentPanel({
         reference,
         paidOn,
       }),
+    onSuccess: () =>
+      toast.done(t("payment.toast.confirmed", { orderNo }), {
+        description: `${formatAmount(amount)} USD`,
+      }),
+    onError: () => toast.failed(t("payment.toast.failed")),
   });
 
   function submit(event: SyntheticEvent) {

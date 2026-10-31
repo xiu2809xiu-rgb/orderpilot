@@ -2,13 +2,13 @@
 
 Rendered from [`scripts/github/data/backlog.json`](../../scripts/github/data/backlog.json) by `node scripts/github/render-docs.mjs`. Change the data, not this file. The same data seeds the issues. The board shows where each story stands.
 
-There are 9 epics and 84 stories. Estimates are story points: a first guess, for the team to change at planning.
+There are 9 epics and 85 stories. Estimates are story points: a first guess, for the team to change at planning.
 
 ## Epics
 
 | Epic   | Title                             | Area                                    | Stories | Points |
 | ------ | --------------------------------- | --------------------------------------- | ------- | ------ |
-| Epic P | The platform base                 | `area: 1 document AI and integration`   | 40      | 232    |
+| Epic P | The platform base                 | `area: 1 document AI and integration`   | 41      | 235    |
 | Epic A | Document intake and AI extraction | `area: 1 document AI and integration`   | 5       | 31     |
 | Epic B | Master data and Navision          | `area: 1 document AI and integration`   | 4       | 14     |
 | Epic C | Order workflows and approvals     | `area: 2 order workflows and approvals` | 5       | 29     |
@@ -106,6 +106,7 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | P-22  | The design system with the Pro kits                                | should   | 8      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-29  | A unit coverage threshold on domain logic                          | should   | 2      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-30  | A k6 smoke load test                                               | should   | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-41  | Finish the bar on every list and detail page                       | should   | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | A-3   | Layout mapping, proposed by AI and approved by a person            | should   | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | A-4   | Learning from corrections, one layout at a time                    | should   | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | A-5   | Email intake through a mock mailbox with signed webhooks           | should   | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
@@ -1004,6 +1005,25 @@ Acceptance criteria:
 - "/" focuses search, and "N" starts a new record on lists that have one.
 - Every action ends with a toast, with Undo where it can be undone.
 - Check: screenshots as every role it touches, at 1440 by 900 and 390 by 844 in `docs/design/screenshots/product-pass/`, looked at before merging: no "Planned", no tiles showing only a dash, no popups over content, no empty-looking lists, no text cut off.
+
+### P-41: Finish the bar on every list and detail page
+
+What P-40 left out so the product pass could close: the pieces every screen inherits but each page still has to adopt.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** should
+- **Estimate:** 3 points
+- **Requirements:** M4 best practices
+- **Planned for:** Sprint 03 (W4)
+- **Depends on:** P-40
+
+Acceptance criteria:
+
+- Every list that has a primary action declares it through `PageHeader`, and its title shows the total.
+- Undo on the SPR decision and on payment confirmation, once the mock overlay records them (the toast already ends each action).
+- Each feature registers its quick actions (Upload PO, New order, Raise SPR) with `registerAction`, and each role's home page reads them with `actionsForRole`.
+- The role matrix and the other plain tables keep their first column in view on a phone, as the common table does.
+- A setting to turn the `/` and `N` keys off for people who use a screen reader or their own keys.
 
 ## Epic A: Document intake and AI extraction
 

@@ -39,7 +39,7 @@ export default function ExceptionsPage() {
         cell: (row) => (
           <Link
             to={`/order-tracker/${row.orderNo}`}
-            className="whitespace-nowrap font-mono font-medium text-primary underline-offset-4 hover:underline"
+            className="inline-block py-0.5 font-mono font-medium text-primary underline-offset-4 hover:underline"
           >
             {row.orderNo}
           </Link>
@@ -62,7 +62,8 @@ export default function ExceptionsPage() {
       {
         id: "summary",
         header: t("list.columns.summary"),
-        cell: (row) => <span className="measure">{row.summary}</span>,
+        cell: (row) => row.summary,
+        wrap: true,
         exportValue: (row) => row.summary,
       },
       {
@@ -124,6 +125,7 @@ export default function ExceptionsPage() {
         title={t("title")}
         description={t("description")}
         meta={<DemoBadge kind="mock" />}
+        total={list.data?.meta.total}
       />
       <DataTable
         tableId="exceptions"

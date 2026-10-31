@@ -11,6 +11,8 @@ import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
 import { HttpResponse, http } from "msw";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { Toaster } from "@/components/common";
+import { useToastStore } from "@/components/common/toast";
 import { createQueryClient } from "@/lib/query";
 import { errorBody, sessionFor } from "@/test/fixtures";
 import { axeViolations } from "@/test/axe";
@@ -41,11 +43,16 @@ function renderPage() {
   return render(
     <QueryClientProvider client={createQueryClient()}>
       <GovernancePage />
+      <Toaster />
     </QueryClientProvider>,
   );
 }
 
 describe("GovernancePage", () => {
+  beforeEach(() => {
+    useToastStore.setState({ items: [] });
+  });
+
   beforeAll(async () => {
     await i18n.loadNamespaces("governance");
   });
@@ -268,6 +275,7 @@ describe("GovernancePage", () => {
   it("disables a user rather than deleting them", async () => {
     signIn("SYSTEM_ADMIN");
     let called = "";
+    let enabled = "";
     const user = {
       id: "00000000-0000-4000-8000-000000000042",
       displayName: "Synthetic Person",
@@ -288,6 +296,10 @@ describe("GovernancePage", () => {
         called = String(params.id);
         return HttpResponse.json({ data: { ...user, disabled: true } });
       }),
+      http.post("*/api/v1/users/:id/enable", ({ params }) => {
+        enabled = String(params.id);
+        return HttpResponse.json({ data: user });
+      }),
     );
     renderPage();
     await userEvent.click(await screen.findByRole("tab", { name: "Users" }));
@@ -298,6 +310,15 @@ describe("GovernancePage", () => {
       expect(called).toBe(user.id);
     });
     expect(screen.queryByRole("button", { name: /delete/i })).toBeNull();
+    // The action ends with a toast, and Undo puts the user back.
+    expect(
+      await screen.findByText("Synthetic Person disabled"),
+    ).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Undo" }));
+    await waitFor(() => {
+      expect(enabled).toBe(user.id);
+    });
+    expect(await screen.findByText("Undone")).toBeInTheDocument();
   });
 
   it("refuses real data to every provider by default", async () => {

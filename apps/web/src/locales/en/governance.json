@@ -20,6 +20,12 @@
   "matrix": {
     "title": "Role and permission matrix",
     "description": "Each cell is a row in the live role-permission table. A change is saved at once and written to the audit log.",
+    "toast": {
+      "granted": "{{permission}} granted to {{role}}",
+      "revoked": "{{permission}} taken from {{role}}",
+      "scope": "{{role}} now sees {{scope}}",
+      "failed": "The change was not saved"
+    },
     "readOnly": "You can read the matrix. Changing it needs the roles.manage permission.",
     "tableLabel": "Permissions by role",
     "scrollHint": "Scroll sideways to see every role.",
@@ -99,6 +105,11 @@
     "disabled": "Disabled",
     "disable": "Disable",
     "enable": "Enable",
+    "toast": {
+      "disabled": "{{name}} disabled",
+      "enabled": "{{name}} enabled",
+      "failed": "The change was not saved"
+    },
     "disableFor": "Disable {{name}}",
     "enableFor": "Enable {{name}}",
     "emptyTitle": "No users yet",

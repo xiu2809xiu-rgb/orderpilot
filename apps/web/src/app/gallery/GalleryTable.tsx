@@ -12,6 +12,7 @@ import {
 } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { ApiError } from "@/lib/api/errors";
+import { formatMoney } from "@/lib/format";
 import {
   DEMO_ORDERS,
   GALLERY_NOW,
@@ -71,12 +72,12 @@ export function GalleryTable() {
           <MaskedValue
             masked={row.status === "blocked"}
             reason="price"
-            value={row.total.toFixed(2)}
+            value={formatMoney(row.total.toFixed(2))}
           />
         ),
         exportValue: (row) => (row.status === "blocked" ? "" : row.total),
         sortable: true,
-        align: "end",
+        kind: "money",
       },
       {
         id: "updatedAt",

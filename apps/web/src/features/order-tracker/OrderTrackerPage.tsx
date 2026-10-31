@@ -34,6 +34,7 @@ export default function OrderTrackerPage() {
         title={t("title")}
         description={t("description")}
         meta={<DemoBadge kind="mock" />}
+        total={tracker.data?.meta.total}
       />
       <DataTable
         tableId="order-tracker"

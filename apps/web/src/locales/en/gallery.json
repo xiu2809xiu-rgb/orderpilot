@@ -11,6 +11,15 @@
     "badgesHint": "Labels that keep a demo honest, and show how sensitive a record is.",
     "piecesHint": "Used inside tables and detail pages."
   },
+  "feedback": {
+    "title": "Amounts, messages and loading shapes",
+    "description": "Every action ends with a message, with Undo where it can be undone. Loading shapes match the final layout.",
+    "showUndo": "Show a message with Undo",
+    "showFailed": "Show an error message",
+    "doneMessage": "Order SO-20261030-0001 saved",
+    "doneDetail": "Nothing else changed.",
+    "failedMessage": "The change was not saved"
+  },
   "table": {
     "caption": "Orders",
     "order": "Order",
