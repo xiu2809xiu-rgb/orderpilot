@@ -91,6 +91,28 @@ describe("dense table", () => {
     expect(cells[1]).not.toHaveClass("left-0");
   });
 
+  it("keeps every cell on one line unless its column says wrap", () => {
+    render(
+      table({
+        columns: [
+          ...columns,
+          {
+            id: "note",
+            header: "Note",
+            cell: () => "A long summary",
+            wrap: true,
+          },
+        ],
+      }),
+    );
+    const cells = within(must(screen.getAllByRole("row")[1])).getAllByRole(
+      "cell",
+    );
+    expect(cells[0]).toHaveClass("whitespace-nowrap");
+    expect(cells[4]).toHaveClass("whitespace-normal");
+    expect(cells[4]).not.toHaveClass("whitespace-nowrap");
+  });
+
   it("scrolls inside its own container, so the page does not scroll sideways", () => {
     render(table());
     const region = screen.getByRole("region", { name: /Orders/ });

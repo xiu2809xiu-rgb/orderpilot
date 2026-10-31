@@ -128,7 +128,13 @@ export function Toaster() {
   return (
     <section
       aria-label={t("toast.region")}
-      className="pointer-events-none fixed inset-x-s2 bottom-s2 z-50 flex flex-col items-end gap-2 sm:left-auto sm:w-96"
+      className={cn(
+        "pointer-events-none fixed z-50 flex flex-col items-end gap-2",
+        // Empty, it is a one-pixel listening post in the corner, never a box over the page.
+        items.length === 0
+          ? "right-0 bottom-0 size-px overflow-hidden"
+          : "inset-x-s2 bottom-s2 sm:left-auto sm:w-96",
+      )}
     >
       <div aria-live="polite" className="flex w-full flex-col gap-2">
         {items

@@ -62,7 +62,8 @@ export default function ExceptionsPage() {
       {
         id: "summary",
         header: t("list.columns.summary"),
-        cell: (row) => <span className="measure">{row.summary}</span>,
+        cell: (row) => row.summary,
+        wrap: true,
         exportValue: (row) => row.summary,
       },
       {

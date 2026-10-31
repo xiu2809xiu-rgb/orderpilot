@@ -53,6 +53,12 @@ export interface DataTableColumn<Row> {
   defaultHidden?: boolean;
   /** The kind of value. It sets the side and the figures; `align` overrides the side. */
   kind?: ColumnKind;
+  /**
+   * Long text that may run over several lines, such as a summary. Every other
+   * column stays on one line, so rows stay compact and the table scrolls
+   * inside its own container when the screen is narrow.
+   */
+  wrap?: boolean;
   align?: "start" | "end";
 }
 
