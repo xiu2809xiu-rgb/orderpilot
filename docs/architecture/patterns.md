@@ -2,37 +2,41 @@
 
 The named patterns used in the code, where each one lives, and why it earns its place. A pattern goes in when a story uses it. Each story adds its rows; planned ones are marked with the story.
 
-| Pattern                     | Where                                                             | Why                                                                                      | Story |
-| --------------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ----- |
-| Layered architecture        | every module under `apps/api/src`                                 | Rules, I/O and HTTP stay apart, so each can be tested and changed alone                  | P-8   |
-| Repository                  | `common/repository.ts`, `health/build-info.repository.ts`         | The only place data is read or written; services stay testable                           | P-8   |
-| Template method             | `BaseRepository.getById`, `toPage`                                | The not-found rule and the page shape are written once                                   | P-8   |
-| Domain class                | `health/domain/readiness-report.ts`                               | A business rule as a plain class with its own tests                                      | P-8   |
-| Domain error                | `common/domain-error.ts`                                          | A rule says no without knowing HTTP; the filter picks the status                         | P-8   |
-| Static factory              | `AppConfig.fromEnv`, `ConfigModule.forRoot`, `AppModule.register` | A named, validated way to build the one config and the module that uses it               | P-8   |
-| Registry                    | `health/readiness-registry.ts`                                    | Modules add their own readiness checks without the health module knowing them            | P-8   |
-| Pipe (validate at the edge) | `common/zod-validation.pipe.ts`                                   | Nothing crosses a boundary before a zod schema parses it                                 | P-8   |
-| Exception filter            | `common/all-exceptions.filter.ts`                                 | One error envelope for every failure                                                     | P-8   |
-| Adapter                     | `logging/app-logger.ts`                                           | Nest's `LoggerService` on top of pino, so all logs share one format                      | P-8   |
-| Unit of work                | `database/database.ts`                                            | A business change and its audit event commit or roll back together                       | P-9   |
-| Hash chain                  | `audit/domain/audit-chain.ts`, `audit/audit.service.ts`           | Each audit event covers the one before it, so tampering shows                            | P-9   |
-| Abstract class as a port    | `storage/object-storage.ts`, `storage/s3-object-storage.ts`       | Services use put, get, head and delete; MinIO or AWS S3 sits behind it                   | P-9   |
-| Seeder                      | `database/seed/seeders.ts`                                        | Each seed step is idempotent; later stories add theirs to one list                       | P-9   |
-| Unit of work                | `database/database.ts`                                            | A business change and its audit event commit or roll back together                       | P-9   |
-| Hash chain                  | `audit/domain/audit-chain.ts`, `audit/audit.service.ts`           | Each audit event covers the one before it, so tampering shows                            | P-9   |
-| Abstract class as a port    | `storage/object-storage.ts`, `storage/s3-object-storage.ts`       | Services use put, get, head and delete; MinIO or AWS S3 sits behind it                   | P-9   |
-| Seeder                      | `database/seed/seeders.ts`                                        | Each seed step is idempotent; later stories add theirs to one list                       | P-9   |
-| Controlled component        | `components/common/data-table/DataTable.tsx`                      | The table holds no paging, sort or filter state: the page owns it and the server answers | P-12  |
-| Render prop (slot)          | `DataTable` `filterSlot`                                          | An area adds its own filter control without the table knowing it                         | P-12  |
-| Lazy loading                | `data-table/export/excel.ts`, the gallery route                   | A large library or a demo page loads only when asked for, so the entry stays small       | P-12  |
-| Barrel (one public entry)   | `components/common/index.ts`                                      | Areas import every common component from one place                                       | P-12  |
-| Transactional outbox        | planned                                                           | Events leave the system only if the business transaction commits                         | P-15  |
-| Gateway                     | planned: `LlmGateway`                                             | One interface over the mock, OpenAI-compatible and Bedrock providers                     | P-17  |
-| Factory and adapter         | planned: `SystemConnector` and the Navision adapter               | Connectors are chosen by name and hide each system's quirks                              | P-20  |
-| Strategy                    | `checks/domain/check-rule.ts` (the rules are planned)             | Each check rule is a class behind one interface                                          | D-1   |
-| Port with a mock adapter    | `checks/domain/order-status-reader.ts`                            | Area 3 reads order status through one interface; area 2 replaces the mock                | D-1   |
-| Lazy-loaded chart           | `features/insights/KpiBars.tsx`                                   | The charts load as their own chunk, so the entry stays small                             | D-1   |
-| State machine               | planned: order and exception lifecycles                           | Legal transitions in one place                                                           | C-1   |
+| Pattern                     | Where                                                                 | Why                                                                                      | Story |
+| --------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ----- |
+| Layered architecture        | every module under `apps/api/src`                                     | Rules, I/O and HTTP stay apart, so each can be tested and changed alone                  | P-8   |
+| Repository                  | `common/repository.ts`, `health/build-info.repository.ts`             | The only place data is read or written; services stay testable                           | P-8   |
+| Template method             | `BaseRepository.getById`, `toPage`                                    | The not-found rule and the page shape are written once                                   | P-8   |
+| Domain class                | `health/domain/readiness-report.ts`                                   | A business rule as a plain class with its own tests                                      | P-8   |
+| Domain error                | `common/domain-error.ts`                                              | A rule says no without knowing HTTP; the filter picks the status                         | P-8   |
+| Static factory              | `AppConfig.fromEnv`, `ConfigModule.forRoot`, `AppModule.register`     | A named, validated way to build the one config and the module that uses it               | P-8   |
+| Registry                    | `health/readiness-registry.ts`                                        | Modules add their own readiness checks without the health module knowing them            | P-8   |
+| Pipe (validate at the edge) | `common/zod-validation.pipe.ts`                                       | Nothing crosses a boundary before a zod schema parses it                                 | P-8   |
+| Exception filter            | `common/all-exceptions.filter.ts`                                     | One error envelope for every failure                                                     | P-8   |
+| Adapter                     | `logging/app-logger.ts`                                               | Nest's `LoggerService` on top of pino, so all logs share one format                      | P-8   |
+| Unit of work                | `database/database.ts`                                                | A business change and its audit event commit or roll back together                       | P-9   |
+| Hash chain                  | `audit/domain/audit-chain.ts`, `audit/audit.service.ts`               | Each audit event covers the one before it, so tampering shows                            | P-9   |
+| Abstract class as a port    | `storage/object-storage.ts`, `storage/s3-object-storage.ts`           | Services use put, get, head and delete; MinIO or AWS S3 sits behind it                   | P-9   |
+| Seeder                      | `database/seed/seeders.ts`                                            | Each seed step is idempotent; later stories add theirs to one list                       | P-9   |
+| Unit of work                | `database/database.ts`                                                | A business change and its audit event commit or roll back together                       | P-9   |
+| Hash chain                  | `audit/domain/audit-chain.ts`, `audit/audit.service.ts`               | Each audit event covers the one before it, so tampering shows                            | P-9   |
+| Abstract class as a port    | `storage/object-storage.ts`, `storage/s3-object-storage.ts`           | Services use put, get, head and delete; MinIO or AWS S3 sits behind it                   | P-9   |
+| Seeder                      | `database/seed/seeders.ts`                                            | Each seed step is idempotent; later stories add theirs to one list                       | P-9   |
+| Controlled component        | `components/common/data-table/DataTable.tsx`                          | The table holds no paging, sort or filter state: the page owns it and the server answers | P-12  |
+| Render prop (slot)          | `DataTable` `filterSlot`                                              | An area adds its own filter control without the table knowing it                         | P-12  |
+| Lazy loading                | `data-table/export/excel.ts`, the gallery route                       | A large library or a demo page loads only when asked for, so the entry stays small       | P-12  |
+| Barrel (one public entry)   | `components/common/index.ts`                                          | Areas import every common component from one place                                       | P-12  |
+| Transactional outbox        | planned                                                               | Events leave the system only if the business transaction commits                         | P-15  |
+| Gateway                     | planned: `LlmGateway`                                                 | One interface over the mock, OpenAI-compatible and Bedrock providers                     | P-17  |
+| Factory and adapter         | planned: `SystemConnector` and the Navision adapter                   | Connectors are chosen by name and hide each system's quirks                              | P-20  |
+| Strategy                    | `checks/domain/check-rule.ts` (the rules are planned)                 | Each check rule is a class behind one interface                                          | D-1   |
+| Port with a mock adapter    | `checks/domain/order-status-reader.ts`                                | Area 3 reads order status through one interface; area 2 replaces the mock                | D-1   |
+| Lazy-loaded chart           | `features/insights/KpiBars.tsx`                                       | The charts load as their own chunk, so the entry stays small                             | D-1   |
+| State machine               | planned: order and exception lifecycles                               | Legal transitions in one place                                                           | C-1   |
+| Port with a mock            | `workflows/workflow-read-model.ts`, `mock-workflow-read-model.ts`     | The routes read through one abstract class; Azri binds a database-backed one             | C-1   |
+| Port to another area        | `workflows/domain/approval-policy.ts`, `mock/mock-approval-policy.ts` | Area 2 asks area 4's approval policy and acts on the answer; the mock stands in          | C-1   |
+| Atomic counter              | `workflows/record-number.repository.ts`                               | One upsert hands out each running number once, with no lock                              | C-1   |
+| Configuration as data       | `DocumentTypeConfig`, `workflows/document-config.repository.ts`       | A default is a row to edit, not a code change                                            | C-1   |
 
 ## Layers
 

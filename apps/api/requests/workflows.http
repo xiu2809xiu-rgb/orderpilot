@@ -1,0 +1,47 @@
+### Area 2: tasks, an order's steps, the SPR approval page and reminders.
+### Sign in first (auth.http). Every answer here is mock data and says so in
+### meta.mock, except the document configuration. The POST requests check and
+### answer "applied": false: they change nothing until the workflow engine exists.
+@baseUrl = http://localhost:3000
+@csrf = paste the op_csrf cookie value here after signing in
+
+### The caller's own task inbox (a role with an inbox). Add ?overdue=true for overdue only.
+GET {{baseUrl}}/api/v1/workflows/tasks?page=1&pageSize=25
+
+### Another role's inbox. Needs workflows.inboxes.any (Management and Auditor).
+GET {{baseUrl}}/api/v1/workflows/inboxes/WAREHOUSE/tasks
+
+### Reminders, for the caller's role or another role's.
+GET {{baseUrl}}/api/v1/workflows/reminders
+###
+GET {{baseUrl}}/api/v1/workflows/inboxes/LOGISTICS/reminders
+
+### An order's steps, timeline and payment. Sample orders are SO-0001 to SO-0010.
+GET {{baseUrl}}/api/v1/workflows/orders/SO-0004/flow
+
+### Confirm a payment with its type. Finance only. Checked, not stored.
+POST {{baseUrl}}/api/v1/workflows/orders/SO-0004/payments
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "paymentType": "prepayment", "amount": "1250.00", "currencyCode": "USD", "reference": "TT-0004", "paidOn": "2026-11-02" }
+
+### An SPR with its suggested fields, the stock figures and the approver's setup.
+GET {{baseUrl}}/api/v1/workflows/sprs/SPR-20261102-0001
+
+### Approve or reject with a comment. Approver only. Checked, nothing changed.
+POST {{baseUrl}}/api/v1/workflows/sprs/SPR-20261102-0001/approve
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "comment": "Within my limit." }
+
+### A comment is required: this one is refused with VALIDATION_FAILED.
+POST {{baseUrl}}/api/v1/workflows/sprs/SPR-20261102-0001/reject
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "comment": "" }
+
+### Field settings and defaults for each document type, read from the table.
+GET {{baseUrl}}/api/v1/workflows/document-config

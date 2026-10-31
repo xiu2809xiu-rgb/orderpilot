@@ -13,7 +13,8 @@ export type RecordNumber = z.infer<typeof recordNumberSchema>;
 
 const SINGAPORE_OFFSET_MS = 8 * 60 * 60 * 1000;
 
-function datePart(date: Date): string {
+/** `YYYYMMDD` in Singapore time: the day a running number belongs to. */
+export function recordDay(date: Date): string {
   const sg = new Date(date.getTime() + SINGAPORE_OFFSET_MS);
   const y = sg.getUTCFullYear().toString().padStart(4, "0");
   const m = (sg.getUTCMonth() + 1).toString().padStart(2, "0");
@@ -30,7 +31,7 @@ export function formatRecordNumber(
   if (!Number.isInteger(sequence) || sequence < 1) {
     throw new RangeError("The running number starts at 1");
   }
-  return `${type}-${datePart(date)}-${sequence.toString().padStart(4, "0")}`;
+  return `${type}-${recordDay(date)}-${sequence.toString().padStart(4, "0")}`;
 }
 
 export interface ParsedRecordNumber {

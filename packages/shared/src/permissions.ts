@@ -22,11 +22,16 @@ export const PERMISSIONS = [
   "exceptions.read",
   "insights.read",
   // Acting on money and approvals. The system admin role never holds these
-  // (see governance/matrix.ts). No role holds them by default: who approves
-  // and who pays is area 4's call, made in the matrix.
+  // (see governance/matrix.ts). The default matrix below grants approvals.decide
+  // to the approver and payments.confirm to finance. payments.post stays
+  // ungranted: no route uses it yet, and area 4 decides it.
   "approvals.decide",
   "payments.confirm",
   "payments.post",
+  // Area 2 (C-1): the workflow screens, SPR reads, and other people's approver inboxes.
+  "workflows.read",
+  "spr.read",
+  "workflows.inboxes.any",
 ] as const;
 
 export const permissionSchema = z.enum(PERMISSIONS);
@@ -53,27 +58,46 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "documents.read",
     "tracker.read",
     "insights.read",
+    "workflows.read",
+    "spr.read",
   ],
-  APPROVER: ["orders.read", "documents.read", "tracker.read"],
+  APPROVER: [
+    "orders.read",
+    "documents.read",
+    "tracker.read",
+    "workflows.read",
+    "spr.read",
+    "approvals.decide",
+  ],
   SUPPORT: [
     "orders.read",
     "documents.read",
     "documents.upload",
     "tracker.read",
     "exceptions.read",
+    "workflows.read",
   ],
   WAREHOUSE: [
     "orders.read",
     "documents.read",
     "tracker.read",
     "exceptions.read",
+    "workflows.read",
   ],
-  FINANCE: ["orders.read", "documents.read", "tracker.read", "exceptions.read"],
+  FINANCE: [
+    "orders.read",
+    "documents.read",
+    "tracker.read",
+    "exceptions.read",
+    "workflows.read",
+    "payments.confirm",
+  ],
   LOGISTICS: [
     "orders.read",
     "documents.read",
     "tracker.read",
     "exceptions.read",
+    "workflows.read",
   ],
   MANAGEMENT: [
     "orders.read",
@@ -82,6 +106,9 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "tracker.read",
     "exceptions.read",
     "insights.read",
+    "workflows.read",
+    "spr.read",
+    "workflows.inboxes.any",
   ],
   AUDITOR: [
     "orders.read",
@@ -91,5 +118,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "tracker.read",
     "exceptions.read",
     "insights.read",
+    "workflows.read",
+    "spr.read",
+    "workflows.inboxes.any",
   ],
 };
