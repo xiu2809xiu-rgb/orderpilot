@@ -6,28 +6,28 @@ How OrderPilot is tested: the levels, the environments, the data, and the failur
 
 ## 1. Test levels
 
-| Level           | What it covers                                                          | Tool                        | Where the tests live                        | Status                                 |
-| --------------- | ----------------------------------------------------------------------- | --------------------------- | ------------------------------------------- | -------------------------------------- |
-| Repository      | The guards, the Git hooks and the shared ESLint config                  | `node --test`               | `scripts/**/*.test.mjs`, `packages/*/test/` | Today (P-5)                            |
-| Unit            | Domain classes and rules, at 80% or more coverage of domain logic       | Vitest                      | Next to the code, as `*.test.ts`            | Today (P-8)                            |
-| API integration | Every endpoint, with 401, 403 and validation cases, and the audit entry | Vitest                      | `apps/api/test/`                            | Planned: P-10, with its harness in P-9 |
-| Component       | Each component in each of its states                                    | Vitest with Testing Library | Next to the component                       | Planned: P-11                          |
-| Contract        | Each connector against the mock Navision                                | Vitest                      | Next to the connector                       | Planned: P-20                          |
-| End-to-end      | The smoke test, then E2E #1 to #4, with WCAG 2.2 AA checked by axe      | Playwright with axe         | Decided by P-14                             | Planned: P-14                          |
-| Load            | The extraction queue and the order endpoints, as a smoke load           | k6                          | To be decided by its story                  | Planned, not yet in a story            |
-| Manual requests | Each endpoint by hand, for reviews and demos                            | `.http` files               | `apps/api/requests/`                        | Today (P-8)                            |
-| Security        | Code, secrets, dependencies, then images and the live URL               | See security testing        | `.github/workflows/`                        | Today (P-6); Trivy P-13, ZAP P-24      |
+| Level           | What it covers                                                          | Tool                        | Where the tests live                        | Status                              |
+| --------------- | ----------------------------------------------------------------------- | --------------------------- | ------------------------------------------- | ----------------------------------- |
+| Repository      | The guards, the Git hooks and the shared ESLint config                  | `node --test`               | `scripts/**/*.test.mjs`, `packages/*/test/` | Today (P-5)                         |
+| Unit            | Domain classes and rules, at 80% or more coverage of domain logic       | Vitest                      | Next to the code, as `*.test.ts`            | Today (P-8)                         |
+| API integration | Every endpoint, with 401, 403 and validation cases, and the audit entry | Vitest                      | `apps/api/test/`                            | Today (P-9 harness), P-10 adds more |
+| Component       | Each component in each of its states                                    | Vitest with Testing Library | Next to the component                       | Planned: P-11                       |
+| Contract        | Each connector against the mock Navision                                | Vitest                      | Next to the connector                       | Planned: P-20                       |
+| End-to-end      | The smoke test, then E2E #1 to #4, with WCAG 2.2 AA checked by axe      | Playwright with axe         | Decided by P-14                             | Planned: P-14                       |
+| Load            | The extraction queue and the order endpoints, as a smoke load           | k6                          | To be decided by its story                  | Planned, not yet in a story         |
+| Manual requests | Each endpoint by hand, for reviews and demos                            | `.http` files               | `apps/api/requests/`                        | Today (P-8)                         |
+| Security        | Code, secrets, dependencies, then images and the live URL               | See security testing        | `.github/workflows/`                        | Today (P-6); Trivy P-13, ZAP P-24   |
 
 `pnpm test` at the root runs every level that exists, and the verify job in CI runs it on every pull request. [Security testing](../security/security-testing.md) covers the security scans.
 
 ## 2. Environments
 
-| Environment | What runs there                                                                                      | `APP_ENV` | Status                                  |
-| ----------- | ---------------------------------------------------------------------------------------------------- | --------- | --------------------------------------- |
-| Local       | Windows 11 with Git Bash, and macOS. Node 24.22.0 and pnpm 12. PostgreSQL, Redis and MinIO in Docker | `local`   | Today for tooling; P-9 for the services |
-| CI          | GitHub Actions on `ubuntu-24.04`: the verify job and the security scans; service containers from P-9 | `local`   | Today (P-6)                             |
-| Docker      | The full stack with `docker compose up --build`, where the end-to-end tests run                      | `local`   | Planned: P-13, P-14                     |
-| Demo        | Amazon Lightsail in Singapore, behind Caddy, with OWASP ZAP against the live URL                     | `demo`    | Planned: P-24                           |
+| Environment | What runs there                                                                                                                  | `APP_ENV` | Status              |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------------- |
+| Local       | Windows 11 with Git Bash, and macOS. Node 24.22.0 and pnpm 12. PostgreSQL, Redis and MinIO in Docker                             | `local`   | Today (P-9)         |
+| CI          | GitHub Actions on `ubuntu-24.04`: the verify job (with PostgreSQL, Redis and MinIO from the compose file) and the security scans | `local`   | Today (P-6)         |
+| Docker      | The full stack with `docker compose up --build`, where the end-to-end tests run                                                  | `local`   | Planned: P-13, P-14 |
+| Demo        | Amazon Lightsail in Singapore, behind Caddy, with OWASP ZAP against the live URL                                                 | `demo`    | Planned: P-24       |
 
 - `APP_ENV` is separate from `NODE_ENV`. Safety rules key off `APP_ENV=production`, so the demo can run `NODE_ENV=production` with demo data (P-8).
 - Tests never call a paid AI provider. They use the mock provider, which is the default (P-17).
@@ -35,7 +35,7 @@ How OrderPilot is tested: the levels, the environments, the data, and the failur
 
 ## 3. Test data
 
-- **Synthetic only,** labelled "Synthetic demo data": fictional customers in the brief's countries, vendors, items from fictional brands, opening stock and orders in different states (`packages/synthetic-data`, planned: P-9, grown by P-19).
+- **Synthetic only,** labelled "Synthetic demo data": fictional customers in the brief's countries, vendors, items from fictional brands, opening stock and orders in different states (`packages/synthetic-data`, Today (P-9), grown by P-19).
 - **Documents with planted mistakes** and their ground truth, for the extraction accuracy target and the mismatch checks (`packages/synthetic-documents`, planned: P-21).
 - **Obviously fake bank details,** no national ID numbers, and prices in USD.
 - **Fixed seeds,** so a failing test fails the same way twice.
@@ -109,8 +109,8 @@ Each row is a case some test must cover. The story is the one that brings the te
 | F5  | Too many sign-in attempts                                                    | Rate limited with 429                                                            | API integration   | Planned: P-8, P-10    |
 | F6  | A role without the right views bank details or prices                        | Masked, with the reason shown                                                    | Unit, component   | Planned: F-1 (area 4) |
 | F7  | A vendor PI's bank details differ from the vendor's record (E2E #4)          | The payment is held until a second approver clears it                            | Unit, end-to-end  | Planned: F-1, P-14    |
-| F8  | Someone updates or deletes an audit event, directly in the database          | The trigger refuses it                                                           | Integration       | Planned: P-9          |
-| F9  | An audit event is altered outside the app                                    | Verifying the hash chain shows exactly where it breaks                           | Unit, integration | Planned: P-9, F-2     |
+| F8  | Someone updates or deletes an audit event, directly in the database          | The trigger refuses it                                                           | Integration       | Today (P-9)           |
+| F9  | An audit event is altered outside the app                                    | Verifying the hash chain shows exactly where it breaks                           | Unit, integration | Today (P-9), F-2      |
 | F10 | Segregation of duties: one person in two conflicting steps of one order      | Refused, and audited                                                             | Unit              | Planned: F-1 (area 4) |
 | F11 | Every request                                                                | One JSON log line, cookies redacted, the caller's `X-Request-Id` as the trace id | Integration       | Today (P-8), G-1      |
 

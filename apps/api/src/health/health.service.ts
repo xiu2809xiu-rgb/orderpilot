@@ -1,6 +1,4 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { AppConfig } from "../config/app-config.js";
-import { BuildInfoRepository } from "./build-info.repository.js";
 import type { ReadinessReport } from "./domain/readiness-report.js";
 import { ReadinessRegistry } from "./readiness-registry.js";
 
@@ -8,9 +6,6 @@ import { ReadinessRegistry } from "./readiness-registry.js";
 @Injectable()
 export class HealthService {
   constructor(
-    @Inject(AppConfig) private readonly config: AppConfig,
-    @Inject(BuildInfoRepository)
-    private readonly buildInfo: BuildInfoRepository,
     @Inject(ReadinessRegistry) private readonly registry: ReadinessRegistry,
   ) {}
 
@@ -23,17 +18,16 @@ export class HealthService {
     return this.registry.run();
   }
 
+  /**
+   * What an anonymous probe may see: whether the API is up, and which checks
+   * ran. No version, environment, uptime or timings: those help an attacker
+   * more than a monitor.
+   */
   async summary() {
-    const info = this.buildInfo.read();
     const report = await this.registry.run();
     return {
       status: report.status,
-      name: info.name,
-      version: info.version,
-      gitSha: info.gitSha,
-      appEnv: this.config.appEnv,
-      uptimeSeconds: Math.floor(process.uptime()),
-      checks: [...report.results],
+      checks: report.results.map(({ name, status }) => ({ name, status })),
     };
   }
 }

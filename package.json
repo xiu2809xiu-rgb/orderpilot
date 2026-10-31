@@ -26,7 +26,13 @@
     "check:samples": "node scripts/check-samples.mjs",
     "check:samples:history": "node scripts/check-samples.mjs --history",
     "check:licence-key": "node scripts/check-licence-key.mjs",
-    "check:secrets": "secretlint --maskSecrets \"**/*\""
+    "check:secrets": "secretlint --maskSecrets \"**/*\"",
+    "db:generate": "pnpm --filter @orderpilot/api db:generate",
+    "db:migrate": "pnpm --filter @orderpilot/api db:migrate",
+    "db:migrate:dev": "pnpm --filter @orderpilot/api db:migrate:dev",
+    "db:seed": "pnpm --filter @orderpilot/api db:seed",
+    "stack:up": "docker compose up -d --wait",
+    "stack:down": "docker compose down"
   },
   "devDependencies": {
     "@commitlint/cli": "21.2.4",

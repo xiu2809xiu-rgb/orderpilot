@@ -1,0 +1,18 @@
+// The generator and the datasource, shared by every area's schema file. Each
+// area owns one file beside this one (docs/team/module-ownership.md); this file
+// has no models and changes rarely.
+
+generator client {
+  provider            = "prisma-client"
+  // Inside src, so tsc compiles it with the rest. Git ignores it: `pnpm install`
+  // and `pnpm db:generate` rebuild it.
+  output              = "../../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+// The connection string is not here: Prisma 7 reads it from prisma.config.ts,
+// which takes it from DATABASE_URL.
+datasource db {
+  provider = "postgresql"
+}

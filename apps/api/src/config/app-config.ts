@@ -29,6 +29,20 @@ export class AppConfig {
 
   readonly logLevel: Env["LOG_LEVEL"];
 
+  readonly database: { readonly url: string };
+  readonly redis: { readonly url: string };
+
+  readonly storage: {
+    /** Null means AWS S3 itself. */
+    readonly endpoint: string | null;
+    readonly region: string;
+    readonly accessKeyId: string;
+    readonly secretAccessKey: string;
+    readonly bucket: string;
+    readonly forcePathStyle: boolean;
+    readonly createBucket: boolean;
+  };
+
   private constructor(env: Env) {
     this.appEnv = env.APP_ENV;
     this.nodeEnv = env.NODE_ENV;
@@ -46,6 +60,17 @@ export class AppConfig {
       maxRequests: env.RATE_LIMIT_MAX_REQUESTS,
     };
     this.logLevel = env.LOG_LEVEL;
+    this.database = { url: env.DATABASE_URL };
+    this.redis = { url: env.REDIS_URL };
+    this.storage = {
+      endpoint: env.S3_ENDPOINT ?? null,
+      region: env.S3_REGION,
+      accessKeyId: env.S3_ACCESS_KEY_ID,
+      secretAccessKey: env.S3_SECRET_ACCESS_KEY,
+      bucket: env.S3_BUCKET,
+      forcePathStyle: env.S3_FORCE_PATH_STYLE ?? env.S3_ENDPOINT !== undefined,
+      createBucket: env.S3_CREATE_BUCKET,
+    };
   }
 
   get isProduction(): boolean {

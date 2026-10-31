@@ -33,7 +33,9 @@ export class HealthController {
   constructor(@Inject(HealthService) private readonly health: HealthService) {}
 
   @Get()
-  @ApiOperation({ summary: "Service health: build, environment and checks" })
+  @ApiOperation({
+    summary: "Service health: status and the names of the checks",
+  })
   @ApiOkResponse({ schema: openApiSchema(healthResponseSchema) })
   async summary() {
     return { data: await this.health.summary() };

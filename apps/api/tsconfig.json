@@ -13,8 +13,11 @@
     // turns this off, because an emit would pull shared's files into this
     // package's dist.
     "paths": {
-      "@orderpilot/shared": ["../../packages/shared/src/index.ts"]
+      "@orderpilot/shared": ["../../packages/shared/src/index.ts"],
+      "@orderpilot/synthetic-data": [
+        "../../packages/synthetic-data/src/index.ts"
+      ]
     }
   },
-  "include": ["src", "test", "vitest.config.ts"]
+  "include": ["src", "test", "vitest.config.ts", "prisma.config.ts"]
 }

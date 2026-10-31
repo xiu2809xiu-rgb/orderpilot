@@ -1,14 +1,22 @@
 import "reflect-metadata";
-import type { Type } from "@nestjs/common";
+import type { INestApplicationContext, Type } from "@nestjs/common";
+import { NestFactory } from "@nestjs/core";
 import type { NestExpressApplication } from "@nestjs/platform-express";
 import { Test } from "@nestjs/testing";
 import { AppModule } from "../../src/app.module.js";
 import { configureApp } from "../../src/bootstrap/configure-app.js";
 import { AppConfig } from "../../src/config/app-config.js";
+import { testInfrastructureEnv } from "./infrastructure.js";
+import { testConfig } from "./reset.js";
 
-/** A valid environment for tests. Nothing here is read from a file or the shell. */
+/**
+ * A valid environment for tests, pointing at the test database, the test Redis
+ * database and the test bucket. The vitest config loads the root .env, which
+ * builds the TEST_* values from the same ports as the development stack.
+ */
 export function testEnv(overrides: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv {
   return {
+    ...testInfrastructureEnv(),
     APP_ENV: "local",
     NODE_ENV: "test",
     LOG_LEVEL: "info",
@@ -63,4 +71,22 @@ export async function createTestApp(
         .map((line) => JSON.parse(line) as Record<string, unknown>),
     close: () => app.close(),
   };
+}
+
+export interface TestContext {
+  readonly app: INestApplicationContext;
+  readonly close: () => Promise<void>;
+}
+
+/**
+ * The whole module graph without an HTTP server, for tests of services,
+ * repositories, the queue and the storage. Connected to the test database,
+ * Redis database and bucket.
+ */
+export async function createTestContext(): Promise<TestContext> {
+  const app = await NestFactory.createApplicationContext(
+    AppModule.register(testConfig()),
+    { logger: false },
+  );
+  return { app, close: () => app.close() };
 }

@@ -46,7 +46,7 @@ In this order, set up once in `bootstrap/configure-app.ts` (the tests call the s
 | ------------ | ----------------------------------- | ---------------------------- | ------------------------------ |
 | Controller   | `health/health.controller.ts`       | A service, a pipe            | A repository, Prisma, any rule |
 | Service      | `health/health.service.ts`          | Repositories, domain classes | Prisma, `req` or `res`         |
-| Repository   | `health/build-info.repository.ts`   | Prisma (P-9), files, the net | HTTP concepts                  |
+| Repository   | `health/build-info.repository.ts`   | Prisma, files, the net       | HTTP concepts                  |
 | Domain class | `health/domain/readiness-report.ts` | Other domain classes         | HTTP, Prisma, Nest             |
 
 A reviewer can check this by reading the imports of a file.
@@ -69,7 +69,9 @@ From a clean clone (the exact steps are in [CONTRIBUTING.md](../../CONTRIBUTING.
 ```bash
 pnpm install
 cp .env.example .env      # PowerShell: Copy-Item .env.example .env
+pnpm stack:up             # PostgreSQL, Redis, MinIO in Docker
+pnpm db:migrate && pnpm db:seed
 pnpm --filter @orderpilot/api dev
 ```
 
-Then open <http://localhost:3000/api/docs>, or call <http://localhost:3000/health>. Not here yet: PostgreSQL, Redis and MinIO (P-9), sessions (P-10), Docker images (P-13).
+Then open <http://localhost:3000/api/docs>, or call <http://localhost:3000/health>. `/health/ready` shows the database, Redis and storage. Not here yet: sessions (P-10), Docker images (P-13).

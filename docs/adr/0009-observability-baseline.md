@@ -21,7 +21,7 @@ When a person sees "something went wrong" on a screen, we need to find the exact
 6. **Three health endpoints**, outside `/api` and unversioned:
    - `/health/live`: the process is up. It checks nothing else, so a slow database never makes an orchestrator restart a healthy process;
    - `/health/ready`: 200 when every registered check is up, 503 when one is down. The body lists each check by name, status and duration, never the reason;
-   - `/health`: the build (name, version, git sha), `APP_ENV`, uptime and the checks, always 200 (for people and dashboards).
+   - `/health`: the status and the name and status of each check, always 200 (for people and dashboards). P-9 cut it down from the build, `APP_ENV`, uptime and timings: anonymous callers need to know whether the API is up, not which version and environment to attack. The version stays in Swagger and, from P-10, behind sign-in.
      They are not rate limited, so a probe cannot be locked out.
 7. **The log level comes from configuration** (`LOG_LEVEL`). There is no pretty printer in the app: pipe the output through one on your own machine if you want colour.
 

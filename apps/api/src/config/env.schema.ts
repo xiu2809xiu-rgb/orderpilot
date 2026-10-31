@@ -80,6 +80,33 @@ export const envSchema = z
     // Off in production unless asked for. Decided after parsing.
     SWAGGER_ENABLED: booleanFlag.optional(),
 
+    // PostgreSQL. Required: there is no default that would be right on every
+    // machine, because the port comes from the root .env.
+    DATABASE_URL: z
+      .string()
+      .regex(/^postgres(ql)?:\/\/\S+$/, "Must start with postgresql://"),
+
+    // Redis, with the database number at the end (redis://host:6379/0).
+    REDIS_URL: z
+      .string()
+      .regex(/^rediss?:\/\/\S+$/, "Must start with redis://"),
+
+    // Document storage over the S3 API. Leave S3_ENDPOINT out for AWS S3.
+    S3_ENDPOINT: z.url().optional(),
+    S3_REGION: z.string().min(1).default("us-east-1"),
+    S3_ACCESS_KEY_ID: z.string().min(1),
+    S3_SECRET_ACCESS_KEY: z.string().min(1),
+    S3_BUCKET: z
+      .string()
+      .regex(
+        /^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/,
+        "Must be a valid bucket name: 3 to 63 lower-case letters, digits, dots or hyphens",
+      ),
+    // MinIO needs path-style addressing. Decided after parsing: on when an
+    // endpoint is set, unless said otherwise.
+    S3_FORCE_PATH_STYLE: booleanFlag.optional(),
+    S3_CREATE_BUCKET: booleanFlag.default(false),
+
     // Set by the image build (P-13). Shown by /health.
     GIT_SHA: z.string().min(1).optional(),
   })

@@ -4,7 +4,7 @@ What works so far. Each story that adds a step updates this page when it merges.
 
 ## What works today
 
-The workspace installs, checks and builds, and the API and the web app start. There is no database yet (P-9), and the web app's real sign-in comes with P-10.
+The workspace installs, checks and builds. The API and the web app start, and the API runs against a local PostgreSQL, Redis and MinIO from Docker Compose. The web app's real sign-in comes with P-10.
 
 1. Install Git, Node 24.22.0 (the version in [`.node-version`](https://github.com/xiu2809xiu-rgb/orderpilot/blob/main/.node-version)) and pnpm 12: `npm install -g pnpm@12.14.0`.
 2. Clone the repository:
@@ -26,23 +26,31 @@ The workspace installs, checks and builds, and the API and the web app start. Th
    - [The working agreement](https://github.com/xiu2809xiu-rgb/orderpilot/blob/main/docs/agile/working-agreement.md): how the team works.
    - [The backlog](https://github.com/xiu2809xiu-rgb/orderpilot/blob/main/docs/agile/backlog.md): what is planned.
 
-5. Install and check:
+5. Start Docker Desktop (Windows, macOS) or Docker Engine (Linux), then copy the settings file. One root `.env` is enough, and its defaults are safe for a laptop:
+
+   ```sh
+   cp .env.example .env        # Git Bash, macOS, Linux. PowerShell: Copy-Item .env.example .env
+   pnpm stack:up               # PostgreSQL, Redis, MinIO and Mailpit; the first run compiles MinIO and takes a few minutes
+   ```
+
+6. Install and check. The tests use the stack, so start it first:
 
    ```sh
    pnpm install
    pnpm lint && pnpm typecheck && pnpm test && pnpm build
    ```
 
-6. Run the API. It needs one root `.env`, copied from the example:
+7. Create the tables, seed them, and run the API:
 
    ```sh
-   cp .env.example .env        # PowerShell: Copy-Item .env.example .env
+   pnpm db:migrate
+   pnpm db:seed
    pnpm --filter @orderpilot/api dev
    ```
 
-   Then open <http://localhost:3000/health> and <http://localhost:3000/api/docs>. If a required setting is missing, the API stops and names the file to create. A variable set in your shell always wins over the files.
+   Then open <http://localhost:3000/health/ready> (database, Redis and storage should all say `up`) and <http://localhost:3000/api/docs>. The ports are the first lines of `.env` (`POSTGRES_PORT`, `REDIS_PORT`, `MINIO_PORT`): change one and every URL built from it moves. Mailpit is the only place OrderPilot sends email in development and demos: nothing leaves your machine, and the messages show at <http://127.0.0.1:8025>. `pnpm stack:down` stops the containers and keeps your data. If a required setting is missing, the API stops and names the file to create. A variable set in your shell always wins over the files.
 
-7. Look at the web app:
+8. Look at the web app:
 
    ```sh
    pnpm --filter @orderpilot/web dev
@@ -67,10 +75,23 @@ The first prints what closed this sprint and what is in progress, by area. The s
 node --test "scripts/github/**/*.test.mjs"
 ```
 
+## Troubleshooting
+
+**Docker is not running.** `docker compose up` says it cannot connect to the Docker daemon, or the tests say that nothing answers on the database port. Start Docker Desktop (Windows and macOS) and wait until it says it is running, then run `docker compose up -d --wait` again. On Linux: `sudo systemctl start docker`.
+
+**Port already in use.** `docker compose up` says a port is already allocated or already in use. Something else on your machine has 5432 (PostgreSQL), 6379 (Redis), 9000 or 9001 (MinIO), 1025 or 8025 (Mailpit). Either stop it, or move the stack: change one line in your `.env`, for example `POSTGRES_PORT=5433`, and run `docker compose up -d --wait` again. The database URLs are built from the port, so nothing else needs to change. To see who holds a port: `netstat -ano | findstr :5432` (PowerShell and Command Prompt) or `lsof -i :5432` (macOS and Linux).
+
+**`role "orderpilot" does not exist`** (or `password authentication failed`). Another PostgreSQL is answering on the port, usually one installed on your machine, not the one in Docker. Our database never saw the request. Stop the other one, or give ours a free port with `POSTGRES_PORT=5433` in `.env` and run `docker compose up -d --wait` again. `docker compose ps` shows which ports our containers hold.
+
+**Changed `.env` and nothing moved.** A variable set in your shell wins over the file, and the API never overrides it. Check with `echo $POSTGRES_PORT` (PowerShell: `$env:POSTGRES_PORT`), and unset it. Then run `docker compose up -d --wait` so the containers pick up the new ports.
+
+**The first `docker compose up` takes minutes.** It compiles MinIO from its source once. Later starts use the cached image.
+
+**Start again from nothing.** `docker compose down` stops and removes the containers and keeps your data. Removing the data too (`docker compose down -v`) deletes the volumes: ask first, and know that it cannot be undone.
+
 ## What later stories bring
 
-| Step                                                              | Story |
-| ----------------------------------------------------------------- | ----- |
-| PostgreSQL, Redis and MinIO in Docker, with the ports from `.env` | P-9   |
-| The full stack with `docker compose up --build`                   | P-13  |
-| End-to-end tests with Playwright and axe                          | P-14  |
+| Step                                            | Story |
+| ----------------------------------------------- | ----- |
+| The full stack with `docker compose up --build` | P-13  |
+| End-to-end tests with Playwright and axe        | P-14  |

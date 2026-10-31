@@ -8,8 +8,8 @@ export interface Page<T> {
 
 /**
  * What a service may ask of a data source. Services depend on this, never on
- * Prisma: P-9 adds repositories that implement it, and the only place Prisma
- * is called is inside them.
+ * Prisma: repositories implement it, and the only place Prisma is called is
+ * inside them.
  */
 export interface Repository<TEntity, TId> {
   findById(id: TId): Promise<TEntity | null>;
