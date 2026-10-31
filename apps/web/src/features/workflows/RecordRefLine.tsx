@@ -11,9 +11,13 @@ export function RecordRefLine({ value }: { value: RecordRef }) {
       </span>
       <span className="text-sm text-muted-foreground">
         {t("task.navision")}:{" "}
-        <span data-numeric className="font-mono">
-          {value.navisionNo ?? t("task.navisionNone")}
-        </span>
+        {value.navisionNo ? (
+          <span data-numeric className="font-mono">
+            {value.navisionNo}
+          </span>
+        ) : (
+          t("task.navisionNone")
+        )}
       </span>
     </span>
   );

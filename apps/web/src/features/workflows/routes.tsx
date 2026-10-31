@@ -25,6 +25,6 @@ function page(
 /** The pages below /workflows. The inbox is the feature's own index page. */
 export const workflowRoutes: RouteObject[] = [
   page("reminders", RemindersPage, "workflows:nav.reminders"),
-  page("orders/:orderNo", OrderStepsPage, "workflows:order.stepsHeading"),
-  page("sprs/:recordNo", SprApprovalPage, "workflows:spr.summaryHeading"),
+  page("orders/:orderNo", OrderStepsPage, "workflows:order.crumb"),
+  page("sprs/:recordNo", SprApprovalPage, "workflows:spr.crumb"),
 ];

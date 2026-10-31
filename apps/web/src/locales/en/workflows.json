@@ -44,7 +44,7 @@
     "order": "Order",
     "request": "Request",
     "navision": "Navision",
-    "navisionNone": "Not in Navision yet",
+    "navisionNone": "none yet",
     "openOrder": "Open order",
     "openRequest": "Open request",
     "kinds": {
@@ -109,7 +109,8 @@
     "by": "{{name}}",
     "notFoundTitle": "This order is not in the sample data",
     "notFoundDescription": "Check the order number, or go back to the task inbox.",
-    "backToInbox": "Back to the task inbox"
+    "backToInbox": "Back to the task inbox",
+    "crumb": "Order"
   },
   "payment": {
     "heading": "Payment",
@@ -141,7 +142,7 @@
     "heading": "Stock purchase request {{recordNo}}",
     "description": "Requested by {{name}} on {{date}} for {{orderNo}}.",
     "navision": "Navision number",
-    "navisionNone": "Not in Navision yet",
+    "navisionNone": "none yet",
     "ourNumber": "OrderPilot number",
     "summaryHeading": "The request",
     "vendor": "Vendor",
@@ -195,6 +196,7 @@
     "readOnly": "Your role can read this request but not decide it.",
     "resultTitle": "{{outcome}} was checked",
     "notFoundTitle": "This request is not in the sample data",
-    "notFoundDescription": "Check the number, or go back to the task inbox."
+    "notFoundDescription": "Check the number, or go back to the task inbox.",
+    "crumb": "Stock purchase request"
   }
 }

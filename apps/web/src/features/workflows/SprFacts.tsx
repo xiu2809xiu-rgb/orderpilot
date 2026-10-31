@@ -7,7 +7,7 @@ function Fact({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div>
       <dt className="text-sm text-muted-foreground">{label}</dt>
-      <dd data-numeric className="font-medium">
+      <dd data-numeric className="break-words font-medium">
         {children}
       </dd>
     </div>

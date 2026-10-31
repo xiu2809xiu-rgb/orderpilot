@@ -67,7 +67,7 @@ describe("the task inbox", () => {
       await screen.findByText("Approve or reject the stock purchase request"),
     ).toBeInTheDocument();
     expect(screen.getByText("SPR-20261102-0002")).toBeInTheDocument();
-    expect(screen.getByText(/Not in Navision yet/)).toBeInTheDocument();
+    expect(screen.getByText(/none yet/)).toBeInTheDocument();
     expect(screen.getByText("Mock")).toBeInTheDocument();
     expect(screen.getByText("Synthetic demo data")).toBeInTheDocument();
     expect(screen.getByText("Overdue")).toBeInTheDocument();

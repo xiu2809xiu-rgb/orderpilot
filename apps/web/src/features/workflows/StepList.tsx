@@ -57,10 +57,16 @@ export function StepList({ steps }: { steps: readonly OrderStep[] }) {
                 {t("order.owner", {
                   role: t(`roles.${step.ownerRole}`, { ns: "common" }),
                 })}
-                {" · "}
-                {step.completedAt
-                  ? t("order.doneOn", { date: formatDate(step.completedAt) })
-                  : t("task.dueOn", { date: formatDate(step.dueAt ?? "") })}
+                {step.state === "skipped" ? null : (
+                  <>
+                    {" · "}
+                    {step.completedAt
+                      ? t("order.doneOn", {
+                          date: formatDate(step.completedAt),
+                        })
+                      : t("task.dueOn", { date: formatDate(step.dueAt ?? "") })}
+                  </>
+                )}
               </p>
             </div>
           </li>

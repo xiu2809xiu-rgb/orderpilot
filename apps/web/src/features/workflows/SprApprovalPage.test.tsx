@@ -105,7 +105,7 @@ describe("the SPR approval page", () => {
       ),
     ).toBeInTheDocument();
     expect(screen.getByText("SPR-20261102-0001")).toBeInTheDocument();
-    expect(screen.getByText(/Not in Navision yet/)).toBeInTheDocument();
+    expect(screen.getByText(/none yet/)).toBeInTheDocument();
     expect(
       screen.getByText("Shortfall (suggested quantity)"),
     ).toBeInTheDocument();

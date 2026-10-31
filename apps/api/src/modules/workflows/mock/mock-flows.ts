@@ -58,6 +58,13 @@ export function stepDueDate(order: SampleOrder, key: string): string {
   return addDays(order.header.orderDate, MOCK_STEP_DUE_DAYS[key] ?? 0);
 }
 
+/** A done step was done on its due date, but never after "now" and never before the order. */
+function doneOn(orderDate: string, due: string): string {
+  const today = MOCK_NOW.toISOString().slice(0, 10);
+  const day = due > today ? today : due;
+  return day < orderDate ? orderDate : day;
+}
+
 function linesTotal(order: SampleOrder): string {
   return order.lines.reduce(
     (sum, line) => addDecimal(sum, line.lineAmount),
@@ -90,12 +97,7 @@ function stepsOf(order: SampleOrder): OrderStep[] {
       optional: step.optional,
       dueAt,
       completedAt:
-        state === "done"
-          ? isoAt(
-              due < order.header.orderDate ? order.header.orderDate : due,
-              8,
-            )
-          : null,
+        state === "done" ? isoAt(doneOn(order.header.orderDate, due), 8) : null,
       overdue: state === "current" && new Date(dueAt) < MOCK_NOW,
     };
   });
