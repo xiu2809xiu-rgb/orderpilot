@@ -5,7 +5,7 @@
 @baseUrl = http://localhost:3000
 @csrf = paste the op_csrf cookie value here after signing in
 
-### The caller's own task inbox (a role with an inbox). Add ?overdue=true for overdue only.
+### The caller's own task inbox (a role with an inbox). Filter with ?overdue=true, ?priority=high or ?kind=CONFIRM_PAYMENT.
 GET {{baseUrl}}/api/v1/workflows/tasks?page=1&pageSize=25
 
 ### Another role's inbox. Needs workflows.inboxes.any (Management and Auditor).
@@ -16,7 +16,7 @@ GET {{baseUrl}}/api/v1/workflows/reminders
 ###
 GET {{baseUrl}}/api/v1/workflows/inboxes/LOGISTICS/reminders
 
-### An order's steps, timeline and payment. Sample orders are SO-0001 to SO-0010.
+### An order's steps, timeline and payment. Sample orders are SO-0001 to SO-0120 and are dated from today.
 GET {{baseUrl}}/api/v1/workflows/orders/SO-0004/flow
 
 ### Confirm a payment with its type. Finance only. Checked, not stored.

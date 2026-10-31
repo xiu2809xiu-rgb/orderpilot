@@ -1076,6 +1076,25 @@
       ]
     },
     {
+      "key": "P-41",
+      "title": "Synthetic data polish",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "could",
+      "estimate": 3,
+      "reqs": ["M3"],
+      "branch": "chore/synthetic-data-polish",
+      "sprints": [3],
+      "dependsOn": ["P-31"],
+      "summary": "Follow-ups to the bigger synthetic set that nobody needs this week.",
+      "acceptance": [
+        "The order, payment, document, SPR and exception rows load into area 1 and area 2 tables (P-18 and the C-2 tables), so the seed writes them as well as the mock read models reading them.",
+        "A rejected SPR and a partly shipped order appear in the set, with the screens that show them.",
+        "The seed keeps the dates of the day it first ran: a second run on a later day moves the stored rows to today, with a test.",
+        "A documents list route and a customers and items route read the set, with paging and filters on the server."
+      ]
+    },
+    {
       "key": "T-1",
       "title": "Owners, backups and reviews",
       "epic": "T",

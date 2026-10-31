@@ -104,10 +104,11 @@ describe("the tracker over mock data", () => {
 });
 
 describe("the tracker over the bigger set", () => {
-  it("lists the newest orders first and pages through all 120", async () => {
+  it("lists late orders first, then the newest, and pages through all 120", async () => {
     const first = await tracker.list({ page: 1, pageSize: 50 });
-    const dates = first.items.map((o) => o.orderDate);
-    expect(dates).toEqual([...dates].sort().reverse());
+    expect(first.items[0]?.overdue.overdue).toBe(true);
+    const days = first.items.map((o) => o.overdue.daysOverdue);
+    expect(days).toEqual([...days].sort((a, b) => b - a));
     const seen = new Set<string>();
     for (let page = 1; page <= 3; page++) {
       const rows = await tracker.list({ page, pageSize: 50 });

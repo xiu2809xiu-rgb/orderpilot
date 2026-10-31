@@ -99,9 +99,11 @@ export class TrackerService {
       const want = query.overdue === "true";
       rows = rows.filter((row) => row.overdue.overdue === want);
     }
-    // The newest orders first, unless the screen asks for another order.
+    // Late orders first (the most late at the top), then the newest, unless
+    // the screen asks for another order.
     rows = [...rows].sort(
       (a, b) =>
+        b.overdue.daysOverdue - a.overdue.daysOverdue ||
         b.orderDate.localeCompare(a.orderDate) ||
         b.orderNo.localeCompare(a.orderNo),
     );

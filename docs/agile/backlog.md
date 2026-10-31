@@ -2,13 +2,13 @@
 
 Rendered from [`scripts/github/data/backlog.json`](../../scripts/github/data/backlog.json) by `node scripts/github/render-docs.mjs`. Change the data, not this file. The same data seeds the issues. The board shows where each story stands.
 
-There are 9 epics and 74 stories. Estimates are story points: a first guess, for the team to change at planning.
+There are 9 epics and 75 stories. Estimates are story points: a first guess, for the team to change at planning.
 
 ## Epics
 
 | Epic   | Title                             | Area                                    | Stories | Points |
 | ------ | --------------------------------- | --------------------------------------- | ------- | ------ |
-| Epic P | The platform base                 | `area: 1 document AI and integration`   | 30      | 175    |
+| Epic P | The platform base                 | `area: 1 document AI and integration`   | 31      | 178    |
 | Epic A | Document intake and AI extraction | `area: 1 document AI and integration`   | 5       | 31     |
 | Epic B | Master data and Navision          | `area: 1 document AI and integration`   | 4       | 14     |
 | Epic C | Order workflows and approvals     | `area: 2 order workflows and approvals` | 5       | 29     |
@@ -106,6 +106,7 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | F-6   | A non-owner runtime database role                                  | should   | 3      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
 | P-23  | The 3D order constellation                                         | could    | 13     | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-27  | Web shell polish                                                   | could    | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-41  | Synthetic data polish                                              | could    | 3      | `area: 1 document AI and integration`   | M3 AI-assisted coding                                          |
 | B-4   | QR codes on generated documents and carton labels                  | could    | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | E-4   | Passkeys to confirm risky approvals                                | could    | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | E-5   | A first-run guided tour for each role                              | could    | 3      | `area: 1 document AI and integration`   | M1 design thinking, M4 best practices                          |
@@ -788,6 +789,25 @@ Acceptance criteria:
 - Thresholds fail the run on a high error rate or a slow 95th percentile, with the numbers written down in docs/agile/test-plan.md.
 - It runs against the Docker stack with one documented command, and its result is recorded in the build report.
 - It is not a required check: it runs on demand or on a schedule, so a slow runner cannot block a merge.
+
+### P-41: Synthetic data polish
+
+Follow-ups to the bigger synthetic set that nobody needs this week.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** could
+- **Estimate:** 3 points
+- **Requirements:** M3 AI-assisted coding
+- **Branch:** `chore/synthetic-data-polish`
+- **Planned for:** Sprint 03 (W4)
+- **Depends on:** P-31
+
+Acceptance criteria:
+
+- The order, payment, document, SPR and exception rows load into area 1 and area 2 tables (P-18 and the C-2 tables), so the seed writes them as well as the mock read models reading them.
+- A rejected SPR and a partly shipped order appear in the set, with the screens that show them.
+- The seed keeps the dates of the day it first ran: a second run on a later day moves the stored rows to today, with a test.
+- A documents list route and a customers and items route read the set, with paging and filters on the server.
 
 ## Epic A: Document intake and AI extraction
 
