@@ -1,4 +1,4 @@
-# ADR 0024: The area 2 base, ports and mocks
+# ADR 0026: The area 2 base, ports and mocks
 
 - **Status:** Accepted
 - **Date:** 2026-11-01
