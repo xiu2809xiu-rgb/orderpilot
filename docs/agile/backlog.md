@@ -2,7 +2,7 @@
 
 Rendered from [`scripts/github/data/backlog.json`](../../scripts/github/data/backlog.json) by `node scripts/github/render-docs.mjs`. Change the data, not this file. The same data seeds the issues. The board shows where each story stands.
 
-There are 9 epics and 65 stories. Estimates are story points: a first guess, for the team to change at planning.
+There are 9 epics and 67 stories. Estimates are story points: a first guess, for the team to change at planning.
 
 ## Epics
 
@@ -14,7 +14,7 @@ There are 9 epics and 65 stories. Estimates are story points: a first guess, for
 | Epic C | Order workflows and approvals     | `area: 2 order workflows and approvals` | 4       | 26     |
 | Epic D | Checks, the tracker and insights  | `area: 3 checks tracker and insights`   | 4       | 23     |
 | Epic E | AI with a person in the loop      | `area: 1 document AI and integration`   | 6       | 29     |
-| Epic F | Financial controls and governance | `area: 4 controls and monitoring`       | 5       | 24     |
+| Epic F | Financial controls and governance | `area: 4 controls and monitoring`       | 7       | 32     |
 | Epic G | Monitoring                        | `area: 4 controls and monitoring`       | 1       | 8      |
 | Epic T | Team stories                      | `area: team`                            | 9       | 36     |
 
@@ -99,12 +99,14 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | B-2   | A Navision-ready import file                                       | should   | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | B-3   | The template engine for PIs, invoices, packing lists and Excel     | should   | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | E-3   | Prompt-injection tests                                             | should   | 3      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| F-6   | A non-owner runtime database role                                  | should   | 3      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
 | P-23  | The 3D order constellation                                         | could    | 13     | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-27  | Web shell polish                                                   | could    | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | B-4   | QR codes on generated documents and carton labels                  | could    | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | E-4   | Passkeys to confirm risky approvals                                | could    | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | E-5   | A first-run guided tour for each role                              | could    | 3      | `area: 1 document AI and integration`   | M1 design thinking, M4 best practices                          |
 | E-6   | An "Ask OrderPilot" help panel that answers from our docs          | could    | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M3 AI-assisted coding                        |
+| F-7   | Session hardening                                                  | could    | 5      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
 
 ## Epic P: The platform base
 
@@ -1277,6 +1279,43 @@ Acceptance criteria:
 - The bank details are synthetic and obviously fake.
 - It is the check behind E2E #4: a vendor PI with changed bank details holds the payment.
 - Tests cover matching details, each field differing on its own, a clearance by one person alone, and a clearance by the person who made the change, replacing F-1's `it.todo` cases for the bank-detail hold.
+
+### F-6: A non-owner runtime database role
+
+The API connects as the owner of its tables, and a table owner or a superuser can switch off the audit trail's append-only trigger (ADR 0010). A runtime role that owns nothing closes that door.
+
+- **Area:** `area: 4 controls and monitoring`
+- **Priority:** should
+- **Estimate:** 3 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Planned for:** Sprint 03 (W4)
+- **Depends on:** P-10
+
+Acceptance criteria:
+
+- Migrations run as an owner role; the API runs as a second role that can read and write the tables but cannot alter them, disable triggers or truncate.
+- The role is created by a migration or the compose set-up, with its password in `.env.example` for laptops and a required secret in production.
+- An integration test connects as the runtime role and shows that `ALTER TABLE ... DISABLE TRIGGER` and `TRUNCATE` on the audit table are refused, and that the API still passes its tests.
+- The test harness keeps its own owner connection for resets, and says so.
+
+### F-7: Session hardening
+
+Follow-ups to ADR 0012 that nobody needs this week: they make long-lived sessions and production set-up safer.
+
+- **Area:** `area: 4 controls and monitoring`
+- **Priority:** could
+- **Estimate:** 5 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Planned for:** Sprint 04 (W5)
+- **Depends on:** P-10
+
+Acceptance criteria:
+
+- A short grace window for the previous refresh token, so two browser tabs that refresh at the same moment do not end the sign-in as a reuse; the window is audited and off by default in production.
+- An absolute lifetime for a sign-in (for example 30 days) on top of the sliding refresh, and a "sign out everywhere" action that revokes every family of one user.
+- The sign-in rate limit keeps its counters in Redis, so it holds with more than one API process, and also limits by account as well as by address.
+- A one-time command creates the first real administrator in production, where the seeded accounts have no password, and audits it.
+- The JWT secret can be rotated with an overlap, so a change does not sign everyone out.
 
 ## Epic G: Monitoring
 
