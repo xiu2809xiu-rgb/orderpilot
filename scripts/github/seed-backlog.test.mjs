@@ -38,7 +38,7 @@ const issue = (overrides = {}) => ({
 
 test("wanted items start with the epics, so that parents exist first", () => {
   const items = wantedItems(loadBacklog(), loadLabels());
-  assert.equal(items.length, 72);
+  assert.equal(items.length, 73);
   assert.equal(items[0].title, "Epic P: The platform base");
   assert.equal(items[0].parentKey, null);
   assert.ok(items.slice(0, 9).every((item) => item.key.startsWith("Epic ")));

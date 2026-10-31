@@ -4,7 +4,7 @@ Everyone on the team follows this guide, whichever tools they use. [CLAUDE.md](C
 
 ## Set-up
 
-There is no app yet, so set-up is short. Each later story adds its own steps here when it merges. These steps work on Windows (in Git Bash or PowerShell) and on macOS.
+Set-up is short. Each story adds its own steps here when it merges. These steps work on Windows (in Git Bash or PowerShell) and on macOS.
 
 ### What works today
 
@@ -49,6 +49,26 @@ There is no app yet, so set-up is short. Each later story adds its own steps her
 6. Read [CLAUDE.md](CLAUDE.md), [AGENTS.md](AGENTS.md) and the [working agreement](docs/agile/working-agreement.md).
 
 Line endings need no set-up. [`.gitattributes`](.gitattributes) keeps text files LF on every machine, even with `core.autocrlf` on.
+
+### Running the API
+
+The API needs one setting before it starts, so copy the example file. One `.env` at the repository root is enough:
+
+```sh
+cp .env.example .env        # PowerShell: Copy-Item .env.example .env
+pnpm build                  # once: the API runs against the built @orderpilot/shared
+pnpm --filter @orderpilot/api dev
+```
+
+`pnpm dev` rebuilds and restarts when you save a file. To run the built output instead, use `pnpm --filter @orderpilot/api start`.
+
+Then try:
+
+- <http://localhost:3000/health> and <http://localhost:3000/health/ready>;
+- <http://localhost:3000/api/docs>, the Swagger page for "OrderPilot API";
+- the `.http` files in [`apps/api/requests`](apps/api/requests), in VS Code (REST Client) or a JetBrains IDE.
+
+The API reads `apps/api/.env`, then the root `.env`, and never overrides a variable your shell, CI or Docker already set. If something required is missing, it stops and names the file to create. To change the port for one run: `API_PORT=3100 pnpm --filter @orderpilot/api dev` (PowerShell: `$env:API_PORT=3100` first). The layers and patterns are in [docs/architecture](docs/architecture/README.md). There is no database yet: PostgreSQL, Redis and MinIO arrive with P-9.
 
 ### Run the web app
 
@@ -106,12 +126,12 @@ If a hook stops you, it says why and what to do. When it refuses a push to `main
 
 ### What later stories bring
 
-| Step                                                               | Story |
-| ------------------------------------------------------------------ | ----- |
-| `cp .env.example .env`, then PostgreSQL, Redis and MinIO in Docker | P-9   |
-| The full stack with `docker compose up --build`                    | P-13  |
-| End-to-end tests with Playwright and axe                           | P-14  |
-| The troubleshooting guide: ports in use, PostgreSQL and Docker     | P-9   |
+| Step                                                              | Story |
+| ----------------------------------------------------------------- | ----- |
+| PostgreSQL, Redis and MinIO in Docker, with the ports from `.env` | P-9   |
+| The full stack with `docker compose up --build`                   | P-13  |
+| End-to-end tests with Playwright and axe                          | P-14  |
+| The troubleshooting guide: ports in use, PostgreSQL and Docker    | P-9   |
 
 ## Workflow
 
@@ -130,7 +150,7 @@ The full version is in [the path from a story to main](AGENTS.md#the-path-from-a
    Use `feat/<area>-…`, `fix/…`, `docs/…`, `chore/…`, `ci/…` or `test/…`. For example: `feat/area2-payment-gate`.
 
 3. **Commit small, with [Conventional Commits](https://www.conventionalcommits.org/).** The types are `feat`, `fix`, `docs`, `chore`, `ci`, `test`, `refactor`, `style`, `perf` and `build`. For example: `feat(api): add the health endpoints`.
-4. **Bring the story's own pieces:** its models and migration, tests, `.env.example` entries and `.http` request files, an ADR if it made a decision, rows in the traceability matrix and `docs/architecture/patterns.md`, and one row in the [AI usage log](docs/ai/ai-usage-log.md). The matrix arrives in P-3 and the patterns file in P-8.
+4. **Bring the story's own pieces:** its models and migration, tests, `.env.example` entries and `.http` request files, an ADR if it made a decision, rows in the traceability matrix and `docs/architecture/patterns.md`, and one row in the [AI usage log](docs/ai/ai-usage-log.md). The matrix is [docs/requirements-traceability.md](docs/requirements-traceability.md) and the patterns file is [docs/architecture/patterns.md](docs/architecture/patterns.md).
 5. **Open one pull request** from the [template](.github/PULL_REQUEST_TEMPLATE.md), with `Closes #N`. It covers:
    - what and why;
    - the acceptance criteria with evidence;

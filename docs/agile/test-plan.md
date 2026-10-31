@@ -9,13 +9,13 @@ How OrderPilot is tested: the levels, the environments, the data, and the failur
 | Level           | What it covers                                                          | Tool                        | Where the tests live                        | Status                                 |
 | --------------- | ----------------------------------------------------------------------- | --------------------------- | ------------------------------------------- | -------------------------------------- |
 | Repository      | The guards, the Git hooks and the shared ESLint config                  | `node --test`               | `scripts/**/*.test.mjs`, `packages/*/test/` | Today (P-5)                            |
-| Unit            | Domain classes and rules, at 80% or more coverage of domain logic       | Vitest                      | Next to the code, as `*.test.ts`            | Planned: P-8                           |
+| Unit            | Domain classes and rules, at 80% or more coverage of domain logic       | Vitest                      | Next to the code, as `*.test.ts`            | Today (P-8)                            |
 | API integration | Every endpoint, with 401, 403 and validation cases, and the audit entry | Vitest                      | `apps/api/test/`                            | Planned: P-10, with its harness in P-9 |
 | Component       | Each component in each of its states                                    | Vitest with Testing Library | Next to the component                       | Planned: P-11                          |
 | Contract        | Each connector against the mock Navision                                | Vitest                      | Next to the connector                       | Planned: P-20                          |
 | End-to-end      | The smoke test, then E2E #1 to #4, with WCAG 2.2 AA checked by axe      | Playwright with axe         | Decided by P-14                             | Planned: P-14                          |
 | Load            | The extraction queue and the order endpoints, as a smoke load           | k6                          | To be decided by its story                  | Planned, not yet in a story            |
-| Manual requests | Each endpoint by hand, for reviews and demos                            | `.http` files               | `apps/api/requests/`                        | Planned: P-8                           |
+| Manual requests | Each endpoint by hand, for reviews and demos                            | `.http` files               | `apps/api/requests/`                        | Today (P-8)                            |
 | Security        | Code, secrets, dependencies, then images and the live URL               | See security testing        | `.github/workflows/`                        | Today (P-6); Trivy P-13, ZAP P-24      |
 
 `pnpm test` at the root runs every level that exists, and the verify job in CI runs it on every pull request. [Security testing](../security/security-testing.md) covers the security scans.
@@ -112,14 +112,14 @@ Each row is a case some test must cover. The story is the one that brings the te
 | F8  | Someone updates or deletes an audit event, directly in the database          | The trigger refuses it                                                           | Integration       | Planned: P-9          |
 | F9  | An audit event is altered outside the app                                    | Verifying the hash chain shows exactly where it breaks                           | Unit, integration | Planned: P-9, F-2     |
 | F10 | Segregation of duties: one person in two conflicting steps of one order      | Refused, and audited                                                             | Unit              | Planned: F-1 (area 4) |
-| F11 | Every request                                                                | One JSON log line, cookies redacted, the caller's `X-Request-Id` as the trace id | Integration       | Planned: P-8, G-1     |
+| F11 | Every request                                                                | One JSON log line, cookies redacted, the caller's `X-Request-Id` as the trace id | Integration       | Today (P-8), G-1      |
 
 ### Platform and UI
 
 | #   | Case                                                                          | Expected                                                            | Level       | Status                      |
 | --- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------- | ----------- | --------------------------- |
-| P1  | A required environment variable is missing                                    | Start-up fails with a message that names the file to create         | Unit        | Planned: P-8                |
-| P2  | Any error from the API                                                        | One envelope: `{ error: { code, message, details, traceId } }`      | Integration | Planned: P-8                |
+| P1  | A required environment variable is missing                                    | Start-up fails with a message that names the file to create         | Unit        | Today (P-8)                 |
+| P2  | Any error from the API                                                        | One envelope: `{ error: { code, message, details, traceId } }`      | Integration | Today (P-8)                 |
 | P3  | A database write succeeds but the process stops before its event is published | The outbox publishes it exactly once after restart                  | Integration | Planned: P-15               |
 | P4  | A page is loading, empty, partial, failed, or not permitted                   | Each state is shown; a failure offers retry and shows the `traceId` | Component   | Planned: P-12               |
 | P5  | Every page, in light and dark                                                 | No axe violations at WCAG 2.2 AA, and full keyboard use             | End-to-end  | Planned: P-14               |

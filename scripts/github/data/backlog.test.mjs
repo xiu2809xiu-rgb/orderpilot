@@ -71,7 +71,7 @@ test("every story the brief names is here, in the expected groups", () => {
     "E-6",
   ];
   for (const key of expected) assert.ok(keys.includes(key), key);
-  assert.equal(keys.length, expected.length + 13);
+  assert.equal(keys.length, expected.length + 14);
 });
 
 test("titles and branches match the brief's headings", () => {

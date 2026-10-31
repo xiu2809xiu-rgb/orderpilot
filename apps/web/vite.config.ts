@@ -24,7 +24,7 @@ function previewHeaders(): Plugin {
 export default defineConfig(({ mode }) => {
   // Only these two names are read from the root .env, never its secrets.
   const env = loadEnv(mode, repoRoot, ["API_PORT", "WEB_PORT"]);
-  const apiTarget = `http://localhost:${env.API_PORT ?? "3000"}`;
+  const apiTarget = `http://127.0.0.1:${env.API_PORT ?? "3000"}`;
   const webPort = Number(env.WEB_PORT ?? "5173");
   const proxy = { "/api": { target: apiTarget, changeOrigin: false } };
 

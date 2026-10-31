@@ -1,0 +1,18 @@
+### Every failure has one shape: { "error": { code, message, details, traceId } }.
+@baseUrl = http://localhost:3000
+
+### 404 under /api
+GET {{baseUrl}}/api/v1/does-not-exist
+
+### 404 outside /api: the same envelope, not an HTML page
+GET {{baseUrl}}/does-not-exist
+
+### A body that is not JSON
+POST {{baseUrl}}/api/v1/system/checks
+Content-Type: application/json
+
+{bad
+
+### Swagger UI (in a browser): http://localhost:3000/api/docs
+### The OpenAPI document:
+GET {{baseUrl}}/api/docs-json

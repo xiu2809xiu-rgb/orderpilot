@@ -305,6 +305,7 @@ Acceptance criteria:
 - `/health`, `/health/live` and `/health/ready`.
 - `apps/api/requests/*.http`, Vitest, and `docs/architecture/` (README and patterns).
 - ADRs: NestJS layered modules; the observability baseline.
+- API shell polish: keep the rate-limit counters in Redis once P-9 lands (the built-in store is per process), make the body-size limit and request timeout settings, drain open requests on shutdown, open Swagger UI in a real browser under its CSP (checked with curl only so far), and generate response-shape tests from the OpenAPI document.
 
 ### P-9: Database, Redis, document storage and the local stack
 
