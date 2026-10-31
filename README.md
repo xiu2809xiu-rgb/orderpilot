@@ -10,13 +10,15 @@ OrderPilot is our product for Problem Statement #11 in the IT2134 IT Innovation 
 
 ## Status
 
-**The base is being built. There is no app to run yet.** This repository holds documents, configuration and the GitHub scripts, with no `pnpm` commands and no `docker compose` stack so far.
+**The base is being built. There is no app to run yet.** This repository holds documents, configuration and the GitHub scripts, and the `pnpm` tooling, but no app and no `docker compose` stack so far.
 
 ### What works today
 
 - **The ground rules:** this README, [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), [AGENTS.md](AGENTS.md), [CLAUDE.md](CLAUDE.md), the ADRs and the agile docs.
 - **Repository files:** LF line endings, ignore rules for secrets, samples and AI tool folders, and the Node version.
 - **GitHub as code:** issue forms, the pull request template, labels, the sprint milestones, the backlog, the board and the wiki, all kept as code in [`.github/`](.github/) and [`scripts/github/`](scripts/github/README.md), and a sprint recorder that files each finished story under its sprint.
+- **The workspace and its checks:** `pnpm install`, then `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm build`, with Git hooks that check every commit and refuse a push to `main`. See [CONTRIBUTING.md](CONTRIBUTING.md).
+- **CI and security scans:** the verify job, Semgrep, gitleaks and OSV run on every pull request and are required. See [security testing](docs/security/security-testing.md).
 - **GitHub protection on `main`:** the `Protect main` ruleset, secret scanning with push protection, Dependabot alerts and security updates, and private vulnerability reporting.
 
 ### What later stories bring
@@ -24,7 +26,6 @@ OrderPilot is our product for Problem Statement #11 in the IT2134 IT Innovation 
 | Stories                 | What they bring                                                                                     |
 | ----------------------- | --------------------------------------------------------------------------------------------------- |
 | P-3, P-4                | The problem statement, research, client questions, and a guide for each area                        |
-| P-5, P-6                | The pnpm workspace, `pnpm` commands, Git hooks, CI and security scans                               |
 | P-7 to P-16             | The app: shared contracts, API, database, sign-in, web shell, Docker images, events and diagrams    |
 | P-17 to P-21            | The core of area 1: the AI gateway, document intake, mock Navision, connectors, synthetic documents |
 | C-1, D-1, F-1, F-2, G-1 | A head start for areas 2, 3 and 4                                                                   |

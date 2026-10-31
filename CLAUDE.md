@@ -179,12 +179,12 @@ Each row says whether it exists today or which story brings it. Everything marke
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------ |
 | Runtime                 | Node 24.22.0, set in `.node-version`                                                                                                                                     | Today                                |
 | GitHub scripts          | `scripts/github/`: plain Node ESM with no dependencies, calling GitHub through `gh api`, tested with `node --test` ([ADR 0016](docs/adr/0016-github-process-as-code.md)) | Today                                |
-| Workspace               | pnpm workspace (`apps/*`, `services/*`, `packages/*`) with root scripts                                                                                                  | Planned: P-5                         |
-| Language                | TypeScript, strict, ESM, from `packages/tsconfig`                                                                                                                        | Planned: P-5                         |
-| Lint and format         | ESLint flat config from `packages/eslint-config` (type-aware, with jsx-a11y, failing on any warning), Prettier and commitlint (config-conventional)                      | Planned: P-5                         |
-| Git hooks               | Commit message: commitlint. Pre-commit: licence-key guard, samples guard, secretlint, em-dash check and lint-staged. Pre-push: samples guard on every commit             | Planned: P-5                         |
-| Dependency updates      | Dependabot for npm and Actions, weekly on Monday 06:00 Singapore time, a 7-day cooldown, grouped                                                                         | Planned: P-5                         |
-| CI and scans            | GitHub Actions: `ci.yml` (verify) and `security.yml` (Semgrep, gitleaks, OSV), then Trivy                                                                                | Planned: P-6, P-13                   |
+| Workspace               | pnpm workspace (`apps/*`, `services/*`, `packages/*`) with root scripts                                                                                                  | Today                                |
+| Language                | TypeScript, strict, ESM, from `packages/tsconfig`                                                                                                                        | Today                                |
+| Lint and format         | ESLint flat config from `packages/eslint-config` (type-aware, with jsx-a11y, failing on any warning), Prettier and commitlint (config-conventional)                      | Today                                |
+| Git hooks               | Commit message: commitlint. Pre-commit: licence-key guard, samples guard, secretlint, em-dash check and lint-staged. Pre-push: samples guard on every commit             | Today                                |
+| Dependency updates      | Dependabot for npm and Actions, weekly on Monday 06:00 Singapore time, a 7-day cooldown, grouped                                                                         | Today                                |
+| CI and scans            | GitHub Actions: `ci.yml` (verify) and `security.yml` (Semgrep, gitleaks, OSV), then Trivy (P-13)                                                                         | Today (P-6), P-13                    |
 | Shared contracts        | `packages/shared`: zod schemas and types                                                                                                                                 | Planned: P-7                         |
 | API                     | NestJS in layers, with Swagger "OrderPilot API" at `/api/docs`                                                                                                           | Planned: P-8                         |
 | Logging                 | pino with correlation ids                                                                                                                                                | Planned: P-8                         |
@@ -212,23 +212,23 @@ Each row says whether it exists today or which story brings it. Everything marke
 
 ## 3. Repository layout
 
-| Path                           | Holds                                                                                                                   | Status             |
-| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------- | ------------------ |
-| `apps/api`                     | The NestJS API, with a worker entry                                                                                     | Planned: P-8, P-13 |
-| `apps/web`                     | The web app                                                                                                             | Planned: P-11      |
-| `services/mock-navision`       | The mock of Navision                                                                                                    | Planned: P-19      |
-| `packages/tsconfig`            | The strict TypeScript config                                                                                            | Planned: P-5       |
-| `packages/eslint-config`       | The flat, type-aware ESLint config                                                                                      | Planned: P-5       |
-| `packages/shared`              | Shared zod schemas and types: envelopes, error codes, roles, permissions, and the order and event contract              | Planned: P-7       |
-| `packages/synthetic-data`      | The seeded generator and synthetic master data                                                                          | Planned: P-19      |
-| `packages/synthetic-documents` | Generated PDFs with planted mistakes and ground truth                                                                   | Planned: P-21      |
-| `scripts/`                     | Repository checks and build scripts, beside `scripts/github/`                                                           | Planned: P-5, P-16 |
-| `scripts/github/`              | Idempotent scripts for labels, the sprint calendar, the board, the backlog and the wiki                                 | Today              |
-| `docs/`                        | All documentation. Today: `adr/`, `agile/`, `ai/`, `wiki/` and `BUILD_REPORT.md`. Later stories add the rest            | Today, growing     |
-| `samples/`                     | Client samples tried on one machine. Git-ignored except its README. The ignore rule exists; the README arrives with P-5 | Today (rule), P-5  |
-| `assets-src/3d/`               | Parametric Blender scripts                                                                                              | Planned: P-23      |
-| `infra/deploy/`                | The server bootstrap, Caddy, `docker-compose.prod.yml` and backups                                                      | Planned: P-24      |
-| `.github/`                     | Issue forms, the pull request template, `CODEOWNERS`, `labels.json`, `rulesets/main.json` and workflows                 | Today, CI in P-6   |
+| Path                           | Holds                                                                                                        | Status             |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------ | ------------------ |
+| `apps/api`                     | The NestJS API, with a worker entry                                                                          | Planned: P-8, P-13 |
+| `apps/web`                     | The web app                                                                                                  | Planned: P-11      |
+| `services/mock-navision`       | The mock of Navision                                                                                         | Planned: P-19      |
+| `packages/tsconfig`            | The strict TypeScript config                                                                                 | Today              |
+| `packages/eslint-config`       | The flat, type-aware ESLint config                                                                           | Today              |
+| `packages/shared`              | Shared zod schemas and types: envelopes, error codes, roles, permissions, and the order and event contract   | Planned: P-7       |
+| `packages/synthetic-data`      | The seeded generator and synthetic master data                                                               | Planned: P-19      |
+| `packages/synthetic-documents` | Generated PDFs with planted mistakes and ground truth                                                        | Planned: P-21      |
+| `scripts/`                     | Repository checks and build scripts, beside `scripts/github/`                                                | Today, P-16        |
+| `scripts/github/`              | Idempotent scripts for labels, the sprint calendar, the board, the backlog and the wiki                      | Today              |
+| `docs/`                        | All documentation. Today: `adr/`, `agile/`, `ai/`, `wiki/` and `BUILD_REPORT.md`. Later stories add the rest | Today, growing     |
+| `samples/`                     | Client samples tried on one machine. Git-ignored except its README. The ignore rule and the README exist     | Today              |
+| `assets-src/3d/`               | Parametric Blender scripts                                                                                   | Planned: P-23      |
+| `infra/deploy/`                | The server bootstrap, Caddy, `docker-compose.prod.yml` and backups                                           | Planned: P-24      |
+| `.github/`                     | Issue forms, the pull request template, `CODEOWNERS`, `labels.json`, `rulesets/main.json` and workflows      | Today              |
 
 Today's root files are `README.md`, `CONTRIBUTING.md`, `SECURITY.md`, `AGENTS.md`, `CLAUDE.md`, `.claude/settings.json`, `.editorconfig`, `.gitattributes`, `.gitignore` and `.node-version`.
 
@@ -256,7 +256,7 @@ The API is NestJS, in layers (planned: P-8). Controllers call services, and serv
 
 - TypeScript in strict mode, as ESM.
 - **No `any`.** Use `unknown` and narrow it with a zod schema or a type guard.
-- Lint runs with no warnings allowed (planned: P-5).
+- Lint runs with no warnings allowed (`eslint --max-warnings 0`).
 
 ### Validation at boundaries
 
@@ -294,8 +294,8 @@ The API is NestJS, in layers (planned: P-8). Controllers call services, and serv
 - **Uploads (planned: P-18):** PDF, PNG, JPEG, XLSX and CSV only, with size limits, type sniffing and a zip-bomb guard. Nothing executable is accepted.
 - **AI (planned: P-17):** documents are treated as data, the model only returns fields, and no model output triggers an action. Area 4's policy decides what data may go to which provider, and the default is synthetic data only.
 - **Keys:** licence keys live only in `apps/web/.env.local`, and AI keys only in the root `.env`. Richie puts them there himself. Never print, echo or ask for a key in chat.
-- **Client samples:** `samples/*` is ignored today. P-5 adds the guards, and P-13 adds a throwaway stack that only this machine can reach, deleted afterwards.
-- **Supply chain (planned: P-5, P-6):** exact version pins; `minimumReleaseAge`; reviewed `allowBuilds`; overrides and ignored advisories, each with a reason and a review date; actions pinned to commit SHAs; least-privilege `permissions`.
+- **Client samples:** `samples/*` is ignored today. The pre-commit and pre-push hooks guard them, and P-13 adds a throwaway stack that only this machine can reach, deleted afterwards.
+- **Supply chain:** exact version pins; `minimumReleaseAge`; reviewed `allowBuilds`; overrides and ignored advisories, each with a reason and a review date; actions pinned to commit SHAs; least-privilege `permissions`.
 - **Claims:** never claim the prototype is PDPA compliant.
 
 ## 6. Performance
@@ -312,7 +312,7 @@ The API is NestJS, in layers (planned: P-8). Controllers call services, and serv
 | Level           | What it covers                                                    | Tool                | Status                                 |
 | --------------- | ----------------------------------------------------------------- | ------------------- | -------------------------------------- |
 | Unit            | Domain logic, at 80% or more                                      | Vitest              | Planned: P-8                           |
-| Scripts         | The pure logic of `scripts/github/`, against a simulated GitHub   | `node --test`       | Today; P-5 adds it to `pnpm test`      |
+| Scripts         | The pure logic of `scripts/github/`, against a simulated GitHub   | `node --test`       | Today, in `pnpm test`                  |
 | API integration | Every endpoint, with 401, 403 and validation cases                | Vitest              | Planned: P-10, with its harness in P-9 |
 | Component       | Components in each of their states                                | Testing Library     | Planned: P-11                          |
 | Contract        | Connectors against the mock                                       | Vitest              | Planned: P-20                          |
@@ -324,7 +324,7 @@ The API is NestJS, in layers (planned: P-8). Controllers call services, and serv
 - 100% of workflow tests pass. A failing test is fixed or reported, never skipped to get a green run.
 - A safety test counts only after you have seen it fail against deliberately broken code.
 - Area bases ship test skeletons as `it.todo` with the key cases named. Their owners fill them in.
-- `docs/agile/test-plan.md` holds the test levels, environments, data, and the failure and edge-case matrix (planned: P-6).
+- `docs/agile/test-plan.md` holds the test levels, environments, data, and the failure and edge-case matrix (P-6).
 
 ## 8. UI rules
 
@@ -378,7 +378,7 @@ Planned with P-11:
    - rows in the traceability matrix and `docs/architecture/patterns.md`;
    - one row in the AI usage log.
 5. **No AI attribution anywhere.** No Co-Authored-By trailers for AI, no "Generated with" lines, and no AI emojis or session links in commits, pull requests, comments or docs. `.claude/settings.json`, as Richie placed it, turns attribution off.
-6. **No em dashes** in any file, commit, pull request or UI text. Use a hyphen, a colon or a new sentence. P-5 adds a check that enforces this.
+6. **No em dashes** in any file, commit, pull request or UI text. Use a hyphen, a colon or a new sentence. `pnpm check:dashes` and the hooks enforce this.
 7. **Data and secrets:**
    - Synthetic data only.
    - Licence keys live only in `apps/web/.env.local`, and AI keys only in the root `.env`. Richie puts them there himself.
@@ -390,7 +390,7 @@ Planned with P-11:
 ### The main branch
 
 - The `Protect main` ruleset blocks deletion and force pushes, and requires a pull request: 0 approvals for now, stale reviews dismissed, review threads resolved, merge commits or squash. Repository admins can bypass it in pull request mode only. [`.github/rulesets/main.json`](.github/rulesets/main.json) mirrors it, and `scripts/github/check-ruleset.mjs` says if the two drift apart.
-- It has no required checks yet. P-6, P-13 and P-14 add theirs, and a required check's name stays fixed once it is required.
+- Four checks are required: `Lint, typecheck, test, build`, `SAST (Semgrep)`, `Secret scan (gitleaks)` and `Dependency scan (OSV)`. P-13 and P-14 add theirs, and a required check's name stays fixed once it is required.
 - One approving review plus code-owner review is switched on at T-9, only on Richie's yes.
 - Never force push and never commit straight to `main`.
 - Release tags are `v0.1-proposal`, `v0.2-technical-review` and `v1.0-final`, each after a feature freeze.

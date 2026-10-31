@@ -22,13 +22,18 @@ We are a student team, so we reply as soon as we can. There is no bug bounty. On
 
 ### Running today
 
-| Control                                | What it does                                                                                                                   |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| GitHub secret scanning                 | Finds known secret patterns in the repository                                                                                  |
-| GitHub push protection                 | Blocks a push that contains a known secret pattern                                                                             |
-| Dependabot alerts and security updates | Flag vulnerable dependencies and open pull requests to fix them. There are no dependencies to read until P-5 adds the lockfile |
-| Private vulnerability reporting        | The private route described above                                                                                              |
-| The `Protect main` ruleset             | Blocks deleting `main` and force pushing to it, and requires a pull request with resolved threads                              |
+| Control                                                                                                                         | What it does                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| GitHub secret scanning                                                                                                          | Finds known secret patterns in the repository                                                                   |
+| GitHub push protection                                                                                                          | Blocks a push that contains a known secret pattern                                                              |
+| Dependabot alerts and security updates                                                                                          | Flag vulnerable dependencies and open pull requests to fix them. The lockfile is on `main`, so they now read it |
+| Private vulnerability reporting                                                                                                 | The private route described above                                                                               |
+| The `Protect main` ruleset                                                                                                      | Blocks deleting `main` and force pushing to it, and requires a pull request with resolved threads               |
+| Git hooks: the licence-key guard, the samples guard, secretlint, commitlint, and a pre-push guard that refuses a push to `main` | Runs on your machine after `pnpm install`                                                                       |
+| `pnpm audit --audit-level high` in the verify job                                                                               | Fails a pull request on a high advisory                                                                         |
+| Semgrep: the default, TypeScript, React, Node and OWASP Top 10 rules                                                            | Required check `SAST (Semgrep)`                                                                                 |
+| gitleaks across the full history                                                                                                | Required check `Secret scan (gitleaks)`                                                                         |
+| OSV dependency scan on the lockfile                                                                                             | Required check `Dependency scan (OSV)`                                                                          |
 
 ### Coming with later stories
 
@@ -36,16 +41,11 @@ None of these run yet.
 
 | Control                                                                                 | Story |
 | --------------------------------------------------------------------------------------- | ----- |
-| Git hooks: the licence-key guard, the samples guard and a secretlint scan               | P-5   |
-| `pnpm audit --audit-level high` in the verify job                                       | P-6   |
-| Semgrep: the default, TypeScript, React, Node and OWASP Top 10 rules                    | P-6   |
-| gitleaks across the full history                                                        | P-6   |
-| OSV dependency scan on the lockfile                                                     | P-6   |
 | Trivy image scan, failing on fixable HIGH or CRITICAL findings, and a Trivy config scan | P-13  |
 | OWASP ZAP baseline scan of the live URL, weekly and on demand                           | P-24  |
 
-P-6 also adds `docs/security/security-testing.md`, which will say what runs where and how we triage findings.
+[Security testing](docs/security/security-testing.md) says what runs where and how we triage findings.
 
 ## When the repository goes private
 
-GitHub secret scanning, push protection and private vulnerability reporting stop for us when the repository goes private. Our own gitleaks and Semgrep scans cover both cases, once P-6 brings them. This file will then be updated, including the way to report.
+GitHub secret scanning, push protection and private vulnerability reporting stop for us when the repository goes private. Our own gitleaks and Semgrep scans cover both cases, which now run. This file will then be updated, including the way to report.
