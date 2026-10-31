@@ -74,7 +74,8 @@
     "submit": "Sign in",
     "submitting": "Signing in",
     "demoTitle": "Demo sign-in",
-    "demoHint": "Pick a role to look around with synthetic data. No password is needed.",
+    "demoHint": "Pick a role to look around. One click, no password.",
+    "orEmail": "or sign in with your email",
     "demoRolesLabel": "Demo roles",
     "optionsFailed": "The demo sign-in could not be checked. You can still sign in with your email."
   },
