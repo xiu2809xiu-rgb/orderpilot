@@ -1,5 +1,5 @@
 # Trivy findings we have accepted or dismissed, read by both jobs in
-# .github/workflows/docker.yml. Empty today: every image and Dockerfile is clean.
+# .github/workflows/docker.yml. Empty today: every image we build is clean.
 #
 # One id per line (a CVE, or a check id such as DS-0002), with a comment above it
 # giving the reason and a review date at most 30 days away, and a row in the

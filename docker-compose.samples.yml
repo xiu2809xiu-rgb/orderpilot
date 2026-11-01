@@ -1,7 +1,9 @@
 # A throwaway stack for trying a client sample. Only this machine can reach it,
-# it cannot reach anything outside, and nothing it holds outlives it.
+# no container has a route to the internet or can resolve an outside name, and
+# nothing it holds outlives it.
 #
 #   pnpm samples:up      build and start, then open http://localhost:8081
+#   pnpm samples:restart-web  restart web and seal it again (see below)
 #   pnpm samples:down    stop and remove everything, the data with it
 #
 # What makes it safe to use with a sample (see samples/README.md first):
@@ -12,7 +14,9 @@
 #   - The stores, the API and the worker sit on an internal network with no route
 #     out, and web has its default route deleted (see web-seal below): no
 #     document can reach an AI provider or anywhere else, whatever the code or a
-#     .env says.
+#     .env says. web also cannot resolve an outside name (see its dns below).
+#   - Restart web with `pnpm samples:restart-web`, which reseals it. After a
+#     plain `docker restart`, web-seal shows unhealthy: restart web the first way.
 #   - Only the web app has a host port, bound to 127.0.0.1. The stores have none.
 #   - samples/ is mounted read-only into the API and the worker, and is never in
 #     an image: .dockerignore keeps it out of every build.
@@ -70,6 +74,12 @@ services:
     networks:
       - sealed
       - published
+    # Docker's resolver forwards names it does not know to public DNS, so a
+    # query name could leave the machine even with no route. Pointing its
+    # upstream at the container's own loopback, where nothing listens, makes
+    # every outside name fail. `api` is answered by Docker itself and still works.
+    dns:
+      - 127.0.0.1
 
   # Docker gives web a default route through the `published` network, so web
   # could reach the internet. This container shares web's network, removes that
@@ -96,11 +106,23 @@ services:
       - NET_ADMIN
     security_opt:
       - no-new-privileges:true
+    # Fails while web has a default route, or when web has been restarted behind
+    # this container's back (a plain `docker restart web`): this container then
+    # holds web's old network, which has no routes at all, and web has its
+    # default route back. `up --wait` therefore refuses an unsealed stack.
     healthcheck:
-      disable: true
+      test:
+        - CMD-SHELL
+        - ip route | grep -q . && ! ip route | grep -q '^default'
+      interval: 2s
+      timeout: 3s
+      retries: 3
     depends_on:
       web:
         condition: service_healthy
+        # `docker compose restart web` restarts this container too, and it
+        # removes the route again.
+        restart: true
 
 networks:
   sealed:

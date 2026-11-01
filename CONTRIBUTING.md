@@ -165,33 +165,34 @@ pnpm --filter @orderpilot/web test       # component and unit tests
 
 ### Trying a client sample
 
-Read [`samples/README.md`](samples/README.md) first. `pnpm samples:up` starts a second, sealed stack on <http://localhost:8081> (`SAMPLES_WEB_PORT`): its own compose project, its data in memory, no route to the internet from any container, and `samples/` mounted read-only. `pnpm samples:down` deletes it, data and all.
+Read [`samples/README.md`](samples/README.md) first. `pnpm samples:up` starts a second, sealed stack on <http://localhost:8081> (`SAMPLES_WEB_PORT`): its own compose project, its data in memory, no route to the internet and no outside name resolution from any container (restart web only with `pnpm samples:restart-web`), and `samples/` mounted read-only. `pnpm samples:down` deletes it, data and all.
 
 ### The root scripts
 
-| Command                  | What it does                                                                                                                  |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
-| `pnpm lint`              | ESLint over the whole repository, failing on any warning                                                                      |
-| `pnpm typecheck`         | TypeScript over the scripts, then each package's own `typecheck`                                                              |
-| `pnpm test`              | The repository's `node --test` tests, then each package's own `test`. The API's integration tests need the stack up           |
-| `pnpm build`             | Each package's own `build`                                                                                                    |
-| `pnpm format`            | Prettier writes every file. Mass formatting: ask first (AGENTS.md, rule 4)                                                    |
-| `pnpm format:check`      | Prettier checks every file and writes nothing                                                                                 |
-| `pnpm check:dashes`      | No em dash in any tracked text file                                                                                           |
-| `pnpm check:samples`     | No client sample in any tracked file; `check:samples:history` checks every commit                                             |
-| `pnpm check:licence-key` | No licence key value and no env file in any tracked file                                                                      |
-| `pnpm check:secrets`     | secretlint over the whole working tree                                                                                        |
-| `pnpm local:setup`       | The whole set-up, safe to repeat after a pull: `.env` if missing, the stack, Prisma client, migrations, shared packages, seed |
-| `pnpm dev`               | The API and the web app together, restarting the API when you save a file                                                     |
-| `pnpm stack:up`          | `docker compose up -d --wait` for the four stores only: PostgreSQL, Redis, MinIO and Mailpit, healthy before it returns       |
-| `pnpm stack:down`        | `docker compose down`: stops and removes the containers, keeps the data                                                       |
-| `pnpm stack:smoke`       | Checks a running full stack from outside, on `STACK_WEB_PORT`                                                                 |
-| `pnpm samples:up`        | Builds and starts the sealed samples stack                                                                                    |
-| `pnpm samples:down`      | Stops and deletes the samples stack and everything it held                                                                    |
-| `pnpm db:migrate`        | Applies pending migrations to the development database                                                                        |
-| `pnpm db:migrate:dev`    | Creates a migration after you edit a `.prisma` file                                                                           |
-| `pnpm db:generate`       | Rebuilds the Prisma client (`pnpm install` does it too)                                                                       |
-| `pnpm db:seed`           | Seeds the development database; safe to run again                                                                             |
+| Command                    | What it does                                                                                                                  |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm lint`                | ESLint over the whole repository, failing on any warning                                                                      |
+| `pnpm typecheck`           | TypeScript over the scripts, then each package's own `typecheck`                                                              |
+| `pnpm test`                | The repository's `node --test` tests, then each package's own `test`. The API's integration tests need the stack up           |
+| `pnpm build`               | Each package's own `build`                                                                                                    |
+| `pnpm format`              | Prettier writes every file. Mass formatting: ask first (AGENTS.md, rule 4)                                                    |
+| `pnpm format:check`        | Prettier checks every file and writes nothing                                                                                 |
+| `pnpm check:dashes`        | No em dash in any tracked text file                                                                                           |
+| `pnpm check:samples`       | No client sample in any tracked file; `check:samples:history` checks every commit                                             |
+| `pnpm check:licence-key`   | No licence key value and no env file in any tracked file                                                                      |
+| `pnpm check:secrets`       | secretlint over the whole working tree                                                                                        |
+| `pnpm local:setup`         | The whole set-up, safe to repeat after a pull: `.env` if missing, the stack, Prisma client, migrations, shared packages, seed |
+| `pnpm dev`                 | The API and the web app together, restarting the API when you save a file                                                     |
+| `pnpm stack:up`            | `docker compose up -d --wait` for the four stores only: PostgreSQL, Redis, MinIO and Mailpit, healthy before it returns       |
+| `pnpm stack:down`          | `docker compose down`: stops and removes the containers, keeps the data                                                       |
+| `pnpm stack:smoke`         | Checks a running full stack from outside, on `STACK_WEB_PORT`                                                                 |
+| `pnpm samples:up`          | Builds and starts the sealed samples stack                                                                                    |
+| `pnpm samples:restart-web` | Restarts the web container of the samples stack and seals it again                                                            |
+| `pnpm samples:down`        | Stops and deletes the samples stack and everything it held                                                                    |
+| `pnpm db:migrate`          | Applies pending migrations to the development database                                                                        |
+| `pnpm db:migrate:dev`      | Creates a migration after you edit a `.prisma` file                                                                           |
+| `pnpm db:generate`         | Rebuilds the Prisma client (`pnpm install` does it too)                                                                       |
+| `pnpm db:seed`             | Seeds the development database; safe to run again                                                                             |
 
 ### The Git hooks
 

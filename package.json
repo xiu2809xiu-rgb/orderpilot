@@ -37,6 +37,7 @@
     "stack:down": "docker compose down",
     "stack:smoke": "node scripts/stack-smoke.mjs",
     "samples:up": "docker compose -f docker-compose.yml -f docker-compose.samples.yml up -d --build --wait",
+    "samples:restart-web": "docker compose -f docker-compose.yml -f docker-compose.samples.yml restart web",
     "samples:down": "docker compose -f docker-compose.yml -f docker-compose.samples.yml down --remove-orphans"
   },
   "devDependencies": {
