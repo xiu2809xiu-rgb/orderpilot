@@ -76,6 +76,10 @@ CMD ["node", "dist/main.js"]
 FROM build AS migrate
 ENV NODE_ENV=production
 WORKDIR /repo/apps/api
-RUN chown -R node:node /repo/apps/api/prisma
+# The migrations run the workspace's own Prisma CLI, so the global npm and pnpm
+# (and the dependencies they bundle) have no job here.
+RUN rm -rf /usr/local/lib/node_modules /usr/local/bin/npm /usr/local/bin/npx \
+           /usr/local/bin/corepack /usr/local/bin/pnpm /usr/local/bin/pnpx /pnpm \
+ && chown -R node:node /repo/apps/api/prisma
 USER node
 CMD ["sh", "-c", "node_modules/.bin/prisma migrate deploy && node dist/database/seed/seed.js"]
