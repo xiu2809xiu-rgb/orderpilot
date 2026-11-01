@@ -1031,6 +1031,7 @@ Acceptance criteria:
 - Plain tables built on `ui/table` meet the 36 to 40 px row height too (the Users table is compact now; the others are not measured).
 - Copy role can be undone, once the API keeps a snapshot of the target role's rows.
 - The home-tile part of the Check in P-40 (no tile showing only a dash, no "Planned" badge) is met by P-33, not by P-40.
+- The home page's Needs you rows fit 36 to 40 px at 1440 by 900: a long task title or customer name wraps to two lines today (45 to 57 px rows, from P-33).
 
 ## Epic A: Document intake and AI extraction
 
