@@ -1,0 +1,399 @@
+{
+  "label": "Synthetic demo data",
+  "file": "po-table-so-0114.pdf",
+  "documentType": "CUSTOMER_PO",
+  "documentNumber": "PO-BD-4891",
+  "layout": "table",
+  "readable": "text",
+  "orderNo": "SO-0114",
+  "customerNo": "C-0013",
+  "purpose": "A dense table printout. Its task says to confirm 2 uncertain fields, the one to try in the sales pilot.",
+  "pageCount": 1,
+  "page": {
+    "width": 595.28,
+    "height": 841.89
+  },
+  "confidenceThreshold": 0.9,
+  "uncertainFieldCount": 2,
+  "mismatch": null,
+  "fields": [
+    {
+      "key": "customerName",
+      "label": "Customer",
+      "group": "header",
+      "lineIndex": null,
+      "value": "Jamunia Trading Ltd",
+      "text": "Jamunia Trading Ltd",
+      "page": 1,
+      "box": [
+        0.0585,
+        0.045,
+        0.1891,
+        0.0144
+      ],
+      "id": "customerName",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "poNumber",
+      "label": "PO number",
+      "group": "header",
+      "lineIndex": null,
+      "value": "PO-BD-4891",
+      "text": "PO-BD-4891",
+      "page": 1,
+      "box": [
+        0.045,
+        0.1094,
+        0.0827,
+        0.0097
+      ],
+      "id": "poNumber",
+      "confidence": 0.96,
+      "uncertain": false
+    },
+    {
+      "key": "poDate",
+      "label": "PO date",
+      "group": "header",
+      "lineIndex": null,
+      "value": "2026-11-02",
+      "text": "02 Nov 2026",
+      "page": 1,
+      "box": [
+        0.3642,
+        0.1094,
+        0.0905,
+        0.0097
+      ],
+      "id": "poDate",
+      "confidence": 0.96,
+      "uncertain": false
+    },
+    {
+      "key": "requiredDate",
+      "label": "Required by",
+      "group": "header",
+      "lineIndex": null,
+      "value": "2026-11-19",
+      "text": "19 Nov 2026",
+      "page": 1,
+      "box": [
+        0.6834,
+        0.1094,
+        0.0905,
+        0.0097
+      ],
+      "id": "requiredDate",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "buyerContact",
+      "label": "Buyer",
+      "group": "header",
+      "lineIndex": null,
+      "value": "Dariusz Penhallow",
+      "text": "Dariusz Penhallow",
+      "page": 1,
+      "box": [
+        0.045,
+        0.1405,
+        0.1377,
+        0.0095
+      ],
+      "id": "buyerContact",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "currency",
+      "label": "Currency",
+      "group": "header",
+      "lineIndex": null,
+      "value": "USD",
+      "text": "USD",
+      "page": 1,
+      "box": [
+        0.3642,
+        0.1403,
+        0.0276,
+        0.0097
+      ],
+      "id": "currency",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "incoterms",
+      "label": "Incoterms",
+      "group": "header",
+      "lineIndex": null,
+      "value": "CIF Chattogram",
+      "text": "CIF Chattogram",
+      "page": 1,
+      "box": [
+        0.6834,
+        0.1403,
+        0.1141,
+        0.0111
+      ],
+      "id": "incoterms",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "paymentTerms",
+      "label": "Payment terms",
+      "group": "header",
+      "lineIndex": null,
+      "value": "30% deposit with order, balance before shipment",
+      "text": "30% deposit with order, balance before shipment",
+      "page": 1,
+      "box": [
+        0.045,
+        0.1712,
+        0.3735,
+        0.011
+      ],
+      "id": "paymentTerms",
+      "confidence": 0.58,
+      "uncertain": true
+    },
+    {
+      "key": "billTo",
+      "label": "Bill to",
+      "group": "header",
+      "lineIndex": null,
+      "value": "16 Tidewater Avenue, Dhaka 1200, Bangladesh",
+      "text": "16 Tidewater Avenue\nDhaka 1200\nBangladesh",
+      "page": 1,
+      "box": [
+        0.045,
+        0.2211,
+        0.1534,
+        0.0352
+      ],
+      "id": "billTo",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "shipTo",
+      "label": "Ship to",
+      "group": "header",
+      "lineIndex": null,
+      "value": "Jamunia Trading Ltd (Warehouse), Godown 4, Anchor Street, Dhaka 1200, Bangladesh",
+      "text": "Jamunia Trading Ltd (Warehouse)\nGodown 4, Anchor Street\nDhaka 1200\nBangladesh",
+      "page": 1,
+      "box": [
+        0.3642,
+        0.2209,
+        0.2477,
+        0.0474
+      ],
+      "id": "shipTo",
+      "confidence": 0.83,
+      "uncertain": true
+    },
+    {
+      "key": "lines.partNumber",
+      "label": "Part number",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "DRA-MN-A-2478",
+      "text": "DRA-MN-A-2478",
+      "page": 1,
+      "box": [
+        0.0837,
+        0.3156,
+        0.0984,
+        0.0092
+      ],
+      "id": "lines.partNumber[0]",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "lines.description",
+      "label": "Description",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "Dravik 24-inch Monitor",
+      "text": "Dravik 24-inch Monitor",
+      "page": 1,
+      "box": [
+        0.2348,
+        0.3156,
+        0.1637,
+        0.0092
+      ],
+      "id": "lines.description[0]",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "lines.quantity",
+      "label": "Quantity",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "12",
+      "text": "12",
+      "page": 1,
+      "box": [
+        0.5765,
+        0.3156,
+        0.0185,
+        0.0091
+      ],
+      "id": "lines.quantity[0]",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "lines.unitPrice",
+      "label": "Unit price",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "121.63",
+      "text": "121.63",
+      "page": 1,
+      "box": [
+        0.6382,
+        0.3156,
+        0.0476,
+        0.0092
+      ],
+      "id": "lines.unitPrice[0]",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "lines.amount",
+      "label": "Amount",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "1459.56",
+      "text": "1,459.56",
+      "page": 1,
+      "box": [
+        0.7815,
+        0.3156,
+        0.0621,
+        0.0104
+      ],
+      "id": "lines.amount[0]",
+      "confidence": 0.96,
+      "uncertain": false
+    },
+    {
+      "key": "lines.partNumber",
+      "label": "Part number",
+      "group": "lines",
+      "lineIndex": 1,
+      "value": "EMB-EB-A-2633",
+      "text": "EMB-EB-A-2633",
+      "page": 1,
+      "box": [
+        0.0837,
+        0.3334,
+        0.0984,
+        0.0092
+      ],
+      "id": "lines.partNumber[1]",
+      "confidence": 0.96,
+      "uncertain": false
+    },
+    {
+      "key": "lines.description",
+      "label": "Description",
+      "group": "lines",
+      "lineIndex": 1,
+      "value": "Emberlyn Wired Earbuds",
+      "text": "Emberlyn Wired Earbuds",
+      "page": 1,
+      "box": [
+        0.2348,
+        0.3335,
+        0.1637,
+        0.0102
+      ],
+      "id": "lines.description[1]",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "lines.quantity",
+      "label": "Quantity",
+      "group": "lines",
+      "lineIndex": 1,
+      "value": "50",
+      "text": "50",
+      "page": 1,
+      "box": [
+        0.5765,
+        0.3334,
+        0.0185,
+        0.0092
+      ],
+      "id": "lines.quantity[1]",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "lines.unitPrice",
+      "label": "Unit price",
+      "group": "lines",
+      "lineIndex": 1,
+      "value": "7.08",
+      "text": "7.08",
+      "page": 1,
+      "box": [
+        0.6527,
+        0.3334,
+        0.0331,
+        0.0092
+      ],
+      "id": "lines.unitPrice[1]",
+      "confidence": 0.96,
+      "uncertain": false
+    },
+    {
+      "key": "lines.amount",
+      "label": "Amount",
+      "group": "lines",
+      "lineIndex": 1,
+      "value": "354.00",
+      "text": "354.00",
+      "page": 1,
+      "box": [
+        0.7961,
+        0.3334,
+        0.0476,
+        0.0092
+      ],
+      "id": "lines.amount[1]",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "total",
+      "label": "Total (USD)",
+      "group": "totals",
+      "lineIndex": null,
+      "value": "1813.56",
+      "text": "1,813.56",
+      "page": 1,
+      "box": [
+        0.8717,
+        0.3581,
+        0.0766,
+        0.0123
+      ],
+      "id": "total",
+      "confidence": 0.98,
+      "uncertain": false
+    }
+  ]
+}

@@ -82,5 +82,5 @@ export async function writeTextPdf(
       }
     }
   }
-  return doc.save();
+  return doc.save({ useObjectStreams: false });
 }

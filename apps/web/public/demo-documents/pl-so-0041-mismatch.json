@@ -1,0 +1,350 @@
+{
+  "label": "Synthetic demo data",
+  "file": "pl-so-0041-mismatch.pdf",
+  "documentType": "PACKING_LIST",
+  "documentNumber": "PL-0041",
+  "layout": "house",
+  "readable": "text",
+  "orderNo": "SO-0041",
+  "customerNo": "C-0027",
+  "purpose": "The mismatch for end-to-end test 1: line 1 packs fewer pieces than the PO orders.",
+  "pageCount": 1,
+  "page": {
+    "width": 595.28,
+    "height": 841.89
+  },
+  "confidenceThreshold": 0.9,
+  "uncertainFieldCount": 0,
+  "mismatch": {
+    "lineIndex": 0,
+    "partNumber": "EMB-SC-A-2634",
+    "ordered": "20",
+    "packed": "18"
+  },
+  "fields": [
+    {
+      "key": "packingListNumber",
+      "label": "Packing list number",
+      "group": "header",
+      "lineIndex": null,
+      "value": "PL-0041",
+      "text": "PL-0041",
+      "page": 1,
+      "box": [
+        0.8749,
+        0.0763,
+        0.0666,
+        0.0108
+      ],
+      "id": "packingListNumber",
+      "confidence": 0.97,
+      "uncertain": false
+    },
+    {
+      "key": "packingListDate",
+      "label": "Packing list date",
+      "group": "header",
+      "lineIndex": null,
+      "value": "2026-10-29",
+      "text": "29 Oct 2026",
+      "page": 1,
+      "box": [
+        0.8443,
+        0.0906,
+        0.0972,
+        0.0108
+      ],
+      "id": "packingListDate",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "poNumber",
+      "label": "PO number",
+      "group": "header",
+      "lineIndex": null,
+      "value": "PO-LK-4380",
+      "text": "PO-LK-4380",
+      "page": 1,
+      "box": [
+        0.844,
+        0.1191,
+        0.0975,
+        0.0108
+      ],
+      "id": "poNumber",
+      "confidence": 0.96,
+      "uncertain": false
+    },
+    {
+      "key": "customerName",
+      "label": "Consignee",
+      "group": "header",
+      "lineIndex": null,
+      "value": "Nuwaran Infotech (Pvt) Ltd",
+      "text": "Nuwaran Infotech (Pvt) Ltd",
+      "page": 1,
+      "box": [
+        0.0585,
+        0.1857,
+        0.2258,
+        0.0131
+      ],
+      "id": "customerName",
+      "confidence": 0.97,
+      "uncertain": false
+    },
+    {
+      "key": "shipTo",
+      "label": "Ship to",
+      "group": "header",
+      "lineIndex": null,
+      "value": "Nuwaran Infotech (Pvt) Ltd (Warehouse), Godown 9, Old Customs Road, Colombo 00100, Sri Lanka",
+      "text": "Nuwaran Infotech (Pvt) Ltd (Warehouse)\nGodown 9, Old Customs Road\nColombo 00100\nSri Lanka",
+      "page": 1,
+      "box": [
+        0.498,
+        0.1854,
+        0.2873,
+        0.0527
+      ],
+      "id": "shipTo",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "lines.partNumber",
+      "label": "Part number",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "EMB-SC-A-2634",
+      "text": "EMB-SC-A-2634",
+      "page": 1,
+      "box": [
+        0.1072,
+        0.3224,
+        0.1216,
+        0.0106
+      ],
+      "id": "lines.partNumber[0]",
+      "confidence": 0.97,
+      "uncertain": false
+    },
+    {
+      "key": "lines.description",
+      "label": "Description",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "Emberlyn Screen Cleaning Kit",
+      "text": "Emberlyn Screen Cleaning Kit",
+      "page": 1,
+      "box": [
+        0.2953,
+        0.3224,
+        0.2095,
+        0.0121
+      ],
+      "id": "lines.description[0]",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "lines.quantity",
+      "label": "Quantity",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "18",
+      "text": "18",
+      "page": 1,
+      "box": [
+        0.7141,
+        0.3224,
+        0.0186,
+        0.0106
+      ],
+      "id": "lines.quantity[0]",
+      "confidence": 0.96,
+      "uncertain": false
+    },
+    {
+      "key": "lines.cartons",
+      "label": "Cartons",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "1",
+      "text": "1",
+      "page": 1,
+      "box": [
+        0.8171,
+        0.3226,
+        0.0097,
+        0.0103
+      ],
+      "id": "lines.cartons[0]",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "lines.grossWeight",
+      "label": "Gross weight (kg)",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "8.0",
+      "text": "8.0",
+      "page": 1,
+      "box": [
+        0.9072,
+        0.3224,
+        0.0259,
+        0.0106
+      ],
+      "id": "lines.grossWeight[0]",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "lines.partNumber",
+      "label": "Part number",
+      "group": "lines",
+      "lineIndex": 1,
+      "value": "ASH-AS-B-2569",
+      "text": "ASH-AS-B-2569",
+      "page": 1,
+      "box": [
+        0.1072,
+        0.3473,
+        0.1193,
+        0.0106
+      ],
+      "id": "lines.partNumber[1]",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "lines.description",
+      "label": "Description",
+      "group": "lines",
+      "lineIndex": 1,
+      "value": "Ashgrove Alarm Siren Unit Pro",
+      "text": "Ashgrove Alarm Siren Unit Pro",
+      "page": 1,
+      "box": [
+        0.2953,
+        0.3473,
+        0.2134,
+        0.0121
+      ],
+      "id": "lines.description[1]",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "lines.quantity",
+      "label": "Quantity",
+      "group": "lines",
+      "lineIndex": 1,
+      "value": "80",
+      "text": "80",
+      "page": 1,
+      "box": [
+        0.7099,
+        0.3473,
+        0.0229,
+        0.0106
+      ],
+      "id": "lines.quantity[1]",
+      "confidence": 0.97,
+      "uncertain": false
+    },
+    {
+      "key": "lines.cartons",
+      "label": "Cartons",
+      "group": "lines",
+      "lineIndex": 1,
+      "value": "16",
+      "text": "16",
+      "page": 1,
+      "box": [
+        0.8079,
+        0.3473,
+        0.0189,
+        0.0106
+      ],
+      "id": "lines.cartons[1]",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "lines.grossWeight",
+      "label": "Gross weight (kg)",
+      "group": "lines",
+      "lineIndex": 1,
+      "value": "152.0",
+      "text": "152.0",
+      "page": 1,
+      "box": [
+        0.892,
+        0.3473,
+        0.0411,
+        0.0106
+      ],
+      "id": "lines.grossWeight[1]",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "totalQuantity",
+      "label": "Total quantity",
+      "group": "totals",
+      "lineIndex": null,
+      "value": "98",
+      "text": "98",
+      "page": 1,
+      "box": [
+        0.9112,
+        0.3809,
+        0.0236,
+        0.0112
+      ],
+      "id": "totalQuantity",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "totalCartons",
+      "label": "Total cartons",
+      "group": "totals",
+      "lineIndex": null,
+      "value": "17",
+      "text": "17",
+      "page": 1,
+      "box": [
+        0.9153,
+        0.4001,
+        0.0195,
+        0.0109
+      ],
+      "id": "totalCartons",
+      "confidence": 0.96,
+      "uncertain": false
+    },
+    {
+      "key": "totalGrossWeight",
+      "label": "Total gross weight (kg)",
+      "group": "totals",
+      "lineIndex": null,
+      "value": "160.0",
+      "text": "160.0",
+      "page": 1,
+      "box": [
+        0.8813,
+        0.4176,
+        0.0536,
+        0.0125
+      ],
+      "id": "totalGrossWeight",
+      "confidence": 0.94,
+      "uncertain": false
+    }
+  ]
+}

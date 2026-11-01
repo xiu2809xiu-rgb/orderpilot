@@ -1,20 +1,15 @@
 import { addDecimal, multiplyDecimal } from "@orderpilot/shared";
+import type { Customer, SyntheticDataset } from "@orderpilot/synthetic-data";
 import {
-  AS_OF,
-  addDays,
-  syntheticDataset,
-  type Customer,
-  type Item,
-  type SampleOrder,
-  type SyntheticDataset,
-} from "@orderpilot/synthetic-data";
-import { toCents } from "./format.js";
-import {
-  DOCUMENT_KINDS,
-  PO_LAYOUTS,
-  type DocumentKind,
-  type LayoutId,
-} from "./model.js";
+  CONTACTS,
+  CREDIT_DAYS,
+  TERMS,
+  layoutForCustomer,
+} from "./facts-data.js";
+import { linesOf } from "./facts-lines.js";
+import { toCents, trimDecimal } from "./format.js";
+import { DOCUMENT_KINDS, type DocumentKind, type LayoutId } from "./model.js";
+import { datesOf, find, numberOf, pinned } from "./pinned.js";
 import {
   SELLER,
   SELLER_BANK,
@@ -64,154 +59,6 @@ export interface DocumentFacts {
   /** What a PI asks for now, when the terms ask for money up front. */
   due: { percent: string; amount: string; balance: string } | null;
   bank: BankDetails | null;
-}
-
-const CONTACTS = [
-  "Anjelika Verrow",
-  "Tomas Quillane",
-  "Marisol Dunreith",
-  "Kabir Ostrand",
-  "Leilani Marchetti",
-  "Dariusz Penhallow",
-  "Imara Tolliver",
-  "Rostam Fairweather",
-] as const;
-
-const TERMS: Readonly<Record<string, string>> = {
-  "30 DAYS": "Net 30 days from invoice date",
-  "60 DAYS": "Net 60 days from invoice date",
-  PREPAID: "100% advance payment before shipment",
-  "50% ADVANCE": "50% advance with order, balance before shipment",
-  "30% DEPOSIT": "30% deposit with order, balance before shipment",
-  "LC AT SIGHT": "Irrevocable letter of credit at sight",
-};
-
-const CREDIT_DAYS: Readonly<Record<string, number>> = {
-  "30 DAYS": 30,
-  "60 DAYS": 60,
-};
-
-// Pieces and kilograms in a carton, by what is inside it.
-const CARTON: Readonly<
-  Record<Item["category"], { pieces: number; kg: number }>
-> = {
-  IT: { pieces: 10, kg: 12 },
-  SURVEILLANCE: { pieces: 5, kg: 9.5 },
-  ACCESSORIES: { pieces: 50, kg: 8 },
-};
-
-/**
- * Which look a customer's PO has. The customer number picks it, so a customer
- * always sends the same one. The spread by five then four keeps neighbouring
- * customers apart and gives the first customers all four looks.
- */
-export function layoutForCustomer(customerNo: string): LayoutId {
-  const n = Number(customerNo.slice(2)) - 1;
-  return PO_LAYOUTS[(n % 5) % PO_LAYOUTS.length] ?? "boxed";
-}
-
-function find<T>(
-  list: readonly T[],
-  test: (item: T) => boolean,
-  what: string,
-): T {
-  const found = list.find(test);
-  if (!found) throw new Error(`No ${what}`);
-  return found;
-}
-
-/**
- * The dates and numbers a document prints. Dates in the synthetic set move
- * with today, but a committed file cannot, so these come from the set as it
- * stands on its fixed reference date. Everything else comes from the set the
- * caller passes, and does not move.
- */
-function pinned(orderNo: string): SampleOrder {
-  return find(
-    syntheticDataset({ referenceDate: AS_OF }).orders,
-    (o) => o.header.no === orderNo,
-    `order ${orderNo}`,
-  );
-}
-
-function numberOf(order: SampleOrder, kind: DocumentKind): string {
-  const suffix = order.header.no.slice(3);
-  const fallback: Record<DocumentKind, string> = {
-    CUSTOMER_PO: order.header.externalDocumentNo,
-    PROFORMA_INVOICE: `PI-${suffix}`,
-    PACKING_LIST: `PL-${suffix}`,
-    SALES_INVOICE: `SI-${suffix}`,
-  };
-  return order.documents.find((d) => d.type === kind)?.number ?? fallback[kind];
-}
-
-function datesOf(
-  order: SampleOrder,
-  kind: DocumentKind,
-  creditDays: number,
-): { issueDate: string; otherDate: string | null } {
-  const ordered = order.header.orderDate;
-  const done = order.milestones;
-  switch (kind) {
-    case "CUSTOMER_PO":
-      return {
-        issueDate: ordered,
-        otherDate: order.header.shipmentDate ?? addDays(ordered, 21),
-      };
-    case "PROFORMA_INVOICE": {
-      const issueDate = done.pi ?? addDays(ordered, 3);
-      return { issueDate, otherDate: addDays(issueDate, 14) };
-    }
-    case "PACKING_LIST":
-      return {
-        issueDate: done.packed ?? addDays(ordered, 14),
-        otherDate: null,
-      };
-    case "SALES_INVOICE": {
-      const issueDate = done.invoiced ?? addDays(ordered, 18);
-      return { issueDate, otherDate: addDays(issueDate, creditDays) };
-    }
-  }
-}
-
-function linesOf(
-  order: SampleOrder,
-  kind: DocumentKind,
-  items: readonly Item[],
-): FactLine[] {
-  const { scenario } = order;
-  return order.lines.map((line, i) => {
-    const item = find(items, (it) => it.no === line.no, `item ${line.no}`);
-    let { quantity, unitPrice } = line;
-    // The customer's PO prints the price it believes in; the mismatch is for
-    // the checks to find against the price list.
-    if (
-      kind === "CUSTOMER_PO" &&
-      scenario.kind === "price-mismatch" &&
-      i === 0
-    ) {
-      unitPrice = scenario.printed;
-    }
-    // The packing list counts what was packed, which is short on the first line.
-    if (
-      kind === "PACKING_LIST" &&
-      scenario.kind === "packing-list-mismatch" &&
-      i === 0
-    ) {
-      quantity = scenario.packed;
-    }
-    const carton = CARTON[item.category];
-    const cartons = Math.ceil(Number(quantity) / carton.pieces);
-    return {
-      partNumber: item.partNumber,
-      description: line.description,
-      quantity,
-      unitPrice,
-      amount: multiplyDecimal(quantity, unitPrice),
-      cartons: String(cartons),
-      grossKg: (cartons * carton.kg).toFixed(1),
-    };
-  });
 }
 
 /**
@@ -287,8 +134,8 @@ export function buildFacts(
     lines,
     totals: {
       amount,
-      quantity: sum(lines.map((l) => l.quantity)),
-      cartons: sum(lines.map((l) => l.cartons)),
+      quantity: trimDecimal(sum(lines.map((l) => l.quantity))),
+      cartons: trimDecimal(sum(lines.map((l) => l.cartons))),
       grossKg: lines.reduce((s, l) => s + Number(l.grossKg), 0).toFixed(1),
     },
     due:

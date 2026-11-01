@@ -1,0 +1,255 @@
+{
+  "label": "Synthetic demo data",
+  "file": "pl-so-0026.pdf",
+  "documentType": "PACKING_LIST",
+  "documentNumber": "PL-0026",
+  "layout": "house",
+  "readable": "text",
+  "orderNo": "SO-0026",
+  "customerNo": "C-0009",
+  "purpose": "A packing list that agrees with its order.",
+  "pageCount": 1,
+  "page": {
+    "width": 595.28,
+    "height": 841.89
+  },
+  "confidenceThreshold": 0.9,
+  "uncertainFieldCount": 0,
+  "mismatch": null,
+  "fields": [
+    {
+      "key": "packingListNumber",
+      "label": "Packing list number",
+      "group": "header",
+      "lineIndex": null,
+      "value": "PL-0026",
+      "text": "PL-0026",
+      "page": 1,
+      "box": [
+        0.8719,
+        0.0763,
+        0.0696,
+        0.0108
+      ],
+      "id": "packingListNumber",
+      "confidence": 0.97,
+      "uncertain": false
+    },
+    {
+      "key": "packingListDate",
+      "label": "Packing list date",
+      "group": "header",
+      "lineIndex": null,
+      "value": "2026-10-20",
+      "text": "20 Oct 2026",
+      "page": 1,
+      "box": [
+        0.8438,
+        0.0906,
+        0.0978,
+        0.0108
+      ],
+      "id": "packingListDate",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "poNumber",
+      "label": "PO number",
+      "group": "header",
+      "lineIndex": null,
+      "value": "PO-PK-4275",
+      "text": "PO-PK-4275",
+      "page": 1,
+      "box": [
+        0.8441,
+        0.1191,
+        0.0974,
+        0.0108
+      ],
+      "id": "poNumber",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "customerName",
+      "label": "Consignee",
+      "group": "header",
+      "lineIndex": null,
+      "value": "Chenavar Electronics (Pvt) Ltd",
+      "text": "Chenavar Electronics (Pvt) Ltd",
+      "page": 1,
+      "box": [
+        0.0585,
+        0.1857,
+        0.2552,
+        0.0131
+      ],
+      "id": "customerName",
+      "confidence": 0.96,
+      "uncertain": false
+    },
+    {
+      "key": "shipTo",
+      "label": "Ship to",
+      "group": "header",
+      "lineIndex": null,
+      "value": "Chenavar Electronics (Pvt) Ltd (Warehouse), Godown 9, Lantern Court, Karachi 74000, Pakistan",
+      "text": "Chenavar Electronics (Pvt) Ltd (Warehouse)\nGodown 9, Lantern Court\nKarachi 74000\nPakistan",
+      "page": 1,
+      "box": [
+        0.498,
+        0.1854,
+        0.3116,
+        0.0527
+      ],
+      "id": "shipTo",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "lines.partNumber",
+      "label": "Part number",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "NOR-KB-B-2411",
+      "text": "NOR-KB-B-2411",
+      "page": 1,
+      "box": [
+        0.1072,
+        0.3224,
+        0.1145,
+        0.0106
+      ],
+      "id": "lines.partNumber[0]",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "lines.description",
+      "label": "Description",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "Norvale Mechanical Keyboard Pro",
+      "text": "Norvale Mechanical Keyboard Pro",
+      "page": 1,
+      "box": [
+        0.2953,
+        0.3226,
+        0.2388,
+        0.0119
+      ],
+      "id": "lines.description[0]",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "lines.quantity",
+      "label": "Quantity",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "120",
+      "text": "120",
+      "page": 1,
+      "box": [
+        0.704,
+        0.3224,
+        0.0288,
+        0.0106
+      ],
+      "id": "lines.quantity[0]",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "lines.cartons",
+      "label": "Cartons",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "12",
+      "text": "12",
+      "page": 1,
+      "box": [
+        0.808,
+        0.3224,
+        0.0189,
+        0.0104
+      ],
+      "id": "lines.cartons[0]",
+      "confidence": 0.97,
+      "uncertain": false
+    },
+    {
+      "key": "lines.grossWeight",
+      "label": "Gross weight (kg)",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "144.0",
+      "text": "144.0",
+      "page": 1,
+      "box": [
+        0.8917,
+        0.3224,
+        0.0415,
+        0.0106
+      ],
+      "id": "lines.grossWeight[0]",
+      "confidence": 0.97,
+      "uncertain": false
+    },
+    {
+      "key": "totalQuantity",
+      "label": "Total quantity",
+      "group": "totals",
+      "lineIndex": null,
+      "value": "120",
+      "text": "120",
+      "page": 1,
+      "box": [
+        0.9041,
+        0.356,
+        0.0307,
+        0.0112
+      ],
+      "id": "totalQuantity",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "totalCartons",
+      "label": "Total cartons",
+      "group": "totals",
+      "lineIndex": null,
+      "value": "12",
+      "text": "12",
+      "page": 1,
+      "box": [
+        0.9148,
+        0.375,
+        0.02,
+        0.011
+      ],
+      "id": "totalCartons",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "totalGrossWeight",
+      "label": "Total gross weight (kg)",
+      "group": "totals",
+      "lineIndex": null,
+      "value": "144.0",
+      "text": "144.0",
+      "page": 1,
+      "box": [
+        0.8814,
+        0.3927,
+        0.0534,
+        0.0125
+      ],
+      "id": "totalGrossWeight",
+      "confidence": 0.99,
+      "uncertain": false
+    }
+  ]
+}

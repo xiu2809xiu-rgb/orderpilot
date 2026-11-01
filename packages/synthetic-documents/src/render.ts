@@ -1,12 +1,13 @@
 import type { SyntheticDataset } from "@orderpilot/synthetic-data";
-import { Canvas, PAGE, type DrawOp } from "./canvas.js";
+import { Canvas } from "./canvas.js";
 import {
   placeFields,
   uncertainIds,
   type ConfidencePlan,
 } from "./confidence.js";
 import { buildFacts, type DocumentFacts } from "./facts.js";
-import { allSpecs, fieldsOf } from "./fields.js";
+import { fieldsOf } from "./build-fields.js";
+import { allSpecs } from "./fields.js";
 import { LAYOUTS } from "./layouts/index.js";
 import {
   DEMO_LABEL,
@@ -17,6 +18,7 @@ import {
 } from "./model.js";
 import { writeTextPdf, type PdfMeta } from "./pdf.js";
 import { scanPages } from "./scan.js";
+import { stamp } from "./stamp.js";
 
 export interface RenderOptions {
   /** Make it look like a photocopy: an image of the page, tilted, grey and speckled. */
@@ -39,37 +41,6 @@ const TITLES: Record<DocumentKind, string> = {
   PACKING_LIST: "Packing list",
   SALES_INVOICE: "Commercial invoice",
 };
-
-/** Every page says what it is, however it is cut out of the file. */
-function stamp(pages: DrawOp[][]): void {
-  pages.forEach((ops, i) => {
-    const y = PAGE.height - 24;
-    const style = { font: "sans", size: 7, color: [0.4, 0.4, 0.42] } as const;
-    ops.push(
-      {
-        kind: "line",
-        from: [36, y - 10],
-        to: [PAGE.width - 36, y - 10],
-        color: [0.8, 0.8, 0.82],
-        lineWidth: 0.4,
-      },
-      {
-        kind: "text",
-        ...style,
-        x: 36,
-        y,
-        text: `${DEMO_LABEL}. Fictional companies, prices in USD, demo bank details. Not a real document.`,
-      },
-      {
-        kind: "text",
-        ...style,
-        x: PAGE.width - 36 - 38,
-        y,
-        text: `Page ${String(i + 1)} of ${String(pages.length)}`,
-      },
-    );
-  });
-}
 
 /**
  * Renders one order's document of one kind to a real PDF, and says where each

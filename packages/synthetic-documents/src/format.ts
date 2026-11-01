@@ -49,3 +49,10 @@ export function toCents(decimal: string): string {
   const text = cents.toString().padStart(3, "0");
   return `${text.slice(0, -2)}.${text.slice(-2)}`;
 }
+
+/** `17.00` as `17`: a count never carries decimals. */
+export function trimDecimal(decimal: string): string {
+  return decimal.includes(".")
+    ? decimal.replace(/0+$/, "").replace(/\.$/, "")
+    : decimal;
+}

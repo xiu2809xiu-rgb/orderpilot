@@ -1,0 +1,597 @@
+{
+  "label": "Synthetic demo data",
+  "file": "pi-so-0063.pdf",
+  "documentType": "PROFORMA_INVOICE",
+  "documentNumber": "PI-20261029-0001",
+  "layout": "house",
+  "readable": "text",
+  "orderNo": "SO-0063",
+  "customerNo": "C-0037",
+  "purpose": "A PI for payment in full before shipment.",
+  "pageCount": 1,
+  "page": {
+    "width": 595.28,
+    "height": 841.89
+  },
+  "confidenceThreshold": 0.9,
+  "uncertainFieldCount": 0,
+  "mismatch": null,
+  "fields": [
+    {
+      "key": "piNumber",
+      "label": "PI number",
+      "group": "header",
+      "lineIndex": null,
+      "value": "PI-20261029-0001",
+      "text": "PI-20261029-0001",
+      "page": 1,
+      "box": [
+        0.7966,
+        0.0763,
+        0.1449,
+        0.0108
+      ],
+      "id": "piNumber",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "piDate",
+      "label": "PI date",
+      "group": "header",
+      "lineIndex": null,
+      "value": "2026-10-29",
+      "text": "29 Oct 2026",
+      "page": 1,
+      "box": [
+        0.8443,
+        0.0906,
+        0.0972,
+        0.0108
+      ],
+      "id": "piDate",
+      "confidence": 0.97,
+      "uncertain": false
+    },
+    {
+      "key": "validUntil",
+      "label": "Valid until",
+      "group": "header",
+      "lineIndex": null,
+      "value": "2026-11-12",
+      "text": "12 Nov 2026",
+      "page": 1,
+      "box": [
+        0.8453,
+        0.1048,
+        0.0963,
+        0.0108
+      ],
+      "id": "validUntil",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "poNumber",
+      "label": "PO number",
+      "group": "header",
+      "lineIndex": null,
+      "value": "PO-LK-4534",
+      "text": "PO-LK-4534",
+      "page": 1,
+      "box": [
+        0.8442,
+        0.1191,
+        0.0973,
+        0.0108
+      ],
+      "id": "poNumber",
+      "confidence": 0.97,
+      "uncertain": false
+    },
+    {
+      "key": "customerName",
+      "label": "Customer",
+      "group": "header",
+      "lineIndex": null,
+      "value": "Lankor Digital Traders (Pvt) Ltd",
+      "text": "Lankor Digital Traders (Pvt) Ltd",
+      "page": 1,
+      "box": [
+        0.0585,
+        0.1857,
+        0.262,
+        0.0137
+      ],
+      "id": "customerName",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "billTo",
+      "label": "Bill to",
+      "group": "header",
+      "lineIndex": null,
+      "value": "24 Tidewater Avenue, Colombo 00100, Sri Lanka",
+      "text": "24 Tidewater Avenue\nColombo 00100\nSri Lanka",
+      "page": 1,
+      "box": [
+        0.0585,
+        0.2022,
+        0.1547,
+        0.0393
+      ],
+      "id": "billTo",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "shipTo",
+      "label": "Ship to",
+      "group": "header",
+      "lineIndex": null,
+      "value": "Lankor Digital Traders (Pvt) Ltd (Warehouse), Godown 1, Anchor Street, Colombo 00100, Sri Lanka",
+      "text": "Lankor Digital Traders (Pvt) Ltd (Warehouse)\nGodown 1, Anchor Street\nColombo 00100\nSri Lanka",
+      "page": 1,
+      "box": [
+        0.498,
+        0.1854,
+        0.3177,
+        0.0527
+      ],
+      "id": "shipTo",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "incoterms",
+      "label": "Incoterms",
+      "group": "header",
+      "lineIndex": null,
+      "value": "FOB Singapore",
+      "text": "FOB Singapore",
+      "page": 1,
+      "box": [
+        0.0585,
+        0.2949,
+        0.1104,
+        0.0123
+      ],
+      "id": "incoterms",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "paymentTerms",
+      "label": "Payment terms",
+      "group": "header",
+      "lineIndex": null,
+      "value": "100% advance payment before shipment",
+      "text": "100% advance payment before shipment",
+      "page": 1,
+      "box": [
+        0.2782,
+        0.2949,
+        0.2928,
+        0.0122
+      ],
+      "id": "paymentTerms",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "currency",
+      "label": "Currency",
+      "group": "header",
+      "lineIndex": null,
+      "value": "USD",
+      "text": "USD",
+      "page": 1,
+      "box": [
+        0.7617,
+        0.2949,
+        0.0349,
+        0.0108
+      ],
+      "id": "currency",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "lines.partNumber",
+      "label": "Part number",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "BRI-SC-B-2619",
+      "text": "BRI-SC-B-2619",
+      "page": 1,
+      "box": [
+        0.1072,
+        0.358,
+        0.1103,
+        0.0106
+      ],
+      "id": "lines.partNumber[0]",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "lines.description",
+      "label": "Description",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "Brindlewick Screen Cleaning Kit Pro",
+      "text": "Brindlewick Screen Cleaning Kit Pro",
+      "page": 1,
+      "box": [
+        0.2819,
+        0.358,
+        0.2535,
+        0.0121
+      ],
+      "id": "lines.description[0]",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "lines.quantity",
+      "label": "Quantity",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "206",
+      "text": "206",
+      "page": 1,
+      "box": [
+        0.6366,
+        0.358,
+        0.0323,
+        0.0106
+      ],
+      "id": "lines.quantity[0]",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "lines.unitPrice",
+      "label": "Unit price",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "2.77",
+      "text": "2.77",
+      "page": 1,
+      "box": [
+        0.7631,
+        0.358,
+        0.0335,
+        0.0104
+      ],
+      "id": "lines.unitPrice[0]",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "lines.amount",
+      "label": "Amount",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "570.62",
+      "text": "570.62",
+      "page": 1,
+      "box": [
+        0.8799,
+        0.358,
+        0.0533,
+        0.0106
+      ],
+      "id": "lines.amount[0]",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "lines.partNumber",
+      "label": "Part number",
+      "group": "lines",
+      "lineIndex": 1,
+      "value": "SOL-DC-A-2575",
+      "text": "SOL-DC-A-2575",
+      "page": 1,
+      "box": [
+        0.1072,
+        0.383,
+        0.1192,
+        0.0106
+      ],
+      "id": "lines.partNumber[1]",
+      "confidence": 0.97,
+      "uncertain": false
+    },
+    {
+      "key": "lines.description",
+      "label": "Description",
+      "group": "lines",
+      "lineIndex": 1,
+      "value": "Soltera Dome Camera 2 MP",
+      "text": "Soltera Dome Camera 2 MP",
+      "page": 1,
+      "box": [
+        0.2819,
+        0.383,
+        0.1958,
+        0.0106
+      ],
+      "id": "lines.description[1]",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "lines.quantity",
+      "label": "Quantity",
+      "group": "lines",
+      "lineIndex": 1,
+      "value": "20",
+      "text": "20",
+      "page": 1,
+      "box": [
+        0.6458,
+        0.383,
+        0.0231,
+        0.0106
+      ],
+      "id": "lines.quantity[1]",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "lines.unitPrice",
+      "label": "Unit price",
+      "group": "lines",
+      "lineIndex": 1,
+      "value": "48.37",
+      "text": "48.37",
+      "page": 1,
+      "box": [
+        0.7535,
+        0.383,
+        0.0431,
+        0.0106
+      ],
+      "id": "lines.unitPrice[1]",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "lines.amount",
+      "label": "Amount",
+      "group": "lines",
+      "lineIndex": 1,
+      "value": "967.40",
+      "text": "967.40",
+      "page": 1,
+      "box": [
+        0.8797,
+        0.383,
+        0.0535,
+        0.0106
+      ],
+      "id": "lines.amount[1]",
+      "confidence": 0.96,
+      "uncertain": false
+    },
+    {
+      "key": "lines.partNumber",
+      "label": "Part number",
+      "group": "lines",
+      "lineIndex": 2,
+      "value": "ZEP-MP-A-2656",
+      "text": "ZEP-MP-A-2656",
+      "page": 1,
+      "box": [
+        0.1072,
+        0.4079,
+        0.1187,
+        0.0106
+      ],
+      "id": "lines.partNumber[2]",
+      "confidence": 0.97,
+      "uncertain": false
+    },
+    {
+      "key": "lines.description",
+      "label": "Description",
+      "group": "lines",
+      "lineIndex": 2,
+      "value": "Zephrine Mouse Pad Large",
+      "text": "Zephrine Mouse Pad Large",
+      "page": 1,
+      "box": [
+        0.2819,
+        0.4081,
+        0.1881,
+        0.012
+      ],
+      "id": "lines.description[2]",
+      "confidence": 0.96,
+      "uncertain": false
+    },
+    {
+      "key": "lines.quantity",
+      "label": "Quantity",
+      "group": "lines",
+      "lineIndex": 2,
+      "value": "20",
+      "text": "20",
+      "page": 1,
+      "box": [
+        0.6458,
+        0.4079,
+        0.0231,
+        0.0106
+      ],
+      "id": "lines.quantity[2]",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "lines.unitPrice",
+      "label": "Unit price",
+      "group": "lines",
+      "lineIndex": 2,
+      "value": "5.37",
+      "text": "5.37",
+      "page": 1,
+      "box": [
+        0.7626,
+        0.4079,
+        0.034,
+        0.0106
+      ],
+      "id": "lines.unitPrice[2]",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "lines.amount",
+      "label": "Amount",
+      "group": "lines",
+      "lineIndex": 2,
+      "value": "107.40",
+      "text": "107.40",
+      "page": 1,
+      "box": [
+        0.8825,
+        0.4079,
+        0.0506,
+        0.0106
+      ],
+      "id": "lines.amount[2]",
+      "confidence": 0.96,
+      "uncertain": false
+    },
+    {
+      "key": "total",
+      "label": "Total (USD)",
+      "group": "totals",
+      "lineIndex": null,
+      "value": "1645.42",
+      "text": "1,645.42",
+      "page": 1,
+      "box": [
+        0.8539,
+        0.4426,
+        0.0809,
+        0.0144
+      ],
+      "id": "total",
+      "confidence": 0.97,
+      "uncertain": false
+    },
+    {
+      "key": "amountDue",
+      "label": "Due now (100%)",
+      "group": "totals",
+      "lineIndex": null,
+      "value": "1645.42",
+      "text": "1,645.42",
+      "page": 1,
+      "box": [
+        0.868,
+        0.4653,
+        0.0669,
+        0.0128
+      ],
+      "id": "amountDue",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "balanceDue",
+      "label": "Balance before shipment",
+      "group": "totals",
+      "lineIndex": null,
+      "value": "0.00",
+      "text": "0.00",
+      "page": 1,
+      "box": [
+        0.8954,
+        0.4843,
+        0.0395,
+        0.0112
+      ],
+      "id": "balanceDue",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "bankBeneficiary",
+      "label": "Beneficiary",
+      "group": "bank",
+      "lineIndex": null,
+      "value": "Spectra Innovations Pte Ltd",
+      "text": "Spectra Innovations Pte Ltd",
+      "page": 1,
+      "box": [
+        0.0753,
+        0.5726,
+        0.202,
+        0.0122
+      ],
+      "id": "bankBeneficiary",
+      "confidence": 0.96,
+      "uncertain": false
+    },
+    {
+      "key": "bankName",
+      "label": "Bank",
+      "group": "bank",
+      "lineIndex": null,
+      "value": "Demo Bank (not a real bank)",
+      "text": "Demo Bank (not a real bank)",
+      "page": 1,
+      "box": [
+        0.5148,
+        0.5723,
+        0.2042,
+        0.012
+      ],
+      "id": "bankName",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "bankAccountNo",
+      "label": "Account number",
+      "group": "bank",
+      "lineIndex": null,
+      "value": "0000 0000 0000",
+      "text": "0000 0000 0000",
+      "page": 1,
+      "box": [
+        0.0753,
+        0.6059,
+        0.131,
+        0.0108
+      ],
+      "id": "bankAccountNo",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "swiftCode",
+      "label": "SWIFT code",
+      "group": "bank",
+      "lineIndex": null,
+      "value": "DEMOZZ00",
+      "text": "DEMOZZ00",
+      "page": 1,
+      "box": [
+        0.5148,
+        0.6059,
+        0.0766,
+        0.0108
+      ],
+      "id": "swiftCode",
+      "confidence": 0.94,
+      "uncertain": false
+    }
+  ]
+}

@@ -1,6 +1,6 @@
-import type { Color } from "../canvas.js";
 import type { DocumentKind } from "../model.js";
 import { drawTable, type Column, type TableLook } from "../table.js";
+import { JADE, drawPaymentBox } from "./payment-box.js";
 import {
   CONTENT_WIDTH,
   MARGIN,
@@ -15,8 +15,6 @@ import {
   type CaptionStyle,
   type DrawLayout,
 } from "./kit.js";
-
-const JADE: Color = [0.07, 0.4, 0.33];
 
 const TITLES: Record<DocumentKind, string> = {
   CUSTOMER_PO: "PURCHASE ORDER",
@@ -170,49 +168,5 @@ export const drawHouse: DrawLayout = (canvas, facts, f) => {
   sumRow("Due now", f.amountDue, bottom + 40);
   sumRow("Balance before shipment", f.balanceDue, bottom + 56);
 
-  const bank = f.bank;
-  if (bank) {
-    const top = bottom + 84;
-    canvas.rect(
-      { x: MARGIN, y: top, w: CONTENT_WIDTH, h: 84 },
-      { stroke: JADE, lineWidth: 1 },
-    );
-    canvas.text("PAYMENT DETAILS", MARGIN + 10, top + 15, {
-      font: "sansBold",
-      size: 8,
-      color: JADE,
-    });
-    canvas.text(
-      "Demo bank details for this synthetic document. Not a real account: do not pay.",
-      RIGHT - 10,
-      top + 15,
-      {
-        font: "sans",
-        size: 7.5,
-        color: MUTED,
-        align: "right",
-      },
-    );
-    const cell = CONTENT_WIDTH / 2;
-    captioned(canvas, bank.beneficiary, MARGIN + 10, top + 34, CAPTION);
-    captioned(canvas, bank.bankName, MARGIN + 10 + cell, top + 34, CAPTION);
-    captioned(canvas, bank.accountNo, MARGIN + 10, top + 62, {
-      ...CAPTION,
-      valueFont: "mono",
-    });
-    captioned(canvas, bank.swiftCode, MARGIN + 10 + cell, top + 62, {
-      ...CAPTION,
-      valueFont: "mono",
-    });
-    canvas.text(
-      `Please quote ${facts.number} as the payment reference.`,
-      MARGIN,
-      top + 102,
-      {
-        font: "sans",
-        size: 8,
-        color: MUTED,
-      },
-    );
-  }
+  if (f.bank) drawPaymentBox(canvas, facts, f.bank, bottom + 84, CAPTION);
 };
