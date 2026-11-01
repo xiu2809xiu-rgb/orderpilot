@@ -98,23 +98,16 @@ export class MockWorkflowReadModel extends WorkflowReadModel {
     const { dataset, orders, customers } = this.view();
     const order = orders.get(orderNo);
     if (!order) return Promise.resolve(null);
-    const flow = buildFlow(
-      order,
-      customers.get(order.header.sellToCustomerNo) ??
-        order.header.sellToCustomerNo,
-      dataset.payments,
-      dataset.asOf,
+    return Promise.resolve(
+      buildFlow(
+        order,
+        customers.get(order.header.sellToCustomerNo) ??
+          order.header.sellToCustomerNo,
+        dataset.payments,
+        dataset.asOf,
+        this.overlay.paymentsOf(orderNo),
+      ),
     );
-    return Promise.resolve({
-      ...flow,
-      payment: {
-        ...flow.payment,
-        confirmations: [
-          ...flow.payment.confirmations,
-          ...this.overlay.paymentsOf(orderNo),
-        ],
-      },
-    });
   }
 
   sprByRecordNo(recordNo: string): Promise<SprRecord | null> {

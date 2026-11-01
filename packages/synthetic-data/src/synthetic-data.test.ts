@@ -466,7 +466,8 @@ describe("one story across the screens", () => {
       expect(task.orderNo && seen.has(task.orderNo)).toBe(false);
       if (task.orderNo) seen.add(task.orderNo);
       const order = orderOf(task.orderNo ?? "");
-      expect(task.amount).toBe(order.total);
+      const spr = data.sprs.find((s) => s.orderNo === task.orderNo);
+      expect(task.amount).toBe(task.ref ? spr?.amount : order.total);
       expect(task.customerName).toBe(customerOf(data, order));
       expect(task.overdue).toBe(task.dueAt.slice(0, 10) < data.asOf);
     }
@@ -493,11 +494,13 @@ describe("one story across the screens", () => {
         role,
       ).toBeGreaterThanOrEqual(4);
       expect(
-        new Set(tasks.map((t) => Math.round(Number(t.amount) / 5000))).size,
+        // SPR tasks carry the request's amount, and an SPR stays under the
+        // approver's USD 5,000 limit, so the buckets are USD 1,000 wide.
+        new Set(tasks.map((t) => Math.round(Number(t.amount) / 1000))).size,
         role,
       ).toBeGreaterThanOrEqual(3);
     }
-    expect(new Set(data.tasks.map((t) => t.kind)).size).toBe(7);
+    expect(new Set(data.tasks.map((t) => t.kind)).size).toBe(8);
   });
 
   it("reminds roles about the tasks that are due or late, and escalates the very late", () => {
@@ -625,6 +628,18 @@ describe("looking fake", () => {
         .filter((l) => l.no === item.no)
         .reduce((sum, l) => sum + Number(l.qtyToShip), 0);
       expect(Number(item.qtyOnSalesOrder)).toBeGreaterThanOrEqual(open);
+    }
+  });
+
+  it("asks for payments in whole cents, and the parts add up to the order", () => {
+    for (const payment of data.payments) {
+      expect(payment.amount, payment.orderNo).toMatch(/^\d+\.\d{2}$/);
+    }
+    for (const order of data.orders) {
+      const parts = data.payments.filter((p) => p.orderNo === order.header.no);
+      if (parts.length < 2) continue;
+      const sum = parts.reduce((total, p) => addDecimal(total, p.amount), "0");
+      expect(sum, order.header.no).toBe(order.total);
     }
   });
 

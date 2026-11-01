@@ -19,6 +19,7 @@ export const TASK_KINDS = [
   "SEND_PI",
   "CONFIRM_PAYMENT",
   "PACK_ORDER",
+  "RECOUNT_CARTONS",
   "ADD_SHIPPING_DOCUMENTS",
 ] as const;
 export const taskKindSchema = z.enum(TASK_KINDS);
@@ -50,7 +51,7 @@ export const workflowTaskSchema = z.object({
   // they are optional so a read model that cannot say them yet still parses.
   customerNo: z.string().min(1).optional(),
   customerName: z.string().min(1).optional(),
-  /** The order's value, in `currencyCode`. */
+  /** What the task is about, in `currencyCode`: an SPR's own amount on an SPR task, else the order's value. */
   amount: decimalStringSchema.optional(),
   currencyCode: z.string().length(3).optional(),
   priority: taskPrioritySchema.optional(),
@@ -84,6 +85,7 @@ export const COMPLETABLE_TASK_KINDS = [
   "RAISE_SPR",
   "SEND_PI",
   "PACK_ORDER",
+  "RECOUNT_CARTONS",
   "ADD_SHIPPING_DOCUMENTS",
 ] as const satisfies readonly TaskKind[];
 

@@ -11,8 +11,9 @@ import type {
   Item,
   SampleException,
   SampleOrder,
+  SampleScreenState,
 } from "@orderpilot/synthetic-data";
-import { SAMPLE_STEPS, sampleStepFor } from "./mock-status.js";
+import { SAMPLE_STEPS, sampleStepFor, type SampleStep } from "./mock-status.js";
 
 // Mock builders for the base's screens. They read the synthetic data's sample
 // scenarios and write typed results that say so (`mock.` rule ids). They hold
@@ -34,18 +35,38 @@ function stepTime(order: SampleOrder, index: number): string {
   return `${order.header.orderDate}T${hour}:00:00.000Z`;
 }
 
+/**
+ * On credit terms nothing is paid before the goods go, so the steps that say
+ * so elsewhere read differently. Only the words change, for one mock timeline.
+ */
+const ON_CREDIT: Partial<Record<SampleScreenState, Partial<SampleStep>>> = {
+  "sample-awaiting-payment": {
+    effect: "No prepayment on these terms: payment follows the invoice",
+  },
+  "sample-ready-to-pick": {
+    actor: "System",
+    title: "Released for packing",
+    effect: "Credit terms: the warehouse can pick before payment",
+  },
+  "sample-closed": { title: "Payment received" },
+};
+
 export function mockTimeline(order: SampleOrder): TimelineStep[] {
   const current = SAMPLE_STEPS.findIndex(
     (entry) => entry.state === order.sampleScreenState,
   );
-  return SAMPLE_STEPS.slice(0, current + 1).map((entry, index) => ({
-    id: `${order.header.no}-step-${String(index + 1)}`,
-    at: stepTime(order, index),
-    actor: entry.actor,
-    title: entry.title,
-    effect: entry.effect,
-    current: index === current,
-  }));
+  const credit = Number(order.header.prepaymentPercent) === 0;
+  return SAMPLE_STEPS.slice(0, current + 1).map((step, index) => {
+    const entry = { ...step, ...(credit ? ON_CREDIT[step.state] : {}) };
+    return {
+      id: `${order.header.no}-step-${String(index + 1)}`,
+      at: stepTime(order, index),
+      actor: entry.actor,
+      title: entry.title,
+      effect: entry.effect,
+      current: index === current,
+    };
+  });
 }
 
 /**

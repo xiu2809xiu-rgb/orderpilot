@@ -49,6 +49,7 @@
       "SEND_PI": "Send pro forma invoice",
       "CONFIRM_PAYMENT": "Confirm payment",
       "PACK_ORDER": "Pack order",
+      "RECOUNT_CARTONS": "Recount cartons",
       "ADD_SHIPPING_DOCUMENTS": "Add shipping documents"
     }
   },

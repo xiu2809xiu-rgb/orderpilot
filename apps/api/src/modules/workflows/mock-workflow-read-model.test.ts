@@ -57,6 +57,31 @@ describe("the mock read model", () => {
     );
   });
 
+  it("never shows the payment step done while a payment task is open", async () => {
+    const payable = dataset.tasks.filter((t) => t.kind === "CONFIRM_PAYMENT");
+    expect(payable.length).toBeGreaterThan(0);
+    for (const task of payable) {
+      const flow = await model.flowOf(task.orderNo ?? "");
+      const step = flow?.steps.find((s) => s.key === "payment-confirmed");
+      expect(step?.state, task.orderNo ?? "").toBe("current");
+      expect(step?.completedAt).toBeNull();
+    }
+  });
+
+  it("does not call a step paid when an order on credit terms has paid nothing", async () => {
+    const credit = orders.filter(
+      (o) =>
+        Number(o.header.prepaymentPercent) === 0 &&
+        o.sampleScreenState === "sample-ready-to-pick",
+    );
+    expect(credit.length).toBeGreaterThan(0);
+    for (const order of credit) {
+      const flow = await model.flowOf(order.header.no);
+      const step = flow?.steps.find((s) => s.key === "payment-confirmed");
+      expect(step?.state, order.header.no).toBe("upcoming");
+    }
+  });
+
   it("numbers the SPRs the OrderPilot way, with Navision's number beside", async () => {
     const approved = dataset.sprs.find((s) => s.status === "approved");
     const suggested = dataset.sprs.find((s) => s.status === "suggested");

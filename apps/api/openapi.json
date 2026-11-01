@@ -879,6 +879,7 @@
                 "SEND_PI",
                 "CONFIRM_PAYMENT",
                 "PACK_ORDER",
+                "RECOUNT_CARTONS",
                 "ADD_SHIPPING_DOCUMENTS"
               ]
             }
@@ -920,6 +921,7 @@
                               "SEND_PI",
                               "CONFIRM_PAYMENT",
                               "PACK_ORDER",
+                              "RECOUNT_CARTONS",
                               "ADD_SHIPPING_DOCUMENTS"
                             ]
                           },
@@ -1272,6 +1274,7 @@
                 "SEND_PI",
                 "CONFIRM_PAYMENT",
                 "PACK_ORDER",
+                "RECOUNT_CARTONS",
                 "ADD_SHIPPING_DOCUMENTS"
               ]
             }
@@ -1322,6 +1325,7 @@
                               "SEND_PI",
                               "CONFIRM_PAYMENT",
                               "PACK_ORDER",
+                              "RECOUNT_CARTONS",
                               "ADD_SHIPPING_DOCUMENTS"
                             ]
                           },
