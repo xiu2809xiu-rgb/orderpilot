@@ -12,6 +12,7 @@ import {
   getMasterDataVendorMockHandler,
 } from "@/lib/api/generated/endpoints/master-data/master-data.msw";
 import type {
+  MasterDataFilters200,
   MasterDataItem200,
   MasterDataItems200,
   MasterDataVendor200,
@@ -43,7 +44,7 @@ const row = (no: string, availability: "short" | "low" | "ok") => ({
   no,
   description: `Synthetic switch ${no}`,
   partNumber: `PN-${no}`,
-  brand: "Northwind",
+  brand: "Synthetic Brand",
   category: "IT" as const,
   baseUnitOfMeasure: "PCS",
   inventory: "120",
@@ -62,9 +63,9 @@ const itemList = (rows: ReturnType<typeof row>[]) =>
     meta: { page: 1, pageSize: 25, total: rows.length, mock: true },
   }) as MasterDataItems200;
 
-const filters = {
+const filters: MasterDataFilters200 = {
   data: {
-    brands: ["Northwind"],
+    brands: ["Synthetic Brand"],
     categories: ["IT", "SURVEILLANCE", "ACCESSORIES"],
     vendors: [{ no: "V-0001", name: "Synthetic Vendor One" }],
     countries: ["IN"],
