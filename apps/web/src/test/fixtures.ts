@@ -53,6 +53,8 @@ export interface MockApiState {
   session: Session | null;
   refreshWorks: boolean;
   password: string;
+  /** Holds back `/auth/options`, to test what the form does while it waits. */
+  optionsDelayMs: number;
 }
 
 /** A fake API for the auth contract. Calls are recorded in `fetch.mock.calls`. */
@@ -62,6 +64,7 @@ export function mockApi(initial: Partial<MockApiState> = {}) {
     session: null,
     refreshWorks: true,
     password: "correct-horse",
+    optionsDelayMs: 0,
     ...initial,
   };
 
@@ -78,9 +81,11 @@ export function mockApi(initial: Partial<MockApiState> = {}) {
 
     switch (route) {
       case "GET /auth/options":
-        return Promise.resolve(
-          json(200, { data: optionsFixture(state.demoMode) }),
-        );
+        return new Promise<Response>((resolve) => {
+          setTimeout(() => {
+            resolve(json(200, { data: optionsFixture(state.demoMode) }));
+          }, state.optionsDelayMs);
+        });
       case "GET /auth/me":
         return Promise.resolve(
           state.session

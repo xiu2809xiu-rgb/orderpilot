@@ -54,6 +54,28 @@ describe("the sign-in page with demo mode on", () => {
     expect(router.state.location.pathname).toBe("/");
   });
 
+  it("keeps what was typed, and the focus, when the roles arrive", async () => {
+    const user = userEvent.setup();
+    renderApp("/login", { demoMode: true, optionsDelayMs: 300 });
+    await user.click(await screen.findByLabelText("Email"));
+    await user.keyboard("abc");
+    await screen.findByRole("list", { name: "Demo roles" });
+    await user.keyboard("def");
+    expect(screen.getByLabelText("Email")).toHaveValue("abcdef");
+    expect(screen.getByLabelText("Email")).toHaveFocus();
+  });
+
+  it("shows a sign-in failure once while the roles are still loading", async () => {
+    const user = userEvent.setup();
+    renderApp("/login", { demoMode: true, optionsDelayMs: 30_000 });
+    await user.type(await screen.findByLabelText("Email"), "a@b.sg");
+    await user.type(screen.getByLabelText("Password"), "wrong{Enter}");
+    await screen.findByRole("alert");
+    // The roles are still on their way: only one place may draw the failure.
+    expect(screen.queryByRole("list", { name: "Demo roles" })).toBeNull();
+    expect(screen.getAllByRole("alert")).toHaveLength(1);
+  });
+
   it("says the AI and Navision are stand-ins", async () => {
     renderApp("/login", { demoMode: true });
     expect(await screen.findByText(/stand-ins/)).toBeInTheDocument();

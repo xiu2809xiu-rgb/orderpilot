@@ -78,6 +78,7 @@ export function SignInForm({
     />
   ) : null;
   const star = demoFirst && roles !== null;
+  const roleFirstLayout = demoFirst && (star || options.isPending);
 
   // Keyed, so the form keeps what was typed when the demo roles arrive above it.
   const form = (
@@ -87,12 +88,12 @@ export function SignInForm({
       idPrefix={idPrefix}
       busy={busy}
       secondary={star}
-      alert={star ? null : alert}
+      alert={roleFirstLayout ? null : alert}
       onSubmit={(values) => run(() => login(values))}
     />
   );
 
-  if (demoFirst && (star || options.isPending)) {
+  if (roleFirstLayout) {
     return (
       <div className="space-y-s3">
         {star ? (
