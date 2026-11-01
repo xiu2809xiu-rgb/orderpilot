@@ -182,6 +182,17 @@ describe("stack smoke", () => {
       );
     });
 
+    it("ignores a trailing comment, as compose does", () => {
+      assert.equal(
+        webPort({}, () => "STACK_WEB_PORT=7380 # moved\n"),
+        "7380",
+      );
+      assert.equal(
+        webPort({}, () => 'STACK_WEB_PORT="7381"  # moved\n'),
+        "7381",
+      );
+    });
+
     it("falls back to 8080 with no file, no line or a bad value", () => {
       const absent = () => {
         throw new Error("ENOENT");

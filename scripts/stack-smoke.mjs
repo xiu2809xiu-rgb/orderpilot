@@ -40,7 +40,9 @@ export function webPort(env, readRootEnv) {
     // No .env is fine: the default port is then the right one.
   }
   const line = /^\s*STACK_WEB_PORT\s*=\s*(.*?)\s*$/m.exec(text)?.[1] ?? "";
-  const value = line.replace(/^(["'])(.*)\1$/, "$2");
+  // Compose ends an unquoted value at " #", and a quoted one at its closing quote.
+  const quoted = /^(["'])(.*?)\1/.exec(line)?.[2];
+  const value = (quoted ?? line.replace(/\s+#.*$/, "")).trim();
   return /^\d{1,5}$/.test(value) ? value : "8080";
 }
 
