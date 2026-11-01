@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import type { PageQuery } from "@orderpilot/shared";
+import type { UserListQuery } from "@orderpilot/shared";
 import { AuditService } from "../audit/audit.service.js";
 import type { AuthContext } from "../auth/auth-context.js";
 import type { Page } from "../common/repository.js";
@@ -36,7 +36,7 @@ export class UsersService {
     @Inject(Database) private readonly database: Database,
   ) {}
 
-  async list(query: PageQuery): Promise<Page<UserView>> {
+  async list(query: UserListQuery): Promise<Page<UserView>> {
     const page = await this.users.list(query);
     return { items: page.items.map(toView), meta: page.meta };
   }

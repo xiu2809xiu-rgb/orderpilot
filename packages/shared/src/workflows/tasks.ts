@@ -1,9 +1,10 @@
 import { z } from "zod";
 import { pageQuerySchema } from "../envelope.js";
+import { paymentTypeSchema } from "../governance/payment.js";
 import { decimalStringSchema } from "../money.js";
 import { recordRefSchema } from "../record-number.js";
 import { roleSchema } from "../roles.js";
-import { orderNoSchema } from "./common.js";
+import { mockRecordedSchema, orderNoSchema } from "./common.js";
 
 /**
  * The kinds of task a step can give a role. A starter list for the sales flow:
@@ -55,6 +56,14 @@ export const workflowTaskSchema = z.object({
   priority: taskPrioritySchema.optional(),
   /** The person in the role who holds the task. */
   assigneeName: z.string().min(1).optional(),
+  /** On a payment task: the payment it waits for, so one click can confirm it. */
+  expectedPayment: z
+    .object({
+      paymentType: paymentTypeSchema,
+      amount: decimalStringSchema,
+      currencyCode: z.string().length(3),
+    })
+    .optional(),
 });
 export type WorkflowTask = z.infer<typeof workflowTaskSchema>;
 
@@ -65,3 +74,40 @@ export const tasksQuerySchema = pageQuerySchema.extend({
   priority: taskPrioritySchema.optional(),
 });
 export type TasksQuery = z.infer<typeof tasksQuerySchema>;
+
+/**
+ * The kinds a person simply marks as done. Reviewing fields has its own screen,
+ * and an SPR or a payment has its own route and its own permission, so the
+ * general Complete route must never stand in for those.
+ */
+export const COMPLETABLE_TASK_KINDS = [
+  "RAISE_SPR",
+  "SEND_PI",
+  "PACK_ORDER",
+  "ADD_SHIPPING_DOCUMENTS",
+] as const satisfies readonly TaskKind[];
+
+export const taskActionResultSchema = mockRecordedSchema.extend({
+  taskId: z.uuid(),
+  /** "OPEN" after an Undo, "DONE" after a completion. */
+  status: taskStatusSchema,
+});
+export type TaskActionResult = z.infer<typeof taskActionResultSchema>;
+
+/**
+ * The business rules that stay configuration until Spectra confirms them, with
+ * today's draft value. `screen` is the web route where the rule can be read,
+ * or null when no screen holds it yet.
+ */
+export const OPEN_RULE_IDS = [
+  "sprTrigger",
+  "piSequence",
+  "approversAndLimits",
+  "delegation",
+] as const;
+export const openRuleSchema = z.object({
+  id: z.enum(OPEN_RULE_IDS),
+  value: z.string().min(1),
+  screen: z.string().min(1).nullable(),
+});
+export type OpenRule = z.infer<typeof openRuleSchema>;

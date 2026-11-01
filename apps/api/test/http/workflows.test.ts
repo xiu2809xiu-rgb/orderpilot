@@ -1,7 +1,7 @@
 import { syntheticDataset } from "@orderpilot/synthetic-data";
 import {
   INBOX_ROLES,
-  NOT_APPLIED_MESSAGE,
+  MOCK_RECORDED_MESSAGE,
   ROLES,
   errorEnvelopeSchema,
   type Role,
@@ -158,7 +158,7 @@ describe("the area 2 routes", () => {
       );
     });
 
-    it("lets the approver approve or reject with a comment, and changes nothing", async () => {
+    it("lets the approver approve or reject with a comment, and keeps it on mock data", async () => {
       for (const action of ["approve", "reject"] as const) {
         const res = await call(
           t,
@@ -169,11 +169,16 @@ describe("the area 2 routes", () => {
         );
         expect(res.status, action).toBe(200);
         const body = sprDecisionResponseSchema.parse(res.body);
-        expect(body.data.applied).toBe(false);
-        expect(body.data.message).toBe(NOT_APPLIED_MESSAGE);
+        expect(body.data.applied).toBe(true);
+        expect(body.data.message).toBe(MOCK_RECORDED_MESSAGE);
       }
       const after = await call(t, as("APPROVER"), "get", `${W}/sprs/${SPR}`);
-      expect(sprResponseSchema.parse(after.body).data.decision).toBeNull();
+      expect(sprResponseSchema.parse(after.body).data.decision?.outcome).toBe(
+        "rejected",
+      );
+      await call(t, as("APPROVER"), "post", `${W}/sprs/${SPR}/undo`, {
+        csrf: true,
+      });
     });
 
     it("needs a comment", async () => {
@@ -217,7 +222,7 @@ describe("the area 2 routes", () => {
       paidOn: data.asOf,
     };
 
-    it("takes a payment type, checks it and stores nothing", async () => {
+    it("takes a payment type and keeps the confirmation on mock data", async () => {
       const res = await call(
         t,
         as("FINANCE"),
@@ -226,7 +231,15 @@ describe("the area 2 routes", () => {
         { csrf: true, body },
       );
       expect(res.status).toBe(200);
-      expect(paymentResponseSchema.parse(res.body).data.applied).toBe(false);
+      const answer = paymentResponseSchema.parse(res.body).data;
+      expect(answer.applied).toBe(true);
+      await call(
+        t,
+        as("FINANCE"),
+        "post",
+        `${W}/orders/${ORDER}/payments/${answer.paymentId}/undo`,
+        { csrf: true },
+      );
     });
 
     it("refuses an unknown payment type and a role that cannot confirm", async () => {

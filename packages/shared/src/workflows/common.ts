@@ -30,5 +30,20 @@ export const notAppliedSchema = z.object({
 export const NOT_APPLIED_MESSAGE =
   "Nothing was changed. The workflow engine is not built yet, so this was only checked.";
 
+/**
+ * What a command answers while a mock overlay keeps its result: the screens
+ * move on and the action can be undone, but only until the API restarts. The
+ * order's own status does not change. Area 2's state machine replaces this.
+ */
+export const mockRecordedSchema = z.object({
+  applied: z.literal(true),
+  message: z.string(),
+});
+export const MOCK_RECORDED_MESSAGE =
+  "Recorded on mock data. The order's status has not changed, and a restart of the API forgets this.";
+
+/** A task in an inbox: the path of its Complete and Undo routes. */
+export const taskParamsSchema = z.object({ taskId: z.uuid() });
+
 /** The path of the routes that open one role's inbox: `/workflows/inboxes/WAREHOUSE/tasks`. */
 export const inboxParamsSchema = z.object({ role: inboxRoleSchema });

@@ -177,15 +177,8 @@ describe("the service over the mock", () => {
     expect(kind.meta.total).toBe(0);
   });
 
-  it("says a decision changed nothing", async () => {
-    const result = await service.decide(sprNo, "approved", "Fine.");
-    expect(result).toMatchObject({ applied: false, outcome: "approved" });
-  });
-
   it("refuses an unknown SPR or order", async () => {
-    await expect(
-      service.decide("SPR-20261102-9999", "rejected", "No."),
-    ).rejects.toThrow();
+    await expect(service.spr("SPR-20261102-9999")).rejects.toThrow();
     await expect(service.flow("SO-9999")).rejects.toThrow();
   });
 });

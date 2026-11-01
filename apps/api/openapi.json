@@ -433,7 +433,8 @@
                               "payments.post",
                               "workflows.read",
                               "spr.read",
-                              "workflows.inboxes.any"
+                              "workflows.inboxes.any",
+                              "tasks.complete"
                             ]
                           }
                         },
@@ -534,7 +535,8 @@
                               "payments.post",
                               "workflows.read",
                               "spr.read",
-                              "workflows.inboxes.any"
+                              "workflows.inboxes.any",
+                              "tasks.complete"
                             ]
                           }
                         },
@@ -670,7 +672,8 @@
                               "payments.post",
                               "workflows.read",
                               "spr.read",
-                              "workflows.inboxes.any"
+                              "workflows.inboxes.any",
+                              "tasks.complete"
                             ]
                           }
                         },
@@ -799,7 +802,8 @@
                               "payments.post",
                               "workflows.read",
                               "spr.read",
-                              "workflows.inboxes.any"
+                              "workflows.inboxes.any",
+                              "tasks.complete"
                             ]
                           }
                         },
@@ -1000,6 +1004,35 @@
                           "assigneeName": {
                             "type": "string",
                             "minLength": 1
+                          },
+                          "expectedPayment": {
+                            "type": "object",
+                            "properties": {
+                              "paymentType": {
+                                "type": "string",
+                                "enum": [
+                                  "prepayment",
+                                  "deposit",
+                                  "balance",
+                                  "full-payment"
+                                ]
+                              },
+                              "amount": {
+                                "type": "string",
+                                "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                              },
+                              "currencyCode": {
+                                "type": "string",
+                                "minLength": 3,
+                                "maxLength": 3
+                              }
+                            },
+                            "required": [
+                              "paymentType",
+                              "amount",
+                              "currencyCode"
+                            ],
+                            "additionalProperties": false
                           }
                         },
                         "required": [
@@ -1052,6 +1085,142 @@
           }
         },
         "summary": "The caller's own task inbox (mock data)",
+        "tags": ["Workflows"]
+      }
+    },
+    "/api/v1/workflows/tasks/{taskId}/complete": {
+      "post": {
+        "operationId": "Workflows_completeTask",
+        "parameters": [
+          {
+            "name": "taskId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "applied": {
+                          "type": "boolean",
+                          "enum": [true]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "taskId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": ["OPEN", "DONE", "CANCELLED"]
+                        }
+                      },
+                      "required": ["applied", "message", "taskId", "status"],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "mock": {
+                          "type": "boolean",
+                          "enum": [true]
+                        }
+                      },
+                      "required": ["mock"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Mark a task in the caller's own inbox as done. Kept in the mock overlay, audited",
+        "tags": ["Workflows"]
+      }
+    },
+    "/api/v1/workflows/tasks/{taskId}/undo": {
+      "post": {
+        "operationId": "Workflows_undoTask",
+        "parameters": [
+          {
+            "name": "taskId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "applied": {
+                          "type": "boolean",
+                          "enum": [true]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "taskId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": ["OPEN", "DONE", "CANCELLED"]
+                        }
+                      },
+                      "required": ["applied", "message", "taskId", "status"],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "mock": {
+                          "type": "boolean",
+                          "enum": [true]
+                        }
+                      },
+                      "required": ["mock"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Undo a completed task. Audited",
         "tags": ["Workflows"]
       }
     },
@@ -1237,6 +1406,35 @@
                           "assigneeName": {
                             "type": "string",
                             "minLength": 1
+                          },
+                          "expectedPayment": {
+                            "type": "object",
+                            "properties": {
+                              "paymentType": {
+                                "type": "string",
+                                "enum": [
+                                  "prepayment",
+                                  "deposit",
+                                  "balance",
+                                  "full-payment"
+                                ]
+                              },
+                              "amount": {
+                                "type": "string",
+                                "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                              },
+                              "currencyCode": {
+                                "type": "string",
+                                "minLength": 3,
+                                "maxLength": 3
+                              }
+                            },
+                            "required": [
+                              "paymentType",
+                              "amount",
+                              "currencyCode"
+                            ],
+                            "additionalProperties": false
                           }
                         },
                         "required": [
@@ -1991,7 +2189,7 @@
                       "properties": {
                         "applied": {
                           "type": "boolean",
-                          "enum": [false]
+                          "enum": [true]
                         },
                         "message": {
                           "type": "string"
@@ -1999,6 +2197,11 @@
                         "orderNo": {
                           "type": "string",
                           "pattern": "^[A-Za-z0-9-]{1,30}$"
+                        },
+                        "paymentId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                         },
                         "paymentType": {
                           "type": "string",
@@ -2014,6 +2217,7 @@
                         "applied",
                         "message",
                         "orderNo",
+                        "paymentId",
                         "paymentType"
                       ],
                       "additionalProperties": false
@@ -2037,7 +2241,89 @@
             }
           }
         },
-        "summary": "Confirm a payment, with its type. Checked only: nothing is stored",
+        "summary": "Confirm a payment, with its type. Kept in the mock overlay, audited",
+        "tags": ["Workflows"]
+      }
+    },
+    "/api/v1/workflows/orders/{orderNo}/payments/{paymentId}/undo": {
+      "post": {
+        "operationId": "Workflows_undoPayment",
+        "parameters": [
+          {
+            "name": "paymentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "orderNo",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "example": "SO-0003"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "applied": {
+                          "type": "boolean",
+                          "enum": [true]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "orderNo": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9-]{1,30}$"
+                        },
+                        "paymentId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        }
+                      },
+                      "required": [
+                        "applied",
+                        "message",
+                        "orderNo",
+                        "paymentId"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "mock": {
+                          "type": "boolean",
+                          "enum": [true]
+                        }
+                      },
+                      "required": ["mock"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Undo a payment confirmation. Audited",
         "tags": ["Workflows"]
       }
     },
@@ -2411,7 +2697,7 @@
                       "properties": {
                         "applied": {
                           "type": "boolean",
-                          "enum": [false]
+                          "enum": [true]
                         },
                         "message": {
                           "type": "string"
@@ -2456,7 +2742,7 @@
             }
           }
         },
-        "summary": "Approve a stock purchase request, with a comment. Checked only: nothing is changed",
+        "summary": "Approve a stock purchase request, with a comment. Kept in the mock overlay, audited",
         "tags": ["Workflows"]
       }
     },
@@ -2506,7 +2792,7 @@
                       "properties": {
                         "applied": {
                           "type": "boolean",
-                          "enum": [false]
+                          "enum": [true]
                         },
                         "message": {
                           "type": "string"
@@ -2551,7 +2837,70 @@
             }
           }
         },
-        "summary": "Reject a stock purchase request, with a comment. Checked only: nothing is changed",
+        "summary": "Reject a stock purchase request, with a comment. Kept in the mock overlay, audited",
+        "tags": ["Workflows"]
+      }
+    },
+    "/api/v1/workflows/sprs/{recordNo}/undo": {
+      "post": {
+        "operationId": "Workflows_undoDecision",
+        "parameters": [
+          {
+            "name": "recordNo",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "example": "SPR-20261102-0001"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "applied": {
+                          "type": "boolean",
+                          "enum": [true]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "recordNo": {
+                          "type": "string",
+                          "pattern": "^SPR-\\d{8}-\\d{4,}$"
+                        }
+                      },
+                      "required": ["applied", "message", "recordNo"],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "mock": {
+                          "type": "boolean",
+                          "enum": [true]
+                        }
+                      },
+                      "required": ["mock"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Undo a decision on a request. Audited",
         "tags": ["Workflows"]
       }
     },
@@ -2655,6 +3004,69 @@
         "tags": ["Workflows"]
       }
     },
+    "/api/v1/workflows/open-rules": {
+      "get": {
+        "operationId": "Workflows_openRules",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "enum": [
+                              "sprTrigger",
+                              "piSequence",
+                              "approversAndLimits",
+                              "delegation"
+                            ]
+                          },
+                          "value": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "screen": {
+                            "nullable": true,
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "required": ["id", "value", "screen"],
+                        "additionalProperties": false
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "mock": {
+                          "type": "boolean",
+                          "enum": [true]
+                        }
+                      },
+                      "required": ["mock"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "The business rules waiting for Spectra to confirm, with their draft values",
+        "tags": ["Workflows"]
+      }
+    },
     "/api/v1/tracker/orders": {
       "get": {
         "operationId": "Tracker_list",
@@ -2696,7 +3108,13 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "enum": ["orderNo", "customerName", "orderDate", "shipmentDate"]
+              "enum": [
+                "orderNo",
+                "customerName",
+                "orderDate",
+                "shipmentDate",
+                "amount"
+              ]
             }
           },
           {
@@ -2718,13 +3136,31 @@
             }
           },
           {
+            "name": "open",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["true", "false"]
+            }
+          },
+          {
+            "name": "documentToConfirm",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["true", "false"]
+            }
+          },
+          {
             "name": "status",
             "required": false,
             "in": "query",
             "schema": {
               "type": "string",
               "minLength": 1,
-              "maxLength": 60
+              "maxLength": 400
             }
           },
           {
@@ -2839,6 +3275,15 @@
                             "type": "string",
                             "format": "date",
                             "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                          },
+                          "amount": {
+                            "type": "string",
+                            "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                          },
+                          "currencyCode": {
+                            "type": "string",
+                            "minLength": 3,
+                            "maxLength": 3
                           }
                         },
                         "required": [
@@ -2891,6 +3336,90 @@
           }
         },
         "summary": "The order tracker: status, owner and overdue flags, a page at a time. Mock data",
+        "tags": ["Tracker"]
+      }
+    },
+    "/api/v1/tracker/flow": {
+      "get": {
+        "operationId": "Tracker_flow",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "openOrders": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "steps": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "enum": [
+                                  "poIn",
+                                  "stock",
+                                  "pi",
+                                  "payment",
+                                  "pack",
+                                  "documents",
+                                  "forwarder",
+                                  "customerTold",
+                                  "awbAndPermit"
+                                ]
+                              },
+                              "statuses": {
+                                "minItems": 1,
+                                "type": "array",
+                                "items": {
+                                  "type": "string",
+                                  "minLength": 1
+                                }
+                              },
+                              "count": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              }
+                            },
+                            "required": ["id", "statuses", "count"],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": ["openOrders", "steps"],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "mock": {
+                          "type": "boolean",
+                          "enum": [true]
+                        }
+                      },
+                      "required": ["mock"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Open orders at each step of the sales flow, for the home page. Mock data",
         "tags": ["Tracker"]
       }
     },
@@ -3267,7 +3796,7 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "enum": ["OPEN", "RESOLVED"]
+              "enum": ["OPEN", "RESOLVED", "ALL"]
             }
           }
         ],
@@ -3577,7 +4106,8 @@
                               "payments.post",
                               "workflows.read",
                               "spr.read",
-                              "workflows.inboxes.any"
+                              "workflows.inboxes.any",
+                              "tasks.complete"
                             ]
                           }
                         },
@@ -3623,7 +4153,8 @@
                                     "payments.post",
                                     "workflows.read",
                                     "spr.read",
-                                    "workflows.inboxes.any"
+                                    "workflows.inboxes.any",
+                                    "tasks.complete"
                                   ]
                                 }
                               },
@@ -3676,7 +4207,8 @@
                                   "payments.post",
                                   "workflows.read",
                                   "spr.read",
-                                  "workflows.inboxes.any"
+                                  "workflows.inboxes.any",
+                                  "tasks.complete"
                                 ]
                               },
                               "kind": {
@@ -3700,9 +4232,21 @@
                       },
                       "required": ["permissions", "roles", "locked"],
                       "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": ["total"],
+                      "additionalProperties": false
                     }
                   },
-                  "required": ["data"],
+                  "required": ["data", "meta"],
                   "additionalProperties": false
                 }
               }
@@ -3805,7 +4349,8 @@
                 "payments.post",
                 "workflows.read",
                 "spr.read",
-                "workflows.inboxes.any"
+                "workflows.inboxes.any",
+                "tasks.complete"
               ]
             }
           },
@@ -3894,7 +4439,8 @@
                               "payments.post",
                               "workflows.read",
                               "spr.read",
-                              "workflows.inboxes.any"
+                              "workflows.inboxes.any",
+                              "tasks.complete"
                             ]
                           }
                         },
@@ -4071,7 +4617,8 @@
                               "payments.post",
                               "workflows.read",
                               "spr.read",
-                              "workflows.inboxes.any"
+                              "workflows.inboxes.any",
+                              "tasks.complete"
                             ]
                           }
                         },
@@ -4252,7 +4799,8 @@
                               "payments.post",
                               "workflows.read",
                               "spr.read",
-                              "workflows.inboxes.any"
+                              "workflows.inboxes.any",
+                              "tasks.complete"
                             ]
                           }
                         },
@@ -5735,6 +6283,15 @@
               "type": "integer",
               "minimum": 1,
               "maximum": 200
+            }
+          },
+          {
+            "name": "active",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["true", "false"]
             }
           }
         ],

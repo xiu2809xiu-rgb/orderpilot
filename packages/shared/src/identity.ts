@@ -1,6 +1,13 @@
 import { z } from "zod";
+import { pageQuerySchema } from "./envelope.js";
 import { permissionSchema } from "./permissions.js";
 import { roleSchema } from "./roles.js";
+
+/** A page of users. `active` keeps the enabled ("true") or the disabled ("false"). */
+export const userListQuerySchema = pageQuerySchema.extend({
+  active: z.enum(["true", "false"]).optional(),
+});
+export type UserListQuery = z.infer<typeof userListQuerySchema>;
 
 /** Who a record points at: enough to show a name and a role, never a password or a hash. */
 export const userRefSchema = z.object({

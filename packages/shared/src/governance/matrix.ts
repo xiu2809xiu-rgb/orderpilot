@@ -33,6 +33,7 @@ export const NEVER_FOR_SYSTEM_ADMIN = [
   "approvals.decide",
   "payments.confirm",
   "payments.post",
+  "tasks.complete",
 ] as const satisfies readonly Permission[];
 
 /** Kept on the system admin role, so the matrix can always be edited. */
@@ -80,6 +81,9 @@ export const matrixSchema = z.object({
   locked: z.array(lockedCellSchema),
 });
 export type Matrix = z.infer<typeof matrixSchema>;
+
+/** How many roles the matrix holds: the total a home tile shows. */
+export const matrixMetaSchema = z.object({ total: z.int().min(0) });
 
 export const matrixPermissionParamsSchema = z.object({
   role: roleSchema,

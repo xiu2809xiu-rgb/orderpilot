@@ -14,7 +14,10 @@ import type { SprRecord } from "./mock/mock-sprs.js";
  * are, and the routes drop `meta.mock`.
  */
 export abstract class WorkflowReadModel {
+  /** The open tasks in a role's inbox. */
   abstract tasksFor(role: InboxRole): Promise<WorkflowTask[]>;
+  /** One task, open or not: an Undo has to find a closed one. */
+  abstract taskById(id: string): Promise<WorkflowTask | null>;
   abstract flowOf(orderNo: string): Promise<OrderFlow | null>;
   abstract sprByRecordNo(recordNo: string): Promise<SprRecord | null>;
   abstract remindersFor(role: InboxRole): Promise<WorkflowReminder[]>;
