@@ -33,26 +33,26 @@ function planFor(order: SampleOrder): TaskPlan | null {
         role: "SUPPORT",
         title:
           scenario.kind === "price-mismatch"
-            ? "Confirm the unit price that differs from the price list"
+            ? "Confirm the differing unit price"
             : `Confirm the ${String(2 + (Number(order.header.no.slice(3)) % 3))} uncertain fields`,
       };
     case "sample-short-stock":
       return {
         kind: "RAISE_SPR",
         role: "PRODUCT_MANAGER",
-        title: "Review the suggested stock purchase request",
+        title: "Review the suggested SPR",
       };
     case "sample-pending-approval":
       return {
         kind: "APPROVE_SPR",
         role: "APPROVER",
-        title: "Approve or reject the stock purchase request",
+        title: "Approve or reject the SPR",
       };
     case "sample-pi-to-send":
       return {
         kind: "SEND_PI",
         role: "SUPPORT",
-        title: "Check and send the proforma invoice",
+        title: "Check and send the PI",
       };
     case "sample-awaiting-payment":
       return {
@@ -71,9 +71,9 @@ function planFor(order: SampleOrder): TaskPlan | null {
       };
     case "sample-packing-list-mismatch":
       return {
-        kind: "PACK_ORDER",
+        kind: "RECOUNT_CARTONS",
         role: "WAREHOUSE",
-        title: "Recount the cartons against the packing list",
+        title: "Recount the cartons",
       };
     case "sample-awb-overdue":
       return {
@@ -131,11 +131,13 @@ export function makeTasks(
     );
     const spr = sprs.find((s) => s.orderNo === order.header.no);
     // The ref is the SPR page's link, so only SPR tasks carry one. Any other
-    // task opens its order.
-    const recordNo =
+    // task opens its order. An SPR task's amount is the request's, because that
+    // is what the person is asked to approve, not the customer's whole order.
+    const taskSpr =
       plan.kind === "RAISE_SPR" || plan.kind === "APPROVE_SPR"
-        ? (spr?.recordNo ?? null)
-        : null;
+        ? spr
+        : undefined;
+    const recordNo = taskSpr?.recordNo ?? null;
     tasks.push({
       id: syntheticId(1, tasks.length + 1),
       kind: plan.kind,
@@ -143,14 +145,16 @@ export function makeTasks(
       assigneeRole: plan.role,
       assigneeName: order.owners[OWNER_OF[plan.role]],
       orderNo: order.header.no,
-      ref: recordNo ? { recordNo, navisionNo: spr?.navisionNo ?? null } : null,
+      ref: recordNo
+        ? { recordNo, navisionNo: taskSpr?.navisionNo ?? null }
+        : null,
       status: "OPEN",
       createdAt: atHour(order.step.enteredOn, 2 + (tasks.length % 6)),
       dueAt: atHour(dueOn, 9),
       overdue: dueOn < reference,
       customerNo: order.header.sellToCustomerNo,
       customerName: customer?.name ?? order.header.sellToCustomerNo,
-      amount: order.total,
+      amount: taskSpr?.amount ?? order.total,
       currencyCode: "USD",
       priority: order.priority,
     });

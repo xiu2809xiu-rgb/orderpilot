@@ -1,4 +1,4 @@
-import { fireEvent, screen, within } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { beforeAll, describe, expect, it } from "vitest";
 import i18n from "@/i18n";
 import {
@@ -7,6 +7,7 @@ import {
   getWorkflowsSprResponseMock,
 } from "@/lib/api/generated/endpoints/workflows/workflows.msw";
 import { axeViolations } from "@/test/axe";
+import { useToastStore } from "@/components/common/toast";
 import { server } from "@/test/server";
 import { renderWorkflowPage } from "./render";
 import SprApprovalPage from "./SprApprovalPage";
@@ -64,6 +65,7 @@ function spr(decision: null | { outcome: "approved"; by: string }) {
         },
       },
       substituteName: "Prakash Menon",
+      escalatesToName: "Sophia Chen",
       decision: decision
         ? {
             ...decision,
@@ -110,10 +112,13 @@ describe("the SPR approval page", () => {
       screen.getByText("Shortfall (suggested quantity)"),
     ).toBeInTheDocument();
     expect(screen.getByText("Limited: 5,000.00 USD")).toBeInTheDocument();
+    // A person, by name: the setup's raw approver id means nothing to staff.
+    expect(screen.getByText("Sophia Chen")).toBeInTheDocument();
+    expect(screen.queryByText(/00000000-0000/)).toBeNull();
     expect(await axeViolations(container)).toEqual([]);
   });
 
-  it("has one primary button, asks for a comment, and says nothing was changed", async () => {
+  it("has one primary button, asks for a comment, and offers Undo once it is done", async () => {
     server.use(
       getWorkflowsSprMockHandler(spr(null)),
       getWorkflowsApproveMockHandler(),
@@ -128,9 +133,10 @@ describe("the SPR approval page", () => {
       target: { value: "Checked against the quote." },
     });
     fireEvent.click(screen.getByRole("button", { name: "Approve" }));
-    expect(await screen.findByRole("status")).toHaveTextContent(
-      "Approved was checked",
-    );
+    await waitFor(() => {
+      expect(useToastStore.getState().items.at(-1)?.kind).toBe("done");
+    });
+    expect(useToastStore.getState().items.at(-1)?.undo).toBeTypeOf("function");
     const primary = screen
       .getAllByRole("button")
       .filter((button) => button.className.includes("bg-primary"));

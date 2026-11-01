@@ -41,13 +41,15 @@ export function ScrollRegion({
     };
   }, []);
 
+  // `relative` keeps an sr-only span (absolutely positioned) inside the clip:
+  // without it the span escapes the region and the whole page scrolls sideways.
   return (
     <div
       ref={ref}
       role="region"
       aria-label={label}
       className={cn(
-        "overflow-auto rounded-xl border bg-card focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none",
+        "relative overflow-auto rounded-xl border bg-card focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none",
         className,
       )}
     >

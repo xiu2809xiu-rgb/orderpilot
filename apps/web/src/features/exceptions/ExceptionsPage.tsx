@@ -1,31 +1,40 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { Truck } from "lucide-react";
 import type { CheckException } from "@orderpilot/shared";
 import {
   DataTable,
-  DEFAULT_QUERY,
   DemoBadge,
+  FilterChips,
   PageHeader,
   RelativeTime,
   StatusBadge,
+  useUrlTableQuery,
   type DataTableColumn,
-  type TableQuery,
 } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { useExceptionsList } from "@/lib/api/generated/endpoints/exceptions/exceptions";
 import { tableStatusOf } from "@/lib/query-status";
 
+const URL_FILTERS = ["state"] as const;
+
 /** The exceptions queue: failed checks waiting for a person, on mock data. Newest first. */
 export default function ExceptionsPage() {
   const { t } = useTranslation("exceptions");
   const { t: tc } = useTranslation("common");
-  const [query, setQuery] = useState<TableQuery>(DEFAULT_QUERY);
+  const [query, setQuery] = useUrlTableQuery(URL_FILTERS);
+  // The queue is the work waiting, so with no state in the link it shows the
+  // open ones, as the server does. Clearing the chip asks for every state.
+  const state =
+    query.filters.state === "RESOLVED" || query.filters.state === "ALL"
+      ? query.filters.state
+      : "OPEN";
   const list = useExceptionsList(
     {
       page: query.page,
       pageSize: query.pageSize,
+      state,
       ...(query.search ? { search: query.search } : {}),
     },
     { query: { placeholderData: (previous) => previous } },
@@ -126,6 +135,22 @@ export default function ExceptionsPage() {
         description={t("description")}
         meta={<DemoBadge kind="mock" />}
         total={list.data?.meta.total}
+      />
+      <FilterChips
+        chips={
+          state === "ALL"
+            ? []
+            : [{ id: "state", label: t(`list.state.${state}`) }]
+        }
+        filters={query.filters}
+        onChange={(filters) => {
+          setQuery({
+            ...query,
+            page: 1,
+            filters:
+              "state" in filters ? filters : { ...filters, state: "ALL" },
+          });
+        }}
       />
       <DataTable
         tableId="exceptions"

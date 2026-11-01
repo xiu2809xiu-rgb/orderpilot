@@ -9,6 +9,7 @@
 
 import { z } from "zod";
 import { pageMetaSchema } from "./envelope.js";
+import { decimalStringSchema } from "./money.js";
 import { documentTypeSchema } from "./order.js";
 import { roleSchema } from "./roles.js";
 
@@ -147,6 +148,9 @@ export const trackerOrderSchema = z.object({
   openExceptions: z.int().min(0),
   shipmentDate: z.iso.date().nullable(),
   orderDate: z.iso.date(),
+  /** The order's value, in `currencyCode`. */
+  amount: decimalStringSchema.optional(),
+  currencyCode: z.string().length(3).optional(),
 });
 export type TrackerOrder = z.infer<typeof trackerOrderSchema>;
 
@@ -155,6 +159,7 @@ export const TRACKER_SORT_COLUMNS = [
   "customerName",
   "orderDate",
   "shipmentDate",
+  "amount",
 ] as const;
 
 export const trackerQuerySchema = z.object({
@@ -164,13 +169,51 @@ export const trackerQuerySchema = z.object({
   sort: z.enum(TRACKER_SORT_COLUMNS).optional(),
   direction: z.enum(["asc", "desc"]).optional(),
   overdue: z.enum(["true", "false"]).optional(),
-  /** The status code to keep, such as the one a tile or a flow step opens. */
-  status: z.string().trim().min(1).max(60).optional(),
+  /** "true" keeps the orders still open, as the status reader reports them. */
+  open: z.enum(["true", "false"]).optional(),
+  /** "true" keeps the orders with a document waiting for a person to confirm it. */
+  documentToConfirm: z.enum(["true", "false"]).optional(),
+  /**
+   * The status codes to keep, separated by commas: one for a tile, several for
+   * a flow step that holds more than one.
+   */
+  status: z.string().trim().min(1).max(400).optional(),
   ownerRole: roleSchema.optional(),
 });
 export type TrackerQuery = z.infer<typeof trackerQuerySchema>;
 
 export const trackerListSchema = mockPageEnvelope(trackerOrderSchema);
+
+// ---- The sales flow ---------------------------------------------------------
+
+/** The brief's nine sales steps, in order. */
+export const SALES_FLOW_STEP_IDS = [
+  "poIn",
+  "stock",
+  "pi",
+  "payment",
+  "pack",
+  "documents",
+  "forwarder",
+  "customerTold",
+  "awbAndPermit",
+] as const;
+export type SalesFlowStepId = (typeof SALES_FLOW_STEP_IDS)[number];
+
+/** Open orders at each step. `statuses` is the tracker filter that opens them. */
+export const salesFlowSchema = z.object({
+  openOrders: z.int().min(0),
+  steps: z.array(
+    z.object({
+      id: z.enum(SALES_FLOW_STEP_IDS),
+      statuses: z.array(z.string().min(1)).min(1),
+      count: z.int().min(0),
+    }),
+  ),
+});
+export type SalesFlow = z.infer<typeof salesFlowSchema>;
+
+export const salesFlowResponseSchema = mockEnvelope(salesFlowSchema);
 
 // ---- An order's timeline ----------------------------------------------------
 
@@ -233,8 +276,8 @@ export const exceptionQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(200).default(25),
   search: z.string().trim().max(100).optional(),
-  /** Leave out for the open ones: the queue is the work waiting. */
-  state: exceptionStateSchema.optional(),
+  /** Leave out for the open ones: the queue is the work waiting. ALL keeps every state. */
+  state: z.enum([...EXCEPTION_STATES, "ALL"]).optional(),
 });
 export type ExceptionQuery = z.infer<typeof exceptionQuerySchema>;
 

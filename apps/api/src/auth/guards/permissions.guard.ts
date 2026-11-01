@@ -12,6 +12,7 @@ import { AuthAuditor } from "../auth-auditor.js";
 import type { AuthedRequest } from "../auth-context.js";
 import { PermissionPolicy } from "../permission-policy.js";
 import { accessOf } from "./classification.js";
+import { refusalSummary } from "./refusal-wording.js";
 
 /**
  * Asks the PermissionPolicy about every @RequirePermission route. A route with
@@ -70,7 +71,7 @@ export class PermissionsGuard implements CanActivate {
     return this.auditor.refused(req, {
       action: "auth.permission.refused",
       reason,
-      summary: `${user.displayName} was refused ${req.method} ${req.path}`,
+      summary: refusalSummary(user.displayName, permission),
       user,
       ...(permission ? { changes: { permission } } : {}),
     });

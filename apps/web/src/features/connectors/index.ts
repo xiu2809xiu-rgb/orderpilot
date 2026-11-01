@@ -9,6 +9,6 @@ export default defineFeature({
   group: "data",
   icon: Plug,
   permission: "settings.manage",
-  cues: [{ id: "health", roles: ["SYSTEM_ADMIN"] }],
+  cues: [],
   Page: lazy(() => import("./ConnectorsPage")),
 });

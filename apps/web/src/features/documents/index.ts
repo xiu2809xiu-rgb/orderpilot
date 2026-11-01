@@ -9,9 +9,6 @@ export default defineFeature({
   group: "operations",
   icon: FileText,
   permission: "documents.read",
-  cues: [
-    { id: "toConfirm", roles: ["SUPPORT"] },
-    { id: "received", roles: ["SUPPORT", "LOGISTICS"] },
-  ],
+  cues: [],
   Page: lazy(() => import("./DocumentsPage")),
 });

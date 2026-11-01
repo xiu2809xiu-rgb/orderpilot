@@ -14,7 +14,7 @@ import {
   ApiParam,
   ApiTags,
 } from "@nestjs/swagger";
-import { pageQuerySchema, type PageQuery } from "@orderpilot/shared";
+import { userListQuerySchema, type UserListQuery } from "@orderpilot/shared";
 import type { Request } from "express";
 import type { AuthContext } from "../auth/auth-context.js";
 import { Auth, RequirePermission } from "../auth/decorators.js";
@@ -46,9 +46,11 @@ export class UsersController {
   @Get()
   @RequirePermission("users.read")
   @ApiOperation({ summary: "List users, a page at a time" })
-  @openApiQuery(pageQuerySchema)
+  @openApiQuery(userListQuerySchema)
   @ApiOkResponse({ schema: openApiSchema(userListResponseSchema) })
-  async list(@Query(new ZodValidationPipe(pageQuerySchema)) query: PageQuery) {
+  async list(
+    @Query(new ZodValidationPipe(userListQuerySchema)) query: UserListQuery,
+  ) {
     const page = await this.users.list(query);
     return { data: page.items, meta: page.meta };
   }

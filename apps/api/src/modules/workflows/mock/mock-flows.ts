@@ -76,7 +76,25 @@ function doneOn(order: SampleOrder, key: string, due: string, asOf: string) {
   return day < order.header.orderDate ? order.header.orderDate : day;
 }
 
-function stepsOf(order: SampleOrder, asOf: string): OrderStep[] {
+/**
+ * The payment step tells what the payments say, not how far the goods have
+ * come: on credit terms the money follows the invoice, so the step stays open
+ * after the later steps are done, and a balance due keeps it open as well.
+ */
+function paymentState(
+  payment: OrderFlow["payment"],
+  byPosition: OrderStep["state"],
+): OrderStep["state"] {
+  if (payment.amountDue !== null) return "current";
+  if (payment.confirmations.length > 0) return "done";
+  return byPosition === "done" ? "upcoming" : byPosition;
+}
+
+function stepsOf(
+  order: SampleOrder,
+  payment: OrderFlow["payment"],
+  asOf: string,
+): OrderStep[] {
   const now = mockNow(asOf);
   const current = MOCK_CURRENT_STEP[order.sampleScreenState];
   const currentIndex =
@@ -84,17 +102,24 @@ function stepsOf(order: SampleOrder, asOf: string): OrderStep[] {
       ? STARTER_SALES_STEPS.length
       : STARTER_SALES_STEPS.findIndex((step) => step.key === current);
   return STARTER_SALES_STEPS.map((step, index) => {
-    const due = stepDueDate(order, step.key);
+    const isPayment = step.key === "payment-confirmed";
+    const moneyDue = isPayment && payment.amountDue !== null;
+    const due =
+      (moneyDue ? order.step.dueOn : null) ?? stepDueDate(order, step.key);
     const dueAt = isoAt(due, 9);
     const past = index < currentIndex;
     const skipped = past && step.optional && !needsSpr(order);
-    const state = skipped
+    const byPosition = skipped
       ? "skipped"
       : past
         ? "done"
         : index === currentIndex
           ? "current"
           : "upcoming";
+    const state = isPayment ? paymentState(payment, byPosition) : byPosition;
+    const paidAt = isPayment
+      ? payment.confirmations[0]?.confirmedAt
+      : undefined;
     return {
       key: step.key,
       ownerRole: step.ownerRole,
@@ -102,7 +127,9 @@ function stepsOf(order: SampleOrder, asOf: string): OrderStep[] {
       optional: step.optional,
       dueAt,
       completedAt:
-        state === "done" ? isoAt(doneOn(order, step.key, due, asOf), 8) : null,
+        state === "done"
+          ? (paidAt ?? isoAt(doneOn(order, step.key, due, asOf), 8))
+          : null,
       overdue: state === "current" && new Date(dueAt) < now,
     };
   });
@@ -111,6 +138,7 @@ function stepsOf(order: SampleOrder, asOf: string): OrderStep[] {
 function paymentOf(
   order: SampleOrder,
   payments: readonly SamplePayment[],
+  confirmedNow: readonly PaymentRecord[],
 ): OrderFlow["payment"] {
   const mine = payments.filter((p) => p.orderNo === order.header.no);
   const confirmations: PaymentRecord[] = mine.flatMap((p) =>
@@ -130,11 +158,15 @@ function paymentOf(
         ]
       : [],
   );
-  const due = mine.find((p) => p.status === "expected");
+  const due = mine.find(
+    (p) =>
+      p.status === "expected" &&
+      !confirmedNow.some((paid) => paid.paymentType === p.paymentType),
+  );
   return {
     prepaymentPercent: order.header.prepaymentPercent,
     amountDue: due?.amount ?? null,
-    confirmations,
+    confirmations: [...confirmations, ...confirmedNow],
   };
 }
 
@@ -225,9 +257,10 @@ export function buildFlow(
   customerName: string,
   payments: readonly SamplePayment[],
   asOf: string,
+  confirmedNow: readonly PaymentRecord[] = [],
 ): OrderFlow {
-  const steps = stepsOf(order, asOf);
-  const payment = paymentOf(order, payments);
+  const payment = paymentOf(order, payments, confirmedNow);
+  const steps = stepsOf(order, payment, asOf);
   return {
     order: {
       no: order.header.no,

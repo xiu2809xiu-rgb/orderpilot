@@ -1,6 +1,7 @@
 import {
   addDecimal,
   multiplyDecimal,
+  roundToCents,
   type NavisionStatus,
   type SalesLine,
 } from "@orderpilot/shared";
@@ -120,9 +121,11 @@ function scenarioFor(
       return {
         kind: "awaiting-payment",
         prepaymentPercent: order.percent,
-        amountDue: multiplyDecimal(
-          order.total,
-          (Number(order.percent) / 100).toFixed(4),
+        amountDue: roundToCents(
+          multiplyDecimal(
+            order.total,
+            (Number(order.percent) / 100).toFixed(4),
+          ),
         ),
       };
     case "sample-packing-list-mismatch": {

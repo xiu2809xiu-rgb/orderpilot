@@ -1,7 +1,8 @@
 ### Area 2: tasks, an order's steps, the SPR approval page and reminders.
 ### Sign in first (auth.http). Every answer here is mock data and says so in
-### meta.mock, except the document configuration. The POST requests check and
-### answer "applied": false: they change nothing until the workflow engine exists.
+### meta.mock, except the document configuration. The POST requests write a real
+### audit event and keep their result in a mock overlay, so the screens move on
+### and Undo works. A restart forgets it, and an order's status never changes.
 @baseUrl = http://localhost:3000
 @csrf = paste the op_csrf cookie value here after signing in
 
@@ -19,7 +20,7 @@ GET {{baseUrl}}/api/v1/workflows/inboxes/LOGISTICS/reminders
 ### An order's steps, timeline and payment. Sample orders are SO-0001 to SO-0120 and are dated from today.
 GET {{baseUrl}}/api/v1/workflows/orders/SO-0004/flow
 
-### Confirm a payment with its type. Finance only. Checked, not stored.
+### Confirm a payment with its type. Finance only. The answer holds the paymentId that Undo takes.
 POST {{baseUrl}}/api/v1/workflows/orders/SO-0004/payments
 Content-Type: application/json
 X-CSRF-Token: {{csrf}}
@@ -29,7 +30,7 @@ X-CSRF-Token: {{csrf}}
 ### An SPR with its suggested fields, the stock figures and the approver's setup.
 GET {{baseUrl}}/api/v1/workflows/sprs/SPR-20261102-0001
 
-### Approve or reject with a comment. Approver only. Checked, nothing changed.
+### Approve or reject with a comment. Approver only. Its task leaves the inbox.
 POST {{baseUrl}}/api/v1/workflows/sprs/SPR-20261102-0001/approve
 Content-Type: application/json
 X-CSRF-Token: {{csrf}}
@@ -42,6 +43,27 @@ Content-Type: application/json
 X-CSRF-Token: {{csrf}}
 
 { "comment": "" }
+
+### Undo a decision. It answers 404 when there is none to undo.
+POST {{baseUrl}}/api/v1/workflows/sprs/SPR-20261102-0001/undo
+X-CSRF-Token: {{csrf}}
+
+### Mark a task in the caller's own inbox as done. Copy an id from the inbox.
+### Another role's task is refused and audited. An SPR, a payment or a field
+### review answers 409: each is finished on its own screen.
+POST {{baseUrl}}/api/v1/workflows/tasks/00000000-0000-4000-8000-000000000001/complete
+X-CSRF-Token: {{csrf}}
+
+### Undo a completed task.
+POST {{baseUrl}}/api/v1/workflows/tasks/00000000-0000-4000-8000-000000000001/undo
+X-CSRF-Token: {{csrf}}
+
+### Undo a payment confirmation, with the paymentId its answer gave.
+POST {{baseUrl}}/api/v1/workflows/orders/SO-0001/payments/00000000-0000-4000-8000-000000000001/undo
+X-CSRF-Token: {{csrf}}
+
+### The rules waiting for Spectra to confirm, with their draft values. Needs settings.manage.
+GET {{baseUrl}}/api/v1/workflows/open-rules
 
 ### Field settings and defaults for each document type, read from the table.
 GET {{baseUrl}}/api/v1/workflows/document-config

@@ -33,13 +33,13 @@ const page = (rows: ReturnType<typeof row>[], total = rows.length) =>
     meta: { page: 1, pageSize: 10, total, mock: true },
   }) as TrackerList200;
 
-function renderPage() {
+function renderPage(link = "/order-tracker") {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
   return render(
     <QueryClientProvider client={client}>
-      <MemoryRouter>
+      <MemoryRouter initialEntries={[link]}>
         <OrderTrackerPage />
       </MemoryRouter>
     </QueryClientProvider>,
@@ -79,6 +79,25 @@ describe("the order tracker", () => {
     expect(seen.some((search) => search.includes("page=2"))).toBe(true);
     expect(seen.at(-1)).toContain("overdue=true");
     expect(seen.at(-1)).toContain("page=1");
+  });
+
+  it("opens from a link with its search and its overdue filter, and shows the filter as a chip", async () => {
+    await i18n.loadNamespaces(["order-tracker", "common"]);
+    const seen: string[] = [];
+    server.use(
+      http.get("*/api/v1/tracker/orders", ({ request }) => {
+        seen.push(new URL(request.url).search);
+        return HttpResponse.json(page([row(1)]));
+      }),
+    );
+    renderPage("/order-tracker?search=C-0001&overdue=true");
+    await screen.findByText("Status 1");
+    expect(seen[0]).toContain("search=C-0001");
+    expect(seen[0]).toContain("overdue=true");
+    expect(screen.getByRole("searchbox", { name: "Search" })).toHaveValue(
+      "C-0001",
+    );
+    expect(screen.getByRole("switch", { name: "Overdue only" })).toBeChecked();
   });
 
   it("shows an empty state with a next step", async () => {

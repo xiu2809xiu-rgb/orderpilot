@@ -6,9 +6,6 @@
     "Budgets and alerts for AI cost",
     "A usage summary read from the clickstream table"
   ],
-  "cues": {
-    "aiUsage": "AI usage this month"
-  },
   "tabs": {
     "label": "Monitoring views",
     "aiUsage": "AI usage and cost",
@@ -53,7 +50,7 @@
     },
     "empty": {
       "title": "No AI calls recorded yet",
-      "description": "The AI gateway writes one record for every model call, and nothing has called a model yet. Cost and usage appear here as soon as the first call is made.",
+      "description": "Every time AI reads a document, its cost and time are recorded here. Nothing has been read by AI yet.",
       "action": "See what data may go to AI"
     }
   },

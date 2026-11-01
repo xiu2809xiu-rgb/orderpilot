@@ -1,5 +1,5 @@
 import { PAYMENT_TYPES, type OrderPayment } from "@orderpilot/shared";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { EmptyState, ErrorPanel, toast } from "@/components/common";
@@ -7,7 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatMoney } from "@/lib/format";
-import { workflowsConfirmPayment } from "@/lib/api/generated/endpoints/workflows/workflows";
+import {
+  workflowsConfirmPayment,
+  workflowsUndoPayment,
+} from "@/lib/api/generated/endpoints/workflows/workflows";
 import { formatAmount, formatDate } from "./format";
 
 const SELECT_CLASS =
@@ -29,6 +32,7 @@ export function PaymentPanel({
   const [reference, setReference] = useState("");
   const [paidOn, setPaidOn] = useState("");
   const [invalid, setInvalid] = useState(false);
+  const queryClient = useQueryClient();
   const confirm = useMutation({
     mutationFn: () =>
       workflowsConfirmPayment(orderNo, {
@@ -38,10 +42,16 @@ export function PaymentPanel({
         reference,
         paidOn,
       }),
-    onSuccess: () =>
+    onSuccess: async (answer) => {
+      await queryClient.invalidateQueries();
       toast.done(t("payment.toast.confirmed", { orderNo }), {
         description: formatMoney(amount),
-      }),
+        undo: async () => {
+          await workflowsUndoPayment(orderNo, answer.data.paymentId);
+          await queryClient.invalidateQueries();
+        },
+      });
+    },
     onError: () => toast.failed(t("payment.toast.failed")),
   });
 
@@ -165,14 +175,6 @@ export function PaymentPanel({
             </p>
           ) : null}
           {confirm.isError ? <ErrorPanel error={confirm.error} /> : null}
-          {confirm.isSuccess ? (
-            <p
-              role="status"
-              className="rounded-lg bg-warning-surface px-s2 py-s1 text-sm text-warning"
-            >
-              {confirm.data.data.message}
-            </p>
-          ) : null}
           <Button
             type="submit"
             size="lg"

@@ -14,4 +14,5 @@ export const TrackerListSort = {
   customerName: 'customerName',
   orderDate: 'orderDate',
   shipmentDate: 'shipmentDate',
+  amount: 'amount',
 } as const;
