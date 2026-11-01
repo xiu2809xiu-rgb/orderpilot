@@ -218,7 +218,7 @@ Phase B is paused at P-13 until the product pass is done. P-13's first builder s
 | ----- | --------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------ |
 | P-31  | `feat/platform-synthetic-data-at-scale` | [#117](https://github.com/xiu2809xiu-rgb/orderpilot/issues/117) | In review, [#132](https://github.com/xiu2809xiu-rgb/orderpilot/pull/132) |
 | P-32  | `feat/area4-consent-card`               | [#118](https://github.com/xiu2809xiu-rgb/orderpilot/issues/118) | Merged, [#129](https://github.com/xiu2809xiu-rgb/orderpilot/pull/129)    |
-| P-33  | `feat/product-pass-home`                | [#119](https://github.com/xiu2809xiu-rgb/orderpilot/issues/119) | In review                                                                |
+| P-33  | `feat/product-pass-home`                | [#119](https://github.com/xiu2809xiu-rgb/orderpilot/issues/119) | In review, [#135](https://github.com/xiu2809xiu-rgb/orderpilot/pull/135) |
 | P-34  | `feat/platform-sign-in`                 | [#120](https://github.com/xiu2809xiu-rgb/orderpilot/issues/120) | Merged, [#130](https://github.com/xiu2809xiu-rgb/orderpilot/pull/130)    |
 | P-35  | `feat/product-pass-master-data`         | [#121](https://github.com/xiu2809xiu-rgb/orderpilot/issues/121) | Not started                                                              |
 | P-36  | `feat/product-pass-orders`              | [#122](https://github.com/xiu2809xiu-rgb/orderpilot/issues/122) | Not started                                                              |
