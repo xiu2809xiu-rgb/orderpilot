@@ -52,10 +52,10 @@ export function itemColumns(
     {
       id: "description",
       header: t("items.columns.description"),
-      // Capped so that eleven columns fit a laptop screen; the full text is
+      // Capped so that the list fits a laptop screen; the full text is
       // on the item's page and in the export.
       cell: (row) => (
-        <span className="block max-w-56 truncate" title={row.description}>
+        <span className="block max-w-44 truncate" title={row.description}>
           {row.description}
         </span>
       ),
@@ -74,6 +74,8 @@ export function itemColumns(
       cell: (row) => row.brand,
       exportValue: (row) => row.brand,
       sortable: true,
+      // The description starts with the brand, and the brand filter says it too.
+      defaultHidden: true,
     },
     {
       id: "category",
@@ -113,7 +115,7 @@ export function itemColumns(
       cell: (row) => (
         <Link
           to={`/master-data/vendors/${row.vendorNo}`}
-          className="block max-w-40 truncate underline-offset-4 hover:underline"
+          className="block max-w-36 truncate underline-offset-4 hover:underline"
           title={row.vendorName}
         >
           {row.vendorName}
