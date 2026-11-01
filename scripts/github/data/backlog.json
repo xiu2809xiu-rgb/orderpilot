@@ -539,14 +539,14 @@
       "reqs": ["M2", "M4"],
       "branch": "feat/area1-synthetic-documents",
       "sprints": [2],
-      "dependsOn": ["P-19"],
-      "summary": "Generated PDFs with planted mistakes and ground truth, for the demo and the accuracy harness.",
+      "dependsOn": ["P-19", "P-52"],
+      "summary": "The rest of the generated set, with planted mistakes and ground truth for the accuracy harness. P-52 brought the package, four layouts, the CLI and twelve files forward.",
       "acceptance": [
-        "`packages/synthetic-documents` generates PDFs from the synthetic master data: POs in at least four customer layouts; PIs, invoices, packing lists and AWB/BL; scanned-looking variants (rotated and noisy).",
-        "Planted mistakes: quantity, price, PO reference, part number and changed bank details.",
-        "Ground truth: a JSON file for every document, for the accuracy harness.",
-        "Delivery: a CLI (`pnpm docs:generate`), with a set copied to `apps/web/public/demo-documents/` for demo uploads, not a folder called `samples`.",
-        "Prompt 003 brings forward 12 synthetic documents in `apps/web/public/demo-documents/` (P-37); this story keeps the generator, the four layouts, the planted mistakes, the ground-truth files and the CLI."
+        "More document kinds in the same renderer, with positions and ground truth: the vendor PI, AWB and bill of lading, import permit and payment advice. P-52 has the PO, PI, packing list and commercial invoice.",
+        "Scanned-looking variants of more than one document, and long orders that flow onto further pages (a layout today refuses an order that does not fit one page).",
+        "Planted mistakes: price, PO reference, part number and changed bank details. The quantity mismatch is P-52's packing list.",
+        "Ground truth: a JSON file for every generated document, for the accuracy harness. P-52 writes them for its twelve.",
+        "Delivery: P-52's `pnpm docs:generate` grows to the full set. The twelve demo files stay in `apps/web/public/demo-documents/`, not a folder called `samples`."
       ]
     },
     {
@@ -958,7 +958,9 @@
         "The README gets the live demo link and a deployment table.",
         "A DAST job: an OWASP ZAP baseline scan of the live URL, weekly and on demand, with its report kept.",
         "ADR: the deployment.",
-        "Decide where the live demo keeps documents: AWS S3 or a maintained S3 store instead of the source-built MinIO, which gets no upstream fixes. Only `S3_ENDPOINT`, the keys and the bucket change (ADR 0011)."
+        "Decide where the live demo keeps documents: AWS S3 or a maintained S3 store instead of the source-built MinIO, which gets no upstream fixes. Only `S3_ENDPOINT`, the keys and the bucket change (ADR 0011).",
+        "Trivy scans the images pushed to GHCR and uploads its reports to code scanning as SARIF, so findings show in the Security tab and not only in the job log (left out of P-13).",
+        "Trivy also scans the images the stack pulls (PostgreSQL with pgvector, Redis and Mailpit), which P-13 does not: at the time, the Redis and pgvector images had fixable HIGH and CRITICAL findings. Move them to fixed versions, put accepted findings through `.trivyignore`, and pin them by digest (left out of P-13)."
       ]
     },
     {

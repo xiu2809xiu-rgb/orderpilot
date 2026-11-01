@@ -21,15 +21,14 @@ Use GitHub's private vulnerability reporting: open [Report a vulnerability](http
 
 None of these run yet.
 
-| Control                                                                                 | Story |
-| --------------------------------------------------------------------------------------- | ----- |
-| Git hooks: the licence-key guard, the samples guard and a secretlint scan               | P-5   |
-| `pnpm audit --audit-level high` in the verify job                                       | P-6   |
-| Semgrep: the default, TypeScript, React, Node and OWASP Top 10 rules                    | P-6   |
-| gitleaks across the full history                                                        | P-6   |
-| OSV dependency scan on the lockfile                                                     | P-6   |
-| Trivy image scan, failing on fixable HIGH or CRITICAL findings, and a Trivy config scan | P-13  |
-| OWASP ZAP baseline scan of the live URL, weekly and on demand                           | P-24  |
+| Control                                                                   | Story |
+| ------------------------------------------------------------------------- | ----- |
+| Git hooks: the licence-key guard, the samples guard and a secretlint scan | P-5   |
+| `pnpm audit --audit-level high` in the verify job                         | P-6   |
+| Semgrep: the default, TypeScript, React, Node and OWASP Top 10 rules      | P-6   |
+| gitleaks across the full history                                          | P-6   |
+| OSV dependency scan on the lockfile                                       | P-6   |
+| OWASP ZAP baseline scan of the live URL, weekly and on demand             | P-24  |
 
 ## The rules for everyone
 
