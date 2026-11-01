@@ -31,6 +31,7 @@
     "results_other": "{{count}} records found."
   },
   "errors": {
+    "invalid": "This form cannot be saved yet. Fix the following:",
     "session": "Not saved: your session ended. Sign in, then save again."
   },
   "viewer": {
