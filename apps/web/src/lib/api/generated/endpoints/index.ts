@@ -5,6 +5,7 @@ export * from './exceptions/exceptions.ts';
 export * from './governance/governance.ts';
 export * from './health/health.ts';
 export * from './insights/insights.ts';
+export * from './master-data/master-data.ts';
 export * from './monitoring/monitoring.ts';
 export * from './system/system.ts';
 export * from './tracker/tracker.ts';

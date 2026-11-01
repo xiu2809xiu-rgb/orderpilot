@@ -2655,6 +2655,1744 @@
         "tags": ["Workflows"]
       }
     },
+    "/api/v1/master-data/filters": {
+      "get": {
+        "operationId": "MasterData_filters",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "brands": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "categories": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": ["IT", "SURVEILLANCE", "ACCESSORIES"]
+                          }
+                        },
+                        "vendors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "no": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": ["no", "name"],
+                            "additionalProperties": false
+                          }
+                        },
+                        "countries": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "paymentTerms": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "priceGroups": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "required": [
+                        "brands",
+                        "categories",
+                        "vendors",
+                        "countries",
+                        "paymentTerms",
+                        "priceGroups"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "mock": {
+                          "type": "boolean",
+                          "enum": [true]
+                        }
+                      },
+                      "required": ["mock"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "What the master data filters can offer. Mock Navision data",
+        "tags": ["MasterData"]
+      }
+    },
+    "/api/v1/master-data/items": {
+      "get": {
+        "operationId": "MasterData_items",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 25,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 100
+            }
+          },
+          {
+            "name": "brand",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            }
+          },
+          {
+            "name": "category",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["IT", "SURVEILLANCE", "ACCESSORIES"]
+            }
+          },
+          {
+            "name": "vendor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9-]{1,20}$"
+            }
+          },
+          {
+            "name": "availability",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["short", "low", "ok"]
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "no",
+                "description",
+                "brand",
+                "inventory",
+                "qtyOnSalesOrder",
+                "qtyOnPurchOrder",
+                "availableStock",
+                "unitPrice"
+              ]
+            }
+          },
+          {
+            "name": "direction",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["asc", "desc"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "no": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "description": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "partNumber": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "brand": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "category": {
+                            "type": "string",
+                            "enum": ["IT", "SURVEILLANCE", "ACCESSORIES"]
+                          },
+                          "baseUnitOfMeasure": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "inventory": {
+                            "type": "string",
+                            "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                          },
+                          "qtyOnSalesOrder": {
+                            "type": "string",
+                            "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                          },
+                          "qtyOnPurchOrder": {
+                            "type": "string",
+                            "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                          },
+                          "availableStock": {
+                            "type": "string",
+                            "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                          },
+                          "availability": {
+                            "type": "string",
+                            "enum": ["short", "low", "ok"]
+                          },
+                          "unitPrice": {
+                            "type": "object",
+                            "properties": {
+                              "field": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "classification": {
+                                "type": "string",
+                                "enum": [
+                                  "public",
+                                  "internal",
+                                  "confidential",
+                                  "restricted"
+                                ]
+                              },
+                              "masked": {
+                                "type": "boolean"
+                              },
+                              "value": {
+                                "nullable": true,
+                                "type": "string"
+                              },
+                              "reason": {
+                                "nullable": true,
+                                "type": "string",
+                                "enum": [
+                                  "role",
+                                  "bankDetails",
+                                  "price",
+                                  "policy"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "field",
+                              "classification",
+                              "masked",
+                              "value",
+                              "reason"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "vendorNo": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "vendorName": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "required": [
+                          "no",
+                          "description",
+                          "partNumber",
+                          "brand",
+                          "category",
+                          "baseUnitOfMeasure",
+                          "inventory",
+                          "qtyOnSalesOrder",
+                          "qtyOnPurchOrder",
+                          "availableStock",
+                          "availability",
+                          "unitPrice",
+                          "vendorNo",
+                          "vendorName"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        "pageSize": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 200
+                        },
+                        "total": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "mock": {
+                          "type": "boolean",
+                          "enum": [true]
+                        }
+                      },
+                      "required": ["page", "pageSize", "total", "mock"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Items with their stock, a page at a time. Prices are masked by role. Mock Navision data",
+        "tags": ["MasterData"]
+      }
+    },
+    "/api/v1/master-data/items/{no}": {
+      "get": {
+        "operationId": "MasterData_item",
+        "parameters": [
+          {
+            "name": "no",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "no": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "description": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "partNumber": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "brand": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "category": {
+                          "type": "string",
+                          "enum": ["IT", "SURVEILLANCE", "ACCESSORIES"]
+                        },
+                        "baseUnitOfMeasure": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "inventory": {
+                          "type": "string",
+                          "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                        },
+                        "qtyOnSalesOrder": {
+                          "type": "string",
+                          "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                        },
+                        "qtyOnPurchOrder": {
+                          "type": "string",
+                          "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                        },
+                        "availableStock": {
+                          "type": "string",
+                          "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                        },
+                        "availability": {
+                          "type": "string",
+                          "enum": ["short", "low", "ok"]
+                        },
+                        "unitPrice": {
+                          "type": "object",
+                          "properties": {
+                            "field": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "classification": {
+                              "type": "string",
+                              "enum": [
+                                "public",
+                                "internal",
+                                "confidential",
+                                "restricted"
+                              ]
+                            },
+                            "masked": {
+                              "type": "boolean"
+                            },
+                            "value": {
+                              "nullable": true,
+                              "type": "string"
+                            },
+                            "reason": {
+                              "nullable": true,
+                              "type": "string",
+                              "enum": ["role", "bankDetails", "price", "policy"]
+                            }
+                          },
+                          "required": [
+                            "field",
+                            "classification",
+                            "masked",
+                            "value",
+                            "reason"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "vendorNo": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "vendorName": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "vendorItemNo": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "unitCost": {
+                          "type": "object",
+                          "properties": {
+                            "field": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "classification": {
+                              "type": "string",
+                              "enum": [
+                                "public",
+                                "internal",
+                                "confidential",
+                                "restricted"
+                              ]
+                            },
+                            "masked": {
+                              "type": "boolean"
+                            },
+                            "value": {
+                              "nullable": true,
+                              "type": "string"
+                            },
+                            "reason": {
+                              "nullable": true,
+                              "type": "string",
+                              "enum": ["role", "bankDetails", "price", "policy"]
+                            }
+                          },
+                          "required": [
+                            "field",
+                            "classification",
+                            "masked",
+                            "value",
+                            "reason"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "orderLines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "orderNo": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "customerNo": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "customerName": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "orderDate": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "shipmentDate": {
+                                "nullable": true,
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "quantity": {
+                                "type": "string",
+                                "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                              },
+                              "heldOut": {
+                                "type": "boolean"
+                              },
+                              "shortfall": {
+                                "nullable": true,
+                                "type": "object",
+                                "properties": {
+                                  "state": {
+                                    "type": "string",
+                                    "enum": ["waiting", "covered"]
+                                  },
+                                  "ordered": {
+                                    "type": "string",
+                                    "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                                  },
+                                  "availableStock": {
+                                    "type": "string",
+                                    "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                                  },
+                                  "shortBy": {
+                                    "type": "string",
+                                    "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                                  },
+                                  "sprRecordNo": {
+                                    "nullable": true,
+                                    "type": "string"
+                                  },
+                                  "purchaseOrderNo": {
+                                    "nullable": true,
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "state",
+                                  "ordered",
+                                  "availableStock",
+                                  "shortBy",
+                                  "sprRecordNo",
+                                  "purchaseOrderNo"
+                                ],
+                                "additionalProperties": false
+                              }
+                            },
+                            "required": [
+                              "orderNo",
+                              "customerNo",
+                              "customerName",
+                              "orderDate",
+                              "shipmentDate",
+                              "status",
+                              "quantity",
+                              "heldOut",
+                              "shortfall"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "salesOrderBreakdown": {
+                          "type": "object",
+                          "properties": {
+                            "listed": {
+                              "type": "string",
+                              "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                            },
+                            "other": {
+                              "type": "string",
+                              "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                            },
+                            "heldOut": {
+                              "type": "string",
+                              "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                            }
+                          },
+                          "required": ["listed", "other", "heldOut"],
+                          "additionalProperties": false
+                        },
+                        "purchaseLines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "purchaseOrderNo": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "orderDate": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "expectedReceiptDate": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "outstandingQuantity": {
+                                "type": "string",
+                                "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                              },
+                              "unitCost": {
+                                "type": "object",
+                                "properties": {
+                                  "field": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "classification": {
+                                    "type": "string",
+                                    "enum": [
+                                      "public",
+                                      "internal",
+                                      "confidential",
+                                      "restricted"
+                                    ]
+                                  },
+                                  "masked": {
+                                    "type": "boolean"
+                                  },
+                                  "value": {
+                                    "nullable": true,
+                                    "type": "string"
+                                  },
+                                  "reason": {
+                                    "nullable": true,
+                                    "type": "string",
+                                    "enum": [
+                                      "role",
+                                      "bankDetails",
+                                      "price",
+                                      "policy"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "field",
+                                  "classification",
+                                  "masked",
+                                  "value",
+                                  "reason"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "sprRecordNo": {
+                                "nullable": true,
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "purchaseOrderNo",
+                              "orderDate",
+                              "expectedReceiptDate",
+                              "outstandingQuantity",
+                              "unitCost",
+                              "sprRecordNo"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "sprs": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "recordNo": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "navisionNo": {
+                                "nullable": true,
+                                "type": "string"
+                              },
+                              "orderNo": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "status": {
+                                "type": "string",
+                                "enum": ["suggested", "submitted", "approved"]
+                              },
+                              "quantity": {
+                                "type": "string",
+                                "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                              },
+                              "needBy": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "requestedBy": {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            },
+                            "required": [
+                              "recordNo",
+                              "navisionNo",
+                              "orderNo",
+                              "status",
+                              "quantity",
+                              "needBy",
+                              "requestedBy"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "no",
+                        "description",
+                        "partNumber",
+                        "brand",
+                        "category",
+                        "baseUnitOfMeasure",
+                        "inventory",
+                        "qtyOnSalesOrder",
+                        "qtyOnPurchOrder",
+                        "availableStock",
+                        "availability",
+                        "unitPrice",
+                        "vendorNo",
+                        "vendorName",
+                        "vendorItemNo",
+                        "unitCost",
+                        "orderLines",
+                        "salesOrderBreakdown",
+                        "purchaseLines",
+                        "sprs"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "mock": {
+                          "type": "boolean",
+                          "enum": [true]
+                        }
+                      },
+                      "required": ["mock"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "One item: its stock, open orders, open purchase orders and SPRs. Mock Navision data",
+        "tags": ["MasterData"]
+      }
+    },
+    "/api/v1/master-data/customers": {
+      "get": {
+        "operationId": "MasterData_customers",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 25,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 100
+            }
+          },
+          {
+            "name": "country",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            }
+          },
+          {
+            "name": "paymentTerms",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            }
+          },
+          {
+            "name": "priceGroup",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["no", "name", "openOrders", "overdueOrders"]
+            }
+          },
+          {
+            "name": "direction",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["asc", "desc"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "no": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "name": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "countryRegionCode": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "currencyCode": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "paymentTermsCode": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "customerPriceGroup": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "openOrders": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "overdueOrders": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          }
+                        },
+                        "required": [
+                          "no",
+                          "name",
+                          "countryRegionCode",
+                          "currencyCode",
+                          "paymentTermsCode",
+                          "customerPriceGroup",
+                          "openOrders",
+                          "overdueOrders"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        "pageSize": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 200
+                        },
+                        "total": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "mock": {
+                          "type": "boolean",
+                          "enum": [true]
+                        }
+                      },
+                      "required": ["page", "pageSize", "total", "mock"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Customers with their open and overdue orders, a page at a time. Mock Navision data",
+        "tags": ["MasterData"]
+      }
+    },
+    "/api/v1/master-data/customers/{no}": {
+      "get": {
+        "operationId": "MasterData_customer",
+        "parameters": [
+          {
+            "name": "no",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "no": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "name": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "countryRegionCode": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "currencyCode": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "paymentTermsCode": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "customerPriceGroup": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "creditLimitLcy": {
+                          "type": "string",
+                          "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                        },
+                        "balanceLcy": {
+                          "type": "string",
+                          "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                        },
+                        "openOrders": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "orderNo": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "externalDocumentNo": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "orderDate": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "shipmentDate": {
+                                "nullable": true,
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "amount": {
+                                "type": "object",
+                                "properties": {
+                                  "field": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "classification": {
+                                    "type": "string",
+                                    "enum": [
+                                      "public",
+                                      "internal",
+                                      "confidential",
+                                      "restricted"
+                                    ]
+                                  },
+                                  "masked": {
+                                    "type": "boolean"
+                                  },
+                                  "value": {
+                                    "nullable": true,
+                                    "type": "string"
+                                  },
+                                  "reason": {
+                                    "nullable": true,
+                                    "type": "string",
+                                    "enum": [
+                                      "role",
+                                      "bankDetails",
+                                      "price",
+                                      "policy"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "field",
+                                  "classification",
+                                  "masked",
+                                  "value",
+                                  "reason"
+                                ],
+                                "additionalProperties": false
+                              }
+                            },
+                            "required": [
+                              "orderNo",
+                              "externalDocumentNo",
+                              "orderDate",
+                              "shipmentDate",
+                              "status",
+                              "amount"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "overdueOrders": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "orderNo": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "externalDocumentNo": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "daysOverdue": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 9007199254740991
+                              },
+                              "reason": {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            },
+                            "required": [
+                              "orderNo",
+                              "externalDocumentNo",
+                              "daysOverdue",
+                              "reason"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "no",
+                        "name",
+                        "countryRegionCode",
+                        "currencyCode",
+                        "paymentTermsCode",
+                        "customerPriceGroup",
+                        "creditLimitLcy",
+                        "balanceLcy",
+                        "openOrders",
+                        "overdueOrders"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "mock": {
+                          "type": "boolean",
+                          "enum": [true]
+                        }
+                      },
+                      "required": ["mock"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "One customer: key facts, open orders and overdue orders. Mock Navision data",
+        "tags": ["MasterData"]
+      }
+    },
+    "/api/v1/master-data/vendors": {
+      "get": {
+        "operationId": "MasterData_vendors",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 25,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 100
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "no",
+                "name",
+                "openPurchaseOrders",
+                "itemsSupplied",
+                "balanceLcy"
+              ]
+            }
+          },
+          {
+            "name": "direction",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["asc", "desc"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "no": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "name": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "currencyCode": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "paymentTermsCode": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "openPurchaseOrders": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "itemsSupplied": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 9007199254740991
+                          },
+                          "balanceLcy": {
+                            "type": "string",
+                            "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                          }
+                        },
+                        "required": [
+                          "no",
+                          "name",
+                          "currencyCode",
+                          "paymentTermsCode",
+                          "openPurchaseOrders",
+                          "itemsSupplied",
+                          "balanceLcy"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        "pageSize": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 200
+                        },
+                        "total": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "mock": {
+                          "type": "boolean",
+                          "enum": [true]
+                        }
+                      },
+                      "required": ["page", "pageSize", "total", "mock"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Vendors, a page at a time. Mock Navision data",
+        "tags": ["MasterData"]
+      }
+    },
+    "/api/v1/master-data/vendors/{no}": {
+      "get": {
+        "operationId": "MasterData_vendor",
+        "parameters": [
+          {
+            "name": "no",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "no": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "name": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "currencyCode": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "paymentTermsCode": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "balanceLcy": {
+                          "type": "string",
+                          "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                        },
+                        "bankAccounts": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "bankName": {
+                                "type": "object",
+                                "properties": {
+                                  "field": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "classification": {
+                                    "type": "string",
+                                    "enum": [
+                                      "public",
+                                      "internal",
+                                      "confidential",
+                                      "restricted"
+                                    ]
+                                  },
+                                  "masked": {
+                                    "type": "boolean"
+                                  },
+                                  "value": {
+                                    "nullable": true,
+                                    "type": "string"
+                                  },
+                                  "reason": {
+                                    "nullable": true,
+                                    "type": "string",
+                                    "enum": [
+                                      "role",
+                                      "bankDetails",
+                                      "price",
+                                      "policy"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "field",
+                                  "classification",
+                                  "masked",
+                                  "value",
+                                  "reason"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "bankAccountNo": {
+                                "type": "object",
+                                "properties": {
+                                  "field": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "classification": {
+                                    "type": "string",
+                                    "enum": [
+                                      "public",
+                                      "internal",
+                                      "confidential",
+                                      "restricted"
+                                    ]
+                                  },
+                                  "masked": {
+                                    "type": "boolean"
+                                  },
+                                  "value": {
+                                    "nullable": true,
+                                    "type": "string"
+                                  },
+                                  "reason": {
+                                    "nullable": true,
+                                    "type": "string",
+                                    "enum": [
+                                      "role",
+                                      "bankDetails",
+                                      "price",
+                                      "policy"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "field",
+                                  "classification",
+                                  "masked",
+                                  "value",
+                                  "reason"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "swiftCode": {
+                                "type": "object",
+                                "properties": {
+                                  "field": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "classification": {
+                                    "type": "string",
+                                    "enum": [
+                                      "public",
+                                      "internal",
+                                      "confidential",
+                                      "restricted"
+                                    ]
+                                  },
+                                  "masked": {
+                                    "type": "boolean"
+                                  },
+                                  "value": {
+                                    "nullable": true,
+                                    "type": "string"
+                                  },
+                                  "reason": {
+                                    "nullable": true,
+                                    "type": "string",
+                                    "enum": [
+                                      "role",
+                                      "bankDetails",
+                                      "price",
+                                      "policy"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "field",
+                                  "classification",
+                                  "masked",
+                                  "value",
+                                  "reason"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "iban": {
+                                "type": "object",
+                                "properties": {
+                                  "field": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "classification": {
+                                    "type": "string",
+                                    "enum": [
+                                      "public",
+                                      "internal",
+                                      "confidential",
+                                      "restricted"
+                                    ]
+                                  },
+                                  "masked": {
+                                    "type": "boolean"
+                                  },
+                                  "value": {
+                                    "nullable": true,
+                                    "type": "string"
+                                  },
+                                  "reason": {
+                                    "nullable": true,
+                                    "type": "string",
+                                    "enum": [
+                                      "role",
+                                      "bankDetails",
+                                      "price",
+                                      "policy"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "field",
+                                  "classification",
+                                  "masked",
+                                  "value",
+                                  "reason"
+                                ],
+                                "additionalProperties": false
+                              }
+                            },
+                            "required": [
+                              "code",
+                              "bankName",
+                              "bankAccountNo",
+                              "swiftCode",
+                              "iban"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "openPurchaseOrders": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "no": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "orderDate": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "expectedReceiptDate": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "lines": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 9007199254740991
+                              },
+                              "outstandingQuantity": {
+                                "type": "string",
+                                "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                              },
+                              "total": {
+                                "type": "object",
+                                "properties": {
+                                  "field": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "classification": {
+                                    "type": "string",
+                                    "enum": [
+                                      "public",
+                                      "internal",
+                                      "confidential",
+                                      "restricted"
+                                    ]
+                                  },
+                                  "masked": {
+                                    "type": "boolean"
+                                  },
+                                  "value": {
+                                    "nullable": true,
+                                    "type": "string"
+                                  },
+                                  "reason": {
+                                    "nullable": true,
+                                    "type": "string",
+                                    "enum": [
+                                      "role",
+                                      "bankDetails",
+                                      "price",
+                                      "policy"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "field",
+                                  "classification",
+                                  "masked",
+                                  "value",
+                                  "reason"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "sprRecordNo": {
+                                "nullable": true,
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "no",
+                              "orderDate",
+                              "expectedReceiptDate",
+                              "lines",
+                              "outstandingQuantity",
+                              "total",
+                              "sprRecordNo"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "no": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "description": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "vendorItemNo": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "availableStock": {
+                                "type": "string",
+                                "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                              },
+                              "availability": {
+                                "type": "string",
+                                "enum": ["short", "low", "ok"]
+                              }
+                            },
+                            "required": [
+                              "no",
+                              "description",
+                              "vendorItemNo",
+                              "availableStock",
+                              "availability"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "no",
+                        "name",
+                        "currencyCode",
+                        "paymentTermsCode",
+                        "balanceLcy",
+                        "bankAccounts",
+                        "openPurchaseOrders",
+                        "items"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "mock": {
+                          "type": "boolean",
+                          "enum": [true]
+                        }
+                      },
+                      "required": ["mock"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "One vendor: key facts, bank accounts masked by role, open purchase orders and items. Mock Navision data",
+        "tags": ["MasterData"]
+      }
+    },
     "/api/v1/tracker/orders": {
       "get": {
         "operationId": "Tracker_list",

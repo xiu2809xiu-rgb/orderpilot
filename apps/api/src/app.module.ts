@@ -16,6 +16,7 @@ import { AuditViewerModule } from "./modules/audit/audit-viewer.module.js";
 import { ChecksModule } from "./modules/checks/checks.module.js";
 import { InsightsModule } from "./modules/insights/insights.module.js";
 import { GovernanceModule } from "./modules/governance/governance.module.js";
+import { MasterDataModule } from "./modules/master-data/master-data.module.js";
 import { MonitoringModule } from "./modules/monitoring/monitoring.module.js";
 import { QueueModule } from "./queue/queue.module.js";
 import { RedisModule } from "./redis/redis.module.js";
@@ -60,6 +61,7 @@ export class AppModule {
         SystemModule,
         AuthModule.register(config),
         WorkflowsModule,
+        MasterDataModule,
         ChecksModule,
         InsightsModule,
         GovernanceModule,

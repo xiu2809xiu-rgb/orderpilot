@@ -7,6 +7,7 @@ export * from "./errors.js";
 export * from "./events.js";
 export * from "./governance/index.js";
 export * from "./identity.js";
+export * from "./master-data.js";
 export * from "./money.js";
 export * from "./monitoring/index.js";
 export * from "./order.js";
