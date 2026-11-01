@@ -33,7 +33,9 @@ export function mockOpenRules(approver: ApproverProfile | null): OpenRule[] {
       value: setup
         ? `${approver.displayName}: purchases up to ${usd(setup.purchaseAmountApprovalLimit)}, sales up to ${usd(setup.salesAmountApprovalLimit)}`
         : "No approver set up yet",
-      screen: "/governance?tab=matrix",
+      // The role matrix holds neither the approver nor the limits, and the SPR
+      // page shows them for one request only, so no screen holds this rule yet.
+      screen: null,
     },
     {
       id: "delegation",

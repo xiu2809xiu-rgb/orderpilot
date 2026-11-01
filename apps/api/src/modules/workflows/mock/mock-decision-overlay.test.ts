@@ -31,11 +31,10 @@ describe("the mock decision overlay", () => {
     expect(overlay.reopenTask(TASK)).toBe(false);
   });
 
-  it("gives the task back when a decision is undone, even after a second decision", () => {
+  it("gives the task back when a decision is undone", () => {
     const overlay = new MockDecisionOverlay();
     overlay.recordDecision(SPR, decision("first"), TASK);
-    overlay.recordDecision(SPR, decision("second"), null);
-    expect(overlay.decisionOf(SPR)?.comment).toBe("second");
+    expect(overlay.decisionOf(SPR)?.comment).toBe("first");
     expect(overlay.isClosed(TASK)).toBe(true);
 
     expect(overlay.undoDecision(SPR)).toBe(true);

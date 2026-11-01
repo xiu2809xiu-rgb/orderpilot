@@ -159,6 +159,10 @@ describe("the area 2 routes", () => {
     });
 
     it("lets the approver approve or reject with a comment, and keeps it on mock data", async () => {
+      const undo = () =>
+        call(t, as("APPROVER"), "post", `${W}/sprs/${SPR}/undo`, {
+          csrf: true,
+        });
       for (const action of ["approve", "reject"] as const) {
         const res = await call(
           t,
@@ -171,14 +175,12 @@ describe("the area 2 routes", () => {
         const body = sprDecisionResponseSchema.parse(res.body);
         expect(body.data.applied).toBe(true);
         expect(body.data.message).toBe(MOCK_RECORDED_MESSAGE);
+        const after = await call(t, as("APPROVER"), "get", `${W}/sprs/${SPR}`);
+        expect(sprResponseSchema.parse(after.body).data.decision?.outcome).toBe(
+          action === "approve" ? "approved" : "rejected",
+        );
+        await undo();
       }
-      const after = await call(t, as("APPROVER"), "get", `${W}/sprs/${SPR}`);
-      expect(sprResponseSchema.parse(after.body).data.decision?.outcome).toBe(
-        "rejected",
-      );
-      await call(t, as("APPROVER"), "post", `${W}/sprs/${SPR}/undo`, {
-        csrf: true,
-      });
     });
 
     it("needs a comment", async () => {

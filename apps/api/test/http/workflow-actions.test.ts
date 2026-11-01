@@ -155,6 +155,18 @@ describe("acting on the mock tasks", () => {
       expect(undo.status).toBe(401);
     });
 
+    it("answers 401 on the SPR and payment Undo and the open rules with no session", async () => {
+      const paths = [
+        ["post", `/sprs/${APPROVE.ref?.recordNo ?? ""}/undo`],
+        ["post", `/orders/${PAY.orderNo ?? ""}/payments/${UNKNOWN}/undo`],
+        ["get", "/open-rules"],
+      ] as const;
+      for (const [method, path] of paths) {
+        const res = await call(t, null, method, `${W}${path}`);
+        expect(res.status, path).toBe(401);
+      }
+    });
+
     it("refuses a role without the permission, and audits it", async () => {
       const before = await auditCount(t, "auth.permission.refused");
       for (const role of ["SYSTEM_ADMIN", "MANAGEMENT", "AUDITOR"] as const) {
@@ -199,7 +211,54 @@ describe("acting on the mock tasks", () => {
       for (const [role, id] of cases) {
         const res = await post(role, `/tasks/${id}/complete`);
         expect(res.status, role).toBe(409);
+        const undo = await post(role, `/tasks/${id}/undo`);
+        expect(undo.status, role).toBe(409);
       }
+    });
+
+    it("keeps a decision and its closed task together: the task Undo cannot split them", async () => {
+      const record = APPROVE.ref?.recordNo ?? "";
+      const opened = await auditCount(t, "workflows.task.reopened");
+      const before = await total("APPROVER", "&kind=APPROVE_SPR");
+      await post("APPROVER", `/sprs/${record}/approve`, { comment: "Fine." });
+
+      const undo = await post("APPROVER", `/tasks/${APPROVE.id}/undo`);
+      expect(undo.status).toBe(409);
+      expect(await total("APPROVER", "&kind=APPROVE_SPR")).toBe(before - 1);
+      expect(await auditCount(t, "workflows.task.reopened")).toBe(opened);
+      await post("APPROVER", `/sprs/${record}/undo`);
+    });
+
+    it("keeps a payment and its closed task together: the task Undo cannot split them", async () => {
+      const orderNo = PAY.orderNo ?? "";
+      const paid = await post("FINANCE", `/orders/${orderNo}/payments`, {
+        paymentType: "prepayment",
+        amount: PAY.amount,
+        currencyCode: "USD",
+        reference: "HOME-UNDO",
+        paidOn: data.asOf,
+      });
+      const { paymentId } = paymentResponseSchema.parse(paid.body).data;
+      const before = await total("FINANCE");
+
+      const undo = await post("FINANCE", `/tasks/${PAY.id}/undo`);
+      expect(undo.status).toBe(409);
+      expect(await total("FINANCE")).toBe(before);
+      await post("FINANCE", `/orders/${orderNo}/payments/${paymentId}/undo`);
+    });
+
+    it("records two quick completions once", async () => {
+      const audited = await auditCount(t, "workflows.task.completed");
+      const answers = await Promise.all([
+        post("WAREHOUSE", `/tasks/${PACK.id}/complete`),
+        post("WAREHOUSE", `/tasks/${PACK.id}/complete`),
+      ]);
+      // 409 while the first is being recorded, 404 once the task has left.
+      const statuses = answers.map((res) => res.status).sort();
+      expect(statuses[0]).toBe(200);
+      expect([404, 409]).toContain(statuses[1]);
+      expect(await auditCount(t, "workflows.task.completed")).toBe(audited + 1);
+      await post("WAREHOUSE", `/tasks/${PACK.id}/undo`);
     });
   });
 
@@ -234,6 +293,22 @@ describe("acting on the mock tasks", () => {
       expect(sprResponseSchema.parse(after.body).data.decision).toBeNull();
     });
 
+    it("records two quick approvals once, and refuses a second decision until the first is undone", async () => {
+      const audited = await auditCount(t, "workflows.spr.approved");
+      const path = `/sprs/${record}/approve`;
+      const answers = await Promise.all([
+        post("APPROVER", path, { comment }),
+        post("APPROVER", path, { comment }),
+      ]);
+      expect(answers.map((res) => res.status).sort()).toEqual([200, 409]);
+      const later = await post("APPROVER", `/sprs/${record}/reject`, {
+        comment,
+      });
+      expect(later.status).toBe(409);
+      expect(await auditCount(t, "workflows.spr.approved")).toBe(audited + 1);
+      await post("APPROVER", `/sprs/${record}/undo`);
+    });
+
     it("refuses an Undo by a role that cannot decide, and one with nothing to undo", async () => {
       await post("APPROVER", `/sprs/${record}/approve`, { comment });
       expect((await post("SUPPORT", `/sprs/${record}/undo`)).status).toBe(403);
@@ -266,12 +341,16 @@ describe("acting on the mock tasks", () => {
         return orderFlowResponseSchema.parse(res.body).data.payment;
       };
       const confirmed = (await flow()).confirmations.length;
+      const confirmedAudit = await auditCount(t, "workflows.payment.confirmed");
       const res = await post("FINANCE", `/orders/${orderNo}/payments`, body);
       expect(res.status).toBe(200);
       const answer = paymentResponseSchema.parse(res.body);
       expect(answer.data.applied).toBe(true);
       expect(await total("FINANCE")).toBe(before - 1);
       expect((await flow()).confirmations).toHaveLength(confirmed + 1);
+      expect(await auditCount(t, "workflows.payment.confirmed")).toBe(
+        confirmedAudit + 1,
+      );
 
       const audited = await auditCount(t, "workflows.payment.undone");
       const undo = await post(
@@ -283,6 +362,39 @@ describe("acting on the mock tasks", () => {
       expect(await total("FINANCE")).toBe(before);
       expect((await flow()).confirmations).toHaveLength(confirmed);
       expect(await auditCount(t, "workflows.payment.undone")).toBe(audited + 1);
+    });
+
+    it("records two quick confirmations once, so one Undo gives the order back", async () => {
+      const path = `/orders/${orderNo}/payments`;
+      const audited = await auditCount(t, "workflows.payment.confirmed");
+      const answers = await Promise.all([
+        post("FINANCE", path, body),
+        post("FINANCE", path, body),
+      ]);
+      expect(answers.map((res) => res.status).sort()).toEqual([200, 409]);
+      expect(await auditCount(t, "workflows.payment.confirmed")).toBe(
+        audited + 1,
+      );
+      const after = await post("FINANCE", path, {
+        ...body,
+        reference: "HOME-0002",
+      });
+      expect(after.status).toBe(409);
+
+      const first = answers.find((res) => res.status === 200);
+      const { paymentId } = paymentResponseSchema.parse(first?.body).data;
+      await post("FINANCE", `${path}/${paymentId}/undo`);
+      const res = await call(
+        t,
+        as("FINANCE"),
+        "get",
+        `${W}/orders/${orderNo}/flow`,
+      );
+      const { confirmations } = orderFlowResponseSchema.parse(res.body).data
+        .payment;
+      expect(confirmations.some((c) => c.reference.startsWith("HOME-"))).toBe(
+        false,
+      );
     });
 
     it("refuses an Undo by another role, of an unknown payment, or with a bad id", async () => {
@@ -314,6 +426,17 @@ describe("acting on the mock tasks", () => {
     it("is refused to a role that does not configure the platform", async () => {
       const res = await call(t, as("SUPPORT"), "get", `${W}/open-rules`);
       expect(res.status).toBe(403);
+    });
+
+    it("links a rule only to a screen that shows it", async () => {
+      const res = await call(t, as("SYSTEM_ADMIN"), "get", `${W}/open-rules`);
+      const rules = openRulesResponseSchema.parse(res.body);
+      expect(rules.data.map((rule) => rule.screen)).toEqual([
+        null,
+        null,
+        null,
+        null,
+      ]);
     });
   });
 });

@@ -1,5 +1,5 @@
 import { syntheticDataset } from "@orderpilot/synthetic-data";
-import { ROLES, type Role } from "@orderpilot/shared";
+import { ROLES, aiUsageReportSchema, type Role } from "@orderpilot/shared";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { API, call, demoSignIn, type Browser } from "../support/auth.js";
 import { resetTestData } from "../support/reset.js";
@@ -74,9 +74,14 @@ describe("the home page's counts", () => {
     expect(matrix.meta.total).toBe(matrix.data.roles.length);
     expect(matrix.meta.total).toBe(ROLES.length);
 
-    const usage = await get("SYSTEM_ADMIN", "/monitoring/ai-usage?pageSize=1");
-    expect(usage.status).toBe(200);
-    expect((usage.body as Listed).meta.total).toBeGreaterThanOrEqual(0);
+    const tile = await list("SYSTEM_ADMIN", "/monitoring/ai-usage?pageSize=1");
+    const report = await get(
+      "SYSTEM_ADMIN",
+      "/monitoring/ai-usage?pageSize=200",
+    );
+    const { data } = aiUsageReportSchema.parse(report.body);
+    expect(tile.meta.total).toBe(data.records.length);
+    expect(tile.meta.total).toBe(data.summary.calls);
   });
 
   it("counts the open orders as every order that is not closed", async () => {

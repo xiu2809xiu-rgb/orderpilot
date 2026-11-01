@@ -62,11 +62,8 @@ export class MockDecisionOverlay {
     decision: SprDecision,
     taskId: string | null,
   ): void {
-    // A second decision replaces the first, and its Undo must still reopen the
-    // task the first one closed.
-    const closed = this.decisions.get(recordNo)?.taskId ?? taskId;
-    this.decisions.set(recordNo, { decision, taskId: closed });
-    if (closed) this.closedTasks.add(closed);
+    this.decisions.set(recordNo, { decision, taskId });
+    if (taskId) this.closedTasks.add(taskId);
   }
 
   undoDecision(recordNo: string): boolean {
