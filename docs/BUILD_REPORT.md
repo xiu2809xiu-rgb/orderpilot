@@ -230,7 +230,7 @@ Prompt 003's deadline of Monday evening, 2 Nov, cannot hold for all of this: 41 
 | P-13  | Docker images and the IaC scan                        | `ci/docker`                      | In progress                                                                  |
 | P-14  | End-to-end smoke                                      | `test/e2e-smoke`                 | Not started                                                                  |
 | P-39  | Module navigation, showing only what is real          | `feat/workspace-modules`         | Not started                                                                  |
-| P-43  | Records open as tabs                                  | `feat/workspace-record-tabs`     | In review, [#139](https://github.com/xiu2809xiu-rgb/orderpilot/issues/139)   |
+| P-43  | Records open as tabs                                  | `feat/workspace-record-tabs`     | In review, [#175](https://github.com/xiu2809xiu-rgb/orderpilot/pull/175)     |
 | P-44  | List template: filter bar, action bar and status chip | `feat/list-template-bars`        | Not started                                                                  |
 | P-45  | List template: grid, saved views and operation log    | `feat/list-template-grid`        | Not started                                                                  |
 | P-46  | Form kit                                              | `feat/form-kit`                  | In progress, [#136](https://github.com/xiu2809xiu-rgb/orderpilot/issues/136) |
