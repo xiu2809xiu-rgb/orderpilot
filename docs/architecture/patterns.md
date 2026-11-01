@@ -40,6 +40,8 @@ The named patterns used in the code, where each one lives, and why it earns its 
 | Port with a mock adapter    | `master-data/domain/master-data-reader.ts`, `MockNavisionMasterData`  | The seam for P-20: the port has its own records, so the connector replaces one class, and the controller and service stay | P-35  |
 | Domain class                | `master-data/domain/stock-position.ts`                                | Available stock and "short" are one tested rule; short is read from the order                                             | P-35  |
 | Derived data                | `synthetic-data/src/purchase-orders.ts`                               | Purchase orders come from approved SPRs and stock figures, so the numbers always agree                                    | P-35  |
+| Test fixture                | `e2e/src/fixtures.ts`                                                 | Every page in every spec is watched and has its analytics card answered, without a line in the spec                       | P-14  |
+| Facade                      | `e2e/src/index.ts`, `checkPage`                                       | A spec calls four helpers; the axe, console, CSP and layout checks behind them change in one place                        | P-14  |
 
 ## Layers
 
