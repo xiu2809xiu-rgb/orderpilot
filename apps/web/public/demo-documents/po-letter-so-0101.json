@@ -1,0 +1,399 @@
+{
+  "label": "Synthetic demo data",
+  "file": "po-letter-so-0101.pdf",
+  "documentType": "CUSTOMER_PO",
+  "documentNumber": "PO-LK-4800",
+  "layout": "letter",
+  "readable": "text",
+  "orderNo": "SO-0101",
+  "customerNo": "C-0002",
+  "purpose": "A plain letter. Its task says to confirm 4 uncertain fields, one of them the price on line 1.",
+  "pageCount": 1,
+  "page": {
+    "width": 595.28,
+    "height": 841.89
+  },
+  "confidenceThreshold": 0.9,
+  "uncertainFieldCount": 4,
+  "mismatch": null,
+  "fields": [
+    {
+      "key": "customerName",
+      "label": "Customer",
+      "group": "header",
+      "lineIndex": null,
+      "value": "Brindle Coast Imports",
+      "text": "Brindle Coast Imports",
+      "page": 1,
+      "box": [
+        0.0954,
+        0.0737,
+        0.3039,
+        0.0221
+      ],
+      "id": "customerName",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "billTo",
+      "label": "Bill to",
+      "group": "header",
+      "lineIndex": null,
+      "value": "19 Spice Quay Street, Kandy 20000, Sri Lanka",
+      "text": "19 Spice Quay Street\nKandy 20000\nSri Lanka",
+      "page": 1,
+      "box": [
+        0.0954,
+        0.102,
+        0.1502,
+        0.0409
+      ],
+      "id": "billTo",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "poDate",
+      "label": "PO date",
+      "group": "header",
+      "lineIndex": null,
+      "value": "2026-10-30",
+      "text": "30 Oct 2026",
+      "page": 1,
+      "box": [
+        0.8078,
+        0.0799,
+        0.0968,
+        0.012
+      ],
+      "id": "poDate",
+      "confidence": 0.97,
+      "uncertain": false
+    },
+    {
+      "key": "poNumber",
+      "label": "PO number",
+      "group": "header",
+      "lineIndex": null,
+      "value": "PO-LK-4800",
+      "text": "PO-LK-4800",
+      "page": 1,
+      "box": [
+        0.2985,
+        0.2632,
+        0.1301,
+        0.014
+      ],
+      "id": "poNumber",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "requiredDate",
+      "label": "Required by",
+      "group": "header",
+      "lineIndex": null,
+      "value": "2026-11-19",
+      "text": "19 Nov 2026",
+      "page": 1,
+      "box": [
+        0.2567,
+        0.3816,
+        0.1006,
+        0.012
+      ],
+      "id": "requiredDate",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "incoterms",
+      "label": "Incoterms",
+      "group": "header",
+      "lineIndex": null,
+      "value": "FOB Singapore",
+      "text": "FOB Singapore",
+      "page": 1,
+      "box": [
+        0.2567,
+        0.4005,
+        0.1206,
+        0.0146
+      ],
+      "id": "incoterms",
+      "confidence": 0.78,
+      "uncertain": true
+    },
+    {
+      "key": "paymentTerms",
+      "label": "Payment terms",
+      "group": "header",
+      "lineIndex": null,
+      "value": "100% advance payment before shipment",
+      "text": "100% advance payment before shipment",
+      "page": 1,
+      "box": [
+        0.2567,
+        0.4192,
+        0.321,
+        0.0149
+      ],
+      "id": "paymentTerms",
+      "confidence": 0.82,
+      "uncertain": true
+    },
+    {
+      "key": "currency",
+      "label": "Currency",
+      "group": "header",
+      "lineIndex": null,
+      "value": "USD",
+      "text": "USD",
+      "page": 1,
+      "box": [
+        0.2567,
+        0.4387,
+        0.0378,
+        0.0119
+      ],
+      "id": "currency",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "shipTo",
+      "label": "Ship to",
+      "group": "header",
+      "lineIndex": null,
+      "value": "Brindle Coast Imports (Warehouse), Godown 2, Tidewater Avenue, Kandy 20000, Sri Lanka",
+      "text": "Brindle Coast Imports (Warehouse)\nGodown 2, Tidewater Avenue\nKandy 20000\nSri Lanka",
+      "page": 1,
+      "box": [
+        0.2567,
+        0.4572,
+        0.2805,
+        0.0605
+      ],
+      "id": "shipTo",
+      "confidence": 0.79,
+      "uncertain": true
+    },
+    {
+      "key": "lines.partNumber",
+      "label": "Part number",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "BRI-DL-B-2614",
+      "text": "BRI-DL-B-2614",
+      "page": 1,
+      "box": [
+        0.1525,
+        0.5853,
+        0.1139,
+        0.0111
+      ],
+      "id": "lines.partNumber[0]",
+      "confidence": 0.97,
+      "uncertain": false
+    },
+    {
+      "key": "lines.description",
+      "label": "Description",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "Brindlewick LED Desk Lamp Pro",
+      "text": "Brindlewick LED Desk Lamp Pro",
+      "page": 1,
+      "box": [
+        0.3138,
+        0.5849,
+        0.2315,
+        0.0136
+      ],
+      "id": "lines.description[0]",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "lines.quantity",
+      "label": "Quantity",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "80",
+      "text": "80",
+      "page": 1,
+      "box": [
+        0.6361,
+        0.5854,
+        0.021,
+        0.011
+      ],
+      "id": "lines.quantity[0]",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "lines.unitPrice",
+      "label": "Unit price",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "33.47",
+      "text": "33.47",
+      "page": 1,
+      "box": [
+        0.7323,
+        0.5854,
+        0.0425,
+        0.011
+      ],
+      "id": "lines.unitPrice[0]",
+      "confidence": 0.73,
+      "uncertain": true
+    },
+    {
+      "key": "lines.amount",
+      "label": "Amount",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "2677.60",
+      "text": "2,677.60",
+      "page": 1,
+      "box": [
+        0.8338,
+        0.5853,
+        0.064,
+        0.013
+      ],
+      "id": "lines.amount[0]",
+      "confidence": 0.97,
+      "uncertain": false
+    },
+    {
+      "key": "lines.partNumber",
+      "label": "Part number",
+      "group": "lines",
+      "lineIndex": 1,
+      "value": "EMB-HC-C-2646",
+      "text": "EMB-HC-C-2646",
+      "page": 1,
+      "box": [
+        0.1525,
+        0.6101,
+        0.1235,
+        0.0111
+      ],
+      "id": "lines.partNumber[1]",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "lines.description",
+      "label": "Description",
+      "group": "lines",
+      "lineIndex": 1,
+      "value": "Emberlyn HDMI Cable 2 m Lite",
+      "text": "Emberlyn HDMI Cable 2 m Lite",
+      "page": 1,
+      "box": [
+        0.3138,
+        0.6097,
+        0.2237,
+        0.0138
+      ],
+      "id": "lines.description[1]",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "lines.quantity",
+      "label": "Quantity",
+      "group": "lines",
+      "lineIndex": 1,
+      "value": "20",
+      "text": "20",
+      "page": 1,
+      "box": [
+        0.6361,
+        0.6102,
+        0.021,
+        0.011
+      ],
+      "id": "lines.quantity[1]",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "lines.unitPrice",
+      "label": "Unit price",
+      "group": "lines",
+      "lineIndex": 1,
+      "value": "4.20",
+      "text": "4.20",
+      "page": 1,
+      "box": [
+        0.7408,
+        0.6102,
+        0.034,
+        0.011
+      ],
+      "id": "lines.unitPrice[1]",
+      "confidence": 0.97,
+      "uncertain": false
+    },
+    {
+      "key": "lines.amount",
+      "label": "Amount",
+      "group": "lines",
+      "lineIndex": 1,
+      "value": "84.00",
+      "text": "84.00",
+      "page": 1,
+      "box": [
+        0.8554,
+        0.6102,
+        0.0425,
+        0.011
+      ],
+      "id": "lines.amount[1]",
+      "confidence": 0.97,
+      "uncertain": false
+    },
+    {
+      "key": "total",
+      "label": "Total (USD)",
+      "group": "totals",
+      "lineIndex": null,
+      "value": "2761.60",
+      "text": "2,761.60",
+      "page": 1,
+      "box": [
+        0.8201,
+        0.6428,
+        0.0778,
+        0.0145
+      ],
+      "id": "total",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "buyerContact",
+      "label": "Buyer",
+      "group": "header",
+      "lineIndex": null,
+      "value": "Marisol Dunreith",
+      "text": "Marisol Dunreith",
+      "page": 1,
+      "box": [
+        0.0954,
+        0.7734,
+        0.1494,
+        0.0124
+      ],
+      "id": "buyerContact",
+      "confidence": 0.95,
+      "uncertain": false
+    }
+  ]
+}

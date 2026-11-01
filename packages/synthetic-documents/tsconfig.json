@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "@orderpilot/tsconfig/base.json",
+  "compilerOptions": {
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "noEmit": true,
+    // It reads its fonts and writes the demo files, so it runs on Node.
+    "types": ["node"],
+    // CI type-checks before it builds, so the packages it uses have no dist yet. Read their source.
+    "paths": {
+      "@orderpilot/shared": ["../shared/src/index.ts"],
+      "@orderpilot/synthetic-data": ["../synthetic-data/src/index.ts"]
+    }
+  },
+  "include": ["src", "vitest.config.ts"]
+}

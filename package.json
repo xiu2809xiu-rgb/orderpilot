@@ -33,6 +33,7 @@
     "db:migrate": "pnpm --filter @orderpilot/api db:migrate",
     "db:migrate:dev": "pnpm --filter @orderpilot/api db:migrate:dev",
     "db:seed": "pnpm --filter @orderpilot/api db:seed",
+    "docs:generate": "pnpm --filter \"@orderpilot/synthetic-documents...\" run build && pnpm --filter @orderpilot/synthetic-documents generate",
     "stack:up": "docker compose up -d --wait",
     "stack:down": "docker compose down"
   },

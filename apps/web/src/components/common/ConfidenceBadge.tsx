@@ -1,3 +1,4 @@
+import { confidenceBand } from "@orderpilot/shared";
 import { Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
@@ -10,11 +11,9 @@ interface ConfidenceBadgeProps {
   approved?: boolean;
 }
 
-export function confidenceBand(confidence: number): "high" | "medium" | "low" {
-  if (confidence >= 0.9) return "high";
-  if (confidence >= 0.7) return "medium";
-  return "low";
-}
+// The cut-offs live in the shared package, so the demo documents' ground truth
+// and this badge can never disagree about what "uncertain" means.
+export { confidenceBand };
 
 const BAND_STYLE = {
   high: "bg-accent text-success",
