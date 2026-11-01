@@ -10,7 +10,7 @@
 #
 # The base image is pinned by digest. Dependabot proposes new digests.
 
-FROM node:24.22.0-alpine@sha256:44fce696f38ba8c987c4db89954051000bbd05ffd8d8659ba15ed4a8602e937f AS base
+FROM node:24.22.1-alpine@sha256:06d7adf3e0ef61a13f1d28682726366f97a15aa1888c934d3ecec86c33918b53 AS base
 ENV CHECKPOINT_DISABLE=1 \
     PRISMA_HIDE_UPDATE_MESSAGE=1 \
     PNPM_HOME=/pnpm \
@@ -52,7 +52,7 @@ RUN pnpm --filter @orderpilot/api deploy --prod --legacy /out
 # CLI), and the compiler is the part of the image an intruder could use most.
 RUN rm -rf /out/node_modules/.pnpm/typescript@* /out/node_modules/.pnpm/prisma@*
 
-FROM node:24.22.0-alpine@sha256:44fce696f38ba8c987c4db89954051000bbd05ffd8d8659ba15ed4a8602e937f AS runtime
+FROM node:24.22.1-alpine@sha256:06d7adf3e0ef61a13f1d28682726366f97a15aa1888c934d3ecec86c33918b53 AS runtime
 ARG GIT_SHA=unknown
 ENV NODE_ENV=production \
     CHECKPOINT_DISABLE=1 \

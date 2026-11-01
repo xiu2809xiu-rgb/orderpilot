@@ -6,7 +6,7 @@
 #
 # Base images are pinned by digest. Dependabot proposes new digests.
 
-FROM node:24.22.0-alpine@sha256:44fce696f38ba8c987c4db89954051000bbd05ffd8d8659ba15ed4a8602e937f AS base
+FROM node:24.22.1-alpine@sha256:06d7adf3e0ef61a13f1d28682726366f97a15aa1888c934d3ecec86c33918b53 AS base
 ENV PNPM_HOME=/pnpm \
     PATH=/pnpm:$PATH \
     CI=true
@@ -36,7 +36,7 @@ RUN VITE_SENTRY_DSN="${VITE_SENTRY_DSN}" pnpm --filter @orderpilot/web build \
  && VITE_SENTRY_DSN="${VITE_SENTRY_DSN}" API_UPSTREAM="${API_UPSTREAM}" \
     node apps/web/scripts/render-nginx.mjs /out/nginx
 
-FROM nginxinc/nginx-unprivileged:1.30.6-alpine3.24@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03 AS runtime
+FROM nginxinc/nginx-unprivileged:1.31.7-alpine3.24@sha256:b5047b9b76845eac124358373c6852377c52e4b05834a47647e955dd91cb8f1e AS runtime
 # Upstream rebuilds its images days after Alpine ships a fix, so the packages are
 # brought up to date here. The "Docker images" job fails on what this misses.
 USER root

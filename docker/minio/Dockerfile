@@ -16,7 +16,7 @@
 # clone (a new base digest, say) takes seconds, and CI keeps the layers between
 # runs (the "Docker images" job). Base images are pinned by digest.
 
-FROM golang:1.26.10-alpine3.24@sha256:a2012b4a1d1f9f7e9f44e0d39b805a901e856b1dd80b4e6ee4338db547050308 AS build
+FROM golang:1.27.2-alpine3.24@sha256:f92b6ef800e499660581efdabdf25d9d817a9d124eaf900924f0504e7e27e12d AS build
 ARG MINIO_TAG=RELEASE.2025-10-15T17-29-55Z
 ARG MINIO_COMMIT=9e49d5e7a648f00e26f2246f4dc28e6b07f8c84a
 RUN apk add --no-cache git
