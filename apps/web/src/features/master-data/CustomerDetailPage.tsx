@@ -4,7 +4,6 @@ import { Link, useParams } from "react-router";
 import type { CustomerDetail } from "@orderpilot/shared";
 import {
   DemoBadge,
-  Money,
   PageHeader,
   SectionCard,
   StatusBadge,
@@ -95,7 +94,12 @@ function CustomerRecord({ customer }: { customer: CustomerDetail }) {
     {
       id: "reason",
       header: t("customer.overdue.reason"),
-      cell: (order) => order.reason,
+      cell: (order) =>
+        t("customer.overdue.due", {
+          step: order.step,
+          date: formatDay(order.dueDate),
+        }),
+      wrap: true,
     },
   ];
   return (
@@ -139,12 +143,12 @@ function CustomerRecord({ customer }: { customer: CustomerDetail }) {
           {
             id: "limit",
             label: t("customer.creditLimit"),
-            value: <Money value={customer.creditLimitLcy} />,
+            value: <MaskedMoney field={customer.creditLimitLcy} />,
           },
           {
             id: "balance",
             label: t("customer.balance"),
-            value: <Money value={customer.balanceLcy} />,
+            value: <MaskedMoney field={customer.balanceLcy} />,
           },
         ]}
       />

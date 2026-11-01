@@ -5,6 +5,7 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
+import type { MasterDataItem200DataOrderLinesItemShortfallPurchaseOrderStatus } from './masterDataItem200DataOrderLinesItemShortfallPurchaseOrderStatus.ts';
 import type { MasterDataItem200DataOrderLinesItemShortfallState } from './masterDataItem200DataOrderLinesItemShortfallState.ts';
 
 /**
@@ -22,4 +23,6 @@ export type MasterDataItem200DataOrderLinesItemShortfall = {
   sprRecordNo: string | null;
   /** @nullable */
   purchaseOrderNo: string | null;
+  /** @nullable */
+  purchaseOrderStatus: MasterDataItem200DataOrderLinesItemShortfallPurchaseOrderStatus;
 } | null;

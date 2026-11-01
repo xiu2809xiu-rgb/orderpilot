@@ -30,7 +30,15 @@ export type ItemAvailability = z.infer<typeof itemAvailabilitySchema>;
 
 const direction = z.enum(["asc", "desc"]).optional();
 const page = z.coerce.number().int().min(1).default(1);
-const pageSize = z.coerce.number().int().min(1).max(200).default(25);
+/** The most rows one page of a master data list holds. */
+export const MASTER_DATA_MAX_PAGE_SIZE = 200;
+
+const pageSize = z.coerce
+  .number()
+  .int()
+  .min(1)
+  .max(MASTER_DATA_MAX_PAGE_SIZE)
+  .default(25);
 const search = z.string().trim().max(100).optional();
 const filterText = z.string().trim().min(1).max(60).optional();
 
@@ -80,15 +88,24 @@ export const itemRowSchema = z.object({
 });
 export type ItemRow = z.infer<typeof itemRowSchema>;
 
+export const PURCHASE_ORDER_STATES = ["open", "received"] as const;
+const purchaseOrderState = z.enum(PURCHASE_ORDER_STATES);
+
 /** Why a line asks for more than the item could cover. */
 export const lineShortfallSchema = z.object({
-  /** `waiting`: still short. `covered`: an approved SPR's open order brings the rest. */
+  /**
+   * `waiting`: the SPR is not approved yet, so the line is held out of Qty.
+   * on Sales Order. `covered`: an approved SPR's purchase order brings the
+   * rest, and the line counts as demand like any other.
+   */
   state: z.enum(["waiting", "covered"]),
   ordered: decimalStringSchema,
   availableStock: decimalStringSchema,
   shortBy: decimalStringSchema,
   sprRecordNo: z.string().nullable(),
   purchaseOrderNo: z.string().nullable(),
+  /** Whether that purchase order is still on its way or has arrived. */
+  purchaseOrderStatus: purchaseOrderState.nullable(),
 });
 export type LineShortfall = z.infer<typeof lineShortfallSchema>;
 
@@ -101,7 +118,7 @@ export const itemOrderLineSchema = z.object({
   status: z.string().min(1),
   /** What is left to ship on this order's line for the item. */
   quantity: decimalStringSchema,
-  /** The short line of an order: not counted in Qty. on Sales Order, as the demand under review. */
+  /** A short line whose SPR waits: not counted in Qty. on Sales Order, as the demand under review. */
   heldOut: z.boolean(),
   shortfall: lineShortfallSchema.nullable(),
 });
@@ -119,6 +136,8 @@ export const itemPurchaseLineSchema = z.object({
 export const itemSprSchema = z.object({
   recordNo: z.string().min(1),
   navisionNo: z.string().nullable(),
+  /** The state of that purchase order: a received one is no longer open. */
+  purchaseOrderStatus: purchaseOrderState.nullable(),
   orderNo: z.string().min(1),
   status: z.enum(["suggested", "submitted", "approved"]),
   quantity: decimalStringSchema,
@@ -133,12 +152,10 @@ export const itemDetailSchema = itemRowSchema.extend({
   orderLines: z.array(itemOrderLineSchema),
   /**
    * How Qty. on Sales Order is made up: `listed` is the open lines that count
-   * towards it, `other` is what Navision holds beyond them. Held-out lines
-   * are apart, in `heldOut`.
+   * towards it, and equals it. Held-out lines are apart, in `heldOut`.
    */
   salesOrderBreakdown: z.object({
     listed: decimalStringSchema,
-    other: decimalStringSchema,
     heldOut: decimalStringSchema,
   }),
   purchaseLines: z.array(itemPurchaseLineSchema),
@@ -193,14 +210,17 @@ export const customerOverdueSchema = z.object({
   orderNo: z.string().min(1),
   externalDocumentNo: z.string().min(1),
   daysOverdue: z.int().min(1),
-  reason: z.string().min(1),
+  /** The step or document that is late, as the tracker names it. */
+  step: z.string().min(1),
+  dueDate: z.string().min(1),
 });
 
 export const customerDetailSchema = customerRowSchema
   .omit({ openOrders: true, overdueOrders: true })
   .extend({
-    creditLimitLcy: decimalStringSchema,
-    balanceLcy: decimalStringSchema,
+    /** Masked, with the balance, for roles that never price anything. */
+    creditLimitLcy: maskedFieldSchema,
+    balanceLcy: maskedFieldSchema,
     openOrders: z.array(customerOrderSchema),
     overdueOrders: z.array(customerOverdueSchema),
   });
@@ -232,7 +252,8 @@ export const vendorRowSchema = z.object({
   paymentTermsCode: z.string().min(1),
   openPurchaseOrders: z.int().min(0),
   itemsSupplied: z.int().min(0),
-  balanceLcy: decimalStringSchema,
+  /** Masked for roles that never price anything. */
+  balanceLcy: maskedFieldSchema,
 });
 export type VendorRow = z.infer<typeof vendorRowSchema>;
 

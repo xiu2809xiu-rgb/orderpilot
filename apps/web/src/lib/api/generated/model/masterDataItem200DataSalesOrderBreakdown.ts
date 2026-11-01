@@ -10,7 +10,5 @@ export type MasterDataItem200DataSalesOrderBreakdown = {
   /** @pattern ^-?\d{1,15}(\.\d{1,4})?$ */
   listed: string;
   /** @pattern ^-?\d{1,15}(\.\d{1,4})?$ */
-  other: string;
-  /** @pattern ^-?\d{1,15}(\.\d{1,4})?$ */
   heldOut: string;
 };

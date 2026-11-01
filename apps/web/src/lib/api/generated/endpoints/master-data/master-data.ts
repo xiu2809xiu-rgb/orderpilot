@@ -517,7 +517,7 @@ export function useMasterDataCustomer<TData = Awaited<ReturnType<typeof masterDa
 
 
 /**
- * @summary Vendors, a page at a time. Mock Navision data
+ * @summary Vendors, a page at a time. Balances are masked by role. Mock Navision data
  */
 export const masterDataVendors = (
     params?: MasterDataVendorsParams,
@@ -589,7 +589,7 @@ export function useMasterDataVendors<TData = Awaited<ReturnType<typeof masterDat
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary Vendors, a page at a time. Mock Navision data
+ * @summary Vendors, a page at a time. Balances are masked by role. Mock Navision data
  */
 
 export function useMasterDataVendors<TData = Awaited<ReturnType<typeof masterDataVendors>>, TError = ErrorType<unknown>>(

@@ -210,5 +210,24 @@ describe("master data routes (mock Navision)", () => {
       const support = JSON.stringify((await get("SUPPORT", path)).body);
       expect(support).toContain(`"${owner.total}"`);
     });
+
+    it("holds no balance or credit limit for Warehouse and Logistics", async () => {
+      const customer = dataset.customers[0];
+      if (!customer) throw new Error("no customer");
+      const figures = [
+        [`${M}/customers/${customer.no}`, customer.creditLimitLcy],
+        [`${M}/customers/${customer.no}`, customer.balanceLcy],
+        [`${M}/vendors/${vendor.no}`, vendor.balanceLcy],
+        [`${M}/vendors?pageSize=200`, vendor.balanceLcy],
+      ] as const;
+      for (const [path, value] of figures) {
+        for (const role of ["WAREHOUSE", "LOGISTICS"] as const) {
+          const text = JSON.stringify((await get(role, path)).body);
+          expect(text).not.toContain(`"${value}"`);
+        }
+        const support = JSON.stringify((await get("SUPPORT", path)).body);
+        expect(support).toContain(`"${value}"`);
+      }
+    });
   });
 });

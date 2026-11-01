@@ -119,7 +119,22 @@ export function ItemSupply({ item }: { item: ItemDetail }) {
     {
       id: "navisionNo",
       header: t("item.sprs.navisionNo"),
-      cell: (spr) => <span className="font-mono">{spr.navisionNo}</span>,
+      cell: (spr) =>
+        spr.navisionNo ? (
+          <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span className="font-mono">{spr.navisionNo}</span>
+            {spr.purchaseOrderStatus ? (
+              <StatusBadge
+                tone={
+                  spr.purchaseOrderStatus === "received" ? "success" : "info"
+                }
+              >
+                {t(`item.sprs.purchaseOrder.${spr.purchaseOrderStatus}`)}
+              </StatusBadge>
+            ) : null}
+          </span>
+        ) : null,
+      wrap: true,
     },
   ];
   return (

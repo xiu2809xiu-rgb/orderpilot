@@ -5,7 +5,6 @@ import type { VendorDetail } from "@orderpilot/shared";
 import {
   ClassificationBadge,
   DemoBadge,
-  Money,
   PageHeader,
   SectionCard,
 } from "@/components/common";
@@ -187,7 +186,7 @@ function VendorRecord({ vendor }: { vendor: VendorDetail }) {
           {
             id: "balance",
             label: t("vendor.balance"),
-            value: <Money value={vendor.balanceLcy} />,
+            value: <MaskedMoney field={vendor.balanceLcy} />,
           },
         ]}
       />

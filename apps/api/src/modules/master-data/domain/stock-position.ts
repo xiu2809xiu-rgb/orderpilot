@@ -3,8 +3,10 @@ import {
   compareDecimal,
   type ItemAvailability,
 } from "@orderpilot/shared";
-import type { Item } from "@orderpilot/synthetic-data";
-import type { MasterDataSalesOrder } from "./master-data-reader.js";
+import type {
+  MasterDataItem,
+  MasterDataSalesOrder,
+} from "./master-data-reader.js";
 
 /** Under this much available stock an item counts as low. A sample for the demo. */
 export const LOW_STOCK_THRESHOLD = "25";
@@ -19,15 +21,16 @@ export function isOpenOrder(order: MasterDataSalesOrder): boolean {
 
 /**
  * Stock facts about one item. Pure, so the rule that decides "short" is tested
- * on its own. The data keeps a short line out of Qty. on Sales Order while it
- * is reviewed, which leaves available stock positive even for an item that
- * cannot cover its orders. So "short" is read from the open orders' shortfalls,
- * and never from the sign of available stock.
+ * on its own. A short line stays out of Qty. on Sales Order while its SPR
+ * waits, as the demand under review, which leaves available stock positive
+ * even for an item that cannot cover its orders. So "short" is read from the
+ * open orders' shortfalls, and never from the sign of available stock. Once
+ * the SPR is approved the line is ordinary demand, counted like any other.
  */
 export class StockPosition {
   constructor(
     private readonly item: Pick<
-      Item,
+      MasterDataItem,
       "no" | "inventory" | "qtyOnSalesOrder" | "qtyOnPurchOrder"
     >,
     private readonly orders: readonly MasterDataSalesOrder[],
@@ -41,12 +44,23 @@ export class StockPosition {
     );
   }
 
-  /** True when this open order wants more of the item than is available. */
-  isShortOn(order: MasterDataSalesOrder): boolean {
+  /** True when this open order's short line for the item waits on its SPR. */
+  isHeldOut(order: MasterDataSalesOrder): boolean {
     return (
       isOpenOrder(order) &&
       order.stockShortfall?.itemNo === this.item.no &&
-      compareDecimal(order.stockShortfall.ordered, this.availableStock) > 0
+      order.stockShortfall.coveredBy === null
+    );
+  }
+
+  /** True when this open order wants more of the item than is available. */
+  isShortOn(order: MasterDataSalesOrder): boolean {
+    return (
+      this.isHeldOut(order) &&
+      compareDecimal(
+        order.stockShortfall?.ordered ?? "0",
+        this.availableStock,
+      ) > 0
     );
   }
 

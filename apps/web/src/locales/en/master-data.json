@@ -95,10 +95,12 @@
       "quantity": "To ship",
       "note": "Note",
       "heldOut": "Demand under review",
+      "onOrder": "Covered by {{po}}",
+      "received": "{{po}} received",
       "covered": "Needed {{ordered}} with {{available}} available. {{po}} covers the {{shortBy}} short.",
+      "coveredReceived": "Needed {{ordered}} with {{available}} available. {{po}} brought in the {{shortBy}} short.",
       "empty": "No open order holds this item.",
       "listed": "Orders above, in Qty. on Sales Order",
-      "other": "Other open orders in Navision",
       "heldOutTotal": "Orders above, held out as demand under review"
     },
     "purchases": {
@@ -125,6 +127,10 @@
       "needBy": "Need by",
       "quantity": "Quantity",
       "navisionNo": "Purchase order",
+      "purchaseOrder": {
+        "open": "On order",
+        "received": "Received"
+      },
       "empty": "No SPR has been raised for this item.",
       "statuses": {
         "suggested": "Suggested",
@@ -192,6 +198,7 @@
       "days_one": "{{count}} day",
       "days_other": "{{count}} days",
       "reason": "What is late",
+      "due": "{{step}}, due {{date}}",
       "empty": "Nothing is overdue for this customer."
     }
   },

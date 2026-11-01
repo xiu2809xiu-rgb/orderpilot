@@ -5,6 +5,7 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
+import type { MasterDataVendor200DataBalanceLcy } from './masterDataVendor200DataBalanceLcy.ts';
 import type { MasterDataVendor200DataBankAccountsItem } from './masterDataVendor200DataBankAccountsItem.ts';
 import type { MasterDataVendor200DataItemsItem } from './masterDataVendor200DataItemsItem.ts';
 import type { MasterDataVendor200DataOpenPurchaseOrdersItem } from './masterDataVendor200DataOpenPurchaseOrdersItem.ts';
@@ -18,8 +19,7 @@ export type MasterDataVendor200Data = {
   currencyCode: string;
   /** @minLength 1 */
   paymentTermsCode: string;
-  /** @pattern ^-?\d{1,15}(\.\d{1,4})?$ */
-  balanceLcy: string;
+  balanceLcy: MasterDataVendor200DataBalanceLcy;
   bankAccounts: MasterDataVendor200DataBankAccountsItem[];
   openPurchaseOrders: MasterDataVendor200DataOpenPurchaseOrdersItem[];
   items: MasterDataVendor200DataItemsItem[];

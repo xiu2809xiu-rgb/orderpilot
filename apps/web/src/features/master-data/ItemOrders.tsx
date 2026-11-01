@@ -7,35 +7,47 @@ import { RecordTable, type RecordColumn } from "./RecordTable";
 
 type OrderLine = ItemDetail["orderLines"][number];
 
+/**
+ * A short line says where it stands: held out while its SPR waits, or covered
+ * by the purchase order the approved SPR raised, which is on its way or in.
+ */
 function Note({ line }: { line: OrderLine }) {
   const { t } = useTranslation("master-data");
-  if (!line.heldOut) return null;
+  const { shortfall } = line;
+  if (!shortfall) return null;
+  if (line.heldOut) {
+    return <StatusBadge tone="warning">{t("item.orders.heldOut")}</StatusBadge>;
+  }
   const figures = {
-    ordered: formatQuantity(line.shortfall?.ordered ?? "0"),
-    available: formatQuantity(line.shortfall?.availableStock ?? "0"),
-    shortBy: formatQuantity(line.shortfall?.shortBy ?? "0"),
-    po: line.shortfall?.purchaseOrderNo ?? "",
+    ordered: formatQuantity(shortfall.ordered),
+    available: formatQuantity(shortfall.availableStock),
+    shortBy: formatQuantity(shortfall.shortBy),
+    po: shortfall.purchaseOrderNo ?? "",
   };
+  const received = shortfall.purchaseOrderStatus === "received";
   return (
     <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
-      <StatusBadge tone="warning">{t("item.orders.heldOut")}</StatusBadge>
-      {line.shortfall?.state === "covered" ? (
-        <span className="text-muted-foreground">
-          {t("item.orders.covered", figures)}
-        </span>
-      ) : null}
+      <StatusBadge tone={received ? "success" : "info"}>
+        {t(received ? "item.orders.received" : "item.orders.onOrder", figures)}
+      </StatusBadge>
+      <span className="text-muted-foreground">
+        {t(
+          received ? "item.orders.coveredReceived" : "item.orders.covered",
+          figures,
+        )}
+      </span>
     </span>
   );
 }
 
 /**
  * The open orders holding this item, and how they make up Qty. on Sales
- * Order. The sum is spelt out under the table: the counted lines, what else
- * Navision holds, and any short line held out of it as the demand under review.
+ * Order. The sum is spelt out under the table: the counted lines are Qty. on
+ * Sales Order, and any short line held out of it is the demand under review.
  */
 export function ItemOrders({ item }: { item: ItemDetail }) {
   const { t } = useTranslation("master-data");
-  const { listed, other, heldOut } = item.salesOrderBreakdown;
+  const { listed, heldOut } = item.salesOrderBreakdown;
   const columns: RecordColumn<OrderLine>[] = [
     {
       id: "order",
@@ -102,10 +114,6 @@ export function ItemOrders({ item }: { item: ItemDetail }) {
           <dt className="text-muted-foreground">{t("item.orders.listed")}</dt>
           <dd data-numeric className="text-right tabular-nums">
             {formatQuantity(listed)}
-          </dd>
-          <dt className="text-muted-foreground">{t("item.orders.other")}</dt>
-          <dd data-numeric className="text-right tabular-nums">
-            {formatQuantity(other)}
           </dd>
           <dt className="font-medium">{t("item.stock.qtyOnSalesOrder")}</dt>
           <dd data-numeric className="text-right font-medium tabular-nums">

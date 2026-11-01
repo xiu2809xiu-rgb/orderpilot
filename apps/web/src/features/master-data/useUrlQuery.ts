@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { useSearchParams } from "react-router";
+import { MASTER_DATA_MAX_PAGE_SIZE } from "@orderpilot/shared";
 import type { TableFilters, TableQuery } from "@/components/common";
 
 const DEFAULT_PAGE_SIZE = 25;
@@ -27,7 +28,11 @@ export function queryFromUrl(
   const sort = url.get("sort");
   return {
     page: positive(url.get("page"), 1),
-    pageSize: positive(url.get("pageSize"), DEFAULT_PAGE_SIZE),
+    // The API refuses more than its maximum, so a hand-edited link is held to it.
+    pageSize: Math.min(
+      positive(url.get("pageSize"), DEFAULT_PAGE_SIZE),
+      MASTER_DATA_MAX_PAGE_SIZE,
+    ),
     search: url.get("search") ?? "",
     sort: sort
       ? {

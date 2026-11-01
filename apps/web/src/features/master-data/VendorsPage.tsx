@@ -6,7 +6,6 @@ import type { VendorRow } from "@orderpilot/shared";
 import {
   DataTable,
   DemoBadge,
-  Money,
   PageHeader,
   type DataTableColumn,
 } from "@/components/common";
@@ -16,7 +15,7 @@ import {
 } from "@/lib/api/generated/endpoints/master-data/master-data";
 import type { MasterDataVendorsParams } from "@/lib/api/generated/model";
 import { tableStatusOf } from "@/lib/query-status";
-import { MasterDataTabs } from "./pieces";
+import { MaskedMoney, MasterDataTabs } from "./pieces";
 import { allPages, apiParams, useUrlQuery } from "./useUrlQuery";
 
 const FILTERS = {};
@@ -28,7 +27,10 @@ const SORTABLE = [
   "balanceLcy",
 ];
 
-function vendorColumns(t: TFunction): DataTableColumn<VendorRow>[] {
+function vendorColumns(
+  t: TFunction,
+  balanceHidden: boolean,
+): DataTableColumn<VendorRow>[] {
   return [
     {
       id: "no",
@@ -83,10 +85,10 @@ function vendorColumns(t: TFunction): DataTableColumn<VendorRow>[] {
     {
       id: "balanceLcy",
       header: t("vendors.columns.balance"),
-      cell: (row) => <Money value={row.balanceLcy} />,
-      exportValue: (row) => row.balanceLcy,
+      cell: (row) => <MaskedMoney field={row.balanceLcy} />,
+      exportValue: (row) => row.balanceLcy.value ?? t("table.hidden"),
       kind: "money",
-      sortable: true,
+      sortable: !balanceHidden,
     },
   ];
 }
@@ -100,7 +102,11 @@ export default function VendorsPage() {
   const list = useMasterDataVendors(params, {
     query: { placeholderData: (previous) => previous },
   });
-  const columns = useMemo(() => vendorColumns(t), [t]);
+  const balanceHidden = list.data?.data[0]?.balanceLcy.masked ?? false;
+  const columns = useMemo(
+    () => vendorColumns(t, balanceHidden),
+    [t, balanceHidden],
+  );
 
   return (
     <div className="space-y-s3">

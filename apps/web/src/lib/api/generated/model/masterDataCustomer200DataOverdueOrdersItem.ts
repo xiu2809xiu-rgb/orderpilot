@@ -17,5 +17,7 @@ export type MasterDataCustomer200DataOverdueOrdersItem = {
      */
   daysOverdue: number;
   /** @minLength 1 */
-  reason: string;
+  step: string;
+  /** @minLength 1 */
+  dueDate: string;
 };

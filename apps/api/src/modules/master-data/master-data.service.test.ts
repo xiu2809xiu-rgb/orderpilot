@@ -1,5 +1,5 @@
 import { createSyntheticDataset } from "@orderpilot/synthetic-data";
-import { addDecimal, compareDecimal } from "@orderpilot/shared";
+import { compareDecimal } from "@orderpilot/shared";
 import { describe, expect, it } from "vitest";
 import { NotFoundError } from "../../common/domain-error.js";
 import { MockChecksRepository } from "../checks/mock-checks.repository.js";
@@ -58,6 +58,7 @@ describe("the stock position of an item", () => {
     ordered: "146",
     availableStock: "46",
     shortBy: "100",
+    coveredBy: null,
   };
 
   it("works out available stock by the formula", () => {
@@ -90,13 +91,19 @@ describe("the stock position of an item", () => {
     expect(stock.availability).toBe("ok");
   });
 
-  it("stops being short once an open purchase order brings the rest", () => {
+  it("counts a line as demand once its SPR is approved, so the item is not free to sell", () => {
+    // The SPR's 100 is on order, and the 146 joined Qty. on Sales Order.
+    const covered = order({
+      stockShortfall: { ...shortfall, coveredBy: "PO-1" },
+    });
     const stock = new StockPosition(
-      stockOf({ inventory: "100", so: "60", po: "106" }),
-      [order({ stockShortfall: shortfall })],
+      stockOf({ inventory: "100", so: "206", po: "106" }),
+      [covered],
     );
-    expect(stock.availableStock).toBe("146.00");
-    expect(stock.availability).toBe("ok");
+    expect(stock.isHeldOut(covered)).toBe(false);
+    expect(stock.isShortOn(covered)).toBe(false);
+    expect(stock.availableStock).toBe("0.00");
+    expect(stock.availability).toBe("low");
   });
 
   it("calls an item low only under the threshold", () => {
@@ -151,9 +158,13 @@ describe("items over the mock", () => {
     }
   });
 
-  it("lists as short exactly the items an open order cannot be covered for", async () => {
+  it("lists as short exactly the items an open order waits on an SPR for", async () => {
     const reader = new MockNavisionMasterData(() => dataset);
-    const orders = await reader.salesOrders();
+    // An approved SPR covers its order: its purchase order brings the rest.
+    const orders = (await reader.salesOrders()).filter(
+      (o) =>
+        dataset.sprs.find((spr) => spr.orderNo === o.no)?.status !== "approved",
+    );
     const short = await service.listItems(
       { ...everything, availability: "short" },
       "SUPPORT",
@@ -222,14 +233,14 @@ describe("items over the mock", () => {
 });
 
 describe("one item's numbers agree", () => {
-  it("adds its counted lines and the rest up to Qty. on Sales Order, and its purchase lines to Qty. on Purch. Order", async () => {
+  it("adds its counted lines up to Qty. on Sales Order, and its purchase lines to Qty. on Purch. Order", async () => {
+    let withDemand = 0;
     for (const item of dataset.items) {
       const detail = await service.item(item.no, "SUPPORT");
-      const { listed, other } = detail.salesOrderBreakdown;
-      expect(Number(other)).toBeGreaterThanOrEqual(0);
-      expect(Number(addDecimal(listed, other))).toBe(
-        Number(item.qtyOnSalesOrder),
-      );
+      const { listed } = detail.salesOrderBreakdown;
+      // Summed from the lines the page shows, against the item card's own figure.
+      expect(Number(listed), item.no).toBe(Number(item.qtyOnSalesOrder));
+      if (Number(item.qtyOnSalesOrder) > 0) withDemand++;
       const counted = detail.orderLines
         .filter((line) => !line.heldOut)
         .reduce((sum, line) => sum + Number(line.quantity), 0);
@@ -241,6 +252,7 @@ describe("one item's numbers agree", () => {
         ),
       ).toBe(Number(item.qtyOnPurchOrder));
     }
+    expect(withDemand).toBeGreaterThan(50);
   });
 
   it("says what a short order needs, has and lacks", async () => {
@@ -260,24 +272,55 @@ describe("one item's numbers agree", () => {
     expect(detail.availability).toBe("short");
   });
 
-  it("names the purchase order that covers an approved SPR's line", async () => {
-    const spr = dataset.sprs.find((s) =>
-      dataset.purchaseOrders.some(
-        (po) => po.no === s.navisionNo && po.status === "open",
-      ),
-    );
-    if (!spr) throw new Error("no open SPR order");
+  it.each(["open", "received"] as const)(
+    "counts an approved SPR's line as demand, and names its %s purchase order",
+    async (status) => {
+      const spr = dataset.sprs.find((s) => {
+        const order = dataset.orders.find((o) => o.header.no === s.orderNo);
+        return (
+          order?.lines.some(
+            (l) => l.no === s.itemNo && Number(l.qtyToShip) > 0,
+          ) &&
+          dataset.purchaseOrders.some(
+            (po) => po.no === s.navisionNo && po.status === status,
+          )
+        );
+      });
+      if (!spr) throw new Error(`no ${status} SPR order`);
+      const detail = await service.item(spr.itemNo, "PRODUCT_MANAGER");
+      const line = detail.orderLines.find((l) => l.orderNo === spr.orderNo);
+      expect(line).toMatchObject({ heldOut: false });
+      expect(line?.shortfall).toMatchObject({
+        state: "covered",
+        purchaseOrderNo: spr.navisionNo,
+        purchaseOrderStatus: status,
+        sprRecordNo: spr.recordNo,
+      });
+      // The order takes everything there is, so nothing is free to sell.
+      expect(Number(detail.availableStock)).toBe(0);
+      expect(detail.availability).toBe("low");
+      expect(
+        detail.sprs.find((r) => r.recordNo === spr.recordNo),
+      ).toMatchObject({
+        navisionNo: spr.navisionNo,
+        purchaseOrderStatus: status,
+      });
+      expect(
+        detail.purchaseLines
+          .map((l) => l.purchaseOrderNo)
+          .includes(spr.navisionNo ?? ""),
+      ).toBe(status === "open");
+    },
+  );
+
+  it("gives an SPR that is not approved no purchase order", async () => {
+    const spr = dataset.sprs.find((s) => s.status !== "approved");
+    if (!spr) throw new Error("no waiting SPR");
     const detail = await service.item(spr.itemNo, "SUPPORT");
-    const held = detail.orderLines.find((line) => line.heldOut);
-    expect(held?.shortfall).toMatchObject({
-      state: "covered",
-      purchaseOrderNo: spr.navisionNo,
-      sprRecordNo: spr.recordNo,
+    expect(detail.sprs.find((r) => r.recordNo === spr.recordNo)).toMatchObject({
+      navisionNo: null,
+      purchaseOrderStatus: null,
     });
-    expect(detail.availability).not.toBe("short");
-    expect(detail.purchaseLines.map((l) => l.purchaseOrderNo)).toContain(
-      spr.navisionNo,
-    );
   });
 
   it("answers an unknown item with not found", async () => {
@@ -310,6 +353,10 @@ describe("customers over the mock", () => {
       const detail = await service.customer(row.no, "SUPPORT");
       expect(detail.openOrders).toHaveLength(row.openOrders);
       expect(detail.overdueOrders).toHaveLength(row.overdueOrders);
+      for (const late of detail.overdueOrders) {
+        expect(late.dueDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+        expect(late.step.length).toBeGreaterThan(0);
+      }
       const late = await tracker.list({
         page: 1,
         pageSize: 200,
@@ -329,7 +376,7 @@ describe("customers over the mock", () => {
 
 describe("vendors over the mock", () => {
   it("counts what the detail lists", async () => {
-    const list = await service.listVendors(everything);
+    const list = await service.listVendors(everything, "FINANCE");
     expect(list.total).toBe(dataset.vendors.length);
     for (const row of list.items) {
       const detail = await service.vendor(row.no, "FINANCE");
@@ -339,14 +386,18 @@ describe("vendors over the mock", () => {
     }
   });
 
-  it("sorts by balance as a number", async () => {
-    const list = await service.listVendors({
+  it("sorts by balance as a number, but not for a role that cannot see it", async () => {
+    const query = {
       ...everything,
-      sort: "balanceLcy",
-      direction: "desc",
-    });
-    const figures = list.items.map((r) => Number(r.balanceLcy));
+      sort: "balanceLcy" as const,
+      direction: "desc" as const,
+    };
+    const list = await service.listVendors(query, "FINANCE");
+    const figures = list.items.map((r) => Number(r.balanceLcy.value));
     expect(figures).toEqual([...figures].sort((a, b) => b - a));
+    const plain = await service.listVendors(everything, "WAREHOUSE");
+    const hidden = await service.listVendors(query, "WAREHOUSE");
+    expect(hidden.items.map((r) => r.no)).toEqual(plain.items.map((r) => r.no));
   });
 });
 
@@ -399,6 +450,36 @@ describe("masking", () => {
       "AUDITOR",
     ] as const) {
       expect((await service.item(no, role)).unitPrice.masked).toBe(false);
+    }
+  });
+
+  it("hides balances and credit limits from Warehouse and Logistics, with the reason", async () => {
+    const customerNo = dataset.customers[0]?.no ?? "";
+    for (const role of ["WAREHOUSE", "LOGISTICS"] as const) {
+      const customer = await service.customer(customerNo, role);
+      const vendor = await service.vendor(vendorNo, role);
+      const rows = await service.listVendors(everything, role);
+      for (const field of [
+        customer.creditLimitLcy,
+        customer.balanceLcy,
+        vendor.balanceLcy,
+        ...rows.items.map((r) => r.balanceLcy),
+      ]) {
+        expect(field).toMatchObject({
+          masked: true,
+          value: null,
+          reason: "role",
+        });
+      }
+    }
+    for (const role of ["SUPPORT", "FINANCE", "MANAGEMENT"] as const) {
+      const customer = await service.customer(customerNo, role);
+      expect(customer.creditLimitLcy.value).toBe(
+        dataset.customers[0]?.creditLimitLcy,
+      );
+      expect((await service.vendor(vendorNo, role)).balanceLcy.masked).toBe(
+        false,
+      );
     }
   });
 

@@ -16,17 +16,15 @@ import {
   type VendorQuery,
   type VendorRow,
 } from "@orderpilot/shared";
-import type {
-  Item,
-  PurchaseOrder,
-  SampleSpr,
-} from "@orderpilot/synthetic-data";
 import { NotFoundError } from "../../common/domain-error.js";
 import { SAMPLE_RULES, mask } from "../governance/domain/masking.js";
 import {
   MASTER_DATA_READER,
+  type MasterDataItem,
+  type MasterDataPurchaseOrder,
   type MasterDataReader,
   type MasterDataSalesOrder,
+  type MasterDataSpr,
 } from "./domain/master-data-reader.js";
 import { StockPosition, isOpenOrder } from "./domain/stock-position.js";
 
@@ -103,7 +101,7 @@ const VENDOR_SORT: Record<
   name: (row) => row.name,
   openPurchaseOrders: (row) => row.openPurchaseOrders,
   itemsSupplied: (row) => row.itemsSupplied,
-  balanceLcy: (row) => Number(row.balanceLcy),
+  balanceLcy: (row) => Number(row.balanceLcy.value ?? 0),
 };
 
 const distinct = (values: readonly string[]): string[] =>
@@ -112,14 +110,25 @@ const distinct = (values: readonly string[]): string[] =>
 const sum = (values: readonly string[]): string =>
   values.reduce((total, value) => addDecimal(total, value), "0.00");
 
-const isOpenPurchase = (po: PurchaseOrder): boolean => po.status === "open";
+const isOpenPurchase = (po: MasterDataPurchaseOrder): boolean =>
+  po.status === "open";
+
+/** The state of the purchase order an SPR became, or null before it is approved. */
+function purchaseStatus(
+  navisionNo: string | null,
+  purchaseOrders: readonly MasterDataPurchaseOrder[],
+): MasterDataPurchaseOrder["status"] | null {
+  if (!navisionNo) return null;
+  return purchaseOrders.find((po) => po.no === navisionNo)?.status ?? null;
+}
 
 /** The open lines holding an item, each with why it is short, if it is. */
 function orderLinesOf(
   itemNo: string,
   orders: readonly MasterDataSalesOrder[],
   stock: StockPosition,
-  sprs: readonly SampleSpr[],
+  sprs: readonly MasterDataSpr[],
+  purchaseOrders: readonly MasterDataPurchaseOrder[],
   customerName: (no: string) => string,
 ): ItemDetail["orderLines"] {
   return orders.flatMap((order) => {
@@ -131,6 +140,7 @@ function orderLinesOf(
     const shortfall =
       order.stockShortfall?.itemNo === itemNo ? order.stockShortfall : null;
     const spr = sprs.find((candidate) => candidate.orderNo === order.no);
+    const heldOut = stock.isHeldOut(order);
     return [
       {
         orderNo: order.no,
@@ -140,14 +150,18 @@ function orderLinesOf(
         shipmentDate: order.shipmentDate,
         status: order.status,
         quantity: line.qtyToShip,
-        heldOut: shortfall !== null,
+        heldOut,
         shortfall: shortfall && {
-          state: stock.isShortOn(order) ? "waiting" : "covered",
+          state: heldOut ? "waiting" : "covered",
           ordered: shortfall.ordered,
           availableStock: shortfall.availableStock,
           shortBy: shortfall.shortBy,
           sprRecordNo: spr?.recordNo ?? null,
-          purchaseOrderNo: spr?.navisionNo ?? null,
+          purchaseOrderNo: shortfall.coveredBy,
+          purchaseOrderStatus: purchaseStatus(
+            shortfall.coveredBy,
+            purchaseOrders,
+          ),
         },
       },
     ];
@@ -171,7 +185,7 @@ export class MasterDataService {
   }
 
   private itemRow(
-    item: Item,
+    item: MasterDataItem,
     orders: readonly MasterDataSalesOrder[],
     vendorName: string,
     role: Role,
@@ -249,10 +263,8 @@ export class MasterDataService {
       orders,
       new StockPosition(item, orders),
       itemSprs,
+      purchaseOrders,
       (customerNo) => customerNames.get(customerNo) ?? "",
-    );
-    const listed = sum(
-      orderLines.filter((l) => !l.heldOut).map((l) => l.quantity),
     );
     return {
       ...this.itemRow(item, orders, names.get(item.vendorNo) ?? "", role),
@@ -260,8 +272,9 @@ export class MasterDataService {
       unitCost: this.field(role, "item.unitCost", item.unitCost),
       orderLines,
       salesOrderBreakdown: {
-        listed,
-        other: addDecimal(item.qtyOnSalesOrder, `-${listed}`),
+        listed: sum(
+          orderLines.filter((l) => !l.heldOut).map((l) => l.quantity),
+        ),
         heldOut: sum(
           orderLines.filter((l) => l.heldOut).map((l) => l.quantity),
         ),
@@ -281,6 +294,7 @@ export class MasterDataService {
       sprs: itemSprs.map((spr) => ({
         recordNo: spr.recordNo,
         navisionNo: spr.navisionNo,
+        purchaseOrderStatus: purchaseStatus(spr.navisionNo, purchaseOrders),
         orderNo: spr.orderNo,
         status: spr.status,
         quantity: spr.quantity,
@@ -338,8 +352,12 @@ export class MasterDataService {
       currencyCode: customer.currencyCode,
       paymentTermsCode: customer.paymentTermsCode,
       customerPriceGroup: customer.customerPriceGroup,
-      creditLimitLcy: customer.creditLimitLcy,
-      balanceLcy: customer.balanceLcy,
+      creditLimitLcy: this.field(
+        role,
+        "customer.creditLimitLcy",
+        customer.creditLimitLcy,
+      ),
+      balanceLcy: this.field(role, "customer.balanceLcy", customer.balanceLcy),
       openOrders: own.filter(isOpenOrder).map((order) => ({
         orderNo: order.no,
         externalDocumentNo: order.externalDocumentNo,
@@ -355,7 +373,8 @@ export class MasterDataService {
                 orderNo: order.no,
                 externalDocumentNo: order.externalDocumentNo,
                 daysOverdue: order.overdue.daysOverdue,
-                reason: order.overdue.reason,
+                step: order.overdue.step,
+                dueDate: order.overdue.dueDate,
               },
             ]
           : [],
@@ -363,7 +382,10 @@ export class MasterDataService {
     };
   }
 
-  async listVendors(query: VendorQuery): Promise<MasterDataPage<VendorRow>> {
+  async listVendors(
+    query: VendorQuery,
+    role: Role,
+  ): Promise<MasterDataPage<VendorRow>> {
     const [vendors, items, purchaseOrders] = await Promise.all([
       this.reader.vendors(),
       this.reader.items(),
@@ -380,9 +402,12 @@ export class MasterDataService {
           (po) => isOpenPurchase(po) && po.buyFromVendorNo === vendor.no,
         ).length,
         itemsSupplied: items.filter((i) => i.vendorNo === vendor.no).length,
-        balanceLcy: vendor.balanceLcy,
+        balanceLcy: this.field(role, "vendor.balanceLcy", vendor.balanceLcy),
       }));
-    return paged(rows, query, query.sort && VENDOR_SORT[query.sort]);
+    // As with prices: a sort by a hidden balance would give its order away.
+    const hidden = this.field(role, "vendor.balanceLcy", "").masked;
+    const sort = query.sort === "balanceLcy" && hidden ? undefined : query.sort;
+    return paged(rows, query, sort && VENDOR_SORT[sort]);
   }
 
   async vendor(no: string, role: Role): Promise<VendorDetail> {
@@ -400,7 +425,7 @@ export class MasterDataService {
       name: vendor.name,
       currencyCode: vendor.currencyCode,
       paymentTermsCode: vendor.paymentTermsCode,
-      balanceLcy: vendor.balanceLcy,
+      balanceLcy: this.field(role, "vendor.balanceLcy", vendor.balanceLcy),
       bankAccounts: accounts.map((account) => ({
         code: account.code,
         bankName: this.field(role, "vendor.bankName", account.name),

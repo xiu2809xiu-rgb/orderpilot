@@ -3236,6 +3236,11 @@
                                   "purchaseOrderNo": {
                                     "nullable": true,
                                     "type": "string"
+                                  },
+                                  "purchaseOrderStatus": {
+                                    "nullable": true,
+                                    "type": "string",
+                                    "enum": ["open", "received"]
                                   }
                                 },
                                 "required": [
@@ -3244,7 +3249,8 @@
                                   "availableStock",
                                   "shortBy",
                                   "sprRecordNo",
-                                  "purchaseOrderNo"
+                                  "purchaseOrderNo",
+                                  "purchaseOrderStatus"
                                 ],
                                 "additionalProperties": false
                               }
@@ -3270,16 +3276,12 @@
                               "type": "string",
                               "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
                             },
-                            "other": {
-                              "type": "string",
-                              "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
-                            },
                             "heldOut": {
                               "type": "string",
                               "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
                             }
                           },
-                          "required": ["listed", "other", "heldOut"],
+                          "required": ["listed", "heldOut"],
                           "additionalProperties": false
                         },
                         "purchaseLines": {
@@ -3375,6 +3377,11 @@
                                 "nullable": true,
                                 "type": "string"
                               },
+                              "purchaseOrderStatus": {
+                                "nullable": true,
+                                "type": "string",
+                                "enum": ["open", "received"]
+                              },
                               "orderNo": {
                                 "type": "string",
                                 "minLength": 1
@@ -3399,6 +3406,7 @@
                             "required": [
                               "recordNo",
                               "navisionNo",
+                              "purchaseOrderStatus",
                               "orderNo",
                               "status",
                               "quantity",
@@ -3688,12 +3696,80 @@
                           "minLength": 1
                         },
                         "creditLimitLcy": {
-                          "type": "string",
-                          "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                          "type": "object",
+                          "properties": {
+                            "field": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "classification": {
+                              "type": "string",
+                              "enum": [
+                                "public",
+                                "internal",
+                                "confidential",
+                                "restricted"
+                              ]
+                            },
+                            "masked": {
+                              "type": "boolean"
+                            },
+                            "value": {
+                              "nullable": true,
+                              "type": "string"
+                            },
+                            "reason": {
+                              "nullable": true,
+                              "type": "string",
+                              "enum": ["role", "bankDetails", "price", "policy"]
+                            }
+                          },
+                          "required": [
+                            "field",
+                            "classification",
+                            "masked",
+                            "value",
+                            "reason"
+                          ],
+                          "additionalProperties": false
                         },
                         "balanceLcy": {
-                          "type": "string",
-                          "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                          "type": "object",
+                          "properties": {
+                            "field": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "classification": {
+                              "type": "string",
+                              "enum": [
+                                "public",
+                                "internal",
+                                "confidential",
+                                "restricted"
+                              ]
+                            },
+                            "masked": {
+                              "type": "boolean"
+                            },
+                            "value": {
+                              "nullable": true,
+                              "type": "string"
+                            },
+                            "reason": {
+                              "nullable": true,
+                              "type": "string",
+                              "enum": ["role", "bankDetails", "price", "policy"]
+                            }
+                          },
+                          "required": [
+                            "field",
+                            "classification",
+                            "masked",
+                            "value",
+                            "reason"
+                          ],
+                          "additionalProperties": false
                         },
                         "openOrders": {
                           "type": "array",
@@ -3793,7 +3869,11 @@
                                 "minimum": 1,
                                 "maximum": 9007199254740991
                               },
-                              "reason": {
+                              "step": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "dueDate": {
                                 "type": "string",
                                 "minLength": 1
                               }
@@ -3802,7 +3882,8 @@
                               "orderNo",
                               "externalDocumentNo",
                               "daysOverdue",
-                              "reason"
+                              "step",
+                              "dueDate"
                             ],
                             "additionalProperties": false
                           }
@@ -3945,8 +4026,47 @@
                             "maximum": 9007199254740991
                           },
                           "balanceLcy": {
-                            "type": "string",
-                            "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                            "type": "object",
+                            "properties": {
+                              "field": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "classification": {
+                                "type": "string",
+                                "enum": [
+                                  "public",
+                                  "internal",
+                                  "confidential",
+                                  "restricted"
+                                ]
+                              },
+                              "masked": {
+                                "type": "boolean"
+                              },
+                              "value": {
+                                "nullable": true,
+                                "type": "string"
+                              },
+                              "reason": {
+                                "nullable": true,
+                                "type": "string",
+                                "enum": [
+                                  "role",
+                                  "bankDetails",
+                                  "price",
+                                  "policy"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "field",
+                              "classification",
+                              "masked",
+                              "value",
+                              "reason"
+                            ],
+                            "additionalProperties": false
                           }
                         },
                         "required": [
@@ -3995,7 +4115,7 @@
             }
           }
         },
-        "summary": "Vendors, a page at a time. Mock Navision data",
+        "summary": "Vendors, a page at a time. Balances are masked by role. Mock Navision data",
         "tags": ["MasterData"]
       }
     },
@@ -4040,8 +4160,42 @@
                           "minLength": 1
                         },
                         "balanceLcy": {
-                          "type": "string",
-                          "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                          "type": "object",
+                          "properties": {
+                            "field": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "classification": {
+                              "type": "string",
+                              "enum": [
+                                "public",
+                                "internal",
+                                "confidential",
+                                "restricted"
+                              ]
+                            },
+                            "masked": {
+                              "type": "boolean"
+                            },
+                            "value": {
+                              "nullable": true,
+                              "type": "string"
+                            },
+                            "reason": {
+                              "nullable": true,
+                              "type": "string",
+                              "enum": ["role", "bankDetails", "price", "policy"]
+                            }
+                          },
+                          "required": [
+                            "field",
+                            "classification",
+                            "masked",
+                            "value",
+                            "reason"
+                          ],
+                          "additionalProperties": false
                         },
                         "bankAccounts": {
                           "type": "array",

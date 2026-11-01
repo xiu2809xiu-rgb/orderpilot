@@ -5,6 +5,7 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
+import type { MasterDataVendors200DataItemBalanceLcy } from './masterDataVendors200DataItemBalanceLcy.ts';
 
 export type MasterDataVendors200DataItem = {
   /** @minLength 1 */
@@ -25,6 +26,5 @@ export type MasterDataVendors200DataItem = {
      * @maximum 9007199254740991
      */
   itemsSupplied: number;
-  /** @pattern ^-?\d{1,15}(\.\d{1,4})?$ */
-  balanceLcy: string;
+  balanceLcy: MasterDataVendors200DataItemBalanceLcy;
 };

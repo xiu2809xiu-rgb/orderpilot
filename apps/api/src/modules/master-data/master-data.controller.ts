@@ -122,14 +122,16 @@ export class MasterDataController {
 
   @Get("vendors")
   @ApiOperation({
-    summary: "Vendors, a page at a time. Mock Navision data",
+    summary:
+      "Vendors, a page at a time. Balances are masked by role. Mock Navision data",
   })
   @openApiQuery(vendorQuerySchema)
   @ApiOkResponse({ schema: openApiSchema(vendorListSchema) })
   async vendors(
     @Query(new ZodValidationPipe(vendorQuerySchema)) query: VendorQuery,
+    @Auth() auth: AuthContext,
   ) {
-    return pageOf(await this.masterData.listVendors(query));
+    return pageOf(await this.masterData.listVendors(query, auth.user.role));
   }
 
   @Get("vendors/:no")

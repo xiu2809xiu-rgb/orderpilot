@@ -53,6 +53,27 @@ const bankRule = (field: string, label: string): MaskingRule => ({
   sample: true,
 });
 
+/**
+ * Account figures go with the selling price: the roles that quote see them,
+ * and Warehouse and Logistics, who never price anything, do not. A sample for
+ * area 4 to confirm.
+ */
+const accountRule = (field: string, label: string): MaskingRule => ({
+  field,
+  label: `${label} (sample rule)`,
+  classification: "confidential",
+  reason: "role",
+  visibleTo: [
+    "PRODUCT_MANAGER",
+    "APPROVER",
+    "SUPPORT",
+    "FINANCE",
+    "MANAGEMENT",
+    "AUDITOR",
+  ],
+  sample: true,
+});
+
 /** First an internal customer note floor roles do not need, then master data's rules. */
 export const SAMPLE_RULES: readonly MaskingRule[] = [
   {
@@ -96,4 +117,7 @@ export const SAMPLE_RULES: readonly MaskingRule[] = [
     ],
     sample: true,
   },
+  accountRule("customer.creditLimitLcy", "Customer credit limit"),
+  accountRule("customer.balanceLcy", "Customer balance"),
+  accountRule("vendor.balanceLcy", "Vendor balance"),
 ];

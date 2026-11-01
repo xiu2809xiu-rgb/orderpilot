@@ -6,12 +6,14 @@ import { MemoryRouter, Route, Routes } from "react-router";
 import { describe, expect, it } from "vitest";
 import i18n from "@/i18n";
 import {
+  getMasterDataCustomerMockHandler,
   getMasterDataFiltersMockHandler,
   getMasterDataItemMockHandler,
   getMasterDataItemsMockHandler,
   getMasterDataVendorMockHandler,
 } from "@/lib/api/generated/endpoints/master-data/master-data.msw";
 import type {
+  MasterDataCustomer200,
   MasterDataFilters200,
   MasterDataItem200,
   MasterDataItems200,
@@ -20,8 +22,10 @@ import type {
 import { axeViolations } from "@/test/axe";
 import { errorBody } from "@/test/fixtures";
 import { server } from "@/test/server";
+import CustomerDetailPage from "./CustomerDetailPage";
 import ItemDetailPage from "./ItemDetailPage";
 import ItemsPage from "./ItemsPage";
+import { queryFromUrl } from "./useUrlQuery";
 import VendorDetailPage from "./VendorDetailPage";
 
 const shown = (field: string, value: string) => ({
@@ -32,7 +36,7 @@ const shown = (field: string, value: string) => ({
   reason: null,
 });
 
-const hidden = (field: string, reason: "price" | "bankDetails") => ({
+const hidden = (field: string, reason: "price" | "bankDetails" | "role") => ({
   field,
   classification: "restricted" as const,
   masked: true,
@@ -78,6 +82,8 @@ const filters: MasterDataFilters200 = {
 const shortItem = {
   data: {
     ...row("I-0004", "short"),
+    inventory: "70",
+    qtyOnSalesOrder: "30",
     vendorItemNo: "VN-77",
     unitCost: hidden("item.unitCost", "price"),
     orderLines: [
@@ -97,6 +103,7 @@ const shortItem = {
           shortBy: "100",
           sprRecordNo: "SPR-0009",
           purchaseOrderNo: null,
+          purchaseOrderStatus: null,
         },
       },
       {
@@ -111,7 +118,7 @@ const shortItem = {
         shortfall: null,
       },
     ],
-    salesOrderBreakdown: { listed: "30", other: "50", heldOut: "146" },
+    salesOrderBreakdown: { listed: "30", heldOut: "146" },
     purchaseLines: [],
     sprs: [],
   },
@@ -131,6 +138,10 @@ function renderAt(path: string) {
           <Route
             path="/master-data/vendors/:no"
             element={<VendorDetailPage />}
+          />
+          <Route
+            path="/master-data/customers/:no"
+            element={<CustomerDetailPage />}
           />
         </Routes>
       </MemoryRouter>
@@ -225,6 +236,90 @@ describe("an item", () => {
     expect(await axeViolations(view.container)).toEqual([]);
   });
 
+  it("calls a line covered by its approved SPR's purchase order, and says when that has arrived", async () => {
+    await load();
+    const covered = {
+      data: {
+        ...shortItem.data,
+        availability: "low" as const,
+        inventory: "176",
+        qtyOnSalesOrder: "176",
+        qtyOnPurchOrder: "0",
+        availableStock: "0",
+        orderLines: [
+          {
+            ...shortItem.data.orderLines[0],
+            heldOut: false,
+            shortfall: {
+              state: "covered" as const,
+              ordered: "146",
+              availableStock: "46",
+              shortBy: "100",
+              sprRecordNo: "SPR-0009",
+              purchaseOrderNo: "PO-0033",
+              purchaseOrderStatus: "received" as const,
+            },
+          },
+          shortItem.data.orderLines[1],
+        ],
+        salesOrderBreakdown: { listed: "176", heldOut: "0.00" },
+        sprs: [
+          {
+            recordNo: "SPR-0009",
+            navisionNo: "PO-0033",
+            purchaseOrderStatus: "received" as const,
+            orderNo: "SO-0012",
+            status: "approved" as const,
+            quantity: "100",
+            needBy: "2026-11-05",
+            requestedBy: "Synthetic Manager",
+          },
+        ],
+      },
+      meta: { mock: true },
+    } as MasterDataItem200;
+    server.use(getMasterDataItemMockHandler(covered));
+    const view = renderAt("/master-data/items/I-0004");
+    await screen.findByRole("heading", { name: "I-0004" });
+    expect(screen.queryByText("Demand under review")).toBeNull();
+    expect(screen.getByText("PO-0033 received")).toBeVisible();
+    expect(
+      screen.getByText(
+        "Needed 146 with 46 available. PO-0033 brought in the 100 short.",
+      ),
+    ).toBeVisible();
+    expect(screen.getByText("Received")).toBeVisible();
+    expect(screen.queryByText(/is short by/)).toBeNull();
+    expect(screen.getByText("Low")).toBeVisible();
+    expect(await axeViolations(view.container)).toEqual([]);
+  });
+
+  it("offers to show the item's orders only when it has some", async () => {
+    await load();
+    server.use(getMasterDataItemMockHandler(shortItem));
+    const view = renderAt("/master-data/items/I-0004");
+    await screen.findByRole("heading", { name: "I-0004" });
+    expect(
+      screen.getByRole("link", { name: "See this item's orders" }),
+    ).toBeVisible();
+    view.unmount();
+    server.use(
+      getMasterDataItemMockHandler({
+        ...shortItem,
+        data: {
+          ...shortItem.data,
+          orderLines: [],
+          salesOrderBreakdown: { listed: "0", heldOut: "0" },
+        },
+      }),
+    );
+    renderAt("/master-data/items/I-0004");
+    await screen.findByText("No open order holds this item.");
+    expect(
+      screen.queryByRole("link", { name: "See this item's orders" }),
+    ).toBeNull();
+  });
+
   it("shows a hidden cost as hidden, with no value", async () => {
     await load();
     server.use(getMasterDataItemMockHandler(shortItem));
@@ -260,7 +355,7 @@ describe("a vendor", () => {
         name: "Synthetic Vendor One",
         currencyCode: "USD",
         paymentTermsCode: "NET30",
-        balanceLcy: "1200.00",
+        balanceLcy: shown("vendor.balanceLcy", "1200.00"),
         bankAccounts: [
           {
             code: "MAIN",
@@ -307,5 +402,66 @@ describe("a vendor", () => {
       ),
     ).toBeVisible();
     expect(await axeViolations(view.container)).toEqual([]);
+  });
+});
+
+describe("a customer", () => {
+  const customer = (masked: boolean) =>
+    ({
+      data: {
+        no: "C-0003",
+        name: "Synthetic Traders",
+        countryRegionCode: "IN",
+        currencyCode: "USD",
+        paymentTermsCode: "PREPAID",
+        customerPriceGroup: "DEALER",
+        creditLimitLcy: masked
+          ? hidden("customer.creditLimitLcy", "role")
+          : shown("customer.creditLimitLcy", "108000.00"),
+        balanceLcy: masked
+          ? hidden("customer.balanceLcy", "role")
+          : shown("customer.balanceLcy", "34107.09"),
+        openOrders: [],
+        overdueOrders: [
+          {
+            orderNo: "SO-0024",
+            externalDocumentNo: "PO-IN-4261",
+            daysOverdue: 11,
+            step: "Bill of lading",
+            dueDate: "2026-10-22",
+          },
+        ],
+      },
+      meta: { mock: true },
+    }) as MasterDataCustomer200;
+
+  it("says what is late in a sentence, with the date as every page writes it", async () => {
+    await load();
+    server.use(getMasterDataCustomerMockHandler(customer(false)));
+    renderAt("/master-data/customers/C-0003");
+    expect(
+      await screen.findByText("Bill of lading, due 22 Oct 2026"),
+    ).toBeVisible();
+    expect(screen.queryByText(/2026-10-22/)).toBeNull();
+  });
+
+  it("hides the credit limit and balance from a role that never prices", async () => {
+    await load();
+    server.use(getMasterDataCustomerMockHandler(customer(true)));
+    const view = renderAt("/master-data/customers/C-0003");
+    await screen.findByRole("heading", { name: "C-0003" });
+    expect(screen.queryByText(/108,000/)).toBeNull();
+    expect(screen.getAllByRole("img", { name: "Hidden" })).toHaveLength(2);
+    expect(await axeViolations(view.container)).toEqual([]);
+  });
+});
+
+describe("a list's address", () => {
+  it("holds a hand-edited page size to what the API allows", () => {
+    const size = (value: string) =>
+      queryFromUrl(new URLSearchParams({ pageSize: value }), {}).pageSize;
+    expect(size("500")).toBe(200);
+    expect(size("50")).toBe(50);
+    expect(size("-3")).toBe(25);
   });
 });
