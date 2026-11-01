@@ -24,7 +24,7 @@ export function RecordLink({
 
   function handle(event: MouseEvent<HTMLAnchorElement>) {
     if (event.defaultPrevented) return;
-    if (openRecord(to, gestureOf(event)) === "stay") event.preventDefault();
+    if (openRecord(to, gestureOf(event))) event.preventDefault();
   }
 
   return (

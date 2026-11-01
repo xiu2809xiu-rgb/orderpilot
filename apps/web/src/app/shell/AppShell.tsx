@@ -7,13 +7,18 @@ import { featureNamespaces } from "@/features/nav";
 import { apiClient } from "@/lib/api/instance";
 import { useSessionStore } from "@/stores/session";
 import { useGlobalShortcuts } from "./shortcuts";
-import { RecordTabs } from "./RecordTabs";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
 
 // The palette (and cmdk) load the first time it is opened.
 const CommandPalette = lazy(async () => ({
   default: (await import("./CommandPalette")).CommandPalette,
+}));
+
+// The open-records strip and the code that keeps it in step with the page load after
+// the first paint, so people who never open a record pay nothing for it.
+const RecordTabs = lazy(async () => ({
+  default: (await import("./recordTabsRuntime")).RecordTabs,
 }));
 
 // Usage analytics (G-1): the consent banner and the page-view recorder. A separate
@@ -77,7 +82,9 @@ export function AppShell() {
               setPaletteOpen(true);
             }}
           />
-          <RecordTabs />
+          <Suspense fallback={null}>
+            <RecordTabs />
+          </Suspense>
           <main
             id="main"
             tabIndex={-1}

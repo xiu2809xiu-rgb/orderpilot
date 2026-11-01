@@ -156,9 +156,27 @@ function tabNames(): string[] {
 beforeAll(async () => {
   // The words load with the first tab; have them ready so each test starts level.
   await i18n.loadNamespaces("record-tabs");
+  // Opening a record loads this on first use; load it now so no test waits on a download.
+  await import("./recordTabsRuntime");
 });
 
 let user: ReturnType<typeof userEvent.setup>;
+
+// A click loads the tab logic on first use, so its effects arrive a moment later.
+async function expectTabs(expected: string[]) {
+  await waitFor(() => {
+    expect(tabNames()).toEqual(expected);
+  });
+}
+
+async function expectPath(
+  router: { state: { location: { pathname: string } } },
+  path: string,
+) {
+  await waitFor(() => {
+    expect(router.state.location.pathname).toBe(path);
+  });
+}
 
 beforeEach(() => {
   user = userEvent.setup();
@@ -180,7 +198,7 @@ describe("record tabs", () => {
   it("opens a record as the active tab and shows its number in the crumbs", async () => {
     const { router } = mount();
     await user.click(screen.getByRole("link", { name: "ITM-001" }));
-    expect(router.state.location.pathname).toBe("/items/ITM-001");
+    await expectPath(router, "/items/ITM-001");
     // The strip loads with the first tab, so it may arrive a moment later.
     const nav = await screen.findByRole("navigation", {
       name: "Open records",
@@ -199,8 +217,8 @@ describe("record tabs", () => {
     await user.click(screen.getByRole("link", { name: "ITM-001" }));
     await act(() => router.navigate("/items"));
     await user.click(screen.getByRole("link", { name: "ITM-001" }));
-    expect(tabNames()).toEqual(["Item ITM-001"]);
-    expect(router.state.location.pathname).toBe("/items/ITM-001");
+    await expectTabs(["Item ITM-001"]);
+    await expectPath(router, "/items/ITM-001");
   });
 
   it("opens a Ctrl+click in a background tab and stays on the list", async () => {
@@ -208,8 +226,8 @@ describe("record tabs", () => {
     await user.keyboard("{Control>}");
     await user.click(screen.getByRole("link", { name: "ITM-002" }));
     await user.keyboard("{/Control}");
-    expect(router.state.location.pathname).toBe("/items");
-    expect(tabNames()).toEqual(["Item ITM-002"]);
+    await expectPath(router, "/items");
+    await expectTabs(["Item ITM-002"]);
     expect(
       within(must(strip())).getByRole("link", { name: /ITM-002/ }),
     ).not.toHaveAttribute("aria-current");
@@ -224,7 +242,7 @@ describe("record tabs", () => {
     await user.click(screen.getByRole("link", { name: "ITM-002" }));
     await user.click(screen.getByRole("link", { name: "ITM-002" }));
     await user.keyboard("{/Meta}");
-    expect(tabNames()).toEqual(["Item ITM-002"]);
+    await expectTabs(["Item ITM-002"]);
     expect(
       await screen.findByText("Item ITM-002 is already open in a tab"),
     ).toBeInTheDocument();
@@ -234,14 +252,14 @@ describe("record tabs", () => {
     const { router } = mount();
     const link = screen.getByRole("link", { name: "ITM-003" });
     await user.pointer({ keys: "[MouseMiddle]", target: link });
-    expect(router.state.location.pathname).toBe("/items");
-    expect(tabNames()).toEqual(["Item ITM-003"]);
+    await expectPath(router, "/items");
+    await expectTabs(["Item ITM-003"]);
   });
 
   it("leaves a link that is not a record to the router", async () => {
     const { router } = mount();
     await user.click(screen.getByRole("link", { name: "Reports" }));
-    expect(router.state.location.pathname).toBe("/reports");
+    await expectPath(router, "/reports");
     expect(strip()).toBeNull();
   });
 
@@ -251,10 +269,10 @@ describe("record tabs", () => {
     await user.keyboard("{Control>}");
     await user.click(within(row).getByText("ROW-1"));
     await user.keyboard("{/Control}");
-    expect(router.state.location.pathname).toBe("/items");
-    expect(tabNames()).toEqual(["Item ROW-1"]);
+    await expectPath(router, "/items");
+    await expectTabs(["Item ROW-1"]);
     await user.click(within(row).getByText("ROW-1"));
-    expect(router.state.location.pathname).toBe("/items/ROW-1");
+    await expectPath(router, "/items/ROW-1");
   });
 
   it("does not open a row while text in it is selected", async () => {
@@ -264,7 +282,7 @@ describe("record tabs", () => {
       toString: () => "ROW",
     } as Selection);
     await user.click(cell);
-    expect(router.state.location.pathname).toBe("/items");
+    await expectPath(router, "/items");
     expect(strip()).toBeNull();
   });
 
@@ -274,13 +292,13 @@ describe("record tabs", () => {
     await act(() => router.navigate("/items"));
     await user.click(screen.getByRole("link", { name: "ITM-002" }));
     await user.click(
-      screen.getByRole("button", { name: "Close Item ITM-002" }),
+      await screen.findByRole("button", { name: "Close Item ITM-002" }),
     );
-    expect(router.state.location.pathname).toBe("/items/ITM-001");
+    await expectPath(router, "/items/ITM-001");
     await user.click(
-      screen.getByRole("button", { name: "Close Item ITM-001" }),
+      await screen.findByRole("button", { name: "Close Item ITM-001" }),
     );
-    expect(router.state.location.pathname).toBe("/items");
+    await expectPath(router, "/items");
     expect(strip()).toBeNull();
   });
 
@@ -290,10 +308,10 @@ describe("record tabs", () => {
     await act(() => router.navigate("/items"));
     await user.click(screen.getByRole("link", { name: "ITM-002" }));
     await user.click(
-      screen.getByRole("button", { name: "Close Item ITM-001" }),
+      await screen.findByRole("button", { name: "Close Item ITM-001" }),
     );
-    expect(router.state.location.pathname).toBe("/items/ITM-002");
-    expect(tabNames()).toEqual(["Item ITM-002"]);
+    await expectPath(router, "/items/ITM-002");
+    await expectTabs(["Item ITM-002"]);
   });
 
   it("closes the oldest tab when an eleventh opens, and says so", async () => {
@@ -327,7 +345,7 @@ describe("record tabs", () => {
       });
     }
     await user.click(screen.getByRole("link", { name: "ITM-011" }));
-    expect(router.state.location.pathname).toBe("/items");
+    await expectPath(router, "/items");
     expect(tabNames()).toHaveLength(MAX_TABS);
     expect(tabNames()).not.toContain("Item ITM-011");
     expect(
@@ -347,17 +365,16 @@ describe("record tabs", () => {
     // A reload empties the store; only localStorage remains.
     useRecordTabs.setState({ owner: null, tabs: [] });
     mount("/items");
-    expect(tabNames()).toEqual(["Item ITM-001", "Item ITM-002"]);
+    await expectTabs(["Item ITM-001", "Item ITM-002"]);
   });
 
   it("restores a tab at the address it was last seen", async () => {
     const first = mount("/items/ITM-004?tab=orders");
-    await waitFor(() => {
-      expect(tabNames()).toEqual(["Item ITM-004"]);
-    });
+    await expectTabs(["Item ITM-004"]);
     first.unmount();
     useRecordTabs.setState({ owner: null, tabs: [] });
     mount("/items");
+    await expectTabs(["Item ITM-004"]);
     expect(
       within(must(strip())).getByRole("link", { name: /ITM-004/ }),
     ).toHaveAttribute("href", "/items/ITM-004?tab=orders");
@@ -366,7 +383,7 @@ describe("record tabs", () => {
   it("keeps each role's tabs apart", async () => {
     mount();
     await user.click(screen.getByRole("link", { name: "ITM-001" }));
-    expect(tabNames()).toEqual(["Item ITM-001"]);
+    await expectTabs(["Item ITM-001"]);
 
     act(() => {
       useSessionStore.getState().setSession(ROLE_B);
@@ -381,14 +398,14 @@ describe("record tabs", () => {
     act(() => {
       useSessionStore.getState().setSession(ROLE_A);
     });
-    await waitFor(() => {
-      expect(tabNames()).toEqual(["Item ITM-001"]);
-    });
+    await expectTabs(["Item ITM-001"]);
   });
 
   it("does not turn the page left open by another role into a tab", async () => {
     mount();
     await user.click(screen.getByRole("link", { name: "ITM-001" }));
+    // The strip loads on first use: switch only once it is watching the page.
+    await expectTabs(["Item ITM-001"]);
     act(() => {
       useSessionStore.getState().setSession(ROLE_B);
     });
@@ -404,8 +421,12 @@ describe("record tabs", () => {
       await act(() => router.navigate("/items"));
       await user.click(screen.getByRole("link", { name: no }));
     }
+    // The strip and its page sync load on first use: wait until the active tab is the stop.
+    await waitFor(() => {
+      const stops = within(must(strip())).getAllByRole("link");
+      expect(stops.map((link) => link.tabIndex)).toEqual([-1, -1, 0]);
+    });
     const links = within(must(strip())).getAllByRole("link");
-    expect(links.map((link) => link.tabIndex)).toEqual([-1, -1, 0]);
 
     await user.tab();
     // Page content comes after the strip: the first Tab stop is the active tab.
@@ -418,7 +439,7 @@ describe("record tabs", () => {
     expect(links[2]).toHaveFocus();
 
     await user.keyboard("{ArrowLeft}{Delete}");
-    expect(tabNames()).toEqual(["Item ITM-001", "Item ITM-003"]);
+    await expectTabs(["Item ITM-001", "Item ITM-003"]);
     // The focus lands on a tab that exists, never on the page body.
     await waitFor(() => {
       expect(document.activeElement).toBe(
@@ -446,17 +467,17 @@ describe("record tabs", () => {
       ).toBeInTheDocument();
     });
     await user.click(
-      screen.getByRole("button", { name: "Close Item ITM-005" }),
+      await screen.findByRole("button", { name: "Close Item ITM-005" }),
     );
     const dialog = await screen.findByRole("dialog");
     expect(within(dialog).getByText("Close Item ITM-005?")).toBeInTheDocument();
     await user.click(
       within(dialog).getByRole("button", { name: "Keep it open" }),
     );
-    expect(tabNames()).toEqual(["Item ITM-005"]);
+    await expectTabs(["Item ITM-005"]);
 
     await user.click(
-      screen.getByRole("button", { name: "Close Item ITM-005" }),
+      await screen.findByRole("button", { name: "Close Item ITM-005" }),
     );
     await user.click(
       within(await screen.findByRole("dialog")).getByRole("button", {
@@ -466,19 +487,19 @@ describe("record tabs", () => {
     expect(strip()).toBeNull();
   });
 
-  it("works with a broken copy in storage", () => {
+  it("works with a broken copy in storage", async () => {
     localStorage.setItem(storageKey(ROLE_A.user.id), "{not json");
     mount("/items/ITM-006");
-    expect(tabNames()).toEqual(["Item ITM-006"]);
+    await expectTabs(["Item ITM-006"]);
   });
 
-  it("works with a copy that has the wrong shape", () => {
+  it("works with a copy that has the wrong shape", async () => {
     localStorage.setItem(
       storageKey(ROLE_A.user.id),
       JSON.stringify([{ key: 1 }]),
     );
     mount("/items/ITM-006");
-    expect(tabNames()).toEqual(["Item ITM-006"]);
+    await expectTabs(["Item ITM-006"]);
   });
 
   it("works when storage refuses to read or write", async () => {
@@ -490,8 +511,8 @@ describe("record tabs", () => {
     });
     const { router } = mount();
     await user.click(screen.getByRole("link", { name: "ITM-001" }));
-    expect(router.state.location.pathname).toBe("/items/ITM-001");
-    expect(tabNames()).toEqual(["Item ITM-001"]);
+    await expectPath(router, "/items/ITM-001");
+    await expectTabs(["Item ITM-001"]);
   });
 
   it("has no accessibility violations", async () => {

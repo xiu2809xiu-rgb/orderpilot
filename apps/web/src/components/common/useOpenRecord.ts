@@ -1,7 +1,6 @@
-import { useCallback, useMemo } from "react";
-import { useLocation } from "react-router";
+import { useCallback } from "react";
+import { useLocation, useNavigate } from "react-router";
 import { resolveRecord } from "@/lib/records";
-import { hasNews, useRecordTabs } from "@/stores/recordTabs";
 
 /** How a person asked to open something. */
 export type OpenGesture = "plain" | "background" | "browser";
@@ -28,38 +27,30 @@ export function gestureOf(event: PointerLike): OpenGesture {
 }
 
 /**
- * What the caller does next: `go` navigates (a link lets the router do it),
- * `stay` stops here, and `default` leaves the click to the browser because the
- * address is not a record page.
+ * Returns a function that opens a record for a click. It answers true when it
+ * has taken the click, so the caller stops the browser's own handling; false
+ * leaves the click alone (not a record page, or a Shift or Alt click).
+ *
+ * The tab logic loads on first use. The strip's code is a separate download
+ * that starts with the shell, so by the first click it is already there.
  */
-export type OpenNext = "go" | "stay" | "default";
-
-/** Opens a record's tab for a click, and says so when something changed out of sight. */
-export function useOpenRecord(): (
-  to: string,
-  gesture: OpenGesture,
-) => OpenNext {
+export function useOpenRecord(): (to: string, gesture: OpenGesture) => boolean {
+  const navigate = useNavigate();
   // Not useMatches: a link also renders under a plain MemoryRouter in tests.
   const { pathname } = useLocation();
-  const onScreen = useMemo(() => resolveRecord(pathname)?.key, [pathname]);
 
   return useCallback(
     (to, gesture) => {
-      if (gesture === "browser") return "default";
-      const record = resolveRecord(to);
-      if (!record) return "default";
-      const background = gesture === "background";
-      const result = useRecordTabs
-        .getState()
-        .open(record, to, background ? onScreen : undefined);
-      if (hasNews(result, background)) {
-        // Loaded on first use: the words and the toast are not needed to open a tab.
-        void import("./announceOpen").then((module) =>
-          module.announceOpen(result, background),
-        );
-      }
-      return background || result.outcome === "full" ? "stay" : "go";
+      if (gesture === "browser" || !resolveRecord(to)) return false;
+      import("@/app/shell/recordTabsRuntime").then(
+        ({ openRecord }) => {
+          if (openRecord(to, gesture, pathname) === "go") return navigate(to);
+        },
+        // The tab logic could not load: the record still opens, just without a tab.
+        () => navigate(to),
+      );
+      return true;
     },
-    [onScreen],
+    [navigate, pathname],
   );
 }

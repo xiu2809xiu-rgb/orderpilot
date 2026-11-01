@@ -68,9 +68,8 @@ function RecordRow<Row>({
         if (!opensRow(event)) return;
         const to = rowHref(row);
         const gesture = gestureOf(event);
-        if (openRecord(to, gesture) !== "stay" && gesture === "plain") {
-          void navigate(to);
-        }
+        // Not a record page, or a Shift or Alt click: a row still opens its address.
+        if (!openRecord(to, gesture) && gesture === "plain") void navigate(to);
       }}
       onAuxClick={(event: RowEvent) => {
         if (event.button === 1 && opensRow(event)) {

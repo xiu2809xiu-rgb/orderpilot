@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useLocation, useMatches } from "react-router";
 import { recordFromMatches, type RecordRef } from "@/lib/records";
+import { announce } from "@/components/common/openRecord";
 import { hasNews, useRecordTabs } from "@/stores/recordTabs";
 import { useSessionStore } from "@/stores/session";
 
@@ -38,9 +39,7 @@ export function useRecordTabSync(): RecordRef | null {
       .getState()
       .open({ key, kind, no, listPath }, `${key}${search}`, key);
     if (hasNews(result, false)) {
-      void import("@/components/common/announceOpen").then((module) =>
-        module.announceOpen(result, false),
-      );
+      void announce(result, false);
     }
   }, [key, kind, no, listPath, search, viewerId]);
 
