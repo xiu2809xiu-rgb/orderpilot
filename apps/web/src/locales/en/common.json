@@ -68,7 +68,7 @@
   },
   "login": {
     "title": "Sign in to OrderPilot",
-    "subtitle": "Use your work email and password.",
+    "subtitle": "Sign in to see your tasks.",
     "email": "Email",
     "password": "Password",
     "submit": "Sign in",
