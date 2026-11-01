@@ -30,7 +30,8 @@ const PINNED = "sticky z-[1] bg-card";
 
 function cellClass(column: HomeColumn, first: boolean): string {
   return cn(
-    "px-2 py-0.5 align-middle",
+    // A cell's height is its least height, so a row with no button keeps 36 px too.
+    "h-9 px-2 py-0.5 align-middle",
     first || column.wrap ? "whitespace-normal" : "whitespace-nowrap",
     first && `left-0 ${PINNED}`,
     column.wrap && "min-w-32",
