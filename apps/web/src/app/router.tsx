@@ -6,7 +6,7 @@ import {
 } from "react-router";
 import { features } from "@/features/registry";
 import type { Feature } from "@/features/define";
-import { setRecordRoutes } from "@/lib/records";
+import { setRecordRoutes } from "@/lib/recordRoutes";
 import {
   PublicOnly,
   RequireAuth,

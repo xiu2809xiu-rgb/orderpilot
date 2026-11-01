@@ -23,7 +23,8 @@ import {
 } from "@/components/common";
 import { DEFAULT_QUERY } from "@/components/common/data-table/types";
 import i18n from "@/i18n";
-import { resolveRecord, setRecordRoutes } from "@/lib/records";
+import { setRecordRoutes } from "@/lib/recordRoutes";
+import { resolveRecord } from "@/lib/resolveRecord";
 import {
   MAX_TABS,
   storageKey,

@@ -1,16 +1,8 @@
-import { matchRoutes, type Params, type RouteObject } from "react-router";
+import type { Params } from "react-router";
 
 /** The kinds of record that open as a tab. Each has its own icon and words. */
-export const RECORD_KINDS = [
-  "order",
-  "orderSteps",
-  "spr",
-  "document",
-  "item",
-  "customer",
-  "vendor",
-] as const;
-export type RecordKind = (typeof RECORD_KINDS)[number];
+export type RecordKind =
+  "order" | "orderSteps" | "spr" | "document" | "item" | "customer" | "vendor";
 
 /**
  * What a record route puts in its `handle`, in one line:
@@ -38,14 +30,8 @@ export interface MatchLike {
   handle?: unknown;
 }
 
-function recordHandle(handle: unknown): RecordHandle["record"] {
-  if (typeof handle !== "object" || handle === null) return undefined;
-  return (handle as RecordHandle).record;
-}
-
-function trimSlash(path: string): string {
-  return path.length > 1 ? path.replace(/\/+$/, "") : path;
-}
+/** Drops a trailing slash, but never the root's own. */
+const trimSlash = (path: string): string => path.replace(/(.)\/+$/, "$1");
 
 /** The record the deepest matching route declares, or null for any other page. */
 export function recordFromMatches(
@@ -53,7 +39,7 @@ export function recordFromMatches(
 ): RecordRef | null {
   for (let index = matches.length - 1; index >= 0; index -= 1) {
     const match = matches[index];
-    const declared = recordHandle(match?.handle);
+    const declared = (match?.handle as RecordHandle | null | undefined)?.record;
     if (!match || !declared) continue;
     const no = match.params[declared.param];
     if (!no) return null;
@@ -61,8 +47,7 @@ export function recordFromMatches(
     // The nearest page above the record is its list: /master-data/items for an item.
     const parent = matches
       .slice(0, index)
-      .reverse()
-      .find((above) => trimSlash(above.pathname) !== key);
+      .findLast((above) => trimSlash(above.pathname) !== key);
     return {
       key,
       kind: declared.kind,
@@ -71,25 +56,4 @@ export function recordFromMatches(
     };
   }
   return null;
-}
-
-let table: RouteObject[] = [];
-
-/** The router hands over its routes once, so a link can find its record without opening it. */
-export function setRecordRoutes(routes: RouteObject[]): void {
-  table = routes;
-}
-
-/** The record a link points at, or null when the address is not a record page. */
-export function resolveRecord(to: string): RecordRef | null {
-  const pathname = to.split(/[?#]/)[0] ?? to;
-  const matches = matchRoutes(table, pathname);
-  if (!matches) return null;
-  return recordFromMatches(
-    matches.map((match) => ({
-      pathname: match.pathname,
-      params: match.params,
-      handle: match.route.handle as unknown,
-    })),
-  );
 }

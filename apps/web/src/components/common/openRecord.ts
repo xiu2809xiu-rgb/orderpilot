@@ -1,5 +1,5 @@
 import i18n from "i18next";
-import { resolveRecord } from "@/lib/records";
+import { resolveRecord } from "@/lib/resolveRecord";
 import {
   hasNews,
   useRecordTabs,

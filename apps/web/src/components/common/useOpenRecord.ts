@@ -1,7 +1,6 @@
 import { useCallback } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { loadRecordTabs } from "@/lib/loadRecordTabs";
-import { resolveRecord } from "@/lib/records";
 
 /** How a person asked to open something. */
 export type OpenGesture = "plain" | "background" | "browser";
@@ -30,7 +29,8 @@ export function gestureOf(event: PointerLike): OpenGesture {
 /**
  * Returns a function that opens a record for a click. It answers true when it
  * has taken the click, so the caller stops the browser's own handling; false
- * leaves the click alone (not a record page, or a Shift or Alt click).
+ * leaves the click alone (a Shift or Alt click, or another button). An address
+ * that is not a record page just navigates, once the tab logic has looked.
  *
  * The tab logic loads on first use. The strip's code is a separate download
  * that starts with the shell, so by the first click it is already there.
@@ -42,7 +42,7 @@ export function useOpenRecord(): (to: string, gesture: OpenGesture) => boolean {
 
   return useCallback(
     (to, gesture) => {
-      if (gesture === "browser" || !resolveRecord(to)) return false;
+      if (gesture === "browser") return false;
       loadRecordTabs().then(
         ({ openRecord }) => {
           if (openRecord(to, gesture, pathname) === "go") return navigate(to);

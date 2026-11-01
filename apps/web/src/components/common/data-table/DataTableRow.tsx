@@ -1,5 +1,4 @@
 import type { ComponentProps, MouseEvent } from "react";
-import { useNavigate } from "react-router";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { gestureOf, useOpenRecord } from "../useOpenRecord";
@@ -57,7 +56,6 @@ function RecordRow<Row>({
   columns,
   rowHref,
 }: DataTableRowProps<Row> & { rowHref: (row: Row) => string }) {
-  const navigate = useNavigate();
   const openRecord = useOpenRecord();
   return (
     <Cells
@@ -65,11 +63,7 @@ function RecordRow<Row>({
       columns={columns}
       className="group/row cursor-pointer hover:bg-muted"
       onClick={(event: RowEvent) => {
-        if (!opensRow(event)) return;
-        const to = rowHref(row);
-        const gesture = gestureOf(event);
-        // Not a record page, or a Shift or Alt click: a row still opens its address.
-        if (!openRecord(to, gesture) && gesture === "plain") void navigate(to);
+        if (opensRow(event)) openRecord(rowHref(row), gestureOf(event));
       }}
       onAuxClick={(event: RowEvent) => {
         if (event.button === 1 && opensRow(event)) {

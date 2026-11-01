@@ -2,10 +2,22 @@ import { useEffect, useMemo } from "react";
 import { useLocation } from "react-router";
 import { z } from "zod";
 import { create } from "zustand";
-import { RECORD_KINDS, resolveRecord, type RecordRef } from "@/lib/records";
+import type { RecordKind, RecordRef } from "@/lib/records";
+import { resolveRecord } from "@/lib/resolveRecord";
 
 /** More than this and the oldest tab with nothing unsaved makes room. */
 export const MAX_TABS = 10;
+
+// Typed against RecordKind, so a new kind cannot be forgotten here.
+const RECORD_KINDS = [
+  "order",
+  "orderSteps",
+  "spr",
+  "document",
+  "item",
+  "customer",
+  "vendor",
+] as const satisfies readonly RecordKind[];
 
 const tabSchema = z.object({
   key: z.string().min(1),
