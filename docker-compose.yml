@@ -99,7 +99,7 @@ services:
       start_period: 5s
 
   redis:
-    image: redis:8.2.3-alpine
+    image: redis:8.10.1-alpine
     restart: unless-stopped
     # Append-only, so queued jobs survive a restart.
     command: ["redis-server", "--appendonly", "yes"]
