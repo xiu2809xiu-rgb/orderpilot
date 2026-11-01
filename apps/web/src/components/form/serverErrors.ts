@@ -11,6 +11,7 @@ import { z } from "zod";
 import i18n from "@/i18n";
 import { ApiError } from "@/lib/api/errors";
 import { describeError } from "@/lib/errors";
+import { errorLeaves } from "./formErrors";
 
 const serverExtraSchema = z.object({
   traceId: z.union([z.string(), z.literal(false)]).optional(),
@@ -194,25 +195,6 @@ export function applyServerError<T extends FieldValues, O = T>(
   );
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-/** Every message in a nested error tree, with the dotted path it sits at. */
-function flattenErrors(node: unknown, path: string[] = []): PlacedIssue[] {
-  if (!isRecord(node)) return [];
-  const own =
-    typeof node.message === "string" && node.message !== "" && path.length > 0
-      ? [{ path: path.join("."), message: node.message }]
-      : [];
-  const inner = Object.entries(node).flatMap(([key, child]) =>
-    ["ref", "message", "type", "types"].includes(key)
-      ? []
-      : flattenErrors(child, [...path, key]),
-  );
-  return [...own, ...inner];
-}
-
 /**
  * Shows what the schema refused when the answer is not on a field: a list that
  * needs a line, a rule across fields, or a field on a tab that is not open.
@@ -223,11 +205,11 @@ export function showInvalidOnForm<T extends FieldValues, O = T>(
   errors: FieldErrors<T>,
   form: FormErrorTarget<T, O>,
 ): void {
-  const unmatched = flattenErrors(errors).filter(
+  const unmatched = errorLeaves(errors).filter(
     (issue) => nearestField(form.control, issue.path) === undefined,
   );
   if (unmatched.length === 0) return;
-  const anyOnField = flattenErrors(errors).length > unmatched.length;
+  const anyOnField = errorLeaves(errors).length > unmatched.length;
   showOnForm(
     form,
     i18n.t("errors.invalid", { ns: "form" }),

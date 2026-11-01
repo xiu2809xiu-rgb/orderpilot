@@ -57,24 +57,28 @@ export function makeOrderSchema(t: TFunction<"gallery">) {
         message: t("form.errors.quantity"),
       }),
   });
-  return z
-    .object({
-      customer: requiredLookup(t("form.errors.customer")),
-      customerPo: z.string().trim().min(1, t("form.errors.customerPo")),
-      orderDate: z.iso.date(t("form.errors.orderDate")),
-      shipBy: z.union([z.literal(""), z.iso.date(t("form.errors.shipBy"))]),
-      paymentTerms: z.string().min(1, t("form.errors.paymentTerms")),
-      currency: z.string(),
-      postingDate: z.string(),
-      freight: z.string().regex(AMOUNT, t("form.errors.freight")),
-      creditLimit: z.union([
-        z.literal(""),
-        z.string().regex(AMOUNT, t("form.errors.freight")),
-      ]),
-      partialShipment: z.boolean(),
-      remarks: z.string().max(500, t("form.errors.remarks")),
-      lines: z.array(line),
-    })
+  const header = z.object({
+    customer: requiredLookup(t("form.errors.customer")),
+    customerPo: z.string().trim().min(1, t("form.errors.customerPo")),
+    orderDate: z.iso.date(t("form.errors.orderDate")),
+    shipBy: z.union([z.literal(""), z.iso.date(t("form.errors.shipBy"))]),
+    paymentTerms: z.string().min(1, t("form.errors.paymentTerms")),
+    currency: z.string(),
+    postingDate: z.string(),
+    freight: z.string().regex(AMOUNT, t("form.errors.freight")),
+    creditLimit: z.union([
+      z.literal(""),
+      z.string().regex(AMOUNT, t("form.errors.freight")),
+    ]),
+    partialShipment: z.boolean(),
+    remarks: z.string().max(500, t("form.errors.remarks")),
+    lines: z.array(line),
+  });
+  // A rule across fields sits on a small object of just those fields, joined
+  // with `.and()`. On the whole object it would wait for every other field to
+  // be right, and a clash of dates would show only after everything else was.
+  const dates = z
+    .object({ orderDate: z.string(), shipBy: z.string() })
     .superRefine((order, context) => {
       if (order.shipBy !== "" && order.shipBy < order.orderDate) {
         context.addIssue({
@@ -84,6 +88,7 @@ export function makeOrderSchema(t: TFunction<"gallery">) {
         });
       }
     });
+  return header.and(dates);
 }
 
 export type OrderSchema = ReturnType<typeof makeOrderSchema>;
