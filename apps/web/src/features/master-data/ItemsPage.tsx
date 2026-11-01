@@ -1,7 +1,6 @@
 import { ITEM_AVAILABILITIES, ITEM_CATEGORY_CODES } from "@orderpilot/shared";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router";
 import { DataTable, DemoBadge, PageHeader } from "@/components/common";
 import {
   masterDataItems,
@@ -25,7 +24,6 @@ const FILTERS = {
 /** Every item with its stock. Read-only, because Navision stays the system of record. */
 export default function ItemsPage() {
   const { t } = useTranslation("master-data");
-  const navigate = useNavigate();
   const [query, setQuery] = useUrlQuery(FILTERS);
   const params: MasterDataItemsParams = apiParams(query, ITEM_SORTABLE);
   const list = useMasterDataItems(params, {
@@ -53,9 +51,7 @@ export default function ItemsPage() {
         query={query}
         onQueryChange={setQuery}
         rowKey={(row) => row.no}
-        onRowClick={(row) => {
-          void navigate(`/master-data/items/${row.no}`);
-        }}
+        rowHref={(row) => `/master-data/items/${row.no}`}
         status={tableStatusOf(list)}
         error={list.error}
         onRetry={() => void list.refetch()}

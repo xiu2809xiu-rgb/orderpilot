@@ -1,7 +1,6 @@
 import type { TFunction } from "i18next";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useNavigate } from "react-router";
 import type { CustomerRow } from "@orderpilot/shared";
 import {
   DataTable,
@@ -9,6 +8,7 @@ import {
   PageHeader,
   StatusBadge,
   type DataTableColumn,
+  RecordLink,
 } from "@/components/common";
 import {
   masterDataCustomers,
@@ -30,12 +30,12 @@ function customerColumns(t: TFunction): DataTableColumn<CustomerRow>[] {
       id: "no",
       header: t("customers.columns.no"),
       cell: (row) => (
-        <Link
+        <RecordLink
           to={`/master-data/customers/${row.no}`}
           className="font-mono font-medium text-primary underline-offset-4 hover:underline"
         >
           {row.no}
-        </Link>
+        </RecordLink>
       ),
       exportValue: (row) => row.no,
       sortable: true,
@@ -99,7 +99,6 @@ function customerColumns(t: TFunction): DataTableColumn<CustomerRow>[] {
 /** Every customer, with what is open and overdue. Read-only. */
 export default function CustomersPage() {
   const { t } = useTranslation("master-data");
-  const navigate = useNavigate();
   const [query, setQuery] = useUrlQuery(FILTERS);
   const params: MasterDataCustomersParams = apiParams(query, SORTABLE);
   const list = useMasterDataCustomers(params, {
@@ -128,9 +127,7 @@ export default function CustomersPage() {
         query={query}
         onQueryChange={setQuery}
         rowKey={(row) => row.no}
-        onRowClick={(row) => {
-          void navigate(`/master-data/customers/${row.no}`);
-        }}
+        rowHref={(row) => `/master-data/customers/${row.no}`}
         status={tableStatusOf(list)}
         error={list.error}
         onRetry={() => void list.refetch()}

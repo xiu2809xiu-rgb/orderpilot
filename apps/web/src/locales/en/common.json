@@ -167,5 +167,32 @@
     "checksLoading": "Loading the checks.",
     "checksFailed": "The checks could not be loaded. Quote this reference to support:",
     "checksNone": "No checks are registered yet."
+  },
+  "recordTabs": {
+    "label": "Open records",
+    "hint": "Use the arrow keys to move between open records, and Delete to close one.",
+    "name": "{{kind}} {{no}}",
+    "close": "Close {{name}}",
+    "unsaved": "unsaved changes",
+    "openedInBackground": "{{name}} is open in a tab",
+    "alreadyOpen": "{{name}} is already open in a tab",
+    "madeRoom": "Closed {{name}} to make room. Up to ten records stay open.",
+    "full": "Ten records are open with unsaved changes",
+    "fullHint": "Save or close one of them, then open this record again.",
+    "kinds": {
+      "order": "Order",
+      "orderSteps": "Order steps",
+      "spr": "SPR",
+      "document": "Document",
+      "item": "Item",
+      "customer": "Customer",
+      "vendor": "Vendor"
+    },
+    "confirm": {
+      "title": "Close {{name}}?",
+      "description": "It has unsaved changes. Its draft is kept, so opening the record again picks up where you left off.",
+      "keep": "Keep it open",
+      "close": "Close tab"
+    }
   }
 }

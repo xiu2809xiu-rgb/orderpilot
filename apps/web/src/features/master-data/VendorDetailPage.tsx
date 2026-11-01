@@ -6,6 +6,7 @@ import {
   ClassificationBadge,
   DemoBadge,
   PageHeader,
+  RecordLink,
   SectionCard,
 } from "@/components/common";
 import { Button } from "@/components/ui/button";
@@ -125,12 +126,12 @@ function VendorRecord({ vendor }: { vendor: VendorDetail }) {
       id: "no",
       header: t("vendor.items.no"),
       cell: (item) => (
-        <Link
+        <RecordLink
           to={`/master-data/items/${item.no}`}
           className="font-mono font-medium text-primary underline-offset-4 hover:underline"
         >
           {item.no}
-        </Link>
+        </RecordLink>
       ),
     },
     {

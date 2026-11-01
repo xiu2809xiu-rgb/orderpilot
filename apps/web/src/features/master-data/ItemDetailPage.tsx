@@ -1,8 +1,8 @@
 import { ListChecks } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Link, useParams } from "react-router";
+import { useParams } from "react-router";
 import type { ItemDetail } from "@orderpilot/shared";
-import { DemoBadge, PageHeader } from "@/components/common";
+import { DemoBadge, PageHeader, RecordLink } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { useMasterDataItem } from "@/lib/api/generated/endpoints/master-data/master-data";
 import { ItemOrders } from "./ItemOrders";
@@ -67,12 +67,12 @@ function ItemRecord({ item }: { item: ItemDetail }) {
             id: "vendor",
             label: t("item.vendor"),
             value: (
-              <Link
+              <RecordLink
                 to={`/master-data/vendors/${item.vendorNo}`}
                 className="text-primary underline-offset-4 hover:underline"
               >
                 {item.vendorName}
-              </Link>
+              </RecordLink>
             ),
           },
           {

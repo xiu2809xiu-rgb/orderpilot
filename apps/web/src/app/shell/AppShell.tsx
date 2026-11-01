@@ -7,6 +7,7 @@ import { featureNamespaces } from "@/features/nav";
 import { apiClient } from "@/lib/api/instance";
 import { useSessionStore } from "@/stores/session";
 import { useGlobalShortcuts } from "./shortcuts";
+import { RecordTabs } from "./RecordTabs";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
 
@@ -76,6 +77,7 @@ export function AppShell() {
               setPaletteOpen(true);
             }}
           />
+          <RecordTabs />
           <main
             id="main"
             tabIndex={-1}

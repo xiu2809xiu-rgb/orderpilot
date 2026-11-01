@@ -1,7 +1,6 @@
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router";
 import type { ItemDetail } from "@orderpilot/shared";
-import { SectionCard, StatusBadge } from "@/components/common";
+import { RecordLink, SectionCard, StatusBadge } from "@/components/common";
 import { formatDay, formatQuantity } from "@/lib/format";
 import { RecordTable, type RecordColumn } from "./RecordTable";
 
@@ -50,24 +49,24 @@ export function ItemOrders({ item }: { item: ItemDetail }) {
       id: "order",
       header: t("item.orders.order"),
       cell: (line) => (
-        <Link
+        <RecordLink
           to={`/order-tracker/${line.orderNo}`}
           className="font-mono font-medium text-primary underline-offset-4 hover:underline"
         >
           {line.orderNo}
-        </Link>
+        </RecordLink>
       ),
     },
     {
       id: "customer",
       header: t("item.orders.customer"),
       cell: (line) => (
-        <Link
+        <RecordLink
           to={`/master-data/customers/${line.customerNo}`}
           className="underline-offset-4 hover:underline"
         >
           {line.customerName}
-        </Link>
+        </RecordLink>
       ),
     },
     {

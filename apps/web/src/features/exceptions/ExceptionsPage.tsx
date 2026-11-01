@@ -11,6 +11,7 @@ import {
   RelativeTime,
   StatusBadge,
   type DataTableColumn,
+  RecordLink,
   type TableQuery,
 } from "@/components/common";
 import { Button } from "@/components/ui/button";
@@ -37,12 +38,12 @@ export default function ExceptionsPage() {
         id: "order",
         header: t("list.columns.order"),
         cell: (row) => (
-          <Link
+          <RecordLink
             to={`/order-tracker/${row.orderNo}`}
             className="-my-0.5 inline-block py-0.5 font-mono font-medium text-primary underline-offset-4 hover:underline"
           >
             {row.orderNo}
-          </Link>
+          </RecordLink>
         ),
         exportValue: (row) => row.orderNo,
         hideable: false,

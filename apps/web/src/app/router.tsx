@@ -6,6 +6,7 @@ import {
 } from "react-router";
 import { features } from "@/features/registry";
 import type { Feature } from "@/features/define";
+import { setRecordRoutes } from "@/lib/records";
 import {
   PublicOnly,
   RequireAuth,
@@ -40,7 +41,7 @@ export function featureRoute(feature: Feature): RouteObject {
 export function buildRoutes(
   list: readonly Feature[] = features,
 ): RouteObject[] {
-  return [
+  const routes: RouteObject[] = [
     {
       element: <RootLayout />,
       errorElement: <RouteCrashPage />,
@@ -108,6 +109,9 @@ export function buildRoutes(
       ],
     },
   ];
+  // A record link reads the routes to open a background tab without visiting the page.
+  setRecordRoutes(routes);
+  return routes;
 }
 
 export function createAppRouter() {

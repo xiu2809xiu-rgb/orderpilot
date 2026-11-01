@@ -1,13 +1,13 @@
 import type { TFunction } from "i18next";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useNavigate } from "react-router";
 import type { VendorRow } from "@orderpilot/shared";
 import {
   DataTable,
   DemoBadge,
   PageHeader,
   type DataTableColumn,
+  RecordLink,
 } from "@/components/common";
 import {
   masterDataVendors,
@@ -36,12 +36,12 @@ function vendorColumns(
       id: "no",
       header: t("vendors.columns.no"),
       cell: (row) => (
-        <Link
+        <RecordLink
           to={`/master-data/vendors/${row.no}`}
           className="font-mono font-medium text-primary underline-offset-4 hover:underline"
         >
           {row.no}
-        </Link>
+        </RecordLink>
       ),
       exportValue: (row) => row.no,
       sortable: true,
@@ -96,7 +96,6 @@ function vendorColumns(
 /** Every vendor. Read-only. Bank details are on a vendor's own page, masked by role. */
 export default function VendorsPage() {
   const { t } = useTranslation("master-data");
-  const navigate = useNavigate();
   const [query, setQuery] = useUrlQuery(FILTERS);
   const params: MasterDataVendorsParams = apiParams(query, SORTABLE);
   const list = useMasterDataVendors(params, {
@@ -126,9 +125,7 @@ export default function VendorsPage() {
         query={query}
         onQueryChange={setQuery}
         rowKey={(row) => row.no}
-        onRowClick={(row) => {
-          void navigate(`/master-data/vendors/${row.no}`);
-        }}
+        rowHref={(row) => `/master-data/vendors/${row.no}`}
         status={tableStatusOf(list)}
         error={list.error}
         onRetry={() => void list.refetch()}

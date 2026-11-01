@@ -2,6 +2,7 @@ import { Suspense, lazy } from "react";
 import type { ComponentType, LazyExoticComponent } from "react";
 import type { RouteObject } from "react-router";
 import { ListPageSkeleton } from "@/components/common";
+import type { RecordHandle, RecordKind } from "@/lib/records";
 
 const ItemsPage = lazy(() => import("./ItemsPage"));
 const ItemDetailPage = lazy(() => import("./ItemDetailPage"));
@@ -20,6 +21,7 @@ function element(Page: LazyExoticComponent<ComponentType>) {
 
 function section(
   path: string,
+  kind: RecordKind,
   List: LazyExoticComponent<ComponentType>,
   Detail: LazyExoticComponent<ComponentType>,
 ): RouteObject {
@@ -28,14 +30,18 @@ function section(
     handle: { crumb: `master-data:tabs.${path}` },
     children: [
       { index: true, element: element(List) },
-      { path: ":no", element: element(Detail) },
+      {
+        path: ":no",
+        element: element(Detail),
+        handle: { record: { kind, param: "no" } } satisfies RecordHandle,
+      },
     ],
   };
 }
 
 /** The pages below /master-data, which itself opens Items. */
 export const masterDataRoutes: RouteObject[] = [
-  section("items", ItemsPage, ItemDetailPage),
-  section("customers", CustomersPage, CustomerDetailPage),
-  section("vendors", VendorsPage, VendorDetailPage),
+  section("items", "item", ItemsPage, ItemDetailPage),
+  section("customers", "customer", CustomersPage, CustomerDetailPage),
+  section("vendors", "vendor", VendorsPage, VendorDetailPage),
 ];
