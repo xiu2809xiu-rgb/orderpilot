@@ -41,6 +41,18 @@ export function numberOf(order: SampleOrder, kind: DocumentKind): string {
   return order.documents.find((d) => d.type === kind)?.number ?? fallback[kind];
 }
 
+/**
+ * The day the set says this document was made, when the set has one. The
+ * number of a PI carries that day, so the date printed beside it must be the
+ * same day. A guess from the order date is only for an order that has none.
+ */
+function madeOn(order: SampleOrder, kind: DocumentKind): string | null {
+  return (
+    order.documents.find((d) => d.type === kind)?.receivedAt?.slice(0, 10) ??
+    null
+  );
+}
+
 export function datesOf(
   order: SampleOrder,
   kind: DocumentKind,
@@ -55,16 +67,17 @@ export function datesOf(
         otherDate: order.header.shipmentDate ?? addDays(ordered, 21),
       };
     case "PROFORMA_INVOICE": {
-      const issueDate = done.pi ?? addDays(ordered, 3);
+      const issueDate = madeOn(order, kind) ?? done.pi ?? addDays(ordered, 3);
       return { issueDate, otherDate: addDays(issueDate, 14) };
     }
     case "PACKING_LIST":
       return {
-        issueDate: done.packed ?? addDays(ordered, 14),
+        issueDate: madeOn(order, kind) ?? done.packed ?? addDays(ordered, 14),
         otherDate: null,
       };
     case "SALES_INVOICE": {
-      const issueDate = done.invoiced ?? addDays(ordered, 18);
+      const issueDate =
+        madeOn(order, kind) ?? done.invoiced ?? addDays(ordered, 18);
       return { issueDate, otherDate: addDays(issueDate, creditDays) };
     }
   }

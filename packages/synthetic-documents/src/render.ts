@@ -70,11 +70,19 @@ export async function renderDocument(
   }
   stamp(canvas.pages);
 
-  const meta: PdfMeta = {
-    title: `${TITLES[kind]} ${facts.number}`,
-    subject: `${DEMO_LABEL}. ${TITLES[kind]} for ${orderNo}.`,
-    keywords: [DEMO_LABEL, kind, orderNo],
-  };
+  // A scan exists to show what a reader does with pixels alone, so its
+  // metadata must not hand over the number, the kind or the order.
+  const meta: PdfMeta = scanned
+    ? {
+        title: "Scanned document",
+        subject: `${DEMO_LABEL}. Scanned document.`,
+        keywords: [DEMO_LABEL],
+      }
+    : {
+        title: `${TITLES[kind]} ${facts.number}`,
+        subject: `${DEMO_LABEL}. ${TITLES[kind]} for ${orderNo}.`,
+        keywords: [DEMO_LABEL, kind, orderNo],
+      };
   const plan: ConfidencePlan = {
     orderNo,
     kind,

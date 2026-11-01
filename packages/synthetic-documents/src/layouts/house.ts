@@ -165,7 +165,9 @@ export const drawHouse: DrawLayout = (canvas, facts, f) => {
     return;
   }
   sumRow("Total (USD)", f.total, bottom + 22, true);
-  sumRow("Due now", f.amountDue, bottom + 40);
+  // The same words as the ground truth's label, so the page and the JSON agree.
+  const due = facts.due ? `Due now (${facts.due.percent}%)` : "Due now";
+  sumRow(due, f.amountDue, bottom + 40);
   sumRow("Balance before shipment", f.balanceDue, bottom + 56);
 
   if (f.bank) drawPaymentBox(canvas, facts, f.bank, bottom + 84, CAPTION);

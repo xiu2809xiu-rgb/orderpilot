@@ -46,6 +46,8 @@ These files are generated. Do not edit them by hand.
 pnpm docs:generate
 \`\`\`
 
+The dates on the files, and the number of a proforma invoice (which carries its date), are those of \`${DEMO_REFERENCE_DATE}\`. The dates in the app move with today, so after that day the three PIs show another number in the app than the file prints. Every other number agrees on any day.
+
 A test regenerates all twelve and compares them with these byte for byte, so the script and the files cannot drift apart. If a change to the synthetic data or to a layout changes a file, that test fails until the files are regenerated and committed.
 `;
 }
