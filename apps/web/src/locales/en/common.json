@@ -65,10 +65,7 @@
   "userMenu": {
     "label": "Account menu",
     "signedInAs": "Signed in as",
-    "signOut": "Sign out",
-    "signOutTitle": "Sign out without saving?",
-    "signOutDescription": "You have changes that are not saved. Signing out deletes them from this device.",
-    "signOutKeep": "Keep editing"
+    "signOut": "Sign out"
   },
   "demo": {
     "switcher": "Demo role",

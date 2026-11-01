@@ -1,5 +1,5 @@
 import { LogOut, Settings } from "lucide-react";
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -15,7 +15,10 @@ import {
 import { logout } from "@/lib/api/auth";
 import { anyFormDirty } from "@/lib/dirty-forms";
 import { useSessionStore } from "@/stores/session";
-import { SignOutDialog } from "./SignOutDialog";
+// Only needed when someone signs out over unsaved changes.
+const SignOutDialog = lazy(() =>
+  import("./SignOutDialog").then((m) => ({ default: m.SignOutDialog })),
+);
 
 function initials(name: string): string {
   return name
@@ -30,6 +33,8 @@ export function UserMenu() {
   const navigate = useNavigate();
   const user = useSessionStore((state) => state.session?.user);
   const [asking, setAsking] = useState(false);
+  // Loaded on the first ask, then kept so that closing can return focus.
+  const [askedOnce, setAskedOnce] = useState(false);
   if (!user) return null;
 
   function signOut() {
@@ -76,8 +81,10 @@ export function UserMenu() {
           <DropdownMenuItem
             onSelect={() => {
               // Signing out deletes the drafts here, so changes get asked about.
-              if (anyFormDirty()) setAsking(true);
-              else signOut();
+              if (anyFormDirty()) {
+                setAskedOnce(true);
+                setAsking(true);
+              } else signOut();
             }}
           >
             <LogOut aria-hidden="true" />
@@ -85,13 +92,17 @@ export function UserMenu() {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <SignOutDialog
-        open={asking}
-        onKeep={() => {
-          setAsking(false);
-        }}
-        onSignOut={signOut}
-      />
+      {askedOnce ? (
+        <Suspense fallback={null}>
+          <SignOutDialog
+            open={asking}
+            onKeep={() => {
+              setAsking(false);
+            }}
+            onSignOut={signOut}
+          />
+        </Suspense>
+      ) : null}
     </>
   );
 }

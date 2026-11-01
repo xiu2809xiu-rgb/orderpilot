@@ -7,8 +7,8 @@ import {
   type Path,
   type UseFormReturn,
 } from "react-hook-form";
+import { getI18n } from "react-i18next";
 import { z } from "zod";
-import i18n from "@/i18n";
 import { ApiError } from "@/lib/api/errors";
 import { describeError } from "@/lib/errors";
 import { errorLeaves } from "./formErrors";
@@ -58,12 +58,15 @@ function formMessage(error: unknown): {
   message: string;
   traceId: string | undefined;
 } {
-  const described = describeError(error, i18n.t);
+  const described = describeError(error, getI18n().t);
   if (!(error instanceof ApiError)) return described;
   if (error.status === 401) {
     // The dialog is about to end this, and the form stays for after it. A plain
     // "you need to sign in" would still be here, and wrong, once signed in.
-    return { ...described, message: i18n.t("errors.session", { ns: "form" }) };
+    return {
+      ...described,
+      message: getI18n().t("errors.session", { ns: "form" }),
+    };
   }
   return { ...described, message: error.personMessage ?? described.message };
 }
@@ -212,7 +215,7 @@ export function showInvalidOnForm<T extends FieldValues, O = T>(
   const anyOnField = errorLeaves(errors).length > unmatched.length;
   showOnForm(
     form,
-    i18n.t("errors.invalid", { ns: "form" }),
+    getI18n().t("errors.invalid", { ns: "form" }),
     undefined,
     [...new Set(unmatched.map((issue) => issue.message))],
     !anyOnField,

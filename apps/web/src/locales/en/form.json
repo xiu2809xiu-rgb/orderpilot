@@ -17,6 +17,12 @@
     "stay": "Keep editing",
     "leave": "Leave this page"
   },
+  "signOut": {
+    "title": "Sign out without saving?",
+    "description": "You have changes that are not saved. Signing out deletes them from this device.",
+    "confirm": "Sign out",
+    "keep": "Keep editing"
+  },
   "select": {
     "placeholder": "Choose one"
   },
