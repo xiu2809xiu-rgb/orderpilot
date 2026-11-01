@@ -35,7 +35,7 @@ function BankAccounts({ vendor }: { vendor: VendorDetail }) {
     {
       id: "bankName",
       header: t("vendor.bank.name"),
-      cell: (account) => <MaskedText field={account.bankName} />,
+      cell: (account) => <MaskedText field={account.bankName} mono={false} />,
     },
     {
       id: "bankAccountNo",

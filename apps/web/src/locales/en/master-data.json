@@ -97,9 +97,9 @@
       "heldOut": "Demand under review",
       "covered": "Needed {{ordered}} with {{available}} available. {{po}} covers the {{shortBy}} short.",
       "empty": "No open order holds this item.",
-      "listed": "Open orders above, counted",
+      "listed": "Orders above, in Qty. on Sales Order",
       "other": "Other open orders in Navision",
-      "heldOutTotal": "Held out as demand under review"
+      "heldOutTotal": "Orders above, held out as demand under review"
     },
     "purchases": {
       "title_one": "{{count}} open purchase order",

@@ -17,7 +17,7 @@ function Note({ line }: { line: OrderLine }) {
     po: line.shortfall?.purchaseOrderNo ?? "",
   };
   return (
-    <span className="inline-flex items-center gap-2">
+    <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
       <StatusBadge tone="warning">{t("item.orders.heldOut")}</StatusBadge>
       {line.shortfall?.state === "covered" ? (
         <span className="text-muted-foreground">
@@ -82,6 +82,7 @@ export function ItemOrders({ item }: { item: ItemDetail }) {
       id: "note",
       header: t("item.orders.note"),
       cell: (line) => <Note line={line} />,
+      wrap: true,
     },
   ];
   return (
@@ -97,17 +98,17 @@ export function ItemOrders({ item }: { item: ItemDetail }) {
           rowKey={(line) => line.orderNo}
           emptyText={t("item.orders.empty")}
         />
-        <dl className="grid gap-x-s3 gap-y-1 text-sm sm:grid-cols-[auto_auto] sm:justify-start">
+        <dl className="grid grid-cols-[1fr_auto] gap-x-s3 gap-y-1 text-sm sm:grid-cols-[auto_auto] sm:justify-start">
           <dt className="text-muted-foreground">{t("item.orders.listed")}</dt>
-          <dd data-numeric className="tabular-nums sm:text-right">
+          <dd data-numeric className="text-right tabular-nums">
             {formatQuantity(listed)}
           </dd>
           <dt className="text-muted-foreground">{t("item.orders.other")}</dt>
-          <dd data-numeric className="tabular-nums sm:text-right">
+          <dd data-numeric className="text-right tabular-nums">
             {formatQuantity(other)}
           </dd>
           <dt className="font-medium">{t("item.stock.qtyOnSalesOrder")}</dt>
-          <dd data-numeric className="font-medium tabular-nums sm:text-right">
+          <dd data-numeric className="text-right font-medium tabular-nums">
             {formatQuantity(item.qtyOnSalesOrder)}
           </dd>
           {Number(heldOut) > 0 ? (
@@ -115,7 +116,7 @@ export function ItemOrders({ item }: { item: ItemDetail }) {
               <dt className="text-muted-foreground">
                 {t("item.orders.heldOutTotal")}
               </dt>
-              <dd data-numeric className="tabular-nums sm:text-right">
+              <dd data-numeric className="text-right tabular-nums">
                 {formatQuantity(heldOut)}
               </dd>
             </>

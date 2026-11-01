@@ -49,12 +49,18 @@ export function MaskedMoney({ field }: { field: MaskedField }) {
   return <Money value={field.value} />;
 }
 
-/** A bank detail or other text the server may have masked. */
-export function MaskedText({ field }: { field: MaskedField }) {
+/** A bank detail or other text the server may have masked. Codes read best in mono, names do not. */
+export function MaskedText({
+  field,
+  mono = true,
+}: {
+  field: MaskedField;
+  mono?: boolean;
+}) {
   if (field.masked || field.value === null) {
     return <MaskedValue masked reason={field.reason ?? "role"} />;
   }
-  return <span className="font-mono">{field.value}</span>;
+  return <span className={mono ? "font-mono" : undefined}>{field.value}</span>;
 }
 
 const BADGE_TONE = { short: "danger", low: "warning", ok: "success" } as const;

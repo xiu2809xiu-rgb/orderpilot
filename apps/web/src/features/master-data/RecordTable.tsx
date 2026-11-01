@@ -16,6 +16,8 @@ export interface RecordColumn<Row> {
   header: string;
   cell: (row: Row) => ReactNode;
   kind?: ColumnKind;
+  /** Lets a sentence wrap instead of pushing the table wider than its card. */
+  wrap?: boolean;
 }
 
 interface RecordTableProps<Row> {

@@ -52,7 +52,13 @@ export function itemColumns(
     {
       id: "description",
       header: t("items.columns.description"),
-      cell: (row) => row.description,
+      // Capped so that eleven columns fit a laptop screen; the full text is
+      // on the item's page and in the export.
+      cell: (row) => (
+        <span className="block max-w-56 truncate" title={row.description}>
+          {row.description}
+        </span>
+      ),
       exportValue: (row) => row.description,
       sortable: true,
     },
@@ -74,6 +80,8 @@ export function itemColumns(
       header: t("items.columns.category"),
       cell: (row) => t(`categories.${row.category}`),
       exportValue: (row) => t(`categories.${row.category}`),
+      // The category filter already says it; Columns brings it back.
+      defaultHidden: true,
     },
     quantity("inventory", t("items.columns.inventory")),
     quantity("qtyOnSalesOrder", t("items.columns.qtyOnSalesOrder")),
@@ -105,7 +113,8 @@ export function itemColumns(
       cell: (row) => (
         <Link
           to={`/master-data/vendors/${row.vendorNo}`}
-          className="underline-offset-4 hover:underline"
+          className="block max-w-40 truncate underline-offset-4 hover:underline"
+          title={row.vendorName}
         >
           {row.vendorName}
         </Link>
