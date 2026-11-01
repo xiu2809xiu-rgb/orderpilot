@@ -1,0 +1,34 @@
+import type { FieldValues, UseFormReturn } from "react-hook-form";
+import { applyServerError } from "./serverErrors";
+import type { DraftControl } from "./useDraft";
+
+interface FormSaveOptions<O, R> {
+  /** Sends the checked values. A throw lands on the form through `applyServerError`. */
+  onSave: (values: O) => Promise<R>;
+  /** Runs after the form is clean, so it can navigate without being asked. */
+  onSaved?: (result: R) => void | Promise<void>;
+  draft?: DraftControl;
+}
+
+/**
+ * The one way a form saves. Valid values go to `onSave`. On success the draft
+ * goes and the saved values become the form's clean state, so leaving no longer
+ * asks. On failure the errors land on the form and the draft stays.
+ */
+export function useFormSave<T extends FieldValues, O = T, R = unknown>(
+  form: UseFormReturn<T, unknown, O>,
+  { onSave, onSaved, draft }: FormSaveOptions<O, R>,
+): () => Promise<void> {
+  return form.handleSubmit(async (values) => {
+    let result: R;
+    try {
+      result = await onSave(values);
+    } catch (error) {
+      applyServerError(error, form);
+      return;
+    }
+    draft?.clear();
+    form.reset(form.getValues());
+    await onSaved?.(result);
+  });
+}
