@@ -4,7 +4,7 @@ Who owns which part of OrderPilot, and who reviews changes to it. 85% of the mar
 
 - **Write only in your own area** ([AGENTS.md, rule 2](../../AGENTS.md#2-write-only-in-your-own-area)). If a task needs a change in another area, the owner of that area makes it or reviews it.
 - **Shared files change in small pull requests,** with the affected owners asked to review.
-- **After the handover,** Richie leaves each area's folders alone. Until then he builds each area's base (C-1, D-1, F-1, F-2 and G-1), never its core logic.
+- **After the handover,** Richie leaves each area's folders alone. Until then he builds each area's base (C-1, D-1, F-1, F-2 and G-1), never its core logic. [Prompt 004, section 7](../ai/prompts/004-erp-grade-workspace.md#7-the-teammates-screens) makes one exception: Richie moves the teammates' screens onto the templates, UI only, in small pull requests that each owner reviews. The stories that need one line or one redirect in an owner's folder say so and ask that owner to review.
 
 Most paths below do not exist yet. They are the planned layout, consistent with [the repository layout in CLAUDE.md](../../CLAUDE.md#3-repository-layout). The story that creates a path may adjust it, and updates this file in the same pull request.
 

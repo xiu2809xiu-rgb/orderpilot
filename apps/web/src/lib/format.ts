@@ -19,6 +19,18 @@ export function formatMoney(value: string, currency = "USD"): string {
   return `${currency} ${negative && !isZero ? "-" : ""}${grouped}.${decimals}`;
 }
 
+/**
+ * "1,234" from a quantity such as "1234.00", and "2.5" from "2.50". Regrouped
+ * as text, like an amount: nothing is parsed, so nothing is rounded.
+ */
+export function formatQuantity(value: string): string {
+  if (!DECIMAL_PATTERN.test(value)) return value;
+  const [whole = "0", fraction = ""] = value.split(".");
+  const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  const decimals = fraction.replace(/0+$/, "");
+  return decimals ? `${grouped}.${decimals}` : grouped;
+}
+
 const DAY = new Intl.DateTimeFormat("en-SG", {
   day: "numeric",
   month: "short",

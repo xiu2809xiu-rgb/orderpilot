@@ -45,7 +45,9 @@ export function MaskedValue({
           <Button
             variant="ghost"
             size="icon"
-            className="size-6"
+            // The negative margin keeps the 24 px target without making a
+            // table row taller than its text.
+            className="-my-0.5 size-6"
             aria-label={t("masked.why")}
           >
             <EyeOff className="size-3.5" aria-hidden="true" />
