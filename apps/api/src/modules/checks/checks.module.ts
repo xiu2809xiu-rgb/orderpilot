@@ -1,10 +1,10 @@
 import { Module } from "@nestjs/common";
+import { syntheticSourceProvider } from "../../common/synthetic-source.js";
 import { ORDER_STATUS_READER } from "./domain/order-status-reader.js";
 import { ExceptionsController } from "./exceptions.controller.js";
 import { ExceptionsService } from "./exceptions.service.js";
 import { MockChecksRepository } from "./mock-checks.repository.js";
 import { MockOrderStatusReader } from "./mock-order-status-reader.js";
-import { syntheticDatasetProvider } from "./synthetic-dataset.js";
 import { TrackerController } from "./tracker.controller.js";
 import { TrackerService } from "./tracker.service.js";
 
@@ -17,7 +17,7 @@ import { TrackerService } from "./tracker.service.js";
 @Module({
   controllers: [TrackerController, ExceptionsController],
   providers: [
-    syntheticDatasetProvider,
+    syntheticSourceProvider,
     MockChecksRepository,
     { provide: ORDER_STATUS_READER, useClass: MockOrderStatusReader },
     TrackerService,

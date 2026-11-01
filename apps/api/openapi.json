@@ -861,6 +861,32 @@
               "type": "string",
               "enum": ["true", "false"]
             }
+          },
+          {
+            "name": "kind",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "REVIEW_FIELDS",
+                "RAISE_SPR",
+                "APPROVE_SPR",
+                "SEND_PI",
+                "CONFIRM_PAYMENT",
+                "PACK_ORDER",
+                "ADD_SHIPPING_DOCUMENTS"
+              ]
+            }
+          },
+          {
+            "name": "priority",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["high", "normal", "low"]
+            }
           }
         ],
         "responses": {
@@ -949,6 +975,31 @@
                           },
                           "overdue": {
                             "type": "boolean"
+                          },
+                          "customerNo": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "customerName": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "amount": {
+                            "type": "string",
+                            "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                          },
+                          "currencyCode": {
+                            "type": "string",
+                            "minLength": 3,
+                            "maxLength": 3
+                          },
+                          "priority": {
+                            "type": "string",
+                            "enum": ["high", "normal", "low"]
+                          },
+                          "assigneeName": {
+                            "type": "string",
+                            "minLength": 1
                           }
                         },
                         "required": [
@@ -1037,6 +1088,32 @@
             "schema": {
               "type": "string",
               "enum": ["true", "false"]
+            }
+          },
+          {
+            "name": "kind",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "REVIEW_FIELDS",
+                "RAISE_SPR",
+                "APPROVE_SPR",
+                "SEND_PI",
+                "CONFIRM_PAYMENT",
+                "PACK_ORDER",
+                "ADD_SHIPPING_DOCUMENTS"
+              ]
+            }
+          },
+          {
+            "name": "priority",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["high", "normal", "low"]
             }
           },
           {
@@ -1135,6 +1212,31 @@
                           },
                           "overdue": {
                             "type": "boolean"
+                          },
+                          "customerNo": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "customerName": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "amount": {
+                            "type": "string",
+                            "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                          },
+                          "currencyCode": {
+                            "type": "string",
+                            "minLength": 3,
+                            "maxLength": 3
+                          },
+                          "priority": {
+                            "type": "string",
+                            "enum": ["high", "normal", "low"]
+                          },
+                          "assigneeName": {
+                            "type": "string",
+                            "minLength": 1
                           }
                         },
                         "required": [
@@ -2614,6 +2716,35 @@
               "type": "string",
               "enum": ["true", "false"]
             }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            }
+          },
+          {
+            "name": "ownerRole",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "SYSTEM_ADMIN",
+                "PRODUCT_MANAGER",
+                "APPROVER",
+                "SUPPORT",
+                "WAREHOUSE",
+                "FINANCE",
+                "LOGISTICS",
+                "MANAGEMENT",
+                "AUDITOR"
+              ]
+            }
           }
         ],
         "responses": {
@@ -3129,6 +3260,15 @@
               "type": "string",
               "maxLength": 100
             }
+          },
+          {
+            "name": "state",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["OPEN", "RESOLVED"]
+            }
           }
         ],
         "responses": {
@@ -3337,6 +3477,27 @@
                               "definition": {
                                 "type": "string",
                                 "minLength": 1
+                              },
+                              "target": {
+                                "type": "number"
+                              },
+                              "weekly": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "weekStart": {
+                                      "type": "string",
+                                      "format": "date",
+                                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                                    },
+                                    "value": {
+                                      "type": "number"
+                                    }
+                                  },
+                                  "required": ["weekStart", "value"],
+                                  "additionalProperties": false
+                                }
                               }
                             },
                             "required": [

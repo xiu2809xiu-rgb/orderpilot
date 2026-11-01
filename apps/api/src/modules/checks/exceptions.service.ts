@@ -24,11 +24,12 @@ export class ExceptionsService {
       .exceptions()
       .filter(
         (e) =>
-          !search ||
-          [e.orderNo, e.customerNo, e.customerName, e.ruleLabel, e.summary]
-            .join(" ")
-            .toLowerCase()
-            .includes(search),
+          e.state === (query.state ?? "OPEN") &&
+          (!search ||
+            [e.orderNo, e.customerNo, e.customerName, e.ruleLabel, e.summary]
+              .join(" ")
+              .toLowerCase()
+              .includes(search)),
       )
       .sort((a, b) => b.openedAt.localeCompare(a.openedAt));
     const start = (query.page - 1) * query.pageSize;
