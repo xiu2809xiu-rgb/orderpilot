@@ -24,7 +24,7 @@ interface AffixProps {
 }
 
 const AFFIX =
-  "inline-flex h-8 shrink-0 items-center border border-input bg-muted/50 px-2 text-xs text-muted-foreground";
+  "inline-flex h-8 pointer-coarse:h-11 shrink-0 items-center border border-input bg-muted/50 px-2 text-xs text-muted-foreground";
 
 /**
  * The value stays a decimal string: an amount never passes through a float.
@@ -40,6 +40,7 @@ export function DecimalField<T extends FieldValues, O = T>({
   disabled,
   readOnly,
   className,
+  hideLabel,
   scale = 0,
   placeholder,
   prefix,
@@ -59,6 +60,7 @@ export function DecimalField<T extends FieldValues, O = T>({
           label={label}
           hint={hint}
           required={required}
+          hideLabel={hideLabel}
           className={className}
         >
           <div className="flex">

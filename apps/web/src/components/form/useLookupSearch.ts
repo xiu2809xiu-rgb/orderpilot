@@ -12,6 +12,15 @@ export interface LookupState {
 const IDLE: LookupState = { status: "idle", query: "", options: [] };
 
 /**
+ * Results belong to the text they answered. While a newer search is pending,
+ * the old ones would let a fast typist pick a record that the text no longer
+ * names, so they go the moment the text changes.
+ */
+function optionsFor(before: LookupState, query: string) {
+  return before.query === query ? before.options : [];
+}
+
+/**
  * Runs a lookup's searches: debounced while the person types, and each one
  * aborted the moment a newer one starts, so a slow answer never overwrites a
  * newer one. Nothing runs after unmount.
@@ -42,7 +51,7 @@ export function useLookupSearch(search: LookupSearch, debounceMs: number) {
       setState((before) => ({
         status: "loading",
         query,
-        options: before.options,
+        options: optionsFor(before, query),
       }));
       latest.current(query, mine.signal).then(
         (options) => {
@@ -65,7 +74,7 @@ export function useLookupSearch(search: LookupSearch, debounceMs: number) {
       setState((before) => ({
         status: "loading",
         query,
-        options: before.options,
+        options: optionsFor(before, query),
       }));
       timer.current = setTimeout(() => {
         run(query);

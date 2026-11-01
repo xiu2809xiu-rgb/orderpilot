@@ -23,6 +23,7 @@ export function CheckboxField<T extends FieldValues, O = T>({
   required,
   disabled,
   readOnly = false,
+  hideLabel = false,
   className,
 }: FieldBaseProps<T, O>) {
   return (
@@ -34,7 +35,7 @@ export function CheckboxField<T extends FieldValues, O = T>({
           hasDescription={hint !== undefined}
           className={cn("content-center", className)}
         >
-          <div className="flex min-h-8 items-center gap-2">
+          <div className="flex min-h-8 items-center gap-2 pointer-coarse:min-h-11">
             <FormControl>
               <Checkbox
                 ref={field.ref}
@@ -47,9 +48,17 @@ export function CheckboxField<T extends FieldValues, O = T>({
                 disabled={disabled}
                 aria-readonly={readOnly ? true : undefined}
                 aria-required={required === true ? true : undefined}
+                // The box is 16 px; this reaches 44 px on a touch screen.
+                className="relative pointer-coarse:size-6 after:absolute after:-inset-2.5 after:content-['']"
               />
             </FormControl>
-            <FormLabel required={required} className="text-sm text-foreground">
+            <FormLabel
+              required={required}
+              className={cn(
+                "text-sm text-foreground pointer-coarse:min-h-11",
+                hideLabel && "sr-only",
+              )}
+            >
               {label}
             </FormLabel>
           </div>

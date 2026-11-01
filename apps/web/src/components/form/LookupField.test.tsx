@@ -2,6 +2,7 @@ import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import i18n from "@/i18n";
+import { draftKey } from "@/lib/draft-store";
 import { axeViolations } from "@/test/axe";
 import {
   KIT_CUSTOMERS,
@@ -56,11 +57,13 @@ describe("the lookup field", () => {
       "qu",
     );
     expect(screen.getAllByText("Searching...").length).toBeGreaterThan(0);
-    expect(lookup()).toHaveAttribute("aria-expanded", "true");
+    // Nothing to point at yet: the combobox is not "expanded" without a list.
+    expect(lookup()).toHaveAttribute("aria-expanded", "false");
     calls.at(-1)?.answer(KIT_CUSTOMERS.slice(0, 1));
     expect(
       await screen.findByRole("option", { name: /Quillon Harbour Traders/ }),
     ).toBeVisible();
+    expect(lookup()).toHaveAttribute("aria-expanded", "true");
     expect(await axeViolations(document.body)).toEqual([]);
   });
 
@@ -125,7 +128,7 @@ describe("the lookup field", () => {
   it("debounces typing, and aborts a search a newer one replaced", async () => {
     const user = userEvent.setup();
     const { search, calls } = controlledSearch();
-    renderInRouter(<KitForm search={search} lookupDebounceMs={40} />);
+    renderInRouter(<KitForm search={search} lookupDebounceMs={400} />);
     // Focus without a click: a click opens the list and searches at once.
     (await screen.findByRole("combobox", { name: LABELS.customer })).focus();
     await user.keyboard("dun");
@@ -146,6 +149,131 @@ describe("the lookup field", () => {
       await screen.findByRole("option", { name: /Dunefall/ }),
     ).toBeVisible();
     expect(screen.queryByRole("option", { name: /Quillon/ })).toBeNull();
+  });
+
+  it("never lets the keyboard pick from the answer to older text", async () => {
+    const user = userEvent.setup();
+    const { search, calls } = controlledSearch();
+    renderInRouter(<KitForm search={search} />);
+    const field = await screen.findByRole("combobox", {
+      name: LABELS.customer,
+    });
+    await user.click(field);
+    calls.at(-1)?.answer(KIT_CUSTOMERS);
+    await screen.findByRole("option", { name: /Quillon/ });
+
+    await user.type(field, "dune");
+    // The answer for "dune" is still on its way: the old rows are gone.
+    expect(screen.queryByRole("option")).toBeNull();
+    await user.keyboard("{ArrowDown}{Enter}");
+    expect(field).toHaveValue("dune");
+
+    calls.at(-1)?.answer(KIT_CUSTOMERS.slice(2));
+    // Enter was pressed with no highlighted row and a single answer: it picks.
+    await waitFor(() => {
+      expect(field).toHaveValue("C-0010  Dunefall General Trading LLC");
+    });
+  });
+
+  it("Enter on a record number picks that record, even before the answer", async () => {
+    const user = userEvent.setup();
+    const { search, calls } = controlledSearch();
+    renderInRouter(<KitForm search={search} />);
+    const field = await screen.findByRole("combobox", {
+      name: LABELS.customer,
+    });
+    await user.type(field, "c-0001{Enter}");
+    expect(field).toHaveValue("c-0001");
+    calls.at(-1)?.answer(KIT_CUSTOMERS.slice(0, 2));
+    await waitFor(() => {
+      expect(field).toHaveValue("C-0001  Quillon Harbour Traders");
+    });
+    expect(screen.queryByRole("listbox")).toBeNull();
+  });
+
+  it("Tab on a record number picks that record and leaves", async () => {
+    const user = userEvent.setup();
+    renderInRouter(<KitForm />);
+    const field = await screen.findByRole("combobox", {
+      name: LABELS.customer,
+    });
+    await user.type(field, "C-0002");
+    await screen.findByRole("option", { name: /Brindle/ });
+    await user.tab();
+    expect(field).toHaveValue("C-0002  Brindle Coast Imports");
+    expect(field).not.toHaveAttribute("aria-invalid", "true");
+    expect(screen.queryByText("Choose a customer from the list.")).toBeNull();
+  });
+
+  it("tells the page which record was picked", async () => {
+    const user = userEvent.setup();
+    const onPick = vi.fn();
+    renderInRouter(<KitForm onPick={onPick} />);
+    await user.type(
+      await screen.findByRole("combobox", { name: LABELS.customer }),
+      "dune",
+    );
+    await user.click(await screen.findByRole("option", { name: /Dunefall/ }));
+    expect(onPick).toHaveBeenCalledWith(
+      expect.objectContaining({ number: "C-0010", detail: "AE" }),
+    );
+  });
+
+  it("keeps the highlighted row in view as the arrows move", async () => {
+    const user = userEvent.setup();
+    const scroll = vi.fn();
+    window.HTMLElement.prototype.scrollIntoView = scroll;
+    renderInRouter(<KitForm />);
+    await user.click(
+      await screen.findByRole("combobox", { name: LABELS.customer }),
+    );
+    await screen.findByRole("option", { name: /Quillon/ });
+    scroll.mockClear();
+    await user.keyboard("{ArrowDown}{ArrowDown}");
+    expect(scroll).toHaveBeenLastCalledWith({ block: "nearest" });
+    expect(lookup()).toHaveAttribute(
+      "aria-activedescendant",
+      screen.getByRole("option", { name: /Brindle/ }).id,
+    );
+    window.HTMLElement.prototype.scrollIntoView = () => undefined;
+  });
+
+  it("has no axe violations with the list open and nothing found", async () => {
+    const user = userEvent.setup();
+    renderInRouter(<KitForm />);
+    await user.type(
+      await screen.findByRole("combobox", { name: LABELS.customer }),
+      "zzzz",
+    );
+    await screen.findByText(/No records match/);
+    expect(await axeViolations(document.body)).toEqual([]);
+  });
+
+  it("Discard clears typing that never became a pick", async () => {
+    const user = userEvent.setup();
+    const {
+      user: { id },
+    } = signInAs("SUPPORT");
+    localStorage.setItem(
+      draftKey(id, "test.order"),
+      JSON.stringify({
+        version: 1,
+        savedAt: new Date().toISOString(),
+        values: { customerPo: "CPO-R" },
+      }),
+    );
+    renderInRouter(<KitForm />);
+    const field = await screen.findByRole("combobox", {
+      name: LABELS.customer,
+    });
+    await user.type(field, "zzzz");
+    await user.tab();
+    await user.click(screen.getByRole("button", { name: "Discard" }));
+    await waitFor(() => {
+      expect(
+        screen.getByRole("combobox", { name: LABELS.customer }),
+      ).toHaveValue("");
+    });
   });
 
   it("failed: says so, and the down arrow tries again", async () => {

@@ -27,6 +27,7 @@
     "typeToSearch": "Type a number or a name to search.",
     "failed": "The search did not work.",
     "retry": "Try again",
+    "notChosen": "Choose one of the records in the list.",
     "results_one": "{{count}} record found.",
     "results_other": "{{count}} records found."
   },

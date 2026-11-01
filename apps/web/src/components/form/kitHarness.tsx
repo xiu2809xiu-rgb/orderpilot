@@ -8,7 +8,8 @@ import { useSessionStore } from "@/stores/session";
 import type { Role } from "@orderpilot/shared";
 import { CheckboxField } from "./CheckboxField";
 import { DateField } from "./DateField";
-import { FormActions, FormGrid } from "./FormGrid";
+import { FormActions } from "./FormActions";
+import { FormGrid } from "./FormGrid";
 import { FormShell } from "./FormShell";
 import { LookupField } from "./LookupField";
 import { MoneyField } from "./MoneyField";
@@ -120,6 +121,7 @@ interface KitFormProps {
   defaults?: Partial<KitInput>;
   serverPaths?: PathMap;
   saveOptions?: SaveOptions;
+  onPick?: (option: LookupOption) => void;
 }
 
 const kitSearch: LookupSearch = (query) =>
@@ -141,6 +143,7 @@ export function KitForm({
   defaults,
   serverPaths,
   saveOptions,
+  onPick,
 }: KitFormProps) {
   const form = useZodForm<KitInput, KitOutput>({
     schema: kitSchema,
@@ -192,6 +195,7 @@ export function KitForm({
           name="customer"
           label={LABELS.customer}
           search={search}
+          onPick={onPick}
           debounceMs={lookupDebounceMs}
           required
         />

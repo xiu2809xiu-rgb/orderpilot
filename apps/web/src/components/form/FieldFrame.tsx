@@ -10,6 +10,7 @@ interface FieldFrameProps {
   label: string;
   hint?: string;
   required?: boolean;
+  hideLabel?: boolean;
   className?: string;
   /** The control, inside `FormControl` so that its ids are wired. */
   children: ReactNode;
@@ -20,12 +21,18 @@ export function FieldFrame({
   label,
   hint,
   required = false,
+  hideLabel = false,
   className,
   children,
 }: FieldFrameProps) {
   return (
     <FormItem hasDescription={hint !== undefined} className={className}>
-      <FormLabel required={required}>{label}</FormLabel>
+      <FormLabel
+        required={required}
+        className={hideLabel ? "sr-only" : undefined}
+      >
+        {label}
+      </FormLabel>
       {children}
       {hint === undefined ? null : <FormDescription>{hint}</FormDescription>}
       <FormMessage />

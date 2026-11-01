@@ -23,6 +23,7 @@ export function TextAreaField<T extends FieldValues, O = T>({
   disabled,
   readOnly,
   className,
+  hideLabel,
   rows = 3,
   placeholder,
   maxLength,
@@ -36,6 +37,7 @@ export function TextAreaField<T extends FieldValues, O = T>({
           label={label}
           hint={hint}
           required={required}
+          hideLabel={hideLabel}
           className={className}
         >
           <FormControl>

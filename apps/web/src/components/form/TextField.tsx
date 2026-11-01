@@ -27,6 +27,7 @@ export function TextField<T extends FieldValues, O = T>({
   disabled,
   readOnly,
   className,
+  hideLabel,
   type = "text",
   placeholder,
   autoComplete = "off",
@@ -42,6 +43,7 @@ export function TextField<T extends FieldValues, O = T>({
           label={label}
           hint={hint}
           required={required}
+          hideLabel={hideLabel}
           className={className}
         >
           <FormControl>

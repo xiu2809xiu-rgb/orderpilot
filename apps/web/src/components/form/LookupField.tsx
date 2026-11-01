@@ -3,7 +3,12 @@ import { FormControl, FormField } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { FieldFrame } from "./FieldFrame";
 import { FIELD_CONTROL, type FieldBaseProps } from "./fieldTypes";
-import { lookupText, lookupValueSchema, type LookupSearch } from "./lookup";
+import {
+  lookupText,
+  lookupValueSchema,
+  type LookupOption,
+  type LookupSearch,
+} from "./lookup";
 import { LookupControl } from "./LookupControl";
 
 interface LookupFieldProps<T extends FieldValues, O> extends FieldBaseProps<
@@ -14,6 +19,11 @@ interface LookupFieldProps<T extends FieldValues, O> extends FieldBaseProps<
   search: LookupSearch;
   placeholder?: string;
   debounceMs?: number;
+  /**
+   * Called with the whole record that was picked, so that a page can fill what
+   * depends on it, such as a unit price or the stock on hand.
+   */
+  onPick?: (option: LookupOption) => void;
 }
 
 /**
@@ -29,15 +39,17 @@ export function LookupField<T extends FieldValues, O = T>({
   disabled,
   readOnly,
   className,
+  hideLabel,
   search,
   placeholder,
   debounceMs = 250,
+  onPick,
 }: LookupFieldProps<T, O>) {
   return (
     <FormField
       control={control}
       name={name}
-      render={({ field }) => {
+      render={({ field, fieldState }) => {
         const parsed = lookupValueSchema.safeParse(field.value);
         const value = parsed.success ? parsed.data : null;
         return (
@@ -45,6 +57,7 @@ export function LookupField<T extends FieldValues, O = T>({
             label={label}
             hint={hint}
             required={required}
+            hideLabel={hideLabel}
             className={className}
           >
             {readOnly === true ? (
@@ -70,6 +83,8 @@ export function LookupField<T extends FieldValues, O = T>({
                 placeholder={placeholder}
                 required={required}
                 disabled={disabled}
+                touched={fieldState.isTouched}
+                onPick={onPick}
               />
             )}
           </FieldFrame>

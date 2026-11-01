@@ -28,6 +28,7 @@ export function DateField<T extends FieldValues, O = T>({
   disabled,
   readOnly,
   className,
+  hideLabel,
   min,
   max,
 }: DateFieldProps<T, O>) {
@@ -40,6 +41,7 @@ export function DateField<T extends FieldValues, O = T>({
           label={label}
           hint={hint}
           required={required}
+          hideLabel={hideLabel}
           className={className}
         >
           <FormControl>

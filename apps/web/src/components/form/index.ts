@@ -3,7 +3,8 @@
 export { CheckboxField } from "./CheckboxField";
 export { DateField } from "./DateField";
 export { normaliseDecimal } from "./decimal";
-export { FormActions, FormGrid } from "./FormGrid";
+export { FormActions } from "./FormActions";
+export { FormGrid } from "./FormGrid";
 export { FormShell } from "./FormShell";
 export type { FieldBaseProps } from "./fieldTypes";
 export {
@@ -19,7 +20,12 @@ export { MoneyField } from "./MoneyField";
 export { NumberField } from "./NumberField";
 export { SaveButton } from "./SaveButton";
 export { SelectField, type SelectOption } from "./SelectField";
-export { applyServerError, readFormError } from "./serverErrors";
+export {
+  applyServerError,
+  readFormError,
+  showInvalidOnForm,
+  type PathMap,
+} from "./serverErrors";
 export { TextAreaField } from "./TextAreaField";
 export { TextField } from "./TextField";
 export { useDraft, type DraftControl, type DraftOptions } from "./useDraft";

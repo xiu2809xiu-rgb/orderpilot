@@ -46,7 +46,7 @@ export function SaveButton<T extends FieldValues, O = T>({
         variant={variant}
         aria-disabled={blocked}
         aria-describedby={reason === undefined ? undefined : reasonId}
-        className="aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
+        className="aria-disabled:cursor-not-allowed aria-disabled:opacity-50 pointer-coarse:h-11"
         onClick={() => {
           if (!blocked) void onSave();
         }}
