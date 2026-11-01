@@ -96,58 +96,62 @@ export function UsersTab() {
                       {user.disabled ? t("users.disabled") : t("users.active")}
                     </StatusBadge>
                   </TableCell>
-                  <TableCell className="space-x-1 text-right">
-                    <UserHistoryDialog
-                      userId={user.id}
-                      name={user.displayName}
-                    />
-                    {canManage ? (
-                      <Button
-                        variant="outline"
-                        size="xs"
-                        aria-disabled={change.isPending}
-                        className="aria-disabled:pointer-events-none aria-disabled:opacity-50"
-                        aria-label={t(
-                          user.disabled
-                            ? "users.enableFor"
-                            : "users.disableFor",
-                          { name: user.displayName },
-                        )}
-                        onClick={() => {
-                          // aria-disabled, not disabled: a disabled button drops the keyboard's focus.
-                          if (change.isPending) return;
-                          const disable = !user.disabled;
-                          change.mutate(
-                            { id: user.id, disable },
-                            {
-                              onSuccess: () =>
-                                toast.done(
-                                  t(
-                                    disable
-                                      ? "users.toast.disabled"
-                                      : "users.toast.enabled",
-                                    { name: user.displayName },
-                                  ),
-                                  {
-                                    undo: async () => {
-                                      await (disable
-                                        ? usersEnable(user.id)
-                                        : usersDisable(user.id));
-                                      await queryClient.invalidateQueries({
-                                        queryKey: getUsersListQueryKey(),
-                                      });
+                  <TableCell className="py-1">
+                    <div className="flex items-center justify-end gap-1">
+                      <UserHistoryDialog
+                        userId={user.id}
+                        name={user.displayName}
+                      />
+                      {canManage ? (
+                        <Button
+                          variant="outline"
+                          size="xs"
+                          aria-disabled={change.isPending}
+                          className="aria-disabled:pointer-events-none aria-disabled:opacity-50"
+                          aria-label={t(
+                            user.disabled
+                              ? "users.enableFor"
+                              : "users.disableFor",
+                            { name: user.displayName },
+                          )}
+                          onClick={() => {
+                            // aria-disabled, not disabled: a disabled button drops the keyboard's focus.
+                            if (change.isPending) return;
+                            const disable = !user.disabled;
+                            change.mutate(
+                              { id: user.id, disable },
+                              {
+                                onSuccess: () =>
+                                  toast.done(
+                                    t(
+                                      disable
+                                        ? "users.toast.disabled"
+                                        : "users.toast.enabled",
+                                      { name: user.displayName },
+                                    ),
+                                    {
+                                      undo: async () => {
+                                        await (disable
+                                          ? usersEnable(user.id)
+                                          : usersDisable(user.id));
+                                        await queryClient.invalidateQueries({
+                                          queryKey: getUsersListQueryKey(),
+                                        });
+                                      },
                                     },
-                                  },
-                                ),
-                              onError: () =>
-                                toast.failed(t("users.toast.failed")),
-                            },
-                          );
-                        }}
-                      >
-                        {user.disabled ? t("users.enable") : t("users.disable")}
-                      </Button>
-                    ) : null}
+                                  ),
+                                onError: () =>
+                                  toast.failed(t("users.toast.failed")),
+                              },
+                            );
+                          }}
+                        >
+                          {user.disabled
+                            ? t("users.enable")
+                            : t("users.disable")}
+                        </Button>
+                      ) : null}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
