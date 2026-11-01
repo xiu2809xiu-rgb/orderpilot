@@ -1,4 +1,4 @@
-# ADR 0032: pdf-lib for the demo documents, and how a file stays true
+# ADR 0033: pdf-lib for the demo documents, and how a file stays true
 
 - **Status:** Accepted
 - **Date:** 2026-11-01
