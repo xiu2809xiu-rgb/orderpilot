@@ -225,31 +225,41 @@ describe("drafts", () => {
   it("are safe when someone else signs in over a mounted form", async () => {
     const support = signInAs("SUPPORT");
     const onSave = vi.fn(() => Promise.resolve());
-    renderInRouter(<KitForm onSave={onSave} />);
+    // Valid values, so only the change of person can stop a save.
+    renderInRouter(<KitForm defaults={VALID} onSave={onSave} />);
     const user = await typeAndWaitForDraft(
       support.user.id,
-      LABELS.customerPo,
-      "CPO-5",
+      LABELS.remarks,
+      "Fragile",
     );
 
+    // The new person has a draft of their own for this record, which would
+    // make the form dirty again under them.
     const finance = sessionFor("FINANCE");
+    plant(finance.user.id, {
+      version: 1,
+      savedAt: new Date().toISOString(),
+      values: { remarks: "Theirs" },
+    });
     act(() => {
       useSessionStore.getState().setSession(finance);
     });
-    expect(
-      screen.queryByRole("textbox", { name: LABELS.customerPo }),
-    ).toBeNull();
-    expect(screen.queryByDisplayValue("CPO-5")).toBeNull();
+    expect(screen.queryByRole("textbox", { name: LABELS.remarks })).toBeNull();
+    expect(screen.queryByDisplayValue("Fragile")).toBeNull();
+    expect(screen.queryByDisplayValue("CPO-7731")).toBeNull();
     expect(screen.getByRole("alert")).toHaveTextContent(
       "This form was opened by someone else",
     );
     // Save goes with the fields, and the shortcut sends nothing.
     expect(screen.queryByRole("button", { name: "Save" })).toBeNull();
     await user.keyboard("{Control>}s{/Control}");
+    await act(() => new Promise((resolve) => setTimeout(resolve, 50)));
     expect(onSave).not.toHaveBeenCalled();
     expect(stored(support.user.id)).toMatchObject({
-      values: { customerPo: "CPO-5" },
+      values: { remarks: "Fragile" },
     });
-    expect(stored(finance.user.id)).toBeNull();
+    expect(stored(finance.user.id)).toMatchObject({
+      values: { remarks: "Theirs" },
+    });
   });
 });
