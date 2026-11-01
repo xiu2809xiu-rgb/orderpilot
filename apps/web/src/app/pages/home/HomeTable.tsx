@@ -21,14 +21,14 @@ const PINNED_LAST = "sticky right-0 z-[1] bg-card max-md:border-l";
 /** A cell of a home table: first keeps the row's name in view when the table scrolls. */
 export function homeCell(column: Pick<HomeColumn, "end" | "action">): string {
   return cn(
-    "whitespace-nowrap px-3 py-1.5 align-middle",
+    "whitespace-nowrap px-2 py-1.5 align-middle",
     column.end && "text-right tabular-nums",
     column.action && `text-right ${PINNED_LAST}`,
   );
 }
 
 /** The first cell: it may wrap, so a long task is never cut off. */
-export const HOME_FIRST_CELL = `whitespace-normal px-3 py-1.5 align-middle ${PINNED_FIRST}`;
+export const HOME_FIRST_CELL = `whitespace-normal px-2 py-1.5 align-middle ${PINNED_FIRST}`;
 
 /** A compact table inside a card. It scrolls in its own box on a phone. */
 export function HomeTable({
@@ -54,7 +54,7 @@ export function HomeTable({
                 key={column.id}
                 scope="col"
                 className={cn(
-                  "h-8 px-3 font-medium whitespace-nowrap",
+                  "h-8 px-2 font-medium whitespace-nowrap",
                   index === 0 && "sticky left-0 z-[1] bg-card max-md:border-r",
                   column.end && "text-right",
                   column.action && `text-right ${PINNED_LAST}`,
@@ -80,7 +80,7 @@ export function ViewAll({ to, label }: { to: string; label: string }) {
   return (
     <Link
       to={to}
-      className="text-sm font-medium whitespace-nowrap text-primary underline-offset-4 hover:underline"
+      className="inline-flex min-h-6 items-center text-sm font-medium whitespace-nowrap text-primary underline-offset-4 hover:underline"
     >
       {label}
     </Link>

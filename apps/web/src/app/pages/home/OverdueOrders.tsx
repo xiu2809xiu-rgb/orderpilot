@@ -39,7 +39,7 @@ export function OverdueOrders() {
   return (
     <SectionCard
       title={t("overdue.title")}
-      className="h-full"
+      className={orders.length > 0 ? "h-full" : undefined}
       actions={
         total > 0 ? (
           <ViewAll to={ALL} label={t("needs.viewAll", { total })} />
@@ -62,12 +62,12 @@ export function OverdueOrders() {
                 <td className={homeCell({})}>
                   <Link
                     to={`/order-tracker/${order.orderNo}`}
-                    className="font-mono text-primary underline-offset-4 hover:underline"
+                    className="inline-flex min-h-6 items-center font-mono text-primary underline-offset-4 hover:underline"
                   >
                     {order.orderNo}
                   </Link>
                 </td>
-                <td className={`${homeCell({})} whitespace-normal`}>
+                <td className={`${homeCell({})} md:whitespace-normal`}>
                   {order.customerName}
                 </td>
                 <td className={homeCell({ end: true })}>

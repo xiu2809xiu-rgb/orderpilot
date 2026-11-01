@@ -31,13 +31,13 @@ export function TaskRow({
         {task.orderNo ? (
           <Link
             to={`/order-tracker/${task.orderNo}`}
-            className="font-mono text-primary underline-offset-4 hover:underline"
+            className="inline-flex min-h-6 items-center font-mono text-primary underline-offset-4 hover:underline"
           >
             {task.orderNo}
           </Link>
         ) : null}
       </td>
-      <td className={cn(homeCell({}), "whitespace-normal md:min-w-32")}>
+      <td className={cn(homeCell({}), "md:min-w-32 md:whitespace-normal")}>
         {task.customerName}
       </td>
       <td className={homeCell({ end: true })}>

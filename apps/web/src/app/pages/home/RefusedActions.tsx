@@ -30,7 +30,7 @@ export function RefusedActions() {
   return (
     <SectionCard
       title={t("refused.title")}
-      className="h-full"
+      className={events.length > 0 ? "h-full" : undefined}
       actions={
         total > 0 ? (
           <ViewAll to={ALL} label={t("needs.viewAll", { total })} />

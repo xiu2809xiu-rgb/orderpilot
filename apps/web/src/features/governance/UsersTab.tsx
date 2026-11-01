@@ -7,6 +7,7 @@ import {
   FilterChips,
   LoadingState,
   PermissionDenied,
+  ScrollRegion,
   SectionCard,
   toast,
   StatusBadge,
@@ -94,90 +95,97 @@ export function UsersTab() {
             onRetry={() => void users.refetch()}
           />
         ) : (
-          <Table aria-label={t("users.tableLabel")}>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t("users.name")}</TableHead>
-                <TableHead>{t("users.email")}</TableHead>
-                <TableHead>{t("users.role")}</TableHead>
-                <TableHead>{t("users.status")}</TableHead>
-                <TableHead>
-                  <span className="sr-only">{t("users.actions")}</span>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {rows.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell>{user.displayName}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>{tc(`roles.${user.role}`)}</TableCell>
-                  <TableCell>
-                    <StatusBadge tone={user.disabled ? "neutral" : "success"}>
-                      {user.disabled ? t("users.disabled") : t("users.active")}
-                    </StatusBadge>
-                  </TableCell>
-                  <TableCell className="py-1">
-                    <div className="flex items-center justify-end gap-1">
-                      <UserHistoryDialog
-                        userId={user.id}
-                        name={user.displayName}
-                      />
-                      {canManage ? (
-                        <Button
-                          variant="outline"
-                          size="xs"
-                          aria-disabled={change.isPending}
-                          className="aria-disabled:pointer-events-none aria-disabled:opacity-50"
-                          aria-label={t(
-                            user.disabled
-                              ? "users.enableFor"
-                              : "users.disableFor",
-                            { name: user.displayName },
-                          )}
-                          onClick={() => {
-                            // aria-disabled, not disabled: a disabled button drops the keyboard's focus.
-                            if (change.isPending) return;
-                            const disable = !user.disabled;
-                            change.mutate(
-                              { id: user.id, disable },
-                              {
-                                onSuccess: () =>
-                                  toast.done(
-                                    t(
-                                      disable
-                                        ? "users.toast.disabled"
-                                        : "users.toast.enabled",
-                                      { name: user.displayName },
-                                    ),
-                                    {
-                                      undo: async () => {
-                                        await (disable
-                                          ? usersEnable(user.id)
-                                          : usersDisable(user.id));
-                                        await queryClient.invalidateQueries({
-                                          queryKey: getUsersListQueryKey(),
-                                        });
-                                      },
-                                    },
-                                  ),
-                                onError: () =>
-                                  toast.failed(t("users.toast.failed")),
-                              },
-                            );
-                          }}
-                        >
-                          {user.disabled
-                            ? t("users.enable")
-                            : t("users.disable")}
-                        </Button>
-                      ) : null}
-                    </div>
-                  </TableCell>
+          <ScrollRegion
+            label={t("users.tableLabel")}
+            className="rounded-none border-0 bg-transparent"
+          >
+            <Table aria-label={t("users.tableLabel")}>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t("users.name")}</TableHead>
+                  <TableHead>{t("users.email")}</TableHead>
+                  <TableHead>{t("users.role")}</TableHead>
+                  <TableHead>{t("users.status")}</TableHead>
+                  <TableHead>
+                    <span className="sr-only">{t("users.actions")}</span>
+                  </TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {rows.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell>{user.displayName}</TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>{tc(`roles.${user.role}`)}</TableCell>
+                    <TableCell>
+                      <StatusBadge tone={user.disabled ? "neutral" : "success"}>
+                        {user.disabled
+                          ? t("users.disabled")
+                          : t("users.active")}
+                      </StatusBadge>
+                    </TableCell>
+                    <TableCell className="py-1">
+                      <div className="flex items-center justify-end gap-1">
+                        <UserHistoryDialog
+                          userId={user.id}
+                          name={user.displayName}
+                        />
+                        {canManage ? (
+                          <Button
+                            variant="outline"
+                            size="xs"
+                            aria-disabled={change.isPending}
+                            className="aria-disabled:pointer-events-none aria-disabled:opacity-50"
+                            aria-label={t(
+                              user.disabled
+                                ? "users.enableFor"
+                                : "users.disableFor",
+                              { name: user.displayName },
+                            )}
+                            onClick={() => {
+                              // aria-disabled, not disabled: a disabled button drops the keyboard's focus.
+                              if (change.isPending) return;
+                              const disable = !user.disabled;
+                              change.mutate(
+                                { id: user.id, disable },
+                                {
+                                  onSuccess: () =>
+                                    toast.done(
+                                      t(
+                                        disable
+                                          ? "users.toast.disabled"
+                                          : "users.toast.enabled",
+                                        { name: user.displayName },
+                                      ),
+                                      {
+                                        undo: async () => {
+                                          await (disable
+                                            ? usersEnable(user.id)
+                                            : usersDisable(user.id));
+                                          await queryClient.invalidateQueries({
+                                            queryKey: getUsersListQueryKey(),
+                                          });
+                                        },
+                                      },
+                                    ),
+                                  onError: () =>
+                                    toast.failed(t("users.toast.failed")),
+                                },
+                              );
+                            }}
+                          >
+                            {user.disabled
+                              ? t("users.enable")
+                              : t("users.disable")}
+                          </Button>
+                        ) : null}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </ScrollRegion>
         )}
       </div>
     </SectionCard>

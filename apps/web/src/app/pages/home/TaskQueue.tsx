@@ -27,7 +27,7 @@ export function TaskQueue({ touch }: { touch: boolean }) {
   return (
     <SectionCard
       title={t("needs.title")}
-      className="h-full"
+      className={tasks.length > 0 ? "h-full" : undefined}
       actions={
         total > 0 ? (
           <ViewAll to="/workflows" label={t("needs.viewAll", { total })} />
