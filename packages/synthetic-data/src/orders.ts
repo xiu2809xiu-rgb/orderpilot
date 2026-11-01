@@ -24,6 +24,9 @@ import {
   type SampleScreenState,
 } from "./types.js";
 
+/** Under the mock approver's purchase limit of 5,000.00, with room to spare. */
+const APPROVER_PURCHASE_LIMIT = 4_900;
+
 const NAVISION_STATUS: Readonly<
   Record<SampleScreenState, NavisionStatus | null>
 > = {
@@ -186,8 +189,12 @@ export function makeOrders(inputs: OrderInputs): SampleOrder[] {
     return customer;
   };
   let nextShort = 0;
+  // Open quantity per item that the stock already has to cover. The short
+  // line of an order waiting for a purchase request is not counted: it is the
+  // demand under review, and the request's own formula weighs it.
+  const reserved = new Map<string, number>();
 
-  return journeys.map((j, i): SampleOrder => {
+  const orders = journeys.map((j, i): SampleOrder => {
     const rank = SAMPLE_SCREEN_STATES.indexOf(j.state);
     const shipped = rank >= 8;
     const customer = pickCustomer(
@@ -203,14 +210,19 @@ export function makeOrders(inputs: OrderInputs): SampleOrder[] {
       if (!shortItem)
         throw new Error("Not enough low-stock items for the SPRs");
       const available = availableStock(shortItem);
-      const ordered = String(Number(available) + random.int(2, 20) * 10);
-      const shortBy = addDecimal(ordered, `-${available}`);
+      // Kept inside the approver's purchase limit, so a request she approved
+      // never contradicts the limit the SPR page shows.
+      const affordable = Math.floor(
+        APPROVER_PURCHASE_LIMIT / Number(shortItem.unitCost),
+      );
+      const shortBy = Math.max(1, Math.min(random.int(2, 20) * 10, affordable));
+      const ordered = String(Number(available) + shortBy);
       lines.push(line(shortItem, ordered, shipped));
       shortfall = {
         itemNo: shortItem.no,
         ordered,
         availableStock: available,
-        shortBy,
+        shortBy: addDecimal(ordered, `-${available}`),
       };
     }
     const wanted =
@@ -222,12 +234,16 @@ export function makeOrders(inputs: OrderInputs): SampleOrder[] {
       const at = normalPool[random.int(0, normalPool.length - 1)];
       const item = at === undefined ? undefined : items[at];
       if (at === undefined || !item || used.has(at)) continue;
-      used.add(at);
-      const room = Math.floor(Number(availableStock(item)) / 2);
-      const usual = random.pick(usualQuantities(item, at));
-      lines.push(
-        line(item, String(Math.max(1, Math.min(usual, room))), shipped),
+      const room = Math.floor(
+        (Number(availableStock(item)) - (reserved.get(item.no) ?? 0)) / 2,
       );
+      if (room < 1) continue;
+      used.add(at);
+      const usual = random.pick(usualQuantities(item, at));
+      const quantity = Math.max(1, Math.min(usual, room));
+      lines.push(line(item, String(quantity), shipped));
+      if (!shipped)
+        reserved.set(item.no, (reserved.get(item.no) ?? 0) + quantity);
     }
     const first = lines[0];
     if (!first) throw new Error("An order needs a line");
@@ -306,4 +322,12 @@ export function makeOrders(inputs: OrderInputs): SampleOrder[] {
       stockShortfall: shortfall,
     };
   });
+  // The item page shows Qty. on Sales Order, so it must hold the open lines
+  // above, on top of the base figure for orders outside this sample.
+  for (const item of items) {
+    const open = reserved.get(item.no);
+    if (open)
+      item.qtyOnSalesOrder = String(Number(item.qtyOnSalesOrder) + open);
+  }
+  return orders;
 }

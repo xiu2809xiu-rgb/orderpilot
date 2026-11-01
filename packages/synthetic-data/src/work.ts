@@ -94,7 +94,10 @@ function planFor(order: SampleOrder): TaskPlan | null {
         ? {
             kind: "CONFIRM_PAYMENT",
             role: "FINANCE",
-            title: "Confirm the balance payment",
+            title:
+              Number(order.header.prepaymentPercent) === 0
+                ? "Confirm the payment"
+                : "Confirm the balance payment",
           }
         : null;
     default:
@@ -127,13 +130,12 @@ export function makeTasks(
       (c) => c.no === order.header.sellToCustomerNo,
     );
     const spr = sprs.find((s) => s.orderNo === order.header.no);
-    const pi = order.documents.find((d) => d.type === "PROFORMA_INVOICE");
+    // The ref is the SPR page's link, so only SPR tasks carry one. Any other
+    // task opens its order.
     const recordNo =
       plan.kind === "RAISE_SPR" || plan.kind === "APPROVE_SPR"
         ? (spr?.recordNo ?? null)
-        : plan.kind === "SEND_PI"
-          ? (pi?.number ?? null)
-          : null;
+        : null;
     tasks.push({
       id: syntheticId(1, tasks.length + 1),
       kind: plan.kind,

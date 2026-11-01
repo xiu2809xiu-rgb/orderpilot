@@ -597,6 +597,45 @@ describe("looking fake", () => {
     }
     expect(JSON.stringify(data)).not.toMatch(/\b\d{3}-\d{2}-\d{4}\b/);
   });
+
+  it("keeps decided and waiting requests inside the approver's purchase limit of 5,000.00", () => {
+    for (const spr of data.sprs) {
+      expect(compareDecimal(spr.amount, "5000.00")).toBeLessThanOrEqual(0);
+    }
+  });
+
+  it("only gives SPR tasks a ref, so every ref opens a request", () => {
+    for (const task of data.tasks) {
+      if (!task.ref) continue;
+      expect(["RAISE_SPR", "APPROVE_SPR"]).toContain(task.kind);
+      expect(data.sprs.some((s) => s.recordNo === task.ref?.recordNo)).toBe(
+        true,
+      );
+    }
+    expect(
+      data.tasks.filter((t) => t.kind === "SEND_PI").every((t) => !t.ref),
+    ).toBe(true);
+  });
+
+  it("holds the open order lines in each item's Qty. on Sales Order", () => {
+    for (const item of data.items) {
+      const open = data.orders
+        .filter((o) => o.stockShortfall?.itemNo !== item.no)
+        .flatMap((o) => o.lines)
+        .filter((l) => l.no === item.no)
+        .reduce((sum, l) => sum + Number(l.qtyToShip), 0);
+      expect(Number(item.qtyOnSalesOrder)).toBeGreaterThanOrEqual(open);
+    }
+  });
+
+  it("does not call a payment a balance when nothing was paid up front", () => {
+    for (const task of data.tasks) {
+      const order = data.orders.find((o) => o.header.no === task.orderNo);
+      if (Number(order?.header.prepaymentPercent) === 0) {
+        expect(task.title).not.toMatch(/balance/);
+      }
+    }
+  });
 });
 
 function customerOf(
