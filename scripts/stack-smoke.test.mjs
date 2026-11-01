@@ -4,7 +4,7 @@ import { checkStack, webPort } from "./stack-smoke.mjs";
 
 const APP_POLICY = "default-src 'self'; script-src 'self'";
 const API_POLICY =
-  "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'";
+  "default-src 'none';frame-ancestors 'none';base-uri 'none';form-action 'none'";
 const INDEX = `<div id="root"></div><script src="/assets/index-abc.js"></script>`;
 
 /** @typedef {Record<string, (init?: RequestInit) => Response>} Routes */

@@ -15,11 +15,12 @@ const ROLE = "SUPPORT";
 
 /**
  * What the API sends on every JSON answer (apps/api/src/bootstrap/security.ts).
+ * Helmet joins directives with a bare semicolon, so that is what is compared.
  * Compared whole: nginx puts the upstream header first and its own after it, so
  * a prefix check would pass a second, combined policy.
  */
 const API_POLICY =
-  "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'";
+  "default-src 'none';frame-ancestors 'none';base-uri 'none';form-action 'none'";
 
 /**
  * The port compose publishes the web app on: the shell wins, then the root
