@@ -26,12 +26,14 @@ function ItemRecord({ item }: { item: ItemDetail }) {
           </>
         }
         actions={
-          <Button asChild variant="outline">
-            <a href="#item-orders">
-              <ListChecks aria-hidden="true" />
-              {t("item.seeOrders")}
-            </a>
-          </Button>
+          item.orderLines.length > 0 ? (
+            <Button asChild variant="outline">
+              <a href="#item-orders">
+                <ListChecks aria-hidden="true" />
+                {t("item.seeOrders")}
+              </a>
+            </Button>
+          ) : undefined
         }
       />
       <KeyFacts
