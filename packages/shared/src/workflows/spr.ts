@@ -63,6 +63,8 @@ export const sprDetailSchema = z.object({
     setup: approvalUserSetupSchema,
   }),
   substituteName: z.string().min(1).nullable(),
+  /** The name of the person behind `approver.setup.approverId`, who is told when the approver does not act. */
+  escalatesToName: z.string().min(1).nullable(),
   /** Null until someone decides. */
   decision: z
     .object({

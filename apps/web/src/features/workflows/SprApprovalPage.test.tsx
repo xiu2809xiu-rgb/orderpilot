@@ -65,6 +65,7 @@ function spr(decision: null | { outcome: "approved"; by: string }) {
         },
       },
       substituteName: "Prakash Menon",
+      escalatesToName: "Sophia Chen",
       decision: decision
         ? {
             ...decision,
@@ -111,6 +112,9 @@ describe("the SPR approval page", () => {
       screen.getByText("Shortfall (suggested quantity)"),
     ).toBeInTheDocument();
     expect(screen.getByText("Limited: 5,000.00 USD")).toBeInTheDocument();
+    // A person, by name: the setup's raw approver id means nothing to staff.
+    expect(screen.getByText("Sophia Chen")).toBeInTheDocument();
+    expect(screen.queryByText(/00000000-0000/)).toBeNull();
     expect(await axeViolations(container)).toEqual([]);
   });
 

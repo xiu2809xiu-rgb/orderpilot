@@ -2588,6 +2588,11 @@
                           "type": "string",
                           "minLength": 1
                         },
+                        "escalatesToName": {
+                          "nullable": true,
+                          "type": "string",
+                          "minLength": 1
+                        },
                         "decision": {
                           "nullable": true,
                           "type": "object",
@@ -2628,6 +2633,7 @@
                         "fields",
                         "approver",
                         "substituteName",
+                        "escalatesToName",
                         "decision"
                       ],
                       "additionalProperties": false

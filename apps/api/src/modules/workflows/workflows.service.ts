@@ -92,6 +92,7 @@ export class WorkflowsService {
       ...record,
       approver: { displayName: approver.displayName, setup: approver.setup },
       substituteName: approver.substituteName,
+      escalatesToName: approver.escalatesToName,
     };
   }
 

@@ -90,7 +90,7 @@
     "description": "{{customer}}, customer PO {{po}}, ordered {{date}}.",
     "navisionNote": "{{orderNo}} is Navision's sales order number.",
     "stepsHeading": "Steps",
-    "stepsDescription": "Where the order is on its way. The state machine will decide the real status.",
+    "stepsDescription": "Where the order is on its way. The steps come from sample data for the demo.",
     "timelineHeading": "Timeline",
     "timelineEmpty": "Nothing has happened to this order yet.",
     "optional": "Only some orders",
@@ -170,7 +170,7 @@
       "person": "Entered by a person"
     },
     "approverHeading": "Approver",
-    "approverDescription": "From the approval setup, in the shape of Navision's Approval User Setup. Area 4 owns the limits.",
+    "approverDescription": "Who approves this request and up to what amount. The limits are draft values until Spectra confirms them.",
     "approverName": "Approver",
     "approverId": "Escalates to",
     "salesLimit": "Sales limit",
