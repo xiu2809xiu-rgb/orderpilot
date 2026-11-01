@@ -37,6 +37,9 @@ The named patterns used in the code, where each one lives, and why it earns its 
 | Port to another area        | `workflows/domain/approval-policy.ts`, `mock/mock-approval-policy.ts` | Area 2 asks area 4's approval policy and acts on the answer; the mock stands in          | C-1   |
 | Atomic counter              | `workflows/record-number.repository.ts`                               | One upsert hands out each running number once, with no lock                              | C-1   |
 | Configuration as data       | `DocumentTypeConfig`, `workflows/document-config.repository.ts`       | A default is a row to edit, not a code change                                            | C-1   |
+| Port with a mock adapter    | `master-data/domain/master-data-reader.ts`, `MockNavisionMasterData`  | The seam for P-20: the connector replaces one class, and the controller and service stay | P-35  |
+| Domain class                | `master-data/domain/stock-position.ts`                                | Available stock and "short" are one tested rule; short is read from the order            | P-35  |
+| Derived data                | `synthetic-data/src/purchase-orders.ts`                               | Purchase orders come from approved SPRs and stock figures, so the numbers always agree   | P-35  |
 
 ## Layers
 
