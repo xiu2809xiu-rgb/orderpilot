@@ -165,7 +165,7 @@ pnpm --filter @orderpilot/web test       # component and unit tests
 
 ### Trying a client sample
 
-Read [`samples/README.md`](samples/README.md) first. `pnpm samples:up` starts a second, sealed stack on <http://localhost:8081> (`SAMPLES_WEB_PORT`): its own compose project, its data in memory, no route out of its network, and `samples/` mounted read-only. `pnpm samples:down` deletes it, data and all.
+Read [`samples/README.md`](samples/README.md) first. `pnpm samples:up` starts a second, sealed stack on <http://localhost:8081> (`SAMPLES_WEB_PORT`): its own compose project, its data in memory, no route to the internet from any container, and `samples/` mounted read-only. `pnpm samples:down` deletes it, data and all.
 
 ### The root scripts
 

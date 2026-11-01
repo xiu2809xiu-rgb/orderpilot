@@ -9,8 +9,10 @@
 #     with the normal stack, and the two can run side by side.
 #   - Every store keeps its data in memory (tmpfs), so `down` leaves nothing on
 #     disk, and there are no named volumes to forget.
-#   - All services sit on an internal network with no route out: no document can
-#     reach an AI provider or anywhere else, whatever the code or a .env says.
+#   - The stores, the API and the worker sit on an internal network with no route
+#     out, and web has its default route deleted (see web-seal below): no
+#     document can reach an AI provider or anywhere else, whatever the code or a
+#     .env says.
 #   - Only the web app has a host port, bound to 127.0.0.1. The stores have none.
 #   - samples/ is mounted read-only into the API and the worker, and is never in
 #     an image: .dockerignore keeps it out of every build.
@@ -68,6 +70,37 @@ services:
     networks:
       - sealed
       - published
+
+  # Docker gives web a default route through the `published` network, so web
+  # could reach the internet. This container shares web's network, removes that
+  # route and leaves the two attached subnets: the API, and the host that
+  # connects to the published port. It alone holds NET_ADMIN, and only to run
+  # that command, so web never has it. With no default route there is nothing
+  # to masquerade, so this also holds on Docker Desktop, where turning
+  # masquerade off on the network did not stop web reaching out.
+  web-seal:
+    image: orderpilot/web:local
+    # The image is built for web, which this waits for.
+    pull_policy: never
+    network_mode: "service:web"
+    user: "0"
+    # It stays running afterwards: `up --wait` counts a container that exits as
+    # a failure unless something depends on it.
+    entrypoint: ["sh", "-c", "ip route del default && exec sleep 2147483647"]
+    command: []
+    restart: "no"
+    read_only: true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_ADMIN
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      disable: true
+    depends_on:
+      web:
+        condition: service_healthy
 
 networks:
   sealed:
