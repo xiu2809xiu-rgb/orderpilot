@@ -19,6 +19,7 @@
     "test": "node --test \"scripts/**/*.test.mjs\" && pnpm -r --if-present test",
     "build": "pnpm -r --if-present build",
     "budget": "pnpm --filter @orderpilot/web budget",
+    "e2e": "pnpm --filter @orderpilot/e2e e2e",
     "api:spec": "pnpm --filter @orderpilot/api openapi && prettier --write apps/api/openapi.json",
     "api:generate": "pnpm api:spec && pnpm --filter @orderpilot/web generate:api",
     "api:check": "node scripts/check-api-generated.mjs",
