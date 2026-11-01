@@ -9,5 +9,11 @@
       "@orderpilot/shared": ["../../packages/shared/src/index.ts"]
     }
   },
-  "include": ["src", "vite.config.ts", "orval.config.ts", "security-headers.ts"]
+  "include": [
+    "src",
+    "vite.config.ts",
+    "orval.config.ts",
+    "security-headers.ts",
+    "bundle-report.ts"
+  ]
 }
