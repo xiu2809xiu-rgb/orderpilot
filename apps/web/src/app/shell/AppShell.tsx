@@ -5,6 +5,7 @@ import { ListPageSkeleton, Toaster } from "@/components/common";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { featureNamespaces } from "@/features/nav";
 import { apiClient } from "@/lib/api/instance";
+import { loadRecordTabs } from "@/lib/loadRecordTabs";
 import { useSessionStore } from "@/stores/session";
 import { useGlobalShortcuts } from "./shortcuts";
 import { Sidebar } from "./Sidebar";
@@ -18,7 +19,7 @@ const CommandPalette = lazy(async () => ({
 // The open-records strip and the code that keeps it in step with the page load after
 // the first paint, so people who never open a record pay nothing for it.
 const RecordTabs = lazy(async () => ({
-  default: (await import("./recordTabsRuntime")).RecordTabs,
+  default: (await loadRecordTabs()).RecordTabs,
 }));
 
 // Usage analytics (G-1): the consent banner and the page-view recorder. A separate

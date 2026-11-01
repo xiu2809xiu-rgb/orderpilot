@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { useLocation, useNavigate } from "react-router";
+import { loadRecordTabs } from "@/lib/loadRecordTabs";
 import { resolveRecord } from "@/lib/records";
 
 /** How a person asked to open something. */
@@ -42,7 +43,7 @@ export function useOpenRecord(): (to: string, gesture: OpenGesture) => boolean {
   return useCallback(
     (to, gesture) => {
       if (gesture === "browser" || !resolveRecord(to)) return false;
-      import("@/app/shell/recordTabsRuntime").then(
+      loadRecordTabs().then(
         ({ openRecord }) => {
           if (openRecord(to, gesture, pathname) === "go") return navigate(to);
         },
