@@ -2028,6 +2028,26 @@
       ]
     },
     {
+      "key": "P-79",
+      "title": "End-to-end follow-ups",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "could",
+      "estimate": 3,
+      "reqs": ["M4", "M6"],
+      "branch": "test/e2e-follow-ups",
+      "sprints": [3],
+      "dependsOn": ["P-14"],
+      "summary": "Follow-ups to P-14 that nobody needs this week: a clean-machine proof of the set-up and a wider browser check.",
+      "acceptance": [
+        "A CI job runs `pnpm local:setup` on a clean runner and then the smoke test against `pnpm dev`, so Getting started is proven on every change to it (left out of issue 102).",
+        "Someone runs Getting started on macOS once and fixes what differs, and the page stops saying macOS is untested (left out of issue 102).",
+        "The smoke test runs each page in the dark theme too, so axe checks the contrast of both themes.",
+        "`apps/web/scripts/screenshots.mjs` and the walk take Playwright from `apps/e2e` instead of an install outside the repository.",
+        "Firefox and WebKit projects, if a story or the panel needs them."
+      ]
+    },
+    {
       "key": "T-1",
       "title": "Owners, backups and reviews",
       "epic": "T",

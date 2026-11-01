@@ -151,7 +151,7 @@ pnpm --filter @orderpilot/web test       # component and unit tests
 - **Ports:** `WEB_PORT` (default 5173) and `API_PORT` (default 3000) are in [`.env.example`](.env.example). Vite reads only those two names from the root `.env`.
 - **Demo sign-in:** with `DEMO_MODE=true` (the default in `.env.example`), the login page lists the nine roles. Without the API running, the page loads but cannot sign in.
 - **Where things are:** each area's screens go in `apps/web/src/features/<feature>/`; the shell, router and guards are in `src/app/`; text is in `src/locales/en/`. [ADR 0013](docs/adr/0013-the-web-stack.md) explains the layout.
-- **Screenshots** for a pull request come from `apps/web/scripts/screenshots.mjs`, which needs Playwright installed outside the repository (the top of the file says how) until P-14 adds it.
+- **Screenshots** for a pull request come from `apps/web/scripts/screenshots.mjs`, which still needs Playwright installed outside the repository (the top of the file says how). Moving it onto `apps/e2e` is in the backlog (P-79).
 
 ### The full stack in Docker
 

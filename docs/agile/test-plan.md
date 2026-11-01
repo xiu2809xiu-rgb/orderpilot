@@ -13,7 +13,7 @@ How OrderPilot is tested: the levels, the environments, the data, and the failur
 | API integration | Every endpoint, with 401, 403 and validation cases, and the audit entry | Vitest                      | `apps/api/test/`                            | Today (P-9 harness), P-10 adds more |
 | Component       | Each component in each of its states                                    | Vitest with Testing Library | Next to the component                       | Planned: P-11                       |
 | Contract        | Each connector against the mock Navision                                | Vitest                      | Next to the connector                       | Planned: P-20                       |
-| End-to-end      | The smoke test, then E2E #1 to #4, with WCAG 2.2 AA checked by axe      | Playwright with axe         | Decided by P-14                             | Planned: P-14                       |
+| End-to-end      | The smoke test, then E2E #1 to #4, with WCAG 2.2 AA checked by axe      | Playwright with axe         | `apps/e2e/tests/`, against a running stack  | Today (P-14): the smoke test        |
 | Load            | The extraction queue and the order endpoints, as a smoke load           | k6                          | To be decided by its story                  | Planned, not yet in a story         |
 | Manual requests | Each endpoint by hand, for reviews and demos                            | `.http` files               | `apps/api/requests/`                        | Today (P-8)                         |
 | Security        | Code, secrets, dependencies, then images and the live URL               | See security testing        | `.github/workflows/`                        | Today (P-6, Trivy P-13); ZAP P-24   |
@@ -22,12 +22,12 @@ How OrderPilot is tested: the levels, the environments, the data, and the failur
 
 ## 2. Environments
 
-| Environment | What runs there                                                                                                                  | `APP_ENV` | Status                        |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------- | --------- | ----------------------------- |
-| Local       | Windows 11 with Git Bash, and macOS. Node 24.22.0 and pnpm 12. PostgreSQL, Redis and MinIO in Docker                             | `local`   | Today (P-9)                   |
-| CI          | GitHub Actions on `ubuntu-24.04`: the verify job (with PostgreSQL, Redis and MinIO from the compose file) and the security scans | `local`   | Today (P-6)                   |
-| Docker      | The full stack with `docker compose up --build`, where the end-to-end tests run                                                  | `local`   | Today (P-13); end-to-end P-14 |
-| Demo        | Amazon Lightsail in Singapore, behind Caddy, with OWASP ZAP against the live URL                                                 | `demo`    | Planned: P-24                 |
+| Environment | What runs there                                                                                                                  | `APP_ENV` | Status             |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------------ |
+| Local       | Windows 11 with Git Bash, and macOS. Node 24.22.0 and pnpm 12. PostgreSQL, Redis and MinIO in Docker                             | `local`   | Today (P-9)        |
+| CI          | GitHub Actions on `ubuntu-24.04`: the verify job (with PostgreSQL, Redis and MinIO from the compose file) and the security scans | `local`   | Today (P-6)        |
+| Docker      | The full stack with `docker compose up --build`, where the end-to-end tests run                                                  | `local`   | Today (P-13, P-14) |
+| Demo        | Amazon Lightsail in Singapore, behind Caddy, with OWASP ZAP against the live URL                                                 | `demo`    | Planned: P-24      |
 
 - `APP_ENV` is separate from `NODE_ENV`. Safety rules key off `APP_ENV=production`, so the demo can run `NODE_ENV=production` with demo data (P-8).
 - Tests never call a paid AI provider. They use the mock provider, which is the default (P-17).
@@ -116,16 +116,16 @@ Each row is a case some test must cover. The story is the one that brings the te
 
 ### Platform and UI
 
-| #   | Case                                                                          | Expected                                                            | Level       | Status                      |
-| --- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------- | ----------- | --------------------------- |
-| P1  | A required environment variable is missing                                    | Start-up fails with a message that names the file to create         | Unit        | Today (P-8)                 |
-| P2  | Any error from the API                                                        | One envelope: `{ error: { code, message, details, traceId } }`      | Integration | Today (P-8)                 |
-| P3  | A database write succeeds but the process stops before its event is published | The outbox publishes it exactly once after restart                  | Integration | Planned: P-15               |
-| P4  | A page is loading, empty, partial, failed, or not permitted                   | Each state is shown; a failure offers retry and shows the `traceId` | Component   | Planned: P-12               |
-| P5  | Every page, in light and dark                                                 | No axe violations at WCAG 2.2 AA, and full keyboard use             | End-to-end  | Planned: P-14               |
-| P6  | The session ends while a form has unsaved input                               | The input is kept, and the user signs back in                       | Component   | Planned: P-11               |
-| P7  | The initial JavaScript bundle                                                 | 250 KB gzip or less, 3D excluded                                    | CI check    | Planned: P-11               |
-| P8  | The extraction queue and the order endpoints under a smoke load               | No errors, and response times recorded                              | Load        | Planned, not yet in a story |
+| #   | Case                                                                          | Expected                                                            | Level       | Status                           |
+| --- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------- | ----------- | -------------------------------- |
+| P1  | A required environment variable is missing                                    | Start-up fails with a message that names the file to create         | Unit        | Today (P-8)                      |
+| P2  | Any error from the API                                                        | One envelope: `{ error: { code, message, details, traceId } }`      | Integration | Today (P-8)                      |
+| P3  | A database write succeeds but the process stops before its event is published | The outbox publishes it exactly once after restart                  | Integration | Planned: P-15                    |
+| P4  | A page is loading, empty, partial, failed, or not permitted                   | Each state is shown; a failure offers retry and shows the `traceId` | Component   | Planned: P-12                    |
+| P5  | Every page, in light and dark                                                 | No axe violations at WCAG 2.2 AA, and full keyboard use             | End-to-end  | Partly: P-14 (light, main pages) |
+| P6  | The session ends while a form has unsaved input                               | The input is kept, and the user signs back in                       | Component   | Planned: P-11                    |
+| P7  | The initial JavaScript bundle                                                 | 250 KB gzip or less, 3D excluded                                    | CI check    | Planned: P-11                    |
+| P8  | The extraction queue and the order endpoints under a smoke load               | No errors, and response times recorded                              | Load        | Planned, not yet in a story      |
 
 ## 5. Entry and exit
 
