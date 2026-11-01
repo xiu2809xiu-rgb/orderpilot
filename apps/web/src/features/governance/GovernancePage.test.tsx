@@ -10,6 +10,7 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
 import { HttpResponse, http } from "msw";
+import { MemoryRouter } from "react-router";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { Toaster } from "@/components/common";
 import { useToastStore } from "@/components/common/toast";
@@ -41,10 +42,12 @@ function signIn(role: (typeof ROLES)[number]) {
 
 function renderPage() {
   return render(
-    <QueryClientProvider client={createQueryClient()}>
-      <GovernancePage />
-      <Toaster />
-    </QueryClientProvider>,
+    <MemoryRouter>
+      <QueryClientProvider client={createQueryClient()}>
+        <GovernancePage />
+        <Toaster />
+      </QueryClientProvider>
+    </MemoryRouter>,
   );
 }
 

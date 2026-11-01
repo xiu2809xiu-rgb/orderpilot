@@ -119,5 +119,9 @@
     "change": "What changed",
     "empty": "No changes recorded yet.",
     "emptyHint": "Edits to this record will be listed here."
+  },
+  "filterChips": {
+    "label": "Active filters",
+    "clear": "Clear filter: {{label}}"
   }
 }

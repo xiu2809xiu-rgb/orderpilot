@@ -1,8 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router";
 import {
   EmptyState,
+  FilterChips,
   LoadingState,
   PermissionDenied,
   SectionCard,
@@ -39,10 +41,15 @@ export function UsersTab() {
   const session = useSessionStore((state) => state.session);
   const canRead = hasPermission(session, "users.read");
   const canManage = hasPermission(session, "users.manage");
+  const [params, setParams] = useSearchParams();
+  const activeOnly = params.get("active") === "true";
   const users = useUsersList(
-    { pageSize: 100 },
+    { pageSize: 100, ...(activeOnly ? { active: "true" as const } : {}) },
     { query: { enabled: canRead } },
   );
+  const chips = activeOnly
+    ? [{ id: "active", label: t("users.activeOnly") }]
+    : [];
   const change = useMutation({
     mutationFn: (v: { id: string; disable: boolean }) =>
       v.disable ? usersDisable(v.id) : usersEnable(v.id),
@@ -64,6 +71,20 @@ export function UsersTab() {
   return (
     <SectionCard title={t("users.title")} description={t("users.description")}>
       <div className="space-y-s2">
+        <FilterChips
+          chips={chips}
+          filters={activeOnly ? { active: true } : {}}
+          onChange={() => {
+            setParams(
+              (previous) => {
+                const next = new URLSearchParams(previous);
+                next.delete("active");
+                return next;
+              },
+              { replace: true },
+            );
+          }}
+        />
         {change.error ? <RefusalPanel error={change.error} /> : null}
         {rows.length === 0 ? (
           <EmptyState
