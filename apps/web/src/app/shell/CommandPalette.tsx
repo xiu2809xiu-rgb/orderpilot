@@ -1,4 +1,5 @@
 import { Home, Settings } from "lucide-react";
+import { useLayoutEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import {
@@ -56,6 +57,15 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   const { t } = useTranslation(["common", "components", ...featureNamespaces]);
   const navigate = useNavigate();
   const session = useSessionStore((state) => state.session);
+  const opener = useRef<HTMLElement | null>(null);
+
+  // Radix returns focus to a trigger, and the palette has none: remember who
+  // had focus before it opened and give it back on close.
+  useLayoutEffect(() => {
+    if (open && document.activeElement instanceof HTMLElement) {
+      opener.current = document.activeElement;
+    }
+  }, [open]);
 
   function go(path: string) {
     onOpenChange(false);
@@ -77,6 +87,13 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
       onOpenChange={onOpenChange}
       title={t("palette.title")}
       description={t("palette.description")}
+      onCloseAutoFocus={(event) => {
+        event.preventDefault();
+        const target = opener.current?.isConnected
+          ? opener.current
+          : document.getElementById("main");
+        target?.focus();
+      }}
     >
       <CommandInput placeholder={t("palette.placeholder")} />
       <CommandList>

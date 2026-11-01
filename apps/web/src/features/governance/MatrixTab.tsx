@@ -50,6 +50,16 @@ export function MatrixTab() {
   });
   const copy = useMutation({
     mutationFn: (body: MatrixCopyBody) => matrixCopy(body),
+    // No Undo: the API keeps no snapshot of the target role's old rows, so a
+    // faithful reversal is not possible. The audit trail holds the change.
+    onSuccess: (_data, body) =>
+      toast.done(
+        t("matrix.toast.copied", {
+          from: tc(`roles.${body.fromRole}`),
+          to: tc(`roles.${body.toRole}`),
+        }),
+      ),
+    onError: () => toast.failed(t("matrix.toast.failed")),
     onSettled: refresh,
   });
   const busy = toggle.isPending || scope.isPending || copy.isPending;

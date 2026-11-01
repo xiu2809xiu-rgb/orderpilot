@@ -5,10 +5,10 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { WorkflowsOrderFlow200DataOrder } from './workflowsOrderFlow200DataOrder.ts';
-import type { WorkflowsOrderFlow200DataPayment } from './workflowsOrderFlow200DataPayment.ts';
-import type { WorkflowsOrderFlow200DataStepsItem } from './workflowsOrderFlow200DataStepsItem.ts';
-import type { WorkflowsOrderFlow200DataTimelineItem } from './workflowsOrderFlow200DataTimelineItem.ts';
+import type { WorkflowsOrderFlow200DataOrder } from "./workflowsOrderFlow200DataOrder.ts";
+import type { WorkflowsOrderFlow200DataPayment } from "./workflowsOrderFlow200DataPayment.ts";
+import type { WorkflowsOrderFlow200DataStepsItem } from "./workflowsOrderFlow200DataStepsItem.ts";
+import type { WorkflowsOrderFlow200DataTimelineItem } from "./workflowsOrderFlow200DataTimelineItem.ts";
 
 export type WorkflowsOrderFlow200Data = {
   order: WorkflowsOrderFlow200DataOrder;

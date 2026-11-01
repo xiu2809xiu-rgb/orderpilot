@@ -5,7 +5,7 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { WorkflowsDocumentConfig200DataItem } from './workflowsDocumentConfig200DataItem.ts';
+import type { WorkflowsDocumentConfig200DataItem } from "./workflowsDocumentConfig200DataItem.ts";
 
 export type WorkflowsDocumentConfig200 = {
   data: WorkflowsDocumentConfig200DataItem[];

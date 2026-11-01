@@ -6,11 +6,11 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type MatrixRead200DataRolesItemDataScope = typeof MatrixRead200DataRolesItemDataScope[keyof typeof MatrixRead200DataRolesItemDataScope];
-
+export type MatrixRead200DataRolesItemDataScope =
+  (typeof MatrixRead200DataRolesItemDataScope)[keyof typeof MatrixRead200DataRolesItemDataScope];
 
 export const MatrixRead200DataRolesItemDataScope = {
-  all: 'all',
-  brands: 'brands',
-  own: 'own',
+  all: "all",
+  brands: "brands",
+  own: "own",
 } as const;

@@ -6,12 +6,12 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type AiUsageReport200DataRecordsItemStatus = typeof AiUsageReport200DataRecordsItemStatus[keyof typeof AiUsageReport200DataRecordsItemStatus];
-
+export type AiUsageReport200DataRecordsItemStatus =
+  (typeof AiUsageReport200DataRecordsItemStatus)[keyof typeof AiUsageReport200DataRecordsItemStatus];
 
 export const AiUsageReport200DataRecordsItemStatus = {
-  ok: 'ok',
-  error: 'error',
-  refused: 'refused',
-  timeout: 'timeout',
+  ok: "ok",
+  error: "error",
+  refused: "refused",
+  timeout: "timeout",
 } as const;

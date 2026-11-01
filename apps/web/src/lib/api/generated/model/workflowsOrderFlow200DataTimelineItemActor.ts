@@ -5,7 +5,7 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { WorkflowsOrderFlow200DataTimelineItemActorKind } from './workflowsOrderFlow200DataTimelineItemActorKind.ts';
+import type { WorkflowsOrderFlow200DataTimelineItemActorKind } from "./workflowsOrderFlow200DataTimelineItemActorKind.ts";
 
 export type WorkflowsOrderFlow200DataTimelineItemActor = {
   kind: WorkflowsOrderFlow200DataTimelineItemActorKind;

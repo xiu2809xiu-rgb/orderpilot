@@ -24,6 +24,7 @@
       "granted": "{{permission}} granted to {{role}}",
       "revoked": "{{permission}} taken from {{role}}",
       "scope": "{{role}} now sees {{scope}}",
+      "copied": "Permissions of {{from}} copied to {{to}}",
       "failed": "The change was not saved"
     },
     "readOnly": "You can read the matrix. Changing it needs the roles.manage permission.",

@@ -1,6 +1,10 @@
 {
   "title": "Component gallery",
   "description": "Every common component in one place, with synthetic data. Shown in demo mode and in development only.",
+  "primaryAction": {
+    "label": "Try the primary action",
+    "done": "The primary action ran. On a real list it opens the form for a new record."
+  },
   "sections": {
     "table": "Data table",
     "tableHint": "Paging, sorting and filtering happen on the server. This page fakes the server in the browser.",

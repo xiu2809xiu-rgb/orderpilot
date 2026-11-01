@@ -92,6 +92,31 @@ describe("keyboard shortcuts", () => {
     expect(screen.getByRole("searchbox", { hidden: true })).not.toHaveFocus();
   });
 
+  it("keeps its letters for a menu, a list or a select trigger", async () => {
+    const onNew = vi.fn();
+    render(
+      <>
+        <Shell onNew={onNew} />
+        <button
+          type="button"
+          role="combobox"
+          aria-expanded="false"
+          aria-controls="x"
+          aria-label="Pick"
+        >
+          Pick
+        </button>
+        <div role="menu" aria-label="Columns" />
+      </>,
+    );
+    screen.getByRole("combobox", { name: "Pick" }).focus();
+    await userEvent.keyboard("n");
+    expect(onNew).not.toHaveBeenCalled();
+    screen.getByRole("combobox", { name: "Pick" }).blur();
+    await userEvent.keyboard("n/");
+    expect(onNew).not.toHaveBeenCalled();
+  });
+
   it("leaves a page without a primary action alone", () => {
     function Bare() {
       useGlobalShortcuts();

@@ -5,9 +5,9 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { TrackerList200DataItemOverdue } from './trackerList200DataItemOverdue.ts';
-import type { TrackerList200DataItemOwnerRole } from './trackerList200DataItemOwnerRole.ts';
-import type { TrackerList200DataItemStatus } from './trackerList200DataItemStatus.ts';
+import type { TrackerList200DataItemOverdue } from "./trackerList200DataItemOverdue.ts";
+import type { TrackerList200DataItemOwnerRole } from "./trackerList200DataItemOwnerRole.ts";
+import type { TrackerList200DataItemStatus } from "./trackerList200DataItemStatus.ts";
 
 export type TrackerList200DataItem = {
   /** @minLength 1 */
@@ -22,14 +22,14 @@ export type TrackerList200DataItem = {
   ownerRole: TrackerList200DataItemOwnerRole;
   overdue: TrackerList200DataItemOverdue;
   /**
-     * @minimum 0
-     * @maximum 9007199254740991
-     */
+   * @minimum 0
+   * @maximum 9007199254740991
+   */
   openExceptions: number;
   /**
-     * @nullable
-     * @pattern ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))$
-     */
+   * @nullable
+   * @pattern ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))$
+   */
   shipmentDate: string | null;
   /** @pattern ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))$ */
   orderDate: string;

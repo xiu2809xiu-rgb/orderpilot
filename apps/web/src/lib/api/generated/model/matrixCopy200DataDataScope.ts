@@ -6,11 +6,11 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type MatrixCopy200DataDataScope = typeof MatrixCopy200DataDataScope[keyof typeof MatrixCopy200DataDataScope];
-
+export type MatrixCopy200DataDataScope =
+  (typeof MatrixCopy200DataDataScope)[keyof typeof MatrixCopy200DataDataScope];
 
 export const MatrixCopy200DataDataScope = {
-  all: 'all',
-  brands: 'brands',
-  own: 'own',
+  all: "all",
+  brands: "brands",
+  own: "own",
 } as const;

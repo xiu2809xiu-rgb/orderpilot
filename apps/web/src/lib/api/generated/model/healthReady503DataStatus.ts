@@ -6,10 +6,10 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type HealthReady503DataStatus = typeof HealthReady503DataStatus[keyof typeof HealthReady503DataStatus];
-
+export type HealthReady503DataStatus =
+  (typeof HealthReady503DataStatus)[keyof typeof HealthReady503DataStatus];
 
 export const HealthReady503DataStatus = {
-  ok: 'ok',
-  unavailable: 'unavailable',
+  ok: "ok",
+  unavailable: "unavailable",
 } as const;

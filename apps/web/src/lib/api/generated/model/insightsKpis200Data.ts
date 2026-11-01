@@ -5,15 +5,15 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { InsightsKpis200DataMeasuresItem } from './insightsKpis200DataMeasuresItem.ts';
+import type { InsightsKpis200DataMeasuresItem } from "./insightsKpis200DataMeasuresItem.ts";
 
 export type InsightsKpis200Data = {
   labEstimate: true;
   /** @minLength 1 */
   note: string;
   /**
-     * @minItems 5
-     * @maxItems 5
-     */
+   * @minItems 5
+   * @maxItems 5
+   */
   measures: InsightsKpis200DataMeasuresItem[];
 };

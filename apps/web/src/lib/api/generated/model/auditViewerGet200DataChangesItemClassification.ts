@@ -6,12 +6,12 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type AuditViewerGet200DataChangesItemClassification = typeof AuditViewerGet200DataChangesItemClassification[keyof typeof AuditViewerGet200DataChangesItemClassification];
-
+export type AuditViewerGet200DataChangesItemClassification =
+  (typeof AuditViewerGet200DataChangesItemClassification)[keyof typeof AuditViewerGet200DataChangesItemClassification];
 
 export const AuditViewerGet200DataChangesItemClassification = {
-  public: 'public',
-  internal: 'internal',
-  confidential: 'confidential',
-  restricted: 'restricted',
+  public: "public",
+  internal: "internal",
+  confidential: "confidential",
+  restricted: "restricted",
 } as const;

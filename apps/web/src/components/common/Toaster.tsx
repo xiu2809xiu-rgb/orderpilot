@@ -1,6 +1,7 @@
 import { CircleAlert, CircleCheck, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { isTyping } from "@/app/shell/shortcuts";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast, useToastStore, type ToastItem } from "./toast";
@@ -8,11 +9,33 @@ import { toast, useToastStore, type ToastItem } from "./toast";
 const SHOW_MS = 6_000;
 const SHOW_WITH_UNDO_MS = 10_000;
 
+type Translate = ReturnType<typeof useTranslation>["t"];
+
+async function performUndo(item: ToastItem, t: Translate) {
+  if (!item.undo) return;
+  try {
+    await item.undo();
+    toast.done(t("toast.undone"));
+  } catch {
+    toast.failed(t("toast.undoFailed"));
+  }
+}
+
+/** Where focus goes when the button that held it leaves the page. */
+function restoreFocus(from: HTMLElement | null) {
+  const target =
+    from?.isConnected && from !== document.body
+      ? from
+      : document.getElementById("main");
+  target?.focus();
+}
+
 function ToastCard({ item }: { item: ToastItem }) {
   const { t } = useTranslation("components");
   const [held, setHeld] = useState(false);
   const [busy, setBusy] = useState(false);
   const card = useRef<HTMLDivElement>(null);
+  const before = useRef<HTMLElement | null>(null);
   const dismiss = useToastStore((state) => state.dismiss);
   const failed = item.kind === "error";
   const Icon = failed ? CircleAlert : CircleCheck;
@@ -21,7 +44,16 @@ function ToastCard({ item }: { item: ToastItem }) {
   useEffect(() => {
     const element = card.current;
     if (!element) return;
-    const hold = () => {
+    const hold = (event: Event) => {
+      // Remember where the person was, so closing the toast can send them back.
+      if (
+        event instanceof FocusEvent &&
+        event.relatedTarget instanceof HTMLElement
+      ) {
+        if (!element.contains(event.relatedTarget)) {
+          before.current = event.relatedTarget;
+        }
+      }
       setHeld(true);
     };
     const release = () => {
@@ -59,17 +91,16 @@ function ToastCard({ item }: { item: ToastItem }) {
     };
   }, [held, failed, item.id, item.undo, dismiss]);
 
+  function close() {
+    const hadFocus = card.current?.contains(document.activeElement) ?? false;
+    dismiss(item.id);
+    if (hadFocus) restoreFocus(before.current);
+  }
+
   async function undo() {
-    if (!item.undo) return;
     setBusy(true);
-    try {
-      await item.undo();
-      toast.done(t("toast.undone"));
-    } catch {
-      toast.failed(t("toast.undoFailed"));
-    } finally {
-      dismiss(item.id);
-    }
+    await performUndo(item, t);
+    close();
   }
 
   return (
@@ -86,6 +117,7 @@ function ToastCard({ item }: { item: ToastItem }) {
       />
       <div className="min-w-0 flex-1">
         <p className="font-medium">{item.message}</p>
+        {item.undo ? <p className="sr-only">{t("toast.undoHint")}</p> : null}
         {item.description ? (
           <p className="text-muted-foreground">{item.description}</p>
         ) : null}
@@ -94,8 +126,11 @@ function ToastCard({ item }: { item: ToastItem }) {
         <Button
           variant="ghost"
           size="sm"
-          disabled={busy}
-          onClick={() => void undo()}
+          aria-disabled={busy}
+          aria-keyshortcuts="Control+Z Meta+Z"
+          onClick={() => {
+            if (!busy) void undo();
+          }}
         >
           {t("toast.undo")}
         </Button>
@@ -105,9 +140,7 @@ function ToastCard({ item }: { item: ToastItem }) {
         size="icon"
         className="size-7"
         aria-label={t("toast.dismiss")}
-        onClick={() => {
-          dismiss(item.id);
-        }}
+        onClick={close}
       >
         <X className="size-4" aria-hidden="true" />
       </Button>
@@ -125,6 +158,30 @@ function ToastCard({ item }: { item: ToastItem }) {
 export function Toaster() {
   const { t } = useTranslation("components");
   const items = useToastStore((state) => state.items);
+
+  // Undo is out of tab order on a long page and the toast leaves in seconds,
+  // so Control or Command Z undoes the latest toast that offers it.
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.defaultPrevented || event.repeat) return;
+      if (!(event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey) {
+        return;
+      }
+      if (event.key.toLowerCase() !== "z" || isTyping(event.target)) return;
+      const latest = useToastStore
+        .getState()
+        .items.filter((item) => item.undo)
+        .at(-1);
+      if (!latest) return;
+      event.preventDefault();
+      useToastStore.getState().dismiss(latest.id);
+      void performUndo(latest, t);
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [t]);
   return (
     <section
       aria-label={t("toast.region")}

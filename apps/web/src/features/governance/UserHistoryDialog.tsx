@@ -34,7 +34,7 @@ export function UserHistoryDialog({
       <DialogTrigger asChild>
         <Button
           variant="ghost"
-          size="sm"
+          size="xs"
           aria-label={t("users.historyFor", { name })}
         >
           <History aria-hidden="true" />

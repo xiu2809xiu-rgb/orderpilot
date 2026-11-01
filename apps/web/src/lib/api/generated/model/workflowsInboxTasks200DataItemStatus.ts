@@ -6,11 +6,11 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type WorkflowsInboxTasks200DataItemStatus = typeof WorkflowsInboxTasks200DataItemStatus[keyof typeof WorkflowsInboxTasks200DataItemStatus];
-
+export type WorkflowsInboxTasks200DataItemStatus =
+  (typeof WorkflowsInboxTasks200DataItemStatus)[keyof typeof WorkflowsInboxTasks200DataItemStatus];
 
 export const WorkflowsInboxTasks200DataItemStatus = {
-  OPEN: 'OPEN',
-  DONE: 'DONE',
-  CANCELLED: 'CANCELLED',
+  OPEN: "OPEN",
+  DONE: "DONE",
+  CANCELLED: "CANCELLED",
 } as const;

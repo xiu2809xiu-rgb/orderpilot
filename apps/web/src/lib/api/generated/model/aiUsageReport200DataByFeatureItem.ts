@@ -10,9 +10,9 @@ export type AiUsageReport200DataByFeatureItem = {
   /** @minLength 1 */
   feature: string;
   /**
-     * @minimum 0
-     * @maximum 9007199254740991
-     */
+   * @minimum 0
+   * @maximum 9007199254740991
+   */
   calls: number;
   /** @pattern ^-?\d{1,15}(\.\d{1,4})?$ */
   costUsd: string;

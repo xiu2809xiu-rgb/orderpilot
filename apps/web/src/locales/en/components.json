@@ -52,6 +52,7 @@
     "region": "Messages",
     "undo": "Undo",
     "undone": "Undone",
+    "undoHint": "Press Control Z to undo.",
     "undoFailed": "Could not undo. Try again from the record.",
     "dismiss": "Close message"
   },

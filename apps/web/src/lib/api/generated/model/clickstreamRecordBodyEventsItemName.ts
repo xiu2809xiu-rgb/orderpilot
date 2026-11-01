@@ -6,11 +6,11 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type ClickstreamRecordBodyEventsItemName = typeof ClickstreamRecordBodyEventsItemName[keyof typeof ClickstreamRecordBodyEventsItemName];
-
+export type ClickstreamRecordBodyEventsItemName =
+  (typeof ClickstreamRecordBodyEventsItemName)[keyof typeof ClickstreamRecordBodyEventsItemName];
 
 export const ClickstreamRecordBodyEventsItemName = {
-  page_view: 'page_view',
-  action: 'action',
-  error_shown: 'error_shown',
+  page_view: "page_view",
+  action: "action",
+  error_shown: "error_shown",
 } as const;

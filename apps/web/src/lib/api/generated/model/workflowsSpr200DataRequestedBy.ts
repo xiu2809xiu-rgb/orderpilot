@@ -5,7 +5,7 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { WorkflowsSpr200DataRequestedByRole } from './workflowsSpr200DataRequestedByRole.ts';
+import type { WorkflowsSpr200DataRequestedByRole } from "./workflowsSpr200DataRequestedByRole.ts";
 
 export type WorkflowsSpr200DataRequestedBy = {
   /** @minLength 1 */

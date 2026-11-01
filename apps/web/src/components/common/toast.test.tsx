@@ -79,6 +79,49 @@ describe("toast", () => {
     expect(screen.queryByText("Disabled Synthetic Person")).toBeNull();
   });
 
+  it("undoes the latest toast from the keyboard, away from the toast", async () => {
+    render(
+      <>
+        <button type="button">Before</button>
+        <input aria-label="Field" />
+        <Toaster />
+      </>,
+    );
+    const undo = vi.fn();
+    act(() => {
+      toast.done("Disabled Synthetic Person", { undo });
+    });
+    // Typing in a field keeps the browser's own undo.
+    await userEvent.click(screen.getByRole("textbox", { name: "Field" }));
+    await userEvent.keyboard("{Control>}z{/Control}");
+    expect(undo).not.toHaveBeenCalled();
+    screen.getByRole("textbox", { name: "Field" }).blur();
+    await userEvent.keyboard("{Control>}z{/Control}");
+    expect(undo).toHaveBeenCalledTimes(1);
+    expect(await screen.findByText("Undone")).toBeInTheDocument();
+    expect(screen.queryByText("Disabled Synthetic Person")).toBeNull();
+  });
+
+  it("returns focus to where the person was when Undo is pressed", async () => {
+    render(
+      <>
+        <button type="button">Disable</button>
+        <main id="main" tabIndex={-1} />
+        <Toaster />
+      </>,
+    );
+    act(() => {
+      toast.done("Disabled", { undo: () => undefined });
+    });
+    const origin = screen.getByRole("button", { name: "Disable" });
+    origin.focus();
+    await userEvent.tab();
+    expect(screen.getByRole("button", { name: /Undo/ })).toHaveFocus();
+    await userEvent.keyboard("{Enter}");
+    await screen.findByText("Undone");
+    expect(origin).toHaveFocus();
+  });
+
   it("says so when Undo fails", async () => {
     render(<Toaster />);
     act(() => {

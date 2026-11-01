@@ -6,6 +6,7 @@ import { EmptyState, ErrorPanel, toast } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { formatMoney } from "@/lib/format";
 import { workflowsConfirmPayment } from "@/lib/api/generated/endpoints/workflows/workflows";
 import { formatAmount, formatDate } from "./format";
 
@@ -39,7 +40,7 @@ export function PaymentPanel({
       }),
     onSuccess: () =>
       toast.done(t("payment.toast.confirmed", { orderNo }), {
-        description: `${formatAmount(amount)} USD`,
+        description: formatMoney(amount),
       }),
     onError: () => toast.failed(t("payment.toast.failed")),
   });

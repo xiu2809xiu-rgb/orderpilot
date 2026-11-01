@@ -104,8 +104,9 @@ export function UsersTab() {
                     {canManage ? (
                       <Button
                         variant="outline"
-                        size="sm"
-                        disabled={change.isPending}
+                        size="xs"
+                        aria-disabled={change.isPending}
+                        className="aria-disabled:pointer-events-none aria-disabled:opacity-50"
                         aria-label={t(
                           user.disabled
                             ? "users.enableFor"
@@ -113,6 +114,8 @@ export function UsersTab() {
                           { name: user.displayName },
                         )}
                         onClick={() => {
+                          // aria-disabled, not disabled: a disabled button drops the keyboard's focus.
+                          if (change.isPending) return;
                           const disable = !user.disabled;
                           change.mutate(
                             { id: user.id, disable },

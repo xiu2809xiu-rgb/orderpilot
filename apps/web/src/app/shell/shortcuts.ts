@@ -22,14 +22,16 @@ export function isTyping(target: EventTarget | null): boolean {
   if (target instanceof HTMLInputElement) {
     return !TEXT_INPUT_TYPES.has(target.type);
   }
-  return target.getAttribute("role") === "textbox";
+  const role = target.getAttribute("role");
+  // A listbox, menu or select trigger takes letters for type-ahead.
+  return role === "textbox" || role === "combobox";
 }
 
-/** A dialog, sheet or the palette is open: the page behind it is not in play. */
+/** A dialog, sheet, menu, list or the palette is open: the page behind it is not in play. */
 export function dialogIsOpen(root: ParentNode = document): boolean {
   return (
     root.querySelector(
-      '[role="dialog"][data-state="open"], [role="alertdialog"][data-state="open"]',
+      '[role="dialog"][data-state="open"], [role="alertdialog"][data-state="open"], [role="menu"], [role="listbox"]',
     ) !== null
   );
 }
