@@ -11,6 +11,7 @@ import {
   Warehouse,
   type LucideIcon,
 } from "lucide-react";
+import { Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import { DemoBadge } from "@/components/common/DemoBadge";
 import { Button } from "@/components/ui/button";
@@ -50,13 +51,16 @@ export function DemoRoles({
           <h2 id={headingId} className="text-sm font-semibold">
             {t("login.demoTitle")}
           </h2>
-          <DemoBadge kind="synthetic" />
+          {/* Its words load on their own: without a local boundary the whole form side would suspend and drop focus. */}
+          <Suspense fallback={null}>
+            <DemoBadge kind="synthetic" />
+          </Suspense>
         </div>
         <p className="text-xs text-muted-foreground">{t("login.demoHint")}</p>
       </div>
       <ul
         aria-label={t("login.demoRolesLabel")}
-        className="grid grid-cols-2 gap-2 min-[480px]:grid-cols-3"
+        className="grid grid-cols-[repeat(auto-fit,minmax(9.5rem,1fr))] gap-2"
       >
         {roles.map(({ role, displayName }) => {
           const Icon = ICONS[role];
