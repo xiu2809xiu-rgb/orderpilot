@@ -116,8 +116,10 @@ describe("docker-compose.yml", () => {
     const images = [...compose.matchAll(/^\s+image: (\S+)$/gm)].map(
       (m) => m[1] ?? "",
     );
-    expect(images).toHaveLength(5);
-    for (const image of images)
+    // Our own images are built here, so only they may carry the tag "local".
+    const pulled = images.filter((image) => !image.endsWith(":local"));
+    expect(pulled).toHaveLength(5);
+    for (const image of pulled)
       expect(image, image).toMatch(/:v?\d[\w.-]*$|:RELEASE\.[\w.-]+$/);
     for (const [, port] of compose.matchAll(/^\s+- "([^"]+:\d+:\d+)"$/gm)) {
       expect(port, port).toMatch(/^127\.0\.0\.1:/);
@@ -125,7 +127,8 @@ describe("docker-compose.yml", () => {
   });
 
   it("has a health check for each service and a named volume for each store", () => {
-    expect(compose.match(/^\s+healthcheck:$/gm)).toHaveLength(5);
+    // The API, the web app and the mocks carry theirs in the image.
+    expect(compose.match(/^\s+healthcheck:$/gm)).toHaveLength(6);
     for (const volume of [
       "postgres-data",
       "redis-data",
