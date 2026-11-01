@@ -50,8 +50,10 @@ x-api-build: &api-build
   args:
     - GIT_SHA
 
-# Our own images run with no privileges they do not use, on a read-only file
-# system. /tmp is the one place they write.
+# The api, worker, web and mock containers run with no privileges they do not
+# use, on a read-only file system. /tmp is the one place they write. MinIO and
+# migrate drop their privileges too but keep a writable file system: MinIO for
+# its data, migrate for the Prisma CLI.
 x-hardened: &hardened
   restart: unless-stopped
   read_only: true
@@ -124,6 +126,10 @@ services:
       - "127.0.0.1:${MINIO_CONSOLE_PORT:-9001}:9001"
     volumes:
       - minio-data:/data
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     healthcheck:
       test:
         [
@@ -230,7 +236,9 @@ services:
   # Traces, metrics and logs in one container (ADR 0021): the OpenTelemetry
   # collector, Tempo, Prometheus, Loki and Grafana. Off unless asked for:
   #   docker compose --profile observability up -d otel-lgtm
-  # The API sends to it when OTEL_EXPORTER_OTLP_ENDPOINT is set. Grafana then
+  # Only an API started with `pnpm dev` sends to it, with OTEL_EXPORTER_OTLP_ENDPOINT
+  # set in the .env (its 127.0.0.1 address means nothing inside a container, so
+  # the containerised API does not export). Grafana then
   # opens at http://127.0.0.1:${GRAFANA_PORT} (user admin, password admin: a
   # laptop only, the port is bound to this machine).
   otel-lgtm:

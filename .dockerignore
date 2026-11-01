@@ -19,6 +19,16 @@
 **/.env.*
 !.env.example
 
+# Other files that hold a credential. The repository tracks none of them (pnpm's
+# settings are in pnpm-workspace.yaml), and a COPY of a whole folder would carry
+# a stray one into a layer.
+.npmrc
+**/.npmrc
+*.pem
+**/*.pem
+*.key
+**/*.key
+
 # Client samples never enter an image.
 samples
 **/samples

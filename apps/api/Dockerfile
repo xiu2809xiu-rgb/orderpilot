@@ -47,6 +47,10 @@ RUN --mount=type=cache,id=orderpilot-pnpm-store,target=/pnpm/store \
 # dependencies, and nothing else.
 FROM build AS deploy
 RUN pnpm --filter @orderpilot/api deploy --prod --legacy /out
+# @prisma/client lists the TypeScript compiler and the Prisma CLI as peers, so
+# pnpm installs both. The server runs neither (the migrate target has its own
+# CLI), and the compiler is the part of the image an intruder could use most.
+RUN rm -rf /out/node_modules/.pnpm/typescript@* /out/node_modules/.pnpm/prisma@*
 
 FROM node:24.22.0-alpine@sha256:44fce696f38ba8c987c4db89954051000bbd05ffd8d8659ba15ed4a8602e937f AS runtime
 ARG GIT_SHA=unknown
