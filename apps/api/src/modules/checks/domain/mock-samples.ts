@@ -51,13 +51,34 @@ const ON_CREDIT: Partial<Record<SampleScreenState, Partial<SampleStep>>> = {
   "sample-closed": { title: "Payment received" },
 };
 
+/**
+ * With a balance still to come, the payment that released packing was a
+ * deposit or a prepayment. Calling it "Payment confirmed" would contradict the
+ * order page, which still has the balance to confirm.
+ */
+function partPayment(percent: number): Partial<SampleStep> {
+  const word = percent === 30 ? "Deposit" : "Prepayment";
+  return {
+    title: `${word} confirmed`,
+    effect: `${word} confirmed: packing released, the warehouse can pick. A balance is still to come`,
+  };
+}
+
 export function mockTimeline(order: SampleOrder): TimelineStep[] {
   const current = SAMPLE_STEPS.findIndex(
     (entry) => entry.state === order.sampleScreenState,
   );
-  const credit = Number(order.header.prepaymentPercent) === 0;
+  const percent = Number(order.header.prepaymentPercent);
+  const credit = percent === 0;
+  const partPaid = percent > 0 && percent < 100;
   return SAMPLE_STEPS.slice(0, current + 1).map((step, index) => {
-    const entry = { ...step, ...(credit ? ON_CREDIT[step.state] : {}) };
+    const entry = {
+      ...step,
+      ...(credit ? ON_CREDIT[step.state] : {}),
+      ...(partPaid && step.state === "sample-ready-to-pick"
+        ? partPayment(percent)
+        : {}),
+    };
     return {
       id: `${order.header.no}-step-${String(index + 1)}`,
       at: stepTime(order, index),
