@@ -104,12 +104,16 @@ describe("the mock read model", () => {
       const spr = await model.sprByRecordNo(row.recordNo);
       const item = dataset.items.find((i) => i.no === row.itemNo);
       if (!spr || !item) throw new Error("missing");
+      // The basis is the stock when it was raised. Once the SPR is approved
+      // the item moves on (its order joins the figures), so only a request
+      // still waiting matches the item as it is now.
+      const figures = row.status === "approved" ? row.basis : item;
       expect(spr.basis).toEqual(
         SprSuggestion.fromShortfall({
           ordered: row.basis.ordered,
-          inventory: item.inventory,
-          qtyOnSalesOrder: item.qtyOnSalesOrder,
-          qtyOnPurchOrder: item.qtyOnPurchOrder,
+          inventory: figures.inventory,
+          qtyOnSalesOrder: figures.qtyOnSalesOrder,
+          qtyOnPurchOrder: figures.qtyOnPurchOrder,
         }),
       );
     }

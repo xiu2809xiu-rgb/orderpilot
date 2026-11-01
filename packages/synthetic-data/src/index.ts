@@ -13,6 +13,7 @@ export { availableStock } from "./stock.js";
 export {
   DOCUMENT_STATUSES,
   ITEM_CATEGORIES,
+  PURCHASE_ORDER_STATUSES,
   SAMPLE_SCREEN_STATES,
   SYNTHETIC_LABEL,
 } from "./types.js";
@@ -27,6 +28,8 @@ export type {
   OrderDocument,
   OrderOwners,
   Person,
+  PurchaseLine,
+  PurchaseOrder,
   SampleException,
   SampleOrder,
   SamplePayment,

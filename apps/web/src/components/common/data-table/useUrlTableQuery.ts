@@ -17,14 +17,19 @@ function readFilters(
 
 /**
  * A table's query with its filters in the address bar, so a link can open a
- * filtered list and a reload keeps it. Paging, sort and search stay in memory.
- * `keys` are the filters a URL may carry: anything else in it is left alone.
+ * filtered list and a reload keeps it. Paging and sort stay in memory. A link
+ * can also start the search with `?search=`, which goes from the address once
+ * the search changes, so a reload never brings back a search the person
+ * cleared. `keys` are the filters a URL may carry: anything else is left alone.
  */
 export function useUrlTableQuery(
   keys: readonly string[],
 ): [TableQuery, (next: TableQuery) => void] {
   const [params, setParams] = useSearchParams();
-  const [rest, setRest] = useState<TableQuery>(DEFAULT_QUERY);
+  const [rest, setRest] = useState<TableQuery>(() => ({
+    ...DEFAULT_QUERY,
+    search: params.get("search") ?? "",
+  }));
   const text = params.toString();
   const query = useMemo(
     () => ({ ...rest, filters: readFilters(new URLSearchParams(text), keys) }),
@@ -42,6 +47,7 @@ export function useUrlTableQuery(
             else if (typeof value === "string") out.set(key, value);
             else out.delete(key);
           }
+          if (next.search !== out.get("search")) out.delete("search");
           return out;
         },
         { replace: true },

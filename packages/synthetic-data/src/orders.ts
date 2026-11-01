@@ -325,8 +325,8 @@ export function makeOrders(inputs: OrderInputs): SampleOrder[] {
       stockShortfall: shortfall,
     };
   });
-  // The item page shows Qty. on Sales Order, so it must hold the open lines
-  // above, on top of the base figure for orders outside this sample.
+  // Qty. on Sales Order is the sum of these open lines. A short line joins it
+  // once its SPR is approved, when the purchase orders are made.
   for (const item of items) {
     const open = reserved.get(item.no);
     if (open)

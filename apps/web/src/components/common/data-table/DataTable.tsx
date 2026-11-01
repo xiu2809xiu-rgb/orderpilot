@@ -30,6 +30,11 @@ export interface DataTableProps<Row> {
   /** Called with the next query for every change. The page fetches and passes new `rows`. */
   onQueryChange: (query: TableQuery) => void;
   rowKey: (row: Row) => string;
+  /**
+   * Opens the record when a row is clicked. Keep a link in the first column
+   * as well: that is how a keyboard or a screen reader reaches the record.
+   */
+  onRowClick?: (row: Row) => void;
   status?: TableStatus;
   error?: unknown;
   onRetry?: () => void;
@@ -62,6 +67,7 @@ export function DataTable<Row>({
   query,
   onQueryChange,
   rowKey,
+  onRowClick,
   status = "ready",
   error,
   onRetry,
@@ -169,6 +175,7 @@ export function DataTable<Row>({
             rowKey={rowKey}
             status={status}
             pageSize={query.pageSize}
+            onRowClick={onRowClick}
             error={error}
             onRetry={onRetry}
             empty={empty}

@@ -4,6 +4,7 @@ import {
   compareDecimal,
   decimalStringSchema,
   documentRefSchema,
+  multiplyDecimal,
   parseRecordNumber,
   salesHeaderSchema,
   salesLineSchema,
@@ -336,11 +337,24 @@ describe("one story across the screens", () => {
     for (const spr of data.sprs) {
       const item = data.items.find((i) => i.no === spr.itemNo);
       if (!item) throw new Error("missing item");
-      // Inventory minus Qty. on Sales Order plus Qty. on Purch. Order.
+      // Inventory minus Qty. on Sales Order plus Qty. on Purch. Order, as they
+      // stood when it was raised. Until it is approved, that is the item now.
+      const { basis } = spr;
       const available = addDecimal(
-        addDecimal(item.inventory, `-${item.qtyOnSalesOrder}`),
-        item.qtyOnPurchOrder,
+        addDecimal(basis.inventory, `-${basis.qtyOnSalesOrder}`),
+        basis.qtyOnPurchOrder,
       );
+      if (spr.status !== "approved") {
+        expect([
+          basis.inventory,
+          basis.qtyOnSalesOrder,
+          basis.qtyOnPurchOrder,
+        ]).toEqual([
+          item.inventory,
+          item.qtyOnSalesOrder,
+          item.qtyOnPurchOrder,
+        ]);
+      }
       expect(spr.basis.availableStock).toBe(available);
       expect(addDecimal(spr.basis.ordered, `-${available}`)).toBe(spr.quantity);
       expect(spr.basis.shortfall).toBe(spr.quantity);
@@ -620,14 +634,148 @@ describe("looking fake", () => {
     ).toBe(true);
   });
 
-  it("holds the open order lines in each item's Qty. on Sales Order", () => {
+  // A short line is held out of Qty. on Sales Order only while its SPR waits.
+  const heldOut = (order: (typeof data.orders)[number], itemNo: string) =>
+    order.stockShortfall?.itemNo === itemNo &&
+    data.sprs.find((s) => s.orderNo === order.header.no)?.status !== "approved";
+
+  it("makes each item's Qty. on Sales Order exactly its open lines, apart from a short line under review", () => {
+    let held = 0;
     for (const item of data.items) {
-      const open = data.orders
-        .filter((o) => o.stockShortfall?.itemNo !== item.no)
-        .flatMap((o) => o.lines)
-        .filter((l) => l.no === item.no)
-        .reduce((sum, l) => sum + Number(l.qtyToShip), 0);
-      expect(Number(item.qtyOnSalesOrder)).toBeGreaterThanOrEqual(open);
+      const lines = data.orders.flatMap((o) =>
+        o.lines
+          .filter((l) => l.no === item.no && Number(l.qtyToShip) > 0)
+          .map((l) => ({
+            quantity: Number(l.qtyToShip),
+            out: heldOut(o, item.no),
+          })),
+      );
+      held += lines.filter((l) => l.out).length;
+      const counted = lines
+        .filter((l) => !l.out)
+        .reduce((sum, l) => sum + l.quantity, 0);
+      expect(Number(item.qtyOnSalesOrder), item.no).toBe(counted);
+    }
+    expect(held).toBeGreaterThan(10);
+  });
+
+  it("counts an approved SPR's short line as demand, so its item has nothing spare", () => {
+    const covered = data.orders.filter(
+      (o) =>
+        o.stockShortfall &&
+        !heldOut(o, o.stockShortfall.itemNo) &&
+        o.lines.some((l) => Number(l.qtyToShip) > 0),
+    );
+    expect(covered.length).toBeGreaterThan(5);
+    for (const order of covered) {
+      const item = data.items.find(
+        (i) => i.no === order.stockShortfall?.itemNo,
+      );
+      if (!item) throw new Error("missing item");
+      expect(Number(availableStock(item)), item.no).toBe(0);
+    }
+    for (const item of data.items) {
+      expect(
+        compareDecimal(availableStock(item), "0"),
+        item.no,
+      ).toBeGreaterThanOrEqual(0);
+    }
+  });
+
+  it("has the goods in hand, and none on an open purchase order, once the warehouse picks", () => {
+    const picking = SAMPLE_SCREEN_STATES.indexOf("sample-ready-to-pick");
+    const atPicking = data.orders.filter(
+      (o) =>
+        SAMPLE_SCREEN_STATES.indexOf(o.sampleScreenState) >= picking &&
+        o.lines.some((l) => Number(l.qtyToShip) > 0),
+    );
+    expect(atPicking.length).toBeGreaterThan(10);
+    const openPurchase = data.purchaseOrders.filter(
+      (po) => po.status === "open",
+    );
+    const needed = new Map<string, number>();
+    for (const order of atPicking) {
+      const spr = data.sprs.find((s) => s.orderNo === order.header.no);
+      expect(openPurchase.some((po) => po.no === spr?.navisionNo)).toBe(false);
+      for (const line of order.lines) {
+        needed.set(
+          line.no,
+          (needed.get(line.no) ?? 0) + Number(line.qtyToShip),
+        );
+        if (order.stockShortfall?.itemNo !== line.no) continue;
+        const onOrder = openPurchase.some((po) =>
+          po.lines.some((l) => l.no === line.no),
+        );
+        expect(onOrder, `${order.header.no} waits on a purchase order`).toBe(
+          false,
+        );
+      }
+    }
+    for (const [itemNo, quantity] of needed) {
+      const item = data.items.find((i) => i.no === itemNo);
+      expect(Number(item?.inventory), itemNo).toBeGreaterThanOrEqual(quantity);
+    }
+  });
+
+  it("has an order behind every approved SPR, with its item, quantity, cost and vendor", () => {
+    const approved = data.sprs.filter((s) => s.status === "approved");
+    expect(approved.length).toBeGreaterThan(5);
+    for (const spr of approved) {
+      const po = data.purchaseOrders.find((p) => p.no === spr.navisionNo);
+      const line = po?.lines[0];
+      expect(po?.sprRecordNo).toBe(spr.recordNo);
+      expect(po?.buyFromVendorNo).toBe(spr.vendorNo);
+      expect(po?.lines).toHaveLength(1);
+      expect(line?.no).toBe(spr.itemNo);
+      expect(line?.quantity).toBe(spr.quantity);
+      expect(line?.unitCost).toBe(spr.unitCost);
+      expect(po?.total).toBe(spr.amount);
+    }
+    expect(
+      data.purchaseOrders.filter((p) => p.sprRecordNo).map((p) => p.no),
+    ).toEqual(approved.map((s) => s.navisionNo));
+  });
+
+  it("adds each item's open purchase lines up to its Qty. on Purch. Order", () => {
+    for (const item of data.items) {
+      const open = data.purchaseOrders
+        .flatMap((po) => po.lines)
+        .filter((line) => line.no === item.no)
+        .reduce((sum, line) => sum + Number(line.outstandingQuantity), 0);
+      expect(open).toBe(Number(item.qtyOnPurchOrder));
+    }
+  });
+
+  it("gives purchase orders one number series, right totals and dates around today", () => {
+    const numbers = data.purchaseOrders.map((po) => po.no);
+    expect(new Set(numbers).size).toBe(numbers.length);
+    expect([...numbers].sort()).toEqual(numbers);
+    for (const po of data.purchaseOrders) {
+      expect(po.no).toMatch(/^PO-[0-9]{4}$/);
+      const vendorItems = data.items.filter(
+        (item) => item.vendorNo === po.buyFromVendorNo,
+      );
+      for (const line of po.lines) {
+        expect(vendorItems.map((item) => item.no)).toContain(line.no);
+        expect(multiplyDecimal(line.quantity, line.unitCost)).toBe(
+          line.lineAmount,
+        );
+      }
+      expect(
+        po.lines.reduce((s, l) => addDecimal(s, l.lineAmount), "0.00"),
+      ).toBe(po.total);
+      expect(po.orderDate <= AS_OF).toBe(true);
+      if (po.status === "open") {
+        expect(po.expectedReceiptDate > AS_OF).toBe(true);
+        continue;
+      }
+      expect(po.lines.every((l) => l.outstandingQuantity === "0")).toBe(true);
+      // Arrived after it was ordered and before the customer paid.
+      const spr = data.sprs.find((s) => s.navisionNo === po.no);
+      const paid = data.orders.find((o) => o.header.no === spr?.orderNo)
+        ?.milestones.paid;
+      expect(po.expectedReceiptDate >= po.orderDate).toBe(true);
+      expect(po.expectedReceiptDate <= (paid ?? "")).toBe(true);
     }
   });
 
