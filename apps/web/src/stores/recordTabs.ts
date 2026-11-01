@@ -51,6 +51,13 @@ function write(key: string | null, tabs: RecordTab[]) {
   }
 }
 
+/** Whether opening a record has something to say. A plain open that just worked is silent. */
+export function hasNews(result: OpenResult, background: boolean): boolean {
+  return (
+    background || result.outcome === "full" || result.outcome === "replaced"
+  );
+}
+
 interface RecordTabsState {
   /** The storage key of the person whose tabs these are, or null before sign-in. */
   owner: string | null;

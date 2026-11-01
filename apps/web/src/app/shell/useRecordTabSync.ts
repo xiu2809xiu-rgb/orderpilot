@@ -1,9 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
-import { useTranslation } from "react-i18next";
 import { useLocation, useMatches } from "react-router";
-import { toast } from "@/components/common";
 import { recordFromMatches, type RecordRef } from "@/lib/records";
-import { useRecordTabs } from "@/stores/recordTabs";
+import { hasNews, useRecordTabs } from "@/stores/recordTabs";
 import { useSessionStore } from "@/stores/session";
 
 /**
@@ -13,7 +11,6 @@ import { useSessionStore } from "@/stores/session";
  * reload. Returns the record on screen, if any.
  */
 export function useRecordTabSync(): RecordRef | null {
-  const { t } = useTranslation();
   const viewerId = useSessionStore((state) => state.session?.user.id ?? null);
   const matches = useMatches();
   const { search } = useLocation();
@@ -40,22 +37,12 @@ export function useRecordTabSync(): RecordRef | null {
     const result = useRecordTabs
       .getState()
       .open({ key, kind, no, listPath }, `${key}${search}`, key);
-    if (result.outcome === "full") {
-      toast.failed(t("recordTabs.full"), {
-        description: t("recordTabs.fullHint"),
-      });
-    } else if (result.outcome === "replaced") {
-      const { closed } = result;
-      toast.done(
-        t("recordTabs.madeRoom", {
-          name: t("recordTabs.name", {
-            kind: t(`recordTabs.kinds.${closed.kind}`),
-            no: closed.no,
-          }),
-        }),
+    if (hasNews(result, false)) {
+      void import("@/components/common/announceOpen").then((module) =>
+        module.announceOpen(result, false),
       );
     }
-  }, [key, kind, no, listPath, search, viewerId, t]);
+  }, [key, kind, no, listPath, search, viewerId]);
 
   return record;
 }

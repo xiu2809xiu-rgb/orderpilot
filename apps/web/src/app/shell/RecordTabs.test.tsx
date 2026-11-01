@@ -6,7 +6,15 @@ import {
   createMemoryRouter,
   type RouteObject,
 } from "react-router";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 import {
   DataTable,
   RecordLink,
@@ -14,6 +22,7 @@ import {
   type DataTableColumn,
 } from "@/components/common";
 import { DEFAULT_QUERY } from "@/components/common/data-table/types";
+import i18n from "@/i18n";
 import { resolveRecord, setRecordRoutes } from "@/lib/records";
 import {
   MAX_TABS,
@@ -144,6 +153,11 @@ function tabNames(): string[] {
     .map((link) => link.getAttribute("title") ?? "");
 }
 
+beforeAll(async () => {
+  // The words load with the first tab; have them ready so each test starts level.
+  await i18n.loadNamespaces("record-tabs");
+});
+
 let user: ReturnType<typeof userEvent.setup>;
 
 beforeEach(() => {
@@ -167,9 +181,11 @@ describe("record tabs", () => {
     const { router } = mount();
     await user.click(screen.getByRole("link", { name: "ITM-001" }));
     expect(router.state.location.pathname).toBe("/items/ITM-001");
-    const tab = within(must(strip())).getByRole("link", {
-      name: /ITM-001/,
+    // The strip loads with the first tab, so it may arrive a moment later.
+    const nav = await screen.findByRole("navigation", {
+      name: "Open records",
     });
+    const tab = within(nav).getByRole("link", { name: /ITM-001/ });
     expect(tab).toHaveAttribute("aria-current", "page");
     const crumbs = screen.getByRole("navigation", { name: /breadcrumb/i });
     expect(within(crumbs).getByText("ITM-001")).toHaveAttribute(

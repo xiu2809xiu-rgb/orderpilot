@@ -1,9 +1,7 @@
 import { useCallback, useMemo } from "react";
-import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router";
 import { resolveRecord } from "@/lib/records";
-import { useRecordTabs, type OpenResult } from "@/stores/recordTabs";
-import { toast } from "./toast";
+import { hasNews, useRecordTabs } from "@/stores/recordTabs";
 
 /** How a person asked to open something. */
 export type OpenGesture = "plain" | "background" | "browser";
@@ -41,7 +39,6 @@ export function useOpenRecord(): (
   to: string,
   gesture: OpenGesture,
 ) => OpenNext {
-  const { t } = useTranslation();
   // Not useMatches: a link also renders under a plain MemoryRouter in tests.
   const { pathname } = useLocation();
   const onScreen = useMemo(() => resolveRecord(pathname)?.key, [pathname]);
@@ -51,42 +48,18 @@ export function useOpenRecord(): (
       if (gesture === "browser") return "default";
       const record = resolveRecord(to);
       if (!record) return "default";
-      const name = t("recordTabs.name", {
-        kind: t(`recordTabs.kinds.${record.kind}`),
-        no: record.no,
-      });
       const background = gesture === "background";
-      const result: OpenResult = useRecordTabs
+      const result = useRecordTabs
         .getState()
         .open(record, to, background ? onScreen : undefined);
-
-      if (result.outcome === "full") {
-        toast.failed(t("recordTabs.full"), {
-          description: t("recordTabs.fullHint"),
-        });
-        return "stay";
-      }
-      const madeRoom =
-        result.outcome === "replaced"
-          ? t("recordTabs.madeRoom", {
-              name: t("recordTabs.name", {
-                kind: t(`recordTabs.kinds.${result.closed.kind}`),
-                no: result.closed.no,
-              }),
-            })
-          : undefined;
-      if (background) {
-        toast.done(
-          result.outcome === "existing"
-            ? t("recordTabs.alreadyOpen", { name })
-            : t("recordTabs.openedInBackground", { name }),
-          madeRoom ? { description: madeRoom } : {},
+      if (hasNews(result, background)) {
+        // Loaded on first use: the words and the toast are not needed to open a tab.
+        void import("./announceOpen").then((module) =>
+          module.announceOpen(result, background),
         );
-        return "stay";
       }
-      if (madeRoom) toast.done(madeRoom);
-      return "go";
+      return background || result.outcome === "full" ? "stay" : "go";
     },
-    [t, onScreen],
+    [onScreen],
   );
 }

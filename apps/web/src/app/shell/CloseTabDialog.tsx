@@ -22,7 +22,7 @@ interface CloseTabDialogProps {
  * gives way to it once P-47 registers forms with `useMarkRecordDirty`.
  */
 export function CloseTabDialog({ name, onKeep, onClose }: CloseTabDialogProps) {
-  const { t } = useTranslation();
+  const { t } = useTranslation("record-tabs");
   return (
     <Dialog
       open={name !== null}
@@ -38,16 +38,14 @@ export function CloseTabDialog({ name, onKeep, onClose }: CloseTabDialogProps) {
         }}
       >
         <DialogHeader>
-          <DialogTitle>{t("recordTabs.confirm.title", { name })}</DialogTitle>
-          <DialogDescription>
-            {t("recordTabs.confirm.description")}
-          </DialogDescription>
+          <DialogTitle>{t("confirm.title", { name })}</DialogTitle>
+          <DialogDescription>{t("confirm.description")}</DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button variant="outline" onClick={onKeep}>
-            {t("recordTabs.confirm.keep")}
+            {t("confirm.keep")}
           </Button>
-          <Button onClick={onClose}>{t("recordTabs.confirm.close")}</Button>
+          <Button onClick={onClose}>{t("confirm.close")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

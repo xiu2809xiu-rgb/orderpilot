@@ -1,152 +1,21 @@
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
-import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router";
-import { useRecordTabs, type RecordTab as Tab } from "@/stores/recordTabs";
-import { CloseTabDialog } from "./CloseTabDialog";
-import { RECORD_TABS_HINT_ID, RecordTab } from "./RecordTab";
+import { Suspense, lazy } from "react";
+import { useRecordTabs } from "@/stores/recordTabs";
 import { useRecordTabSync } from "./useRecordTabSync";
 
-/** Where the focus goes when the last tab closes: the page itself. */
-const MAIN = "#main";
-
-const MOVES: Record<string, (index: number, count: number) => number> = {
-  ArrowRight: (index) => index + 1,
-  ArrowLeft: (index) => index - 1,
-  Home: () => 0,
-  End: (_, count) => count - 1,
-};
+// The strip's markup, icons and dialog stay out of the first download.
+const RecordTabStrip = lazy(() => import("./RecordTabStrip"));
 
 /**
- * The strip of open records under the top bar. It takes no space until a
- * record is open. One Tab stop: the arrow keys move along it and Delete
- * closes the focused tab.
+ * Keeps the open records in step with the page, and shows the strip under the
+ * top bar once there is one. With no tab open it renders nothing at all.
  */
 export function RecordTabs() {
-  const { t } = useTranslation();
-  const navigate = useNavigate();
   const record = useRecordTabSync();
-  const tabs = useRecordTabs((state) => state.tabs);
-  const closeTab = useRecordTabs((state) => state.close);
-  const [focused, setFocused] = useState<string | null>(null);
-  const [confirming, setConfirming] = useState<Tab | null>(null);
-  const links = useRef(new Map<string, HTMLAnchorElement>());
-  // A close removes the focused element, so the next render puts the focus somewhere real.
-  const pendingFocus = useRef<string | null>(null);
-  const activeKey = record?.key;
-
-  useEffect(() => {
-    const target = pendingFocus.current;
-    if (target === null) return;
-    pendingFocus.current = null;
-    const element =
-      target === MAIN
-        ? document.getElementById("main")
-        : links.current.get(target);
-    element?.focus();
-  });
-
-  useEffect(() => {
-    if (!activeKey) return;
-    // "nearest" scrolls only when the tab is out of view, and never smoothly.
-    links.current
-      .get(activeKey)
-      ?.scrollIntoView({ block: "nearest", inline: "nearest" });
-  }, [activeKey, tabs.length]);
-
-  if (tabs.length === 0) return null;
-
-  const rovingKey = tabs.some((tab) => tab.key === focused)
-    ? focused
-    : tabs.some((tab) => tab.key === activeKey)
-      ? activeKey
-      : tabs[0]?.key;
-
-  function finishClose(tab: Tab) {
-    const index = tabs.findIndex((each) => each.key === tab.key);
-    const next = tabs[index - 1] ?? tabs[index + 1] ?? null;
-    closeTab(tab.key);
-    setConfirming(null);
-    pendingFocus.current = next?.key ?? MAIN;
-    if (tab.key === activeKey) void navigate(next ? next.to : tab.listPath);
-  }
-
-  function requestClose(tab: Tab) {
-    if (tab.dirty) setConfirming(tab);
-    else finishClose(tab);
-  }
-
-  function onKeyDown(event: KeyboardEvent<HTMLAnchorElement>, index: number) {
-    const tab = tabs[index];
-    if (!tab) return;
-    if (event.key === "Delete" || event.key === "Backspace") {
-      event.preventDefault();
-      requestClose(tab);
-      return;
-    }
-    const move = MOVES[event.key];
-    if (!move) return;
-    event.preventDefault();
-    const count = tabs.length;
-    const target = tabs[(move(index, count) + count) % count];
-    if (target) links.current.get(target.key)?.focus();
-  }
-
+  const open = useRecordTabs((state) => state.tabs.length > 0);
+  if (!open) return null;
   return (
-    <nav
-      aria-label={t("recordTabs.label")}
-      className="shrink-0 border-b bg-background"
-    >
-      <p id={RECORD_TABS_HINT_ID} className="sr-only">
-        {t("recordTabs.hint")}
-      </p>
-      <ul
-        className="flex items-center gap-1 overflow-x-auto px-s2 py-1 [scrollbar-width:thin]"
-        onWheel={(event) => {
-          // A mouse wheel has no sideways motion: turn it into one here.
-          if (event.deltaX === 0)
-            event.currentTarget.scrollLeft += event.deltaY;
-        }}
-      >
-        {tabs.map((tab, index) => (
-          <li key={tab.key} className="shrink-0">
-            <RecordTab
-              tab={tab}
-              active={tab.key === activeKey}
-              focusable={tab.key === rovingKey}
-              linkRef={(element) => {
-                if (element) links.current.set(tab.key, element);
-                else links.current.delete(tab.key);
-              }}
-              onKeyDown={(event) => {
-                onKeyDown(event, index);
-              }}
-              onFocus={() => {
-                setFocused(tab.key);
-              }}
-              onClose={() => {
-                requestClose(tab);
-              }}
-            />
-          </li>
-        ))}
-      </ul>
-      <CloseTabDialog
-        name={
-          confirming
-            ? t("recordTabs.name", {
-                kind: t(`recordTabs.kinds.${confirming.kind}`),
-                no: confirming.no,
-              })
-            : null
-        }
-        onKeep={() => {
-          if (confirming) pendingFocus.current = confirming.key;
-          setConfirming(null);
-        }}
-        onClose={() => {
-          if (confirming) finishClose(confirming);
-        }}
-      />
-    </nav>
+    <Suspense fallback={<div className="h-10 shrink-0 border-b" aria-hidden />}>
+      <RecordTabStrip activeKey={record?.key} />
+    </Suspense>
   );
 }

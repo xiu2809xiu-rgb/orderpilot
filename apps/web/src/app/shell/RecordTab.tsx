@@ -29,10 +29,10 @@ export function RecordTab({
   onFocus,
   onClose,
 }: RecordTabProps) {
-  const { t } = useTranslation();
+  const { t } = useTranslation("record-tabs");
   const Icon = RECORD_KIND_ICONS[tab.kind];
-  const name = t("recordTabs.name", {
-    kind: t(`recordTabs.kinds.${tab.kind}`),
+  const name = t("name", {
+    kind: t(`kinds.${tab.kind}`),
     no: tab.no,
   });
 
@@ -67,7 +67,7 @@ export function RecordTab({
         className="flex h-full items-center gap-1.5 rounded-md pr-1 pl-2 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
       >
         <Icon className="size-3.5 shrink-0" aria-hidden="true" />
-        <span className="sr-only">{t(`recordTabs.kinds.${tab.kind}`)} </span>
+        <span className="sr-only">{t(`kinds.${tab.kind}`)} </span>
         <span
           className={cn(
             "font-mono whitespace-nowrap tabular-nums",
@@ -82,7 +82,7 @@ export function RecordTab({
               className="size-1.5 shrink-0 rounded-full bg-primary"
               aria-hidden="true"
             />
-            <span className="sr-only">, {t("recordTabs.unsaved")}</span>
+            <span className="sr-only">, {t("unsaved")}</span>
           </>
         ) : null}
       </Link>
@@ -90,7 +90,7 @@ export function RecordTab({
       <button
         type="button"
         tabIndex={-1}
-        aria-label={t("recordTabs.close", { name })}
+        aria-label={t("close", { name })}
         onClick={onClose}
         className="mr-0.5 grid size-6 shrink-0 place-items-center rounded-sm text-muted-foreground hover:bg-background hover:text-foreground pointer-coarse:size-11"
       >
