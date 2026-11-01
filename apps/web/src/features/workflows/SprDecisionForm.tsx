@@ -2,7 +2,7 @@ import type { SprDetail } from "@orderpilot/shared";
 import { useMutation } from "@tanstack/react-query";
 import { useState, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
-import { ErrorPanel } from "@/components/common";
+import { ErrorPanel, toast } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -34,6 +34,15 @@ export function SprDecisionForm({
       outcome === "approved"
         ? workflowsApprove(spr.ref.recordNo, { comment })
         : workflowsReject(spr.ref.recordNo, { comment }),
+    // The base only echoes the decision. Undo arrives with the mock overlay.
+    onSuccess: (_result, outcome) =>
+      toast.done(
+        t("spr.toast.done", {
+          outcome: t(`spr.outcomes.${outcome}`),
+          ref: spr.ref.recordNo,
+        }),
+      ),
+    onError: () => toast.failed(t("spr.toast.failed")),
   });
 
   if (spr.decision) {

@@ -5,8 +5,10 @@ import {
   OperationLog,
   PageHeader,
   SectionCard,
+  toast,
 } from "@/components/common";
 import { GALLERY_NOW } from "./galleryData";
+import { GalleryFeedback } from "./GalleryFeedback";
 import { GalleryPieces } from "./GalleryPieces";
 import { GalleryTable } from "./GalleryTable";
 
@@ -45,6 +47,10 @@ export function GalleryPage() {
         title={t("title")}
         description={t("description")}
         meta={<DemoBadge kind="synthetic" />}
+        primaryAction={{
+          label: t("primaryAction.label"),
+          onRun: () => toast.done(t("primaryAction.done")),
+        }}
       />
       <SectionCard
         title={t("sections.table")}
@@ -53,6 +59,7 @@ export function GalleryPage() {
         <GalleryTable />
       </SectionCard>
       <GalleryPieces />
+      <GalleryFeedback />
       <OperationLog
         rows={rows}
         demo

@@ -51,6 +51,7 @@
       "title": "Checks",
       "description": "Sample results. Each says what was expected, what was found and the tolerance it used.",
       "empty": "No checks have run on this order yet.",
+      "emptyHint": "Checks run when the order is read from Navision. They appear here once they have.",
       "expected": "Expected",
       "found": "Found",
       "tolerance": "Tolerance",

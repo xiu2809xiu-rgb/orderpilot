@@ -1272,7 +1272,7 @@
       "priority": "must",
       "estimate": 5,
       "reqs": ["M4"],
-      "branch": "feat/product-pass-bar",
+      "branch": "feat/platform-the-bar",
       "sprints": [1, 2],
       "dependsOn": ["P-12"],
       "summary": "The efficiency and density rules every list and detail page meets. Prompt 003; finished before the handover on Monday evening, 2 Nov.",
@@ -1283,6 +1283,28 @@
         "\"/\" focuses search, and \"N\" starts a new record on lists that have one.",
         "Every action ends with a toast, with Undo where it can be undone.",
         "Check: screenshots as every role it touches, at 1440 by 900 and 390 by 844 in `docs/design/screenshots/product-pass/`, looked at before merging: no \"Planned\", no tiles showing only a dash, no popups over content, no empty-looking lists, no text cut off."
+      ]
+    },
+    {
+      "key": "P-41",
+      "title": "Finish the bar on every list and detail page",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "should",
+      "estimate": 3,
+      "reqs": ["M4"],
+      "sprints": [3],
+      "dependsOn": ["P-40"],
+      "summary": "What P-40 left out so the product pass could close: the pieces every screen inherits but each page still has to adopt.",
+      "acceptance": [
+        "Every list that has a primary action declares it through `PageHeader`, and its title shows the total.",
+        "Undo on the SPR decision and on payment confirmation, once the mock overlay records them (the toast already ends each action).",
+        "Each feature registers its quick actions (Upload PO, New order, Raise SPR) with `registerAction`, and each role's home page reads them with `actionsForRole`.",
+        "The role matrix and the other plain tables keep their first column in view on a phone, as the common table does.",
+        "A setting to turn the `/` and `N` keys off for people who use a screen reader or their own keys.",
+        "Plain tables built on `ui/table` meet the 36 to 40 px row height too (the Users table is compact now; the others are not measured).",
+        "Copy role can be undone, once the API keeps a snapshot of the target role's rows.",
+        "The home-tile part of the Check in P-40 (no tile showing only a dash, no \"Planned\" badge) is met by P-33, not by P-40."
       ]
     },
     {

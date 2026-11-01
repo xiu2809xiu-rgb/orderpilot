@@ -27,24 +27,38 @@ interface EmptyStateProps {
   description?: string;
   /** The next step, such as a button to create the first record. Always give one. */
   action?: ReactNode;
+  /** When there is no other next step, a Reload button that asks again. */
+  onRetry?: () => void;
 }
 
-/** Nothing to show yet, and what to do about it. */
+/**
+ * Nothing to show yet, and what to do about it. A compact strip, never a big
+ * empty card. It always names a next step: your `action`, or your words, or
+ * a plain line saying records appear here as they are added.
+ */
 export function EmptyState({
   icon,
   title,
   description,
   action,
+  onRetry,
 }: EmptyStateProps) {
   const { t } = useTranslation("components");
+  const next =
+    action ??
+    (onRetry ? (
+      <Button variant="outline" onClick={onRetry}>
+        {t("states.reload")}
+      </Button>
+    ) : null);
   return (
     <StatePanel
       variant="inline"
       icon={icon ?? Inbox}
       title={title ?? t("states.emptyTitle")}
-      description={description}
+      description={description ?? (next ? undefined : t("states.emptyNext"))}
     >
-      {action}
+      {next}
     </StatePanel>
   );
 }

@@ -1,10 +1,13 @@
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { cn } from "@/lib/utils";
 import { EmptyState, ErrorPanel, PermissionDenied } from "../states";
-import type { DataTableColumn } from "./types";
+import { usePrimaryActionStore } from "../primaryAction";
+import { cellClass } from "./cells";
+import { alignsEnd, type DataTableColumn } from "./types";
 
 export type TableStatus = "ready" | "loading" | "error" | "forbidden";
 
@@ -51,16 +54,29 @@ export function DataTableBody<Row>({
 }: DataTableBodyProps<Row>) {
   const { t } = useTranslation("components");
   const span = Math.max(1, columns.length);
+  // An empty list offers its page's primary action ("New order") as the next step.
+  const primary = usePrimaryActionStore((state) => state.current);
+  const PrimaryIcon = primary?.icon ?? Plus;
+  const primaryButton =
+    primary && !primary.disabled ? (
+      <Button onClick={primary.run}>
+        <PrimaryIcon aria-hidden="true" />
+        {primary.label}
+      </Button>
+    ) : undefined;
 
   if (status === "loading") {
     return (
       <TableBody>
         {Array.from({ length: Math.min(pageSize, 8) }, (_, index) => (
-          <TableRow key={index} className="hover:bg-transparent">
-            {columns.map((column) => (
-              <TableCell key={column.id}>
+          <TableRow key={index} className="group/row hover:bg-transparent">
+            {columns.map((column, position) => (
+              <TableCell
+                key={column.id}
+                className={cellClass(column, position === 0)}
+              >
                 <Skeleton
-                  className="h-5 w-3/4 animate-none"
+                  className={`h-5 animate-none ${alignsEnd(column) ? "ml-auto w-16" : "w-3/4"}`}
                   aria-hidden="true"
                 />
               </TableCell>
@@ -107,7 +123,7 @@ export function DataTableBody<Row>({
               }
             />
           ) : (
-            <EmptyState {...empty} />
+            <EmptyState {...empty} action={empty?.action ?? primaryButton} />
           )}
         </StateRow>
       </TableBody>
@@ -116,12 +132,12 @@ export function DataTableBody<Row>({
   return (
     <TableBody>
       {rows.map((row) => (
-        <TableRow key={rowKey(row)}>
-          {columns.map((column) => (
+        <TableRow key={rowKey(row)} className="group/row hover:bg-muted">
+          {columns.map((column, position) => (
             <TableCell
               key={column.id}
-              className={cn(column.align === "end" && "text-right")}
-              data-numeric={column.align === "end" ? "" : undefined}
+              className={cellClass(column, position === 0)}
+              data-numeric={alignsEnd(column) ? "" : undefined}
             >
               {column.cell(row)}
             </TableCell>

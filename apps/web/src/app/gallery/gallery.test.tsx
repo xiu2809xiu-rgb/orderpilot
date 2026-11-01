@@ -43,6 +43,14 @@ describe("the component gallery route", () => {
     expect(screen.getByRole("table", { name: "Orders" })).toBeVisible();
   });
 
+  it("runs its one primary action from the N key", async () => {
+    const user = userEvent.setup();
+    renderApp("/gallery", { session: sessionFor("AUDITOR") });
+    await screen.findByRole("heading", { level: 1, name: "Component gallery" });
+    await user.keyboard("n");
+    expect(await screen.findByText(/The primary action ran/)).toBeVisible();
+  });
+
   it("does not exist for a real session in a production build", async () => {
     vi.stubEnv("DEV", false);
     renderApp("/gallery", {

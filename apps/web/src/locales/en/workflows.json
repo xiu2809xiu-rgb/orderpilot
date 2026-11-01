@@ -113,6 +113,10 @@
     "crumb": "Order"
   },
   "payment": {
+    "toast": {
+      "confirmed": "Payment confirmed for order {{orderNo}}",
+      "failed": "The payment was not confirmed"
+    },
     "heading": "Payment",
     "description": "The prepayment asked for and what Finance has confirmed.",
     "prepaymentPercent": "Prepayment asked for",
@@ -182,6 +186,10 @@
     "noSubstitute": "None",
     "decisionHeading": "Your decision",
     "decisionDone": "Decided: {{outcome}} by {{name}} on {{date}}",
+    "toast": {
+      "done": "{{ref}} {{outcome}}",
+      "failed": "The decision was not saved"
+    },
     "outcomes": {
       "approved": "Approved",
       "rejected": "Rejected"

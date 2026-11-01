@@ -1,4 +1,5 @@
-import { Home, LogOut, Moon, Settings, Sun } from "lucide-react";
+import { Home, Settings } from "lucide-react";
+import { useLayoutEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import {
@@ -10,8 +11,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { featureNamespaces, featuresFor } from "@/features/nav";
-import { logout } from "@/lib/api/auth";
-import { useThemeStore, type ThemePreference } from "@/lib/theme";
+import { actionsFor, type AppAction } from "@/lib/actions";
 import { useSessionStore } from "@/stores/session";
 
 interface CommandPaletteProps {
@@ -19,26 +19,66 @@ interface CommandPaletteProps {
   onOpenChange: (open: boolean) => void;
 }
 
-/** The command palette. AppShell opens it with Control K or Command K. */
+function Key({ children }: { children: string }) {
+  return (
+    <kbd className="rounded border bg-muted px-1.5 font-mono text-xs">
+      {children}
+    </kbd>
+  );
+}
+
+/** What the keyboard can do, always visible under the list. */
+function ShortcutHelp() {
+  const { t } = useTranslation("common");
+  return (
+    <ul
+      aria-label={t("palette.helpLabel")}
+      className="flex flex-wrap gap-x-s3 gap-y-1 border-t px-s2 py-s1 text-xs text-muted-foreground"
+    >
+      <li className="flex items-center gap-1.5">
+        <Key>{"/"}</Key> {t("palette.helpSearch")}
+      </li>
+      <li className="flex items-center gap-1.5">
+        <Key>{"N"}</Key> {t("palette.helpNew")}
+      </li>
+      <li className="flex items-center gap-1.5">
+        <Key>{t("palette.keys")}</Key> {t("palette.helpPalette")}
+      </li>
+    </ul>
+  );
+}
+
+/**
+ * The command palette. AppShell opens it with Control K or Command K. It runs
+ * actions (registered with `registerAction`, filtered by the session's
+ * permissions) above the list of places to go.
+ */
 export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
-  const { t } = useTranslation(["common", ...featureNamespaces]);
+  const { t } = useTranslation(["common", "components", ...featureNamespaces]);
   const navigate = useNavigate();
   const session = useSessionStore((state) => state.session);
-  const setPreference = useThemeStore((state) => state.setPreference);
+  const opener = useRef<HTMLElement | null>(null);
+
+  // Radix returns focus to a trigger, and the palette has none: remember who
+  // had focus before it opened and give it back on close.
+  useLayoutEffect(() => {
+    if (open && document.activeElement instanceof HTMLElement) {
+      opener.current = document.activeElement;
+    }
+  }, [open]);
 
   function go(path: string) {
     onOpenChange(false);
     void navigate(path);
   }
 
-  function chooseTheme(preference: ThemePreference) {
+  function run(action: AppAction) {
     onOpenChange(false);
-    setPreference(preference);
-  }
-
-  function signOut() {
-    onOpenChange(false);
-    void logout().then(() => navigate("/login"));
+    void action.run({
+      navigate: (to) => {
+        void navigate(to);
+      },
+    });
   }
 
   return (
@@ -47,10 +87,38 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
       onOpenChange={onOpenChange}
       title={t("palette.title")}
       description={t("palette.description")}
+      onCloseAutoFocus={(event) => {
+        event.preventDefault();
+        const target = opener.current?.isConnected
+          ? opener.current
+          : document.getElementById("main");
+        target?.focus();
+      }}
     >
       <CommandInput placeholder={t("palette.placeholder")} />
       <CommandList>
         <CommandEmpty>{t("palette.empty")}</CommandEmpty>
+        <CommandGroup heading={t("palette.actions")}>
+          {actionsFor(session).map((action) => {
+            const label = t(action.label, {
+              ns: action.namespace ?? "common",
+              defaultValue: action.label,
+            });
+            return (
+              <CommandItem
+                key={action.id}
+                value={label}
+                keywords={[...(action.keywords ?? [])]}
+                onSelect={() => {
+                  run(action);
+                }}
+              >
+                <action.icon aria-hidden="true" />
+                {label}
+              </CommandItem>
+            );
+          })}
+        </CommandGroup>
         <CommandGroup heading={t("palette.goTo")}>
           <CommandItem
             onSelect={() => {
@@ -80,29 +148,8 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             {t("nav.settings")}
           </CommandItem>
         </CommandGroup>
-        <CommandGroup heading={t("palette.actions")}>
-          <CommandItem
-            onSelect={() => {
-              chooseTheme("light");
-            }}
-          >
-            <Sun aria-hidden="true" />
-            {t("theme.light")}
-          </CommandItem>
-          <CommandItem
-            onSelect={() => {
-              chooseTheme("dark");
-            }}
-          >
-            <Moon aria-hidden="true" />
-            {t("theme.dark")}
-          </CommandItem>
-          <CommandItem onSelect={signOut}>
-            <LogOut aria-hidden="true" />
-            {t("userMenu.signOut")}
-          </CommandItem>
-        </CommandGroup>
       </CommandList>
+      <ShortcutHelp />
     </CommandDialog>
   );
 }

@@ -2,12 +2,15 @@ import { ArrowDown, ArrowUp, ChevronsUpDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { TableHead } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import type { DataTableColumn, TableSort } from "./types";
+import { headClass } from "./cells";
+import { alignsEnd, type DataTableColumn, type TableSort } from "./types";
 
 interface SortHeaderProps<Row> {
   column: DataTableColumn<Row>;
   sort: TableSort | null;
   onSort: (columnId: string) => void;
+  /** The first column stays in view when the table scrolls sideways. */
+  first?: boolean;
 }
 
 /**
@@ -19,6 +22,7 @@ export function SortHeader<Row>({
   column,
   sort,
   onSort,
+  first = false,
 }: SortHeaderProps<Row>) {
   const { t } = useTranslation("components");
   const active = sort?.columnId === column.id ? sort.direction : null;
@@ -36,7 +40,7 @@ export function SortHeader<Row>({
     <TableHead
       scope="col"
       aria-sort={ariaSort}
-      className={cn(column.align === "end" && "text-right")}
+      className={headClass(column, first)}
     >
       {column.sortable ? (
         <button
@@ -47,7 +51,7 @@ export function SortHeader<Row>({
           title={t("table.sortBy", { column: column.header })}
           className={cn(
             "-mx-1 inline-flex items-center gap-1 rounded-sm px-1 py-0.5 font-medium hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none",
-            column.align === "end" && "flex-row-reverse",
+            alignsEnd(column) && "flex-row-reverse",
           )}
         >
           {column.header}

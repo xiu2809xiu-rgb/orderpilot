@@ -88,6 +88,7 @@ export function MaskingTab() {
             icon={EyeOff}
             title={t("masking.emptyTitle")}
             description={t("masking.emptyDescription")}
+            onRetry={() => void sample.refetch()}
           />
         ) : (
           <Table aria-label={t("masking.recordsLabel")}>

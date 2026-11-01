@@ -62,6 +62,7 @@ export function AiTab() {
           <EmptyState
             title={t("ai.emptyTitle")}
             description={t("ai.emptyDescription")}
+            onRetry={() => void rules.refetch()}
           />
         ) : (
           <Table aria-label={t("ai.rulesLabel")}>

@@ -1,11 +1,12 @@
 import { Suspense, lazy, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet } from "react-router";
-import { Skeleton } from "@/components/ui/skeleton";
+import { ListPageSkeleton, Toaster } from "@/components/common";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { featureNamespaces } from "@/features/nav";
 import { apiClient } from "@/lib/api/instance";
 import { useSessionStore } from "@/stores/session";
+import { useGlobalShortcuts } from "./shortcuts";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
 
@@ -56,6 +57,7 @@ export function AppShell() {
   const [paletteUsed, setPaletteUsed] = useState(false);
   const [dock, setDock] = useState<HTMLElement | null>(null);
   useScheduledRefresh();
+  useGlobalShortcuts();
   usePaletteShortcut(() => {
     setPaletteUsed(true);
     setPaletteOpen((open) => !open);
@@ -79,7 +81,7 @@ export function AppShell() {
             tabIndex={-1}
             className="min-h-0 flex-1 overflow-y-auto p-s3 outline-none"
           >
-            <Suspense fallback={<PageSkeleton />}>
+            <Suspense fallback={<ListPageSkeleton />}>
               <Outlet />
             </Suspense>
           </main>
@@ -95,19 +97,10 @@ export function AppShell() {
           <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
         </Suspense>
       ) : null}
+      <Toaster />
       <Suspense fallback={null}>
         <AnalyticsRoot dock={dock} />
       </Suspense>
     </TooltipProvider>
-  );
-}
-
-function PageSkeleton() {
-  return (
-    <div className="space-y-s2" aria-hidden="true">
-      <Skeleton className="h-8 w-48" />
-      <Skeleton className="h-4 w-96 max-w-full" />
-      <Skeleton className="h-40 w-full max-w-2xl" />
-    </div>
   );
 }

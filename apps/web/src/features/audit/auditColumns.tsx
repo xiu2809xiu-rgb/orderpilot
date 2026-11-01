@@ -20,7 +20,7 @@ export function useAuditColumns(onOpen: (id: string) => void) {
         id: "sequence",
         header: t("table.sequence"),
         hideable: false,
-        align: "end",
+        kind: "number",
         cell: (row) => <span data-numeric>{row.sequence}</span>,
         exportValue: (row) => row.sequence,
       },
@@ -33,14 +33,14 @@ export function useAuditColumns(onOpen: (id: string) => void) {
         id: "actor",
         header: t("table.actor"),
         cell: (row) => (
-          <div>
-            <div>{row.actorName}</div>
+          <span>
+            {row.actorName}
             {row.actorRole ? (
-              <div className="text-xs text-muted-foreground">
+              <span className="ml-2 text-xs text-muted-foreground">
                 {tc(`roles.${row.actorRole}`)}
-              </div>
+              </span>
             ) : null}
-          </div>
+          </span>
         ),
       },
       {

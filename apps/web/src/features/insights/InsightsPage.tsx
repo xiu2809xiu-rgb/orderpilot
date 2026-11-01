@@ -54,6 +54,7 @@ export default function InsightsPage() {
           icon={ChartColumn}
           title={t("kpi.emptyTitle")}
           description={t("kpi.emptyDescription")}
+          onRetry={() => void kpis.refetch()}
         />
       ) : (
         <>
