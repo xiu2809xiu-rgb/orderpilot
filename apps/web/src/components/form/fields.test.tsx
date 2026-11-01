@@ -116,6 +116,57 @@ describe("the kit's fields", () => {
     expect(await axeViolations(document.body)).toEqual([]);
   });
 
+  it("invalid: every kind of field wires its error to itself", async () => {
+    const user = userEvent.setup();
+    renderInRouter(<KitForm />);
+    await user.type(
+      await screen.findByRole("textbox", { name: LABELS.remarks }),
+      "Far too long a remark",
+    );
+    await user.click(screen.getByRole("button", { name: "Save" }));
+    await screen.findByText("Enter a whole number.");
+    const wired: [HTMLElement, string][] = [
+      [box(LABELS.customerPo), "Enter the customer's PO number."],
+      [box(LABELS.quantity), "Enter a whole number."],
+      [box(LABELS.price), "Enter an amount such as 12.50."],
+      [screen.getByLabelText(/^Ship by/), "Enter the ship-by date."],
+      [
+        screen.getByRole("combobox", { name: LABELS.terms }),
+        "Choose the payment terms.",
+      ],
+      [
+        screen.getByRole("combobox", { name: LABELS.customer }),
+        "Choose a customer from the list.",
+      ],
+      [box(LABELS.remarks), "Keep remarks to 10 characters."],
+    ];
+    for (const [control, message] of wired) {
+      expect(control).toHaveAttribute("aria-invalid", "true");
+      expect(control).toHaveAccessibleDescription(
+        expect.stringContaining(message),
+      );
+    }
+    expect(await axeViolations(document.body)).toEqual([]);
+  });
+
+  it("read-only: numbers, amounts and dates are not editable either", async () => {
+    const user = userEvent.setup();
+    renderInRouter(<KitForm readOnly defaults={VALID} />);
+    await screen.findByRole("textbox", { name: LABELS.customerPo });
+    for (const control of [
+      box(LABELS.quantity),
+      box(LABELS.price),
+      screen.getByLabelText(/^Ship by/),
+    ]) {
+      expect(control).toHaveAttribute("readonly");
+      await user.type(control, "9");
+    }
+    expect(box(LABELS.quantity)).toHaveValue("12");
+    expect(box(LABELS.price)).toHaveValue("18.40");
+    expect(screen.getByLabelText(/^Ship by/)).toHaveValue("2026-11-20");
+    expect(await axeViolations(document.body)).toEqual([]);
+  });
+
   it("disabled: nothing can be changed", async () => {
     renderInRouter(<KitForm disabled />);
     await screen.findByRole("textbox", { name: LABELS.customerPo });
