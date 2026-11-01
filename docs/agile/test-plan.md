@@ -36,7 +36,7 @@ How OrderPilot is tested: the levels, the environments, the data, and the failur
 ## 3. Test data
 
 - **Synthetic only,** labelled "Synthetic demo data": fictional customers in the brief's countries, vendors, items from fictional brands, opening stock and orders in different states (`packages/synthetic-data`, Today (P-9), grown by P-19).
-- **Documents with planted mistakes** and their ground truth, for the extraction accuracy target and the mismatch checks (`packages/synthetic-documents`, planned: P-21).
+- **Documents with planted mistakes** and their ground truth, for the extraction accuracy target and the mismatch checks (`packages/synthetic-documents`: the first twelve files are there today (P-52), the full set is planned: P-21).
 - **Obviously fake bank details,** no national ID numbers, and prices in USD.
 - **Fixed seeds,** so a failing test fails the same way twice.
 - **No Spectra document** in a test, a fixture or a prompt. A client sample is tried only in `samples/`, which Git ignores, on one machine.

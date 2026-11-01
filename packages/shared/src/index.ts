@@ -2,6 +2,7 @@ export * from "./audit.js";
 export * from "./audit-viewer/index.js";
 export * from "./auth-routes.js";
 export * from "./checks.js";
+export * from "./confidence.js";
 export * from "./envelope.js";
 export * from "./errors.js";
 export * from "./events.js";

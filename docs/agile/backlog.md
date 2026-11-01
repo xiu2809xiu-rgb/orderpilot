@@ -630,7 +630,7 @@ Acceptance criteria:
 
 ### P-21: Synthetic documents
 
-Generated PDFs with planted mistakes and ground truth, for the demo and the accuracy harness.
+The rest of the generated set, with planted mistakes and ground truth for the accuracy harness. P-52 brought the package, four layouts, the CLI and twelve files forward.
 
 - **Area:** `area: 1 document AI and integration`
 - **Priority:** must
@@ -638,15 +638,15 @@ Generated PDFs with planted mistakes and ground truth, for the demo and the accu
 - **Requirements:** M2 GRS by design, M4 best practices
 - **Branch:** `feat/area1-synthetic-documents`
 - **Planned for:** Sprint 02 (W3)
-- **Depends on:** P-19
+- **Depends on:** P-19, P-52
 
 Acceptance criteria:
 
-- `packages/synthetic-documents` generates PDFs from the synthetic master data: POs in at least four customer layouts; PIs, invoices, packing lists and AWB/BL; scanned-looking variants (rotated and noisy).
-- Planted mistakes: quantity, price, PO reference, part number and changed bank details.
-- Ground truth: a JSON file for every document, for the accuracy harness.
-- Delivery: a CLI (`pnpm docs:generate`), with a set copied to `apps/web/public/demo-documents/` for demo uploads, not a folder called `samples`.
-- Prompt 003 brings forward 12 synthetic documents in `apps/web/public/demo-documents/` (P-37); this story keeps the generator, the four layouts, the planted mistakes, the ground-truth files and the CLI.
+- More document kinds in the same renderer, with positions and ground truth: the vendor PI, AWB and bill of lading, import permit and payment advice. P-52 has the PO, PI, packing list and commercial invoice.
+- Scanned-looking variants of more than one document, and long orders that flow onto further pages (a layout today refuses an order that does not fit one page).
+- Planted mistakes: price, PO reference, part number and changed bank details. The quantity mismatch is P-52's packing list.
+- Ground truth: a JSON file for every generated document, for the accuracy harness. P-52 writes them for its twelve.
+- Delivery: P-52's `pnpm docs:generate` grows to the full set. The twelve demo files stay in `apps/web/public/demo-documents/`, not a folder called `samples`.
 
 ### P-22: The design system with the Pro kits
 
