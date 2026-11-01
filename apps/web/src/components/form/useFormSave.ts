@@ -1,6 +1,7 @@
 import type { FieldValues, UseFormReturn } from "react-hook-form";
 import { applyServerError } from "./serverErrors";
 import type { DraftControl } from "./useDraft";
+import { isSameViewer, useMountViewer } from "./useViewerChanged";
 
 interface FormSaveOptions<O, R> {
   /** Sends the checked values. A throw lands on the form through `applyServerError`. */
@@ -19,7 +20,10 @@ export function useFormSave<T extends FieldValues, O = T, R = unknown>(
   form: UseFormReturn<T, unknown, O>,
   { onSave, onSaved, draft }: FormSaveOptions<O, R>,
 ): () => Promise<void> {
+  const mountViewer = useMountViewer();
   return form.handleSubmit(async (values) => {
+    // Someone else signed in over this form: these are not their values to send.
+    if (!isSameViewer(mountViewer)) return;
     let result: R;
     try {
       result = await onSave(values);

@@ -7,6 +7,7 @@ import {
 } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { useViewerChanged } from "./useViewerChanged";
 
 interface SaveButtonProps<T extends FieldValues, O> {
   form: UseFormReturn<T, unknown, O>;
@@ -33,7 +34,10 @@ export function SaveButton<T extends FieldValues, O = T>({
   const { t } = useTranslation("form");
   const { isDirty, isSubmitting } = useFormState({ control: form.control });
   const reasonId = useId();
-  const reason = blockedReason ?? (isDirty ? undefined : t("save.noChanges"));
+  const otherViewer = useViewerChanged();
+  const reason = otherViewer
+    ? t("viewer.saveBlocked")
+    : (blockedReason ?? (isDirty ? undefined : t("save.noChanges")));
   const blocked = reason !== undefined || isSubmitting;
   return (
     <>

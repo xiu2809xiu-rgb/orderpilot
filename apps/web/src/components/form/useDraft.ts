@@ -68,10 +68,14 @@ export function useDraft<T extends FieldValues, O = T>(
     write?.();
   }, [cancel]);
 
+  // A ref, so a list written inline in the caller does not restart the effect.
+  useLayoutEffect(() => {
+    excluded.current = exclude;
+  });
+
   // One effect on purpose. On a new key the old subscription must stop before
   // the form is reset, or the reset would be written under the old key.
   useLayoutEffect(() => {
-    excluded.current = exclude;
     if (seenKey.current !== storageKey) {
       // Another person or another record: what is on screen is not theirs.
       seenKey.current = storageKey;
@@ -124,7 +128,7 @@ export function useDraft<T extends FieldValues, O = T>(
       unsubscribe();
       flush();
     };
-  }, [storageKey, viewerId, form, version, debounceMs, exclude, cancel, flush]);
+  }, [storageKey, viewerId, form, version, debounceMs, cancel, flush]);
 
   const clear = useCallback(() => {
     cancel();

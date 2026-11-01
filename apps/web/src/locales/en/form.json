@@ -24,11 +24,19 @@
     "placeholder": "Search by number or name",
     "searching": "Searching...",
     "noResults": "No records match \"{{query}}\".",
-    "typeToSearch": "No records to show yet.",
+    "typeToSearch": "Type a number or a name to search.",
     "failed": "The search did not work.",
-    "retry": "Try again"
+    "retry": "Try again",
+    "results_one": "{{count}} record found.",
+    "results_other": "{{count}} records found."
   },
   "errors": {
     "session": "Not saved: your session ended. Sign in, then save again."
+  },
+  "viewer": {
+    "title": "This form was opened by someone else",
+    "description": "Another person signed in while it was open, so its values are not shown. Reload the page to work on it as yourself. Their unsaved changes stay with them.",
+    "reload": "Reload the page",
+    "saveBlocked": "Reload the page to save as yourself."
   }
 }

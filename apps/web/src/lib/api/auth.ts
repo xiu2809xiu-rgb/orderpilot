@@ -5,6 +5,7 @@ import {
   type Role,
   type Session,
 } from "@orderpilot/shared";
+import { removeDraftsOf } from "@/lib/draft-store";
 import { useSessionStore } from "@/stores/session";
 import { apiClient } from "./instance";
 
@@ -30,6 +31,10 @@ export async function logout(): Promise<void> {
   try {
     await apiClient.call(authRoutes.logout);
   } finally {
+    // An explicit sign-out: the person is done, so their drafts go too. An
+    // expired session never comes through here, and its drafts stay.
+    const viewerId = useSessionStore.getState().session?.user.id;
+    if (viewerId !== undefined) removeDraftsOf(viewerId);
     apiClient.markSessionEnded();
     useSessionStore.getState().setAnonymous();
   }

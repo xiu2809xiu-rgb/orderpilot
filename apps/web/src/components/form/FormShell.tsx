@@ -4,8 +4,10 @@ import { Form } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
 import { DraftNotice } from "./DraftNotice";
 import { FormErrorSummary } from "./FormErrorSummary";
+import { OtherViewerNotice } from "./OtherViewerNotice";
 import { UnsavedChangesDialog } from "./UnsavedChangesDialog";
 import type { DraftControl } from "./useDraft";
+import { useViewerChanged } from "./useViewerChanged";
 
 interface FormShellProps<T extends FieldValues, O> extends Omit<
   ComponentProps<"form">,
@@ -24,7 +26,8 @@ interface FormShellProps<T extends FieldValues, O> extends Omit<
 /**
  * The frame of every form: the form-level error, the draft notice, the fields,
  * and the prompt before leaving. Nothing here submits: `SaveButton` and Ctrl+S
- * do, so Enter in a single-line field can never save by accident.
+ * do, so Enter in a single-line field can never save by accident. Once someone
+ * else signs in over it, the fields give way to a notice.
  */
 export function FormShell<T extends FieldValues, O = T>({
   form,
@@ -34,6 +37,7 @@ export function FormShell<T extends FieldValues, O = T>({
   children,
   ...props
 }: FormShellProps<T, O>) {
+  const otherViewer = useViewerChanged();
   return (
     <Form {...form}>
       <form
@@ -44,9 +48,15 @@ export function FormShell<T extends FieldValues, O = T>({
         }}
         {...props}
       >
-        <FormErrorSummary />
-        {draft ? <DraftNotice draft={draft} /> : null}
-        {children}
+        {otherViewer ? (
+          <OtherViewerNotice />
+        ) : (
+          <>
+            <FormErrorSummary />
+            {draft ? <DraftNotice draft={draft} /> : null}
+            {children}
+          </>
+        )}
       </form>
       {leaveGuard ? (
         <UnsavedChangesDialog form={form} draftKept={draft !== undefined} />
