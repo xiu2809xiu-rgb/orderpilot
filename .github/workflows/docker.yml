@@ -36,10 +36,6 @@ jobs:
     runs-on: ubuntu-24.04
     # MinIO compiles from source in a few minutes on a cold cache.
     timeout-minutes: 30
-    permissions:
-      contents: read
-      # The GitHub Actions cache that keeps MinIO's layers between runs.
-      actions: write
     env:
       GIT_SHA: ${{ github.sha }}
     steps:
@@ -54,8 +50,9 @@ jobs:
       # Every image the compose file builds, from the compose file itself, so
       # the CI build and `docker compose up --build` cannot drift apart. The
       # worker is the API image with another command, so it is not built twice.
-      # Only MinIO is cached: it is the slow one, and its compiled layer is
-      # small. The Node images reinstall from the lockfile each run.
+      # Only MinIO is cached, in the GitHub Actions cache it shares with the
+      # verify job: it is the slow one, and its compiled layer is small. The
+      # Node images reinstall from the lockfile each run.
       - name: Build every image
         uses: docker/bake-action@59cb1203cd42bcefd40a1b6d73b589e48c86040e # v7.5.0
         with:
