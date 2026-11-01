@@ -5,7 +5,7 @@ import {
   type Role,
   type Session,
 } from "@orderpilot/shared";
-import { removeDraftsOf } from "@/lib/draft-store";
+import { removeDraftsOf } from "@/lib/draft-keys";
 import { useSessionStore } from "@/stores/session";
 import { apiClient } from "./instance";
 

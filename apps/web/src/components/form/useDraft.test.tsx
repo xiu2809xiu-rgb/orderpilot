@@ -165,6 +165,77 @@ describe("drafts", () => {
     expect(stored(id)).toBeNull();
   });
 
+  it("survive clearing a filled lookup and typing in another field", async () => {
+    const {
+      user: { id },
+    } = signInAs("SUPPORT");
+    const first = renderInRouter(<KitForm defaults={VALID} />);
+    const user = await typeAndWaitForDraft(id, LABELS.customerPo, "-NEW");
+    // Typing in a lookup empties it, which is a null where the record had a customer.
+    await user.type(
+      screen.getByRole("combobox", { name: LABELS.customer }),
+      "x",
+    );
+    await waitFor(() => {
+      expect(stored(id)).toMatchObject({ values: { customer: null } });
+    });
+    first.unmount();
+
+    renderInRouter(<KitForm defaults={VALID} />);
+    expect(
+      await screen.findByRole("textbox", { name: LABELS.customerPo }),
+    ).toHaveValue("CPO-7731-NEW");
+    expect(stored(id)).not.toBeNull();
+  });
+
+  it("drop the drafts of anyone who has not come back in a week", async () => {
+    const {
+      user: { id },
+    } = signInAs("SUPPORT");
+    const old = new Date(Date.now() - DRAFT_MAX_AGE_MS - 60_000).toISOString();
+    const theirs = draftKey(sessionFor("FINANCE").user.id, "other.form");
+    localStorage.setItem(
+      theirs,
+      JSON.stringify({ version: 1, savedAt: old, values: { a: "b" } }),
+    );
+    renderInRouter(<KitForm />);
+    await screen.findByRole("textbox", { name: LABELS.customerPo });
+    expect(localStorage.getItem(theirs)).toBeNull();
+    expect(stored(id)).toBeNull();
+  });
+
+  it("tell the leave prompt the truth about what stays", async () => {
+    const {
+      user: { id },
+    } = signInAs("SUPPORT");
+    const { router } = renderInRouter(<KitForm />, <h1>Elsewhere</h1>);
+    const user = userEvent.setup();
+    await user.type(
+      await screen.findByRole("textbox", { name: LABELS.creditLimit }),
+      "9000",
+    );
+    await act(async () => {
+      await router.navigate("/elsewhere");
+    });
+    // The credit limit is left out of drafts, so nothing of it would come back.
+    expect(await screen.findByText(/will be lost/i)).toBeVisible();
+    expect(stored(id)).toBeNull();
+  });
+
+  it("tell the leave prompt a draft will stay when it will", async () => {
+    signInAs("SUPPORT");
+    const { router } = renderInRouter(<KitForm />, <h1>Elsewhere</h1>);
+    const user = userEvent.setup();
+    await user.type(
+      await screen.findByRole("textbox", { name: LABELS.customerPo }),
+      "CPO-9",
+    );
+    await act(async () => {
+      await router.navigate("/elsewhere");
+    });
+    expect(await screen.findByText(/stay as a draft/i)).toBeVisible();
+  });
+
   it("keep a prototype key in storage away from the form", () => {
     const planted: unknown = JSON.parse('{"__proto__": {"polluted": true}}');
     expect(fitsShape(kitDefaults(), planted)).toBe(false);

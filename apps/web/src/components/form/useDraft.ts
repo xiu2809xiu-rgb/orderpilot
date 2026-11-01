@@ -5,6 +5,7 @@ import {
   readDraft,
   removeDraft,
   removeStaleDrafts,
+  storageWorks,
   writeDraft,
 } from "@/lib/draft-store";
 import { useSessionStore } from "@/stores/session";
@@ -20,6 +21,12 @@ export interface DraftOptions {
   /** Raise it when the form's fields change, so older drafts are dropped. */
   version?: number;
   debounceMs?: number;
+  /**
+   * The field that identifies a row of a list, such as a line number. A
+   * restored row gets its left-out fields back only from the row with the same
+   * one: a deleted line must never hand its neighbour its price.
+   */
+  rowKey?: string;
 }
 
 export interface DraftControl {
@@ -29,6 +36,12 @@ export interface DraftControl {
   discard: () => void;
   /** Drops the draft and leaves the form alone: call it after a save. */
   clear: () => void;
+  /**
+   * True when leaving now loses nothing: the draft can be written, and it would
+   * bring back every change. False when storage is blocked or a changed field
+   * is one the draft leaves out.
+   */
+  keeps: () => boolean;
 }
 
 const NOTHING_LEFT_OUT: readonly string[] = [];
@@ -47,6 +60,7 @@ export function useDraft<T extends FieldValues, O = T>(
     exclude = NOTHING_LEFT_OUT,
     version = 1,
     debounceMs = 400,
+    rowKey = "id",
   }: DraftOptions = {},
 ): DraftControl {
   const viewerId = useSessionStore((state) => state.session?.user.id);
@@ -84,13 +98,13 @@ export function useDraft<T extends FieldValues, O = T>(
     }
     if (storageKey === null || viewerId === undefined) return;
 
-    removeStaleDrafts(viewerId);
+    removeStaleDrafts();
     const stored = readDraft(storageKey, version);
     const defaults: unknown = form.formState.defaultValues ?? {};
     if (stored && fitsShape(defaults, stored.values)) {
       // The shape was checked just above; a value in it is still the person's
       // own unfinished typing, which the schema checks at save.
-      form.reset(mergeDraft(defaults, stored.values) as T, {
+      form.reset(mergeDraft(defaults, stored.values, rowKey) as T, {
         keepDefaultValues: true,
       });
       setRestoredAt(stored.savedAt);
@@ -128,7 +142,7 @@ export function useDraft<T extends FieldValues, O = T>(
       unsubscribe();
       flush();
     };
-  }, [storageKey, viewerId, form, version, debounceMs, cancel, flush]);
+  }, [storageKey, viewerId, form, version, debounceMs, rowKey, cancel, flush]);
 
   const clear = useCallback(() => {
     cancel();
@@ -141,8 +155,19 @@ export function useDraft<T extends FieldValues, O = T>(
     form.reset();
   }, [clear, form]);
 
+  const keeps = useCallback(() => {
+    if (storageKey === null || !storageWorks()) return false;
+    const values: unknown = form.getValues();
+    const defaults: unknown = form.formState.defaultValues ?? {};
+    const kept = omitPaths(values, excluded.current);
+    return (
+      JSON.stringify(mergeDraft(defaults, kept, rowKey)) ===
+      JSON.stringify(values)
+    );
+  }, [storageKey, form, rowKey]);
+
   return useMemo(
-    () => ({ restoredAt, discard, clear }),
-    [restoredAt, discard, clear],
+    () => ({ restoredAt, discard, clear, keeps }),
+    [restoredAt, discard, clear, keeps],
   );
 }

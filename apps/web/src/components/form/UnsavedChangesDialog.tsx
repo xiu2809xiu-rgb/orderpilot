@@ -9,18 +9,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import type { DraftControl } from "./useDraft";
 import { useUnsavedChanges } from "./useUnsavedChanges";
 
 interface UnsavedChangesDialogProps<T extends FieldValues, O> {
   form: UseFormReturn<T, unknown, O>;
-  /** True when a draft holds the changes, so leaving does not lose them. */
-  draftKept: boolean;
+  /** The form's draft: when it can hold every change, leaving loses nothing. */
+  draft: DraftControl | undefined;
 }
 
 /** The one prompt before a route change takes unsaved changes away. */
 export function UnsavedChangesDialog<T extends FieldValues, O = T>({
   form,
-  draftKept,
+  draft,
 }: UnsavedChangesDialogProps<T, O>) {
   const { t } = useTranslation("form");
   const blocker = useUnsavedChanges(form);
@@ -35,7 +36,11 @@ export function UnsavedChangesDialog<T extends FieldValues, O = T>({
         <DialogHeader>
           <DialogTitle>{t("unsaved.title")}</DialogTitle>
           <DialogDescription>
-            {t(draftKept ? "unsaved.kept" : "unsaved.lost")}
+            {t(
+              blocker.state === "blocked" && draft?.keeps() === true
+                ? "unsaved.kept"
+                : "unsaved.lost",
+            )}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

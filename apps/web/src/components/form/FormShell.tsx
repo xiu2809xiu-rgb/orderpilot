@@ -58,9 +58,7 @@ export function FormShell<T extends FieldValues, O = T>({
           </>
         )}
       </form>
-      {leaveGuard ? (
-        <UnsavedChangesDialog form={form} draftKept={draft !== undefined} />
-      ) : null}
+      {leaveGuard ? <UnsavedChangesDialog form={form} draft={draft} /> : null}
     </Form>
   );
 }

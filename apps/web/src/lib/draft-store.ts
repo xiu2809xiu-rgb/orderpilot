@@ -1,6 +1,7 @@
 import { z } from "zod";
+import { DRAFT_PREFIX as PREFIX, keysOfAll } from "./draft-keys";
 
-const PREFIX = "op.draft";
+export { draftKey, removeDraftsOf } from "./draft-keys";
 
 /** A draft older than this is dropped: the record has likely moved on. */
 export const DRAFT_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
@@ -11,11 +12,6 @@ const draftSchema = z.object({
   values: z.record(z.string(), z.unknown()),
 });
 export type StoredDraft = z.infer<typeof draftSchema>;
-
-/** The viewer's id is in the key, so one person never reads another's draft. */
-export function draftKey(viewerId: string, key: string): string {
-  return `${PREFIX}.${viewerId}.${key}`;
-}
 
 function parse(raw: string | null): StoredDraft | null {
   if (raw === null) return null;
@@ -66,23 +62,24 @@ export function writeDraft(storageKey: string, draft: StoredDraft): void {
   }
 }
 
-function keysOf(viewerId: string): string[] {
+/** False in a private window or with blocked storage, where no draft can be kept. */
+export function storageWorks(): boolean {
   try {
-    const prefix = `${PREFIX}.${viewerId}.`;
-    return Object.keys(localStorage).filter((key) => key.startsWith(prefix));
+    const probe = `${PREFIX}.probe`;
+    localStorage.setItem(probe, "1");
+    localStorage.removeItem(probe);
+    return true;
   } catch {
-    return [];
+    return false;
   }
 }
 
-/** An explicit sign-out: the person is done, so nothing of theirs stays here. */
-export function removeDraftsOf(viewerId: string): void {
-  keysOf(viewerId).forEach(removeDraft);
-}
-
-/** Drafts of forms never opened again would otherwise stay for good. */
-export function removeStaleDrafts(viewerId: string, now = Date.now()): void {
-  for (const key of keysOf(viewerId)) {
+/**
+ * Drafts of forms never opened again would otherwise stay for good. It looks at
+ * everyone's, since a shared machine keeps the drafts of people who never came back.
+ */
+export function removeStaleDrafts(now = Date.now()): void {
+  for (const key of keysOfAll()) {
     let raw: string | null;
     try {
       raw = localStorage.getItem(key);
