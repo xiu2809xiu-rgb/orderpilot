@@ -7,6 +7,7 @@ import { Money } from "@/components/common";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { formatDay, formatMoney } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { CustomerName } from "./CustomerName";
 import { isOneClick } from "./useTaskAction";
 
 const LINK =
@@ -22,7 +23,11 @@ function amountOf(task: WorkflowTask, t: TFunction<"home">): ReactNode {
         <span className="whitespace-nowrap tabular-nums">
           {t("needs.partOf", {
             part: formatMoney(paying.amount, paying.currencyCode),
-            whole: formatMoney(task.amount, whole),
+            // The currency is said once when both figures share it: the cell is the widest one in the table.
+            whole:
+              whole === paying.currencyCode
+                ? formatMoney(task.amount, "").trim()
+                : formatMoney(task.amount, whole),
           })}
         </span>
       );
@@ -60,7 +65,7 @@ export function taskCells(
         {task.orderNo}
       </Link>
     ) : null,
-    customer: task.customerName,
+    customer: <CustomerName name={task.customerName} />,
     amount: amountOf(task, t),
     due: (
       <span

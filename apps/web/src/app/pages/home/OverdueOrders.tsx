@@ -5,6 +5,7 @@ import { Money, SectionCard } from "@/components/common";
 import { buttonVariants } from "@/components/ui/button";
 import { QueryBoundary } from "@/features/workflows/QueryBoundary";
 import { useTrackerList } from "@/lib/api/generated/endpoints/tracker/tracker";
+import { CustomerName } from "./CustomerName";
 import { HomeEmpty, HomeTable, ViewAll, type HomeColumn } from "./HomeTable";
 
 const ALL = "/order-tracker?overdue=true";
@@ -21,9 +22,9 @@ export function OverdueOrders() {
   const orders = (query.data?.data ?? []) as TrackerOrder[];
   const total = query.data?.meta.total ?? 0;
   const columns: HomeColumn[] = [
-    { id: "what", label: t("overdue.status") },
+    { id: "what", label: t("overdue.status"), single: true },
     { id: "order", label: t("needs.columns.order") },
-    { id: "customer", label: t("needs.columns.customer"), wrap: true },
+    { id: "customer", label: t("needs.columns.customer") },
     { id: "amount", label: t("needs.columns.amount"), end: true },
     { id: "late", label: t("needs.columns.late"), end: true },
     { id: "action", label: t("needs.columns.action"), action: true },
@@ -62,7 +63,7 @@ export function OverdueOrders() {
                     {order.orderNo}
                   </Link>
                 ),
-                customer: order.customerName,
+                customer: <CustomerName name={order.customerName} />,
                 amount: order.amount ? (
                   <Money value={order.amount} currency={order.currencyCode} />
                 ) : null,

@@ -1,9 +1,8 @@
 import { CircleCheck, type LucideIcon } from "lucide-react";
-import type { ReactNode } from "react";
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "react-router";
 import { ScrollRegion, StatePanel } from "@/components/common";
 import { buttonVariants } from "@/components/ui/button";
-import { useMediaQuery } from "@/lib/useMediaQuery";
 import { cn } from "@/lib/utils";
 
 export interface HomeColumn {
@@ -13,6 +12,8 @@ export interface HomeColumn {
   end?: boolean;
   /** Long text wraps instead of widening the table. */
   wrap?: boolean;
+  /** Never wraps, not even the first column. A row stays one line high, or the table gives way to stacked rows. */
+  single?: boolean;
   /** The row's one action. It stays in view when a wide table scrolls. */
   action?: boolean;
 }
@@ -23,16 +24,15 @@ export interface HomeRow {
   cells: Readonly<Record<string, ReactNode>>;
 }
 
-// Tailwind's md breakpoint, where the table gives way to stacked rows.
-const NARROW = "(max-width: 47.99rem)";
-
 const PINNED = "sticky z-[1] bg-card";
 
 function cellClass(column: HomeColumn, first: boolean): string {
   return cn(
     // A cell's height is its least height, so a row with no button keeps 36 px too.
-    "h-9 px-2 py-0.5 align-middle",
-    first || column.wrap ? "whitespace-normal" : "whitespace-nowrap",
+    "h-9 px-1.5 py-0.5 align-middle",
+    (first || column.wrap) && !column.single
+      ? "whitespace-normal"
+      : "whitespace-nowrap",
     first && `left-0 ${PINNED}`,
     column.wrap && "min-w-32",
     column.end && "text-right tabular-nums",
@@ -64,7 +64,7 @@ function RowTable({
                 key={column.id}
                 scope="col"
                 className={cn(
-                  "h-8 px-2 font-medium whitespace-nowrap",
+                  "h-8 px-1.5 font-medium whitespace-nowrap",
                   index === 0 && `left-0 ${PINNED}`,
                   column.end && "text-right",
                   column.action && `right-0 text-right ${PINNED}`,
@@ -145,14 +145,55 @@ function RowStack({
   );
 }
 
-/** A role's short list inside a card: a table, or stacked rows on a phone. */
+/**
+ * True while the card is too narrow for the whole table. The card is measured,
+ * not the screen: a sidebar, a laptop or a tablet on its side all change how much
+ * room a table has. The table's own width is kept while it is shown, so the
+ * stacked rows know how much room to wait for. A table that is cut off would hide the
+ * amount a person is about to confirm.
+ */
+function useStacked() {
+  const box = useRef<HTMLDivElement>(null);
+  const needed = useRef(0);
+  const [stacked, setStacked] = useState(false);
+  useLayoutEffect(() => {
+    const element = box.current;
+    if (!element) return;
+    const measure = () => {
+      const table = element.querySelector("table");
+      if (table) {
+        // The table stretches to its card, so its own width says nothing until
+        // it is let size itself.
+        table.style.width = "auto";
+        needed.current = table.offsetWidth;
+        table.style.width = "";
+      }
+      setStacked(element.clientWidth + 1 < needed.current);
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    const table = element.querySelector("table");
+    if (table) observer.observe(table);
+    return () => {
+      observer.disconnect();
+    };
+  }, [stacked]);
+  return { box, stacked };
+}
+
+/** A role's short list inside a card: a table where it fits, stacked rows where it does not. */
 export function HomeTable(props: {
   label: string;
   columns: readonly HomeColumn[];
   rows: readonly HomeRow[];
 }) {
-  const narrow = useMediaQuery(NARROW);
-  return narrow ? <RowStack {...props} /> : <RowTable {...props} />;
+  const { box, stacked } = useStacked();
+  return (
+    <div ref={box}>
+      {stacked ? <RowStack {...props} /> : <RowTable {...props} />}
+    </div>
+  );
 }
 
 /** "View all (24)", on the right of the card's title. */

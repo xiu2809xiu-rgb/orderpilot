@@ -18,9 +18,9 @@ export function TaskQueue({ touch }: { touch: boolean }) {
   const focus = useTaskFocus(query.data?.data);
   const action = useTaskAction({ onUndone: focus.followBack });
   const columns: HomeColumn[] = [
-    { id: "what", label: t("needs.columns.what") },
+    { id: "what", label: t("needs.columns.what"), single: true },
     { id: "order", label: t("needs.columns.order") },
-    { id: "customer", label: t("needs.columns.customer"), wrap: true },
+    { id: "customer", label: t("needs.columns.customer") },
     { id: "amount", label: t("needs.columns.amount"), end: true },
     { id: "due", label: t("needs.columns.due") },
     { id: "action", label: t("needs.columns.action"), action: true },
