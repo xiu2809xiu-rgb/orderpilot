@@ -223,6 +223,7 @@ Each row says whether it exists today or which story brings it. Everything marke
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
 | `apps/api`                     | The NestJS API, with a worker entry                                                                                                                                    | Today (P-8, P-13)                 |
 | `apps/web`                     | The web app                                                                                                                                                            | Built: P-11                       |
+| `services/mock-template`       | The template every mock service starts from, built by `docker/mock/Dockerfile`                                                                                         | Today (P-13)                      |
 | `services/mock-navision`       | The mock of Navision                                                                                                                                                   | Planned: P-19                     |
 | `packages/tsconfig`            | The strict TypeScript config                                                                                                                                           | Today                             |
 | `packages/eslint-config`       | The flat, type-aware ESLint config                                                                                                                                     | Today                             |
@@ -234,10 +235,11 @@ Each row says whether it exists today or which story brings it. Everything marke
 | `docs/`                        | All documentation: `adr/`, `agile/`, `ai/`, `client/`, `design-thinking/`, `grs/`, `research/`, `team/` and more                                                       | Today, growing                    |
 | `samples/`                     | Client samples tried on one machine. Git-ignored except its README. The ignore rule and the README exist                                                               | Today                             |
 | `assets-src/3d/`               | Parametric Blender scripts                                                                                                                                             | Planned: P-23                     |
+| `docker/`                      | The Dockerfiles that are not an app's own: MinIO built from source (`docker/minio`) and the mock services (`docker/mock`)                                              | Today (P-13)                      |
 | `infra/deploy/`                | The server bootstrap, Caddy, `docker-compose.prod.yml` and backups                                                                                                     | Planned: P-24                     |
 | `.github/`                     | Issue forms, the pull request template, `CODEOWNERS`, `labels.json`, `rulesets/main.json` and workflows                                                                | Today                             |
 
-Today's root files are `README.md`, `CONTRIBUTING.md`, `SECURITY.md`, `AGENTS.md`, `CLAUDE.md`, `.claude/settings.json`, `.editorconfig`, `.gitattributes`, `.gitignore` and `.node-version`.
+Today's root files are `README.md`, `CONTRIBUTING.md`, `SECURITY.md`, `AGENTS.md`, `CLAUDE.md`, `.claude/settings.json`, `.editorconfig`, `.gitattributes`, `.gitignore`, `.node-version`, `.dockerignore`, `.trivyignore`, `docker-compose.yml` and `docker-compose.samples.yml`.
 
 ## 4. Engineering standards
 

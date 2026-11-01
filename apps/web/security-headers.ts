@@ -1,5 +1,5 @@
-// The response headers the web image will send (nginx, P-13), served today by
-// `vite preview` so the production build is proved under the same policy.
+// The response headers the web image sends (nginx, P-13), and `vite preview`
+// serves them too, so the production build is proved under the same policy.
 // ADR 0015 says why styles may be inline and scripts may not.
 
 /**
