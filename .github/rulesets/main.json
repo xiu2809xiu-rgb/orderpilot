@@ -52,6 +52,12 @@
           },
           {
             "context": "Dependency scan (OSV)"
+          },
+          {
+            "context": "Docker images"
+          },
+          {
+            "context": "IaC and Dockerfile scan"
           }
         ]
       }

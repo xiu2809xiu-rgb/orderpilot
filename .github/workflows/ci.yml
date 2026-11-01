@@ -46,13 +46,14 @@ jobs:
 
       # The integration tests need PostgreSQL, Redis and MinIO. They run from the
       # same docker-compose.yml as on a laptop, so the versions cannot drift
-      # apart, with the safe defaults from .env.example. This only starts the
-      # build; "Wait for the local stack" below waits for it.
+      # apart, with the safe defaults from .env.example. Only the four stores:
+      # the app images are the "Docker images" job's (docker.yml). This only
+      # starts the build; "Wait for the local stack" below waits for it.
       - name: Start the local stack in the background
         run: |
           cp .env.example .env
           rm -f "$RUNNER_TEMP/stack.exit"
-          nohup sh -c 'docker compose up -d --build > "$RUNNER_TEMP/stack.log" 2>&1; echo $? > "$RUNNER_TEMP/stack.exit"' > /dev/null 2>&1 &
+          nohup sh -c 'docker compose up -d --build postgres redis minio mailpit > "$RUNNER_TEMP/stack.log" 2>&1; echo $? > "$RUNNER_TEMP/stack.exit"' > /dev/null 2>&1 &
 
       - name: Samples history check
         run: node scripts/check-samples.mjs --history
@@ -91,7 +92,7 @@ jobs:
             echo "The background start of the stack failed or timed out."
             exit 1
           fi
-          docker compose up -d --wait
+          docker compose up -d --wait postgres redis minio mailpit
           docker compose ps
 
       # Unit tests and the integration tests (real database, Redis and storage).
