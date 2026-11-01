@@ -720,6 +720,7 @@ Acceptance criteria:
 - A DAST job: an OWASP ZAP baseline scan of the live URL, weekly and on demand, with its report kept.
 - ADR: the deployment.
 - Decide where the live demo keeps documents: AWS S3 or a maintained S3 store instead of the source-built MinIO, which gets no upstream fixes. Only `S3_ENDPOINT`, the keys and the bucket change (ADR 0011).
+- Trivy scans the images pushed to GHCR and uploads its reports to code scanning as SARIF, so findings show in the Security tab and not only in the job log (left out of P-13).
 
 ### P-25: Slides as code
 

@@ -54,6 +54,9 @@ services:
       - sealed
   api:
     <<: *sealed-app
+    environment:
+      # The browser signs in from this stack's own port.
+      CORS_ORIGINS: http://localhost:${SAMPLES_WEB_PORT:-8081},http://127.0.0.1:${SAMPLES_WEB_PORT:-8081}
   worker:
     <<: *sealed-app
   web:

@@ -119,7 +119,11 @@ export async function checkStack(base, get = fetch) {
   await check(`${ROLE} can sign in and the session works`, async () => {
     const login = await get(url("/api/v1/auth/demo-login"), {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      // As a browser sends it, so the API's origin check is part of the test.
+      headers: {
+        "Content-Type": "application/json",
+        Origin: new URL(base).origin,
+      },
       body: JSON.stringify({ role: ROLE }),
     });
     if (login.status !== 200) return `sign-in status ${String(login.status)}`;

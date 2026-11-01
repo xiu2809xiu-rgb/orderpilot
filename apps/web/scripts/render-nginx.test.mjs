@@ -36,6 +36,12 @@ describe("the web image's nginx configuration", () => {
     expect(api).toContain("proxy_pass http://$api_upstream;");
   });
 
+  it("never hands the browser's Host header to the API: the caller controls it", () => {
+    const api = location(serverConf, "/api/");
+    expect(api).toContain("proxy_set_header Host $proxy_host;");
+    expect(api).not.toMatch(/\$(http_)?host\b/);
+  });
+
   it("falls back to the app for a deep link, and never for a hashed file", () => {
     expect(location(serverConf, "/")).toContain("try_files $uri /index.html;");
     const assets = location(serverConf, "/assets/");
