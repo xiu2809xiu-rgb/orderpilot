@@ -18,7 +18,7 @@ registerAction({
 
 // The tracker's filters use the sample data's status codes, never area 2's
 // state machine: area 2's API replaces them along with the mock reader.
-const READY_TO_SHIP = "sample-ready-to-pick";
+const READY_TO_PICK = "sample-ready-to-pick";
 
 const OrderDetailPage = lazy(() => import("./OrderDetailPage"));
 
@@ -43,7 +43,7 @@ export default defineFeature({
       api: "/tracker/orders?overdue=true",
     },
     {
-      id: "awaitingApproval",
+      id: "waitingForApproval",
       roles: ["PRODUCT_MANAGER"],
       to: "/order-tracker?status=sample-pending-approval",
       api: "/tracker/orders?status=sample-pending-approval",
@@ -55,10 +55,10 @@ export default defineFeature({
       api: "/tracker/orders?documentToConfirm=true",
     },
     {
-      id: "readyToShip",
+      id: "readyToPick",
       roles: ["WAREHOUSE", "LOGISTICS", "MANAGEMENT"],
-      to: `/order-tracker?status=${READY_TO_SHIP}`,
-      api: `/tracker/orders?status=${READY_TO_SHIP}`,
+      to: `/order-tracker?status=${READY_TO_PICK}`,
+      api: `/tracker/orders?status=${READY_TO_PICK}`,
     },
   ],
   Page: lazy(() => import("./OrderTrackerPage")),

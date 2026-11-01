@@ -22,7 +22,6 @@ export function PurchaseFlow() {
       title={t("purchase.title")}
       description={t("purchase.description")}
       actions={<Badge variant="outline">{t("purchase.phase")}</Badge>}
-      className="h-full"
     >
       <ol className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
         {STEPS.map((step, index) => (

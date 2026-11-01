@@ -58,7 +58,7 @@ describe("menus by role", () => {
 
 describe("role home tiles", () => {
   const EXPECTED: Record<Role, readonly string[]> = {
-    PRODUCT_MANAGER: ["myTasks", "awaitingApproval", "openOrders", "overdue"],
+    PRODUCT_MANAGER: ["myTasks", "waitingForApproval", "openOrders", "overdue"],
     // The story lists Open exceptions too, but the default matrix gives the
     // approver no exceptions.read, and a tile never lands on a refusal.
     APPROVER: ["awaitingApproval", "overdue", "openOrders"],
@@ -69,15 +69,15 @@ describe("role home tiles", () => {
       "overdue",
       "openExceptions",
     ],
-    WAREHOUSE: ["myTasks", "readyToShip", "overdue", "openExceptions"],
+    WAREHOUSE: ["myTasks", "readyToPick", "overdue", "openExceptions"],
     FINANCE: ["myTasks", "awaitingPayment", "overdue", "openExceptions"],
-    LOGISTICS: ["myTasks", "readyToShip", "overdue", "openExceptions"],
+    LOGISTICS: ["myTasks", "readyToPick", "overdue", "openExceptions"],
     MANAGEMENT: [
       "openOrders",
       "overdue",
       "awaitingApproval",
       "awaitingPayment",
-      "readyToShip",
+      "readyToPick",
       "openExceptions",
     ],
     AUDITOR: ["auditEvents", "refusedActions", "roles", "openExceptions"],

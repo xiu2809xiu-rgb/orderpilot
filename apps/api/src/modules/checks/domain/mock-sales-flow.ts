@@ -10,7 +10,10 @@ export interface MockFlowStep {
  * Which of the synthetic data's sample states sit at which of the brief's nine
  * sales steps. Every state but `sample-closed` is here exactly once, so the
  * steps add up to the open orders. The steps follow the brief's order, where
- * the AWB and the permit are followed up last. The states are fixture labels,
+ * the AWB and the permit are followed up last. The sample data has no state
+ * for "with the forwarder" or "customer told", and it posts the invoice after
+ * shipping as Navision does, so the home page names those two steps after the
+ * states they hold (Shipped, Invoiced). The states are fixture labels,
  * not order statuses: this table goes when area 2's state machine reports the
  * real step.
  */

@@ -12,7 +12,7 @@ export function QuickActions({ session }: { session: Session }) {
   const navigate = useNavigate();
   const actions = actionsFor(session).filter((action) => action.quick);
   return (
-    <SectionCard title={t("quick.title")} className="h-full">
+    <SectionCard title={t("quick.title")}>
       <ul className="-mx-s1 space-y-0.5">
         {actions.map((action) => (
           <li key={action.id}>

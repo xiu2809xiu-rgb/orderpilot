@@ -31,7 +31,6 @@ export function SalesFlow() {
             })
           : undefined
       }
-      className="h-full"
     >
       <QueryBoundary query={query}>
         <ScrollRegion

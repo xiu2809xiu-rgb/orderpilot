@@ -28,7 +28,7 @@ export interface RoleCue {
 
 /** The order of each role's tiles. A role only gets those it may open. */
 export const TILE_ORDER: Readonly<Record<Role, readonly string[]>> = {
-  PRODUCT_MANAGER: ["myTasks", "awaitingApproval", "openOrders", "overdue"],
+  PRODUCT_MANAGER: ["myTasks", "waitingForApproval", "openOrders", "overdue"],
   APPROVER: ["awaitingApproval", "overdue", "openOrders", "openExceptions"],
   SUPPORT: [
     "myTasks",
@@ -37,15 +37,15 @@ export const TILE_ORDER: Readonly<Record<Role, readonly string[]>> = {
     "overdue",
     "openExceptions",
   ],
-  WAREHOUSE: ["myTasks", "readyToShip", "overdue", "openExceptions"],
+  WAREHOUSE: ["myTasks", "readyToPick", "overdue", "openExceptions"],
   FINANCE: ["myTasks", "awaitingPayment", "overdue", "openExceptions"],
-  LOGISTICS: ["myTasks", "readyToShip", "overdue", "openExceptions"],
+  LOGISTICS: ["myTasks", "readyToPick", "overdue", "openExceptions"],
   MANAGEMENT: [
     "openOrders",
     "overdue",
     "awaitingApproval",
     "awaitingPayment",
-    "readyToShip",
+    "readyToPick",
     "openExceptions",
   ],
   AUDITOR: ["auditEvents", "refusedActions", "roles", "openExceptions"],

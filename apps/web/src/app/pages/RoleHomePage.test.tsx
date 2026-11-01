@@ -105,7 +105,7 @@ describe("the role home page", () => {
       await screen.findByRole("status", { name: "Loading My tasks" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("status", { name: "Loading Ready to ship" }),
+      screen.getByRole("status", { name: "Loading Ready to pick" }),
     ).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Needs you" })).toBeVisible();
   });
@@ -144,7 +144,7 @@ describe("the role home page", () => {
     await waitFor(() => {
       expect(tile(/My tasks/)).toHaveTextContent("1");
     });
-    expect(tile(/Ready to ship/)).toHaveAttribute(
+    expect(tile(/Ready to pick/)).toHaveAttribute(
       "href",
       "/order-tracker?status=sample-ready-to-pick",
     );

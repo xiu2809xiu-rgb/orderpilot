@@ -37,7 +37,7 @@ export function RoleHomePage() {
         meta={<DemoBadge kind="synthetic" />}
       />
       <HomeTiles session={session} />
-      <div className="grid grid-cols-1 gap-s3 lg:grid-cols-[minmax(0,1fr)_16rem]">
+      <div className="grid grid-cols-1 items-start gap-s3 lg:grid-cols-[minmax(0,1fr)_16rem]">
         <div className="min-w-0">
           <NeedsYou session={session} />
         </div>
