@@ -31,10 +31,7 @@ function Note({ line }: { line: OrderLine }) {
         {t(received ? "item.orders.received" : "item.orders.onOrder", figures)}
       </StatusBadge>
       <span className="text-muted-foreground">
-        {t(
-          received ? "item.orders.coveredReceived" : "item.orders.covered",
-          figures,
-        )}
+        {t("item.orders.covered", figures)}
       </span>
     </span>
   );

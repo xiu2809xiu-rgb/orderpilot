@@ -284,9 +284,7 @@ describe("an item", () => {
     expect(screen.queryByText("Demand under review")).toBeNull();
     expect(screen.getByText("PO-0033 received")).toBeVisible();
     expect(
-      screen.getByText(
-        "Needed 146 with 46 available. PO-0033 brought in the 100 short.",
-      ),
+      screen.getByText("Needed 146 with 46 available, 100 short."),
     ).toBeVisible();
     expect(screen.getByText("Received")).toBeVisible();
     expect(screen.queryByText(/is short by/)).toBeNull();

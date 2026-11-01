@@ -97,8 +97,7 @@
       "heldOut": "Demand under review",
       "onOrder": "Covered by {{po}}",
       "received": "{{po}} received",
-      "covered": "Needed {{ordered}} with {{available}} available. {{po}} covers the {{shortBy}} short.",
-      "coveredReceived": "Needed {{ordered}} with {{available}} available. {{po}} brought in the {{shortBy}} short.",
+      "covered": "Needed {{ordered}} with {{available}} available, {{shortBy}} short.",
       "empty": "No open order holds this item.",
       "listed": "Orders above, in Qty. on Sales Order",
       "heldOutTotal": "Orders above, held out as demand under review"
