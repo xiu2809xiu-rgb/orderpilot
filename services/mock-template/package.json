@@ -1,0 +1,24 @@
+{
+  "name": "@orderpilot/mock-template",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The smallest mock service: the shape every mock copies, and what the generic mock image is built and scanned with.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "main": "./dist/main.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/main.js",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@orderpilot/tsconfig": "workspace:*",
+    "@types/node": "24.19.2",
+    "typescript": "6.0.3",
+    "vitest": "5.0.5"
+  }
+}

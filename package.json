@@ -34,8 +34,12 @@
     "db:migrate:dev": "pnpm --filter @orderpilot/api db:migrate:dev",
     "db:seed": "pnpm --filter @orderpilot/api db:seed",
     "docs:generate": "pnpm --filter \"@orderpilot/synthetic-documents...\" run build && pnpm --filter @orderpilot/synthetic-documents generate",
-    "stack:up": "docker compose up -d --wait",
-    "stack:down": "docker compose down"
+    "stack:up": "docker compose up -d --wait postgres redis minio mailpit",
+    "stack:down": "docker compose down",
+    "stack:smoke": "node scripts/stack-smoke.mjs",
+    "samples:up": "docker compose -f docker-compose.yml -f docker-compose.samples.yml up -d --build --wait",
+    "samples:restart-web": "docker compose -f docker-compose.yml -f docker-compose.samples.yml restart web",
+    "samples:down": "docker compose -f docker-compose.yml -f docker-compose.samples.yml down --remove-orphans"
   },
   "devDependencies": {
     "@commitlint/cli": "21.2.4",
