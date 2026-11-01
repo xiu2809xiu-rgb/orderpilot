@@ -16,18 +16,18 @@ How OrderPilot is tested: the levels, the environments, the data, and the failur
 | End-to-end      | The smoke test, then E2E #1 to #4, with WCAG 2.2 AA checked by axe      | Playwright with axe         | Decided by P-14                             | Planned: P-14                       |
 | Load            | The extraction queue and the order endpoints, as a smoke load           | k6                          | To be decided by its story                  | Planned, not yet in a story         |
 | Manual requests | Each endpoint by hand, for reviews and demos                            | `.http` files               | `apps/api/requests/`                        | Today (P-8)                         |
-| Security        | Code, secrets, dependencies, then images and the live URL               | See security testing        | `.github/workflows/`                        | Today (P-6); Trivy P-13, ZAP P-24   |
+| Security        | Code, secrets, dependencies, then images and the live URL               | See security testing        | `.github/workflows/`                        | Today (P-6, Trivy P-13); ZAP P-24   |
 
 `pnpm test` at the root runs every level that exists, and the verify job in CI runs it on every pull request. [Security testing](../security/security-testing.md) covers the security scans.
 
 ## 2. Environments
 
-| Environment | What runs there                                                                                                                  | `APP_ENV` | Status              |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------------- |
-| Local       | Windows 11 with Git Bash, and macOS. Node 24.22.0 and pnpm 12. PostgreSQL, Redis and MinIO in Docker                             | `local`   | Today (P-9)         |
-| CI          | GitHub Actions on `ubuntu-24.04`: the verify job (with PostgreSQL, Redis and MinIO from the compose file) and the security scans | `local`   | Today (P-6)         |
-| Docker      | The full stack with `docker compose up --build`, where the end-to-end tests run                                                  | `local`   | Planned: P-13, P-14 |
-| Demo        | Amazon Lightsail in Singapore, behind Caddy, with OWASP ZAP against the live URL                                                 | `demo`    | Planned: P-24       |
+| Environment | What runs there                                                                                                                  | `APP_ENV` | Status                        |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------- | --------- | ----------------------------- |
+| Local       | Windows 11 with Git Bash, and macOS. Node 24.22.0 and pnpm 12. PostgreSQL, Redis and MinIO in Docker                             | `local`   | Today (P-9)                   |
+| CI          | GitHub Actions on `ubuntu-24.04`: the verify job (with PostgreSQL, Redis and MinIO from the compose file) and the security scans | `local`   | Today (P-6)                   |
+| Docker      | The full stack with `docker compose up --build`, where the end-to-end tests run                                                  | `local`   | Today (P-13); end-to-end P-14 |
+| Demo        | Amazon Lightsail in Singapore, behind Caddy, with OWASP ZAP against the live URL                                                 | `demo`    | Planned: P-24                 |
 
 - `APP_ENV` is separate from `NODE_ENV`. Safety rules key off `APP_ENV=production`, so the demo can run `NODE_ENV=production` with demo data (P-8).
 - Tests never call a paid AI provider. They use the mock provider, which is the default (P-17).

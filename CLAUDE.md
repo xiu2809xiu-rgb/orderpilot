@@ -184,7 +184,7 @@ Each row says whether it exists today or which story brings it. Everything marke
 | Lint and format         | ESLint flat config from `packages/eslint-config` (type-aware, with jsx-a11y, failing on any warning), Prettier and commitlint (config-conventional)                      | Today                                |
 | Git hooks               | Commit message: commitlint. Pre-commit: licence-key guard, samples guard, secretlint, em-dash check and lint-staged. Pre-push: samples guard on every commit             | Today                                |
 | Dependency updates      | Dependabot for npm and Actions, weekly on Monday 06:00 Singapore time, a 7-day cooldown, grouped                                                                         | Today                                |
-| CI and scans            | GitHub Actions: `ci.yml` (verify) and `security.yml` (Semgrep, gitleaks, OSV), then Trivy (P-13)                                                                         | Today (P-6), P-13                    |
+| CI and scans            | GitHub Actions: `ci.yml` (verify), `security.yml` (Semgrep, gitleaks, OSV) and `docker.yml` (the images with Trivy, and Trivy config)                                    | Today (P-6, P-13)                    |
 | Shared contracts        | `packages/shared`: zod schemas and types                                                                                                                                 | Built: P-7 (draft order contract)    |
 | API                     | NestJS in layers, with Swagger "OrderPilot API" at `/api/docs`                                                                                                           | Today (P-8)                          |
 | Logging                 | pino with correlation ids                                                                                                                                                | Today (P-8)                          |
@@ -197,7 +197,7 @@ Each row says whether it exists today or which story brings it. Everything marke
 | Text                    | react-i18next: English, with no hard-coded strings ([ADR 0014](docs/adr/0014-i18n-with-english-first.md))                                                                | Built: P-11                          |
 | Forms                   | React Hook Form with zod                                                                                                                                                 | Built: P-11                          |
 | Icons and type          | Lucide only, and the Geist font with tabular numbers                                                                                                                     | Built: P-11                          |
-| Containers              | Docker Compose under project name `orderpilot`: PostgreSQL, Redis and MinIO, then `api`, `worker` and `web`                                                              | Today (P-9), P-13                    |
+| Containers              | Docker Compose under project name `orderpilot`: the four stores, then the migrations, `api`, `worker` and `web`, plus a samples stack (ADR 0031)                         | Today (P-9, P-13)                    |
 | Tests                   | Vitest, Testing Library, and Playwright with axe                                                                                                                         | Today (P-8, P-11), P-14              |
 | Events and live updates | A typed domain event bus, a transactional outbox, idempotency keys and SSE                                                                                               | Planned: P-15                        |
 | Diagrams                | Mermaid sources rendered to SVG                                                                                                                                          | Planned: P-16                        |
@@ -221,7 +221,7 @@ Each row says whether it exists today or which story brings it. Everything marke
 
 | Path                           | Holds                                                                                                                                                                  | Status                            |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
-| `apps/api`                     | The NestJS API, with a worker entry                                                                                                                                    | Today (P-8), P-13                 |
+| `apps/api`                     | The NestJS API, with a worker entry                                                                                                                                    | Today (P-8, P-13)                 |
 | `apps/web`                     | The web app                                                                                                                                                            | Built: P-11                       |
 | `services/mock-navision`       | The mock of Navision                                                                                                                                                   | Planned: P-19                     |
 | `packages/tsconfig`            | The strict TypeScript config                                                                                                                                           | Today                             |
@@ -301,7 +301,7 @@ The API is NestJS, in layers ([ADR 0008](docs/adr/0008-nestjs-layered-modules.md
 - **Uploads (planned: P-18):** PDF, PNG, JPEG, XLSX and CSV only, with size limits, type sniffing and a zip-bomb guard. Nothing executable is accepted.
 - **AI (planned: P-17):** documents are treated as data, the model only returns fields, and no model output triggers an action. Area 4's policy decides what data may go to which provider, and the default is synthetic data only.
 - **Keys:** licence keys live only in `apps/web/.env.local`, and AI keys only in the root `.env`. Richie puts them there himself. Never print, echo or ask for a key in chat.
-- **Client samples:** `samples/*` is ignored today. The pre-commit and pre-push hooks guard them, and P-13 adds a throwaway stack that only this machine can reach, deleted afterwards.
+- **Client samples:** `samples/*` is ignored today. The pre-commit and pre-push hooks guard them, and `pnpm samples:up` starts a throwaway stack that only this machine can reach, deleted afterwards (P-13).
 - **Supply chain:** exact version pins; `minimumReleaseAge`; reviewed `allowBuilds`; overrides and ignored advisories, each with a reason and a review date; actions pinned to commit SHAs; least-privilege `permissions`.
 - **Claims:** never claim the prototype is PDPA compliant.
 
@@ -397,7 +397,7 @@ Planned with P-11:
 ### The main branch
 
 - The `Protect main` ruleset blocks deletion and force pushes, and requires a pull request: 0 approvals for now, stale reviews dismissed, review threads resolved, merge commits or squash. Repository admins can bypass it in pull request mode only. [`.github/rulesets/main.json`](.github/rulesets/main.json) mirrors it, and `scripts/github/check-ruleset.mjs` says if the two drift apart.
-- Four checks are required: `Lint, typecheck, test, build`, `SAST (Semgrep)`, `Secret scan (gitleaks)` and `Dependency scan (OSV)`. P-13 and P-14 add theirs, and a required check's name stays fixed once it is required.
+- Four checks are required: `Lint, typecheck, test, build`, `SAST (Semgrep)`, `Secret scan (gitleaks)` and `Dependency scan (OSV)`. P-13 adds `Docker images` and `IaC and Dockerfile scan` to `.github/rulesets/main.json`, required once the ruleset is applied after it merges. P-14 adds its own, and a required check's name stays fixed once it is required.
 - One approving review plus code-owner review is switched on at T-9, only on Richie's yes.
 - Never force push and never commit straight to `main`.
 - Release tags are `v0.1-proposal`, `v0.2-technical-review` and `v1.0-final`, each after a feature freeze.

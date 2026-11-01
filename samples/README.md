@@ -10,7 +10,7 @@ This folder is for trying a client sample on one machine. **Nothing in it except
 
 1. **Only anonymised samples, and only with Spectra's OK.** The samples we asked for are listed in `docs/client/questions-for-client.md` (planned: P-3).
 2. **Never send a sample to an AI service,** your AI coding tool included, unless Spectra has given its written OK for that provider, in an approved region.
-3. **Delete it when you are done.** A throwaway stack that only this machine can reach, deleted afterwards, arrives with P-13.
+3. **Delete it when you are done.** Try a sample only on the throwaway stack: `pnpm samples:up` starts it on <http://localhost:8081>, sealed from every network and keeping its data in memory, and `pnpm samples:down` deletes it with everything it held. `docker-compose.samples.yml` says how it is sealed.
 
 ## If a sample reaches Git
 

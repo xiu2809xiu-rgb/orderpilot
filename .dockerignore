@@ -8,6 +8,9 @@
 .githooks
 .claude
 .vscode
+.kiro
+.cursor
+.idea
 
 # Secrets: only the documented example is ever needed (and not even that).
 .env
