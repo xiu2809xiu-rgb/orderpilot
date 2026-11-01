@@ -1,8 +1,10 @@
 import { act, screen, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import userEvent from "@testing-library/user-event";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import i18n from "@/i18n";
 import { draftKey } from "@/lib/draft-store";
+import { SessionEndedDialog } from "@/app/SessionEndedDialog";
 import { UserMenu } from "@/app/shell/UserMenu";
 import { useSessionStore } from "@/stores/session";
 import { axeViolations } from "@/test/axe";
@@ -239,5 +241,34 @@ describe("signing out over a form", () => {
       expect(useSessionStore.getState().status).toBe("anonymous");
     });
     vi.unstubAllGlobals();
+  });
+});
+
+describe("a session that ends under a form", () => {
+  it("gives the keyboard back its place once signed in again", async () => {
+    const user = userEvent.setup();
+    const session = signInAs("SUPPORT");
+    renderInRouter(
+      <QueryClientProvider client={new QueryClient()}>
+        <SessionEndedDialog />
+        <KitForm />
+      </QueryClientProvider>,
+    );
+    const field = await screen.findByRole("textbox", {
+      name: LABELS.customerPo,
+    });
+    await user.type(field, "CPO-12");
+    act(() => {
+      useSessionStore.getState().setExpired();
+    });
+    await screen.findByRole("dialog");
+    expect(field).not.toHaveFocus();
+    act(() => {
+      useSessionStore.getState().setSession(session);
+    });
+    await waitFor(() => {
+      expect(field).toHaveFocus();
+    });
+    expect(field).toHaveValue("CPO-12");
   });
 });
