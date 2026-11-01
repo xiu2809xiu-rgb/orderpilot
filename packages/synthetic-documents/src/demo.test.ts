@@ -1,12 +1,12 @@
 import { CONFIDENCE_HIGH } from "@orderpilot/shared";
-import { createSyntheticDataset } from "@orderpilot/synthetic-data";
+import { AS_OF, createSyntheticDataset } from "@orderpilot/synthetic-data";
 import { beforeAll, describe, expect, it } from "vitest";
 import { DEMO_FILES, type GroundTruth } from "./demo.js";
 import { layoutForCustomer } from "./facts-data.js";
 import { PO_LAYOUTS } from "./model.js";
 import { generated, type Generated } from "./testing/generated.js";
 
-const dataset = createSyntheticDataset();
+const dataset = createSyntheticDataset({ referenceDate: AS_OF });
 let run: Generated;
 beforeAll(async () => {
   run = await generated();
@@ -79,6 +79,49 @@ describe("the demo files", () => {
     expect((due ?? 0) + (balance ?? 0)).toBe(total);
     expect(value(pi, "amountDue")).toMatch(/^\d+\.\d{2}$/);
   });
+});
+
+describe("the dates and numbers the files print", () => {
+  const ISSUE_ID: Record<string, string> = {
+    CUSTOMER_PO: "poDate",
+    PROFORMA_INVOICE: "piDate",
+    PACKING_LIST: "packingListDate",
+    SALES_INVOICE: "invoiceDate",
+  };
+
+  it("date each document the day the set says it was made", () => {
+    for (const file of DEMO_FILES) {
+      const document = dataset.orders
+        .find((o) => o.header.no === file.orderNo)
+        ?.documents.find((d) => d.type === file.kind);
+      expect(
+        value(truthOf(file.stem), ISSUE_ID[file.kind] ?? ""),
+        file.stem,
+      ).toBe(document?.receivedAt?.slice(0, 10));
+    }
+  });
+
+  // A PI's number carries the day it was made, and that day moves with the
+  // reference date. So after AS_OF the app shows another PI number than the
+  // committed file. Every other number is the same on any day.
+  it.each(["2026-12-15", "2027-03-01"])(
+    "agree with the set built for %s, except a PI's number",
+    (day) => {
+      const later = createSyntheticDataset({ referenceDate: day });
+      for (const file of DEMO_FILES) {
+        const document = later.orders
+          .find((o) => o.header.no === file.orderNo)
+          ?.documents.find((d) => d.type === file.kind);
+        const printed = truthOf(file.stem).documentNumber;
+        if (file.kind === "PROFORMA_INVOICE") {
+          expect(document?.number, file.stem).not.toBe(printed);
+          expect(printed, file.stem).toMatch(/^PI-\d{8}-\d{4}$/);
+        } else {
+          expect(printed, file.stem).toBe(document?.number);
+        }
+      }
+    },
+  );
 });
 
 describe("the PI's bank details", () => {
@@ -176,7 +219,7 @@ describe("the three-uncertain-fields rule", () => {
     }
   });
 
-  it("leaves a document someone has confirmed with nothing to confirm, and a scan with all of it", () => {
+  it("leaves a PO that is not read by Mock AI, and every other document, with nothing to confirm, and a scan with all of it", () => {
     for (const stem of [
       "pi-so-0097",
       "pl-so-0026",

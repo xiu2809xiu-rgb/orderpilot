@@ -20,7 +20,10 @@ export interface DemoFile {
 
 /**
  * The twelve demo files. Each is tied to an order in the synthetic set, picked
- * for the task or scenario it has, so a file and the screens never disagree.
+ * for the task or scenario it has. Lines, prices, customers and the PO, packing
+ * list and invoice numbers read the same on any day. A file's dates and a PI's
+ * number are those of 2 Nov 2026, so the screens show other dates, and other PI
+ * numbers, after that day.
  */
 export const DEMO_FILES: readonly DemoFile[] = [
   {

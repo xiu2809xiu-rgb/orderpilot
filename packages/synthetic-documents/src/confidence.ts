@@ -27,7 +27,9 @@ const PRICE_TITLE_START = "Confirm the unit price that differs";
 /**
  * The ids of the fields Mock AI is unsure of on this order's PO. The order's
  * own task says how many, so the documents can never disagree with the inbox.
- * Documents other than a PO have been confirmed by someone already.
+ * Only a PO is read by Mock AI here. The other documents are made or checked
+ * inside Spectra, so they carry no uncertain fields even where the set still
+ * lists one as to confirm.
  */
 export function uncertainIds(
   dataset: SyntheticDataset,

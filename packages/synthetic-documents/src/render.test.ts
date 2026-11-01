@@ -67,6 +67,22 @@ describe("renderDocument", () => {
     expect(scan.pageCount).toBe(1);
   });
 
+  it("keeps the number, the kind and the order out of a scan's metadata", async () => {
+    const scan = await renderDocument(dataset, "SO-0120", "CUSTOMER_PO", {
+      scanned: true,
+    });
+    const { PDFDocument } = await import("pdf-lib");
+    const doc = await PDFDocument.load(scan.bytes, { updateMetadata: false });
+    const metadata = [doc.getTitle(), doc.getSubject(), doc.getKeywords()]
+      .join(" ")
+      .toLowerCase();
+    expect(metadata).toContain("synthetic demo data");
+    for (const given of [scan.facts.number, "SO-0120", "CUSTOMER_PO", "po-"]) {
+      expect(metadata).not.toContain(given.toLowerCase());
+    }
+    expect(doc.getAuthor()).toBe("Synthetic demo data");
+  });
+
   it("refuses a scan of more than one page", async () => {
     await expect(
       renderDocument(dataset, "SO-0115", "CUSTOMER_PO", { scanned: true }),
