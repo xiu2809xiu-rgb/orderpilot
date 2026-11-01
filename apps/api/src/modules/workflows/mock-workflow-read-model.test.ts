@@ -79,12 +79,20 @@ describe("the mock read model", () => {
       const spr = await model.sprByRecordNo(row.recordNo);
       const item = dataset.items.find((i) => i.no === row.itemNo);
       if (!spr || !item) throw new Error("missing");
+      // The basis is the stock when it was raised: an open order from an
+      // approved SPR has joined Qty. on Purch. Order since.
+      const posted = dataset.purchaseOrders.find(
+        (po) => po.no === row.navisionNo && po.status === "open",
+      );
       expect(spr.basis).toEqual(
         SprSuggestion.fromShortfall({
           ordered: row.basis.ordered,
           inventory: item.inventory,
           qtyOnSalesOrder: item.qtyOnSalesOrder,
-          qtyOnPurchOrder: item.qtyOnPurchOrder,
+          qtyOnPurchOrder: String(
+            Number(item.qtyOnPurchOrder) -
+              Number(posted?.lines[0]?.quantity ?? 0),
+          ),
         }),
       );
     }

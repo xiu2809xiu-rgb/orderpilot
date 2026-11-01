@@ -238,6 +238,34 @@ export interface SamplePayment {
   confirmedBy: string | null;
 }
 
+export const PURCHASE_ORDER_STATUSES = ["open", "received"] as const;
+
+/** A line of a purchase order. `no` is the item's number, as on a sales line. */
+export interface PurchaseLine {
+  no: string;
+  description: string;
+  quantity: DecimalString;
+  /** What is still to arrive. Qty. on Purch. Order is the sum of these. */
+  outstandingQuantity: DecimalString;
+  unitCost: DecimalString;
+  lineAmount: DecimalString;
+}
+
+/** A vendor purchase order in Navision, from an approved SPR or already on order. */
+export interface PurchaseOrder {
+  no: string;
+  buyFromVendorNo: string;
+  orderDate: string;
+  expectedReceiptDate: string;
+  currencyCode: "USD";
+  status: (typeof PURCHASE_ORDER_STATUSES)[number];
+  /** The SPR it came from, or null for an order no SPR explains. */
+  sprRecordNo: string | null;
+  lines: PurchaseLine[];
+  /** Sum of the lines. */
+  total: DecimalString;
+}
+
 export const SPR_STATUSES = ["suggested", "submitted", "approved"] as const;
 
 /**
@@ -351,6 +379,7 @@ export interface SyntheticDataset {
   orders: SampleOrder[];
   payments: SamplePayment[];
   sprs: SampleSpr[];
+  purchaseOrders: PurchaseOrder[];
   tasks: SampleTask[];
   reminders: SampleReminder[];
   exceptions: SampleException[];
