@@ -6,17 +6,17 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type AuthLogin200DataUserRole =
-  (typeof AuthLogin200DataUserRole)[keyof typeof AuthLogin200DataUserRole];
+export type AuthLogin200DataUserRole = typeof AuthLogin200DataUserRole[keyof typeof AuthLogin200DataUserRole];
+
 
 export const AuthLogin200DataUserRole = {
-  SYSTEM_ADMIN: "SYSTEM_ADMIN",
-  PRODUCT_MANAGER: "PRODUCT_MANAGER",
-  APPROVER: "APPROVER",
-  SUPPORT: "SUPPORT",
-  WAREHOUSE: "WAREHOUSE",
-  FINANCE: "FINANCE",
-  LOGISTICS: "LOGISTICS",
-  MANAGEMENT: "MANAGEMENT",
-  AUDITOR: "AUDITOR",
+  SYSTEM_ADMIN: 'SYSTEM_ADMIN',
+  PRODUCT_MANAGER: 'PRODUCT_MANAGER',
+  APPROVER: 'APPROVER',
+  SUPPORT: 'SUPPORT',
+  WAREHOUSE: 'WAREHOUSE',
+  FINANCE: 'FINANCE',
+  LOGISTICS: 'LOGISTICS',
+  MANAGEMENT: 'MANAGEMENT',
+  AUDITOR: 'AUDITOR',
 } as const;

@@ -6,27 +6,27 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type AuthRefresh200DataPermissionsItem =
-  (typeof AuthRefresh200DataPermissionsItem)[keyof typeof AuthRefresh200DataPermissionsItem];
+export type AuthRefresh200DataPermissionsItem = typeof AuthRefresh200DataPermissionsItem[keyof typeof AuthRefresh200DataPermissionsItem];
+
 
 export const AuthRefresh200DataPermissionsItem = {
-  usersread: "users.read",
-  usersmanage: "users.manage",
-  rolesread: "roles.read",
-  rolesmanage: "roles.manage",
-  settingsmanage: "settings.manage",
-  auditread: "audit.read",
-  aiUsageread: "aiUsage.read",
-  documentsread: "documents.read",
-  documentsupload: "documents.upload",
-  ordersread: "orders.read",
-  trackerread: "tracker.read",
-  exceptionsread: "exceptions.read",
-  insightsread: "insights.read",
-  approvalsdecide: "approvals.decide",
-  paymentsconfirm: "payments.confirm",
-  paymentspost: "payments.post",
-  workflowsread: "workflows.read",
-  sprread: "spr.read",
-  workflowsinboxesany: "workflows.inboxes.any",
+  usersread: 'users.read',
+  usersmanage: 'users.manage',
+  rolesread: 'roles.read',
+  rolesmanage: 'roles.manage',
+  settingsmanage: 'settings.manage',
+  auditread: 'audit.read',
+  aiUsageread: 'aiUsage.read',
+  documentsread: 'documents.read',
+  documentsupload: 'documents.upload',
+  ordersread: 'orders.read',
+  trackerread: 'tracker.read',
+  exceptionsread: 'exceptions.read',
+  insightsread: 'insights.read',
+  approvalsdecide: 'approvals.decide',
+  paymentsconfirm: 'payments.confirm',
+  paymentspost: 'payments.post',
+  workflowsread: 'workflows.read',
+  sprread: 'spr.read',
+  workflowsinboxesany: 'workflows.inboxes.any',
 } as const;

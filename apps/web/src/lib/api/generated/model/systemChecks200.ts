@@ -5,8 +5,8 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { SystemChecks200DataItem } from "./systemChecks200DataItem.ts";
-import type { SystemChecks200Meta } from "./systemChecks200Meta.ts";
+import type { SystemChecks200DataItem } from './systemChecks200DataItem.ts';
+import type { SystemChecks200Meta } from './systemChecks200Meta.ts';
 
 export type SystemChecks200 = {
   data: SystemChecks200DataItem[];

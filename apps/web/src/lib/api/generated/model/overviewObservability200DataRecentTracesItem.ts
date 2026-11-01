@@ -12,13 +12,13 @@ export type OverviewObservability200DataRecentTracesItem = {
   /** @maxLength 120 */
   route: string;
   /**
-   * @minimum 0
-   * @maximum 9007199254740991
-   */
+     * @minimum 0
+     * @maximum 9007199254740991
+     */
   durationMs: number;
   /**
-   * @minimum 100
-   * @maximum 599
-   */
+     * @minimum 100
+     * @maximum 599
+     */
   status: number;
 };

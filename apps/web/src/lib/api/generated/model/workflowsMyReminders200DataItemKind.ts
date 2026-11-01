@@ -6,12 +6,12 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type WorkflowsMyReminders200DataItemKind =
-  (typeof WorkflowsMyReminders200DataItemKind)[keyof typeof WorkflowsMyReminders200DataItemKind];
+export type WorkflowsMyReminders200DataItemKind = typeof WorkflowsMyReminders200DataItemKind[keyof typeof WorkflowsMyReminders200DataItemKind];
+
 
 export const WorkflowsMyReminders200DataItemKind = {
-  TASK_DUE: "TASK_DUE",
-  PAYMENT_DUE: "PAYMENT_DUE",
-  SHIPPING_DOCUMENT_MISSING: "SHIPPING_DOCUMENT_MISSING",
-  IMPORT_PERMIT_MISSING: "IMPORT_PERMIT_MISSING",
+  TASK_DUE: 'TASK_DUE',
+  PAYMENT_DUE: 'PAYMENT_DUE',
+  SHIPPING_DOCUMENT_MISSING: 'SHIPPING_DOCUMENT_MISSING',
+  IMPORT_PERMIT_MISSING: 'IMPORT_PERMIT_MISSING',
 } as const;

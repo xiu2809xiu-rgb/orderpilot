@@ -10,8 +10,8 @@ export type OverviewClickstream200DataByRoleItem = {
   /** @minLength 1 */
   role: string;
   /**
-   * @minimum 0
-   * @maximum 9007199254740991
-   */
+     * @minimum 0
+     * @maximum 9007199254740991
+     */
   events: number;
 };

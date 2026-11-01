@@ -5,7 +5,7 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { WorkflowsConfirmPayment200DataPaymentType } from "./workflowsConfirmPayment200DataPaymentType.ts";
+import type { WorkflowsConfirmPayment200DataPaymentType } from './workflowsConfirmPayment200DataPaymentType.ts';
 
 export type WorkflowsConfirmPayment200Data = {
   applied: false;

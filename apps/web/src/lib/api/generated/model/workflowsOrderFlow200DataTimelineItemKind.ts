@@ -6,13 +6,13 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type WorkflowsOrderFlow200DataTimelineItemKind =
-  (typeof WorkflowsOrderFlow200DataTimelineItemKind)[keyof typeof WorkflowsOrderFlow200DataTimelineItemKind];
+export type WorkflowsOrderFlow200DataTimelineItemKind = typeof WorkflowsOrderFlow200DataTimelineItemKind[keyof typeof WorkflowsOrderFlow200DataTimelineItemKind];
+
 
 export const WorkflowsOrderFlow200DataTimelineItemKind = {
-  orderreceived: "order.received",
-  stepcompleted: "step.completed",
-  taskcreated: "task.created",
-  remindersent: "reminder.sent",
-  paymentconfirmed: "payment.confirmed",
+  orderreceived: 'order.received',
+  stepcompleted: 'step.completed',
+  taskcreated: 'task.created',
+  remindersent: 'reminder.sent',
+  paymentconfirmed: 'payment.confirmed',
 } as const;

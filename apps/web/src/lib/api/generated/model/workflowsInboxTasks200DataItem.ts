@@ -5,10 +5,10 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { WorkflowsInboxTasks200DataItemAssigneeRole } from "./workflowsInboxTasks200DataItemAssigneeRole.ts";
-import type { WorkflowsInboxTasks200DataItemKind } from "./workflowsInboxTasks200DataItemKind.ts";
-import type { WorkflowsInboxTasks200DataItemRef } from "./workflowsInboxTasks200DataItemRef.ts";
-import type { WorkflowsInboxTasks200DataItemStatus } from "./workflowsInboxTasks200DataItemStatus.ts";
+import type { WorkflowsInboxTasks200DataItemAssigneeRole } from './workflowsInboxTasks200DataItemAssigneeRole.ts';
+import type { WorkflowsInboxTasks200DataItemKind } from './workflowsInboxTasks200DataItemKind.ts';
+import type { WorkflowsInboxTasks200DataItemRef } from './workflowsInboxTasks200DataItemRef.ts';
+import type { WorkflowsInboxTasks200DataItemStatus } from './workflowsInboxTasks200DataItemStatus.ts';
 
 export type WorkflowsInboxTasks200DataItem = {
   /** @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */
@@ -18,9 +18,9 @@ export type WorkflowsInboxTasks200DataItem = {
   title: string;
   assigneeRole: WorkflowsInboxTasks200DataItemAssigneeRole;
   /**
-   * @nullable
-   * @pattern ^[A-Za-z0-9-]{1,30}$
-   */
+     * @nullable
+     * @pattern ^[A-Za-z0-9-]{1,30}$
+     */
   orderNo: string | null;
   /** @nullable */
   ref: WorkflowsInboxTasks200DataItemRef;

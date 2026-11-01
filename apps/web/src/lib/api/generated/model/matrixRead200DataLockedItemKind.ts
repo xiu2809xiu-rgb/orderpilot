@@ -6,10 +6,10 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type MatrixRead200DataLockedItemKind =
-  (typeof MatrixRead200DataLockedItemKind)[keyof typeof MatrixRead200DataLockedItemKind];
+export type MatrixRead200DataLockedItemKind = typeof MatrixRead200DataLockedItemKind[keyof typeof MatrixRead200DataLockedItemKind];
+
 
 export const MatrixRead200DataLockedItemKind = {
-  never: "never",
-  always: "always",
+  never: 'never',
+  always: 'always',
 } as const;

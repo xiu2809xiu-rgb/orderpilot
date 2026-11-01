@@ -6,12 +6,12 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type PolicyMaskingSample200DataRecordsItemNoteClassification =
-  (typeof PolicyMaskingSample200DataRecordsItemNoteClassification)[keyof typeof PolicyMaskingSample200DataRecordsItemNoteClassification];
+export type PolicyMaskingSample200DataRecordsItemNoteClassification = typeof PolicyMaskingSample200DataRecordsItemNoteClassification[keyof typeof PolicyMaskingSample200DataRecordsItemNoteClassification];
+
 
 export const PolicyMaskingSample200DataRecordsItemNoteClassification = {
-  public: "public",
-  internal: "internal",
-  confidential: "confidential",
-  restricted: "restricted",
+  public: 'public',
+  internal: 'internal',
+  confidential: 'confidential',
+  restricted: 'restricted',
 } as const;

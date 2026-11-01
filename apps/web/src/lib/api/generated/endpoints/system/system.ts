@@ -5,7 +5,9 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import { useQuery } from "@tanstack/react-query";
+import {
+  useQuery
+} from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
@@ -15,23 +17,26 @@ import type {
   QueryKey,
   UndefinedInitialDataOptions,
   UseQueryOptions,
-  UseQueryResult,
-} from "@tanstack/react-query";
+  UseQueryResult
+} from '@tanstack/react-query';
 
-import type { SystemChecks200, SystemChecksParams } from "../../model";
+import type {
+  SystemChecks200,
+  SystemChecksParams
+} from '../../model';
 
-import { apiMutator } from "../../../mutator.ts";
-import type { ErrorType } from "../../../mutator.ts";
+import { apiMutator } from '../../../mutator.ts';
+import type { ErrorType } from '../../../mutator.ts';
 
-const withQueryKey = <T extends object, K>(
-  query: T,
-  queryKey: K,
-): T & { queryKey: K } => {
+
+
+
+const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKey: K } => {
   const result = { queryKey } as T & { queryKey: K };
   for (const key of Object.keys(query)) {
     // The explicit queryKey always wins, matching the previous
     // `{ ...query, queryKey }` spread where it was set last.
-    if (key === "queryKey") continue;
+    if (key === 'queryKey') continue;
     Object.defineProperty(result, key, {
       enumerable: true,
       configurable: true,
@@ -45,134 +50,92 @@ const withQueryKey = <T extends object, K>(
  * @summary The readiness checks that are registered, a page at a time
  */
 export const systemChecks = (
-  params?: SystemChecksParams,
-  signal?: AbortSignal,
+    params?: SystemChecksParams,
+ signal?: AbortSignal
 ) => {
-  return apiMutator<SystemChecks200>({
-    url: `/api/v1/system/checks`,
-    method: "GET",
-    params,
-    signal,
-  });
-};
 
-export const getSystemChecksQueryKey = (params?: SystemChecksParams) => {
-  return [`/api/v1/system/checks`, ...(params ? [params] : [])] as const;
-};
 
-export const getSystemChecksQueryOptions = <
-  TData = Awaited<ReturnType<typeof systemChecks>>,
-  TError = ErrorType<unknown>,
->(
-  params?: SystemChecksParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof systemChecks>>, TError, TData>
-    >;
-  },
+      return apiMutator<SystemChecks200>(
+      {url: `/api/v1/system/checks`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getSystemChecksQueryKey = (params?: SystemChecksParams,) => {
+    return [
+    `/api/v1/system/checks`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getSystemChecksQueryOptions = <TData = Awaited<ReturnType<typeof systemChecks>>, TError = ErrorType<unknown>>(params?: SystemChecksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof systemChecks>>, TError, TData>>, }
 ) => {
-  const { query: queryOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getSystemChecksQueryKey(params);
+const {query: queryOptions} = options ?? {};
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof systemChecks>>> = ({
-    signal,
-  }) => systemChecks(params, signal);
+  const queryKey =  queryOptions?.queryKey ?? getSystemChecksQueryKey(params);
 
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof systemChecks>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
 
-export type SystemChecksQueryResult = NonNullable<
-  Awaited<ReturnType<typeof systemChecks>>
->;
-export type SystemChecksQueryError = ErrorType<unknown>;
 
-export function useSystemChecks<
-  TData = Awaited<ReturnType<typeof systemChecks>>,
-  TError = ErrorType<unknown>,
->(
-  params: undefined | SystemChecksParams,
-  options: {
-    query: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof systemChecks>>, TError, TData>
-    > &
-      Pick<
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof systemChecks>>> = ({ signal }) => systemChecks(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof systemChecks>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type SystemChecksQueryResult = NonNullable<Awaited<ReturnType<typeof systemChecks>>>
+export type SystemChecksQueryError = ErrorType<unknown>
+
+
+export function useSystemChecks<TData = Awaited<ReturnType<typeof systemChecks>>, TError = ErrorType<unknown>>(
+ params: undefined |  SystemChecksParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof systemChecks>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof systemChecks>>,
           TError,
           Awaited<ReturnType<typeof systemChecks>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useSystemChecks<
-  TData = Awaited<ReturnType<typeof systemChecks>>,
-  TError = ErrorType<unknown>,
->(
-  params?: SystemChecksParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof systemChecks>>, TError, TData>
-    > &
-      Pick<
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSystemChecks<TData = Awaited<ReturnType<typeof systemChecks>>, TError = ErrorType<unknown>>(
+ params?: SystemChecksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof systemChecks>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof systemChecks>>,
           TError,
           Awaited<ReturnType<typeof systemChecks>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useSystemChecks<
-  TData = Awaited<ReturnType<typeof systemChecks>>,
-  TError = ErrorType<unknown>,
->(
-  params?: SystemChecksParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof systemChecks>>, TError, TData>
-    >;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSystemChecks<TData = Awaited<ReturnType<typeof systemChecks>>, TError = ErrorType<unknown>>(
+ params?: SystemChecksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof systemChecks>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary The readiness checks that are registered, a page at a time
  */
 
-export function useSystemChecks<
-  TData = Awaited<ReturnType<typeof systemChecks>>,
-  TError = ErrorType<unknown>,
->(
-  params?: SystemChecksParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof systemChecks>>, TError, TData>
-    >;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getSystemChecksQueryOptions(params, options);
+export function useSystemChecks<TData = Awaited<ReturnType<typeof systemChecks>>, TError = ErrorType<unknown>>(
+ params?: SystemChecksParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof systemChecks>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+  const queryOptions = getSystemChecksQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
+

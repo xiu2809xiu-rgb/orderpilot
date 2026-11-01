@@ -6,11 +6,11 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type WorkflowsSpr200DataFieldsItemOrigin =
-  (typeof WorkflowsSpr200DataFieldsItemOrigin)[keyof typeof WorkflowsSpr200DataFieldsItemOrigin];
+export type WorkflowsSpr200DataFieldsItemOrigin = typeof WorkflowsSpr200DataFieldsItemOrigin[keyof typeof WorkflowsSpr200DataFieldsItemOrigin];
+
 
 export const WorkflowsSpr200DataFieldsItemOrigin = {
-  suggested: "suggested",
-  default: "default",
-  person: "person",
+  suggested: 'suggested',
+  default: 'default',
+  person: 'person',
 } as const;

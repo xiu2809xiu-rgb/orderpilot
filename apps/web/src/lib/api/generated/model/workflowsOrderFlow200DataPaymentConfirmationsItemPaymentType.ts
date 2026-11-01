@@ -6,12 +6,12 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type WorkflowsOrderFlow200DataPaymentConfirmationsItemPaymentType =
-  (typeof WorkflowsOrderFlow200DataPaymentConfirmationsItemPaymentType)[keyof typeof WorkflowsOrderFlow200DataPaymentConfirmationsItemPaymentType];
+export type WorkflowsOrderFlow200DataPaymentConfirmationsItemPaymentType = typeof WorkflowsOrderFlow200DataPaymentConfirmationsItemPaymentType[keyof typeof WorkflowsOrderFlow200DataPaymentConfirmationsItemPaymentType];
+
 
 export const WorkflowsOrderFlow200DataPaymentConfirmationsItemPaymentType = {
-  prepayment: "prepayment",
-  deposit: "deposit",
-  balance: "balance",
-  "full-payment": "full-payment",
+  prepayment: 'prepayment',
+  deposit: 'deposit',
+  balance: 'balance',
+  'full-payment': 'full-payment',
 } as const;
