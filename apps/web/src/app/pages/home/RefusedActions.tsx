@@ -4,14 +4,7 @@ import { RelativeTime, SectionCard } from "@/components/common";
 import { buttonVariants } from "@/components/ui/button";
 import { QueryBoundary } from "@/features/workflows/QueryBoundary";
 import { useAuditViewerList } from "@/lib/api/generated/endpoints/audit/audit";
-import {
-  HOME_FIRST_CELL,
-  HomeEmpty,
-  HomeTable,
-  ViewAll,
-  homeCell,
-  type HomeColumn,
-} from "./HomeTable";
+import { HomeEmpty, HomeTable, ViewAll, type HomeColumn } from "./HomeTable";
 
 const ALL = "/audit?refusals=1";
 
@@ -30,7 +23,6 @@ export function RefusedActions() {
   return (
     <SectionCard
       title={t("refused.title")}
-      className={events.length > 0 ? "h-full" : undefined}
       actions={
         total > 0 ? (
           <ViewAll to={ALL} label={t("needs.viewAll", { total })} />
@@ -46,14 +38,15 @@ export function RefusedActions() {
             action={t("refused.emptyAction")}
           />
         ) : (
-          <HomeTable label={t("refused.table")} columns={columns}>
-            {events.map((event) => (
-              <tr key={event.id}>
-                <td className={HOME_FIRST_CELL}>{event.summary}</td>
-                <td className={homeCell({})}>
-                  <RelativeTime value={event.occurredAt} />
-                </td>
-                <td className={homeCell({ action: true })}>
+          <HomeTable
+            label={t("refused.table")}
+            columns={columns}
+            rows={events.map((event) => ({
+              id: event.id,
+              cells: {
+                what: event.summary,
+                when: <RelativeTime value={event.occurredAt} />,
+                action: (
                   <Link
                     to={`/audit?event=${event.id}`}
                     className={buttonVariants({
@@ -67,10 +60,10 @@ export function RefusedActions() {
                   >
                     {t("refused.open")}
                   </Link>
-                </td>
-              </tr>
-            ))}
-          </HomeTable>
+                ),
+              },
+            }))}
+          />
         )}
       </QueryBoundary>
     </SectionCard>

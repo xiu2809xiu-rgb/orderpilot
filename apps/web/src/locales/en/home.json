@@ -46,8 +46,14 @@
       "SEND_PI": "Mark sent",
       "CONFIRM_PAYMENT": "Confirm",
       "PACK_ORDER": "Mark packed",
+      "RECOUNT_CARTONS": "Mark counted",
       "ADD_SHIPPING_DOCUMENTS": "Mark added"
     },
+    "sprTask": {
+      "RAISE_SPR": "Review {{recordNo}}",
+      "APPROVE_SPR": "Decide on {{recordNo}}"
+    },
+    "partOf": "{{part}} of {{whole}}",
     "done": {
       "REVIEW_FIELDS": "Reviewed {{orderNo}}",
       "RAISE_SPR": "Raised the SPR for {{orderNo}}",
@@ -55,6 +61,7 @@
       "SEND_PI": "Marked the PI for {{orderNo}} as sent",
       "CONFIRM_PAYMENT": "Confirmed the payment for {{orderNo}}",
       "PACK_ORDER": "Marked {{orderNo}} as packed",
+      "RECOUNT_CARTONS": "Marked the cartons for {{orderNo}} as counted",
       "ADD_SHIPPING_DOCUMENTS": "Marked the documents for {{orderNo}} as added"
     }
   },

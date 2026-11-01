@@ -3,8 +3,9 @@ import { SectionCard } from "@/components/common";
 import { QueryBoundary } from "@/features/workflows/QueryBoundary";
 import { useWorkflowsMyTasks } from "@/lib/api/generated/endpoints/workflows/workflows";
 import { HomeEmpty, HomeTable, ViewAll, type HomeColumn } from "./HomeTable";
-import { TaskRow } from "./TaskRow";
+import { taskCells } from "./TaskRow";
 import { useTaskAction } from "./useTaskAction";
+import { useTaskFocus } from "./useTaskFocus";
 
 const TOP = 5;
 
@@ -12,13 +13,14 @@ const TOP = 5;
 export function TaskQueue({ touch }: { touch: boolean }) {
   const { t } = useTranslation("home");
   const query = useWorkflowsMyTasks({ pageSize: TOP });
-  const action = useTaskAction();
   const tasks = query.data?.data ?? [];
   const total = query.data?.meta.total ?? 0;
+  const focus = useTaskFocus(query.data?.data);
+  const action = useTaskAction({ onUndone: focus.followBack });
   const columns: HomeColumn[] = [
     { id: "what", label: t("needs.columns.what") },
     { id: "order", label: t("needs.columns.order") },
-    { id: "customer", label: t("needs.columns.customer") },
+    { id: "customer", label: t("needs.columns.customer"), wrap: true },
     { id: "amount", label: t("needs.columns.amount"), end: true },
     { id: "due", label: t("needs.columns.due") },
     { id: "action", label: t("needs.columns.action"), action: true },
@@ -27,7 +29,7 @@ export function TaskQueue({ touch }: { touch: boolean }) {
   return (
     <SectionCard
       title={t("needs.title")}
-      className={tasks.length > 0 ? "h-full" : undefined}
+      headingRef={focus.headingRef}
       actions={
         total > 0 ? (
           <ViewAll to="/workflows" label={t("needs.viewAll", { total })} />
@@ -43,19 +45,23 @@ export function TaskQueue({ touch }: { touch: boolean }) {
             action={t("needs.emptyAction")}
           />
         ) : (
-          <HomeTable label={t("needs.table")} columns={columns}>
-            {tasks.map((task) => (
-              <TaskRow
-                key={task.id}
-                task={task}
-                touch={touch}
-                busy={action.isPending && action.variables.id === task.id}
-                onAct={() => {
-                  action.mutate(task);
-                }}
-              />
-            ))}
-          </HomeTable>
+          <div ref={focus.listRef}>
+            <HomeTable
+              label={t("needs.table")}
+              columns={columns}
+              rows={tasks.map((task, index) => ({
+                id: task.id,
+                cells: taskCells(task, t, {
+                  touch,
+                  busy: action.isBusy(task),
+                  onAct: () => {
+                    focus.followNext(task, index);
+                    action.act(task);
+                  },
+                }),
+              }))}
+            />
+          </div>
         )}
       </QueryBoundary>
     </SectionCard>

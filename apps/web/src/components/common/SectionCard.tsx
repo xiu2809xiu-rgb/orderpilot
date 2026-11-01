@@ -1,4 +1,4 @@
-import { useId, type ReactNode } from "react";
+import { useId, type ReactNode, type Ref } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface SectionCardProps {
@@ -8,6 +8,8 @@ interface SectionCardProps {
   actions?: ReactNode;
   children: ReactNode;
   className?: string;
+  /** Lets a page move focus to the heading, for example when its list empties. */
+  headingRef?: Ref<HTMLHeadingElement>;
 }
 
 /** A titled block of a page. It is a labelled region, so screen readers can jump to it. */
@@ -17,6 +19,7 @@ export function SectionCard({
   actions,
   children,
   className,
+  headingRef,
 }: SectionCardProps) {
   const headingId = useId();
   return (
@@ -24,7 +27,13 @@ export function SectionCard({
       <CardHeader className="flex flex-wrap items-start justify-between gap-s2">
         <div className="space-y-1">
           <CardTitle id={headingId} className="text-lg">
-            <h2>{title}</h2>
+            <h2
+              ref={headingRef}
+              tabIndex={headingRef ? -1 : undefined}
+              className="focus-visible:outline-2 focus-visible:outline-ring"
+            >
+              {title}
+            </h2>
           </CardTitle>
           {description ? (
             <p className="measure text-sm text-muted-foreground">

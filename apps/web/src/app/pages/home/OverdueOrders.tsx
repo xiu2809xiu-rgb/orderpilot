@@ -5,14 +5,7 @@ import { Money, SectionCard } from "@/components/common";
 import { buttonVariants } from "@/components/ui/button";
 import { QueryBoundary } from "@/features/workflows/QueryBoundary";
 import { useTrackerList } from "@/lib/api/generated/endpoints/tracker/tracker";
-import {
-  HOME_FIRST_CELL,
-  HomeEmpty,
-  HomeTable,
-  ViewAll,
-  homeCell,
-  type HomeColumn,
-} from "./HomeTable";
+import { HomeEmpty, HomeTable, ViewAll, type HomeColumn } from "./HomeTable";
 
 const ALL = "/order-tracker?overdue=true";
 
@@ -30,7 +23,7 @@ export function OverdueOrders() {
   const columns: HomeColumn[] = [
     { id: "what", label: t("overdue.status") },
     { id: "order", label: t("needs.columns.order") },
-    { id: "customer", label: t("needs.columns.customer") },
+    { id: "customer", label: t("needs.columns.customer"), wrap: true },
     { id: "amount", label: t("needs.columns.amount"), end: true },
     { id: "late", label: t("needs.columns.late"), end: true },
     { id: "action", label: t("needs.columns.action"), action: true },
@@ -39,7 +32,6 @@ export function OverdueOrders() {
   return (
     <SectionCard
       title={t("overdue.title")}
-      className={orders.length > 0 ? "h-full" : undefined}
       actions={
         total > 0 ? (
           <ViewAll to={ALL} label={t("needs.viewAll", { total })} />
@@ -55,30 +47,29 @@ export function OverdueOrders() {
             action={t("needs.emptyAction")}
           />
         ) : (
-          <HomeTable label={t("overdue.table")} columns={columns}>
-            {orders.map((order) => (
-              <tr key={order.orderNo}>
-                <td className={HOME_FIRST_CELL}>{order.status.label}</td>
-                <td className={homeCell({})}>
+          <HomeTable
+            label={t("overdue.table")}
+            columns={columns}
+            rows={orders.map((order) => ({
+              id: order.orderNo,
+              cells: {
+                what: order.status.label,
+                order: (
                   <Link
                     to={`/order-tracker/${order.orderNo}`}
                     className="inline-flex min-h-6 items-center font-mono text-primary underline-offset-4 hover:underline"
                   >
                     {order.orderNo}
                   </Link>
-                </td>
-                <td className={`${homeCell({})} md:whitespace-normal`}>
-                  {order.customerName}
-                </td>
-                <td className={homeCell({ end: true })}>
-                  {order.amount ? (
-                    <Money value={order.amount} currency={order.currencyCode} />
-                  ) : null}
-                </td>
-                <td className={homeCell({ end: true })}>
-                  {t("overdue.daysLate", { count: order.overdue.daysOverdue })}
-                </td>
-                <td className={homeCell({ action: true })}>
+                ),
+                customer: order.customerName,
+                amount: order.amount ? (
+                  <Money value={order.amount} currency={order.currencyCode} />
+                ) : null,
+                late: t("overdue.daysLate", {
+                  count: order.overdue.daysOverdue,
+                }),
+                action: (
                   <Link
                     to={`/order-tracker/${order.orderNo}`}
                     className={buttonVariants({
@@ -92,10 +83,10 @@ export function OverdueOrders() {
                   >
                     {t("overdue.open")}
                   </Link>
-                </td>
-              </tr>
-            ))}
-          </HomeTable>
+                ),
+              },
+            }))}
+          />
         )}
       </QueryBoundary>
     </SectionCard>
