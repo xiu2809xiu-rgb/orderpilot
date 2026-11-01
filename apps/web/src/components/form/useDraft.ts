@@ -34,8 +34,13 @@ export interface DraftControl {
   restoredAt: string | null;
   /** Drops the draft and puts the form back to its defaults. */
   discard: () => void;
-  /** Drops the draft and leaves the form alone: call it after a save. */
+  /** Drops the draft and leaves the form alone. */
   clear: () => void;
+  /**
+   * For after a save, given the values that were sent: drops the draft of
+   * them and keeps one of anything typed since, which the save never sent.
+   */
+  settle: (saved: unknown) => void;
   /**
    * True when leaving now loses nothing: the draft can be written, and it would
    * bring back every change. False when storage is blocked or a changed field
@@ -70,6 +75,7 @@ export function useDraft<T extends FieldValues, O = T>(
   const excluded = useRef(exclude);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const pendingWrite = useRef<(() => void) | null>(null);
+  const resync = useRef<((saved: unknown) => void) | null>(null);
 
   const cancel = useCallback(() => {
     clearTimeout(timer.current);
@@ -97,6 +103,7 @@ export function useDraft<T extends FieldValues, O = T>(
       setRestoredAt(null);
     }
     if (storageKey === null || viewerId === undefined) return;
+    const draftAt: string = storageKey;
 
     removeStaleDrafts();
     const stored = readDraft(storageKey, version);
@@ -112,33 +119,41 @@ export function useDraft<T extends FieldValues, O = T>(
       removeDraft(storageKey);
     }
 
+    // Writes the draft, or drops it when the form is back to its defaults.
+    function sync(values: unknown, defaultValues: unknown) {
+      const kept = omitPaths(values, excluded.current);
+      const base = omitPaths(defaultValues ?? {}, excluded.current);
+      if (JSON.stringify(kept) === JSON.stringify(base)) {
+        cancel();
+        removeDraft(draftAt);
+        setRestoredAt(null);
+        return;
+      }
+      pendingWrite.current = () => {
+        // Signed out while a write waited: that draft is gone for good.
+        if (useSessionStore.getState().session === null) return;
+        writeDraft(draftAt, {
+          version,
+          savedAt: new Date().toISOString(),
+          values: kept as Record<string, unknown>,
+        });
+      };
+      clearTimeout(timer.current);
+      timer.current = setTimeout(flush, debounceMs);
+    }
+    resync.current = (saved) => {
+      sync(form.getValues(), saved);
+    };
     const unsubscribe = form.subscribe({
       formState: { values: true },
       callback: ({ values, defaultValues }) => {
-        const kept = omitPaths(values, excluded.current);
-        const base = omitPaths(defaultValues ?? {}, excluded.current);
-        if (JSON.stringify(kept) === JSON.stringify(base)) {
-          cancel();
-          removeDraft(storageKey);
-          setRestoredAt(null);
-          return;
-        }
-        pendingWrite.current = () => {
-          // Signed out while a write waited: that draft is gone for good.
-          if (useSessionStore.getState().session === null) return;
-          writeDraft(storageKey, {
-            version,
-            savedAt: new Date().toISOString(),
-            values: kept as Record<string, unknown>,
-          });
-        };
-        clearTimeout(timer.current);
-        timer.current = setTimeout(flush, debounceMs);
+        sync(values, defaultValues);
       },
     });
     window.addEventListener("pagehide", flush);
     return () => {
       window.removeEventListener("pagehide", flush);
+      resync.current = null;
       unsubscribe();
       flush();
     };
@@ -149,6 +164,14 @@ export function useDraft<T extends FieldValues, O = T>(
     if (storageKey !== null) removeDraft(storageKey);
     setRestoredAt(null);
   }, [cancel, storageKey]);
+
+  const settle = useCallback(
+    (saved: unknown) => {
+      clear();
+      resync.current?.(saved);
+    },
+    [clear],
+  );
 
   const discard = useCallback(() => {
     clear();
@@ -167,7 +190,7 @@ export function useDraft<T extends FieldValues, O = T>(
   }, [storageKey, form, rowKey]);
 
   return useMemo(
-    () => ({ restoredAt, discard, clear, keeps }),
-    [restoredAt, discard, clear, keeps],
+    () => ({ restoredAt, discard, clear, settle, keeps }),
+    [restoredAt, discard, clear, settle, keeps],
   );
 }

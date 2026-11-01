@@ -1,9 +1,19 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { z } from "zod";
 import i18n from "@/i18n";
 import { ApiError, NetworkError } from "@/lib/api/errors";
 import { axeViolations } from "@/test/axe";
+import {
+  FormActions,
+  FormGrid,
+  FormShell,
+  SaveButton,
+  TextField,
+  useFormSave,
+  useZodForm,
+} from "./index";
 import { KitForm, LABELS, renderInRouter, signInAs, VALID } from "./kitHarness";
 
 beforeAll(async () => {
@@ -204,5 +214,89 @@ describe("server errors on a form", () => {
     expect(
       Object.keys(localStorage).some((key) => key.startsWith("op.draft.")),
     ).toBe(false);
+  });
+
+  it("a nested path under a lookup lands on the lookup", async () => {
+    await saveFailing(
+      invalid({
+        path: "customer.number",
+        message: "This customer is blocked.",
+      }),
+    );
+    const lookup = await screen.findByRole("combobox", {
+      name: LABELS.customer,
+    });
+    expect(lookup).toHaveAttribute("aria-invalid", "true");
+    expect(lookup).toHaveAccessibleDescription(/This customer is blocked/);
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+
+  it("a path map renames the server's names to the form's, row by row", async () => {
+    const user = userEvent.setup();
+    const error = invalid(
+      { path: "customerNo", message: "Customer C-0002 is on hold." },
+      { path: "lines.1.itemNo", message: "Item I-0007 is not stocked." },
+    );
+    renderInRouter(
+      <KitForm
+        defaults={VALID}
+        onSave={() => Promise.reject(error)}
+        serverPaths={{
+          customerNo: "customer",
+          "lines.*.itemNo": "lines.*.quantity",
+        }}
+      />,
+    );
+    await user.type(
+      await screen.findByRole("textbox", { name: LABELS.remarks }),
+      "x",
+    );
+    await user.click(screen.getByRole("button", { name: "Save" }));
+    expect(
+      await screen.findByText("Customer C-0002 is on hold."),
+    ).toBeVisible();
+    expect(screen.getByText("Item I-0007 is not stocked.")).toBeVisible();
+    expect(box(LABELS.line(2))).toHaveAttribute("aria-invalid", "true");
+    expect(box(LABELS.line(1))).not.toHaveAttribute("aria-invalid");
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+});
+
+const rulesSchema = z.object({
+  po: z.string(),
+  lines: z.array(z.object({ q: z.string() })).min(1, "Add at least one line."),
+});
+
+function NoFieldForm({ onSave }: { onSave: () => Promise<void> }) {
+  const form = useZodForm<
+    z.input<typeof rulesSchema>,
+    z.output<typeof rulesSchema>
+  >({ schema: rulesSchema, defaultValues: { po: "", lines: [] } });
+  const save = useFormSave(form, { onSave });
+  return (
+    <FormShell form={form}>
+      <FormGrid>
+        <TextField control={form.control} name="po" label="PO" />
+      </FormGrid>
+      <FormActions>
+        <SaveButton form={form} onSave={save} />
+      </FormActions>
+    </FormShell>
+  );
+}
+
+describe("a rule the schema refuses where no field shows it", () => {
+  it("is said at the top, takes focus, and sends nothing", async () => {
+    const user = userEvent.setup();
+    const onSave = vi.fn(() => Promise.resolve());
+    renderInRouter(<NoFieldForm onSave={onSave} />);
+    await user.type(await screen.findByRole("textbox", { name: "PO" }), "A");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent("Add at least one line.");
+    await waitFor(() => {
+      expect(alert).toHaveFocus();
+    });
+    expect(onSave).not.toHaveBeenCalled();
   });
 });

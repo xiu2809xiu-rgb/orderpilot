@@ -67,47 +67,174 @@ function formMessage(error: unknown): {
   return { ...described, message: error.personMessage ?? described.message };
 }
 
-/**
- * Shows a failed save on the form, in the server's words. Each issue lands on
- * its field, including paths such as `lines.0.quantity`, and the one highest on
- * the page takes focus. What has no field, and any other error, goes to the form-level
- * error at the top with the trace id. Takes anything a save can throw.
- */
-export function applyServerError<T extends FieldValues, O = T>(
-  error: unknown,
-  form: Pick<UseFormReturn<T, unknown, O>, "control" | "setError" | "setFocus">,
-): void {
-  const issues: FieldIssue[] = error instanceof ApiError ? error.details : [];
-  const matched = issues.flatMap((issue) => {
-    const element = fieldElement(form.control, issue.path);
-    return element === undefined ? [] : [{ issue, element }];
-  });
-  const unmatched = issues.filter(
-    (issue) => !matched.some((entry) => entry.issue === issue),
-  );
-  for (const { issue } of matched) {
-    form.setError(issue.path as Path<T>, {
-      type: "server",
-      message: issue.message,
-    });
-  }
-  const first = [...matched].sort((a, b) =>
-    byPosition(a.element, b.element),
-  )[0];
-  if (first) form.setFocus(first.issue.path as Path<T>);
-  const focused = first !== undefined;
-  if (issues.length > 0 && unmatched.length === 0) return;
+/** Server paths and the form paths they belong to: "customerNo" to "customer". */
+export type PathMap = Readonly<Record<string, string>>;
 
-  const { message, traceId } = formMessage(error);
+/**
+ * A server path in the form's own words. A `*` stands for one row index and
+ * carries across: { "lines.*.itemNo": "lines.*.item" }. What follows the mapped
+ * part stays, so "lines.2.itemNo.length" would map as far as it can.
+ */
+function mapPath(path: string, map: PathMap): string {
+  const parts = path.split(".");
+  for (const [from, to] of Object.entries(map)) {
+    const pattern = from.split(".");
+    const indices: string[] = [];
+    const fits =
+      pattern.length <= parts.length &&
+      pattern.every((segment, index) => {
+        const part = parts[index] ?? "";
+        if (segment !== "*") return segment === part;
+        indices.push(part);
+        return /^\d+$/.test(part);
+      });
+    if (!fits) continue;
+    const mapped = to.split(".").map((segment) => {
+      return segment === "*" ? (indices.shift() ?? "") : segment;
+    });
+    return [...mapped, ...parts.slice(pattern.length)].join(".");
+  }
+  return path;
+}
+
+/**
+ * The nearest field at or above `path`: a lookup holds `{ number, name }`, so
+ * an issue on "customer.number" belongs to the field "customer".
+ */
+function nearestField<T extends FieldValues, O>(
+  control: Control<T, unknown, O>,
+  path: string,
+): { path: string; element: Element | null } | undefined {
+  const parts = path.split(".");
+  for (let length = parts.length; length > 0; length -= 1) {
+    const candidate = parts.slice(0, length).join(".");
+    const element = fieldElement(control, candidate);
+    if (element !== undefined) return { path: candidate, element };
+  }
+  return undefined;
+}
+
+type FormErrorTarget<T extends FieldValues, O> = Pick<
+  UseFormReturn<T, unknown, O>,
+  "control" | "setError" | "setFocus"
+>;
+
+function showOnForm<T extends FieldValues, O>(
+  form: FormErrorTarget<T, O>,
+  message: string,
+  traceId: string | undefined,
+  issues: string[],
+  takeFocus: boolean,
+) {
   form.setError(SERVER_ERROR, {
     type: "server",
     message,
-    types: {
-      traceId: traceId ?? false,
-      issues: unmatched.map((issue) => issue.message),
-      takeFocus: !focused,
-    },
+    types: { traceId: traceId ?? false, issues, takeFocus },
   });
+}
+
+interface PlacedIssue {
+  path: string;
+  message: string;
+}
+
+/** Puts each issue on its field and focuses the one highest on the page. */
+function placeIssues<T extends FieldValues, O>(
+  form: FormErrorTarget<T, O>,
+  issues: readonly PlacedIssue[],
+  map: PathMap,
+): { unmatched: PlacedIssue[]; focused: boolean } {
+  const placed = issues.map((issue) => ({
+    issue,
+    field: nearestField(form.control, mapPath(issue.path, map)),
+  }));
+  for (const { issue, field } of placed) {
+    if (field) {
+      form.setError(field.path as Path<T>, {
+        type: "server",
+        message: issue.message,
+      });
+    }
+  }
+  const first = placed
+    .filter((entry) => entry.field !== undefined)
+    .sort((a, b) =>
+      byPosition(a.field?.element ?? null, b.field?.element ?? null),
+    )[0];
+  if (first?.field) form.setFocus(first.field.path as Path<T>);
+  return {
+    unmatched: placed.flatMap((entry) => (entry.field ? [] : [entry.issue])),
+    focused: first !== undefined,
+  };
+}
+
+/**
+ * Shows a failed save on the form, in the server's words. Each issue lands on
+ * its field, including paths such as `lines.0.quantity`, and the one highest on
+ * the page takes focus. `map` renames the server's paths to the form's. What
+ * has no field, and any other error, goes to the form-level error at the top
+ * with the trace id. Takes anything a save can throw.
+ */
+export function applyServerError<T extends FieldValues, O = T>(
+  error: unknown,
+  form: FormErrorTarget<T, O>,
+  map: PathMap = {},
+): void {
+  const issues: FieldIssue[] = error instanceof ApiError ? error.details : [];
+  const { unmatched, focused } = placeIssues(form, issues, map);
+  if (issues.length > 0 && unmatched.length === 0) return;
+
+  const { message, traceId } = formMessage(error);
+  showOnForm(
+    form,
+    message,
+    traceId,
+    unmatched.map((issue) => issue.message),
+    !focused,
+  );
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/** Every message in a nested error tree, with the dotted path it sits at. */
+function flattenErrors(node: unknown, path: string[] = []): PlacedIssue[] {
+  if (!isRecord(node)) return [];
+  const own =
+    typeof node.message === "string" && node.message !== "" && path.length > 0
+      ? [{ path: path.join("."), message: node.message }]
+      : [];
+  const inner = Object.entries(node).flatMap(([key, child]) =>
+    ["ref", "message", "type", "types"].includes(key)
+      ? []
+      : flattenErrors(child, [...path, key]),
+  );
+  return [...own, ...inner];
+}
+
+/**
+ * Shows what the schema refused when the answer is not on a field: a list that
+ * needs a line, a rule across fields, or a field on a tab that is not open.
+ * React Hook Form focuses the first field that has an error; when none has,
+ * the summary takes focus instead, so Save never seems to do nothing.
+ */
+export function showInvalidOnForm<T extends FieldValues, O = T>(
+  errors: FieldErrors<T>,
+  form: FormErrorTarget<T, O>,
+): void {
+  const unmatched = flattenErrors(errors).filter(
+    (issue) => nearestField(form.control, issue.path) === undefined,
+  );
+  if (unmatched.length === 0) return;
+  const anyOnField = flattenErrors(errors).length > unmatched.length;
+  showOnForm(
+    form,
+    i18n.t("errors.invalid", { ns: "form" }),
+    undefined,
+    [...new Set(unmatched.map((issue) => issue.message))],
+    !anyOnField,
+  );
 }
 
 /** The form-level error, if there is one. */

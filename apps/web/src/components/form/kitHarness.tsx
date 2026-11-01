@@ -14,6 +14,7 @@ import { LookupField } from "./LookupField";
 import { MoneyField } from "./MoneyField";
 import { NumberField } from "./NumberField";
 import { SaveButton } from "./SaveButton";
+import type { SaveOptions } from "./useSaveReason";
 import { SelectField } from "./SelectField";
 import { TextAreaField } from "./TextAreaField";
 import { TextField } from "./TextField";
@@ -21,6 +22,7 @@ import { useDraft } from "./useDraft";
 import { useFormSave } from "./useFormSave";
 import { useSaveShortcut } from "./useSaveShortcut";
 import { useZodForm } from "./useZodForm";
+import type { PathMap } from "./serverErrors";
 import { requiredLookup, type LookupOption, type LookupSearch } from "./lookup";
 
 export const kitSchema = z.object({
@@ -116,6 +118,8 @@ interface KitFormProps {
   lookupDebounceMs?: number;
   /** Starting values, as a loaded record would give. */
   defaults?: Partial<KitInput>;
+  serverPaths?: PathMap;
+  saveOptions?: SaveOptions;
 }
 
 const kitSearch: LookupSearch = (query) =>
@@ -135,6 +139,8 @@ export function KitForm({
   debounceMs = 0,
   lookupDebounceMs = 0,
   defaults,
+  serverPaths,
+  saveOptions,
 }: KitFormProps) {
   const form = useZodForm<KitInput, KitOutput>({
     schema: kitSchema,
@@ -144,8 +150,8 @@ export function KitForm({
     exclude: ["creditLimit"],
     debounceMs,
   });
-  const save = useFormSave(form, { onSave, draft });
-  useSaveShortcut(form, save);
+  const save = useFormSave(form, { onSave, draft, serverPaths });
+  useSaveShortcut(form, save, saveOptions);
   const common = { control: form.control, readOnly, disabled };
   return (
     <FormShell form={form} draft={draft} aria-label={LABELS.form}>
@@ -207,7 +213,7 @@ export function KitForm({
         />
       </FormGrid>
       <FormActions>
-        <SaveButton form={form} onSave={save} />
+        <SaveButton form={form} onSave={save} {...saveOptions} />
       </FormActions>
     </FormShell>
   );
