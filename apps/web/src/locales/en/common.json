@@ -59,8 +59,13 @@
   },
   "notifications": {
     "title": "Notifications",
-    "empty": "No notifications yet",
-    "emptyHint": "Reminders and approval requests will appear here when workflows are built."
+    "titleCount_one": "Notifications: {{shown}} reminder",
+    "titleCount_other": "Notifications: {{shown}} reminders",
+    "empty": "No reminders right now.",
+    "noInbox": "Your role has no task inbox, so there is nothing to remind you about.",
+    "failed": "Could not load your reminders.",
+    "due": "Due {{date}}",
+    "seeAll": "See all ({{count}})"
   },
   "userMenu": {
     "label": "Account menu, {{initials}}",
@@ -131,18 +136,6 @@
       "home": "Go to home"
     }
   },
-  "home": {
-    "welcome": "Welcome, {{name}}",
-    "roleHome": "{{role}} home",
-    "atAGlance": "At a glance",
-    "atAGlanceHint": "Counts appear as each area is built.",
-    "noCues": "No tiles for your role yet.",
-    "lists": "Lists",
-    "listsEmptyTitle": "Your lists will appear here",
-    "listsEmptyHint": "Task lists, recent orders and documents for your role arrive with their areas.",
-    "noValue": "–",
-    "noCount": "No count yet"
-  },
   "planned": {
     "badge": "Planned",
     "arrives": "What arrives here",
@@ -167,5 +160,17 @@
     "checksLoading": "Loading the checks.",
     "checksFailed": "The checks could not be loaded. Quote this reference to support:",
     "checksNone": "No checks are registered yet."
+  },
+  "quickActions": {
+    "inbox": "Open my inbox",
+    "overdue": "Show my overdue tasks",
+    "reminders": "See my reminders",
+    "tracker": "Open the order tracker",
+    "exceptions": "Open the exceptions queue",
+    "kpis": "See the KPIs",
+    "users": "Manage users",
+    "matrix": "Roles and permissions",
+    "audit": "Open the audit trail",
+    "aiUse": "See AI use"
   }
 }

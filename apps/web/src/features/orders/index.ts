@@ -9,9 +9,6 @@ export default defineFeature({
   group: "operations",
   icon: Package,
   permission: "orders.read",
-  cues: [
-    { id: "open", roles: ["PRODUCT_MANAGER", "SUPPORT", "MANAGEMENT"] },
-    { id: "readyToShip", roles: ["WAREHOUSE", "LOGISTICS"] },
-  ],
+  cues: [],
   Page: lazy(() => import("./OrdersPage")),
 });

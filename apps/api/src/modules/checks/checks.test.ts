@@ -86,14 +86,41 @@ describe("the tracker over mock data", () => {
   });
 
   it("says what a step changed, in our own words", async () => {
-    const ready = dataset.orders.find(
-      (o) => o.sampleScreenState === "sample-ready-to-pick",
+    const readyRank = SAMPLE_SCREEN_STATES.indexOf("sample-ready-to-pick");
+    const paid = dataset.orders.find(
+      (o) =>
+        Number(o.header.prepaymentPercent) === 100 &&
+        SAMPLE_SCREEN_STATES.indexOf(o.sampleScreenState) >= readyRank,
     );
-    if (!ready) throw new Error("No ready-to-pick sample");
-    const timeline = await tracker.timeline(ready.header.no);
+    if (!paid) throw new Error("No fully prepaid order past the payment");
+    const timeline = await tracker.timeline(paid.header.no);
     expect(timeline.steps.map((s) => s.effect).join(" ")).toContain(
       "Payment confirmed: packing released",
     );
+  });
+
+  it("calls a part payment a deposit or prepayment, so it agrees with the balance still to confirm", async () => {
+    const partPaid = dataset.orders.filter((o) => {
+      const percent = Number(o.header.prepaymentPercent);
+      return percent > 0 && percent < 100;
+    });
+    const readyRank = SAMPLE_SCREEN_STATES.indexOf("sample-ready-to-pick");
+    const released = partPaid.filter(
+      (o) => SAMPLE_SCREEN_STATES.indexOf(o.sampleScreenState) >= readyRank,
+    );
+    expect(released.length).toBeGreaterThan(0);
+    let seen = 0;
+    for (const order of released) {
+      const { steps } = await tracker.timeline(order.header.no);
+      const titles = steps.map((s) => s.title);
+      expect(titles).not.toContain("Payment confirmed");
+      if (
+        titles.some((title) => /^(Deposit|Prepayment) confirmed$/.test(title))
+      ) {
+        seen += 1;
+      }
+    }
+    expect(seen).toBeGreaterThan(0);
   });
 
   it("answers an unknown order with not found", async () => {

@@ -1,7 +1,7 @@
 import { Suspense, lazy } from "react";
 import type { ComponentType, LazyExoticComponent } from "react";
 import type { RouteObject } from "react-router";
-import { ListPageSkeleton } from "@/components/common";
+import { ListPageSkeleton } from "@/components/common/skeletons";
 
 const ItemsPage = lazy(() => import("./ItemsPage"));
 const ItemDetailPage = lazy(() => import("./ItemDetailPage"));

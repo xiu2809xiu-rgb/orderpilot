@@ -1,7 +1,7 @@
-import { ROLES } from "@orderpilot/shared";
+import { ROLES, type Role } from "@orderpilot/shared";
 import { describe, expect, it } from "vitest";
 import { sessionFor } from "@/test/fixtures";
-import { cuesFor, featuresFor, groupedFeatures } from "./nav";
+import { cuesFor, featuresFor, groupedFeatures, TILE_ORDER } from "./nav";
 import { features } from "./registry";
 
 describe("the feature registry", () => {
@@ -57,18 +57,67 @@ describe("menus by role", () => {
 });
 
 describe("role home tiles", () => {
-  it.each(ROLES)("%s has at least one tile it may open", (role) => {
-    const session = sessionFor(role);
-    expect(cuesFor(role, featuresFor(session)).length).toBeGreaterThan(0);
+  const EXPECTED: Record<Role, readonly string[]> = {
+    PRODUCT_MANAGER: ["myTasks", "waitingForApproval", "openOrders", "overdue"],
+    // The story lists Open exceptions too, but the default matrix gives the
+    // approver no exceptions.read, and a tile never lands on a refusal.
+    APPROVER: ["awaitingApproval", "overdue", "openOrders"],
+    SUPPORT: [
+      "myTasks",
+      "documentsToConfirm",
+      "openOrders",
+      "overdue",
+      "openExceptions",
+    ],
+    WAREHOUSE: ["myTasks", "readyToPick", "overdue", "openExceptions"],
+    FINANCE: ["myTasks", "awaitingPayment", "overdue", "openExceptions"],
+    LOGISTICS: ["myTasks", "readyToPick", "overdue", "openExceptions"],
+    MANAGEMENT: [
+      "openOrders",
+      "overdue",
+      "awaitingApproval",
+      "awaitingPayment",
+      "readyToPick",
+      "openExceptions",
+    ],
+    AUDITOR: ["auditEvents", "refusedActions", "roles", "openExceptions"],
+    SYSTEM_ADMIN: ["activeUsers", "roles", "auditEvents", "aiUse"],
+  };
+
+  it.each(ROLES)("%s gets its tiles, in order", (role) => {
+    const ids = cuesFor(sessionFor(role)).map((c) => c.cue.id);
+    expect(ids).toEqual(EXPECTED[role]);
+    expect(TILE_ORDER[role]).toEqual(
+      expect.arrayContaining([...EXPECTED[role]]),
+    );
   });
 
-  it("gives approvers the SPR tile and warehouse staff the ship tile", () => {
-    const ids = (role: (typeof ROLES)[number]) =>
-      cuesFor(role, featuresFor(sessionFor(role))).map(
-        (c) => `${c.feature.id}.${c.cue.id}`,
-      );
-    expect(ids("APPROVER")).toContain("workflows.sprApproval");
-    expect(ids("WAREHOUSE")).toContain("orders.readyToShip");
-    expect(ids("WAREHOUSE")).not.toContain("workflows.sprApproval");
+  it.each(ROLES)(
+    "%s gets no tile that opens a page it may not read",
+    (role) => {
+      const session = sessionFor(role);
+      const open = featuresFor(session);
+      for (const { cue } of cuesFor(session)) {
+        const segment = cue.to.split(/[/?]/)[1];
+        const page = open.find((f) => f.path === segment);
+        expect(page, `${role} ${cue.id} opens ${cue.to}`).toBeDefined();
+        if (cue.permission) {
+          expect(session.permissions).toContain(cue.permission);
+        }
+      }
+    },
+  );
+
+  it("drops a tile when the session lacks the list's permission", () => {
+    const session = sessionFor("MANAGEMENT");
+    const narrowed = {
+      ...session,
+      permissions: session.permissions.filter(
+        (p) => p !== "workflows.inboxes.any",
+      ),
+    };
+    const ids = cuesFor(narrowed).map((c) => c.cue.id);
+    expect(ids).not.toContain("awaitingApproval");
+    expect(cuesFor(null)).toEqual([]);
   });
 });

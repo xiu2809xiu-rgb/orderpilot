@@ -9,7 +9,7 @@ Content-Type: application/json
 
 { "role": "MANAGEMENT" }
 
-### The tracker, a page at a time. Sort by orderNo, customerName, orderDate or shipmentDate.
+### The tracker, a page at a time. Sort by orderNo, customerName, orderDate, shipmentDate or amount.
 GET {{baseUrl}}/api/v1/tracker/orders?page=1&pageSize=10&sort=orderDate&direction=desc
 
 ### Only the overdue orders, found by a search.
@@ -17,6 +17,21 @@ GET {{baseUrl}}/api/v1/tracker/orders?overdue=true&search=SO
 
 ### Only the orders at one status, or held by one role. The status code is in each row.
 GET {{baseUrl}}/api/v1/tracker/orders?status=sample-awaiting-payment
+
+### Several statuses at once, as a step of the sales flow opens them.
+GET {{baseUrl}}/api/v1/tracker/orders?status=sample-short-stock,sample-pending-approval
+
+### The open orders, and the orders with a document to confirm.
+GET {{baseUrl}}/api/v1/tracker/orders?open=true
+
+###
+GET {{baseUrl}}/api/v1/tracker/orders?documentToConfirm=true
+
+### Open orders at each of the nine sales steps. They add up to openOrders.
+GET {{baseUrl}}/api/v1/tracker/flow
+
+### The queue is the open exceptions unless asked. ALL keeps the resolved ones too.
+GET {{baseUrl}}/api/v1/exceptions?state=ALL
 ###
 GET {{baseUrl}}/api/v1/tracker/orders?ownerRole=WAREHOUSE&pageSize=50
 

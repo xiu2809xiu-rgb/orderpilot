@@ -7,6 +7,7 @@ import {
 } from "@nestjs/swagger";
 import {
   orderTimelineResponseSchema,
+  salesFlowResponseSchema,
   trackerListSchema,
   trackerQuerySchema,
   type TrackerQuery,
@@ -18,13 +19,13 @@ import { ZodValidationPipe } from "../../common/zod-validation.pipe.js";
 import { TrackerService } from "./tracker.service.js";
 
 @ApiTags("Tracker")
-@Controller("tracker/orders")
+@Controller("tracker")
 export class TrackerController {
   constructor(
     @Inject(TrackerService) private readonly tracker: TrackerService,
   ) {}
 
-  @Get()
+  @Get("orders")
   @RequirePermission("tracker.read")
   @ApiOperation({
     summary:
@@ -47,7 +48,18 @@ export class TrackerController {
     };
   }
 
-  @Get(":orderNo")
+  @Get("flow")
+  @RequirePermission("tracker.read")
+  @ApiOperation({
+    summary:
+      "Open orders at each step of the sales flow, for the home page. Mock data",
+  })
+  @ApiOkResponse({ schema: openApiSchema(salesFlowResponseSchema) })
+  async flow() {
+    return { data: await this.tracker.flow(), meta: { mock: true as const } };
+  }
+
+  @Get("orders/:orderNo")
   @RequirePermission("tracker.read")
   @ApiParam({ name: "orderNo", schema: { type: "string" } })
   @ApiOperation({

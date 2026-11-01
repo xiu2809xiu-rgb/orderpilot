@@ -1,5 +1,5 @@
 import type { SprDetail } from "@orderpilot/shared";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { ErrorPanel, toast } from "@/components/common";
@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import {
   workflowsApprove,
   workflowsReject,
+  workflowsUndoDecision,
 } from "@/lib/api/generated/endpoints/workflows/workflows";
 import { formatDateTime } from "./format";
 
@@ -15,8 +16,8 @@ type Outcome = "approved" | "rejected";
 
 /**
  * Approve or reject, with a comment. Approve is the one primary button;
- * Reject sits beside it as a secondary action. In the base the answer says
- * that nothing was changed, and the screen says so too.
+ * Reject sits beside it as a secondary action. The decision shows here at once
+ * and its toast offers Undo.
  */
 export function SprDecisionForm({
   spr,
@@ -28,20 +29,27 @@ export function SprDecisionForm({
   const { t } = useTranslation("workflows");
   const [comment, setComment] = useState("");
   const [missing, setMissing] = useState(false);
-  const [asked, setAsked] = useState<Outcome>("approved");
+  const queryClient = useQueryClient();
   const decide = useMutation({
     mutationFn: (outcome: Outcome) =>
       outcome === "approved"
         ? workflowsApprove(spr.ref.recordNo, { comment })
         : workflowsReject(spr.ref.recordNo, { comment }),
-    // The base only echoes the decision. Undo arrives with the mock overlay.
-    onSuccess: (_result, outcome) =>
+    onSuccess: async (_result, outcome) => {
+      await queryClient.invalidateQueries();
       toast.done(
         t("spr.toast.done", {
           outcome: t(`spr.outcomes.${outcome}`),
           ref: spr.ref.recordNo,
         }),
-      ),
+        {
+          undo: async () => {
+            await workflowsUndoDecision(spr.ref.recordNo);
+            await queryClient.invalidateQueries();
+          },
+        },
+      );
+    },
     onError: () => toast.failed(t("spr.toast.failed")),
   });
 
@@ -64,7 +72,6 @@ export function SprDecisionForm({
   }
 
   function submit(outcome: Outcome) {
-    setAsked(outcome);
     const empty = comment.trim() === "";
     setMissing(empty);
     if (!empty) decide.mutate(outcome);
@@ -103,17 +110,6 @@ export function SprDecisionForm({
         ) : null}
       </div>
       {decide.isError ? <ErrorPanel error={decide.error} /> : null}
-      {decide.isSuccess ? (
-        <div
-          role="status"
-          className="rounded-lg bg-warning-surface px-s2 py-s1 text-sm text-warning"
-        >
-          <p className="font-medium">
-            {t("spr.resultTitle", { outcome: t(`spr.outcomes.${asked}`) })}
-          </p>
-          <p>{decide.data.data.message}</p>
-        </div>
-      ) : null}
       <div className="flex flex-wrap gap-2">
         <Button
           type="submit"

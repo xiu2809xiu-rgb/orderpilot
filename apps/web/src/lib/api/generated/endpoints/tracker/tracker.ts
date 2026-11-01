@@ -21,6 +21,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  TrackerFlow200,
   TrackerList200,
   TrackerListParams,
   TrackerTimeline200
@@ -129,6 +130,98 @@ export function useTrackerList<TData = Awaited<ReturnType<typeof trackerList>>, 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getTrackerListQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary Open orders at each step of the sales flow, for the home page. Mock data
+ */
+export const trackerFlow = (
+
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<TrackerFlow200>(
+      {url: `/api/v1/tracker/flow`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getTrackerFlowQueryKey = () => {
+    return [
+    `/api/v1/tracker/flow`
+    ] as const;
+    }
+
+
+export const getTrackerFlowQueryOptions = <TData = Awaited<ReturnType<typeof trackerFlow>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof trackerFlow>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getTrackerFlowQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof trackerFlow>>> = ({ signal }) => trackerFlow(signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof trackerFlow>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type TrackerFlowQueryResult = NonNullable<Awaited<ReturnType<typeof trackerFlow>>>
+export type TrackerFlowQueryError = ErrorType<unknown>
+
+
+export function useTrackerFlow<TData = Awaited<ReturnType<typeof trackerFlow>>, TError = ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof trackerFlow>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof trackerFlow>>,
+          TError,
+          Awaited<ReturnType<typeof trackerFlow>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTrackerFlow<TData = Awaited<ReturnType<typeof trackerFlow>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof trackerFlow>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof trackerFlow>>,
+          TError,
+          Awaited<ReturnType<typeof trackerFlow>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTrackerFlow<TData = Awaited<ReturnType<typeof trackerFlow>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof trackerFlow>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Open orders at each step of the sales flow, for the home page. Mock data
+ */
+
+export function useTrackerFlow<TData = Awaited<ReturnType<typeof trackerFlow>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof trackerFlow>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getTrackerFlowQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

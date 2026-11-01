@@ -48,6 +48,15 @@ export function multiplyDecimal(a: string, b: string): string {
   return fromUnits(rounded);
 }
 
+/** An amount as it is paid: rounded half away from zero to two decimals. */
+export function roundToCents(value: string): string {
+  const cent = FACTOR / 100n;
+  const units = toUnits(value);
+  const half = cent / 2n;
+  const whole = (units >= 0n ? units + half : units - half) / cent;
+  return fromUnits(whole * cent);
+}
+
 /** -1, 0 or 1. */
 export function compareDecimal(a: string, b: string): -1 | 0 | 1 {
   const x = toUnits(a);

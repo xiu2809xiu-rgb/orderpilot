@@ -5,6 +5,7 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
+import type { UsersListActive } from './usersListActive.ts';
 
 export type UsersListParams = {
 /**
@@ -17,4 +18,5 @@ page?: number;
  * @maximum 200
  */
 pageSize?: number;
+active?: UsersListActive;
 };

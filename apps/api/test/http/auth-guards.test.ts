@@ -167,6 +167,10 @@ describe("the guards", () => {
       });
       expect(event?.changes).toMatchObject({ permission: "settings.manage" });
       expect(event?.traceId).toBe(res.headers["x-request-id"]);
+      // The auditor reads the summary, so it is in words. The route stays in the event.
+      expect(event?.summary).toMatch(/was refused changing the settings$/);
+      expect(event?.summary).not.toContain("/");
+      expect(event?.entityId).toContain("/probe/settings");
     });
 
     it("does not audit an anonymous call to a protected route, so the trail cannot be flooded", async () => {

@@ -8,7 +8,7 @@
 import type { WorkflowsReject200DataOutcome } from './workflowsReject200DataOutcome.ts';
 
 export type WorkflowsReject200Data = {
-  applied: false;
+  applied: true;
   message: string;
   /** @pattern ^SPR-\d{8}-\d{4,}$ */
   recordNo: string;

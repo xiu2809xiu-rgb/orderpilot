@@ -99,7 +99,7 @@ describe("signed in", () => {
     expect(
       await screen.findByRole("heading", { name: "Welcome, Grace Ong" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Finance home")).toBeInTheDocument();
+    expect(screen.getByText(/^Finance · /)).toBeInTheDocument();
   });
 
   it("falls back to the login page when a stale session cookie cannot be restored", async () => {
@@ -118,13 +118,18 @@ describe("signed in", () => {
     ).toHaveLength(1);
   });
 
-  it("shows tiles with a dash and Planned, never an invented count", async () => {
+  it("keeps the page up when a tile cannot load, and offers a retry", async () => {
     renderApp("/", { session: sessionFor("WAREHOUSE") });
-    const tile = await screen.findByRole("link", { name: /Ready to ship/ });
-    expect(tile).toHaveAttribute("href", "/orders");
-    expect(tile).toHaveTextContent("Planned");
-    expect(tile).toHaveTextContent("No count yet");
-    expect(tile.textContent).not.toMatch(/\d/);
+    const tiles = await screen.findByRole("region", { name: "Your counts" });
+    await waitFor(() => {
+      expect(
+        within(tiles).getAllByRole("button", { name: /Retry/ }),
+      ).toHaveLength(4);
+    });
+    expect(tiles.textContent).not.toMatch(/Planned|No count yet/);
+    expect(
+      screen.getByRole("heading", { name: /Welcome/ }),
+    ).toBeInTheDocument();
   });
 
   it("gives each role its own menu inside a navigation landmark", async () => {

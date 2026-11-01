@@ -32,6 +32,9 @@ export const PERMISSIONS = [
   "workflows.read",
   "spr.read",
   "workflows.inboxes.any",
+  // Marking a task in the caller's own inbox as done. The system admin never
+  // holds it (see governance/matrix.ts).
+  "tasks.complete",
 ] as const;
 
 export const permissionSchema = z.enum(PERMISSIONS);
@@ -60,6 +63,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "insights.read",
     "workflows.read",
     "spr.read",
+    "tasks.complete",
   ],
   APPROVER: [
     "orders.read",
@@ -68,6 +72,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "workflows.read",
     "spr.read",
     "approvals.decide",
+    "tasks.complete",
   ],
   SUPPORT: [
     "orders.read",
@@ -76,6 +81,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "tracker.read",
     "exceptions.read",
     "workflows.read",
+    "tasks.complete",
   ],
   WAREHOUSE: [
     "orders.read",
@@ -83,6 +89,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "tracker.read",
     "exceptions.read",
     "workflows.read",
+    "tasks.complete",
   ],
   FINANCE: [
     "orders.read",
@@ -91,6 +98,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "exceptions.read",
     "workflows.read",
     "payments.confirm",
+    "tasks.complete",
   ],
   LOGISTICS: [
     "orders.read",
@@ -98,6 +106,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "tracker.read",
     "exceptions.read",
     "workflows.read",
+    "tasks.complete",
   ],
   MANAGEMENT: [
     "orders.read",

@@ -71,7 +71,8 @@ export class MatrixController {
   @ApiOperation({ summary: "Read the role-permission matrix" })
   @ApiOkResponse({ schema: openApiSchema(matrixResponseSchema) })
   async read() {
-    return { data: await this.matrix.matrix() };
+    const data = await this.matrix.matrix();
+    return { data, meta: { total: data.roles.length } };
   }
 
   @Put(":role/permissions/:permission")

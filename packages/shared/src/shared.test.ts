@@ -19,6 +19,7 @@ import {
   errorEnvelopeSchema,
   formatRecordNumber,
   multiplyDecimal,
+  roundToCents,
   orderSchema,
   pageEnvelope,
   parseRecordNumber,
@@ -98,6 +99,13 @@ describe("money", () => {
   it("multiplies and rounds", () => {
     expect(multiplyDecimal("12", "3.5")).toBe("42.00");
     expect(multiplyDecimal("0.3333", "3")).toBe("0.9999");
+  });
+  it("rounds to cents, half away from zero", () => {
+    expect(roundToCents("601.596")).toBe("601.60");
+    expect(roundToCents("5222.205")).toBe("5222.21");
+    expect(roundToCents("5222.2049")).toBe("5222.20");
+    expect(roundToCents("-1.005")).toBe("-1.01");
+    expect(roundToCents("12")).toBe("12.00");
   });
   it("compares", () => {
     expect(compareDecimal("1.10", "1.1")).toBe(0);

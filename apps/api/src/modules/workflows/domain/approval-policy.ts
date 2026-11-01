@@ -5,6 +5,8 @@ export interface ApproverProfile {
   readonly setup: ApprovalUserSetup;
   /** The substitute's name, when the setup names one. */
   readonly substituteName: string | null;
+  /** The name of the person the setup escalates to (its Approver ID), when it names one. */
+  readonly escalatesToName: string | null;
 }
 
 /**

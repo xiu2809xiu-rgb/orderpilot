@@ -6,9 +6,6 @@
     "An AI explanation of each exception, marked as AI",
     "Tolerances set from Spectra answers"
   ],
-  "cues": {
-    "open": "Open exceptions"
-  },
   "list": {
     "caption": "Exceptions waiting for a person",
     "emptyTitle": "No exceptions",

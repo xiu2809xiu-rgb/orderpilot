@@ -6,9 +6,6 @@
     "Trends over a period you choose",
     "Real figures once Spectra gives baselines"
   ],
-  "cues": {
-    "kpis": "KPI dashboard"
-  },
   "kpi": {
     "labEstimate": "Mock lab estimates",
     "labEstimateHint": "No real run has happened. These numbers only show how the dashboard will read. They are not linked to the order tracker.",
@@ -26,5 +23,8 @@
     "emptyTitle": "No measures yet",
     "emptyDescription": "The five measures appear here once the dashboard has figures.",
     "loadingChart": "Loading the charts"
+  },
+  "trend": {
+    "label": "{{weeks}} weeks, from {{from}} to {{to}} {{unit}}"
   }
 }
