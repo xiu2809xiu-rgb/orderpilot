@@ -32,6 +32,7 @@ export class MockApprovalPolicy extends ApprovalPolicy {
       displayName: DEMO_PERSONAS.APPROVER,
       setup: APPROVER_SETUP,
       substituteName: DEMO_PERSONAS.PRODUCT_MANAGER,
+      escalatesToName: DEMO_PERSONAS.MANAGEMENT,
     });
   }
 }

@@ -4,7 +4,7 @@ import { recordRefSchema } from "../record-number.js";
 import { roleSchema } from "../roles.js";
 import { approvalUserSetupSchema } from "../governance/approval.js";
 import { paymentTypeSchema } from "../governance/payment.js";
-import { notAppliedSchema, orderNoSchema } from "./common.js";
+import { mockRecordedSchema, orderNoSchema } from "./common.js";
 
 export const sprNumberSchema = z
   .string()
@@ -63,6 +63,8 @@ export const sprDetailSchema = z.object({
     setup: approvalUserSetupSchema,
   }),
   substituteName: z.string().min(1).nullable(),
+  /** The name of the person behind `approver.setup.approverId`, who is told when the approver does not act. */
+  escalatesToName: z.string().min(1).nullable(),
   /** Null until someone decides. */
   decision: z
     .object({
@@ -80,7 +82,7 @@ export const sprDecisionInputSchema = z.object({
 });
 export type SprDecisionInput = z.infer<typeof sprDecisionInputSchema>;
 
-export const sprDecisionResultSchema = notAppliedSchema.extend({
+export const sprDecisionResultSchema = mockRecordedSchema.extend({
   recordNo: sprNumberSchema,
   outcome: z.enum(SPR_DECISIONS),
   /** The comment as it was understood, so the screen can show it was heard. */
@@ -88,8 +90,27 @@ export const sprDecisionResultSchema = notAppliedSchema.extend({
 });
 export type SprDecisionResult = z.infer<typeof sprDecisionResultSchema>;
 
-export const paymentResultSchema = notAppliedSchema.extend({
+/** What an Undo of a decision answers: the SPR is waiting for a decision again. */
+export const sprDecisionUndoResultSchema = mockRecordedSchema.extend({
+  recordNo: sprNumberSchema,
+});
+export type SprDecisionUndoResult = z.infer<typeof sprDecisionUndoResultSchema>;
+
+export const paymentResultSchema = mockRecordedSchema.extend({
   orderNo: orderNoSchema,
+  /** The confirmation's id, which the Undo route takes. */
+  paymentId: z.uuid(),
   paymentType: paymentTypeSchema,
 });
 export type PaymentResult = z.infer<typeof paymentResultSchema>;
+
+export const paymentUndoParamsSchema = z.object({
+  orderNo: orderNoSchema,
+  paymentId: z.uuid(),
+});
+
+export const paymentUndoResultSchema = mockRecordedSchema.extend({
+  orderNo: orderNoSchema,
+  paymentId: z.uuid(),
+});
+export type PaymentUndoResult = z.infer<typeof paymentUndoResultSchema>;

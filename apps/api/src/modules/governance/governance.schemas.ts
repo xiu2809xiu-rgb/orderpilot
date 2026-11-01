@@ -4,12 +4,15 @@ import {
   dataEnvelope,
   maskedFieldSchema,
   maskingRuleSchema,
+  matrixMetaSchema,
   matrixSchema,
   roleAccessSchema,
 } from "@orderpilot/shared";
 import { z } from "zod";
 
-export const matrixResponseSchema = dataEnvelope(matrixSchema);
+export const matrixResponseSchema = dataEnvelope(matrixSchema).extend({
+  meta: matrixMetaSchema,
+});
 export const roleAccessResponseSchema = dataEnvelope(roleAccessSchema);
 
 /** One synthetic customer with the sample rule applied for the caller's role. */

@@ -6,7 +6,9 @@
  * OpenAPI spec version: 0.0.0
  */
 import type { MatrixRead200Data } from './matrixRead200Data.ts';
+import type { MatrixRead200Meta } from './matrixRead200Meta.ts';
 
 export type MatrixRead200 = {
   data: MatrixRead200Data;
+  meta: MatrixRead200Meta;
 };

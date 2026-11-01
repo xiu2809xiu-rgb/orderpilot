@@ -93,15 +93,14 @@ describe("feature namespaces", () => {
     },
   );
 
-  it("gives every cue a label", async () => {
+  it("gives every home tile a label", async () => {
+    await i18n.loadNamespaces("home");
     for (const feature of features) {
-      await i18n.loadNamespaces(feature.namespace);
       for (const cue of feature.cues) {
-        const key = `cues.${cue.id}`;
-        expect(
-          i18n.t(key, { ns: feature.namespace }),
-          `${feature.id} ${key}`,
-        ).not.toBe(key);
+        const key = `tiles.${cue.id}`;
+        expect(i18n.t(key, { ns: "home" }), `${feature.id} ${key}`).not.toBe(
+          key,
+        );
       }
     }
   });

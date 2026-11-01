@@ -8,6 +8,8 @@ export interface ReportedOrderStatus {
   readonly ownerRole: Role;
   /** When the order entered this status. */
   readonly since: string;
+  /** False once nothing is left to do on the order. */
+  readonly open: boolean;
 }
 
 /**

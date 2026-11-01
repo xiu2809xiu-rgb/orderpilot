@@ -3,10 +3,14 @@ import {
   documentTypeConfigSchema,
   mockEnvelope,
   mockPageEnvelope,
+  openRuleSchema,
   orderFlowSchema,
   paymentResultSchema,
+  paymentUndoResultSchema,
   sprDecisionResultSchema,
+  sprDecisionUndoResultSchema,
   sprDetailSchema,
+  taskActionResultSchema,
   workflowReminderSchema,
   workflowTaskSchema,
 } from "@orderpilot/shared";
@@ -22,6 +26,12 @@ export const orderFlowResponseSchema = mockEnvelope(orderFlowSchema);
 export const sprResponseSchema = mockEnvelope(sprDetailSchema);
 export const sprDecisionResponseSchema = mockEnvelope(sprDecisionResultSchema);
 export const paymentResponseSchema = mockEnvelope(paymentResultSchema);
+export const paymentUndoResponseSchema = mockEnvelope(paymentUndoResultSchema);
+export const sprDecisionUndoResponseSchema = mockEnvelope(
+  sprDecisionUndoResultSchema,
+);
+export const taskActionResponseSchema = mockEnvelope(taskActionResultSchema);
+export const openRulesResponseSchema = mockEnvelope(z.array(openRuleSchema));
 /** Configuration is real data from the database, so it carries no `meta.mock`. */
 export const documentConfigResponseSchema = dataEnvelope(
   z.array(documentTypeConfigSchema),

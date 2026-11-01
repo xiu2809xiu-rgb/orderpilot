@@ -7,6 +7,7 @@ import {
   Param,
   Post,
   Query,
+  Req,
 } from "@nestjs/common";
 import {
   ApiBody,
@@ -19,9 +20,11 @@ import {
   inboxParamsSchema,
   orderParamsSchema,
   paymentConfirmationInputSchema,
+  paymentUndoParamsSchema,
   remindersQuerySchema,
   sprDecisionInputSchema,
   sprParamsSchema,
+  taskParamsSchema,
   tasksQuerySchema,
   type InboxRole,
   type PaymentConfirmationInput,
@@ -29,18 +32,28 @@ import {
   type SprDecisionInput,
   type TasksQuery,
 } from "@orderpilot/shared";
+import type { Request } from "express";
 import type { AuthContext } from "../../auth/auth-context.js";
 import { Auth, RequirePermission } from "../../auth/decorators.js";
 import { openApiQuery, openApiSchema } from "../../common/openapi.js";
+import { requestIdOf } from "../../common/request-id.js";
 import { ZodValidationPipe } from "../../common/zod-validation.pipe.js";
 import { InboxScope } from "./domain/inbox-scope.js";
 import {
+  MockWorkflowActions,
+  type ActionInfo,
+} from "./mock/mock-workflow-actions.js";
+import {
   documentConfigResponseSchema,
+  openRulesResponseSchema,
   orderFlowResponseSchema,
   paymentResponseSchema,
+  paymentUndoResponseSchema,
   reminderListResponseSchema,
   sprDecisionResponseSchema,
+  sprDecisionUndoResponseSchema,
   sprResponseSchema,
+  taskActionResponseSchema,
   taskListResponseSchema,
 } from "./workflows.schemas.js";
 import { WorkflowsService } from "./workflows.service.js";
@@ -59,18 +72,32 @@ const roleParam = ApiParam({
   name: "role",
   schema: { type: "string", example: "WAREHOUSE" },
 });
+const taskParam = ApiParam({
+  name: "taskId",
+  schema: { type: "string", format: "uuid" },
+});
+const paymentParam = ApiParam({
+  name: "paymentId",
+  schema: { type: "string", format: "uuid" },
+});
+
+function infoOf(req: Request): ActionInfo {
+  return { ip: req.ip ?? null, traceId: requestIdOf(req) };
+}
 
 /**
  * The area 2 base: every route answers with typed mock data (`meta.mock`)
  * except the document configuration, which is read from its table. The
- * commands check and say that nothing was changed. Every route names its
- * permission; who holds it is the role-permission matrix (area 4).
+ * commands write a real audit event and keep their result in a mock overlay,
+ * never in an order's status. Every route names its permission; who holds it
+ * is the role-permission matrix (area 4).
  */
 @ApiTags("Workflows")
 @Controller("workflows")
 export class WorkflowsController {
   constructor(
     @Inject(WorkflowsService) private readonly workflows: WorkflowsService,
+    @Inject(MockWorkflowActions) private readonly actions: MockWorkflowActions,
   ) {}
 
   @Get("tasks")
@@ -83,6 +110,43 @@ export class WorkflowsController {
     @Query(new ZodValidationPipe(tasksQuerySchema)) query: TasksQuery,
   ) {
     return this.tasksOf(InboxScope.own(auth.user.role), query);
+  }
+
+  @Post("tasks/:taskId/complete")
+  @HttpCode(200)
+  @RequirePermission("tasks.complete")
+  @taskParam
+  @ApiOperation({
+    summary:
+      "Mark a task in the caller's own inbox as done. Kept in the mock overlay, audited",
+  })
+  @ApiOkResponse({ schema: openApiSchema(taskActionResponseSchema) })
+  async completeTask(
+    @Param(new ZodValidationPipe(taskParamsSchema)) params: { taskId: string },
+    @Auth() auth: AuthContext,
+    @Req() req: Request,
+  ) {
+    return {
+      data: await this.actions.completeTask(params.taskId, auth, infoOf(req)),
+      meta: MOCK,
+    };
+  }
+
+  @Post("tasks/:taskId/undo")
+  @HttpCode(200)
+  @RequirePermission("tasks.complete")
+  @taskParam
+  @ApiOperation({ summary: "Undo a completed task. Audited" })
+  @ApiOkResponse({ schema: openApiSchema(taskActionResponseSchema) })
+  async undoTask(
+    @Param(new ZodValidationPipe(taskParamsSchema)) params: { taskId: string },
+    @Auth() auth: AuthContext,
+    @Req() req: Request,
+  ) {
+    return {
+      data: await this.actions.undoTask(params.taskId, auth, infoOf(req)),
+      meta: MOCK,
+    };
   }
 
   @Get("inboxes/:role/tasks")
@@ -149,7 +213,7 @@ export class WorkflowsController {
   @orderParam
   @ApiOperation({
     summary:
-      "Confirm a payment, with its type. Checked only: nothing is stored",
+      "Confirm a payment, with its type. Kept in the mock overlay, audited",
   })
   @ApiBody({ schema: openApiSchema(paymentConfirmationInputSchema) })
   @ApiOkResponse({ schema: openApiSchema(paymentResponseSchema) })
@@ -158,9 +222,41 @@ export class WorkflowsController {
     params: { orderNo: string },
     @Body(new ZodValidationPipe(paymentConfirmationInputSchema))
     body: PaymentConfirmationInput,
+    @Auth() auth: AuthContext,
+    @Req() req: Request,
+  ) {
+    await this.workflows.flow(params.orderNo);
+    return {
+      data: await this.actions.confirmPayment(
+        params.orderNo,
+        body,
+        auth,
+        infoOf(req),
+      ),
+      meta: MOCK,
+    };
+  }
+
+  @Post("orders/:orderNo/payments/:paymentId/undo")
+  @HttpCode(200)
+  @RequirePermission("payments.confirm")
+  @orderParam
+  @paymentParam
+  @ApiOperation({ summary: "Undo a payment confirmation. Audited" })
+  @ApiOkResponse({ schema: openApiSchema(paymentUndoResponseSchema) })
+  async undoPayment(
+    @Param(new ZodValidationPipe(paymentUndoParamsSchema))
+    params: { orderNo: string; paymentId: string },
+    @Auth() auth: AuthContext,
+    @Req() req: Request,
   ) {
     return {
-      data: await this.workflows.confirmPayment(params.orderNo, body),
+      data: await this.actions.undoPayment(
+        params.orderNo,
+        params.paymentId,
+        auth,
+        infoOf(req),
+      ),
       meta: MOCK,
     };
   }
@@ -184,7 +280,7 @@ export class WorkflowsController {
   @recordParam
   @ApiOperation({
     summary:
-      "Approve a stock purchase request, with a comment. Checked only: nothing is changed",
+      "Approve a stock purchase request, with a comment. Kept in the mock overlay, audited",
   })
   @ApiBody({ schema: openApiSchema(sprDecisionInputSchema) })
   @ApiOkResponse({ schema: openApiSchema(sprDecisionResponseSchema) })
@@ -192,12 +288,17 @@ export class WorkflowsController {
     @Param(new ZodValidationPipe(sprParamsSchema)) params: { recordNo: string },
     @Body(new ZodValidationPipe(sprDecisionInputSchema))
     body: SprDecisionInput,
+    @Auth() auth: AuthContext,
+    @Req() req: Request,
   ) {
+    await this.workflows.spr(params.recordNo);
     return {
-      data: await this.workflows.decide(
+      data: await this.actions.decide(
         params.recordNo,
         "approved",
         body.comment,
+        auth,
+        infoOf(req),
       ),
       meta: MOCK,
     };
@@ -209,7 +310,7 @@ export class WorkflowsController {
   @recordParam
   @ApiOperation({
     summary:
-      "Reject a stock purchase request, with a comment. Checked only: nothing is changed",
+      "Reject a stock purchase request, with a comment. Kept in the mock overlay, audited",
   })
   @ApiBody({ schema: openApiSchema(sprDecisionInputSchema) })
   @ApiOkResponse({ schema: openApiSchema(sprDecisionResponseSchema) })
@@ -217,13 +318,35 @@ export class WorkflowsController {
     @Param(new ZodValidationPipe(sprParamsSchema)) params: { recordNo: string },
     @Body(new ZodValidationPipe(sprDecisionInputSchema))
     body: SprDecisionInput,
+    @Auth() auth: AuthContext,
+    @Req() req: Request,
   ) {
+    await this.workflows.spr(params.recordNo);
     return {
-      data: await this.workflows.decide(
+      data: await this.actions.decide(
         params.recordNo,
         "rejected",
         body.comment,
+        auth,
+        infoOf(req),
       ),
+      meta: MOCK,
+    };
+  }
+
+  @Post("sprs/:recordNo/undo")
+  @HttpCode(200)
+  @RequirePermission("approvals.decide")
+  @recordParam
+  @ApiOperation({ summary: "Undo a decision on a request. Audited" })
+  @ApiOkResponse({ schema: openApiSchema(sprDecisionUndoResponseSchema) })
+  async undoDecision(
+    @Param(new ZodValidationPipe(sprParamsSchema)) params: { recordNo: string },
+    @Auth() auth: AuthContext,
+    @Req() req: Request,
+  ) {
+    return {
+      data: await this.actions.undoDecision(params.recordNo, auth, infoOf(req)),
       meta: MOCK,
     };
   }
@@ -236,6 +359,17 @@ export class WorkflowsController {
   @ApiOkResponse({ schema: openApiSchema(documentConfigResponseSchema) })
   async documentConfig() {
     return { data: await this.workflows.documentConfig() };
+  }
+
+  @Get("open-rules")
+  @RequirePermission("settings.manage")
+  @ApiOperation({
+    summary:
+      "The business rules waiting for Spectra to confirm, with their draft values",
+  })
+  @ApiOkResponse({ schema: openApiSchema(openRulesResponseSchema) })
+  async openRules() {
+    return { data: await this.workflows.openRules(), meta: MOCK };
   }
 
   private async tasksOf(role: InboxRole, query: TasksQuery) {

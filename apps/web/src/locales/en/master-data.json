@@ -3,10 +3,9 @@
   "description": "Items, customers and vendors, read from Navision.",
   "arrives": [
     "Items with their stock, open orders and purchase orders",
-    "Customers with their terms, open orders and what is overdue",
+    "Customers with their terms, orders to ship and what is overdue",
     "Vendors with their bank accounts, masked by role"
   ],
-  "cues": {},
   "actions": {
     "findItem": "Find an item",
     "customers": "Customers",
@@ -140,7 +139,7 @@
   },
   "customers": {
     "title": "Customers",
-    "description": "Who buys, on what terms, and what is open or overdue.",
+    "description": "Who buys, on what terms, and what is waiting to ship or overdue.",
     "caption": "Customers",
     "emptyTitle": "No customers yet",
     "columns": {
@@ -150,7 +149,7 @@
       "currency": "Currency",
       "paymentTerms": "Payment terms",
       "priceGroup": "Price group",
-      "openOrders": "Open orders",
+      "openOrders": "To ship",
       "overdue": "Overdue"
     },
     "filters": {
@@ -174,17 +173,17 @@
     "notFoundTitle": "No such customer",
     "notFoundDescription": "Navision has no customer numbered {{no}}.",
     "open": {
-      "title_one": "{{count}} open order",
-      "title_other": "{{count}} open orders",
-      "description": "Orders with something still to ship.",
-      "caption": "Open orders for this customer",
+      "title_one": "{{count}} order to ship",
+      "title_other": "{{count}} orders to ship",
+      "description": "Orders with something still to ship. The tracker's open orders also include orders already shipped.",
+      "caption": "Orders to ship for this customer",
       "order": "Order",
       "po": "Customer PO",
       "status": "Status",
       "orderDate": "Order date",
       "shipmentDate": "Shipment date",
       "amount": "Amount",
-      "empty": "This customer has nothing open."
+      "empty": "Nothing is waiting to ship for this customer."
     },
     "overdue": {
       "title_one": "{{count}} overdue",

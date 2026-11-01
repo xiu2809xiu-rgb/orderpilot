@@ -29,4 +29,5 @@ export const MatrixRead200DataLockedItemPermission = {
   workflowsread: 'workflows.read',
   sprread: 'spr.read',
   workflowsinboxesany: 'workflows.inboxes.any',
+  taskscomplete: 'tasks.complete',
 } as const;

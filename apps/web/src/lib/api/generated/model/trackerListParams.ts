@@ -6,6 +6,8 @@
  * OpenAPI spec version: 0.0.0
  */
 import type { TrackerListDirection } from './trackerListDirection.ts';
+import type { TrackerListDocumentToConfirm } from './trackerListDocumentToConfirm.ts';
+import type { TrackerListOpen } from './trackerListOpen.ts';
 import type { TrackerListOverdue } from './trackerListOverdue.ts';
 import type { TrackerListOwnerRole } from './trackerListOwnerRole.ts';
 import type { TrackerListSort } from './trackerListSort.ts';
@@ -28,9 +30,11 @@ search?: string;
 sort?: TrackerListSort;
 direction?: TrackerListDirection;
 overdue?: TrackerListOverdue;
+open?: TrackerListOpen;
+documentToConfirm?: TrackerListDocumentToConfirm;
 /**
  * @minLength 1
- * @maxLength 60
+ * @maxLength 400
  */
 status?: string;
 ownerRole?: TrackerListOwnerRole;

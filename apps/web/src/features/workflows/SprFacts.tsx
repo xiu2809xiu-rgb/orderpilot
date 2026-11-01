@@ -57,7 +57,7 @@ export function SprBasis({ basis }: { basis: SprDetail["basis"] }) {
   );
 }
 
-/** The approver in the shape of Navision's Approval User Setup. */
+/** The approver, their limits and who stands in, from the approval setup. */
 export function ApproverFacts({ spr }: { spr: SprDetail }) {
   const { t } = useTranslation("workflows");
   const { setup } = spr.approver;
@@ -71,7 +71,7 @@ export function ApproverFacts({ spr }: { spr: SprDetail }) {
     <dl className="grid gap-s2 sm:grid-cols-2">
       <Fact label={t("spr.approverName")}>{spr.approver.displayName}</Fact>
       <Fact label={t("spr.approverId")}>
-        {setup.approverId ?? t("spr.noSubstitute")}
+        {spr.escalatesToName ?? t("spr.noSubstitute")}
       </Fact>
       <Fact label={t("spr.salesLimit")}>
         {limit(setup.salesAmountApprovalLimit, setup.unlimitedSalesApproval)}

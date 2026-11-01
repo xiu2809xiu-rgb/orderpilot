@@ -29,4 +29,5 @@ export const AuthRefresh200DataPermissionsItem = {
   workflowsread: 'workflows.read',
   sprread: 'spr.read',
   workflowsinboxesany: 'workflows.inboxes.any',
+  taskscomplete: 'tasks.complete',
 } as const;
