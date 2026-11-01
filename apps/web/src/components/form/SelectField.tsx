@@ -118,6 +118,7 @@ function SelectControl<T extends FieldValues>({
       <FormControl>
         <SelectTrigger
           ref={field.ref}
+          name={field.name}
           size="sm"
           aria-required={required === true ? true : undefined}
           onBlur={() => {

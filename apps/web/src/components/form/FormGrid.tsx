@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
 const COLUMNS = {
@@ -36,9 +37,12 @@ export function FormActions({
   note,
   children,
 }: {
-  note: string;
+  /** Replaces the note on the required mark, for a form with none. */
+  note?: string;
   children: ReactNode;
 }) {
+  const { t } = useTranslation("form");
+  note ??= t("requiredNote");
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 border-t pt-s2">
       <p className="text-xs text-muted-foreground">{note}</p>

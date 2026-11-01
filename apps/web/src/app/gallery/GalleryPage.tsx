@@ -9,6 +9,7 @@ import {
 } from "@/components/common";
 import { GALLERY_NOW } from "./galleryData";
 import { GalleryFeedback } from "./GalleryFeedback";
+import { GalleryForm } from "./GalleryForm";
 import { GalleryPieces } from "./GalleryPieces";
 import { GalleryTable } from "./GalleryTable";
 
@@ -57,6 +58,12 @@ export function GalleryPage() {
         description={t("sections.tableHint")}
       >
         <GalleryTable />
+      </SectionCard>
+      <SectionCard
+        title={t("sections.form")}
+        description={t("sections.formHint")}
+      >
+        <GalleryForm />
       </SectionCard>
       <GalleryPieces />
       <GalleryFeedback />
