@@ -63,7 +63,7 @@ function api(tasks: WorkflowTask[], options: { trackerFails?: boolean } = {}) {
     }),
     http.get("*/api/v1/tracker/orders", () =>
       options.trackerFails
-        ? HttpResponse.json(errorBody("INTERNAL"), { status: 500 })
+        ? HttpResponse.json(errorBody("INTERNAL_ERROR"), { status: 500 })
         : HttpResponse.json(page([], 2)),
     ),
     http.get("*/api/v1/exceptions", () => HttpResponse.json(page([], 1))),
