@@ -6,17 +6,17 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type MatrixRead200DataLockedItemRole = typeof MatrixRead200DataLockedItemRole[keyof typeof MatrixRead200DataLockedItemRole];
-
+export type MatrixRead200DataLockedItemRole =
+  (typeof MatrixRead200DataLockedItemRole)[keyof typeof MatrixRead200DataLockedItemRole];
 
 export const MatrixRead200DataLockedItemRole = {
-  SYSTEM_ADMIN: 'SYSTEM_ADMIN',
-  PRODUCT_MANAGER: 'PRODUCT_MANAGER',
-  APPROVER: 'APPROVER',
-  SUPPORT: 'SUPPORT',
-  WAREHOUSE: 'WAREHOUSE',
-  FINANCE: 'FINANCE',
-  LOGISTICS: 'LOGISTICS',
-  MANAGEMENT: 'MANAGEMENT',
-  AUDITOR: 'AUDITOR',
+  SYSTEM_ADMIN: "SYSTEM_ADMIN",
+  PRODUCT_MANAGER: "PRODUCT_MANAGER",
+  APPROVER: "APPROVER",
+  SUPPORT: "SUPPORT",
+  WAREHOUSE: "WAREHOUSE",
+  FINANCE: "FINANCE",
+  LOGISTICS: "LOGISTICS",
+  MANAGEMENT: "MANAGEMENT",
+  AUDITOR: "AUDITOR",
 } as const;

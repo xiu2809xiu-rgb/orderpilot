@@ -9,10 +9,11 @@
 /**
  * @nullable
  */
-export type AuditViewerChain200DataProblem = typeof AuditViewerChain200DataProblem[keyof typeof AuditViewerChain200DataProblem] | null;
-
+export type AuditViewerChain200DataProblem =
+  | (typeof AuditViewerChain200DataProblem)[keyof typeof AuditViewerChain200DataProblem]
+  | null;
 
 export const AuditViewerChain200DataProblem = {
-  'prevHash-mismatch': 'prevHash-mismatch',
-  'hash-mismatch': 'hash-mismatch',
+  "prevHash-mismatch": "prevHash-mismatch",
+  "hash-mismatch": "hash-mismatch",
 } as const;

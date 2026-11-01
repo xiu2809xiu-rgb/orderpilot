@@ -18,12 +18,18 @@
     "home": "Home",
     "settings": "Settings",
     "gallery": "Component gallery",
-    "groups": {
-      "operations": "Operations",
-      "data": "Data",
-      "insight": "Insight",
-      "control": "Control"
-    }
+    "modules": {
+      "home": "Home",
+      "sales": "Sales",
+      "purchasing": "Purchasing",
+      "warehouse": "Warehouse",
+      "finance": "Finance",
+      "documents": "Documents",
+      "masterData": "Master data",
+      "reports": "Reports",
+      "system": "System"
+    },
+    "waiting": "{{count}} waiting"
   },
   "roles": {
     "SYSTEM_ADMIN": "System admin",
@@ -135,11 +141,6 @@
       "reload": "Reload the page",
       "home": "Go to home"
     }
-  },
-  "planned": {
-    "badge": "Planned",
-    "arrives": "What arrives here",
-    "backHome": "Back to home"
   },
   "settings": {
     "title": "Settings",

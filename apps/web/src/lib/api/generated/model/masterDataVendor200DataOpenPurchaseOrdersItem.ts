@@ -5,7 +5,7 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { MasterDataVendor200DataOpenPurchaseOrdersItemTotal } from './masterDataVendor200DataOpenPurchaseOrdersItemTotal.ts';
+import type { MasterDataVendor200DataOpenPurchaseOrdersItemTotal } from "./masterDataVendor200DataOpenPurchaseOrdersItemTotal.ts";
 
 export type MasterDataVendor200DataOpenPurchaseOrdersItem = {
   /** @minLength 1 */
@@ -15,9 +15,9 @@ export type MasterDataVendor200DataOpenPurchaseOrdersItem = {
   /** @minLength 1 */
   expectedReceiptDate: string;
   /**
-     * @minimum 1
-     * @maximum 9007199254740991
-     */
+   * @minimum 1
+   * @maximum 9007199254740991
+   */
   lines: number;
   /** @pattern ^-?\d{1,15}(\.\d{1,4})?$ */
   outstandingQuantity: string;

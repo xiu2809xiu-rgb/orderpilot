@@ -5,37 +5,37 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { MasterDataItemsAvailability } from './masterDataItemsAvailability.ts';
-import type { MasterDataItemsCategory } from './masterDataItemsCategory.ts';
-import type { MasterDataItemsDirection } from './masterDataItemsDirection.ts';
-import type { MasterDataItemsSort } from './masterDataItemsSort.ts';
+import type { MasterDataItemsAvailability } from "./masterDataItemsAvailability.ts";
+import type { MasterDataItemsCategory } from "./masterDataItemsCategory.ts";
+import type { MasterDataItemsDirection } from "./masterDataItemsDirection.ts";
+import type { MasterDataItemsSort } from "./masterDataItemsSort.ts";
 
 export type MasterDataItemsParams = {
-/**
- * @minimum 1
- * @maximum 9007199254740991
- */
-page?: number;
-/**
- * @minimum 1
- * @maximum 200
- */
-pageSize?: number;
-/**
- * @maxLength 100
- */
-search?: string;
-/**
- * @minLength 1
- * @maxLength 60
- */
-brand?: string;
-category?: MasterDataItemsCategory;
-/**
- * @pattern ^[A-Za-z0-9-]{1,20}$
- */
-vendor?: string;
-availability?: MasterDataItemsAvailability;
-sort?: MasterDataItemsSort;
-direction?: MasterDataItemsDirection;
+  /**
+   * @minimum 1
+   * @maximum 9007199254740991
+   */
+  page?: number;
+  /**
+   * @minimum 1
+   * @maximum 200
+   */
+  pageSize?: number;
+  /**
+   * @maxLength 100
+   */
+  search?: string;
+  /**
+   * @minLength 1
+   * @maxLength 60
+   */
+  brand?: string;
+  category?: MasterDataItemsCategory;
+  /**
+   * @pattern ^[A-Za-z0-9-]{1,20}$
+   */
+  vendor?: string;
+  availability?: MasterDataItemsAvailability;
+  sort?: MasterDataItemsSort;
+  direction?: MasterDataItemsDirection;
 };

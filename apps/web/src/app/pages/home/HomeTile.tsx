@@ -1,25 +1,9 @@
-import { apiPath } from "@orderpilot/shared";
-import { useQuery } from "@tanstack/react-query";
 import { ChevronRight, RotateCw } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
-import { z } from "zod";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { FeatureCue } from "@/features/define";
-import { apiClient } from "@/lib/api/instance";
-
-const listSchema = z.object({ meta: z.object({ total: z.number() }) });
-
-/** The list's own total, so the tile cannot disagree with the page it opens. */
-async function countOf(api: string, signal: AbortSignal): Promise<number> {
-  const joiner = api.includes("?") ? "&" : "?";
-  const body = await apiClient.request<unknown>({
-    method: "GET",
-    url: apiPath(`${api}${joiner}pageSize=1`),
-    signal,
-  });
-  return listSchema.parse(body).meta.total;
-}
+import { useListCount } from "@/lib/useListCount";
 
 const CARD =
   "flex h-full flex-col gap-1 rounded-xl bg-card px-s2 py-s2 shadow-card";
@@ -28,10 +12,7 @@ const CARD =
 export function HomeTile({ cue }: { cue: FeatureCue }) {
   const { t } = useTranslation("home");
   const label = t(`tiles.${cue.id}`);
-  const count = useQuery({
-    queryKey: ["home-tile", cue.api],
-    queryFn: ({ signal }) => countOf(cue.api, signal),
-  });
+  const count = useListCount(cue.api);
 
   if (count.isPending) {
     return (

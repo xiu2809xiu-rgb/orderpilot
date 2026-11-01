@@ -10,8 +10,8 @@ export type AuthLoginBody = {
   /** @pattern ^(?:[A-Za-z0-9_'+\-]+\.)*[A-Za-z0-9_'+\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$ */
   email: string;
   /**
-     * @minLength 1
-     * @maxLength 256
-     */
+   * @minLength 1
+   * @maxLength 256
+   */
   password: string;
 };

@@ -5,37 +5,37 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { TrackerListDirection } from './trackerListDirection.ts';
-import type { TrackerListDocumentToConfirm } from './trackerListDocumentToConfirm.ts';
-import type { TrackerListOpen } from './trackerListOpen.ts';
-import type { TrackerListOverdue } from './trackerListOverdue.ts';
-import type { TrackerListOwnerRole } from './trackerListOwnerRole.ts';
-import type { TrackerListSort } from './trackerListSort.ts';
+import type { TrackerListDirection } from "./trackerListDirection.ts";
+import type { TrackerListDocumentToConfirm } from "./trackerListDocumentToConfirm.ts";
+import type { TrackerListOpen } from "./trackerListOpen.ts";
+import type { TrackerListOverdue } from "./trackerListOverdue.ts";
+import type { TrackerListOwnerRole } from "./trackerListOwnerRole.ts";
+import type { TrackerListSort } from "./trackerListSort.ts";
 
 export type TrackerListParams = {
-/**
- * @minimum 1
- * @maximum 9007199254740991
- */
-page?: number;
-/**
- * @minimum 1
- * @maximum 200
- */
-pageSize?: number;
-/**
- * @maxLength 100
- */
-search?: string;
-sort?: TrackerListSort;
-direction?: TrackerListDirection;
-overdue?: TrackerListOverdue;
-open?: TrackerListOpen;
-documentToConfirm?: TrackerListDocumentToConfirm;
-/**
- * @minLength 1
- * @maxLength 400
- */
-status?: string;
-ownerRole?: TrackerListOwnerRole;
+  /**
+   * @minimum 1
+   * @maximum 9007199254740991
+   */
+  page?: number;
+  /**
+   * @minimum 1
+   * @maximum 200
+   */
+  pageSize?: number;
+  /**
+   * @maxLength 100
+   */
+  search?: string;
+  sort?: TrackerListSort;
+  direction?: TrackerListDirection;
+  overdue?: TrackerListOverdue;
+  open?: TrackerListOpen;
+  documentToConfirm?: TrackerListDocumentToConfirm;
+  /**
+   * @minLength 1
+   * @maxLength 400
+   */
+  status?: string;
+  ownerRole?: TrackerListOwnerRole;
 };

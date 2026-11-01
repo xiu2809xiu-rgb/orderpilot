@@ -1,7 +1,5 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router";
-import { ListChecks } from "lucide-react";
 import {
   DataTable,
   DemoBadge,
@@ -9,7 +7,6 @@ import {
   PageHeader,
   useUrlTableQuery,
 } from "@/components/common";
-import { Button } from "@/components/ui/button";
 import { useTrackerList } from "@/lib/api/generated/endpoints/tracker/tracker";
 import { tableStatusOf } from "@/lib/query-status";
 import { toParams, trackerChips, TRACKER_URL_FILTERS } from "./trackerParams";
@@ -59,14 +56,6 @@ export default function OrderTrackerPage() {
         empty={{
           title: t("list.emptyTitle"),
           description: t("list.emptyDescription"),
-          action: (
-            <Button asChild variant="outline">
-              <Link to="/orders">
-                <ListChecks aria-hidden="true" />
-                {t("list.emptyAction")}
-              </Link>
-            </Button>
-          ),
         }}
       />
     </div>

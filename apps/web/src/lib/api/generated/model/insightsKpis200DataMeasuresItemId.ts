@@ -6,13 +6,13 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type InsightsKpis200DataMeasuresItemId = typeof InsightsKpis200DataMeasuresItemId[keyof typeof InsightsKpis200DataMeasuresItemId];
-
+export type InsightsKpis200DataMeasuresItemId =
+  (typeof InsightsKpis200DataMeasuresItemId)[keyof typeof InsightsKpis200DataMeasuresItemId];
 
 export const InsightsKpis200DataMeasuresItemId = {
-  processingTime: 'processingTime',
-  manualTouches: 'manualTouches',
-  dataEntryErrors: 'dataEntryErrors',
-  approvalTurnaround: 'approvalTurnaround',
-  overdueOrders: 'overdueOrders',
+  processingTime: "processingTime",
+  manualTouches: "manualTouches",
+  dataEntryErrors: "dataEntryErrors",
+  approvalTurnaround: "approvalTurnaround",
+  overdueOrders: "overdueOrders",
 } as const;

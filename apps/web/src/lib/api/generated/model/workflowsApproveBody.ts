@@ -8,8 +8,8 @@
 
 export type WorkflowsApproveBody = {
   /**
-     * @minLength 1
-     * @maxLength 500
-     */
+   * @minLength 1
+   * @maxLength 500
+   */
   comment: string;
 };

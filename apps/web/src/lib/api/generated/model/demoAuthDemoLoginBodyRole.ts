@@ -6,17 +6,17 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type DemoAuthDemoLoginBodyRole = typeof DemoAuthDemoLoginBodyRole[keyof typeof DemoAuthDemoLoginBodyRole];
-
+export type DemoAuthDemoLoginBodyRole =
+  (typeof DemoAuthDemoLoginBodyRole)[keyof typeof DemoAuthDemoLoginBodyRole];
 
 export const DemoAuthDemoLoginBodyRole = {
-  SYSTEM_ADMIN: 'SYSTEM_ADMIN',
-  PRODUCT_MANAGER: 'PRODUCT_MANAGER',
-  APPROVER: 'APPROVER',
-  SUPPORT: 'SUPPORT',
-  WAREHOUSE: 'WAREHOUSE',
-  FINANCE: 'FINANCE',
-  LOGISTICS: 'LOGISTICS',
-  MANAGEMENT: 'MANAGEMENT',
-  AUDITOR: 'AUDITOR',
+  SYSTEM_ADMIN: "SYSTEM_ADMIN",
+  PRODUCT_MANAGER: "PRODUCT_MANAGER",
+  APPROVER: "APPROVER",
+  SUPPORT: "SUPPORT",
+  WAREHOUSE: "WAREHOUSE",
+  FINANCE: "FINANCE",
+  LOGISTICS: "LOGISTICS",
+  MANAGEMENT: "MANAGEMENT",
+  AUDITOR: "AUDITOR",
 } as const;

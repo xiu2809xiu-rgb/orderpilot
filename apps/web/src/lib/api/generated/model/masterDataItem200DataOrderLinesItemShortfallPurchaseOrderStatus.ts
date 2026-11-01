@@ -9,10 +9,11 @@
 /**
  * @nullable
  */
-export type MasterDataItem200DataOrderLinesItemShortfallPurchaseOrderStatus = typeof MasterDataItem200DataOrderLinesItemShortfallPurchaseOrderStatus[keyof typeof MasterDataItem200DataOrderLinesItemShortfallPurchaseOrderStatus] | null;
-
+export type MasterDataItem200DataOrderLinesItemShortfallPurchaseOrderStatus =
+  | (typeof MasterDataItem200DataOrderLinesItemShortfallPurchaseOrderStatus)[keyof typeof MasterDataItem200DataOrderLinesItemShortfallPurchaseOrderStatus]
+  | null;
 
 export const MasterDataItem200DataOrderLinesItemShortfallPurchaseOrderStatus = {
-  open: 'open',
-  received: 'received',
+  open: "open",
+  received: "received",
 } as const;

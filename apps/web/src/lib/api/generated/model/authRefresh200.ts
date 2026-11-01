@@ -5,7 +5,7 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { AuthRefresh200Data } from './authRefresh200Data.ts';
+import type { AuthRefresh200Data } from "./authRefresh200Data.ts";
 
 export type AuthRefresh200 = {
   data: AuthRefresh200Data;

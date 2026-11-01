@@ -1,9 +1,7 @@
 {
   "title": "Mapping",
   "description": "How document fields map to ERP fields.",
-  "arrives": [
-    "Field mappings for each document type",
-    "Customer-specific aliases and unit conversions",
-    "A test run before a mapping goes live"
-  ]
+  "menu": {
+    "mapping": "Mapping"
+  }
 }

@@ -5,8 +5,8 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { AuditViewerList200DataItemChangesItemClassification } from './auditViewerList200DataItemChangesItemClassification.ts';
-import type { AuditViewerList200DataItemChangesItemReason } from './auditViewerList200DataItemChangesItemReason.ts';
+import type { AuditViewerList200DataItemChangesItemClassification } from "./auditViewerList200DataItemChangesItemClassification.ts";
+import type { AuditViewerList200DataItemChangesItemReason } from "./auditViewerList200DataItemChangesItemReason.ts";
 
 export type AuditViewerList200DataItemChangesItem = {
   /** @minLength 1 */

@@ -1,14 +1,23 @@
 import { ArrowLeftRight } from "lucide-react";
-import { lazy } from "react";
-import { defineFeature } from "../define";
+import { defineFeature, devOnlyPage } from "../define";
 
 export default defineFeature({
   id: "mapping",
   namespace: "mapping",
   path: "mapping",
-  group: "data",
-  icon: ArrowLeftRight,
   permission: "settings.manage",
+  menu: [
+    {
+      id: "mapping.mapping",
+      module: "system",
+      label: "mapping:menu.mapping",
+      to: "/mapping",
+      icon: ArrowLeftRight,
+    },
+  ],
   cues: [],
-  Page: lazy(() => import("./MappingPage")),
+  planned: true,
+  Page: devOnlyPage(
+    import.meta.env.DEV ? () => import("./MappingPage") : undefined,
+  ),
 });

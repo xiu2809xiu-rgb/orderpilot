@@ -5,15 +5,15 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { AuditViewerGet200DataActorKind } from './auditViewerGet200DataActorKind.ts';
-import type { AuditViewerGet200DataActorRole } from './auditViewerGet200DataActorRole.ts';
-import type { AuditViewerGet200DataChangesItem } from './auditViewerGet200DataChangesItem.ts';
+import type { AuditViewerGet200DataActorKind } from "./auditViewerGet200DataActorKind.ts";
+import type { AuditViewerGet200DataActorRole } from "./auditViewerGet200DataActorRole.ts";
+import type { AuditViewerGet200DataChangesItem } from "./auditViewerGet200DataChangesItem.ts";
 
 export type AuditViewerGet200Data = {
   /**
-     * @minimum 1
-     * @maximum 9007199254740991
-     */
+   * @minimum 1
+   * @maximum 9007199254740991
+   */
   sequence: number;
   /** @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */
   id: string;
@@ -21,9 +21,9 @@ export type AuditViewerGet200Data = {
   occurredAt: string;
   actorKind: AuditViewerGet200DataActorKind;
   /**
-     * @nullable
-     * @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
-     */
+   * @nullable
+   * @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+   */
   actorUserId: string | null;
   /** @nullable */
   actorRole: AuditViewerGet200DataActorRole;

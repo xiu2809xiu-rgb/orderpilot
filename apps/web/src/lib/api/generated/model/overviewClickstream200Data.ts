@@ -5,8 +5,8 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { OverviewClickstream200DataByRoleItem } from './overviewClickstream200DataByRoleItem.ts';
-import type { OverviewClickstream200DataTopRoutesItem } from './overviewClickstream200DataTopRoutesItem.ts';
+import type { OverviewClickstream200DataByRoleItem } from "./overviewClickstream200DataByRoleItem.ts";
+import type { OverviewClickstream200DataTopRoutesItem } from "./overviewClickstream200DataTopRoutesItem.ts";
 
 export type OverviewClickstream200Data = {
   /** @pattern ^-?\d{1,15}(\.\d{1,4})?$ */

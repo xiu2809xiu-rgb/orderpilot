@@ -6,10 +6,10 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type WorkflowsOrderFlow200DataTimelineItemActorKind = typeof WorkflowsOrderFlow200DataTimelineItemActorKind[keyof typeof WorkflowsOrderFlow200DataTimelineItemActorKind];
-
+export type WorkflowsOrderFlow200DataTimelineItemActorKind =
+  (typeof WorkflowsOrderFlow200DataTimelineItemActorKind)[keyof typeof WorkflowsOrderFlow200DataTimelineItemActorKind];
 
 export const WorkflowsOrderFlow200DataTimelineItemActorKind = {
-  user: 'user',
-  system: 'system',
+  user: "user",
+  system: "system",
 } as const;

@@ -9,9 +9,9 @@
 export type TrackerList200DataItemOverdue = {
   overdue: boolean;
   /**
-     * @minimum 0
-     * @maximum 9007199254740991
-     */
+   * @minimum 0
+   * @maximum 9007199254740991
+   */
   daysOverdue: number;
   /** @nullable */
   reason: string | null;

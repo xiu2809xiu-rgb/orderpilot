@@ -6,12 +6,13 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type MasterDataVendor200DataOpenPurchaseOrdersItemTotalClassification = typeof MasterDataVendor200DataOpenPurchaseOrdersItemTotalClassification[keyof typeof MasterDataVendor200DataOpenPurchaseOrdersItemTotalClassification];
+export type MasterDataVendor200DataOpenPurchaseOrdersItemTotalClassification =
+  (typeof MasterDataVendor200DataOpenPurchaseOrdersItemTotalClassification)[keyof typeof MasterDataVendor200DataOpenPurchaseOrdersItemTotalClassification];
 
-
-export const MasterDataVendor200DataOpenPurchaseOrdersItemTotalClassification = {
-  public: 'public',
-  internal: 'internal',
-  confidential: 'confidential',
-  restricted: 'restricted',
-} as const;
+export const MasterDataVendor200DataOpenPurchaseOrdersItemTotalClassification =
+  {
+    public: "public",
+    internal: "internal",
+    confidential: "confidential",
+    restricted: "restricted",
+  } as const;

@@ -9,12 +9,13 @@
 /**
  * @nullable
  */
-export type MasterDataCustomer200DataCreditLimitLcyReason = typeof MasterDataCustomer200DataCreditLimitLcyReason[keyof typeof MasterDataCustomer200DataCreditLimitLcyReason] | null;
-
+export type MasterDataCustomer200DataCreditLimitLcyReason =
+  | (typeof MasterDataCustomer200DataCreditLimitLcyReason)[keyof typeof MasterDataCustomer200DataCreditLimitLcyReason]
+  | null;
 
 export const MasterDataCustomer200DataCreditLimitLcyReason = {
-  role: 'role',
-  bankDetails: 'bankDetails',
-  price: 'price',
-  policy: 'policy',
+  role: "role",
+  bankDetails: "bankDetails",
+  price: "price",
+  policy: "policy",
 } as const;

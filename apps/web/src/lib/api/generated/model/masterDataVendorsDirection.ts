@@ -6,10 +6,10 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type MasterDataVendorsDirection = typeof MasterDataVendorsDirection[keyof typeof MasterDataVendorsDirection];
-
+export type MasterDataVendorsDirection =
+  (typeof MasterDataVendorsDirection)[keyof typeof MasterDataVendorsDirection];
 
 export const MasterDataVendorsDirection = {
-  asc: 'asc',
-  desc: 'desc',
+  asc: "asc",
+  desc: "desc",
 } as const;

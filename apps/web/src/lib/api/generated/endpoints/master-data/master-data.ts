@@ -5,9 +5,7 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import {
-  useQuery
-} from '@tanstack/react-query';
+import { useQuery } from "@tanstack/react-query";
 import type {
   DataTag,
   DefinedInitialDataOptions,
@@ -17,8 +15,8 @@ import type {
   QueryKey,
   UndefinedInitialDataOptions,
   UseQueryOptions,
-  UseQueryResult
-} from '@tanstack/react-query';
+  UseQueryResult,
+} from "@tanstack/react-query";
 
 import type {
   MasterDataCustomer200,
@@ -30,21 +28,21 @@ import type {
   MasterDataItemsParams,
   MasterDataVendor200,
   MasterDataVendors200,
-  MasterDataVendorsParams
-} from '../../model';
+  MasterDataVendorsParams,
+} from "../../model";
 
-import { apiMutator } from '../../../mutator.ts';
-import type { ErrorType } from '../../../mutator.ts';
+import { apiMutator } from "../../../mutator.ts";
+import type { ErrorType } from "../../../mutator.ts";
 
-
-
-
-const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKey: K } => {
+const withQueryKey = <T extends object, K>(
+  query: T,
+  queryKey: K,
+): T & { queryKey: K } => {
   const result = { queryKey } as T & { queryKey: K };
   for (const key of Object.keys(query)) {
     // The explicit queryKey always wins, matching the previous
     // `{ ...query, queryKey }` spread where it was set last.
-    if (key === 'queryKey') continue;
+    if (key === "queryKey") continue;
     Object.defineProperty(result, key, {
       enumerable: true,
       configurable: true,
@@ -57,647 +55,1072 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
 /**
  * @summary What the master data filters can offer. Mock Navision data
  */
-export const masterDataFilters = (
-
- signal?: AbortSignal
-) => {
-
-
-      return apiMutator<MasterDataFilters200>(
-      {url: `/api/v1/master-data/filters`, method: 'GET', signal
-    },
-      );
-    }
-
-
-
+export const masterDataFilters = (signal?: AbortSignal) => {
+  return apiMutator<MasterDataFilters200>({
+    url: `/api/v1/master-data/filters`,
+    method: "GET",
+    signal,
+  });
+};
 
 export const getMasterDataFiltersQueryKey = () => {
-    return [
-    `/api/v1/master-data/filters`
-    ] as const;
-    }
+  return [`/api/v1/master-data/filters`] as const;
+};
 
+export const getMasterDataFiltersQueryOptions = <
+  TData = Awaited<ReturnType<typeof masterDataFilters>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof masterDataFilters>>,
+      TError,
+      TData
+    >
+  >;
+}) => {
+  const { query: queryOptions } = options ?? {};
 
-export const getMasterDataFiltersQueryOptions = <TData = Awaited<ReturnType<typeof masterDataFilters>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataFilters>>, TError, TData>>, }
-) => {
+  const queryKey = queryOptions?.queryKey ?? getMasterDataFiltersQueryKey();
 
-const {query: queryOptions} = options ?? {};
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof masterDataFilters>>
+  > = ({ signal }) => masterDataFilters(signal);
 
-  const queryKey =  queryOptions?.queryKey ?? getMasterDataFiltersQueryKey();
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof masterDataFilters>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
 
+export type MasterDataFiltersQueryResult = NonNullable<
+  Awaited<ReturnType<typeof masterDataFilters>>
+>;
+export type MasterDataFiltersQueryError = ErrorType<unknown>;
 
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof masterDataFilters>>> = ({ signal }) => masterDataFilters(signal);
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof masterDataFilters>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type MasterDataFiltersQueryResult = NonNullable<Awaited<ReturnType<typeof masterDataFilters>>>
-export type MasterDataFiltersQueryError = ErrorType<unknown>
-
-
-export function useMasterDataFilters<TData = Awaited<ReturnType<typeof masterDataFilters>>, TError = ErrorType<unknown>>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataFilters>>, TError, TData>> & Pick<
+export function useMasterDataFilters<
+  TData = Awaited<ReturnType<typeof masterDataFilters>>,
+  TError = ErrorType<unknown>,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof masterDataFilters>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof masterDataFilters>>,
           TError,
           Awaited<ReturnType<typeof masterDataFilters>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useMasterDataFilters<TData = Awaited<ReturnType<typeof masterDataFilters>>, TError = ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataFilters>>, TError, TData>> & Pick<
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useMasterDataFilters<
+  TData = Awaited<ReturnType<typeof masterDataFilters>>,
+  TError = ErrorType<unknown>,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof masterDataFilters>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof masterDataFilters>>,
           TError,
           Awaited<ReturnType<typeof masterDataFilters>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useMasterDataFilters<TData = Awaited<ReturnType<typeof masterDataFilters>>, TError = ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataFilters>>, TError, TData>>, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useMasterDataFilters<
+  TData = Awaited<ReturnType<typeof masterDataFilters>>,
+  TError = ErrorType<unknown>,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof masterDataFilters>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 /**
  * @summary What the master data filters can offer. Mock Navision data
  */
 
-export function useMasterDataFilters<TData = Awaited<ReturnType<typeof masterDataFilters>>, TError = ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataFilters>>, TError, TData>>, }
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+export function useMasterDataFilters<
+  TData = Awaited<ReturnType<typeof masterDataFilters>>,
+  TError = ErrorType<unknown>,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof masterDataFilters>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getMasterDataFiltersQueryOptions(options);
 
-  const queryOptions = getMasterDataFiltersQueryOptions(options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
-
-
-
-
-
 
 /**
  * @summary Items with their stock, a page at a time. Prices are masked by role. Mock Navision data
  */
 export const masterDataItems = (
-    params?: MasterDataItemsParams,
- signal?: AbortSignal
+  params?: MasterDataItemsParams,
+  signal?: AbortSignal,
 ) => {
+  return apiMutator<MasterDataItems200>({
+    url: `/api/v1/master-data/items`,
+    method: "GET",
+    params,
+    signal,
+  });
+};
 
+export const getMasterDataItemsQueryKey = (params?: MasterDataItemsParams) => {
+  return [`/api/v1/master-data/items`, ...(params ? [params] : [])] as const;
+};
 
-      return apiMutator<MasterDataItems200>(
-      {url: `/api/v1/master-data/items`, method: 'GET',
-        params, signal
-    },
-      );
-    }
-
-
-
-
-export const getMasterDataItemsQueryKey = (params?: MasterDataItemsParams,) => {
-    return [
-    `/api/v1/master-data/items`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-
-export const getMasterDataItemsQueryOptions = <TData = Awaited<ReturnType<typeof masterDataItems>>, TError = ErrorType<unknown>>(params?: MasterDataItemsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataItems>>, TError, TData>>, }
+export const getMasterDataItemsQueryOptions = <
+  TData = Awaited<ReturnType<typeof masterDataItems>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: MasterDataItemsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof masterDataItems>>,
+        TError,
+        TData
+      >
+    >;
+  },
 ) => {
+  const { query: queryOptions } = options ?? {};
 
-const {query: queryOptions} = options ?? {};
+  const queryKey = queryOptions?.queryKey ?? getMasterDataItemsQueryKey(params);
 
-  const queryKey =  queryOptions?.queryKey ?? getMasterDataItemsQueryKey(params);
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof masterDataItems>>> = ({
+    signal,
+  }) => masterDataItems(params, signal);
 
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof masterDataItems>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
 
+export type MasterDataItemsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof masterDataItems>>
+>;
+export type MasterDataItemsQueryError = ErrorType<unknown>;
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof masterDataItems>>> = ({ signal }) => masterDataItems(params, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof masterDataItems>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type MasterDataItemsQueryResult = NonNullable<Awaited<ReturnType<typeof masterDataItems>>>
-export type MasterDataItemsQueryError = ErrorType<unknown>
-
-
-export function useMasterDataItems<TData = Awaited<ReturnType<typeof masterDataItems>>, TError = ErrorType<unknown>>(
- params: undefined |  MasterDataItemsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataItems>>, TError, TData>> & Pick<
+export function useMasterDataItems<
+  TData = Awaited<ReturnType<typeof masterDataItems>>,
+  TError = ErrorType<unknown>,
+>(
+  params: undefined | MasterDataItemsParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof masterDataItems>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof masterDataItems>>,
           TError,
           Awaited<ReturnType<typeof masterDataItems>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useMasterDataItems<TData = Awaited<ReturnType<typeof masterDataItems>>, TError = ErrorType<unknown>>(
- params?: MasterDataItemsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataItems>>, TError, TData>> & Pick<
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useMasterDataItems<
+  TData = Awaited<ReturnType<typeof masterDataItems>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: MasterDataItemsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof masterDataItems>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof masterDataItems>>,
           TError,
           Awaited<ReturnType<typeof masterDataItems>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useMasterDataItems<TData = Awaited<ReturnType<typeof masterDataItems>>, TError = ErrorType<unknown>>(
- params?: MasterDataItemsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataItems>>, TError, TData>>, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useMasterDataItems<
+  TData = Awaited<ReturnType<typeof masterDataItems>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: MasterDataItemsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof masterDataItems>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 /**
  * @summary Items with their stock, a page at a time. Prices are masked by role. Mock Navision data
  */
 
-export function useMasterDataItems<TData = Awaited<ReturnType<typeof masterDataItems>>, TError = ErrorType<unknown>>(
- params?: MasterDataItemsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataItems>>, TError, TData>>, }
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+export function useMasterDataItems<
+  TData = Awaited<ReturnType<typeof masterDataItems>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: MasterDataItemsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof masterDataItems>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getMasterDataItemsQueryOptions(params, options);
 
-  const queryOptions = getMasterDataItemsQueryOptions(params,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
 
-
-
-
-
-
 /**
  * @summary One item: its stock, open orders, open purchase orders and SPRs. Mock Navision data
  */
-export const masterDataItem = (
-    no: string,
- signal?: AbortSignal
+export const masterDataItem = (no: string, signal?: AbortSignal) => {
+  return apiMutator<MasterDataItem200>({
+    url: `/api/v1/master-data/items/${no}`,
+    method: "GET",
+    signal,
+  });
+};
+
+export const getMasterDataItemQueryKey = (no: string) => {
+  return [`/api/v1/master-data/items/${no}`] as const;
+};
+
+export const getMasterDataItemQueryOptions = <
+  TData = Awaited<ReturnType<typeof masterDataItem>>,
+  TError = ErrorType<unknown>,
+>(
+  no: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof masterDataItem>>, TError, TData>
+    >;
+  },
 ) => {
+  const { query: queryOptions } = options ?? {};
 
+  const queryKey = queryOptions?.queryKey ?? getMasterDataItemQueryKey(no);
 
-      return apiMutator<MasterDataItem200>(
-      {url: `/api/v1/master-data/items/${no}`, method: 'GET', signal
-    },
-      );
-    }
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof masterDataItem>>> = ({
+    signal,
+  }) => masterDataItem(no, signal);
 
+  return {
+    queryKey,
+    queryFn,
+    enabled: no !== null && no !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof masterDataItem>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
 
+export type MasterDataItemQueryResult = NonNullable<
+  Awaited<ReturnType<typeof masterDataItem>>
+>;
+export type MasterDataItemQueryError = ErrorType<unknown>;
 
-
-export const getMasterDataItemQueryKey = (no: string,) => {
-    return [
-    `/api/v1/master-data/items/${no}`
-    ] as const;
-    }
-
-
-export const getMasterDataItemQueryOptions = <TData = Awaited<ReturnType<typeof masterDataItem>>, TError = ErrorType<unknown>>(no: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataItem>>, TError, TData>>, }
-) => {
-
-const {query: queryOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getMasterDataItemQueryKey(no);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof masterDataItem>>> = ({ signal }) => masterDataItem(no, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: no !== null && no !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof masterDataItem>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type MasterDataItemQueryResult = NonNullable<Awaited<ReturnType<typeof masterDataItem>>>
-export type MasterDataItemQueryError = ErrorType<unknown>
-
-
-export function useMasterDataItem<TData = Awaited<ReturnType<typeof masterDataItem>>, TError = ErrorType<unknown>>(
- no: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataItem>>, TError, TData>> & Pick<
+export function useMasterDataItem<
+  TData = Awaited<ReturnType<typeof masterDataItem>>,
+  TError = ErrorType<unknown>,
+>(
+  no: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof masterDataItem>>, TError, TData>
+    > &
+      Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof masterDataItem>>,
           TError,
           Awaited<ReturnType<typeof masterDataItem>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useMasterDataItem<TData = Awaited<ReturnType<typeof masterDataItem>>, TError = ErrorType<unknown>>(
- no: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataItem>>, TError, TData>> & Pick<
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useMasterDataItem<
+  TData = Awaited<ReturnType<typeof masterDataItem>>,
+  TError = ErrorType<unknown>,
+>(
+  no: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof masterDataItem>>, TError, TData>
+    > &
+      Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof masterDataItem>>,
           TError,
           Awaited<ReturnType<typeof masterDataItem>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useMasterDataItem<TData = Awaited<ReturnType<typeof masterDataItem>>, TError = ErrorType<unknown>>(
- no: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataItem>>, TError, TData>>, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useMasterDataItem<
+  TData = Awaited<ReturnType<typeof masterDataItem>>,
+  TError = ErrorType<unknown>,
+>(
+  no: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof masterDataItem>>, TError, TData>
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 /**
  * @summary One item: its stock, open orders, open purchase orders and SPRs. Mock Navision data
  */
 
-export function useMasterDataItem<TData = Awaited<ReturnType<typeof masterDataItem>>, TError = ErrorType<unknown>>(
- no: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataItem>>, TError, TData>>, }
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+export function useMasterDataItem<
+  TData = Awaited<ReturnType<typeof masterDataItem>>,
+  TError = ErrorType<unknown>,
+>(
+  no: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof masterDataItem>>, TError, TData>
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getMasterDataItemQueryOptions(no, options);
 
-  const queryOptions = getMasterDataItemQueryOptions(no,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
-
-
-
-
-
 
 /**
  * @summary Customers with their open and overdue orders, a page at a time. Mock Navision data
  */
 export const masterDataCustomers = (
-    params?: MasterDataCustomersParams,
- signal?: AbortSignal
+  params?: MasterDataCustomersParams,
+  signal?: AbortSignal,
 ) => {
+  return apiMutator<MasterDataCustomers200>({
+    url: `/api/v1/master-data/customers`,
+    method: "GET",
+    params,
+    signal,
+  });
+};
 
-
-      return apiMutator<MasterDataCustomers200>(
-      {url: `/api/v1/master-data/customers`, method: 'GET',
-        params, signal
-    },
-      );
-    }
-
-
-
-
-export const getMasterDataCustomersQueryKey = (params?: MasterDataCustomersParams,) => {
-    return [
-    `/api/v1/master-data/customers`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-
-export const getMasterDataCustomersQueryOptions = <TData = Awaited<ReturnType<typeof masterDataCustomers>>, TError = ErrorType<unknown>>(params?: MasterDataCustomersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataCustomers>>, TError, TData>>, }
+export const getMasterDataCustomersQueryKey = (
+  params?: MasterDataCustomersParams,
 ) => {
+  return [
+    `/api/v1/master-data/customers`,
+    ...(params ? [params] : []),
+  ] as const;
+};
 
-const {query: queryOptions} = options ?? {};
+export const getMasterDataCustomersQueryOptions = <
+  TData = Awaited<ReturnType<typeof masterDataCustomers>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: MasterDataCustomersParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof masterDataCustomers>>,
+        TError,
+        TData
+      >
+    >;
+  },
+) => {
+  const { query: queryOptions } = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getMasterDataCustomersQueryKey(params);
+  const queryKey =
+    queryOptions?.queryKey ?? getMasterDataCustomersQueryKey(params);
 
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof masterDataCustomers>>
+  > = ({ signal }) => masterDataCustomers(params, signal);
 
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof masterDataCustomers>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof masterDataCustomers>>> = ({ signal }) => masterDataCustomers(params, signal);
+export type MasterDataCustomersQueryResult = NonNullable<
+  Awaited<ReturnType<typeof masterDataCustomers>>
+>;
+export type MasterDataCustomersQueryError = ErrorType<unknown>;
 
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof masterDataCustomers>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type MasterDataCustomersQueryResult = NonNullable<Awaited<ReturnType<typeof masterDataCustomers>>>
-export type MasterDataCustomersQueryError = ErrorType<unknown>
-
-
-export function useMasterDataCustomers<TData = Awaited<ReturnType<typeof masterDataCustomers>>, TError = ErrorType<unknown>>(
- params: undefined |  MasterDataCustomersParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataCustomers>>, TError, TData>> & Pick<
+export function useMasterDataCustomers<
+  TData = Awaited<ReturnType<typeof masterDataCustomers>>,
+  TError = ErrorType<unknown>,
+>(
+  params: undefined | MasterDataCustomersParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof masterDataCustomers>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof masterDataCustomers>>,
           TError,
           Awaited<ReturnType<typeof masterDataCustomers>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useMasterDataCustomers<TData = Awaited<ReturnType<typeof masterDataCustomers>>, TError = ErrorType<unknown>>(
- params?: MasterDataCustomersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataCustomers>>, TError, TData>> & Pick<
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useMasterDataCustomers<
+  TData = Awaited<ReturnType<typeof masterDataCustomers>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: MasterDataCustomersParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof masterDataCustomers>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof masterDataCustomers>>,
           TError,
           Awaited<ReturnType<typeof masterDataCustomers>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useMasterDataCustomers<TData = Awaited<ReturnType<typeof masterDataCustomers>>, TError = ErrorType<unknown>>(
- params?: MasterDataCustomersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataCustomers>>, TError, TData>>, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useMasterDataCustomers<
+  TData = Awaited<ReturnType<typeof masterDataCustomers>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: MasterDataCustomersParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof masterDataCustomers>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 /**
  * @summary Customers with their open and overdue orders, a page at a time. Mock Navision data
  */
 
-export function useMasterDataCustomers<TData = Awaited<ReturnType<typeof masterDataCustomers>>, TError = ErrorType<unknown>>(
- params?: MasterDataCustomersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataCustomers>>, TError, TData>>, }
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+export function useMasterDataCustomers<
+  TData = Awaited<ReturnType<typeof masterDataCustomers>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: MasterDataCustomersParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof masterDataCustomers>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getMasterDataCustomersQueryOptions(params, options);
 
-  const queryOptions = getMasterDataCustomersQueryOptions(params,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
 
-
-
-
-
-
 /**
  * @summary One customer: key facts, open orders and overdue orders. Mock Navision data
  */
-export const masterDataCustomer = (
-    no: string,
- signal?: AbortSignal
+export const masterDataCustomer = (no: string, signal?: AbortSignal) => {
+  return apiMutator<MasterDataCustomer200>({
+    url: `/api/v1/master-data/customers/${no}`,
+    method: "GET",
+    signal,
+  });
+};
+
+export const getMasterDataCustomerQueryKey = (no: string) => {
+  return [`/api/v1/master-data/customers/${no}`] as const;
+};
+
+export const getMasterDataCustomerQueryOptions = <
+  TData = Awaited<ReturnType<typeof masterDataCustomer>>,
+  TError = ErrorType<unknown>,
+>(
+  no: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof masterDataCustomer>>,
+        TError,
+        TData
+      >
+    >;
+  },
 ) => {
+  const { query: queryOptions } = options ?? {};
 
+  const queryKey = queryOptions?.queryKey ?? getMasterDataCustomerQueryKey(no);
 
-      return apiMutator<MasterDataCustomer200>(
-      {url: `/api/v1/master-data/customers/${no}`, method: 'GET', signal
-    },
-      );
-    }
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof masterDataCustomer>>
+  > = ({ signal }) => masterDataCustomer(no, signal);
 
+  return {
+    queryKey,
+    queryFn,
+    enabled: no !== null && no !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof masterDataCustomer>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
 
+export type MasterDataCustomerQueryResult = NonNullable<
+  Awaited<ReturnType<typeof masterDataCustomer>>
+>;
+export type MasterDataCustomerQueryError = ErrorType<unknown>;
 
-
-export const getMasterDataCustomerQueryKey = (no: string,) => {
-    return [
-    `/api/v1/master-data/customers/${no}`
-    ] as const;
-    }
-
-
-export const getMasterDataCustomerQueryOptions = <TData = Awaited<ReturnType<typeof masterDataCustomer>>, TError = ErrorType<unknown>>(no: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataCustomer>>, TError, TData>>, }
-) => {
-
-const {query: queryOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getMasterDataCustomerQueryKey(no);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof masterDataCustomer>>> = ({ signal }) => masterDataCustomer(no, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: no !== null && no !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof masterDataCustomer>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type MasterDataCustomerQueryResult = NonNullable<Awaited<ReturnType<typeof masterDataCustomer>>>
-export type MasterDataCustomerQueryError = ErrorType<unknown>
-
-
-export function useMasterDataCustomer<TData = Awaited<ReturnType<typeof masterDataCustomer>>, TError = ErrorType<unknown>>(
- no: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataCustomer>>, TError, TData>> & Pick<
+export function useMasterDataCustomer<
+  TData = Awaited<ReturnType<typeof masterDataCustomer>>,
+  TError = ErrorType<unknown>,
+>(
+  no: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof masterDataCustomer>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof masterDataCustomer>>,
           TError,
           Awaited<ReturnType<typeof masterDataCustomer>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useMasterDataCustomer<TData = Awaited<ReturnType<typeof masterDataCustomer>>, TError = ErrorType<unknown>>(
- no: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataCustomer>>, TError, TData>> & Pick<
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useMasterDataCustomer<
+  TData = Awaited<ReturnType<typeof masterDataCustomer>>,
+  TError = ErrorType<unknown>,
+>(
+  no: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof masterDataCustomer>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof masterDataCustomer>>,
           TError,
           Awaited<ReturnType<typeof masterDataCustomer>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useMasterDataCustomer<TData = Awaited<ReturnType<typeof masterDataCustomer>>, TError = ErrorType<unknown>>(
- no: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataCustomer>>, TError, TData>>, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useMasterDataCustomer<
+  TData = Awaited<ReturnType<typeof masterDataCustomer>>,
+  TError = ErrorType<unknown>,
+>(
+  no: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof masterDataCustomer>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 /**
  * @summary One customer: key facts, open orders and overdue orders. Mock Navision data
  */
 
-export function useMasterDataCustomer<TData = Awaited<ReturnType<typeof masterDataCustomer>>, TError = ErrorType<unknown>>(
- no: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataCustomer>>, TError, TData>>, }
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+export function useMasterDataCustomer<
+  TData = Awaited<ReturnType<typeof masterDataCustomer>>,
+  TError = ErrorType<unknown>,
+>(
+  no: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof masterDataCustomer>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getMasterDataCustomerQueryOptions(no, options);
 
-  const queryOptions = getMasterDataCustomerQueryOptions(no,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
-
-
-
-
-
 
 /**
  * @summary Vendors, a page at a time. Balances are masked by role. Mock Navision data
  */
 export const masterDataVendors = (
-    params?: MasterDataVendorsParams,
- signal?: AbortSignal
+  params?: MasterDataVendorsParams,
+  signal?: AbortSignal,
 ) => {
+  return apiMutator<MasterDataVendors200>({
+    url: `/api/v1/master-data/vendors`,
+    method: "GET",
+    params,
+    signal,
+  });
+};
 
-
-      return apiMutator<MasterDataVendors200>(
-      {url: `/api/v1/master-data/vendors`, method: 'GET',
-        params, signal
-    },
-      );
-    }
-
-
-
-
-export const getMasterDataVendorsQueryKey = (params?: MasterDataVendorsParams,) => {
-    return [
-    `/api/v1/master-data/vendors`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-
-export const getMasterDataVendorsQueryOptions = <TData = Awaited<ReturnType<typeof masterDataVendors>>, TError = ErrorType<unknown>>(params?: MasterDataVendorsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataVendors>>, TError, TData>>, }
+export const getMasterDataVendorsQueryKey = (
+  params?: MasterDataVendorsParams,
 ) => {
+  return [`/api/v1/master-data/vendors`, ...(params ? [params] : [])] as const;
+};
 
-const {query: queryOptions} = options ?? {};
+export const getMasterDataVendorsQueryOptions = <
+  TData = Awaited<ReturnType<typeof masterDataVendors>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: MasterDataVendorsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof masterDataVendors>>,
+        TError,
+        TData
+      >
+    >;
+  },
+) => {
+  const { query: queryOptions } = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getMasterDataVendorsQueryKey(params);
+  const queryKey =
+    queryOptions?.queryKey ?? getMasterDataVendorsQueryKey(params);
 
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof masterDataVendors>>
+  > = ({ signal }) => masterDataVendors(params, signal);
 
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof masterDataVendors>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof masterDataVendors>>> = ({ signal }) => masterDataVendors(params, signal);
+export type MasterDataVendorsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof masterDataVendors>>
+>;
+export type MasterDataVendorsQueryError = ErrorType<unknown>;
 
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof masterDataVendors>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type MasterDataVendorsQueryResult = NonNullable<Awaited<ReturnType<typeof masterDataVendors>>>
-export type MasterDataVendorsQueryError = ErrorType<unknown>
-
-
-export function useMasterDataVendors<TData = Awaited<ReturnType<typeof masterDataVendors>>, TError = ErrorType<unknown>>(
- params: undefined |  MasterDataVendorsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataVendors>>, TError, TData>> & Pick<
+export function useMasterDataVendors<
+  TData = Awaited<ReturnType<typeof masterDataVendors>>,
+  TError = ErrorType<unknown>,
+>(
+  params: undefined | MasterDataVendorsParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof masterDataVendors>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof masterDataVendors>>,
           TError,
           Awaited<ReturnType<typeof masterDataVendors>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useMasterDataVendors<TData = Awaited<ReturnType<typeof masterDataVendors>>, TError = ErrorType<unknown>>(
- params?: MasterDataVendorsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataVendors>>, TError, TData>> & Pick<
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useMasterDataVendors<
+  TData = Awaited<ReturnType<typeof masterDataVendors>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: MasterDataVendorsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof masterDataVendors>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof masterDataVendors>>,
           TError,
           Awaited<ReturnType<typeof masterDataVendors>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useMasterDataVendors<TData = Awaited<ReturnType<typeof masterDataVendors>>, TError = ErrorType<unknown>>(
- params?: MasterDataVendorsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataVendors>>, TError, TData>>, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useMasterDataVendors<
+  TData = Awaited<ReturnType<typeof masterDataVendors>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: MasterDataVendorsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof masterDataVendors>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 /**
  * @summary Vendors, a page at a time. Balances are masked by role. Mock Navision data
  */
 
-export function useMasterDataVendors<TData = Awaited<ReturnType<typeof masterDataVendors>>, TError = ErrorType<unknown>>(
- params?: MasterDataVendorsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataVendors>>, TError, TData>>, }
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+export function useMasterDataVendors<
+  TData = Awaited<ReturnType<typeof masterDataVendors>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: MasterDataVendorsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof masterDataVendors>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getMasterDataVendorsQueryOptions(params, options);
 
-  const queryOptions = getMasterDataVendorsQueryOptions(params,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
 
-
-
-
-
-
 /**
  * @summary One vendor: key facts, bank accounts masked by role, open purchase orders and items. Mock Navision data
  */
-export const masterDataVendor = (
-    no: string,
- signal?: AbortSignal
+export const masterDataVendor = (no: string, signal?: AbortSignal) => {
+  return apiMutator<MasterDataVendor200>({
+    url: `/api/v1/master-data/vendors/${no}`,
+    method: "GET",
+    signal,
+  });
+};
+
+export const getMasterDataVendorQueryKey = (no: string) => {
+  return [`/api/v1/master-data/vendors/${no}`] as const;
+};
+
+export const getMasterDataVendorQueryOptions = <
+  TData = Awaited<ReturnType<typeof masterDataVendor>>,
+  TError = ErrorType<unknown>,
+>(
+  no: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof masterDataVendor>>,
+        TError,
+        TData
+      >
+    >;
+  },
 ) => {
+  const { query: queryOptions } = options ?? {};
 
+  const queryKey = queryOptions?.queryKey ?? getMasterDataVendorQueryKey(no);
 
-      return apiMutator<MasterDataVendor200>(
-      {url: `/api/v1/master-data/vendors/${no}`, method: 'GET', signal
-    },
-      );
-    }
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof masterDataVendor>>
+  > = ({ signal }) => masterDataVendor(no, signal);
 
+  return {
+    queryKey,
+    queryFn,
+    enabled: no !== null && no !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof masterDataVendor>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
 
+export type MasterDataVendorQueryResult = NonNullable<
+  Awaited<ReturnType<typeof masterDataVendor>>
+>;
+export type MasterDataVendorQueryError = ErrorType<unknown>;
 
-
-export const getMasterDataVendorQueryKey = (no: string,) => {
-    return [
-    `/api/v1/master-data/vendors/${no}`
-    ] as const;
-    }
-
-
-export const getMasterDataVendorQueryOptions = <TData = Awaited<ReturnType<typeof masterDataVendor>>, TError = ErrorType<unknown>>(no: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataVendor>>, TError, TData>>, }
-) => {
-
-const {query: queryOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getMasterDataVendorQueryKey(no);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof masterDataVendor>>> = ({ signal }) => masterDataVendor(no, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: no !== null && no !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof masterDataVendor>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type MasterDataVendorQueryResult = NonNullable<Awaited<ReturnType<typeof masterDataVendor>>>
-export type MasterDataVendorQueryError = ErrorType<unknown>
-
-
-export function useMasterDataVendor<TData = Awaited<ReturnType<typeof masterDataVendor>>, TError = ErrorType<unknown>>(
- no: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataVendor>>, TError, TData>> & Pick<
+export function useMasterDataVendor<
+  TData = Awaited<ReturnType<typeof masterDataVendor>>,
+  TError = ErrorType<unknown>,
+>(
+  no: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof masterDataVendor>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof masterDataVendor>>,
           TError,
           Awaited<ReturnType<typeof masterDataVendor>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useMasterDataVendor<TData = Awaited<ReturnType<typeof masterDataVendor>>, TError = ErrorType<unknown>>(
- no: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataVendor>>, TError, TData>> & Pick<
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useMasterDataVendor<
+  TData = Awaited<ReturnType<typeof masterDataVendor>>,
+  TError = ErrorType<unknown>,
+>(
+  no: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof masterDataVendor>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof masterDataVendor>>,
           TError,
           Awaited<ReturnType<typeof masterDataVendor>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useMasterDataVendor<TData = Awaited<ReturnType<typeof masterDataVendor>>, TError = ErrorType<unknown>>(
- no: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataVendor>>, TError, TData>>, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useMasterDataVendor<
+  TData = Awaited<ReturnType<typeof masterDataVendor>>,
+  TError = ErrorType<unknown>,
+>(
+  no: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof masterDataVendor>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 /**
  * @summary One vendor: key facts, bank accounts masked by role, open purchase orders and items. Mock Navision data
  */
 
-export function useMasterDataVendor<TData = Awaited<ReturnType<typeof masterDataVendor>>, TError = ErrorType<unknown>>(
- no: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataVendor>>, TError, TData>>, }
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+export function useMasterDataVendor<
+  TData = Awaited<ReturnType<typeof masterDataVendor>>,
+  TError = ErrorType<unknown>,
+>(
+  no: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof masterDataVendor>>,
+        TError,
+        TData
+      >
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getMasterDataVendorQueryOptions(no, options);
 
-  const queryOptions = getMasterDataVendorQueryOptions(no,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
-
-
-
-
-
-

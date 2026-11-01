@@ -6,11 +6,11 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type MasterDataItem200DataSprsItemStatus = typeof MasterDataItem200DataSprsItemStatus[keyof typeof MasterDataItem200DataSprsItemStatus];
-
+export type MasterDataItem200DataSprsItemStatus =
+  (typeof MasterDataItem200DataSprsItemStatus)[keyof typeof MasterDataItem200DataSprsItemStatus];
 
 export const MasterDataItem200DataSprsItemStatus = {
-  suggested: 'suggested',
-  submitted: 'submitted',
-  approved: 'approved',
+  suggested: "suggested",
+  submitted: "submitted",
+  approved: "approved",
 } as const;

@@ -6,10 +6,10 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type MasterDataItem200DataOrderLinesItemShortfallState = typeof MasterDataItem200DataOrderLinesItemShortfallState[keyof typeof MasterDataItem200DataOrderLinesItemShortfallState];
-
+export type MasterDataItem200DataOrderLinesItemShortfallState =
+  (typeof MasterDataItem200DataOrderLinesItemShortfallState)[keyof typeof MasterDataItem200DataOrderLinesItemShortfallState];
 
 export const MasterDataItem200DataOrderLinesItemShortfallState = {
-  waiting: 'waiting',
-  covered: 'covered',
+  waiting: "waiting",
+  covered: "covered",
 } as const;

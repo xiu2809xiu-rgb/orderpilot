@@ -6,12 +6,12 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type WorkflowsDocumentConfig200DataItemFieldsItemKind = typeof WorkflowsDocumentConfig200DataItemFieldsItemKind[keyof typeof WorkflowsDocumentConfig200DataItemFieldsItemKind];
-
+export type WorkflowsDocumentConfig200DataItemFieldsItemKind =
+  (typeof WorkflowsDocumentConfig200DataItemFieldsItemKind)[keyof typeof WorkflowsDocumentConfig200DataItemFieldsItemKind];
 
 export const WorkflowsDocumentConfig200DataItemFieldsItemKind = {
-  text: 'text',
-  number: 'number',
-  date: 'date',
-  choice: 'choice',
+  text: "text",
+  number: "number",
+  date: "date",
+  choice: "choice",
 } as const;

@@ -19,9 +19,16 @@ export default defineFeature({
   id: "insights",
   namespace: "insights",
   path: "insights",
-  group: "insight",
-  icon: ChartColumn,
   permission: "insights.read",
+  menu: [
+    {
+      id: "insights.kpis",
+      module: "reports",
+      label: "insights:menu.kpis",
+      to: "/insights",
+      icon: ChartColumn,
+    },
+  ],
   cues: [],
   Page: lazy(() => import("./InsightsPage")),
 });

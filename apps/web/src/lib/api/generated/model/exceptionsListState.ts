@@ -6,11 +6,11 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type ExceptionsListState = typeof ExceptionsListState[keyof typeof ExceptionsListState];
-
+export type ExceptionsListState =
+  (typeof ExceptionsListState)[keyof typeof ExceptionsListState];
 
 export const ExceptionsListState = {
-  OPEN: 'OPEN',
-  RESOLVED: 'RESOLVED',
-  ALL: 'ALL',
+  OPEN: "OPEN",
+  RESOLVED: "RESOLVED",
+  ALL: "ALL",
 } as const;

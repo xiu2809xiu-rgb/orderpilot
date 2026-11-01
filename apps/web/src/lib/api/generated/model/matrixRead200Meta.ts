@@ -8,8 +8,8 @@
 
 export type MatrixRead200Meta = {
   /**
-     * @minimum 0
-     * @maximum 9007199254740991
-     */
+   * @minimum 0
+   * @maximum 9007199254740991
+   */
   total: number;
 };

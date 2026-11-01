@@ -19,9 +19,16 @@ export default defineFeature({
   id: "monitoring",
   namespace: "monitoring",
   path: "monitoring",
-  group: "control",
-  icon: Activity,
   permission: "aiUsage.read",
+  menu: [
+    {
+      id: "monitoring.monitoring",
+      module: "system",
+      label: "monitoring:menu.monitoring",
+      to: "/monitoring",
+      icon: Activity,
+    },
+  ],
   cues: [
     {
       id: "aiUse",

@@ -6,10 +6,10 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type UsersListActive = typeof UsersListActive[keyof typeof UsersListActive];
-
+export type UsersListActive =
+  (typeof UsersListActive)[keyof typeof UsersListActive];
 
 export const UsersListActive = {
-  true: 'true',
-  false: 'false',
+  true: "true",
+  false: "false",
 } as const;

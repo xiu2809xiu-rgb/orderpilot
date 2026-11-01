@@ -6,12 +6,12 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type PolicyCheckAiDestinationBodyClassification = typeof PolicyCheckAiDestinationBodyClassification[keyof typeof PolicyCheckAiDestinationBodyClassification];
-
+export type PolicyCheckAiDestinationBodyClassification =
+  (typeof PolicyCheckAiDestinationBodyClassification)[keyof typeof PolicyCheckAiDestinationBodyClassification];
 
 export const PolicyCheckAiDestinationBodyClassification = {
-  public: 'public',
-  internal: 'internal',
-  confidential: 'confidential',
-  restricted: 'restricted',
+  public: "public",
+  internal: "internal",
+  confidential: "confidential",
+  restricted: "restricted",
 } as const;

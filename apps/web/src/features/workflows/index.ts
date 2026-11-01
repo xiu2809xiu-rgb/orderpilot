@@ -1,4 +1,4 @@
-import { BellRing, Clock, Inbox, Workflow } from "lucide-react";
+import { BellRing, Clock, Inbox } from "lucide-react";
 import { lazy } from "react";
 import { registerAction } from "@/lib/actions";
 import { defineFeature } from "../define";
@@ -49,9 +49,18 @@ export default defineFeature({
   id: "workflows",
   namespace: "workflows",
   path: "workflows",
-  group: "operations",
-  icon: Workflow,
   permission: "workflows.read",
+  menu: [
+    {
+      id: "workflows.myTasks",
+      module: "home",
+      label: "workflows:menu.myTasks",
+      to: "/workflows",
+      icon: Inbox,
+      permission: "tasks.complete",
+      count: { api: "/workflows/tasks" },
+    },
+  ],
   cues: [
     {
       id: "myTasks",

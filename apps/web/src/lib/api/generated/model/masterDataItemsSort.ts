@@ -6,16 +6,16 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type MasterDataItemsSort = typeof MasterDataItemsSort[keyof typeof MasterDataItemsSort];
-
+export type MasterDataItemsSort =
+  (typeof MasterDataItemsSort)[keyof typeof MasterDataItemsSort];
 
 export const MasterDataItemsSort = {
-  no: 'no',
-  description: 'description',
-  brand: 'brand',
-  inventory: 'inventory',
-  qtyOnSalesOrder: 'qtyOnSalesOrder',
-  qtyOnPurchOrder: 'qtyOnPurchOrder',
-  availableStock: 'availableStock',
-  unitPrice: 'unitPrice',
+  no: "no",
+  description: "description",
+  brand: "brand",
+  inventory: "inventory",
+  qtyOnSalesOrder: "qtyOnSalesOrder",
+  qtyOnPurchOrder: "qtyOnPurchOrder",
+  availableStock: "availableStock",
+  unitPrice: "unitPrice",
 } as const;

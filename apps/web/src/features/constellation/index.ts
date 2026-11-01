@@ -1,14 +1,23 @@
 import { Orbit } from "lucide-react";
-import { lazy } from "react";
-import { defineFeature } from "../define";
+import { defineFeature, devOnlyPage } from "../define";
 
 export default defineFeature({
   id: "constellation",
   namespace: "constellation",
   path: "constellation",
-  group: "insight",
-  icon: Orbit,
   permission: "orders.read",
+  menu: [
+    {
+      id: "constellation.constellation",
+      module: "reports",
+      label: "constellation:menu.constellation",
+      to: "/constellation",
+      icon: Orbit,
+    },
+  ],
   cues: [],
-  Page: lazy(() => import("./ConstellationPage")),
+  planned: true,
+  Page: devOnlyPage(
+    import.meta.env.DEV ? () => import("./ConstellationPage") : undefined,
+  ),
 });

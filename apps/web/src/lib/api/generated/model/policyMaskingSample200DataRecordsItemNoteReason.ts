@@ -9,12 +9,13 @@
 /**
  * @nullable
  */
-export type PolicyMaskingSample200DataRecordsItemNoteReason = typeof PolicyMaskingSample200DataRecordsItemNoteReason[keyof typeof PolicyMaskingSample200DataRecordsItemNoteReason] | null;
-
+export type PolicyMaskingSample200DataRecordsItemNoteReason =
+  | (typeof PolicyMaskingSample200DataRecordsItemNoteReason)[keyof typeof PolicyMaskingSample200DataRecordsItemNoteReason]
+  | null;
 
 export const PolicyMaskingSample200DataRecordsItemNoteReason = {
-  role: 'role',
-  bankDetails: 'bankDetails',
-  price: 'price',
-  policy: 'policy',
+  role: "role",
+  bankDetails: "bankDetails",
+  price: "price",
+  policy: "policy",
 } as const;

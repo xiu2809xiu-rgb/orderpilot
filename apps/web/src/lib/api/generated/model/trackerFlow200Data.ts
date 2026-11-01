@@ -5,13 +5,13 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { TrackerFlow200DataStepsItem } from './trackerFlow200DataStepsItem.ts';
+import type { TrackerFlow200DataStepsItem } from "./trackerFlow200DataStepsItem.ts";
 
 export type TrackerFlow200Data = {
   /**
-     * @minimum 0
-     * @maximum 9007199254740991
-     */
+   * @minimum 0
+   * @maximum 9007199254740991
+   */
   openOrders: number;
   steps: TrackerFlow200DataStepsItem[];
 };

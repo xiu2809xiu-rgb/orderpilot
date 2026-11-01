@@ -6,12 +6,12 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type MasterDataCustomer200DataCreditLimitLcyClassification = typeof MasterDataCustomer200DataCreditLimitLcyClassification[keyof typeof MasterDataCustomer200DataCreditLimitLcyClassification];
-
+export type MasterDataCustomer200DataCreditLimitLcyClassification =
+  (typeof MasterDataCustomer200DataCreditLimitLcyClassification)[keyof typeof MasterDataCustomer200DataCreditLimitLcyClassification];
 
 export const MasterDataCustomer200DataCreditLimitLcyClassification = {
-  public: 'public',
-  internal: 'internal',
-  confidential: 'confidential',
-  restricted: 'restricted',
+  public: "public",
+  internal: "internal",
+  confidential: "confidential",
+  restricted: "restricted",
 } as const;

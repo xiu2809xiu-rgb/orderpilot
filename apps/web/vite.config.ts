@@ -23,8 +23,12 @@ function previewHeaders(sentryDsn: string | undefined): Plugin {
 }
 
 export default defineConfig(({ mode }) => {
-  // Only these two names are read from the root .env, never its secrets.
-  const env = loadEnv(mode, repoRoot, ["API_PORT", "WEB_PORT"]);
+  // Only these names are read from the root .env, never its secrets.
+  const env = loadEnv(mode, repoRoot, [
+    "API_PORT",
+    "WEB_PORT",
+    "VITE_SHOW_PLANNED",
+  ]);
   // The web app's own env file may hold VITE_SENTRY_DSN; without it the policy stays strict.
   const sentryDsn = loadEnv(mode, import.meta.dirname, "VITE_").VITE_SENTRY_DSN;
   // loadEnv also parses the root .env's NODE_ENV=development and hands it to
@@ -36,7 +40,20 @@ export default defineConfig(({ mode }) => {
   const webPort = Number(env.WEB_PORT ?? "5173");
   const proxy = { "/api": { target: apiTarget, changeOrigin: false } };
 
+  // The developer switch for planned features comes from the root .env, in the
+  // dev server only. Tests and production builds never see it (the test run
+  // stubs it, and the registry ignores it outside development).
+  const define =
+    mode === "development"
+      ? {
+          "import.meta.env.VITE_SHOW_PLANNED": JSON.stringify(
+            env.VITE_SHOW_PLANNED ?? "",
+          ),
+        }
+      : undefined;
+
   return {
+    define,
     plugins: [react(), tailwindcss(), previewHeaders(sentryDsn)],
     resolve: {
       alias: {

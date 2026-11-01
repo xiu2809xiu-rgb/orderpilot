@@ -6,17 +6,17 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type WorkflowsOrderFlow200DataStepsItemOwnerRole = typeof WorkflowsOrderFlow200DataStepsItemOwnerRole[keyof typeof WorkflowsOrderFlow200DataStepsItemOwnerRole];
-
+export type WorkflowsOrderFlow200DataStepsItemOwnerRole =
+  (typeof WorkflowsOrderFlow200DataStepsItemOwnerRole)[keyof typeof WorkflowsOrderFlow200DataStepsItemOwnerRole];
 
 export const WorkflowsOrderFlow200DataStepsItemOwnerRole = {
-  SYSTEM_ADMIN: 'SYSTEM_ADMIN',
-  PRODUCT_MANAGER: 'PRODUCT_MANAGER',
-  APPROVER: 'APPROVER',
-  SUPPORT: 'SUPPORT',
-  WAREHOUSE: 'WAREHOUSE',
-  FINANCE: 'FINANCE',
-  LOGISTICS: 'LOGISTICS',
-  MANAGEMENT: 'MANAGEMENT',
-  AUDITOR: 'AUDITOR',
+  SYSTEM_ADMIN: "SYSTEM_ADMIN",
+  PRODUCT_MANAGER: "PRODUCT_MANAGER",
+  APPROVER: "APPROVER",
+  SUPPORT: "SUPPORT",
+  WAREHOUSE: "WAREHOUSE",
+  FINANCE: "FINANCE",
+  LOGISTICS: "LOGISTICS",
+  MANAGEMENT: "MANAGEMENT",
+  AUDITOR: "AUDITOR",
 } as const;

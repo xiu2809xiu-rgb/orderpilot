@@ -6,10 +6,10 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type TrackerListDocumentToConfirm = typeof TrackerListDocumentToConfirm[keyof typeof TrackerListDocumentToConfirm];
-
+export type TrackerListDocumentToConfirm =
+  (typeof TrackerListDocumentToConfirm)[keyof typeof TrackerListDocumentToConfirm];
 
 export const TrackerListDocumentToConfirm = {
-  true: 'true',
-  false: 'false',
+  true: "true",
+  false: "false",
 } as const;

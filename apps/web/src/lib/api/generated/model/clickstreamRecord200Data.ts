@@ -8,8 +8,8 @@
 
 export type ClickstreamRecord200Data = {
   /**
-     * @minimum 0
-     * @maximum 9007199254740991
-     */
+   * @minimum 0
+   * @maximum 9007199254740991
+   */
   accepted: number;
 };

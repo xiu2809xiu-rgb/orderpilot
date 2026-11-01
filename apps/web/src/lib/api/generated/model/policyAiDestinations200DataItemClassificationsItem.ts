@@ -6,12 +6,12 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type PolicyAiDestinations200DataItemClassificationsItem = typeof PolicyAiDestinations200DataItemClassificationsItem[keyof typeof PolicyAiDestinations200DataItemClassificationsItem];
-
+export type PolicyAiDestinations200DataItemClassificationsItem =
+  (typeof PolicyAiDestinations200DataItemClassificationsItem)[keyof typeof PolicyAiDestinations200DataItemClassificationsItem];
 
 export const PolicyAiDestinations200DataItemClassificationsItem = {
-  public: 'public',
-  internal: 'internal',
-  confidential: 'confidential',
-  restricted: 'restricted',
+  public: "public",
+  internal: "internal",
+  confidential: "confidential",
+  restricted: "restricted",
 } as const;

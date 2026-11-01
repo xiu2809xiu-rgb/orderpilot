@@ -6,13 +6,13 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type TrackerListSort = typeof TrackerListSort[keyof typeof TrackerListSort];
-
+export type TrackerListSort =
+  (typeof TrackerListSort)[keyof typeof TrackerListSort];
 
 export const TrackerListSort = {
-  orderNo: 'orderNo',
-  customerName: 'customerName',
-  orderDate: 'orderDate',
-  shipmentDate: 'shipmentDate',
-  amount: 'amount',
+  orderNo: "orderNo",
+  customerName: "customerName",
+  orderDate: "orderDate",
+  shipmentDate: "shipmentDate",
+  amount: "amount",
 } as const;

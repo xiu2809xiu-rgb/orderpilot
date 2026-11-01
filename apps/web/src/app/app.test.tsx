@@ -2,11 +2,12 @@ import { authRoutes, ROLES } from "@orderpilot/shared";
 import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import axe from "axe-core";
-import { Package } from "lucide-react";
 import { lazy, useState } from "react";
 import { createMemoryRouter } from "react-router";
 import { describe, expect, it, vi } from "vitest";
 import { defineFeature } from "@/features/define";
+import i18n from "@/i18n";
+import { allFeatures } from "@/features/registry";
 import { ApiError } from "@/lib/api/errors";
 import { apiClient } from "@/lib/api/instance";
 import { mockApi, sessionFor } from "@/test/fixtures";
@@ -137,10 +138,10 @@ describe("signed in", () => {
     await screen.findByRole("heading", { name: /Welcome/ });
     const nav = screen.getByRole("navigation", { name: "Main navigation" });
     expect(
-      within(nav).getByRole("link", { name: "Orders" }),
+      within(nav).getByRole("link", { name: "Order tracker" }),
     ).toBeInTheDocument();
     expect(
-      within(nav).queryByRole("link", { name: "Governance" }),
+      within(nav).queryByRole("link", { name: "Roles" }),
     ).not.toBeInTheDocument();
     expect(
       within(nav).queryByRole("link", { name: "Audit log" }),
@@ -154,17 +155,33 @@ describe("signed in", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows a planned page for an area", async () => {
+  it("shows the not-found page for a planned area, as for any unknown address", async () => {
     renderApp("/orders", { session: sessionFor("SUPPORT") });
+    expect(
+      await screen.findByRole("heading", { name: "Page not found" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Planned")).not.toBeInTheDocument();
+    expect(screen.queryByText("What arrives here")).not.toBeInTheDocument();
+  });
+
+  it("shows the placeholder, labelled for developers, when the developer flag is on", async () => {
+    const api = mockApi({ session: sessionFor("SUPPORT") });
+    vi.stubGlobal("fetch", api.fetch);
+    resetApp();
+    document.cookie = "op_csrf=csrf-token-1";
+    apiClient.markSessionStarted();
+    // The shell loads the text of reachable areas; this run adds a planned one.
+    await i18n.loadNamespaces(["orders", "planned"]);
+    const router = createMemoryRouter(buildRoutes(allFeatures, true), {
+      initialEntries: ["/orders"],
+    });
+    render(<App router={router} />);
     expect(
       await screen.findByRole("heading", { name: "Orders" }),
     ).toBeInTheDocument();
     expect(screen.getByText("Planned")).toBeInTheDocument();
-    expect(screen.getByText("What arrives here")).toBeInTheDocument();
+    expect(screen.getByText(/Developer view/)).toBeInTheDocument();
     const crumbs = screen.getByRole("navigation", { name: "Breadcrumb" });
-    expect(
-      within(crumbs).getByRole("link", { name: "Home" }),
-    ).toBeInTheDocument();
     expect(within(crumbs).getByText("Orders")).toHaveAttribute(
       "aria-current",
       "page",
@@ -205,10 +222,12 @@ describe("signed in", () => {
     await screen.findByRole("heading", { name: /Welcome/ });
     await user.keyboard("{Control>}k{/Control}");
     const box = await screen.findByRole("combobox");
-    await user.type(box, "docu");
-    await user.click(await screen.findByRole("option", { name: /Documents/ }));
+    await user.type(box, "tracker");
+    await user.click(
+      await screen.findByRole("option", { name: /Order tracker/ }),
+    );
     await waitFor(() => {
-      expect(router.state.location.pathname).toBe("/documents");
+      expect(router.state.location.pathname).toBe("/order-tracker");
     });
   });
 
@@ -256,8 +275,7 @@ const notes = defineFeature({
   id: "notes",
   namespace: "orders",
   path: "notes",
-  group: "operations",
-  icon: Package,
+  menu: [],
   cues: [],
   Page: lazy(() =>
     Promise.resolve({
@@ -372,9 +390,9 @@ describe("accessibility (axe)", () => {
     expect(await violations(container)).toEqual([]);
   });
 
-  it("finds nothing on a planned page or the settings page", async () => {
+  it("finds nothing on the not-found page or the settings page", async () => {
     const first = renderApp("/orders", { session: sessionFor("SUPPORT") });
-    await screen.findByRole("heading", { name: "Orders" });
+    await screen.findByRole("heading", { name: "Page not found" });
     expect(await violations(first.container)).toEqual([]);
     first.unmount();
     const second = renderApp("/settings", { session: sessionFor("SUPPORT") });

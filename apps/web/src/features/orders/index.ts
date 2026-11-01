@@ -1,14 +1,23 @@
 import { Package } from "lucide-react";
-import { lazy } from "react";
-import { defineFeature } from "../define";
+import { defineFeature, devOnlyPage } from "../define";
 
 export default defineFeature({
   id: "orders",
   namespace: "orders",
   path: "orders",
-  group: "operations",
-  icon: Package,
   permission: "orders.read",
+  menu: [
+    {
+      id: "orders.orders",
+      module: "sales",
+      label: "orders:menu.orders",
+      to: "/orders",
+      icon: Package,
+    },
+  ],
   cues: [],
-  Page: lazy(() => import("./OrdersPage")),
+  planned: true,
+  Page: devOnlyPage(
+    import.meta.env.DEV ? () => import("./OrdersPage") : undefined,
+  ),
 });

@@ -1,4 +1,4 @@
-import { Home, Settings } from "lucide-react";
+import { Settings } from "lucide-react";
 import { useLayoutEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
@@ -10,7 +10,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { featureNamespaces, featuresFor } from "@/features/nav";
+import { featureNamespaces, menuFor } from "@/features/nav";
 import { actionsFor, type AppAction } from "@/lib/actions";
 import { useSessionStore } from "@/stores/session";
 
@@ -120,23 +120,15 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
           })}
         </CommandGroup>
         <CommandGroup heading={t("palette.goTo")}>
-          <CommandItem
-            onSelect={() => {
-              go("/");
-            }}
-          >
-            <Home aria-hidden="true" />
-            {t("nav.home")}
-          </CommandItem>
-          {featuresFor(session).map((feature) => (
+          {menuFor(session).map((entry) => (
             <CommandItem
-              key={feature.id}
+              key={entry.id}
               onSelect={() => {
-                go(`/${feature.path}`);
+                go(entry.to);
               }}
             >
-              <feature.icon aria-hidden="true" />
-              {t("title", { ns: feature.namespace })}
+              <entry.icon aria-hidden="true" />
+              {t(entry.label)}
             </CommandItem>
           ))}
           <CommandItem

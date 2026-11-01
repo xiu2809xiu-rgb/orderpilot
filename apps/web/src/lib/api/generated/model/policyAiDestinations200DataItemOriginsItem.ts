@@ -6,10 +6,10 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type PolicyAiDestinations200DataItemOriginsItem = typeof PolicyAiDestinations200DataItemOriginsItem[keyof typeof PolicyAiDestinations200DataItemOriginsItem];
-
+export type PolicyAiDestinations200DataItemOriginsItem =
+  (typeof PolicyAiDestinations200DataItemOriginsItem)[keyof typeof PolicyAiDestinations200DataItemOriginsItem];
 
 export const PolicyAiDestinations200DataItemOriginsItem = {
-  synthetic: 'synthetic',
-  real: 'real',
+  synthetic: "synthetic",
+  real: "real",
 } as const;

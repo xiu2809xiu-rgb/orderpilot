@@ -6,18 +6,18 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type TrackerTimeline200DataChecksItemEvidenceItemDocumentType = typeof TrackerTimeline200DataChecksItemEvidenceItemDocumentType[keyof typeof TrackerTimeline200DataChecksItemEvidenceItemDocumentType];
-
+export type TrackerTimeline200DataChecksItemEvidenceItemDocumentType =
+  (typeof TrackerTimeline200DataChecksItemEvidenceItemDocumentType)[keyof typeof TrackerTimeline200DataChecksItemEvidenceItemDocumentType];
 
 export const TrackerTimeline200DataChecksItemEvidenceItemDocumentType = {
-  CUSTOMER_PO: 'CUSTOMER_PO',
-  PROFORMA_INVOICE: 'PROFORMA_INVOICE',
-  VENDOR_PI: 'VENDOR_PI',
-  SALES_INVOICE: 'SALES_INVOICE',
-  PACKING_LIST: 'PACKING_LIST',
-  AWB: 'AWB',
-  BILL_OF_LADING: 'BILL_OF_LADING',
-  IMPORT_PERMIT: 'IMPORT_PERMIT',
-  PAYMENT_ADVICE: 'PAYMENT_ADVICE',
-  OTHER: 'OTHER',
+  CUSTOMER_PO: "CUSTOMER_PO",
+  PROFORMA_INVOICE: "PROFORMA_INVOICE",
+  VENDOR_PI: "VENDOR_PI",
+  SALES_INVOICE: "SALES_INVOICE",
+  PACKING_LIST: "PACKING_LIST",
+  AWB: "AWB",
+  BILL_OF_LADING: "BILL_OF_LADING",
+  IMPORT_PERMIT: "IMPORT_PERMIT",
+  PAYMENT_ADVICE: "PAYMENT_ADVICE",
+  OTHER: "OTHER",
 } as const;

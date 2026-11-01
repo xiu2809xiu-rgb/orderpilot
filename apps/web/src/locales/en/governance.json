@@ -1,11 +1,10 @@
 {
   "title": "Governance",
   "description": "Who may do what, and what data may go where.",
-  "arrives": [
-    "Approval limits and delegation",
-    "Segregation of duties and the bank-detail control",
-    "The real masking rules"
-  ],
+  "menu": {
+    "users": "Users",
+    "roles": "Roles"
+  },
   "tabs": {
     "label": "Governance sections",
     "matrix": "Role matrix",

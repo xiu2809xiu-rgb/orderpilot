@@ -1,4 +1,4 @@
-import { Building2, Database, Factory, Search } from "lucide-react";
+import { Building2, Factory, Package, Search } from "lucide-react";
 import { lazy } from "react";
 import { registerAction } from "@/lib/actions";
 import { defineFeature } from "../define";
@@ -30,9 +30,30 @@ export default defineFeature({
   id: "master-data",
   namespace: "master-data",
   path: "master-data",
-  group: "data",
-  icon: Database,
   permission: "orders.read",
+  menu: [
+    {
+      id: "master-data.customers",
+      module: "masterData",
+      label: "master-data:menu.customers",
+      to: "/master-data/customers",
+      icon: Building2,
+    },
+    {
+      id: "master-data.vendors",
+      module: "masterData",
+      label: "master-data:menu.vendors",
+      to: "/master-data/vendors",
+      icon: Factory,
+    },
+    {
+      id: "master-data.items",
+      module: "masterData",
+      label: "master-data:menu.items",
+      to: "/master-data/items",
+      icon: Package,
+    },
+  ],
   cues: [],
   Page: lazy(() => import("./MasterDataPage")),
   children: masterDataRoutes,

@@ -1,12 +1,9 @@
 {
   "title": "Workflows",
   "description": "Tasks, approvals and the steps every order passes through.",
-  "arrives": [
-    "The state machine behind every order, written by the area owner",
-    "SPR approval within limits, with a second approver where one is needed",
-    "The payment gate for prepayment orders",
-    "Reminders and escalations on a schedule"
-  ],
+  "menu": {
+    "myTasks": "My tasks"
+  },
   "nav": {
     "label": "Workflow pages",
     "inbox": "Task inbox",

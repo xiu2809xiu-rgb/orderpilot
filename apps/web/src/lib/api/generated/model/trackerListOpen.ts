@@ -6,10 +6,10 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type TrackerListOpen = typeof TrackerListOpen[keyof typeof TrackerListOpen];
-
+export type TrackerListOpen =
+  (typeof TrackerListOpen)[keyof typeof TrackerListOpen];
 
 export const TrackerListOpen = {
-  true: 'true',
-  false: 'false',
+  true: "true",
+  false: "false",
 } as const;

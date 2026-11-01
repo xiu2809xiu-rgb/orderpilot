@@ -6,16 +6,16 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type WorkflowsMyTasks200DataItemKind = typeof WorkflowsMyTasks200DataItemKind[keyof typeof WorkflowsMyTasks200DataItemKind];
-
+export type WorkflowsMyTasks200DataItemKind =
+  (typeof WorkflowsMyTasks200DataItemKind)[keyof typeof WorkflowsMyTasks200DataItemKind];
 
 export const WorkflowsMyTasks200DataItemKind = {
-  REVIEW_FIELDS: 'REVIEW_FIELDS',
-  RAISE_SPR: 'RAISE_SPR',
-  APPROVE_SPR: 'APPROVE_SPR',
-  SEND_PI: 'SEND_PI',
-  CONFIRM_PAYMENT: 'CONFIRM_PAYMENT',
-  PACK_ORDER: 'PACK_ORDER',
-  RECOUNT_CARTONS: 'RECOUNT_CARTONS',
-  ADD_SHIPPING_DOCUMENTS: 'ADD_SHIPPING_DOCUMENTS',
+  REVIEW_FIELDS: "REVIEW_FIELDS",
+  RAISE_SPR: "RAISE_SPR",
+  APPROVE_SPR: "APPROVE_SPR",
+  SEND_PI: "SEND_PI",
+  CONFIRM_PAYMENT: "CONFIRM_PAYMENT",
+  PACK_ORDER: "PACK_ORDER",
+  RECOUNT_CARTONS: "RECOUNT_CARTONS",
+  ADD_SHIPPING_DOCUMENTS: "ADD_SHIPPING_DOCUMENTS",
 } as const;

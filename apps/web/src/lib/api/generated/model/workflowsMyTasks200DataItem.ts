@@ -5,12 +5,12 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { WorkflowsMyTasks200DataItemAssigneeRole } from './workflowsMyTasks200DataItemAssigneeRole.ts';
-import type { WorkflowsMyTasks200DataItemExpectedPayment } from './workflowsMyTasks200DataItemExpectedPayment.ts';
-import type { WorkflowsMyTasks200DataItemKind } from './workflowsMyTasks200DataItemKind.ts';
-import type { WorkflowsMyTasks200DataItemPriority } from './workflowsMyTasks200DataItemPriority.ts';
-import type { WorkflowsMyTasks200DataItemRef } from './workflowsMyTasks200DataItemRef.ts';
-import type { WorkflowsMyTasks200DataItemStatus } from './workflowsMyTasks200DataItemStatus.ts';
+import type { WorkflowsMyTasks200DataItemAssigneeRole } from "./workflowsMyTasks200DataItemAssigneeRole.ts";
+import type { WorkflowsMyTasks200DataItemExpectedPayment } from "./workflowsMyTasks200DataItemExpectedPayment.ts";
+import type { WorkflowsMyTasks200DataItemKind } from "./workflowsMyTasks200DataItemKind.ts";
+import type { WorkflowsMyTasks200DataItemPriority } from "./workflowsMyTasks200DataItemPriority.ts";
+import type { WorkflowsMyTasks200DataItemRef } from "./workflowsMyTasks200DataItemRef.ts";
+import type { WorkflowsMyTasks200DataItemStatus } from "./workflowsMyTasks200DataItemStatus.ts";
 
 export type WorkflowsMyTasks200DataItem = {
   /** @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */
@@ -20,9 +20,9 @@ export type WorkflowsMyTasks200DataItem = {
   title: string;
   assigneeRole: WorkflowsMyTasks200DataItemAssigneeRole;
   /**
-     * @nullable
-     * @pattern ^[A-Za-z0-9-]{1,30}$
-     */
+   * @nullable
+   * @pattern ^[A-Za-z0-9-]{1,30}$
+   */
   orderNo: string | null;
   /** @nullable */
   ref: WorkflowsMyTasks200DataItemRef;
@@ -39,9 +39,9 @@ export type WorkflowsMyTasks200DataItem = {
   /** @pattern ^-?\d{1,15}(\.\d{1,4})?$ */
   amount?: string;
   /**
-     * @minLength 3
-     * @maxLength 3
-     */
+   * @minLength 3
+   * @maxLength 3
+   */
   currencyCode?: string;
   priority?: WorkflowsMyTasks200DataItemPriority;
   /** @minLength 1 */

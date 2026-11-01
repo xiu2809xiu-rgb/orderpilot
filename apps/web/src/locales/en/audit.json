@@ -1,7 +1,9 @@
 {
   "title": "Audit log",
   "description": "Who did what, when and from where, over a hash chain that shows any change.",
-  "arrives": ["Export of the filtered trail", "Retention per record type"],
+  "menu": {
+    "log": "Audit log"
+  },
   "filters": {
     "region": "Filter the audit log",
     "kind": "Actor type",

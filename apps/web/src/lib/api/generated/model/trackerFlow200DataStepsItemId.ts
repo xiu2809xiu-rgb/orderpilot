@@ -6,17 +6,17 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type TrackerFlow200DataStepsItemId = typeof TrackerFlow200DataStepsItemId[keyof typeof TrackerFlow200DataStepsItemId];
-
+export type TrackerFlow200DataStepsItemId =
+  (typeof TrackerFlow200DataStepsItemId)[keyof typeof TrackerFlow200DataStepsItemId];
 
 export const TrackerFlow200DataStepsItemId = {
-  poIn: 'poIn',
-  stock: 'stock',
-  pi: 'pi',
-  payment: 'payment',
-  pack: 'pack',
-  documents: 'documents',
-  forwarder: 'forwarder',
-  customerTold: 'customerTold',
-  awbAndPermit: 'awbAndPermit',
+  poIn: "poIn",
+  stock: "stock",
+  pi: "pi",
+  payment: "payment",
+  pack: "pack",
+  documents: "documents",
+  forwarder: "forwarder",
+  customerTold: "customerTold",
+  awbAndPermit: "awbAndPermit",
 } as const;

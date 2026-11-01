@@ -6,10 +6,10 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type WorkflowsReject200DataOutcome = typeof WorkflowsReject200DataOutcome[keyof typeof WorkflowsReject200DataOutcome];
-
+export type WorkflowsReject200DataOutcome =
+  (typeof WorkflowsReject200DataOutcome)[keyof typeof WorkflowsReject200DataOutcome];
 
 export const WorkflowsReject200DataOutcome = {
-  approved: 'approved',
-  rejected: 'rejected',
+  approved: "approved",
+  rejected: "rejected",
 } as const;
