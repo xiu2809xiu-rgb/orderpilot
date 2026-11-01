@@ -5,7 +5,9 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import { useQuery } from "@tanstack/react-query";
+import {
+  useQuery
+} from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
@@ -15,8 +17,8 @@ import type {
   QueryKey,
   UndefinedInitialDataOptions,
   UseQueryOptions,
-  UseQueryResult,
-} from "@tanstack/react-query";
+  UseQueryResult
+} from '@tanstack/react-query';
 
 import type {
   MatrixCopy200,
@@ -33,21 +35,21 @@ import type {
   PolicyAiDestinations200,
   PolicyCheckAiDestination200,
   PolicyCheckAiDestinationBody,
-  PolicyMaskingSample200,
-} from "../../model";
+  PolicyMaskingSample200
+} from '../../model';
 
-import { apiMutator } from "../../../mutator.ts";
-import type { ErrorType } from "../../../mutator.ts";
+import { apiMutator } from '../../../mutator.ts';
+import type { ErrorType } from '../../../mutator.ts';
 
-const withQueryKey = <T extends object, K>(
-  query: T,
-  queryKey: K,
-): T & { queryKey: K } => {
+
+
+
+const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKey: K } => {
   const result = { queryKey } as T & { queryKey: K };
   for (const key of Object.keys(query)) {
     // The explicit queryKey always wins, matching the previous
     // `{ ...query, queryKey }` spread where it was set last.
-    if (key === "queryKey") continue;
+    if (key === 'queryKey') continue;
     Object.defineProperty(result, key, {
       enumerable: true,
       configurable: true,
@@ -60,1355 +62,673 @@ const withQueryKey = <T extends object, K>(
 /**
  * @summary Read the role-permission matrix
  */
-export const matrixRead = (signal?: AbortSignal) => {
-  return apiMutator<MatrixRead200>({
-    url: `/api/v1/governance/matrix`,
-    method: "GET",
-    signal,
-  });
-};
+export const matrixRead = (
+
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<MatrixRead200>(
+      {url: `/api/v1/governance/matrix`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
 
 export const getMatrixReadQueryKey = () => {
-  return [`/api/v1/governance/matrix`] as const;
-};
+    return [
+    `/api/v1/governance/matrix`
+    ] as const;
+    }
 
-export const getMatrixReadQueryOptions = <
-  TData = Awaited<ReturnType<typeof matrixRead>>,
-  TError = ErrorType<MatrixRead403>,
->(options?: {
-  query?: Partial<
-    UseQueryOptions<Awaited<ReturnType<typeof matrixRead>>, TError, TData>
-  >;
-}) => {
-  const { query: queryOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getMatrixReadQueryKey();
+export const getMatrixReadQueryOptions = <TData = Awaited<ReturnType<typeof matrixRead>>, TError = ErrorType<MatrixRead403>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof matrixRead>>, TError, TData>>, }
+) => {
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof matrixRead>>> = ({
-    signal,
-  }) => matrixRead(signal);
+const {query: queryOptions} = options ?? {};
 
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof matrixRead>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
+  const queryKey =  queryOptions?.queryKey ?? getMatrixReadQueryKey();
 
-export type MatrixReadQueryResult = NonNullable<
-  Awaited<ReturnType<typeof matrixRead>>
->;
-export type MatrixReadQueryError = ErrorType<MatrixRead403>;
 
-export function useMatrixRead<
-  TData = Awaited<ReturnType<typeof matrixRead>>,
-  TError = ErrorType<MatrixRead403>,
->(
-  options: {
-    query: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof matrixRead>>, TError, TData>
-    > &
-      Pick<
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof matrixRead>>> = ({ signal }) => matrixRead(signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof matrixRead>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type MatrixReadQueryResult = NonNullable<Awaited<ReturnType<typeof matrixRead>>>
+export type MatrixReadQueryError = ErrorType<MatrixRead403>
+
+
+export function useMatrixRead<TData = Awaited<ReturnType<typeof matrixRead>>, TError = ErrorType<MatrixRead403>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof matrixRead>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof matrixRead>>,
           TError,
           Awaited<ReturnType<typeof matrixRead>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useMatrixRead<
-  TData = Awaited<ReturnType<typeof matrixRead>>,
-  TError = ErrorType<MatrixRead403>,
->(
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof matrixRead>>, TError, TData>
-    > &
-      Pick<
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useMatrixRead<TData = Awaited<ReturnType<typeof matrixRead>>, TError = ErrorType<MatrixRead403>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof matrixRead>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof matrixRead>>,
           TError,
           Awaited<ReturnType<typeof matrixRead>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useMatrixRead<
-  TData = Awaited<ReturnType<typeof matrixRead>>,
-  TError = ErrorType<MatrixRead403>,
->(
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof matrixRead>>, TError, TData>
-    >;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useMatrixRead<TData = Awaited<ReturnType<typeof matrixRead>>, TError = ErrorType<MatrixRead403>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof matrixRead>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Read the role-permission matrix
  */
 
-export function useMatrixRead<
-  TData = Awaited<ReturnType<typeof matrixRead>>,
-  TError = ErrorType<MatrixRead403>,
->(
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof matrixRead>>, TError, TData>
-    >;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getMatrixReadQueryOptions(options);
+export function useMatrixRead<TData = Awaited<ReturnType<typeof matrixRead>>, TError = ErrorType<MatrixRead403>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof matrixRead>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+  const queryOptions = getMatrixReadQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
 
 /**
  * @summary Grant or revoke one permission of a role
  */
 export const matrixSetPermission = (
-  role:
-    | "SYSTEM_ADMIN"
-    | "PRODUCT_MANAGER"
-    | "APPROVER"
-    | "SUPPORT"
-    | "WAREHOUSE"
-    | "FINANCE"
-    | "LOGISTICS"
-    | "MANAGEMENT"
-    | "AUDITOR",
-  permission:
-    | "users.read"
-    | "users.manage"
-    | "roles.read"
-    | "roles.manage"
-    | "settings.manage"
-    | "audit.read"
-    | "aiUsage.read"
-    | "documents.read"
-    | "documents.upload"
-    | "orders.read"
-    | "tracker.read"
-    | "exceptions.read"
-    | "insights.read"
-    | "approvals.decide"
-    | "payments.confirm"
-    | "payments.post"
-    | "workflows.read"
-    | "spr.read"
-    | "workflows.inboxes.any",
-  matrixSetPermissionBody: MatrixSetPermissionBody,
-  signal?: AbortSignal,
+    role: 'SYSTEM_ADMIN' | 'PRODUCT_MANAGER' | 'APPROVER' | 'SUPPORT' | 'WAREHOUSE' | 'FINANCE' | 'LOGISTICS' | 'MANAGEMENT' | 'AUDITOR',
+    permission: 'users.read' | 'users.manage' | 'roles.read' | 'roles.manage' | 'settings.manage' | 'audit.read' | 'aiUsage.read' | 'documents.read' | 'documents.upload' | 'orders.read' | 'tracker.read' | 'exceptions.read' | 'insights.read' | 'approvals.decide' | 'payments.confirm' | 'payments.post' | 'workflows.read' | 'spr.read' | 'workflows.inboxes.any',
+    matrixSetPermissionBody: MatrixSetPermissionBody,
+ signal?: AbortSignal
 ) => {
-  return apiMutator<MatrixSetPermission200>({
-    url: `/api/v1/governance/matrix/${role}/permissions/${permission}`,
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    data: matrixSetPermissionBody,
-    signal,
-  });
-};
 
-export const getMatrixSetPermissionQueryKey = (
-  role:
-    | "SYSTEM_ADMIN"
-    | "PRODUCT_MANAGER"
-    | "APPROVER"
-    | "SUPPORT"
-    | "WAREHOUSE"
-    | "FINANCE"
-    | "LOGISTICS"
-    | "MANAGEMENT"
-    | "AUDITOR",
-  permission:
-    | "users.read"
-    | "users.manage"
-    | "roles.read"
-    | "roles.manage"
-    | "settings.manage"
-    | "audit.read"
-    | "aiUsage.read"
-    | "documents.read"
-    | "documents.upload"
-    | "orders.read"
-    | "tracker.read"
-    | "exceptions.read"
-    | "insights.read"
-    | "approvals.decide"
-    | "payments.confirm"
-    | "payments.post"
-    | "workflows.read"
-    | "spr.read"
-    | "workflows.inboxes.any",
-  matrixSetPermissionBody?: MatrixSetPermissionBody,
+
+      return apiMutator<MatrixSetPermission200>(
+      {url: `/api/v1/governance/matrix/${role}/permissions/${permission}`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: matrixSetPermissionBody, signal
+    },
+      );
+    }
+
+
+
+
+export const getMatrixSetPermissionQueryKey = (role: 'SYSTEM_ADMIN' | 'PRODUCT_MANAGER' | 'APPROVER' | 'SUPPORT' | 'WAREHOUSE' | 'FINANCE' | 'LOGISTICS' | 'MANAGEMENT' | 'AUDITOR',
+    permission: 'users.read' | 'users.manage' | 'roles.read' | 'roles.manage' | 'settings.manage' | 'audit.read' | 'aiUsage.read' | 'documents.read' | 'documents.upload' | 'orders.read' | 'tracker.read' | 'exceptions.read' | 'insights.read' | 'approvals.decide' | 'payments.confirm' | 'payments.post' | 'workflows.read' | 'spr.read' | 'workflows.inboxes.any',
+    matrixSetPermissionBody?: MatrixSetPermissionBody,) => {
+    return [
+    'PUT', `/api/v1/governance/matrix/${role}/permissions/${permission}`, matrixSetPermissionBody
+    ] as const;
+    }
+
+
+export const getMatrixSetPermissionQueryOptions = <TData = Awaited<ReturnType<typeof matrixSetPermission>>, TError = ErrorType<MatrixSetPermission403>>(role: 'SYSTEM_ADMIN' | 'PRODUCT_MANAGER' | 'APPROVER' | 'SUPPORT' | 'WAREHOUSE' | 'FINANCE' | 'LOGISTICS' | 'MANAGEMENT' | 'AUDITOR',
+    permission: 'users.read' | 'users.manage' | 'roles.read' | 'roles.manage' | 'settings.manage' | 'audit.read' | 'aiUsage.read' | 'documents.read' | 'documents.upload' | 'orders.read' | 'tracker.read' | 'exceptions.read' | 'insights.read' | 'approvals.decide' | 'payments.confirm' | 'payments.post' | 'workflows.read' | 'spr.read' | 'workflows.inboxes.any',
+    matrixSetPermissionBody: MatrixSetPermissionBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof matrixSetPermission>>, TError, TData>>, }
 ) => {
-  return [
-    "PUT",
-    `/api/v1/governance/matrix/${role}/permissions/${permission}`,
-    matrixSetPermissionBody,
-  ] as const;
-};
 
-export const getMatrixSetPermissionQueryOptions = <
-  TData = Awaited<ReturnType<typeof matrixSetPermission>>,
-  TError = ErrorType<MatrixSetPermission403>,
->(
-  role:
-    | "SYSTEM_ADMIN"
-    | "PRODUCT_MANAGER"
-    | "APPROVER"
-    | "SUPPORT"
-    | "WAREHOUSE"
-    | "FINANCE"
-    | "LOGISTICS"
-    | "MANAGEMENT"
-    | "AUDITOR",
-  permission:
-    | "users.read"
-    | "users.manage"
-    | "roles.read"
-    | "roles.manage"
-    | "settings.manage"
-    | "audit.read"
-    | "aiUsage.read"
-    | "documents.read"
-    | "documents.upload"
-    | "orders.read"
-    | "tracker.read"
-    | "exceptions.read"
-    | "insights.read"
-    | "approvals.decide"
-    | "payments.confirm"
-    | "payments.post"
-    | "workflows.read"
-    | "spr.read"
-    | "workflows.inboxes.any",
-  matrixSetPermissionBody: MatrixSetPermissionBody,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof matrixSetPermission>>,
-        TError,
-        TData
-      >
-    >;
-  },
-) => {
-  const { query: queryOptions } = options ?? {};
+const {query: queryOptions} = options ?? {};
 
-  const queryKey =
-    queryOptions?.queryKey ??
-    getMatrixSetPermissionQueryKey(role, permission, matrixSetPermissionBody);
+  const queryKey =  queryOptions?.queryKey ?? getMatrixSetPermissionQueryKey(role,permission,matrixSetPermissionBody);
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof matrixSetPermission>>
-  > = ({ signal }) =>
-    matrixSetPermission(role, permission, matrixSetPermissionBody, signal);
 
-  return {
-    queryKey,
-    queryFn,
-    enabled:
-      role !== null &&
-      role !== undefined &&
-      permission !== null &&
-      permission !== undefined,
-    ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof matrixSetPermission>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
 
-export type MatrixSetPermissionQueryResult = NonNullable<
-  Awaited<ReturnType<typeof matrixSetPermission>>
->;
-export type MatrixSetPermissionQueryError = ErrorType<MatrixSetPermission403>;
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof matrixSetPermission>>> = ({ signal }) => matrixSetPermission(role,permission,matrixSetPermissionBody, signal);
 
-export function useMatrixSetPermission<
-  TData = Awaited<ReturnType<typeof matrixSetPermission>>,
-  TError = ErrorType<MatrixSetPermission403>,
->(
-  role:
-    | "SYSTEM_ADMIN"
-    | "PRODUCT_MANAGER"
-    | "APPROVER"
-    | "SUPPORT"
-    | "WAREHOUSE"
-    | "FINANCE"
-    | "LOGISTICS"
-    | "MANAGEMENT"
-    | "AUDITOR",
-  permission:
-    | "users.read"
-    | "users.manage"
-    | "roles.read"
-    | "roles.manage"
-    | "settings.manage"
-    | "audit.read"
-    | "aiUsage.read"
-    | "documents.read"
-    | "documents.upload"
-    | "orders.read"
-    | "tracker.read"
-    | "exceptions.read"
-    | "insights.read"
-    | "approvals.decide"
-    | "payments.confirm"
-    | "payments.post"
-    | "workflows.read"
-    | "spr.read"
-    | "workflows.inboxes.any",
-  matrixSetPermissionBody: MatrixSetPermissionBody,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof matrixSetPermission>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+
+
+
+
+   return  { queryKey, queryFn, enabled: role !== null && role !== undefined && permission !== null && permission !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof matrixSetPermission>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type MatrixSetPermissionQueryResult = NonNullable<Awaited<ReturnType<typeof matrixSetPermission>>>
+export type MatrixSetPermissionQueryError = ErrorType<MatrixSetPermission403>
+
+
+export function useMatrixSetPermission<TData = Awaited<ReturnType<typeof matrixSetPermission>>, TError = ErrorType<MatrixSetPermission403>>(
+ role: 'SYSTEM_ADMIN' | 'PRODUCT_MANAGER' | 'APPROVER' | 'SUPPORT' | 'WAREHOUSE' | 'FINANCE' | 'LOGISTICS' | 'MANAGEMENT' | 'AUDITOR',
+    permission: 'users.read' | 'users.manage' | 'roles.read' | 'roles.manage' | 'settings.manage' | 'audit.read' | 'aiUsage.read' | 'documents.read' | 'documents.upload' | 'orders.read' | 'tracker.read' | 'exceptions.read' | 'insights.read' | 'approvals.decide' | 'payments.confirm' | 'payments.post' | 'workflows.read' | 'spr.read' | 'workflows.inboxes.any',
+    matrixSetPermissionBody: MatrixSetPermissionBody, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof matrixSetPermission>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof matrixSetPermission>>,
           TError,
           Awaited<ReturnType<typeof matrixSetPermission>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useMatrixSetPermission<
-  TData = Awaited<ReturnType<typeof matrixSetPermission>>,
-  TError = ErrorType<MatrixSetPermission403>,
->(
-  role:
-    | "SYSTEM_ADMIN"
-    | "PRODUCT_MANAGER"
-    | "APPROVER"
-    | "SUPPORT"
-    | "WAREHOUSE"
-    | "FINANCE"
-    | "LOGISTICS"
-    | "MANAGEMENT"
-    | "AUDITOR",
-  permission:
-    | "users.read"
-    | "users.manage"
-    | "roles.read"
-    | "roles.manage"
-    | "settings.manage"
-    | "audit.read"
-    | "aiUsage.read"
-    | "documents.read"
-    | "documents.upload"
-    | "orders.read"
-    | "tracker.read"
-    | "exceptions.read"
-    | "insights.read"
-    | "approvals.decide"
-    | "payments.confirm"
-    | "payments.post"
-    | "workflows.read"
-    | "spr.read"
-    | "workflows.inboxes.any",
-  matrixSetPermissionBody: MatrixSetPermissionBody,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof matrixSetPermission>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useMatrixSetPermission<TData = Awaited<ReturnType<typeof matrixSetPermission>>, TError = ErrorType<MatrixSetPermission403>>(
+ role: 'SYSTEM_ADMIN' | 'PRODUCT_MANAGER' | 'APPROVER' | 'SUPPORT' | 'WAREHOUSE' | 'FINANCE' | 'LOGISTICS' | 'MANAGEMENT' | 'AUDITOR',
+    permission: 'users.read' | 'users.manage' | 'roles.read' | 'roles.manage' | 'settings.manage' | 'audit.read' | 'aiUsage.read' | 'documents.read' | 'documents.upload' | 'orders.read' | 'tracker.read' | 'exceptions.read' | 'insights.read' | 'approvals.decide' | 'payments.confirm' | 'payments.post' | 'workflows.read' | 'spr.read' | 'workflows.inboxes.any',
+    matrixSetPermissionBody: MatrixSetPermissionBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof matrixSetPermission>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof matrixSetPermission>>,
           TError,
           Awaited<ReturnType<typeof matrixSetPermission>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useMatrixSetPermission<
-  TData = Awaited<ReturnType<typeof matrixSetPermission>>,
-  TError = ErrorType<MatrixSetPermission403>,
->(
-  role:
-    | "SYSTEM_ADMIN"
-    | "PRODUCT_MANAGER"
-    | "APPROVER"
-    | "SUPPORT"
-    | "WAREHOUSE"
-    | "FINANCE"
-    | "LOGISTICS"
-    | "MANAGEMENT"
-    | "AUDITOR",
-  permission:
-    | "users.read"
-    | "users.manage"
-    | "roles.read"
-    | "roles.manage"
-    | "settings.manage"
-    | "audit.read"
-    | "aiUsage.read"
-    | "documents.read"
-    | "documents.upload"
-    | "orders.read"
-    | "tracker.read"
-    | "exceptions.read"
-    | "insights.read"
-    | "approvals.decide"
-    | "payments.confirm"
-    | "payments.post"
-    | "workflows.read"
-    | "spr.read"
-    | "workflows.inboxes.any",
-  matrixSetPermissionBody: MatrixSetPermissionBody,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof matrixSetPermission>>,
-        TError,
-        TData
-      >
-    >;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useMatrixSetPermission<TData = Awaited<ReturnType<typeof matrixSetPermission>>, TError = ErrorType<MatrixSetPermission403>>(
+ role: 'SYSTEM_ADMIN' | 'PRODUCT_MANAGER' | 'APPROVER' | 'SUPPORT' | 'WAREHOUSE' | 'FINANCE' | 'LOGISTICS' | 'MANAGEMENT' | 'AUDITOR',
+    permission: 'users.read' | 'users.manage' | 'roles.read' | 'roles.manage' | 'settings.manage' | 'audit.read' | 'aiUsage.read' | 'documents.read' | 'documents.upload' | 'orders.read' | 'tracker.read' | 'exceptions.read' | 'insights.read' | 'approvals.decide' | 'payments.confirm' | 'payments.post' | 'workflows.read' | 'spr.read' | 'workflows.inboxes.any',
+    matrixSetPermissionBody: MatrixSetPermissionBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof matrixSetPermission>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Grant or revoke one permission of a role
  */
 
-export function useMatrixSetPermission<
-  TData = Awaited<ReturnType<typeof matrixSetPermission>>,
-  TError = ErrorType<MatrixSetPermission403>,
->(
-  role:
-    | "SYSTEM_ADMIN"
-    | "PRODUCT_MANAGER"
-    | "APPROVER"
-    | "SUPPORT"
-    | "WAREHOUSE"
-    | "FINANCE"
-    | "LOGISTICS"
-    | "MANAGEMENT"
-    | "AUDITOR",
-  permission:
-    | "users.read"
-    | "users.manage"
-    | "roles.read"
-    | "roles.manage"
-    | "settings.manage"
-    | "audit.read"
-    | "aiUsage.read"
-    | "documents.read"
-    | "documents.upload"
-    | "orders.read"
-    | "tracker.read"
-    | "exceptions.read"
-    | "insights.read"
-    | "approvals.decide"
-    | "payments.confirm"
-    | "payments.post"
-    | "workflows.read"
-    | "spr.read"
-    | "workflows.inboxes.any",
-  matrixSetPermissionBody: MatrixSetPermissionBody,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof matrixSetPermission>>,
-        TError,
-        TData
-      >
-    >;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getMatrixSetPermissionQueryOptions(
-    role,
-    permission,
-    matrixSetPermissionBody,
-    options,
-  );
+export function useMatrixSetPermission<TData = Awaited<ReturnType<typeof matrixSetPermission>>, TError = ErrorType<MatrixSetPermission403>>(
+ role: 'SYSTEM_ADMIN' | 'PRODUCT_MANAGER' | 'APPROVER' | 'SUPPORT' | 'WAREHOUSE' | 'FINANCE' | 'LOGISTICS' | 'MANAGEMENT' | 'AUDITOR',
+    permission: 'users.read' | 'users.manage' | 'roles.read' | 'roles.manage' | 'settings.manage' | 'audit.read' | 'aiUsage.read' | 'documents.read' | 'documents.upload' | 'orders.read' | 'tracker.read' | 'exceptions.read' | 'insights.read' | 'approvals.decide' | 'payments.confirm' | 'payments.post' | 'workflows.read' | 'spr.read' | 'workflows.inboxes.any',
+    matrixSetPermissionBody: MatrixSetPermissionBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof matrixSetPermission>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+  const queryOptions = getMatrixSetPermissionQueryOptions(role,permission,matrixSetPermissionBody,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
 
 /**
  * @summary Set the data scope of a role (which records it may see)
  */
 export const matrixSetDataScope = (
-  role:
-    | "SYSTEM_ADMIN"
-    | "PRODUCT_MANAGER"
-    | "APPROVER"
-    | "SUPPORT"
-    | "WAREHOUSE"
-    | "FINANCE"
-    | "LOGISTICS"
-    | "MANAGEMENT"
-    | "AUDITOR",
-  matrixSetDataScopeBody: MatrixSetDataScopeBody,
-  signal?: AbortSignal,
+    role: 'SYSTEM_ADMIN' | 'PRODUCT_MANAGER' | 'APPROVER' | 'SUPPORT' | 'WAREHOUSE' | 'FINANCE' | 'LOGISTICS' | 'MANAGEMENT' | 'AUDITOR',
+    matrixSetDataScopeBody: MatrixSetDataScopeBody,
+ signal?: AbortSignal
 ) => {
-  return apiMutator<MatrixSetDataScope200>({
-    url: `/api/v1/governance/matrix/${role}/data-scope`,
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    data: matrixSetDataScopeBody,
-    signal,
-  });
-};
 
-export const getMatrixSetDataScopeQueryKey = (
-  role:
-    | "SYSTEM_ADMIN"
-    | "PRODUCT_MANAGER"
-    | "APPROVER"
-    | "SUPPORT"
-    | "WAREHOUSE"
-    | "FINANCE"
-    | "LOGISTICS"
-    | "MANAGEMENT"
-    | "AUDITOR",
-  matrixSetDataScopeBody?: MatrixSetDataScopeBody,
+
+      return apiMutator<MatrixSetDataScope200>(
+      {url: `/api/v1/governance/matrix/${role}/data-scope`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: matrixSetDataScopeBody, signal
+    },
+      );
+    }
+
+
+
+
+export const getMatrixSetDataScopeQueryKey = (role: 'SYSTEM_ADMIN' | 'PRODUCT_MANAGER' | 'APPROVER' | 'SUPPORT' | 'WAREHOUSE' | 'FINANCE' | 'LOGISTICS' | 'MANAGEMENT' | 'AUDITOR',
+    matrixSetDataScopeBody?: MatrixSetDataScopeBody,) => {
+    return [
+    'PUT', `/api/v1/governance/matrix/${role}/data-scope`, matrixSetDataScopeBody
+    ] as const;
+    }
+
+
+export const getMatrixSetDataScopeQueryOptions = <TData = Awaited<ReturnType<typeof matrixSetDataScope>>, TError = ErrorType<MatrixSetDataScope403>>(role: 'SYSTEM_ADMIN' | 'PRODUCT_MANAGER' | 'APPROVER' | 'SUPPORT' | 'WAREHOUSE' | 'FINANCE' | 'LOGISTICS' | 'MANAGEMENT' | 'AUDITOR',
+    matrixSetDataScopeBody: MatrixSetDataScopeBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof matrixSetDataScope>>, TError, TData>>, }
 ) => {
-  return [
-    "PUT",
-    `/api/v1/governance/matrix/${role}/data-scope`,
-    matrixSetDataScopeBody,
-  ] as const;
-};
 
-export const getMatrixSetDataScopeQueryOptions = <
-  TData = Awaited<ReturnType<typeof matrixSetDataScope>>,
-  TError = ErrorType<MatrixSetDataScope403>,
->(
-  role:
-    | "SYSTEM_ADMIN"
-    | "PRODUCT_MANAGER"
-    | "APPROVER"
-    | "SUPPORT"
-    | "WAREHOUSE"
-    | "FINANCE"
-    | "LOGISTICS"
-    | "MANAGEMENT"
-    | "AUDITOR",
-  matrixSetDataScopeBody: MatrixSetDataScopeBody,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof matrixSetDataScope>>,
-        TError,
-        TData
-      >
-    >;
-  },
-) => {
-  const { query: queryOptions } = options ?? {};
+const {query: queryOptions} = options ?? {};
 
-  const queryKey =
-    queryOptions?.queryKey ??
-    getMatrixSetDataScopeQueryKey(role, matrixSetDataScopeBody);
+  const queryKey =  queryOptions?.queryKey ?? getMatrixSetDataScopeQueryKey(role,matrixSetDataScopeBody);
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof matrixSetDataScope>>
-  > = ({ signal }) => matrixSetDataScope(role, matrixSetDataScopeBody, signal);
 
-  return {
-    queryKey,
-    queryFn,
-    enabled: role !== null && role !== undefined,
-    ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof matrixSetDataScope>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
 
-export type MatrixSetDataScopeQueryResult = NonNullable<
-  Awaited<ReturnType<typeof matrixSetDataScope>>
->;
-export type MatrixSetDataScopeQueryError = ErrorType<MatrixSetDataScope403>;
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof matrixSetDataScope>>> = ({ signal }) => matrixSetDataScope(role,matrixSetDataScopeBody, signal);
 
-export function useMatrixSetDataScope<
-  TData = Awaited<ReturnType<typeof matrixSetDataScope>>,
-  TError = ErrorType<MatrixSetDataScope403>,
->(
-  role:
-    | "SYSTEM_ADMIN"
-    | "PRODUCT_MANAGER"
-    | "APPROVER"
-    | "SUPPORT"
-    | "WAREHOUSE"
-    | "FINANCE"
-    | "LOGISTICS"
-    | "MANAGEMENT"
-    | "AUDITOR",
-  matrixSetDataScopeBody: MatrixSetDataScopeBody,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof matrixSetDataScope>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+
+
+
+
+   return  { queryKey, queryFn, enabled: role !== null && role !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof matrixSetDataScope>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type MatrixSetDataScopeQueryResult = NonNullable<Awaited<ReturnType<typeof matrixSetDataScope>>>
+export type MatrixSetDataScopeQueryError = ErrorType<MatrixSetDataScope403>
+
+
+export function useMatrixSetDataScope<TData = Awaited<ReturnType<typeof matrixSetDataScope>>, TError = ErrorType<MatrixSetDataScope403>>(
+ role: 'SYSTEM_ADMIN' | 'PRODUCT_MANAGER' | 'APPROVER' | 'SUPPORT' | 'WAREHOUSE' | 'FINANCE' | 'LOGISTICS' | 'MANAGEMENT' | 'AUDITOR',
+    matrixSetDataScopeBody: MatrixSetDataScopeBody, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof matrixSetDataScope>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof matrixSetDataScope>>,
           TError,
           Awaited<ReturnType<typeof matrixSetDataScope>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useMatrixSetDataScope<
-  TData = Awaited<ReturnType<typeof matrixSetDataScope>>,
-  TError = ErrorType<MatrixSetDataScope403>,
->(
-  role:
-    | "SYSTEM_ADMIN"
-    | "PRODUCT_MANAGER"
-    | "APPROVER"
-    | "SUPPORT"
-    | "WAREHOUSE"
-    | "FINANCE"
-    | "LOGISTICS"
-    | "MANAGEMENT"
-    | "AUDITOR",
-  matrixSetDataScopeBody: MatrixSetDataScopeBody,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof matrixSetDataScope>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useMatrixSetDataScope<TData = Awaited<ReturnType<typeof matrixSetDataScope>>, TError = ErrorType<MatrixSetDataScope403>>(
+ role: 'SYSTEM_ADMIN' | 'PRODUCT_MANAGER' | 'APPROVER' | 'SUPPORT' | 'WAREHOUSE' | 'FINANCE' | 'LOGISTICS' | 'MANAGEMENT' | 'AUDITOR',
+    matrixSetDataScopeBody: MatrixSetDataScopeBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof matrixSetDataScope>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof matrixSetDataScope>>,
           TError,
           Awaited<ReturnType<typeof matrixSetDataScope>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useMatrixSetDataScope<
-  TData = Awaited<ReturnType<typeof matrixSetDataScope>>,
-  TError = ErrorType<MatrixSetDataScope403>,
->(
-  role:
-    | "SYSTEM_ADMIN"
-    | "PRODUCT_MANAGER"
-    | "APPROVER"
-    | "SUPPORT"
-    | "WAREHOUSE"
-    | "FINANCE"
-    | "LOGISTICS"
-    | "MANAGEMENT"
-    | "AUDITOR",
-  matrixSetDataScopeBody: MatrixSetDataScopeBody,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof matrixSetDataScope>>,
-        TError,
-        TData
-      >
-    >;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useMatrixSetDataScope<TData = Awaited<ReturnType<typeof matrixSetDataScope>>, TError = ErrorType<MatrixSetDataScope403>>(
+ role: 'SYSTEM_ADMIN' | 'PRODUCT_MANAGER' | 'APPROVER' | 'SUPPORT' | 'WAREHOUSE' | 'FINANCE' | 'LOGISTICS' | 'MANAGEMENT' | 'AUDITOR',
+    matrixSetDataScopeBody: MatrixSetDataScopeBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof matrixSetDataScope>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Set the data scope of a role (which records it may see)
  */
 
-export function useMatrixSetDataScope<
-  TData = Awaited<ReturnType<typeof matrixSetDataScope>>,
-  TError = ErrorType<MatrixSetDataScope403>,
->(
-  role:
-    | "SYSTEM_ADMIN"
-    | "PRODUCT_MANAGER"
-    | "APPROVER"
-    | "SUPPORT"
-    | "WAREHOUSE"
-    | "FINANCE"
-    | "LOGISTICS"
-    | "MANAGEMENT"
-    | "AUDITOR",
-  matrixSetDataScopeBody: MatrixSetDataScopeBody,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof matrixSetDataScope>>,
-        TError,
-        TData
-      >
-    >;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getMatrixSetDataScopeQueryOptions(
-    role,
-    matrixSetDataScopeBody,
-    options,
-  );
+export function useMatrixSetDataScope<TData = Awaited<ReturnType<typeof matrixSetDataScope>>, TError = ErrorType<MatrixSetDataScope403>>(
+ role: 'SYSTEM_ADMIN' | 'PRODUCT_MANAGER' | 'APPROVER' | 'SUPPORT' | 'WAREHOUSE' | 'FINANCE' | 'LOGISTICS' | 'MANAGEMENT' | 'AUDITOR',
+    matrixSetDataScopeBody: MatrixSetDataScopeBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof matrixSetDataScope>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+  const queryOptions = getMatrixSetDataScopeQueryOptions(role,matrixSetDataScopeBody,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
 
 /**
  * @summary Copy a role's permissions and data scope to another role
  */
 export const matrixCopy = (
-  matrixCopyBody: MatrixCopyBody,
-  signal?: AbortSignal,
+    matrixCopyBody: MatrixCopyBody,
+ signal?: AbortSignal
 ) => {
-  return apiMutator<MatrixCopy200>({
-    url: `/api/v1/governance/matrix/copy`,
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    data: matrixCopyBody,
-    signal,
-  });
-};
 
-export const getMatrixCopyQueryKey = (matrixCopyBody?: MatrixCopyBody) => {
-  return ["POST", `/api/v1/governance/matrix/copy`, matrixCopyBody] as const;
-};
 
-export const getMatrixCopyQueryOptions = <
-  TData = Awaited<ReturnType<typeof matrixCopy>>,
-  TError = ErrorType<MatrixCopy403>,
->(
-  matrixCopyBody: MatrixCopyBody,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof matrixCopy>>, TError, TData>
-    >;
-  },
+      return apiMutator<MatrixCopy200>(
+      {url: `/api/v1/governance/matrix/copy`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: matrixCopyBody, signal
+    },
+      );
+    }
+
+
+
+
+export const getMatrixCopyQueryKey = (matrixCopyBody?: MatrixCopyBody,) => {
+    return [
+    'POST', `/api/v1/governance/matrix/copy`, matrixCopyBody
+    ] as const;
+    }
+
+
+export const getMatrixCopyQueryOptions = <TData = Awaited<ReturnType<typeof matrixCopy>>, TError = ErrorType<MatrixCopy403>>(matrixCopyBody: MatrixCopyBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof matrixCopy>>, TError, TData>>, }
 ) => {
-  const { query: queryOptions } = options ?? {};
 
-  const queryKey =
-    queryOptions?.queryKey ?? getMatrixCopyQueryKey(matrixCopyBody);
+const {query: queryOptions} = options ?? {};
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof matrixCopy>>> = ({
-    signal,
-  }) => matrixCopy(matrixCopyBody, signal);
+  const queryKey =  queryOptions?.queryKey ?? getMatrixCopyQueryKey(matrixCopyBody);
 
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof matrixCopy>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
 
-export type MatrixCopyQueryResult = NonNullable<
-  Awaited<ReturnType<typeof matrixCopy>>
->;
-export type MatrixCopyQueryError = ErrorType<MatrixCopy403>;
 
-export function useMatrixCopy<
-  TData = Awaited<ReturnType<typeof matrixCopy>>,
-  TError = ErrorType<MatrixCopy403>,
->(
-  matrixCopyBody: MatrixCopyBody,
-  options: {
-    query: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof matrixCopy>>, TError, TData>
-    > &
-      Pick<
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof matrixCopy>>> = ({ signal }) => matrixCopy(matrixCopyBody, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof matrixCopy>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type MatrixCopyQueryResult = NonNullable<Awaited<ReturnType<typeof matrixCopy>>>
+export type MatrixCopyQueryError = ErrorType<MatrixCopy403>
+
+
+export function useMatrixCopy<TData = Awaited<ReturnType<typeof matrixCopy>>, TError = ErrorType<MatrixCopy403>>(
+ matrixCopyBody: MatrixCopyBody, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof matrixCopy>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof matrixCopy>>,
           TError,
           Awaited<ReturnType<typeof matrixCopy>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useMatrixCopy<
-  TData = Awaited<ReturnType<typeof matrixCopy>>,
-  TError = ErrorType<MatrixCopy403>,
->(
-  matrixCopyBody: MatrixCopyBody,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof matrixCopy>>, TError, TData>
-    > &
-      Pick<
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useMatrixCopy<TData = Awaited<ReturnType<typeof matrixCopy>>, TError = ErrorType<MatrixCopy403>>(
+ matrixCopyBody: MatrixCopyBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof matrixCopy>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof matrixCopy>>,
           TError,
           Awaited<ReturnType<typeof matrixCopy>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useMatrixCopy<
-  TData = Awaited<ReturnType<typeof matrixCopy>>,
-  TError = ErrorType<MatrixCopy403>,
->(
-  matrixCopyBody: MatrixCopyBody,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof matrixCopy>>, TError, TData>
-    >;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useMatrixCopy<TData = Awaited<ReturnType<typeof matrixCopy>>, TError = ErrorType<MatrixCopy403>>(
+ matrixCopyBody: MatrixCopyBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof matrixCopy>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Copy a role's permissions and data scope to another role
  */
 
-export function useMatrixCopy<
-  TData = Awaited<ReturnType<typeof matrixCopy>>,
-  TError = ErrorType<MatrixCopy403>,
->(
-  matrixCopyBody: MatrixCopyBody,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof matrixCopy>>, TError, TData>
-    >;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getMatrixCopyQueryOptions(matrixCopyBody, options);
+export function useMatrixCopy<TData = Awaited<ReturnType<typeof matrixCopy>>, TError = ErrorType<MatrixCopy403>>(
+ matrixCopyBody: MatrixCopyBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof matrixCopy>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+  const queryOptions = getMatrixCopyQueryOptions(matrixCopyBody,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+
+
+
+
+
 /**
  * @summary Synthetic customers with the sample masking rule applied for the caller's role
  */
-export const policyMaskingSample = (signal?: AbortSignal) => {
-  return apiMutator<PolicyMaskingSample200>({
-    url: `/api/v1/governance/masking/sample`,
-    method: "GET",
-    signal,
-  });
-};
+export const policyMaskingSample = (
+
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<PolicyMaskingSample200>(
+      {url: `/api/v1/governance/masking/sample`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
 
 export const getPolicyMaskingSampleQueryKey = () => {
-  return [`/api/v1/governance/masking/sample`] as const;
-};
+    return [
+    `/api/v1/governance/masking/sample`
+    ] as const;
+    }
 
-export const getPolicyMaskingSampleQueryOptions = <
-  TData = Awaited<ReturnType<typeof policyMaskingSample>>,
-  TError = ErrorType<unknown>,
->(options?: {
-  query?: Partial<
-    UseQueryOptions<
-      Awaited<ReturnType<typeof policyMaskingSample>>,
-      TError,
-      TData
-    >
-  >;
-}) => {
-  const { query: queryOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getPolicyMaskingSampleQueryKey();
+export const getPolicyMaskingSampleQueryOptions = <TData = Awaited<ReturnType<typeof policyMaskingSample>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof policyMaskingSample>>, TError, TData>>, }
+) => {
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof policyMaskingSample>>
-  > = ({ signal }) => policyMaskingSample(signal);
+const {query: queryOptions} = options ?? {};
 
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof policyMaskingSample>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
+  const queryKey =  queryOptions?.queryKey ?? getPolicyMaskingSampleQueryKey();
 
-export type PolicyMaskingSampleQueryResult = NonNullable<
-  Awaited<ReturnType<typeof policyMaskingSample>>
->;
-export type PolicyMaskingSampleQueryError = ErrorType<unknown>;
 
-export function usePolicyMaskingSample<
-  TData = Awaited<ReturnType<typeof policyMaskingSample>>,
-  TError = ErrorType<unknown>,
->(
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof policyMaskingSample>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof policyMaskingSample>>> = ({ signal }) => policyMaskingSample(signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof policyMaskingSample>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type PolicyMaskingSampleQueryResult = NonNullable<Awaited<ReturnType<typeof policyMaskingSample>>>
+export type PolicyMaskingSampleQueryError = ErrorType<unknown>
+
+
+export function usePolicyMaskingSample<TData = Awaited<ReturnType<typeof policyMaskingSample>>, TError = ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof policyMaskingSample>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof policyMaskingSample>>,
           TError,
           Awaited<ReturnType<typeof policyMaskingSample>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function usePolicyMaskingSample<
-  TData = Awaited<ReturnType<typeof policyMaskingSample>>,
-  TError = ErrorType<unknown>,
->(
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof policyMaskingSample>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePolicyMaskingSample<TData = Awaited<ReturnType<typeof policyMaskingSample>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof policyMaskingSample>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof policyMaskingSample>>,
           TError,
           Awaited<ReturnType<typeof policyMaskingSample>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function usePolicyMaskingSample<
-  TData = Awaited<ReturnType<typeof policyMaskingSample>>,
-  TError = ErrorType<unknown>,
->(
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof policyMaskingSample>>,
-        TError,
-        TData
-      >
-    >;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePolicyMaskingSample<TData = Awaited<ReturnType<typeof policyMaskingSample>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof policyMaskingSample>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Synthetic customers with the sample masking rule applied for the caller's role
  */
 
-export function usePolicyMaskingSample<
-  TData = Awaited<ReturnType<typeof policyMaskingSample>>,
-  TError = ErrorType<unknown>,
->(
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof policyMaskingSample>>,
-        TError,
-        TData
-      >
-    >;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getPolicyMaskingSampleQueryOptions(options);
+export function usePolicyMaskingSample<TData = Awaited<ReturnType<typeof policyMaskingSample>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof policyMaskingSample>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+  const queryOptions = getPolicyMaskingSampleQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+
+
+
+
+
 /**
  * @summary What data may go to which AI provider
  */
-export const policyAiDestinations = (signal?: AbortSignal) => {
-  return apiMutator<PolicyAiDestinations200>({
-    url: `/api/v1/governance/ai-destinations`,
-    method: "GET",
-    signal,
-  });
-};
+export const policyAiDestinations = (
+
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<PolicyAiDestinations200>(
+      {url: `/api/v1/governance/ai-destinations`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
 
 export const getPolicyAiDestinationsQueryKey = () => {
-  return [`/api/v1/governance/ai-destinations`] as const;
-};
+    return [
+    `/api/v1/governance/ai-destinations`
+    ] as const;
+    }
 
-export const getPolicyAiDestinationsQueryOptions = <
-  TData = Awaited<ReturnType<typeof policyAiDestinations>>,
-  TError = ErrorType<unknown>,
->(options?: {
-  query?: Partial<
-    UseQueryOptions<
-      Awaited<ReturnType<typeof policyAiDestinations>>,
-      TError,
-      TData
-    >
-  >;
-}) => {
-  const { query: queryOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getPolicyAiDestinationsQueryKey();
+export const getPolicyAiDestinationsQueryOptions = <TData = Awaited<ReturnType<typeof policyAiDestinations>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof policyAiDestinations>>, TError, TData>>, }
+) => {
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof policyAiDestinations>>
-  > = ({ signal }) => policyAiDestinations(signal);
+const {query: queryOptions} = options ?? {};
 
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof policyAiDestinations>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
+  const queryKey =  queryOptions?.queryKey ?? getPolicyAiDestinationsQueryKey();
 
-export type PolicyAiDestinationsQueryResult = NonNullable<
-  Awaited<ReturnType<typeof policyAiDestinations>>
->;
-export type PolicyAiDestinationsQueryError = ErrorType<unknown>;
 
-export function usePolicyAiDestinations<
-  TData = Awaited<ReturnType<typeof policyAiDestinations>>,
-  TError = ErrorType<unknown>,
->(
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof policyAiDestinations>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof policyAiDestinations>>> = ({ signal }) => policyAiDestinations(signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof policyAiDestinations>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type PolicyAiDestinationsQueryResult = NonNullable<Awaited<ReturnType<typeof policyAiDestinations>>>
+export type PolicyAiDestinationsQueryError = ErrorType<unknown>
+
+
+export function usePolicyAiDestinations<TData = Awaited<ReturnType<typeof policyAiDestinations>>, TError = ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof policyAiDestinations>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof policyAiDestinations>>,
           TError,
           Awaited<ReturnType<typeof policyAiDestinations>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function usePolicyAiDestinations<
-  TData = Awaited<ReturnType<typeof policyAiDestinations>>,
-  TError = ErrorType<unknown>,
->(
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof policyAiDestinations>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePolicyAiDestinations<TData = Awaited<ReturnType<typeof policyAiDestinations>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof policyAiDestinations>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof policyAiDestinations>>,
           TError,
           Awaited<ReturnType<typeof policyAiDestinations>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function usePolicyAiDestinations<
-  TData = Awaited<ReturnType<typeof policyAiDestinations>>,
-  TError = ErrorType<unknown>,
->(
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof policyAiDestinations>>,
-        TError,
-        TData
-      >
-    >;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePolicyAiDestinations<TData = Awaited<ReturnType<typeof policyAiDestinations>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof policyAiDestinations>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary What data may go to which AI provider
  */
 
-export function usePolicyAiDestinations<
-  TData = Awaited<ReturnType<typeof policyAiDestinations>>,
-  TError = ErrorType<unknown>,
->(
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof policyAiDestinations>>,
-        TError,
-        TData
-      >
-    >;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getPolicyAiDestinationsQueryOptions(options);
+export function usePolicyAiDestinations<TData = Awaited<ReturnType<typeof policyAiDestinations>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof policyAiDestinations>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+  const queryOptions = getPolicyAiDestinationsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
 
 /**
  * @summary Ask whether one kind of data may go to one AI provider
  */
 export const policyCheckAiDestination = (
-  policyCheckAiDestinationBody: PolicyCheckAiDestinationBody,
-  signal?: AbortSignal,
+    policyCheckAiDestinationBody: PolicyCheckAiDestinationBody,
+ signal?: AbortSignal
 ) => {
-  return apiMutator<PolicyCheckAiDestination200>({
-    url: `/api/v1/governance/ai-destinations/check`,
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    data: policyCheckAiDestinationBody,
-    signal,
-  });
-};
 
-export const getPolicyCheckAiDestinationQueryKey = (
-  policyCheckAiDestinationBody?: PolicyCheckAiDestinationBody,
+
+      return apiMutator<PolicyCheckAiDestination200>(
+      {url: `/api/v1/governance/ai-destinations/check`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: policyCheckAiDestinationBody, signal
+    },
+      );
+    }
+
+
+
+
+export const getPolicyCheckAiDestinationQueryKey = (policyCheckAiDestinationBody?: PolicyCheckAiDestinationBody,) => {
+    return [
+    'POST', `/api/v1/governance/ai-destinations/check`, policyCheckAiDestinationBody
+    ] as const;
+    }
+
+
+export const getPolicyCheckAiDestinationQueryOptions = <TData = Awaited<ReturnType<typeof policyCheckAiDestination>>, TError = ErrorType<unknown>>(policyCheckAiDestinationBody: PolicyCheckAiDestinationBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof policyCheckAiDestination>>, TError, TData>>, }
 ) => {
-  return [
-    "POST",
-    `/api/v1/governance/ai-destinations/check`,
-    policyCheckAiDestinationBody,
-  ] as const;
-};
 
-export const getPolicyCheckAiDestinationQueryOptions = <
-  TData = Awaited<ReturnType<typeof policyCheckAiDestination>>,
-  TError = ErrorType<unknown>,
->(
-  policyCheckAiDestinationBody: PolicyCheckAiDestinationBody,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof policyCheckAiDestination>>,
-        TError,
-        TData
-      >
-    >;
-  },
-) => {
-  const { query: queryOptions } = options ?? {};
+const {query: queryOptions} = options ?? {};
 
-  const queryKey =
-    queryOptions?.queryKey ??
-    getPolicyCheckAiDestinationQueryKey(policyCheckAiDestinationBody);
+  const queryKey =  queryOptions?.queryKey ?? getPolicyCheckAiDestinationQueryKey(policyCheckAiDestinationBody);
 
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof policyCheckAiDestination>>
-  > = ({ signal }) =>
-    policyCheckAiDestination(policyCheckAiDestinationBody, signal);
 
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof policyCheckAiDestination>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
 
-export type PolicyCheckAiDestinationQueryResult = NonNullable<
-  Awaited<ReturnType<typeof policyCheckAiDestination>>
->;
-export type PolicyCheckAiDestinationQueryError = ErrorType<unknown>;
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof policyCheckAiDestination>>> = ({ signal }) => policyCheckAiDestination(policyCheckAiDestinationBody, signal);
 
-export function usePolicyCheckAiDestination<
-  TData = Awaited<ReturnType<typeof policyCheckAiDestination>>,
-  TError = ErrorType<unknown>,
->(
-  policyCheckAiDestinationBody: PolicyCheckAiDestinationBody,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof policyCheckAiDestination>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof policyCheckAiDestination>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type PolicyCheckAiDestinationQueryResult = NonNullable<Awaited<ReturnType<typeof policyCheckAiDestination>>>
+export type PolicyCheckAiDestinationQueryError = ErrorType<unknown>
+
+
+export function usePolicyCheckAiDestination<TData = Awaited<ReturnType<typeof policyCheckAiDestination>>, TError = ErrorType<unknown>>(
+ policyCheckAiDestinationBody: PolicyCheckAiDestinationBody, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof policyCheckAiDestination>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof policyCheckAiDestination>>,
           TError,
           Awaited<ReturnType<typeof policyCheckAiDestination>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function usePolicyCheckAiDestination<
-  TData = Awaited<ReturnType<typeof policyCheckAiDestination>>,
-  TError = ErrorType<unknown>,
->(
-  policyCheckAiDestinationBody: PolicyCheckAiDestinationBody,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof policyCheckAiDestination>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePolicyCheckAiDestination<TData = Awaited<ReturnType<typeof policyCheckAiDestination>>, TError = ErrorType<unknown>>(
+ policyCheckAiDestinationBody: PolicyCheckAiDestinationBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof policyCheckAiDestination>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof policyCheckAiDestination>>,
           TError,
           Awaited<ReturnType<typeof policyCheckAiDestination>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function usePolicyCheckAiDestination<
-  TData = Awaited<ReturnType<typeof policyCheckAiDestination>>,
-  TError = ErrorType<unknown>,
->(
-  policyCheckAiDestinationBody: PolicyCheckAiDestinationBody,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof policyCheckAiDestination>>,
-        TError,
-        TData
-      >
-    >;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePolicyCheckAiDestination<TData = Awaited<ReturnType<typeof policyCheckAiDestination>>, TError = ErrorType<unknown>>(
+ policyCheckAiDestinationBody: PolicyCheckAiDestinationBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof policyCheckAiDestination>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Ask whether one kind of data may go to one AI provider
  */
 
-export function usePolicyCheckAiDestination<
-  TData = Awaited<ReturnType<typeof policyCheckAiDestination>>,
-  TError = ErrorType<unknown>,
->(
-  policyCheckAiDestinationBody: PolicyCheckAiDestinationBody,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof policyCheckAiDestination>>,
-        TError,
-        TData
-      >
-    >;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getPolicyCheckAiDestinationQueryOptions(
-    policyCheckAiDestinationBody,
-    options,
-  );
+export function usePolicyCheckAiDestination<TData = Awaited<ReturnType<typeof policyCheckAiDestination>>, TError = ErrorType<unknown>>(
+ policyCheckAiDestinationBody: PolicyCheckAiDestinationBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof policyCheckAiDestination>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+  const queryOptions = getPolicyCheckAiDestinationQueryOptions(policyCheckAiDestinationBody,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
+

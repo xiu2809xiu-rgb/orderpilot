@@ -6,11 +6,11 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type OverviewObservability200DataServicesItemStatus =
-  (typeof OverviewObservability200DataServicesItemStatus)[keyof typeof OverviewObservability200DataServicesItemStatus];
+export type OverviewObservability200DataServicesItemStatus = typeof OverviewObservability200DataServicesItemStatus[keyof typeof OverviewObservability200DataServicesItemStatus];
+
 
 export const OverviewObservability200DataServicesItemStatus = {
-  healthy: "healthy",
-  degraded: "degraded",
-  down: "down",
+  healthy: 'healthy',
+  degraded: 'degraded',
+  down: 'down',
 } as const;

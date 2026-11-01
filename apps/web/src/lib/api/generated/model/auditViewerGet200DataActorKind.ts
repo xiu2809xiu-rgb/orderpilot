@@ -6,11 +6,11 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type AuditViewerGet200DataActorKind =
-  (typeof AuditViewerGet200DataActorKind)[keyof typeof AuditViewerGet200DataActorKind];
+export type AuditViewerGet200DataActorKind = typeof AuditViewerGet200DataActorKind[keyof typeof AuditViewerGet200DataActorKind];
+
 
 export const AuditViewerGet200DataActorKind = {
-  user: "user",
-  system: "system",
-  ai: "ai",
+  user: 'user',
+  system: 'system',
+  ai: 'ai',
 } as const;

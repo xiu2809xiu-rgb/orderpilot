@@ -9,18 +9,17 @@
 /**
  * @nullable
  */
-export type WorkflowsInboxReminders200DataItemEscalatedTo =
-  | (typeof WorkflowsInboxReminders200DataItemEscalatedTo)[keyof typeof WorkflowsInboxReminders200DataItemEscalatedTo]
-  | null;
+export type WorkflowsInboxReminders200DataItemEscalatedTo = typeof WorkflowsInboxReminders200DataItemEscalatedTo[keyof typeof WorkflowsInboxReminders200DataItemEscalatedTo] | null;
+
 
 export const WorkflowsInboxReminders200DataItemEscalatedTo = {
-  SYSTEM_ADMIN: "SYSTEM_ADMIN",
-  PRODUCT_MANAGER: "PRODUCT_MANAGER",
-  APPROVER: "APPROVER",
-  SUPPORT: "SUPPORT",
-  WAREHOUSE: "WAREHOUSE",
-  FINANCE: "FINANCE",
-  LOGISTICS: "LOGISTICS",
-  MANAGEMENT: "MANAGEMENT",
-  AUDITOR: "AUDITOR",
+  SYSTEM_ADMIN: 'SYSTEM_ADMIN',
+  PRODUCT_MANAGER: 'PRODUCT_MANAGER',
+  APPROVER: 'APPROVER',
+  SUPPORT: 'SUPPORT',
+  WAREHOUSE: 'WAREHOUSE',
+  FINANCE: 'FINANCE',
+  LOGISTICS: 'LOGISTICS',
+  MANAGEMENT: 'MANAGEMENT',
+  AUDITOR: 'AUDITOR',
 } as const;

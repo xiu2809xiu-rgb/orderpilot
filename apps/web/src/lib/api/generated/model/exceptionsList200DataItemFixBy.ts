@@ -6,17 +6,17 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type ExceptionsList200DataItemFixBy =
-  (typeof ExceptionsList200DataItemFixBy)[keyof typeof ExceptionsList200DataItemFixBy];
+export type ExceptionsList200DataItemFixBy = typeof ExceptionsList200DataItemFixBy[keyof typeof ExceptionsList200DataItemFixBy];
+
 
 export const ExceptionsList200DataItemFixBy = {
-  SYSTEM_ADMIN: "SYSTEM_ADMIN",
-  PRODUCT_MANAGER: "PRODUCT_MANAGER",
-  APPROVER: "APPROVER",
-  SUPPORT: "SUPPORT",
-  WAREHOUSE: "WAREHOUSE",
-  FINANCE: "FINANCE",
-  LOGISTICS: "LOGISTICS",
-  MANAGEMENT: "MANAGEMENT",
-  AUDITOR: "AUDITOR",
+  SYSTEM_ADMIN: 'SYSTEM_ADMIN',
+  PRODUCT_MANAGER: 'PRODUCT_MANAGER',
+  APPROVER: 'APPROVER',
+  SUPPORT: 'SUPPORT',
+  WAREHOUSE: 'WAREHOUSE',
+  FINANCE: 'FINANCE',
+  LOGISTICS: 'LOGISTICS',
+  MANAGEMENT: 'MANAGEMENT',
+  AUDITOR: 'AUDITOR',
 } as const;

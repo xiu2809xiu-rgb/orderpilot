@@ -6,12 +6,12 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type WorkflowsConfirmPaymentBodyPaymentType =
-  (typeof WorkflowsConfirmPaymentBodyPaymentType)[keyof typeof WorkflowsConfirmPaymentBodyPaymentType];
+export type WorkflowsConfirmPaymentBodyPaymentType = typeof WorkflowsConfirmPaymentBodyPaymentType[keyof typeof WorkflowsConfirmPaymentBodyPaymentType];
+
 
 export const WorkflowsConfirmPaymentBodyPaymentType = {
-  prepayment: "prepayment",
-  deposit: "deposit",
-  balance: "balance",
-  "full-payment": "full-payment",
+  prepayment: 'prepayment',
+  deposit: 'deposit',
+  balance: 'balance',
+  'full-payment': 'full-payment',
 } as const;

@@ -6,10 +6,10 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type TrackerListOverdue =
-  (typeof TrackerListOverdue)[keyof typeof TrackerListOverdue];
+export type TrackerListOverdue = typeof TrackerListOverdue[keyof typeof TrackerListOverdue];
+
 
 export const TrackerListOverdue = {
-  true: "true",
-  false: "false",
+  true: 'true',
+  false: 'false',
 } as const;

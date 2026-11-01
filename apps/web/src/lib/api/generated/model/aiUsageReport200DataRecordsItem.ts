@@ -5,7 +5,7 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { AiUsageReport200DataRecordsItemStatus } from "./aiUsageReport200DataRecordsItemStatus.ts";
+import type { AiUsageReport200DataRecordsItemStatus } from './aiUsageReport200DataRecordsItemStatus.ts';
 
 export type AiUsageReport200DataRecordsItem = {
   /** @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */
@@ -21,27 +21,27 @@ export type AiUsageReport200DataRecordsItem = {
   /** @minLength 1 */
   promptVersion: string;
   /**
-   * @minimum 0
-   * @maximum 9007199254740991
-   */
+     * @minimum 0
+     * @maximum 9007199254740991
+     */
   inputTokens: number;
   /**
-   * @minimum 0
-   * @maximum 9007199254740991
-   */
+     * @minimum 0
+     * @maximum 9007199254740991
+     */
   outputTokens: number;
   /** @pattern ^-?\d{1,15}(\.\d{1,4})?$ */
   costUsd: string;
   /**
-   * @minimum 0
-   * @maximum 9007199254740991
-   */
+     * @minimum 0
+     * @maximum 9007199254740991
+     */
   latencyMs: number;
   status: AiUsageReport200DataRecordsItemStatus;
   /**
-   * @nullable
-   * @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
-   */
+     * @nullable
+     * @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+     */
   userId: string | null;
   /** @minLength 1 */
   traceId: string;

@@ -6,11 +6,11 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type WorkflowsInboxTasks200DataItemPriority =
-  (typeof WorkflowsInboxTasks200DataItemPriority)[keyof typeof WorkflowsInboxTasks200DataItemPriority];
+export type WorkflowsInboxTasks200DataItemPriority = typeof WorkflowsInboxTasks200DataItemPriority[keyof typeof WorkflowsInboxTasks200DataItemPriority];
+
 
 export const WorkflowsInboxTasks200DataItemPriority = {
-  high: "high",
-  normal: "normal",
-  low: "low",
+  high: 'high',
+  normal: 'normal',
+  low: 'low',
 } as const;

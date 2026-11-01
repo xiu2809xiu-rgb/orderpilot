@@ -5,8 +5,8 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { TrackerTimeline200DataMatchesItemKind } from "./trackerTimeline200DataMatchesItemKind.ts";
-import type { TrackerTimeline200DataMatchesItemPossibleMatchesItem } from "./trackerTimeline200DataMatchesItemPossibleMatchesItem.ts";
+import type { TrackerTimeline200DataMatchesItemKind } from './trackerTimeline200DataMatchesItemKind.ts';
+import type { TrackerTimeline200DataMatchesItemPossibleMatchesItem } from './trackerTimeline200DataMatchesItemPossibleMatchesItem.ts';
 
 export type TrackerTimeline200DataMatchesItem = {
   kind: TrackerTimeline200DataMatchesItemKind;
@@ -15,14 +15,14 @@ export type TrackerTimeline200DataMatchesItem = {
   /** @minLength 1 */
   printedName: string;
   /**
-   * @minLength 1
-   * @nullable
-   */
+     * @minLength 1
+     * @nullable
+     */
   matchedNo: string | null;
   /**
-   * @minLength 1
-   * @nullable
-   */
+     * @minLength 1
+     * @nullable
+     */
   matchedName: string | null;
   possibleMatches: TrackerTimeline200DataMatchesItemPossibleMatchesItem[];
 };

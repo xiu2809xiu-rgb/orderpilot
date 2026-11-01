@@ -12,9 +12,9 @@ export type MasterDataCustomer200DataOverdueOrdersItem = {
   /** @minLength 1 */
   externalDocumentNo: string;
   /**
-   * @minimum 1
-   * @maximum 9007199254740991
-   */
+     * @minimum 1
+     * @maximum 9007199254740991
+     */
   daysOverdue: number;
   /** @minLength 1 */
   step: string;
