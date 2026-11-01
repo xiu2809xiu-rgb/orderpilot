@@ -6,9 +6,6 @@
     "Open actions on each order",
     "Shipment dates, AWB or BL numbers and permits"
   ],
-  "cues": {
-    "inTransit": "Shipments in transit"
-  },
   "list": {
     "caption": "Orders in the tracker",
     "overdueOnly": "Overdue only",
@@ -29,7 +26,26 @@
     "overdueDays_one": "{{count}} day overdue",
     "overdueDays_other": "{{count}} days overdue",
     "onTime": "On time",
-    "noShipmentDate": "Not set"
+    "noShipmentDate": "Not set",
+    "chips": {
+      "open": "Open orders",
+      "overdue": "Overdue",
+      "documentToConfirm": "Has a document to confirm"
+    },
+    "statuses": {
+      "sample-po-received": "PO received",
+      "sample-extracted-awaiting-review": "Fields awaiting review",
+      "sample-short-stock": "Short on stock",
+      "sample-pending-approval": "Waiting for approval",
+      "sample-pi-to-send": "Proforma invoice to send",
+      "sample-awaiting-payment": "Waiting for payment",
+      "sample-ready-to-pick": "Ready to pick",
+      "sample-packing-list-mismatch": "Packing list differs from the PO",
+      "sample-awb-overdue": "Shipped, AWB overdue",
+      "sample-shipped": "Shipped",
+      "sample-invoiced": "Invoiced",
+      "sample-closed": "Closed"
+    }
   },
   "detail": {
     "back": "Back to the tracker",

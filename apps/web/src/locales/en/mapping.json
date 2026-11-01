@@ -5,6 +5,5 @@
     "Field mappings for each document type",
     "Customer-specific aliases and unit conversions",
     "A test run before a mapping goes live"
-  ],
-  "cues": {}
+  ]
 }

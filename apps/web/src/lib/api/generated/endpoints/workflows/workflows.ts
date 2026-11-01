@@ -23,6 +23,7 @@ import type {
 import type {
   WorkflowsApprove200,
   WorkflowsApproveBody,
+  WorkflowsCompleteTask200,
   WorkflowsConfirmPayment200,
   WorkflowsConfirmPaymentBody,
   WorkflowsDocumentConfig200,
@@ -34,10 +35,14 @@ import type {
   WorkflowsMyRemindersParams,
   WorkflowsMyTasks200,
   WorkflowsMyTasksParams,
+  WorkflowsOpenRules200,
   WorkflowsOrderFlow200,
   WorkflowsReject200,
   WorkflowsRejectBody,
-  WorkflowsSpr200
+  WorkflowsSpr200,
+  WorkflowsUndoDecision200,
+  WorkflowsUndoPayment200,
+  WorkflowsUndoTask200
 } from '../../model';
 
 import { apiMutator } from '../../../mutator.ts';
@@ -143,6 +148,190 @@ export function useWorkflowsMyTasks<TData = Awaited<ReturnType<typeof workflowsM
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getWorkflowsMyTasksQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary Mark a task in the caller's own inbox as done. Kept in the mock overlay, audited
+ */
+export const workflowsCompleteTask = (
+    taskId: string,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<WorkflowsCompleteTask200>(
+      {url: `/api/v1/workflows/tasks/${taskId}/complete`, method: 'POST', signal
+    },
+      );
+    }
+
+
+
+
+export const getWorkflowsCompleteTaskQueryKey = (taskId: string,) => {
+    return [
+    'POST', `/api/v1/workflows/tasks/${taskId}/complete`
+    ] as const;
+    }
+
+
+export const getWorkflowsCompleteTaskQueryOptions = <TData = Awaited<ReturnType<typeof workflowsCompleteTask>>, TError = ErrorType<unknown>>(taskId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsCompleteTask>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getWorkflowsCompleteTaskQueryKey(taskId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof workflowsCompleteTask>>> = ({ signal }) => workflowsCompleteTask(taskId, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: taskId !== null && taskId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof workflowsCompleteTask>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type WorkflowsCompleteTaskQueryResult = NonNullable<Awaited<ReturnType<typeof workflowsCompleteTask>>>
+export type WorkflowsCompleteTaskQueryError = ErrorType<unknown>
+
+
+export function useWorkflowsCompleteTask<TData = Awaited<ReturnType<typeof workflowsCompleteTask>>, TError = ErrorType<unknown>>(
+ taskId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsCompleteTask>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof workflowsCompleteTask>>,
+          TError,
+          Awaited<ReturnType<typeof workflowsCompleteTask>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useWorkflowsCompleteTask<TData = Awaited<ReturnType<typeof workflowsCompleteTask>>, TError = ErrorType<unknown>>(
+ taskId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsCompleteTask>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof workflowsCompleteTask>>,
+          TError,
+          Awaited<ReturnType<typeof workflowsCompleteTask>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useWorkflowsCompleteTask<TData = Awaited<ReturnType<typeof workflowsCompleteTask>>, TError = ErrorType<unknown>>(
+ taskId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsCompleteTask>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Mark a task in the caller's own inbox as done. Kept in the mock overlay, audited
+ */
+
+export function useWorkflowsCompleteTask<TData = Awaited<ReturnType<typeof workflowsCompleteTask>>, TError = ErrorType<unknown>>(
+ taskId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsCompleteTask>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getWorkflowsCompleteTaskQueryOptions(taskId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary Undo a completed task. Audited
+ */
+export const workflowsUndoTask = (
+    taskId: string,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<WorkflowsUndoTask200>(
+      {url: `/api/v1/workflows/tasks/${taskId}/undo`, method: 'POST', signal
+    },
+      );
+    }
+
+
+
+
+export const getWorkflowsUndoTaskQueryKey = (taskId: string,) => {
+    return [
+    'POST', `/api/v1/workflows/tasks/${taskId}/undo`
+    ] as const;
+    }
+
+
+export const getWorkflowsUndoTaskQueryOptions = <TData = Awaited<ReturnType<typeof workflowsUndoTask>>, TError = ErrorType<unknown>>(taskId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsUndoTask>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getWorkflowsUndoTaskQueryKey(taskId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof workflowsUndoTask>>> = ({ signal }) => workflowsUndoTask(taskId, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: taskId !== null && taskId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof workflowsUndoTask>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type WorkflowsUndoTaskQueryResult = NonNullable<Awaited<ReturnType<typeof workflowsUndoTask>>>
+export type WorkflowsUndoTaskQueryError = ErrorType<unknown>
+
+
+export function useWorkflowsUndoTask<TData = Awaited<ReturnType<typeof workflowsUndoTask>>, TError = ErrorType<unknown>>(
+ taskId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsUndoTask>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof workflowsUndoTask>>,
+          TError,
+          Awaited<ReturnType<typeof workflowsUndoTask>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useWorkflowsUndoTask<TData = Awaited<ReturnType<typeof workflowsUndoTask>>, TError = ErrorType<unknown>>(
+ taskId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsUndoTask>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof workflowsUndoTask>>,
+          TError,
+          Awaited<ReturnType<typeof workflowsUndoTask>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useWorkflowsUndoTask<TData = Awaited<ReturnType<typeof workflowsUndoTask>>, TError = ErrorType<unknown>>(
+ taskId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsUndoTask>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Undo a completed task. Audited
+ */
+
+export function useWorkflowsUndoTask<TData = Awaited<ReturnType<typeof workflowsUndoTask>>, TError = ErrorType<unknown>>(
+ taskId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsUndoTask>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getWorkflowsUndoTaskQueryOptions(taskId,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -540,7 +729,7 @@ export function useWorkflowsOrderFlow<TData = Awaited<ReturnType<typeof workflow
 
 
 /**
- * @summary Confirm a payment, with its type. Checked only: nothing is stored
+ * @summary Confirm a payment, with its type. Kept in the mock overlay, audited
  */
 export const workflowsConfirmPayment = (
     orderNo: string,
@@ -619,7 +808,7 @@ export function useWorkflowsConfirmPayment<TData = Awaited<ReturnType<typeof wor
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary Confirm a payment, with its type. Checked only: nothing is stored
+ * @summary Confirm a payment, with its type. Kept in the mock overlay, audited
  */
 
 export function useWorkflowsConfirmPayment<TData = Awaited<ReturnType<typeof workflowsConfirmPayment>>, TError = ErrorType<unknown>>(
@@ -629,6 +818,105 @@ export function useWorkflowsConfirmPayment<TData = Awaited<ReturnType<typeof wor
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getWorkflowsConfirmPaymentQueryOptions(orderNo,workflowsConfirmPaymentBody,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary Undo a payment confirmation. Audited
+ */
+export const workflowsUndoPayment = (
+    orderNo: string,
+    paymentId: string,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<WorkflowsUndoPayment200>(
+      {url: `/api/v1/workflows/orders/${orderNo}/payments/${paymentId}/undo`, method: 'POST', signal
+    },
+      );
+    }
+
+
+
+
+export const getWorkflowsUndoPaymentQueryKey = (orderNo: string,
+    paymentId: string,) => {
+    return [
+    'POST', `/api/v1/workflows/orders/${orderNo}/payments/${paymentId}/undo`
+    ] as const;
+    }
+
+
+export const getWorkflowsUndoPaymentQueryOptions = <TData = Awaited<ReturnType<typeof workflowsUndoPayment>>, TError = ErrorType<unknown>>(orderNo: string,
+    paymentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsUndoPayment>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getWorkflowsUndoPaymentQueryKey(orderNo,paymentId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof workflowsUndoPayment>>> = ({ signal }) => workflowsUndoPayment(orderNo,paymentId, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: orderNo !== null && orderNo !== undefined && paymentId !== null && paymentId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof workflowsUndoPayment>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type WorkflowsUndoPaymentQueryResult = NonNullable<Awaited<ReturnType<typeof workflowsUndoPayment>>>
+export type WorkflowsUndoPaymentQueryError = ErrorType<unknown>
+
+
+export function useWorkflowsUndoPayment<TData = Awaited<ReturnType<typeof workflowsUndoPayment>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    paymentId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsUndoPayment>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof workflowsUndoPayment>>,
+          TError,
+          Awaited<ReturnType<typeof workflowsUndoPayment>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useWorkflowsUndoPayment<TData = Awaited<ReturnType<typeof workflowsUndoPayment>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    paymentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsUndoPayment>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof workflowsUndoPayment>>,
+          TError,
+          Awaited<ReturnType<typeof workflowsUndoPayment>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useWorkflowsUndoPayment<TData = Awaited<ReturnType<typeof workflowsUndoPayment>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    paymentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsUndoPayment>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Undo a payment confirmation. Audited
+ */
+
+export function useWorkflowsUndoPayment<TData = Awaited<ReturnType<typeof workflowsUndoPayment>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    paymentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsUndoPayment>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getWorkflowsUndoPaymentQueryOptions(orderNo,paymentId,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -733,7 +1021,7 @@ export function useWorkflowsSpr<TData = Awaited<ReturnType<typeof workflowsSpr>>
 
 
 /**
- * @summary Approve a stock purchase request, with a comment. Checked only: nothing is changed
+ * @summary Approve a stock purchase request, with a comment. Kept in the mock overlay, audited
  */
 export const workflowsApprove = (
     recordNo: string,
@@ -812,7 +1100,7 @@ export function useWorkflowsApprove<TData = Awaited<ReturnType<typeof workflowsA
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary Approve a stock purchase request, with a comment. Checked only: nothing is changed
+ * @summary Approve a stock purchase request, with a comment. Kept in the mock overlay, audited
  */
 
 export function useWorkflowsApprove<TData = Awaited<ReturnType<typeof workflowsApprove>>, TError = ErrorType<unknown>>(
@@ -834,7 +1122,7 @@ export function useWorkflowsApprove<TData = Awaited<ReturnType<typeof workflowsA
 
 
 /**
- * @summary Reject a stock purchase request, with a comment. Checked only: nothing is changed
+ * @summary Reject a stock purchase request, with a comment. Kept in the mock overlay, audited
  */
 export const workflowsReject = (
     recordNo: string,
@@ -913,7 +1201,7 @@ export function useWorkflowsReject<TData = Awaited<ReturnType<typeof workflowsRe
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary Reject a stock purchase request, with a comment. Checked only: nothing is changed
+ * @summary Reject a stock purchase request, with a comment. Kept in the mock overlay, audited
  */
 
 export function useWorkflowsReject<TData = Awaited<ReturnType<typeof workflowsReject>>, TError = ErrorType<unknown>>(
@@ -923,6 +1211,98 @@ export function useWorkflowsReject<TData = Awaited<ReturnType<typeof workflowsRe
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getWorkflowsRejectQueryOptions(recordNo,workflowsRejectBody,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary Undo a decision on a request. Audited
+ */
+export const workflowsUndoDecision = (
+    recordNo: string,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<WorkflowsUndoDecision200>(
+      {url: `/api/v1/workflows/sprs/${recordNo}/undo`, method: 'POST', signal
+    },
+      );
+    }
+
+
+
+
+export const getWorkflowsUndoDecisionQueryKey = (recordNo: string,) => {
+    return [
+    'POST', `/api/v1/workflows/sprs/${recordNo}/undo`
+    ] as const;
+    }
+
+
+export const getWorkflowsUndoDecisionQueryOptions = <TData = Awaited<ReturnType<typeof workflowsUndoDecision>>, TError = ErrorType<unknown>>(recordNo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsUndoDecision>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getWorkflowsUndoDecisionQueryKey(recordNo);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof workflowsUndoDecision>>> = ({ signal }) => workflowsUndoDecision(recordNo, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: recordNo !== null && recordNo !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof workflowsUndoDecision>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type WorkflowsUndoDecisionQueryResult = NonNullable<Awaited<ReturnType<typeof workflowsUndoDecision>>>
+export type WorkflowsUndoDecisionQueryError = ErrorType<unknown>
+
+
+export function useWorkflowsUndoDecision<TData = Awaited<ReturnType<typeof workflowsUndoDecision>>, TError = ErrorType<unknown>>(
+ recordNo: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsUndoDecision>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof workflowsUndoDecision>>,
+          TError,
+          Awaited<ReturnType<typeof workflowsUndoDecision>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useWorkflowsUndoDecision<TData = Awaited<ReturnType<typeof workflowsUndoDecision>>, TError = ErrorType<unknown>>(
+ recordNo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsUndoDecision>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof workflowsUndoDecision>>,
+          TError,
+          Awaited<ReturnType<typeof workflowsUndoDecision>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useWorkflowsUndoDecision<TData = Awaited<ReturnType<typeof workflowsUndoDecision>>, TError = ErrorType<unknown>>(
+ recordNo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsUndoDecision>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Undo a decision on a request. Audited
+ */
+
+export function useWorkflowsUndoDecision<TData = Awaited<ReturnType<typeof workflowsUndoDecision>>, TError = ErrorType<unknown>>(
+ recordNo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsUndoDecision>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getWorkflowsUndoDecisionQueryOptions(recordNo,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -1015,6 +1395,98 @@ export function useWorkflowsDocumentConfig<TData = Awaited<ReturnType<typeof wor
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getWorkflowsDocumentConfigQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary The business rules waiting for Spectra to confirm, with their draft values
+ */
+export const workflowsOpenRules = (
+
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<WorkflowsOpenRules200>(
+      {url: `/api/v1/workflows/open-rules`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getWorkflowsOpenRulesQueryKey = () => {
+    return [
+    `/api/v1/workflows/open-rules`
+    ] as const;
+    }
+
+
+export const getWorkflowsOpenRulesQueryOptions = <TData = Awaited<ReturnType<typeof workflowsOpenRules>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsOpenRules>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getWorkflowsOpenRulesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof workflowsOpenRules>>> = ({ signal }) => workflowsOpenRules(signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof workflowsOpenRules>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type WorkflowsOpenRulesQueryResult = NonNullable<Awaited<ReturnType<typeof workflowsOpenRules>>>
+export type WorkflowsOpenRulesQueryError = ErrorType<unknown>
+
+
+export function useWorkflowsOpenRules<TData = Awaited<ReturnType<typeof workflowsOpenRules>>, TError = ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsOpenRules>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof workflowsOpenRules>>,
+          TError,
+          Awaited<ReturnType<typeof workflowsOpenRules>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useWorkflowsOpenRules<TData = Awaited<ReturnType<typeof workflowsOpenRules>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsOpenRules>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof workflowsOpenRules>>,
+          TError,
+          Awaited<ReturnType<typeof workflowsOpenRules>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useWorkflowsOpenRules<TData = Awaited<ReturnType<typeof workflowsOpenRules>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsOpenRules>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary The business rules waiting for Spectra to confirm, with their draft values
+ */
+
+export function useWorkflowsOpenRules<TData = Awaited<ReturnType<typeof workflowsOpenRules>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsOpenRules>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getWorkflowsOpenRulesQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

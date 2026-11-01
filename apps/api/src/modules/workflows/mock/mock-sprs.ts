@@ -11,7 +11,10 @@ import type {
 } from "@orderpilot/synthetic-data";
 
 /** An SPR as the read model holds it. The approver is added by the service, from area 4's policy. */
-export type SprRecord = Omit<SprDetail, "approver" | "substituteName">;
+export type SprRecord = Omit<
+  SprDetail,
+  "approver" | "substituteName" | "escalatesToName"
+>;
 
 function fieldsOf(
   config: DocumentTypeConfig,

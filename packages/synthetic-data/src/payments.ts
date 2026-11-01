@@ -1,4 +1,4 @@
-import { addDecimal, multiplyDecimal } from "@orderpilot/shared";
+import { addDecimal, multiplyDecimal, roundToCents } from "@orderpilot/shared";
 import { atHour } from "./dates.js";
 import type { Journey } from "./journey.js";
 import { syntheticId } from "./records.js";
@@ -28,7 +28,7 @@ export function makePayments(
     const percent = Number(header.prepaymentPercent);
     const upfront =
       percent > 0
-        ? multiplyDecimal(order.total, (percent / 100).toFixed(4))
+        ? roundToCents(multiplyDecimal(order.total, (percent / 100).toFixed(4)))
         : "0.00";
     const base = {
       orderNo: header.no,

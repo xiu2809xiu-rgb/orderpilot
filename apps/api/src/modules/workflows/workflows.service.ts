@@ -1,22 +1,20 @@
 import { Inject, Injectable } from "@nestjs/common";
-import {
-  NOT_APPLIED_MESSAGE,
-  type DocumentTypeConfig,
-  type InboxRole,
-  type OrderFlow,
-  type PageMeta,
-  type PageQuery,
-  type PaymentConfirmationInput,
-  type PaymentResult,
-  type SprDecisionResult,
-  type SprDetail,
-  type TasksQuery,
-  type WorkflowReminder,
-  type WorkflowTask,
+import type {
+  DocumentTypeConfig,
+  InboxRole,
+  OpenRule,
+  OrderFlow,
+  PageMeta,
+  PageQuery,
+  SprDetail,
+  TasksQuery,
+  WorkflowReminder,
+  WorkflowTask,
 } from "@orderpilot/shared";
 import { NotFoundError } from "../../common/domain-error.js";
 import { ApprovalPolicy } from "./domain/approval-policy.js";
 import { DocumentConfigRepository } from "./document-config.repository.js";
+import { mockOpenRules } from "./mock/mock-open-rules.js";
 import { WorkflowReadModel } from "./workflow-read-model.js";
 
 export interface Page<T> {
@@ -44,10 +42,9 @@ function byUrgency(a: WorkflowTask, b: WorkflowTask): number {
 }
 
 /**
- * The area 2 base. It answers from the read model and changes nothing: the
- * commands check what they should (the record exists, the input is valid, the
- * caller holds the permission) and then say that nothing was applied. Azri's
- * stories put the state machine behind the commands.
+ * The area 2 base. It answers from the read model. The commands on the mock
+ * data live in `MockWorkflowActions`, and Azri's stories put the state machine
+ * in their place.
  */
 @Injectable()
 export class WorkflowsService {
@@ -95,40 +92,16 @@ export class WorkflowsService {
       ...record,
       approver: { displayName: approver.displayName, setup: approver.setup },
       substituteName: approver.substituteName,
-    };
-  }
-
-  /** Approve or reject. Checked and answered; nothing is changed (the SPR story is Azri's). */
-  async decide(
-    recordNo: string,
-    outcome: SprDecisionResult["outcome"],
-    comment: string,
-  ): Promise<SprDecisionResult> {
-    await this.spr(recordNo);
-    return {
-      applied: false,
-      message: NOT_APPLIED_MESSAGE,
-      recordNo,
-      outcome,
-      comment,
-    };
-  }
-
-  /** Confirm a payment. Checked and answered; nothing is stored (the payment gate is Azri's). */
-  async confirmPayment(
-    orderNo: string,
-    input: PaymentConfirmationInput,
-  ): Promise<PaymentResult> {
-    await this.flow(orderNo);
-    return {
-      applied: false,
-      message: NOT_APPLIED_MESSAGE,
-      orderNo,
-      paymentType: input.paymentType,
+      escalatesToName: approver.escalatesToName,
     };
   }
 
   documentConfig(): Promise<DocumentTypeConfig[]> {
     return this.config.list();
+  }
+
+  /** What stays open until Spectra confirms it, with today's draft values. */
+  async openRules(): Promise<OpenRule[]> {
+    return mockOpenRules(await this.approvals.approverFor("PRODUCT_MANAGER"));
   }
 }

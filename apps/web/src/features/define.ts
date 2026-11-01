@@ -7,12 +7,20 @@ export const NAV_GROUPS = ["operations", "data", "insight", "control"] as const;
 export type NavGroup = (typeof NAV_GROUPS)[number];
 
 /**
- * A tile on a role's home page. Its label is `cues.<id>` in the feature's
- * namespace. Until the area has data the tile shows a dash and "Planned".
+ * A tile on a role's home page. Its label is `tiles.<id>` in the `home`
+ * namespace. Plain data, so no feature's code joins the entry bundle. `to` and
+ * `api` carry the same filters, because the tile's count is the `meta.total`
+ * of that list: it cannot disagree with the page it opens.
  */
 export interface FeatureCue {
   id: string;
   roles: readonly Role[];
+  /** The web route with its filters. */
+  to: string;
+  /** The API list with the same filters, after `/api/v1`. */
+  api: string;
+  /** What the list needs, when that is not the feature's own permission. */
+  permission?: Permission;
 }
 
 /**

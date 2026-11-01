@@ -1,6 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import type {
   OrderTimeline,
+  SalesFlow,
   TrackerOrder,
   TrackerQuery,
 } from "@orderpilot/shared";
@@ -11,6 +12,7 @@ import {
   mockOverdue,
   mockTimeline,
 } from "./domain/mock-samples.js";
+import { MOCK_SALES_FLOW } from "./domain/mock-sales-flow.js";
 import {
   ORDER_STATUS_READER,
   type OrderStatusReader,
@@ -30,6 +32,15 @@ const SORT_KEY = {
   orderDate: (o: TrackerOrder) => o.orderDate,
   shipmentDate: (o: TrackerOrder) => o.shipmentDate ?? "",
 } as const;
+
+function comparer(column: NonNullable<TrackerQuery["sort"]>) {
+  if (column === "amount") {
+    return (a: TrackerOrder, b: TrackerOrder) =>
+      Number(a.amount ?? 0) - Number(b.amount ?? 0);
+  }
+  const key = SORT_KEY[column];
+  return (a: TrackerOrder, b: TrackerOrder) => key(a).localeCompare(key(b));
+}
 
 /**
  * The tracker's routes over mock data. Status and owner come from the
@@ -64,6 +75,11 @@ export class TrackerService {
     let rows = orders.flatMap((order): TrackerOrder[] => {
       const status = reported.get(order.header.no);
       if (!status) return [];
+      if (query.open && status.open !== (query.open === "true")) return [];
+      if (query.documentToConfirm) {
+        const waiting = order.documents.some((d) => d.status === "to-confirm");
+        if (waiting !== (query.documentToConfirm === "true")) return [];
+      }
       return [
         {
           orderNo: order.header.no,
@@ -76,6 +92,8 @@ export class TrackerService {
           openExceptions: openByOrder.get(order.header.no) ?? 0,
           shipmentDate: order.header.shipmentDate,
           orderDate: order.header.orderDate,
+          amount: order.total,
+          currencyCode: order.header.currencyCode,
         },
       ];
     });
@@ -90,7 +108,8 @@ export class TrackerService {
       );
     }
     if (query.status) {
-      rows = rows.filter((row) => row.status.code === query.status);
+      const wanted = new Set(query.status.split(","));
+      rows = rows.filter((row) => wanted.has(row.status.code));
     }
     if (query.ownerRole) {
       rows = rows.filter((row) => row.ownerRole === query.ownerRole);
@@ -108,12 +127,10 @@ export class TrackerService {
         b.orderNo.localeCompare(a.orderNo),
     );
     if (query.sort) {
-      const key = SORT_KEY[query.sort];
+      const compare = comparer(query.sort);
       const sign = query.direction === "desc" ? -1 : 1;
       rows = [...rows].sort(
-        (a, b) =>
-          sign * key(a).localeCompare(key(b)) ||
-          a.orderNo.localeCompare(b.orderNo),
+        (a, b) => sign * compare(a, b) || a.orderNo.localeCompare(b.orderNo),
       );
     }
 
@@ -123,6 +140,24 @@ export class TrackerService {
       page: query.page,
       pageSize: query.pageSize,
       total: rows.length,
+    };
+  }
+
+  /** How many open orders sit at each step. A count only: it moves no order. */
+  async flow(): Promise<SalesFlow> {
+    const reported = await this.statuses.statusOfMany(
+      this.repo.orders().map((o) => o.header.no),
+    );
+    const open = [...reported.values()].filter((order) => order.open);
+    return {
+      openOrders: open.length,
+      steps: MOCK_SALES_FLOW.map((step) => ({
+        id: step.id,
+        statuses: [...step.statuses],
+        count: open.filter((o) =>
+          (step.statuses as readonly string[]).includes(o.status.code),
+        ).length,
+      })),
     };
   }
 

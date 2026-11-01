@@ -1,6 +1,6 @@
 import { lazy, Suspense } from "react";
 import { QuietBoundary } from "./QuietBoundary";
-import { useMediaQuery } from "./useMediaQuery";
+import { useMediaQuery } from "@/lib/useMediaQuery";
 
 // Its own chunk: the form never waits for the animation.
 const OrderFlow = lazy(() =>
