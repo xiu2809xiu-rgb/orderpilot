@@ -163,6 +163,21 @@ pnpm --filter @orderpilot/web test       # component and unit tests
 - The mock services start only when asked: `docker compose --profile mocks up -d --build mock-template`.
 - Screenshots for a pull request come from this stack (CLAUDE.md, rule 3).
 
+### Run the end-to-end tests
+
+The browser tests in `apps/e2e` run against a stack that is already up, and start nothing themselves ([ADR 0034](docs/adr/0034-playwright-end-to-end-tests.md)). Once per machine, download Chromium; then bring the full stack up and run them:
+
+```sh
+pnpm --filter @orderpilot/e2e exec playwright install chromium
+docker compose up --build -d --wait
+pnpm e2e
+```
+
+- `pnpm e2e` signs in as each of the nine roles, so the default sign-in limit of 20 a minute is too tight for repeated runs. Set `AUTH_RATE_LIMIT_MAX_REQUESTS=1000` in the root `.env` and run `docker compose up -d --wait` again, as CI does. Leave `DEMO_MODE=true`: the tests sign in through the demo route.
+- `E2E_BASE_URL=http://localhost:5173 pnpm e2e` runs them against `pnpm dev` or any other stack instead.
+- `pnpm e2e -- -g "Auditor"` runs only the tests whose title matches. `pnpm --filter @orderpilot/e2e e2e:report` opens the last report.
+- Never run them against the live demo: they sign in as every role and leave audit events.
+
 ### Trying a client sample
 
 Read [`samples/README.md`](samples/README.md) first. `pnpm samples:up` starts a second, sealed stack on <http://localhost:8081> (`SAMPLES_WEB_PORT`): its own compose project, its data in memory, no route to the internet and no outside name resolution from any container (restart web only with `pnpm samples:restart-web`), and `samples/` mounted read-only. `pnpm samples:down` deletes it, data and all.
@@ -186,6 +201,7 @@ Read [`samples/README.md`](samples/README.md) first. `pnpm samples:up` starts a 
 | `pnpm stack:up`            | `docker compose up -d --wait` for the four stores only: PostgreSQL, Redis, MinIO and Mailpit, healthy before it returns       |
 | `pnpm stack:down`          | `docker compose down`: stops and removes the containers, keeps the data                                                       |
 | `pnpm stack:smoke`         | Checks a running full stack from outside, on `STACK_WEB_PORT`                                                                 |
+| `pnpm e2e`                 | The browser tests in `apps/e2e` against a running stack: the smoke test of every role and each screen's spec                  |
 | `pnpm samples:up`          | Builds and starts the sealed samples stack                                                                                    |
 | `pnpm samples:restart-web` | Restarts the web container of the samples stack and seals it again                                                            |
 | `pnpm samples:down`        | Stops and deletes the samples stack and everything it held                                                                    |
@@ -245,12 +261,6 @@ If a hook stops you, it says why and what to do. When it refuses a push to `main
 **The first `docker compose up` takes minutes.** It compiles MinIO from its source once. Later starts use the cached image.
 
 **Start again from nothing.** `docker compose down` stops and removes the containers and keeps your data. Removing the data too (`docker compose down -v`) deletes the volumes: ask first, and know that it cannot be undone.
-
-### What later stories bring
-
-| Step                                     | Story |
-| ---------------------------------------- | ----- |
-| End-to-end tests with Playwright and axe | P-14  |
 
 ## Workflow
 
@@ -362,6 +372,52 @@ The web app never hand-writes a call to the API. It uses hooks and mock handlers
 5. In the web app, import the hook (`useSystemChecks`) from `@/lib/api/generated/endpoints/<tag>/<tag>`. In a test, add the generated handler with `server.use(getSystemChecksMockHandler(...))` from `@/test/server`. `ServiceChecksCard` and its test are the example.
 
 Never edit the generated folder by hand.
+
+## End-to-end tests
+
+Every CRUD screen brings `apps/e2e/tests/<screen>.spec.ts` ([prompt 004](docs/ai/prompts/004-erp-grade-workspace.md#8-check-it), section 8): an allowed role creates, edits and voids a record, and a role without the permission sees no button and gets a 403 from the server. [`governance.spec.ts`](apps/e2e/tests/governance.spec.ts) is the shortest example, and [`smoke.spec.ts`](apps/e2e/tests/smoke.spec.ts) the longest.
+
+Import everything from `../src/index.js`, never from `@playwright/test`: its `test` watches every page and answers the analytics card.
+
+| Helper                                      | What it does                                                                                                                                                                     |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `signInAs(page, role)`                      | A real session as that role's demo persona, signed in once per run and reused. `{ fresh: true }` signs in anew, for a test that signs out                                        |
+| `checkPage(page)`                           | Fails on console errors, CSP violations, 5xx answers, a 403 from the API, "Planned" and other developer text, sideways scroll at 1440 and 390 wide, and axe WCAG 2.2 AA problems |
+| `expectNoButton(page, name)`                | No button with that accessible name, once the page has loaded                                                                                                                    |
+| `expectRefused(role, method, route, body?)` | Calls the API directly as that role, with its CSRF token, and expects a 403 `FORBIDDEN` envelope whose trace id is the request's                                                 |
+
+```ts
+import {
+  checkPage,
+  expect,
+  expectNoButton,
+  expectRefused,
+  signInAs,
+  test,
+} from "../src/index.js";
+
+test("support creates, edits and voids an order", async ({ page }) => {
+  await signInAs(page, "SUPPORT");
+  await page.goto("/orders");
+  await checkPage(page);
+  await page.getByRole("button", { name: "New order" }).click();
+  // ...fill the form, save, edit, then void with a reason, checking each step.
+});
+
+test("the warehouse sees no New order button and is refused", async ({
+  page,
+}) => {
+  await signInAs(page, "WAREHOUSE");
+  await page.goto("/orders");
+  await expectNoButton(page, "New order");
+  await expectRefused("WAREHOUSE", "POST", "/orders", validOrderBody);
+});
+```
+
+- Send `expectRefused` a body the route would accept, so the 403 cannot be a validation error.
+- Show in the same spec that the allowed role does see the button, or a misspelt name passes `expectNoButton` for the wrong reason.
+- Give each record a value of its own (a PO number with the test's name in it, say), because the tests run in parallel against one database and are run again.
+- A new page that every role should open goes in `SMOKE_PAGES` (`apps/e2e/src/roles.ts`) and is then in the smoke test too.
 
 ## Using AI tools
 
