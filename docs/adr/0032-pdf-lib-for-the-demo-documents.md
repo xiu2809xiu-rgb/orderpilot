@@ -1,7 +1,7 @@
 # ADR 0032: pdf-lib for the demo documents, and how a file stays true
 
 - **Status:** Accepted
-- **Date:** 2026-11-02
+- **Date:** 2026-11-01
 - **Story:** P-52, demo documents (issue 147)
 
 ## Context

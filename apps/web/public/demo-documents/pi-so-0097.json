@@ -436,13 +436,13 @@
       "label": "Beneficiary",
       "group": "bank",
       "lineIndex": null,
-      "value": "Spectra Innovations Pte Ltd",
-      "text": "Spectra Innovations Pte Ltd",
+      "value": "Spectra Demo Pte Ltd",
+      "text": "Spectra Demo Pte Ltd",
       "page": 1,
       "box": [
         0.0753,
         0.5477,
-        0.202,
+        0.1608,
         0.0122
       ],
       "id": "bankBeneficiary",

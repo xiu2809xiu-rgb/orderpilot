@@ -13,9 +13,13 @@ export interface BankDetails {
   swiftCode: string;
 }
 
-/** Spectra's side of every document. The postcode is not a real one. */
+/**
+ * Spectra's side of every document, as a fictional demo company: the data
+ * rules ask for no real company, and a demo account is not the client's own.
+ * The postcode is not a real one.
+ */
 export const SELLER: Party = {
-  name: "Spectra Innovations Pte Ltd",
+  name: "Spectra Demo Pte Ltd",
   address: ["18 Demo Quay, #00-00", "Singapore 000000"],
 };
 
