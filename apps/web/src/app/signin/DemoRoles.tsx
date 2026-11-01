@@ -60,7 +60,7 @@ export function DemoRoles({
       </div>
       <ul
         aria-label={t("login.demoRolesLabel")}
-        className="grid grid-cols-[repeat(auto-fit,minmax(9.5rem,1fr))] gap-2"
+        className="grid grid-cols-[repeat(auto-fit,minmax(9rem,1fr))] gap-2"
       >
         {roles.map(({ role, displayName }) => {
           const Icon = ICONS[role];
