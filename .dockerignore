@@ -1,0 +1,38 @@
+# What the Docker build context leaves out. Images are built from the
+# repository root, so this file keeps secrets, client samples and heavy folders
+# out of every image and out of the build cache.
+
+# Version control and tool folders.
+.git
+.github
+.githooks
+.claude
+.vscode
+
+# Secrets: only the documented example is ever needed (and not even that).
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+
+# Client samples never enter an image.
+samples
+**/samples
+
+# Dependencies and build output are made inside the build. The Prisma client is
+# generated there too, so a stale copy from a laptop never reaches an image.
+node_modules
+**/node_modules
+**/dist
+**/coverage
+**/.vite
+apps/api/src/generated
+**/*.tsbuildinfo
+**/playwright-report
+**/test-results
+
+# Documentation and local state are not needed to run anything.
+docs
+*.log
+.pnpm-store
