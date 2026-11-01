@@ -6,9 +6,6 @@
     "Budgets and alerts for AI cost",
     "A usage summary read from the clickstream table"
   ],
-  "cues": {
-    "aiUsage": "AI usage this month"
-  },
   "tabs": {
     "label": "Monitoring views",
     "aiUsage": "AI usage and cost",

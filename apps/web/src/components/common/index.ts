@@ -13,6 +13,9 @@ export type { DataTableProps } from "./data-table/DataTable";
 export type { TableStatus } from "./data-table/DataTableBody";
 export { exportCell, toCsv } from "./data-table/export/csv";
 export { DEFAULT_QUERY } from "./data-table/types";
+export { useUrlTableQuery } from "./data-table/useUrlTableQuery";
+export { FilterChips, type FilterChip } from "./FilterChips";
+export { NumberTicker } from "./NumberTicker";
 export type {
   ColumnKind,
   DataTableColumn,

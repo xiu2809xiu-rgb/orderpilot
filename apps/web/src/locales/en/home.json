@@ -1,0 +1,136 @@
+{
+  "welcome": "Welcome, {{name}}",
+  "context": "{{role}} · {{date}}",
+  "tiles": {
+    "label": "Your counts",
+    "loading": "Loading {{label}}",
+    "retry": "Could not load. Retry",
+    "myTasks": "My tasks",
+    "documentsToConfirm": "Documents to confirm",
+    "openOrders": "Open orders",
+    "openExceptions": "Open exceptions",
+    "overdue": "Overdue",
+    "awaitingApproval": "Awaiting approval",
+    "awaitingPayment": "Awaiting payment",
+    "readyToShip": "Ready to ship",
+    "auditEvents": "Audit events",
+    "refusedActions": "Refused actions",
+    "roles": "Roles",
+    "activeUsers": "Active users",
+    "aiUse": "AI use"
+  },
+  "needs": {
+    "title": "Needs you",
+    "viewAll": "View all ({{total}})",
+    "overdue": "Overdue",
+    "actionOn": "{{action}}: {{what}}",
+    "failed": "Could not finish the task for {{orderNo}}",
+    "approvedComment": "Approved from the home page.",
+    "emptyTitle": "You are up to date",
+    "emptyDescription": "Nothing needs you right now. The tracker shows where every order stands.",
+    "emptyAction": "Open the tracker",
+    "columns": {
+      "what": "Task",
+      "order": "Order",
+      "customer": "Customer",
+      "amount": "Amount",
+      "due": "Due",
+      "late": "Late",
+      "action": "Action"
+    },
+    "actions": {
+      "REVIEW_FIELDS": "Review",
+      "RAISE_SPR": "Raise",
+      "APPROVE_SPR": "Approve",
+      "SEND_PI": "Mark sent",
+      "CONFIRM_PAYMENT": "Confirm",
+      "PACK_ORDER": "Mark packed",
+      "ADD_SHIPPING_DOCUMENTS": "Mark added"
+    },
+    "done": {
+      "REVIEW_FIELDS": "Reviewed {{orderNo}}",
+      "RAISE_SPR": "Raised the SPR for {{orderNo}}",
+      "APPROVE_SPR": "Approved the SPR for {{orderNo}}",
+      "SEND_PI": "Marked the PI for {{orderNo}} as sent",
+      "CONFIRM_PAYMENT": "Confirmed the payment for {{orderNo}}",
+      "PACK_ORDER": "Marked {{orderNo}} as packed",
+      "ADD_SHIPPING_DOCUMENTS": "Marked the documents for {{orderNo}} as added"
+    }
+  },
+  "overdue": {
+    "title": "Most overdue, by amount",
+    "status": "Where it stands",
+    "open": "Open order",
+    "emptyTitle": "No order is overdue",
+    "emptyDescription": "Every open order is on time. The tracker shows where each one stands.",
+    "daysLate_one": "{{count}} day",
+    "daysLate_other": "{{count}} days"
+  },
+  "refused": {
+    "title": "Latest refused actions",
+    "open": "Open",
+    "emptyTitle": "No refused actions",
+    "emptyDescription": "Nobody has been refused anything yet. The audit trail holds every event.",
+    "emptyAction": "Open the audit trail",
+    "columns": {
+      "what": "What was refused",
+      "when": "When"
+    }
+  },
+  "rules": {
+    "title": "Waiting for Spectra to confirm",
+    "description": "These rules stay as configuration until Spectra confirms them.",
+    "open": "Open",
+    "noScreen": "No screen holds this yet",
+    "columns": {
+      "rule": "Rule",
+      "draft": "Draft value"
+    },
+    "names": {
+      "sprTrigger": "SPR trigger",
+      "piSequence": "PI sequence",
+      "approversAndLimits": "Approvers and limits",
+      "delegation": "Delegation"
+    }
+  },
+  "quick": {
+    "title": "Quick actions"
+  },
+  "kpis": {
+    "title": "Spectra's five measures",
+    "viewAll": "View all KPIs",
+    "target": "Target {{value}}"
+  },
+  "flow": {
+    "title": "Sales flow",
+    "summary_one": "{{count}} open order. Most are at {{step}}.",
+    "summary_other": "{{count}} open orders. Most are at {{step}}.",
+    "steps": {
+      "poIn": "PO in",
+      "stock": "Stock",
+      "pi": "PI",
+      "payment": "Payment",
+      "pack": "Pack",
+      "documents": "Documents",
+      "forwarder": "Forwarder",
+      "customerTold": "Customer told",
+      "awbAndPermit": "AWB and permit"
+    }
+  },
+  "purchase": {
+    "title": "Purchase flow",
+    "description": "Arrives with the bank-detail check.",
+    "phase": "Phase 2",
+    "steps": {
+      "spr": "SPR raised",
+      "approved": "Approved",
+      "vendorPo": "Vendor PO",
+      "vendorPi": "Vendor PI",
+      "forwarder": "Forwarder",
+      "goodsChecked": "Goods checked",
+      "received": "Received",
+      "customerTold": "Customer told",
+      "vendorPaid": "Vendor paid"
+    }
+  }
+}

@@ -7,11 +7,6 @@
     "The payment gate for prepayment orders",
     "Reminders and escalations on a schedule"
   ],
-  "cues": {
-    "myTasks": "My tasks",
-    "sprApproval": "SPRs awaiting approval",
-    "paymentsToConfirm": "Payments to confirm"
-  },
   "nav": {
     "label": "Workflow pages",
     "inbox": "Task inbox",
@@ -201,7 +196,6 @@
     "reject": "Reject",
     "sending": "Checking",
     "readOnly": "Your role can read this request but not decide it.",
-    "resultTitle": "{{outcome}} was checked",
     "notFoundTitle": "This request is not in the sample data",
     "notFoundDescription": "Check the number, or go back to the task inbox.",
     "crumb": "Stock purchase request"

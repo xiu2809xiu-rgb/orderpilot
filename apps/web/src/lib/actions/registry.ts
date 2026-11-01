@@ -28,6 +28,8 @@ export interface AppAction {
   keywords?: readonly string[];
   /** Without it the action is for every signed-in person. */
   permission?: Permission;
+  /** True puts it among the quick actions on the home page. */
+  quick?: boolean;
   run: (context: ActionContext) => void | Promise<void>;
 }
 

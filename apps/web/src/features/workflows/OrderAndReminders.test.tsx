@@ -1,4 +1,4 @@
-import { fireEvent, screen } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
 import { beforeAll, describe, expect, it } from "vitest";
 import i18n from "@/i18n";
@@ -11,6 +11,7 @@ import {
 } from "@/lib/api/generated/endpoints/workflows/workflows.msw";
 import { axeViolations } from "@/test/axe";
 import { errorBody } from "@/test/fixtures";
+import { useToastStore } from "@/components/common/toast";
 import { server } from "@/test/server";
 import OrderStepsPage from "./OrderStepsPage";
 import { renderWorkflowPage } from "./render";
@@ -89,7 +90,7 @@ describe("an order's steps and timeline", () => {
     expect(await axeViolations(container)).toEqual([]);
   });
 
-  it("offers the payment form only to a role that can confirm, and says nothing was saved", async () => {
+  it("offers the payment form only to a role that can confirm, and offers Undo once it is confirmed", async () => {
     server.use(
       getWorkflowsOrderFlowMockHandler(FLOW),
       getWorkflowsConfirmPaymentMockHandler(),
@@ -108,7 +109,10 @@ describe("an order's steps and timeline", () => {
       target: { value: "2026-11-02" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Confirm payment" }));
-    expect(await screen.findByRole("status")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(useToastStore.getState().items.at(-1)?.kind).toBe("done");
+    });
+    expect(useToastStore.getState().items.at(-1)?.undo).toBeTypeOf("function");
   });
 
   it("hides the payment form from a role that cannot confirm", async () => {

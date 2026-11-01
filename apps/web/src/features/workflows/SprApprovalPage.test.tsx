@@ -1,4 +1,4 @@
-import { fireEvent, screen, within } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { beforeAll, describe, expect, it } from "vitest";
 import i18n from "@/i18n";
 import {
@@ -7,6 +7,7 @@ import {
   getWorkflowsSprResponseMock,
 } from "@/lib/api/generated/endpoints/workflows/workflows.msw";
 import { axeViolations } from "@/test/axe";
+import { useToastStore } from "@/components/common/toast";
 import { server } from "@/test/server";
 import { renderWorkflowPage } from "./render";
 import SprApprovalPage from "./SprApprovalPage";
@@ -113,7 +114,7 @@ describe("the SPR approval page", () => {
     expect(await axeViolations(container)).toEqual([]);
   });
 
-  it("has one primary button, asks for a comment, and says nothing was changed", async () => {
+  it("has one primary button, asks for a comment, and offers Undo once it is done", async () => {
     server.use(
       getWorkflowsSprMockHandler(spr(null)),
       getWorkflowsApproveMockHandler(),
@@ -128,9 +129,10 @@ describe("the SPR approval page", () => {
       target: { value: "Checked against the quote." },
     });
     fireEvent.click(screen.getByRole("button", { name: "Approve" }));
-    expect(await screen.findByRole("status")).toHaveTextContent(
-      "Approved was checked",
-    );
+    await waitFor(() => {
+      expect(useToastStore.getState().items.at(-1)?.kind).toBe("done");
+    });
+    expect(useToastStore.getState().items.at(-1)?.undo).toBeTypeOf("function");
     const primary = screen
       .getAllByRole("button")
       .filter((button) => button.className.includes("bg-primary"));

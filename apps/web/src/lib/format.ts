@@ -26,6 +26,28 @@ const DAY = new Intl.DateTimeFormat("en-SG", {
   timeZone: "Asia/Singapore",
 });
 
+const LONG_DAY = new Intl.DateTimeFormat("en-SG", {
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  timeZone: "Asia/Singapore",
+});
+
+/** "Monday, 2 November 2026" in Singapore time. */
+export function formatLongDay(value: Date): string {
+  return LONG_DAY.format(value);
+}
+
+const ISO_DAY = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Asia/Singapore",
+});
+
+/** "2026-11-02": today's date in Singapore, as an API date. */
+export function todayInSingapore(now = new Date()): string {
+  return ISO_DAY.format(now);
+}
+
 /** "2 Nov 2026" in Singapore time: the one short date used in tables. */
 export function formatDay(value: string | Date): string {
   return DAY.format(typeof value === "string" ? new Date(value) : value);

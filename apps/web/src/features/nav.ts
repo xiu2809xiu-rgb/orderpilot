@@ -26,13 +26,53 @@ export interface RoleCue {
   cue: FeatureCue;
 }
 
-/** The tiles on a role's home page, for the areas that role may open. */
-export function cuesFor(role: Role, visible: readonly Feature[]): RoleCue[] {
-  return visible.flatMap((feature) =>
-    feature.cues
-      .filter((cue) => cue.roles.includes(role))
-      .map((cue) => ({ feature, cue })),
-  );
+/** The order of each role's tiles. A role only gets those it may open. */
+export const TILE_ORDER: Readonly<Record<Role, readonly string[]>> = {
+  PRODUCT_MANAGER: ["myTasks", "awaitingApproval", "openOrders", "overdue"],
+  APPROVER: ["awaitingApproval", "overdue", "openOrders", "openExceptions"],
+  SUPPORT: [
+    "myTasks",
+    "documentsToConfirm",
+    "openOrders",
+    "overdue",
+    "openExceptions",
+  ],
+  WAREHOUSE: ["myTasks", "readyToShip", "overdue", "openExceptions"],
+  FINANCE: ["myTasks", "awaitingPayment", "overdue", "openExceptions"],
+  LOGISTICS: ["myTasks", "readyToShip", "overdue", "openExceptions"],
+  MANAGEMENT: [
+    "openOrders",
+    "overdue",
+    "awaitingApproval",
+    "awaitingPayment",
+    "readyToShip",
+    "openExceptions",
+  ],
+  AUDITOR: ["auditEvents", "refusedActions", "roles", "openExceptions"],
+  SYSTEM_ADMIN: ["activeUsers", "roles", "auditEvents", "aiUse"],
+};
+
+/**
+ * The tiles on this session's home page, in the role's order. A tile needs the
+ * feature's permission and the list's own, so none lands on a refusal.
+ */
+export function cuesFor(
+  session: Session | null,
+  list: readonly Feature[] = features,
+): RoleCue[] {
+  if (!session) return [];
+  const { role } = session.user;
+  const order = TILE_ORDER[role];
+  return featuresFor(session, list)
+    .flatMap((feature) =>
+      feature.cues
+        .filter(
+          (cue) =>
+            cue.roles.includes(role) && hasPermission(session, cue.permission),
+        )
+        .map((cue) => ({ feature, cue })),
+    )
+    .sort((a, b) => order.indexOf(a.cue.id) - order.indexOf(b.cue.id));
 }
 
 export const featureNamespaces: string[] = features.map(
