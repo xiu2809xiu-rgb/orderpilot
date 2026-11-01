@@ -187,7 +187,6 @@ node --test "scripts/github/**/*.test.mjs"
 
 ## What later stories bring
 
-| Step                                            | Story |
-| ----------------------------------------------- | ----- |
-| The full stack with `docker compose up --build` | P-13  |
-| End-to-end tests with Playwright and axe        | P-14  |
+| Step                                     | Story |
+| ---------------------------------------- | ----- |
+| End-to-end tests with Playwright and axe | P-14  |

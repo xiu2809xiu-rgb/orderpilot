@@ -113,7 +113,7 @@ describe("buildSteps", () => {
     for (const step of steps) step.run();
     assert.deepEqual(commands, [
       "docker info",
-      "docker compose up -d --wait --no-recreate",
+      "docker compose up -d --wait --no-recreate postgres redis minio mailpit",
       "pnpm db:generate",
       "pnpm db:migrate",
       "pnpm --filter @orderpilot/shared --filter @orderpilot/synthetic-data build",

@@ -134,7 +134,9 @@ export function buildSteps(options = {}) {
     },
     {
       name: "Start PostgreSQL, Redis, MinIO and Mailpit",
-      run: command("docker compose up -d --wait --no-recreate"),
+      run: command(
+        "docker compose up -d --wait --no-recreate postgres redis minio mailpit",
+      ),
       hint: "Read the message above. A port already in use is the usual cause: change the port in .env (see Getting started), then run pnpm local:setup again. The first start compiles MinIO and takes a few minutes.",
     },
     {

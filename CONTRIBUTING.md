@@ -153,30 +153,46 @@ pnpm --filter @orderpilot/web test       # component and unit tests
 - **Where things are:** each area's screens go in `apps/web/src/features/<feature>/`; the shell, router and guards are in `src/app/`; text is in `src/locales/en/`. [ADR 0013](docs/adr/0013-the-web-stack.md) explains the layout.
 - **Screenshots** for a pull request come from `apps/web/scripts/screenshots.mjs`, which needs Playwright installed outside the repository (the top of the file says how) until P-14 adds it.
 
-There is no Docker image of the web app until P-13.
+### The full stack in Docker
+
+`docker compose up --build` builds and starts everything, on a fresh clone with no `.env` at all: the four stores, then the migrations and the seed, then the API, the worker and the web app, each waiting until what it needs is healthy. The first build takes a few minutes, because MinIO compiles from source; later builds reuse the cache. [ADR 0031](docs/adr/0031-docker-and-the-deployment-target.md) explains the images.
+
+- Open <http://localhost:8080> (`STACK_WEB_PORT`) and sign in as any role. nginx serves the production build and hands `/api/` to the API, which has no host port of its own.
+- `pnpm stack:smoke` checks the running stack as a browser would: the security headers, the SPA fallback, caching, the proxy and a demo sign-in.
+- It shares the stores with `pnpm dev`, and none of its ports clash, so both can run at once.
+- The mock services start only when asked: `docker compose --profile mocks up -d --build mock-template`.
+- Screenshots for a pull request come from this stack (CLAUDE.md, rule 3).
+
+### Trying a client sample
+
+Read [`samples/README.md`](samples/README.md) first. `pnpm samples:up` starts a second, sealed stack on <http://localhost:8081> (`SAMPLES_WEB_PORT`): its own compose project, its data in memory, no route to the internet and no outside name resolution from any container (restart web only with `pnpm samples:restart-web`), and `samples/` mounted read-only. `pnpm samples:down` deletes it, data and all.
 
 ### The root scripts
 
-| Command                  | What it does                                                                                                                  |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
-| `pnpm lint`              | ESLint over the whole repository, failing on any warning                                                                      |
-| `pnpm typecheck`         | TypeScript over the scripts, then each package's own `typecheck`                                                              |
-| `pnpm test`              | The repository's `node --test` tests, then each package's own `test`. The API's integration tests need the stack up           |
-| `pnpm build`             | Each package's own `build`                                                                                                    |
-| `pnpm format`            | Prettier writes every file. Mass formatting: ask first (AGENTS.md, rule 4)                                                    |
-| `pnpm format:check`      | Prettier checks every file and writes nothing                                                                                 |
-| `pnpm check:dashes`      | No em dash in any tracked text file                                                                                           |
-| `pnpm check:samples`     | No client sample in any tracked file; `check:samples:history` checks every commit                                             |
-| `pnpm check:licence-key` | No licence key value and no env file in any tracked file                                                                      |
-| `pnpm check:secrets`     | secretlint over the whole working tree                                                                                        |
-| `pnpm local:setup`       | The whole set-up, safe to repeat after a pull: `.env` if missing, the stack, Prisma client, migrations, shared packages, seed |
-| `pnpm dev`               | The API and the web app together, restarting the API when you save a file                                                     |
-| `pnpm stack:up`          | `docker compose up -d --wait`: PostgreSQL, Redis, MinIO and Mailpit, healthy before it returns                                |
-| `pnpm stack:down`        | `docker compose down`: stops and removes the containers, keeps the data                                                       |
-| `pnpm db:migrate`        | Applies pending migrations to the development database                                                                        |
-| `pnpm db:migrate:dev`    | Creates a migration after you edit a `.prisma` file                                                                           |
-| `pnpm db:generate`       | Rebuilds the Prisma client (`pnpm install` does it too)                                                                       |
-| `pnpm db:seed`           | Seeds the development database; safe to run again                                                                             |
+| Command                    | What it does                                                                                                                  |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm lint`                | ESLint over the whole repository, failing on any warning                                                                      |
+| `pnpm typecheck`           | TypeScript over the scripts, then each package's own `typecheck`                                                              |
+| `pnpm test`                | The repository's `node --test` tests, then each package's own `test`. The API's integration tests need the stack up           |
+| `pnpm build`               | Each package's own `build`                                                                                                    |
+| `pnpm format`              | Prettier writes every file. Mass formatting: ask first (AGENTS.md, rule 4)                                                    |
+| `pnpm format:check`        | Prettier checks every file and writes nothing                                                                                 |
+| `pnpm check:dashes`        | No em dash in any tracked text file                                                                                           |
+| `pnpm check:samples`       | No client sample in any tracked file; `check:samples:history` checks every commit                                             |
+| `pnpm check:licence-key`   | No licence key value and no env file in any tracked file                                                                      |
+| `pnpm check:secrets`       | secretlint over the whole working tree                                                                                        |
+| `pnpm local:setup`         | The whole set-up, safe to repeat after a pull: `.env` if missing, the stack, Prisma client, migrations, shared packages, seed |
+| `pnpm dev`                 | The API and the web app together, restarting the API when you save a file                                                     |
+| `pnpm stack:up`            | `docker compose up -d --wait` for the four stores only: PostgreSQL, Redis, MinIO and Mailpit, healthy before it returns       |
+| `pnpm stack:down`          | `docker compose down`: stops and removes the containers, keeps the data                                                       |
+| `pnpm stack:smoke`         | Checks a running full stack from outside, on `STACK_WEB_PORT`                                                                 |
+| `pnpm samples:up`          | Builds and starts the sealed samples stack                                                                                    |
+| `pnpm samples:restart-web` | Restarts the web container of the samples stack and seals it again                                                            |
+| `pnpm samples:down`        | Stops and deletes the samples stack and everything it held                                                                    |
+| `pnpm db:migrate`          | Applies pending migrations to the development database                                                                        |
+| `pnpm db:migrate:dev`      | Creates a migration after you edit a `.prisma` file                                                                           |
+| `pnpm db:generate`         | Rebuilds the Prisma client (`pnpm install` does it too)                                                                       |
+| `pnpm db:seed`             | Seeds the development database; safe to run again                                                                             |
 
 ### The Git hooks
 
@@ -232,10 +248,9 @@ If a hook stops you, it says why and what to do. When it refuses a push to `main
 
 ### What later stories bring
 
-| Step                                            | Story |
-| ----------------------------------------------- | ----- |
-| The full stack with `docker compose up --build` | P-13  |
-| End-to-end tests with Playwright and axe        | P-14  |
+| Step                                     | Story |
+| ---------------------------------------- | ----- |
+| End-to-end tests with Playwright and axe | P-14  |
 
 ## Workflow
 

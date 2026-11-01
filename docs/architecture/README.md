@@ -74,4 +74,4 @@ pnpm db:migrate && pnpm db:seed
 pnpm --filter @orderpilot/api dev
 ```
 
-Then open <http://localhost:3000/api/docs>, or call <http://localhost:3000/health>. `/health/ready` shows the database, Redis and storage. Not here yet: sessions (P-10), Docker images (P-13).
+Then open <http://localhost:3000/api/docs>, or call <http://localhost:3000/health>. `/health/ready` shows the database, Redis and storage. Not here yet: sessions (P-10). The full stack in Docker is in [CONTRIBUTING.md](../../CONTRIBUTING.md#the-full-stack-in-docker) (P-13).

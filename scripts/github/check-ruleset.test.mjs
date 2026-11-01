@@ -73,6 +73,8 @@ test("the mirror is Protect main, with the rules step 0 set", () => {
       "SAST (Semgrep)",
       "Secret scan (gitleaks)",
       "Dependency scan (OSV)",
+      "Docker images",
+      "IaC and Dockerfile scan",
     ],
   );
   assert.deepEqual(ruleset.bypass_actors, [
