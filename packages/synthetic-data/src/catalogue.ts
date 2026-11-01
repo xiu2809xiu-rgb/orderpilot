@@ -113,6 +113,10 @@ export function makeItems(
       const low = isLowStockIndex(index);
       const inventory = low ? random.int(10, 60) : random.int(150, 900);
       const prefix = brand.name.slice(0, 3).toUpperCase();
+      // Qty. on Sales Order starts at nothing: the sample's open orders are
+      // all there is, so their lines add up to it. The draw that once gave it
+      // a base figure stays, so every number drawn after it stays put.
+      random.int(0, low ? (inventory / 2) | 0 : 60);
       items.push({
         no: `I-${pad(index + 1)}`,
         description: `${brand.name} ${product.name}${variant.label}`,
@@ -123,7 +127,7 @@ export function makeItems(
         unitPrice: price,
         unitCost: (Number(price) * product.cost).toFixed(2),
         inventory: String(inventory),
-        qtyOnSalesOrder: String(random.int(0, low ? (inventory / 2) | 0 : 60)),
+        qtyOnSalesOrder: "0",
         qtyOnPurchOrder: String(random.int(0, low ? 20 : 400)),
         vendorNo: vendor.no,
         vendorItemNo: `${prefix}-${pad(index + 100)}`,
