@@ -11,8 +11,9 @@ import type {
  * the value only to a role the rule lists. For anyone else the value is null,
  * so it never leaves the server and cannot be read from the page.
  *
- * Only the neutral sample rule below ships with the base. The real rules
- * (bank details, prices, who sees what and why) are area 4's.
+ * Only sample rules ship with the base. The real rules (bank details, prices,
+ * who sees what and why) are area 4's: the master data pages use the samples
+ * below until the owner confirms or replaces them.
  */
 
 /** A field with no rule is shown. Add a rule to hide it. */
@@ -42,7 +43,38 @@ export function mask(
   };
 }
 
-/** The one example rule: an internal customer note that floor roles do not need. */
+/** Bank details stay with the role that pays vendors. */
+const bankRule = (field: string, label: string): MaskingRule => ({
+  field,
+  label: `${label} (sample rule)`,
+  classification: "restricted",
+  reason: "bankDetails",
+  visibleTo: ["FINANCE"],
+  sample: true,
+});
+
+/**
+ * Account figures go with the selling price: the roles that quote see them,
+ * and Warehouse and Logistics, who never price anything, do not. A sample for
+ * area 4 to confirm.
+ */
+const accountRule = (field: string, label: string): MaskingRule => ({
+  field,
+  label: `${label} (sample rule)`,
+  classification: "confidential",
+  reason: "role",
+  visibleTo: [
+    "PRODUCT_MANAGER",
+    "APPROVER",
+    "SUPPORT",
+    "FINANCE",
+    "MANAGEMENT",
+    "AUDITOR",
+  ],
+  sample: true,
+});
+
+/** First an internal customer note floor roles do not need, then master data's rules. */
 export const SAMPLE_RULES: readonly MaskingRule[] = [
   {
     field: "sample.customerNote",
@@ -58,4 +90,34 @@ export const SAMPLE_RULES: readonly MaskingRule[] = [
     ],
     sample: true,
   },
+  bankRule("vendor.bankName", "Vendor bank name"),
+  bankRule("vendor.bankAccountNo", "Vendor bank account number"),
+  bankRule("vendor.swiftCode", "Vendor SWIFT code"),
+  bankRule("vendor.iban", "Vendor IBAN"),
+  {
+    field: "item.unitCost",
+    label: "Item cost and amounts built from it (sample rule)",
+    classification: "confidential",
+    reason: "price",
+    visibleTo: ["FINANCE", "MANAGEMENT", "PRODUCT_MANAGER"],
+    sample: true,
+  },
+  {
+    field: "item.unitPrice",
+    label: "Selling price and amounts built from it (sample rule)",
+    classification: "confidential",
+    reason: "price",
+    visibleTo: [
+      "PRODUCT_MANAGER",
+      "APPROVER",
+      "SUPPORT",
+      "FINANCE",
+      "MANAGEMENT",
+      "AUDITOR",
+    ],
+    sample: true,
+  },
+  accountRule("customer.creditLimitLcy", "Customer credit limit"),
+  accountRule("customer.balanceLcy", "Customer balance"),
+  accountRule("vendor.balanceLcy", "Vendor balance"),
 ];

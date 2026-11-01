@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { ListChecks } from "lucide-react";
 import {
   DataTable,
@@ -15,11 +15,21 @@ import { tableStatusOf } from "@/lib/query-status";
 import { toParams } from "./trackerParams";
 import { trackerColumns } from "./trackerColumns";
 
+/** Another page can open the tracker filtered: `?search=C-0001&overdue=true`. */
+function queryFromLink(link: URLSearchParams): TableQuery {
+  return {
+    ...DEFAULT_QUERY,
+    search: link.get("search") ?? "",
+    filters: link.get("overdue") === "true" ? { overdue: true } : {},
+  };
+}
+
 /** The order tracker: every order with its status, owner and overdue flag, on mock data. */
 export default function OrderTrackerPage() {
   const { t } = useTranslation("order-tracker");
   const { t: tc } = useTranslation("common");
-  const [query, setQuery] = useState<TableQuery>(DEFAULT_QUERY);
+  const [link] = useSearchParams();
+  const [query, setQuery] = useState<TableQuery>(() => queryFromLink(link));
   const tracker = useTrackerList(toParams(query), {
     query: { placeholderData: (previous) => previous },
   });
