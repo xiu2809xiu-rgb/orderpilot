@@ -1,0 +1,353 @@
+/* The order flow (OrderFlow.tsx). The base rules are the still frame: the
+   document has reached "approve" and every stage is lit. Under
+   data-motion="on" the same parts animate in a 14 s loop. Tokens only. */
+
+.of {
+  --of-t: 14s;
+}
+
+.of-track {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.of-seg {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+.of-node {
+  fill: var(--card);
+  stroke: var(--border);
+  stroke-width: 1.5;
+}
+.of-icon,
+.of-icon-lit {
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.of-icon {
+  stroke: var(--muted-foreground);
+}
+.of-node-lit {
+  fill: var(--primary);
+}
+.of-icon-lit {
+  stroke: var(--primary-foreground);
+}
+.of-title {
+  fill: var(--foreground);
+  font-size: 14px;
+  font-weight: 600;
+}
+.of-who {
+  fill: var(--muted-foreground);
+  font-size: 12px;
+}
+
+.of-doc {
+  transform: translateX(420px);
+}
+.of-sheet {
+  fill: var(--card);
+  stroke: var(--primary);
+  stroke-width: 1.5;
+}
+.of-lines {
+  fill: none;
+  stroke: var(--muted-foreground);
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0.45;
+}
+.of-drop {
+  fill: none;
+  stroke: var(--input);
+  stroke-width: 1.5;
+  stroke-dasharray: 2 4;
+}
+.of-beam {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  opacity: 0;
+}
+.of-ticks {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.of-badge {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.of-badge circle {
+  fill: var(--primary);
+}
+.of-badge path {
+  fill: none;
+  stroke: var(--primary-foreground);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Motion: only when allowed, and paused while the tab is hidden. */
+.of[data-motion="on"]
+  :is(
+    .of-doc,
+    .of-doc-fade,
+    .of-sheet,
+    .of-beam,
+    .of-ticks,
+    .of-badge,
+    .of-lit,
+    .of-seg
+  ) {
+  animation-duration: var(--of-t);
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+  animation-timing-function: var(--ease-out);
+}
+.of[data-motion="on"][data-paused="true"]
+  :is(
+    .of-doc,
+    .of-doc-fade,
+    .of-sheet,
+    .of-beam,
+    .of-ticks,
+    .of-badge,
+    .of-lit,
+    .of-seg
+  ) {
+  animation-play-state: paused;
+}
+
+.of[data-motion="on"] .of-doc {
+  animation-name: of-move;
+}
+.of[data-motion="on"] .of-doc-fade {
+  animation-name: of-fade;
+}
+.of[data-motion="on"] .of-sheet {
+  animation-name: of-sheet;
+}
+.of[data-motion="on"] .of-beam {
+  animation-name: of-scan;
+}
+.of[data-motion="on"] .of-ticks {
+  animation-name: of-tick;
+}
+.of[data-motion="on"] .of-badge {
+  animation-name: of-badge;
+}
+.of[data-motion="on"] .of-lit1 {
+  animation-name: of-lit1;
+}
+.of[data-motion="on"] .of-lit2 {
+  animation-name: of-lit2;
+}
+.of[data-motion="on"] .of-lit3 {
+  animation-name: of-lit3;
+}
+.of[data-motion="on"] .of-seg1 {
+  animation-name: of-seg1;
+}
+.of[data-motion="on"] .of-seg2 {
+  animation-name: of-seg2;
+}
+
+@keyframes of-move {
+  0%,
+  22% {
+    transform: translateX(60px);
+  }
+  30%,
+  52% {
+    transform: translateX(240px);
+  }
+  60%,
+  93.9% {
+    transform: translateX(420px);
+  }
+  94%,
+  100% {
+    transform: translateX(60px);
+  }
+}
+@keyframes of-fade {
+  0% {
+    opacity: 0;
+  }
+  3%,
+  86% {
+    opacity: 1;
+  }
+  93%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes of-sheet {
+  0%,
+  58% {
+    stroke: var(--input);
+  }
+  63%,
+  86% {
+    stroke: var(--primary);
+  }
+  93%,
+  100% {
+    stroke: var(--input);
+  }
+}
+@keyframes of-scan {
+  0%,
+  4%,
+  20%,
+  100% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  6% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  13% {
+    opacity: 1;
+    transform: translateY(24px);
+  }
+  18% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes of-tick {
+  0%,
+  33% {
+    opacity: 0;
+  }
+  38%,
+  86% {
+    opacity: 1;
+  }
+  92%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes of-badge {
+  0%,
+  60% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  65% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+  68%,
+  86% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  93%,
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+@keyframes of-lit1 {
+  0%,
+  2% {
+    opacity: 0;
+  }
+  8%,
+  88% {
+    opacity: 1;
+  }
+  95%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes of-lit2 {
+  0%,
+  28% {
+    opacity: 0;
+  }
+  34%,
+  88% {
+    opacity: 1;
+  }
+  95%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes of-lit3 {
+  0%,
+  58% {
+    opacity: 0;
+  }
+  64%,
+  88% {
+    opacity: 1;
+  }
+  95%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes of-seg1 {
+  0%,
+  22% {
+    stroke-dashoffset: 1;
+    opacity: 1;
+  }
+  30%,
+  88% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  95% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+  95.1%,
+  100% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+}
+@keyframes of-seg2 {
+  0%,
+  52% {
+    stroke-dashoffset: 1;
+    opacity: 1;
+  }
+  60%,
+  88% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  95% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+  95.1%,
+  100% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+}
