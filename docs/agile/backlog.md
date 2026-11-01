@@ -2,13 +2,13 @@
 
 Rendered from [`scripts/github/data/backlog.json`](../../scripts/github/data/backlog.json) by `node scripts/github/render-docs.mjs`. Change the data, not this file. The same data seeds the issues. The board shows where each story stands.
 
-There are 9 epics and 85 stories. Estimates are story points: a first guess, for the team to change at planning.
+There are 9 epics and 84 stories. Estimates are story points: a first guess, for the team to change at planning.
 
 ## Epics
 
 | Epic   | Title                             | Area                                    | Stories | Points |
 | ------ | --------------------------------- | --------------------------------------- | ------- | ------ |
-| Epic P | The platform base                 | `area: 1 document AI and integration`   | 41      | 235    |
+| Epic P | The platform base                 | `area: 1 document AI and integration`   | 40      | 232    |
 | Epic A | Document intake and AI extraction | `area: 1 document AI and integration`   | 5       | 31     |
 | Epic B | Master data and Navision          | `area: 1 document AI and integration`   | 4       | 14     |
 | Epic C | Order workflows and approvals     | `area: 2 order workflows and approvals` | 5       | 29     |
@@ -116,7 +116,6 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | F-6   | A non-owner runtime database role                                  | should   | 3      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
 | P-23  | The 3D order constellation                                         | could    | 13     | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-27  | Web shell polish                                                   | could    | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
-| P-41  | Synthetic data polish                                              | could    | 3      | `area: 1 document AI and integration`   | M3 AI-assisted coding                                          |
 | B-4   | QR codes on generated documents and carton labels                  | could    | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | E-4   | Passkeys to confirm risky approvals                                | could    | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | E-5   | A first-run guided tour for each role                              | could    | 3      | `area: 1 document AI and integration`   | M1 design thinking, M4 best practices                          |
@@ -547,6 +546,9 @@ Acceptance criteria:
 - UI: an upload screen with drag and drop, and a documents list.
 - Queue: a job that marks each document "awaiting AI" until the extraction stories.
 - Prompt 003 brings forward upload, the documents list and 12 synthetic documents (P-37); this story keeps the rest: the safe upload API, extraction, content-hash duplicate detection, the data model and the queue.
+- The seed loads the synthetic set's orders, payments, documents, SPRs and exceptions into the order tables, as well as the mock read models reading them (follow-up to P-31).
+- A second seed run on a later day moves the stored rows to today's dates, with a test (follow-up to P-31).
+- The synthetic set includes a rejected SPR and a partly shipped order, with the screens that show them (follow-up to P-31).
 
 ### P-19: Mock Navision and synthetic master data
 
@@ -1005,25 +1007,6 @@ Acceptance criteria:
 - "/" focuses search, and "N" starts a new record on lists that have one.
 - Every action ends with a toast, with Undo where it can be undone.
 - Check: screenshots as every role it touches, at 1440 by 900 and 390 by 844 in `docs/design/screenshots/product-pass/`, looked at before merging: no "Planned", no tiles showing only a dash, no popups over content, no empty-looking lists, no text cut off.
-
-### P-41: Synthetic data polish
-
-Follow-ups to the bigger synthetic set that nobody needs this week.
-
-- **Area:** `area: 1 document AI and integration`
-- **Priority:** could
-- **Estimate:** 3 points
-- **Requirements:** M3 AI-assisted coding
-- **Branch:** `chore/synthetic-data-polish`
-- **Planned for:** Sprint 01 (W2) and Sprint 02 (W3)
-- **Depends on:** P-31
-
-Acceptance criteria:
-
-- The order, payment, document, SPR and exception rows load into area 1 and area 2 tables (P-18 and the C-2 tables), so the seed writes them as well as the mock read models reading them.
-- A rejected SPR and a partly shipped order appear in the set, with the screens that show them.
-- The seed keeps the dates of the day it first ran: a second run on a later day moves the stored rows to today, with a test.
-- A documents list route and a customers and items route read the set, with paging and filters on the server.
 
 ## Epic A: Document intake and AI extraction
 

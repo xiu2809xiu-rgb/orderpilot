@@ -481,7 +481,10 @@
         "Data model: the start of area 1's order data: orders, order lines, documents, and field values with confidence and provenance. Status stays in area 2.",
         "UI: an upload screen with drag and drop, and a documents list.",
         "Queue: a job that marks each document \"awaiting AI\" until the extraction stories.",
-        "Prompt 003 brings forward upload, the documents list and 12 synthetic documents (P-37); this story keeps the rest: the safe upload API, extraction, content-hash duplicate detection, the data model and the queue."
+        "Prompt 003 brings forward upload, the documents list and 12 synthetic documents (P-37); this story keeps the rest: the safe upload API, extraction, content-hash duplicate detection, the data model and the queue.",
+        "The seed loads the synthetic set's orders, payments, documents, SPRs and exceptions into the order tables, as well as the mock read models reading them (follow-up to P-31).",
+        "A second seed run on a later day moves the stored rows to today's dates, with a test (follow-up to P-31).",
+        "The synthetic set includes a rejected SPR and a partly shipped order, with the screens that show them (follow-up to P-31)."
       ]
     },
     {
@@ -1279,25 +1282,6 @@
         "\"/\" focuses search, and \"N\" starts a new record on lists that have one.",
         "Every action ends with a toast, with Undo where it can be undone.",
         "Check: screenshots as every role it touches, at 1440 by 900 and 390 by 844 in `docs/design/screenshots/product-pass/`, looked at before merging: no \"Planned\", no tiles showing only a dash, no popups over content, no empty-looking lists, no text cut off."
-      ]
-    },
-    {
-      "key": "P-41",
-      "title": "Synthetic data polish",
-      "epic": "P",
-      "area": "area: 1 document AI and integration",
-      "priority": "could",
-      "estimate": 3,
-      "reqs": ["M3"],
-      "branch": "chore/synthetic-data-polish",
-      "sprints": [1, 2],
-      "dependsOn": ["P-31"],
-      "summary": "Follow-ups to the bigger synthetic set that nobody needs this week.",
-      "acceptance": [
-        "The order, payment, document, SPR and exception rows load into area 1 and area 2 tables (P-18 and the C-2 tables), so the seed writes them as well as the mock read models reading them.",
-        "A rejected SPR and a partly shipped order appear in the set, with the screens that show them.",
-        "The seed keeps the dates of the day it first ran: a second run on a later day moves the stored rows to today, with a test.",
-        "A documents list route and a customers and items route read the set, with paging and filters on the server."
       ]
     },
     {
