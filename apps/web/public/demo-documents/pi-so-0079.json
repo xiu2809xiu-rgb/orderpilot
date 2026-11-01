@@ -1,0 +1,417 @@
+{
+  "label": "Synthetic demo data",
+  "file": "pi-so-0079.pdf",
+  "documentType": "PROFORMA_INVOICE",
+  "documentNumber": "PI-20261029-0004",
+  "layout": "house",
+  "readable": "text",
+  "orderNo": "SO-0079",
+  "customerNo": "C-0025",
+  "purpose": "A PI for a 50% advance on a single line.",
+  "pageCount": 1,
+  "page": {
+    "width": 595.28,
+    "height": 841.89
+  },
+  "confidenceThreshold": 0.9,
+  "uncertainFieldCount": 0,
+  "mismatch": null,
+  "fields": [
+    {
+      "key": "piNumber",
+      "label": "PI number",
+      "group": "header",
+      "lineIndex": null,
+      "value": "PI-20261029-0004",
+      "text": "PI-20261029-0004",
+      "page": 1,
+      "box": [
+        0.793,
+        0.0763,
+        0.1485,
+        0.0108
+      ],
+      "id": "piNumber",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "piDate",
+      "label": "PI date",
+      "group": "header",
+      "lineIndex": null,
+      "value": "2026-10-29",
+      "text": "29 Oct 2026",
+      "page": 1,
+      "box": [
+        0.8443,
+        0.0906,
+        0.0972,
+        0.0108
+      ],
+      "id": "piDate",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "validUntil",
+      "label": "Valid until",
+      "group": "header",
+      "lineIndex": null,
+      "value": "2026-11-12",
+      "text": "12 Nov 2026",
+      "page": 1,
+      "box": [
+        0.8453,
+        0.1048,
+        0.0963,
+        0.0108
+      ],
+      "id": "validUntil",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "poNumber",
+      "label": "PO number",
+      "group": "header",
+      "lineIndex": null,
+      "value": "PO-AE-4646",
+      "text": "PO-AE-4646",
+      "page": 1,
+      "box": [
+        0.8433,
+        0.1191,
+        0.0982,
+        0.0108
+      ],
+      "id": "poNumber",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "customerName",
+      "label": "Customer",
+      "group": "header",
+      "lineIndex": null,
+      "value": "Hamriva Systems FZCO",
+      "text": "Hamriva Systems FZCO",
+      "page": 1,
+      "box": [
+        0.0585,
+        0.1859,
+        0.197,
+        0.0133
+      ],
+      "id": "customerName",
+      "confidence": 0.96,
+      "uncertain": false
+    },
+    {
+      "key": "billTo",
+      "label": "Bill to",
+      "group": "header",
+      "lineIndex": null,
+      "value": "20 Harbour Link Road, Dubai PO Box 00000, United Arab Emirates",
+      "text": "20 Harbour Link Road\nDubai PO Box 00000\nUnited Arab Emirates",
+      "page": 1,
+      "box": [
+        0.0585,
+        0.2022,
+        0.159,
+        0.0393
+      ],
+      "id": "billTo",
+      "confidence": 0.97,
+      "uncertain": false
+    },
+    {
+      "key": "shipTo",
+      "label": "Ship to",
+      "group": "header",
+      "lineIndex": null,
+      "value": "Hamriva Systems FZCO (Warehouse), Godown 7, Lantern Court, Dubai PO Box 00000, United Arab Emirates",
+      "text": "Hamriva Systems FZCO (Warehouse)\nGodown 7, Lantern Court\nDubai PO Box 00000\nUnited Arab Emirates",
+      "page": 1,
+      "box": [
+        0.498,
+        0.1854,
+        0.2634,
+        0.0527
+      ],
+      "id": "shipTo",
+      "confidence": 0.97,
+      "uncertain": false
+    },
+    {
+      "key": "incoterms",
+      "label": "Incoterms",
+      "group": "header",
+      "lineIndex": null,
+      "value": "FOB Singapore",
+      "text": "FOB Singapore",
+      "page": 1,
+      "box": [
+        0.0585,
+        0.2949,
+        0.1104,
+        0.0123
+      ],
+      "id": "incoterms",
+      "confidence": 0.96,
+      "uncertain": false
+    },
+    {
+      "key": "paymentTerms",
+      "label": "Payment terms",
+      "group": "header",
+      "lineIndex": null,
+      "value": "50% advance with order, balance before shipment",
+      "text": "50% advance with order, balance before shipment",
+      "page": 1,
+      "box": [
+        0.2782,
+        0.2949,
+        0.3596,
+        0.0123
+      ],
+      "id": "paymentTerms",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "currency",
+      "label": "Currency",
+      "group": "header",
+      "lineIndex": null,
+      "value": "USD",
+      "text": "USD",
+      "page": 1,
+      "box": [
+        0.7617,
+        0.2949,
+        0.0349,
+        0.0108
+      ],
+      "id": "currency",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "lines.partNumber",
+      "label": "Part number",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "DRA-MS-A-2475",
+      "text": "DRA-MS-A-2475",
+      "page": 1,
+      "box": [
+        0.1072,
+        0.358,
+        0.122,
+        0.0106
+      ],
+      "id": "lines.partNumber[0]",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "lines.description",
+      "label": "Description",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "Dravik Wireless Mouse",
+      "text": "Dravik Wireless Mouse",
+      "page": 1,
+      "box": [
+        0.2819,
+        0.3582,
+        0.1617,
+        0.0104
+      ],
+      "id": "lines.description[0]",
+      "confidence": 0.97,
+      "uncertain": false
+    },
+    {
+      "key": "lines.quantity",
+      "label": "Quantity",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "172",
+      "text": "172",
+      "page": 1,
+      "box": [
+        0.6414,
+        0.358,
+        0.0275,
+        0.0104
+      ],
+      "id": "lines.quantity[0]",
+      "confidence": 0.97,
+      "uncertain": false
+    },
+    {
+      "key": "lines.unitPrice",
+      "label": "Unit price",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "16.04",
+      "text": "16.04",
+      "page": 1,
+      "box": [
+        0.7553,
+        0.358,
+        0.0413,
+        0.0106
+      ],
+      "id": "lines.unitPrice[0]",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "lines.amount",
+      "label": "Amount",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "2758.88",
+      "text": "2,758.88",
+      "page": 1,
+      "box": [
+        0.8692,
+        0.358,
+        0.064,
+        0.0121
+      ],
+      "id": "lines.amount[0]",
+      "confidence": 0.97,
+      "uncertain": false
+    },
+    {
+      "key": "total",
+      "label": "Total (USD)",
+      "group": "totals",
+      "lineIndex": null,
+      "value": "2758.88",
+      "text": "2,758.88",
+      "page": 1,
+      "box": [
+        0.8516,
+        0.3927,
+        0.0832,
+        0.0144
+      ],
+      "id": "total",
+      "confidence": 0.97,
+      "uncertain": false
+    },
+    {
+      "key": "amountDue",
+      "label": "Due now (50%)",
+      "group": "totals",
+      "lineIndex": null,
+      "value": "1379.44",
+      "text": "1,379.44",
+      "page": 1,
+      "box": [
+        0.8687,
+        0.4154,
+        0.0661,
+        0.0128
+      ],
+      "id": "amountDue",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "balanceDue",
+      "label": "Balance before shipment",
+      "group": "totals",
+      "lineIndex": null,
+      "value": "1379.44",
+      "text": "1,379.44",
+      "page": 1,
+      "box": [
+        0.8687,
+        0.4344,
+        0.0661,
+        0.0128
+      ],
+      "id": "balanceDue",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "bankBeneficiary",
+      "label": "Beneficiary",
+      "group": "bank",
+      "lineIndex": null,
+      "value": "Spectra Demo Pte Ltd",
+      "text": "Spectra Demo Pte Ltd",
+      "page": 1,
+      "box": [
+        0.0753,
+        0.5227,
+        0.1608,
+        0.0122
+      ],
+      "id": "bankBeneficiary",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "bankName",
+      "label": "Bank",
+      "group": "bank",
+      "lineIndex": null,
+      "value": "Demo Bank (not a real bank)",
+      "text": "Demo Bank (not a real bank)",
+      "page": 1,
+      "box": [
+        0.5148,
+        0.5225,
+        0.2042,
+        0.012
+      ],
+      "id": "bankName",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "bankAccountNo",
+      "label": "Account number",
+      "group": "bank",
+      "lineIndex": null,
+      "value": "0000 0000 0000",
+      "text": "0000 0000 0000",
+      "page": 1,
+      "box": [
+        0.0753,
+        0.556,
+        0.131,
+        0.0108
+      ],
+      "id": "bankAccountNo",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "swiftCode",
+      "label": "SWIFT code",
+      "group": "bank",
+      "lineIndex": null,
+      "value": "DEMOZZ00",
+      "text": "DEMOZZ00",
+      "page": 1,
+      "box": [
+        0.5148,
+        0.556,
+        0.0766,
+        0.0108
+      ],
+      "id": "swiftCode",
+      "confidence": 0.96,
+      "uncertain": false
+    }
+  ]
+}
