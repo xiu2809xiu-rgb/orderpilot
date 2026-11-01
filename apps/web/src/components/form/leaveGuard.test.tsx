@@ -1,7 +1,9 @@
 import { act, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import i18n from "@/i18n";
+import { draftKey } from "@/lib/draft-store";
+import { UserMenu } from "@/app/shell/UserMenu";
 import { useSessionStore } from "@/stores/session";
 import { axeViolations } from "@/test/axe";
 import { sessionFor } from "@/test/fixtures";
@@ -110,5 +112,132 @@ describe("leaving a form", () => {
     });
     await go(router, "/elsewhere");
     expect(router.state.location.pathname).toBe("/elsewhere");
+  });
+
+  it("opens on Keep editing, and gives focus back to the field it came from", async () => {
+    const user = userEvent.setup();
+    const { router } = renderInRouter(<KitForm />, ELSEWHERE);
+    const field = await screen.findByRole("textbox", {
+      name: LABELS.customerPo,
+    });
+    await user.type(field, "CPO-9");
+    await go(router, "/elsewhere");
+    const keep = await screen.findByRole("button", { name: "Keep editing" });
+    expect(keep).toHaveFocus();
+    await user.keyboard("{Escape}");
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).toBeNull();
+    });
+    expect(field).toHaveFocus();
+
+    await go(router, "/elsewhere");
+    await user.click(
+      await screen.findByRole("button", { name: "Keep editing" }),
+    );
+    await waitFor(() => {
+      expect(field).toHaveFocus();
+    });
+  });
+
+  it("Discard hands focus to the first field instead of dropping it", async () => {
+    const {
+      user: { id },
+    } = signInAs("SUPPORT");
+    localStorage.setItem(
+      draftKey(id, "test.order"),
+      JSON.stringify({
+        version: 1,
+        savedAt: new Date().toISOString(),
+        values: { customerPo: "CPO-R" },
+      }),
+    );
+    const user = userEvent.setup();
+    renderInRouter(<KitForm />);
+    await user.click(await screen.findByRole("button", { name: "Discard" }));
+    await waitFor(() => {
+      expect(
+        screen.getByRole("textbox", { name: LABELS.customerPo }),
+      ).toHaveFocus();
+    });
+  });
+});
+
+describe("signing out over a form", () => {
+  function withMenu() {
+    return renderInRouter(
+      <>
+        <UserMenu />
+        <KitForm />
+      </>,
+      <h1>Sign in</h1>,
+    );
+  }
+
+  it("asks first, and keeping the changes keeps the draft", async () => {
+    const {
+      user: { id },
+    } = signInAs("SUPPORT");
+    const user = userEvent.setup();
+    withMenu();
+    await user.type(
+      await screen.findByRole("textbox", { name: LABELS.customerPo }),
+      "CPO-10",
+    );
+    await waitFor(() => {
+      expect(localStorage.getItem(draftKey(id, "test.order"))).not.toBeNull();
+    });
+    await user.click(screen.getByRole("button", { name: "Account menu" }));
+    await user.click(await screen.findByRole("menuitem", { name: "Sign out" }));
+    const dialog = await screen.findByRole("dialog", {
+      name: "Sign out without saving?",
+    });
+    expect(dialog).toHaveTextContent("deletes them from this device");
+    expect(screen.getByRole("button", { name: "Keep editing" })).toHaveFocus();
+    await user.click(screen.getByRole("button", { name: "Keep editing" }));
+    expect(useSessionStore.getState().status).toBe("active");
+    expect(localStorage.getItem(draftKey(id, "test.order"))).not.toBeNull();
+  });
+
+  it("signs out and deletes the draft once the person says so", async () => {
+    const {
+      user: { id },
+    } = signInAs("SUPPORT");
+    vi.stubGlobal("fetch", () =>
+      Promise.resolve(Response.json({ data: { ok: true } })),
+    );
+    const user = userEvent.setup();
+    const { router } = withMenu();
+    await user.type(
+      await screen.findByRole("textbox", { name: LABELS.customerPo }),
+      "CPO-11",
+    );
+    await waitFor(() => {
+      expect(localStorage.getItem(draftKey(id, "test.order"))).not.toBeNull();
+    });
+    await user.click(screen.getByRole("button", { name: "Account menu" }));
+    await user.click(await screen.findByRole("menuitem", { name: "Sign out" }));
+    await user.click(await screen.findByRole("button", { name: "Sign out" }));
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe("/login");
+    });
+    expect(localStorage.getItem(draftKey(id, "test.order"))).toBeNull();
+    vi.unstubAllGlobals();
+  });
+
+  it("signs out at once when nothing is unsaved", async () => {
+    signInAs("SUPPORT");
+    vi.stubGlobal("fetch", () =>
+      Promise.resolve(Response.json({ data: { ok: true } })),
+    );
+    const user = userEvent.setup();
+    withMenu();
+    await screen.findByRole("textbox", { name: LABELS.customerPo });
+    await user.click(screen.getByRole("button", { name: "Account menu" }));
+    await user.click(await screen.findByRole("menuitem", { name: "Sign out" }));
+    expect(screen.queryByRole("dialog")).toBeNull();
+    await waitFor(() => {
+      expect(useSessionStore.getState().status).toBe("anonymous");
+    });
+    vi.unstubAllGlobals();
   });
 });

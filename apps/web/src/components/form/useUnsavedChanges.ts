@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import type { FieldValues, UseFormReturn } from "react-hook-form";
 import { useBlocker, type Blocker } from "react-router";
+import { registerDirtyForm } from "@/lib/dirty-forms";
 import { useSessionStore } from "@/stores/session";
 
 /**
@@ -25,6 +26,16 @@ export function useUnsavedChanges<T extends FieldValues, O = T>(
         },
       }),
     [form],
+  );
+
+  useEffect(
+    () =>
+      registerDirtyForm(
+        () =>
+          dirty.current &&
+          useSessionStore.getState().session?.user.id === viewerId.current,
+      ),
+    [],
   );
 
   useEffect(() => {
