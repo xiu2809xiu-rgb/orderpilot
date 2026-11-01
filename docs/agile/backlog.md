@@ -993,7 +993,7 @@ The efficiency and density rules every list and detail page meets. Prompt 003; f
 - **Priority:** must
 - **Estimate:** 5 points
 - **Requirements:** M4 best practices
-- **Branch:** `feat/product-pass-bar`
+- **Branch:** `feat/platform-the-bar`
 - **Planned for:** Sprint 01 (W2) and Sprint 02 (W3)
 - **Depends on:** P-12
 
@@ -1024,6 +1024,9 @@ Acceptance criteria:
 - Each feature registers its quick actions (Upload PO, New order, Raise SPR) with `registerAction`, and each role's home page reads them with `actionsForRole`.
 - The role matrix and the other plain tables keep their first column in view on a phone, as the common table does.
 - A setting to turn the `/` and `N` keys off for people who use a screen reader or their own keys.
+- Plain tables built on `ui/table` meet the 36 to 40 px row height too (the Users table is compact now; the others are not measured).
+- Copy role can be undone, once the API keeps a snapshot of the target role's rows.
+- The home-tile part of the Check in P-40 (no tile showing only a dash, no "Planned" badge) is met by P-33, not by P-40.
 
 ## Epic A: Document intake and AI extraction
 

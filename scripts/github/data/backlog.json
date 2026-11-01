@@ -1268,7 +1268,7 @@
       "priority": "must",
       "estimate": 5,
       "reqs": ["M4"],
-      "branch": "feat/product-pass-bar",
+      "branch": "feat/platform-the-bar",
       "sprints": [1, 2],
       "dependsOn": ["P-12"],
       "summary": "The efficiency and density rules every list and detail page meets. Prompt 003; finished before the handover on Monday evening, 2 Nov.",
@@ -1297,7 +1297,10 @@
         "Undo on the SPR decision and on payment confirmation, once the mock overlay records them (the toast already ends each action).",
         "Each feature registers its quick actions (Upload PO, New order, Raise SPR) with `registerAction`, and each role's home page reads them with `actionsForRole`.",
         "The role matrix and the other plain tables keep their first column in view on a phone, as the common table does.",
-        "A setting to turn the `/` and `N` keys off for people who use a screen reader or their own keys."
+        "A setting to turn the `/` and `N` keys off for people who use a screen reader or their own keys.",
+        "Plain tables built on `ui/table` meet the 36 to 40 px row height too (the Users table is compact now; the others are not measured).",
+        "Copy role can be undone, once the API keeps a snapshot of the target role's rows.",
+        "The home-tile part of the Check in P-40 (no tile showing only a dash, no \"Planned\" badge) is met by P-33, not by P-40."
       ]
     },
     {
