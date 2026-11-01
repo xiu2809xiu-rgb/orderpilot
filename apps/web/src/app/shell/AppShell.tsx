@@ -1,8 +1,10 @@
 import { Suspense, lazy, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet } from "react-router";
-import { ListPageSkeleton, Toaster } from "@/components/common";
-import { TooltipProvider } from "@/components/ui/tooltip";
+// Direct paths, never the "@/components/common" barrel: the barrel would put
+// every common component in the entry chunk (docs/architecture/patterns.md).
+import { ListPageSkeleton } from "@/components/common/skeletons";
+import { Toaster } from "@/components/common/Toaster";
 import { featureNamespaces } from "@/features/nav";
 import { apiClient } from "@/lib/api/instance";
 import { useSessionStore } from "@/stores/session";
@@ -64,7 +66,7 @@ export function AppShell() {
   });
 
   return (
-    <TooltipProvider>
+    <>
       {/* While the consent card is in the dock the shell is one screen tall and the page scrolls
           inside it, so the card ends the scrolling area instead of covering it. */}
       <div className="flex min-h-dvh has-[[data-consent-card]]:h-dvh">
@@ -101,6 +103,6 @@ export function AppShell() {
       <Suspense fallback={null}>
         <AnalyticsRoot dock={dock} />
       </Suspense>
-    </TooltipProvider>
+    </>
   );
 }
