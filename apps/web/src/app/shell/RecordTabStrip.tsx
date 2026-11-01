@@ -96,7 +96,7 @@ export default function RecordTabStrip({
         {t("hint")}
       </p>
       <ul
-        className="flex items-center gap-1 overflow-x-auto px-s2 py-1 [scrollbar-width:thin]"
+        className="flex items-center gap-1 overflow-x-auto scroll-px-s2 px-s2 py-1 [scrollbar-width:thin]"
         onWheel={(event) => {
           // A mouse wheel has no sideways motion: turn it into one here.
           if (event.deltaX === 0)

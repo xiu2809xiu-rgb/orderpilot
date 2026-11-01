@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useLocation, useMatches } from "react-router";
-import { recordFromMatches, type RecordRef } from "@/lib/records";
+import type { RecordRef } from "@/lib/records";
+import { recordFromMatches } from "@/lib/resolveRecord";
 import { announce } from "@/components/common/openRecord";
 import { hasNews, useRecordTabs } from "@/stores/recordTabs";
 import { useSessionStore } from "@/stores/session";

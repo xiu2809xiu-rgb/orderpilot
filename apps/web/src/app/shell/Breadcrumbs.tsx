@@ -2,7 +2,7 @@ import { ChevronRight } from "lucide-react";
 import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useMatches } from "react-router";
-import { recordFromMatches } from "@/lib/records";
+import { recordCrumb } from "@/lib/records";
 import { cn } from "@/lib/utils";
 
 /**
@@ -26,8 +26,8 @@ export function Breadcrumbs() {
     const { crumb } = (match.handle ?? {}) as CrumbHandle;
     return crumb ? [{ path: match.pathname, label: t(crumb) }] : [];
   });
-  const record = recordFromMatches(matches);
-  if (record) trail.push({ path: record.key, label: record.no, mono: true });
+  const record = recordCrumb(matches);
+  if (record) trail.push({ path: record.path, label: record.no, mono: true });
   if (trail.length === 0) return null;
 
   return (

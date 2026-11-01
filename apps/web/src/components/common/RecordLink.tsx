@@ -2,7 +2,10 @@ import type { MouseEvent } from "react";
 import { Link, type LinkProps } from "react-router";
 import { gestureOf, useOpenRecord } from "./useOpenRecord";
 
-export interface RecordLinkProps extends Omit<LinkProps, "to"> {
+export interface RecordLinkProps extends Omit<
+  LinkProps,
+  "to" | "onAuxClick" | "onMouseDown"
+> {
   /** The record page's address, such as `/order-tracker/SO-26-0001`. */
   to: string;
 }
@@ -13,16 +16,10 @@ export interface RecordLinkProps extends Omit<LinkProps, "to"> {
  * and stays on this page. React Router leaves modified clicks to the browser,
  * so without this a record would open in a browser tab instead.
  */
-export function RecordLink({
-  to,
-  onClick,
-  onAuxClick,
-  onMouseDown,
-  ...props
-}: RecordLinkProps) {
+export function RecordLink({ to, onClick, ...props }: RecordLinkProps) {
   const openRecord = useOpenRecord();
 
-  function handle(event: MouseEvent<HTMLAnchorElement>) {
+  function open(event: MouseEvent<HTMLAnchorElement>) {
     if (event.defaultPrevented) return;
     if (openRecord(to, gestureOf(event))) event.preventDefault();
   }
@@ -33,14 +30,12 @@ export function RecordLink({
       {...props}
       onClick={(event) => {
         onClick?.(event);
-        handle(event);
+        open(event);
       }}
       onAuxClick={(event) => {
-        onAuxClick?.(event);
-        if (event.button === 1) handle(event);
+        if (event.button === 1) open(event);
       }}
       onMouseDown={(event) => {
-        onMouseDown?.(event);
         // A middle press starts the browser's autoscroll on Windows; the click is ours.
         if (event.button === 1) event.preventDefault();
       }}

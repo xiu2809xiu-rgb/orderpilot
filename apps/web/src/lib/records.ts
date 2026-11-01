@@ -30,30 +30,19 @@ export interface MatchLike {
   handle?: unknown;
 }
 
-/** Drops a trailing slash, but never the root's own. */
-const trimSlash = (path: string): string => path.replace(/(.)\/+$/, "$1");
+const declared = (match: MatchLike | undefined) =>
+  (match?.handle as RecordHandle | null | undefined)?.record;
 
-/** The record the deepest matching route declares, or null for any other page. */
-export function recordFromMatches(
+/**
+ * The record number the breadcrumbs end with, from the deepest route that
+ * declares one. It is all the entry bundle needs: the tab logic that reads
+ * the rest (list, key) loads on the first open, from `resolveRecord`.
+ */
+export function recordCrumb(
   matches: readonly MatchLike[],
-): RecordRef | null {
-  for (let index = matches.length - 1; index >= 0; index -= 1) {
-    const match = matches[index];
-    const declared = (match?.handle as RecordHandle | null | undefined)?.record;
-    if (!match || !declared) continue;
-    const no = match.params[declared.param];
-    if (!no) return null;
-    const key = trimSlash(match.pathname);
-    // The nearest page above the record is its list: /master-data/items for an item.
-    const parent = matches
-      .slice(0, index)
-      .findLast((above) => trimSlash(above.pathname) !== key);
-    return {
-      key,
-      kind: declared.kind,
-      no,
-      listPath: parent ? trimSlash(parent.pathname) : "/",
-    };
-  }
-  return null;
+): { path: string; no: string } | null {
+  const match = matches.findLast(declared);
+  const param = declared(match)?.param;
+  const no = match && param ? match.params[param] : undefined;
+  return match && no ? { path: match.pathname, no } : null;
 }

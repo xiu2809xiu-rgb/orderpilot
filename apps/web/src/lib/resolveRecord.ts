@@ -1,6 +1,34 @@
 import { matchRoutes } from "react-router";
 import { recordRoutes } from "./recordRoutes";
-import { recordFromMatches, type RecordRef } from "./records";
+import type { MatchLike, RecordHandle, RecordRef } from "./records";
+
+/** Drops a trailing slash, but never the root's own. */
+const trimSlash = (path: string): string => path.replace(/(.)\/+$/, "$1");
+
+/** The record the deepest matching route declares, or null for any other page. */
+export function recordFromMatches(
+  matches: readonly MatchLike[],
+): RecordRef | null {
+  for (let index = matches.length - 1; index >= 0; index -= 1) {
+    const match = matches[index];
+    const declared = (match?.handle as RecordHandle | null | undefined)?.record;
+    if (!match || !declared) continue;
+    const no = match.params[declared.param];
+    if (!no) return null;
+    const key = trimSlash(match.pathname);
+    // The nearest page above the record is its list: /master-data/items for an item.
+    const parent = matches
+      .slice(0, index)
+      .findLast((above) => trimSlash(above.pathname) !== key);
+    return {
+      key,
+      kind: declared.kind,
+      no,
+      listPath: parent ? trimSlash(parent.pathname) : "/",
+    };
+  }
+  return null;
+}
 
 /**
  * The record a link points at, or null when the address is not a record page.
