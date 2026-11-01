@@ -12,14 +12,24 @@ import { pathToFileURL } from "node:url";
 const ROLE = "SUPPORT";
 
 /**
+ * @typedef {(url: string, init?: RequestInit) => Promise<Response>} Get
+ * @typedef {{ name: string, problem: string | null }} Result
+ */
+
+/**
  * The checks, in order. Each returns null or says what is wrong.
  *
  * @param {string} base
- * @param {typeof fetch} get
- * @returns {Promise<{ name: string, problem: string | null }[]>}
+ * @param {Get} get
+ * @returns {Promise<Result[]>}
  */
 export async function checkStack(base, get = fetch) {
+  /** @type {Result[]} */
   const results = [];
+  /**
+   * @param {string} name
+   * @param {() => Promise<string | null>} run
+   */
   const check = async (name, run) => {
     let problem;
     try {
@@ -29,7 +39,9 @@ export async function checkStack(base, get = fetch) {
     }
     results.push({ name, problem });
   };
+  /** @param {string} path */
   const url = (path) => new URL(path, base).href;
+  /** @param {Response} res */
   const headerProblem = (res) => {
     const policy = res.headers.get("content-security-policy") ?? "";
     if (!policy.includes("script-src 'self'")) return `CSP is "${policy}"`;
@@ -85,7 +97,10 @@ export async function checkStack(base, get = fetch) {
       const res = await get(url("/api/v1/auth/me"), {
         headers: { "X-Request-Id": "stack-smoke-1" },
       });
-      const body = await res.json();
+      // The envelope is checked, not trusted: any other shape fails below.
+      const body = /** @type {{ error?: { traceId?: unknown } } | null} */ (
+        await res.json()
+      );
       const policy = res.headers.get("content-security-policy") ?? "";
       if (res.status !== 401) return `status ${String(res.status)}`;
       if (!policy.startsWith("default-src 'none'")) return `CSP is "${policy}"`;

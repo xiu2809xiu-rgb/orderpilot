@@ -6,13 +6,21 @@ const APP_POLICY = "default-src 'self'; script-src 'self'";
 const API_POLICY = "default-src 'none'; frame-ancestors 'none'";
 const INDEX = `<div id="root"></div><script src="/assets/index-abc.js"></script>`;
 
-/** A stack that does everything right, with `broken` swapped in per path. */
+/** @typedef {Record<string, (init?: RequestInit) => Response>} Routes */
+
+/**
+ * A stack that does everything right, with `broken` swapped in per path.
+ *
+ * @param {Routes} [broken]
+ * @returns {import("./stack-smoke.mjs").Get}
+ */
 function stack(broken = {}) {
   const staticHeaders = {
     "content-security-policy": APP_POLICY,
     "x-content-type-options": "nosniff",
     "cache-control": "no-cache",
   };
+  /** @type {Routes} */
   const routes = {
     "/healthz": () => new Response("ok"),
     "/": () => new Response(INDEX, { headers: staticHeaders }),
@@ -26,7 +34,7 @@ function stack(broken = {}) {
       }),
     "/assets/not-a-file.js": () => new Response("", { status: 404 }),
     "/api/v1/auth/me": (init) =>
-      init?.headers?.cookie
+      new Headers(init?.headers).has("cookie")
         ? new Response(JSON.stringify({ data: { role: "SUPPORT" } }))
         : new Response(
             JSON.stringify({ error: { traceId: "stack-smoke-1" } }),
@@ -50,6 +58,7 @@ function stack(broken = {}) {
   };
 }
 
+/** @param {Routes} [broken] */
 async function problems(broken) {
   const results = await checkStack("http://stack.test", stack(broken));
   return results.filter(({ problem }) => problem !== null);
@@ -70,7 +79,7 @@ describe("stack smoke", () => {
           },
         }),
     });
-    assert.match(failed[0].name, /only the API's own policy/);
+    assert.match(failed[0]?.name ?? "", /only the API's own policy/);
   });
 
   it("fails when a deep link is a 404 instead of the app", async () => {
@@ -78,7 +87,7 @@ describe("stack smoke", () => {
       "/tracker/orders/does-not-matter": () =>
         new Response("", { status: 404 }),
     });
-    assert.match(failed[0].name, /deep link/);
+    assert.match(failed[0]?.name ?? "", /deep link/);
   });
 
   it("fails when a location loses the security headers", async () => {
@@ -88,14 +97,14 @@ describe("stack smoke", () => {
           headers: { "cache-control": "max-age=31536000, immutable" },
         }),
     });
-    assert.match(failed[0].name, /hashed file/);
+    assert.match(failed[0]?.name ?? "", /hashed file/);
   });
 
   it("fails when a missing script comes back as the app", async () => {
     const failed = await problems({
       "/assets/not-a-file.js": () => new Response(INDEX),
     });
-    assert.match(failed[0].name, /missing hashed file/);
+    assert.match(failed[0]?.name ?? "", /missing hashed file/);
   });
 
   it("reports a stack that cannot be reached, for every check", async () => {
