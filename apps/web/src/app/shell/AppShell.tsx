@@ -7,15 +7,20 @@ import { ListPageSkeleton } from "@/components/common/skeletons";
 import { Toaster } from "@/components/common/Toaster";
 import { featureNamespaces } from "@/features/nav";
 import { apiClient } from "@/lib/api/instance";
+import { whenIdle } from "@/lib/deferred";
 import { useSessionStore } from "@/stores/session";
 import { useGlobalShortcuts } from "./shortcuts";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
 
-// The palette (and cmdk) load the first time it is opened.
+// The palette (and cmdk) and the session-ended dialog stay out of the entry
+// chunk. They are fetched once the browser is idle, so Control K and an ended
+// session never wait for the network.
+const loadPalette = () => import("./CommandPalette");
 const CommandPalette = lazy(async () => ({
-  default: (await import("./CommandPalette")).CommandPalette,
+  default: (await loadPalette()).CommandPalette,
 }));
+const loadSessionEnded = () => import("../SessionEndedDialog");
 
 // Usage analytics (G-1): the consent banner and the page-view recorder. A separate
 // chunk, so the entry bundle does not grow.
@@ -60,6 +65,14 @@ export function AppShell() {
   const [dock, setDock] = useState<HTMLElement | null>(null);
   useScheduledRefresh();
   useGlobalShortcuts();
+  useEffect(
+    () =>
+      whenIdle(() => {
+        void loadPalette().catch(() => undefined);
+        void loadSessionEnded().catch(() => undefined);
+      }),
+    [],
+  );
   usePaletteShortcut(() => {
     setPaletteUsed(true);
     setPaletteOpen((open) => !open);

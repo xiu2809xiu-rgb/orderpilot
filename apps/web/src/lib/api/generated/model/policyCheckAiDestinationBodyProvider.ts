@@ -6,11 +6,11 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type PolicyCheckAiDestinationBodyProvider = typeof PolicyCheckAiDestinationBodyProvider[keyof typeof PolicyCheckAiDestinationBodyProvider];
-
+export type PolicyCheckAiDestinationBodyProvider =
+  (typeof PolicyCheckAiDestinationBodyProvider)[keyof typeof PolicyCheckAiDestinationBodyProvider];
 
 export const PolicyCheckAiDestinationBodyProvider = {
-  mock: 'mock',
-  'openai-compatible': 'openai-compatible',
-  bedrock: 'bedrock',
+  mock: "mock",
+  "openai-compatible": "openai-compatible",
+  bedrock: "bedrock",
 } as const;

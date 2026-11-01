@@ -6,19 +6,19 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type WorkflowsDocumentConfig200DataItemDocumentType = typeof WorkflowsDocumentConfig200DataItemDocumentType[keyof typeof WorkflowsDocumentConfig200DataItemDocumentType];
-
+export type WorkflowsDocumentConfig200DataItemDocumentType =
+  (typeof WorkflowsDocumentConfig200DataItemDocumentType)[keyof typeof WorkflowsDocumentConfig200DataItemDocumentType];
 
 export const WorkflowsDocumentConfig200DataItemDocumentType = {
-  SPR: 'SPR',
-  CUSTOMER_PO: 'CUSTOMER_PO',
-  PROFORMA_INVOICE: 'PROFORMA_INVOICE',
-  VENDOR_PI: 'VENDOR_PI',
-  SALES_INVOICE: 'SALES_INVOICE',
-  PACKING_LIST: 'PACKING_LIST',
-  AWB: 'AWB',
-  BILL_OF_LADING: 'BILL_OF_LADING',
-  IMPORT_PERMIT: 'IMPORT_PERMIT',
-  PAYMENT_ADVICE: 'PAYMENT_ADVICE',
-  OTHER: 'OTHER',
+  SPR: "SPR",
+  CUSTOMER_PO: "CUSTOMER_PO",
+  PROFORMA_INVOICE: "PROFORMA_INVOICE",
+  VENDOR_PI: "VENDOR_PI",
+  SALES_INVOICE: "SALES_INVOICE",
+  PACKING_LIST: "PACKING_LIST",
+  AWB: "AWB",
+  BILL_OF_LADING: "BILL_OF_LADING",
+  IMPORT_PERMIT: "IMPORT_PERMIT",
+  PAYMENT_ADVICE: "PAYMENT_ADVICE",
+  OTHER: "OTHER",
 } as const;

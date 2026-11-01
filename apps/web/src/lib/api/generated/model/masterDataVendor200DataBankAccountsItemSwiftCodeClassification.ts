@@ -6,12 +6,12 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type MasterDataVendor200DataBankAccountsItemSwiftCodeClassification = typeof MasterDataVendor200DataBankAccountsItemSwiftCodeClassification[keyof typeof MasterDataVendor200DataBankAccountsItemSwiftCodeClassification];
-
+export type MasterDataVendor200DataBankAccountsItemSwiftCodeClassification =
+  (typeof MasterDataVendor200DataBankAccountsItemSwiftCodeClassification)[keyof typeof MasterDataVendor200DataBankAccountsItemSwiftCodeClassification];
 
 export const MasterDataVendor200DataBankAccountsItemSwiftCodeClassification = {
-  public: 'public',
-  internal: 'internal',
-  confidential: 'confidential',
-  restricted: 'restricted',
+  public: "public",
+  internal: "internal",
+  confidential: "confidential",
+  restricted: "restricted",
 } as const;

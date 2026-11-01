@@ -7,14 +7,14 @@
  */
 
 export type UsersListParams = {
-/**
- * @minimum 1
- * @maximum 9007199254740991
- */
-page?: number;
-/**
- * @minimum 1
- * @maximum 200
- */
-pageSize?: number;
+  /**
+   * @minimum 1
+   * @maximum 9007199254740991
+   */
+  page?: number;
+  /**
+   * @minimum 1
+   * @maximum 200
+   */
+  pageSize?: number;
 };

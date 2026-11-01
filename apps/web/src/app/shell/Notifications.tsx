@@ -1,11 +1,7 @@
 import { Bell } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "./overlays/popover";
 
 /** Empty until the workflow area sends reminders. No badge: there is no count. */
 export function Notifications() {

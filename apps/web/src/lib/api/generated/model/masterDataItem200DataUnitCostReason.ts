@@ -9,12 +9,13 @@
 /**
  * @nullable
  */
-export type MasterDataItem200DataUnitCostReason = typeof MasterDataItem200DataUnitCostReason[keyof typeof MasterDataItem200DataUnitCostReason] | null;
-
+export type MasterDataItem200DataUnitCostReason =
+  | (typeof MasterDataItem200DataUnitCostReason)[keyof typeof MasterDataItem200DataUnitCostReason]
+  | null;
 
 export const MasterDataItem200DataUnitCostReason = {
-  role: 'role',
-  bankDetails: 'bankDetails',
-  price: 'price',
-  policy: 'policy',
+  role: "role",
+  bankDetails: "bankDetails",
+  price: "price",
+  policy: "policy",
 } as const;

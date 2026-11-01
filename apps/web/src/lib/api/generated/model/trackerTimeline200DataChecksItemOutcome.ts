@@ -6,10 +6,10 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type TrackerTimeline200DataChecksItemOutcome = typeof TrackerTimeline200DataChecksItemOutcome[keyof typeof TrackerTimeline200DataChecksItemOutcome];
-
+export type TrackerTimeline200DataChecksItemOutcome =
+  (typeof TrackerTimeline200DataChecksItemOutcome)[keyof typeof TrackerTimeline200DataChecksItemOutcome];
 
 export const TrackerTimeline200DataChecksItemOutcome = {
-  pass: 'pass',
-  fail: 'fail',
+  pass: "pass",
+  fail: "fail",
 } as const;

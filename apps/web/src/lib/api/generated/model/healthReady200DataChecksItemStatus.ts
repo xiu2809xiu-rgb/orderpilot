@@ -6,10 +6,10 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type HealthReady200DataChecksItemStatus = typeof HealthReady200DataChecksItemStatus[keyof typeof HealthReady200DataChecksItemStatus];
-
+export type HealthReady200DataChecksItemStatus =
+  (typeof HealthReady200DataChecksItemStatus)[keyof typeof HealthReady200DataChecksItemStatus];
 
 export const HealthReady200DataChecksItemStatus = {
-  up: 'up',
-  down: 'down',
+  up: "up",
+  down: "down",
 } as const;

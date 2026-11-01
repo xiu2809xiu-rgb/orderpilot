@@ -13,8 +13,8 @@ export type WorkflowsMyTasks200DataItemRef = {
   /** @pattern ^(SPR|PI|EXC)-\d{8}-\d{4,}$ */
   recordNo: string;
   /**
-     * @minLength 1
-     * @nullable
-     */
+   * @minLength 1
+   * @nullable
+   */
   navisionNo: string | null;
 } | null;

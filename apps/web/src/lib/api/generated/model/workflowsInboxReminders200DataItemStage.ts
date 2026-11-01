@@ -6,11 +6,11 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type WorkflowsInboxReminders200DataItemStage = typeof WorkflowsInboxReminders200DataItemStage[keyof typeof WorkflowsInboxReminders200DataItemStage];
-
+export type WorkflowsInboxReminders200DataItemStage =
+  (typeof WorkflowsInboxReminders200DataItemStage)[keyof typeof WorkflowsInboxReminders200DataItemStage];
 
 export const WorkflowsInboxReminders200DataItemStage = {
-  scheduled: 'scheduled',
-  sent: 'sent',
-  escalated: 'escalated',
+  scheduled: "scheduled",
+  sent: "sent",
+  escalated: "escalated",
 } as const;

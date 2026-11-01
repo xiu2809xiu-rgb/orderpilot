@@ -5,24 +5,24 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { MasterDataVendorsDirection } from './masterDataVendorsDirection.ts';
-import type { MasterDataVendorsSort } from './masterDataVendorsSort.ts';
+import type { MasterDataVendorsDirection } from "./masterDataVendorsDirection.ts";
+import type { MasterDataVendorsSort } from "./masterDataVendorsSort.ts";
 
 export type MasterDataVendorsParams = {
-/**
- * @minimum 1
- * @maximum 9007199254740991
- */
-page?: number;
-/**
- * @minimum 1
- * @maximum 200
- */
-pageSize?: number;
-/**
- * @maxLength 100
- */
-search?: string;
-sort?: MasterDataVendorsSort;
-direction?: MasterDataVendorsDirection;
+  /**
+   * @minimum 1
+   * @maximum 9007199254740991
+   */
+  page?: number;
+  /**
+   * @minimum 1
+   * @maximum 200
+   */
+  pageSize?: number;
+  /**
+   * @maxLength 100
+   */
+  search?: string;
+  sort?: MasterDataVendorsSort;
+  direction?: MasterDataVendorsDirection;
 };

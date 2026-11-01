@@ -9,10 +9,11 @@
 /**
  * @nullable
  */
-export type MasterDataItem200DataSprsItemPurchaseOrderStatus = typeof MasterDataItem200DataSprsItemPurchaseOrderStatus[keyof typeof MasterDataItem200DataSprsItemPurchaseOrderStatus] | null;
-
+export type MasterDataItem200DataSprsItemPurchaseOrderStatus =
+  | (typeof MasterDataItem200DataSprsItemPurchaseOrderStatus)[keyof typeof MasterDataItem200DataSprsItemPurchaseOrderStatus]
+  | null;
 
 export const MasterDataItem200DataSprsItemPurchaseOrderStatus = {
-  open: 'open',
-  received: 'received',
+  open: "open",
+  received: "received",
 } as const;

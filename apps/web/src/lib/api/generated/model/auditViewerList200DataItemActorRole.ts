@@ -9,17 +9,18 @@
 /**
  * @nullable
  */
-export type AuditViewerList200DataItemActorRole = typeof AuditViewerList200DataItemActorRole[keyof typeof AuditViewerList200DataItemActorRole] | null;
-
+export type AuditViewerList200DataItemActorRole =
+  | (typeof AuditViewerList200DataItemActorRole)[keyof typeof AuditViewerList200DataItemActorRole]
+  | null;
 
 export const AuditViewerList200DataItemActorRole = {
-  SYSTEM_ADMIN: 'SYSTEM_ADMIN',
-  PRODUCT_MANAGER: 'PRODUCT_MANAGER',
-  APPROVER: 'APPROVER',
-  SUPPORT: 'SUPPORT',
-  WAREHOUSE: 'WAREHOUSE',
-  FINANCE: 'FINANCE',
-  LOGISTICS: 'LOGISTICS',
-  MANAGEMENT: 'MANAGEMENT',
-  AUDITOR: 'AUDITOR',
+  SYSTEM_ADMIN: "SYSTEM_ADMIN",
+  PRODUCT_MANAGER: "PRODUCT_MANAGER",
+  APPROVER: "APPROVER",
+  SUPPORT: "SUPPORT",
+  WAREHOUSE: "WAREHOUSE",
+  FINANCE: "FINANCE",
+  LOGISTICS: "LOGISTICS",
+  MANAGEMENT: "MANAGEMENT",
+  AUDITOR: "AUDITOR",
 } as const;

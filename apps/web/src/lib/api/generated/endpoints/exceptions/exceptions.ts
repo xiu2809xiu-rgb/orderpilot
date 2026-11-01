@@ -5,9 +5,7 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import {
-  useQuery
-} from '@tanstack/react-query';
+import { useQuery } from "@tanstack/react-query";
 import type {
   DataTag,
   DefinedInitialDataOptions,
@@ -17,26 +15,23 @@ import type {
   QueryKey,
   UndefinedInitialDataOptions,
   UseQueryOptions,
-  UseQueryResult
-} from '@tanstack/react-query';
+  UseQueryResult,
+} from "@tanstack/react-query";
 
-import type {
-  ExceptionsList200,
-  ExceptionsListParams
-} from '../../model';
+import type { ExceptionsList200, ExceptionsListParams } from "../../model";
 
-import { apiMutator } from '../../../mutator.ts';
-import type { ErrorType } from '../../../mutator.ts';
+import { apiMutator } from "../../../mutator.ts";
+import type { ErrorType } from "../../../mutator.ts";
 
-
-
-
-const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKey: K } => {
+const withQueryKey = <T extends object, K>(
+  query: T,
+  queryKey: K,
+): T & { queryKey: K } => {
   const result = { queryKey } as T & { queryKey: K };
   for (const key of Object.keys(query)) {
     // The explicit queryKey always wins, matching the previous
     // `{ ...query, queryKey }` spread where it was set last.
-    if (key === 'queryKey') continue;
+    if (key === "queryKey") continue;
     Object.defineProperty(result, key, {
       enumerable: true,
       configurable: true,
@@ -50,92 +45,134 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
  * @summary The exceptions queue, newest first, a page at a time. Mock data
  */
 export const exceptionsList = (
-    params?: ExceptionsListParams,
- signal?: AbortSignal
+  params?: ExceptionsListParams,
+  signal?: AbortSignal,
 ) => {
+  return apiMutator<ExceptionsList200>({
+    url: `/api/v1/exceptions`,
+    method: "GET",
+    params,
+    signal,
+  });
+};
 
+export const getExceptionsListQueryKey = (params?: ExceptionsListParams) => {
+  return [`/api/v1/exceptions`, ...(params ? [params] : [])] as const;
+};
 
-      return apiMutator<ExceptionsList200>(
-      {url: `/api/v1/exceptions`, method: 'GET',
-        params, signal
-    },
-      );
-    }
-
-
-
-
-export const getExceptionsListQueryKey = (params?: ExceptionsListParams,) => {
-    return [
-    `/api/v1/exceptions`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-
-export const getExceptionsListQueryOptions = <TData = Awaited<ReturnType<typeof exceptionsList>>, TError = ErrorType<unknown>>(params?: ExceptionsListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof exceptionsList>>, TError, TData>>, }
+export const getExceptionsListQueryOptions = <
+  TData = Awaited<ReturnType<typeof exceptionsList>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ExceptionsListParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof exceptionsList>>, TError, TData>
+    >;
+  },
 ) => {
+  const { query: queryOptions } = options ?? {};
 
-const {query: queryOptions} = options ?? {};
+  const queryKey = queryOptions?.queryKey ?? getExceptionsListQueryKey(params);
 
-  const queryKey =  queryOptions?.queryKey ?? getExceptionsListQueryKey(params);
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof exceptionsList>>> = ({
+    signal,
+  }) => exceptionsList(params, signal);
 
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof exceptionsList>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
 
+export type ExceptionsListQueryResult = NonNullable<
+  Awaited<ReturnType<typeof exceptionsList>>
+>;
+export type ExceptionsListQueryError = ErrorType<unknown>;
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof exceptionsList>>> = ({ signal }) => exceptionsList(params, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof exceptionsList>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type ExceptionsListQueryResult = NonNullable<Awaited<ReturnType<typeof exceptionsList>>>
-export type ExceptionsListQueryError = ErrorType<unknown>
-
-
-export function useExceptionsList<TData = Awaited<ReturnType<typeof exceptionsList>>, TError = ErrorType<unknown>>(
- params: undefined |  ExceptionsListParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof exceptionsList>>, TError, TData>> & Pick<
+export function useExceptionsList<
+  TData = Awaited<ReturnType<typeof exceptionsList>>,
+  TError = ErrorType<unknown>,
+>(
+  params: undefined | ExceptionsListParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof exceptionsList>>, TError, TData>
+    > &
+      Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof exceptionsList>>,
           TError,
           Awaited<ReturnType<typeof exceptionsList>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useExceptionsList<TData = Awaited<ReturnType<typeof exceptionsList>>, TError = ErrorType<unknown>>(
- params?: ExceptionsListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof exceptionsList>>, TError, TData>> & Pick<
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useExceptionsList<
+  TData = Awaited<ReturnType<typeof exceptionsList>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ExceptionsListParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof exceptionsList>>, TError, TData>
+    > &
+      Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof exceptionsList>>,
           TError,
           Awaited<ReturnType<typeof exceptionsList>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useExceptionsList<TData = Awaited<ReturnType<typeof exceptionsList>>, TError = ErrorType<unknown>>(
- params?: ExceptionsListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof exceptionsList>>, TError, TData>>, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useExceptionsList<
+  TData = Awaited<ReturnType<typeof exceptionsList>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ExceptionsListParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof exceptionsList>>, TError, TData>
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 /**
  * @summary The exceptions queue, newest first, a page at a time. Mock data
  */
 
-export function useExceptionsList<TData = Awaited<ReturnType<typeof exceptionsList>>, TError = ErrorType<unknown>>(
- params?: ExceptionsListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof exceptionsList>>, TError, TData>>, }
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+export function useExceptionsList<
+  TData = Awaited<ReturnType<typeof exceptionsList>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ExceptionsListParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof exceptionsList>>, TError, TData>
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getExceptionsListQueryOptions(params, options);
 
-  const queryOptions = getExceptionsListQueryOptions(params,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
-
-
-
-
-
-

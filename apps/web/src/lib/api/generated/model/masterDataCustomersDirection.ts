@@ -6,10 +6,10 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type MasterDataCustomersDirection = typeof MasterDataCustomersDirection[keyof typeof MasterDataCustomersDirection];
-
+export type MasterDataCustomersDirection =
+  (typeof MasterDataCustomersDirection)[keyof typeof MasterDataCustomersDirection];
 
 export const MasterDataCustomersDirection = {
-  asc: 'asc',
-  desc: 'desc',
+  asc: "asc",
+  desc: "desc",
 } as const;

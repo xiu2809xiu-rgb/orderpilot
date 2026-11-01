@@ -6,10 +6,10 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type WorkflowsInboxTasksOverdue = typeof WorkflowsInboxTasksOverdue[keyof typeof WorkflowsInboxTasksOverdue];
-
+export type WorkflowsInboxTasksOverdue =
+  (typeof WorkflowsInboxTasksOverdue)[keyof typeof WorkflowsInboxTasksOverdue];
 
 export const WorkflowsInboxTasksOverdue = {
-  true: 'true',
-  false: 'false',
+  true: "true",
+  false: "false",
 } as const;

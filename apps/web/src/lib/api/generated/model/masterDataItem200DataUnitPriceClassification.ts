@@ -6,12 +6,12 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type MasterDataItem200DataUnitPriceClassification = typeof MasterDataItem200DataUnitPriceClassification[keyof typeof MasterDataItem200DataUnitPriceClassification];
-
+export type MasterDataItem200DataUnitPriceClassification =
+  (typeof MasterDataItem200DataUnitPriceClassification)[keyof typeof MasterDataItem200DataUnitPriceClassification];
 
 export const MasterDataItem200DataUnitPriceClassification = {
-  public: 'public',
-  internal: 'internal',
-  confidential: 'confidential',
-  restricted: 'restricted',
+  public: "public",
+  internal: "internal",
+  confidential: "confidential",
+  restricted: "restricted",
 } as const;

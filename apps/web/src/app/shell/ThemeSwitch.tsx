@@ -7,7 +7,7 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "./overlays/dropdown-menu";
 import { useThemeStore, type ThemePreference } from "@/lib/theme";
 
 const CHOICES: ThemePreference[] = ["light", "dark", "system"];

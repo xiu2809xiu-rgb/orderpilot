@@ -6,10 +6,10 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type PolicyCheckAiDestinationBodyOrigin = typeof PolicyCheckAiDestinationBodyOrigin[keyof typeof PolicyCheckAiDestinationBodyOrigin];
-
+export type PolicyCheckAiDestinationBodyOrigin =
+  (typeof PolicyCheckAiDestinationBodyOrigin)[keyof typeof PolicyCheckAiDestinationBodyOrigin];
 
 export const PolicyCheckAiDestinationBodyOrigin = {
-  synthetic: 'synthetic',
-  real: 'real',
+  synthetic: "synthetic",
+  real: "real",
 } as const;

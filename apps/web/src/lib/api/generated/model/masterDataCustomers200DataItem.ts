@@ -20,13 +20,13 @@ export type MasterDataCustomers200DataItem = {
   /** @minLength 1 */
   customerPriceGroup: string;
   /**
-     * @minimum 0
-     * @maximum 9007199254740991
-     */
+   * @minimum 0
+   * @maximum 9007199254740991
+   */
   openOrders: number;
   /**
-     * @minimum 0
-     * @maximum 9007199254740991
-     */
+   * @minimum 0
+   * @maximum 9007199254740991
+   */
   overdueOrders: number;
 };

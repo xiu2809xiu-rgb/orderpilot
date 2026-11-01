@@ -6,12 +6,12 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type WorkflowsOrderFlow200DataStepsItemState = typeof WorkflowsOrderFlow200DataStepsItemState[keyof typeof WorkflowsOrderFlow200DataStepsItemState];
-
+export type WorkflowsOrderFlow200DataStepsItemState =
+  (typeof WorkflowsOrderFlow200DataStepsItemState)[keyof typeof WorkflowsOrderFlow200DataStepsItemState];
 
 export const WorkflowsOrderFlow200DataStepsItemState = {
-  done: 'done',
-  current: 'current',
-  upcoming: 'upcoming',
-  skipped: 'skipped',
+  done: "done",
+  current: "current",
+  upcoming: "upcoming",
+  skipped: "skipped",
 } as const;

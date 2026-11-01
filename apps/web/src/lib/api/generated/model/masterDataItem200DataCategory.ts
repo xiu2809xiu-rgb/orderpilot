@@ -6,11 +6,11 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type MasterDataItem200DataCategory = typeof MasterDataItem200DataCategory[keyof typeof MasterDataItem200DataCategory];
-
+export type MasterDataItem200DataCategory =
+  (typeof MasterDataItem200DataCategory)[keyof typeof MasterDataItem200DataCategory];
 
 export const MasterDataItem200DataCategory = {
-  IT: 'IT',
-  SURVEILLANCE: 'SURVEILLANCE',
-  ACCESSORIES: 'ACCESSORIES',
+  IT: "IT",
+  SURVEILLANCE: "SURVEILLANCE",
+  ACCESSORIES: "ACCESSORIES",
 } as const;

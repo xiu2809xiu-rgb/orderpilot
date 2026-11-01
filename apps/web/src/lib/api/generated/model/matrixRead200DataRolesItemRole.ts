@@ -6,17 +6,17 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type MatrixRead200DataRolesItemRole = typeof MatrixRead200DataRolesItemRole[keyof typeof MatrixRead200DataRolesItemRole];
-
+export type MatrixRead200DataRolesItemRole =
+  (typeof MatrixRead200DataRolesItemRole)[keyof typeof MatrixRead200DataRolesItemRole];
 
 export const MatrixRead200DataRolesItemRole = {
-  SYSTEM_ADMIN: 'SYSTEM_ADMIN',
-  PRODUCT_MANAGER: 'PRODUCT_MANAGER',
-  APPROVER: 'APPROVER',
-  SUPPORT: 'SUPPORT',
-  WAREHOUSE: 'WAREHOUSE',
-  FINANCE: 'FINANCE',
-  LOGISTICS: 'LOGISTICS',
-  MANAGEMENT: 'MANAGEMENT',
-  AUDITOR: 'AUDITOR',
+  SYSTEM_ADMIN: "SYSTEM_ADMIN",
+  PRODUCT_MANAGER: "PRODUCT_MANAGER",
+  APPROVER: "APPROVER",
+  SUPPORT: "SUPPORT",
+  WAREHOUSE: "WAREHOUSE",
+  FINANCE: "FINANCE",
+  LOGISTICS: "LOGISTICS",
+  MANAGEMENT: "MANAGEMENT",
+  AUDITOR: "AUDITOR",
 } as const;

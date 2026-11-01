@@ -5,9 +5,7 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import {
-  useQuery
-} from '@tanstack/react-query';
+import { useQuery } from "@tanstack/react-query";
 import type {
   DataTag,
   DefinedInitialDataOptions,
@@ -17,25 +15,23 @@ import type {
   QueryKey,
   UndefinedInitialDataOptions,
   UseQueryOptions,
-  UseQueryResult
-} from '@tanstack/react-query';
+  UseQueryResult,
+} from "@tanstack/react-query";
 
-import type {
-  InsightsKpis200
-} from '../../model';
+import type { InsightsKpis200 } from "../../model";
 
-import { apiMutator } from '../../../mutator.ts';
-import type { ErrorType } from '../../../mutator.ts';
+import { apiMutator } from "../../../mutator.ts";
+import type { ErrorType } from "../../../mutator.ts";
 
-
-
-
-const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKey: K } => {
+const withQueryKey = <T extends object, K>(
+  query: T,
+  queryKey: K,
+): T & { queryKey: K } => {
   const result = { queryKey } as T & { queryKey: K };
   for (const key of Object.keys(query)) {
     // The explicit queryKey always wins, matching the previous
     // `{ ...query, queryKey }` spread where it was set last.
-    if (key === 'queryKey') continue;
+    if (key === "queryKey") continue;
     Object.defineProperty(result, key, {
       enumerable: true,
       configurable: true,
@@ -48,92 +44,124 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
 /**
  * @summary Spectra's five measures, as mock lab estimates
  */
-export const insightsKpis = (
-
- signal?: AbortSignal
-) => {
-
-
-      return apiMutator<InsightsKpis200>(
-      {url: `/api/v1/insights/kpis`, method: 'GET', signal
-    },
-      );
-    }
-
-
-
+export const insightsKpis = (signal?: AbortSignal) => {
+  return apiMutator<InsightsKpis200>({
+    url: `/api/v1/insights/kpis`,
+    method: "GET",
+    signal,
+  });
+};
 
 export const getInsightsKpisQueryKey = () => {
-    return [
-    `/api/v1/insights/kpis`
-    ] as const;
-    }
+  return [`/api/v1/insights/kpis`] as const;
+};
 
+export const getInsightsKpisQueryOptions = <
+  TData = Awaited<ReturnType<typeof insightsKpis>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<Awaited<ReturnType<typeof insightsKpis>>, TError, TData>
+  >;
+}) => {
+  const { query: queryOptions } = options ?? {};
 
-export const getInsightsKpisQueryOptions = <TData = Awaited<ReturnType<typeof insightsKpis>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof insightsKpis>>, TError, TData>>, }
-) => {
+  const queryKey = queryOptions?.queryKey ?? getInsightsKpisQueryKey();
 
-const {query: queryOptions} = options ?? {};
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof insightsKpis>>> = ({
+    signal,
+  }) => insightsKpis(signal);
 
-  const queryKey =  queryOptions?.queryKey ?? getInsightsKpisQueryKey();
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof insightsKpis>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
 
+export type InsightsKpisQueryResult = NonNullable<
+  Awaited<ReturnType<typeof insightsKpis>>
+>;
+export type InsightsKpisQueryError = ErrorType<unknown>;
 
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof insightsKpis>>> = ({ signal }) => insightsKpis(signal);
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof insightsKpis>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type InsightsKpisQueryResult = NonNullable<Awaited<ReturnType<typeof insightsKpis>>>
-export type InsightsKpisQueryError = ErrorType<unknown>
-
-
-export function useInsightsKpis<TData = Awaited<ReturnType<typeof insightsKpis>>, TError = ErrorType<unknown>>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof insightsKpis>>, TError, TData>> & Pick<
+export function useInsightsKpis<
+  TData = Awaited<ReturnType<typeof insightsKpis>>,
+  TError = ErrorType<unknown>,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof insightsKpis>>, TError, TData>
+    > &
+      Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof insightsKpis>>,
           TError,
           Awaited<ReturnType<typeof insightsKpis>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useInsightsKpis<TData = Awaited<ReturnType<typeof insightsKpis>>, TError = ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof insightsKpis>>, TError, TData>> & Pick<
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useInsightsKpis<
+  TData = Awaited<ReturnType<typeof insightsKpis>>,
+  TError = ErrorType<unknown>,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof insightsKpis>>, TError, TData>
+    > &
+      Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof insightsKpis>>,
           TError,
           Awaited<ReturnType<typeof insightsKpis>>
-        > , 'initialData'
-      >, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useInsightsKpis<TData = Awaited<ReturnType<typeof insightsKpis>>, TError = ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof insightsKpis>>, TError, TData>>, }
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+        >,
+        "initialData"
+      >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useInsightsKpis<
+  TData = Awaited<ReturnType<typeof insightsKpis>>,
+  TError = ErrorType<unknown>,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof insightsKpis>>, TError, TData>
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
 /**
  * @summary Spectra's five measures, as mock lab estimates
  */
 
-export function useInsightsKpis<TData = Awaited<ReturnType<typeof insightsKpis>>, TError = ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof insightsKpis>>, TError, TData>>, }
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+export function useInsightsKpis<
+  TData = Awaited<ReturnType<typeof insightsKpis>>,
+  TError = ErrorType<unknown>,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof insightsKpis>>, TError, TData>
+    >;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getInsightsKpisQueryOptions(options);
 
-  const queryOptions = getInsightsKpisQueryOptions(options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
-
-
-
-
-
-

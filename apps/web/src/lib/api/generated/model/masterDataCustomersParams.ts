@@ -5,39 +5,39 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { MasterDataCustomersDirection } from './masterDataCustomersDirection.ts';
-import type { MasterDataCustomersSort } from './masterDataCustomersSort.ts';
+import type { MasterDataCustomersDirection } from "./masterDataCustomersDirection.ts";
+import type { MasterDataCustomersSort } from "./masterDataCustomersSort.ts";
 
 export type MasterDataCustomersParams = {
-/**
- * @minimum 1
- * @maximum 9007199254740991
- */
-page?: number;
-/**
- * @minimum 1
- * @maximum 200
- */
-pageSize?: number;
-/**
- * @maxLength 100
- */
-search?: string;
-/**
- * @minLength 1
- * @maxLength 60
- */
-country?: string;
-/**
- * @minLength 1
- * @maxLength 60
- */
-paymentTerms?: string;
-/**
- * @minLength 1
- * @maxLength 60
- */
-priceGroup?: string;
-sort?: MasterDataCustomersSort;
-direction?: MasterDataCustomersDirection;
+  /**
+   * @minimum 1
+   * @maximum 9007199254740991
+   */
+  page?: number;
+  /**
+   * @minimum 1
+   * @maximum 200
+   */
+  pageSize?: number;
+  /**
+   * @maxLength 100
+   */
+  search?: string;
+  /**
+   * @minLength 1
+   * @maxLength 60
+   */
+  country?: string;
+  /**
+   * @minLength 1
+   * @maxLength 60
+   */
+  paymentTerms?: string;
+  /**
+   * @minLength 1
+   * @maxLength 60
+   */
+  priceGroup?: string;
+  sort?: MasterDataCustomersSort;
+  direction?: MasterDataCustomersDirection;
 };

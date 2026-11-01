@@ -6,11 +6,11 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type PolicyAiDestinations200DataItemProvider = typeof PolicyAiDestinations200DataItemProvider[keyof typeof PolicyAiDestinations200DataItemProvider];
-
+export type PolicyAiDestinations200DataItemProvider =
+  (typeof PolicyAiDestinations200DataItemProvider)[keyof typeof PolicyAiDestinations200DataItemProvider];
 
 export const PolicyAiDestinations200DataItemProvider = {
-  mock: 'mock',
-  'openai-compatible': 'openai-compatible',
-  bedrock: 'bedrock',
+  mock: "mock",
+  "openai-compatible": "openai-compatible",
+  bedrock: "bedrock",
 } as const;

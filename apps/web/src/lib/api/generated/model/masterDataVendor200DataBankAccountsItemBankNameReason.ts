@@ -9,12 +9,13 @@
 /**
  * @nullable
  */
-export type MasterDataVendor200DataBankAccountsItemBankNameReason = typeof MasterDataVendor200DataBankAccountsItemBankNameReason[keyof typeof MasterDataVendor200DataBankAccountsItemBankNameReason] | null;
-
+export type MasterDataVendor200DataBankAccountsItemBankNameReason =
+  | (typeof MasterDataVendor200DataBankAccountsItemBankNameReason)[keyof typeof MasterDataVendor200DataBankAccountsItemBankNameReason]
+  | null;
 
 export const MasterDataVendor200DataBankAccountsItemBankNameReason = {
-  role: 'role',
-  bankDetails: 'bankDetails',
-  price: 'price',
-  policy: 'policy',
+  role: "role",
+  bankDetails: "bankDetails",
+  price: "price",
+  policy: "policy",
 } as const;

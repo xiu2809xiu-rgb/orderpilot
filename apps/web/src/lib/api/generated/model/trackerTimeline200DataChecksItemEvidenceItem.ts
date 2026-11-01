@@ -5,7 +5,7 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { TrackerTimeline200DataChecksItemEvidenceItemDocumentType } from './trackerTimeline200DataChecksItemEvidenceItemDocumentType.ts';
+import type { TrackerTimeline200DataChecksItemEvidenceItemDocumentType } from "./trackerTimeline200DataChecksItemEvidenceItemDocumentType.ts";
 
 export type TrackerTimeline200DataChecksItemEvidenceItem = {
   /** @minLength 1 */

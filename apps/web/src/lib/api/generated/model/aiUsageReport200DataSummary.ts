@@ -8,25 +8,25 @@
 
 export type AiUsageReport200DataSummary = {
   /**
-     * @minimum 0
-     * @maximum 9007199254740991
-     */
+   * @minimum 0
+   * @maximum 9007199254740991
+   */
   calls: number;
   /**
-     * @minimum 0
-     * @maximum 9007199254740991
-     */
+   * @minimum 0
+   * @maximum 9007199254740991
+   */
   inputTokens: number;
   /**
-     * @minimum 0
-     * @maximum 9007199254740991
-     */
+   * @minimum 0
+   * @maximum 9007199254740991
+   */
   outputTokens: number;
   /** @pattern ^-?\d{1,15}(\.\d{1,4})?$ */
   costUsd: string;
   /**
-     * @minimum 0
-     * @maximum 9007199254740991
-     */
+   * @minimum 0
+   * @maximum 9007199254740991
+   */
   failedCalls: number;
 };
