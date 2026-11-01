@@ -30,7 +30,7 @@ The licence-key guard reads the real values from `apps/web/.env.local` on your m
 | `security.yml` | SAST (Semgrep)                  | Semgrep with `p/default`, `p/typescript`, `p/react`, `p/nodejs` and `p/owasp-top-ten`, failing on any finding                                                                                       | Today (P-6)  |
 | `security.yml` | Secret scan (gitleaks)          | gitleaks over every commit in the history, findings redacted                                                                                                                                        | Today (P-6)  |
 | `security.yml` | Dependency scan (OSV)           | OSV-Scanner on `pnpm-lock.yaml`, failing on any advisory that `osv-scanner.toml` does not accept                                                                                                    | Today (P-6)  |
-| `docker.yml`   | Docker images                   | Builds every image from `docker-compose.yml`, scans each with Trivy (failing on a fixable HIGH or CRITICAL), starts the stack from them and runs `pnpm stack:smoke`                                 | Today (P-13) |
+| `docker.yml`   | Docker images                   | Builds every image from `docker-compose.yml`, scans each image we build with Trivy (failing on a fixable HIGH or CRITICAL), starts the stack from them and runs `pnpm stack:smoke`                  | Today (P-13) |
 | `docker.yml`   | IaC and Dockerfile scan         | `trivy config` over every Dockerfile and infrastructure file, failing on a finding of any severity                                                                                                  | Today (P-13) |
 
 `security.yml` also runs every Monday at 06:30 Singapore time, and `docker.yml` at 06:45, so a new advisory against an unchanged lockfile or base image still shows up. Semgrep and gitleaks keep a SARIF report as a run artifact for 14 days.
@@ -47,11 +47,12 @@ The licence-key guard reads the real values from `apps/web/.env.local` on your m
 
 ### Later
 
-| Control                                                       | Status        |
-| ------------------------------------------------------------- | ------------- |
-| End-to-end tests with axe, including the refusals of E2E #3   | Planned: P-14 |
-| OWASP ZAP baseline scan of the live URL, weekly and on demand | Planned: P-24 |
-| Lighthouse at each release                                    | Planned: P-24 |
+| Control                                                                          | Status        |
+| -------------------------------------------------------------------------------- | ------------- |
+| End-to-end tests with axe, including the refusals of E2E #3                      | Planned: P-14 |
+| OWASP ZAP baseline scan of the live URL, weekly and on demand                    | Planned: P-24 |
+| Lighthouse at each release                                                       | Planned: P-24 |
+| Trivy over the images the stack pulls (PostgreSQL with pgvector, Redis, Mailpit) | Planned: P-24 |
 
 ## Triage
 

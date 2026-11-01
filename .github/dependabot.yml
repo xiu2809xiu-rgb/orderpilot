@@ -90,3 +90,31 @@ updates:
       - dependency-name: "*"
         update-types:
           - version-update:semver-major
+
+  # The images compose pulls (PostgreSQL with pgvector, Redis, Mailpit, otel-lgtm).
+  # Trivy does not scan them yet: P-24 does (see the backlog), so these proposals
+  # are the only signal until then. No majors.
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Asia/Singapore
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: build
+      include: scope
+    labels:
+      - "type: chore"
+      - dependencies
+    groups:
+      pulled-images:
+        patterns:
+          - "*"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - version-update:semver-major

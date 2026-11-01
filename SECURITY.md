@@ -34,16 +34,17 @@ We are a student team, so we reply as soon as we can. There is no bug bounty. On
 | Semgrep: the default, TypeScript, React, Node and OWASP Top 10 rules                                                            | Required check `SAST (Semgrep)`                                                                                 |
 | gitleaks across the full history                                                                                                | Required check `Secret scan (gitleaks)`                                                                         |
 | OSV dependency scan on the lockfile                                                                                             | Required check `Dependency scan (OSV)`                                                                          |
-| Trivy over every image, failing on fixable HIGH or CRITICAL findings                                                            | Required check `Docker images`                                                                                  |
+| Trivy over every image we build, failing on fixable HIGH or CRITICAL findings                                                   | Required check `Docker images`                                                                                  |
 | Trivy config over every Dockerfile                                                                                              | Required check `IaC and Dockerfile scan`                                                                        |
 
 ### Coming with later stories
 
-None of these run yet.
+None of these run yet. Until the second one does, Dependabot proposes new versions of the pulled images weekly, and nothing scans them.
 
-| Control                                                       | Story |
-| ------------------------------------------------------------- | ----- |
-| OWASP ZAP baseline scan of the live URL, weekly and on demand | P-24  |
+| Control                                                            | Story |
+| ------------------------------------------------------------------ | ----- |
+| OWASP ZAP baseline scan of the live URL, weekly and on demand      | P-24  |
+| Trivy over the images the stack pulls (PostgreSQL, Redis, Mailpit) | P-24  |
 
 [Security testing](docs/security/security-testing.md) says what runs where and how we triage findings.
 
