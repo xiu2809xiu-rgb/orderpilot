@@ -225,7 +225,7 @@ Prompt 003's deadline of Monday evening, 2 Nov, cannot hold for all of this: 41 
 
 | Story | Title                                                 | Branch                           | State                                                                        |
 | ----- | ----------------------------------------------------- | -------------------------------- | ---------------------------------------------------------------------------- |
-| P-42  | Plan prompt 004                                       | `chore/plan-prompt-004`          | In review                                                                    |
+| P-42  | Plan prompt 004                                       | `chore/plan-prompt-004`          | In review, [#138](https://github.com/xiu2809xiu-rgb/orderpilot/pull/138)     |
 | P-13  | Docker images and the IaC scan                        | `ci/docker`                      | In progress                                                                  |
 | P-14  | End-to-end smoke                                      | `test/e2e-smoke`                 | Not started                                                                  |
 | P-39  | Module navigation, showing only what is real          | `feat/workspace-modules`         | Not started                                                                  |
