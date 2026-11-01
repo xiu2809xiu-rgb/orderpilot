@@ -872,7 +872,7 @@ A sign-in page that states OrderPilot's promise. Prompt 003; finished before the
 - **Priority:** must
 - **Estimate:** 3 points
 - **Requirements:** M4 best practices
-- **Branch:** `feat/product-pass-signin`
+- **Branch:** `feat/platform-sign-in`
 - **Planned for:** Sprint 01 (W2) and Sprint 02 (W3)
 - **Depends on:** P-12
 
@@ -882,6 +882,7 @@ Acceptance criteria:
 - That side has the tagline, the three-step "AI reads, rules decide, people approve" and a subtle animated order flow (React Bits free or Magic UI free).
 - Demo sign-in stays one click per role.
 - Check: screenshots at 1440 by 900 and 390 by 844 in `docs/design/screenshots/product-pass/`, looked at before merging: no "Planned", no tiles showing only a dash, no popups over content, no empty-looking lists, no text cut off.
+- Polish left for later: the sign-in page remembers the role a visitor picked last, and the order flow gets a short still picture on a phone.
 
 ### P-35: Master data
 
