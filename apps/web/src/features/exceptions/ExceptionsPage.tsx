@@ -24,12 +24,17 @@ export default function ExceptionsPage() {
   const { t } = useTranslation("exceptions");
   const { t: tc } = useTranslation("common");
   const [query, setQuery] = useUrlTableQuery(URL_FILTERS);
-  const state = query.filters.state;
+  // The queue is the work waiting, so with no state in the link it shows the
+  // open ones, as the server does. Clearing the chip asks for every state.
+  const state =
+    query.filters.state === "RESOLVED" || query.filters.state === "ALL"
+      ? query.filters.state
+      : "OPEN";
   const list = useExceptionsList(
     {
       page: query.page,
       pageSize: query.pageSize,
-      state: state === "OPEN" || state === "RESOLVED" ? state : "ALL",
+      state,
       ...(query.search ? { search: query.search } : {}),
     },
     { query: { placeholderData: (previous) => previous } },
@@ -133,13 +138,18 @@ export default function ExceptionsPage() {
       />
       <FilterChips
         chips={
-          state === "OPEN" || state === "RESOLVED"
-            ? [{ id: "state", label: t(`list.state.${state}`) }]
-            : []
+          state === "ALL"
+            ? []
+            : [{ id: "state", label: t(`list.state.${state}`) }]
         }
         filters={query.filters}
         onChange={(filters) => {
-          setQuery({ ...query, page: 1, filters });
+          setQuery({
+            ...query,
+            page: 1,
+            filters:
+              "state" in filters ? filters : { ...filters, state: "ALL" },
+          });
         }}
       />
       <DataTable
