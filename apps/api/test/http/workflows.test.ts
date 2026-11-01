@@ -1,3 +1,4 @@
+import { syntheticDataset } from "@orderpilot/synthetic-data";
 import {
   INBOX_ROLES,
   NOT_APPLIED_MESSAGE,
@@ -21,7 +22,14 @@ import {
 } from "../../src/modules/workflows/workflows.schemas.js";
 
 const W = `${API}/workflows`;
-const SPR = "SPR-20261102-0001";
+// The data is relative to today, so the numbers are read from it, not typed.
+const data = syntheticDataset();
+const waiting = data.orders.find((o) => o.scenario.kind === "awaiting-payment");
+const suggested = data.sprs.find((s) => s.status === "suggested");
+if (!waiting || !suggested)
+  throw new Error("The dataset has no sample to test");
+const ORDER = waiting.header.no;
+const SPR = suggested.recordNo;
 
 describe("the area 2 routes", () => {
   let t: TestApp;
@@ -114,12 +122,14 @@ describe("the area 2 routes", () => {
         t,
         as("FINANCE"),
         "get",
-        `${W}/orders/SO-0004/flow`,
+        `${W}/orders/${ORDER}/flow`,
       );
       expect(res.status).toBe(200);
       const body = orderFlowResponseSchema.parse(res.body);
       expect(body.meta.mock).toBe(true);
-      expect(body.data.payment.prepaymentPercent).toBe("50");
+      expect(body.data.payment.prepaymentPercent).toBe(
+        waiting.header.prepaymentPercent,
+      );
       expect(body.data.steps.some((step) => step.state === "current")).toBe(
         true,
       );
@@ -204,7 +214,7 @@ describe("the area 2 routes", () => {
       amount: "1000.00",
       currencyCode: "USD",
       reference: "TT-0004",
-      paidOn: "2026-11-02",
+      paidOn: data.asOf,
     };
 
     it("takes a payment type, checks it and stores nothing", async () => {
@@ -212,7 +222,7 @@ describe("the area 2 routes", () => {
         t,
         as("FINANCE"),
         "post",
-        `${W}/orders/SO-0004/payments`,
+        `${W}/orders/${ORDER}/payments`,
         { csrf: true, body },
       );
       expect(res.status).toBe(200);
@@ -224,7 +234,7 @@ describe("the area 2 routes", () => {
         t,
         as("FINANCE"),
         "post",
-        `${W}/orders/SO-0004/payments`,
+        `${W}/orders/${ORDER}/payments`,
         { csrf: true, body: { ...body, paymentType: "GIFT" } },
       );
       expect(unknown.status).toBe(400);
@@ -232,7 +242,7 @@ describe("the area 2 routes", () => {
         t,
         as("SUPPORT"),
         "post",
-        `${W}/orders/SO-0004/payments`,
+        `${W}/orders/${ORDER}/payments`,
         { csrf: true, body },
       );
       expect(support.status).toBe(403);

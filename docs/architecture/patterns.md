@@ -124,7 +124,7 @@ A throw rolls both back, so the trail never records work that did not happen. `A
 
 ## Seeding
 
-`pnpm db:seed` runs every `Seeder` in `database/seed/seeders.ts`, in order, through the same modules the API uses. Each one looks before it writes, so running it again changes nothing, and says in one line what it did. The test set-up runs the same seed. P-10 added the role-permission matrix and the nine users (with `DEMO_PASSWORD` as their password and one `user.created` audit event each); later stories load the synthetic dataset (`packages/synthetic-data`) into their tables.
+`pnpm db:seed` runs every `Seeder` in `database/seed/seeders.ts`, in order, through the same modules the API uses. Each one looks before it writes, so running it again changes nothing, and says in one line what it did. The test set-up runs the same seed. P-10 added the role-permission matrix and the nine users (with `DEMO_PASSWORD` as their password and one `user.created` audit event each); later stories load the synthetic dataset (`packages/synthetic-data`) into their tables. The dataset is generated orders first, with documents, payments, SPRs, tasks, reminders and exceptions derived from each order's fixture state, from a seed and a reference date (today in Asia/Singapore at run time).
 
 ## Guards: who may call a route
 

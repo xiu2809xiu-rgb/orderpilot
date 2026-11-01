@@ -15,11 +15,18 @@ GET {{baseUrl}}/api/v1/tracker/orders?page=1&pageSize=10&sort=orderDate&directio
 ### Only the overdue orders, found by a search.
 GET {{baseUrl}}/api/v1/tracker/orders?overdue=true&search=SO
 
+### Only the orders at one status, or held by one role. The status code is in each row.
+GET {{baseUrl}}/api/v1/tracker/orders?status=sample-awaiting-payment
+###
+GET {{baseUrl}}/api/v1/tracker/orders?ownerRole=WAREHOUSE&pageSize=50
+
 ### One order's timeline: pick an order No. from the list above.
 GET {{baseUrl}}/api/v1/tracker/orders/SO-0001
 
-### The exceptions queue.
+### The exceptions queue: the open ones, or ?state=RESOLVED for the history.
 GET {{baseUrl}}/api/v1/exceptions?page=1&pageSize=25
+###
+GET {{baseUrl}}/api/v1/exceptions?state=RESOLVED
 
-### Spectra's five measures, as mock lab estimates.
+### Spectra's five measures, as mock lab estimates, with twelve weekly values and a target each.
 GET {{baseUrl}}/api/v1/insights/kpis

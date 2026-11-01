@@ -213,18 +213,18 @@ Ticked means it exists on `main` and I found it with a command. Planned means th
 
 Phase B is paused at P-13 until the product pass is done. P-13's first builder stopped at a usage limit, and its work is uncommitted in its worktree. Richie said yes to the recorder and to coverage being recorded.
 
-| Story | Branch                                | Issue                                                           | State       |
-| ----- | ------------------------------------- | --------------------------------------------------------------- | ----------- |
-| P-31  | `feat/product-pass-data`              | [#117](https://github.com/xiu2809xiu-rgb/orderpilot/issues/117) | Not started |
-| P-32  | `feat/area4-consent-card`             | [#118](https://github.com/xiu2809xiu-rgb/orderpilot/issues/118) | In review   |
-| P-33  | `feat/product-pass-home`              | [#119](https://github.com/xiu2809xiu-rgb/orderpilot/issues/119) | Not started |
-| P-34  | `feat/platform-sign-in`               | [#120](https://github.com/xiu2809xiu-rgb/orderpilot/issues/120) | In review   |
-| P-35  | `feat/product-pass-master-data`       | [#121](https://github.com/xiu2809xiu-rgb/orderpilot/issues/121) | Not started |
-| P-36  | `feat/product-pass-orders`            | [#122](https://github.com/xiu2809xiu-rgb/orderpilot/issues/122) | Not started |
-| P-37  | `feat/product-pass-documents`         | [#123](https://github.com/xiu2809xiu-rgb/orderpilot/issues/123) | Not started |
-| P-38  | `feat/product-pass-inherited-screens` | [#124](https://github.com/xiu2809xiu-rgb/orderpilot/issues/124) | Not started |
-| P-39  | `feat/product-pass-hide-planned`      | [#125](https://github.com/xiu2809xiu-rgb/orderpilot/issues/125) | Not started |
-| P-40  | `feat/platform-the-bar`               | [#126](https://github.com/xiu2809xiu-rgb/orderpilot/issues/126) | In review   |
+| Story | Branch                                  | Issue                                                           | State                                                                    |
+| ----- | --------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| P-31  | `feat/platform-synthetic-data-at-scale` | [#117](https://github.com/xiu2809xiu-rgb/orderpilot/issues/117) | In review, [#132](https://github.com/xiu2809xiu-rgb/orderpilot/pull/132) |
+| P-32  | `feat/area4-consent-card`               | [#118](https://github.com/xiu2809xiu-rgb/orderpilot/issues/118) | Merged, [#129](https://github.com/xiu2809xiu-rgb/orderpilot/pull/129)    |
+| P-33  | `feat/product-pass-home`                | [#119](https://github.com/xiu2809xiu-rgb/orderpilot/issues/119) | Not started                                                              |
+| P-34  | `feat/platform-sign-in`                 | [#120](https://github.com/xiu2809xiu-rgb/orderpilot/issues/120) | Merged, [#130](https://github.com/xiu2809xiu-rgb/orderpilot/pull/130)    |
+| P-35  | `feat/product-pass-master-data`         | [#121](https://github.com/xiu2809xiu-rgb/orderpilot/issues/121) | Not started                                                              |
+| P-36  | `feat/product-pass-orders`              | [#122](https://github.com/xiu2809xiu-rgb/orderpilot/issues/122) | Not started                                                              |
+| P-37  | `feat/product-pass-documents`           | [#123](https://github.com/xiu2809xiu-rgb/orderpilot/issues/123) | Not started                                                              |
+| P-38  | `feat/product-pass-inherited-screens`   | [#124](https://github.com/xiu2809xiu-rgb/orderpilot/issues/124) | Not started                                                              |
+| P-39  | `feat/product-pass-hide-planned`        | [#125](https://github.com/xiu2809xiu-rgb/orderpilot/issues/125) | Not started                                                              |
+| P-40  | `feat/platform-the-bar`                 | [#126](https://github.com/xiu2809xiu-rgb/orderpilot/issues/126) | In review, [#131](https://github.com/xiu2809xiu-rgb/orderpilot/pull/131) |
 
 ## Prompt 002: Finish the base by Sunday night
 

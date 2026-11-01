@@ -6,8 +6,13 @@ import {
   type TimelineStep,
   type Tolerance,
 } from "@orderpilot/shared";
-import type { Customer, Item, SampleOrder } from "@orderpilot/synthetic-data";
-import { SAMPLE_STEPS } from "./mock-status.js";
+import type {
+  Customer,
+  Item,
+  SampleException,
+  SampleOrder,
+} from "@orderpilot/synthetic-data";
+import { SAMPLE_STEPS, sampleStepFor } from "./mock-status.js";
 
 // Mock builders for the base's screens. They read the synthetic data's sample
 // scenarios and write typed results that say so (`mock.` rule ids). They hold
@@ -43,16 +48,33 @@ export function mockTimeline(order: SampleOrder): TimelineStep[] {
   }));
 }
 
-export function mockOverdue(order: SampleOrder): OverdueFlag {
+/**
+ * Overdue as the dataset states it: the order has work waiting that fell due
+ * before today. The words come from the dataset's scenario or the step. No
+ * rule here decides what is late: that is the SLA logic, which is not ours.
+ */
+export function mockOverdue(order: SampleOrder, asOf: string): OverdueFlag {
   const { scenario } = order;
-  if (scenario.kind !== "awb-overdue") {
+  const due = order.step.dueOn;
+  if (!due || due >= asOf) {
     return { overdue: false, daysOverdue: 0, reason: null };
   }
-  const what = scenario.documentType === "AWB" ? "AWB" : "Bill of lading";
+  const days = Math.round(
+    (Date.parse(`${asOf}T00:00:00Z`) - Date.parse(`${due}T00:00:00Z`)) /
+      86_400_000,
+  );
+  if (scenario.kind === "awb-overdue") {
+    const what = scenario.documentType === "AWB" ? "AWB" : "Bill of lading";
+    return {
+      overdue: true,
+      daysOverdue: days,
+      reason: `${what} was due on ${scenario.dueDate}`,
+    };
+  }
   return {
     overdue: true,
-    daysOverdue: scenario.daysOverdue,
-    reason: `${what} was due on ${scenario.dueDate}`,
+    daysOverdue: days,
+    reason: `${sampleStepFor(order.sampleScreenState).status.label} was due on ${due}`,
   };
 }
 
@@ -114,60 +136,60 @@ export function mockChecks(order: SampleOrder): CheckResult[] {
       checkedAt,
     });
   }
+  if (order.scenario.kind === "price-mismatch") {
+    const { itemNo, printed, listed } = order.scenario;
+    results.push({
+      id: `mock-${no}-3`,
+      ruleId: "mock.sample-price",
+      ruleLabel: "Unit price against the price list (sample result)",
+      orderNo: no,
+      outcome: "fail",
+      expected: listed,
+      actual: printed,
+      tolerance: {
+        label: "Price difference in USD (sample value)",
+        value: "0.00",
+      },
+      evidence: [
+        {
+          documentId: `${no}-customer-po`,
+          documentType: "CUSTOMER_PO",
+          location: `item ${itemNo}: unit price`,
+          value: printed,
+        },
+      ],
+      checkedAt,
+    });
+  }
   return results;
 }
 
-/** One sample exception for each sample scenario that would raise one. */
+/**
+ * The dataset's exceptions in the queue's shape, with the customer's name
+ * added. The dataset raises them from each order's scenario; area 3's engine
+ * replaces that.
+ */
 export function mockExceptions(
-  orders: readonly SampleOrder[],
+  exceptions: readonly SampleException[],
   customers: readonly Customer[],
 ): CheckException[] {
-  const rows: CheckException[] = [];
-  for (const order of orders) {
-    const customer = customers.find(
-      (c) => c.no === order.header.sellToCustomerNo,
-    );
-    const index = SAMPLE_STEPS.findIndex(
-      (entry) => entry.state === order.sampleScreenState,
-    );
-    const base = {
-      id: `mock-exception-${order.header.no}`,
-      orderNo: order.header.no,
-      customerNo: order.header.sellToCustomerNo,
-      customerName: customer?.name ?? order.header.sellToCustomerNo,
-      state: "OPEN" as const,
-      openedAt: stepTime(order, Math.max(index, 0)),
-    };
-    const { scenario } = order;
-    if (scenario.kind === "packing-list-mismatch") {
-      const ordered = plainQuantity(scenario.ordered);
-      const packed = plainQuantity(scenario.packed);
-      rows.push({
-        ...base,
-        ruleId: "mock.sample-quantity",
-        ruleLabel: "Packing list quantity against the PO (sample result)",
-        summary: `Item ${scenario.itemNo}: the packing list says ${packed}, the PO says ${ordered}`,
-        expected: ordered,
-        actual: packed,
-        difference: "sample difference",
-        tolerance: MOCK_TOLERANCE,
-        fixBy: "SUPPORT",
-      });
-    } else if (scenario.kind === "awb-overdue") {
-      rows.push({
-        ...base,
-        ruleId: "mock.sample-awb-due",
-        ruleLabel: "Shipping document received on time (sample result)",
-        summary: `The ${scenario.documentType === "AWB" ? "AWB" : "bill of lading"} was due on ${scenario.dueDate} and has not arrived`,
-        expected: `Received by ${scenario.dueDate}`,
-        actual: "Not received",
-        difference: `${String(scenario.daysOverdue)} days late`,
-        tolerance: { label: "Days late (sample value)", value: "0" },
-        fixBy: "LOGISTICS",
-      });
-    }
-  }
-  return rows;
+  const names = new Map(customers.map((c) => [c.no, c.name]));
+  return exceptions.map((e) => ({
+    id: e.recordNo,
+    orderNo: e.orderNo,
+    customerNo: e.customerNo,
+    customerName: names.get(e.customerNo) ?? e.customerNo,
+    ruleId: e.ruleId,
+    ruleLabel: e.ruleLabel,
+    summary: e.summary,
+    expected: e.expected,
+    actual: e.found,
+    difference: e.difference,
+    tolerance: { label: e.toleranceLabel, value: e.toleranceValue },
+    fixBy: e.fixBy,
+    state: e.state,
+    openedAt: e.openedAt,
+  }));
 }
 
 /**

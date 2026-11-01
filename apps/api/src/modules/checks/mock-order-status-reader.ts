@@ -1,11 +1,13 @@
 import { Inject, Injectable } from "@nestjs/common";
-import type { SyntheticDataset } from "@orderpilot/synthetic-data";
+import {
+  SYNTHETIC_SOURCE,
+  type DatasetSource,
+} from "../../common/synthetic-source.js";
 import { sampleStepFor } from "./domain/mock-status.js";
 import type {
   OrderStatusReader,
   ReportedOrderStatus,
 } from "./domain/order-status-reader.js";
-import { SYNTHETIC_DATASET } from "./synthetic-dataset.js";
 
 /**
  * Answers from the synthetic data's sample states. It stands in for area 2's
@@ -15,29 +17,36 @@ import { SYNTHETIC_DATASET } from "./synthetic-dataset.js";
 @Injectable()
 export class MockOrderStatusReader implements OrderStatusReader {
   constructor(
-    @Inject(SYNTHETIC_DATASET) private readonly dataset: SyntheticDataset,
+    @Inject(SYNTHETIC_SOURCE) private readonly source: DatasetSource,
   ) {}
 
   statusOf(orderNo: string): Promise<ReportedOrderStatus | null> {
-    const order = this.dataset.orders.find((o) => o.header.no === orderNo);
+    const order = this.source().orders.find((o) => o.header.no === orderNo);
     if (!order) return Promise.resolve(null);
     const entry = sampleStepFor(order.sampleScreenState);
     return Promise.resolve({
       orderNo,
       status: entry.status,
       ownerRole: entry.ownerRole,
-      since: `${order.header.orderDate}T08:00:00.000Z`,
+      since: `${order.step.enteredOn}T08:00:00.000Z`,
     });
   }
 
-  async statusOfMany(
+  statusOfMany(
     orderNos: readonly string[],
   ): Promise<ReadonlyMap<string, ReportedOrderStatus>> {
+    const wanted = new Set(orderNos);
     const found = new Map<string, ReportedOrderStatus>();
-    for (const orderNo of orderNos) {
-      const status = await this.statusOf(orderNo);
-      if (status) found.set(orderNo, status);
+    for (const order of this.source().orders) {
+      if (!wanted.has(order.header.no)) continue;
+      const entry = sampleStepFor(order.sampleScreenState);
+      found.set(order.header.no, {
+        orderNo: order.header.no,
+        status: entry.status,
+        ownerRole: entry.ownerRole,
+        since: `${order.step.enteredOn}T08:00:00.000Z`,
+      });
     }
-    return found;
+    return Promise.resolve(found);
   }
 }
