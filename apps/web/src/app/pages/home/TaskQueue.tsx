@@ -43,7 +43,7 @@ export function TaskQueue({ touch }: { touch: boolean }) {
             action={t("needs.emptyAction")}
           />
         ) : (
-          <HomeTable label={t("needs.title")} columns={columns}>
+          <HomeTable label={t("needs.table")} columns={columns}>
             {tasks.map((task) => (
               <TaskRow
                 key={task.id}

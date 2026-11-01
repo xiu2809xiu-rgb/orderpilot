@@ -21,6 +21,7 @@
   },
   "needs": {
     "title": "Needs you",
+    "table": "Your next tasks, most urgent first",
     "viewAll": "View all ({{total}})",
     "overdue": "Overdue",
     "actionOn": "{{action}}: {{what}}",
@@ -60,6 +61,7 @@
   "overdue": {
     "title": "Most overdue, by amount",
     "status": "Where it stands",
+    "table": "Overdue orders, largest first",
     "open": "Open order",
     "emptyTitle": "No order is overdue",
     "emptyDescription": "Every open order is on time. The tracker shows where each one stands.",
@@ -68,6 +70,7 @@
   },
   "refused": {
     "title": "Latest refused actions",
+    "table": "Refused actions, newest first",
     "open": "Open",
     "emptyTitle": "No refused actions",
     "emptyDescription": "Nobody has been refused anything yet. The audit trail holds every event.",
@@ -79,6 +82,7 @@
   },
   "rules": {
     "title": "Waiting for Spectra to confirm",
+    "table": "Open business rules and their draft values",
     "description": "These rules stay as configuration until Spectra confirms them.",
     "open": "Open",
     "noScreen": "No screen holds this yet",
@@ -106,6 +110,7 @@
     "summary_one": "{{count}} open order. Most are at {{step}}.",
     "summary_other": "{{count}} open orders. Most are at {{step}}.",
     "steps": {
+      "label": "Open orders at each sales step",
       "poIn": "PO in",
       "stock": "Stock",
       "pi": "PI",

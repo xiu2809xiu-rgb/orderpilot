@@ -55,7 +55,7 @@ export function OverdueOrders() {
             action={t("needs.emptyAction")}
           />
         ) : (
-          <HomeTable label={t("overdue.title")} columns={columns}>
+          <HomeTable label={t("overdue.table")} columns={columns}>
             {orders.map((order) => (
               <tr key={order.orderNo}>
                 <td className={HOME_FIRST_CELL}>{order.status.label}</td>

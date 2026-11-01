@@ -35,7 +35,7 @@ export function SalesFlow() {
     >
       <QueryBoundary query={query}>
         <ScrollRegion
-          label={t("flow.title")}
+          label={t("flow.steps.label")}
           className="rounded-none border-0 bg-transparent"
         >
           <ol className="flex min-w-[46rem] items-stretch">

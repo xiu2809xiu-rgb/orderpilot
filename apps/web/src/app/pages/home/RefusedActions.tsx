@@ -46,7 +46,7 @@ export function RefusedActions() {
             action={t("refused.emptyAction")}
           />
         ) : (
-          <HomeTable label={t("refused.title")} columns={columns}>
+          <HomeTable label={t("refused.table")} columns={columns}>
             {events.map((event) => (
               <tr key={event.id}>
                 <td className={HOME_FIRST_CELL}>{event.summary}</td>

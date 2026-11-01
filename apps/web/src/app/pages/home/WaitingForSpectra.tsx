@@ -32,7 +32,7 @@ export function WaitingForSpectra() {
       className="h-full"
     >
       <QueryBoundary query={query}>
-        <HomeTable label={t("rules.title")} columns={columns}>
+        <HomeTable label={t("rules.table")} columns={columns}>
           {rules.map((rule) => (
             <tr key={rule.id}>
               <td className={HOME_FIRST_CELL}>{t(`rules.names.${rule.id}`)}</td>
