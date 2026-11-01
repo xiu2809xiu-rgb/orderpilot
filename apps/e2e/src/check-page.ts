@@ -49,9 +49,15 @@ function rawKeys(page: Page): Promise<string[]> {
     const key = /^[a-z][a-zA-Z0-9]*(?:[.:][a-zA-Z0-9]+)+$/;
     const found: string[] = [];
     for (const el of document.body.querySelectorAll("*")) {
-      if (el.children.length > 0 || el.closest("code,kbd,pre")) continue;
+      if (el.children.length > 0 || el.closest("code,kbd,pre,samp")) continue;
+      // Monospace text is an identifier shown on purpose, such as a
+      // permission name under its plain label in the role matrix.
+      if (getComputedStyle(el).fontFamily.toLowerCase().includes("mono")) {
+        continue;
+      }
       const text = el.textContent.trim();
-      // A key has a namespace colon or a camelCase part; "orders.read" is a name.
+      // Only a namespace colon or a camelCase part counts, because a plain
+      // "invoice.pdf" has the same shape as a key.
       if (key.test(text) && /[:A-Z]/.test(text)) found.push(text);
     }
     return found;
@@ -74,7 +80,12 @@ async function axeProblems(page: Page): Promise<string[]> {
     ({ id, impact, help, nodes }) =>
       `axe ${id} (${impact ?? "unknown"}): ${help}, at ${nodes
         .slice(0, 3)
-        .map((node) => node.target.join(" "))
+        // Radix ids change between runs, so the element's opening tag is
+        // what tells a reader which one it is.
+        .map(
+          (node) =>
+            `${node.target.join(" ")} ${node.html.replace(/\s+/g, " ").slice(0, 160)}`,
+        )
         .join("; ")}`,
   );
 }
