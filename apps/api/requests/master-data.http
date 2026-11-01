@@ -1,0 +1,47 @@
+### Master data: items, customers and vendors from the mock of Navision. Every
+### answer says so in meta.mock. Read-only: Navision stays the system of record.
+### Sign in first (see auth.http): REST Client keeps the cookies.
+@baseUrl = http://localhost:3000
+
+### Sign in as Finance, who sees bank details, cost and prices.
+POST {{baseUrl}}/api/v1/auth/demo-login
+Content-Type: application/json
+
+{ "role": "FINANCE" }
+
+### What the filters can offer.
+GET {{baseUrl}}/api/v1/master-data/filters
+
+### Items, a page at a time. Sort by no, description, brand, inventory,
+### qtyOnSalesOrder, qtyOnPurchOrder, availableStock or unitPrice.
+GET {{baseUrl}}/api/v1/master-data/items?page=1&pageSize=25&sort=availableStock&direction=asc
+
+### Search covers the number, the description and the part number.
+GET {{baseUrl}}/api/v1/master-data/items?search=monitor
+
+### Filters: brand, category (IT, SURVEILLANCE, ACCESSORIES), vendor and
+### availability (short, low, ok).
+GET {{baseUrl}}/api/v1/master-data/items?availability=short
+###
+GET {{baseUrl}}/api/v1/master-data/items?category=SURVEILLANCE&vendor=V-0002
+
+### One item: stock, open orders, open purchase orders and SPRs.
+GET {{baseUrl}}/api/v1/master-data/items/I-0004
+
+### An unknown number answers the 404 envelope.
+GET {{baseUrl}}/api/v1/master-data/items/I-9999
+
+### Customers: search, country, payment terms and price group.
+GET {{baseUrl}}/api/v1/master-data/customers?country=IN&sort=overdueOrders&direction=desc
+###
+GET {{baseUrl}}/api/v1/master-data/customers?paymentTerms=30%20DAYS&priceGroup=DIST-A
+
+### One customer: key facts, open orders and overdue orders.
+GET {{baseUrl}}/api/v1/master-data/customers/C-0001
+
+### Vendors.
+GET {{baseUrl}}/api/v1/master-data/vendors?sort=balanceLcy&direction=desc
+
+### One vendor. Finance sees the bank account. Sign in as WAREHOUSE and the same
+### request answers masked: true, value: null and the reason.
+GET {{baseUrl}}/api/v1/master-data/vendors/V-0001

@@ -2,13 +2,13 @@
 
 Rendered from [`scripts/github/data/backlog.json`](../../scripts/github/data/backlog.json) by `node scripts/github/render-docs.mjs`. Change the data, not this file. The same data seeds the issues. The board shows where each story stands.
 
-There are 9 epics and 85 stories. Estimates are story points: a first guess, for the team to change at planning.
+There are 9 epics and 120 stories. Estimates are story points: a first guess, for the team to change at planning.
 
 ## Epics
 
 | Epic   | Title                             | Area                                    | Stories | Points |
 | ------ | --------------------------------- | --------------------------------------- | ------- | ------ |
-| Epic P | The platform base                 | `area: 1 document AI and integration`   | 41      | 235    |
+| Epic P | The platform base                 | `area: 1 document AI and integration`   | 76      | 444    |
 | Epic A | Document intake and AI extraction | `area: 1 document AI and integration`   | 5       | 31     |
 | Epic B | Master data and Navision          | `area: 1 document AI and integration`   | 4       | 14     |
 | Epic C | Order workflows and approvals     | `area: 2 order workflows and approvals` | 5       | 29     |
@@ -20,7 +20,7 @@ There are 9 epics and 85 stories. Estimates are story points: a first guess, for
 
 ## Ready to pull
 
-The starter stories for areas 2, 3 and 4. Their owners start on them on Monday 2 Nov and refine them, and at the handover prompt 004 writes the rest from the owners' notes. They sit at Ready on the board.
+The starter stories for areas 2, 3 and 4. Their owners start on them on Monday 2 Nov and refine them, and at the handover prompt 005 writes the rest from the owners' notes. They sit at Ready on the board.
 
 | Story | Title                                                              | Area                                    | Points |
 | ----- | ------------------------------------------------------------------ | --------------------------------------- | ------ |
@@ -84,11 +84,46 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | P-33  | Home pages that work                                               | must     | 8      | `area: 1 document AI and integration`   | M4 best practices, M5 team Git workflow                        |
 | P-34  | Sign-in that sells it                                              | must     | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-35  | Master data                                                        | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
-| P-36  | Orders and the one order page                                      | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
-| P-37  | Documents and the review screen                                    | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
-| P-38  | The screens the teammates inherit                                  | must     | 8      | `area: 1 document AI and integration`   | M4 best practices, M5 team Git workflow                        |
-| P-39  | Hide what is not real yet                                          | must     | 2      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-36  | Orders: the reader and the list                                    | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-37  | Document intake and the inbox                                      | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-38  | The task inbox on the templates                                    | must     | 8      | `area: 2 order workflows and approvals` | M4 best practices, M5 team Git workflow                        |
+| P-39  | Module navigation, showing only what is real                       | must     | 2      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-40  | The bar for every screen: dense tables, keys and actions           | must     | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-42  | Plan prompt 004                                                    | must     | 2      | `area: 1 document AI and integration`   | M4 best practices, M5 team Git workflow                        |
+| P-43  | Records open as tabs                                               | must     | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-44  | List template: filter bar, action bar and status chip              | must     | 8      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-45  | List template: grid, saved views and operation log                 | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-46  | Form kit                                                           | must     | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-47  | Document form                                                      | must     | 8      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-48  | Lines grid                                                         | must     | 8      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-49  | New order and draft editing                                        | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-50  | Submit, cancel and copy an order                                   | must     | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-51  | The one order page                                                 | must     | 8      | `area: 1 document AI and integration`   | M3 AI-assisted coding, M4 best practices                       |
+| P-52  | Demo documents                                                     | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-53  | Mock AI and the review fields                                      | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-54  | Document preview and highlight                                     | must     | 8      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-55  | An order from a confirmed PO                                       | must     | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-56  | Pins, to-dos and reminders: the records                            | must     | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-57  | Pin to top, Remind me and Add to my to-dos                         | must     | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-58  | The My work panel                                                  | must     | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-59  | Personal reminders fire                                            | must     | 8      | `area: 1 document AI and integration`   | M4 best practices, M6 deploy and monitor                       |
+| P-60  | SPR drafts and the SPR list                                        | must     | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-61  | The SPR form                                                       | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-62  | Payment confirmations                                              | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-63  | Shipments                                                          | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-64  | Users                                                              | must     | 5      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
+| P-65  | Roles                                                              | must     | 8      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
+| P-66  | Approval limits form                                               | must     | 5      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
+| P-67  | Check tolerance and reminder rule forms                            | must     | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-68  | Change requests for master data                                    | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-69  | Mock Navision Demo data page                                       | must     | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-70  | Pick and pack, and Proforma invoices                               | must     | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-71  | One status system everywhere                                       | must     | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-72  | SPR approval on the templates                                      | must     | 3      | `area: 2 order workflows and approvals` | M4 best practices, M5 team Git workflow                        |
+| P-73  | Exceptions on the templates                                        | must     | 3      | `area: 3 checks tracker and insights`   | M4 best practices, M5 team Git workflow                        |
+| P-74  | Tracker and KPIs on the templates                                  | must     | 5      | `area: 3 checks tracker and insights`   | M4 best practices, M5 team Git workflow                        |
+| P-75  | Audit log on the template                                          | must     | 3      | `area: 4 controls and monitoring`       | M4 best practices, M5 team Git workflow                        |
+| P-76  | Governance and monitoring on the templates                         | must     | 5      | `area: 4 controls and monitoring`       | M4 best practices, M5 team Git workflow                        |
 | T-1   | Owners, backups and reviews                                        | must     | 2      | `area: team`                            | M5 team Git workflow                                           |
 | T-2   | The briefing call with Spectra                                     | must     | 2      | `area: team`                            | M1 design thinking                                             |
 | T-3   | The project plan                                                   | must     | 3      | `area: team`                            | M5 team Git workflow                                           |
@@ -543,13 +578,12 @@ Acceptance criteria:
 
 - Upload API: accepts PDF, PNG, JPEG, XLSX and CSV; size limits, type sniffing and a zip-bomb guard; nothing executable; stored through P-9's storage service.
 - Processing: PDF text extraction (pdfjs-dist) plus page images for the vision models; duplicate detection by content hash.
-- Data model: the start of area 1's order data: orders, order lines, documents, and field values with confidence and provenance. Status stays in area 2.
+- Data model: field values with confidence and provenance, on top of the orders and documents tables that P-36 and P-37 bring. Status stays in area 2.
 - UI: an upload screen with drag and drop, and a documents list.
 - Queue: a job that marks each document "awaiting AI" until the extraction stories.
 - Prompt 003 brings forward upload, the documents list and 12 synthetic documents (P-37); this story keeps the rest: the safe upload API, extraction, content-hash duplicate detection, the data model and the queue.
-- The seed loads the synthetic set's orders, payments, documents, SPRs and exceptions into the order tables, as well as the mock read models reading them (follow-up to P-31).
-- A second seed run on a later day moves the stored rows to today's dates, with a test (follow-up to P-31).
 - The synthetic set includes a rejected SPR and a partly shipped order, with the screens that show them (follow-up to P-31).
+- Prompt 004 keeps the sample set behind `OrderDirectory` and `DocumentDirectory`, because its dates move with today, so the seed does not copy it into the order tables (ADR in P-36).
 
 ### P-19: Mock Navision and synthetic master data
 
@@ -908,9 +942,9 @@ Acceptance criteria:
 - A vendor shows its bank accounts (masked by role) and its open purchase orders.
 - Check: screenshots as every role it touches, at 1440 by 900 and 390 by 844 in `docs/design/screenshots/product-pass/`, looked at before merging: no "Planned", no tiles showing only a dash, no popups over content, no empty-looking lists, no text cut off.
 
-### P-36: Orders and the one order page
+### P-36: Orders: the reader and the list
 
-The orders list, a New order form and one order page for every area. Prompt 003; finished before the handover on Monday evening, 2 Nov.
+Orders as real records, with the sample set behind one reader, and the orders list on prompt 004's template. Prompt 003 item 6.
 
 - **Area:** `area: 1 document AI and integration`
 - **Priority:** must
@@ -918,19 +952,20 @@ The orders list, a New order form and one order page for every area. Prompt 003;
 - **Requirements:** M2 GRS by design, M4 best practices
 - **Branch:** `feat/product-pass-orders`
 - **Planned for:** Sprint 01 (W2) and Sprint 02 (W3)
-- **Depends on:** P-31, P-35
+- **Depends on:** P-31, P-35, P-45
 
 Acceptance criteria:
 
-- The orders list, with filters for status, customer, owner, date and amount.
-- A New order form: customer, PO number, and lines with item search, quantity and price. It shows availability live as you type, and flags a shortfall with "Raise SPR".
-- One order page is the single place for an order: area 1's header, lines, amounts, availability and documents; area 2's steps; area 3's checks and tracker view; the next actions for the role. Each section stays a component in its owner's folder.
-- Writes go to OrderPilot only, never to Navision.
-- Check: screenshots as every role it touches, at 1440 by 900 and 390 by 844 in `docs/design/screenshots/product-pass/`, looked at before merging: no "Planned", no tiles showing only a dash, no popups over content, no empty-looking lists, no text cut off.
+- An ADR records it: the 120 sample orders stay in the synthetic set, because their dates move with today, and new orders are real rows in OrderPilot's own tables.
+- `apps/api/src/modules/orders`, in layers, with `SalesOrder` and `SalesOrderLine`, a capture state of draft, submitted or void that is never called status, and new numbers from the record number service.
+- `OrderDirectory` answers for sample and stored orders alike, and whatever needs an order's facts asks it, so a new order shows up wherever a sample order does.
+- `GET /orders` and `GET /orders/:orderNo` are paged, sorted and filtered on the server, masked by role, with `.http` requests and API tests for 401, 403, 404 and validation.
+- Orders is a list on the template in the Sales module, and leaves the planned list.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
 
-### P-37: Documents and the review screen
+### P-37: Document intake and the inbox
 
-Upload, the documents list and the review screen, brought forward from P-18 and P-21. Prompt 003; finished before the handover on Monday evening, 2 Nov.
+A safe upload and a documents inbox on prompt 004's template, brought forward from P-18. Prompt 003 item 7.
 
 - **Area:** `area: 1 document AI and integration`
 - **Priority:** must
@@ -938,56 +973,60 @@ Upload, the documents list and the review screen, brought forward from P-18 and 
 - **Requirements:** M2 GRS by design, M4 best practices
 - **Branch:** `feat/product-pass-documents`
 - **Planned for:** Sprint 01 (W2) and Sprint 02 (W3)
-- **Depends on:** P-31
+- **Depends on:** P-31, P-45, P-14
 
 Acceptance criteria:
 
-- Upload with drag and drop (PDF, images, Excel), and the documents list.
-- Each document's page shows the preview beside the fields read from it. Each field has its confidence, and clicking a field highlights where it came from on the page.
-- Confirm and Correct actions, with the corrections audited.
-- Until P-17's gateway is ready, Mock AI fills the fields from the synthetic ground truth.
-- Ship 12 synthetic documents (POs in different layouts, PIs and packing lists, including one scanned-looking PO) in `apps/web/public/demo-documents/`, so anyone can try the demo story's first two steps.
-- Check: screenshots as every role it touches, at 1440 by 900 and 390 by 844 in `docs/design/screenshots/product-pass/`, looked at before merging: no "Planned", no tiles showing only a dash, no popups over content, no empty-looking lists, no text cut off.
+- `POST /documents` takes PDF, PNG, JPEG, XLSX and CSV only, sniffed and not trusted, with size limits and a zip-bomb guard. Nothing executable is accepted.
+- Files go through the storage service, a `Document` row records them, `GET /documents/:id/file` streams them behind `documents.read`, and the same content uploaded twice links to the first.
+- `DocumentDirectory` answers for sample and stored documents alike.
+- Inbox is a list on the template in the Documents module, with Upload PO as its one primary action, on the page and not in a popup, and in the home page and Ctrl+K for the roles allowed.
+- A document can be voided with a reason, with its own permission, and every step is audited.
+- `.http` requests and API tests for every kind of refused upload.
+- A Playwright test: an allowed role uploads and voids a document, and a role without the permission sees no button and gets a 403 from the server.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
 
-### P-38: The screens the teammates inherit
+### P-38: The task inbox on the templates
 
-UI only for the task inbox, SPR approval, exceptions and insights; never their logic. Prompt 003; finished before the handover on Monday evening, 2 Nov.
+UI only: the first of the teammates' screens to move. Prompt 004 section 7, and prompt 003 item 8.
 
-- **Area:** `area: 1 document AI and integration`
+- **Area:** `area: 2 order workflows and approvals`
 - **Priority:** must
 - **Estimate:** 8 points
 - **Requirements:** M4 best practices, M5 team Git workflow
-- **Branch:** `feat/product-pass-inherited-screens`
+- **Branch:** `feat/template-inbox`
 - **Planned for:** Sprint 01 (W2) and Sprint 02 (W3)
-- **Depends on:** P-31
+- **Depends on:** P-45
 
 Acceptance criteria:
 
-- Task inbox: a compact list with customer, amount, age, due date and priority, and filters by type. Inline actions (approve, reject with a comment, open), and bulk select where it's safe.
-- SPR approval: the request, the stock picture, the customer's order, the approver's limit, and the decision with a comment.
-- Exceptions: severity, expected and found side by side, assign, and resolve with a reason.
-- Insights: the five KPIs with trend and target, by week.
-- Keep every area's core logic as `it.todo` for its owner. In each pull request, say what changed, and ask that area's owner to review.
-- Check: screenshots as every role it touches, at 1440 by 900 and 390 by 844 in `docs/design/screenshots/product-pass/`, looked at before merging: no "Planned", no tiles showing only a dash, no popups over content, no empty-looking lists, no text cut off.
+- The task inbox is a compact list on the template, with its filters in the address, and reminders as a tab.
+- Inline actions use the mock overlay. Batch actions cover only tasks that merely complete, never an approval or a payment, and end with one toast and one Undo.
+- The core logic stays `it.todo`, and Azri reviews the pull request.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
 
-### P-39: Hide what is not real yet
+### P-39: Module navigation, showing only what is real
 
-No placeholder a reviewer can reach. Prompt 003; finished before the handover on Monday evening, 2 Nov.
+Navigation by business module, with counts, and no placeholder a reviewer can reach. Prompt 004 section 2, and prompt 003 item 9.
 
 - **Area:** `area: 1 document AI and integration`
 - **Priority:** must
 - **Estimate:** 2 points
 - **Requirements:** M4 best practices
-- **Branch:** `feat/product-pass-hide-planned`
+- **Branch:** `feat/workspace-modules`
 - **Planned for:** Sprint 01 (W2) and Sprint 02 (W3)
-- **Depends on:** P-12
+- **Depends on:** P-12, P-33, P-35
 
 Acceptance criteria:
 
-- Remove Mapping, Connectors and the 3D view from the menu until their stories land.
-- Hide a menu item until it has something real to show.
-- Keep `PlannedPage` only behind a development flag.
-- Check: screenshots as every role it touches, at 1440 by 900 and 390 by 844 in `docs/design/screenshots/product-pass/`, looked at before merging: no "Planned", no tiles showing only a dash, no popups over content, no empty-looking lists, no text cut off.
+- Navigation is by module, in prompt 004's order: Home, Sales, Purchasing, Warehouse, Finance, Documents, Master data, Reports and System. A feature declares its menu entries, each naming its module and permission.
+- Each role sees only its own modules, a module with nothing to show is left out, and existing addresses keep working.
+- The task inbox stays reachable as My tasks under Home until My work replaces it.
+- A menu entry that holds waiting work shows its count, from the hook the home tiles use, so a tile and a menu count always agree. A role that may not read a list makes no request for it.
+- A feature declares whether it is ready. In a production build a planned feature is left out of the menu, the routes, Ctrl+K, the home page and the breadcrumbs, and its address shows not-found.
+- Phase 2 pages are not declared at all.
+- `PlannedPage` stays behind an opt-in development flag, off by default, and its text is not in the production bundle.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
 
 ### P-40: The bar for every screen: dense tables, keys and actions
 
@@ -1024,13 +1063,726 @@ What P-40 left out so the product pass could close: the pieces every screen inhe
 Acceptance criteria:
 
 - Every list that has a primary action declares it through `PageHeader`, and its title shows the total.
-- Undo on the SPR decision and on payment confirmation, once the mock overlay records them (the toast already ends each action).
-- Each feature registers its quick actions (Upload PO, New order, Raise SPR) with `registerAction`, and each role's home page reads them with `actionsForRole`.
 - The role matrix and the other plain tables keep their first column in view on a phone, as the common table does.
 - A setting to turn the `/` and `N` keys off for people who use a screen reader or their own keys.
 - Plain tables built on `ui/table` meet the 36 to 40 px row height too (the Users table is compact now; the others are not measured).
 - Copy role can be undone, once the API keeps a snapshot of the target role's rows.
 - The home-tile part of the Check in P-40 (no tile showing only a dash, no "Planned" badge) is met by P-33, not by P-40.
+- The quick actions move into the stories that bring them: Upload PO in P-37, New order in P-49 and Raise SPR in P-61.
+
+### P-42: Plan prompt 004
+
+Files prompt 004 and turns it into stories, in the order of its section 9.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 2 points
+- **Requirements:** M4 best practices, M5 team Git workflow
+- **Branch:** `chore/plan-prompt-004`
+- **Planned for:** Sprint 02 (W3)
+
+Acceptance criteria:
+
+- Prompt 004 is in `docs/ai/prompts/`, and every reference to the prompt that writes each area's stories names prompt 005.
+- The backlog holds prompt 004's stories, and P-18, P-36 to P-39 and P-41 are rescoped so that nothing is built twice.
+- `docs/team/module-ownership.md` records the exception that prompt 004 section 7 makes for moving the teammates' screens onto the templates.
+- `docs/BUILD_REPORT.md` shows the status of each story, and the Waiting for Richie list holds the decisions taken while cutting the stories.
+
+### P-43: Records open as tabs
+
+A strip of open records under the top bar, like an ERP workspace. Prompt 004 section 2.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 5 points
+- **Requirements:** M4 best practices
+- **Branch:** `feat/workspace-record-tabs`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-39
+
+Acceptance criteria:
+
+- Opening an order, document or SPR adds a tab to a strip under the top bar, showing the record's kind and number. A record route declares itself in one line.
+- Tabs belong to one person: they survive a reload, and a role switch shows that role's tabs.
+- Ctrl+click or Command+click opens a record in a background tab, from every list and link, through one `RecordLink`.
+- Each tab has a close button, and there are at most ten. An eleventh closes the oldest tab with no unsaved changes, and says so.
+- Breadcrumbs stay, and gain the record's number.
+- The strip works from the keyboard, and at 390 px it scrolls inside itself.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+
+### P-44: List template: filter bar, action bar and status chip
+
+The first half of the list page template, proved on the master data lists. Prompt 004 section 3.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 8 points
+- **Requirements:** M4 best practices
+- **Branch:** `feat/list-template-bars`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-33, P-35
+
+Acceptance criteria:
+
+- One URL query hook replaces the two that P-33 and P-35 brought, keeping search, filters, page and sort in the address. `DataTable` stays under 200 lines.
+- The shadcn/ui primitives the templates need are added: checkbox, select, textarea and form.
+- `StatusChip` gives each of prompt 004's five families one colour and one icon: draft, waiting, ready, blocked and done. A status with no family shows neutral.
+- Filter bar: a quick search, the three or four filters that matter, More filters for the rest, and chips for what is applied.
+- Action bar: New, Edit, Void or Disable, batch actions, Import, Export and Print. Each shows only if the screen declares it and the role holds its permission, so a screen never offers a button the role cannot use.
+- Void and Disable ask for a reason in one shared dialog, and the reason is required.
+- Export gives every filtered row, masked as the screen is, and Print gives a clean print view.
+- `ListPage` builds a page from one declaration, and the Items, Customers and Vendors lists move onto it.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+
+### P-45: List template: grid, saved views and operation log
+
+The second half of the list page template. Prompt 004 section 3.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 8 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/list-template-grid`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-44
+
+Acceptance criteria:
+
+- Row checkboxes, select all on the page, a count of what is selected, and batch actions in the action bar.
+- A row menu with View, Edit, Copy and Void where the screen declares them, built so that My work can add its three actions in one place.
+- Saved views hold filters, sort and columns for each person. Column settings show, hide and order columns.
+- The selected record's operation log sits in a panel at the foot.
+- A record-scoped read of the log: anyone who may read the record sees who, when and what, never field values or an IP address. Refusals are audited, and area 4 reviews the rule.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+
+### P-46: Form kit
+
+Fields, server errors and drafts for every form. Prompt 004 section 3.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 5 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/form-kit`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-44
+
+Acceptance criteria:
+
+- `FormField`, on React Hook Form with zod: label, hint, error and required mark, for text, number, money, date, select, long text and lookup fields.
+- Validation is inline, field by field. A server's `VALIDATION_FAILED` details land on their fields in the server's words, and any other error shows its trace id.
+- Unsaved changes survive an expired session and a reload, for each person and record, and never hold a masked field. A restored draft says so and can be thrown away.
+- Leaving a form with unsaved changes asks first.
+- Component tests cover every state.
+
+### P-47: Document form
+
+The form every order, SPR, payment and shipment uses. Prompt 004 section 3.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 8 points
+- **Requirements:** M4 best practices
+- **Branch:** `feat/document-form`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-45, P-46
+
+Acceptance criteria:
+
+- A header grid of fields, a footer with totals, attachments and the status chip, and an action bar: Save, Save and new, Submit for approval, Approve or Reject when the role may, Print or PDF, and Void.
+- Each action shows only if the form declares it and the role may use it.
+- Below the form, tabs for Timeline, Checks, Documents and Operation log, each with a count of what needs attention and a compact empty state.
+- Print or PDF uses the browser's print view until B-3 brings generated documents.
+- Component tests cover every state, and the demo gallery shows the template.
+
+### P-48: Lines grid
+
+Inline order lines with item lookup and availability. Prompt 004 section 3.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 8 points
+- **Requirements:** M4 best practices
+- **Branch:** `feat/lines-grid`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-46
+
+Acceptance criteria:
+
+- Inline editing of lines: item lookup by part number or name, quantity, unit price, amount and availability.
+- Enter adds a line, Delete removes one, and the grid works from the keyboard alone.
+- Amounts and totals are computed from decimal strings, never floats, and update as you type.
+- A server error on `lines.N.quantity` lands on that cell.
+- A shortfall is flagged on the line with what is needed, what is available and how short it is. It never stops saving.
+- A masked price stays masked, with its reason, and the grid has a read-only mode.
+- At 390 px each line stacks, with no sideways page scroll.
+- Component tests cover the keyboard path, and the demo gallery shows the grid.
+
+### P-49: New order and draft editing
+
+Support enters an order on the document form. Prompt 004 section 4.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 8 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/order-form`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-36, P-47, P-48, P-14
+
+Acceptance criteria:
+
+- `/orders/new` and the draft's own page use the document form and the lines grid, with the customer chosen by search and matched on its Navision number.
+- `POST /orders` and `PATCH /orders/:orderNo`, for drafts only, with new permissions held by Support and the Product Manager and never by System admin.
+- No duplicate orders: one customer plus one PO number is one order, with a unique index and a 409 that names the existing order, and the form links to it.
+- Availability shows live on each line, from the same formula as master data.
+- New order is the list's one primary action, N starts it, and the home page and Ctrl+K offer it to the roles allowed.
+- Every route has `.http` requests and API tests for 401, 403, 404, validation and the duplicate.
+- A Playwright test: an allowed role creates, edits and voids a record, and a role without the permission sees no button and gets a 403 from the server.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+
+### P-50: Submit, cancel and copy an order
+
+The rest of an order's life on area 1's side. Prompt 004 section 4.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 5 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/order-actions`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-49
+
+Acceptance criteria:
+
+- Submit moves the order's capture state and calls an `OrderHandoff` port, bound to a mock. Azri binds it after C-2, and no transition rule is written here.
+- A submitted order then appears in the tracker and the home page's flow, from a fixture state named as a fixture.
+- Cancel asks for a reason, works on a draft or a submitted order, sample orders included, and hard-deletes nothing.
+- Copy opens a new draft from any order.
+- Every action is audited, and the Playwright test from P-49 covers them.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+
+### P-51: The one order page
+
+One page for an order, with each area's section in its owner's folder. Prompt 003 item 6, on prompt 004's document form.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 8 points
+- **Requirements:** M3 AI-assisted coding, M4 best practices
+- **Branch:** `feat/one-order-page`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-50
+
+Acceptance criteria:
+
+- `/orders/:orderNo` is the single place for an order, and `/order-tracker/:orderNo` and `/workflows/orders/:orderNo` redirect to it.
+- Area 2's steps and area 3's checks stay components in their owners' folders, moved and not rewritten, and show in the Timeline and Checks tabs.
+- The Documents and Operation log tabs show what is real, and an order with little to show says so compactly.
+- Next actions for the signed-in role sit in the action bar, using the same actions as Needs you. A role with nothing to do sees what is waiting, and on whom.
+- Azri and Iok Teck are asked to review.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+
+### P-52: Demo documents
+
+Real PDFs and ground truth for the review screen, from `packages/synthetic-documents`. Brought forward from P-21.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 8 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/demo-documents`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-37
+
+Acceptance criteria:
+
+- `packages/synthetic-documents` renders a document from the synthetic set to a real PDF: pure, deterministic, and returning each field's value and its place on the page.
+- Four layouts, so POs from different customers look different, all labelled "Synthetic demo data" with obviously fake bank details.
+- 12 files in `apps/web/public/demo-documents/`, with the script that makes them: POs, PIs, packing lists, one scanned-looking PO, and a packing list whose quantity differs from the PO.
+- Each is tied to a real order, and an order with three uncertain fields has exactly three, on any reference date, with a test.
+- The PDF library has an ADR, a pinned version and a traceability row.
+
+### P-53: Mock AI and the review fields
+
+Mock AI reads a document, and a person confirms the uncertain fields. Prompt 003 item 7.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 8 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/document-review`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-52
+
+Acceptance criteria:
+
+- Mock AI classifies a known document and fills its fields from the ground truth, labelled "Mock AI". An unknown file ends honestly, and it never invents a field.
+- `/documents/:id` shows the fields, grouped into header and lines, each with its confidence and source, and "Requires approval" on the uncertain ones.
+- Confirm and Correct are inline and keyboard first. A review stores who, when, the old value and the new one in OrderPilot's own tables, and each is audited, with Undo.
+- When every uncertain field is done the document is confirmed and its task leaves the inbox. No order status changes and nothing goes to Navision.
+- To review is a list on the template, and the home page's tile opens it with the same count.
+- Bank details never reach a role that may not see them, tested on the bytes of the response.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+
+### P-54: Document preview and highlight
+
+The page beside the fields, and where each field came from. Prompt 003 item 7.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 8 points
+- **Requirements:** M4 best practices
+- **Branch:** `feat/document-preview`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-53
+
+Acceptance criteria:
+
+- PDFs preview through pdfjs-dist in a lazy chunk with its worker bundled, so the strict CSP holds. Images show directly, and XLSX or CSV as a simple table.
+- Selecting a field scrolls the page to it and highlights where it came from, scaled with the zoom, in both themes.
+- Zoom, and pages when there are several, from the keyboard too.
+- At 390 px the preview and the fields stack, with a way to jump between them.
+- pdfjs-dist has an ADR, a pinned version and a traceability row, and `pnpm budget` passes.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+
+### P-55: An order from a confirmed PO
+
+Enter once, flows everywhere. Prompt 004 section 4.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 5 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/order-from-po`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-49, P-53
+
+Acceptance criteria:
+
+- A confirmed PO offers Create order, which opens a draft pre-filled from what a person confirmed.
+- Customers and items match on their Navision numbers, and a look-alike name is only shown as a possible match.
+- The draft keeps a link to its source document, and the two pages link to each other.
+- The order form's footer lists its attachments, and Attach uploads through P-37's route.
+- The Playwright test covers the path from upload to a saved draft.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+
+### P-56: Pins, to-dos and reminders: the records
+
+Each person's own records, audited. Prompt 004 section 5.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 5 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/my-work-records`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-15, P-45
+
+Acceptance criteria:
+
+- Pins, to-dos and reminders are stored for one person, on any record or as free text. Nobody else can read or change them, and a test proves it.
+- Routes to create, edit, reorder, finish and remove them, voided with a reason where a business record would be, and never hard-deleted.
+- Every change is audited, and these stay separate from area 2's tasks and reminder engine.
+- `.http` requests and API tests for 401, 403, 404 and validation.
+
+### P-57: Pin to top, Remind me and Add to my to-dos
+
+Three actions on every row menu and record page. Prompt 004 section 5.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 5 points
+- **Requirements:** M4 best practices
+- **Branch:** `feat/my-work-actions`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-56
+
+Acceptance criteria:
+
+- Every row menu, record page and read-only master data page offers the three actions, added in one place.
+- Pinned records float to the top of their own list, for that person only, and the list endpoints of other areas stay unchanged.
+- Each action ends with a toast and Undo.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+
+### P-58: The My work panel
+
+Four tabs on the home page. Prompt 004 section 5.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 5 points
+- **Requirements:** M4 best practices
+- **Branch:** `feat/my-work-panel`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-57
+
+Acceptance criteria:
+
+- The home page has a My work panel with four tabs: Needs you, My to-dos, Reminders and Pinned.
+- Needs you shows what the home page shows today. My to-dos has a due date, a done checkbox and drag to reorder, with buttons for the keyboard.
+- Reminders also lists area 2's system reminders, marked System, read from its route.
+- Pinned records show first on the home page.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+
+### P-59: Personal reminders fire
+
+Reminders on the platform's BullMQ queue, with mail to Mailpit. Prompt 004 section 5.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 8 points
+- **Requirements:** M4 best practices, M6 deploy and monitor
+- **Branch:** `feat/my-work-reminders`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-58
+
+Acceptance criteria:
+
+- A reminder fires on a date, or when a condition from a closed list holds, such as still unpaid on a date.
+- Postgres holds each reminder. A delayed BullMQ job fires it, and a repeating sweep requeues what is due, so losing Redis loses nothing and nothing fires twice.
+- When it fires, the bell and the home page show it for any role, and an email goes to Mailpit if the person chose one.
+- A mail service that can only reach Mailpit, with an ADR, a pinned version and `.env.example` entries.
+- The worker runs in the compose stack and in the end-to-end job, and a Playwright test sees a reminder fire.
+
+### P-60: SPR drafts and the SPR list
+
+OrderPilot's own SPR drafts, beside area 2's approval. Prompt 004 section 4.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 5 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/spr-drafts`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-45, P-46
+
+Acceptance criteria:
+
+- An area 1 table holds drafts, numbered by the record number service, with no limit, trigger or status logic. The port that hands a submitted draft to area 2 is agreed with Azri.
+- SPRs is a list on the template, in the Purchasing module, reading sample and stored SPRs through one reader, with the approver's waiting count on its menu entry.
+- Support may raise an SPR from a shortfall, as the brief says, with the permission recorded.
+- `.http` requests and API tests for 401, 403, 404 and validation.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+
+### P-61: The SPR form
+
+Raise an SPR from a shortage line, pre-filled. Prompt 004 section 4.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 8 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/spr-form`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-60, P-47, P-48
+
+Acceptance criteria:
+
+- An SPR is created from a shortage line, pre-filled through `SprSuggestion`, on the document form.
+- It can be edited while it is a draft, submitted, and withdrawn with a reason.
+- A submitted SPR reaches the approver's inbox through the agreed port, and the AI never raises or approves one.
+- Raise SPR appears on the order's line, on the item page, and in the home page and Ctrl+K for the roles allowed.
+- Azri is asked to review.
+- A Playwright test: an allowed role creates, edits and voids a record, and a role without the permission sees no button and gets a 403 from the server.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+
+### P-62: Payment confirmations
+
+Finance records and voids payments. Prompt 004 section 4.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 8 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/payment-entries`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-47
+
+Acceptance criteria:
+
+- An area 1 entry holds a payment while it is a draft, so that Finance can record it and edit it before confirming. Azri's `PaymentConfirmation` is untouched.
+- Confirm calls area 2's existing route, and the payment gate's effect stays area 2's.
+- Void asks for a reason, and still records it when the mock overlay has forgotten the payment.
+- Payments is a list on the template in the Finance module, with a document form, and amounts and bank details masked by role.
+- Azri is asked to review.
+- A Playwright test: an allowed role creates, edits and voids a record, and a role without the permission sees no button and gets a 403 from the server.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+
+### P-63: Shipments
+
+Logistics records forwarders and AWB/BL numbers. Prompt 004 section 4.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 8 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/shipments`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-47
+
+Acceptance criteria:
+
+- A new area 1 module holds a shipment: the order, the forwarder, the AWB or BL number and the dates, with no status logic.
+- Shipments is a list on the template in the Sales module, with a document form, reading sample shipments from the synthetic set and stored ones through one reader.
+- Logistics records, edits and voids a shipment with a reason.
+- Area 2's follow-ups can read a shipment, with Azri's yes.
+- A Playwright test: an allowed role creates, edits and voids a record, and a role without the permission sees no button and gets a 403 from the server.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+
+### P-64: Users
+
+A list and a form for Spectra's staff. Prompt 004 section 4.
+
+- **Area:** `area: 4 controls and monitoring`
+- **Priority:** must
+- **Estimate:** 5 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/system-users`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-45, P-46
+
+Acceptance criteria:
+
+- `/system/users` is a list on the template, and the old governance link redirects to it.
+- A form with name, email, role, data scope and status: create, edit, disable, re-enable, and reset the demo password.
+- Disable asks for a reason, every change is audited, and a person cannot disable themselves.
+- Data scope is per role today, so the form shows it read-only and says so.
+- Angelyn is asked to review.
+- A Playwright test: an allowed role creates, edits and voids a record, and a role without the permission sees no button and gets a 403 from the server.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+
+### P-65: Roles
+
+Permissions grouped by module, in plain names. Prompt 004 section 4.
+
+- **Area:** `area: 4 controls and monitoring`
+- **Priority:** must
+- **Estimate:** 8 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/system-roles`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-64
+
+Acceptance criteria:
+
+- A list of roles, and a page for each with its permissions grouped by module as checkboxes, Select all in module, its data scope and Copy role.
+- The role set stays the nine roles of the brief, so Copy role copies onto an existing role. The enum stays, and the pull request says so.
+- The full grid stays only as a read-only Compare roles view, and the old links redirect.
+- Plain names everywhere, never raw keys like `permissions.tracker.read`.
+- It calls the existing matrix routes, and a locked cell stays locked and says why. The policy itself is untouched.
+- Angelyn is asked to review.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+
+### P-66: Approval limits form
+
+A form only, in the shape of Navision's Approval User Setup. Prompt 004 section 4.
+
+- **Area:** `area: 4 controls and monitoring`
+- **Priority:** must
+- **Estimate:** 5 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/settings-approval-limits`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** F-3, P-46
+
+Acceptance criteria:
+
+- A list and a form for each approver's limits, parsed by `approvalUserSetupSchema`, on the route F-3 brings.
+- `ApprovalPolicy` and the verdict stay with their owners, and the form changes no logic.
+- Angelyn is asked to review.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+
+### P-67: Check tolerance and reminder rule forms
+
+Forms only, for areas 2 and 3. Prompt 004 section 4.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 5 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/settings-rule-forms`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-46
+
+Acceptance criteria:
+
+- A keyed, audited setting table behind `settings.manage`, with each value parsed by a schema its owner approves.
+- A form for area 3's check tolerances and one for area 2's reminder rules, in the System module under Rules.
+- Nothing reads them until D-2 and C-4 do, and each form says so in plain words.
+- Iok Teck and Azri are asked to accept the shape before this merges.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+
+### P-68: Change requests for master data
+
+Managed in Navision, with Request a change. Prompt 004 section 1.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 8 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/master-change-requests`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-44, P-46
+
+Acceptance criteria:
+
+- Customers, vendors and items say Managed in Navision, and offer Request a change.
+- A request is a record, and a second person approves it before it is applied, to mock data only.
+- A change to a vendor's bank details stops at a port for area 4's control and is never applied here.
+- Every step is audited, and a person cannot approve their own request.
+- A Playwright test: an allowed role creates, edits and voids a record, and a role without the permission sees no button and gets a 403 from the server.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+
+### P-69: Mock Navision Demo data page
+
+Test records for demos, for System admin only. Prompt 004 section 1.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 5 points
+- **Requirements:** M4 best practices
+- **Branch:** `feat/mock-navision-demo-data`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-68
+
+Acceptance criteria:
+
+- A page for System admin only, with its own permission, labelled as demo only, to add and edit test records in mock Navision.
+- It works only with demo mode on, and the server refuses it otherwise.
+- P-20's real connector retires it.
+- A Playwright test: an allowed role creates, edits and voids a record, and a role without the permission sees no button and gets a 403 from the server.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+
+### P-70: Pick and pack, and Proforma invoices
+
+The two module pages that have no form of their own yet. Prompt 004 section 2.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 3 points
+- **Requirements:** M4 best practices
+- **Branch:** `feat/work-queues`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-45
+
+Acceptance criteria:
+
+- Pick and pack in the Warehouse module and Proforma invoices in the Sales module are lists on the template, of the work waiting for that role.
+- Each row opens the order and offers the action Needs you offers. Nothing is generated: B-3 brings documents.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+
+### P-71: One status system everywhere
+
+Status chips, timers and counts. Prompt 004 section 6.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 5 points
+- **Requirements:** M4 best practices
+- **Branch:** `feat/status-families`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-44
+
+Acceptance criteria:
+
+- Area 2 reports an optional family beside each status, so ADR 0025's rule that status codes stay unlisted holds. Each owner is asked to review.
+- The same chip is used on every screen.
+- Overdue and SLA timers, such as "due in 3 h" and "2 days late", show only what the API reports.
+- The sidebar and the tabs show counts of what needs attention.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+
+### P-72: SPR approval on the templates
+
+UI only. Prompt 004 section 7.
+
+- **Area:** `area: 2 order workflows and approvals`
+- **Priority:** must
+- **Estimate:** 3 points
+- **Requirements:** M4 best practices, M5 team Git workflow
+- **Branch:** `feat/template-spr-approval`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-47
+
+Acceptance criteria:
+
+- SPR approval uses the document form, showing the request, the stock picture, the order and the limit as a fact. It computes and enforces nothing.
+- The core logic stays `it.todo`, and Azri reviews the pull request.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+
+### P-73: Exceptions on the templates
+
+UI only. Prompt 004 section 7.
+
+- **Area:** `area: 3 checks tracker and insights`
+- **Priority:** must
+- **Estimate:** 3 points
+- **Requirements:** M4 best practices, M5 team Git workflow
+- **Branch:** `feat/template-exceptions`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-45
+
+Acceptance criteria:
+
+- Exceptions is a list on the template, every column fits at 1440, and an exception shows expected and found side by side.
+- Assign and resolve stay hidden until D-3 brings them, and the checks engine stays Iok Teck's.
+- Iok Teck reviews the pull request.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+
+### P-74: Tracker and KPIs on the templates
+
+UI only. Prompt 004 section 7.
+
+- **Area:** `area: 3 checks tracker and insights`
+- **Priority:** must
+- **Estimate:** 5 points
+- **Requirements:** M4 best practices, M5 team Git workflow
+- **Branch:** `feat/template-tracker-insights`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-45
+
+Acceptance criteria:
+
+- The order tracker is a list on the template, and each row opens the one order page.
+- KPIs show each measure's value, target and trend, reusing the lazy chart component. A miss is said in words as well as colour, and no formula is computed.
+- Iok Teck reviews the pull request.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+
+### P-75: Audit log on the template
+
+UI only. Prompt 004 section 7.
+
+- **Area:** `area: 4 controls and monitoring`
+- **Priority:** must
+- **Estimate:** 3 points
+- **Requirements:** M4 best practices, M5 team Git workflow
+- **Branch:** `feat/template-audit`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-45
+
+Acceptance criteria:
+
+- The audit log is a list on the template, with rows of 36 to 40 px.
+- Angelyn reviews the pull request.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+
+### P-76: Governance and monitoring on the templates
+
+UI only. Prompt 004 section 7.
+
+- **Area:** `area: 4 controls and monitoring`
+- **Priority:** must
+- **Estimate:** 5 points
+- **Requirements:** M4 best practices, M5 team Git workflow
+- **Branch:** `feat/template-monitoring`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-65
+
+Acceptance criteria:
+
+- Masking, AI destinations and the monitoring tabs use the templates, with the first column kept in view on a phone.
+- Audit and policy logic stay `it.todo`, and Angelyn reviews the pull request.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
 
 ## Epic A: Document intake and AI extraction
 
@@ -1870,6 +2622,6 @@ Each owner takes over their area, and the team moves to planning by tasks.
 Acceptance criteria:
 
 - Each owner takes over their area.
-- Prompt 004 writes the rest of epics A to G's stories from the owners' planning notes.
+- Prompt 005 writes the rest of epics A to G's stories from the owners' planning notes.
 - One approving review plus code-owner review is switched on, only on Richie's yes.
 - The first sprint is planned by tasks.

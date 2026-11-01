@@ -14,6 +14,7 @@ import { planJourneys } from "./journey.js";
 import { makeKpis } from "./kpis.js";
 import { makeOrders } from "./orders.js";
 import { makePayments } from "./payments.js";
+import { makePurchaseOrders } from "./purchase-orders.js";
 import { SeededRandom } from "./random.js";
 import { RecordNumberer } from "./records.js";
 import { makeSprs } from "./sprs.js";
@@ -66,6 +67,7 @@ export function createSyntheticDataset(
     documents: documentFactory(numberer),
   });
   const sprs = makeSprs(orders, journeys, items, numberer);
+  const purchaseOrders = makePurchaseOrders(sprs, items, orders, reference);
   const tasks = makeTasks(orders, customers, sprs, reference);
   return {
     label: SYNTHETIC_LABEL,
@@ -80,6 +82,7 @@ export function createSyntheticDataset(
     orders,
     payments: makePayments(orders, journeys),
     sprs,
+    purchaseOrders,
     tasks,
     reminders: makeReminders(tasks, orders, reference),
     exceptions: makeExceptions(orders, journeys, numberer),
