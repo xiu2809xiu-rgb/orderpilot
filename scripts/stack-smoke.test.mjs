@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { checkStack } from "./stack-smoke.mjs";
+import { checkStack, webPort } from "./stack-smoke.mjs";
 
 const APP_POLICY = "default-src 'self'; script-src 'self'";
-const API_POLICY = "default-src 'none'; frame-ancestors 'none'";
+const API_POLICY =
+  "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'";
 const INDEX = `<div id="root"></div><script src="/assets/index-abc.js"></script>`;
 
 /** @typedef {Record<string, (init?: RequestInit) => Response>} Routes */
@@ -32,7 +33,11 @@ function stack(broken = {}) {
           "cache-control": "public, max-age=31536000, immutable",
         },
       }),
-    "/assets/not-a-file.js": () => new Response("", { status: 404 }),
+    "/assets/not-a-file.js": () =>
+      new Response("", {
+        status: 404,
+        headers: { "cache-control": "no-cache" },
+      }),
     "/api/v1/auth/me": (init) =>
       new Headers(init?.headers).has("cookie")
         ? new Response(JSON.stringify({ data: { role: "SUPPORT" } }))
@@ -42,6 +47,7 @@ function stack(broken = {}) {
               status: 401,
               headers: {
                 "content-security-policy": API_POLICY,
+                "x-content-type-options": "nosniff",
                 "x-request-id": "stack-smoke-1",
               },
             },
@@ -69,17 +75,62 @@ describe("stack smoke", () => {
     assert.deepEqual(await problems(), []);
   });
 
-  it("fails when nginx adds its policy to a proxied API answer", async () => {
+  // Real nginx puts the upstream header first and add_header after it, so the
+  // fakes below keep that order: a check that only looks at the start passes them.
+  it("fails when nginx adds its policy after the API's, as it really does", async () => {
     const failed = await problems({
       "/api/v1/auth/me": () =>
         new Response(JSON.stringify({ error: {} }), {
           status: 401,
           headers: {
-            "content-security-policy": `${APP_POLICY}, ${API_POLICY}`,
+            "content-security-policy": `${API_POLICY}, ${APP_POLICY}`,
+            "x-content-type-options": "nosniff",
           },
         }),
     });
     assert.match(failed[0]?.name ?? "", /only the API's own policy/);
+    assert.match(failed[0]?.problem ?? "", /CSP is/);
+  });
+
+  it("fails when nginx repeats X-Content-Type-Options on an API answer", async () => {
+    const failed = await problems({
+      "/api/v1/auth/me": () =>
+        new Response(JSON.stringify({ error: {} }), {
+          status: 401,
+          headers: {
+            "content-security-policy": API_POLICY,
+            "x-content-type-options": "nosniff, nosniff",
+          },
+        }),
+    });
+    assert.match(failed[0]?.problem ?? "", /X-Content-Type-Options/);
+  });
+
+  it("fails when nginx adds a header the API never sends", async () => {
+    const failed = await problems({
+      "/api/v1/auth/me": () =>
+        new Response(JSON.stringify({ error: {} }), {
+          status: 401,
+          headers: {
+            "content-security-policy": API_POLICY,
+            "x-content-type-options": "nosniff",
+            "permissions-policy": "camera=()",
+          },
+        }),
+    });
+    assert.match(failed[0]?.problem ?? "", /Permissions-Policy/);
+  });
+
+  it("fails when a missing hashed file is cached for a year", async () => {
+    const failed = await problems({
+      "/assets/not-a-file.js": () =>
+        new Response("", {
+          status: 404,
+          headers: { "cache-control": "public, max-age=31536000, immutable" },
+        }),
+    });
+    assert.match(failed[0]?.name ?? "", /missing hashed file/);
+    assert.match(failed[0]?.problem ?? "", /404 is cached/);
   });
 
   it("fails when a deep link is a 404 instead of the app", async () => {
@@ -112,5 +163,42 @@ describe("stack smoke", () => {
       Promise.reject(new Error("connection refused")),
     );
     assert.equal(results.filter(({ problem }) => problem).length, 8);
+  });
+
+  describe("the port", () => {
+    it("takes the shell first", () => {
+      assert.equal(
+        webPort({ STACK_WEB_PORT: "9001" }, () => "STACK_WEB_PORT=9002\n"),
+        "9001",
+      );
+    });
+
+    it("reads the root .env when the shell sets nothing", () => {
+      const env =
+        "POSTGRES_PORT=5432\n  STACK_WEB_PORT = '9002' \nWEB_PORT=1\n";
+      assert.equal(
+        webPort({}, () => env),
+        "9002",
+      );
+    });
+
+    it("falls back to 8080 with no file, no line or a bad value", () => {
+      const absent = () => {
+        throw new Error("ENOENT");
+      };
+      assert.equal(webPort({}, absent), "8080");
+      assert.equal(
+        webPort({}, () => "POSTGRES_PORT=1\n"),
+        "8080",
+      );
+      assert.equal(
+        webPort({}, () => "STACK_WEB_PORT=abc\n"),
+        "8080",
+      );
+      assert.equal(
+        webPort({}, () => "# STACK_WEB_PORT=9002\n"),
+        "8080",
+      );
+    });
   });
 });

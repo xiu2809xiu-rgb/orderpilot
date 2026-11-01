@@ -7,9 +7,41 @@
 // app, proxies the API without adding to its headers, and a person can sign in.
 // Plain Node with no dependencies, so CI can run it without an install.
 
-import { pathToFileURL } from "node:url";
+import { readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROLE = "SUPPORT";
+
+/**
+ * What the API sends on every JSON answer (apps/api/src/bootstrap/security.ts).
+ * Compared whole: nginx puts the upstream header first and its own after it, so
+ * a prefix check would pass a second, combined policy.
+ */
+const API_POLICY =
+  "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'";
+
+/**
+ * The port compose publishes the web app on: the shell wins, then the root
+ * .env (the way compose reads it), then 8080. Only this one variable is taken
+ * from the file, so nothing else in it is ever held or printed.
+ *
+ * @param {NodeJS.ProcessEnv} env
+ * @param {() => string} readRootEnv
+ */
+export function webPort(env, readRootEnv) {
+  const fromShell = env["STACK_WEB_PORT"];
+  if (fromShell !== undefined && fromShell !== "") return fromShell;
+  let text = "";
+  try {
+    text = readRootEnv();
+  } catch {
+    // No .env is fine: the default port is then the right one.
+  }
+  const line = /^\s*STACK_WEB_PORT\s*=\s*(.*?)\s*$/m.exec(text)?.[1] ?? "";
+  const value = line.replace(/^(["'])(.*)\1$/, "$2");
+  return /^\d{1,5}$/.test(value) ? value : "8080";
+}
 
 /**
  * @typedef {(url: string, init?: RequestInit) => Promise<Response>} Get
@@ -87,10 +119,18 @@ export async function checkStack(base, get = fetch) {
       return headerProblem(res);
     },
   );
-  await check("a missing hashed file is a 404, not the app", async () => {
-    const res = await get(url("/assets/not-a-file.js"));
-    return res.status === 404 ? null : `status ${String(res.status)}`;
-  });
+  await check(
+    "a missing hashed file is a 404, not the app, and is never cached",
+    async () => {
+      const res = await get(url("/assets/not-a-file.js"));
+      if (res.status !== 404) return `status ${String(res.status)}`;
+      // A year-long cache on a 404 would keep a client failing after a rollback.
+      const cache = res.headers.get("cache-control") ?? "";
+      return /immutable|max-age=[1-9]/.test(cache)
+        ? `the 404 is cached: Cache-Control is "${cache}"`
+        : null;
+    },
+  );
   await check(
     "a proxied API answer carries only the API's own policy",
     async () => {
@@ -102,8 +142,14 @@ export async function checkStack(base, get = fetch) {
         await res.json()
       );
       const policy = res.headers.get("content-security-policy") ?? "";
+      const sniff = res.headers.get("x-content-type-options");
       if (res.status !== 401) return `status ${String(res.status)}`;
-      if (!policy.startsWith("default-src 'none'")) return `CSP is "${policy}"`;
+      if (policy !== API_POLICY) return `CSP is "${policy}"`;
+      // A header sent twice is read back as "a, b".
+      if (sniff !== "nosniff") return `X-Content-Type-Options is "${sniff}"`;
+      if (res.headers.has("permissions-policy")) {
+        return "nginx added a Permissions-Policy to an API answer";
+      }
       if (res.headers.get("x-request-id") !== "stack-smoke-1") {
         return "the request id did not reach the API";
       }
@@ -140,7 +186,10 @@ export async function checkStack(base, get = fetch) {
 }
 
 async function main() {
-  const port = process.env["STACK_WEB_PORT"] ?? "8080";
+  const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+  const port = webPort(process.env, () =>
+    readFileSync(resolve(root, ".env"), "utf8"),
+  );
   const base = process.argv[2] ?? `http://localhost:${port}`;
   const results = await checkStack(base);
   for (const { name, problem } of results) {

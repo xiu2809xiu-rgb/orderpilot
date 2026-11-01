@@ -8,6 +8,8 @@
 #   - /api/ carries NONE of them. The API sends its own, much stricter set, and
 #     a second Content-Security-Policy from nginx would be combined with it.
 #   - Hashed files under /assets/ are cached for a year and never revalidated.
+#     A missing one is a plain 404 that is not cached.
+#   - No add_header at server level: it would reach /api/ answers too.
 #   - Any other path that is not a file is a client-side route: index.html.
 
 # The caller's request id wins; without one nginx makes one, so every request
@@ -60,7 +62,9 @@ server {
 
     location /assets/ {
         try_files $uri =404;
-        add_header Cache-Control "public, max-age=31536000, immutable" always;
+        # No "always" here: nginx then sends it on 2xx and 3xx only. A 404 for a
+        # chunk that a rollback brings back must not be kept for a year.
+        add_header Cache-Control "public, max-age=31536000, immutable";
         include /etc/nginx/security-headers.conf;
     }
 

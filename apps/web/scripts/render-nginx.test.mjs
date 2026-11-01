@@ -12,6 +12,11 @@ function location(conf, name) {
   return conf.slice(start, conf.indexOf("\n    }", start));
 }
 
+/** The server block with every location block and comment taken out. */
+function serverLevel(conf) {
+  return conf.replace(/^\s*#.*$/gm, "").replace(/location [^{]*\{[^}]*\}/g, "");
+}
+
 describe("the web image's nginx configuration", () => {
   const { serverConf, headersConf } = renderNginx({ headers });
 
@@ -34,6 +39,24 @@ describe("the web image's nginx configuration", () => {
     expect(api).not.toContain("add_header");
     expect(api).not.toContain("security-headers.conf");
     expect(api).toContain("proxy_pass http://$api_upstream;");
+  });
+
+  it("sets no header at server level: it would reach the API's answers too", () => {
+    const server = serverLevel(serverConf);
+    expect(server).not.toContain("add_header");
+    expect(server).not.toContain("security-headers.conf");
+    // The helper really strips locations, so this fails if one is added outside.
+    expect(serverLevel(`${serverConf}\nadd_header X-Test "1";`)).toContain(
+      "add_header",
+    );
+  });
+
+  it("does not cache a missing hashed file: the year-long header is not 'always'", () => {
+    const cache = location(serverConf, "/assets/")
+      .split("\n")
+      .find((line) => line.includes("immutable"));
+    expect(cache).toContain("add_header Cache-Control");
+    expect(cache).not.toContain("always");
   });
 
   it("never hands the browser's Host header to the API: the caller controls it", () => {
