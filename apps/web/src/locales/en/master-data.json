@@ -1,10 +1,249 @@
 {
   "title": "Master data",
-  "description": "Customers, items, vendors and stock, read from the ERP.",
-  "arrives": [
-    "Searchable customers, items and vendors",
-    "Available stock from inventory and open orders",
-    "Where each record came from"
-  ],
-  "cues": {}
+  "description": "Items, customers and vendors, read from Navision.",
+  "cues": {},
+  "actions": {
+    "findItem": "Find an item",
+    "customers": "Customers",
+    "vendors": "Vendors"
+  },
+  "tabs": {
+    "label": "Master data lists",
+    "items": "Items",
+    "customers": "Customers",
+    "vendors": "Vendors"
+  },
+  "table": {
+    "scroll": "{{name}}, scrollable",
+    "hidden": "Hidden"
+  },
+  "emptyDescription": "Records appear here once they are read from Navision. Open Connectors to check the link.",
+  "availability": {
+    "short": "Short",
+    "low": "Low",
+    "ok": "OK"
+  },
+  "categories": {
+    "IT": "IT",
+    "SURVEILLANCE": "Surveillance",
+    "ACCESSORIES": "Accessories"
+  },
+  "items": {
+    "title": "Items",
+    "description": "Stock, prices and vendors. Navision stays the system of record, so nothing is changed here.",
+    "caption": "Items",
+    "emptyTitle": "No items yet",
+    "columns": {
+      "no": "No.",
+      "description": "Description",
+      "partNumber": "Part number",
+      "brand": "Brand",
+      "category": "Category",
+      "inventory": "Stock",
+      "qtyOnSalesOrder": "On sales order",
+      "qtyOnPurchOrder": "On purch. order",
+      "availableStock": "Available",
+      "unitPrice": "Price",
+      "vendor": "Vendor"
+    },
+    "filters": {
+      "brand": "Brand",
+      "allBrands": "All brands",
+      "category": "Category",
+      "allCategories": "All categories",
+      "vendor": "Vendor",
+      "allVendors": "All vendors",
+      "availability": "Availability",
+      "allAvailability": "Any availability"
+    }
+  },
+  "item": {
+    "back": "Items",
+    "seeOrders": "See this item's orders",
+    "partNumber": "Part number",
+    "category": "Category",
+    "unit": "Unit of measure",
+    "price": "Price",
+    "cost": "Cost",
+    "vendor": "Vendor",
+    "vendorItemNo": "Vendor item No.",
+    "notFoundTitle": "No such item",
+    "notFoundDescription": "Navision has no item numbered {{no}}.",
+    "stock": {
+      "title": "Stock",
+      "inventory": "Inventory",
+      "qtyOnSalesOrder": "Qty. on Sales Order",
+      "qtyOnPurchOrder": "Qty. on Purch. Order",
+      "availableStock": "Available Stock",
+      "formula": "Available Stock is Inventory minus Qty. on Sales Order plus Qty. on Purch. Order.",
+      "short": "needs {{ordered}}, {{available}} are available, and it is short by {{shortBy}}."
+    },
+    "orders": {
+      "title_one": "{{count}} open order",
+      "title_other": "{{count}} open orders",
+      "description": "Orders with this item still to ship.",
+      "caption": "Open orders holding this item",
+      "order": "Order",
+      "customer": "Customer",
+      "status": "Status",
+      "orderDate": "Order date",
+      "quantity": "To ship",
+      "note": "Note",
+      "heldOut": "Demand under review",
+      "covered": "Needed {{ordered}} with {{available}} available. {{po}} covers the {{shortBy}} short.",
+      "empty": "No open order holds this item.",
+      "listed": "Open orders above, counted",
+      "other": "Other open orders in Navision",
+      "heldOutTotal": "Held out as demand under review"
+    },
+    "purchases": {
+      "title_one": "{{count}} open purchase order",
+      "title_other": "{{count}} open purchase orders",
+      "description": "{{total}} still to arrive, which is the Qty. on Purch. Order.",
+      "caption": "Open purchase orders for this item",
+      "no": "Purchase order",
+      "spr": "SPR",
+      "orderDate": "Order date",
+      "expected": "Expected",
+      "quantity": "To arrive",
+      "unitCost": "Unit cost",
+      "empty": "Nothing is on order for this item."
+    },
+    "sprs": {
+      "title_one": "{{count}} SPR",
+      "title_other": "{{count}} SPRs",
+      "caption": "SPRs for this item",
+      "recordNo": "SPR",
+      "status": "Status",
+      "order": "Order",
+      "requestedBy": "Requested by",
+      "needBy": "Need by",
+      "quantity": "Quantity",
+      "navisionNo": "Purchase order",
+      "empty": "No SPR has been raised for this item.",
+      "statuses": {
+        "suggested": "Suggested",
+        "submitted": "With the approver",
+        "approved": "Approved"
+      }
+    }
+  },
+  "customers": {
+    "title": "Customers",
+    "description": "Who buys, on what terms, and what is open or overdue.",
+    "caption": "Customers",
+    "emptyTitle": "No customers yet",
+    "columns": {
+      "no": "No.",
+      "name": "Name",
+      "country": "Country",
+      "currency": "Currency",
+      "paymentTerms": "Payment terms",
+      "priceGroup": "Price group",
+      "openOrders": "Open orders",
+      "overdue": "Overdue"
+    },
+    "filters": {
+      "country": "Country",
+      "allCountries": "All countries",
+      "paymentTerms": "Payment terms",
+      "allPaymentTerms": "All payment terms",
+      "priceGroup": "Price group",
+      "allPriceGroups": "All price groups"
+    }
+  },
+  "customer": {
+    "back": "Customers",
+    "openTracker": "All orders in the tracker",
+    "country": "Country",
+    "currency": "Currency",
+    "paymentTerms": "Payment terms",
+    "priceGroup": "Price group",
+    "creditLimit": "Credit limit",
+    "balance": "Balance",
+    "notFoundTitle": "No such customer",
+    "notFoundDescription": "Navision has no customer numbered {{no}}.",
+    "open": {
+      "title_one": "{{count}} open order",
+      "title_other": "{{count}} open orders",
+      "description": "Orders with something still to ship.",
+      "caption": "Open orders for this customer",
+      "order": "Order",
+      "po": "Customer PO",
+      "status": "Status",
+      "orderDate": "Order date",
+      "shipmentDate": "Shipment date",
+      "amount": "Amount",
+      "empty": "This customer has nothing open."
+    },
+    "overdue": {
+      "title_one": "{{count}} overdue",
+      "title_other": "{{count}} overdue",
+      "caption": "Overdue orders for this customer",
+      "inTracker": "Open in the tracker",
+      "order": "Order",
+      "po": "Customer PO",
+      "late": "Late by",
+      "days_one": "{{count}} day",
+      "days_other": "{{count}} days",
+      "reason": "What is late",
+      "empty": "Nothing is overdue for this customer."
+    }
+  },
+  "vendors": {
+    "title": "Vendors",
+    "description": "Who supplies Spectra, on what terms, and what is on order.",
+    "caption": "Vendors",
+    "emptyTitle": "No vendors yet",
+    "columns": {
+      "no": "No.",
+      "name": "Name",
+      "currency": "Currency",
+      "paymentTerms": "Payment terms",
+      "openPurchaseOrders": "Open purchase orders",
+      "itemsSupplied": "Items supplied",
+      "balance": "Balance"
+    }
+  },
+  "vendor": {
+    "back": "Vendors",
+    "seeItems": "See this vendor's items",
+    "currency": "Currency",
+    "paymentTerms": "Payment terms",
+    "balance": "Balance",
+    "notFoundTitle": "No such vendor",
+    "notFoundDescription": "Navision has no vendor numbered {{no}}.",
+    "bank": {
+      "title": "Bank accounts",
+      "code": "Code",
+      "name": "Bank",
+      "accountNo": "Account No.",
+      "swift": "SWIFT",
+      "iban": "IBAN",
+      "empty": "No bank account is on file for this vendor."
+    },
+    "orders": {
+      "title_one": "{{count}} open purchase order",
+      "title_other": "{{count}} open purchase orders",
+      "caption": "Open purchase orders for this vendor",
+      "no": "Purchase order",
+      "spr": "SPR",
+      "orderDate": "Order date",
+      "expected": "Expected",
+      "lines": "Lines",
+      "quantity": "To arrive",
+      "total": "Total",
+      "empty": "Nothing is on order with this vendor."
+    },
+    "items": {
+      "title_one": "{{count}} item supplied",
+      "title_other": "{{count}} items supplied",
+      "caption": "Items this vendor supplies",
+      "no": "No.",
+      "description": "Description",
+      "vendorItemNo": "Vendor item No.",
+      "available": "Available",
+      "empty": "This vendor supplies no items."
+    }
+  }
 }

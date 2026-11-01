@@ -1,9 +1,10 @@
-import type { ReactNode } from "react";
+import type { MouseEvent, ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 import { EmptyState, ErrorPanel, PermissionDenied } from "../states";
 import { usePrimaryActionStore } from "../primaryAction";
 import { cellClass } from "./cells";
@@ -15,6 +16,7 @@ interface DataTableBodyProps<Row> {
   columns: readonly DataTableColumn<Row>[];
   rows: readonly Row[];
   rowKey: (row: Row) => string;
+  onRowClick?: ((row: Row) => void) | undefined;
   status: TableStatus;
   pageSize: number;
   error?: unknown;
@@ -23,6 +25,19 @@ interface DataTableBodyProps<Row> {
   empty?: { title?: string; description?: string; action?: ReactNode };
   filtered: boolean;
   onClearFilters: () => void;
+}
+
+/**
+ * True for a plain click on the row itself. A click on a link or a button in
+ * the row is that control's own, a popover's clicks bubble here through its
+ * portal without being inside the row, and dragging over text is copying.
+ */
+function opensRow(event: MouseEvent<HTMLElement>): boolean {
+  const target = event.target;
+  if (!(target instanceof Element)) return false;
+  if (!event.currentTarget.contains(target)) return false;
+  if (target.closest("a, button, input, select, label")) return false;
+  return !window.getSelection()?.toString();
 }
 
 /** One cell-wide row that holds a state message in place of the data. */
@@ -44,6 +59,7 @@ export function DataTableBody<Row>({
   columns,
   rows,
   rowKey,
+  onRowClick,
   status,
   pageSize,
   error,
@@ -132,7 +148,20 @@ export function DataTableBody<Row>({
   return (
     <TableBody>
       {rows.map((row) => (
-        <TableRow key={rowKey(row)} className="group/row hover:bg-muted">
+        <TableRow
+          key={rowKey(row)}
+          className={cn(
+            "group/row hover:bg-muted",
+            onRowClick && "cursor-pointer",
+          )}
+          onClick={
+            onRowClick
+              ? (event) => {
+                  if (opensRow(event)) onRowClick(row);
+                }
+              : undefined
+          }
+        >
           {columns.map((column, position) => (
             <TableCell
               key={column.id}
