@@ -2028,26 +2028,23 @@
       ]
     },
     {
-      "key": "P-78",
-      "title": "Room in the entry bundle",
+      "key": "P-79",
+      "title": "End-to-end follow-ups",
       "epic": "P",
       "area": "area: 1 document AI and integration",
-      "priority": "must",
+      "priority": "could",
       "estimate": 3,
       "reqs": ["M4", "M6"],
-      "branch": "perf/entry-bundle-room",
-      "sprints": [2],
-      "dependsOn": ["P-11"],
-      "summary": "The initial JS was at 248.8 KB of its 250 KB budget, so the next prompt 004 stories had no room. Make room under the same limit, with no change anyone can see.",
+      "branch": "test/e2e-follow-ups",
+      "sprints": [3],
+      "dependsOn": ["P-14"],
+      "summary": "Follow-ups to P-14 that nobody needs this week: a clean-machine proof of the set-up and a wider browser check.",
       "acceptance": [
-        "Measure what the initial chunk holds, by module and by package, and put the top 20 in the pull request, before and after.",
-        "Move out what the first screen does not need: the barrel, click-only dialogs and menus, the generated client and lazy locale namespaces, each checked rather than assumed.",
-        "Every lazy piece shows the right skeleton or nothing while it loads, prefetches on idle where a click would wait, and changes nothing a person sees or can do.",
-        "The initial chunk is at 225 KB gzip or less.",
-        "`pnpm budget` prints the initial size and the five largest modules in it, and the limit is not raised.",
-        "The walk for all nine roles ends with 0 FAIL in light and dark, and looks the same as on main.",
-        "A Playwright script signs in from a cold load as three roles and opens the role switcher, the user menu, the bell and Control K, and lets a session end, with no console error and no CSP violation.",
-        "The rule for what the shell may import is written in `docs/architecture/patterns.md`."
+        "A CI job runs `pnpm local:setup` on a clean runner and then the smoke test against `pnpm dev`, so Getting started is proven on every change to it (left out of issue 102).",
+        "Someone runs Getting started on macOS once and fixes what differs, and the page stops saying macOS is untested (left out of issue 102).",
+        "The smoke test runs each page in the dark theme too, so axe checks the contrast of both themes.",
+        "`apps/web/scripts/screenshots.mjs` and the walk take Playwright from `apps/e2e` instead of an install outside the repository.",
+        "Firefox and WebKit projects, if a story or the panel needs them."
       ]
     },
     {
@@ -2517,6 +2514,29 @@
         "The chain check runs in the background for a long trail and shows progress, instead of one request that reads everything.",
         "A broken chain shows the event it breaks at, with a link to open it and the events around it.",
         "A browser test: an auditor filters to refusals, opens one, and sees a masked value with its reason."
+      ]
+    },
+    {
+      "key": "P-78",
+      "title": "Room in the entry bundle",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 3,
+      "reqs": ["M4", "M6"],
+      "branch": "perf/entry-bundle-room",
+      "sprints": [2],
+      "dependsOn": ["P-11"],
+      "summary": "The initial JS was at 248.8 KB of its 250 KB budget, so the next prompt 004 stories had no room. Make room under the same limit, with no change anyone can see.",
+      "acceptance": [
+        "Measure what the initial chunk holds, by module and by package, and put the top 20 in the pull request, before and after.",
+        "Move out what the first screen does not need: the barrel, click-only dialogs and menus, the generated client and lazy locale namespaces, each checked rather than assumed.",
+        "Every lazy piece shows the right skeleton or nothing while it loads, prefetches on idle where a click would wait, and changes nothing a person sees or can do.",
+        "The initial chunk is at 225 KB gzip or less.",
+        "`pnpm budget` prints the initial size and the five largest modules in it, and the limit is not raised.",
+        "The walk for all nine roles ends with 0 FAIL in light and dark, and looks the same as on main.",
+        "A Playwright script signs in from a cold load as three roles and opens the role switcher, the user menu, the bell and Control K, and lets a session end, with no console error and no CSP violation.",
+        "The rule for what the shell may import is written in `docs/architecture/patterns.md`."
       ]
     }
   ]

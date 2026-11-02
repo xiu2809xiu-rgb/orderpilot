@@ -58,6 +58,9 @@
           },
           {
             "context": "IaC and Dockerfile scan"
+          },
+          {
+            "context": "End-to-end smoke"
           }
         ]
       }

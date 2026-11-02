@@ -50,7 +50,11 @@ export function UserMenu() {
             variant="ghost"
             size="icon"
             className="rounded-full"
-            aria-label={t("userMenu.label")}
+            // The initials are the visible text, so the name carries them too
+            // (WCAG 2.5.3, label in name).
+            aria-label={t("userMenu.label", {
+              initials: initials(user.displayName),
+            })}
           >
             <Avatar className="size-8">
               <AvatarFallback className="bg-accent text-xs font-medium text-accent-foreground">

@@ -22,6 +22,9 @@ blob-report/
 coverage/
 playwright-report/
 test-results/
+# Each role's signed-in session for one end-to-end run (apps/e2e). Real
+# session cookies, even if short-lived and synthetic.
+.auth/
 
 # AI tool folders and config files stay on each person's machine. The root
 # .claude/settings.json is the one exception: it turns attribution off for

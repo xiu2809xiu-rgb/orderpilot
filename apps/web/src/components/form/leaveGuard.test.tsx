@@ -188,7 +188,7 @@ describe("signing out over a form", () => {
     await waitFor(() => {
       expect(localStorage.getItem(draftKey(id, "test.order"))).not.toBeNull();
     });
-    await user.click(screen.getByRole("button", { name: "Account menu" }));
+    await user.click(screen.getByRole("button", { name: /^Account menu/ }));
     await user.click(await screen.findByRole("menuitem", { name: "Sign out" }));
     const dialog = await screen.findByRole("dialog", {
       name: "Sign out without saving?",
@@ -216,7 +216,7 @@ describe("signing out over a form", () => {
     await waitFor(() => {
       expect(localStorage.getItem(draftKey(id, "test.order"))).not.toBeNull();
     });
-    await user.click(screen.getByRole("button", { name: "Account menu" }));
+    await user.click(screen.getByRole("button", { name: /^Account menu/ }));
     await user.click(await screen.findByRole("menuitem", { name: "Sign out" }));
     await user.click(await screen.findByRole("button", { name: "Sign out" }));
     await waitFor(() => {
@@ -234,7 +234,7 @@ describe("signing out over a form", () => {
     const user = userEvent.setup();
     withMenu();
     await screen.findByRole("textbox", { name: LABELS.customerPo });
-    await user.click(screen.getByRole("button", { name: "Account menu" }));
+    await user.click(screen.getByRole("button", { name: /^Account menu/ }));
     await user.click(await screen.findByRole("menuitem", { name: "Sign out" }));
     expect(screen.queryByRole("dialog")).toBeNull();
     await waitFor(() => {

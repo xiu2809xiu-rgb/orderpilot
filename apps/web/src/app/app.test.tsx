@@ -216,7 +216,7 @@ describe("signed in", () => {
     const user = userEvent.setup();
     const { router } = renderApp("/", { session: sessionFor("SUPPORT") });
     await screen.findByRole("heading", { name: /Welcome/ });
-    await user.click(screen.getByRole("button", { name: "Account menu" }));
+    await user.click(screen.getByRole("button", { name: /^Account menu/ }));
     await user.click(await screen.findByRole("menuitem", { name: "Sign out" }));
     await waitFor(() => {
       expect(router.state.location.pathname).toBe("/login");

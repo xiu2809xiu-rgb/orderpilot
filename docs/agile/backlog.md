@@ -2,13 +2,13 @@
 
 Rendered from [`scripts/github/data/backlog.json`](../../scripts/github/data/backlog.json) by `node scripts/github/render-docs.mjs`. Change the data, not this file. The same data seeds the issues. The board shows where each story stands.
 
-There are 9 epics and 121 stories. Estimates are story points: a first guess, for the team to change at planning.
+There are 9 epics and 122 stories. Estimates are story points: a first guess, for the team to change at planning.
 
 ## Epics
 
 | Epic   | Title                             | Area                                    | Stories | Points |
 | ------ | --------------------------------- | --------------------------------------- | ------- | ------ |
-| Epic P | The platform base                 | `area: 1 document AI and integration`   | 77      | 447    |
+| Epic P | The platform base                 | `area: 1 document AI and integration`   | 78      | 450    |
 | Epic A | Document intake and AI extraction | `area: 1 document AI and integration`   | 5       | 31     |
 | Epic B | Master data and Navision          | `area: 1 document AI and integration`   | 4       | 14     |
 | Epic C | Order workflows and approvals     | `area: 2 order workflows and approvals` | 5       | 29     |
@@ -124,7 +124,6 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | P-74  | Tracker and KPIs on the templates                                  | must     | 5      | `area: 3 checks tracker and insights`   | M4 best practices, M5 team Git workflow                        |
 | P-75  | Audit log on the template                                          | must     | 3      | `area: 4 controls and monitoring`       | M4 best practices, M5 team Git workflow                        |
 | P-76  | Governance and monitoring on the templates                         | must     | 5      | `area: 4 controls and monitoring`       | M4 best practices, M5 team Git workflow                        |
-| P-78  | Room in the entry bundle                                           | must     | 3      | `area: 1 document AI and integration`   | M4 best practices, M6 deploy and monitor                       |
 | T-1   | Owners, backups and reviews                                        | must     | 2      | `area: team`                            | M5 team Git workflow                                           |
 | T-2   | The briefing call with Spectra                                     | must     | 2      | `area: team`                            | M1 design thinking                                             |
 | T-3   | The project plan                                                   | must     | 3      | `area: team`                            | M5 team Git workflow                                           |
@@ -138,6 +137,7 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | A-2   | Extraction with confidence and provenance                          | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | E-1   | The review screen, with source highlighting                        | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | E-2   | The accuracy harness, with a 95% target and a comparison of models | must     | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-78  | Room in the entry bundle                                           | must     | 3      | `area: 1 document AI and integration`   | M4 best practices, M6 deploy and monitor                       |
 | C-5   | Area 2 polish left out of the base                                 | should   | 3      | `area: 2 order workflows and approvals` | M4 best practices                                              |
 | P-22  | The design system with the Pro kits                                | should   | 8      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-29  | A unit coverage threshold on domain logic                          | should   | 2      | `area: 1 document AI and integration`   | M4 best practices                                              |
@@ -153,6 +153,7 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | F-6   | A non-owner runtime database role                                  | should   | 3      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
 | P-23  | The 3D order constellation                                         | could    | 13     | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-27  | Web shell polish                                                   | could    | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-79  | End-to-end follow-ups                                              | could    | 3      | `area: 1 document AI and integration`   | M4 best practices, M6 deploy and monitor                       |
 | B-4   | QR codes on generated documents and carton labels                  | could    | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | E-4   | Passkeys to confirm risky approvals                                | could    | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | E-5   | A first-run guided tour for each role                              | could    | 3      | `area: 1 document AI and integration`   | M1 design thinking, M4 best practices                          |
@@ -1786,6 +1787,26 @@ Acceptance criteria:
 - Masking, AI destinations and the monitoring tabs use the templates, with the first column kept in view on a phone.
 - Audit and policy logic stay `it.todo`, and Angelyn reviews the pull request.
 - Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+
+### P-79: End-to-end follow-ups
+
+Follow-ups to P-14 that nobody needs this week: a clean-machine proof of the set-up and a wider browser check.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** could
+- **Estimate:** 3 points
+- **Requirements:** M4 best practices, M6 deploy and monitor
+- **Branch:** `test/e2e-follow-ups`
+- **Planned for:** Sprint 03 (W4)
+- **Depends on:** P-14
+
+Acceptance criteria:
+
+- A CI job runs `pnpm local:setup` on a clean runner and then the smoke test against `pnpm dev`, so Getting started is proven on every change to it (left out of issue 102).
+- Someone runs Getting started on macOS once and fixes what differs, and the page stops saying macOS is untested (left out of issue 102).
+- The smoke test runs each page in the dark theme too, so axe checks the contrast of both themes.
+- `apps/web/scripts/screenshots.mjs` and the walk take Playwright from `apps/e2e` instead of an install outside the repository.
+- Firefox and WebKit projects, if a story or the panel needs them.
 
 ### P-78: Room in the entry bundle
 
