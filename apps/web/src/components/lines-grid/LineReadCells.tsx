@@ -4,6 +4,10 @@ import { lookupValueSchema } from "@/components/form";
 import { cn } from "@/lib/utils";
 import { useGrid } from "./gridContext";
 
+// The mask's "why" button is small for a mouse; a finger needs 44 px.
+export const TOUCH_BUTTONS =
+  "[&_button]:pointer-coarse:size-11 @max-3xl:[&_button]:size-11";
+
 function asText(value: unknown): string {
   return typeof value === "string" ? value : "";
 }
@@ -52,7 +56,11 @@ export function MaskedPrice({ numeric = true }: { numeric?: boolean }) {
   if (priceMask === null) return null;
   return (
     <span
-      className={cn("flex min-h-8 items-center py-1", numeric && "justify-end")}
+      className={cn(
+        "flex min-h-8 items-center py-1",
+        numeric && "justify-end",
+        TOUCH_BUTTONS,
+      )}
     >
       <MaskedValue
         masked

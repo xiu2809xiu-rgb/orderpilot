@@ -8,7 +8,7 @@ import { GridContext, type GridContextValue } from "./gridContext";
 import { LineRow } from "./LineRow";
 import { LinesFooter } from "./LinesFooter";
 import { editableKinds, trackTemplate } from "./lineValues";
-import type { LineColumn, LinesGridProps } from "./types";
+import type { ColumnKind, LineColumn, LinesGridProps } from "./types";
 import { useGridKeys } from "./useGridKeys";
 import { useItemPick } from "./useItemPick";
 import { useItemSearch } from "./useItemSearch";
@@ -16,6 +16,14 @@ import { useLineActions } from "./useLineActions";
 import { useLineTotals } from "./useLineTotals";
 import { usePendingFocus } from "./usePendingFocus";
 import { useStable } from "./useStable";
+
+// Whole class names for Tailwind. Numbers line up on the right, as their cells do.
+function headerClass(kind: ColumnKind): string | undefined {
+  if (kind === "remove") return "sr-only";
+  const numeric =
+    kind === "quantity" || kind === "unitPrice" || kind === "amount";
+  return numeric ? "@3xl:text-right" : undefined;
+}
 
 /** Where Enter on an item goes: the quantity, since the pick filled the description. */
 function afterItem(editable: readonly string[]): string | undefined {
@@ -132,7 +140,7 @@ export function LinesGrid(props: LinesGridProps) {
                 <div
                   key={column.kind}
                   role="columnheader"
-                  className={column.kind === "remove" ? "sr-only" : undefined}
+                  className={headerClass(column.kind)}
                 >
                   {column.header}
                 </div>
@@ -157,7 +165,7 @@ export function LinesGrid(props: LinesGridProps) {
               variant="outline"
               size="sm"
               data-add-line
-              className="pointer-coarse:h-11"
+              className="pointer-coarse:h-11 @max-3xl:h-11"
               onClick={add}
             >
               <Plus aria-hidden="true" />

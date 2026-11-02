@@ -88,7 +88,9 @@ export function AvailabilityCell({
           available: stock,
         })}
       </p>
-      {grid.shortfallAction?.(short)}
+      <div className="[&_button]:pointer-coarse:min-h-11 @max-3xl:[&_button]:min-h-11">
+        {grid.shortfallAction?.(short)}
+      </div>
     </div>
   );
 }

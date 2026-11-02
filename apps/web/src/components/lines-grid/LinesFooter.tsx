@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { MaskedValue, Money } from "@/components/common";
 import { formatQuantity } from "@/lib/format";
+import { TOUCH_BUTTONS } from "./LineReadCells";
 import type { LineTotals } from "./types";
 
 /** The default footer: how many lines, how many units, and what they come to. */
@@ -19,7 +20,7 @@ export function LinesFooter({ totals }: { totals: LineTotals }) {
       {totals.amount === null && totals.masked === null ? null : (
         <div className="flex items-center gap-1 font-medium">
           <dt>{t("footer.total")}</dt>
-          <dd className="tabular-nums">
+          <dd className={`tabular-nums ${TOUCH_BUTTONS}`}>
             {totals.masked ? (
               <MaskedValue
                 masked
