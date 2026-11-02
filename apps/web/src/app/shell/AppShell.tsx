@@ -1,7 +1,9 @@
 import { Suspense, lazy, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet } from "react-router";
-import { ListPageSkeleton, Toaster } from "@/components/common";
+// Direct imports: the barrel would pull the data table into the first load.
+import { ListPageSkeleton } from "@/components/common/skeletons";
+import { Toaster } from "@/components/common/Toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { featureNamespaces } from "@/features/nav";
 import { apiClient } from "@/lib/api/instance";
