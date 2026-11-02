@@ -271,6 +271,7 @@ Prompt 003's deadline of Monday evening, 2 Nov, cannot hold for all of this: 41 
 | P-74  | Tracker and KPIs on the templates                     | `feat/template-tracker-insights` | Not started                                                                  |
 | P-75  | Audit log on the template                             | `feat/template-audit`            | Not started                                                                  |
 | P-76  | Governance and monitoring on the templates            | `feat/template-monitoring`       | Not started                                                                  |
+| P-78  | Room in the entry bundle                              | `perf/entry-bundle-room`         | In review, [#178](https://github.com/xiu2809xiu-rgb/orderpilot/issues/178)   |
 
 ## Prompt 003: the product pass
 
