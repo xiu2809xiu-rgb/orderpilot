@@ -1,4 +1,4 @@
-import type { FieldIssue } from "@orderpilot/shared";
+import type { ErrorCode, FieldIssue } from "@orderpilot/shared";
 import {
   get,
   type Control,
@@ -12,6 +12,23 @@ import { z } from "zod";
 import { ApiError } from "@/lib/api/errors";
 import { describeError } from "@/lib/errors";
 import { errorLeaves } from "./formErrors";
+
+// The API words these refusals for the person who hit them. Its other messages
+// are fixed texts for the log, so a screen uses its own words for those. Kept
+// here, not on ApiError, because only forms show them and the entry stays small.
+const CODES_WORDED_FOR_A_PERSON = new Set<ErrorCode>([
+  "VALIDATION_FAILED",
+  "FORBIDDEN",
+  "NOT_FOUND",
+  "CONFLICT",
+]);
+
+/** The server's own words, when they are meant for a person. */
+function personMessage(error: ApiError): string | undefined {
+  return error.fromEnvelope && CODES_WORDED_FOR_A_PERSON.has(error.code)
+    ? error.message
+    : undefined;
+}
 
 const serverExtraSchema = z.object({
   traceId: z.union([z.string(), z.literal(false)]).optional(),
@@ -68,7 +85,7 @@ function formMessage(error: unknown): {
       message: getI18n().t("errors.session", { ns: "form" }),
     };
   }
-  return { ...described, message: error.personMessage ?? described.message };
+  return { ...described, message: personMessage(error) ?? described.message };
 }
 
 /** Server paths and the form paths they belong to: "customerNo" to "customer". */

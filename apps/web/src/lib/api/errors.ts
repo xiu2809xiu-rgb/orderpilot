@@ -1,14 +1,5 @@
 import type { ErrorCode, FieldIssue } from "@orderpilot/shared";
 
-// The API words these refusals for the person who hit them. Its other messages
-// are fixed texts for the log, so a screen uses its own words for those.
-const CODES_WORDED_FOR_A_PERSON = new Set<ErrorCode>([
-  "VALIDATION_FAILED",
-  "FORBIDDEN",
-  "NOT_FOUND",
-  "CONFLICT",
-]);
-
 /** The API answered with the error envelope. Switch on `code`, never on `message`. */
 export class ApiError extends Error {
   override readonly name = "ApiError";
@@ -23,13 +14,6 @@ export class ApiError extends Error {
     readonly fromEnvelope = true,
   ) {
     super(message);
-  }
-
-  /** The server's own words, when they are meant for a person. */
-  get personMessage(): string | undefined {
-    return this.fromEnvelope && CODES_WORDED_FOR_A_PERSON.has(this.code)
-      ? this.message
-      : undefined;
   }
 }
 
