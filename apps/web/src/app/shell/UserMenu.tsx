@@ -11,7 +11,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "./overlays/dropdown-menu";
 import { logout } from "@/lib/api/auth";
 import { anyFormDirty } from "@/lib/dirty-forms";
 import { useSessionStore } from "@/stores/session";

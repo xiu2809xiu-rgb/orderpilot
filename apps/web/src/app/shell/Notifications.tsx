@@ -10,14 +10,10 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { apiClient } from "@/lib/api/instance";
 import { formatDay } from "@/lib/format";
 import { useSessionStore } from "@/stores/session";
+import { Popover, PopoverContent, PopoverTrigger } from "./overlays/popover";
 
 const NEXT = 5;
 

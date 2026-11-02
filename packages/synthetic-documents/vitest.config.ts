@@ -14,6 +14,12 @@ export default defineConfig({
       ),
     },
   },
-  // Rendering all twelve files twice takes a few seconds on a cold machine.
-  test: { include: ["src/**/*.test.ts"], testTimeout: 60_000 },
+  // Rendering all twelve files twice takes a few seconds on a cold machine, and
+  // longer while the other packages test in parallel. The files render in
+  // beforeAll, so the hooks need the same allowance as the tests.
+  test: {
+    include: ["src/**/*.test.ts"],
+    testTimeout: 60_000,
+    hookTimeout: 60_000,
+  },
 });

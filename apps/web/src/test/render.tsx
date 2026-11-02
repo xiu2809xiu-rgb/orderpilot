@@ -1,12 +1,18 @@
 import { render } from "@testing-library/react";
-import { vi } from "vitest";
+import { beforeAll, vi } from "vitest";
 import { App } from "@/app/App";
 import { createTestRouter } from "@/app/router";
+import { loadShellOverlays } from "@/app/shell/overlays/preload";
 import { resetBootstrap } from "@/lib/api/auth";
 import { apiClient } from "@/lib/api/instance";
 import { queryClient } from "@/lib/query";
 import { useSessionStore } from "@/stores/session";
 import { mockApi, type MockApiState } from "./fixtures";
+
+// A file that renders the app sees the shell's menus as they are once the
+// browser has prefetched them (overlays/deferred.test.tsx covers the moment
+// before). Only these files pay for loading Radix, not every test file.
+beforeAll(loadShellOverlays);
 
 /** Puts the app, the stores and the cookie back to a fresh page load. */
 export function resetApp() {

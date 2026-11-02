@@ -2,13 +2,13 @@
 
 Rendered from [`scripts/github/data/backlog.json`](../../scripts/github/data/backlog.json) by `node scripts/github/render-docs.mjs`. Change the data, not this file. The same data seeds the issues. The board shows where each story stands.
 
-There are 9 epics and 121 stories. Estimates are story points: a first guess, for the team to change at planning.
+There are 9 epics and 122 stories. Estimates are story points: a first guess, for the team to change at planning.
 
 ## Epics
 
 | Epic   | Title                             | Area                                    | Stories | Points |
 | ------ | --------------------------------- | --------------------------------------- | ------- | ------ |
-| Epic P | The platform base                 | `area: 1 document AI and integration`   | 77      | 447    |
+| Epic P | The platform base                 | `area: 1 document AI and integration`   | 78      | 450    |
 | Epic A | Document intake and AI extraction | `area: 1 document AI and integration`   | 5       | 31     |
 | Epic B | Master data and Navision          | `area: 1 document AI and integration`   | 4       | 14     |
 | Epic C | Order workflows and approvals     | `area: 2 order workflows and approvals` | 5       | 29     |
@@ -137,6 +137,7 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | A-2   | Extraction with confidence and provenance                          | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | E-1   | The review screen, with source highlighting                        | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | E-2   | The accuracy harness, with a 95% target and a comparison of models | must     | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-78  | Room in the entry bundle                                           | must     | 3      | `area: 1 document AI and integration`   | M4 best practices, M6 deploy and monitor                       |
 | C-5   | Area 2 polish left out of the base                                 | should   | 3      | `area: 2 order workflows and approvals` | M4 best practices                                              |
 | P-22  | The design system with the Pro kits                                | should   | 8      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-29  | A unit coverage threshold on domain logic                          | should   | 2      | `area: 1 document AI and integration`   | M4 best practices                                              |
@@ -1806,6 +1807,29 @@ Acceptance criteria:
 - The smoke test runs each page in the dark theme too, so axe checks the contrast of both themes.
 - `apps/web/scripts/screenshots.mjs` and the walk take Playwright from `apps/e2e` instead of an install outside the repository.
 - Firefox and WebKit projects, if a story or the panel needs them.
+
+### P-78: Room in the entry bundle
+
+The initial JS was at 248.8 KB of its 250 KB budget, so the next prompt 004 stories had no room. Make room under the same limit, with no change anyone can see.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 3 points
+- **Requirements:** M4 best practices, M6 deploy and monitor
+- **Branch:** `perf/entry-bundle-room`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-11
+
+Acceptance criteria:
+
+- Measure what the initial chunk holds, by module and by package, and put the top 20 in the pull request, before and after.
+- Move out what the first screen does not need: the barrel, click-only dialogs and menus, the generated client and lazy locale namespaces, each checked rather than assumed.
+- Every lazy piece shows the right skeleton or nothing while it loads, prefetches on idle where a click would wait, and changes nothing a person sees or can do.
+- The initial chunk is at 225 KB gzip or less.
+- `pnpm budget` prints the initial size and the five largest modules in it, and the limit is not raised.
+- The walk for all nine roles ends with 0 FAIL in light and dark, and looks the same as on main.
+- A Playwright script signs in from a cold load as three roles and opens the role switcher, the user menu, the bell and Control K, and lets a session end, with no console error and no CSP violation.
+- The rule for what the shell may import is written in `docs/architecture/patterns.md`.
 
 ## Epic A: Document intake and AI extraction
 

@@ -1,10 +1,16 @@
 import type { Role, WorkflowReminder } from "@orderpilot/shared";
 import { fireEvent, screen } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import { renderWorkflowPage } from "@/features/workflows/render";
 import { server } from "@/test/server";
 import { Notifications } from "./Notifications";
+import { loadShellOverlays } from "./overlays/preload";
+
+// The bell as it is once the browser has prefetched the popover. A click before
+// that moment is covered in overlays/deferred.test.tsx; here it would only add
+// a cold import to the wait, which a full parallel run can push past 5 s.
+beforeAll(loadShellOverlays);
 
 function reminder(index: number): WorkflowReminder {
   return {
