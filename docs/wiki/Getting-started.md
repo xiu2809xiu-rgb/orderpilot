@@ -98,7 +98,7 @@ Line endings need no set-up. [`.gitattributes`](https://github.com/xiu2809xiu-rg
 
 One `.env` at the repository root is enough. Its values are safe for a laptop and are not secrets. `.env` is never committed.
 
-- **Who reads it.** The API reads `apps/api/.env` first, then the root `.env`. The Prisma commands (`pnpm db:migrate` and the others) read the same files by the same rules. Docker Compose reads the root `.env` itself for the ports and passwords. The web app's Vite server reads only `API_PORT` and `WEB_PORT` from it. `pnpm local:setup` never reads it.
+- **Who reads it.** The API reads `apps/api/.env` first, then the root `.env`. The Prisma commands (`pnpm db:migrate` and the others) read the same files by the same rules. Docker Compose reads the root `.env` itself for the ports and passwords. The web app's Vite server reads only `API_PORT`, `WEB_PORT` and the developer switch `VITE_SHOW_PLANNED` from it (see below). `pnpm local:setup` never reads it.
 - **The shell wins.** A variable already set in your shell, in CI or by Docker is never overridden by a file. A file that is missing is skipped.
 - **References.** A value may use another, such as `${POSTGRES_PORT}`, so one line moves every URL built from it.
 - **Missing values.** If something required is missing, the API stops and names the file to create.
@@ -127,6 +127,10 @@ $env:API_PORT = 3100; pnpm dev    # PowerShell
 ```
 
 A second clone on the same machine needs its own ports and its own Docker project name, because the project is called `orderpilot` in `docker-compose.yml`. Set `COMPOSE_PROJECT_NAME` in the shell (`export COMPOSE_PROJECT_NAME=orderpilot-two`, PowerShell: `$env:COMPOSE_PROJECT_NAME = "orderpilot-two"`) before `pnpm local:setup`, and keep it set while you work in that clone.
+
+## Seeing screens that are not built yet
+
+The menu, the routes, Ctrl+K and the home page show only what exists. A screen that is still a placeholder (a feature marked `planned: true` in its `index.ts`) is left out, and its address shows the not-found page, the same as any unknown address. To see what is coming, set `VITE_SHOW_PLANNED=true` in the root `.env` and restart `pnpm dev`. It works only in the development server, and it is off by default so your screenshots look like production. A production build never contains the placeholder or its text, and `pnpm budget` fails if it does.
 
 ## After a pull
 
