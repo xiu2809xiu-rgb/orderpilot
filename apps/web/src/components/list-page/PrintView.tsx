@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import type { DataTableColumn } from "@/components/common";
@@ -36,9 +36,15 @@ export function PrintView<Row>({
   const { t: tc } = useTranslation("components");
   const printable = columns.filter((column) => column.exportValue);
 
+  const printed = useRef(false);
+
   useEffect(() => {
     window.addEventListener("afterprint", onDone, { once: true });
-    window.print();
+    // StrictMode runs this effect twice in development: open one dialog.
+    if (!printed.current) {
+      printed.current = true;
+      window.print();
+    }
     return () => {
       window.removeEventListener("afterprint", onDone);
     };
