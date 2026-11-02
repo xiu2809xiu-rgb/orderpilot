@@ -269,5 +269,5 @@ function toApiError(status: number, json: unknown, traceId: string): ApiError {
   }
   // Not our envelope (a proxy page, say): keep the status and the trace id.
   const code = STATUS_TO_CODE[status] ?? "INTERNAL_ERROR";
-  return new ApiError(code, "Unexpected response.", status, traceId);
+  return new ApiError(code, "Unexpected response.", status, traceId, [], false);
 }

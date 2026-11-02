@@ -10,6 +10,8 @@ export class ApiError extends Error {
     readonly status: number,
     readonly traceId: string,
     readonly details: FieldIssue[] = [],
+    /** False for an answer that was not our envelope, such as a proxy's page. */
+    readonly fromEnvelope = true,
   ) {
     super(message);
   }

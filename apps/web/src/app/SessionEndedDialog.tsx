@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useRestoreFocus } from "@/lib/useRestoreFocus";
 import { useSessionStore } from "@/stores/session";
 import { SignInForm } from "./SignInForm";
 
@@ -19,11 +20,15 @@ export function SessionEndedDialog() {
   const queryClient = useQueryClient();
   const open = useSessionStore((state) => state.status === "expired");
   const email = useSessionStore((state) => state.session?.user.email);
+  // The page stays as it was left, and so does the keyboard's place in it.
+  const focus = useRestoreFocus();
 
   return (
     <Dialog open={open}>
       <DialogContent
         showCloseButton={false}
+        onOpenAutoFocus={focus.onOpenAutoFocus}
+        onCloseAutoFocus={focus.onCloseAutoFocus}
         onEscapeKeyDown={(event) => {
           event.preventDefault();
         }}

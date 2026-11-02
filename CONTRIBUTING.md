@@ -242,6 +242,8 @@ If a hook stops you, it says why and what to do. When it refuses a push to `main
 
 **Changed `.env` and nothing moved.** A variable set in your shell wins over the file, and the API never overrides it. Check with `echo $POSTGRES_PORT` (PowerShell: `$env:POSTGRES_PORT`), and unset it. Then run `docker compose up -d --wait` so the containers pick up the new ports.
 
+**A new locale file is missing in the web tests** (`No translations for en/<name>`, or the raw key on screen). Vitest keeps transformed modules in `node_modules/.vitest-cache`, and `i18n.ts`'s list of locale files is from before the file existed. Delete that folder and run the tests again. CI starts clean, so it never sees this.
+
 **The first `docker compose up` takes minutes.** It compiles MinIO from its source once. Later starts use the cached image.
 
 **Start again from nothing.** `docker compose down` stops and removes the containers and keeps your data. Removing the data too (`docker compose down -v`) deletes the volumes: ask first, and know that it cannot be undone.
@@ -340,6 +342,62 @@ If something destructive or irreversible seems necessary, ask Richie first.
 6. **Cover every state and WCAG 2.2 AA.** Handle loading, empty, error with retry and a trace id, partial, success and permission denied, wherever they apply. See the [UI rules](CLAUDE.md#8-ui-rules).
 7. **Test it** with Testing Library, and add its screenshots in light and dark to the pull request.
 8. **Stay in your area.** Shared components need a review from their owners, listed in [module ownership](docs/team/module-ownership.md#shared-files-and-who-reviews-them).
+
+## Building a form
+
+Every form is built from the kit in `apps/web/src/components/form`, imported from `@/components/form`. Never hand-roll a field, a save or an error box. `/gallery` shows the whole kit on a sales order header with a faked save, in demo mode and in development.
+
+```tsx
+const form = useZodForm<OrderInput, Order>({
+  schema: orderSchema,
+  defaultValues: order,
+});
+const draft = useDraft(`order.${order.no}`, form, {
+  exclude: ["lines.*.unitPrice"],
+});
+const save = useFormSave(form, {
+  draft,
+  onSave: (values) => updateOrder(order.no, values),
+});
+useSaveShortcut(form, save);
+
+<FormShell form={form} draft={draft}>
+  <FormGrid>
+    <LookupField
+      control={form.control}
+      name="customer"
+      label={t("customer")}
+      search={searchCustomers}
+      required
+      className="sm:col-span-2"
+    />
+    <TextField
+      control={form.control}
+      name="customerPo"
+      label={t("customerPo")}
+      required
+      code
+    />
+    <MoneyField
+      control={form.control}
+      name="freight"
+      label={t("freight")}
+      currency="USD"
+    />
+  </FormGrid>
+  <FormActions>
+    <SaveButton form={form} onSave={save} />
+  </FormActions>
+</FormShell>;
+```
+
+- **The schema** lives in `packages/shared` when the API checks the same thing, with plain messages ("Enter the customer's PO number", never "Too small"). A field shows its error when the person leaves it, then on each change.
+- **Fields:** `TextField`, `NumberField` (with a `unit`), `MoneyField` (a decimal string with its currency, never a float), `DateField` (YYYY-MM-DD), `SelectField`, `TextAreaField`, `CheckboxField` and `LookupField`. Each takes `label`, `hint`, `required`, `disabled` and `readOnly`, and wires its label, hint, error, `aria-describedby` and `aria-invalid` itself. Prefer `readOnly` to `disabled`: it stays focusable and copyable. Amounts are tidied when the field is left after typing, never when it is only tabbed through, and a comma counts only as grouping ("1,200.50"): "12,50" is left for the schema to refuse. In a table cell, pass `hideLabel`: the label is not drawn but stays the field's accessible name. On a touch screen every control grows to 44 px.
+- **A rule across fields** (a ship-by date after the order date) sits on a small object of just those fields, joined to the main schema with `.and()`: on the whole object it would wait until every other field was right. A field that shows an error is checked again whenever any other field changes, so the error clears when the other field is corrected.
+- **A lookup** takes a `search(query, signal)` that returns `{ number, name, detail? }` records and stops when `signal` aborts. It holds `{ number, name }` or null; send the number. Use `requiredLookup(message)` in the schema. Its keys are the Navision ones: type a number and press Enter or Tab and the record is picked once the search has answered; the arrows only ever move through the results of the text as it stands. `onPick(option)` gives the page the whole record, for a unit price or the stock on hand. The list is a popover, so a grid cell cannot clip it.
+- **Errors: one line.** Save through `useFormSave` and every error lands for you: each `details` entry on its field in the server's words (`lines.0.quantity` included), the highest one focused, and the rest, a 409, a 403 or a 500, at the top with the trace id. A rule the schema refuses where no field shows it (a list that needs a line) goes to the same place, so Save never seems to do nothing. A path under a lookup (`customer.number`) lands on the lookup. Where the API's names differ from the form's, pass `serverPaths`: `{ customerNo: "customer", "lines.*.itemNo": "lines.*.item" }`. Outside `useFormSave`, call `applyServerError(error, form, map)` in your `catch`.
+- **Drafts.** `useDraft(key, form, { exclude, rowKey })` keeps unsaved changes in this browser for this viewer and this record. Put the record's number in the key, and list every field that can be masked in `exclude`, with `*` for every row. A row's left-out fields come back only from the row with the same `rowKey` field (`id` by default), never by position, so give rows a stable id; a row with none comes back with those fields empty. Mount the form once its record has loaded. A draft goes on save, on Discard and on sign-out, and stays when the session expires. Drafts older than seven days are dropped, whoever's they are. After a save the form is clean again, but anything typed while it ran stays unsaved. Signing out removes drafts only for the tab where it happens: another tab left open can write one again, since tabs share no session signal yet.
+- **Leaving and keys.** `FormShell` asks before a route change or a tab close while the form has unsaved changes; pass `leaveGuard={false}` for a form that keeps nothing, such as a filter. Signing out over a form with changes asks too, and says they will be deleted. The prompt opens on Keep editing, and focus returns to the field. Enter never submits. Ctrl+S or Command+S saves through `useSaveShortcut`, from inside a field too. Save is refused until something has changed: pass `allowClean` for a form that its defaults fill in, such as an SPR raised from a shortage line, and `blockedReason` when the person cannot save yet, in their words. **Pass the same two options to `SaveButton` and to `useSaveShortcut`**, and the button and the key always agree.
 
 ## Adding an API route
 
