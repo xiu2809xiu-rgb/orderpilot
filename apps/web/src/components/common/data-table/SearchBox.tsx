@@ -64,7 +64,7 @@ export function SearchBox({
         // The slash key finds this field (see app/shell/shortcuts.ts).
         data-quick-search=""
         aria-keyshortcuts="/"
-        className="peer pr-8 pl-9"
+        className="peer pr-8 pl-9 pointer-coarse:h-11"
       />
       <kbd
         aria-hidden="true"

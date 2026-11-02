@@ -22,7 +22,7 @@ export function FilterControl({
   const switchId = useId();
   if (filter.kind === "toggle") {
     return (
-      <div className="flex items-center gap-2 text-sm">
+      <div className="flex items-center gap-2 text-sm pointer-coarse:min-h-11">
         <Switch
           id={switchId}
           checked={filters[filter.id] === true}
