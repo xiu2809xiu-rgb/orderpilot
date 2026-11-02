@@ -413,6 +413,40 @@ useSaveShortcut(form, save);
 - **Drafts.** `useDraft(key, form, { exclude, rowKey })` keeps unsaved changes in this browser for this viewer and this record. Put the record's number in the key, and list every field that can be masked in `exclude`, with `*` for every row. A row's left-out fields come back only from the row with the same `rowKey` field (`id` by default), never by position, so give rows a stable id; a row with none comes back with those fields empty. Mount the form once its record has loaded. A draft goes on save, on Discard and on sign-out, and stays when the session expires. Drafts older than seven days are dropped, whoever's they are. After a save the form is clean again, but anything typed while it ran stays unsaved. Signing out removes drafts only for the tab where it happens: another tab left open can write one again, since tabs share no session signal yet.
 - **Leaving and keys.** `FormShell` asks before a route change or a tab close while the form has unsaved changes; pass `leaveGuard={false}` for a form that keeps nothing, such as a filter. Signing out over a form with changes asks too, and says they will be deleted. The prompt opens on Keep editing, and focus returns to the field. Enter never submits. Ctrl+S or Command+S saves through `useSaveShortcut`, from inside a field too. Save is refused until something has changed: pass `allowClean` for a form that its defaults fill in, such as an SPR raised from a shortage line, and `blockedReason` when the person cannot save yet, in their words. **Pass the same two options to `SaveButton` and to `useSaveShortcut`**, and the button and the key always agree.
 
+## Building a list
+
+Every list is a `ListPage` from `@/components/list-page`. Never hand-roll a toolbar, a filter select or a table around `DataTable`. `/gallery` shows one with its filters, actions, reason dialog, Export and Print.
+
+```tsx
+const [query, setQuery] = useUrlQuery(URL_FILTERS, { pageSize: 25 });
+const params = apiParams(query, SORTABLE);
+const list = useMasterDataItems(params, {
+  query: { placeholderData: (previous) => previous },
+});
+
+<ListPage
+  tableId="master-data-items"
+  title={t("items.title")}
+  caption={t("items.caption")}
+  columns={columns}
+  rowKey={(row) => row.no}
+  rowHref={(row) => `/master-data/items/${row.no}`}
+  query={query}
+  onQueryChange={setQuery}
+  list={list}
+  filters={filters}
+  actions={actions}
+  exportOptions={{ fileName: "items", loadRows }}
+/>;
+```
+
+- **The address.** `useUrlQuery(spec)` keeps search, filters, page, sort and page size in the URL and reads them back on a reload. `spec` is a constant: each filter with the values it allows, or `null` for any text (or a plain list of names). A value the API would refuse falls back to the default. `apiParams` turns the query into the call's parameters, and `allPages` fetches every page for an export.
+- **Filters** are declared: `{ id, label, allLabel, options, more }`. Keep the three or four that matter in the bar and mark the rest `more: true`. A `kind: "toggle"` is a yes/no switch. Applied filters show as chips with Clear all. Give options plain labels, never raw codes.
+- **Actions** are declared too: `{ id, kind, label, icon, permission, needs, onRun }`. The kinds are `new`, `edit`, `void`, `disable`, `batch`, `import`, `export` and `print`, and the bar always draws them in that order. An action is drawn only if the role holds its `permission`, so a screen never shows a button the role cannot use (the server still refuses it). `new` is the one primary button and the N key runs it. An action that needs a selection is blocked with its reason until you pass `selection`. Export and Print are done for you from `exportOptions`.
+- **Void and Disable** take `reasoned: { title, confirmLabel, doneMessage, run }`. The template asks for a required reason in one dialog, shows the server's words under the field, and ends with a toast.
+- **A status** on a list is `<StatusChip family="waiting">{t("...")}</StatusChip>`. The family is draft, waiting, ready, blocked or done (or none, for neutral); the word is yours. Never list status codes in the web app.
+- **Not yet:** row checkboxes, the row menu, saved views beyond filters and the operation log panel come with P-45.
+
 ## Adding an API route
 
 The web app never hand-writes a call to the API. It uses hooks and mock handlers that orval generates from the API's OpenAPI file ([ADR 0019](docs/adr/0019-generated-api-hooks-and-mocks.md)).

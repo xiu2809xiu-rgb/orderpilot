@@ -239,7 +239,7 @@ Prompt 003's deadline of Monday evening, 2 Nov, cannot hold for all of this: 41 
 | P-14  | End-to-end smoke                                      | `test/e2e-smoke`                 | In review, [#182](https://github.com/xiu2809xiu-rgb/orderpilot/pull/182)   |
 | P-39  | Module navigation, showing only what is real          | `feat/workspace-modules`         | In review, pull request opened                                             |
 | P-43  | Records open as tabs                                  | `feat/workspace-record-tabs`     | Not started                                                                |
-| P-44  | List template: filter bar, action bar and status chip | `feat/list-template-bars`        | Not started                                                                |
+| P-44  | List template: filter bar, action bar and status chip | `feat/list-template-bars`        | In review, pull request opened                                             |
 | P-45  | List template: grid, saved views and operation log    | `feat/list-template-grid`        | Not started                                                                |
 | P-46  | Form kit                                              | `feat/form-kit`                  | In review, [#173](https://github.com/xiu2809xiu-rgb/orderpilot/pull/173)   |
 | P-47  | Document form                                         | `feat/document-form`             | Not started                                                                |
@@ -295,7 +295,7 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 | P-14  | End-to-end smoke                                      | `test/e2e-smoke`                 | Merged, [#182](https://github.com/xiu2809xiu-rgb/orderpilot/pull/182)    |
 | P-39  | Module navigation, showing only what is real          | `feat/workspace-modules`         | In progress: branch pushed, pull request next                            |
 | P-43  | Records open as tabs                                  | `feat/workspace-record-tabs`     | In review, [#175](https://github.com/xiu2809xiu-rgb/orderpilot/pull/175) |
-| P-44  | List template: filter bar, action bar and status chip | `feat/list-template-bars`        | Not started                                                              |
+| P-44  | List template: filter bar, action bar and status chip | `feat/list-template-bars`        | In review, pull request opened                                           |
 | P-45  | List template: grid, saved views and operation log    | `feat/list-template-grid`        | Not started                                                              |
 | P-46  | Form kit                                              | `feat/form-kit`                  | Merged, [#173](https://github.com/xiu2809xiu-rgb/orderpilot/pull/173)    |
 | P-47  | Document form                                         | `feat/document-form`             | Not started                                                              |
