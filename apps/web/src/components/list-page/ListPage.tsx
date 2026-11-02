@@ -12,12 +12,8 @@ import {
 } from "@/components/common";
 import { tableStatusOf } from "@/lib/query-status";
 import { useSessionStore } from "@/stores/session";
-import { ActionBar } from "./ActionBar";
 import { labelOf, usableActions } from "./actions";
-import { AppliedFilters } from "./AppliedFilters";
-import { appliedChips, withoutChip, withSearch } from "./chips";
-import { FilterBar } from "./FilterBar";
-import { ViewSettings } from "./ViewSettings";
+import { ListToolbar } from "./ListToolbar";
 import type { ListAction, ListFilter, ListResult } from "./types";
 
 export interface ListPageProps<Row> {
@@ -31,6 +27,8 @@ export interface ListPageProps<Row> {
   tabs?: ReactNode;
   /** Names the table for screen readers. */
   caption: string;
+  /** 2 when the list sits under a page that already has its h1. */
+  headingLevel?: 1 | 2;
   columns: readonly DataTableColumn<Row>[];
   rowKey: (row: Row) => string;
   /** The record page a row opens. The row then works like a `RecordLink`. */
@@ -69,6 +67,7 @@ export function ListPage<Row>({
   demo,
   tabs,
   caption,
+  headingLevel,
   columns,
   rowKey,
   rowHref,
@@ -100,12 +99,12 @@ export function ListPage<Row>({
         }
       : undefined,
   );
-  const chips = appliedChips(filters, query, t("filters.search"));
 
   return (
     <div className="space-y-s3">
       <PageHeader
         title={title}
+        {...(headingLevel ? { headingLevel } : {})}
         {...(description ? { description } : {})}
         {...(demo ? { meta: <DemoBadge kind={demo} /> } : {})}
         {...(list.data ? { total: list.data.meta.total } : {})}
@@ -128,47 +127,19 @@ export function ListPage<Row>({
         {...(partialNotice ? { partialNotice } : {})}
         {...(empty ? { empty } : {})}
         {...(pageSizes ? { pageSizes } : {})}
-        toolbar={({ shown, rows, change, setFilter, prefs, visibleIds }) => (
-          <div className="space-y-s2">
-            <ActionBar
-              actions={usable}
-              selection={selection}
-              title={title}
-              filterWords={chips.map((chip) => chip.label)}
-              columns={shown}
-              rows={rows}
-              exportOptions={exportOptions}
-            />
-            <FilterBar
-              filters={filters}
-              values={query.filters}
-              search={query.search}
-              onSearch={(search) => {
-                change({ search });
-              }}
-              setFilter={setFilter}
-              searchDebounceMs={searchDebounceMs}
-              trailing={
-                <ViewSettings
-                  columns={columns}
-                  visibleIds={visibleIds}
-                  prefs={prefs}
-                  query={query}
-                  change={change}
-                />
-              }
-            />
-            <AppliedFilters
-              chips={chips}
-              filters={withSearch(query)}
-              onChange={(next) => {
-                change(withoutChip(next));
-              }}
-              onClearAll={() => {
-                change({ search: "", filters: {} });
-              }}
-            />
-          </div>
+        toolbar={(table) => (
+          <ListToolbar
+            table={table}
+            columns={columns}
+            query={query}
+            title={title}
+            searchLabel={t("filters.search")}
+            filters={filters}
+            actions={usable}
+            selection={selection}
+            exportOptions={exportOptions}
+            searchDebounceMs={searchDebounceMs}
+          />
         )}
       />
     </div>

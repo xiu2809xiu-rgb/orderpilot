@@ -16,6 +16,19 @@ import {
   type ListAction,
 } from "./types";
 
+/** New, Edit, Void, Disable and batch actions: they get a row of their own. */
+export const LEFT_KINDS: readonly ActionKind[] = [
+  "new",
+  "edit",
+  "void",
+  "disable",
+  "batch",
+];
+
+export function hasLeftActions<Row>(actions: readonly ListAction<Row>[]) {
+  return actions.some((action) => LEFT_KINDS.includes(action.kind));
+}
+
 /** The icon an action wears when the screen names none. */
 export const KIND_ICONS: Record<ActionKind, LucideIcon | null> = {
   new: Plus,

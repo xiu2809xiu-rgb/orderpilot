@@ -2,8 +2,9 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { DataTableColumn, ExportOptions } from "@/components/common";
 import { ExportMenu } from "@/components/common/data-table/ExportMenu";
+import { cn } from "@/lib/utils";
 import { ActionButton } from "./ActionButton";
-import { blockedReason, KIND_ICONS, labelOf } from "./actions";
+import { blockedReason, KIND_ICONS, labelOf, LEFT_KINDS } from "./actions";
 import { PrintButton } from "./PrintButton";
 import { ReasonDialog } from "./ReasonDialog";
 import { needsOf, type ListAction } from "./types";
@@ -19,9 +20,12 @@ interface ActionBarProps<Row> {
   columns: readonly DataTableColumn<Row>[];
   rows: readonly Row[];
   exportOptions?: ExportOptions<Row> | undefined;
+  /**
+   * Draws no row of its own: used when the screen has only Import, Export and
+   * Print, which then share the filter bar's row instead of leaving one empty.
+   */
+  compact?: boolean;
 }
-
-const LEFT = ["new", "edit", "void", "disable", "batch"] as const;
 
 /**
  * New, Edit, Void or Disable, batch actions, Import, Export and Print, in that
@@ -36,6 +40,7 @@ export function ActionBar<Row>({
   columns,
   rows,
   exportOptions,
+  compact = false,
 }: ActionBarProps<Row>) {
   const { t } = useTranslation("list-page");
   const [asking, setAsking] = useState<ListAction<Row> | null>(null);
@@ -89,12 +94,8 @@ export function ActionBar<Row>({
     );
   };
 
-  const left = actions.filter((a) =>
-    (LEFT as readonly string[]).includes(a.kind),
-  );
-  const right = actions.filter(
-    (a) => !(LEFT as readonly string[]).includes(a.kind),
-  );
+  const left = actions.filter((a) => LEFT_KINDS.includes(a.kind));
+  const right = actions.filter((a) => !LEFT_KINDS.includes(a.kind));
   const reasoned = asking?.reasoned;
   return (
     <div
@@ -104,7 +105,12 @@ export function ActionBar<Row>({
     >
       {left.map(draw)}
       {right.length > 0 ? (
-        <div className="ml-auto flex flex-wrap items-center gap-2">
+        <div
+          className={cn(
+            "flex flex-wrap items-center gap-2",
+            !compact && "ml-auto",
+          )}
+        >
           {right.map(draw)}
         </div>
       ) : null}

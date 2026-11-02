@@ -15,7 +15,9 @@
     "badgesHint": "Labels that keep a demo honest, and show how sensitive a record is.",
     "piecesHint": "Used inside tables and detail pages.",
     "form": "Form kit",
-    "formHint": "Fields, server errors, drafts and the prompt before leaving. The save is faked in the browser: choose what the server answers, then press Save or Ctrl+S."
+    "formHint": "Fields, server errors, drafts and the prompt before leaving. The save is faked in the browser: choose what the server answers, then press Save or Ctrl+S.",
+    "list": "List page",
+    "listHint": "The template every list is built on: filters, the action bar, Void with its reason, Export and Print, and the five status chips. New is left out here because N already runs this page's own primary action. The server is faked in the browser."
   },
   "feedback": {
     "title": "Amounts, messages and loading shapes",
@@ -145,5 +147,27 @@
       "warehouse": "Warehouse SG-02 is closed for a stock count until Monday.",
       "conflict": "Someone else changed this order after you opened it. Reload it to see their changes, then save again."
     }
+  },
+  "list": {
+    "title": "Sales orders",
+    "caption": "Sales orders on the list page",
+    "allStatuses": "All statuses",
+    "families": "The five status families",
+    "family": {
+      "draft": "Draft",
+      "waiting": "Waiting",
+      "ready": "Ready",
+      "blocked": "Blocked",
+      "done": "Done",
+      "none": "No family"
+    },
+    "pick": "Pretend the first row is selected (the grid's checkboxes come later)",
+    "edit": "Edit order",
+    "editDone": "Opened {{reference}} for editing",
+    "void": "Void order",
+    "voidTitle": "Void this order",
+    "voidDescription": "The order is kept, marked void, and the reason is shown with it.",
+    "voidConfirm": "Void order",
+    "voidDone": "Voided {{reference}}"
   }
 }
