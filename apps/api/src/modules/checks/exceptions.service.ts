@@ -20,11 +20,12 @@ export class ExceptionsService {
     total: number;
   } {
     const search = query.search?.toLowerCase();
+    const state = query.state ?? "OPEN";
     const all = this.repo
       .exceptions()
       .filter(
         (e) =>
-          e.state === (query.state ?? "OPEN") &&
+          (state === "ALL" || e.state === state) &&
           (!search ||
             [e.orderNo, e.customerNo, e.customerName, e.ruleLabel, e.summary]
               .join(" ")

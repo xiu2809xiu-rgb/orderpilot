@@ -24,33 +24,36 @@ The licence-key guard reads the real values from `apps/web/.env.local` on your m
 
 ### In CI, on every pull request and every push to main
 
-| Workflow       | Job (the required check's name) | What it does                                                                                                                                                                                        | Status      |
-| -------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| `ci.yml`       | Lint, typecheck, test, build    | The samples check over every commit in the history, a frozen install, `pnpm audit --audit-level high`, format, the em-dash check, the licence-key and env-file guard, lint, typecheck, tests, build | Today (P-6) |
-| `security.yml` | SAST (Semgrep)                  | Semgrep with `p/default`, `p/typescript`, `p/react`, `p/nodejs` and `p/owasp-top-ten`, failing on any finding                                                                                       | Today (P-6) |
-| `security.yml` | Secret scan (gitleaks)          | gitleaks over every commit in the history, findings redacted                                                                                                                                        | Today (P-6) |
-| `security.yml` | Dependency scan (OSV)           | OSV-Scanner on `pnpm-lock.yaml`, failing on any advisory that `osv-scanner.toml` does not accept                                                                                                    | Today (P-6) |
+| Workflow       | Job (the required check's name) | What it does                                                                                                                                                                                        | Status       |
+| -------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| `ci.yml`       | Lint, typecheck, test, build    | The samples check over every commit in the history, a frozen install, `pnpm audit --audit-level high`, format, the em-dash check, the licence-key and env-file guard, lint, typecheck, tests, build | Today (P-6)  |
+| `security.yml` | SAST (Semgrep)                  | Semgrep with `p/default`, `p/typescript`, `p/react`, `p/nodejs` and `p/owasp-top-ten`, failing on any finding                                                                                       | Today (P-6)  |
+| `security.yml` | Secret scan (gitleaks)          | gitleaks over every commit in the history, findings redacted                                                                                                                                        | Today (P-6)  |
+| `security.yml` | Dependency scan (OSV)           | OSV-Scanner on `pnpm-lock.yaml`, failing on any advisory that `osv-scanner.toml` does not accept                                                                                                    | Today (P-6)  |
+| `docker.yml`   | Docker images                   | Builds every image from `docker-compose.yml`, scans each image we build with Trivy (failing on a fixable HIGH or CRITICAL), starts the stack from them and runs `pnpm stack:smoke`                  | Today (P-13) |
+| `docker.yml`   | IaC and Dockerfile scan         | `trivy config` over every Dockerfile and infrastructure file, failing on a finding of any severity                                                                                                  | Today (P-13) |
 
-`security.yml` also runs every Monday at 06:30 Singapore time, so a new advisory against an unchanged lockfile still shows up. Semgrep and gitleaks keep a SARIF report as a run artifact for 14 days.
+`security.yml` also runs every Monday at 06:30 Singapore time, and `docker.yml` at 06:45, so a new advisory against an unchanged lockfile or base image still shows up. Semgrep and gitleaks keep a SARIF report as a run artifact for 14 days.
 
 ### On GitHub
 
-| Control                                                   | Status                                     |
-| --------------------------------------------------------- | ------------------------------------------ |
-| Dependabot alerts and security updates                    | Today, reading `pnpm-lock.yaml` from P-5   |
-| Dependabot version updates, weekly on Monday 06:00 SGT    | Today (P-5)                                |
-| Secret scanning with push protection                      | Today, while the repository is public      |
-| Private vulnerability reporting                           | Today, while the repository is public      |
-| The `Protect main` ruleset, with the four checks required | The checks become required when P-6 merges |
+| Control                                                        | Status                                                                      |
+| -------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Dependabot alerts and security updates                         | Today, reading `pnpm-lock.yaml` from P-5                                    |
+| Dependabot version updates, weekly on Monday 06:00 SGT         | Today (P-5)                                                                 |
+| Secret scanning with push protection                           | Today, while the repository is public                                       |
+| Private vulnerability reporting                                | Today, while the repository is public                                       |
+| The `Protect main` ruleset, with the six checks above required | Four since P-6; P-13's two once the ruleset file is applied after its merge |
 
 ### Later
 
-| Control                                                                                 | Status        |
-| --------------------------------------------------------------------------------------- | ------------- |
-| Trivy image scan, failing on fixable HIGH or CRITICAL findings, and a Trivy config scan | Planned: P-13 |
-| End-to-end tests with axe, including the refusals of E2E #3                             | Planned: P-14 |
-| OWASP ZAP baseline scan of the live URL, weekly and on demand                           | Planned: P-24 |
-| Lighthouse at each release                                                              | Planned: P-24 |
+| Control                                                                          | Status        |
+| -------------------------------------------------------------------------------- | ------------- |
+| End-to-end tests with axe, and `expectRefused` for server-side refusals          | Today (P-14)  |
+| E2E #3's own spec: a direct call refused, and the refusal in the audit viewer    | Planned: F-8  |
+| OWASP ZAP baseline scan of the live URL, weekly and on demand                    | Planned: P-24 |
+| Lighthouse at each release                                                       | Planned: P-24 |
+| Trivy over the images the stack pulls (PostgreSQL with pgvector, Redis, Mailpit) | Planned: P-24 |
 
 ## Triage
 
@@ -62,14 +65,15 @@ Every finding gets one of three outcomes. The person whose pull request it block
 
 Where to record an accepted or dismissed finding:
 
-| Tool         | Where                                                                                                  |
-| ------------ | ------------------------------------------------------------------------------------------------------ |
-| OSV-Scanner  | `osv-scanner.toml`: `[[IgnoredVulns]]` with `id`, `ignoreUntil` (the review date) and `reason`         |
-| `pnpm audit` | `pnpm-workspace.yaml`, under `audit.ignore`, by GHSA id, with the reason and review date above it      |
-| Semgrep      | A `// nosemgrep: <rule-id>` comment on the line, followed by the reason and the review date            |
-| gitleaks     | `.gitleaksignore`, by the finding's fingerprint, with the reason and review date in a comment above it |
-| secretlint   | `.secretlintignore`, or a `secretlint-disable-line` comment, with the reason and review date           |
-| Dependabot   | Dismiss the alert on GitHub with a reason, and add a row below                                         |
+| Tool         | Where                                                                                                                                                               |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| OSV-Scanner  | `osv-scanner.toml`: `[[IgnoredVulns]]` with `id`, `ignoreUntil` (the review date) and `reason`                                                                      |
+| `pnpm audit` | `pnpm-workspace.yaml`, under `audit.ignore`, by GHSA id, with the reason and review date above it                                                                   |
+| Semgrep      | A `// nosemgrep: <rule-id>` comment on the line, followed by the reason and the review date                                                                         |
+| gitleaks     | `.gitleaksignore`, by the finding's fingerprint, with the reason and review date in a comment above it                                                              |
+| Trivy        | `.trivyignore`, by CVE or check id, with the reason and review date in a comment above it. A Go module MinIO pulls in is fixed in `docker/minio/Dockerfile` instead |
+| secretlint   | `.secretlintignore`, or a `secretlint-disable-line` comment, with the reason and review date                                                                        |
+| Dependabot   | Dismiss the alert on GitHub with a reason, and add a row below                                                                                                      |
 
 - A review date is at most 30 days away. On that date the entry is fixed, renewed with a new reason, or removed. `osv-scanner.toml` fails the scan again by itself once `ignoreUntil` passes.
 - Never weaken a rule, drop a scan or lower a threshold to get a green run. That change needs its own pull request and Richie's yes.

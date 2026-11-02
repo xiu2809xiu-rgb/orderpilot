@@ -1,5 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { MemoryRouter, useLocation } from "react-router";
@@ -82,6 +88,29 @@ describe("the exceptions queue", () => {
         "/order-tracker/SO-0007",
       );
     });
+  });
+
+  it("shows the open exceptions by default, and every state once the chip is cleared", async () => {
+    await i18n.loadNamespaces(["exceptions", "common"]);
+    const asked: (string | null)[] = [];
+    server.use(
+      http.get("*/api/v1/exceptions", ({ request }) => {
+        asked.push(new URL(request.url).searchParams.get("state"));
+        return HttpResponse.json(queue([mismatch]));
+      }),
+    );
+    renderPage();
+    const clear = await screen.findByRole("button", {
+      name: "Clear filter: Open",
+    });
+    expect(asked.at(-1)).toBe("OPEN");
+    fireEvent.click(clear);
+    await waitFor(() => {
+      expect(asked.at(-1)).toBe("ALL");
+    });
+    expect(
+      screen.queryByRole("button", { name: "Clear filter: Open" }),
+    ).toBeNull();
   });
 
   it("shows an empty queue with a next step", async () => {

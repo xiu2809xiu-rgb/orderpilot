@@ -1,0 +1,130 @@
+# A throwaway stack for trying a client sample. Only this machine can reach it,
+# no container has a route to the internet or can resolve an outside name, and
+# nothing it holds outlives it.
+#
+#   pnpm samples:up      build and start, then open http://localhost:8081
+#   pnpm samples:restart-web  restart web and seal it again (see below)
+#   pnpm samples:down    stop and remove everything, the data with it
+#
+# What makes it safe to use with a sample (see samples/README.md first):
+#   - It is its own compose project, so it shares no container, volume or network
+#     with the normal stack, and the two can run side by side.
+#   - Every store keeps its data in memory (tmpfs), so `down` leaves nothing on
+#     disk, and there are no named volumes to forget.
+#   - The stores, the API and the worker sit on an internal network with no route
+#     out, and web has its default route deleted (see web-seal below): no
+#     document can reach an AI provider or anywhere else, whatever the code or a
+#     .env says. web also cannot resolve an outside name (see its dns below).
+#   - Restart web with `pnpm samples:restart-web`, which reseals it. After a
+#     plain `docker restart`, web-seal shows unhealthy: restart web the first way.
+#   - Only the web app has a host port, bound to 127.0.0.1. The stores have none.
+#   - samples/ is mounted read-only into the API and the worker, and is never in
+#     an image: .dockerignore keeps it out of every build.
+name: orderpilot-samples
+
+x-sealed: &sealed
+  restart: "no"
+  ports: !reset []
+  networks:
+    - sealed
+
+x-sealed-app: &sealed-app
+  <<: *sealed
+  volumes:
+    - ./samples:/samples:ro
+
+services:
+  postgres:
+    <<: *sealed
+    volumes: !reset []
+    tmpfs:
+      - /var/lib/postgresql
+  redis:
+    <<: *sealed
+    # Nothing to keep: the append-only log would only be written to memory.
+    command: ["redis-server", "--appendonly", "no"]
+    volumes: !reset []
+    tmpfs:
+      - /data
+  minio:
+    <<: *sealed
+    volumes: !reset []
+    tmpfs:
+      # The image's unprivileged user owns its data folder.
+      - /data:uid=10001,gid=10001
+  mailpit:
+    <<: *sealed
+  migrate:
+    restart: "no"
+    networks:
+      - sealed
+  api:
+    <<: *sealed-app
+    environment:
+      # The browser signs in from this stack's own port.
+      CORS_ORIGINS: http://localhost:${SAMPLES_WEB_PORT:-8081},http://127.0.0.1:${SAMPLES_WEB_PORT:-8081}
+  worker:
+    <<: *sealed-app
+  web:
+    restart: "no"
+    ports: !override
+      - "127.0.0.1:${SAMPLES_WEB_PORT:-8081}:8080"
+    # The internal network reaches the API. The second one exists only because
+    # Docker cannot publish a port from an internal network alone.
+    networks:
+      - sealed
+      - published
+    # Docker's resolver forwards names it does not know to public DNS, so a
+    # query name could leave the machine even with no route. Pointing its
+    # upstream at the container's own loopback, where nothing listens, makes
+    # every outside name fail. `api` is answered by Docker itself and still works.
+    dns:
+      - 127.0.0.1
+
+  # Docker gives web a default route through the `published` network, so web
+  # could reach the internet. This container shares web's network, removes that
+  # route and leaves the two attached subnets: the API, and the host that
+  # connects to the published port. It alone holds NET_ADMIN, and only to run
+  # that command, so web never has it. With no default route there is nothing
+  # to masquerade, so this also holds on Docker Desktop, where turning
+  # masquerade off on the network did not stop web reaching out.
+  web-seal:
+    image: orderpilot/web:local
+    # The image is built for web, which this waits for.
+    pull_policy: never
+    network_mode: "service:web"
+    user: "0"
+    # It stays running afterwards: `up --wait` counts a container that exits as
+    # a failure unless something depends on it.
+    entrypoint: ["sh", "-c", "ip route del default && exec sleep 2147483647"]
+    command: []
+    restart: "no"
+    read_only: true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_ADMIN
+    security_opt:
+      - no-new-privileges:true
+    # Fails while web has a default route, or when web has been restarted behind
+    # this container's back (a plain `docker restart web`): this container then
+    # holds web's old network, which has no routes at all, and web has its
+    # default route back. `up --wait` therefore refuses an unsealed stack.
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - ip route | grep -q . && ! ip route | grep -q '^default'
+      interval: 2s
+      timeout: 3s
+      retries: 3
+    depends_on:
+      web:
+        condition: service_healthy
+        # `docker compose restart web` restarts this container too, and it
+        # removes the route again.
+        restart: true
+
+networks:
+  sealed:
+    internal: true
+  published:

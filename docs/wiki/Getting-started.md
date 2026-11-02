@@ -153,6 +153,21 @@ The first prints what closed this sprint and what is in progress, by area. The s
 node --test "scripts/github/**/*.test.mjs"
 ```
 
+## Run the end-to-end tests
+
+The browser tests in `apps/e2e` run against a stack that is already up, and start nothing themselves ([ADR 0034](https://github.com/xiu2809xiu-rgb/orderpilot/blob/main/docs/adr/0034-playwright-end-to-end-tests.md)). Once per machine, download Chromium; then bring the full stack up and run them:
+
+```sh
+pnpm --filter @orderpilot/e2e exec playwright install chromium
+docker compose up --build -d --wait
+pnpm e2e
+```
+
+- `pnpm e2e` signs in as each of the nine roles, so the default sign-in limit of 20 a minute is too tight for repeated runs. Set `AUTH_RATE_LIMIT_MAX_REQUESTS=1000` in the root `.env` and run `docker compose up -d --wait` again, as CI does. Leave `DEMO_MODE=true`: the tests sign in through the demo route.
+- `E2E_BASE_URL=http://localhost:5173 pnpm e2e` runs them against `pnpm dev` or any other stack instead.
+- `pnpm e2e -- -g "Auditor"` runs only the tests whose title matches. `pnpm --filter @orderpilot/e2e e2e:report` opens the last report.
+- Never run them against the live demo: they sign in as every role and leave audit events.
+
 ## Troubleshooting
 
 **`pnpm local:setup` stops at a step.** It says which step failed and what to do. Fix that, then run it again: every step is safe to repeat.
@@ -184,10 +199,3 @@ node --test "scripts/github/**/*.test.mjs"
 **The first `docker compose up` takes minutes.** It compiles MinIO from its source once. Later starts use the cached image.
 
 **Start again from nothing.** `docker compose down` stops and removes the containers and keeps your data. Removing the data too (`docker compose down -v`) deletes the volumes: ask first, and know that it cannot be undone.
-
-## What later stories bring
-
-| Step                                            | Story |
-| ----------------------------------------------- | ----- |
-| The full stack with `docker compose up --build` | P-13  |
-| End-to-end tests with Playwright and axe        | P-14  |

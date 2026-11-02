@@ -2,6 +2,7 @@
 # check on main, so it never changes. Later stories add steps to it: the
 # diagrams check (P-16) and the slides check (P-25). The bundle budget (P-11)
 # is in, after the build, and so is the generated API code check (P-26).
+# The second job, "End-to-end smoke" (P-14), is required too.
 #
 # No path filters: a required workflow that does not run leaves its check
 # pending forever. Heavy jobs skip with job-level conditions instead.
@@ -24,8 +25,8 @@ jobs:
   verify:
     name: Lint, typecheck, test, build
     runs-on: ubuntu-24.04
-    # MinIO is built from source (docker/minio), which takes a few minutes the
-    # first time. It builds in the background while the checks below run.
+    # MinIO is built from source (docker/minio), which takes a few minutes on a
+    # cold cache.
     timeout-minutes: 25
     steps:
       - name: Check out the full history
@@ -44,15 +45,34 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
 
+      # MinIO compiles from source (docker/minio). Its layers live in the GitHub
+      # Actions cache, shared with the "Docker images" job, so this takes seconds
+      # unless its Dockerfile changed. Bake reads the compose file, so the image
+      # gets the tag compose expects and the next step does not build it again.
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Build MinIO from the cache
+        uses: docker/bake-action@59cb1203cd42bcefd40a1b6d73b589e48c86040e # v7.5.0
+        with:
+          source: .
+          files: docker-compose.yml
+          targets: minio
+          load: true
+          set: |
+            minio.cache-from=type=gha,scope=minio
+            minio.cache-to=type=gha,scope=minio,mode=max
+
       # The integration tests need PostgreSQL, Redis and MinIO. They run from the
       # same docker-compose.yml as on a laptop, so the versions cannot drift
-      # apart, with the safe defaults from .env.example. This only starts the
-      # build; "Wait for the local stack" below waits for it.
+      # apart, with the safe defaults from .env.example. Only the four stores:
+      # the app images are the "Docker images" job's (docker.yml). This only
+      # starts them; "Wait for the local stack" below waits for it.
       - name: Start the local stack in the background
         run: |
           cp .env.example .env
           rm -f "$RUNNER_TEMP/stack.exit"
-          nohup sh -c 'docker compose up -d --build > "$RUNNER_TEMP/stack.log" 2>&1; echo $? > "$RUNNER_TEMP/stack.exit"' > /dev/null 2>&1 &
+          nohup sh -c 'docker compose up -d postgres redis minio mailpit > "$RUNNER_TEMP/stack.log" 2>&1; echo $? > "$RUNNER_TEMP/stack.exit"' > /dev/null 2>&1 &
 
       - name: Samples history check
         run: node scripts/check-samples.mjs --history
@@ -91,7 +111,7 @@ jobs:
             echo "The background start of the stack failed or timed out."
             exit 1
           fi
-          docker compose up -d --wait
+          docker compose up -d --wait postgres redis minio mailpit
           docker compose ps
 
       # Unit tests and the integration tests (real database, Redis and storage).
@@ -113,3 +133,98 @@ jobs:
 
       - name: Bundle budget (initial JS, 250 KB gzip)
         run: pnpm budget
+
+  # The smoke test of every role in a real browser (apps/e2e, ADR 0034), against
+  # the compose stack as P-13 builds it. Its name, "End-to-end smoke", is a
+  # required check on main, so it never changes.
+  e2e:
+    name: End-to-end smoke
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      GIT_SHA: ${{ github.sha }}
+      # The run signs in as every role within a minute, from one address.
+      # Compose passes these to the API; everyone else keeps the defaults.
+      AUTH_RATE_LIMIT_MAX_REQUESTS: "1000"
+      RATE_LIMIT_MAX_REQUESTS: "5000"
+      # The tests sign in through the demo route.
+      DEMO_MODE: "true"
+      E2E_BASE_URL: http://localhost:8080
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      # MinIO from the cache P-13 set up, shared with the verify and "Docker
+      # images" jobs, so it is never compiled here.
+      - name: Build MinIO from the cache
+        uses: docker/bake-action@59cb1203cd42bcefd40a1b6d73b589e48c86040e # v7.5.0
+        with:
+          source: .
+          files: docker-compose.yml
+          targets: minio
+          load: true
+          set: |
+            minio.cache-from=type=gha,scope=minio
+            minio.cache-to=type=gha,scope=minio,mode=max
+
+      # The app images build once, in the background, while pnpm and Chromium
+      # install. Only these three: MinIO is the image just loaded from the cache,
+      # and `up --build` would compile it again. The migrate service applies the migrations and the seed, and
+      # the API starts only after it exits with 0, so a healthy stack is a
+      # seeded one.
+      - name: Build and start the stack in the background
+        run: |
+          cp .env.example .env
+          rm -f "$RUNNER_TEMP/stack.exit"
+          nohup sh -c '{ docker compose build migrate api web && docker compose up -d --no-build --wait api worker web; } > "$RUNNER_TEMP/stack.log" 2>&1; echo $? > "$RUNNER_TEMP/stack.exit"' > /dev/null 2>&1 &
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - name: Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install the end-to-end package (frozen lockfile)
+        run: pnpm install --frozen-lockfile --filter "@orderpilot/e2e..."
+
+      - name: Install Chromium
+        run: pnpm --filter @orderpilot/e2e exec playwright install --with-deps chromium
+
+      - name: Wait for the stack
+        run: |
+          for _ in $(seq 1 240); do
+            [ -f "$RUNNER_TEMP/stack.exit" ] && break
+            sleep 5
+          done
+          if [ "$(cat "$RUNNER_TEMP/stack.exit" 2>/dev/null)" != "0" ]; then
+            tail -n 80 "$RUNNER_TEMP/stack.log" || true
+            echo "The stack did not build or did not become healthy."
+            exit 1
+          fi
+          docker compose ps -a
+
+      - name: End-to-end tests
+        run: pnpm e2e
+
+      - name: Playwright report and traces (when a step failed)
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: playwright-report
+          path: |
+            apps/e2e/playwright-report/
+            apps/e2e/test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Service logs (when a step failed)
+        if: failure()
+        run: docker compose logs --tail 150 migrate api worker web || true

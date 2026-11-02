@@ -11,7 +11,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "./overlays/dropdown-menu";
 import { demoLogin, fetchAuthOptions } from "@/lib/api/auth";
 import { useSessionStore } from "@/stores/session";
 

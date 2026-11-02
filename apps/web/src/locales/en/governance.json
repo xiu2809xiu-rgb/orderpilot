@@ -6,9 +6,6 @@
     "Segregation of duties and the bank-detail control",
     "The real masking rules"
   ],
-  "cues": {
-    "roles": "Roles and permissions"
-  },
   "tabs": {
     "label": "Governance sections",
     "matrix": "Role matrix",
@@ -122,7 +119,8 @@
     "history": "History",
     "historyFor": "History of {{name}}",
     "historyTitle": "History of {{name}}",
-    "historyDescription": "What changed on this user, from the audit trail."
+    "historyDescription": "What changed on this user, from the audit trail.",
+    "activeOnly": "Active users"
   },
   "masking": {
     "title": "Masking",

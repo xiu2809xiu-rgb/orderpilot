@@ -19,6 +19,7 @@
     "test": "node --test \"scripts/**/*.test.mjs\" && pnpm -r --if-present test",
     "build": "pnpm -r --if-present build",
     "budget": "pnpm --filter @orderpilot/web budget",
+    "e2e": "pnpm --filter @orderpilot/e2e e2e",
     "api:spec": "pnpm --filter @orderpilot/api openapi && prettier --write apps/api/openapi.json",
     "api:generate": "pnpm api:spec && pnpm --filter @orderpilot/web generate:api",
     "api:check": "node scripts/check-api-generated.mjs",
@@ -33,8 +34,13 @@
     "db:migrate": "pnpm --filter @orderpilot/api db:migrate",
     "db:migrate:dev": "pnpm --filter @orderpilot/api db:migrate:dev",
     "db:seed": "pnpm --filter @orderpilot/api db:seed",
-    "stack:up": "docker compose up -d --wait",
-    "stack:down": "docker compose down"
+    "docs:generate": "pnpm --filter \"@orderpilot/synthetic-documents...\" run build && pnpm --filter @orderpilot/synthetic-documents generate",
+    "stack:up": "docker compose up -d --wait postgres redis minio mailpit",
+    "stack:down": "docker compose down",
+    "stack:smoke": "node scripts/stack-smoke.mjs",
+    "samples:up": "docker compose -f docker-compose.yml -f docker-compose.samples.yml up -d --build --wait",
+    "samples:restart-web": "docker compose -f docker-compose.yml -f docker-compose.samples.yml restart web",
+    "samples:down": "docker compose -f docker-compose.yml -f docker-compose.samples.yml down --remove-orphans"
   },
   "devDependencies": {
     "@commitlint/cli": "21.2.4",

@@ -1,20 +1,27 @@
 import { Suspense, lazy, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet } from "react-router";
-import { ListPageSkeleton, Toaster } from "@/components/common";
-import { TooltipProvider } from "@/components/ui/tooltip";
+// Direct paths, never the "@/components/common" barrel: the barrel would put
+// every common component in the entry chunk (docs/architecture/patterns.md).
+import { ListPageSkeleton } from "@/components/common/skeletons";
+import { Toaster } from "@/components/common/Toaster";
 import { featureNamespaces } from "@/features/nav";
 import { apiClient } from "@/lib/api/instance";
+import { whenIdle } from "@/lib/deferred";
 import { loadRecordTabs } from "@/lib/loadRecordTabs";
 import { useSessionStore } from "@/stores/session";
 import { useGlobalShortcuts } from "./shortcuts";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
 
-// The palette (and cmdk) load the first time it is opened.
+// The palette (and cmdk) and the session-ended dialog stay out of the entry
+// chunk. They are fetched once the browser is idle, so Control K and an ended
+// session never wait for the network.
+const loadPalette = () => import("./CommandPalette");
 const CommandPalette = lazy(async () => ({
-  default: (await import("./CommandPalette")).CommandPalette,
+  default: (await loadPalette()).CommandPalette,
 }));
+const loadSessionEnded = () => import("../SessionEndedDialog");
 
 // The open-records strip and the code that keeps it in step with the page load after
 // the first paint, as a chunk of their own. Everyone downloads it, but the entry bundle
@@ -66,13 +73,21 @@ export function AppShell() {
   const [dock, setDock] = useState<HTMLElement | null>(null);
   useScheduledRefresh();
   useGlobalShortcuts();
+  useEffect(
+    () =>
+      whenIdle(() => {
+        void loadPalette().catch(() => undefined);
+        void loadSessionEnded().catch(() => undefined);
+      }),
+    [],
+  );
   usePaletteShortcut(() => {
     setPaletteUsed(true);
     setPaletteOpen((open) => !open);
   });
 
   return (
-    <TooltipProvider>
+    <>
       {/* While the consent card is in the dock the shell is one screen tall and the page scrolls
           inside it, so the card ends the scrolling area instead of covering it. */}
       <div className="flex min-h-dvh has-[[data-consent-card]]:h-dvh">
@@ -112,6 +127,6 @@ export function AppShell() {
       <Suspense fallback={null}>
         <AnalyticsRoot dock={dock} />
       </Suspense>
-    </TooltipProvider>
+    </>
   );
 }

@@ -1,7 +1,15 @@
+import { taskKindSchema } from "@orderpilot/shared";
 import { CircleCheck } from "lucide-react";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { EmptyState, PageHeader, SectionCard } from "@/components/common";
+import { useSearchParams } from "react-router";
+import {
+  EmptyState,
+  FilterChips,
+  PageHeader,
+  SectionCard,
+  type FilterChip,
+  type TableFilters,
+} from "@/components/common";
 import { Button } from "@/components/ui/button";
 import {
   useWorkflowsInboxTasks,
@@ -18,8 +26,36 @@ import { WorkflowNav } from "./WorkflowNav";
 export default function WorkflowsPage() {
   const { t } = useTranslation(["workflows", "common"]);
   const { role, mayPick, setRole } = useInboxRole();
-  const [overdueOnly, setOverdueOnly] = useState(false);
-  const params = overdueOnly ? { overdue: "true" as const } : undefined;
+  const [search, setSearch] = useSearchParams();
+  const overdueOnly = search.get("overdue") === "true";
+  const asked = taskKindSchema.safeParse(search.get("kind"));
+  const kind = asked.success ? asked.data : undefined;
+  const params = {
+    ...(overdueOnly ? { overdue: "true" as const } : {}),
+    ...(kind ? { kind } : {}),
+  };
+
+  function setFilters(filters: TableFilters) {
+    setSearch(
+      (previous) => {
+        const next = new URLSearchParams(previous);
+        next.delete("overdue");
+        next.delete("kind");
+        if (filters.overdue === true) next.set("overdue", "true");
+        if (typeof filters.kind === "string") next.set("kind", filters.kind);
+        return next;
+      },
+      { replace: true },
+    );
+  }
+  const filters: TableFilters = {
+    ...(overdueOnly ? { overdue: true } : {}),
+    ...(kind ? { kind } : {}),
+  };
+  const chips: FilterChip[] = [
+    ...(kind ? [{ id: "kind", label: t(`task.kinds.${kind}`) }] : []),
+    ...(overdueOnly ? [{ id: "overdue", label: t("inbox.overdueOnly") }] : []),
+  ];
 
   const mine = useWorkflowsMyTasks(params, {
     query: { enabled: !mayPick && role !== undefined },
@@ -41,6 +77,7 @@ export default function WorkflowsPage() {
         meta={<MockBadges mock={query.data?.meta.mock} />}
       />
       <WorkflowNav />
+      <FilterChips chips={chips} filters={filters} onChange={setFilters} />
       {mayPick ? (
         <RolePicker value={role ?? "SUPPORT"} onChange={setRole} />
       ) : null}
@@ -59,7 +96,7 @@ export default function WorkflowsPage() {
               className="min-h-11"
               aria-pressed={overdueOnly}
               onClick={() => {
-                setOverdueOnly((value) => !value);
+                setFilters({ ...filters, overdue: !overdueOnly });
               }}
             >
               {t("inbox.overdueOnly")}
@@ -82,7 +119,7 @@ export default function WorkflowsPage() {
                       variant="outline"
                       className="min-h-11"
                       onClick={() => {
-                        setOverdueOnly(false);
+                        setFilters({});
                       }}
                     >
                       {t("inbox.showAll")}

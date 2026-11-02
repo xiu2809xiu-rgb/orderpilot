@@ -173,7 +173,7 @@ When Spectra sends samples, they are used to confirm the formats above and nothi
 
 1. **Only with Spectra's OK,** and only on one machine. The person who receives them saves them in `samples/` at the repository root, which Git ignores (today). The samples guards in the Git hooks (planned: P-5) refuse any sample file in a commit or a push.
 2. **Never to an AI.** Don't open a sample in an AI tool, paste it into a chat or send it to a third-party AI service. No Spectra document goes to one without Spectra's written OK, in an approved region (A-31). OrderPilot's AI provider stays on `mock` (planned: P-17).
-3. **On the throwaway stack only.** Run OrderPilot against a sample only on the samples stack, which only that machine can reach and which is deleted afterwards (planned: P-13). Until P-13 exists, read the samples by eye and run no code on them.
+3. **On the throwaway stack only.** Run OrderPilot against a sample only on the samples stack, which only that machine can reach and which is deleted afterwards: `pnpm samples:up`, then `pnpm samples:down` (P-13, `docker-compose.samples.yml`).
 4. **Write down shapes, not values.** Record what you learn in this file, in our own words: the fields, their order, the layout, the number formats. Never a name, a price, an account number or a screenshot.
 5. **Delete when done.** Delete the samples from `samples/` once the formats are recorded, or sooner if Spectra asks, and add a line to the log below.
 

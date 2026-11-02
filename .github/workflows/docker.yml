@@ -1,0 +1,137 @@
+# The images and the scans of what builds them. Both job names, "Docker images"
+# and "IaC and Dockerfile scan", are required checks on main, so they never
+# change. ADR 0031 records the choices; docs/security/security-testing.md says
+# how a finding is triaged.
+#
+# No path filters, for the same reason as ci.yml. Trivy is downloaded by version
+# and checked against its SHA-256, like gitleaks and OSV-Scanner, rather than
+# run through an action: that keeps one less third-party script in the job.
+name: Docker
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    # Mondays 06:45 Singapore time, after the security scans, so a new advisory
+    # against a base image surfaces on a quiet main.
+    - cron: "45 22 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docker-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  TRIVY_VERSION: 0.76.0
+  TRIVY_SHA256: e24b1c51293c1b15e4ba8d45bbc7891ba053f90278ec2698f3562c993e145fe7
+  TRIVY_NO_PROGRESS: "true"
+
+jobs:
+  images:
+    name: Docker images
+    runs-on: ubuntu-24.04
+    # MinIO compiles from source in a few minutes on a cold cache.
+    timeout-minutes: 30
+    env:
+      GIT_SHA: ${{ github.sha }}
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      # Every image the compose file builds, from the compose file itself, so
+      # the CI build and `docker compose up --build` cannot drift apart. The
+      # worker is the API image with another command, so it is not built twice.
+      # Only MinIO is cached, in the GitHub Actions cache it shares with the
+      # verify job: it is the slow one, and its compiled layer is small. The
+      # Node images reinstall from the lockfile each run.
+      - name: Build every image
+        uses: docker/bake-action@59cb1203cd42bcefd40a1b6d73b589e48c86040e # v7.5.0
+        with:
+          source: .
+          files: docker-compose.yml
+          targets: minio,migrate,api,web,mock-template
+          load: true
+          set: |
+            minio.cache-from=type=gha,scope=minio
+            minio.cache-to=type=gha,scope=minio,mode=max
+
+      - name: Install Trivy
+        run: |
+          archive="trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
+          curl -sSfL -o "$RUNNER_TEMP/$archive" \
+            "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/$archive"
+          echo "${TRIVY_SHA256}  $RUNNER_TEMP/$archive" | sha256sum --check --strict
+          tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP" trivy
+          "$RUNNER_TEMP/trivy" --version
+
+      # Fails on a HIGH or CRITICAL finding that has a fix. One without a fix
+      # cannot be acted on here, so it is shown in the report but does not fail.
+      - name: Scan every image (fixable HIGH and CRITICAL fail)
+        run: |
+          status=0
+          for image in \
+            orderpilot/api:local \
+            orderpilot/api-migrate:local \
+            orderpilot/web:local \
+            orderpilot/mock-template:local \
+            "$(docker compose config --images | grep '^orderpilot/minio:')"; do
+            echo "::group::$image"
+            "$RUNNER_TEMP/trivy" image --scanners vuln --ignorefile .trivyignore \
+              --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 "$image" || status=1
+            echo "::endgroup::"
+          done
+          exit "$status"
+
+      # The images work together, not only build: the stack starts from the
+      # images just built, then the smoke test uses it as a browser would.
+      - name: Start the stack from the built images
+        run: |
+          cp .env.example .env
+          docker compose up -d --no-build --wait api worker web
+          docker compose ps -a
+
+      - name: Smoke-test the stack
+        run: node scripts/stack-smoke.mjs
+
+      - name: Stack logs (when a step failed)
+        if: failure()
+        run: docker compose logs --tail 60 || true
+
+  config:
+    name: IaC and Dockerfile scan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Trivy
+        run: |
+          archive="trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
+          curl -sSfL -o "$RUNNER_TEMP/$archive" \
+            "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/$archive"
+          echo "${TRIVY_SHA256}  $RUNNER_TEMP/$archive" | sha256sum --check --strict
+          tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP" trivy
+          "$RUNNER_TEMP/trivy" --version
+
+      # Every Dockerfile (and any Terraform, Kubernetes or CloudFormation a later
+      # story adds, such as P-24's deployment files). The Dockerfiles are clean
+      # at every severity today, so any finding is new and fails the job.
+      - name: Scan the Dockerfiles and infrastructure files
+        run: >-
+          "$RUNNER_TEMP/trivy" config
+          --ignorefile .trivyignore
+          --skip-dirs "**/node_modules"
+          --exit-code 1
+          .

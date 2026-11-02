@@ -2,13 +2,13 @@
 
 Rendered from [`scripts/github/data/backlog.json`](../../scripts/github/data/backlog.json) by `node scripts/github/render-docs.mjs`. Change the data, not this file. The same data seeds the issues. The board shows where each story stands.
 
-There are 9 epics and 121 stories. Estimates are story points: a first guess, for the team to change at planning.
+There are 9 epics and 123 stories. Estimates are story points: a first guess, for the team to change at planning.
 
 ## Epics
 
 | Epic   | Title                             | Area                                    | Stories | Points |
 | ------ | --------------------------------- | --------------------------------------- | ------- | ------ |
-| Epic P | The platform base                 | `area: 1 document AI and integration`   | 77      | 447    |
+| Epic P | The platform base                 | `area: 1 document AI and integration`   | 79      | 453    |
 | Epic A | Document intake and AI extraction | `area: 1 document AI and integration`   | 5       | 31     |
 | Epic B | Master data and Navision          | `area: 1 document AI and integration`   | 4       | 14     |
 | Epic C | Order workflows and approvals     | `area: 2 order workflows and approvals` | 5       | 29     |
@@ -137,6 +137,7 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | A-2   | Extraction with confidence and provenance                          | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | E-1   | The review screen, with source highlighting                        | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | E-2   | The accuracy harness, with a 95% target and a comparison of models | must     | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-78  | Room in the entry bundle                                           | must     | 3      | `area: 1 document AI and integration`   | M4 best practices, M6 deploy and monitor                       |
 | C-5   | Area 2 polish left out of the base                                 | should   | 3      | `area: 2 order workflows and approvals` | M4 best practices                                              |
 | P-22  | The design system with the Pro kits                                | should   | 8      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-29  | A unit coverage threshold on domain logic                          | should   | 2      | `area: 1 document AI and integration`   | M4 best practices                                              |
@@ -153,6 +154,7 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | P-23  | The 3D order constellation                                         | could    | 13     | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-27  | Web shell polish                                                   | could    | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-77  | Tab strip polish                                                   | could    | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-79  | End-to-end follow-ups                                              | could    | 3      | `area: 1 document AI and integration`   | M4 best practices, M6 deploy and monitor                       |
 | B-4   | QR codes on generated documents and carton labels                  | could    | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | E-4   | Passkeys to confirm risky approvals                                | could    | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | E-5   | A first-run guided tour for each role                              | could    | 3      | `area: 1 document AI and integration`   | M1 design thinking, M4 best practices                          |
@@ -631,7 +633,7 @@ Acceptance criteria:
 
 ### P-21: Synthetic documents
 
-Generated PDFs with planted mistakes and ground truth, for the demo and the accuracy harness.
+The rest of the generated set, with planted mistakes and ground truth for the accuracy harness. P-52 brought the package, four layouts, the CLI and twelve files forward.
 
 - **Area:** `area: 1 document AI and integration`
 - **Priority:** must
@@ -639,15 +641,15 @@ Generated PDFs with planted mistakes and ground truth, for the demo and the accu
 - **Requirements:** M2 GRS by design, M4 best practices
 - **Branch:** `feat/area1-synthetic-documents`
 - **Planned for:** Sprint 02 (W3)
-- **Depends on:** P-19
+- **Depends on:** P-19, P-52
 
 Acceptance criteria:
 
-- `packages/synthetic-documents` generates PDFs from the synthetic master data: POs in at least four customer layouts; PIs, invoices, packing lists and AWB/BL; scanned-looking variants (rotated and noisy).
-- Planted mistakes: quantity, price, PO reference, part number and changed bank details.
-- Ground truth: a JSON file for every document, for the accuracy harness.
-- Delivery: a CLI (`pnpm docs:generate`), with a set copied to `apps/web/public/demo-documents/` for demo uploads, not a folder called `samples`.
-- Prompt 003 brings forward 12 synthetic documents in `apps/web/public/demo-documents/` (P-37); this story keeps the generator, the four layouts, the planted mistakes, the ground-truth files and the CLI.
+- More document kinds in the same renderer, with positions and ground truth: the vendor PI, AWB and bill of lading, import permit and payment advice. P-52 has the PO, PI, packing list and commercial invoice.
+- Scanned-looking variants of more than one document, and long orders that flow onto further pages (a layout today refuses an order that does not fit one page).
+- Planted mistakes: price, PO reference, part number and changed bank details. The quantity mismatch is P-52's packing list.
+- Ground truth: a JSON file for every generated document, for the accuracy harness. P-52 writes them for its twelve.
+- Delivery: P-52's `pnpm docs:generate` grows to the full set. The twelve demo files stay in `apps/web/public/demo-documents/`, not a folder called `samples`.
 
 ### P-22: The design system with the Pro kits
 
@@ -721,6 +723,8 @@ Acceptance criteria:
 - A DAST job: an OWASP ZAP baseline scan of the live URL, weekly and on demand, with its report kept.
 - ADR: the deployment.
 - Decide where the live demo keeps documents: AWS S3 or a maintained S3 store instead of the source-built MinIO, which gets no upstream fixes. Only `S3_ENDPOINT`, the keys and the bucket change (ADR 0011).
+- Trivy scans the images pushed to GHCR and uploads its reports to code scanning as SARIF, so findings show in the Security tab and not only in the job log (left out of P-13).
+- Trivy also scans the images the stack pulls (PostgreSQL with pgvector, Redis and Mailpit), which P-13 does not: at the time, the Redis and pgvector images had fixable HIGH and CRITICAL findings. Move them to fixed versions, put accepted findings through `.trivyignore`, and pin them by digest (left out of P-13).
 
 ### P-25: Slides as code
 
@@ -1802,6 +1806,49 @@ Acceptance criteria:
 - A tab's context menu offers Close others and Close all, and a tab can be dragged to a new place in the strip.
 - A second browser window shows the same tabs without a reload.
 - A tab for a record that no longer exists, or that the person may no longer open, says so on the strip.
+
+### P-79: End-to-end follow-ups
+
+Follow-ups to P-14 that nobody needs this week: a clean-machine proof of the set-up and a wider browser check.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** could
+- **Estimate:** 3 points
+- **Requirements:** M4 best practices, M6 deploy and monitor
+- **Branch:** `test/e2e-follow-ups`
+- **Planned for:** Sprint 03 (W4)
+- **Depends on:** P-14
+
+Acceptance criteria:
+
+- A CI job runs `pnpm local:setup` on a clean runner and then the smoke test against `pnpm dev`, so Getting started is proven on every change to it (left out of issue 102).
+- Someone runs Getting started on macOS once and fixes what differs, and the page stops saying macOS is untested (left out of issue 102).
+- The smoke test runs each page in the dark theme too, so axe checks the contrast of both themes.
+- `apps/web/scripts/screenshots.mjs` and the walk take Playwright from `apps/e2e` instead of an install outside the repository.
+- Firefox and WebKit projects, if a story or the panel needs them.
+
+### P-78: Room in the entry bundle
+
+The initial JS was at 248.8 KB of its 250 KB budget, so the next prompt 004 stories had no room. Make room under the same limit, with no change anyone can see.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 3 points
+- **Requirements:** M4 best practices, M6 deploy and monitor
+- **Branch:** `perf/entry-bundle-room`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-11
+
+Acceptance criteria:
+
+- Measure what the initial chunk holds, by module and by package, and put the top 20 in the pull request, before and after.
+- Move out what the first screen does not need: the barrel, click-only dialogs and menus, the generated client and lazy locale namespaces, each checked rather than assumed.
+- Every lazy piece shows the right skeleton or nothing while it loads, prefetches on idle where a click would wait, and changes nothing a person sees or can do.
+- The initial chunk is at 225 KB gzip or less.
+- `pnpm budget` prints the initial size and the five largest modules in it, and the limit is not raised.
+- The walk for all nine roles ends with 0 FAIL in light and dark, and looks the same as on main.
+- A Playwright script signs in from a cold load as three roles and opens the role switcher, the user menu, the bell and Control K, and lets a session end, with no console error and no CSP violation.
+- The rule for what the shell may import is written in `docs/architecture/patterns.md`.
 
 ## Epic A: Document intake and AI extraction
 

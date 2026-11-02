@@ -8,7 +8,7 @@
  */
 import { useTranslation } from "react-i18next";
 import { FlowIcon, type FlowStage } from "./FlowIcon";
-import { REDUCED_MOTION, useMediaQuery } from "./useMediaQuery";
+import { REDUCED_MOTION, useMediaQuery } from "@/lib/useMediaQuery";
 import { usePageVisible } from "./usePageVisible";
 import "./order-flow.css";
 

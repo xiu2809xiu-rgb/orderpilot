@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "@orderpilot/tsconfig/node.json",
+  "compilerOptions": {
+    "noEmit": true,
+    // Reads the port logic from scripts/stack-smoke.mjs, typed by its JSDoc.
+    "allowJs": true,
+    "lib": ["es2024", "dom"],
+    // The tests run against a stack, never a build of this tree, so shared is
+    // read from its source: no `pnpm build` is needed before `pnpm e2e`.
+    "paths": {
+      "@orderpilot/shared": ["../../packages/shared/src/index.ts"]
+    }
+  },
+  "include": ["src", "tests", "playwright.config.ts"]
+}

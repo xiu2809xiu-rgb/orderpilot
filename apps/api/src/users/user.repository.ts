@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import type { PageQuery, Role } from "@orderpilot/shared";
+import type { UserListQuery, Role } from "@orderpilot/shared";
 import { BaseRepository, type Page } from "../common/repository.js";
 import { Database } from "../database/database.js";
 import type { User as UserRow } from "../generated/prisma/client.js";
@@ -43,14 +43,19 @@ export class UserRepository extends BaseRepository<UserRecord, string> {
     return row ? toRecord(row) : null;
   }
 
-  async list(query: PageQuery): Promise<Page<UserRecord>> {
+  async list(query: UserListQuery): Promise<Page<UserRecord>> {
+    const where =
+      query.active === undefined
+        ? {}
+        : { disabledAt: query.active === "true" ? null : { not: null } };
     const [rows, total] = await Promise.all([
       this.database.client.user.findMany({
+        where,
         orderBy: [{ role: "asc" }, { email: "asc" }],
         skip: (query.page - 1) * query.pageSize,
         take: query.pageSize,
       }),
-      this.database.client.user.count(),
+      this.database.client.user.count({ where }),
     ]);
     return this.toPage(rows.map(toRecord), total, query);
   }

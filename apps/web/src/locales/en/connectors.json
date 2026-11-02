@@ -5,8 +5,5 @@
     "The status of each connector",
     "Settings and a connection test",
     "A log of recent calls"
-  ],
-  "cues": {
-    "health": "Connector health"
-  }
+  ]
 }

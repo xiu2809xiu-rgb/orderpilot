@@ -48,6 +48,9 @@ X-CSRF-Token: {{csrf}}
 ### holds both). Another role gets 403 FORBIDDEN, and the refusal is audited.
 GET {{baseUrl}}/api/v1/users?page=1&pageSize=25
 
+### Only the active users, as the System Admin's home tile counts them.
+GET {{baseUrl}}/api/v1/users?active=true&pageSize=1
+
 ### One user. Replace the id with one from the list.
 GET {{baseUrl}}/api/v1/users/00000000-0000-7000-8000-000000000000
 

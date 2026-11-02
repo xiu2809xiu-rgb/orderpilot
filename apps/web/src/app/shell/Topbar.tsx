@@ -9,7 +9,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet";
+} from "./overlays/sheet";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { Notifications } from "./Notifications";
 import { RoleSwitcher } from "./RoleSwitcher";

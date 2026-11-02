@@ -14,7 +14,12 @@ export const LOW_STOCK_THRESHOLD = "25";
 const negate = (value: string): string =>
   value.startsWith("-") ? value.slice(1) : `-${value}`;
 
-/** Still something to ship. This is what "open" means on every master data page. */
+/**
+ * Still something to ship. This is what "open" means on the master data pages,
+ * where the web app words it "to ship" for a customer. The tracker's open orders
+ * are wider: they also count orders already shipped that wait for an invoice or
+ * the AWB, so the two numbers differ on purpose.
+ */
 export function isOpenOrder(order: MasterDataSalesOrder): boolean {
   return order.lines.some((line) => compareDecimal(line.qtyToShip, "0") > 0);
 }

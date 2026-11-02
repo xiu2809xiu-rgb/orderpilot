@@ -1,4 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
+import type { SampleOrder } from "@orderpilot/synthetic-data";
 import {
   SYNTHETIC_SOURCE,
   type DatasetSource,
@@ -8,6 +9,17 @@ import type {
   OrderStatusReader,
   ReportedOrderStatus,
 } from "./domain/order-status-reader.js";
+
+function reportOf(order: SampleOrder): ReportedOrderStatus {
+  const entry = sampleStepFor(order.sampleScreenState);
+  return {
+    orderNo: order.header.no,
+    status: entry.status,
+    ownerRole: entry.ownerRole,
+    since: `${order.step.enteredOn}T08:00:00.000Z`,
+    open: order.sampleScreenState !== "sample-closed",
+  };
+}
 
 /**
  * Answers from the synthetic data's sample states. It stands in for area 2's
@@ -22,14 +34,7 @@ export class MockOrderStatusReader implements OrderStatusReader {
 
   statusOf(orderNo: string): Promise<ReportedOrderStatus | null> {
     const order = this.source().orders.find((o) => o.header.no === orderNo);
-    if (!order) return Promise.resolve(null);
-    const entry = sampleStepFor(order.sampleScreenState);
-    return Promise.resolve({
-      orderNo,
-      status: entry.status,
-      ownerRole: entry.ownerRole,
-      since: `${order.step.enteredOn}T08:00:00.000Z`,
-    });
+    return Promise.resolve(order ? reportOf(order) : null);
   }
 
   statusOfMany(
@@ -39,13 +44,7 @@ export class MockOrderStatusReader implements OrderStatusReader {
     const found = new Map<string, ReportedOrderStatus>();
     for (const order of this.source().orders) {
       if (!wanted.has(order.header.no)) continue;
-      const entry = sampleStepFor(order.sampleScreenState);
-      found.set(order.header.no, {
-        orderNo: order.header.no,
-        status: entry.status,
-        ownerRole: entry.ownerRole,
-        since: `${order.step.enteredOn}T08:00:00.000Z`,
-      });
+      found.set(order.header.no, reportOf(order));
     }
     return Promise.resolve(found);
   }

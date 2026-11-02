@@ -1,0 +1,81 @@
+# The web image's nginx server, rendered at build time by
+# scripts/render-nginx.mjs. __API_UPSTREAM__ is host:port of the API.
+#
+# The rules:
+#   - Static files carry the security headers from security-headers.ts, the same
+#     ones `vite preview` sends, through one include repeated in each location:
+#     nginx drops inherited add_header lines as soon as a location sets its own.
+#   - /api/ carries NONE of them. The API sends its own, much stricter set, and
+#     a second Content-Security-Policy from nginx would be combined with it.
+#   - Hashed files under /assets/ are cached for a year and never revalidated.
+#     A missing one is a plain 404 that is not cached.
+#   - No add_header at server level: it would reach /api/ answers too.
+#   - Any other path that is not a file is a client-side route: index.html.
+
+# The caller's request id wins; without one nginx makes one, so every request
+# can be followed from the browser to the API log.
+map $http_x_request_id $op_request_id {
+    default $http_x_request_id;
+    ""      $request_id;
+}
+
+server {
+    listen 8080;
+    server_name _;
+    server_tokens off;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # Room for the uploads that arrive in P-18; the API sets the real limit.
+    client_max_body_size 25m;
+
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_types text/css application/javascript text/javascript application/json image/svg+xml;
+
+    # Docker's embedded DNS. Resolving per request lets the web container start
+    # before the API and survive the API being recreated.
+    resolver 127.0.0.11 valid=10s ipv6=off;
+
+    location = /healthz {
+        access_log off;
+        default_type text/plain;
+        return 200 "ok\n";
+    }
+
+    location /api/ {
+        set $api_upstream __API_UPSTREAM__;
+        proxy_pass http://$api_upstream;
+        proxy_http_version 1.1;
+        # The API's own name, never the browser's Host header, which the caller
+        # controls. The API knows which origins may sign in from CORS_ORIGINS.
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Request-Id $op_request_id;
+        proxy_connect_timeout 5s;
+        proxy_read_timeout 60s;
+    }
+
+    location /assets/ {
+        try_files $uri =404;
+        # No "always" here: nginx then sends it on 2xx and 3xx only. A 404 for a
+        # chunk that a rollback brings back must not be kept for a year.
+        add_header Cache-Control "public, max-age=31536000, immutable";
+        include /etc/nginx/security-headers.conf;
+    }
+
+    location = /index.html {
+        add_header Cache-Control "no-cache" always;
+        include /etc/nginx/security-headers.conf;
+    }
+
+    location / {
+        try_files $uri /index.html;
+        add_header Cache-Control "no-cache" always;
+        include /etc/nginx/security-headers.conf;
+    }
+}

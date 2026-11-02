@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.0.0
  */
 import type { WorkflowsMyTasks200DataItemAssigneeRole } from './workflowsMyTasks200DataItemAssigneeRole.ts';
+import type { WorkflowsMyTasks200DataItemExpectedPayment } from './workflowsMyTasks200DataItemExpectedPayment.ts';
 import type { WorkflowsMyTasks200DataItemKind } from './workflowsMyTasks200DataItemKind.ts';
 import type { WorkflowsMyTasks200DataItemPriority } from './workflowsMyTasks200DataItemPriority.ts';
 import type { WorkflowsMyTasks200DataItemRef } from './workflowsMyTasks200DataItemRef.ts';
@@ -45,4 +46,5 @@ export type WorkflowsMyTasks200DataItem = {
   priority?: WorkflowsMyTasks200DataItemPriority;
   /** @minLength 1 */
   assigneeName?: string;
+  expectedPayment?: WorkflowsMyTasks200DataItemExpectedPayment;
 };

@@ -45,6 +45,11 @@ export type WorkflowsSpr200Data = {
      * @nullable
      */
   substituteName: string | null;
+  /**
+     * @minLength 1
+     * @nullable
+     */
+  escalatesToName: string | null;
   /** @nullable */
   decision: WorkflowsSpr200DataDecision;
 };
