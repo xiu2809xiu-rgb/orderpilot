@@ -63,3 +63,43 @@ export function compareDecimal(a: string, b: string): -1 | 0 | 1 {
   const y = toUnits(b);
   return x < y ? -1 : x > y ? 1 : 0;
 }
+
+/** Exact subtraction on decimal strings: `a` minus `b`. */
+export function subtractDecimal(a: string, b: string): string {
+  return fromUnits(toUnits(a) - toUnits(b));
+}
+
+/**
+ * Exact sum of any number of decimal strings. It adds in whole units and
+ * converts once, so a long list can never be refused for the size of its
+ * running total.
+ */
+export function sumDecimal(values: readonly string[]): string {
+  return fromUnits(values.reduce((total, value) => total + toUnits(value), 0n));
+}
+
+/** True when the text is a decimal string this module can compute with. */
+export function isDecimalString(text: string): boolean {
+  return DECIMAL_PATTERN.test(text);
+}
+
+/**
+ * What a line costs: the quantity times the unit price, as it is paid, to the
+ * cent. Null while either one is empty or half typed ("3." or "abc"), so a
+ * screen can show a blank amount instead of a wrong one as someone types.
+ */
+export function lineAmount(quantity: string, unitPrice: string): string | null {
+  if (!isDecimalString(quantity) || !isDecimalString(unitPrice)) return null;
+  return roundToCents(multiplyDecimal(quantity, unitPrice));
+}
+
+/**
+ * By how much a quantity is more than what is available, or null when the
+ * available stock covers it (or either is not a decimal string).
+ */
+export function shortfallOf(needed: string, available: string): string | null {
+  if (!isDecimalString(needed) || !isDecimalString(available)) return null;
+  return compareDecimal(needed, available) > 0
+    ? subtractDecimal(needed, available)
+    : null;
+}
