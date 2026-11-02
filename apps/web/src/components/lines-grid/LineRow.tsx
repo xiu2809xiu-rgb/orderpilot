@@ -20,7 +20,7 @@ const SPAN: Record<LineColumn["kind"], string> = {
   description: "col-span-2 @3xl:col-span-1",
   quantity: "col-span-1",
   unitPrice: "col-span-1",
-  amount: "col-span-1",
+  amount: "col-span-2 @3xl:col-span-1",
   availability: "col-span-2 @3xl:col-span-1",
   remove: "col-span-2 @3xl:col-span-1",
 };

@@ -26,7 +26,7 @@ export function ReadText({ field, row, numeric = false }: ReadTextProps) {
     <span
       className={cn(
         "block min-h-8 py-1.5 text-sm break-words",
-        numeric && "text-right tabular-nums",
+        numeric && "tabular-nums @3xl:text-right",
       )}
     >
       {value === "" ? <span className="text-muted-foreground">-</span> : value}
@@ -58,7 +58,7 @@ export function MaskedPrice({ numeric = true }: { numeric?: boolean }) {
     <span
       className={cn(
         "flex min-h-8 items-center py-1",
-        numeric && "justify-end",
+        numeric && "@3xl:justify-end",
         TOUCH_BUTTONS,
       )}
     >

@@ -248,6 +248,11 @@ async function walk(browser, theme, size) {
   await page
     .getByRole("heading", { level: 1, name: "Component gallery" })
     .waitFor();
+  // The analytics question sits over the bottom of every picture otherwise.
+  await page
+    .getByRole("button", { name: "No thanks" })
+    .click({ timeout: 3000 })
+    .catch(() => undefined);
   const card = page.getByRole("region", { name: "Lines grid", exact: true });
   await card.scrollIntoViewIfNeeded();
   await page.getByRole("table", { name: "Order lines" }).waitFor();

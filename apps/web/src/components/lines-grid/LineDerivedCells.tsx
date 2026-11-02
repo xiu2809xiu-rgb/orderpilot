@@ -20,7 +20,7 @@ export function AmountCell({ row }: { row: string }) {
       })
     : null;
   return (
-    <span className="block min-h-8 py-1.5 text-right text-sm">
+    <span className="block min-h-8 py-1.5 text-sm @3xl:text-right">
       {amount === null ? (
         <span className="text-muted-foreground">-</span>
       ) : (
