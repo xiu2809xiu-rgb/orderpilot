@@ -1,12 +1,15 @@
 import { useId } from "react";
+import { cn } from "@/lib/utils";
 
 interface FilterSelectProps {
-  /** Names the filter for screen readers, and is the first option's words. */
+  /** Names the filter. Hidden from sight unless `showLabel`, but always read aloud. */
   label: string;
   allLabel: string;
   value: string;
   options: readonly { value: string; label: string }[];
   onChange: (value: string | undefined) => void;
+  /** Draw the label above the field, as in the More filters popover. */
+  showLabel?: boolean;
 }
 
 /** One filter in a list's bar. A link can set a value the options have not loaded yet. */
@@ -16,12 +19,16 @@ export function FilterSelect({
   value,
   options,
   onChange,
+  showLabel = false,
 }: FilterSelectProps) {
   const id = useId();
   const known = value === "" || options.some((o) => o.value === value);
   return (
-    <>
-      <label htmlFor={id} className="sr-only">
+    <div className={showLabel ? "space-y-1" : undefined}>
+      <label
+        htmlFor={id}
+        className={showLabel ? "text-xs text-muted-foreground" : "sr-only"}
+      >
         {label}
       </label>
       <select
@@ -30,7 +37,10 @@ export function FilterSelect({
         onChange={(event) => {
           onChange(event.target.value || undefined);
         }}
-        className="h-9 max-w-44 rounded-md border border-input bg-background px-2 text-sm"
+        className={cn(
+          "h-9 rounded-md border border-input bg-background px-2 text-sm pointer-coarse:h-11",
+          showLabel ? "w-full" : "max-w-44",
+        )}
       >
         <option value="">{allLabel}</option>
         {known ? null : <option value={value}>{value}</option>}
@@ -40,6 +50,6 @@ export function FilterSelect({
           </option>
         ))}
       </select>
-    </>
+    </div>
   );
 }

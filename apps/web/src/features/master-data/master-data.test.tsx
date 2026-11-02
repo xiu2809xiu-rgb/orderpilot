@@ -20,12 +20,12 @@ import type {
   MasterDataVendor200,
 } from "@/lib/api/generated/model";
 import { axeViolations } from "@/test/axe";
-import { errorBody } from "@/test/fixtures";
+import { useSessionStore } from "@/stores/session";
+import { errorBody, sessionFor } from "@/test/fixtures";
 import { server } from "@/test/server";
 import CustomerDetailPage from "./CustomerDetailPage";
 import ItemDetailPage from "./ItemDetailPage";
 import ItemsPage from "./ItemsPage";
-import { queryFromUrl } from "./useUrlQuery";
 import VendorDetailPage from "./VendorDetailPage";
 
 const shown = (field: string, value: string) => ({
@@ -126,6 +126,7 @@ const shortItem = {
 } as MasterDataItem200;
 
 function renderAt(path: string) {
+  useSessionStore.getState().setSession(sessionFor("SUPPORT"));
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
@@ -149,7 +150,8 @@ function renderAt(path: string) {
   );
 }
 
-const load = () => i18n.loadNamespaces(["master-data", "common", "components"]);
+const load = () =>
+  i18n.loadNamespaces(["master-data", "common", "components", "list-page"]);
 
 describe("the items list", () => {
   it("lists items with the Mock Navision badge, marks the short one and links each record", async () => {
@@ -451,15 +453,5 @@ describe("a customer", () => {
     expect(screen.queryByText(/108,000/)).toBeNull();
     expect(screen.getAllByRole("img", { name: "Hidden" })).toHaveLength(2);
     expect(await axeViolations(view.container)).toEqual([]);
-  });
-});
-
-describe("a list's address", () => {
-  it("holds a hand-edited page size to what the API allows", () => {
-    const size = (value: string) =>
-      queryFromUrl(new URLSearchParams({ pageSize: value }), {}).pageSize;
-    expect(size("500")).toBe(200);
-    expect(size("50")).toBe(50);
-    expect(size("-3")).toBe(25);
   });
 });

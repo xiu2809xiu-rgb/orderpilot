@@ -47,6 +47,7 @@
       "qtyOnSalesOrder": "On sales order",
       "qtyOnPurchOrder": "On purch. order",
       "availableStock": "Available",
+      "availability": "Availability",
       "unitPrice": "Price",
       "vendor": "Vendor"
     },
@@ -159,7 +160,8 @@
       "allPaymentTerms": "All payment terms",
       "priceGroup": "Price group",
       "allPriceGroups": "All price groups"
-    }
+    },
+    "overdueCount": "{{count}} overdue"
   },
   "customer": {
     "back": "Customers",
