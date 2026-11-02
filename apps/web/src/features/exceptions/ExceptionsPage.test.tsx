@@ -1,7 +1,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
-import { MemoryRouter } from "react-router";
+import { MemoryRouter, useLocation } from "react-router";
 import { describe, expect, it } from "vitest";
 import i18n from "@/i18n";
 import { getExceptionsListMockHandler } from "@/lib/api/generated/endpoints/exceptions/exceptions.msw";
@@ -34,6 +35,10 @@ const mismatch = {
   openedAt: "2026-10-02T09:00:00.000Z",
 };
 
+function Where() {
+  return <p data-testid="where">{useLocation().pathname}</p>;
+}
+
 function renderPage() {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
@@ -42,6 +47,7 @@ function renderPage() {
     <QueryClientProvider client={client}>
       <MemoryRouter>
         <ExceptionsPage />
+        <Where />
       </MemoryRouter>
     </QueryClientProvider>,
   );
@@ -63,6 +69,19 @@ describe("the exceptions queue", () => {
       "/order-tracker/SO-0007",
     );
     expect(await axeViolations(view.container)).toEqual([]);
+  });
+
+  it("opens the order when the row itself is clicked, away from its link", async () => {
+    await i18n.loadNamespaces(["exceptions", "common"]);
+    server.use(getExceptionsListMockHandler(queue([mismatch])));
+    renderPage();
+    await userEvent.click(await screen.findByText("-10"));
+    // The tab logic loads on first use, so the move arrives a moment later.
+    await waitFor(() => {
+      expect(screen.getByTestId("where")).toHaveTextContent(
+        "/order-tracker/SO-0007",
+      );
+    });
   });
 
   it("shows an empty queue with a next step", async () => {

@@ -137,6 +137,7 @@ export default function ExceptionsPage() {
         query={query}
         onQueryChange={setQuery}
         rowKey={(row) => row.id}
+        rowHref={(row) => `/order-tracker/${row.orderNo}`}
         status={tableStatusOf(list)}
         error={list.error}
         onRetry={() => void list.refetch()}

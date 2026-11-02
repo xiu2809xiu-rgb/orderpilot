@@ -55,6 +55,7 @@ export default function OrderTrackerPage() {
         query={query}
         onQueryChange={setQuery}
         rowKey={(row) => row.orderNo}
+        rowHref={(row) => `/order-tracker/${row.orderNo}`}
         status={tableStatusOf(tracker)}
         error={tracker.error}
         onRetry={() => void tracker.refetch()}
