@@ -27,7 +27,7 @@ The entry went from 248.8 KB to 202.0 KB gzip.
 ## Consequences
 
 - The stand-in is replaced by the real trigger shortly after the first paint. The element is new, so a test that holds an element handle across that moment must look the trigger up again. Locators and role queries do this already.
-- Unit tests load the overlays in `src/test/setup.ts`, so a shell test sees what a person sees after the prefetch. `overlays/deferred.test.tsx` covers the moment before.
+- A test that renders the app through `src/test/render.tsx` loads the overlays first, so it sees what a person sees after the prefetch, and other test files do not pay for Radix. `overlays/deferred.test.tsx` covers the moment before.
 - A shell overlay must come from a facade. A part the facades do not have yet (such as a submenu) is added to the facade with one `deferredPart` line.
 - Pages are already lazy chunks, so they keep importing `@/components/ui/*` directly.
 
