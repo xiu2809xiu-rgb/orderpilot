@@ -30,6 +30,7 @@ export { MaskedValue, type MaskReason } from "./MaskedValue";
 export { OperationLog, type OperationLogRow } from "./OperationLog";
 export { Money } from "./Money";
 export { PageHeader } from "./PageHeader";
+export { RecordLink, type RecordLinkProps } from "./RecordLink";
 export {
   runPrimaryAction,
   usePrimaryAction,

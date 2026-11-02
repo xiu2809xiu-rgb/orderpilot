@@ -1,9 +1,9 @@
 import { BellRing } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router";
 import {
   EmptyState,
   PageHeader,
+  RecordLink,
   SectionCard,
   StatusBadge,
 } from "@/components/common";
@@ -73,12 +73,12 @@ export default function RemindersPage() {
                   </div>
                   <p className="font-medium">{reminder.message}</p>
                   <p className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                    <Link
+                    <RecordLink
                       to={`/workflows/orders/${reminder.orderNo}`}
                       className="inline-flex min-h-11 items-center font-mono text-primary underline-offset-4 hover:underline"
                     >
                       {reminder.orderNo}
-                    </Link>
+                    </RecordLink>
                     <span className="self-center">
                       {t("reminders.dueOn", {
                         date: formatDate(reminder.dueAt),

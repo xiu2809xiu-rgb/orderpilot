@@ -9,6 +9,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { z } from "zod";
+import { RecordLink } from "@/components/common/RecordLink";
 import { Button } from "@/components/ui/button";
 import { apiClient } from "@/lib/api/instance";
 import { formatDay } from "@/lib/format";
@@ -101,7 +102,7 @@ export function Notifications() {
             <ul className="min-h-0 divide-y overflow-y-auto">
               {reminders.data?.data.map((reminder) => (
                 <li key={reminder.id}>
-                  <Link
+                  <RecordLink
                     to={`/workflows/orders/${reminder.orderNo}`}
                     onClick={close}
                     className="block rounded-sm py-1.5 hover:bg-muted focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
@@ -112,7 +113,7 @@ export function Notifications() {
                         date: formatDay(reminder.dueAt),
                       })}
                     </span>
-                  </Link>
+                  </RecordLink>
                 </li>
               ))}
             </ul>

@@ -1,8 +1,7 @@
 import type { WorkflowTask } from "@orderpilot/shared";
 import { ArrowRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router";
-import { StatusBadge } from "@/components/common";
+import { RecordLink, StatusBadge } from "@/components/common";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { formatDate } from "./format";
@@ -59,7 +58,7 @@ export function TaskCard({
         {task.ref ? <RecordRefLine value={task.ref} /> : null}
       </div>
       {target ? (
-        <Link
+        <RecordLink
           to={target}
           className={cn(
             buttonVariants({ size: "lg" }),
@@ -69,7 +68,7 @@ export function TaskCard({
         >
           {task.ref ? t("task.openRequest") : t("task.openOrder")}
           <ArrowRight aria-hidden="true" />
-        </Link>
+        </RecordLink>
       ) : null}
     </li>
   );

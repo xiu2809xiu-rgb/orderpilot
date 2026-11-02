@@ -1,6 +1,7 @@
 import { Suspense, lazy } from "react";
 import type { RouteObject } from "react-router";
 import { Splash } from "@/app/Splash";
+import type { RecordHandle } from "@/lib/records";
 
 const RemindersPage = lazy(() => import("./RemindersPage"));
 const OrderStepsPage = lazy(() => import("./OrderStepsPage"));
@@ -10,6 +11,7 @@ function page(
   path: string,
   Page: React.LazyExoticComponent<React.ComponentType>,
   crumb: string,
+  record?: RecordHandle["record"],
 ): RouteObject {
   return {
     path,
@@ -18,13 +20,19 @@ function page(
         <Page />
       </Suspense>
     ),
-    handle: { crumb },
+    handle: { crumb, record },
   };
 }
 
 /** The pages below /workflows. The inbox is the feature's own index page. */
 export const workflowRoutes: RouteObject[] = [
   page("reminders", RemindersPage, "workflows:nav.reminders"),
-  page("orders/:orderNo", OrderStepsPage, "workflows:order.crumb"),
-  page("sprs/:recordNo", SprApprovalPage, "workflows:spr.crumb"),
+  page("orders/:orderNo", OrderStepsPage, "workflows:order.crumb", {
+    kind: "orderSteps",
+    param: "orderNo",
+  }),
+  page("sprs/:recordNo", SprApprovalPage, "workflows:spr.crumb", {
+    kind: "spr",
+    param: "recordNo",
+  }),
 ];

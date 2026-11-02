@@ -6,6 +6,7 @@ import { loadShellOverlays } from "@/app/shell/overlays/preload";
 import { resetBootstrap } from "@/lib/api/auth";
 import { apiClient } from "@/lib/api/instance";
 import { queryClient } from "@/lib/query";
+import { useRecordTabs } from "@/stores/recordTabs";
 import { useSessionStore } from "@/stores/session";
 import { mockApi, type MockApiState } from "./fixtures";
 
@@ -19,6 +20,7 @@ export function resetApp() {
   resetBootstrap();
   queryClient.clear();
   useSessionStore.setState({ status: "booting", session: null });
+  useRecordTabs.setState({ owner: null, tabs: [] });
   apiClient.reset();
   document.cookie = "op_csrf=; Max-Age=0";
   document.documentElement.classList.remove("dark");

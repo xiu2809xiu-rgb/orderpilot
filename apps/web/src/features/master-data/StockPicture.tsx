@@ -1,8 +1,7 @@
 import { CircleAlert } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router";
 import type { ItemDetail } from "@orderpilot/shared";
-import { SectionCard } from "@/components/common";
+import { RecordLink, SectionCard } from "@/components/common";
 import { formatQuantity } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -82,12 +81,12 @@ export function StockPicture({ item }: { item: ItemDetail }) {
         >
           <CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
           <span>
-            <Link
+            <RecordLink
               to={`/order-tracker/${line.orderNo}`}
               className="underline underline-offset-4"
             >
               {line.orderNo}
-            </Link>{" "}
+            </RecordLink>{" "}
             {t("item.stock.short", {
               ordered: formatQuantity(line.shortfall?.ordered ?? "0"),
               available: formatQuantity(line.shortfall?.availableStock ?? "0"),

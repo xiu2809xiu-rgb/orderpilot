@@ -2,13 +2,13 @@
 
 Rendered from [`scripts/github/data/backlog.json`](../../scripts/github/data/backlog.json) by `node scripts/github/render-docs.mjs`. Change the data, not this file. The same data seeds the issues. The board shows where each story stands.
 
-There are 9 epics and 122 stories. Estimates are story points: a first guess, for the team to change at planning.
+There are 9 epics and 123 stories. Estimates are story points: a first guess, for the team to change at planning.
 
 ## Epics
 
 | Epic   | Title                             | Area                                    | Stories | Points |
 | ------ | --------------------------------- | --------------------------------------- | ------- | ------ |
-| Epic P | The platform base                 | `area: 1 document AI and integration`   | 78      | 450    |
+| Epic P | The platform base                 | `area: 1 document AI and integration`   | 79      | 453    |
 | Epic A | Document intake and AI extraction | `area: 1 document AI and integration`   | 5       | 31     |
 | Epic B | Master data and Navision          | `area: 1 document AI and integration`   | 4       | 14     |
 | Epic C | Order workflows and approvals     | `area: 2 order workflows and approvals` | 5       | 29     |
@@ -153,6 +153,7 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | F-6   | A non-owner runtime database role                                  | should   | 3      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
 | P-23  | The 3D order constellation                                         | could    | 13     | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-27  | Web shell polish                                                   | could    | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-77  | Tab strip polish                                                   | could    | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-79  | End-to-end follow-ups                                              | could    | 3      | `area: 1 document AI and integration`   | M4 best practices, M6 deploy and monitor                       |
 | B-4   | QR codes on generated documents and carton labels                  | could    | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | E-4   | Passkeys to confirm risky approvals                                | could    | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
@@ -1787,6 +1788,24 @@ Acceptance criteria:
 - Masking, AI destinations and the monitoring tabs use the templates, with the first column kept in view on a phone.
 - Audit and policy logic stay `it.todo`, and Angelyn reviews the pull request.
 - Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+
+### P-77: Tab strip polish
+
+Left out of P-43 because no teammate needs it this week.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** could
+- **Estimate:** 3 points
+- **Requirements:** M4 best practices
+- **Branch:** `feat/workspace-tab-polish`
+- **Planned for:** Sprint 03 (W4)
+- **Depends on:** P-43
+
+Acceptance criteria:
+
+- A tab's context menu offers Close others and Close all, and a tab can be dragged to a new place in the strip.
+- A second browser window shows the same tabs without a reload.
+- A tab for a record that no longer exists, or that the person may no longer open, says so on the strip.
 
 ### P-79: End-to-end follow-ups
 

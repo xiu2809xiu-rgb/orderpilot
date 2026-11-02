@@ -8,6 +8,7 @@ import { Toaster } from "@/components/common/Toaster";
 import { featureNamespaces } from "@/features/nav";
 import { apiClient } from "@/lib/api/instance";
 import { whenIdle } from "@/lib/deferred";
+import { loadRecordTabs } from "@/lib/loadRecordTabs";
 import { useSessionStore } from "@/stores/session";
 import { useGlobalShortcuts } from "./shortcuts";
 import { Sidebar } from "./Sidebar";
@@ -21,6 +22,15 @@ const CommandPalette = lazy(async () => ({
   default: (await loadPalette()).CommandPalette,
 }));
 const loadSessionEnded = () => import("../SessionEndedDialog");
+
+// The open-records strip and the code that keeps it in step with the page are a chunk
+// of their own, so the entry bundle does not carry them. The download starts when the
+// shell first renders, not when the browser is idle: a person who reloads with tabs open
+// should see them at once. Until it arrives the strip shows nothing, and a record click
+// asks for the same chunk through `loadRecordTabs`, so it is fetched only once.
+const RecordTabs = lazy(async () => ({
+  default: (await loadRecordTabs()).RecordTabs,
+}));
 
 // Usage analytics (G-1): the consent banner and the page-view recorder. A separate
 // chunk, so the entry bundle does not grow.
@@ -91,6 +101,9 @@ export function AppShell() {
               setPaletteOpen(true);
             }}
           />
+          <Suspense fallback={null}>
+            <RecordTabs />
+          </Suspense>
           <main
             id="main"
             tabIndex={-1}

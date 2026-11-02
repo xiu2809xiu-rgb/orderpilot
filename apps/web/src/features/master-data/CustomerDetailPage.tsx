@@ -5,6 +5,7 @@ import type { CustomerDetail } from "@orderpilot/shared";
 import {
   DemoBadge,
   PageHeader,
+  RecordLink,
   SectionCard,
   StatusBadge,
 } from "@/components/common";
@@ -19,12 +20,12 @@ type OpenOrder = CustomerDetail["openOrders"][number];
 type OverdueOrder = CustomerDetail["overdueOrders"][number];
 
 const orderLink = (orderNo: string) => (
-  <Link
+  <RecordLink
     to={`/order-tracker/${orderNo}`}
     className="font-mono font-medium text-primary underline-offset-4 hover:underline"
   >
     {orderNo}
-  </Link>
+  </RecordLink>
 );
 
 function CustomerRecord({ customer }: { customer: CustomerDetail }) {

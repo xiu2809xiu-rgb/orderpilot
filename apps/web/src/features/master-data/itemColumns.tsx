@@ -1,9 +1,9 @@
 import type { TFunction } from "i18next";
-import { Link } from "react-router";
 import type { ItemRow } from "@orderpilot/shared";
 import type { DataTableColumn } from "@/components/common";
 import { formatQuantity } from "@/lib/format";
 import { AvailableFigure, MaskedMoney } from "./pieces";
+import { RecordLink } from "@/components/common";
 
 export const ITEM_SORTABLE = [
   "no",
@@ -38,12 +38,12 @@ export function itemColumns(
       id: "no",
       header: t("items.columns.no"),
       cell: (row) => (
-        <Link
+        <RecordLink
           to={`/master-data/items/${row.no}`}
           className="font-mono font-medium text-primary underline-offset-4 hover:underline"
         >
           {row.no}
-        </Link>
+        </RecordLink>
       ),
       exportValue: (row) => row.no,
       sortable: true,
@@ -113,13 +113,13 @@ export function itemColumns(
       id: "vendor",
       header: t("items.columns.vendor"),
       cell: (row) => (
-        <Link
+        <RecordLink
           to={`/master-data/vendors/${row.vendorNo}`}
           className="block max-w-36 truncate underline-offset-4 hover:underline"
           title={row.vendorName}
         >
           {row.vendorName}
-        </Link>
+        </RecordLink>
       ),
       exportValue: (row) => `${row.vendorNo} ${row.vendorName}`,
     },

@@ -2028,6 +2028,24 @@
       ]
     },
     {
+      "key": "P-77",
+      "title": "Tab strip polish",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "could",
+      "estimate": 3,
+      "reqs": ["M4"],
+      "branch": "feat/workspace-tab-polish",
+      "sprints": [3],
+      "dependsOn": ["P-43"],
+      "summary": "Left out of P-43 because no teammate needs it this week.",
+      "acceptance": [
+        "A tab's context menu offers Close others and Close all, and a tab can be dragged to a new place in the strip.",
+        "A second browser window shows the same tabs without a reload.",
+        "A tab for a record that no longer exists, or that the person may no longer open, says so on the strip."
+      ]
+    },
+    {
       "key": "P-79",
       "title": "End-to-end follow-ups",
       "epic": "P",
