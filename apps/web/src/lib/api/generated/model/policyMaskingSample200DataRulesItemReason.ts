@@ -6,12 +6,12 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type PolicyMaskingSample200DataRulesItemReason =
-  (typeof PolicyMaskingSample200DataRulesItemReason)[keyof typeof PolicyMaskingSample200DataRulesItemReason];
+export type PolicyMaskingSample200DataRulesItemReason = typeof PolicyMaskingSample200DataRulesItemReason[keyof typeof PolicyMaskingSample200DataRulesItemReason];
+
 
 export const PolicyMaskingSample200DataRulesItemReason = {
-  role: "role",
-  bankDetails: "bankDetails",
-  price: "price",
-  policy: "policy",
+  role: 'role',
+  bankDetails: 'bankDetails',
+  price: 'price',
+  policy: 'policy',
 } as const;

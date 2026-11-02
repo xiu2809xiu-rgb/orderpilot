@@ -6,10 +6,10 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type TrackerListDirection =
-  (typeof TrackerListDirection)[keyof typeof TrackerListDirection];
+export type TrackerListDirection = typeof TrackerListDirection[keyof typeof TrackerListDirection];
+
 
 export const TrackerListDirection = {
-  asc: "asc",
-  desc: "desc",
+  asc: 'asc',
+  desc: 'desc',
 } as const;

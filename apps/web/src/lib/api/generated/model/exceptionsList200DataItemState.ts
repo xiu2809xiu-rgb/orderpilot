@@ -6,10 +6,10 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type ExceptionsList200DataItemState =
-  (typeof ExceptionsList200DataItemState)[keyof typeof ExceptionsList200DataItemState];
+export type ExceptionsList200DataItemState = typeof ExceptionsList200DataItemState[keyof typeof ExceptionsList200DataItemState];
+
 
 export const ExceptionsList200DataItemState = {
-  OPEN: "OPEN",
-  RESOLVED: "RESOLVED",
+  OPEN: 'OPEN',
+  RESOLVED: 'RESOLVED',
 } as const;

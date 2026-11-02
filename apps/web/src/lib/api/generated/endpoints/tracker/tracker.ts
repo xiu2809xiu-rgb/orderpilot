@@ -5,7 +5,9 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import { useQuery } from "@tanstack/react-query";
+import {
+  useQuery
+} from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
@@ -15,28 +17,28 @@ import type {
   QueryKey,
   UndefinedInitialDataOptions,
   UseQueryOptions,
-  UseQueryResult,
-} from "@tanstack/react-query";
+  UseQueryResult
+} from '@tanstack/react-query';
 
 import type {
   TrackerFlow200,
   TrackerList200,
   TrackerListParams,
-  TrackerTimeline200,
-} from "../../model";
+  TrackerTimeline200
+} from '../../model';
 
-import { apiMutator } from "../../../mutator.ts";
-import type { ErrorType } from "../../../mutator.ts";
+import { apiMutator } from '../../../mutator.ts';
+import type { ErrorType } from '../../../mutator.ts';
 
-const withQueryKey = <T extends object, K>(
-  query: T,
-  queryKey: K,
-): T & { queryKey: K } => {
+
+
+
+const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKey: K } => {
   const result = { queryKey } as T & { queryKey: K };
   for (const key of Object.keys(query)) {
     // The explicit queryKey always wins, matching the previous
     // `{ ...query, queryKey }` spread where it was set last.
-    if (key === "queryKey") continue;
+    if (key === 'queryKey') continue;
     Object.defineProperty(result, key, {
       enumerable: true,
       configurable: true,
@@ -50,417 +52,276 @@ const withQueryKey = <T extends object, K>(
  * @summary The order tracker: status, owner and overdue flags, a page at a time. Mock data
  */
 export const trackerList = (
-  params?: TrackerListParams,
-  signal?: AbortSignal,
+    params?: TrackerListParams,
+ signal?: AbortSignal
 ) => {
-  return apiMutator<TrackerList200>({
-    url: `/api/v1/tracker/orders`,
-    method: "GET",
-    params,
-    signal,
-  });
-};
 
-export const getTrackerListQueryKey = (params?: TrackerListParams) => {
-  return [`/api/v1/tracker/orders`, ...(params ? [params] : [])] as const;
-};
 
-export const getTrackerListQueryOptions = <
-  TData = Awaited<ReturnType<typeof trackerList>>,
-  TError = ErrorType<unknown>,
->(
-  params?: TrackerListParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof trackerList>>, TError, TData>
-    >;
-  },
+      return apiMutator<TrackerList200>(
+      {url: `/api/v1/tracker/orders`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getTrackerListQueryKey = (params?: TrackerListParams,) => {
+    return [
+    `/api/v1/tracker/orders`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getTrackerListQueryOptions = <TData = Awaited<ReturnType<typeof trackerList>>, TError = ErrorType<unknown>>(params?: TrackerListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof trackerList>>, TError, TData>>, }
 ) => {
-  const { query: queryOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getTrackerListQueryKey(params);
+const {query: queryOptions} = options ?? {};
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof trackerList>>> = ({
-    signal,
-  }) => trackerList(params, signal);
+  const queryKey =  queryOptions?.queryKey ?? getTrackerListQueryKey(params);
 
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof trackerList>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
 
-export type TrackerListQueryResult = NonNullable<
-  Awaited<ReturnType<typeof trackerList>>
->;
-export type TrackerListQueryError = ErrorType<unknown>;
 
-export function useTrackerList<
-  TData = Awaited<ReturnType<typeof trackerList>>,
-  TError = ErrorType<unknown>,
->(
-  params: undefined | TrackerListParams,
-  options: {
-    query: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof trackerList>>, TError, TData>
-    > &
-      Pick<
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof trackerList>>> = ({ signal }) => trackerList(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof trackerList>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type TrackerListQueryResult = NonNullable<Awaited<ReturnType<typeof trackerList>>>
+export type TrackerListQueryError = ErrorType<unknown>
+
+
+export function useTrackerList<TData = Awaited<ReturnType<typeof trackerList>>, TError = ErrorType<unknown>>(
+ params: undefined |  TrackerListParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof trackerList>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof trackerList>>,
           TError,
           Awaited<ReturnType<typeof trackerList>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useTrackerList<
-  TData = Awaited<ReturnType<typeof trackerList>>,
-  TError = ErrorType<unknown>,
->(
-  params?: TrackerListParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof trackerList>>, TError, TData>
-    > &
-      Pick<
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTrackerList<TData = Awaited<ReturnType<typeof trackerList>>, TError = ErrorType<unknown>>(
+ params?: TrackerListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof trackerList>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof trackerList>>,
           TError,
           Awaited<ReturnType<typeof trackerList>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useTrackerList<
-  TData = Awaited<ReturnType<typeof trackerList>>,
-  TError = ErrorType<unknown>,
->(
-  params?: TrackerListParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof trackerList>>, TError, TData>
-    >;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTrackerList<TData = Awaited<ReturnType<typeof trackerList>>, TError = ErrorType<unknown>>(
+ params?: TrackerListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof trackerList>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary The order tracker: status, owner and overdue flags, a page at a time. Mock data
  */
 
-export function useTrackerList<
-  TData = Awaited<ReturnType<typeof trackerList>>,
-  TError = ErrorType<unknown>,
->(
-  params?: TrackerListParams,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof trackerList>>, TError, TData>
-    >;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getTrackerListQueryOptions(params, options);
+export function useTrackerList<TData = Awaited<ReturnType<typeof trackerList>>, TError = ErrorType<unknown>>(
+ params?: TrackerListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof trackerList>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+  const queryOptions = getTrackerListQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+
+
+
+
+
 /**
  * @summary Open orders at each step of the sales flow, for the home page. Mock data
  */
-export const trackerFlow = (signal?: AbortSignal) => {
-  return apiMutator<TrackerFlow200>({
-    url: `/api/v1/tracker/flow`,
-    method: "GET",
-    signal,
-  });
-};
+export const trackerFlow = (
+
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<TrackerFlow200>(
+      {url: `/api/v1/tracker/flow`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
 
 export const getTrackerFlowQueryKey = () => {
-  return [`/api/v1/tracker/flow`] as const;
-};
+    return [
+    `/api/v1/tracker/flow`
+    ] as const;
+    }
 
-export const getTrackerFlowQueryOptions = <
-  TData = Awaited<ReturnType<typeof trackerFlow>>,
-  TError = ErrorType<unknown>,
->(options?: {
-  query?: Partial<
-    UseQueryOptions<Awaited<ReturnType<typeof trackerFlow>>, TError, TData>
-  >;
-}) => {
-  const { query: queryOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getTrackerFlowQueryKey();
+export const getTrackerFlowQueryOptions = <TData = Awaited<ReturnType<typeof trackerFlow>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof trackerFlow>>, TError, TData>>, }
+) => {
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof trackerFlow>>> = ({
-    signal,
-  }) => trackerFlow(signal);
+const {query: queryOptions} = options ?? {};
 
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-    Awaited<ReturnType<typeof trackerFlow>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
+  const queryKey =  queryOptions?.queryKey ?? getTrackerFlowQueryKey();
 
-export type TrackerFlowQueryResult = NonNullable<
-  Awaited<ReturnType<typeof trackerFlow>>
->;
-export type TrackerFlowQueryError = ErrorType<unknown>;
 
-export function useTrackerFlow<
-  TData = Awaited<ReturnType<typeof trackerFlow>>,
-  TError = ErrorType<unknown>,
->(
-  options: {
-    query: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof trackerFlow>>, TError, TData>
-    > &
-      Pick<
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof trackerFlow>>> = ({ signal }) => trackerFlow(signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof trackerFlow>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type TrackerFlowQueryResult = NonNullable<Awaited<ReturnType<typeof trackerFlow>>>
+export type TrackerFlowQueryError = ErrorType<unknown>
+
+
+export function useTrackerFlow<TData = Awaited<ReturnType<typeof trackerFlow>>, TError = ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof trackerFlow>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof trackerFlow>>,
           TError,
           Awaited<ReturnType<typeof trackerFlow>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useTrackerFlow<
-  TData = Awaited<ReturnType<typeof trackerFlow>>,
-  TError = ErrorType<unknown>,
->(
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof trackerFlow>>, TError, TData>
-    > &
-      Pick<
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTrackerFlow<TData = Awaited<ReturnType<typeof trackerFlow>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof trackerFlow>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof trackerFlow>>,
           TError,
           Awaited<ReturnType<typeof trackerFlow>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useTrackerFlow<
-  TData = Awaited<ReturnType<typeof trackerFlow>>,
-  TError = ErrorType<unknown>,
->(
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof trackerFlow>>, TError, TData>
-    >;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTrackerFlow<TData = Awaited<ReturnType<typeof trackerFlow>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof trackerFlow>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Open orders at each step of the sales flow, for the home page. Mock data
  */
 
-export function useTrackerFlow<
-  TData = Awaited<ReturnType<typeof trackerFlow>>,
-  TError = ErrorType<unknown>,
->(
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof trackerFlow>>, TError, TData>
-    >;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getTrackerFlowQueryOptions(options);
+export function useTrackerFlow<TData = Awaited<ReturnType<typeof trackerFlow>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof trackerFlow>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+  const queryOptions = getTrackerFlowQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+
+
+
+
+
 /**
  * @summary One order's timeline: each step and its effect, check results and master-data matches. Mock data
  */
-export const trackerTimeline = (orderNo: string, signal?: AbortSignal) => {
-  return apiMutator<TrackerTimeline200>({
-    url: `/api/v1/tracker/orders/${orderNo}`,
-    method: "GET",
-    signal,
-  });
-};
-
-export const getTrackerTimelineQueryKey = (orderNo: string) => {
-  return [`/api/v1/tracker/orders/${orderNo}`] as const;
-};
-
-export const getTrackerTimelineQueryOptions = <
-  TData = Awaited<ReturnType<typeof trackerTimeline>>,
-  TError = ErrorType<unknown>,
->(
-  orderNo: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof trackerTimeline>>,
-        TError,
-        TData
-      >
-    >;
-  },
+export const trackerTimeline = (
+    orderNo: string,
+ signal?: AbortSignal
 ) => {
-  const { query: queryOptions } = options ?? {};
 
-  const queryKey =
-    queryOptions?.queryKey ?? getTrackerTimelineQueryKey(orderNo);
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof trackerTimeline>>> = ({
-    signal,
-  }) => trackerTimeline(orderNo, signal);
+      return apiMutator<TrackerTimeline200>(
+      {url: `/api/v1/tracker/orders/${orderNo}`, method: 'GET', signal
+    },
+      );
+    }
 
-  return {
-    queryKey,
-    queryFn,
-    enabled: orderNo !== null && orderNo !== undefined,
-    ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof trackerTimeline>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
 
-export type TrackerTimelineQueryResult = NonNullable<
-  Awaited<ReturnType<typeof trackerTimeline>>
->;
-export type TrackerTimelineQueryError = ErrorType<unknown>;
 
-export function useTrackerTimeline<
-  TData = Awaited<ReturnType<typeof trackerTimeline>>,
-  TError = ErrorType<unknown>,
->(
-  orderNo: string,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof trackerTimeline>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+
+export const getTrackerTimelineQueryKey = (orderNo: string,) => {
+    return [
+    `/api/v1/tracker/orders/${orderNo}`
+    ] as const;
+    }
+
+
+export const getTrackerTimelineQueryOptions = <TData = Awaited<ReturnType<typeof trackerTimeline>>, TError = ErrorType<unknown>>(orderNo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof trackerTimeline>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getTrackerTimelineQueryKey(orderNo);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof trackerTimeline>>> = ({ signal }) => trackerTimeline(orderNo, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: orderNo !== null && orderNo !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof trackerTimeline>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type TrackerTimelineQueryResult = NonNullable<Awaited<ReturnType<typeof trackerTimeline>>>
+export type TrackerTimelineQueryError = ErrorType<unknown>
+
+
+export function useTrackerTimeline<TData = Awaited<ReturnType<typeof trackerTimeline>>, TError = ErrorType<unknown>>(
+ orderNo: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof trackerTimeline>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof trackerTimeline>>,
           TError,
           Awaited<ReturnType<typeof trackerTimeline>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useTrackerTimeline<
-  TData = Awaited<ReturnType<typeof trackerTimeline>>,
-  TError = ErrorType<unknown>,
->(
-  orderNo: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof trackerTimeline>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTrackerTimeline<TData = Awaited<ReturnType<typeof trackerTimeline>>, TError = ErrorType<unknown>>(
+ orderNo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof trackerTimeline>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof trackerTimeline>>,
           TError,
           Awaited<ReturnType<typeof trackerTimeline>>
-        >,
-        "initialData"
-      >;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useTrackerTimeline<
-  TData = Awaited<ReturnType<typeof trackerTimeline>>,
-  TError = ErrorType<unknown>,
->(
-  orderNo: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof trackerTimeline>>,
-        TError,
-        TData
-      >
-    >;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTrackerTimeline<TData = Awaited<ReturnType<typeof trackerTimeline>>, TError = ErrorType<unknown>>(
+ orderNo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof trackerTimeline>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary One order's timeline: each step and its effect, check results and master-data matches. Mock data
  */
 
-export function useTrackerTimeline<
-  TData = Awaited<ReturnType<typeof trackerTimeline>>,
-  TError = ErrorType<unknown>,
->(
-  orderNo: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof trackerTimeline>>,
-        TError,
-        TData
-      >
-    >;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getTrackerTimelineQueryOptions(orderNo, options);
+export function useTrackerTimeline<TData = Awaited<ReturnType<typeof trackerTimeline>>, TError = ErrorType<unknown>>(
+ orderNo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof trackerTimeline>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+  const queryOptions = getTrackerTimelineQueryOptions(orderNo,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
+

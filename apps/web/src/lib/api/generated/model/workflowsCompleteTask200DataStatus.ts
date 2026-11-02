@@ -6,11 +6,11 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type WorkflowsCompleteTask200DataStatus =
-  (typeof WorkflowsCompleteTask200DataStatus)[keyof typeof WorkflowsCompleteTask200DataStatus];
+export type WorkflowsCompleteTask200DataStatus = typeof WorkflowsCompleteTask200DataStatus[keyof typeof WorkflowsCompleteTask200DataStatus];
+
 
 export const WorkflowsCompleteTask200DataStatus = {
-  OPEN: "OPEN",
-  DONE: "DONE",
-  CANCELLED: "CANCELLED",
+  OPEN: 'OPEN',
+  DONE: 'DONE',
+  CANCELLED: 'CANCELLED',
 } as const;

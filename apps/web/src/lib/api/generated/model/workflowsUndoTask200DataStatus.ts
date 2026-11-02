@@ -6,11 +6,11 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type WorkflowsUndoTask200DataStatus =
-  (typeof WorkflowsUndoTask200DataStatus)[keyof typeof WorkflowsUndoTask200DataStatus];
+export type WorkflowsUndoTask200DataStatus = typeof WorkflowsUndoTask200DataStatus[keyof typeof WorkflowsUndoTask200DataStatus];
+
 
 export const WorkflowsUndoTask200DataStatus = {
-  OPEN: "OPEN",
-  DONE: "DONE",
-  CANCELLED: "CANCELLED",
+  OPEN: 'OPEN',
+  DONE: 'DONE',
+  CANCELLED: 'CANCELLED',
 } as const;

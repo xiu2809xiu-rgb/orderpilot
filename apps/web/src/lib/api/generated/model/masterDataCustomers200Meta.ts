@@ -8,19 +8,19 @@
 
 export type MasterDataCustomers200Meta = {
   /**
-   * @minimum 1
-   * @maximum 9007199254740991
-   */
+     * @minimum 1
+     * @maximum 9007199254740991
+     */
   page: number;
   /**
-   * @minimum 1
-   * @maximum 200
-   */
+     * @minimum 1
+     * @maximum 200
+     */
   pageSize: number;
   /**
-   * @minimum 0
-   * @maximum 9007199254740991
-   */
+     * @minimum 0
+     * @maximum 9007199254740991
+     */
   total: number;
   mock: true;
 };

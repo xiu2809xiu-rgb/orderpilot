@@ -9,13 +9,12 @@
 /**
  * @nullable
  */
-export type MasterDataVendor200DataBankAccountsItemSwiftCodeReason =
-  | (typeof MasterDataVendor200DataBankAccountsItemSwiftCodeReason)[keyof typeof MasterDataVendor200DataBankAccountsItemSwiftCodeReason]
-  | null;
+export type MasterDataVendor200DataBankAccountsItemSwiftCodeReason = typeof MasterDataVendor200DataBankAccountsItemSwiftCodeReason[keyof typeof MasterDataVendor200DataBankAccountsItemSwiftCodeReason] | null;
+
 
 export const MasterDataVendor200DataBankAccountsItemSwiftCodeReason = {
-  role: "role",
-  bankDetails: "bankDetails",
-  price: "price",
-  policy: "policy",
+  role: 'role',
+  bankDetails: 'bankDetails',
+  price: 'price',
+  policy: 'policy',
 } as const;

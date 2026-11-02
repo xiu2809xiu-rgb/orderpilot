@@ -5,15 +5,15 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { WorkflowsOpenRules200DataItemId } from "./workflowsOpenRules200DataItemId.ts";
+import type { WorkflowsOpenRules200DataItemId } from './workflowsOpenRules200DataItemId.ts';
 
 export type WorkflowsOpenRules200DataItem = {
   id: WorkflowsOpenRules200DataItemId;
   /** @minLength 1 */
   value: string;
   /**
-   * @minLength 1
-   * @nullable
-   */
+     * @minLength 1
+     * @nullable
+     */
   screen: string | null;
 };

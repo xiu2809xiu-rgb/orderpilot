@@ -6,10 +6,10 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type AuditViewerListRefusalsOnly =
-  (typeof AuditViewerListRefusalsOnly)[keyof typeof AuditViewerListRefusalsOnly];
+export type AuditViewerListRefusalsOnly = typeof AuditViewerListRefusalsOnly[keyof typeof AuditViewerListRefusalsOnly];
+
 
 export const AuditViewerListRefusalsOnly = {
-  true: "true",
-  false: "false",
+  true: 'true',
+  false: 'false',
 } as const;

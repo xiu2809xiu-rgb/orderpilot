@@ -5,10 +5,17 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import { faker } from "@faker-js/faker";
+import {
+  faker
+} from '@faker-js/faker';
 
-import { HttpResponse, http } from "msw";
-import type { RequestHandlerOptions } from "msw";
+import {
+  HttpResponse,
+  http
+} from 'msw';
+import type {
+  RequestHandlerOptions
+} from 'msw';
 
 import type {
   MasterDataCustomer200,
@@ -17,808 +24,108 @@ import type {
   MasterDataItem200,
   MasterDataItems200,
   MasterDataVendor200,
-  MasterDataVendors200,
-} from "../../model";
+  MasterDataVendors200
+} from '../../model';
 
-export const getMasterDataFiltersResponseMock = (
-  overrideResponse: Partial<Extract<MasterDataFilters200, object>> = {},
-): MasterDataFilters200 => ({
-  data: {
-    brands: Array.from(
-      { length: faker.number.int({ min: 1, max: 10 }) },
-      (_, i) => i + 1,
-    ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
-    categories: faker.helpers.arrayElements([
-      "IT",
-      "SURVEILLANCE",
-      "ACCESSORIES",
-    ] as const),
-    vendors: Array.from(
-      { length: faker.number.int({ min: 1, max: 10 }) },
-      (_, i) => i + 1,
-    ).map(() => ({
-      no: faker.string.alpha({ length: { min: 10, max: 20 } }),
-      name: faker.string.alpha({ length: { min: 10, max: 20 } }),
-    })),
-    countries: Array.from(
-      { length: faker.number.int({ min: 1, max: 10 }) },
-      (_, i) => i + 1,
-    ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
-    paymentTerms: Array.from(
-      { length: faker.number.int({ min: 1, max: 10 }) },
-      (_, i) => i + 1,
-    ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
-    priceGroups: Array.from(
-      { length: faker.number.int({ min: 1, max: 10 }) },
-      (_, i) => i + 1,
-    ).map(() => faker.string.alpha({ length: { min: 10, max: 20 } })),
-  },
-  meta: { mock: faker.helpers.arrayElement([true] as const) },
-  ...overrideResponse,
-});
 
-export const getMasterDataItemsResponseMock = (
-  overrideResponse: Partial<Extract<MasterDataItems200, object>> = {},
-): MasterDataItems200 => ({
-  data: Array.from(
-    { length: faker.number.int({ min: 1, max: 10 }) },
-    (_, i) => i + 1,
-  ).map(() => ({
-    no: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    description: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    partNumber: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    brand: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    category: faker.helpers.arrayElement([
-      "IT",
-      "SURVEILLANCE",
-      "ACCESSORIES",
-    ] as const),
-    baseUnitOfMeasure: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    inventory: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"),
-    qtyOnSalesOrder: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"),
-    qtyOnPurchOrder: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"),
-    availableStock: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"),
-    availability: faker.helpers.arrayElement(["short", "low", "ok"] as const),
-    unitPrice: {
-      field: faker.string.alpha({ length: { min: 1, max: 20 } }),
-      classification: faker.helpers.arrayElement([
-        "public",
-        "internal",
-        "confidential",
-        "restricted",
-      ] as const),
-      masked: faker.datatype.boolean(),
-      value: faker.helpers.arrayElement([
-        faker.string.alpha({ length: { min: 10, max: 20 } }),
-        null,
-      ]),
-      reason: faker.helpers.arrayElement([
-        faker.helpers.arrayElement([
-          "role",
-          "bankDetails",
-          "price",
-          "policy",
-        ] as const),
-        null,
-      ]),
-    },
-    vendorNo: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    vendorName: faker.string.alpha({ length: { min: 1, max: 20 } }),
-  })),
-  meta: {
-    page: faker.number.int({ min: 1, max: 9007199254740991 }),
-    pageSize: faker.number.int({ min: 1, max: 200 }),
-    total: faker.number.int({ min: 0, max: 9007199254740991 }),
-    mock: faker.helpers.arrayElement([true] as const),
-  },
-  ...overrideResponse,
-});
+export const getMasterDataFiltersResponseMock = (overrideResponse: Partial<Extract<MasterDataFilters200, object>> = {}): MasterDataFilters200 => ({data: {brands: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => (faker.string.alpha({length: {min: 10, max: 20}}))), categories: faker.helpers.arrayElements(['IT','SURVEILLANCE','ACCESSORIES'] as const), vendors: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({no: faker.string.alpha({length: {min: 10, max: 20}}), name: faker.string.alpha({length: {min: 10, max: 20}})})), countries: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => (faker.string.alpha({length: {min: 10, max: 20}}))), paymentTerms: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => (faker.string.alpha({length: {min: 10, max: 20}}))), priceGroups: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => (faker.string.alpha({length: {min: 10, max: 20}})))}, meta: {mock: faker.helpers.arrayElement([true] as const)}, ...overrideResponse})
 
-export const getMasterDataItemResponseMock = (
-  overrideResponse: Partial<Extract<MasterDataItem200, object>> = {},
-): MasterDataItem200 => ({
-  data: {
-    no: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    description: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    partNumber: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    brand: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    category: faker.helpers.arrayElement([
-      "IT",
-      "SURVEILLANCE",
-      "ACCESSORIES",
-    ] as const),
-    baseUnitOfMeasure: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    inventory: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"),
-    qtyOnSalesOrder: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"),
-    qtyOnPurchOrder: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"),
-    availableStock: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"),
-    availability: faker.helpers.arrayElement(["short", "low", "ok"] as const),
-    unitPrice: {
-      field: faker.string.alpha({ length: { min: 1, max: 20 } }),
-      classification: faker.helpers.arrayElement([
-        "public",
-        "internal",
-        "confidential",
-        "restricted",
-      ] as const),
-      masked: faker.datatype.boolean(),
-      value: faker.helpers.arrayElement([
-        faker.string.alpha({ length: { min: 10, max: 20 } }),
-        null,
-      ]),
-      reason: faker.helpers.arrayElement([
-        faker.helpers.arrayElement([
-          "role",
-          "bankDetails",
-          "price",
-          "policy",
-        ] as const),
-        null,
-      ]),
-    },
-    vendorNo: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    vendorName: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    vendorItemNo: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    unitCost: {
-      field: faker.string.alpha({ length: { min: 1, max: 20 } }),
-      classification: faker.helpers.arrayElement([
-        "public",
-        "internal",
-        "confidential",
-        "restricted",
-      ] as const),
-      masked: faker.datatype.boolean(),
-      value: faker.helpers.arrayElement([
-        faker.string.alpha({ length: { min: 10, max: 20 } }),
-        null,
-      ]),
-      reason: faker.helpers.arrayElement([
-        faker.helpers.arrayElement([
-          "role",
-          "bankDetails",
-          "price",
-          "policy",
-        ] as const),
-        null,
-      ]),
-    },
-    orderLines: Array.from(
-      { length: faker.number.int({ min: 1, max: 10 }) },
-      (_, i) => i + 1,
-    ).map(() => ({
-      orderNo: faker.string.alpha({ length: { min: 1, max: 20 } }),
-      customerNo: faker.string.alpha({ length: { min: 1, max: 20 } }),
-      customerName: faker.string.alpha({ length: { min: 1, max: 20 } }),
-      orderDate: faker.string.alpha({ length: { min: 1, max: 20 } }),
-      shipmentDate: faker.helpers.arrayElement([
-        faker.string.alpha({ length: { min: 10, max: 20 } }),
-        null,
-      ]),
-      status: faker.string.alpha({ length: { min: 1, max: 20 } }),
-      quantity: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"),
-      heldOut: faker.datatype.boolean(),
-      shortfall: faker.helpers.arrayElement([
-        {
-          state: faker.helpers.arrayElement(["waiting", "covered"] as const),
-          ordered: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"),
-          availableStock: faker.helpers.fromRegExp(
-            "^-?\\d{1,15}(\\.\\d{1,4})?$",
-          ),
-          shortBy: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"),
-          sprRecordNo: faker.helpers.arrayElement([
-            faker.string.alpha({ length: { min: 10, max: 20 } }),
-            null,
-          ]),
-          purchaseOrderNo: faker.helpers.arrayElement([
-            faker.string.alpha({ length: { min: 10, max: 20 } }),
-            null,
-          ]),
-          purchaseOrderStatus: faker.helpers.arrayElement([
-            faker.helpers.arrayElement(["open", "received"] as const),
-            null,
-          ]),
-        },
-        null,
-      ]),
-    })),
-    salesOrderBreakdown: {
-      listed: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"),
-      heldOut: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"),
-    },
-    purchaseLines: Array.from(
-      { length: faker.number.int({ min: 1, max: 10 }) },
-      (_, i) => i + 1,
-    ).map(() => ({
-      purchaseOrderNo: faker.string.alpha({ length: { min: 1, max: 20 } }),
-      orderDate: faker.string.alpha({ length: { min: 1, max: 20 } }),
-      expectedReceiptDate: faker.string.alpha({ length: { min: 1, max: 20 } }),
-      outstandingQuantity: faker.helpers.fromRegExp(
-        "^-?\\d{1,15}(\\.\\d{1,4})?$",
-      ),
-      unitCost: {
-        field: faker.string.alpha({ length: { min: 1, max: 20 } }),
-        classification: faker.helpers.arrayElement([
-          "public",
-          "internal",
-          "confidential",
-          "restricted",
-        ] as const),
-        masked: faker.datatype.boolean(),
-        value: faker.helpers.arrayElement([
-          faker.string.alpha({ length: { min: 10, max: 20 } }),
-          null,
-        ]),
-        reason: faker.helpers.arrayElement([
-          faker.helpers.arrayElement([
-            "role",
-            "bankDetails",
-            "price",
-            "policy",
-          ] as const),
-          null,
-        ]),
-      },
-      sprRecordNo: faker.helpers.arrayElement([
-        faker.string.alpha({ length: { min: 10, max: 20 } }),
-        null,
-      ]),
-    })),
-    sprs: Array.from(
-      { length: faker.number.int({ min: 1, max: 10 }) },
-      (_, i) => i + 1,
-    ).map(() => ({
-      recordNo: faker.string.alpha({ length: { min: 1, max: 20 } }),
-      navisionNo: faker.helpers.arrayElement([
-        faker.string.alpha({ length: { min: 10, max: 20 } }),
-        null,
-      ]),
-      purchaseOrderStatus: faker.helpers.arrayElement([
-        faker.helpers.arrayElement(["open", "received"] as const),
-        null,
-      ]),
-      orderNo: faker.string.alpha({ length: { min: 1, max: 20 } }),
-      status: faker.helpers.arrayElement([
-        "suggested",
-        "submitted",
-        "approved",
-      ] as const),
-      quantity: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"),
-      needBy: faker.string.alpha({ length: { min: 1, max: 20 } }),
-      requestedBy: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    })),
-  },
-  meta: { mock: faker.helpers.arrayElement([true] as const) },
-  ...overrideResponse,
-});
+export const getMasterDataItemsResponseMock = (overrideResponse: Partial<Extract<MasterDataItems200, object>> = {}): MasterDataItems200 => ({data: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({no: faker.string.alpha({length: {min: 1, max: 20}}), description: faker.string.alpha({length: {min: 1, max: 20}}), partNumber: faker.string.alpha({length: {min: 1, max: 20}}), brand: faker.string.alpha({length: {min: 1, max: 20}}), category: faker.helpers.arrayElement(['IT','SURVEILLANCE','ACCESSORIES'] as const), baseUnitOfMeasure: faker.string.alpha({length: {min: 1, max: 20}}), inventory: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), qtyOnSalesOrder: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), qtyOnPurchOrder: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), availableStock: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), availability: faker.helpers.arrayElement(['short','low','ok'] as const), unitPrice: {field: faker.string.alpha({length: {min: 1, max: 20}}), classification: faker.helpers.arrayElement(['public','internal','confidential','restricted'] as const), masked: faker.datatype.boolean(), value: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), reason: faker.helpers.arrayElement([faker.helpers.arrayElement(['role','bankDetails','price','policy'] as const), null])}, vendorNo: faker.string.alpha({length: {min: 1, max: 20}}), vendorName: faker.string.alpha({length: {min: 1, max: 20}})})), meta: {page: faker.number.int({min: 1, max: 9007199254740991}), pageSize: faker.number.int({min: 1, max: 200}), total: faker.number.int({min: 0, max: 9007199254740991}), mock: faker.helpers.arrayElement([true] as const)}, ...overrideResponse})
 
-export const getMasterDataCustomersResponseMock = (
-  overrideResponse: Partial<Extract<MasterDataCustomers200, object>> = {},
-): MasterDataCustomers200 => ({
-  data: Array.from(
-    { length: faker.number.int({ min: 1, max: 10 }) },
-    (_, i) => i + 1,
-  ).map(() => ({
-    no: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    name: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    countryRegionCode: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    currencyCode: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    paymentTermsCode: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    customerPriceGroup: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    openOrders: faker.number.int({ min: 0, max: 9007199254740991 }),
-    overdueOrders: faker.number.int({ min: 0, max: 9007199254740991 }),
-  })),
-  meta: {
-    page: faker.number.int({ min: 1, max: 9007199254740991 }),
-    pageSize: faker.number.int({ min: 1, max: 200 }),
-    total: faker.number.int({ min: 0, max: 9007199254740991 }),
-    mock: faker.helpers.arrayElement([true] as const),
-  },
-  ...overrideResponse,
-});
+export const getMasterDataItemResponseMock = (overrideResponse: Partial<Extract<MasterDataItem200, object>> = {}): MasterDataItem200 => ({data: {no: faker.string.alpha({length: {min: 1, max: 20}}), description: faker.string.alpha({length: {min: 1, max: 20}}), partNumber: faker.string.alpha({length: {min: 1, max: 20}}), brand: faker.string.alpha({length: {min: 1, max: 20}}), category: faker.helpers.arrayElement(['IT','SURVEILLANCE','ACCESSORIES'] as const), baseUnitOfMeasure: faker.string.alpha({length: {min: 1, max: 20}}), inventory: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), qtyOnSalesOrder: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), qtyOnPurchOrder: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), availableStock: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), availability: faker.helpers.arrayElement(['short','low','ok'] as const), unitPrice: {field: faker.string.alpha({length: {min: 1, max: 20}}), classification: faker.helpers.arrayElement(['public','internal','confidential','restricted'] as const), masked: faker.datatype.boolean(), value: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), reason: faker.helpers.arrayElement([faker.helpers.arrayElement(['role','bankDetails','price','policy'] as const), null])}, vendorNo: faker.string.alpha({length: {min: 1, max: 20}}), vendorName: faker.string.alpha({length: {min: 1, max: 20}}), vendorItemNo: faker.string.alpha({length: {min: 1, max: 20}}), unitCost: {field: faker.string.alpha({length: {min: 1, max: 20}}), classification: faker.helpers.arrayElement(['public','internal','confidential','restricted'] as const), masked: faker.datatype.boolean(), value: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), reason: faker.helpers.arrayElement([faker.helpers.arrayElement(['role','bankDetails','price','policy'] as const), null])}, orderLines: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({orderNo: faker.string.alpha({length: {min: 1, max: 20}}), customerNo: faker.string.alpha({length: {min: 1, max: 20}}), customerName: faker.string.alpha({length: {min: 1, max: 20}}), orderDate: faker.string.alpha({length: {min: 1, max: 20}}), shipmentDate: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), status: faker.string.alpha({length: {min: 1, max: 20}}), quantity: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), heldOut: faker.datatype.boolean(), shortfall: faker.helpers.arrayElement([{state: faker.helpers.arrayElement(['waiting','covered'] as const), ordered: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), availableStock: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), shortBy: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), sprRecordNo: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), purchaseOrderNo: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), purchaseOrderStatus: faker.helpers.arrayElement([faker.helpers.arrayElement(['open','received'] as const), null])},null,])})), salesOrderBreakdown: {listed: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), heldOut: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$")}, purchaseLines: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({purchaseOrderNo: faker.string.alpha({length: {min: 1, max: 20}}), orderDate: faker.string.alpha({length: {min: 1, max: 20}}), expectedReceiptDate: faker.string.alpha({length: {min: 1, max: 20}}), outstandingQuantity: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), unitCost: {field: faker.string.alpha({length: {min: 1, max: 20}}), classification: faker.helpers.arrayElement(['public','internal','confidential','restricted'] as const), masked: faker.datatype.boolean(), value: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), reason: faker.helpers.arrayElement([faker.helpers.arrayElement(['role','bankDetails','price','policy'] as const), null])}, sprRecordNo: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null])})), sprs: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({recordNo: faker.string.alpha({length: {min: 1, max: 20}}), navisionNo: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), purchaseOrderStatus: faker.helpers.arrayElement([faker.helpers.arrayElement(['open','received'] as const), null]), orderNo: faker.string.alpha({length: {min: 1, max: 20}}), status: faker.helpers.arrayElement(['suggested','submitted','approved'] as const), quantity: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), needBy: faker.string.alpha({length: {min: 1, max: 20}}), requestedBy: faker.string.alpha({length: {min: 1, max: 20}})}))}, meta: {mock: faker.helpers.arrayElement([true] as const)}, ...overrideResponse})
 
-export const getMasterDataCustomerResponseMock = (
-  overrideResponse: Partial<Extract<MasterDataCustomer200, object>> = {},
-): MasterDataCustomer200 => ({
-  data: {
-    no: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    name: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    countryRegionCode: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    currencyCode: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    paymentTermsCode: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    customerPriceGroup: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    creditLimitLcy: {
-      field: faker.string.alpha({ length: { min: 1, max: 20 } }),
-      classification: faker.helpers.arrayElement([
-        "public",
-        "internal",
-        "confidential",
-        "restricted",
-      ] as const),
-      masked: faker.datatype.boolean(),
-      value: faker.helpers.arrayElement([
-        faker.string.alpha({ length: { min: 10, max: 20 } }),
-        null,
-      ]),
-      reason: faker.helpers.arrayElement([
-        faker.helpers.arrayElement([
-          "role",
-          "bankDetails",
-          "price",
-          "policy",
-        ] as const),
-        null,
-      ]),
-    },
-    balanceLcy: {
-      field: faker.string.alpha({ length: { min: 1, max: 20 } }),
-      classification: faker.helpers.arrayElement([
-        "public",
-        "internal",
-        "confidential",
-        "restricted",
-      ] as const),
-      masked: faker.datatype.boolean(),
-      value: faker.helpers.arrayElement([
-        faker.string.alpha({ length: { min: 10, max: 20 } }),
-        null,
-      ]),
-      reason: faker.helpers.arrayElement([
-        faker.helpers.arrayElement([
-          "role",
-          "bankDetails",
-          "price",
-          "policy",
-        ] as const),
-        null,
-      ]),
-    },
-    openOrders: Array.from(
-      { length: faker.number.int({ min: 1, max: 10 }) },
-      (_, i) => i + 1,
-    ).map(() => ({
-      orderNo: faker.string.alpha({ length: { min: 1, max: 20 } }),
-      externalDocumentNo: faker.string.alpha({ length: { min: 1, max: 20 } }),
-      orderDate: faker.string.alpha({ length: { min: 1, max: 20 } }),
-      shipmentDate: faker.helpers.arrayElement([
-        faker.string.alpha({ length: { min: 10, max: 20 } }),
-        null,
-      ]),
-      status: faker.string.alpha({ length: { min: 1, max: 20 } }),
-      amount: {
-        field: faker.string.alpha({ length: { min: 1, max: 20 } }),
-        classification: faker.helpers.arrayElement([
-          "public",
-          "internal",
-          "confidential",
-          "restricted",
-        ] as const),
-        masked: faker.datatype.boolean(),
-        value: faker.helpers.arrayElement([
-          faker.string.alpha({ length: { min: 10, max: 20 } }),
-          null,
-        ]),
-        reason: faker.helpers.arrayElement([
-          faker.helpers.arrayElement([
-            "role",
-            "bankDetails",
-            "price",
-            "policy",
-          ] as const),
-          null,
-        ]),
-      },
-    })),
-    overdueOrders: Array.from(
-      { length: faker.number.int({ min: 1, max: 10 }) },
-      (_, i) => i + 1,
-    ).map(() => ({
-      orderNo: faker.string.alpha({ length: { min: 1, max: 20 } }),
-      externalDocumentNo: faker.string.alpha({ length: { min: 1, max: 20 } }),
-      daysOverdue: faker.number.int({ min: 1, max: 9007199254740991 }),
-      step: faker.string.alpha({ length: { min: 1, max: 20 } }),
-      dueDate: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    })),
-  },
-  meta: { mock: faker.helpers.arrayElement([true] as const) },
-  ...overrideResponse,
-});
+export const getMasterDataCustomersResponseMock = (overrideResponse: Partial<Extract<MasterDataCustomers200, object>> = {}): MasterDataCustomers200 => ({data: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({no: faker.string.alpha({length: {min: 1, max: 20}}), name: faker.string.alpha({length: {min: 1, max: 20}}), countryRegionCode: faker.string.alpha({length: {min: 1, max: 20}}), currencyCode: faker.string.alpha({length: {min: 1, max: 20}}), paymentTermsCode: faker.string.alpha({length: {min: 1, max: 20}}), customerPriceGroup: faker.string.alpha({length: {min: 1, max: 20}}), openOrders: faker.number.int({min: 0, max: 9007199254740991}), overdueOrders: faker.number.int({min: 0, max: 9007199254740991})})), meta: {page: faker.number.int({min: 1, max: 9007199254740991}), pageSize: faker.number.int({min: 1, max: 200}), total: faker.number.int({min: 0, max: 9007199254740991}), mock: faker.helpers.arrayElement([true] as const)}, ...overrideResponse})
 
-export const getMasterDataVendorsResponseMock = (
-  overrideResponse: Partial<Extract<MasterDataVendors200, object>> = {},
-): MasterDataVendors200 => ({
-  data: Array.from(
-    { length: faker.number.int({ min: 1, max: 10 }) },
-    (_, i) => i + 1,
-  ).map(() => ({
-    no: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    name: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    currencyCode: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    paymentTermsCode: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    openPurchaseOrders: faker.number.int({ min: 0, max: 9007199254740991 }),
-    itemsSupplied: faker.number.int({ min: 0, max: 9007199254740991 }),
-    balanceLcy: {
-      field: faker.string.alpha({ length: { min: 1, max: 20 } }),
-      classification: faker.helpers.arrayElement([
-        "public",
-        "internal",
-        "confidential",
-        "restricted",
-      ] as const),
-      masked: faker.datatype.boolean(),
-      value: faker.helpers.arrayElement([
-        faker.string.alpha({ length: { min: 10, max: 20 } }),
-        null,
-      ]),
-      reason: faker.helpers.arrayElement([
-        faker.helpers.arrayElement([
-          "role",
-          "bankDetails",
-          "price",
-          "policy",
-        ] as const),
-        null,
-      ]),
-    },
-  })),
-  meta: {
-    page: faker.number.int({ min: 1, max: 9007199254740991 }),
-    pageSize: faker.number.int({ min: 1, max: 200 }),
-    total: faker.number.int({ min: 0, max: 9007199254740991 }),
-    mock: faker.helpers.arrayElement([true] as const),
-  },
-  ...overrideResponse,
-});
+export const getMasterDataCustomerResponseMock = (overrideResponse: Partial<Extract<MasterDataCustomer200, object>> = {}): MasterDataCustomer200 => ({data: {no: faker.string.alpha({length: {min: 1, max: 20}}), name: faker.string.alpha({length: {min: 1, max: 20}}), countryRegionCode: faker.string.alpha({length: {min: 1, max: 20}}), currencyCode: faker.string.alpha({length: {min: 1, max: 20}}), paymentTermsCode: faker.string.alpha({length: {min: 1, max: 20}}), customerPriceGroup: faker.string.alpha({length: {min: 1, max: 20}}), creditLimitLcy: {field: faker.string.alpha({length: {min: 1, max: 20}}), classification: faker.helpers.arrayElement(['public','internal','confidential','restricted'] as const), masked: faker.datatype.boolean(), value: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), reason: faker.helpers.arrayElement([faker.helpers.arrayElement(['role','bankDetails','price','policy'] as const), null])}, balanceLcy: {field: faker.string.alpha({length: {min: 1, max: 20}}), classification: faker.helpers.arrayElement(['public','internal','confidential','restricted'] as const), masked: faker.datatype.boolean(), value: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), reason: faker.helpers.arrayElement([faker.helpers.arrayElement(['role','bankDetails','price','policy'] as const), null])}, openOrders: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({orderNo: faker.string.alpha({length: {min: 1, max: 20}}), externalDocumentNo: faker.string.alpha({length: {min: 1, max: 20}}), orderDate: faker.string.alpha({length: {min: 1, max: 20}}), shipmentDate: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), status: faker.string.alpha({length: {min: 1, max: 20}}), amount: {field: faker.string.alpha({length: {min: 1, max: 20}}), classification: faker.helpers.arrayElement(['public','internal','confidential','restricted'] as const), masked: faker.datatype.boolean(), value: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), reason: faker.helpers.arrayElement([faker.helpers.arrayElement(['role','bankDetails','price','policy'] as const), null])}})), overdueOrders: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({orderNo: faker.string.alpha({length: {min: 1, max: 20}}), externalDocumentNo: faker.string.alpha({length: {min: 1, max: 20}}), daysOverdue: faker.number.int({min: 1, max: 9007199254740991}), step: faker.string.alpha({length: {min: 1, max: 20}}), dueDate: faker.string.alpha({length: {min: 1, max: 20}})}))}, meta: {mock: faker.helpers.arrayElement([true] as const)}, ...overrideResponse})
 
-export const getMasterDataVendorResponseMock = (
-  overrideResponse: Partial<Extract<MasterDataVendor200, object>> = {},
-): MasterDataVendor200 => ({
-  data: {
-    no: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    name: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    currencyCode: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    paymentTermsCode: faker.string.alpha({ length: { min: 1, max: 20 } }),
-    balanceLcy: {
-      field: faker.string.alpha({ length: { min: 1, max: 20 } }),
-      classification: faker.helpers.arrayElement([
-        "public",
-        "internal",
-        "confidential",
-        "restricted",
-      ] as const),
-      masked: faker.datatype.boolean(),
-      value: faker.helpers.arrayElement([
-        faker.string.alpha({ length: { min: 10, max: 20 } }),
-        null,
-      ]),
-      reason: faker.helpers.arrayElement([
-        faker.helpers.arrayElement([
-          "role",
-          "bankDetails",
-          "price",
-          "policy",
-        ] as const),
-        null,
-      ]),
-    },
-    bankAccounts: Array.from(
-      { length: faker.number.int({ min: 1, max: 10 }) },
-      (_, i) => i + 1,
-    ).map(() => ({
-      code: faker.string.alpha({ length: { min: 1, max: 20 } }),
-      bankName: {
-        field: faker.string.alpha({ length: { min: 1, max: 20 } }),
-        classification: faker.helpers.arrayElement([
-          "public",
-          "internal",
-          "confidential",
-          "restricted",
-        ] as const),
-        masked: faker.datatype.boolean(),
-        value: faker.helpers.arrayElement([
-          faker.string.alpha({ length: { min: 10, max: 20 } }),
-          null,
-        ]),
-        reason: faker.helpers.arrayElement([
-          faker.helpers.arrayElement([
-            "role",
-            "bankDetails",
-            "price",
-            "policy",
-          ] as const),
-          null,
-        ]),
-      },
-      bankAccountNo: {
-        field: faker.string.alpha({ length: { min: 1, max: 20 } }),
-        classification: faker.helpers.arrayElement([
-          "public",
-          "internal",
-          "confidential",
-          "restricted",
-        ] as const),
-        masked: faker.datatype.boolean(),
-        value: faker.helpers.arrayElement([
-          faker.string.alpha({ length: { min: 10, max: 20 } }),
-          null,
-        ]),
-        reason: faker.helpers.arrayElement([
-          faker.helpers.arrayElement([
-            "role",
-            "bankDetails",
-            "price",
-            "policy",
-          ] as const),
-          null,
-        ]),
-      },
-      swiftCode: {
-        field: faker.string.alpha({ length: { min: 1, max: 20 } }),
-        classification: faker.helpers.arrayElement([
-          "public",
-          "internal",
-          "confidential",
-          "restricted",
-        ] as const),
-        masked: faker.datatype.boolean(),
-        value: faker.helpers.arrayElement([
-          faker.string.alpha({ length: { min: 10, max: 20 } }),
-          null,
-        ]),
-        reason: faker.helpers.arrayElement([
-          faker.helpers.arrayElement([
-            "role",
-            "bankDetails",
-            "price",
-            "policy",
-          ] as const),
-          null,
-        ]),
-      },
-      iban: {
-        field: faker.string.alpha({ length: { min: 1, max: 20 } }),
-        classification: faker.helpers.arrayElement([
-          "public",
-          "internal",
-          "confidential",
-          "restricted",
-        ] as const),
-        masked: faker.datatype.boolean(),
-        value: faker.helpers.arrayElement([
-          faker.string.alpha({ length: { min: 10, max: 20 } }),
-          null,
-        ]),
-        reason: faker.helpers.arrayElement([
-          faker.helpers.arrayElement([
-            "role",
-            "bankDetails",
-            "price",
-            "policy",
-          ] as const),
-          null,
-        ]),
-      },
-    })),
-    openPurchaseOrders: Array.from(
-      { length: faker.number.int({ min: 1, max: 10 }) },
-      (_, i) => i + 1,
-    ).map(() => ({
-      no: faker.string.alpha({ length: { min: 1, max: 20 } }),
-      orderDate: faker.string.alpha({ length: { min: 1, max: 20 } }),
-      expectedReceiptDate: faker.string.alpha({ length: { min: 1, max: 20 } }),
-      lines: faker.number.int({ min: 1, max: 9007199254740991 }),
-      outstandingQuantity: faker.helpers.fromRegExp(
-        "^-?\\d{1,15}(\\.\\d{1,4})?$",
-      ),
-      total: {
-        field: faker.string.alpha({ length: { min: 1, max: 20 } }),
-        classification: faker.helpers.arrayElement([
-          "public",
-          "internal",
-          "confidential",
-          "restricted",
-        ] as const),
-        masked: faker.datatype.boolean(),
-        value: faker.helpers.arrayElement([
-          faker.string.alpha({ length: { min: 10, max: 20 } }),
-          null,
-        ]),
-        reason: faker.helpers.arrayElement([
-          faker.helpers.arrayElement([
-            "role",
-            "bankDetails",
-            "price",
-            "policy",
-          ] as const),
-          null,
-        ]),
-      },
-      sprRecordNo: faker.helpers.arrayElement([
-        faker.string.alpha({ length: { min: 10, max: 20 } }),
-        null,
-      ]),
-    })),
-    items: Array.from(
-      { length: faker.number.int({ min: 1, max: 10 }) },
-      (_, i) => i + 1,
-    ).map(() => ({
-      no: faker.string.alpha({ length: { min: 1, max: 20 } }),
-      description: faker.string.alpha({ length: { min: 1, max: 20 } }),
-      vendorItemNo: faker.string.alpha({ length: { min: 1, max: 20 } }),
-      availableStock: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"),
-      availability: faker.helpers.arrayElement(["short", "low", "ok"] as const),
-    })),
-  },
-  meta: { mock: faker.helpers.arrayElement([true] as const) },
-  ...overrideResponse,
-});
+export const getMasterDataVendorsResponseMock = (overrideResponse: Partial<Extract<MasterDataVendors200, object>> = {}): MasterDataVendors200 => ({data: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({no: faker.string.alpha({length: {min: 1, max: 20}}), name: faker.string.alpha({length: {min: 1, max: 20}}), currencyCode: faker.string.alpha({length: {min: 1, max: 20}}), paymentTermsCode: faker.string.alpha({length: {min: 1, max: 20}}), openPurchaseOrders: faker.number.int({min: 0, max: 9007199254740991}), itemsSupplied: faker.number.int({min: 0, max: 9007199254740991}), balanceLcy: {field: faker.string.alpha({length: {min: 1, max: 20}}), classification: faker.helpers.arrayElement(['public','internal','confidential','restricted'] as const), masked: faker.datatype.boolean(), value: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), reason: faker.helpers.arrayElement([faker.helpers.arrayElement(['role','bankDetails','price','policy'] as const), null])}})), meta: {page: faker.number.int({min: 1, max: 9007199254740991}), pageSize: faker.number.int({min: 1, max: 200}), total: faker.number.int({min: 0, max: 9007199254740991}), mock: faker.helpers.arrayElement([true] as const)}, ...overrideResponse})
 
-export const getMasterDataFiltersMockHandler = (
-  overrideResponse?:
-    | MasterDataFilters200
-    | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) => Promise<MasterDataFilters200> | MasterDataFilters200),
-  options?: RequestHandlerOptions,
-) => {
-  return http.get(
-    "*/api/v1/master-data/filters",
-    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
-      return HttpResponse.json(
-        overrideResponse !== undefined
-          ? typeof overrideResponse === "function"
-            ? await overrideResponse(info)
-            : overrideResponse
-          : getMasterDataFiltersResponseMock(),
-        { status: 200 },
-      );
-    },
-    options,
-  );
-};
+export const getMasterDataVendorResponseMock = (overrideResponse: Partial<Extract<MasterDataVendor200, object>> = {}): MasterDataVendor200 => ({data: {no: faker.string.alpha({length: {min: 1, max: 20}}), name: faker.string.alpha({length: {min: 1, max: 20}}), currencyCode: faker.string.alpha({length: {min: 1, max: 20}}), paymentTermsCode: faker.string.alpha({length: {min: 1, max: 20}}), balanceLcy: {field: faker.string.alpha({length: {min: 1, max: 20}}), classification: faker.helpers.arrayElement(['public','internal','confidential','restricted'] as const), masked: faker.datatype.boolean(), value: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), reason: faker.helpers.arrayElement([faker.helpers.arrayElement(['role','bankDetails','price','policy'] as const), null])}, bankAccounts: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({code: faker.string.alpha({length: {min: 1, max: 20}}), bankName: {field: faker.string.alpha({length: {min: 1, max: 20}}), classification: faker.helpers.arrayElement(['public','internal','confidential','restricted'] as const), masked: faker.datatype.boolean(), value: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), reason: faker.helpers.arrayElement([faker.helpers.arrayElement(['role','bankDetails','price','policy'] as const), null])}, bankAccountNo: {field: faker.string.alpha({length: {min: 1, max: 20}}), classification: faker.helpers.arrayElement(['public','internal','confidential','restricted'] as const), masked: faker.datatype.boolean(), value: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), reason: faker.helpers.arrayElement([faker.helpers.arrayElement(['role','bankDetails','price','policy'] as const), null])}, swiftCode: {field: faker.string.alpha({length: {min: 1, max: 20}}), classification: faker.helpers.arrayElement(['public','internal','confidential','restricted'] as const), masked: faker.datatype.boolean(), value: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), reason: faker.helpers.arrayElement([faker.helpers.arrayElement(['role','bankDetails','price','policy'] as const), null])}, iban: {field: faker.string.alpha({length: {min: 1, max: 20}}), classification: faker.helpers.arrayElement(['public','internal','confidential','restricted'] as const), masked: faker.datatype.boolean(), value: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), reason: faker.helpers.arrayElement([faker.helpers.arrayElement(['role','bankDetails','price','policy'] as const), null])}})), openPurchaseOrders: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({no: faker.string.alpha({length: {min: 1, max: 20}}), orderDate: faker.string.alpha({length: {min: 1, max: 20}}), expectedReceiptDate: faker.string.alpha({length: {min: 1, max: 20}}), lines: faker.number.int({min: 1, max: 9007199254740991}), outstandingQuantity: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), total: {field: faker.string.alpha({length: {min: 1, max: 20}}), classification: faker.helpers.arrayElement(['public','internal','confidential','restricted'] as const), masked: faker.datatype.boolean(), value: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null]), reason: faker.helpers.arrayElement([faker.helpers.arrayElement(['role','bankDetails','price','policy'] as const), null])}, sprRecordNo: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null])})), items: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({no: faker.string.alpha({length: {min: 1, max: 20}}), description: faker.string.alpha({length: {min: 1, max: 20}}), vendorItemNo: faker.string.alpha({length: {min: 1, max: 20}}), availableStock: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), availability: faker.helpers.arrayElement(['short','low','ok'] as const)}))}, meta: {mock: faker.helpers.arrayElement([true] as const)}, ...overrideResponse})
 
-export const getMasterDataItemsMockHandler = (
-  overrideResponse?:
-    | MasterDataItems200
-    | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) => Promise<MasterDataItems200> | MasterDataItems200),
-  options?: RequestHandlerOptions,
-) => {
-  return http.get(
-    "*/api/v1/master-data/items",
-    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
-      return HttpResponse.json(
-        overrideResponse !== undefined
-          ? typeof overrideResponse === "function"
-            ? await overrideResponse(info)
-            : overrideResponse
-          : getMasterDataItemsResponseMock(),
-        { status: 200 },
-      );
-    },
-    options,
-  );
-};
 
-export const getMasterDataItemMockHandler = (
-  overrideResponse?:
-    | MasterDataItem200
-    | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) => Promise<MasterDataItem200> | MasterDataItem200),
-  options?: RequestHandlerOptions,
-) => {
-  return http.get(
-    "*/api/v1/master-data/items/:no",
-    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
-      return HttpResponse.json(
-        overrideResponse !== undefined
-          ? typeof overrideResponse === "function"
-            ? await overrideResponse(info)
-            : overrideResponse
-          : getMasterDataItemResponseMock(),
-        { status: 200 },
-      );
-    },
-    options,
-  );
-};
+export const getMasterDataFiltersMockHandler = (overrideResponse?: MasterDataFilters200 | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<MasterDataFilters200> | MasterDataFilters200), options?: RequestHandlerOptions) => {
+  return http.get('*/api/v1/master-data/filters', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
 
-export const getMasterDataCustomersMockHandler = (
-  overrideResponse?:
-    | MasterDataCustomers200
-    | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) => Promise<MasterDataCustomers200> | MasterDataCustomers200),
-  options?: RequestHandlerOptions,
-) => {
-  return http.get(
-    "*/api/v1/master-data/customers",
-    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
-      return HttpResponse.json(
-        overrideResponse !== undefined
-          ? typeof overrideResponse === "function"
-            ? await overrideResponse(info)
-            : overrideResponse
-          : getMasterDataCustomersResponseMock(),
-        { status: 200 },
-      );
-    },
-    options,
-  );
-};
 
-export const getMasterDataCustomerMockHandler = (
-  overrideResponse?:
-    | MasterDataCustomer200
-    | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) => Promise<MasterDataCustomer200> | MasterDataCustomer200),
-  options?: RequestHandlerOptions,
-) => {
-  return http.get(
-    "*/api/v1/master-data/customers/:no",
-    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
-      return HttpResponse.json(
-        overrideResponse !== undefined
-          ? typeof overrideResponse === "function"
-            ? await overrideResponse(info)
-            : overrideResponse
-          : getMasterDataCustomerResponseMock(),
-        { status: 200 },
-      );
-    },
-    options,
-  );
-};
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getMasterDataFiltersResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
 
-export const getMasterDataVendorsMockHandler = (
-  overrideResponse?:
-    | MasterDataVendors200
-    | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) => Promise<MasterDataVendors200> | MasterDataVendors200),
-  options?: RequestHandlerOptions,
-) => {
-  return http.get(
-    "*/api/v1/master-data/vendors",
-    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
-      return HttpResponse.json(
-        overrideResponse !== undefined
-          ? typeof overrideResponse === "function"
-            ? await overrideResponse(info)
-            : overrideResponse
-          : getMasterDataVendorsResponseMock(),
-        { status: 200 },
-      );
-    },
-    options,
-  );
-};
+export const getMasterDataItemsMockHandler = (overrideResponse?: MasterDataItems200 | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<MasterDataItems200> | MasterDataItems200), options?: RequestHandlerOptions) => {
+  return http.get('*/api/v1/master-data/items', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
 
-export const getMasterDataVendorMockHandler = (
-  overrideResponse?:
-    | MasterDataVendor200
-    | ((
-        info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) => Promise<MasterDataVendor200> | MasterDataVendor200),
-  options?: RequestHandlerOptions,
-) => {
-  return http.get(
-    "*/api/v1/master-data/vendors/:no",
-    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
-      return HttpResponse.json(
-        overrideResponse !== undefined
-          ? typeof overrideResponse === "function"
-            ? await overrideResponse(info)
-            : overrideResponse
-          : getMasterDataVendorResponseMock(),
-        { status: 200 },
-      );
-    },
-    options,
-  );
-};
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getMasterDataItemsResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getMasterDataItemMockHandler = (overrideResponse?: MasterDataItem200 | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<MasterDataItem200> | MasterDataItem200), options?: RequestHandlerOptions) => {
+  return http.get('*/api/v1/master-data/items/:no', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getMasterDataItemResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getMasterDataCustomersMockHandler = (overrideResponse?: MasterDataCustomers200 | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<MasterDataCustomers200> | MasterDataCustomers200), options?: RequestHandlerOptions) => {
+  return http.get('*/api/v1/master-data/customers', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getMasterDataCustomersResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getMasterDataCustomerMockHandler = (overrideResponse?: MasterDataCustomer200 | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<MasterDataCustomer200> | MasterDataCustomer200), options?: RequestHandlerOptions) => {
+  return http.get('*/api/v1/master-data/customers/:no', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getMasterDataCustomerResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getMasterDataVendorsMockHandler = (overrideResponse?: MasterDataVendors200 | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<MasterDataVendors200> | MasterDataVendors200), options?: RequestHandlerOptions) => {
+  return http.get('*/api/v1/master-data/vendors', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getMasterDataVendorsResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getMasterDataVendorMockHandler = (overrideResponse?: MasterDataVendor200 | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<MasterDataVendor200> | MasterDataVendor200), options?: RequestHandlerOptions) => {
+  return http.get('*/api/v1/master-data/vendors/:no', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getMasterDataVendorResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
 export const getMasterDataMock = () => [
   getMasterDataFiltersMockHandler(),
   getMasterDataItemsMockHandler(),
@@ -826,5 +133,5 @@ export const getMasterDataMock = () => [
   getMasterDataCustomersMockHandler(),
   getMasterDataCustomerMockHandler(),
   getMasterDataVendorsMockHandler(),
-  getMasterDataVendorMockHandler(),
-];
+  getMasterDataVendorMockHandler()
+]

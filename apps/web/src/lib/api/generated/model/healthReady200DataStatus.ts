@@ -6,10 +6,10 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type HealthReady200DataStatus =
-  (typeof HealthReady200DataStatus)[keyof typeof HealthReady200DataStatus];
+export type HealthReady200DataStatus = typeof HealthReady200DataStatus[keyof typeof HealthReady200DataStatus];
+
 
 export const HealthReady200DataStatus = {
-  ok: "ok",
-  unavailable: "unavailable",
+  ok: 'ok',
+  unavailable: 'unavailable',
 } as const;

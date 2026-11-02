@@ -6,17 +6,17 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type MatrixSetPermission200DataRole =
-  (typeof MatrixSetPermission200DataRole)[keyof typeof MatrixSetPermission200DataRole];
+export type MatrixSetPermission200DataRole = typeof MatrixSetPermission200DataRole[keyof typeof MatrixSetPermission200DataRole];
+
 
 export const MatrixSetPermission200DataRole = {
-  SYSTEM_ADMIN: "SYSTEM_ADMIN",
-  PRODUCT_MANAGER: "PRODUCT_MANAGER",
-  APPROVER: "APPROVER",
-  SUPPORT: "SUPPORT",
-  WAREHOUSE: "WAREHOUSE",
-  FINANCE: "FINANCE",
-  LOGISTICS: "LOGISTICS",
-  MANAGEMENT: "MANAGEMENT",
-  AUDITOR: "AUDITOR",
+  SYSTEM_ADMIN: 'SYSTEM_ADMIN',
+  PRODUCT_MANAGER: 'PRODUCT_MANAGER',
+  APPROVER: 'APPROVER',
+  SUPPORT: 'SUPPORT',
+  WAREHOUSE: 'WAREHOUSE',
+  FINANCE: 'FINANCE',
+  LOGISTICS: 'LOGISTICS',
+  MANAGEMENT: 'MANAGEMENT',
+  AUDITOR: 'AUDITOR',
 } as const;

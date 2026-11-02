@@ -6,13 +6,13 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type MasterDataVendorsSort =
-  (typeof MasterDataVendorsSort)[keyof typeof MasterDataVendorsSort];
+export type MasterDataVendorsSort = typeof MasterDataVendorsSort[keyof typeof MasterDataVendorsSort];
+
 
 export const MasterDataVendorsSort = {
-  no: "no",
-  name: "name",
-  openPurchaseOrders: "openPurchaseOrders",
-  itemsSupplied: "itemsSupplied",
-  balanceLcy: "balanceLcy",
+  no: 'no',
+  name: 'name',
+  openPurchaseOrders: 'openPurchaseOrders',
+  itemsSupplied: 'itemsSupplied',
+  balanceLcy: 'balanceLcy',
 } as const;

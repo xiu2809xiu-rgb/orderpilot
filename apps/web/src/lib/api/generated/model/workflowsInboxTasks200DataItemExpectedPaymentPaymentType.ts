@@ -6,12 +6,12 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type WorkflowsInboxTasks200DataItemExpectedPaymentPaymentType =
-  (typeof WorkflowsInboxTasks200DataItemExpectedPaymentPaymentType)[keyof typeof WorkflowsInboxTasks200DataItemExpectedPaymentPaymentType];
+export type WorkflowsInboxTasks200DataItemExpectedPaymentPaymentType = typeof WorkflowsInboxTasks200DataItemExpectedPaymentPaymentType[keyof typeof WorkflowsInboxTasks200DataItemExpectedPaymentPaymentType];
+
 
 export const WorkflowsInboxTasks200DataItemExpectedPaymentPaymentType = {
-  prepayment: "prepayment",
-  deposit: "deposit",
-  balance: "balance",
-  "full-payment": "full-payment",
+  prepayment: 'prepayment',
+  deposit: 'deposit',
+  balance: 'balance',
+  'full-payment': 'full-payment',
 } as const;

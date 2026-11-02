@@ -5,9 +5,9 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { MatrixCopy200DataDataScope } from "./matrixCopy200DataDataScope.ts";
-import type { MatrixCopy200DataPermissionsItem } from "./matrixCopy200DataPermissionsItem.ts";
-import type { MatrixCopy200DataRole } from "./matrixCopy200DataRole.ts";
+import type { MatrixCopy200DataDataScope } from './matrixCopy200DataDataScope.ts';
+import type { MatrixCopy200DataPermissionsItem } from './matrixCopy200DataPermissionsItem.ts';
+import type { MatrixCopy200DataRole } from './matrixCopy200DataRole.ts';
 
 export type MatrixCopy200Data = {
   role: MatrixCopy200DataRole;

@@ -6,12 +6,12 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type WorkflowsOpenRules200DataItemId =
-  (typeof WorkflowsOpenRules200DataItemId)[keyof typeof WorkflowsOpenRules200DataItemId];
+export type WorkflowsOpenRules200DataItemId = typeof WorkflowsOpenRules200DataItemId[keyof typeof WorkflowsOpenRules200DataItemId];
+
 
 export const WorkflowsOpenRules200DataItemId = {
-  sprTrigger: "sprTrigger",
-  piSequence: "piSequence",
-  approversAndLimits: "approversAndLimits",
-  delegation: "delegation",
+  sprTrigger: 'sprTrigger',
+  piSequence: 'piSequence',
+  approversAndLimits: 'approversAndLimits',
+  delegation: 'delegation',
 } as const;

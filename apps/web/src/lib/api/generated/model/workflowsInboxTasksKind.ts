@@ -6,16 +6,16 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type WorkflowsInboxTasksKind =
-  (typeof WorkflowsInboxTasksKind)[keyof typeof WorkflowsInboxTasksKind];
+export type WorkflowsInboxTasksKind = typeof WorkflowsInboxTasksKind[keyof typeof WorkflowsInboxTasksKind];
+
 
 export const WorkflowsInboxTasksKind = {
-  REVIEW_FIELDS: "REVIEW_FIELDS",
-  RAISE_SPR: "RAISE_SPR",
-  APPROVE_SPR: "APPROVE_SPR",
-  SEND_PI: "SEND_PI",
-  CONFIRM_PAYMENT: "CONFIRM_PAYMENT",
-  PACK_ORDER: "PACK_ORDER",
-  RECOUNT_CARTONS: "RECOUNT_CARTONS",
-  ADD_SHIPPING_DOCUMENTS: "ADD_SHIPPING_DOCUMENTS",
+  REVIEW_FIELDS: 'REVIEW_FIELDS',
+  RAISE_SPR: 'RAISE_SPR',
+  APPROVE_SPR: 'APPROVE_SPR',
+  SEND_PI: 'SEND_PI',
+  CONFIRM_PAYMENT: 'CONFIRM_PAYMENT',
+  PACK_ORDER: 'PACK_ORDER',
+  RECOUNT_CARTONS: 'RECOUNT_CARTONS',
+  ADD_SHIPPING_DOCUMENTS: 'ADD_SHIPPING_DOCUMENTS',
 } as const;

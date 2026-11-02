@@ -9,13 +9,12 @@
 /**
  * @nullable
  */
-export type AuditViewerGet200DataChangesItemReason =
-  | (typeof AuditViewerGet200DataChangesItemReason)[keyof typeof AuditViewerGet200DataChangesItemReason]
-  | null;
+export type AuditViewerGet200DataChangesItemReason = typeof AuditViewerGet200DataChangesItemReason[keyof typeof AuditViewerGet200DataChangesItemReason] | null;
+
 
 export const AuditViewerGet200DataChangesItemReason = {
-  role: "role",
-  bankDetails: "bankDetails",
-  price: "price",
-  policy: "policy",
+  role: 'role',
+  bankDetails: 'bankDetails',
+  price: 'price',
+  policy: 'policy',
 } as const;

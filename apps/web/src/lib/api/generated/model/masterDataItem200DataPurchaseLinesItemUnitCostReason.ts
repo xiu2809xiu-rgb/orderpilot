@@ -9,13 +9,12 @@
 /**
  * @nullable
  */
-export type MasterDataItem200DataPurchaseLinesItemUnitCostReason =
-  | (typeof MasterDataItem200DataPurchaseLinesItemUnitCostReason)[keyof typeof MasterDataItem200DataPurchaseLinesItemUnitCostReason]
-  | null;
+export type MasterDataItem200DataPurchaseLinesItemUnitCostReason = typeof MasterDataItem200DataPurchaseLinesItemUnitCostReason[keyof typeof MasterDataItem200DataPurchaseLinesItemUnitCostReason] | null;
+
 
 export const MasterDataItem200DataPurchaseLinesItemUnitCostReason = {
-  role: "role",
-  bankDetails: "bankDetails",
-  price: "price",
-  policy: "policy",
+  role: 'role',
+  bankDetails: 'bankDetails',
+  price: 'price',
+  policy: 'policy',
 } as const;

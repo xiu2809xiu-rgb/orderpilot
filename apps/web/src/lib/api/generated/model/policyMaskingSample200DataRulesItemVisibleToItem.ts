@@ -6,17 +6,17 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type PolicyMaskingSample200DataRulesItemVisibleToItem =
-  (typeof PolicyMaskingSample200DataRulesItemVisibleToItem)[keyof typeof PolicyMaskingSample200DataRulesItemVisibleToItem];
+export type PolicyMaskingSample200DataRulesItemVisibleToItem = typeof PolicyMaskingSample200DataRulesItemVisibleToItem[keyof typeof PolicyMaskingSample200DataRulesItemVisibleToItem];
+
 
 export const PolicyMaskingSample200DataRulesItemVisibleToItem = {
-  SYSTEM_ADMIN: "SYSTEM_ADMIN",
-  PRODUCT_MANAGER: "PRODUCT_MANAGER",
-  APPROVER: "APPROVER",
-  SUPPORT: "SUPPORT",
-  WAREHOUSE: "WAREHOUSE",
-  FINANCE: "FINANCE",
-  LOGISTICS: "LOGISTICS",
-  MANAGEMENT: "MANAGEMENT",
-  AUDITOR: "AUDITOR",
+  SYSTEM_ADMIN: 'SYSTEM_ADMIN',
+  PRODUCT_MANAGER: 'PRODUCT_MANAGER',
+  APPROVER: 'APPROVER',
+  SUPPORT: 'SUPPORT',
+  WAREHOUSE: 'WAREHOUSE',
+  FINANCE: 'FINANCE',
+  LOGISTICS: 'LOGISTICS',
+  MANAGEMENT: 'MANAGEMENT',
+  AUDITOR: 'AUDITOR',
 } as const;

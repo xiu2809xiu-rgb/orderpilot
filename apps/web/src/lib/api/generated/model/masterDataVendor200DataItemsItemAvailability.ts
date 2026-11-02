@@ -6,11 +6,11 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type MasterDataVendor200DataItemsItemAvailability =
-  (typeof MasterDataVendor200DataItemsItemAvailability)[keyof typeof MasterDataVendor200DataItemsItemAvailability];
+export type MasterDataVendor200DataItemsItemAvailability = typeof MasterDataVendor200DataItemsItemAvailability[keyof typeof MasterDataVendor200DataItemsItemAvailability];
+
 
 export const MasterDataVendor200DataItemsItemAvailability = {
-  short: "short",
-  low: "low",
-  ok: "ok",
+  short: 'short',
+  low: 'low',
+  ok: 'ok',
 } as const;

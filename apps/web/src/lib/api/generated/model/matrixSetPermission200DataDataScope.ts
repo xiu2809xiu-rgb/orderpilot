@@ -6,11 +6,11 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type MatrixSetPermission200DataDataScope =
-  (typeof MatrixSetPermission200DataDataScope)[keyof typeof MatrixSetPermission200DataDataScope];
+export type MatrixSetPermission200DataDataScope = typeof MatrixSetPermission200DataDataScope[keyof typeof MatrixSetPermission200DataDataScope];
+
 
 export const MatrixSetPermission200DataDataScope = {
-  all: "all",
-  brands: "brands",
-  own: "own",
+  all: 'all',
+  brands: 'brands',
+  own: 'own',
 } as const;

@@ -6,10 +6,10 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type TrackerTimeline200DataMatchesItemKind =
-  (typeof TrackerTimeline200DataMatchesItemKind)[keyof typeof TrackerTimeline200DataMatchesItemKind];
+export type TrackerTimeline200DataMatchesItemKind = typeof TrackerTimeline200DataMatchesItemKind[keyof typeof TrackerTimeline200DataMatchesItemKind];
+
 
 export const TrackerTimeline200DataMatchesItemKind = {
-  customer: "customer",
-  item: "item",
+  customer: 'customer',
+  item: 'item',
 } as const;

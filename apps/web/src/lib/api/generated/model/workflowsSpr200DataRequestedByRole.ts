@@ -6,17 +6,17 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type WorkflowsSpr200DataRequestedByRole =
-  (typeof WorkflowsSpr200DataRequestedByRole)[keyof typeof WorkflowsSpr200DataRequestedByRole];
+export type WorkflowsSpr200DataRequestedByRole = typeof WorkflowsSpr200DataRequestedByRole[keyof typeof WorkflowsSpr200DataRequestedByRole];
+
 
 export const WorkflowsSpr200DataRequestedByRole = {
-  SYSTEM_ADMIN: "SYSTEM_ADMIN",
-  PRODUCT_MANAGER: "PRODUCT_MANAGER",
-  APPROVER: "APPROVER",
-  SUPPORT: "SUPPORT",
-  WAREHOUSE: "WAREHOUSE",
-  FINANCE: "FINANCE",
-  LOGISTICS: "LOGISTICS",
-  MANAGEMENT: "MANAGEMENT",
-  AUDITOR: "AUDITOR",
+  SYSTEM_ADMIN: 'SYSTEM_ADMIN',
+  PRODUCT_MANAGER: 'PRODUCT_MANAGER',
+  APPROVER: 'APPROVER',
+  SUPPORT: 'SUPPORT',
+  WAREHOUSE: 'WAREHOUSE',
+  FINANCE: 'FINANCE',
+  LOGISTICS: 'LOGISTICS',
+  MANAGEMENT: 'MANAGEMENT',
+  AUDITOR: 'AUDITOR',
 } as const;
