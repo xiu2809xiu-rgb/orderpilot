@@ -299,7 +299,7 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 | P-45  | List template: grid, saved views and operation log    | `feat/list-template-grid`        | Not started                                                              |
 | P-46  | Form kit                                              | `feat/form-kit`                  | Merged, [#173](https://github.com/xiu2809xiu-rgb/orderpilot/pull/173)    |
 | P-47  | Document form                                         | `feat/document-form`             | Not started                                                              |
-| P-48  | Lines grid                                            | `feat/lines-grid`                | In progress: branch started                                              |
+| P-48  | Lines grid                                            | `feat/lines-grid`                | In review, [#190](https://github.com/xiu2809xiu-rgb/orderpilot/pull/190) |
 | P-36  | Orders: the reader and the list                       | `feat/product-pass-orders`       | Not started                                                              |
 | P-49  | New order and draft editing                           | `feat/order-form`                | Not started                                                              |
 | P-50  | Submit, cancel and copy an order                      | `feat/order-actions`             | Not started                                                              |
