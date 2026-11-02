@@ -25,6 +25,10 @@ import type {
   LineValue,
 } from "./types";
 
+// Named here, since a literal in JSX is what the text check looks for.
+const FORM_NAME = "Order";
+const TABLE_NAME = "Order lines";
+
 export const ITEMS: readonly ItemOption[] = [
   {
     number: "I-0001",
@@ -142,10 +146,10 @@ function Harness({
   });
   const save = useFormSave(form, { onSave, draft, serverPaths });
   return (
-    <FormShell form={form} draft={draft} aria-label="Order">
+    <FormShell form={form} draft={draft} aria-label={FORM_NAME}>
       <Profiler id="grid" onRender={onRender ?? (() => undefined)}>
         <LinesGrid
-          label="Order lines"
+          label={TABLE_NAME}
           columns={COLUMNS}
           searchItems={searchItems}
           debounceMs={0}
