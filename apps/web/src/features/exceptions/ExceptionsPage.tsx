@@ -12,6 +12,7 @@ import {
   StatusBadge,
   useUrlTableQuery,
   type DataTableColumn,
+  RecordLink,
 } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { useExceptionsList } from "@/lib/api/generated/endpoints/exceptions/exceptions";
@@ -46,12 +47,12 @@ export default function ExceptionsPage() {
         id: "order",
         header: t("list.columns.order"),
         cell: (row) => (
-          <Link
+          <RecordLink
             to={`/order-tracker/${row.orderNo}`}
             className="-my-0.5 inline-block py-0.5 font-mono font-medium text-primary underline-offset-4 hover:underline"
           >
             {row.orderNo}
-          </Link>
+          </RecordLink>
         ),
         exportValue: (row) => row.orderNo,
         hideable: false,
@@ -161,6 +162,7 @@ export default function ExceptionsPage() {
         query={query}
         onQueryChange={setQuery}
         rowKey={(row) => row.id}
+        rowHref={(row) => `/order-tracker/${row.orderNo}`}
         status={tableStatusOf(list)}
         error={list.error}
         onRetry={() => void list.refetch()}

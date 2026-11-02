@@ -1,7 +1,10 @@
 import type { TFunction } from "i18next";
-import { Link } from "react-router";
 import type { TrackerOrder } from "@orderpilot/shared";
-import { StatusBadge, type DataTableColumn } from "@/components/common";
+import {
+  StatusBadge,
+  type DataTableColumn,
+  RecordLink,
+} from "@/components/common";
 import { formatDay } from "@/lib/format";
 
 /**
@@ -20,12 +23,12 @@ export function trackerColumns(
       id: "orderNo",
       header: t("list.columns.orderNo"),
       cell: (row) => (
-        <Link
+        <RecordLink
           to={`/order-tracker/${row.orderNo}`}
           className="-my-0.5 inline-block py-0.5 font-mono font-medium text-primary underline-offset-4 hover:underline"
         >
           {row.orderNo}
-        </Link>
+        </RecordLink>
       ),
       exportValue: (row) => row.orderNo,
       sortable: true,

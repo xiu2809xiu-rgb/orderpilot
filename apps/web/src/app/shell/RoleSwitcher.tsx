@@ -43,7 +43,8 @@ export function RoleSwitcher() {
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm">
           <UserCog aria-hidden="true" />
-          {t("demo.switcher")}
+          {/* Icon only on a phone, so the trail keeps room for the record number. */}
+          <span className="max-sm:sr-only">{t("demo.switcher")}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64">

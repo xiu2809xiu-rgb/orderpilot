@@ -10,6 +10,7 @@ import {
   showPlannedFeatures,
 } from "@/features/registry";
 import type { Feature } from "@/features/define";
+import { setRecordRoutes } from "@/lib/recordRoutes";
 import {
   PublicOnly,
   RequireAuth,
@@ -49,7 +50,7 @@ export function buildRoutes(
   list: readonly Feature[] = allFeatures,
   withPlanned: boolean = showPlannedFeatures(),
 ): RouteObject[] {
-  return [
+  const routes: RouteObject[] = [
     {
       element: <RootLayout />,
       errorElement: <RouteCrashPage />,
@@ -117,6 +118,9 @@ export function buildRoutes(
       ],
     },
   ];
+  // A record link reads the routes to open a background tab without visiting the page.
+  setRecordRoutes(routes);
+  return routes;
 }
 
 export function createAppRouter() {

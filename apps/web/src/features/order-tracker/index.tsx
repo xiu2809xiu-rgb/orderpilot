@@ -73,6 +73,7 @@ export default defineFeature({
   children: [
     {
       path: ":orderNo",
+      handle: { record: { kind: "order", param: "orderNo" } },
       element: (
         <Suspense fallback={<Splash />}>
           <OrderDetailPage />

@@ -1,8 +1,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
-import { MemoryRouter } from "react-router";
+import { MemoryRouter, useLocation } from "react-router";
 import { describe, expect, it } from "vitest";
 import i18n from "@/i18n";
 import { getTrackerListMockHandler } from "@/lib/api/generated/endpoints/tracker/tracker.msw";
@@ -33,6 +33,10 @@ const page = (rows: ReturnType<typeof row>[], total = rows.length) =>
     meta: { page: 1, pageSize: 10, total, mock: true },
   }) as TrackerList200;
 
+function Where() {
+  return <p data-testid="where">{useLocation().pathname}</p>;
+}
+
 function renderPage(link = "/order-tracker") {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
@@ -41,6 +45,7 @@ function renderPage(link = "/order-tracker") {
     <QueryClientProvider client={client}>
       <MemoryRouter initialEntries={[link]}>
         <OrderTrackerPage />
+        <Where />
       </MemoryRouter>
     </QueryClientProvider>,
   );
@@ -59,6 +64,19 @@ describe("the order tracker", () => {
     );
     expect(screen.getByText("3 days overdue")).toBeInTheDocument();
     expect(await axeViolations(view.container)).toEqual([]);
+  });
+
+  it("opens the order when the row itself is clicked, away from its link", async () => {
+    await i18n.loadNamespaces(["order-tracker", "common"]);
+    server.use(getTrackerListMockHandler(page([row(1), row(2)])));
+    renderPage();
+    await userEvent.click(await screen.findByText("Status 2"));
+    // The tab logic loads on first use, so the move arrives a moment later.
+    await waitFor(() => {
+      expect(screen.getByTestId("where")).toHaveTextContent(
+        "/order-tracker/SO-0002",
+      );
+    });
   });
 
   it("asks the server for the next page, the search and the overdue filter", async () => {

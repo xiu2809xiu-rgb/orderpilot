@@ -1,7 +1,7 @@
 import type { TrackerOrder } from "@orderpilot/shared";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router";
 import { Money, SectionCard } from "@/components/common";
+import { RecordLink } from "@/components/common/RecordLink";
 import { buttonVariants } from "@/components/ui/button";
 import { QueryBoundary } from "@/features/workflows/QueryBoundary";
 import { useTrackerList } from "@/lib/api/generated/endpoints/tracker/tracker";
@@ -56,12 +56,12 @@ export function OverdueOrders() {
               cells: {
                 what: order.status.label,
                 order: (
-                  <Link
+                  <RecordLink
                     to={`/order-tracker/${order.orderNo}`}
                     className="inline-flex min-h-6 items-center font-mono text-primary underline-offset-4 hover:underline"
                   >
                     {order.orderNo}
-                  </Link>
+                  </RecordLink>
                 ),
                 customer: <CustomerName name={order.customerName} />,
                 amount: order.amount ? (
@@ -71,7 +71,7 @@ export function OverdueOrders() {
                   count: order.overdue.daysOverdue,
                 }),
                 action: (
-                  <Link
+                  <RecordLink
                     to={`/order-tracker/${order.orderNo}`}
                     className={buttonVariants({
                       variant: "outline",
@@ -83,7 +83,7 @@ export function OverdueOrders() {
                     })}
                   >
                     {t("overdue.open")}
-                  </Link>
+                  </RecordLink>
                 ),
               },
             }))}

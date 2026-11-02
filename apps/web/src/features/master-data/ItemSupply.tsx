@@ -1,7 +1,6 @@
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router";
 import type { ItemDetail } from "@orderpilot/shared";
-import { SectionCard, StatusBadge } from "@/components/common";
+import { RecordLink, SectionCard, StatusBadge } from "@/components/common";
 import { formatDay, formatQuantity } from "@/lib/format";
 import { hasPermission, useSessionStore } from "@/stores/session";
 import { MaskedMoney } from "./pieces";
@@ -24,12 +23,12 @@ function SprNumber({ recordNo }: { recordNo: string | null }) {
     return <span className="font-mono">{recordNo}</span>;
   }
   return (
-    <Link
+    <RecordLink
       to={`/workflows/sprs/${recordNo}`}
       className="font-mono text-primary underline-offset-4 hover:underline"
     >
       {recordNo}
-    </Link>
+    </RecordLink>
   );
 }
 
@@ -91,12 +90,12 @@ export function ItemSupply({ item }: { item: ItemDetail }) {
       id: "order",
       header: t("item.sprs.order"),
       cell: (spr) => (
-        <Link
+        <RecordLink
           to={`/order-tracker/${spr.orderNo}`}
           className="font-mono text-primary underline-offset-4 hover:underline"
         >
           {spr.orderNo}
-        </Link>
+        </RecordLink>
       ),
     },
     {

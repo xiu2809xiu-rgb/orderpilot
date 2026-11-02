@@ -2,8 +2,8 @@ import { compareDecimal, type WorkflowTask } from "@orderpilot/shared";
 import type { TFunction } from "i18next";
 import { Clock } from "lucide-react";
 import type { ReactNode } from "react";
-import { Link } from "react-router";
 import { Money } from "@/components/common";
+import { RecordLink } from "@/components/common/RecordLink";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { formatDay, formatMoney } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -48,22 +48,22 @@ export function taskCells(
   const target = touch ? "pointer-coarse:min-h-11" : undefined;
   return {
     what: task.ref ? (
-      <Link to={`/workflows/sprs/${task.ref.recordNo}`} className={LINK}>
+      <RecordLink to={`/workflows/sprs/${task.ref.recordNo}`} className={LINK}>
         {t(`needs.sprTask.${task.kind}`, {
           recordNo: task.ref.recordNo,
           defaultValue: task.title,
         })}
-      </Link>
+      </RecordLink>
     ) : (
       task.title
     ),
     order: task.orderNo ? (
-      <Link
+      <RecordLink
         to={`/order-tracker/${task.orderNo}`}
         className={cn(LINK, "font-mono")}
       >
         {task.orderNo}
-      </Link>
+      </RecordLink>
     ) : null,
     customer: <CustomerName name={task.customerName} />,
     amount: amountOf(task, t),
@@ -99,7 +99,7 @@ export function taskCells(
         {t(`needs.actions.${task.kind}`)}
       </Button>
     ) : (
-      <Link
+      <RecordLink
         to={`/order-tracker/${task.orderNo ?? ""}`}
         data-task-action
         className={cn(
@@ -112,7 +112,7 @@ export function taskCells(
         })}
       >
         {t("needs.actions.REVIEW_FIELDS")}
-      </Link>
+      </RecordLink>
     ),
   };
 }

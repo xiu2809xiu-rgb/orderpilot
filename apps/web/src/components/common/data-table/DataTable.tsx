@@ -35,6 +35,8 @@ export interface DataTableProps<Row> {
    * as well: that is how a keyboard or a screen reader reaches the record.
    */
   onRowClick?: (row: Row) => void;
+  /** The record page a row opens. The row then works like a `RecordLink`. */
+  rowHref?: (row: Row) => string;
   status?: TableStatus;
   error?: unknown;
   onRetry?: () => void;
@@ -68,6 +70,7 @@ export function DataTable<Row>({
   onQueryChange,
   rowKey,
   onRowClick,
+  rowHref,
   status = "ready",
   error,
   onRetry,
@@ -176,6 +179,7 @@ export function DataTable<Row>({
             status={status}
             pageSize={query.pageSize}
             onRowClick={onRowClick}
+            rowHref={rowHref}
             error={error}
             onRetry={onRetry}
             empty={empty}
