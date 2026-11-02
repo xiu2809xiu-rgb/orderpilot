@@ -101,10 +101,9 @@ async function shoot(locator, name, theme, size) {
   shots.push(file);
 }
 
-// A required field's label ends in a mark, so the name is matched from its start.
-// Labels are words, a comma and a number, so they need no escaping.
-const cell = (page, label) =>
-  page.getByLabel(new RegExp("^" + label + "(?![0-9])"));
+// A required field's label ends in a mark, so the name is matched as text, not
+// exactly. Each name used here is not the start of another line's.
+const cell = (page, label) => page.getByLabel(label);
 
 async function entryWalk(page, label) {
   const grid = page.getByRole("table", { name: "Order lines" });
