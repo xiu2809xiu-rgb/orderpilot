@@ -40,6 +40,8 @@ The named patterns used in the code, where each one lives, and why it earns its 
 | Port with a mock adapter    | `master-data/domain/master-data-reader.ts`, `MockNavisionMasterData`  | The seam for P-20: the port has its own records, so the connector replaces one class, and the controller and service stay | P-35  |
 | Domain class                | `master-data/domain/stock-position.ts`                                | Available stock and "short" are one tested rule; short is read from the order                                             | P-35  |
 | Derived data                | `synthetic-data/src/purchase-orders.ts`                               | Purchase orders come from approved SPRs and stock figures, so the numbers always agree                                    | P-35  |
+| Declared entries            | `features/define.ts` (`MenuEntry`), `features/nav.ts` (`menuFor`)     | Each feature declares its menu lines and the shell only reads them, so a menu built twice cannot disagree with itself     | P-39  |
+| Registry filter             | `features/registry.ts` (`reachableFeatures`)                          | One place decides whether a planned feature can be reached, so the menu, routes and palette cannot drift apart            | P-39  |
 
 ## Layers
 

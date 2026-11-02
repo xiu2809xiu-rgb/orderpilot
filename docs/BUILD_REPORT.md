@@ -232,7 +232,7 @@ Prompt 003's deadline of Monday evening, 2 Nov, cannot hold for all of this: 41 
 | P-42  | Plan prompt 004                                       | `chore/plan-prompt-004`          | In review, [#138](https://github.com/xiu2809xiu-rgb/orderpilot/pull/138)     |
 | P-13  | Docker images and the IaC scan                        | `ci/docker`                      | In review, [#172](https://github.com/xiu2809xiu-rgb/orderpilot/pull/172)     |
 | P-14  | End-to-end smoke                                      | `test/e2e-smoke`                 | Not started                                                                  |
-| P-39  | Module navigation, showing only what is real          | `feat/workspace-modules`         | Not started                                                                  |
+| P-39  | Module navigation, showing only what is real          | `feat/workspace-modules`         | In review, pull request opened                                               |
 | P-43  | Records open as tabs                                  | `feat/workspace-record-tabs`     | Not started                                                                  |
 | P-44  | List template: filter bar, action bar and status chip | `feat/list-template-bars`        | Not started                                                                  |
 | P-45  | List template: grid, saved views and operation log    | `feat/list-template-grid`        | Not started                                                                  |
