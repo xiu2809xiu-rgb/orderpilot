@@ -23,9 +23,11 @@ const CommandPalette = lazy(async () => ({
 }));
 const loadSessionEnded = () => import("../SessionEndedDialog");
 
-// The open-records strip and the code that keeps it in step with the page load after
-// the first paint, as a chunk of their own. Everyone downloads it, but the entry bundle
-// does not carry it.
+// The open-records strip and the code that keeps it in step with the page are a chunk
+// of their own, so the entry bundle does not carry them. The download starts when the
+// shell first renders, not when the browser is idle: a person who reloads with tabs open
+// should see them at once. Until it arrives the strip shows nothing, and a record click
+// asks for the same chunk through `loadRecordTabs`, so it is fetched only once.
 const RecordTabs = lazy(async () => ({
   default: (await loadRecordTabs()).RecordTabs,
 }));
