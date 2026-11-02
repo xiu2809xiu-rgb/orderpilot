@@ -44,7 +44,7 @@ export interface ListPageProps<Row> {
   actions?: readonly ListAction<Row>[];
   /** The ticked rows. P-45 brings the checkboxes; until then leave it out. */
   selection?: readonly Row[];
-  /** Export and Print give every row the filter shows through `loadRows`. */
+  /** Export and Print give every row the filter shows through `loadRows`. Without it they use the rows on screen. */
   exportOptions?: ExportOptions<Row>;
   empty?: { title?: string; description?: string; action?: ReactNode };
   partialNotice?: string;
@@ -137,7 +137,7 @@ export function ListPage<Row>({
             filters={filters}
             actions={usable}
             selection={selection}
-            exportOptions={exportOptions}
+            exportOptions={exportOptions ?? { fileName: tableId }}
             searchDebounceMs={searchDebounceMs}
           />
         )}
