@@ -11,7 +11,7 @@ const browser = {
 
 // The files the first screen loads before it paints: the entry chunk, under
 // the 250 KB budget. They may not pull in a whole kit or area. The rule is in
-// docs/architecture/patterns.md ("What the entry may import").
+// docs/architecture/patterns.md ("The entry chunk: what the shell may import").
 const entryFiles = [
   "src/main.tsx",
   "src/i18n.ts",
