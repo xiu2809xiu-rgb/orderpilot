@@ -19,16 +19,27 @@ const RECORD_KINDS = [
   "vendor",
 ] as const satisfies readonly RecordKind[];
 
-const tabSchema = z.object({
-  key: z.string().min(1),
-  kind: z.enum(RECORD_KINDS),
-  no: z.string().min(1),
-  listPath: z.string().min(1),
-  /** The address as it was last seen, with its query, so the tab opens exactly that. */
-  to: z.string().min(1),
-  /** Set by the record's form through `useMarkRecordDirty`. */
-  dirty: z.boolean(),
-});
+/** A path inside this app. Storage can be edited, so a tab may never point anywhere else. */
+const appPath = z
+  .string()
+  .refine((value) => value.startsWith("/") && !value.startsWith("//"));
+
+const tabSchema = z
+  .object({
+    key: appPath,
+    kind: z.enum(RECORD_KINDS),
+    no: z.string().min(1),
+    listPath: appPath,
+    /** The address as it was last seen, with its query, so the tab opens exactly that. */
+    to: appPath,
+    /** Set by the record's form through `useMarkRecordDirty`. */
+    dirty: z.boolean(),
+  })
+  // The address is the record's own, plus at most a query or a fragment.
+  .refine(
+    ({ key, to }) =>
+      to.startsWith(key) && /^([?#]|$)/.test(to.slice(key.length)),
+  );
 const storedSchema = z.array(tabSchema).max(MAX_TABS);
 
 export type RecordTab = z.infer<typeof tabSchema>;
@@ -87,6 +98,10 @@ interface RecordTabsState {
 }
 
 export const useRecordTabs = create<RecordTabsState>()((set, get) => {
+  // A form can report unsaved changes before its tab exists (a typed address, a
+  // reload, a link that is not a RecordLink). The mark waits here for the tab.
+  const pendingDirty = new Set<string>();
+
   function commit(tabs: RecordTab[]) {
     set({ tabs });
     write(get().owner, tabs);
@@ -98,6 +113,7 @@ export const useRecordTabs = create<RecordTabsState>()((set, get) => {
     load: (viewerId) => {
       const owner = viewerId ? storageKey(viewerId) : null;
       if (owner === get().owner) return;
+      pendingDirty.clear();
       set({ owner, tabs: owner ? read(owner) : [] });
     },
     open: (record, to, keep) => {
@@ -109,7 +125,12 @@ export const useRecordTabs = create<RecordTabsState>()((set, get) => {
         commit(tabs.map((tab) => (tab === found ? moved : tab)));
         return { outcome: "existing", tab: moved };
       }
-      const tab: RecordTab = { ...record, to, dirty: false };
+      const tab: RecordTab = {
+        ...record,
+        to,
+        dirty: pendingDirty.has(record.key),
+      };
+      pendingDirty.delete(record.key);
       if (tabs.length < MAX_TABS) {
         commit([...tabs, tab]);
         return { outcome: "added", tab };
@@ -120,10 +141,16 @@ export const useRecordTabs = create<RecordTabsState>()((set, get) => {
       return { outcome: "replaced", tab, closed };
     },
     close: (key) => {
+      pendingDirty.delete(key);
       commit(get().tabs.filter((tab) => tab.key !== key));
     },
     setDirty: (key, dirty) => {
       const { tabs } = get();
+      if (!tabs.some((tab) => tab.key === key)) {
+        if (dirty) pendingDirty.add(key);
+        else pendingDirty.delete(key);
+        return;
+      }
       if (!tabs.some((tab) => tab.key === key && tab.dirty !== dirty)) return;
       commit(tabs.map((tab) => (tab.key === key ? { ...tab, dirty } : tab)));
     },
