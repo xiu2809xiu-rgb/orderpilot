@@ -13,7 +13,9 @@
     "pieces": "Small pieces",
     "log": "Operation log",
     "badgesHint": "Labels that keep a demo honest, and show how sensitive a record is.",
-    "piecesHint": "Used inside tables and detail pages."
+    "piecesHint": "Used inside tables and detail pages.",
+    "form": "Form kit",
+    "formHint": "Fields, server errors, drafts and the prompt before leaving. The save is faked in the browser: choose what the server answers, then press Save or Ctrl+S."
   },
   "feedback": {
     "title": "Amounts, messages and loading shapes",
@@ -85,5 +87,63 @@
     "emptyDescription": "Upload a purchase order to start.",
     "emptyAction": "Upload a document",
     "partialDescription": "The supplier list is still loading."
+  },
+  "form": {
+    "formLabel": "Sales order header",
+    "saved": "Saved. Nothing was sent: this form fakes its save.",
+    "answer": {
+      "label": "Fake server answer",
+      "saves": "Saves",
+      "fields": "Rejects two fields",
+      "noField": "Rejects something with no field",
+      "conflict": "Conflict (409)",
+      "forbidden": "Refused (403)",
+      "failure": "Server error (500)",
+      "searchFails": "Searches fail"
+    },
+    "fields": {
+      "customer": "Customer",
+      "customerPo": "Customer PO number",
+      "paymentTerms": "Payment terms",
+      "orderDate": "Order date",
+      "shipBy": "Ship by",
+      "shipByHint": "Leave empty if the customer gave no date.",
+      "freight": "Freight",
+      "creditLimit": "Credit limit",
+      "creditLimitHint": "Never kept in a draft, as a masked field would not be.",
+      "currency": "Currency",
+      "currencyHint": "From the customer card in Navision.",
+      "postingDate": "Posting date",
+      "postingDateHint": "Set when the order is posted.",
+      "partial": "Partial shipment allowed",
+      "remarks": "Remarks",
+      "lines": "Lines",
+      "item": "Line {{n}} item",
+      "quantity": "Line {{n}} quantity"
+    },
+    "terms": {
+      "30 DAYS": "30 days",
+      "PREPAID": "Prepaid",
+      "LC AT SIGHT": "Letter of credit at sight",
+      "50% ADVANCE": "50% in advance"
+    },
+    "errors": {
+      "customer": "Choose a customer from the list.",
+      "customerPo": "Enter the customer's PO number.",
+      "orderDate": "Enter the order date.",
+      "shipBy": "Enter a date, or leave it empty.",
+      "shipByBefore": "Ship by must be on or after the order date.",
+      "paymentTerms": "Choose the payment terms.",
+      "freight": "Enter an amount such as 120.00.",
+      "remarks": "Keep remarks to 500 characters.",
+      "item": "Choose an item from the list.",
+      "quantity": "Enter a whole number above zero."
+    },
+    "server": {
+      "stock": "Only 40 units of {{item}} are free to promise.",
+      "poUsed": "PO number {{po}} is already on order SO-20261030-0007 for this customer.",
+      "warehouse": "Warehouse SG-02 is closed for a stock count until Monday.",
+      "conflict": "Someone else changed this order after you opened it. Reload it to see their changes, then save again."
+    }
   }
 }
