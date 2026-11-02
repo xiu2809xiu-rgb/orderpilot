@@ -1,5 +1,5 @@
 import { Plus } from "lucide-react";
-import { useEffect, useId, useMemo, useRef, type CSSProperties } from "react";
+import { useId, useMemo, useRef, type CSSProperties } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { lookupText, lookupValueSchema } from "@/components/form";
@@ -8,9 +8,10 @@ import { GridContext, type GridContextValue } from "./gridContext";
 import { LineRow } from "./LineRow";
 import { LinesFooter } from "./LinesFooter";
 import { editableKinds, trackTemplate } from "./lineValues";
-import { asLookupSearch, type LineColumn, type LinesGridProps } from "./types";
+import type { LineColumn, LinesGridProps } from "./types";
 import { useGridKeys } from "./useGridKeys";
 import { useItemPick } from "./useItemPick";
+import { useItemSearch } from "./useItemSearch";
 import { useLineActions } from "./useLineActions";
 import { useLineTotals } from "./useLineTotals";
 import { usePendingFocus } from "./usePendingFocus";
@@ -53,8 +54,12 @@ export function LinesGrid(props: LinesGridProps) {
     firstEditable: editable[0],
     ask,
   });
+  const advance = useRef<number | null>(null);
+  const itemSearch = useItemSearch(props.searchItems, name, advance);
   const keys = useGridKeys({
     rootRef,
+    advance,
+    flagUnknown: itemSearch.flagUnknown,
     editable,
     rowCount: array.fields.length,
     add,
@@ -70,23 +75,15 @@ export function LinesGrid(props: LinesGridProps) {
   const pick = useItemPick({
     name,
     priceMask,
-    advance: keys.advance,
+    advance,
     advanceTo: afterItem(editable),
     root: rootRef,
-  });
-  // The screen's search is often written inline; the lookup must not restart
-  // when the screen re-renders, so it always calls the latest.
-  const search = useRef(props.searchItems);
-  useEffect(() => {
-    search.current = props.searchItems;
   });
   const context = useMemo<GridContextValue>(
     () => ({
       name,
       columns,
-      searchItems: asLookupSearch((query, signal) =>
-        search.current(query, signal),
-      ),
+      searchItems: itemSearch.search,
       debounceMs: props.debounceMs ?? 250,
       readOnly,
       priceMask,

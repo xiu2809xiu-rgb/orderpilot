@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { z } from "zod";
 import { decimalStringSchema } from "@orderpilot/shared";
 import type { MaskReason } from "@/components/common";
-import type { LookupSearch, LookupValue } from "@/components/form";
+import type { LookupValue } from "@/components/form";
 
 /** What the grid keeps for a line. A screen's schema may hold more beside it. */
 export interface LineValue {
@@ -45,9 +45,6 @@ export type ItemSearch = (
   query: string,
   signal: AbortSignal,
 ) => Promise<readonly ItemOption[]>;
-
-/** An item search is a lookup search that returns richer records. */
-export const asLookupSearch = (search: ItemSearch): LookupSearch => search;
 
 export const COLUMN_KINDS = [
   "lineNo",

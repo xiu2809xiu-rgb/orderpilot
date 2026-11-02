@@ -1,4 +1,4 @@
-import { useRef, type KeyboardEvent, type RefObject } from "react";
+import type { KeyboardEvent, RefObject } from "react";
 import {
   focusPlace,
   hasSelectionIn,
@@ -16,6 +16,10 @@ interface GridKeysOptions {
   remove: (index: number, from: ColumnKind | null) => void;
   /** True when the item cell shows a chosen item and no half-typed text. */
   isSettled: (row: number, input: HTMLInputElement) => boolean;
+  /** Set to the line whose item Enter is waiting on. See `useItemSearch`. */
+  advance: { current: number | null };
+  /** Flags typed text that the last search found no item for. */
+  flagUnknown: (row: number, text: string) => boolean;
   readOnly: boolean;
 }
 
@@ -30,11 +34,17 @@ function asKind(cell: string | null): ColumnKind | null {
  * only Ctrl+Delete and Alt with an up or down arrow reach into it.
  */
 export function useGridKeys(options: GridKeysOptions) {
-  const { rootRef, editable, rowCount, add, remove, isSettled, readOnly } =
-    options;
-  // Set when Enter was pressed on an item still being worked out: the pick
-  // that follows moves the focus on. Anything else typed in between cancels it.
-  const advance = useRef<number | null>(null);
+  const {
+    rootRef,
+    editable,
+    rowCount,
+    add,
+    remove,
+    isSettled,
+    readOnly,
+    advance,
+    flagUnknown,
+  } = options;
 
   function move(place: Place, step: number) {
     const root = rootRef.current;
@@ -79,7 +89,9 @@ export function useGridKeys(options: GridKeysOptions) {
         event.preventDefault();
         event.stopPropagation();
         moveOn(place);
-      } else {
+      } else if (!flagUnknown(place.row, target.value)) {
+        // Set when Enter was pressed on an item still being worked out: the
+        // pick that follows moves the focus on. Anything else typed cancels it.
         advance.current = place.row;
       }
     }
@@ -131,5 +143,5 @@ export function useGridKeys(options: GridKeysOptions) {
     }
   }
 
-  return { onKeyDown, onKeyDownCapture, advance };
+  return { onKeyDown, onKeyDownCapture };
 }

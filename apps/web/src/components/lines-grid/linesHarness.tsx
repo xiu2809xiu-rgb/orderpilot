@@ -1,5 +1,6 @@
 // Test-only: a form with a lines grid, built the way a screen would build one.
 import { render } from "@testing-library/react";
+import { Profiler, type ProfilerOnRenderCallback } from "react";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { z } from "zod";
 import { Toaster } from "@/components/common";
@@ -119,6 +120,8 @@ interface HarnessProps extends Partial<Omit<LinesGridProps, "label">> {
   onSave?: (values: Output) => Promise<unknown>;
   serverPaths?: PathMap;
   draftKey?: string;
+  /** Hears every commit of the grid, for the speed test. */
+  onRender?: ProfilerOnRenderCallback;
 }
 
 function Harness({
@@ -126,6 +129,7 @@ function Harness({
   onSave = () => Promise.resolve(),
   serverPaths,
   draftKey = "test.lines",
+  onRender,
   ...grid
 }: HarnessProps) {
   const form = useZodForm<Input, Output>({
@@ -139,13 +143,15 @@ function Harness({
   const save = useFormSave(form, { onSave, draft, serverPaths });
   return (
     <FormShell form={form} draft={draft} aria-label="Order">
-      <LinesGrid
-        label="Order lines"
-        columns={COLUMNS}
-        searchItems={searchItems}
-        debounceMs={0}
-        {...grid}
-      />
+      <Profiler id="grid" onRender={onRender ?? (() => undefined)}>
+        <LinesGrid
+          label="Order lines"
+          columns={COLUMNS}
+          searchItems={searchItems}
+          debounceMs={0}
+          {...grid}
+        />
+      </Profiler>
       <SaveButton form={form} onSave={save} variant="outline" />
       <Toaster />
     </FormShell>

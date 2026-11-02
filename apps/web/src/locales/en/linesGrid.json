@@ -30,5 +30,6 @@
     "lines": "Lines",
     "quantity": "Quantity",
     "total": "Total"
-  }
+  },
+  "unknownItem": "No item matches \"{{text}}\". Check the part number."
 }

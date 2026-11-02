@@ -38,7 +38,9 @@ describe("the lines grid, from the keyboard", () => {
     const user = userEvent.setup();
     renderGrid();
     await user.type(await item(1), "NV-WM-100{Enter}");
-    expect(box("Quantity", 1)).toHaveFocus();
+    await waitFor(() => {
+      expect(box("Quantity", 1)).toHaveFocus();
+    });
     expect(box("Description", 1)).toHaveValue("Wireless mouse, 2.4 GHz");
     expect(box("Unit price", 1)).toHaveValue("18.40");
     expect(screen.getByText("40 PCS available")).toBeVisible();
