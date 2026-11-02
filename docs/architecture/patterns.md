@@ -202,6 +202,9 @@ A service that changes something on behalf of a user takes the `AuthContext` and
 | Lookup table              | `checks/domain/mock-sales-flow.ts`                            | One named table maps the sample states onto the nine sales steps, so the steps add up to the open orders                                                   | P-33  |
 | Memento (draft store)     | `lib/draft-store.ts`, `components/form/useDraft.ts`           | A form's unsaved state is saved and restored outside it, keyed by viewer and record, versioned and aged, with masked fields left out                       | P-46  |
 | Adapter (server errors)   | `components/form/serverErrors.ts`                             | One function turns the API's error envelope into field errors and a form-level error, so no form reads `details` itself                                    | P-46  |
+| Declarative columns       | `LineColumn[]` in `components/lines-grid/types.ts`            | A screen lists the columns it wants and the grid draws, widens and reads them, so an order and an SPR share one grid                                       | P-48  |
+| Derived value             | `lineMath.ts`, `useLineTotals.ts`                             | A line's amount and the totals are worked out from the strings on every change, so nothing is stored that could disagree or leak a masked price            | P-48  |
+| Event delegation          | `useGridKeys.ts`, `gridNav.ts`                                | One key handler finds the line and cell from data attributes, so 200 lines carry no handlers or refs of their own                                          | P-48  |
 
 ## The entry chunk: what the shell may import
 

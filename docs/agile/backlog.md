@@ -2,13 +2,13 @@
 
 Rendered from [`scripts/github/data/backlog.json`](../../scripts/github/data/backlog.json) by `node scripts/github/render-docs.mjs`. Change the data, not this file. The same data seeds the issues. The board shows where each story stands.
 
-There are 9 epics and 123 stories. Estimates are story points: a first guess, for the team to change at planning.
+There are 9 epics and 124 stories. Estimates are story points: a first guess, for the team to change at planning.
 
 ## Epics
 
 | Epic   | Title                             | Area                                    | Stories | Points |
 | ------ | --------------------------------- | --------------------------------------- | ------- | ------ |
-| Epic P | The platform base                 | `area: 1 document AI and integration`   | 79      | 453    |
+| Epic P | The platform base                 | `area: 1 document AI and integration`   | 80      | 456    |
 | Epic A | Document intake and AI extraction | `area: 1 document AI and integration`   | 5       | 31     |
 | Epic B | Master data and Navision          | `area: 1 document AI and integration`   | 4       | 14     |
 | Epic C | Order workflows and approvals     | `area: 2 order workflows and approvals` | 5       | 29     |
@@ -163,6 +163,7 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | F-8   | Governance base polish                                             | could    | 3      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
 | G-2   | Monitoring base polish                                             | could    | 3      | `area: 4 controls and monitoring`       | M2 GRS by design, M6 deploy and monitor                        |
 | F-9   | Audit viewer polish                                                | could    | 3      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
+| P-80  | Lines grid polish                                                  | could    | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
 
 ## Epic P: The platform base
 
@@ -1849,6 +1850,26 @@ Acceptance criteria:
 - The walk for all nine roles ends with 0 FAIL in light and dark, and looks the same as on main.
 - A Playwright script signs in from a cold load as three roles and opens the role switcher, the user menu, the bell and Control K, and lets a session end, with no console error and no CSP violation.
 - The rule for what the shell may import is written in `docs/architecture/patterns.md`.
+
+### P-80: Lines grid polish
+
+Left out of P-48 because no teammate needs it this week.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** could
+- **Estimate:** 3 points
+- **Requirements:** M4 best practices
+- **Branch:** `feat/lines-grid-polish`
+- **Planned for:** Sprint 03 (W4)
+- **Depends on:** P-48
+
+Acceptance criteria:
+
+- Pasting rows from a spreadsheet (a part number and a quantity on each) fills one line per row, each part number resolved on its Navision number, and the rows that match nothing are listed for the person to fix.
+- The shortfall counts every line that asks for the same item together, not each line alone, and says which lines add up to it.
+- A click on a line's number selects the line, so the mouse can reach Delete too.
+- Column widths can be dragged and are kept for each person.
+- A line can be moved up or down with the keyboard, and the move can be undone.
 
 ## Epic A: Document intake and AI extraction
 
