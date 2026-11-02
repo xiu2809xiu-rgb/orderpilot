@@ -179,6 +179,23 @@ async function expectPath(
   });
 }
 
+// A plain click adds the tab at once, but the page follows later, as a router
+// transition. The tab being active is the proof that the page has rendered:
+// act on the page, switch role, close or press Tab only after it.
+async function expectActive(title: string) {
+  await waitFor(() => {
+    const link = within(must(strip()))
+      .getAllByRole("link")
+      .find((each) => each.getAttribute("title") === title);
+    expect(link).toHaveAttribute("aria-current", "page");
+  });
+}
+
+async function openByClick(label: string, title = `Item ${label}`) {
+  await user.click(screen.getByRole("link", { name: label }));
+  await expectActive(title);
+}
+
 beforeEach(() => {
   user = userEvent.setup();
   localStorage.clear();
@@ -198,9 +215,8 @@ describe("record tabs", () => {
 
   it("opens a record as the active tab and shows its number in the crumbs", async () => {
     const { router } = mount();
-    await user.click(screen.getByRole("link", { name: "ITM-001" }));
+    await openByClick("ITM-001");
     await expectPath(router, "/items/ITM-001");
-    // The strip loads with the first tab, so it may arrive a moment later.
     const nav = await screen.findByRole("navigation", {
       name: "Open records",
     });
@@ -215,9 +231,9 @@ describe("record tabs", () => {
 
   it("opens a record that is already open by activating its tab", async () => {
     const { router } = mount();
-    await user.click(screen.getByRole("link", { name: "ITM-001" }));
+    await openByClick("ITM-001");
     await act(() => router.navigate("/items"));
-    await user.click(screen.getByRole("link", { name: "ITM-001" }));
+    await openByClick("ITM-001");
     await expectTabs(["Item ITM-001"]);
     await expectPath(router, "/items/ITM-001");
   });
@@ -273,6 +289,7 @@ describe("record tabs", () => {
     await expectPath(router, "/items");
     await expectTabs(["Item ROW-1"]);
     await user.click(within(row).getByText("ROW-1"));
+    await expectActive("Item ROW-1");
     await expectPath(router, "/items/ROW-1");
   });
 
@@ -289,13 +306,14 @@ describe("record tabs", () => {
 
   it("closing the active tab goes to the previous one, then to the list", async () => {
     const { router } = mount();
-    await user.click(screen.getByRole("link", { name: "ITM-001" }));
+    await openByClick("ITM-001");
     await act(() => router.navigate("/items"));
-    await user.click(screen.getByRole("link", { name: "ITM-002" }));
+    await openByClick("ITM-002");
     await user.click(
       await screen.findByRole("button", { name: "Close Item ITM-002" }),
     );
     await expectPath(router, "/items/ITM-001");
+    await expectActive("Item ITM-001");
     await user.click(
       await screen.findByRole("button", { name: "Close Item ITM-001" }),
     );
@@ -305,9 +323,9 @@ describe("record tabs", () => {
 
   it("closing a background tab stays on the page", async () => {
     const { router } = mount();
-    await user.click(screen.getByRole("link", { name: "ITM-001" }));
+    await openByClick("ITM-001");
     await act(() => router.navigate("/items"));
-    await user.click(screen.getByRole("link", { name: "ITM-002" }));
+    await openByClick("ITM-002");
     await user.click(
       await screen.findByRole("button", { name: "Close Item ITM-001" }),
     );
@@ -327,13 +345,14 @@ describe("record tabs", () => {
     await user.keyboard("{Control>}");
     await user.click(screen.getByRole("link", { name: "ITM-011" }));
     await user.keyboard("{/Control}");
+    // The click is handled once the tab logic answers: wait for its toast first.
+    expect(
+      await screen.findByText(/Closed Item ITM-001 to make room/),
+    ).toBeInTheDocument();
     const names = tabNames();
     expect(names).toHaveLength(MAX_TABS);
     expect(names).not.toContain("Item ITM-001");
     expect(names).toContain("Item ITM-011");
-    expect(
-      await screen.findByText(/Closed Item ITM-001 to make room/),
-    ).toBeInTheDocument();
   });
 
   it("opens nothing, and says why, when all ten have unsaved changes", async () => {
@@ -346,21 +365,22 @@ describe("record tabs", () => {
       });
     }
     await user.click(screen.getByRole("link", { name: "ITM-011" }));
-    await expectPath(router, "/items");
-    expect(tabNames()).toHaveLength(MAX_TABS);
-    expect(tabNames()).not.toContain("Item ITM-011");
     expect(
       await screen.findByText("Ten records are open with unsaved changes"),
     ).toBeInTheDocument();
+    await expectPath(router, "/items");
+    expect(tabNames()).toHaveLength(MAX_TABS);
+    expect(tabNames()).not.toContain("Item ITM-011");
   });
 
   it("keeps the tabs through a reload", async () => {
     const first = mount();
-    await user.click(screen.getByRole("link", { name: "ITM-001" }));
+    await openByClick("ITM-001");
     await act(() => first.router.navigate("/items"));
     await user.keyboard("{Control>}");
     await user.click(screen.getByRole("link", { name: "ITM-002" }));
     await user.keyboard("{/Control}");
+    await expectTabs(["Item ITM-001", "Item ITM-002"]);
     first.unmount();
 
     // A reload empties the store; only localStorage remains.
@@ -383,8 +403,7 @@ describe("record tabs", () => {
 
   it("keeps each role's tabs apart", async () => {
     mount();
-    await user.click(screen.getByRole("link", { name: "ITM-001" }));
-    await expectTabs(["Item ITM-001"]);
+    await openByClick("ITM-001");
 
     act(() => {
       useSessionStore.getState().setSession(ROLE_B);
@@ -404,9 +423,8 @@ describe("record tabs", () => {
 
   it("does not turn the page left open by another role into a tab", async () => {
     mount();
-    await user.click(screen.getByRole("link", { name: "ITM-001" }));
-    // The strip loads on first use: switch only once it is watching the page.
-    await expectTabs(["Item ITM-001"]);
+    // Switch only once the page is on screen and its tab is active.
+    await openByClick("ITM-001");
     act(() => {
       useSessionStore.getState().setSession(ROLE_B);
     });
@@ -420,7 +438,7 @@ describe("record tabs", () => {
     const { router } = mount();
     for (const no of ["ITM-001", "ITM-002", "ITM-003"]) {
       await act(() => router.navigate("/items"));
-      await user.click(screen.getByRole("link", { name: no }));
+      await openByClick(no);
     }
     // The strip and its page sync load on first use: wait until the active tab is the stop.
     await waitFor(() => {
@@ -451,8 +469,11 @@ describe("record tabs", () => {
 
   it("puts the focus on the page when the last tab closes", async () => {
     mount();
-    await user.click(screen.getByRole("link", { name: "ITM-001" }));
+    await openByClick("ITM-001");
     await user.tab();
+    expect(
+      within(must(strip())).getByRole("link", { name: /ITM-001/ }),
+    ).toHaveFocus();
     await user.keyboard("{Delete}");
     expect(strip()).toBeNull();
     await waitFor(() => {
@@ -511,16 +532,16 @@ describe("record tabs", () => {
       throw new Error("blocked");
     });
     const { router } = mount();
-    await user.click(screen.getByRole("link", { name: "ITM-001" }));
+    await openByClick("ITM-001");
     await expectPath(router, "/items/ITM-001");
     await expectTabs(["Item ITM-001"]);
   });
 
   it("has no accessibility violations", async () => {
     const { container, router } = mount();
-    await user.click(screen.getByRole("link", { name: "ITM-001" }));
+    await openByClick("ITM-001");
     await act(() => router.navigate("/items"));
-    await user.click(screen.getByRole("link", { name: "SO-26-0001" }));
+    await openByClick("SO-26-0001", "Order SO-26-0001");
     expect(await axeViolations(container)).toEqual([]);
   });
 });
