@@ -6,3 +6,4 @@ export { expect, test, type E2eOptions } from "./fixtures.js";
 export { expectNoButton, expectRefused, type Method } from "./refusals.js";
 export { SMOKE_PAGES, type SmokePage } from "./roles.js";
 export { signInAs, type SignInOptions } from "./session.js";
+export { expectRealPage } from "./real-page.js";
