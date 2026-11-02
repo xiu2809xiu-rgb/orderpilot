@@ -58,7 +58,7 @@ export function Topbar({ onOpenPalette }: { onOpenPalette: () => void }) {
       <Button
         variant="outline"
         size="sm"
-        className="hidden w-52 justify-start font-normal text-muted-foreground sm:inline-flex"
+        className="hidden w-52 justify-start font-normal text-muted-foreground xl:inline-flex"
         aria-keyshortcuts="Control+K Meta+K"
         onClick={onOpenPalette}
       >
@@ -74,7 +74,7 @@ export function Topbar({ onOpenPalette }: { onOpenPalette: () => void }) {
       <Button
         variant="ghost"
         size="icon"
-        className="sm:hidden"
+        className="xl:hidden"
         aria-label={t("shell.search")}
         onClick={onOpenPalette}
       >

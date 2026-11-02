@@ -4,6 +4,7 @@
   "name": "{{kind}} {{no}}",
   "close": "Close {{name}}",
   "unsaved": "unsaved changes",
+  "stepsLabel": "{{no}} steps",
   "openedInBackground": "{{name}} is open in a tab",
   "alreadyOpen": "{{name}} is already open in a tab",
   "madeRoom": "Closed {{name}} to make room. Up to ten records stay open.",

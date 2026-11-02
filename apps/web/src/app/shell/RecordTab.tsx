@@ -31,6 +31,7 @@ export function RecordTab({
 }: RecordTabProps) {
   const { t } = useTranslation("record-tabs");
   const Icon = RECORD_KIND_ICONS[tab.kind];
+  const steps = tab.kind === "orderSteps";
   const name = t("name", {
     kind: t(`kinds.${tab.kind}`),
     no: tab.no,
@@ -67,14 +68,17 @@ export function RecordTab({
         className="flex h-full items-center gap-1.5 rounded-md pr-1 pl-2 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
       >
         <Icon className="size-3.5 shrink-0" aria-hidden="true" />
-        <span className="sr-only">{t(`kinds.${tab.kind}`)} </span>
+        {/* The steps page of an order shares its number with the order: its own word tells them apart. */}
+        {steps ? null : (
+          <span className="sr-only">{t(`kinds.${tab.kind}`)} </span>
+        )}
         <span
           className={cn(
             "font-mono whitespace-nowrap tabular-nums",
             active && "font-medium",
           )}
         >
-          {tab.no}
+          {steps ? t("stepsLabel", { no: tab.no }) : tab.no}
         </span>
         {tab.dirty ? (
           <>

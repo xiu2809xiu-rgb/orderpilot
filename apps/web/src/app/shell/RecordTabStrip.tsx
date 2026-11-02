@@ -13,8 +13,8 @@ const MOVES: Record<string, (index: number, count: number) => number> = {
 };
 
 /**
- * The strip of open records under the top bar. It loads when the first record
- * opens, so a person who never opens one does not download it. One Tab stop:
+ * The strip of open records under the top bar. It loads after the first paint,
+ * in a chunk of its own that the entry bundle does not carry. One Tab stop:
  * the arrow keys move along it and Delete closes the focused tab.
  */
 export default function RecordTabStrip({
@@ -41,9 +41,11 @@ export default function RecordTabStrip({
 
   useEffect(() => {
     if (!activeKey) return;
-    // "nearest" scrolls only when the tab is out of view, and never smoothly.
+    // "nearest" scrolls only when the tab is out of view, and never smoothly. The
+    // whole item is brought in, so its close button is never left past the edge.
     links.current
       .get(activeKey)
+      ?.closest("li")
       ?.scrollIntoView({ block: "nearest", inline: "nearest" });
   }, [activeKey, tabs.length]);
 

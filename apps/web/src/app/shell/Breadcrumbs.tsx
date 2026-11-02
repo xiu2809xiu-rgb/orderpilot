@@ -19,6 +19,10 @@ interface Crumb {
   mono?: boolean;
 }
 
+/**
+ * Below the large breakpoint the trail shows only the page you are on, so a
+ * record number stays readable beside the search and role buttons.
+ */
 export function Breadcrumbs() {
   const { t } = useTranslation();
   const matches = useMatches();
@@ -40,11 +44,13 @@ export function Breadcrumbs() {
           return (
             <Fragment key={`${item.path}${item.mono ? "#no" : ""}`}>
               {index > 0 ? (
-                <li aria-hidden="true">
+                <li aria-hidden="true" className="hidden lg:block">
                   <ChevronRight className="size-3.5" />
                 </li>
               ) : null}
-              <li className="truncate">
+              <li
+                className={cn(last ? "shrink-0" : "hidden truncate lg:block")}
+              >
                 {last ? (
                   <span
                     aria-current="page"

@@ -17,7 +17,8 @@ const CommandPalette = lazy(async () => ({
 }));
 
 // The open-records strip and the code that keeps it in step with the page load after
-// the first paint, so people who never open a record pay nothing for it.
+// the first paint, as a chunk of their own. Everyone downloads it, but the entry bundle
+// does not carry it.
 const RecordTabs = lazy(async () => ({
   default: (await loadRecordTabs()).RecordTabs,
 }));

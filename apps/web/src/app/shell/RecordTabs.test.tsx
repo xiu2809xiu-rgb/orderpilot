@@ -509,6 +509,33 @@ describe("record tabs", () => {
     expect(strip()).toBeNull();
   });
 
+  it("tells an order from its steps page when they share a number", async () => {
+    mount();
+    act(() => {
+      const open = useRecordTabs.getState().open;
+      open(must(resolveRecord("/orders/SO-26-0001")), "/orders/SO-26-0001");
+      open(
+        {
+          key: "/orders/SO-26-0001/steps",
+          kind: "orderSteps",
+          no: "SO-26-0001",
+          listPath: "/orders",
+        },
+        "/orders/SO-26-0001/steps",
+      );
+    });
+    const nav = await screen.findByRole("navigation", { name: "Open records" });
+    // Both read the same number, so the steps tab says what it is in plain sight.
+    expect(within(nav).getByText("SO-26-0001 steps")).toBeVisible();
+    expect(
+      within(nav).getByRole("link", { name: "SO-26-0001 steps" }),
+    ).toBeInTheDocument();
+    expect(within(nav).getAllByRole("link")).toHaveLength(2);
+    expect(
+      within(nav).getByRole("link", { name: /Order\s*SO-26-0001/ }),
+    ).toBeInTheDocument();
+  });
+
   it("works with a broken copy in storage", async () => {
     localStorage.setItem(storageKey(ROLE_A.user.id), "{not json");
     mount("/items/ITM-006");
