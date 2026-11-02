@@ -118,14 +118,11 @@ describe("the order tracker", () => {
     expect(screen.getByRole("switch", { name: "Overdue only" })).toBeChecked();
   });
 
-  it("shows an empty state with a next step", async () => {
+  it("shows an empty state that names what is missing", async () => {
     await i18n.loadNamespaces(["order-tracker", "common"]);
     server.use(getTrackerListMockHandler(page([])));
     renderPage();
     expect(await screen.findByText("No orders to track yet")).toBeVisible();
-    expect(
-      screen.getByRole("link", { name: "Open the orders list" }),
-    ).toBeVisible();
   });
 
   it("shows the error with its trace id and a retry", async () => {

@@ -12,6 +12,7 @@ import { describe, expect, it } from "vitest";
 import { moduleName } from "../bundle-report.ts";
 import {
   BUDGET_BYTES,
+  findPlannedText,
   initialScripts,
   isOwnCode,
   measureInitialJs,
@@ -99,5 +100,22 @@ describe("bundle budget", () => {
     expect(moduleName("\u0000rolldown/runtime.js", root)).toBe(
       "rolldown/runtime.js",
     );
+  });
+});
+
+describe("developers-only text", () => {
+  const planned = {
+    badge: "Planned",
+    lists: { a: ["A sentence that is long enough"] },
+  };
+
+  it("is found in a build that contains it, and only there", () => {
+    const dist = mkdtempSync(path.join(tmpdir(), "op-planned-"));
+    mkdirSync(path.join(dist, "assets"));
+    writeFileSync(path.join(dist, "assets/clean.js"), 'x="Planned";y=1');
+    expect(findPlannedText(dist, planned)).toEqual([]);
+    const leak = path.join(dist, "assets/leak.js");
+    writeFileSync(leak, 'x="A sentence that is long enough"');
+    expect(findPlannedText(dist, planned)).toEqual([leak]);
   });
 });

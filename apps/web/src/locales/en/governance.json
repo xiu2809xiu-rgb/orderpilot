@@ -1,11 +1,10 @@
 {
   "title": "Governance",
   "description": "Who may do what, and what data may go where.",
-  "arrives": [
-    "Approval limits and delegation",
-    "Segregation of duties and the bank-detail control",
-    "The real masking rules"
-  ],
+  "menu": {
+    "users": "Users",
+    "roles": "Roles"
+  },
   "tabs": {
     "label": "Governance sections",
     "matrix": "Role matrix",
@@ -29,7 +28,7 @@
     "scrollHint": "Scroll sideways to see every role.",
     "permission": "Permission",
     "dataScope": "Data scope",
-    "dataScopeHint": "Which records a role may see. It is stored and shown here, but no list is filtered by it yet.",
+    "dataScopeHint": "Which records a role may see. It is recorded here, and no list is filtered by it.",
     "scopes": {
       "all": "All records",
       "brands": "Own brands",

@@ -4,7 +4,11 @@ import {
   createMemoryRouter,
   type RouteObject,
 } from "react-router";
-import { features } from "@/features/registry";
+import {
+  allFeatures,
+  reachableFeatures,
+  showPlannedFeatures,
+} from "@/features/registry";
 import type { Feature } from "@/features/define";
 import { setRecordRoutes } from "@/lib/recordRoutes";
 import {
@@ -38,8 +42,13 @@ export function featureRoute(feature: Feature): RouteObject {
   };
 }
 
+/**
+ * A planned feature gets no route, so its address falls through to the
+ * not-found page like any other unknown one.
+ */
 export function buildRoutes(
-  list: readonly Feature[] = features,
+  list: readonly Feature[] = allFeatures,
+  withPlanned: boolean = showPlannedFeatures(),
 ): RouteObject[] {
   const routes: RouteObject[] = [
     {
@@ -94,7 +103,7 @@ export function buildRoutes(
                     },
                   ],
                 },
-                ...list.map(featureRoute),
+                ...reachableFeatures(list, withPlanned).map(featureRoute),
                 {
                   path: "*",
                   lazy: async () => ({

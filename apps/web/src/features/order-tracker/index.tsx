@@ -26,9 +26,16 @@ export default defineFeature({
   id: "order-tracker",
   namespace: "order-tracker",
   path: "order-tracker",
-  group: "operations",
-  icon: Truck,
   permission: "tracker.read",
+  menu: [
+    {
+      id: "order-tracker.tracker",
+      module: "reports",
+      label: "order-tracker:menu.tracker",
+      to: "/order-tracker",
+      icon: Truck,
+    },
+  ],
   cues: [
     {
       id: "openOrders",

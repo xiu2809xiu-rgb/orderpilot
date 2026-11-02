@@ -1,0 +1,48 @@
+{
+  "badge": "Planned",
+  "heading": "What arrives here",
+  "developerNote": "Developer view: this page is not built yet, and it is hidden from everyone else.",
+  "lists": {
+    "orders": [
+      "A list of orders with status and filters",
+      "An order's lines, checks and documents on one page",
+      "Draft sales orders and vendor POs, ready for the ERP"
+    ],
+    "documents": [
+      "Upload a customer PO and see what the AI read",
+      "Field-by-field confidence, with the source highlighted",
+      "Confirm or correct before anything reaches the ERP"
+    ],
+    "constellation": [
+      "Orders as points, grouped by stage",
+      "Click a point to open the order",
+      "A plain list for anyone who prefers it"
+    ],
+    "mapping": [
+      "Field mappings for each document type",
+      "Customer-specific aliases and unit conversions",
+      "A test run before a mapping goes live"
+    ],
+    "connectors": [
+      "The status of each connector",
+      "Settings and a connection test",
+      "A log of recent calls"
+    ]
+  },
+  "purchase": {
+    "title": "Purchase flow",
+    "description": "Arrives with the bank-detail check.",
+    "phase": "Phase 2",
+    "steps": {
+      "spr": "SPR raised",
+      "approved": "Approved",
+      "vendorPo": "Vendor PO",
+      "vendorPi": "Vendor PI",
+      "forwarder": "Forwarder",
+      "goodsChecked": "Goods checked",
+      "received": "Received",
+      "customerTold": "Customer told",
+      "vendorPaid": "Vendor paid"
+    }
+  }
+}

@@ -1,14 +1,23 @@
 import { Plug } from "lucide-react";
-import { lazy } from "react";
-import { defineFeature } from "../define";
+import { defineFeature, devOnlyPage } from "../define";
 
 export default defineFeature({
   id: "connectors",
   namespace: "connectors",
   path: "connectors",
-  group: "data",
-  icon: Plug,
   permission: "settings.manage",
+  menu: [
+    {
+      id: "connectors.connectors",
+      module: "system",
+      label: "connectors:menu.connectors",
+      to: "/connectors",
+      icon: Plug,
+    },
+  ],
   cues: [],
-  Page: lazy(() => import("./ConnectorsPage")),
+  planned: true,
+  Page: devOnlyPage(
+    import.meta.env.DEV ? () => import("./ConnectorsPage") : undefined,
+  ),
 });

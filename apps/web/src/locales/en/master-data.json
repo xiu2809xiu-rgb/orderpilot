@@ -1,11 +1,11 @@
 {
   "title": "Master data",
   "description": "Items, customers and vendors, read from Navision.",
-  "arrives": [
-    "Items with their stock, open orders and purchase orders",
-    "Customers with their terms, orders to ship and what is overdue",
-    "Vendors with their bank accounts, masked by role"
-  ],
+  "menu": {
+    "customers": "Customers",
+    "vendors": "Vendors",
+    "items": "Items"
+  },
   "actions": {
     "findItem": "Find an item",
     "customers": "Customers",

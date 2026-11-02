@@ -1,14 +1,23 @@
 import { FileText } from "lucide-react";
-import { lazy } from "react";
-import { defineFeature } from "../define";
+import { defineFeature, devOnlyPage } from "../define";
 
 export default defineFeature({
   id: "documents",
   namespace: "documents",
   path: "documents",
-  group: "operations",
-  icon: FileText,
   permission: "documents.read",
+  menu: [
+    {
+      id: "documents.inbox",
+      module: "documents",
+      label: "documents:menu.inbox",
+      to: "/documents",
+      icon: FileText,
+    },
+  ],
   cues: [],
-  Page: lazy(() => import("./DocumentsPage")),
+  planned: true,
+  Page: devOnlyPage(
+    import.meta.env.DEV ? () => import("./DocumentsPage") : undefined,
+  ),
 });

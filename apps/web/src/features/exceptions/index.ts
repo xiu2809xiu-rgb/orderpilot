@@ -19,9 +19,17 @@ export default defineFeature({
   id: "exceptions",
   namespace: "exceptions",
   path: "exceptions",
-  group: "operations",
-  icon: TriangleAlert,
   permission: "exceptions.read",
+  menu: [
+    {
+      id: "exceptions.exceptions",
+      module: "reports",
+      label: "exceptions:menu.exceptions",
+      to: "/exceptions?state=OPEN",
+      icon: TriangleAlert,
+      count: { api: "/exceptions?state=OPEN" },
+    },
+  ],
   cues: [
     {
       id: "openExceptions",

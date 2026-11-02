@@ -5,6 +5,7 @@ import { Plus } from "lucide-react";
 import { must } from "@/test/must";
 import { MemoryRouter } from "react-router";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
+import { allFeatures } from "@/features/registry";
 import { registerAction } from "@/lib/actions";
 import { useSessionStore } from "@/stores/session";
 import { sessionFor } from "@/test/fixtures";
@@ -13,7 +14,9 @@ import { CommandPalette } from "./CommandPalette";
 const added: (() => void)[] = [];
 
 beforeAll(async () => {
-  await i18n.loadNamespaces(["common", "orders", "audit", "governance"]);
+  await i18n.loadNamespaces(
+    allFeatures.map((feature) => feature.namespace).concat("common"),
+  );
 });
 
 afterEach(() => {
@@ -78,6 +81,40 @@ describe("command palette", () => {
     expect(
       await screen.findByRole("option", { name: /Change a role/ }),
     ).toBeInTheDocument();
+  });
+
+  it("goes to the menu's places and to no planned screen", async () => {
+    open("WAREHOUSE");
+    await screen.findByRole("combobox");
+    const goTo = within(
+      screen.getByRole("group", { name: "Go to" }),
+    ).getAllByRole("option");
+    expect(goTo.map((o) => o.textContent)).toEqual([
+      "Home",
+      "My tasks",
+      "Customers",
+      "Vendors",
+      "Items",
+      "Order tracker",
+      "Exceptions",
+      "Settings",
+    ]);
+  });
+
+  it("offers each system admin place and no planned one", async () => {
+    open("SYSTEM_ADMIN");
+    await screen.findByRole("combobox");
+    const goTo = within(
+      screen.getByRole("group", { name: "Go to" }),
+    ).getAllByRole("option");
+    expect(goTo.map((o) => o.textContent)).toEqual([
+      "Home",
+      "Users",
+      "Roles",
+      "Audit log",
+      "Monitoring",
+      "Settings",
+    ]);
   });
 
   it("explains the keys in its help", async () => {

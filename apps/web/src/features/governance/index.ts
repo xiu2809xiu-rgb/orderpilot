@@ -30,9 +30,25 @@ export default defineFeature({
   id: "governance",
   namespace: "governance",
   path: "governance",
-  group: "control",
-  icon: ShieldCheck,
   permission: "roles.read",
+  menu: [
+    {
+      id: "governance.users",
+      module: "system",
+      label: "governance:menu.users",
+      to: "/governance?tab=users",
+      icon: Users,
+      permission: "users.read",
+    },
+    {
+      id: "governance.roles",
+      module: "system",
+      label: "governance:menu.roles",
+      to: "/governance?tab=matrix",
+      icon: ShieldCheck,
+      isDefaultTab: true,
+    },
+  ],
   cues: [
     {
       id: "roles",

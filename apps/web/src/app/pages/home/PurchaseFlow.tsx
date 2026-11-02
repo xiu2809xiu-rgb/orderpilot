@@ -14,9 +14,9 @@ const STEPS = [
   "vendorPaid",
 ] as const;
 
-/** The purchase flow, muted and with no counts: it arrives in Phase 2. */
-export function PurchaseFlow() {
-  const { t } = useTranslation("home");
+/** The purchase flow as a developer preview: muted, with no counts. */
+export default function PurchaseFlow() {
+  const { t } = useTranslation("planned");
   return (
     <SectionCard
       title={t("purchase.title")}

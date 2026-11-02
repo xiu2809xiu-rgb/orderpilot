@@ -1,17 +1,14 @@
 {
   "title": "Order tracker",
   "description": "Where every order stands, who holds it and what is overdue.",
-  "arrives": [
-    "Status, owner and overdue flags computed from workflow events",
-    "Open actions on each order",
-    "Shipment dates, AWB or BL numbers and permits"
-  ],
+  "menu": {
+    "tracker": "Order tracker"
+  },
   "list": {
     "caption": "Orders in the tracker",
     "overdueOnly": "Overdue only",
     "emptyTitle": "No orders to track yet",
     "emptyDescription": "Orders appear here once a customer PO has been received.",
-    "emptyAction": "Open the orders list",
     "columns": {
       "orderNo": "Order No.",
       "customer": "Customer",

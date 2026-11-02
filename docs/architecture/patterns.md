@@ -42,6 +42,8 @@ The named patterns used in the code, where each one lives, and why it earns its 
 | Derived data                | `synthetic-data/src/purchase-orders.ts`                               | Purchase orders come from approved SPRs and stock figures, so the numbers always agree                                    | P-35  |
 | Test fixture                | `e2e/src/fixtures.ts`                                                 | Every page in every spec is watched and has its analytics card answered, without a line in the spec                       | P-14  |
 | Facade                      | `e2e/src/index.ts`, `checkPage`                                       | A spec calls four helpers; the axe, console, CSP and layout checks behind them change in one place                        | P-14  |
+| Declared entries            | `features/define.ts` (`MenuEntry`), `features/nav.ts` (`menuFor`)     | Each feature declares its menu lines and the shell only reads them, so a menu built twice cannot disagree with itself     | P-39  |
+| Registry filter             | `features/registry.ts` (`reachableFeatures`)                          | One place decides whether a planned feature can be reached, so the menu, routes and palette cannot drift apart            | P-39  |
 
 ## Layers
 

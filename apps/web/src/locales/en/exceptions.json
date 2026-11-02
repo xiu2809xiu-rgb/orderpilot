@@ -1,11 +1,9 @@
 {
   "title": "Exceptions",
   "description": "Orders that failed a check and need a person.",
-  "arrives": [
-    "Assign, escalate and resolve an exception, with every step audited",
-    "An AI explanation of each exception, marked as AI",
-    "Tolerances set from Spectra answers"
-  ],
+  "menu": {
+    "exceptions": "Exceptions"
+  },
   "list": {
     "caption": "Exceptions waiting for a person",
     "emptyTitle": "No exceptions",

@@ -93,7 +93,7 @@
     "table": "Open business rules and their draft values",
     "description": "These rules stay as configuration until Spectra confirms them.",
     "open": "Open",
-    "noScreen": "No screen holds this yet",
+    "noScreen": "Held in configuration",
     "columns": {
       "rule": "Rule",
       "draft": "Draft value"
@@ -128,22 +128,6 @@
       "forwarder": "Shipped",
       "customerTold": "Invoiced",
       "awbAndPermit": "AWB and permit"
-    }
-  },
-  "purchase": {
-    "title": "Purchase flow",
-    "description": "Arrives with the bank-detail check.",
-    "phase": "Phase 2",
-    "steps": {
-      "spr": "SPR raised",
-      "approved": "Approved",
-      "vendorPo": "Vendor PO",
-      "vendorPi": "Vendor PI",
-      "forwarder": "Forwarder",
-      "goodsChecked": "Goods checked",
-      "received": "Received",
-      "customerTold": "Customer told",
-      "vendorPaid": "Vendor paid"
     }
   }
 }

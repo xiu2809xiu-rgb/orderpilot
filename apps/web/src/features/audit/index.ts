@@ -19,9 +19,16 @@ export default defineFeature({
   id: "audit",
   namespace: "audit",
   path: "audit",
-  group: "control",
-  icon: ScrollText,
   permission: "audit.read",
+  menu: [
+    {
+      id: "audit.log",
+      module: "system",
+      label: "audit:menu.log",
+      to: "/audit",
+      icon: ScrollText,
+    },
+  ],
   cues: [
     {
       id: "auditEvents",

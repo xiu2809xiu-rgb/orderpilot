@@ -4,10 +4,24 @@ import common from "./locales/en/common.json";
 
 // One file per feature namespace, each its own chunk: an area's text never
 // grows the entry bundle. Only `common` ships in the entry.
-const lazyNamespaces = import.meta.glob<{ default: Record<string, unknown> }>([
-  "./locales/*/*.json",
-  "!./locales/*/common.json",
-]);
+type Loaders = Record<
+  string,
+  () => Promise<{ default: Record<string, unknown> }>
+>;
+const lazyNamespaces: Loaders = {
+  ...import.meta.glob<{ default: Record<string, unknown> }>([
+    "./locales/*/*.json",
+    "!./locales/*/common.json",
+    "!./locales/*/planned.json",
+  ]),
+  // The text of the developers-only placeholder pages. In a production build
+  // the condition is false and the file is not bundled at all.
+  ...(import.meta.env.DEV
+    ? import.meta.glob<{ default: Record<string, unknown> }>(
+        "./locales/*/planned.json",
+      )
+    : {}),
+};
 
 const lazyBackend: BackendModule = {
   type: "backend",

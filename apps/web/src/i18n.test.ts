@@ -3,7 +3,7 @@ import path from "node:path";
 import ts from "typescript";
 import { describe, expect, it } from "vitest";
 import i18n from "./i18n";
-import { features } from "./features/registry";
+import { allFeatures } from "./features/registry";
 
 const src = import.meta.dirname;
 
@@ -79,23 +79,46 @@ describe("no hard-coded strings", () => {
 });
 
 describe("feature namespaces", () => {
-  it.each(features.map((feature) => [feature.namespace]))(
-    "%s loads lazily and has a title, a description and its list",
+  it.each(allFeatures.map((feature) => [feature.namespace]))(
+    "%s loads lazily and has a title, a description and its menu names",
     async (namespace) => {
       await i18n.loadNamespaces(namespace);
       expect(i18n.t("title", { ns: namespace })).not.toBe("title");
       expect(i18n.t("description", { ns: namespace })).not.toBe("description");
-      const arrives = i18n.t("arrives", {
-        ns: namespace,
-        returnObjects: true,
-      });
-      expect(Array.isArray(arrives) && arrives.length > 0).toBe(true);
+      const feature = allFeatures.find((f) => f.namespace === namespace);
+      for (const entry of feature?.menu ?? []) {
+        expect(i18n.t(entry.label), entry.id).not.toBe(entry.label);
+      }
     },
   );
 
+  it("keeps talk of the future in planned.json alone", () => {
+    const dir = path.join(src, "locales", "en");
+    const files = readdirSync(dir).filter(
+      (file) => file.endsWith(".json") && file !== "planned.json",
+    );
+    expect(files.length).toBeGreaterThan(10);
+    for (const file of files) {
+      expect(readFileSync(path.join(dir, file), "utf8"), file).not.toMatch(
+        /\bPlanned\b|coming soon|No count yet|Counts appear|\barrives\b|Phase 2/i,
+      );
+    }
+  });
+
+  it("gives every planned screen its developer-only list", async () => {
+    await i18n.loadNamespaces("planned");
+    for (const feature of allFeatures.filter((f) => f.planned)) {
+      const lists = i18n.t(`lists.${feature.id}`, {
+        ns: "planned",
+        returnObjects: true,
+      });
+      expect(Array.isArray(lists) && lists.length > 0, feature.id).toBe(true);
+    }
+  });
+
   it("gives every home tile a label", async () => {
     await i18n.loadNamespaces("home");
-    for (const feature of features) {
+    for (const feature of allFeatures) {
       for (const cue of feature.cues) {
         const key = `tiles.${cue.id}`;
         expect(i18n.t(key, { ns: "home" }), `${feature.id} ${key}`).not.toBe(

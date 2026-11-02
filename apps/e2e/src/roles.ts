@@ -12,11 +12,13 @@ const workflows: SmokePage = { path: "/workflows", name: "Workflows" };
 
 /**
  * Each role's home page and its two main pages, in the order the smoke test
- * opens them. This is the one list: a story that makes a page real adds it
- * here, and P-39 extends it with every menu entry.
+ * opens them with the full page check. This is the one list: a story that
+ * makes a page real adds it here. `menu.spec.ts` follows every menu entry and
+ * every Ctrl+K place of each role on top, with a lighter check.
  *
- * Pages that still show a placeholder (Orders, Documents, Mapping, Connectors
- * and the 3D view) are left out until P-39 hides them.
+ * Pages that are not built (Orders, Documents, Mapping, Connectors and the 3D
+ * view) have no address: the web app answers them with the not-found page
+ * until their story removes their planned flag.
  */
 export const SMOKE_PAGES: Readonly<Record<Role, readonly SmokePage[]>> = {
   SYSTEM_ADMIN: [
