@@ -25,6 +25,10 @@ x-app-env: &app-env
   JWT_SECRET: ${JWT_SECRET:-local-development-secret-not-for-production-use}
   COOKIE_SECURE: ${COOKIE_SECURE:-false}
   LOG_LEVEL: ${LOG_LEVEL:-info}
+  # The end-to-end run raises both, because it signs in as every role within a
+  # minute from one address (apps/e2e, ci.yml). Everyone else keeps the defaults.
+  RATE_LIMIT_MAX_REQUESTS: ${RATE_LIMIT_MAX_REQUESTS:-300}
+  AUTH_RATE_LIMIT_MAX_REQUESTS: ${AUTH_RATE_LIMIT_MAX_REQUESTS:-20}
   # nginx in the web container is the one proxy in front of the API.
   TRUST_PROXY_HOPS: 1
   CORS_ORIGINS: http://localhost:${STACK_WEB_PORT:-8080},http://127.0.0.1:${STACK_WEB_PORT:-8080}

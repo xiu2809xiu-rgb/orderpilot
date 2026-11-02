@@ -10,8 +10,9 @@ afterEach(() => {
 });
 
 describe("the component gallery route", () => {
+  // Axe walks the whole page, forms included. Under a full parallel run that
+  // takes longer than the usual limit, so this test has its own.
   it("shows every component to a demo session", async () => {
-    const user = userEvent.setup();
     const { container } = renderApp("/gallery", {
       session: sessionFor("AUDITOR"),
     });
@@ -30,8 +31,12 @@ describe("the component gallery route", () => {
       screen.getByRole("heading", { name: "Operation log" }),
     ).toBeVisible();
     expect(await axeViolations(container)).toEqual([]);
+  }, 60_000);
 
-    // The table is served by the fake server, and its states can be forced.
+  it("lets the table be forced into its states", async () => {
+    const user = userEvent.setup();
+    renderApp("/gallery", { session: sessionFor("AUDITOR") });
+    await screen.findByRole("heading", { level: 1, name: "Component gallery" });
     const table = screen.getByRole("table", { name: "Orders" });
     expect(within(table).getAllByRole("row")).toHaveLength(11);
     await user.click(screen.getByRole("button", { name: "Show an error" }));

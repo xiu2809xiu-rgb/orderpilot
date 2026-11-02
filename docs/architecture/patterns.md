@@ -40,6 +40,8 @@ The named patterns used in the code, where each one lives, and why it earns its 
 | Port with a mock adapter    | `master-data/domain/master-data-reader.ts`, `MockNavisionMasterData`  | The seam for P-20: the port has its own records, so the connector replaces one class, and the controller and service stay | P-35  |
 | Domain class                | `master-data/domain/stock-position.ts`                                | Available stock and "short" are one tested rule; short is read from the order                                             | P-35  |
 | Derived data                | `synthetic-data/src/purchase-orders.ts`                               | Purchase orders come from approved SPRs and stock figures, so the numbers always agree                                    | P-35  |
+| Test fixture                | `e2e/src/fixtures.ts`                                                 | Every page in every spec is watched and has its analytics card answered, without a line in the spec                       | P-14  |
+| Facade                      | `e2e/src/index.ts`, `checkPage`                                       | A spec calls four helpers; the axe, console, CSP and layout checks behind them change in one place                        | P-14  |
 | Declared entries            | `features/define.ts` (`MenuEntry`), `features/nav.ts` (`menuFor`)     | Each feature declares its menu lines and the shell only reads them, so a menu built twice cannot disagree with itself     | P-39  |
 | Registry filter             | `features/registry.ts` (`reachableFeatures`)                          | One place decides whether a planned feature can be reached, so the menu, routes and palette cannot drift apart            | P-39  |
 
@@ -197,3 +199,22 @@ A service that changes something on behalf of a user takes the `AuthContext` and
 | Overlay over a read model | `workflows/mock/mock-decision-overlay.ts`                     | A mock keeps what people did in memory, so a task leaves and Undo works, until the state machine replaces it                                               | P-33  |
 | Declarative tile          | `FeatureCue` in `features/define.ts`, `cuesFor` in `nav.ts`   | A tile names its route and its API list with the same filters, so its count is that list's total                                                           | P-33  |
 | Lookup table              | `checks/domain/mock-sales-flow.ts`                            | One named table maps the sample states onto the nine sales steps, so the steps add up to the open orders                                                   | P-33  |
+| Memento (draft store)     | `lib/draft-store.ts`, `components/form/useDraft.ts`           | A form's unsaved state is saved and restored outside it, keyed by viewer and record, versioned and aged, with masked fields left out                       | P-46  |
+| Adapter (server errors)   | `components/form/serverErrors.ts`                             | One function turns the API's error envelope into field errors and a form-level error, so no form reads `details` itself                                    | P-46  |
+
+## The entry chunk: what the shell may import
+
+The first screen (the sign-in page or a role's home page) waits for the entry chunk, which `pnpm budget` holds at 250 KB gzip or less. It was 202 KB after P-78. The rule that keeps it there, checked by the `orderpilot-web/entry-chunk` lint rule in `apps/web/eslint.config.js`:
+
+- **The shell, the router, the stores, `lib/api` and each feature's `index.ts` and `routes.tsx` import only what the first paint shows.** A page, a dialog or anything opened by a click is a lazy chunk.
+- **No barrel.** Import `@/components/common/skeletons`, never `@/components/common`, which brings every common component.
+- **No generated client.** The entry calls `apiClient`; a hook from `@/lib/api/generated` brings a whole area's endpoints.
+- **Overlays through the facades.** A menu, popover or sheet in the shell comes from `@/app/shell/overlays/*`, never from `@/components/ui/*` ([ADR 0035](../adr/0035-the-shell-loads-its-overlays-after-the-first-paint.md)). A dialog, the palette or a tooltip is lazy-loaded where it is used.
+- **Look before you add.** `pnpm budget` prints the five largest modules in the entry and the five largest of our own code. If your story grows the entry, the pull request says by how much and why.
+
+| Pattern                        | Where                                                   | Why                                                                                                                          | Story |
+| ------------------------------ | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ----- |
+| Module loaded on demand        | `deferredModule`, `useDeferredModule` in `lib/deferred` | A module is fetched once, a failed fetch is tried again on the next click, and components re-render when it arrives          | P-78  |
+| Facade with a stand-in trigger | `app/shell/overlays/`                                   | The shell keeps shadcn's names and props; until Radix arrives the trigger is a plain button that looks the same and opens it | P-78  |
+| Prefetch on idle               | `whenIdle`, `DeferredRoot`, `AppShell`                  | The menus, the palette and the session dialog arrive after the first paint, so a click or Control K never waits              | P-78  |
+| Build report                   | `apps/web/bundle-report.ts`, `pnpm budget`              | The build records each chunk's modules, so the budget names what fills the entry instead of a bare total                     | P-78  |

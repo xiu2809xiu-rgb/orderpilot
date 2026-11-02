@@ -74,7 +74,7 @@
     "seeAll": "See all ({{count}})"
   },
   "userMenu": {
-    "label": "Account menu",
+    "label": "Account menu, {{initials}}",
     "signedInAs": "Signed in as",
     "signOut": "Sign out"
   },

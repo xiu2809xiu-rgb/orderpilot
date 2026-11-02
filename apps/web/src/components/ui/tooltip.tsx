@@ -15,10 +15,16 @@ function TooltipProvider({
   );
 }
 
+// Each tooltip brings its own provider, as shadcn's current version does, so
+// the shell needs no provider and the tooltip code stays out of the entry.
 function Tooltip({
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Root>) {
-  return <TooltipPrimitive.Root data-slot="tooltip" {...props} />;
+  return (
+    <TooltipProvider>
+      <TooltipPrimitive.Root data-slot="tooltip" {...props} />
+    </TooltipProvider>
+  );
 }
 
 function TooltipTrigger({

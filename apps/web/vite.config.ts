@@ -2,6 +2,7 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import path from "node:path";
 import { defineConfig, loadEnv, type Plugin } from "vite";
+import { bundleReport } from "./bundle-report.ts";
 import { securityHeaders } from "./security-headers.ts";
 
 const repoRoot = path.resolve(import.meta.dirname, "../..");
@@ -54,7 +55,12 @@ export default defineConfig(({ mode }) => {
 
   return {
     define,
-    plugins: [react(), tailwindcss(), previewHeaders(sentryDsn)],
+    plugins: [
+      react(),
+      tailwindcss(),
+      previewHeaders(sentryDsn),
+      bundleReport(repoRoot),
+    ],
     resolve: {
       alias: {
         "@": path.resolve(import.meta.dirname, "src"),

@@ -49,7 +49,8 @@ The licence-key guard reads the real values from `apps/web/.env.local` on your m
 
 | Control                                                                          | Status        |
 | -------------------------------------------------------------------------------- | ------------- |
-| End-to-end tests with axe, including the refusals of E2E #3                      | Planned: P-14 |
+| End-to-end tests with axe, and `expectRefused` for server-side refusals          | Today (P-14)  |
+| E2E #3's own spec: a direct call refused, and the refusal in the audit viewer    | Planned: F-8  |
 | OWASP ZAP baseline scan of the live URL, weekly and on demand                    | Planned: P-24 |
 | Lighthouse at each release                                                       | Planned: P-24 |
 | Trivy over the images the stack pulls (PostgreSQL with pgvector, Redis, Mailpit) | Planned: P-24 |

@@ -198,7 +198,7 @@ Each row says whether it exists today or which story brings it. Everything marke
 | Forms                   | React Hook Form with zod                                                                                                                                                 | Built: P-11                          |
 | Icons and type          | Lucide only, and the Geist font with tabular numbers                                                                                                                     | Built: P-11                          |
 | Containers              | Docker Compose under project name `orderpilot`: the four stores, then the migrations, `api`, `worker` and `web`, plus a samples stack (ADR 0031)                         | Today (P-9, P-13)                    |
-| Tests                   | Vitest, Testing Library, and Playwright with axe                                                                                                                         | Today (P-8, P-11), P-14              |
+| Tests                   | Vitest, Testing Library, and Playwright 1.64.1 with `@axe-core/playwright` 4.14.0, Chromium only ([ADR 0034](docs/adr/0034-playwright-end-to-end-tests.md))              | Today (P-8, P-11, P-14)              |
 | Events and live updates | A typed domain event bus, a transactional outbox, idempotency keys and SSE                                                                                               | Planned: P-15                        |
 | Diagrams                | Mermaid sources rendered to SVG                                                                                                                                          | Planned: P-16                        |
 | AI                      | `LlmGateway` with three providers: mock (the default), OpenAI-compatible, and optional Bedrock                                                                           | Planned: P-17                        |
@@ -224,6 +224,7 @@ Each row says whether it exists today or which story brings it. Everything marke
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
 | `apps/api`                       | The NestJS API, with a worker entry                                                                                                                                    | Today (P-8), P-13                                 |
 | `apps/web`                       | The web app                                                                                                                                                            | Built: P-11                                       |
+| `apps/e2e`                       | The Playwright tests of a running stack: the smoke test of every role, and the helpers each CRUD spec uses                                                             | Today (P-14)                                      |
 | `services/mock-template`         | The template every mock service starts from, built by `docker/mock/Dockerfile`                                                                                         | Today (P-13)                                      |
 | `services/mock-navision`         | The mock of Navision                                                                                                                                                   | Planned: P-19                                     |
 | `packages/tsconfig`              | The strict TypeScript config                                                                                                                                           | Today                                             |
@@ -327,7 +328,7 @@ The API is NestJS, in layers ([ADR 0008](docs/adr/0008-nestjs-layered-modules.md
 | API integration | Every endpoint, with 401, 403 and validation cases                | Vitest              | Planned: P-10, with its harness in P-9 |
 | Component       | Components in each of their states                                | Testing Library     | Built: P-11                            |
 | Contract        | Connectors against the mock                                       | Vitest              | Planned: P-20                          |
-| End-to-end      | The smoke test first, then E2E #1 to #4, with WCAG 2.2 AA checked | Playwright with axe | Planned: P-14                          |
+| End-to-end      | The smoke test first, then E2E #1 to #4, with WCAG 2.2 AA checked | Playwright with axe | Today (P-14): smoke test, helpers      |
 | Load            | The extraction queue and the order endpoints                      | k6                  | Planned, not yet in a story            |
 | Manual requests | `.http` request files in `apps/api/requests/`                     | Any REST client     | Planned: P-8                           |
 
@@ -401,7 +402,7 @@ Planned with P-11:
 ### The main branch
 
 - The `Protect main` ruleset blocks deletion and force pushes, and requires a pull request: 0 approvals for now, stale reviews dismissed, review threads resolved, merge commits or squash. Repository admins can bypass it in pull request mode only. [`.github/rulesets/main.json`](.github/rulesets/main.json) mirrors it, and `scripts/github/check-ruleset.mjs` says if the two drift apart.
-- Four checks are required: `Lint, typecheck, test, build`, `SAST (Semgrep)`, `Secret scan (gitleaks)` and `Dependency scan (OSV)`. P-13 adds `Docker images` and `IaC and Dockerfile scan` to `.github/rulesets/main.json`, required once the ruleset is applied after it merges. P-14 adds its own, and a required check's name stays fixed once it is required.
+- Four checks are required: `Lint, typecheck, test, build`, `SAST (Semgrep)`, `Secret scan (gitleaks)` and `Dependency scan (OSV)`. P-13 adds `Docker images` and `IaC and Dockerfile scan` to `.github/rulesets/main.json`, required once the ruleset is applied after it merges. P-14 adds `End-to-end smoke` the same way, and a required check's name stays fixed once it is required.
 - One approving review plus code-owner review is switched on at T-9, only on Richie's yes.
 - Never force push and never commit straight to `main`.
 - Release tags are `v0.1-proposal`, `v0.2-technical-review` and `v1.0-final`, each after a feature freeze.

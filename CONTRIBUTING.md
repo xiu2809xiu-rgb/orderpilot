@@ -155,7 +155,7 @@ pnpm --filter @orderpilot/web test       # component and unit tests
 - **Ports:** `WEB_PORT` (default 5173) and `API_PORT` (default 3000) are in [`.env.example`](.env.example). Vite reads only those two names from the root `.env`.
 - **Demo sign-in:** with `DEMO_MODE=true` (the default in `.env.example`), the login page lists the nine roles. Without the API running, the page loads but cannot sign in.
 - **Where things are:** each area's screens go in `apps/web/src/features/<feature>/`; the shell, router and guards are in `src/app/`; text is in `src/locales/en/`. [ADR 0013](docs/adr/0013-the-web-stack.md) explains the layout.
-- **Screenshots** for a pull request come from `apps/web/scripts/screenshots.mjs`, which needs Playwright installed outside the repository (the top of the file says how) until P-14 adds it.
+- **Screenshots** for a pull request come from `apps/web/scripts/screenshots.mjs`, which still needs Playwright installed outside the repository (the top of the file says how). Moving it onto `apps/e2e` is in the backlog (P-79).
 
 ### The full stack in Docker
 
@@ -166,6 +166,21 @@ pnpm --filter @orderpilot/web test       # component and unit tests
 - It shares the stores with `pnpm dev`, and none of its ports clash, so both can run at once.
 - The mock services start only when asked: `docker compose --profile mocks up -d --build mock-template`.
 - Screenshots for a pull request come from this stack (CLAUDE.md, rule 3).
+
+### Run the end-to-end tests
+
+The browser tests in `apps/e2e` run against a stack that is already up, and start nothing themselves ([ADR 0034](docs/adr/0034-playwright-end-to-end-tests.md)). Once per machine, download Chromium; then bring the full stack up and run them:
+
+```sh
+pnpm --filter @orderpilot/e2e exec playwright install chromium
+docker compose up --build -d --wait
+pnpm e2e
+```
+
+- `pnpm e2e` signs in as each of the nine roles, so the default sign-in limit of 20 a minute is too tight for repeated runs. Set `AUTH_RATE_LIMIT_MAX_REQUESTS=1000` in the root `.env` and run `docker compose up -d --wait` again, as CI does. Leave `DEMO_MODE=true`: the tests sign in through the demo route.
+- `E2E_BASE_URL=http://localhost:5173 pnpm e2e` runs them against `pnpm dev` or any other stack instead.
+- `pnpm e2e -- -g "Auditor"` runs only the tests whose title matches. `pnpm --filter @orderpilot/e2e e2e:report` opens the last report.
+- Never run them against the live demo: they sign in as every role and leave audit events.
 
 ### Trying a client sample
 
@@ -190,6 +205,7 @@ Read [`samples/README.md`](samples/README.md) first. `pnpm samples:up` starts a 
 | `pnpm stack:up`            | `docker compose up -d --wait` for the four stores only: PostgreSQL, Redis, MinIO and Mailpit, healthy before it returns       |
 | `pnpm stack:down`          | `docker compose down`: stops and removes the containers, keeps the data                                                       |
 | `pnpm stack:smoke`         | Checks a running full stack from outside, on `STACK_WEB_PORT`                                                                 |
+| `pnpm e2e`                 | The browser tests in `apps/e2e` against a running stack: the smoke test of every role and each screen's spec                  |
 | `pnpm samples:up`          | Builds and starts the sealed samples stack                                                                                    |
 | `pnpm samples:restart-web` | Restarts the web container of the samples stack and seals it again                                                            |
 | `pnpm samples:down`        | Stops and deletes the samples stack and everything it held                                                                    |
@@ -246,15 +262,11 @@ If a hook stops you, it says why and what to do. When it refuses a push to `main
 
 **Changed `.env` and nothing moved.** A variable set in your shell wins over the file, and the API never overrides it. Check with `echo $POSTGRES_PORT` (PowerShell: `$env:POSTGRES_PORT`), and unset it. Then run `docker compose up -d --wait` so the containers pick up the new ports.
 
+**A new locale file is missing in the web tests** (`No translations for en/<name>`, or the raw key on screen). Vitest keeps transformed modules in `node_modules/.vitest-cache`, and `i18n.ts`'s list of locale files is from before the file existed. Delete that folder and run the tests again. CI starts clean, so it never sees this.
+
 **The first `docker compose up` takes minutes.** It compiles MinIO from its source once. Later starts use the cached image.
 
 **Start again from nothing.** `docker compose down` stops and removes the containers and keeps your data. Removing the data too (`docker compose down -v`) deletes the volumes: ask first, and know that it cannot be undone.
-
-### What later stories bring
-
-| Step                                     | Story |
-| ---------------------------------------- | ----- |
-| End-to-end tests with Playwright and axe | P-14  |
 
 ## Workflow
 
@@ -345,6 +357,62 @@ If something destructive or irreversible seems necessary, ask Richie first.
 7. **Test it** with Testing Library, and add its screenshots in light and dark to the pull request.
 8. **Stay in your area.** Shared components need a review from their owners, listed in [module ownership](docs/team/module-ownership.md#shared-files-and-who-reviews-them).
 
+## Building a form
+
+Every form is built from the kit in `apps/web/src/components/form`, imported from `@/components/form`. Never hand-roll a field, a save or an error box. `/gallery` shows the whole kit on a sales order header with a faked save, in demo mode and in development.
+
+```tsx
+const form = useZodForm<OrderInput, Order>({
+  schema: orderSchema,
+  defaultValues: order,
+});
+const draft = useDraft(`order.${order.no}`, form, {
+  exclude: ["lines.*.unitPrice"],
+});
+const save = useFormSave(form, {
+  draft,
+  onSave: (values) => updateOrder(order.no, values),
+});
+useSaveShortcut(form, save);
+
+<FormShell form={form} draft={draft}>
+  <FormGrid>
+    <LookupField
+      control={form.control}
+      name="customer"
+      label={t("customer")}
+      search={searchCustomers}
+      required
+      className="sm:col-span-2"
+    />
+    <TextField
+      control={form.control}
+      name="customerPo"
+      label={t("customerPo")}
+      required
+      code
+    />
+    <MoneyField
+      control={form.control}
+      name="freight"
+      label={t("freight")}
+      currency="USD"
+    />
+  </FormGrid>
+  <FormActions>
+    <SaveButton form={form} onSave={save} />
+  </FormActions>
+</FormShell>;
+```
+
+- **The schema** lives in `packages/shared` when the API checks the same thing, with plain messages ("Enter the customer's PO number", never "Too small"). A field shows its error when the person leaves it, then on each change.
+- **Fields:** `TextField`, `NumberField` (with a `unit`), `MoneyField` (a decimal string with its currency, never a float), `DateField` (YYYY-MM-DD), `SelectField`, `TextAreaField`, `CheckboxField` and `LookupField`. Each takes `label`, `hint`, `required`, `disabled` and `readOnly`, and wires its label, hint, error, `aria-describedby` and `aria-invalid` itself. Prefer `readOnly` to `disabled`: it stays focusable and copyable. Amounts are tidied when the field is left after typing, never when it is only tabbed through, and a comma counts only as grouping ("1,200.50"): "12,50" is left for the schema to refuse. In a table cell, pass `hideLabel`: the label is not drawn but stays the field's accessible name. On a touch screen every control grows to 44 px.
+- **A rule across fields** (a ship-by date after the order date) sits on a small object of just those fields, joined to the main schema with `.and()`: on the whole object it would wait until every other field was right. A field that shows an error is checked again whenever any other field changes, so the error clears when the other field is corrected.
+- **A lookup** takes a `search(query, signal)` that returns `{ number, name, detail? }` records and stops when `signal` aborts. It holds `{ number, name }` or null; send the number. Use `requiredLookup(message)` in the schema. Its keys are the Navision ones: type a number and press Enter or Tab and the record is picked once the search has answered; the arrows only ever move through the results of the text as it stands. `onPick(option)` gives the page the whole record, for a unit price or the stock on hand. The list is a popover, so a grid cell cannot clip it.
+- **Errors: one line.** Save through `useFormSave` and every error lands for you: each `details` entry on its field in the server's words (`lines.0.quantity` included), the highest one focused, and the rest, a 409, a 403 or a 500, at the top with the trace id. A rule the schema refuses where no field shows it (a list that needs a line) goes to the same place, so Save never seems to do nothing. A path under a lookup (`customer.number`) lands on the lookup. Where the API's names differ from the form's, pass `serverPaths`: `{ customerNo: "customer", "lines.*.itemNo": "lines.*.item" }`. Outside `useFormSave`, call `applyServerError(error, form, map)` in your `catch`.
+- **Drafts.** `useDraft(key, form, { exclude, rowKey })` keeps unsaved changes in this browser for this viewer and this record. Put the record's number in the key, and list every field that can be masked in `exclude`, with `*` for every row. A row's left-out fields come back only from the row with the same `rowKey` field (`id` by default), never by position, so give rows a stable id; a row with none comes back with those fields empty. Mount the form once its record has loaded. A draft goes on save, on Discard and on sign-out, and stays when the session expires. Drafts older than seven days are dropped, whoever's they are. After a save the form is clean again, but anything typed while it ran stays unsaved. Signing out removes drafts only for the tab where it happens: another tab left open can write one again, since tabs share no session signal yet.
+- **Leaving and keys.** `FormShell` asks before a route change or a tab close while the form has unsaved changes; pass `leaveGuard={false}` for a form that keeps nothing, such as a filter. Signing out over a form with changes asks too, and says they will be deleted. The prompt opens on Keep editing, and focus returns to the field. Enter never submits. Ctrl+S or Command+S saves through `useSaveShortcut`, from inside a field too. Save is refused until something has changed: pass `allowClean` for a form that its defaults fill in, such as an SPR raised from a shortage line, and `blockedReason` when the person cannot save yet, in their words. **Pass the same two options to `SaveButton` and to `useSaveShortcut`**, and the button and the key always agree.
+
 ## Adding an API route
 
 The web app never hand-writes a call to the API. It uses hooks and mock handlers that orval generates from the API's OpenAPI file ([ADR 0019](docs/adr/0019-generated-api-hooks-and-mocks.md)).
@@ -366,6 +434,52 @@ The web app never hand-writes a call to the API. It uses hooks and mock handlers
 5. In the web app, import the hook (`useSystemChecks`) from `@/lib/api/generated/endpoints/<tag>/<tag>`. In a test, add the generated handler with `server.use(getSystemChecksMockHandler(...))` from `@/test/server`. `ServiceChecksCard` and its test are the example.
 
 Never edit the generated folder by hand.
+
+## End-to-end tests
+
+Every CRUD screen brings `apps/e2e/tests/<screen>.spec.ts` ([prompt 004](docs/ai/prompts/004-erp-grade-workspace.md#8-check-it), section 8): an allowed role creates, edits and voids a record, and a role without the permission sees no button and gets a 403 from the server. [`governance.spec.ts`](apps/e2e/tests/governance.spec.ts) is the shortest example, and [`smoke.spec.ts`](apps/e2e/tests/smoke.spec.ts) the longest.
+
+Import everything from `../src/index.js`, never from `@playwright/test`: its `test` watches every page and answers the analytics card.
+
+| Helper                                      | What it does                                                                                                                                                                     |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `signInAs(page, role)`                      | A real session as that role's demo persona, signed in once per run and reused. `{ fresh: true }` signs in anew, for a test that signs out                                        |
+| `checkPage(page)`                           | Fails on console errors, CSP violations, 5xx answers, a 403 from the API, "Planned" and other developer text, sideways scroll at 1440 and 390 wide, and axe WCAG 2.2 AA problems |
+| `expectNoButton(page, name)`                | No button with that accessible name, once the page has loaded                                                                                                                    |
+| `expectRefused(role, method, route, body?)` | Calls the API directly as that role, with its CSRF token, and expects a 403 `FORBIDDEN` envelope whose trace id is the request's                                                 |
+
+```ts
+import {
+  checkPage,
+  expect,
+  expectNoButton,
+  expectRefused,
+  signInAs,
+  test,
+} from "../src/index.js";
+
+test("support creates, edits and voids an order", async ({ page }) => {
+  await signInAs(page, "SUPPORT");
+  await page.goto("/orders");
+  await checkPage(page);
+  await page.getByRole("button", { name: "New order" }).click();
+  // ...fill the form, save, edit, then void with a reason, checking each step.
+});
+
+test("the warehouse sees no New order button and is refused", async ({
+  page,
+}) => {
+  await signInAs(page, "WAREHOUSE");
+  await page.goto("/orders");
+  await expectNoButton(page, "New order");
+  await expectRefused("WAREHOUSE", "POST", "/orders", validOrderBody);
+});
+```
+
+- Send `expectRefused` a body the route would accept, so the 403 cannot be a validation error.
+- Show in the same spec that the allowed role does see the button, or a misspelt name passes `expectNoButton` for the wrong reason.
+- Give each record a value of its own (a PO number with the test's name in it, say), because the tests run in parallel against one database and are run again.
+- A new page that every role should open goes in `SMOKE_PAGES` (`apps/e2e/src/roles.ts`) and is then in the smoke test too.
 
 ## Using AI tools
 

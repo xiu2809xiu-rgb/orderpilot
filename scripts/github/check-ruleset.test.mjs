@@ -75,6 +75,7 @@ test("the mirror is Protect main, with the rules step 0 set", () => {
       "Dependency scan (OSV)",
       "Docker images",
       "IaC and Dockerfile scan",
+      "End-to-end smoke",
     ],
   );
   assert.deepEqual(ruleset.bypass_actors, [
