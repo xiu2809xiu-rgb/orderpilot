@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { MenuCount as MenuCountSpec } from "@/features/define";
 import { useListCount } from "@/lib/useListCount";
 import { hasPermission, useSessionStore } from "@/stores/session";
@@ -17,15 +18,16 @@ export function useWaiting(count: MenuCountSpec | undefined): number {
   return total.data ?? 0;
 }
 
-/** The number on a menu line. Its words are in the link's name, so it is hidden. */
+/** The number on a menu line. It is visible text, so the link's name keeps it (WCAG 2.5.3), and a hidden word says what it counts. */
 export function MenuCount({ waiting }: { waiting: number }) {
+  const { t } = useTranslation();
   return (
     <span
-      aria-hidden="true"
       data-numeric
       className="ml-auto min-w-5 rounded-full bg-primary px-1.5 text-center text-xs leading-5 font-medium text-primary-foreground tabular-nums"
     >
       {waiting > 99 ? "99+" : waiting.toLocaleString("en")}
+      <span className="sr-only"> {t("nav.waitingWord")}</span>
     </span>
   );
 }

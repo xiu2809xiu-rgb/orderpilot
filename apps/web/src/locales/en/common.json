@@ -29,7 +29,8 @@
       "reports": "Reports",
       "system": "System"
     },
-    "waiting": "{{count}} waiting"
+    "waiting": "{{count}} waiting",
+    "waitingWord": "waiting"
   },
   "roles": {
     "SYSTEM_ADMIN": "System admin",

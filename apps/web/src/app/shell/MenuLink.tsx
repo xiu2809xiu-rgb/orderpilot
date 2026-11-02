@@ -24,18 +24,16 @@ export function MenuLink({
       to={entry.to}
       onClick={onNavigate}
       aria-current={active ? "page" : undefined}
-      aria-label={
-        waiting > 0
-          ? `${label}, ${t("nav.waiting", { count: waiting })}`
-          : undefined
-      }
       className={cn(
         "flex h-9 items-center gap-3 rounded-md px-3 text-sm font-medium text-sidebar-foreground transition-colors hover:bg-sidebar-accent/70",
         active && "bg-sidebar-accent text-sidebar-accent-foreground",
       )}
     >
       <entry.icon className="size-4 shrink-0" aria-hidden="true" />
-      <span className="min-w-0 truncate">{label}</span>
+      <span className="min-w-0 truncate">
+        {label}
+        {waiting > 0 ? " " : null}
+      </span>
       {waiting > 0 ? <MenuCount waiting={waiting} /> : null}
     </Link>
   );
