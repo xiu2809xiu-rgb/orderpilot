@@ -28,7 +28,7 @@ export function DraftNotice({ draft }: { draft: DraftControl }) {
         type="button"
         variant="ghost"
         size="xs"
-        className="ml-auto"
+        className="ml-auto pointer-coarse:min-h-11"
         onClick={(event) => {
           // The notice goes with the draft, and focus with it: hand it to the
           // first field so a keyboard user is not sent back to the page top.
