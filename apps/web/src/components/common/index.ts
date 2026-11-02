@@ -13,7 +13,18 @@ export type { DataTableProps } from "./data-table/DataTable";
 export type { TableStatus } from "./data-table/DataTableBody";
 export { exportCell, toCsv } from "./data-table/export/csv";
 export { DEFAULT_QUERY } from "./data-table/types";
-export { useUrlTableQuery } from "./data-table/useUrlTableQuery";
+export {
+  allPages,
+  apiParams,
+  MAX_PAGE_SIZE,
+  queryFromUrl,
+  urlFromQuery,
+  useUrlQuery,
+  type FilterSpec,
+  type UrlQueryOptions,
+} from "./data-table/useUrlQuery";
+export type { DataTableState } from "./data-table/useDataTableState";
+export type { ExportOptions } from "./data-table/ExportMenu";
 export { FilterChips, type FilterChip } from "./FilterChips";
 export { NumberTicker } from "./NumberTicker";
 export type {
@@ -57,3 +68,4 @@ export {
   PermissionDenied,
 } from "./states";
 export { StatusBadge, type StatusTone } from "./StatusBadge";
+export { STATUS_FAMILIES, StatusChip, type StatusFamily } from "./StatusChip";
