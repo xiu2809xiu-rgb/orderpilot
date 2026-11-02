@@ -6,10 +6,15 @@ import i18n from "@/i18n";
 import { draftKey } from "@/lib/draft-store";
 import { SessionEndedDialog } from "@/app/SessionEndedDialog";
 import { UserMenu } from "@/app/shell/UserMenu";
+import { loadShellOverlays } from "@/app/shell/overlays/preload";
 import { useSessionStore } from "@/stores/session";
 import { axeViolations } from "@/test/axe";
 import { sessionFor } from "@/test/fixtures";
 import { KitForm, LABELS, renderInRouter, signInAs, VALID } from "./kitHarness";
+
+// The account menu is one of the shell overlays that load after the first paint
+// (ADR 0035): load them as the browser would have by the time a person clicks.
+beforeAll(loadShellOverlays);
 
 beforeAll(async () => {
   await i18n.loadNamespaces("form");
