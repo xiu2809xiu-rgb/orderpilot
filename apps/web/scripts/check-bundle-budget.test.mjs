@@ -11,6 +11,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   BUDGET_BYTES,
+  findPlannedText,
   initialScripts,
   measureInitialJs,
 } from "./check-bundle-budget.mjs";
@@ -48,5 +49,22 @@ describe("bundle budget", () => {
     writeFileSync(path.join(dist, "assets/index-abc.js"), noise);
     writeFileSync(path.join(dist, "assets/vendor-def.js"), "x");
     expect(measureInitialJs(dist).total).toBeGreaterThan(BUDGET_BYTES);
+  });
+});
+
+describe("developers-only text", () => {
+  const planned = {
+    badge: "Planned",
+    lists: { a: ["A sentence that is long enough"] },
+  };
+
+  it("is found in a build that contains it, and only there", () => {
+    const dist = mkdtempSync(path.join(tmpdir(), "op-planned-"));
+    mkdirSync(path.join(dist, "assets"));
+    writeFileSync(path.join(dist, "assets/clean.js"), 'x="Planned";y=1');
+    expect(findPlannedText(dist, planned)).toEqual([]);
+    const leak = path.join(dist, "assets/leak.js");
+    writeFileSync(leak, 'x="A sentence that is long enough"');
+    expect(findPlannedText(dist, planned)).toEqual([leak]);
   });
 });

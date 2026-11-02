@@ -10,7 +10,6 @@
     "reminders": "Reminders"
   },
   "notice": {
-    "mock": "These screens read mock data. Approving, rejecting and confirming only check the request: nothing is saved until the workflow engine is built.",
     "notApplied": "Nothing was changed"
   },
   "inbox": {

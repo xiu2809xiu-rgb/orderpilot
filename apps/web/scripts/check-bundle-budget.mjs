@@ -3,9 +3,12 @@
 // script and its modulepreload links. Route chunks and the 3D chunks (P-23)
 // load later, on demand, so they are outside the budget by design.
 //
+// It also checks that the developers-only text of unbuilt screens
+// (src/locales/en/planned.json) is in no file of the build.
+//
 // Usage: node scripts/check-bundle-budget.mjs [distDir]
 
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { gzipSync } from "node:zlib";
@@ -36,6 +39,38 @@ export function measureInitialJs(distDir) {
   return { files, total };
 }
 
+/** Every string of 20 characters or more in planned.json, which only a dev build loads. */
+export function plannedSentences(json) {
+  const found = [];
+  const walk = (value) => {
+    if (typeof value === "string") {
+      if (value.length >= 20) found.push(value);
+    } else if (value && typeof value === "object") {
+      Object.values(value).forEach(walk);
+    }
+  };
+  walk(json);
+  return found;
+}
+
+function filesUnder(dir) {
+  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) =>
+    entry.isDirectory()
+      ? filesUnder(path.join(dir, entry.name))
+      : [path.join(dir, entry.name)],
+  );
+}
+
+/** The files of a build that contain text meant for developers only. */
+export function findPlannedText(distDir, plannedJson) {
+  const sentences = plannedSentences(plannedJson);
+  return filesUnder(distDir).filter((file) => {
+    if (!/\.(js|json|html|css)$/.test(file)) return false;
+    const text = readFileSync(file, "utf8");
+    return sentences.some((sentence) => text.includes(sentence));
+  });
+}
+
 function kb(bytes) {
   return `${(bytes / 1000).toFixed(1)} KB`;
 }
@@ -54,7 +89,19 @@ function main() {
   console.log(
     `Initial JS: ${kb(total)} gzip, ${verdict} the ${kb(BUDGET_BYTES)} budget.`,
   );
-  if (total > BUDGET_BYTES) process.exit(1);
+  const planned = JSON.parse(
+    readFileSync(
+      path.resolve(import.meta.dirname, "../src/locales/en/planned.json"),
+      "utf8",
+    ),
+  );
+  const leaks = findPlannedText(dist, planned);
+  console.log(
+    leaks.length === 0
+      ? "No developers-only text in the build."
+      : `Developers-only text found in: ${leaks.join(", ")}`,
+  );
+  if (total > BUDGET_BYTES || leaks.length > 0) process.exit(1);
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) main();

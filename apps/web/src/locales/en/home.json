@@ -93,7 +93,7 @@
     "table": "Open business rules and their draft values",
     "description": "These rules stay as configuration until Spectra confirms them.",
     "open": "Open",
-    "noScreen": "No screen holds this yet",
+    "noScreen": "Held in configuration",
     "columns": {
       "rule": "Rule",
       "draft": "Draft value"
