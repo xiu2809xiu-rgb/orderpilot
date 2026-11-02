@@ -3,9 +3,14 @@ import {
   ITEM_CATEGORY_CODES,
   type ItemRow,
 } from "@orderpilot/shared";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { allPages, apiParams, useUrlQuery } from "@/components/common";
+import {
+  allPages,
+  apiParams,
+  useUrlQuery,
+  type TableQuery,
+} from "@/components/common";
 import { ListPage, type ListFilter } from "@/components/list-page";
 import {
   masterDataItems,
@@ -23,18 +28,35 @@ const URL_FILTERS = {
   vendor: null,
   availability: ITEM_AVAILABILITIES,
 };
+
+/** A role that cannot see prices cannot sort by them, whatever the address says. */
+function withoutPriceSort(query: TableQuery, priceHidden: boolean): TableQuery {
+  return priceHidden && query.sort?.columnId === "unitPrice"
+    ? { ...query, sort: null }
+    : query;
+}
+
 const ACTIONS = readOnlyActions<ItemRow>();
 
 /** Every item with its stock. Read-only, because Navision stays the system of record. */
 export default function ItemsPage() {
   const { t } = useTranslation("master-data");
-  const [query, setQuery] = useUrlQuery(URL_FILTERS, { pageSize: 25 });
+  const [asked, setQuery] = useUrlQuery(URL_FILTERS, { pageSize: 25 });
+  // The server ignores a price sort for a role that cannot see prices, so the
+  // first request may carry it. Once the rows say prices are masked, the page
+  // stops showing and sending it.
+  const [priceHidden, setPriceHidden] = useState(false);
+  const query = useMemo(
+    () => withoutPriceSort(asked, priceHidden),
+    [asked, priceHidden],
+  );
   const params: MasterDataItemsParams = apiParams(query, ITEM_SORTABLE);
   const list = useMasterDataItems(params, {
     query: { placeholderData: (previous) => previous },
   });
+  const masked = list.data?.data[0]?.unitPrice.masked;
+  if (masked !== undefined && masked !== priceHidden) setPriceHidden(masked);
   const options = useMasterDataFilters().data?.data;
-  const priceHidden = list.data?.data[0]?.unitPrice.masked ?? false;
   const columns = useMemo(() => itemColumns(t, priceHidden), [t, priceHidden]);
   const filters = useMemo<ListFilter[]>(
     () => [

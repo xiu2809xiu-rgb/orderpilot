@@ -21,6 +21,32 @@ describe("a list's address", () => {
     expect(size("2.5")).toBe(25);
   });
 
+  it("falls back to page 1 for a page the API cannot read as a safe integer", () => {
+    const page = (value: string) =>
+      queryFromUrl(new URLSearchParams({ page: value }), SPEC).page;
+    expect(page("99999999999999999999")).toBe(1);
+    expect(page("9007199254740993")).toBe(1);
+    expect(page("9007199254740991")).toBe(9007199254740991);
+    expect(page("7")).toBe(7);
+  });
+
+  it("cuts a search and a text filter to the length the API takes", () => {
+    const long = "x".repeat(150);
+    const query = queryFromUrl(
+      new URLSearchParams({ search: long, brand: long, status: long }),
+      { brand: null, status: null },
+      { filterMax: { status: 120 } },
+    );
+    expect(query.search).toHaveLength(100);
+    expect(query.filters.brand).toHaveLength(60);
+    expect(query.filters.status).toHaveLength(120);
+    expect(
+      queryFromUrl(new URLSearchParams({ search: long }), SPEC, {
+        searchMax: 120,
+      }).search,
+    ).toHaveLength(120);
+  });
+
   it("drops a page, a filter value and a direction that mean nothing", () => {
     const query = queryFromUrl(
       new URLSearchParams(

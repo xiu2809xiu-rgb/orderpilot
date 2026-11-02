@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { MemoryRouter, Route, Routes } from "react-router";
@@ -187,6 +187,27 @@ describe("the items list", () => {
     renderAt("/master-data/items?availability=short");
     await screen.findByText("Synthetic switch I-0004");
     expect(seen[0]).toContain("availability=short");
+  });
+
+  it("stops sending a price sort once the prices are masked for the role", async () => {
+    await load();
+    const seen: string[] = [];
+    const masked = {
+      ...row("I-0004", "short"),
+      unitPrice: hidden("item.unitPrice", "price"),
+    };
+    server.use(
+      getMasterDataFiltersMockHandler(filters),
+      http.get("*/api/v1/master-data/items", ({ request }) => {
+        seen.push(new URL(request.url).search);
+        return HttpResponse.json(itemList([masked]));
+      }),
+    );
+    renderAt("/master-data/items?sort=unitPrice&direction=desc");
+    await screen.findByText("Synthetic switch I-0004");
+    await waitFor(() => {
+      expect(seen.at(-1)).not.toContain("sort=");
+    });
   });
 
   it("shows the error with its trace id and a retry", async () => {

@@ -9,14 +9,22 @@ import {
 } from "@/components/common";
 import { useTrackerList } from "@/lib/api/generated/endpoints/tracker/tracker";
 import { tableStatusOf } from "@/lib/query-status";
-import { toParams, trackerChips, TRACKER_URL_FILTERS } from "./trackerParams";
+import {
+  toParams,
+  trackerChips,
+  TRACKER_URL_FILTERS,
+  TRACKER_URL_OPTIONS,
+} from "./trackerParams";
 import { trackerColumns } from "./trackerColumns";
 
 /** The order tracker: every order with its status, owner and overdue flag, on mock data. */
 export default function OrderTrackerPage() {
   const { t } = useTranslation("order-tracker");
   const { t: tc } = useTranslation("common");
-  const [query, setQuery] = useUrlQuery(TRACKER_URL_FILTERS);
+  const [query, setQuery] = useUrlQuery(
+    TRACKER_URL_FILTERS,
+    TRACKER_URL_OPTIONS,
+  );
   const tracker = useTrackerList(toParams(query), {
     query: { placeholderData: (previous) => previous },
   });

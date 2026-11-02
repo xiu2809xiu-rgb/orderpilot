@@ -12,9 +12,18 @@ export type FilterSpec =
 /** The API refuses a page size over this: a hand-edited address must not reach it. */
 export const MAX_PAGE_SIZE = 200;
 
+/** What the master data, tracker and exceptions endpoints take for search. */
+export const MAX_SEARCH_LENGTH = 100;
+/** What they take for a text filter, unless a list says otherwise. */
+export const MAX_FILTER_LENGTH = 60;
+
 export interface UrlQueryOptions {
   /** The page size when the address does not say, or says something the API refuses. */
   pageSize?: number;
+  /** Longest search the API takes. Longer text in the address is cut. */
+  searchMax?: number;
+  /** Longest text for a filter, by filter id. Others use `MAX_FILTER_LENGTH`. */
+  filterMax?: Readonly<Record<string, number>>;
 }
 
 const MANAGED = ["search", "sort", "direction", "page", "pageSize"] as const;
@@ -41,20 +50,29 @@ function positive(value: string | null, fallback: number, max?: number) {
 export function queryFromUrl(
   url: URLSearchParams,
   spec: FilterSpec,
-  { pageSize = DEFAULT_QUERY.pageSize }: UrlQueryOptions = {},
+  {
+    pageSize = DEFAULT_QUERY.pageSize,
+    searchMax = MAX_SEARCH_LENGTH,
+    filterMax = {},
+  }: UrlQueryOptions = {},
 ): TableQuery {
   const filters: TableFilters = {};
   for (const [id, allowed] of Object.entries(normalise(spec))) {
     const value = url.get(id);
     if (!value) continue;
-    if (allowed === null) filters[id] = value === "true" ? true : value;
-    else if (allowed.includes(value)) filters[id] = value;
+    if (allowed === null) {
+      filters[id] =
+        value === "true"
+          ? true
+          : value.slice(0, filterMax[id] ?? MAX_FILTER_LENGTH);
+    } else if (allowed.includes(value)) filters[id] = value;
   }
   const sort = url.get("sort");
   return {
-    page: positive(url.get("page"), 1),
+    // The API reads a page as a safe integer: 1e20 in the address is refused.
+    page: positive(url.get("page"), 1, Number.MAX_SAFE_INTEGER),
     pageSize: positive(url.get("pageSize"), pageSize, MAX_PAGE_SIZE),
-    search: url.get("search") ?? "",
+    search: (url.get("search") ?? "").slice(0, searchMax),
     sort: sort
       ? {
           columnId: sort,
@@ -105,10 +123,15 @@ export function useUrlQuery(
   options: UrlQueryOptions = {},
 ): [TableQuery, (query: TableQuery) => void] {
   const [url, setUrl] = useSearchParams();
-  const { pageSize } = options;
+  const { pageSize, searchMax, filterMax } = options;
   const query = useMemo(
-    () => queryFromUrl(url, spec, { pageSize }),
-    [url, spec, pageSize],
+    () =>
+      queryFromUrl(url, spec, {
+        ...(pageSize ? { pageSize } : {}),
+        ...(searchMax ? { searchMax } : {}),
+        ...(filterMax ? { filterMax } : {}),
+      }),
+    [url, spec, pageSize, searchMax, filterMax],
   );
   const setQuery = useCallback(
     (next: TableQuery) => {
