@@ -49,6 +49,9 @@ export function useZodForm<T extends FieldValues, O = T>({
     const stopValues = form.subscribe({
       formState: { values: true },
       callback: ({ name }) => {
+        // A reset sends its values with no field name, before it clears the
+        // errors: re-checking then would bring back the errors it removes.
+        if (name === undefined) return;
         const stale = errorLeaves(errors.current)
           .filter(
             (leaf) =>

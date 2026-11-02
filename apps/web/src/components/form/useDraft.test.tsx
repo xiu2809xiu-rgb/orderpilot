@@ -82,6 +82,34 @@ describe("drafts", () => {
     expect(screen.queryByText("Draft restored.")).toBeNull();
   });
 
+  it("leave no errors behind when discarded over fields that show them", async () => {
+    const {
+      user: { id },
+    } = signInAs("SUPPORT");
+    const first = renderInRouter(<KitForm />);
+    await typeAndWaitForDraft(id, LABELS.remarks, "Call first");
+    await typeAndWaitForDraft(id, LABELS.customerPo, "CPO-1");
+    first.unmount();
+
+    const user = userEvent.setup();
+    renderInRouter(<KitForm />);
+    const po = await screen.findByRole("textbox", { name: LABELS.customerPo });
+    // Emptied and left: the required error shows, and the remarks keep the
+    // form changed, so the draft and its notice stay.
+    await user.clear(po);
+    await user.tab();
+    await waitFor(() => {
+      expect(po).toHaveAttribute("aria-invalid", "true");
+    });
+
+    await user.click(screen.getByRole("button", { name: "Discard" }));
+    expect(box(LABELS.customerPo)).toHaveValue("");
+    // A re-check started by the reset would land after it: give it the time.
+    await act(() => new Promise((resolve) => setTimeout(resolve, 50)));
+    expect(document.querySelectorAll('[aria-invalid="true"]')).toHaveLength(0);
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+
   it("carry a version and a time, and never a field marked to leave out", async () => {
     const {
       user: { id },
