@@ -1,17 +1,543 @@
-import { describe, it } from "vitest";
+import {
+  Body,
+  Controller,
+  HttpCode,
+  Inject,
+  Param,
+  Post,
+  Req,
+} from "@nestjs/common";
+import { ModuleRef } from "@nestjs/core";
+import {
+  DEFAULT_ROLE_PERMISSIONS,
+  ROLES,
+  decimalStringSchema,
+  errorEnvelopeSchema,
+  sessionResponseSchema,
+  type Role,
+} from "@orderpilot/shared";
+import type { Request } from "express";
+import request from "supertest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { z } from "zod";
+import type { AuthContext } from "../../src/auth/auth-context.js";
+import { Auth, RequirePermission } from "../../src/auth/decorators.js";
+import { PasswordHasher } from "../../src/auth/domain/password-hasher.js";
+import { PermissionPolicy } from "../../src/auth/permission-policy.js";
+import { requestIdOf } from "../../src/common/request-id.js";
+import { ZodValidationPipe } from "../../src/common/zod-validation.pipe.js";
+import { Database } from "../../src/database/database.js";
+import { seedApprovalSetups } from "../../src/modules/governance/approval-setup-seed.js";
+import { ApprovalSetupRepository } from "../../src/modules/governance/approval-setup.repository.js";
+import { ApprovalSetupService } from "../../src/modules/governance/approval-setup.service.js";
+import { AuthorisationService } from "../../src/modules/governance/authorisation.service.js";
+import type { ApprovalSetup } from "../../src/modules/governance/domain/approval-setup.js";
+import { GovernancePermissionPolicy } from "../../src/modules/governance/governance-permission-policy.js";
+import { UserRepository } from "../../src/users/user.repository.js";
+import {
+  API,
+  TEST_DEMO_PASSWORD,
+  auditEvents,
+  browserFrom,
+  call,
+  demoSignIn,
+  emailForRole,
+  type Browser,
+} from "../support/auth.js";
+import { resetTestData } from "../support/reset.js";
+import { createTestApp, type TestApp } from "../support/test-app.js";
 
 // Area 4's to-do tests (F-1). Each name is a case the real policy must pass.
 // Angelyn turns them into tests as F-3, F-4 and F-5 land; nothing here is
 // skipped or silenced, and `pnpm test` lists them as todo.
 
-describe("approval limits (F-3)", () => {
-  it.todo("approves an amount at or under the approver's limit");
-  it.todo("refuses an amount over the approver's limit, naming the rule");
-  it.todo("lets an approver with the unlimited flag approve any amount");
-  it.todo("keeps sales and purchase limits apart");
-  it.todo(
-    "lets a substitute approve with the same limits while the approver is away",
+const standInBodySchema = z.object({
+  action: z.string().min(1),
+  amount: decimalStringSchema.optional(),
+  requesterUserId: z.uuid().optional(),
+});
+type StandInBody = z.infer<typeof standInBodySchema>;
+
+/**
+ * Stands in for area 2's SPR approval until C-3 calls the policy, and does what
+ * an acting route will do: the guard checks the permission, then the route
+ * asks the policy before it acts. It is registered only in this file's test
+ * app, through createTestApp's extra controllers, never in production code.
+ */
+@Controller("test-only/approvals")
+class StandInApprovalController {
+  constructor(@Inject(ModuleRef) private readonly modules: ModuleRef) {}
+
+  @Post(":recordNo/approve")
+  @HttpCode(200)
+  @RequirePermission("approvals.decide")
+  async approve(
+    @Param("recordNo") recordNo: string,
+    @Body(new ZodValidationPipe(standInBodySchema)) body: StandInBody,
+    @Auth() auth: AuthContext,
+    @Req() req: Request,
+  ) {
+    // The test app's root module cannot inject GovernanceModule's providers,
+    // so the service is looked up across modules.
+    const policy = this.modules.get(AuthorisationService, { strict: false });
+    await policy.enforce(
+      {
+        actor: { userId: auth.user.id, role: auth.user.role },
+        action: body.action,
+        resource: { type: "Spr", id: recordNo },
+        amount: body.amount,
+        requesterUserId: body.requesterUserId,
+      },
+      { ip: req.ip ?? null, traceId: requestIdOf(req) },
+    );
+    return { data: { approved: recordNo } };
+  }
+}
+
+const SECOND_APPROVER = "approver.second@example.test";
+const BY_THE_TEST = {
+  actor: { kind: "system", name: "governance-controls test" },
+  ip: null,
+  traceId: "governance-controls-test",
+} as const;
+const STAND_IN = (recordNo: string) =>
+  `${API}/test-only/approvals/${recordNo}/approve`;
+const MANAGEMENT_APPROVES = `${API}/governance/matrix/MANAGEMENT/permissions/approvals.decide`;
+
+const hoursFromNow = (hours: number) =>
+  new Date(Date.now() + hours * 3_600_000);
+const awayNow = () => ({
+  awayFrom: hoursFromNow(-1),
+  awayUntil: hoursFromNow(1),
+});
+
+async function passwordSignIn(t: TestApp, email: string): Promise<Browser> {
+  const res = await request(t.app.getHttpServer())
+    .post(`${API}/auth/login`)
+    .send({ email, password: TEST_DEMO_PASSWORD });
+  if (res.status !== 200) {
+    throw new Error(`sign-in failed: ${String(res.status)} ${res.text}`);
+  }
+  return browserFrom(
+    sessionResponseSchema.parse(res.body).data,
+    res.headers["set-cookie"],
   );
+}
+
+describe("approval limits (F-3)", () => {
+  let t: TestApp;
+  const people = new Map<
+    "requester" | "approver" | "substitute" | "management",
+    string
+  >();
+  const sessions = new Map<Role | "SECOND_APPROVER", Browser>();
+  const idOf = (who: Parameters<typeof people.get>[0]): string => {
+    const found = people.get(who);
+    if (!found) throw new Error(`no user for ${who}`);
+    return found;
+  };
+  const as = (who: Role | "SECOND_APPROVER"): Browser => {
+    const found = sessions.get(who);
+    if (!found) throw new Error(`no session for ${who}`);
+    return found;
+  };
+
+  /**
+   * The sample chain: the Product Manager's SPRs go to the approver, whose
+   * substitute is a second approver, and who escalates to Management.
+   */
+  const sample = (userId: string): ApprovalSetup => {
+    const base = {
+      userId,
+      approverId: null,
+      salesAmountApprovalLimit: "0.00",
+      purchaseAmountApprovalLimit: "0.00",
+      unlimitedSalesApproval: false,
+      unlimitedPurchaseApproval: false,
+      substituteUserId: null,
+      awayFrom: null,
+      awayUntil: null,
+    };
+    switch (userId) {
+      case idOf("requester"):
+        return { ...base, approverId: idOf("approver") };
+      case idOf("approver"):
+        return {
+          ...base,
+          approverId: idOf("management"),
+          substituteUserId: idOf("substitute"),
+          salesAmountApprovalLimit: "20000.00",
+          purchaseAmountApprovalLimit: "5000.00",
+        };
+      case idOf("substitute"):
+        return {
+          ...base,
+          approverId: idOf("management"),
+          salesAmountApprovalLimit: "3000.00",
+          purchaseAmountApprovalLimit: "3000.00",
+        };
+      default:
+        return {
+          ...base,
+          unlimitedSalesApproval: true,
+          unlimitedPurchaseApproval: true,
+        };
+    }
+  };
+  const change = (userId: string, overrides: Partial<ApprovalSetup> = {}) =>
+    t.app
+      .get(ApprovalSetupService)
+      .save({ ...sample(userId), ...overrides }, BY_THE_TEST);
+
+  const approve = (
+    who: Role | "SECOND_APPROVER",
+    action: string,
+    amount: string,
+    recordNo = "SPR-TEST-0001",
+  ) =>
+    call(t, as(who), "post", STAND_IN(recordNo), {
+      csrf: true,
+      body: { action, amount, requesterUserId: idOf("requester") },
+    });
+  const lastRefusal = async () =>
+    (await auditEvents(t))
+      .filter((event) => event.action === "governance.policy.refused")
+      .at(-1);
+  /**
+   * Management does not hold approvals.decide in the default matrix, so the
+   * guard refuses them before the policy is asked. Richie's change to the
+   * default settles it; until then a test that needs it grants it for itself.
+   */
+  const withManagementApproving = async (work: () => Promise<void>) => {
+    const grant = (granted: boolean) =>
+      call(t, as("SYSTEM_ADMIN"), "put", MANAGEMENT_APPROVES, {
+        csrf: true,
+        body: { granted },
+      });
+    expect((await grant(true)).status).toBe(200);
+    try {
+      await work();
+    } finally {
+      await grant(false);
+    }
+  };
+
+  beforeAll(async () => {
+    await resetTestData();
+    t = await createTestApp({}, [StandInApprovalController], (builder) =>
+      builder
+        .overrideProvider(PermissionPolicy)
+        .useClass(GovernancePermissionPolicy),
+    );
+    const users = t.app.get(UserRepository);
+    const demoUser = async (role: Role) => {
+      const user = await users.findByEmail(await emailForRole(role));
+      if (!user) throw new Error(`no demo user for ${role}`);
+      return user.id;
+    };
+    people.set("requester", await demoUser("PRODUCT_MANAGER"));
+    people.set("approver", await demoUser("APPROVER"));
+    people.set("management", await demoUser("MANAGEMENT"));
+    const second = await users.create({
+      email: SECOND_APPROVER,
+      displayName: "Second Approver",
+      role: "APPROVER",
+      passwordHash: await t.app.get(PasswordHasher).hash(TEST_DEMO_PASSWORD),
+    });
+    people.set("substitute", second.id);
+    for (const role of ROLES) sessions.set(role, await demoSignIn(t, role));
+    sessions.set("SECOND_APPROVER", await passwordSignIn(t, SECOND_APPROVER));
+  });
+  beforeEach(async () => {
+    for (const userId of people.values()) await change(userId);
+  });
+  afterAll(async () => {
+    await t.close();
+  });
+
+  it("puts area 4's policy behind the permissions guard", () => {
+    expect(t.app.get(PermissionPolicy)).toBeInstanceOf(
+      GovernancePermissionPolicy,
+    );
+  });
+
+  it("approves an amount at or under the approver's limit", async () => {
+    for (const amount of ["4999.99", "5000.00"]) {
+      expect((await approve("APPROVER", "spr.approve", amount)).status).toBe(
+        200,
+      );
+    }
+  });
+
+  it("refuses an amount over the approver's limit, naming the rule", async () => {
+    const res = await approve(
+      "APPROVER",
+      "spr.approve",
+      "5000.01",
+      "SPR-TEST-0002",
+    );
+    expect(res.status).toBe(403);
+    const { error } = errorEnvelopeSchema.parse(res.body);
+    // The caller learns nothing about the rules: the reason is in the audit trail only.
+    expect({ ...error, traceId: "" }).toEqual({
+      code: "FORBIDDEN",
+      message: "You do not have access to this.",
+      details: null,
+      traceId: "",
+    });
+    expect(error.traceId).toBe(res.headers["x-request-id"]);
+    const event = await lastRefusal();
+    expect(event).toMatchObject({
+      actor: { kind: "user", userId: idOf("approver"), role: "APPROVER" },
+      entityType: "Spr",
+      entityId: "SPR-TEST-0002",
+      traceId: error.traceId,
+      changes: {
+        action: "spr.approve",
+        rule: "approval-limit",
+        amount: "5000.01",
+        requesterUserId: idOf("requester"),
+      },
+    });
+    expect(event?.changes?.reason).toContain("purchase approval limit");
+    // An amount is a value masking may hide, so it stays out of the summary.
+    expect(event?.summary).not.toContain("5000");
+  });
+
+  it("lets an approver with the unlimited flag approve any amount", async () => {
+    const huge = "999999999999.99";
+    expect((await approve("APPROVER", "spr.approve", huge)).status).toBe(403);
+    await change(idOf("approver"), { unlimitedPurchaseApproval: true });
+    expect((await approve("APPROVER", "spr.approve", huge)).status).toBe(200);
+  });
+
+  it("keeps sales and purchase limits apart", async () => {
+    const amount = "10000.00";
+    expect(
+      (await approve("APPROVER", "sales-order.approve", amount)).status,
+    ).toBe(200);
+    expect((await approve("APPROVER", "spr.approve", amount)).status).toBe(403);
+    expect(
+      (await approve("APPROVER", "purchase-order.approve", amount)).status,
+    ).toBe(403);
+    await change(idOf("approver"), { unlimitedSalesApproval: true });
+    expect((await approve("APPROVER", "spr.approve", amount)).status).toBe(403);
+  });
+
+  it("lets a substitute approve with their own limit while the approver is away", async () => {
+    await change(idOf("approver"), awayNow());
+    expect(
+      (await approve("SECOND_APPROVER", "spr.approve", "3000.00")).status,
+    ).toBe(200);
+    // The approver's limit (5000.00) would cover this; the substitute's own does not.
+    expect(
+      (await approve("SECOND_APPROVER", "spr.approve", "3000.01")).status,
+    ).toBe(403);
+    expect((await lastRefusal())?.changes).toMatchObject({
+      rule: "approval-limit",
+    });
+    // While they are away, the approver is not the one who decides.
+    expect((await approve("APPROVER", "spr.approve", "100.00")).status).toBe(
+      403,
+    );
+    expect((await lastRefusal())?.changes).toMatchObject({
+      rule: "approval-route",
+    });
+  });
+
+  it("refuses the substitute while the approver is present, before and after the absence", async () => {
+    for (const absence of [
+      { awayFrom: null, awayUntil: null },
+      { awayFrom: hoursFromNow(1), awayUntil: hoursFromNow(2) },
+      { awayFrom: hoursFromNow(-2), awayUntil: hoursFromNow(-1) },
+    ]) {
+      await change(idOf("approver"), absence);
+      expect(
+        (await approve("SECOND_APPROVER", "spr.approve", "100.00")).status,
+      ).toBe(403);
+      expect((await lastRefusal())?.changes).toMatchObject({
+        rule: "approval-route",
+      });
+    }
+  });
+
+  it("escalates to the absent approver's Approver ID when the substitute is away too", async () => {
+    await change(idOf("approver"), awayNow());
+    await change(idOf("substitute"), awayNow());
+    expect(
+      (await approve("SECOND_APPROVER", "spr.approve", "100.00")).status,
+    ).toBe(403);
+    expect((await lastRefusal())?.changes).toMatchObject({
+      rule: "approval-route",
+    });
+    expect((await approve("MANAGEMENT", "spr.approve", "100.00")).status).toBe(
+      403,
+    );
+    await withManagementApproving(async () => {
+      expect(
+        (await approve("MANAGEMENT", "spr.approve", "250000.00")).status,
+      ).toBe(200);
+    });
+  });
+
+  it("escalates when the absent approver has no substitute", async () => {
+    await change(idOf("approver"), { ...awayNow(), substituteUserId: null });
+    await withManagementApproving(async () => {
+      expect(
+        (await approve("MANAGEMENT", "spr.approve", "100.00")).status,
+      ).toBe(200);
+    });
+    expect(
+      (await approve("SECOND_APPROVER", "spr.approve", "100.00")).status,
+    ).toBe(403);
+  });
+
+  it("names who should receive a request, for area 2 to route it", async () => {
+    const policy = t.app.get(AuthorisationService);
+    expect(await policy.deciderFor(idOf("requester"))).toEqual({
+      kind: "approver",
+      userId: idOf("approver"),
+    });
+    await change(idOf("approver"), awayNow());
+    expect(await policy.deciderFor(idOf("requester"))).toEqual({
+      kind: "substitute",
+      userId: idOf("substitute"),
+      standsInFor: idOf("approver"),
+    });
+    await change(idOf("substitute"), awayNow());
+    expect(await policy.deciderFor(idOf("requester"))).toEqual({
+      kind: "escalated",
+      userId: idOf("management"),
+      from: idOf("approver"),
+    });
+  });
+
+  it("never lets anyone be their own substitute", async () => {
+    await expect(
+      change(idOf("approver"), { substituteUserId: idOf("approver") }),
+    ).rejects.toMatchObject({ code: "VALIDATION_FAILED" });
+    // A row written by any other route is refused by the table itself.
+    await expect(
+      t.app.get(Database).client
+        .$executeRaw`UPDATE "ApprovalUserSetup" SET "substituteUserId" = "userId" WHERE "userId" = ${idOf("approver")}::uuid`,
+    ).rejects.toThrow(/not_own_substitute/);
+  });
+
+  it("refuses an action the policy does not know", async () => {
+    expect((await approve("APPROVER", "order.delete", "1.00")).status).toBe(
+      403,
+    );
+    expect((await lastRefusal())?.changes).toMatchObject({ rule: "action" });
+  });
+
+  it("audits every limit change with the before and after values", async () => {
+    const changed = async () =>
+      (await auditEvents(t)).filter(
+        (event) => event.action === "governance.approval-setup.changed",
+      );
+    const before = (await changed()).length;
+    await change(idOf("approver"), { purchaseAmountApprovalLimit: "6000.00" });
+    const events = await changed();
+    expect(events.length).toBe(before + 1);
+    expect(events.at(-1)).toMatchObject({
+      actor: BY_THE_TEST.actor,
+      entityType: "ApprovalUserSetup",
+      entityId: idOf("approver"),
+      changes: {
+        before: { purchaseAmountApprovalLimit: "5000.00" },
+        after: { purchaseAmountApprovalLimit: "6000.00" },
+      },
+    });
+    expect(events.at(-1)?.summary).not.toContain("6000");
+    // Saving the same values again changes nothing and writes nothing.
+    await change(idOf("approver"), { purchaseAmountApprovalLimit: "6000.00" });
+    expect((await changed()).length).toBe(before + 1);
+  });
+
+  it("is asked before the action's transaction opens, so a refusal's audit is never rolled back", async () => {
+    const policy = t.app.get(AuthorisationService);
+    await expect(
+      t.app.get(Database).transaction(() =>
+        policy.enforce(
+          {
+            actor: { userId: idOf("approver"), role: "APPROVER" },
+            action: "spr.approve",
+            resource: { type: "Spr", id: "SPR-TEST-0003" },
+            amount: "5000.01",
+            requesterUserId: idOf("requester"),
+          },
+          BY_THE_TEST,
+        ),
+      ),
+    ).rejects.toThrow(/before opening the transaction/);
+  });
+
+  it("refuses every role without approvals.decide at the guard, and audits each refusal", async () => {
+    const refusals = async () =>
+      (await auditEvents(t)).filter(
+        (event) => event.action === "auth.permission.refused",
+      );
+    for (const role of ROLES) {
+      if (DEFAULT_ROLE_PERMISSIONS[role].includes("approvals.decide")) continue;
+      const before = (await refusals()).length;
+      const res = await approve(role, "spr.approve", "100.00");
+      expect(res.status, role).toBe(403);
+      expect(errorEnvelopeSchema.parse(res.body).error.code, role).toBe(
+        "FORBIDDEN",
+      );
+      const events = await refusals();
+      expect(events.length, role).toBe(before + 1);
+      expect(events.at(-1)?.changes, role).toMatchObject({
+        permission: "approvals.decide",
+      });
+    }
+  });
+});
+
+describe("the approval setup seed (F-3)", () => {
+  let t: TestApp;
+  beforeAll(async () => {
+    await resetTestData();
+    t = await createTestApp();
+  });
+  afterAll(async () => {
+    await t.close();
+  });
+
+  it("sets up the sample chain, and a second run changes nothing", async () => {
+    await seedApprovalSetups(t.app);
+    const users = t.app.get(UserRepository);
+    const setups = t.app.get(ApprovalSetupRepository);
+    const idFor = async (role: Role) => {
+      const user = await users.findByEmail(await emailForRole(role));
+      if (!user) throw new Error(`no demo user for ${role}`);
+      return user.id;
+    };
+    const [requester, approver, management] = await Promise.all([
+      idFor("PRODUCT_MANAGER"),
+      idFor("APPROVER"),
+      idFor("MANAGEMENT"),
+    ]);
+    expect(await setups.find(requester)).toMatchObject({
+      approverId: approver,
+    });
+    expect(await setups.find(approver)).toMatchObject({
+      approverId: management,
+      salesAmountApprovalLimit: "20000.00",
+      purchaseAmountApprovalLimit: "5000.00",
+      unlimitedSalesApproval: false,
+      unlimitedPurchaseApproval: false,
+      substituteUserId: null,
+    });
+    expect(await setups.find(management)).toMatchObject({
+      unlimitedSalesApproval: true,
+      unlimitedPurchaseApproval: true,
+    });
+
+    const before = (await auditEvents(t)).length;
+    await seedApprovalSetups(t.app);
+    expect((await auditEvents(t)).length).toBe(before);
+  });
 });
 
 describe("no self-approval (F-4)", () => {
