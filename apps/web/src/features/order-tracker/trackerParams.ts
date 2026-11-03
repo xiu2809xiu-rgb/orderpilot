@@ -16,6 +16,9 @@ export const TRACKER_URL_FILTERS = [
   "documentToConfirm",
 ] as const;
 
+/** A status filter holds several comma-separated codes: the API takes up to 400 characters. */
+export const TRACKER_URL_OPTIONS = { filterMax: { status: 400 } } as const;
+
 /** The active filters in words, with their status codes as Spectra's staff say them. */
 export function trackerChips(
   filters: TableQuery["filters"],

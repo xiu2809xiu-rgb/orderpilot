@@ -39,7 +39,7 @@ export function SavedFilters({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" className="pointer-coarse:h-11">
           <Bookmark aria-hidden="true" />
           {t("table.saved")}
         </Button>

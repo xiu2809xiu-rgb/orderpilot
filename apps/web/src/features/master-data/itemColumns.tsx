@@ -2,7 +2,7 @@ import type { TFunction } from "i18next";
 import type { ItemRow } from "@orderpilot/shared";
 import type { DataTableColumn } from "@/components/common";
 import { formatQuantity } from "@/lib/format";
-import { AvailableFigure, MaskedMoney } from "./pieces";
+import { AvailabilityBadge, MaskedMoney } from "./pieces";
 import { RecordLink } from "@/components/common";
 
 export const ITEM_SORTABLE = [
@@ -91,15 +91,16 @@ export function itemColumns(
     {
       id: "availableStock",
       header: t("items.columns.availableStock"),
-      cell: (row) => (
-        <AvailableFigure
-          value={row.availableStock}
-          availability={row.availability}
-        />
-      ),
+      cell: (row) => formatQuantity(row.availableStock),
       exportValue: (row) => Number(row.availableStock),
       kind: "number",
       sortable: true,
+    },
+    {
+      id: "availability",
+      header: t("items.columns.availability"),
+      cell: (row) => <AvailabilityBadge availability={row.availability} />,
+      exportValue: (row) => t(`availability.${row.availability}`),
     },
     {
       id: "unitPrice",

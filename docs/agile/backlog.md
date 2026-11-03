@@ -1159,6 +1159,8 @@ Acceptance criteria:
 - Saved views hold filters, sort and columns for each person. Column settings show, hide and order columns.
 - The selected record's operation log sits in a panel at the foot.
 - A record-scoped read of the log: anyone who may read the record sees who, when and what, never field values or an IP address. Refusals are audited, and area 4 reviews the rule.
+- Print keeps the title on every page, numbers the pages and prints a long list in a stream, so a list of many thousands of rows does not sit in the page at once (P-44 prints every row in one table).
+- The tracker, the exceptions queue, the users list and the inbox move onto `ListPage`, one line or redirect each in their owners' folders, each owner asked to review (P-44 changes only their URL hook import).
 - Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
 
 ### P-46: Form kit

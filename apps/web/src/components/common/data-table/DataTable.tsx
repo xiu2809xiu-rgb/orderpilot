@@ -1,9 +1,10 @@
-import { useMemo, useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Table, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollRegion } from "../ScrollRegion";
 import { PartialNotice } from "../states";
 import { DataTableToolbar } from "./DataTableToolbar";
+import { useDataTableState, type DataTableState } from "./useDataTableState";
 import type { ExportOptions } from "./ExportMenu";
 import { DataTableBody, type TableStatus } from "./DataTableBody";
 import { Pagination } from "./Pagination";
@@ -14,7 +15,6 @@ import {
   type TableQuery,
   type ToggleFilter,
 } from "./types";
-import { useTablePrefs } from "./useTablePrefs";
 
 export interface DataTableProps<Row> {
   /** Names this table's saved settings. Unique per table, for example "orders". */
@@ -49,6 +49,13 @@ export interface DataTableProps<Row> {
     filters: TableFilters;
     setFilter: (id: string, value: string | boolean | undefined) => void;
   }) => ReactNode;
+  /**
+   * Draws the controls above the table in place of the default toolbar. The
+   * list page template puts its filter bar and action bar there.
+   */
+  toolbar?: (
+    state: DataTableState<Row> & { rows: readonly Row[] },
+  ) => ReactNode;
   empty?: { title?: string; description?: string; action?: ReactNode };
   exportOptions?: ExportOptions<Row>;
   pageSizes?: readonly number[];
@@ -77,77 +84,36 @@ export function DataTable<Row>({
   partialNotice,
   toggleFilters = [],
   filterSlot,
+  toolbar,
   empty,
   exportOptions,
   pageSizes = [10, 25, 50],
   searchDebounceMs = 300,
 }: DataTableProps<Row>) {
   const { t } = useTranslation("components");
-  const prefs = useTablePrefs(tableId);
-  const [sortNote, setSortNote] = useState("");
-
-  const visibleIds = useMemo(
-    () =>
-      new Set(
-        prefs.hidden
-          ? columns
-              .filter((c) => !prefs.hidden?.includes(c.id))
-              .map((c) => c.id)
-          : columns.filter((c) => !c.defaultHidden).map((c) => c.id),
-      ),
-    [columns, prefs.hidden],
-  );
-  const shown = columns.filter(
-    (column) => column.hideable === false || visibleIds.has(column.id),
-  );
-
-  // Any change to what is asked for goes back to the first page.
-  const change = (patch: Partial<TableQuery>) => {
-    onQueryChange({ ...query, page: 1, ...patch });
-  };
-  const setFilter = (id: string, value: string | boolean | undefined) => {
-    const rest = Object.entries(query.filters).filter(([key]) => key !== id);
-    const filters: TableFilters = Object.fromEntries(rest);
-    if (value !== undefined && value !== false && value !== "") {
-      filters[id] = value;
-    }
-    change({ filters });
-  };
-  const filtered = query.search !== "" || Object.keys(query.filters).length > 0;
-
-  function sortBy(columnId: string) {
-    const current = query.sort?.columnId === columnId ? query.sort : null;
-    const header = columns.find((c) => c.id === columnId)?.header ?? columnId;
-    if (current?.direction === "desc") {
-      setSortNote("");
-      change({ sort: null });
-      return;
-    }
-    const direction = current ? "desc" : "asc";
-    setSortNote(
-      t(direction === "asc" ? "table.sortedAsc" : "table.sortedDesc", {
-        column: header,
-      }),
-    );
-    change({ sort: { columnId, direction } });
-  }
+  const state = useDataTableState(tableId, columns, query, onQueryChange);
+  const { shown, change, sortBy, sortNote, filtered } = state;
 
   return (
     <div className="space-y-s2">
-      <DataTableToolbar
-        columns={columns}
-        shown={shown}
-        rows={rows}
-        query={query}
-        change={change}
-        setFilter={setFilter}
-        visibleIds={visibleIds}
-        prefs={prefs}
-        toggleFilters={toggleFilters}
-        filterSlot={filterSlot}
-        exportOptions={exportOptions}
-        searchDebounceMs={searchDebounceMs}
-      />
+      {toolbar ? (
+        toolbar({ ...state, rows })
+      ) : (
+        <DataTableToolbar
+          columns={columns}
+          shown={shown}
+          rows={rows}
+          query={query}
+          change={change}
+          setFilter={state.setFilter}
+          visibleIds={state.visibleIds}
+          prefs={state.prefs}
+          toggleFilters={toggleFilters}
+          filterSlot={filterSlot}
+          exportOptions={exportOptions}
+          searchDebounceMs={searchDebounceMs}
+        />
+      )}
 
       {partialNotice ? (
         <PartialNotice description={partialNotice} onRetry={onRetry} />

@@ -56,6 +56,9 @@ const TEXT_PAIRS: [string, string][] = [
   ["primary", "background"],
   ["primary", "card"],
   ["warning", "warning-surface"],
+  // The ready chip (StatusChip) is green on the accent surface.
+  ["success", "accent"],
+  ["success", "background"],
   ["sidebar-foreground", "sidebar"],
   ["sidebar-accent-foreground", "sidebar-accent"],
   ["muted-foreground", "sidebar"],

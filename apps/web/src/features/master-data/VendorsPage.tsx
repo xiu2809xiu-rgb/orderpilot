@@ -3,22 +3,22 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import type { VendorRow } from "@orderpilot/shared";
 import {
-  DataTable,
-  DemoBadge,
-  PageHeader,
-  type DataTableColumn,
+  allPages,
+  apiParams,
   RecordLink,
+  useUrlQuery,
+  type DataTableColumn,
 } from "@/components/common";
+import { ListPage } from "@/components/list-page";
 import {
   masterDataVendors,
   useMasterDataVendors,
 } from "@/lib/api/generated/endpoints/master-data/master-data";
 import type { MasterDataVendorsParams } from "@/lib/api/generated/model";
-import { tableStatusOf } from "@/lib/query-status";
+import { readOnlyActions } from "./listActions";
 import { MaskedMoney, MasterDataTabs } from "./pieces";
-import { allPages, apiParams, useUrlQuery } from "./useUrlQuery";
 
-const FILTERS = {};
+const URL_FILTERS = {};
 const SORTABLE = [
   "no",
   "name",
@@ -93,10 +93,12 @@ function vendorColumns(
   ];
 }
 
+const ACTIONS = readOnlyActions<VendorRow>();
+
 /** Every vendor. Read-only. Bank details are on a vendor's own page, masked by role. */
 export default function VendorsPage() {
   const { t } = useTranslation("master-data");
-  const [query, setQuery] = useUrlQuery(FILTERS);
+  const [query, setQuery] = useUrlQuery(URL_FILTERS, { pageSize: 25 });
   const params: MasterDataVendorsParams = apiParams(query, SORTABLE);
   const list = useMasterDataVendors(params, {
     query: { placeholderData: (previous) => previous },
@@ -108,39 +110,31 @@ export default function VendorsPage() {
   );
 
   return (
-    <div className="space-y-s3">
-      <PageHeader
-        title={t("vendors.title")}
-        description={t("vendors.description")}
-        meta={<DemoBadge kind="mockNavision" />}
-        total={list.data?.meta.total}
-      />
-      <MasterDataTabs />
-      <DataTable
-        tableId="master-data-vendors"
-        caption={t("vendors.caption")}
-        columns={columns}
-        rows={list.data?.data ?? []}
-        total={list.data?.meta.total ?? 0}
-        query={query}
-        onQueryChange={setQuery}
-        rowKey={(row) => row.no}
-        rowHref={(row) => `/master-data/vendors/${row.no}`}
-        status={tableStatusOf(list)}
-        error={list.error}
-        onRetry={() => void list.refetch()}
-        exportOptions={{
-          fileName: "vendors",
-          loadRows: () =>
-            allPages(async (page) =>
-              masterDataVendors({ ...params, page, pageSize: 200 }),
-            ),
-        }}
-        empty={{
-          title: t("vendors.emptyTitle"),
-          description: t("emptyDescription"),
-        }}
-      />
-    </div>
+    <ListPage
+      tableId="master-data-vendors"
+      title={t("vendors.title")}
+      description={t("vendors.description")}
+      demo="mockNavision"
+      tabs={<MasterDataTabs />}
+      caption={t("vendors.caption")}
+      columns={columns}
+      rowKey={(row) => row.no}
+      rowHref={(row) => `/master-data/vendors/${row.no}`}
+      query={query}
+      onQueryChange={setQuery}
+      list={list}
+      actions={ACTIONS}
+      exportOptions={{
+        fileName: "vendors",
+        loadRows: () =>
+          allPages(async (page) =>
+            masterDataVendors({ ...params, page, pageSize: 200 }),
+          ),
+      }}
+      empty={{
+        title: t("vendors.emptyTitle"),
+        description: t("emptyDescription"),
+      }}
+    />
   );
 }

@@ -10,7 +10,7 @@ import {
   PageHeader,
   RelativeTime,
   StatusBadge,
-  useUrlTableQuery,
+  useUrlQuery,
   type DataTableColumn,
   RecordLink,
 } from "@/components/common";
@@ -24,7 +24,7 @@ const URL_FILTERS = ["state"] as const;
 export default function ExceptionsPage() {
   const { t } = useTranslation("exceptions");
   const { t: tc } = useTranslation("common");
-  const [query, setQuery] = useUrlTableQuery(URL_FILTERS);
+  const [query, setQuery] = useUrlQuery(URL_FILTERS);
   // The queue is the work waiting, so with no state in the link it shows the
   // open ones, as the server does. Clearing the chip asks for every state.
   const state =
