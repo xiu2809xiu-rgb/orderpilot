@@ -86,11 +86,30 @@ export function isDecimalString(text: string): boolean {
 /**
  * What a line costs: the quantity times the unit price, as it is paid, to the
  * cent. Null while either one is empty or half typed ("3." or "abc"), so a
- * screen can show a blank amount instead of a wrong one as someone types.
+ * screen can show a blank amount instead of a wrong one as someone types. Null
+ * too when two valid numbers give a product this module cannot hold (more than
+ * 15 whole digits): see `isLineAmountTooLarge`.
  */
 export function lineAmount(quantity: string, unitPrice: string): string | null {
   if (!isDecimalString(quantity) || !isDecimalString(unitPrice)) return null;
-  return roundToCents(multiplyDecimal(quantity, unitPrice));
+  const product = multiplyDecimal(quantity, unitPrice);
+  // roundToCents would refuse a product past the pattern with a RangeError.
+  if (!isDecimalString(product)) return null;
+  const amount = roundToCents(product);
+  // Rounding up can add a digit (999999999999999.99995 becomes 10^15).
+  return isDecimalString(amount) ? amount : null;
+}
+
+/** True when both are decimal strings but their product is too large to hold. */
+export function isLineAmountTooLarge(
+  quantity: string,
+  unitPrice: string,
+): boolean {
+  return (
+    isDecimalString(quantity) &&
+    isDecimalString(unitPrice) &&
+    lineAmount(quantity, unitPrice) === null
+  );
 }
 
 /**

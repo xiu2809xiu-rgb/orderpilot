@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   isDecimalString,
+  isLineAmountTooLarge,
   lineAmount,
   shortfallOf,
   subtractDecimal,
@@ -30,6 +31,24 @@ describe("the decimal helpers a lines grid uses", () => {
     expect(lineAmount("3", "abc")).toBeNull();
     expect(lineAmount("1,200", "2")).toBeNull();
     expect(lineAmount("3", "1e3")).toBeNull();
+  });
+
+  it("gives no amount, and does not throw, when the product is too large", () => {
+    expect(lineAmount("100000000", "10000000.00")).toBeNull();
+    expect(lineAmount("99999999", "99999999.99")).toBeNull();
+    expect(lineAmount("999999999999999", "2")).toBeNull();
+    expect(lineAmount("-999999999999999", "2")).toBeNull();
+    expect(isLineAmountTooLarge("99999999", "99999999.99")).toBe(true);
+    expect(isLineAmountTooLarge("3", "19.99")).toBe(false);
+    expect(isLineAmountTooLarge("3.", "19.99")).toBe(false);
+  });
+
+  it("still prices the largest line it can hold", () => {
+    expect(lineAmount("999999999999999", "1")).toBe("999999999999999.00");
+  });
+
+  it("gives no amount when rounding adds a sixteenth digit", () => {
+    expect(lineAmount("999999999999999.9999", "1")).toBeNull();
   });
 
   it("sums without float error and without a size limit on the total", () => {

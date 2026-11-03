@@ -1,3 +1,4 @@
+import { isLineAmountTooLarge } from "@orderpilot/shared";
 import { TriangleAlert } from "lucide-react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -9,6 +10,7 @@ import { MaskedPrice } from "./LineReadCells";
 
 /** What a line costs, worked out again on every keystroke from decimal strings. */
 export function AmountCell({ row }: { row: string }) {
+  const { t } = useTranslation("linesGrid");
   const { control } = useFormContext();
   const { priceMask } = useGrid();
   const [line] = readLines([useWatch({ control, name: row })]);
@@ -19,9 +21,14 @@ export function AmountCell({ row }: { row: string }) {
         unitPrice: line.unitPrice ?? "",
       })
     : null;
+  const tooLarge =
+    line !== undefined &&
+    isLineAmountTooLarge(line.quantity ?? "", line.unitPrice ?? "");
   return (
     <span className="block min-h-8 py-1.5 text-sm @3xl:text-right">
-      {amount === null ? (
+      {tooLarge ? (
+        <span className="text-warning">{t("amountTooLarge")}</span>
+      ) : amount === null ? (
         <span className="text-muted-foreground">-</span>
       ) : (
         <Money value={amount} />

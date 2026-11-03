@@ -12,6 +12,7 @@
   "placeholders": {
     "item": "Part number or name"
   },
+  "amountTooLarge": "Too large to price",
   "remove": "Remove line {{n}}",
   "removeShort": "Remove",
   "removed": "Removed line {{n}}",

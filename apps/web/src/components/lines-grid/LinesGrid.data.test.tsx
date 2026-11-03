@@ -144,6 +144,22 @@ describe("amounts and totals", () => {
     expect(within(footer()).getByText("USD 298.80")).toBeVisible();
   });
 
+  it("says an amount is too large instead of crashing the screen", async () => {
+    const user = userEvent.setup();
+    renderGrid({ lines: SAVED });
+    await screen.findByRole("table");
+    const quantity = box("Quantity", 1);
+    const price = box("Unit price", 1);
+    await user.clear(quantity);
+    await user.type(quantity, "99999999");
+    await user.clear(price);
+    await user.type(price, "99999999.99");
+    expect(screen.getByText("Too large to price")).toBeVisible();
+    expect(screen.getByRole("table")).toBeVisible();
+    // The other line still counts, and the oversize one is left out of the total.
+    expect(within(footer()).getByText("USD 298.80")).toBeVisible();
+  });
+
   it("shows the server's totals until a line changes", async () => {
     const user = userEvent.setup();
     const serverTotals = { quantity: "15", amount: "358.78" };
