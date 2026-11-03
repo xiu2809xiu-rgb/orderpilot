@@ -402,7 +402,8 @@ Planned with P-11:
 ### The main branch
 
 - The `Protect main` ruleset blocks deletion and force pushes, and requires a pull request: 0 approvals for now, stale reviews dismissed, review threads resolved, merge commits or squash. Repository admins can bypass it in pull request mode only. [`.github/rulesets/main.json`](.github/rulesets/main.json) mirrors it, and `scripts/github/check-ruleset.mjs` says if the two drift apart.
-- Four checks are required: `Lint, typecheck, test, build`, `SAST (Semgrep)`, `Secret scan (gitleaks)` and `Dependency scan (OSV)`. P-13 adds `Docker images` and `IaC and Dockerfile scan` to `.github/rulesets/main.json`, required once the ruleset is applied after it merges. P-14 adds `End-to-end smoke` the same way, and a required check's name stays fixed once it is required.
+- Seven checks are required: `Lint, typecheck, test, build`, `SAST (Semgrep)`, `Secret scan (gitleaks)`, `Dependency scan (OSV)`, `Docker images`, `IaC and Dockerfile scan` and `End-to-end smoke`. A required check's name stays fixed once it is required.
+- `Docker images` and `End-to-end smoke` skip when a change touches none of their inputs, which counts as passed ([ADR 0039](docs/adr/0039-heavy-ci-jobs-skip-by-job-condition.md)). Never put a path filter on a workflow that holds a required check: its check would stay pending for ever.
 - One approving review plus code-owner review is switched on at T-9, only on Richie's yes.
 - Never force push and never commit straight to `main`.
 - Release tags are `v0.1-proposal`, `v0.2-technical-review` and `v1.0-final`, each after a feature freeze.

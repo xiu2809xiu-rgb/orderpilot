@@ -292,7 +292,7 @@ The full version is in [the path from a story to main](AGENTS.md#the-path-from-a
    - the real results of `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm build`, plus `docker compose up --build` once it exists;
    - for UI changes, screenshots in light and dark from a Docker build of the branch, saved in `docs/design/screenshots/<area>/`.
 6. **Get a review.** The reviewer of the day responds within one working day. Resolve every thread.
-7. **Merge with a merge commit** once every required check is green. The branch is then deleted and the story moves to Done.
+7. **Merge with a merge commit** once every required check is green. `Docker images` and `End-to-end smoke` show as skipped when a change touches none of their inputs, and that counts as green. The branch is then deleted and the story moves to Done.
 
 ### Never
 
