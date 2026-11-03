@@ -107,6 +107,69 @@ Area 2 and area 3 wire their own detail pages; F-2 does not edit them. Two steps
 
 If you need a different layout, call `useAuditViewerList({ entityType, entityId, pageSize })` yourself and pass `toOperationRows(data.data)` to `OperationLog`.
 
+## The authorisation policy (F-3)
+
+F-3 brings the first real policy ([ADR 0037](../adr/0037-the-authorisation-policy-with-approval-limits.md)):
+
+- **One chain of rules** in `apps/api/src/modules/governance/domain/`:
+  - The rules are `system-admin`, `permission`, `approval-route` and `approval-limit`, in that order, and the first refusal wins.
+  - The guard runs the first two through `GovernancePermissionPolicy`.
+  - An area runs all four through `AuthorisationService.enforce`.
+- **The approval setup table**, `ApprovalUserSetup`: Navision's Approval User Setup plus `awayFrom` and `awayUntil`.
+  - Every change goes through `ApprovalSetupService.save`, which audits the before and after.
+  - `seedApprovalSetups` writes the sample chain.
+- **Tests:** a unit test beside each rule, and `apps/api/test/http/governance-controls.test.ts` against the real database, through a stand-in route that only the test app registers.
+
+### How another area asks the policy
+
+Import `GovernanceModule`, inject `AuthorisationService`, and ask before you act, before you open your transaction:
+
+```ts
+await this.authorisation.enforce(
+  {
+    actor: { userId: auth.user.id, role: auth.user.role },
+    action: "spr.approve",
+    resource: { type: "Spr", id: recordNo },
+    amount: sprTotal,
+    requesterUserId: raisedByUserId,
+  },
+  { ip: req.ip ?? null, traceId: requestIdOf(req) },
+);
+```
+
+- **A refusal** throws the standard 403 `FORBIDDEN` and is already audited, so let it through.
+- **To route a task,** `deciderFor(requesterUserId)` says who should receive it: the approver, their substitute, or the person the absent approver escalates to.
+
+### The absence and escalation rule (Q-6)
+
+An open rule, configuration until Spectra answers [Q-6](../client/questions-for-client.md) (A-23, A-24):
+
+1. The requester's approver (their Approver ID) decides.
+2. While the approver is away, or disabled, their substitute decides. Away means from `awayFrom` until `awayUntil`, or until cleared when there is no end.
+3. If the substitute is not set, is the approver themselves, has no setup, is disabled or is away too, the request escalates to the absent approver's own Approver ID. The seed points it at Management.
+4. One level only. If that person cannot act either, nobody may decide, and the policy refuses.
+
+**Nobody can be their own substitute:**
+
+- `save` refuses it;
+- a `CHECK` in the table refuses it;
+- the chain treats such a row as having no substitute.
+
+**Whose limit a substitute uses** is being confirmed with Richie.
+
+- Today it is their own: `SUBSTITUTE_LIMITS = "own"` in `domain/approval-limit-rule.ts`.
+- Flipping it to `"approver"` changes nothing else, and the unit tests cover both settings.
+
+### Still to come
+
+- **Richie's one-line changes:**
+  - the policy behind the `PermissionPolicy` token (`auth.module.ts`);
+  - the seeder (`seeders.ts`);
+  - `approvals.decide` for Management in the default matrix, with its description in `CLAUDE.md`, so an escalated request can be decided.
+- **C-3 (Azri)** calls `enforce` from the SPR approval route. E2E #3 through that route stays `it.todo` until then.
+- **The routes** to read and change a setup (`roles.read`, `roles.manage`), in a follow-up pull request that P-66's form needs.
+- **The data scope,** as a second slice once Q-17 is answered.
+
 ## What's yours to build
 
 **Starter stories,** ready to pull on the board (planned: P-2 seeds them):
@@ -126,9 +189,9 @@ If you need a different layout, call `useAuditViewerList({ entityType, entityId,
 - enforcing the data scope (filtering lists by brand or by owner), and the brand ownership question (Q-17);
 - the masking rules for bank details and prices, and the classification of each field;
 - the real rules for data sent to AI: the base only has the safe default;
-- approval limits, substitutes, no self-approval and segregation of duties (F-3, F-4): the contracts exist, the rules do not;
+- no self-approval and segregation of duties (F-4): the contracts exist, the rules do not. F-3 brought the limits and substitutes, above;
 - the bank-detail control (F-5);
-- a policy class under the `PermissionPolicy` token that runs your rules in a chain (ADR 0012, point 7);
+- a policy class under the `PermissionPolicy` token that runs your rules in a chain (ADR 0012, point 7): F-3 wrote `GovernancePermissionPolicy`, and putting it behind the token is Richie's one line;
 - the seed adds missing pairs back, so a permission you revoke returns on the next seed: decide whether it should;
 - polish nobody needs this week: a search box and filters on the matrix, an undo for a change, and a browser test of E2E #3 (backlog F-8).
 
@@ -145,7 +208,7 @@ If you need a different layout, call `useAuditViewerList({ entityType, entityId,
 - the real role-permission matrix for all nine roles, and the data scope by brand (Q-17);
 - the masking rules for each role, each with its reason;
 - classification of every sensitive field, and the rules for what may go to which AI provider (R-03 in [GRS by design](../grs/grs-by-design.md));
-- delegation: a substitute approver while the approver is away, with the same limits;
+- delegation beyond F-3: whose limit a substitute uses (being confirmed, `SUBSTITUTE_LIMITS`), and escalation past one level;
 - audit export and retention per record type (F-2 left both out: the `it.todo` tests name the cases);
 - anchoring the latest audit hash outside the database, and scheduling the chain check (both are in the backlog under F-2);
 - the real masking rules for an event's `changes`, in place of the one sample rule;
