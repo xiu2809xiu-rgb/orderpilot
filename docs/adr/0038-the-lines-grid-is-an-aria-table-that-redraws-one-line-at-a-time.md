@@ -1,4 +1,4 @@
-# ADR 0037: The lines grid is an ARIA table that redraws one line at a time
+# ADR 0038: The lines grid is an ARIA table that redraws one line at a time
 
 - **Status:** Accepted
 - **Date:** 2026-11-03
