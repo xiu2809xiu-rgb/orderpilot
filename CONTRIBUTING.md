@@ -413,6 +413,47 @@ useSaveShortcut(form, save);
 - **Drafts.** `useDraft(key, form, { exclude, rowKey })` keeps unsaved changes in this browser for this viewer and this record. Put the record's number in the key, and list every field that can be masked in `exclude`, with `*` for every row. A row's left-out fields come back only from the row with the same `rowKey` field (`id` by default), never by position, so give rows a stable id; a row with none comes back with those fields empty. Mount the form once its record has loaded. A draft goes on save, on Discard and on sign-out, and stays when the session expires. Drafts older than seven days are dropped, whoever's they are. After a save the form is clean again, but anything typed while it ran stays unsaved. Signing out removes drafts only for the tab where it happens: another tab left open can write one again, since tabs share no session signal yet.
 - **Leaving and keys.** `FormShell` asks before a route change or a tab close while the form has unsaved changes; pass `leaveGuard={false}` for a form that keeps nothing, such as a filter. Signing out over a form with changes asks too, and says they will be deleted. The prompt opens on Keep editing, and focus returns to the field. Enter never submits. Ctrl+S or Command+S saves through `useSaveShortcut`, from inside a field too. Save is refused until something has changed: pass `allowClean` for a form that its defaults fill in, such as an SPR raised from a shortage line, and `blockedReason` when the person cannot save yet, in their words. **Pass the same two options to `SaveButton` and to `useSaveShortcut`**, and the button and the key always agree.
 
+## Building a lines grid
+
+Order and SPR lines are typed into the lines grid in `apps/web/src/components/lines-grid`, imported from `@/components/lines-grid`. It sits inside a `FormShell` whose form has a `lines` array of `LineValue`. `/gallery` shows it as Support uses it, with prices masked, read-only and with 200 lines.
+
+```tsx
+const columns: LineColumn[] = [
+  { kind: "lineNo", header: t("line") },
+  { kind: "item", header: t("item") },
+  { kind: "description", header: t("description"), readOnly: true },
+  { kind: "quantity", header: t("quantity") },
+  { kind: "unitPrice", header: t("unitPrice") },
+  { kind: "amount", header: t("amount") },
+  { kind: "availability", header: t("availability") },
+  { kind: "remove", header: t("remove") },
+]; // An SPR lists only lineNo, item, quantity, availability and remove.
+
+const draft = useDraft(
+  `order.${no}`,
+  form,
+  lineDraftOptions("lines", priceMask !== null),
+);
+
+<LinesGrid
+  label={t("orderLines")}
+  columns={columns}
+  searchItems={searchItems} // (query, signal) => Promise<ItemOption[]>
+  priceMask={priceMask} // { reason, visibleTo } for a role that may not see prices
+  serverTotals={saved?.totals}
+  shortfallAction={(short) => <RaiseSprButton line={short} />}
+/>;
+```
+
+- **A line** is `{ lineId, item, description, quantity, unitPrice, unit, availableStock }`. Make a new one with `emptyLine()`, and give a saved line its own `lineId`. Quantity and price are decimal strings, never numbers. The schema is the screen's, in `packages/shared` when the API checks the same thing; `requiredLookup` refuses a line whose item was not chosen from the list.
+- **The item search** returns `{ number, name, detail, description, unit, availableStock, unitPrice }` for each item, where `number` is the Navision number and `detail` is the part number. `availableStock` is what the API reports from the same formula as master data: never work it out in the web app. `unitPrice` is the API's masked field. Picking an item fills the description, the unit, the stock and, if the role may see prices, the default price.
+- **Keys.** Tab and Shift+Tab walk the cells. Enter moves to the next cell, and on the last one adds a line and lands in its item cell. After an item is picked by Enter, focus goes to the quantity. Esc leaves a cell for its line, where Delete removes it and the arrows change line. Ctrl+Delete removes the line from inside a field, and Alt with the up or down arrow changes line from inside one. Delete and the arrows in a field are the field's own. Removing a line ends with a toast whose Undo puts it back.
+- **Amounts and totals** are worked out from the strings with `lineAmount` and `sumDecimal` from `@orderpilot/shared`, as you type. `useLineTotals` gives a footer of your own the one value it needs; the default footer is `LinesFooter`. After a save pass the server's totals as `serverTotals`: they are shown until a line changes, and the server's answer wins.
+- **Masks.** Pass `priceMask` for a role that may not see prices. The price and amount cells and the total show the mask and its reason, no price is written to the form, and `lineDraftOptions` leaves prices out of the draft. The API sends no price to that role.
+- **Errors.** Save through `useFormSave` with `serverPaths` such as `{ "lines.*.itemNo": "lines.*.item" }`. An error on `lines.2.quantity` lands on that cell and takes the focus, and the line's number is marked.
+- **A shortfall** is flagged in words on the line: what is needed, what is available and how short it is. `shortfallAction` is the slot for Raise SPR. It never stops a save.
+- Pass `readOnly` to draw a saved record: plain text cells, no buttons.
+
 ## Adding an API route
 
 The web app never hand-writes a call to the API. It uses hooks and mock handlers that orval generates from the API's OpenAPI file ([ADR 0019](docs/adr/0019-generated-api-hooks-and-mocks.md)).

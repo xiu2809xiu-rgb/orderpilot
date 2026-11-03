@@ -15,7 +15,9 @@
     "badgesHint": "Labels that keep a demo honest, and show how sensitive a record is.",
     "piecesHint": "Used inside tables and detail pages.",
     "form": "Form kit",
-    "formHint": "Fields, server errors, drafts and the prompt before leaving. The save is faked in the browser: choose what the server answers, then press Save or Ctrl+S."
+    "formHint": "Fields, server errors, drafts and the prompt before leaving. The save is faked in the browser: choose what the server answers, then press Save or Ctrl+S.",
+    "lines": "Lines grid",
+    "linesHint": "Order and SPR lines that are typed into. Search by part number or name, press Enter to move on, and Enter on the last cell adds a line. The save is faked in the browser."
   },
   "feedback": {
     "title": "Amounts, messages and loading shapes",
@@ -144,6 +146,50 @@
       "poUsed": "PO number {{po}} is already on order SO-20261030-0007 for this customer.",
       "warehouse": "Warehouse SG-02 is closed for a stock count until Monday.",
       "conflict": "Someone else changed this order after you opened it. Reload it to see their changes, then save again."
+    }
+  },
+  "lines": {
+    "formLabel": "Order lines",
+    "tableLabel": "Order lines",
+    "saved": "Saved. Nothing was sent: this grid fakes its save.",
+    "note": "Synthetic demo data. The server works the totals out again, and its answer wins.",
+    "visibleTo": "Support and Finance",
+    "raiseSpr": "Raise SPR",
+    "sprDone": "Raise SPR for {{item}} is built by the workflow area. Nothing was raised.",
+    "columns": {
+      "lineNo": "Line",
+      "item": "Item",
+      "description": "Description",
+      "quantity": "Quantity",
+      "unitPrice": "Unit price (USD)",
+      "amount": "Amount (USD)",
+      "availability": "Availability",
+      "remove": "Remove"
+    },
+    "bar": {
+      "viewer": "View as",
+      "viewers": {
+        "support": "Support (sees prices)",
+        "warehouse": "Warehouse (prices masked)"
+      },
+      "answer": "Fake server answer",
+      "answers": {
+        "saves": "Saves",
+        "refuses": "Refuses the quantity on line 2"
+      },
+      "readOnly": "Read only",
+      "few": "Two lines",
+      "many": "Load 200 lines"
+    },
+    "errors": {
+      "item": "Choose an item from the list.",
+      "description": "Keep the description to 100 characters.",
+      "quantity": "Enter a quantity above zero, such as 12.",
+      "unitPrice": "Enter a price such as 19.99, or leave it empty.",
+      "none": "Add at least one line."
+    },
+    "server": {
+      "stock": "Only 8 units of {{item}} can be promised on this date."
     }
   }
 }

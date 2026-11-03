@@ -11,16 +11,19 @@ afterEach(() => {
 
 describe("the component gallery route", () => {
   // Axe walks the whole page, forms included. Under a full parallel run that
-  // takes longer than the usual limit, so this test has its own.
+  // takes longer than the usual limit, so this test has its own. It is also the
+  // first to load the gallery's chunk, which now holds the lines grid too, so
+  // the first lookup waits longer than the others do.
   it("shows every component to a demo session", async () => {
     const { container } = renderApp("/gallery", {
       session: sessionFor("AUDITOR"),
     });
     expect(
-      await screen.findByRole("heading", {
-        level: 1,
-        name: "Component gallery",
-      }),
+      await screen.findByRole(
+        "heading",
+        { level: 1, name: "Component gallery" },
+        { timeout: 20_000 },
+      ),
     ).toBeVisible();
     expect(screen.getAllByText("Synthetic demo data").length).toBeGreaterThan(
       0,
