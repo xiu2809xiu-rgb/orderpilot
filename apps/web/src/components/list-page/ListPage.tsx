@@ -13,6 +13,7 @@ import {
 import { tableStatusOf } from "@/lib/query-status";
 import { useSessionStore } from "@/stores/session";
 import { labelOf, usableActions } from "./actions";
+import { assertFiltersInUrl } from "./filterIds";
 import { ListToolbar } from "./ListToolbar";
 import type { ListAction, ListFilter, ListResult } from "./types";
 
@@ -39,6 +40,7 @@ export interface ListPageProps<Row> {
   onQueryChange: (query: TableQuery) => void;
   /** The generated query hook's result, as it comes. */
   list: ListResult<Row>;
+  /** Each id must also be in the `useUrlQuery` spec: development throws if one is not. */
   filters?: readonly ListFilter[];
   /** Every action the screen has. The template draws those the role may use. */
   actions?: readonly ListAction<Row>[];
@@ -86,6 +88,7 @@ export function ListPage<Row>({
 }: ListPageProps<Row>) {
   const { t } = useTranslation("list-page");
   const session = useSessionStore((state) => state.session);
+  if (import.meta.env.DEV) assertFiltersInUrl(filters, onQueryChange);
   const usable = usableActions(actions, session);
   const creating = usable.find((action) => action.kind === "new");
   // N starts the one primary action, wherever the New button is drawn.

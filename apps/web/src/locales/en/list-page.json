@@ -4,7 +4,13 @@
     "more": "More filters",
     "moreTitle": "More filters",
     "moreApplied": "{{count}} applied",
-    "clearAll": "Clear all"
+    "clearAll": "Clear all",
+    "from": "From",
+    "to": "To",
+    "lookupSearch": "Search {{label}}",
+    "lookupEmpty": "No match.",
+    "rangeFrom": "{{label}} from",
+    "rangeTo": "{{label}} to"
   },
   "actions": {
     "label": "Actions",

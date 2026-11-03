@@ -1,17 +1,31 @@
-import type { FilterChip, TableFilters, TableQuery } from "@/components/common";
+import {
+  rangeIds,
+  type FilterChip,
+  type TableFilters,
+  type TableQuery,
+} from "@/components/common";
+import { formatDay } from "@/lib/format";
 import type { ListFilter } from "./types";
 
 /** The id the search term uses as a chip, which no filter may take. */
 export const SEARCH_CHIP = "__search";
 
+/** The words a range chip needs: "Order date from" and "Order date to". */
+export interface RangeWords {
+  from: (label: string) => string;
+  to: (label: string) => string;
+}
+
 /**
  * The applied filters in words: "Brand: Quillon", "Overdue only", and the
  * search term. A value a link set that the options do not list shows as it is.
+ * A range gives one chip for each end, so each can be cleared on its own.
  */
 export function appliedChips(
   filters: readonly ListFilter[],
   query: Pick<TableQuery, "search" | "filters">,
   searchLabel: string,
+  range: RangeWords,
 ): FilterChip[] {
   const chips: FilterChip[] = [];
   if (query.search) {
@@ -19,7 +33,18 @@ export function appliedChips(
   }
   for (const filter of filters) {
     const value = query.filters[filter.id];
-    if (filter.kind === "toggle") {
+    if (filter.kind === "range") {
+      const [from, to] = rangeIds(filter.id);
+      for (const [key, words] of [
+        [from, range.from(filter.label)],
+        [to, range.to(filter.label)],
+      ] as const) {
+        const day = query.filters[key];
+        if (typeof day === "string" && day !== "") {
+          chips.push({ id: key, label: `${words}: ${formatDay(day)}` });
+        }
+      }
+    } else if (filter.kind === "toggle") {
       if (value === true) chips.push({ id: filter.id, label: filter.label });
     } else if (typeof value === "string" && value !== "") {
       const option = filter.options?.find((o) => o.value === value);

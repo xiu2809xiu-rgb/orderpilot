@@ -3,11 +3,48 @@ import { useSearchParams } from "react-router";
 import { DEFAULT_QUERY, type TableFilters, type TableQuery } from "./types";
 
 /**
- * The filters a list accepts, each with the values it allows, or null for any
- * text. A plain list of names means "any text" for each.
+ * What one filter takes: a list of values, null for any text, or "date" for
+ * a day written as 2026-11-30.
+ */
+export type FilterRule = readonly string[] | null | "date";
+
+/**
+ * The filters a list accepts, each with its rule. A plain list of names means
+ * "any text" for each.
  */
 export type FilterSpec =
-  Readonly<Record<string, readonly string[] | null>> | readonly string[];
+  Readonly<Record<string, FilterRule>> | readonly string[];
+
+/** The two filters behind a date range named `id`: `idFrom` and `idTo`. */
+export function rangeIds(id: string): readonly [string, string] {
+  return [`${id}From`, `${id}To`];
+}
+
+/** The rules for a date range filter, to spread into a list's spec. */
+export function rangeSpec(id: string): Record<string, "date"> {
+  const [from, to] = rangeIds(id);
+  return { [from]: "date", [to]: "date" };
+}
+
+const DAY = /^\d{4}-\d{2}-\d{2}$/;
+
+/** A real calendar day: 2026-02-30 is refused by the API, so it is dropped here. */
+export function isDay(value: string): boolean {
+  if (!DAY.test(value)) return false;
+  const date = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().startsWith(value);
+}
+
+// The ids a list's URL hook accepts, found from its setter. A list page uses it
+// to tell a developer at once that a filter it draws would do nothing.
+const URL_IDS = new WeakMap<object, ReadonlySet<string>>();
+
+/** The filter ids `useUrlQuery` carries for this setter, or undefined for any other. */
+export function urlFilterIds(
+  setQuery: unknown,
+): ReadonlySet<string> | undefined {
+  return typeof setQuery === "function" ? URL_IDS.get(setQuery) : undefined;
+}
 
 /** The API refuses a page size over this: a hand-edited address must not reach it. */
 export const MAX_PAGE_SIZE = 200;
@@ -28,12 +65,10 @@ export interface UrlQueryOptions {
 
 const MANAGED = ["search", "sort", "direction", "page", "pageSize"] as const;
 
-function normalise(
-  spec: FilterSpec,
-): Readonly<Record<string, readonly string[] | null>> {
+function normalise(spec: FilterSpec): Readonly<Record<string, FilterRule>> {
   return Array.isArray(spec)
     ? Object.fromEntries((spec as readonly string[]).map((id) => [id, null]))
-    : (spec as Readonly<Record<string, readonly string[] | null>>);
+    : (spec as Readonly<Record<string, FilterRule>>);
 }
 
 function positive(value: string | null, fallback: number, max?: number) {
@@ -60,7 +95,9 @@ export function queryFromUrl(
   for (const [id, allowed] of Object.entries(normalise(spec))) {
     const value = url.get(id);
     if (!value) continue;
-    if (allowed === null) {
+    if (allowed === "date") {
+      if (isDay(value)) filters[id] = value;
+    } else if (allowed === null) {
       filters[id] =
         value === "true"
           ? true
@@ -141,6 +178,7 @@ export function useUrlQuery(
     },
     [setUrl, spec, pageSize],
   );
+  URL_IDS.set(setQuery, new Set(Object.keys(normalise(spec))));
   return [query, setQuery];
 }
 

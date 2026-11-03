@@ -7,14 +7,19 @@ export interface FilterOption {
 }
 
 /**
- * One filter a list offers. A select needs `options`. A toggle is a yes/no
- * switch such as "Overdue only". `more` puts it under More filters, so the bar
- * keeps to the three or four that matter.
+ * One filter a list offers. A select needs `options`. A lookup is a select
+ * with a search box, for a long list such as customers or vendors. A toggle is
+ * a yes/no switch such as "Overdue only". A range is two dates: it keeps
+ * `idFrom` and `idTo` (see `rangeSpec`). `more` puts it under More filters,
+ * so the bar keeps to the three or four that matter.
+ *
+ * Every id, or both of a range's, must also be in the list's `useUrlQuery`
+ * spec. The page checks this in development and says which one is missing.
  */
 export interface ListFilter {
   id: string;
   label: string;
-  kind?: "select" | "toggle";
+  kind?: "select" | "lookup" | "toggle" | "range";
   options?: readonly FilterOption[];
   /** The first option of a select, such as "All brands". */
   allLabel?: string;
@@ -61,6 +66,13 @@ export interface ListAction<Row> {
   permission: Permission;
   /** Defaults by kind: Edit and Void act on one row, batch on many, the rest on none. */
   needs?: ActionNeeds;
+  /**
+   * Says why the selected rows cannot take this action, already translated, or
+   * returns undefined when they can: for example "Only SPRs waiting for
+   * approval can be approved." The button then stays reachable and gives the
+   * reason, as it does when nothing is selected.
+   */
+  enabledFor?: (rows: readonly Row[]) => string | undefined;
   /** Runs the action with the selected rows. */
   onRun?: (rows: readonly Row[]) => void;
   /** For Void and Disable: the template asks for a reason, then runs this. */

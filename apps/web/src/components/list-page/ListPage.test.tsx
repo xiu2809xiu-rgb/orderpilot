@@ -3,7 +3,12 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import type { Role } from "@orderpilot/shared";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
-import { useUrlQuery, type DataTableColumn } from "@/components/common";
+import {
+  rangeSpec,
+  useUrlQuery,
+  type DataTableColumn,
+  type FilterSpec,
+} from "@/components/common";
 import { useToastStore } from "@/components/common/toast";
 import i18n from "@/i18n";
 import { ApiError } from "@/lib/api/errors";
@@ -72,6 +77,26 @@ const URL_FILTERS = {
   overdue: null,
 };
 
+const WIDE_SPEC = {
+  ...URL_FILTERS,
+  customer: null,
+  ...rangeSpec("orderDate"),
+};
+
+const WIDE_FILTERS: ListFilter[] = [
+  {
+    id: "customer",
+    label: "Customer",
+    allLabel: "All customers",
+    kind: "lookup",
+    options: [
+      { value: "C-0001", label: "Quillon Trading" },
+      { value: "C-0002", label: "Harbour Supply" },
+    ],
+  },
+  { id: "orderDate", label: "Order date", kind: "range" },
+];
+
 const ok: ListResult<Row> = {
   data: { data: ROWS, meta: { total: 2 } },
   isPending: false,
@@ -90,6 +115,8 @@ interface HarnessProps {
   selection?: Row[];
   list?: ListResult<Row>;
   loadRows?: () => Promise<readonly Row[]>;
+  filters?: ListFilter[];
+  spec?: FilterSpec;
 }
 
 function Harness({
@@ -97,8 +124,10 @@ function Harness({
   selection,
   list = ok,
   loadRows,
+  filters = FILTERS,
+  spec = URL_FILTERS,
 }: HarnessProps) {
-  const [query, setQuery] = useUrlQuery(URL_FILTERS, { pageSize: 25 });
+  const [query, setQuery] = useUrlQuery(spec, { pageSize: 25 });
   return (
     <ListPage
       tableId="test-list"
@@ -110,7 +139,7 @@ function Harness({
       query={query}
       onQueryChange={setQuery}
       list={list}
-      filters={FILTERS}
+      filters={filters}
       actions={actions}
       {...(selection ? { selection } : {})}
       searchDebounceMs={0}
@@ -248,6 +277,37 @@ describe("the action bar", () => {
     expect(onRun).toHaveBeenCalledWith([FIRST]);
   });
 
+  it("keeps a batch action blocked, with the screen's reason, for rows that cannot take it", async () => {
+    const onRun = vi.fn();
+    const action: ListAction<Row> = {
+      id: "approve",
+      kind: "batch",
+      label: "Approve",
+      permission: "orders.read",
+      enabledFor: (rows) =>
+        rows.every((row) => row.brand === "Quillon")
+          ? undefined
+          : "Only Quillon rows can be approved.",
+      onRun,
+    };
+    const view = renderList({
+      actions: [action],
+      selection: ROWS,
+    });
+    const blocked = screen.getByRole("button", { name: "Approve" });
+    expect(blocked).toHaveAttribute("aria-disabled", "true");
+    expect(blocked).toHaveAccessibleDescription(
+      "Only Quillon rows can be approved.",
+    );
+    await userEvent.click(blocked);
+    expect(onRun).not.toHaveBeenCalled();
+    view.unmount();
+
+    renderList({ actions: [action], selection: [FIRST] });
+    await userEvent.click(screen.getByRole("button", { name: "Approve" }));
+    expect(onRun).toHaveBeenCalledWith([FIRST]);
+  });
+
   it("asks for a reason before a Void, refuses an empty one and ends with a toast", async () => {
     const run = vi.fn().mockResolvedValue(undefined);
     const action: ListAction<Row> = {
@@ -358,6 +418,49 @@ describe("the filter bar", () => {
     await userEvent.click(screen.getByRole("button", { name: "Clear all" }));
     expect(screen.queryByRole("list", { name: "Active filters" })).toBeNull();
     expect(screen.getByRole("searchbox")).toHaveValue("");
+  });
+
+  it("filters on a date range and shows each end as its own chip", async () => {
+    renderList(
+      { filters: WIDE_FILTERS, spec: WIDE_SPEC },
+      { path: "/items?orderDateFrom=2026-11-01" },
+    );
+    const group = screen.getByRole("group", { name: "Order date" });
+    const to = within(group).getByLabelText(/to/i);
+    await userEvent.type(to, "2026-11-30");
+    const chips = screen.getByRole("list", { name: "Active filters" });
+    expect(within(chips).getByText(/Order date from: /)).toBeVisible();
+    expect(within(chips).getByText(/Order date to: /)).toBeVisible();
+    await userEvent.click(
+      within(chips).getByRole("button", {
+        name: /Clear filter: Order date from/,
+      }),
+    );
+    expect(within(chips).queryByText(/Order date from: /)).toBeNull();
+    expect(within(chips).getByText(/Order date to: /)).toBeVisible();
+  });
+
+  it("picks from a long list by searching it, and keeps the number", async () => {
+    renderList({ filters: WIDE_FILTERS, spec: WIDE_SPEC });
+    await userEvent.click(screen.getByRole("combobox", { name: "Customer" }));
+    await userEvent.type(
+      screen.getByPlaceholderText("Search Customer"),
+      "harbour",
+    );
+    expect(screen.queryByText("Quillon Trading")).toBeNull();
+    await userEvent.click(screen.getByText("Harbour Supply"));
+    const chips = screen.getByRole("list", { name: "Active filters" });
+    expect(within(chips).getByText("Customer: Harbour Supply")).toBeVisible();
+  });
+
+  it("says at once when a filter is drawn that the address would drop", () => {
+    const quiet = vi.spyOn(console, "error").mockImplementation(() => {
+      // React logs the render error as well as throwing it.
+    });
+    expect(() => {
+      renderList({ filters: WIDE_FILTERS, spec: URL_FILTERS });
+    }).toThrow(/"customer" is not in this list's useUrlQuery spec/);
+    quiet.mockRestore();
   });
 
   it("holds a hand-edited page size to the default instead of breaking the page", () => {

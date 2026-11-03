@@ -3,9 +3,49 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, useLocation } from "react-router";
 import { describe, expect, it } from "vitest";
 import { DEFAULT_QUERY } from "./types";
-import { queryFromUrl, urlFromQuery, useUrlQuery } from "./useUrlQuery";
+import {
+  isDay,
+  queryFromUrl,
+  rangeIds,
+  rangeSpec,
+  urlFromQuery,
+  useUrlQuery,
+} from "./useUrlQuery";
 
 const SPEC = { brand: null, availability: ["short", "low", "ok"] } as const;
+
+describe("a date range in the address", () => {
+  const spec = { brand: null, ...rangeSpec("orderDate") };
+
+  it("names the two ends idFrom and idTo", () => {
+    expect(rangeIds("orderDate")).toEqual(["orderDateFrom", "orderDateTo"]);
+  });
+
+  it("accepts a real day and drops one the API would refuse", () => {
+    expect(isDay("2026-11-30")).toBe(true);
+    expect(isDay("2026-02-30")).toBe(false);
+    expect(isDay("2026-1-3")).toBe(false);
+    expect(isDay("tomorrow")).toBe(false);
+    expect(isDay("2026-11-30T00:00")).toBe(false);
+    const url = new URLSearchParams({
+      orderDateFrom: "2026-11-01",
+      orderDateTo: "2026-02-30",
+    });
+    expect(queryFromUrl(url, spec).filters).toEqual({
+      orderDateFrom: "2026-11-01",
+    });
+  });
+
+  it("writes both ends back and keeps the round trip", () => {
+    const query = queryFromUrl(
+      new URLSearchParams("orderDateFrom=2026-11-01&orderDateTo=2026-11-30"),
+      spec,
+    );
+    const back = urlFromQuery(new URLSearchParams(), query, spec);
+    expect(back.get("orderDateFrom")).toBe("2026-11-01");
+    expect(back.get("orderDateTo")).toBe("2026-11-30");
+  });
+});
 
 describe("a list's address", () => {
   it("falls back to the default page size when a hand-edited one is refused by the API", () => {

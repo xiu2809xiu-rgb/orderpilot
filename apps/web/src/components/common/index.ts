@@ -18,8 +18,12 @@ export {
   apiParams,
   MAX_PAGE_SIZE,
   queryFromUrl,
+  rangeIds,
+  rangeSpec,
+  urlFilterIds,
   urlFromQuery,
   useUrlQuery,
+  type FilterRule,
   type FilterSpec,
   type UrlQueryOptions,
 } from "./data-table/useUrlQuery";

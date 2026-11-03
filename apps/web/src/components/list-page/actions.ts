@@ -64,11 +64,11 @@ export function usableActions<Row>(
 /** Why an action cannot run yet, or undefined when it can. */
 export function blockedReason<Row>(
   action: ListAction<Row>,
-  selected: number,
+  selection: readonly Row[],
   t: TFunction,
 ): string | undefined {
   const needs = needsOf(action);
-  if (needs === "one" && selected !== 1) return t("actions.needsOne");
-  if (needs === "many" && selected === 0) return t("actions.needsMany");
-  return undefined;
+  if (needs === "one" && selection.length !== 1) return t("actions.needsOne");
+  if (needs === "many" && selection.length === 0) return t("actions.needsMany");
+  return action.enabledFor?.(selection);
 }

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type {
   DataTableColumn,
   DataTableState,
@@ -44,8 +45,12 @@ export function ListToolbar<Row>({
   exportOptions,
   searchDebounceMs,
 }: ListToolbarProps<Row>) {
+  const { t } = useTranslation("list-page");
   const { shown, rows, change, setFilter, prefs, visibleIds } = table;
-  const chips = appliedChips(filters, query, searchLabel);
+  const chips = appliedChips(filters, query, searchLabel, {
+    from: (label) => t("filters.rangeFrom", { label }),
+    to: (label) => t("filters.rangeTo", { label }),
+  });
   const ownRow = hasLeftActions(actions);
   const bar = (
     <ActionBar

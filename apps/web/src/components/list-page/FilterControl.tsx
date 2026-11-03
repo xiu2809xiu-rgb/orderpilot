@@ -1,6 +1,8 @@
 import { useId } from "react";
 import { Switch } from "@/components/ui/switch";
 import type { TableFilters } from "@/components/common";
+import { FilterLookup } from "./FilterLookup";
+import { FilterRange } from "./FilterRange";
 import { FilterSelect } from "./FilterSelect";
 import type { ListFilter } from "./types";
 
@@ -34,8 +36,20 @@ export function FilterControl({
       </div>
     );
   }
+  if (filter.kind === "range") {
+    return (
+      <FilterRange
+        label={filter.label}
+        id={filter.id}
+        filters={filters}
+        setFilter={setFilter}
+        showLabel={showLabel}
+      />
+    );
+  }
+  const Pick = filter.kind === "lookup" ? FilterLookup : FilterSelect;
   return (
-    <FilterSelect
+    <Pick
       label={filter.label}
       allLabel={filter.allLabel ?? filter.label}
       value={String(filters[filter.id] ?? "")}

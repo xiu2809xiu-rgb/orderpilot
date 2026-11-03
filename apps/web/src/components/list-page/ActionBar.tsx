@@ -7,7 +7,7 @@ import { ActionButton } from "./ActionButton";
 import { blockedReason, KIND_ICONS, labelOf, LEFT_KINDS } from "./actions";
 import { PrintButton } from "./PrintButton";
 import { ReasonDialog } from "./ReasonDialog";
-import { needsOf, type ListAction } from "./types";
+import type { ListAction } from "./types";
 
 interface ActionBarProps<Row> {
   /** Only the actions this role may use, in the bar's order. */
@@ -82,11 +82,7 @@ export function ActionBar<Row>({
         label={label}
         icon={action.icon ?? KIND_ICONS[action.kind]}
         primary={action.kind === "new"}
-        blocked={
-          needsOf(action) === "none"
-            ? undefined
-            : blockedReason(action, selection.length, t)
-        }
+        blocked={blockedReason(action, selection, t)}
         onRun={() => {
           run(action);
         }}

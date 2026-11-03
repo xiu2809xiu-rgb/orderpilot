@@ -8,6 +8,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { FilterControl } from "./FilterControl";
+import { isApplied } from "./filterIds";
 import type { ListFilter } from "./types";
 
 interface MoreFiltersProps {
@@ -23,10 +24,7 @@ interface MoreFiltersProps {
 export function MoreFilters({ filters, values, setFilter }: MoreFiltersProps) {
   const { t } = useTranslation("list-page");
   if (filters.length === 0) return null;
-  const applied = filters.filter((filter) => {
-    const value = values[filter.id];
-    return value !== undefined && value !== false && value !== "";
-  }).length;
+  const applied = filters.filter((filter) => isApplied(filter, values)).length;
   return (
     <Popover>
       <PopoverTrigger asChild>

@@ -194,7 +194,11 @@ describe("the items list", () => {
     const seen: string[] = [];
     const masked = {
       ...row("I-0004", "short"),
-      unitPrice: hidden("item.unitPrice", "price"),
+      unitPrice: {
+        ...shown("item.unitPrice", ""),
+        masked: true,
+        value: "",
+      },
     };
     server.use(
       getMasterDataFiltersMockHandler(filters),
