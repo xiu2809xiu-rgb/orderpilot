@@ -25,7 +25,7 @@ export function AmountCell({ row }: { row: string }) {
     line !== undefined &&
     isLineAmountTooLarge(line.quantity ?? "", line.unitPrice ?? "");
   return (
-    <span className="block min-h-8 py-1.5 text-sm @3xl:text-right">
+    <span className="block min-h-8 py-1.5 text-sm @lines:text-right">
       {tooLarge ? (
         <span className="text-warning">{t("amountTooLarge")}</span>
       ) : amount === null ? (
@@ -95,7 +95,7 @@ export function AvailabilityCell({
           available: stock,
         })}
       </p>
-      <div className="[&_button]:pointer-coarse:min-h-11 @max-3xl:[&_button]:min-h-11">
+      <div className="[&_button]:pointer-coarse:min-h-11 @max-lines:[&_button]:min-h-11">
         {grid.shortfallAction?.(short)}
       </div>
     </div>

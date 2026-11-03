@@ -1,12 +1,12 @@
-// Walks the lines grid on the demo gallery, in the production build, at 1440
-// and 390 px wide in light and dark, and takes the pictures. It types the way
+// Walks the lines grid on the demo gallery, in the production build, at 1440,
+// 1024 (a tablet in landscape, touch) and 390 px wide in light and dark, and takes the pictures. It types the way
 // Support would: no mouse for the entry itself. No API, no database, no Docker:
 // the API is answered by the browser. Run `pnpm build` first, then
 //   node apps/web/scripts/walk-lines-grid.mjs
 // Playwright comes from apps/e2e (pnpm install there), or from PLAYWRIGHT_DIR.
 
 // The functions given to page.evaluate run in the browser, so they use its globals.
-/* global document, window, requestAnimationFrame */
+/* global document, window, requestAnimationFrame, getComputedStyle */
 
 import { spawn } from "node:child_process";
 import { mkdirSync } from "node:fs";
@@ -157,7 +157,18 @@ async function entryWalk(page, label) {
   );
 }
 
-async function layoutChecks(page, label, narrow) {
+async function layoutChecks(page, label, touch, stacked) {
+  // A tablet in landscape keeps the grid: one row of tracks per line.
+  const tracks = await page.evaluate(() => {
+    const row = document.querySelector("[data-row]");
+    return row
+      ? getComputedStyle(row).gridTemplateColumns.split(" ").length
+      : 0;
+  });
+  check(
+    stacked ? tracks <= 2 : tracks >= 6,
+    `${label}: ${String(tracks)} columns per line, expected ${stacked ? "a stack" : "a grid"}`,
+  );
   const wide = await page.evaluate(
     () => document.documentElement.scrollWidth - window.innerWidth,
   );
@@ -178,7 +189,7 @@ async function layoutChecks(page, label, narrow) {
       .filter(({ r }) => r.width > 0 && r.height > 0 && r.height < 44)
       .map(({ r, n }) => `${n ?? "?"} ${Math.round(r.height)}px`);
   });
-  if (narrow)
+  if (touch)
     check(
       small.length === 0,
       `${label}: targets under 44px: ${small.slice(0, 4).join(", ")}`,
@@ -219,13 +230,18 @@ async function typingSpeed(page, card, label) {
   console.log(line);
 }
 
+const VIEWPORTS = {
+  1440: { width: 1440, height: 900 },
+  1024: { width: 1024, height: 768 },
+  390: { width: 390, height: 844 },
+};
+
 async function walk(browser, theme, size) {
   const narrow = size === 390;
+  const touch = size !== 1440;
   const context = await browser.newContext({
-    viewport: narrow
-      ? { width: 390, height: 844 }
-      : { width: 1440, height: 900 },
-    hasTouch: narrow,
+    viewport: VIEWPORTS[size],
+    hasTouch: touch,
     isMobile: narrow,
     colorScheme: theme,
     reducedMotion: "reduce",
@@ -257,7 +273,7 @@ async function walk(browser, theme, size) {
   await page.getByRole("table", { name: "Order lines" }).waitFor();
   await sleep(300);
   await shoot(card, "support", theme, size);
-  await layoutChecks(page, `${label} support`, narrow);
+  await layoutChecks(page, `${label} support`, touch, narrow);
 
   if (!narrow) {
     await entryWalk(page, label);
@@ -278,7 +294,7 @@ async function walk(browser, theme, size) {
     `${label}: the server error did not take focus`,
   );
   await shoot(card, "server-error", theme, size);
-  await layoutChecks(page, `${label} error`, narrow);
+  await layoutChecks(page, `${label} error`, touch, narrow);
 
   // A role that may not see prices, then the record read-only.
   await card.getByLabel("View as").click();
@@ -291,7 +307,7 @@ async function walk(browser, theme, size) {
   await shoot(card, "masked", theme, size);
   await card.getByRole("switch", { name: "Read only" }).click();
   await shoot(card, "read-only", theme, size);
-  await layoutChecks(page, `${label} read-only`, narrow);
+  await layoutChecks(page, `${label} read-only`, touch, narrow);
 
   if (size === 1440 && theme === "light") {
     await card.getByRole("switch", { name: "Read only" }).click();
@@ -308,7 +324,7 @@ async function run() {
   const browser = await chromium.launch();
   try {
     for (const theme of ["light", "dark"]) {
-      for (const size of [1440, 390]) await walk(browser, theme, size);
+      for (const size of [1440, 1024, 390]) await walk(browser, theme, size);
     }
   } finally {
     await browser.close();

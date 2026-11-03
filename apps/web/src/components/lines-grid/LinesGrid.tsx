@@ -22,7 +22,7 @@ function headerClass(kind: ColumnKind): string | undefined {
   if (kind === "remove") return "sr-only";
   const numeric =
     kind === "quantity" || kind === "unitPrice" || kind === "amount";
-  return numeric ? "@3xl:text-right" : undefined;
+  return numeric ? "@lines:text-right" : undefined;
 }
 
 /** Where Enter on an item goes: the quantity, since the pick filled the description. */
@@ -130,11 +130,16 @@ export function LinesGrid(props: LinesGridProps) {
             role="table"
             aria-label={props.label}
             aria-describedby={readOnly ? undefined : hintId}
-            style={{ "--line-tracks": trackTemplate(columns) } as CSSProperties}
+            style={
+              {
+                "--line-tracks": trackTemplate(columns),
+                "--line-tracks-compact": trackTemplate(columns, true),
+              } as CSSProperties
+            }
           >
             <div
               role="row"
-              className="px-0 text-xs font-medium text-muted-foreground @max-3xl:sr-only @3xl:grid @3xl:grid-cols-(--line-tracks) @3xl:gap-x-s1 @3xl:border-b @3xl:pb-1"
+              className="px-0 text-xs font-medium text-muted-foreground @max-lines:sr-only @lines:grid @lines:grid-cols-(--line-tracks-compact) @3xl:grid-cols-(--line-tracks) @lines:gap-x-s1 @lines:border-b @lines:pb-1"
             >
               {columns.map((column) => (
                 <div
@@ -146,7 +151,7 @@ export function LinesGrid(props: LinesGridProps) {
                 </div>
               ))}
             </div>
-            <div role="rowgroup" className="space-y-s2 @3xl:space-y-0">
+            <div role="rowgroup" className="space-y-s2 @lines:space-y-0">
               {array.fields.map((field, index) => (
                 <LineRow key={field.id} index={index} />
               ))}
@@ -165,7 +170,7 @@ export function LinesGrid(props: LinesGridProps) {
               variant="outline"
               size="sm"
               data-add-line
-              className="pointer-coarse:h-11 @max-3xl:h-11"
+              className="pointer-coarse:h-11 @max-lines:h-11"
               onClick={add}
             >
               <Plus aria-hidden="true" />
@@ -173,7 +178,7 @@ export function LinesGrid(props: LinesGridProps) {
             </Button>
             <p
               id={hintId}
-              className="hidden max-w-[70ch] text-xs text-muted-foreground @3xl:block"
+              className="hidden max-w-[70ch] text-xs text-muted-foreground @lines:block"
             >
               {t("keys")}
             </p>

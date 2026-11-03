@@ -6,7 +6,7 @@ import { useGrid } from "./gridContext";
 
 // The mask's "why" button is small for a mouse; a finger needs 44 px.
 export const TOUCH_BUTTONS =
-  "[&_button]:pointer-coarse:size-11 @max-3xl:[&_button]:size-11";
+  "[&_button]:pointer-coarse:size-11 @max-lines:[&_button]:size-11";
 
 function asText(value: unknown): string {
   return typeof value === "string" ? value : "";
@@ -26,7 +26,7 @@ export function ReadText({ field, row, numeric = false }: ReadTextProps) {
     <span
       className={cn(
         "block min-h-8 py-1.5 text-sm break-words",
-        numeric && "tabular-nums @3xl:text-right",
+        numeric && "tabular-nums @lines:text-right",
       )}
     >
       {value === "" ? <span className="text-muted-foreground">-</span> : value}
@@ -58,7 +58,7 @@ export function MaskedPrice({ numeric = true }: { numeric?: boolean }) {
     <span
       className={cn(
         "flex min-h-8 items-center py-1",
-        numeric && "@3xl:justify-end",
+        numeric && "@lines:justify-end",
         TOUCH_BUTTONS,
       )}
     >

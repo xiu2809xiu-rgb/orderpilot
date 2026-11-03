@@ -55,9 +55,35 @@ const DEFAULT_WIDTH: Record<ColumnKind, string> = {
   remove: "2.75rem",
 };
 
-/** The `grid-template-columns` of the columns, for screens wide enough for a grid. */
-export function trackTemplate(columns: readonly LineColumn[]): string {
-  return columns.map((c) => c.width ?? DEFAULT_WIDTH[c.kind]).join(" ");
+// Between 640 and 768 px of the grid's own width (a tablet in landscape with
+// the side menu open) the same columns fit in tighter tracks. Only the columns
+// whose width is a default are tightened: a screen's own width is kept.
+const COMPACT_WIDTH: Partial<Record<ColumnKind, string>> = {
+  lineNo: "2.25rem",
+  item: "minmax(0, 2fr)",
+  description: "minmax(0, 1fr)",
+  quantity: "5rem",
+  unitPrice: "5.5rem",
+  amount: "5.5rem",
+  availability: "minmax(6.5rem, 1fr)",
+};
+
+/**
+ * The `grid-template-columns` of the columns, for screens wide enough for a
+ * grid. `compact` is the version for the narrower of the two grid widths.
+ */
+export function trackTemplate(
+  columns: readonly LineColumn[],
+  compact = false,
+): string {
+  return columns
+    .map(
+      (c) =>
+        c.width ??
+        (compact ? COMPACT_WIDTH[c.kind] : undefined) ??
+        DEFAULT_WIDTH[c.kind],
+    )
+    .join(" ");
 }
 
 const ENTRY_KINDS: readonly ColumnKind[] = [

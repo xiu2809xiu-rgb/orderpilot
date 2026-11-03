@@ -14,7 +14,7 @@ export function LineNumberCell({ index, row }: { index: number; row: string }) {
   return (
     <span className="flex min-h-8 items-center gap-1 text-sm font-medium tabular-nums">
       <span aria-hidden="true">
-        <span className="@3xl:hidden">{t("lineWord")} </span>
+        <span className="@lines:hidden">{t("lineWord")} </span>
         {index + 1}
       </span>
       <span className="sr-only">{t("cells.lineNo", { n: index + 1 })}</span>
@@ -37,13 +37,13 @@ export function RemoveCell({ index }: { index: number }) {
       type="button"
       variant="ghost"
       aria-label={t("remove", { n: index + 1 })}
-      className="h-8 w-full justify-start pointer-coarse:h-11 @max-3xl:h-11 @3xl:w-8 @3xl:justify-center @3xl:px-0 @3xl:pointer-coarse:w-11"
+      className="h-8 w-full justify-start pointer-coarse:h-11 @max-lines:h-11 @lines:w-8 @lines:justify-center @lines:px-0 @lines:pointer-coarse:w-11"
       onClick={() => {
         grid.remove(index, "remove" satisfies ColumnKind);
       }}
     >
       <Trash2 aria-hidden="true" />
-      <span className="@3xl:sr-only">{t("removeShort")}</span>
+      <span className="@lines:sr-only">{t("removeShort")}</span>
     </Button>
   );
 }

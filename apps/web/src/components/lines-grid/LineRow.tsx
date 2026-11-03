@@ -15,19 +15,19 @@ import type { LineColumn } from "./types";
 // Whole class names, so that Tailwind finds them. Stacked lines use two
 // columns: short cells share a row, long ones take both.
 const SPAN: Record<LineColumn["kind"], string> = {
-  lineNo: "col-span-2 @3xl:col-span-1",
-  item: "col-span-2 @3xl:col-span-1",
-  description: "col-span-2 @3xl:col-span-1",
+  lineNo: "col-span-2 @lines:col-span-1",
+  item: "col-span-2 @lines:col-span-1",
+  description: "col-span-2 @lines:col-span-1",
   quantity: "col-span-1",
   unitPrice: "col-span-1",
-  amount: "col-span-2 @3xl:col-span-1",
-  availability: "col-span-2 @3xl:col-span-1",
-  remove: "col-span-2 @3xl:col-span-1",
+  amount: "col-span-2 @lines:col-span-1",
+  availability: "col-span-2 @lines:col-span-1",
+  remove: "col-span-2 @lines:col-span-1",
 };
 
 // On a phone a line is a block of its own, so its inputs get the touch height
 // that a coarse pointer gets anywhere.
-const STACKED_INPUTS = "@max-3xl:[&_input]:h-11";
+const STACKED_INPUTS = "@max-lines:[&_input]:h-11";
 
 function CellBody({ column, index }: { column: LineColumn; index: number }) {
   const grid = useGrid();
@@ -70,7 +70,7 @@ export const LineRow = memo(function LineRow({ index }: { index: number }) {
       className={cn(
         "grid grid-cols-2 gap-x-s2 gap-y-s1 rounded-md border bg-card p-s2 outline-none",
         "focus-visible:ring-[3px] focus-visible:ring-ring/50",
-        "@3xl:grid-cols-(--line-tracks) @3xl:items-start @3xl:gap-x-s1 @3xl:rounded-none @3xl:border-0 @3xl:border-b @3xl:bg-transparent @3xl:px-0 @3xl:py-1",
+        "@lines:grid-cols-(--line-tracks-compact) @3xl:grid-cols-(--line-tracks) @lines:items-start @lines:gap-x-s1 @lines:rounded-none @lines:border-0 @lines:border-b @lines:bg-transparent @lines:px-0 @lines:py-1",
       )}
     >
       {grid.columns.map((column) => (
@@ -83,7 +83,7 @@ export const LineRow = memo(function LineRow({ index }: { index: number }) {
           {column.kind === "lineNo" || column.kind === "remove" ? null : (
             <span
               aria-hidden="true"
-              className="mb-0.5 block text-xs text-muted-foreground @3xl:hidden"
+              className="mb-0.5 block text-xs text-muted-foreground @lines:hidden"
             >
               {column.header}
             </span>
