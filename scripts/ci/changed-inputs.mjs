@@ -40,7 +40,16 @@ const NOT_FOR_E2E = [
   /^\.github\/workflows\/docker\.yml$/,
 ];
 
+/**
+ * @param {string} file
+ * @param {RegExp[]} patterns
+ */
 const matches = (file, patterns) => patterns.some((p) => p.test(file));
+
+/**
+ * @param {string[]} files
+ * @param {RegExp[]} ignored
+ */
 const counts = (files, ignored) =>
   files.some((file) => !matches(file, NEVER) && !matches(file, ignored));
 
@@ -48,6 +57,10 @@ const counts = (files, ignored) =>
  * The answer for one event. Only a pull request or a push has a diff to judge: a
  * schedule or a manual run is there to run everything, and so is an empty diff,
  * which nothing should produce.
+ *
+ * @param {string} event The GitHub event name.
+ * @param {string[]} files
+ * @returns {{ images: boolean, e2e: boolean }}
  */
 export function decide(event, files) {
   const hasDiff = event === "pull_request" || event === "push";
@@ -62,6 +75,9 @@ export function decide(event, files) {
  * What the commit under test changes against its first parent: on a pull request
  * the checkout is GitHub's merge commit, whose first parent is the base branch, and
  * a merge to main has the previous main there. Renames count as both of their paths.
+ *
+ * @param {string} cwd
+ * @returns {string[]}
  */
 export function changedFiles(cwd) {
   const out = execFileSync(
@@ -74,6 +90,7 @@ export function changedFiles(cwd) {
 
 function main() {
   const event = process.env.GITHUB_EVENT_NAME ?? "";
+  /** @type {string[]} */
   let files = [];
   let answer = { images: true, e2e: true };
   try {
@@ -82,7 +99,7 @@ function main() {
   } catch (error) {
     // Running a job needlessly is the safe way to be wrong.
     console.log(
-      `::notice::Running every job: no diff to judge. ${error.message}`,
+      `::notice::Running every job: no diff to judge. ${String(error)}`,
     );
   }
   console.log(`${event}: ${files.length} changed file(s)`);

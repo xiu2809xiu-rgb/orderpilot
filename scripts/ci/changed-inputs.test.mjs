@@ -15,6 +15,7 @@ const root = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "../..",
 );
+/** @param {string} file */
 const read = (file) => readFileSync(path.join(root, file), "utf8");
 const both = { images: true, e2e: true };
 const neither = { images: false, e2e: false };
@@ -125,7 +126,7 @@ test("every path a Dockerfile copies is an input of the images job", () => {
   for (const dockerfile of dockerfiles) {
     for (const line of read(dockerfile).split("\n")) {
       const copy = /^\s*(?:COPY|ADD)\s+(?!--from)(.+)$/.exec(line);
-      if (!copy) continue;
+      if (!copy?.[1]) continue;
       const parts = copy[1]
         .trim()
         .split(/\s+/)
@@ -153,6 +154,7 @@ test("every path a Dockerfile copies is an input of the images job", () => {
 
 test("the diff is the commit against its first parent, renames count twice", () => {
   const dir = mkdtempSync(path.join(tmpdir(), "changed-inputs-"));
+  /** @param {string[]} args */
   const git = (...args) =>
     execFileSync(
       "git",
@@ -200,11 +202,16 @@ test("the diff is the commit against its first parent, renames count twice", () 
 
 // The workflows are read as text, as workflow.test.mjs does: scripts here have no
 // dependencies, so no YAML parser.
+/** @param {string} file */
 const code = (file) =>
   read(file)
     .split("\n")
     .filter((line) => !line.trim().startsWith("#"))
     .join("\n");
+/**
+ * @param {string} file
+ * @param {string} job
+ */
 const jobBlock = (file, job) => {
   const lines = code(file).split("\n");
   const start = lines.indexOf(`  ${job}:`);
