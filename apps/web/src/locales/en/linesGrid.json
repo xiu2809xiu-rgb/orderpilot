@@ -1,0 +1,36 @@
+{
+  "lineWord": "Line",
+  "row": "Line {{n}}",
+  "lineHasError": "This line has an error.",
+  "cells": {
+    "lineNo": "Line {{n}}",
+    "item": "Item, line {{n}}",
+    "description": "Description, line {{n}}",
+    "quantity": "Quantity, line {{n}}",
+    "unitPrice": "Unit price, line {{n}}"
+  },
+  "placeholders": {
+    "item": "Part number or name"
+  },
+  "amountTooLarge": "Too large to price",
+  "remove": "Remove line {{n}}",
+  "removeShort": "Remove",
+  "removed": "Removed line {{n}}",
+  "add": "Add line",
+  "empty": "No lines yet. Add a line to start.",
+  "emptyReadOnly": "This record has no lines.",
+  "keys": "Enter moves to the next cell and adds a line after the last. Esc selects the line, and Delete then removes it. Ctrl+Delete removes the line from anywhere. Alt with the up or down arrow changes line.",
+  "availability": {
+    "noItem": "No item chosen yet.",
+    "unknown": "Not known",
+    "available": "{{stock}} available",
+    "short": "Short by {{by}}",
+    "detail": "Needs {{needed}}, {{available}} available"
+  },
+  "footer": {
+    "lines": "Lines",
+    "quantity": "Quantity",
+    "total": "Total"
+  },
+  "unknownItem": "No item matches \"{{text}}\". Check the part number."
+}

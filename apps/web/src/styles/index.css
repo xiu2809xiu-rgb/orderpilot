@@ -6,6 +6,10 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* Where the lines grid stops stacking, measured on its own width: a tablet
+     in landscape, with the side menu open, leaves it about 670 px. */
+  --container-lines: 40rem;
+
   --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono Variable", ui-monospace, monospace;
 

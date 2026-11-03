@@ -35,6 +35,8 @@ The licence-key guard reads the real values from `apps/web/.env.local` on your m
 
 `security.yml` also runs every Monday at 06:30 Singapore time, and `docker.yml` at 06:45, so a new advisory against an unchanged lockfile or base image still shows up. Semgrep and gitleaks keep a SARIF report as a run artifact for 14 days.
 
+`Docker images` and `End-to-end smoke` skip on a pull request or a merge that touches none of their inputs, such as a docs change, and a skipped job counts as passed for a required check. `scripts/ci/changed-inputs.mjs` decides, and any doubt runs the job ([ADR 0039](../adr/0039-heavy-ci-jobs-skip-by-job-condition.md)). The weekly run always builds and scans the images.
+
 ### On GitHub
 
 | Control                                                        | Status                                                                      |

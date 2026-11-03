@@ -2558,6 +2558,26 @@
         "A Playwright script signs in from a cold load as three roles and opens the role switcher, the user menu, the bell and Control K, and lets a session end, with no console error and no CSP violation.",
         "The rule for what the shell may import is written in `docs/architecture/patterns.md`."
       ]
+    },
+    {
+      "key": "P-80",
+      "title": "Lines grid polish",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "could",
+      "estimate": 3,
+      "reqs": ["M4"],
+      "branch": "feat/lines-grid-polish",
+      "sprints": [3],
+      "dependsOn": ["P-48"],
+      "summary": "Left out of P-48 because no teammate needs it this week.",
+      "acceptance": [
+        "Pasting rows from a spreadsheet (a part number and a quantity on each) fills one line per row, each part number resolved on its Navision number, and the rows that match nothing are listed for the person to fix.",
+        "The shortfall counts every line that asks for the same item together, not each line alone, and says which lines add up to it.",
+        "A click on a line's number selects the line, so the mouse can reach Delete too.",
+        "Column widths can be dragged and are kept for each person.",
+        "A line can be moved up or down with the keyboard, and the move can be undone."
+      ]
     }
   ]
 }
