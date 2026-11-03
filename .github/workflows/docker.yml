@@ -3,7 +3,9 @@
 # change. ADR 0031 records the choices; docs/security/security-testing.md says
 # how a finding is triaged.
 #
-# No path filters, for the same reason as ci.yml. Trivy is downloaded by version
+# No path filters, for the same reason as ci.yml: "Docker images" skips with a
+# job-level condition instead (scripts/ci/changed-inputs.mjs, ADR 0039), and the
+# weekly schedule always runs it. Trivy is downloaded by version
 # and checked against its SHA-256, like gitleaks and OSV-Scanner, rather than
 # run through an action: that keeps one less third-party script in the job.
 name: Docker
@@ -31,8 +33,13 @@ env:
   TRIVY_NO_PROGRESS: "true"
 
 jobs:
+  # It waits for the IaC scan, which is quick and always runs, so that the decision
+  # bills no job of its own. Skipped counts as passed, and any failure to decide
+  # leaves the answer empty, so the comparison is with 'false'.
   images:
     name: Docker images
+    needs: config
+    if: needs.config.outputs.images != 'false'
     runs-on: ubuntu-24.04
     # MinIO compiles from source in a few minutes on a cold cache.
     timeout-minutes: 30
@@ -110,11 +117,19 @@ jobs:
     name: IaC and Dockerfile scan
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    outputs:
+      images: ${{ steps.inputs.outputs.images }}
     steps:
       - name: Check out
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          # The commit under test and its parents, for the decision below.
+          fetch-depth: 2
           persist-credentials: false
+
+      - name: Decide whether this change needs the images job
+        id: inputs
+        run: node scripts/ci/changed-inputs.mjs
 
       - name: Install Trivy
         run: |
