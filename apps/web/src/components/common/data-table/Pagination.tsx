@@ -45,7 +45,7 @@ export function Pagination({
             onChange={(event) => {
               onPageSize(Number(event.target.value));
             }}
-            className="h-8 rounded-md border border-input bg-background px-2 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
+            className="h-8 rounded-md border border-input bg-background px-2 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none pointer-coarse:h-11"
           >
             {pageSizes.map((size) => (
               <option key={size} value={size}>
@@ -58,6 +58,7 @@ export function Pagination({
           <Button
             variant="outline"
             size="icon-sm"
+            className="pointer-coarse:size-11"
             aria-label={t("table.previous")}
             disabled={page <= 1}
             onClick={() => {
@@ -70,6 +71,7 @@ export function Pagination({
           <Button
             variant="outline"
             size="icon-sm"
+            className="pointer-coarse:size-11"
             aria-label={t("table.next")}
             disabled={page >= pages}
             onClick={() => {

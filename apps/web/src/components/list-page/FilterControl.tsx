@@ -24,7 +24,10 @@ export function FilterControl({
   const switchId = useId();
   if (filter.kind === "toggle") {
     return (
-      <div className="flex items-center gap-2 text-sm pointer-coarse:min-h-11">
+      <label
+        htmlFor={switchId}
+        className="flex items-center gap-2 text-sm pointer-coarse:min-h-11"
+      >
         <Switch
           id={switchId}
           checked={filters[filter.id] === true}
@@ -32,8 +35,8 @@ export function FilterControl({
             setFilter(filter.id, checked);
           }}
         />
-        <label htmlFor={switchId}>{filter.label}</label>
-      </div>
+        <span>{filter.label}</span>
+      </label>
     );
   }
   if (filter.kind === "range") {

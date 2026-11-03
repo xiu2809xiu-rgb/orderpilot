@@ -78,6 +78,7 @@ export function FilterLookup({
               <CommandEmpty>{t("filters.lookupEmpty")}</CommandEmpty>
               <CommandGroup>
                 <CommandItem
+                  className="pointer-coarse:min-h-11"
                   value={allLabel}
                   onSelect={() => {
                     pick(undefined);
@@ -89,6 +90,7 @@ export function FilterLookup({
                 {options.map((option) => (
                   <CommandItem
                     key={option.value}
+                    className="pointer-coarse:min-h-11"
                     value={`${option.label} ${option.value}`}
                     onSelect={() => {
                       pick(option.value);
