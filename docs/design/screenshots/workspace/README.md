@@ -6,4 +6,5 @@ Pictures of the list page template, taken from a production build of this branch
 - `items-more-filters-390-*`: the More filters popover on a phone.
 - `reason-dialog-390x844-*` and `reason-dialog-844x390-*`: the Void reason dialog, with its inline error, on a phone upright and on its side. `reason-done-*` shows the toast after it.
 - `gallery-list-1440-*`: the gallery's list demo, with the five status chips.
+- `gallery-filters-*`: the gallery's list demo with a customer lookup and an Updated date range under More filters, at 1440 and 390 wide.
 - `print-items-support.png`: the print view as the browser draws it for paper.

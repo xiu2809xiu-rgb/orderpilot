@@ -23,7 +23,7 @@ export const STATUS_TONE: Record<DemoStatus, StatusTone> = {
   blocked: "danger",
 };
 
-const CUSTOMERS = [
+export const CUSTOMERS = [
   "Harbour Foods Example",
   "Pinewood Supplies Example",
   "Lakeside Trading Example",
@@ -65,7 +65,11 @@ export function serveOrders(query: TableQuery) {
           .includes(needle)) &&
       (query.filters.active !== true || order.active) &&
       (query.filters.status === undefined ||
-        query.filters.status === order.status),
+        query.filters.status === order.status) &&
+      (query.filters.customer === undefined ||
+        query.filters.customer === order.customer) &&
+      onOrAfter(order.updatedAt, query.filters.updatedFrom) &&
+      onOrBefore(order.updatedAt, query.filters.updatedTo),
   );
   const sort = query.sort;
   const key = SORTABLE.find((candidate) => candidate === sort?.columnId);
@@ -78,6 +82,15 @@ export function serveOrders(query: TableQuery) {
     rows: rows.slice(start, start + query.pageSize),
     total: rows.length,
   };
+}
+
+// The range is whole days, so "to" includes the day it names.
+function onOrAfter(stamp: string, day: unknown): boolean {
+  return typeof day !== "string" || stamp.slice(0, 10) >= day;
+}
+
+function onOrBefore(stamp: string, day: unknown): boolean {
+  return typeof day !== "string" || stamp.slice(0, 10) <= day;
 }
 
 function compare(a: DemoOrder, b: DemoOrder, key: SortKey): number {

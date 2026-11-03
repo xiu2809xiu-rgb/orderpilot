@@ -18,6 +18,7 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/common/toast";
 import { formatMoney } from "@/lib/format";
 import {
+  CUSTOMERS,
   DEMO_ORDERS,
   serveOrders,
   type DemoOrder,
@@ -101,6 +102,19 @@ export function GalleryList() {
           value: status,
           label: t(`status.${status}`),
         })),
+      },
+      {
+        id: "customer",
+        label: t("table.customer"),
+        allLabel: t("list.allCustomers"),
+        kind: "lookup",
+        options: CUSTOMERS.map((name) => ({ value: name, label: name })),
+      },
+      {
+        id: "updated",
+        label: t("table.updated"),
+        kind: "range",
+        more: true,
       },
       {
         id: "active",
