@@ -234,6 +234,7 @@ Prompt 003's deadline of Monday evening, 2 Nov, cannot hold for all of this: 41 
 
 | Story | Title                                                 | Branch                           | State                                                                      |
 | ----- | ----------------------------------------------------- | -------------------------------- | -------------------------------------------------------------------------- |
+| #191  | Cut CI minutes before the repository goes private     | `ci/minutes-job-conditions`      | In review                                                                  |
 | P-42  | Plan prompt 004                                       | `chore/plan-prompt-004`          | In review, [#138](https://github.com/xiu2809xiu-rgb/orderpilot/pull/138)   |
 | P-13  | Docker images and the IaC scan                        | `ci/docker`                      | In review, [#172](https://github.com/xiu2809xiu-rgb/orderpilot/pull/172)   |
 | P-14  | End-to-end smoke                                      | `test/e2e-smoke`                 | In review, [#182](https://github.com/xiu2809xiu-rgb/orderpilot/pull/182)   |
