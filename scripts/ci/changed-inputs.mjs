@@ -14,7 +14,8 @@ import { pathToFileURL } from "node:url";
 // minutes; a wrong entry lets a broken image through, so keep this list obvious.
 const NEVER = [
   /^docs\//,
-  /\.md$/,
+  /^[^/]+\.md$/,
+  /(?:^|\/)README\.md$/,
   /^samples\//,
   /^\.claude\//,
   /^\.githooks\//,
@@ -28,17 +29,14 @@ const NEVER = [
   /^lint-staged\.config\.js$/,
   /^osv-scanner\.toml$/,
   /^docker-compose\.samples\.yml$/,
-  // Repository scripts, except this one and the smoke test the images job runs.
+  // Repository scripts, except this one and the smoke test: the images job runs
+  // that, and the end-to-end package imports it.
   /^scripts\/(?!ci\/|stack-smoke\.mjs$)/,
   // GitHub's own files, except the two workflows that hold the jobs.
   /^\.github\/(?!workflows\/(?:ci|docker)\.yml$)/,
 ];
 const NOT_FOR_IMAGES = [/^apps\/e2e\//, /^\.github\/workflows\/ci\.yml$/];
-const NOT_FOR_E2E = [
-  /^\.trivyignore$/,
-  /^scripts\/stack-smoke\.mjs$/,
-  /^\.github\/workflows\/docker\.yml$/,
-];
+const NOT_FOR_E2E = [/^\.trivyignore$/, /^\.github\/workflows\/docker\.yml$/];
 
 /**
  * @param {string} file

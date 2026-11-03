@@ -13,7 +13,7 @@ Both are required checks. GitHub leaves a required check pending for ever if a w
 ## Decision
 
 1. **A script decides.** `scripts/ci/changed-inputs.mjs` compares the commit under test with its first parent: on a pull request that is GitHub's merge commit against the base, and on main it is the merge against the previous main. A schedule or a manual run always runs both jobs.
-2. **It lists what cannot matter, not what can.** Docs, Markdown, repository scripts and GitHub's own files other than the two workflows are not inputs. Anything else is, so a new folder runs both jobs until someone decides otherwise. A test checks that every path a Dockerfile copies counts as an input.
+2. **It lists what cannot matter, not what can.** Docs, root Markdown files, READMEs, repository scripts other than the smoke test, and GitHub's own files other than the two workflows are not inputs. Anything else is, so a new folder runs both jobs until someone decides otherwise. Tests check that every path a Dockerfile copies, and every repository file the end-to-end package imports, counts as an input.
 3. **The decision costs no job of its own.** It is a step in a job that always runs, and the heavy job `needs` that job: `verify` for "End-to-end smoke", and "IaC and Dockerfile scan" for "Docker images". A separate job would bill a minute on every run.
 4. **Only a clear "false" skips.** The condition compares with `'false'`, so an empty answer runs the job. If the script cannot read the diff, it answers true.
 5. **A skipped child cannot hide a failed parent.** GitHub also skips a job when a job it needs has failed, and a skipped job reports success. Both parents are required checks themselves, so the pull request is still blocked.

@@ -3,7 +3,13 @@
 
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { test } from "node:test";
@@ -64,6 +70,9 @@ test("a change to the code or the build needs both jobs", () => {
     "pnpm-workspace.yaml",
     "tsconfig.json",
     "scripts/ci/changed-inputs.mjs",
+    "scripts/stack-smoke.mjs",
+    "apps/api/src/prompts/extract.md",
+    "packages/shared/src/rules.md",
   ]) {
     assert.deepEqual(decide("pull_request", [file]), both, file);
   }
@@ -89,10 +98,6 @@ test("each job also runs for what only it uses, and not for the other's", () => 
     e2e: true,
   });
   assert.deepEqual(decide("pull_request", [".github/workflows/docker.yml"]), {
-    images: true,
-    e2e: false,
-  });
-  assert.deepEqual(decide("pull_request", ["scripts/stack-smoke.mjs"]), {
     images: true,
     e2e: false,
   });
@@ -150,6 +155,36 @@ test("every path a Dockerfile copies is an input of the images job", () => {
     }
   }
   assert.ok(seen >= 10, `found only ${seen} COPY sources`);
+});
+
+test("every repository file the end-to-end package imports is one of its inputs", () => {
+  const folders = ["apps/e2e/src", "apps/e2e/tests"];
+  let seen = 0;
+  for (const folder of folders) {
+    for (const entry of readdirSync(path.join(root, folder), {
+      recursive: true,
+    })) {
+      const file = path.posix.join(folder, String(entry).replaceAll("\\", "/"));
+      if (!/\.(?:ts|mjs)$/.test(file)) continue;
+      for (const match of read(file).matchAll(/from "(\.\.?\/[^"]+)"/g)) {
+        const imported = path.posix.join(
+          path.posix.dirname(file),
+          String(match[1]),
+        );
+        if (imported.startsWith("apps/e2e/")) continue;
+        seen += 1;
+        assert.equal(
+          decide("pull_request", [imported]).e2e,
+          true,
+          `${file}: ${imported}`,
+        );
+      }
+    }
+  }
+  assert.ok(
+    seen >= 1,
+    "expected the end-to-end package to import the smoke script",
+  );
 });
 
 test("the diff is the commit against its first parent, renames count twice", () => {
