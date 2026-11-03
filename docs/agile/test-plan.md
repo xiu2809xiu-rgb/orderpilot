@@ -132,3 +132,5 @@ Each row is a case some test must cover. The story is the one that brings the te
 - **A story is ready** when its acceptance criteria name the cases from this matrix that it covers.
 - **A story is done** when those tests pass in CI, each safety test has been seen failing against broken code, and its rows here say Today.
 - **A release** (Weeks 5, 13 and 18) runs every level that exists on the tagged commit, and its report lists any row still planned.
+
+A throwaway line to prove that a docs-only change skips the heavy jobs. It is never merged.
