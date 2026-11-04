@@ -2578,6 +2578,27 @@
         "Column widths can be dragged and are kept for each person.",
         "A line can be moved up or down with the keyboard, and the move can be undone."
       ]
+    },
+    {
+      "key": "P-81",
+      "title": "Settle into the private repository",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 2,
+      "reqs": ["M4", "M5"],
+      "branch": "ci/private-repository",
+      "sprints": [2],
+      "dependsOn": ["P-6"],
+      "summary": "Richie made the repository private on 5 Nov. Rule 8 of CLAUDE.md lists what follows, and two build report items come with it: the first verify run on the smaller private runners (item bk) and Dependabot moving to monthly (item bp).",
+      "acceptance": [
+        "The `Protect main` ruleset is still active, `check-ruleset.mjs` finds no drift from `.github/rulesets/main.json`, and the wiki still opens.",
+        "`SECURITY.md` says how to report a problem now that private vulnerability reporting is gone, and lists only what still runs. `docs/security/security-testing.md` says what changed.",
+        "Dependabot version updates run monthly in all four ecosystems, with the 7-day cooldown kept, and the docs that said weekly say monthly.",
+        "The first verify run on the private runners is read, and any check that fails there for want of time or memory is fixed, with the reason beside the fix.",
+        "What says the repository is public is corrected: `CLAUDE.md`, `CONTRIBUTING.md`, the pull request template and the GRS risks. An ADR records what going private changed.",
+        "A-31 records Richie's decision of 5 Nov: Spectra's briefing material stays outside the repository and our coding tools may read it on his PC, while real business samples still wait for Spectra's written OK (Q-12)."
+      ]
     }
   ]
 }
