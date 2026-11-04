@@ -121,7 +121,7 @@ OrderPilot is an AI-assisted order-automation layer **beside** Navision, never i
 - Every extracted field keeps its confidence and source. AI output is a draft until a person confirms it.
 - Match customers, vendors and items on their Navision numbers, never on names. A look-alike name is shown as a possible match.
 - Open business rules are configuration until Spectra confirms them: the SPR trigger, the PI sequence, approvers and limits, and delegation.
-- No Spectra document goes to a third-party AI without their written OK, in an approved region.
+- No Spectra document goes to a third-party AI without their written OK, in an approved region. The one exception is the briefing material Spectra gave the team: it stays outside the repository, and coding tools may read it on Richie's PC (A-31).
 
 ### Targets
 
