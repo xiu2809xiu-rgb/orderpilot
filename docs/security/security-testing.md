@@ -39,13 +39,13 @@ The licence-key guard reads the real values from `apps/web/.env.local` on your m
 
 ### On GitHub
 
-| Control                                                        | Status                                                                      |
-| -------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| Dependabot alerts and security updates                         | Today, reading `pnpm-lock.yaml` from P-5                                    |
-| Dependabot version updates, weekly on Monday 06:00 SGT         | Today (P-5)                                                                 |
-| Secret scanning with push protection                           | Today, while the repository is public                                       |
-| Private vulnerability reporting                                | Today, while the repository is public                                       |
-| The `Protect main` ruleset, with the six checks above required | Four since P-6; P-13's two once the ruleset file is applied after its merge |
+| Control                                                                                      | Status                                                                              |
+| -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Dependabot alerts and security updates                                                       | Today, reading `pnpm-lock.yaml` from P-5                                            |
+| Dependabot version updates, monthly on the 1st at 06:00 SGT                                  | Today (P-5), monthly since P-81                                                     |
+| Secret scanning with push protection                                                         | Stopped on 5 Nov 2026, when the repository went private (P-81)                      |
+| Private vulnerability reporting                                                              | Stopped on 5 Nov 2026 (P-81). Problems go to Richie directly, as `SECURITY.md` says |
+| The `Protect main` ruleset, with seven required checks: the six above and `End-to-end smoke` | Today. `check-ruleset.mjs` compares it with `.github/rulesets/main.json`            |
 
 ### Later
 
@@ -88,6 +88,6 @@ Where to record an accepted or dismissed finding:
 | GHSA-g3hv-75wg-m249, minimatch below 11.0.1, moderate | OSV, `pnpm audit` | Accepted | Denial of service through an attacker-supplied glob pattern. Only dev tools reach it (ESLint, Prettier and others), and they match patterns we write; nothing ships. The fix is a new major, published 2026-10-27, inside our 7-day release-age window, and the tools still ask for minimatch 3 and 10                                                                                                        | `osv-scanner.toml`, `pnpm-workspace.yaml`, 2026-10-31 | 2026-11-14 |
 | GHSA-3g3m-2fjr-6pw4, glob 13.0.6, medium              | OSV               | Accepted | A walk that is aborted keeps reading directories. Only `@sentry/bundler-plugins` (build-time source-map tooling, a dependency of `@sentry/node`) reaches it, and we never call it or pass glob an abort signal. The fix is glob 14.0.2, published 2026-10-27, inside our 7-day release-age window until 2026-11-03: an override to it replaces this entry (G-1, [ADR 0022](../adr/0022-sentry-for-errors.md)) | `osv-scanner.toml`, 2026-11-01                        | 2026-11-06 |
 
-## When the repository goes private
+## Since the repository went private
 
-GitHub secret scanning, push protection and private vulnerability reporting stop. gitleaks, secretlint and Semgrep keep covering secrets and code, and none of our scans uploads to code scanning, so nothing else changes. Then `SECURITY.md`, this file and `.github/rulesets/main.json` are updated (CLAUDE.md, rule 8).
+Richie made the repository private on 5 Nov 2026 ([ADR 0040](../adr/0040-what-going-private-changed.md)). As planned, GitHub secret scanning, push protection and private vulnerability reporting stopped. gitleaks, secretlint and Semgrep keep covering secrets and code, and none of our scans uploads to code scanning, so nothing else changed. The `Protect main` ruleset is still active on GitHub Pro, and `.github/rulesets/main.json` needed no change: `check-ruleset.mjs` finds no drift.
