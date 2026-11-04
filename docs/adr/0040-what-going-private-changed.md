@@ -1,0 +1,36 @@
+# ADR 0040: What going private changed
+
+- **Status:** Accepted
+- **Date:** 2026-11-05
+- **Story:** P-81, settle into the private repository (issue 198)
+
+## Context
+
+Richie made the repository private on 5 Nov 2026, on GitHub Pro. Two plans led here. [ADR 0006](0006-devsecops-tools.md) chose scans that keep working on a private repository, because GitHub's free secret scanning, push protection and private vulnerability reporting stop there. [ADR 0039](0039-heavy-ci-jobs-skip-by-job-condition.md) cut CI minutes before the switch, because private repositories draw on 3,000 Actions minutes a month and run on 2-CPU runners instead of 4.
+
+Three things were still open: how to report a security problem once GitHub's route is gone, how often Dependabot proposes new versions (build report item bp), and whether the web tests hold their time limits on the smaller runners (item bk).
+
+## Decision
+
+1. **Security problems go to Richie directly.** GitHub's private vulnerability reporting and repository security advisories exist only on public repositories, and an issue is readable by everyone with access. `SECURITY.md` says so, and keeps the rule that a report never contains a working key.
+2. **Dependabot version updates run monthly,** on the 1st of each month at 06:00 Singapore time, in all four ecosystems, with the same groups and the 7-day cooldown. Security updates are unchanged: they do not wait for the schedule.
+3. **A check that fails on the smaller runners for want of memory or time gets that resource, in that step only:** see "The first private run" below.
+4. **The ruleset and the wiki stay as they are.** GitHub Pro keeps rulesets enforced and wikis open on a private repository. `check-ruleset.mjs` finds no drift, so `.github/rulesets/main.json` is unchanged.
+5. **What said the repository is public now says it is private.** The Pro kits still wait for P-22, which needs Richie's licence keys as well as a private repository.
+
+## The first private run
+
+The first verify run on the private runners was P-28's (pull request 197, 5 Nov). ESLint ran out of heap at about 2 GB, so the job stopped at Lint, before the tests. V8 sizes its default heap from the machine's memory: about 2 GB on the 7 GB private runner, against about 4 GB on the 16 GB public runner and on the team's laptops. The Lint step now runs with `NODE_OPTIONS=--max-old-space-size=4096`, the limit it had before, and no other step changes.
+
+## Consequences
+
+- A non-security version update can wait up to a month. A pressing one is done by hand in its own pull request, with the release-age rule still applying.
+- The 1st of each month brings the grouped proposals together, so that is a heavy day for CI minutes.
+- One person receives security reports. If Richie is away, a report waits for him; a second contact is his call.
+- If the repository goes public again, for example for the final, secret scanning, push protection and private vulnerability reporting must be switched back on by hand, and `SECURITY.md`'s reporting route put back.
+
+## Alternatives considered
+
+- **Keep weekly updates.** About 1,000 more minutes a month (item bp's estimate), a third of the allowance, for updates that rarely matter within a month.
+- **Quarterly updates.** Fewer runs, but larger jumps that are harder to review, and the grouped minor and patch updates would grow stale.
+- **A shared team mailbox for reports.** The team has none, and making one only for this adds an account to look after.
