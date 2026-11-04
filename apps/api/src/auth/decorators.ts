@@ -9,15 +9,17 @@ import type { AuthContext, AuthedRequest } from "./auth-context.js";
 export const PUBLIC_KEY = "op:public";
 export const AUTHENTICATED_KEY = "op:authenticated";
 export const PERMISSION_KEY = "op:permission";
+export const PERMISSION_OF_KEY = "op:permission-of";
 export const SKIP_CSRF_KEY = "op:skip-csrf";
 export const STRICT_RATE_LIMIT_KEY = "op:strict-rate-limit";
 
 /**
- * The guards: every route needs one of these three, or it is refused.
+ * The guards: every route needs one of these, or it is refused.
  *
  *   @Public()                   no session needed (health, sign-in, docs)
  *   @Authenticated()            any signed-in user (their own profile)
  *   @RequirePermission("x.y")   a signed-in user whose role holds x.y
+ *   @RequirePermissionOf(fn)    the same, with x.y named by the route's params
  *
  * Put it on the handler, or on the controller to cover all its routes. A
  * handler's decorator wins over its controller's.
@@ -32,6 +34,22 @@ export const Authenticated = (): MethodDecorator & ClassDecorator =>
 export const RequirePermission = (
   ...permissions: [Permission, ...Permission[]]
 ): MethodDecorator & ClassDecorator => SetMetadata(PERMISSION_KEY, permissions);
+
+/** Names the permission a request needs from its route params, or undefined when none fits. */
+export type PermissionResolver = (
+  params: Readonly<Record<string, string | undefined>>,
+) => Permission | undefined;
+
+/**
+ * For a route whose permission depends on what it is asked about, such as a
+ * record's operation log: reading a user's log needs `users.read`, an order's
+ * `orders.read`. The guard asks the PermissionPolicy about the permission that
+ * `resolve` names and audits a refusal, exactly as for @RequirePermission. A
+ * request it names no permission for is refused (deny by default).
+ */
+export const RequirePermissionOf = (
+  resolve: PermissionResolver,
+): MethodDecorator & ClassDecorator => SetMetadata(PERMISSION_OF_KEY, resolve);
 
 /**
  * Exempts a POST from the CSRF check. Only for the two routes that start a

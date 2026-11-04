@@ -26,6 +26,8 @@ export interface AuditSearch {
   readonly from?: Date;
   readonly to?: Date;
   readonly refusalsOnly?: boolean;
+  /** Leaves refusals out: a record's operation log is what was done to it, not what was refused. */
+  readonly withoutRefusals?: boolean;
   /** Words in the summary, ignoring case. */
   readonly search?: string;
 }
@@ -219,6 +221,13 @@ function toWhere(filters: AuditSearch): Prisma.AuditEventWhereInput {
     ...(filters.refusalsOnly
       ? {
           OR: REFUSAL_ACTION_SUFFIXES.map((suffix) => ({
+            action: { endsWith: suffix },
+          })),
+        }
+      : {}),
+    ...(filters.withoutRefusals
+      ? {
+          NOT: REFUSAL_ACTION_SUFFIXES.map((suffix) => ({
             action: { endsWith: suffix },
           })),
         }

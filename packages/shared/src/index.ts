@@ -12,6 +12,7 @@ export * from "./identity.js";
 export * from "./master-data.js";
 export * from "./money.js";
 export * from "./monitoring/index.js";
+export * from "./operation-log.js";
 export * from "./order.js";
 export * from "./permissions.js";
 export * from "./record-number.js";
