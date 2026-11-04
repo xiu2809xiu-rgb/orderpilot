@@ -24,6 +24,8 @@ The first verify run on the private runners was P-28's (pull request 197, 5 Nov)
 
 The same run's "Docker images" job ran out of disk: Trivy exports each image to scan it, and the 2.9 GB migrate image did not fit beside the images and the builder's copy of every layer. The job now deletes preinstalled toolchains it never uses (Android, .NET, Haskell) before it builds, and frees the builder's cache once the images are loaded, when MinIO's layers are already in the Actions cache. Each step prints the free space, so the next shortfall shows in the log.
 
+P-81's own run (pull request 199) was the first to reach the tests on a private runner. Every check passed: verify took 8 minutes 36 seconds against about 4 minutes 40 on the public runner, "Docker images" 7 minutes, and "End-to-end smoke" 7 minutes. No web test timed out: the slowest took 9.1 seconds of its 15 (the lines grid's speed test), and the slowest axe test 3.7. A 2-CPU runner runs one test worker, so each test has the machine to itself. The timeouts in build report item bk happen only on a 20-thread laptop with little free memory, where many workers compete, so the CI settings stay as they are.
+
 ## Consequences
 
 - A non-security version update can wait up to a month. A pressing one is done by hand in its own pull request, with the release-age rule still applying.
