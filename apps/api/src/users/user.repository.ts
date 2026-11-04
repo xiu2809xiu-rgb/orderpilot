@@ -2,7 +2,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import type { UserListQuery, Role } from "@orderpilot/shared";
 import { BaseRepository, type Page } from "../common/repository.js";
 import { Database } from "../database/database.js";
-import type { User as UserRow } from "../generated/prisma/client.js";
+import type { Prisma, User as UserRow } from "../generated/prisma/client.js";
 
 /** A user as the services see it. The password hash stays inside the auth layer. */
 export interface UserRecord {
@@ -44,10 +44,20 @@ export class UserRepository extends BaseRepository<UserRecord, string> {
   }
 
   async list(query: UserListQuery): Promise<Page<UserRecord>> {
-    const where =
-      query.active === undefined
+    const where: Prisma.UserWhereInput = {
+      ...(query.active === undefined
         ? {}
-        : { disabledAt: query.active === "true" ? null : { not: null } };
+        : { disabledAt: query.active === "true" ? null : { not: null } }),
+      ...(query.role ? { role: query.role } : {}),
+      ...(query.search
+        ? {
+            OR: [
+              { displayName: { contains: query.search, mode: "insensitive" } },
+              { email: { contains: query.search, mode: "insensitive" } },
+            ],
+          }
+        : {}),
+    };
     const [rows, total] = await Promise.all([
       this.database.client.user.findMany({
         where,

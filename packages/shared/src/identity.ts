@@ -3,9 +3,15 @@ import { pageQuerySchema } from "./envelope.js";
 import { permissionSchema } from "./permissions.js";
 import { roleSchema } from "./roles.js";
 
-/** A page of users. `active` keeps the enabled ("true") or the disabled ("false"). */
+/**
+ * A page of users. `active` keeps the enabled ("true") or the disabled
+ * ("false"), `role` keeps one role, and `search` finds words in the name or
+ * the email address, ignoring case.
+ */
 export const userListQuerySchema = pageQuerySchema.extend({
   active: z.enum(["true", "false"]).optional(),
+  role: roleSchema.optional(),
+  search: z.string().trim().min(1).max(100).optional(),
 });
 export type UserListQuery = z.infer<typeof userListQuerySchema>;
 
