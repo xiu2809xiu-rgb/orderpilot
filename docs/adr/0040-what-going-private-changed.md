@@ -26,6 +26,8 @@ The same run's "Docker images" job ran out of disk: Trivy exports each image to 
 
 P-81's own run (pull request 199) was the first to reach the tests on a private runner. Every check passed: verify took 8 minutes 36 seconds against about 4 minutes 40 on the public runner, "Docker images" 7 minutes, and "End-to-end smoke" 7 minutes. No web test timed out: the slowest took 9.1 seconds of its 15 (the lines grid's speed test), and the slowest axe test 3.7. A 2-CPU runner runs one test worker, so each test has the machine to itself. The timeouts in build report item bk happen only on a 20-thread laptop with little free memory, where many workers compete, so the CI settings stay as they are.
 
+The next run of the same pull request failed "End-to-end smoke": it ran out of disk while building the migrate image, which the first run had just squeezed past. The images job's log shows why: a private runner starts with about 13 GB free of 72, and deleting the unused toolchains brings that to about 34. The end-to-end job now does the same deletion at the head of the background chain that builds its images, so the 1 to 3 minutes it takes overlap with installing pnpm's packages and Chromium in front.
+
 ## Consequences
 
 - A non-security version update can wait up to a month. A pressing one is done by hand in its own pull request, with the release-age rule still applying.
