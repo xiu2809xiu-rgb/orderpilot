@@ -969,6 +969,7 @@ Acceptance criteria:
 - `GET /orders` and `GET /orders/:orderNo` are paged, sorted and filtered on the server, masked by role, with `.http` requests and API tests for 401, 403, 404 and validation.
 - Orders is a list on the template in the Sales module, and leaves the planned list.
 - Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+- Orders waiting on stock are one filter away, and a short line says by how much, so a person resolves each shortage; nothing is ordered for them.
 
 ### P-37: Document intake and the inbox
 
@@ -1375,6 +1376,7 @@ Acceptance criteria:
 - The order form's footer lists its attachments, and Attach uploads through P-37's route.
 - The Playwright test covers the path from upload to a saved draft.
 - Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+- Create order is offered only once a person has confirmed every field the reader was unsure of and looked at every mismatch, and the order records who confirmed them.
 
 ### P-56: Pins, to-dos and reminders: the records
 
@@ -1495,6 +1497,7 @@ Acceptance criteria:
 - Azri is asked to review.
 - A Playwright test: an allowed role creates, edits and voids a record, and a role without the permission sees no button and gets a 403 from the server.
 - Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+- The pre-filled SPR stays a draft until a person reviews it and submits it, it shows which fields were suggested and from what, and it warns, with a link, when an open SPR already covers the line.
 
 ### P-62: Payment confirmations
 
@@ -1517,6 +1520,7 @@ Acceptance criteria:
 - Azri is asked to review.
 - A Playwright test: an allowed role creates, edits and voids a record, and a role without the permission sees no button and gets a 403 from the server.
 - Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+- Only Finance records, confirms or voids a payment, and the entry keeps the amount received, the bank charges and the payer's reference, so a transfer that arrives a little short can be matched later by area 2 and area 3.
 
 ### P-63: Shipments
 
@@ -1538,6 +1542,7 @@ Acceptance criteria:
 - Area 2's follow-ups can read a shipment, with Azri's yes.
 - A Playwright test: an allowed role creates, edits and voids a record, and a role without the permission sees no button and gets a 403 from the server.
 - Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+- The shipment also holds the shipping terms, and which shipping papers have arrived (the AWB or BL and the import permit) as fields a person ticks; reminders about the missing ones stay area 2's.
 
 ### P-64: Users
 
@@ -1718,6 +1723,7 @@ Acceptance criteria:
 - SPR approval uses the document form, showing the request, the stock picture, the order and the limit as a fact. It computes and enforces nothing.
 - The core logic stays `it.todo`, and Azri reviews the pull request.
 - Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+- It also shows the cost against the selling price where the role may see both, the vendor and the lead time, because the approver decides with them.
 
 ### P-73: Exceptions on the templates
 
