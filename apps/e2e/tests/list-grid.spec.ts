@@ -1,0 +1,68 @@
+import {
+  checkPage,
+  expect,
+  expectRefused,
+  signInAs,
+  test,
+} from "../src/index.js";
+
+// P-45: the list template's grid. A row is ticked, the count says so, the
+// record's operation log opens at the foot, and a role that may not read the
+// record is refused by the server (a screen that hides the panel proves
+// nothing). The users list is the first screen where one role may read the
+// log and another may not.
+
+test.describe("The list grid on the users list", () => {
+  test("a ticked row is counted and opens its operation log", async ({
+    page,
+  }) => {
+    await signInAs(page, "SYSTEM_ADMIN");
+    await page.goto("/governance?tab=users");
+    const rows = page.getByRole("checkbox", { name: /^Select (?!all)/ });
+    await expect(rows.first()).toBeVisible();
+    await expect(
+      page.getByText("Select one row to see who changed it, and when."),
+    ).toBeVisible();
+
+    await rows.first().check();
+    await expect(page.getByText("1 selected")).toBeVisible();
+    await expect(page.getByText(/^Operation log: /)).toBeVisible();
+
+    await page.getByRole("button", { name: "Clear selection" }).click();
+    await expect(page.getByText("1 selected")).toHaveCount(0);
+  });
+
+  test("the row menu opens from the keyboard", async ({ page }) => {
+    await signInAs(page, "SYSTEM_ADMIN");
+    await page.goto("/governance?tab=users");
+    const menu = page.getByRole("button", { name: /^Actions for / }).first();
+    await menu.focus();
+    await page.keyboard.press("Enter");
+    await expect(page.getByRole("menuitem", { name: "Disable" })).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("menuitem")).toHaveCount(0);
+  });
+
+  test("fits at a desktop and a phone width with no accessibility violations", async ({
+    page,
+  }) => {
+    await signInAs(page, "SYSTEM_ADMIN");
+    await page.goto("/governance?tab=users");
+    await checkPage(page);
+  });
+
+  test("a role that may not read users is refused the log by the server", async ({
+    page,
+  }) => {
+    await signInAs(page, "WAREHOUSE");
+    await page.goto("/order-tracker");
+    await expect(
+      page.getByRole("checkbox", { name: /^Select all rows/ }),
+    ).toBeVisible();
+    await expectRefused(
+      "WAREHOUSE",
+      "GET",
+      "/operation-log/User/00000000-0000-4000-8000-000000000001",
+    );
+  });
+});

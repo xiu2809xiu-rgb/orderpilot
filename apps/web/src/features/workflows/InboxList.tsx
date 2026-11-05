@@ -79,7 +79,7 @@ export function InboxList({ role, mayPick, above }: InboxListProps) {
           return target ? (
             <RecordLink
               to={target}
-              className="inline-flex items-center font-medium text-primary underline-offset-4 hover:underline pointer-coarse:min-h-11"
+              className="inline-flex min-h-6 items-center font-medium text-primary underline-offset-4 hover:underline pointer-coarse:min-h-11"
             >
               {task.title}
             </RecordLink>
