@@ -12,11 +12,8 @@ Pictures of the list page template, taken from a production build of this branch
 
 ## The list grid (P-45)
 
-The pictures of the order tracker, exceptions queue, task inbox and users tab below were taken from the first build, which moved those four screens onto the template. That work is parked on the branch `wip/p45-owner-screens`, and the screens on this branch are as they are on `main`. The three `p45-` pictures show the shared template as this branch ships it: `p45-customers-390-light.png` (a phone list shows the name and country under the number), and `p45-gallery-log-390-light.png` and `p45-gallery-log-1440-light.png` (a ticked row with its operation log; the entries in them are made-up sample lines served to the page, not data from the API).
+Taken from a Docker build of this branch (the `migrate`, `api` and `web` images, in a compose project of their own), with Playwright at 1440 by 900 and 390 by 844, in light and dark. All data is synthetic demo data. The order tracker, exceptions queue, task inbox and users tab are not shown: this story leaves them as they are on `main`, and their move onto the template is parked on `wip/p45-owner-screens` for each owner's own pull request.
 
-Taken from the real API in demo mode (the Vite dev server on this branch, an API and database of its own), with Playwright at 1440 by 900 and 390 by 844. All data is synthetic demo data.
-
-- `<role>-<page>-<width>-light.png`: each role's two main pages that P-45 touched, in light. The system admin has the users tab, Finance and the Auditor have the exceptions queue, and the rest have the order tracker and the task inbox. The home pages are not retaken: this story does not change them.
-- `tracker-selected-log-*`: the order tracker with one row ticked, the count, the batch bar and the operation log at the foot, in light and dark.
-- `users-selected-log-*-dark`: the users tab with one user ticked and that user's operation log (who, when and what, no field values and no IP address).
-- `tracker-row-menu-*`, `tracker-column-settings-*`, `tracker-saved-views-*`: the row menu, the column settings (show, hide and order) and the saved views, in light.
+- `p45-product_manager-<items|customers|vendors>-<width>-<theme>.png`: the three master data lists as Product manager. At 390 the first column carries the next two columns under it, and the row menu stays at the right. The Saved views, Columns, Export and Print buttons sit above the table.
+- `p45-support-gallery-<width>-<theme>.png`: the gallery's list, which declares every feature: row checkboxes (24 px, with a 44 px touch target on a phone), select all, the row menu, saved views and columns.
+- `p45-support-gallery-selected-<width>-<theme>.png`: the same list with the first row ticked, scrolled to that record's operation log. It says "No changes recorded yet" because the sample orders have no audit events.
