@@ -10,6 +10,8 @@ interface FilterSelectProps {
   onChange: (value: string | undefined) => void;
   /** Draw the label above the field, as in the More filters popover. */
   showLabel?: boolean;
+  /** Says a value the options do not list, such as several statuses from a link. */
+  describe?: ((value: string) => string) | undefined;
 }
 
 /** One filter in a list's bar. A link can set a value the options have not loaded yet. */
@@ -20,6 +22,7 @@ export function FilterSelect({
   options,
   onChange,
   showLabel = false,
+  describe,
 }: FilterSelectProps) {
   const id = useId();
   const known = value === "" || options.some((o) => o.value === value);
@@ -43,7 +46,9 @@ export function FilterSelect({
         )}
       >
         <option value="">{allLabel}</option>
-        {known ? null : <option value={value}>{value}</option>}
+        {known ? null : (
+          <option value={value}>{describe?.(value) ?? value}</option>
+        )}
         {options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}

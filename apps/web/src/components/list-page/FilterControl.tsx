@@ -50,17 +50,19 @@ export function FilterControl({
       />
     );
   }
-  const Pick = filter.kind === "lookup" ? FilterLookup : FilterSelect;
-  return (
-    <Pick
-      label={filter.label}
-      allLabel={filter.allLabel ?? filter.label}
-      value={String(filters[filter.id] ?? "")}
-      options={filter.options ?? []}
-      showLabel={showLabel}
-      onChange={(next) => {
-        setFilter(filter.id, next);
-      }}
-    />
+  const shared = {
+    label: filter.label,
+    allLabel: filter.allLabel ?? filter.label,
+    value: String(filters[filter.id] ?? ""),
+    options: filter.options ?? [],
+    showLabel,
+    onChange: (next: string | undefined) => {
+      setFilter(filter.id, next);
+    },
+  };
+  return filter.kind === "lookup" ? (
+    <FilterLookup {...shared} />
+  ) : (
+    <FilterSelect {...shared} describe={filter.describe} />
   );
 }

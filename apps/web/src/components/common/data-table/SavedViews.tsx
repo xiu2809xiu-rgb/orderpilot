@@ -8,22 +8,25 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import type { SavedFilter } from "./types";
+import type { SavedView } from "./types";
 
-interface SavedFiltersProps {
-  saved: readonly SavedFilter[];
-  onApply: (filter: SavedFilter) => void;
+interface SavedViewsProps {
+  saved: readonly SavedView[];
+  onApply: (view: SavedView) => void;
   onSave: (name: string) => void;
   onDelete: (id: string) => void;
 }
 
-/** Named filters, kept in this browser for this viewer, so they survive a reload. */
-export function SavedFilters({
+/**
+ * Saved views: a name for the search, filters, sort and columns as they are
+ * now. Kept in this browser for this viewer, so they survive a reload.
+ */
+export function SavedViews({
   saved,
   onApply,
   onSave,
   onDelete,
-}: SavedFiltersProps) {
+}: SavedViewsProps) {
   const { t } = useTranslation("components");
   const nameId = useId();
   const [name, setName] = useState("");
@@ -51,25 +54,26 @@ export function SavedFilters({
           </p>
         ) : (
           <ul className="space-y-1">
-            {saved.map((filter) => (
-              <li key={filter.id} className="flex items-center gap-1">
+            {saved.map((view) => (
+              <li key={view.id} className="flex items-center gap-1">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="flex-1 justify-start"
-                  aria-label={t("table.savedApply", { name: filter.name })}
+                  className="flex-1 justify-start pointer-coarse:h-11"
+                  aria-label={t("table.savedApply", { name: view.name })}
                   onClick={() => {
-                    onApply(filter);
+                    onApply(view);
                   }}
                 >
-                  {filter.name}
+                  {view.name}
                 </Button>
                 <Button
                   variant="ghost"
                   size="icon-sm"
-                  aria-label={t("table.savedDelete", { name: filter.name })}
+                  className="pointer-coarse:size-11"
+                  aria-label={t("table.savedDelete", { name: view.name })}
                   onClick={() => {
-                    onDelete(filter.id);
+                    onDelete(view.id);
                   }}
                 >
                   <Trash2 aria-hidden="true" />
@@ -90,7 +94,12 @@ export function SavedFilters({
             }}
             maxLength={60}
           />
-          <Button type="submit" size="sm" disabled={name.trim() === ""}>
+          <Button
+            type="submit"
+            size="sm"
+            className="pointer-coarse:h-11"
+            disabled={name.trim() === ""}
+          >
             {t("table.savedSave")}
           </Button>
           <p className="text-xs text-muted-foreground">

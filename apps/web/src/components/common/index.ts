@@ -16,6 +16,7 @@ export { DEFAULT_QUERY } from "./data-table/types";
 export {
   allPages,
   apiParams,
+  rowPages,
   MAX_PAGE_SIZE,
   queryFromUrl,
   rangeIds,
@@ -34,8 +35,10 @@ export { NumberTicker } from "./NumberTicker";
 export type {
   ColumnKind,
   DataTableColumn,
-  SavedFilter,
+  RowActionsColumn,
+  SavedView,
   TableFilters,
+  TableSelection,
   TableQuery,
   TableSort,
   ToggleFilter,

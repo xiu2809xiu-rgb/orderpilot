@@ -18,7 +18,8 @@ export interface RangeWords {
 
 /**
  * The applied filters in words: "Brand: Quillon", "Overdue only", and the
- * search term. A value a link set that the options do not list shows as it is.
+ * search term. A value a link set that the options do not list is said by the
+ * filter's `describe`, or shown as it is.
  * A range gives one chip for each end, so each can be cleared on its own.
  */
 export function appliedChips(
@@ -48,10 +49,8 @@ export function appliedChips(
       if (value === true) chips.push({ id: filter.id, label: filter.label });
     } else if (typeof value === "string" && value !== "") {
       const option = filter.options?.find((o) => o.value === value);
-      chips.push({
-        id: filter.id,
-        label: `${filter.label}: ${option?.label ?? value}`,
-      });
+      const words = option?.label ?? filter.describe?.(value) ?? value;
+      chips.push({ id: filter.id, label: `${filter.label}: ${words}` });
     }
   }
   return chips;

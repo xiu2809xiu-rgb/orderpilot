@@ -23,7 +23,9 @@
     "export": "Export",
     "print": "Print",
     "needsOne": "Select one row first.",
-    "needsMany": "Select one or more rows first."
+    "needsMany": "Select one or more rows first.",
+    "view": "View",
+    "copy": "Copy"
   },
   "reason": {
     "label": "Reason",
@@ -38,6 +40,24 @@
     "noFilters": "Filters: none",
     "printedOn": "Printed {{when}}",
     "rows_one": "{{count}} row",
-    "rows_other": "{{count}} rows"
+    "rows_other": "{{count}} rows",
+    "preparingCount": "Preparing {{done, number}} of {{total, number}} rows",
+    "pageOf": "Page {{page}} of {{pages}}"
+  },
+  "selection": {
+    "count_one": "{{count}} selected",
+    "count_other": "{{count}} selected",
+    "clear": "Clear selection"
+  },
+  "rowMenu": {
+    "open": "Actions for {{row}}",
+    "column": "Row actions"
+  },
+  "log": {
+    "title": "Operation log",
+    "titleFor": "Operation log: {{record}}",
+    "pickOne": "Select one row to see who changed it, and when.",
+    "tooMany": "{{count}} rows are selected. Select one to see its operation log.",
+    "newest": "The {{shown}} newest of {{total, number}} changes. Older ones are in the audit trail, for the roles that may read it."
   }
 }

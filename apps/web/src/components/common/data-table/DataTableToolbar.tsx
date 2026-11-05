@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
-import { ColumnMenu } from "./ColumnMenu";
+import { ColumnSettings } from "./ColumnSettings";
 import { ExportMenu, type ExportOptions } from "./ExportMenu";
-import { SavedFilters } from "./SavedFilters";
+import { SavedViews } from "./SavedViews";
 import { SearchBox } from "./SearchBox";
 import type {
   DataTableColumn,
@@ -9,9 +9,10 @@ import type {
   TableQuery,
   ToggleFilter,
 } from "./types";
-import type { useTablePrefs } from "./useTablePrefs";
+import type { TablePrefs } from "./useTablePrefs";
 
 interface DataTableToolbarProps<Row> {
+  /** Every column, in the viewer's order. */
   columns: readonly DataTableColumn<Row>[];
   /** The columns on screen: what an export holds. */
   shown: readonly DataTableColumn<Row>[];
@@ -21,7 +22,7 @@ interface DataTableToolbarProps<Row> {
   change: (patch: Partial<TableQuery>) => void;
   setFilter: (id: string, value: string | boolean | undefined) => void;
   visibleIds: ReadonlySet<string>;
-  prefs: ReturnType<typeof useTablePrefs>;
+  prefs: TablePrefs;
   toggleFilters: readonly ToggleFilter[];
   filterSlot?: (api: {
     filters: TableFilters;
@@ -31,7 +32,7 @@ interface DataTableToolbarProps<Row> {
   searchDebounceMs: number;
 }
 
-/** Quick search, filters, saved filters, column settings and export. */
+/** Quick search, filters, saved views, column settings and export. */
 export function DataTableToolbar<Row>({
   columns,
   shown,
@@ -71,31 +72,31 @@ export function DataTableToolbar<Row>({
       ))}
       {filterSlot?.({ filters: query.filters, setFilter })}
       <div className="ml-auto flex flex-wrap items-center gap-2">
-        <SavedFilters
+        <SavedViews
           saved={prefs.saved}
-          onApply={(filter) => {
+          onApply={(view) => {
             change({
-              search: filter.search,
-              filters: filter.filters,
-              sort: filter.sort,
+              search: view.search,
+              filters: view.filters,
+              sort: view.sort,
             });
+            prefs.applyColumns(view);
           }}
           onSave={(name) => {
-            prefs.saveFilter(name, query);
+            prefs.saveView(name, query);
           }}
-          onDelete={prefs.deleteFilter}
+          onDelete={prefs.deleteView}
         />
-        <ColumnMenu
+        <ColumnSettings
           columns={columns}
           visible={visibleIds}
-          onChange={(ids) => {
+          onVisibleChange={(ids) => {
             prefs.setHidden(
               columns.filter((c) => !ids.includes(c.id)).map((c) => c.id),
             );
           }}
-          onReset={() => {
-            prefs.setHidden([]);
-          }}
+          onOrderChange={prefs.setOrder}
+          onReset={prefs.resetColumns}
         />
         {exportOptions ? (
           <ExportMenu columns={shown} rows={rows} {...exportOptions} />

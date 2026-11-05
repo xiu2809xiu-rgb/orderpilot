@@ -6,9 +6,15 @@ import { Button } from "@/components/ui/button";
 import { TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { EmptyState, ErrorPanel, PermissionDenied } from "../states";
 import { usePrimaryActionStore } from "../primaryAction";
-import { cellClass } from "./cells";
+import { ACTIONS_CELL, cellClass, SELECT_CELL } from "./cells";
+import { firstSticky } from "./DataTableHead";
 import { DataTableRow } from "./DataTableRow";
-import { alignsEnd, type DataTableColumn } from "./types";
+import {
+  alignsEnd,
+  type DataTableColumn,
+  type RowActionsColumn,
+  type TableSelection,
+} from "./types";
 
 export type TableStatus = "ready" | "loading" | "error" | "forbidden";
 
@@ -26,6 +32,8 @@ interface DataTableBodyProps<Row> {
   empty?: { title?: string; description?: string; action?: ReactNode };
   filtered: boolean;
   onClearFilters: () => void;
+  selection?: TableSelection<Row> | undefined;
+  rowActions?: RowActionsColumn<Row> | undefined;
 }
 
 /** One cell-wide row that holds a state message in place of the data. */
@@ -56,9 +64,13 @@ export function DataTableBody<Row>({
   empty,
   filtered,
   onClearFilters,
+  selection,
+  rowActions,
 }: DataTableBodyProps<Row>) {
   const { t } = useTranslation("components");
-  const span = Math.max(1, columns.length);
+  const span =
+    Math.max(1, columns.length) + (selection ? 1 : 0) + (rowActions ? 1 : 0);
+  const first = firstSticky(selection !== undefined);
   // An empty list offers its page's primary action ("New order") as the next step.
   const primary = usePrimaryActionStore((state) => state.current);
   const PrimaryIcon = primary?.icon ?? Plus;
@@ -75,10 +87,11 @@ export function DataTableBody<Row>({
       <TableBody>
         {Array.from({ length: Math.min(pageSize, 8) }, (_, index) => (
           <TableRow key={index} className="group/row hover:bg-transparent">
+            {selection ? <TableCell className={SELECT_CELL} /> : null}
             {columns.map((column, position) => (
               <TableCell
                 key={column.id}
-                className={cellClass(column, position === 0)}
+                className={cellClass(column, position === 0 ? first : "none")}
               >
                 <Skeleton
                   className={`h-5 animate-none ${alignsEnd(column) ? "ml-auto w-16" : "w-3/4"}`}
@@ -86,6 +99,7 @@ export function DataTableBody<Row>({
                 />
               </TableCell>
             ))}
+            {rowActions ? <TableCell className={ACTIONS_CELL} /> : null}
           </TableRow>
         ))}
       </TableBody>
@@ -143,6 +157,8 @@ export function DataTableBody<Row>({
           columns={columns}
           onRowClick={onRowClick}
           rowHref={rowHref}
+          selection={selection}
+          rowActions={rowActions}
         />
       ))}
     </TableBody>
