@@ -1,4 +1,4 @@
-# ADR 0037: The authorisation policy with approval limits
+# ADR 0041: The authorisation policy with approval limits
 
 - **Status:** Accepted
 - **Date:** 2026-11-03

@@ -1,6 +1,6 @@
 # Prompt area4-001: F-3, the authorisation policy with approval limits
 
-Angelyn's prompts for story F-3 ([#47](https://github.com/xiu2809xiu-rgb/orderpilot/issues/47)), as she wrote them, in the order she sent them. Each came after the AI tool's plan or its revision, and nothing was edited before the last one. The result is in [ADR 0037](../../adr/0037-the-authorisation-policy-with-approval-limits.md) and the [area 4 guide](../../team/area-4-controls-security-and-monitoring.md#the-authorisation-policy-f-3).
+Angelyn's prompts for story F-3 ([#47](https://github.com/xiu2809xiu-rgb/orderpilot/issues/47)), as she wrote them, in the order she sent them. Each came after the AI tool's plan or its revision, and nothing was edited before the last one. The result is in [ADR 0041](../../adr/0041-the-authorisation-policy-with-approval-limits.md) and the [area 4 guide](../../team/area-4-controls-security-and-monitoring.md#the-authorisation-policy-f-3).
 
 ## 1. The brief
 

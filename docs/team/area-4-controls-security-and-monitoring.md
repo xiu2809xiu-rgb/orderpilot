@@ -109,7 +109,7 @@ If you need a different layout, call `useAuditViewerList({ entityType, entityId,
 
 ## The authorisation policy (F-3)
 
-F-3 brings the first real policy ([ADR 0037](../adr/0037-the-authorisation-policy-with-approval-limits.md)):
+F-3 brings the first real policy ([ADR 0041](../adr/0041-the-authorisation-policy-with-approval-limits.md)):
 
 - **One chain of rules** in `apps/api/src/modules/governance/domain/`:
   - The rules are `system-admin`, `permission`, `approval-route` and `approval-limit`, in that order, and the first refusal wins.
