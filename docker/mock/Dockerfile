@@ -9,7 +9,7 @@
 #
 # The base image is pinned by digest. Dependabot proposes new digests.
 
-FROM node:24.22.0-alpine@sha256:44fce696f38ba8c987c4db89954051000bbd05ffd8d8659ba15ed4a8602e937f AS base
+FROM node:24.22.2-alpine@sha256:8a32c8cf649a49915a66e81e7a609223c708d0adabf288ee3f4077d765542f85 AS base
 ENV PNPM_HOME=/pnpm \
     PATH=/pnpm:$PATH \
     CI=true
@@ -30,7 +30,7 @@ RUN --mount=type=cache,id=orderpilot-pnpm-store,target=/pnpm/store \
  && pnpm --filter "@orderpilot/${SERVICE}..." build \
  && pnpm --filter "@orderpilot/${SERVICE}" deploy --prod --legacy /out
 
-FROM node:24.22.0-alpine@sha256:44fce696f38ba8c987c4db89954051000bbd05ffd8d8659ba15ed4a8602e937f AS runtime
+FROM node:24.22.2-alpine@sha256:8a32c8cf649a49915a66e81e7a609223c708d0adabf288ee3f4077d765542f85 AS runtime
 ENV NODE_ENV=production \
     PORT=8090
 # The package managers run nothing here. A tool that is not in the image cannot
