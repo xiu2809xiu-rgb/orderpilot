@@ -6,8 +6,13 @@ import {
 } from "@orderpilot/shared";
 import { describe, expect, it } from "vitest";
 import { DomainError } from "../../../common/domain-error.js";
+import { STARTER_SALES_STEPS } from "./sales-flow.js";
 import {
+  currentStepOf,
+  holdKeyOf,
   navisionStatusOf,
+  TRANSITION_EVENTS,
+  waitingOnOf,
   OrderStateMachine,
   type OrderActor,
   type OrderCommand,
@@ -34,6 +39,7 @@ function snapshot(
     stockCoversOrder: true,
     holds: status === "OnHold" ? ["check"] : [],
     resumeTo: status === "OnHold" ? "Packing" : null,
+    enteredAt: "2026-11-01T00:00:00.000Z",
     ...changes,
   };
 }
@@ -205,6 +211,12 @@ describe("every status against every event", () => {
     },
   );
 
+  it("lists a case for every event the machine has, so a new one cannot go untested", () => {
+    expect(new Set(CASES.map((c) => c.command.type))).toEqual(
+      new Set(TRANSITION_EVENTS),
+    );
+  });
+
   it("covers every status and every event in the machine", () => {
     expect(ORDER_STATUSES).toHaveLength(14);
     expect(every).toHaveLength(14 * 15);
@@ -267,6 +279,7 @@ describe("order transitions (the state machine)", () => {
       stockCoversOrder: null,
       holds: [],
       resumeTo: null,
+      enteredAt: AT.toISOString(),
     });
     expect(event).toEqual({
       type: "ORDER_STARTED",
@@ -830,6 +843,11 @@ describe("Navision's Sales Header Status, where the states meet it (an assumptio
     expect(navisionStatusOf(snapshot(status))).toBe(navision);
   });
 
+  it("lists every status but OnHold, which answers by where it will return to", () => {
+    const listed = new Set(expected.map(([status]) => status));
+    expect(ORDER_STATUSES.filter((s) => !listed.has(s))).toEqual(["OnHold"]);
+  });
+
   it("shows Open while waiting for payment when no prepayment is due", () => {
     expect(
       navisionStatusOf(snapshot("AwaitingPayment", { prepaymentDue: null })),
@@ -840,5 +858,304 @@ describe("Navision's Sales Header Status, where the states meet it (an assumptio
     expect(
       navisionStatusOf(snapshot("OnHold", { resumeTo: "AwaitingSpr" })),
     ).toBe("Pending Approval");
+  });
+});
+
+describe("the step an order is on", () => {
+  const known = new Set(STARTER_SALES_STEPS.map((step) => step.key));
+
+  it.each([
+    ["Received", "fields-confirmed"],
+    ["Confirmed", "stock-checked"],
+    ["StockChecked", "pi-sent"],
+    ["AwaitingSpr", "spr-approval"],
+    ["SprApproved", "pi-sent"],
+    ["AwaitingPayment", "payment-confirmed"],
+    ["Paid", "packed"],
+    ["Packing", "invoiced"],
+    ["Invoiced", "shipping-documents"],
+    ["Released", "shipping-documents"],
+    ["AwaitingShippingDocuments", "shipping-documents"],
+  ] as const)("%s waits on %s, a step of the flow", (status, step) => {
+    expect(currentStepOf(snapshot(status))).toBe(step);
+    expect(known.has(step)).toBe(true);
+  });
+
+  it("is on no step once the order has finished", () => {
+    expect(currentStepOf(snapshot("Closed"))).toBeNull();
+    expect(currentStepOf(snapshot("Cancelled"))).toBeNull();
+  });
+
+  it("stays on the step it was held at", () => {
+    expect(currentStepOf(snapshot("OnHold", { resumeTo: "AwaitingSpr" }))).toBe(
+      "spr-approval",
+    );
+  });
+});
+
+describe("what an event records", () => {
+  it.each([
+    [
+      "STOCK_CHECKED",
+      snapshot("Confirmed"),
+      { type: "STOCK_CHECKED", stockCoversOrder: false },
+      person("PRODUCT_MANAGER"),
+      null,
+      { stockCoversOrder: "false" },
+    ],
+    [
+      "PAYMENT_CONFIRMED",
+      snapshot("AwaitingPayment"),
+      {
+        type: "PAYMENT_CONFIRMED",
+        paymentType: "full-payment",
+        amount: "400.00",
+      },
+      person("FINANCE"),
+      null,
+      { paymentType: "full-payment", amount: "400.00" },
+    ],
+    [
+      "HOLD_RAISED",
+      snapshot("Packing"),
+      { type: "HOLD_RAISED", source: "payment", reason: "  Bank changed  " },
+      SYSTEM,
+      "Bank changed",
+      { source: "payment" },
+    ],
+    [
+      "HOLD_RAISED, for one rule",
+      snapshot("Packing"),
+      {
+        type: "HOLD_RAISED",
+        source: "check",
+        ref: "packing-qty",
+        reason: "Differs",
+      },
+      SYSTEM,
+      "Differs",
+      { source: "check", ref: "packing-qty" },
+    ],
+    [
+      "HOLD_CLEARED",
+      snapshot("OnHold"),
+      { type: "HOLD_CLEARED", source: "check" },
+      SYSTEM,
+      null,
+      { source: "check" },
+    ],
+    [
+      "CANCELLED",
+      snapshot("Packing"),
+      { type: "CANCELLED", reason: "  Withdrawn  " },
+      person("SUPPORT"),
+      "Withdrawn",
+      null,
+    ],
+    [
+      "RELEASED",
+      snapshot("Invoiced"),
+      { type: "RELEASED" },
+      person("WAREHOUSE"),
+      null,
+      null,
+    ],
+  ] as const)("%s", (_name, state, command, actor, reason, data) => {
+    const { event } = machine.apply(state, command, actor, AT);
+    expect(event.reason).toBe(reason);
+    expect(event.data).toEqual(data);
+  });
+});
+
+describe("starting an order", () => {
+  it("lets Support or the system start one, and no other role", () => {
+    expect(
+      machine.start(person("SUPPORT"), AT, { prepaymentDue: null }).state
+        .status,
+    ).toBe("Received");
+    expect(
+      machine.start(SYSTEM, AT, { prepaymentDue: null }).event.data,
+    ).toBeNull();
+
+    for (const role of ROLES.filter((r) => r !== "SUPPORT")) {
+      const error = refusal(() =>
+        machine.start(person(role), AT, { prepaymentDue: null }),
+      );
+      expect(error.code).toBe("FORBIDDEN");
+    }
+  });
+
+  it.each(["1,250.00", "abc", "", "0", "0.00", "-5"])(
+    "refuses a prepayment due of %j, which would jam or open the gate later",
+    (prepaymentDue) => {
+      const error = refusal(() =>
+        machine.start(person("SUPPORT"), AT, { prepaymentDue }),
+      );
+      expect(error.code).toBe("CONFLICT");
+    },
+  );
+});
+
+describe("a payment amount that is not a number", () => {
+  it("is refused as a conflict, not thrown as a crash", () => {
+    const error = refusal(() =>
+      machine.apply(
+        snapshot("AwaitingPayment"),
+        { type: "PAYMENT_CONFIRMED", paymentType: "prepayment", amount: "abc" },
+        person("FINANCE"),
+        AT,
+      ),
+    );
+    expect(error.code).toBe("CONFLICT");
+  });
+});
+
+describe("holds for one rule each", () => {
+  const raise = (ref: string): OrderCommand => ({
+    type: "HOLD_RAISED",
+    source: "check",
+    ref,
+    reason: `${ref} failed`,
+  });
+
+  it("stays held until every failing rule has passed", () => {
+    let { state } = machine.apply(
+      snapshot("Packing"),
+      raise("packing-qty"),
+      SYSTEM,
+      AT,
+    );
+    ({ state } = machine.apply(state, raise("po-total"), SYSTEM, AT));
+    expect(state.holds).toEqual(["check:packing-qty", "check:po-total"]);
+
+    ({ state } = machine.apply(
+      state,
+      { type: "HOLD_CLEARED", source: "check", ref: "po-total" },
+      SYSTEM,
+      AT,
+    ));
+    expect(state).toMatchObject({
+      status: "OnHold",
+      holds: ["check:packing-qty"],
+    });
+
+    ({ state } = machine.apply(
+      state,
+      { type: "HOLD_CLEARED", source: "check", ref: "packing-qty" },
+      SYSTEM,
+      AT,
+    ));
+    expect(state).toMatchObject({ status: "Packing", holds: [] });
+  });
+
+  it("does not let one rule clear another rule's hold", () => {
+    const error = refusal(() =>
+      machine.apply(
+        snapshot("OnHold", { holds: ["check:packing-qty"] }),
+        { type: "HOLD_CLEARED", source: "check", ref: "po-total" },
+        SYSTEM,
+        AT,
+      ),
+    );
+    expect(error.code).toBe("CONFLICT");
+  });
+
+  it("names a hold by its source alone when no rule is given", () => {
+    expect(holdKeyOf({ source: "payment" })).toBe("payment");
+    expect(holdKeyOf({ source: "check", ref: "po-total" })).toBe(
+      "check:po-total",
+    );
+  });
+});
+
+describe("what an order waits on", () => {
+  it("adds up: the role it names can really make the next move", () => {
+    const moving = ORDER_STATUSES.filter(
+      (s) => !["Closed", "Cancelled", "OnHold"].includes(s),
+    );
+    for (const status of moving) {
+      const state = snapshot(status);
+      const role = waitingOnOf(state)?.role;
+      const move = CASES.find(
+        (c) =>
+          c.legal[status] && c.actor.kind === "user" && c.actor.role === role,
+      );
+      expect(move, status).toBeDefined();
+      if (!move || !role) continue;
+      expect(() =>
+        machine.apply(state, move.command, person(role), AT),
+      ).not.toThrow();
+    }
+  });
+
+  it("waits on raising an SPR, not sending the PI, on a shortfall", () => {
+    expect(
+      waitingOnOf(snapshot("StockChecked", { stockCoversOrder: false })),
+    ).toEqual({ step: "spr-approval", role: "PRODUCT_MANAGER" });
+    expect(
+      waitingOnOf(snapshot("StockChecked", { stockCoversOrder: false }), {
+        sprRequiredOnShortfall: false,
+      }),
+    ).toEqual({ step: "pi-sent", role: "SUPPORT" });
+  });
+
+  it("waits on packing, not Finance, when no prepayment is due", () => {
+    expect(
+      waitingOnOf(snapshot("AwaitingPayment", { prepaymentDue: null })),
+    ).toEqual({ step: "packed", role: "WAREHOUSE" });
+  });
+
+  it("waits on nothing for a hold with nowhere to return to", () => {
+    const state = snapshot("OnHold", { resumeTo: null });
+    expect(waitingOnOf(state)).toBeNull();
+    expect(navisionStatusOf(state)).toBeNull();
+  });
+
+  it("reports the step on each transition, with the machine's own rules", () => {
+    const relaxed = new OrderStateMachine({ sprRequiredOnShortfall: false });
+    const command: OrderCommand = {
+      type: "STOCK_CHECKED",
+      stockCoversOrder: false,
+    };
+    const actor = person("PRODUCT_MANAGER");
+    expect(
+      machine.apply(snapshot("Confirmed"), command, actor, AT).currentStep,
+    ).toBe("spr-approval");
+    expect(
+      relaxed.apply(snapshot("Confirmed"), command, actor, AT).currentStep,
+    ).toBe("pi-sent");
+  });
+});
+
+describe("when an order entered its status", () => {
+  const OLD = "2026-11-01T00:00:00.000Z";
+
+  it("moves when the status does", () => {
+    const { state } = machine.apply(
+      snapshot("Invoiced"),
+      { type: "RELEASED" },
+      person("WAREHOUSE"),
+      AT,
+    );
+    expect(state.enteredAt).toBe(AT.toISOString());
+  });
+
+  it("stays put on a second hold, or on clearing one of two", () => {
+    const held = snapshot("OnHold", { holds: ["check:a"] });
+    const second = machine.apply(
+      held,
+      { type: "HOLD_RAISED", source: "check", ref: "b", reason: "Failed" },
+      SYSTEM,
+      AT,
+    );
+    expect(second.state.enteredAt).toBe(OLD);
+
+    const partly = machine.apply(
+      second.state,
+      { type: "HOLD_CLEARED", source: "check", ref: "a" },
+      SYSTEM,
+      AT,
+    );
+    expect(partly.state.enteredAt).toBe(OLD);
   });
 });

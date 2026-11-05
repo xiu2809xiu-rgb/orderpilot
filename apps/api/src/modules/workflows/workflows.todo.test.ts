@@ -5,11 +5,6 @@ import { describe, it } from "vitest";
 // one into a real test in the story that builds the behaviour, then delete the
 // todo line.
 
-describe("order transitions (the state machine)", () => {
-  it.todo("writes a workflow event for every transition, with who and when");
-  it.todo("is the only code that writes a workflow instance's status");
-});
-
 describe("SPR approval within limits", () => {
   it.todo(
     "approves an SPR whose amount is within the approver's purchase limit",
@@ -36,6 +31,5 @@ describe("retries and idempotency", () => {
     "applies a command once when it is sent twice with the same idempotency key",
   );
   it.todo("returns the first result for a repeated key");
-  it.todo("rolls back the whole transition when one step of it fails");
   it.todo("retries a failed notification without sending it twice");
 });

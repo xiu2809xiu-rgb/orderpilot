@@ -1,12 +1,21 @@
 import { Module } from "@nestjs/common";
 import { AuditModule } from "../../audit/audit.module.js";
 import { syntheticSourceProvider } from "../../common/synthetic-source.js";
+import { GovernanceModule } from "../governance/governance.module.js";
 import { ApprovalPolicy } from "./domain/approval-policy.js";
+import {
+  DEFAULT_ORDER_FLOW_RULES,
+  ORDER_FLOW_RULES,
+} from "./domain/order-state-machine.js";
 import { DocumentConfigRepository } from "./document-config.repository.js";
 import { MockApprovalPolicy } from "./mock/mock-approval-policy.js";
 import { MockDecisionOverlay } from "./mock/mock-decision-overlay.js";
 import { MockWorkflowActions } from "./mock/mock-workflow-actions.js";
 import { MockWorkflowReadModel } from "./mock-workflow-read-model.js";
+import { OrderWorkflowRepository } from "./order-workflow.repository.js";
+import { OrderWorkflowService } from "./order-workflow.service.js";
+import { WorkflowCheckReporter } from "./workflow-check-reporter.js";
+import { WorkflowOrderStatusReader } from "./workflow-order-status-reader.js";
 import { RecordNumberRepository } from "./record-number.repository.js";
 import { RecordNumberService } from "./record-number.service.js";
 import { WorkflowReadModel } from "./workflow-read-model.js";
@@ -17,10 +26,11 @@ import { WorkflowsService } from "./workflows.service.js";
  * Area 2: workflows and approvals (Azri). The base binds two ports to mocks:
  * the read model (typed data from the synthetic dataset) and area 4's approval
  * policy. Each is swapped by providing a real class under the same token. The
- * mock commands and their overlay go when the state machine lands.
+ * mock commands and their overlay stay until a route calls OrderWorkflowService,
+ * which runs the state machine (C-2) and is what other areas read status from.
  */
 @Module({
-  imports: [AuditModule],
+  imports: [AuditModule, GovernanceModule],
   controllers: [WorkflowsController],
   providers: [
     WorkflowsService,
@@ -30,9 +40,19 @@ import { WorkflowsService } from "./workflows.service.js";
     DocumentConfigRepository,
     RecordNumberRepository,
     RecordNumberService,
+    OrderWorkflowRepository,
+    OrderWorkflowService,
+    WorkflowOrderStatusReader,
+    WorkflowCheckReporter,
+    { provide: ORDER_FLOW_RULES, useValue: DEFAULT_ORDER_FLOW_RULES },
     { provide: WorkflowReadModel, useClass: MockWorkflowReadModel },
     { provide: ApprovalPolicy, useClass: MockApprovalPolicy },
   ],
-  exports: [RecordNumberService],
+  exports: [
+    RecordNumberService,
+    OrderWorkflowService,
+    WorkflowOrderStatusReader,
+    WorkflowCheckReporter,
+  ],
 })
 export class WorkflowsModule {}

@@ -1,5 +1,6 @@
 import {
   compareDecimal,
+  isDecimalString,
   type HoldSource,
   type NavisionStatus,
   type OrderStatus,
@@ -25,10 +26,12 @@ export interface OrderSnapshot {
   readonly prepaymentDue: string | null;
   /** The answer of the stock check; null until it has run. */
   readonly stockCoversOrder: boolean | null;
-  /** Everything holding the order. An order can be held for two reasons at once. */
-  readonly holds: readonly HoldSource[];
+  /** Every hold on the order, as `holdKeyOf` names them. It can have several at once. */
+  readonly holds: readonly string[];
   /** Where a held order returns to; null when it is not on hold. */
   readonly resumeTo: OrderStatus | null;
+  /** When it entered this status, as an ISO time. A second hold on a held order is not a new status. */
+  readonly enteredAt: string;
 }
 
 export type OrderCommand =
@@ -55,9 +58,15 @@ export type OrderCommand =
   | {
       readonly type: "HOLD_RAISED";
       readonly source: HoldSource;
+      /** Which check or payment it is, so one passing never clears another's hold. */
+      readonly ref?: string;
       readonly reason: string;
     }
-  | { readonly type: "HOLD_CLEARED"; readonly source: HoldSource }
+  | {
+      readonly type: "HOLD_CLEARED";
+      readonly source: HoldSource;
+      readonly ref?: string;
+    }
   | { readonly type: "CANCELLED"; readonly reason: string };
 
 export type OrderCommandType = OrderCommand["type"];
@@ -77,6 +86,16 @@ export interface OrderEvent {
 export interface OrderTransitionResult {
   readonly state: OrderSnapshot;
   readonly event: OrderEvent;
+  /** The step the order now waits on; null once it has finished. */
+  readonly currentStep: string | null;
+}
+
+/** What names a hold: its source, and which check or payment when the source says. */
+export function holdKeyOf(hold: {
+  readonly source: HoldSource;
+  readonly ref?: string;
+}): string {
+  return hold.ref ? `${hold.source}:${hold.ref}` : hold.source;
 }
 
 /**
@@ -91,6 +110,9 @@ export interface OrderFlowRules {
 export const DEFAULT_ORDER_FLOW_RULES: OrderFlowRules = {
   sprRequiredOnShortfall: true,
 };
+
+/** The injection token for the rules, so a setting can replace the default. */
+export const ORDER_FLOW_RULES = Symbol("ORDER_FLOW_RULES");
 
 /** `SYSTEM`: another area reports it. No person can press it directly. */
 const SYSTEM = "SYSTEM";
@@ -203,11 +225,72 @@ const TRANSITIONS: readonly Transition[] = [
   },
 ];
 
+/** Every event the table knows, so a test can notice one with no cases. */
+export const TRANSITION_EVENTS: readonly OrderCommandType[] = [
+  ...new Set(TRANSITIONS.map((t) => t.on)),
+];
+
 /** Payment types that satisfy the gate. A deposit or a balance does not. */
 const GATE_PAYMENT_TYPES: readonly PaymentType[] = [
   "prepayment",
   "full-payment",
 ];
+
+/** What an order waits on: the step, and the role whose move takes it on. */
+export interface WaitingOn {
+  readonly step: string;
+  readonly role: Role;
+}
+
+/** What each status normally waits on. Closed and Cancelled wait on nothing. */
+const WAITING_ON: Readonly<Record<OrderStatus, WaitingOn | null>> = {
+  Received: { step: "fields-confirmed", role: "SUPPORT" },
+  Confirmed: { step: "stock-checked", role: "PRODUCT_MANAGER" },
+  StockChecked: { step: "pi-sent", role: "SUPPORT" },
+  AwaitingSpr: { step: "spr-approval", role: "APPROVER" },
+  SprApproved: { step: "pi-sent", role: "SUPPORT" },
+  AwaitingPayment: { step: "payment-confirmed", role: "FINANCE" },
+  Paid: { step: "packed", role: "WAREHOUSE" },
+  Packing: { step: "invoiced", role: "SUPPORT" },
+  Invoiced: { step: "shipping-documents", role: "WAREHOUSE" },
+  Released: { step: "shipping-documents", role: "SUPPORT" },
+  AwaitingShippingDocuments: { step: "shipping-documents", role: "LOGISTICS" },
+  Closed: null,
+  OnHold: null,
+  Cancelled: null,
+};
+
+/**
+ * What an order waits on. The facts can change the answer: on a shortfall the
+ * next move is raising an SPR, and with no prepayment due nothing waits on
+ * Finance. A held order stays on what it was held at.
+ */
+export function waitingOnOf(
+  state: OrderSnapshot,
+  rules: OrderFlowRules = DEFAULT_ORDER_FLOW_RULES,
+): WaitingOn | null {
+  const status = state.status === "OnHold" ? state.resumeTo : state.status;
+  if (status === null) return null;
+  if (
+    status === "StockChecked" &&
+    rules.sprRequiredOnShortfall &&
+    state.stockCoversOrder === false
+  ) {
+    return { step: "spr-approval", role: "PRODUCT_MANAGER" };
+  }
+  if (status === "AwaitingPayment" && state.prepaymentDue === null) {
+    return { step: "packed", role: "WAREHOUSE" };
+  }
+  return WAITING_ON[status];
+}
+
+/** The step an order is on. */
+export function currentStepOf(
+  state: OrderSnapshot,
+  rules: OrderFlowRules = DEFAULT_ORDER_FLOW_RULES,
+): string | null {
+  return waitingOnOf(state, rules)?.step ?? null;
+}
 
 /**
  * Where OrderPilot's states meet Navision's Sales Header Status: an assumption
@@ -248,19 +331,36 @@ export class OrderStateMachine {
     private readonly rules: OrderFlowRules = DEFAULT_ORDER_FLOW_RULES,
   ) {}
 
+  /** Starts an order. Support opens one by hand, or the system from area 1's event. */
   start(
     actor: OrderActor,
     at: Date,
     facts: { readonly prepaymentDue: string | null },
   ): OrderTransitionResult {
+    if (actor.kind === "user" && actor.role !== "SUPPORT") {
+      throw new DomainError("FORBIDDEN", "You may not start an order.");
+    }
+    const due = facts.prepaymentDue;
+    // A bad amount here would be stored, and would open or jam the gate later.
+    if (
+      due !== null &&
+      (!isDecimalString(due) || compareDecimal(due, "0") <= 0)
+    ) {
+      throw new ConflictError(
+        "The prepayment due must be an amount above zero, or none at all.",
+      );
+    }
+    const state: OrderSnapshot = {
+      status: "Received",
+      prepaymentDue: due,
+      stockCoversOrder: null,
+      holds: [],
+      resumeTo: null,
+      enteredAt: at.toISOString(),
+    };
     return {
-      state: {
-        status: "Received",
-        prepaymentDue: facts.prepaymentDue,
-        stockCoversOrder: null,
-        holds: [],
-        resumeTo: null,
-      },
+      state,
+      currentStep: currentStepOf(state, this.rules),
       event: {
         type: "ORDER_STARTED",
         from: null,
@@ -302,9 +402,14 @@ export class OrderStateMachine {
       );
     }
 
-    const next = nextState(state, command, transition);
+    const moved = nextState(state, command, transition);
+    const next: OrderSnapshot =
+      moved.status === state.status
+        ? moved
+        : { ...moved, enteredAt: at.toISOString() };
     return {
       state: next,
+      currentStep: currentStepOf(next, this.rules),
       event: {
         type: command.type,
         from: state.status,
@@ -353,13 +458,13 @@ export class OrderStateMachine {
         return command.reason.trim() ? null : "say why it was rejected.";
       case "HOLD_RAISED":
         if (!command.reason.trim()) return "say why it is held.";
-        return state.holds.includes(command.source)
-          ? `it already has a ${command.source} hold.`
+        return state.holds.includes(holdKeyOf(command))
+          ? "it already has that hold."
           : null;
       case "HOLD_CLEARED":
-        return state.holds.includes(command.source)
+        return state.holds.includes(holdKeyOf(command))
           ? null
-          : `it has no ${command.source} hold.`;
+          : "it does not have that hold.";
       case "CANCELLED":
         if (!command.reason.trim()) return "say why it is cancelled.";
         // A held order keeps the limit of the status it was held from.
@@ -380,6 +485,7 @@ function refusalOfPayment(
   amount: string,
 ): string | null {
   if (state.prepaymentDue === null) return "no prepayment is due.";
+  if (!isDecimalString(amount)) return "the amount is not a number.";
   if (!GATE_PAYMENT_TYPES.includes(paymentType)) {
     return `a ${paymentType} payment does not open the gate.`;
   }
@@ -404,12 +510,13 @@ function nextState(
       return {
         ...state,
         status: "OnHold",
-        holds: [...state.holds, command.source],
+        holds: [...state.holds, holdKeyOf(command)],
         // A second hold must not overwrite where the order first came from.
         resumeTo: state.resumeTo ?? state.status,
       };
     case "HOLD_CLEARED": {
-      const holds = state.holds.filter((source) => source !== command.source);
+      const key = holdKeyOf(command);
+      const holds = state.holds.filter((hold) => hold !== key);
       if (holds.length > 0) return { ...state, holds };
       return {
         ...state,
@@ -447,7 +554,9 @@ function dataOf(
       return { paymentType: command.paymentType, amount: command.amount };
     case "HOLD_RAISED":
     case "HOLD_CLEARED":
-      return { source: command.source };
+      return command.ref
+        ? { source: command.source, ref: command.ref }
+        : { source: command.source };
     case "STOCK_CHECKED":
       return { stockCoversOrder: String(command.stockCoversOrder) };
     default:
