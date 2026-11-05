@@ -68,24 +68,27 @@ describe("the task inbox", () => {
     expect(screen.getByText("SPR-20261102-0002")).toBeInTheDocument();
     expect(screen.getByText(/none yet/)).toBeInTheDocument();
     expect(screen.getByText("Mock")).toBeInTheDocument();
-    expect(screen.getByText("Synthetic demo data")).toBeInTheDocument();
-    expect(screen.getByText("Overdue")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Open request/ })).toHaveAttribute(
-      "href",
-      "/workflows/sprs/SPR-20261102-0002",
-    );
+    // The column heading and the badge on the overdue task.
+    expect(screen.getAllByText("Overdue")).toHaveLength(2);
+    expect(
+      screen.getByRole("link", {
+        name: "Approve or reject the stock purchase request",
+      }),
+    ).toHaveAttribute("href", "/workflows/sprs/SPR-20261102-0002");
     expect(await axeViolations(container)).toEqual([]);
   });
 
   it("gives the warehouse big touch targets", async () => {
     server.use(getWorkflowsMyTasksMockHandler(page([TASK])));
     open("WAREHOUSE");
-    const action = await screen.findByRole("link", { name: /Open order/ });
-    expect(action.className).toContain("min-h-14");
-    expect(action.className).toContain("w-full");
+    const action = await screen.findByRole("link", {
+      name: "Add the air waybill",
+    });
+    expect(action.className).toContain("pointer-coarse:min-h-11");
+    expect(action).toHaveAttribute("href", "/workflows/orders/SO-0008");
   });
 
-  it("says nothing is overdue and offers all tasks again", async () => {
+  it("says nothing is overdue and shows all tasks again when the switch is turned off", async () => {
     server.use(
       getWorkflowsMyTasksMockHandler(({ request }) =>
         new URL(request.url).searchParams.get("overdue") === "true"
@@ -95,9 +98,9 @@ describe("the task inbox", () => {
     );
     open("APPROVER");
     await screen.findByText("Add the air waybill");
-    fireEvent.click(screen.getByRole("button", { name: "Overdue only" }));
-    expect(await screen.findByText("No tasks waiting")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Show all tasks" }));
+    fireEvent.click(screen.getByRole("switch", { name: "Overdue only" }));
+    expect(await screen.findByText("No results match")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("switch", { name: "Overdue only" }));
     expect(await screen.findByText("Add the air waybill")).toBeInTheDocument();
   });
 

@@ -119,7 +119,10 @@
     "historyFor": "History of {{name}}",
     "historyTitle": "History of {{name}}",
     "historyDescription": "What changed on this user, from the audit trail.",
-    "activeOnly": "Active users"
+    "activeOnly": "Active users",
+    "allRoles": "All roles",
+    "alreadyDisabled": "Some of these users are already disabled.",
+    "alreadyActive": "Some of these users are already active."
   },
   "masking": {
     "title": "Masking",

@@ -26,7 +26,13 @@
     "count_one": "{{count}} task",
     "count_other": "{{count}} tasks",
     "noInboxTitle": "Your role has no task inbox",
-    "noInboxDescription": "Ask for the permission to open other roles' inboxes, or sign in as a role that has tasks."
+    "noInboxDescription": "Ask for the permission to open other roles' inboxes, or sign in as a role that has tasks.",
+    "allKinds": "All kinds",
+    "columns": {
+      "kind": "Kind",
+      "title": "Task",
+      "due": "Due"
+    }
   },
   "task": {
     "dueOn": "Due {{date}}",
