@@ -57,4 +57,4 @@ export const SELECT_CELL =
 
 /** The row menu column: pinned to the right edge, so it is never scrolled away. */
 export const ACTIONS_CELL =
-  "sticky right-0 z-[1] w-px bg-card px-1 py-0 text-right group-hover/row:bg-muted group-data-[selected]/row:bg-accent max-md:border-l";
+  "sticky right-0 z-[1] w-px bg-card px-1 py-0 text-right group-hover/row:bg-muted group-data-[selected]/row:bg-accent border-l";

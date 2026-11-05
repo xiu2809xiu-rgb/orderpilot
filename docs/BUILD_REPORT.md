@@ -253,7 +253,7 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 | P-39  | Module navigation, showing only what is real          | `feat/workspace-modules`         | Merged, [#187](https://github.com/xiu2809xiu-rgb/orderpilot/pull/187)    |
 | P-43  | Records open as tabs                                  | `feat/workspace-record-tabs`     | Merged, [#175](https://github.com/xiu2809xiu-rgb/orderpilot/pull/175)    |
 | P-44  | List template: filter bar, action bar and status chip | `feat/list-template-bars`        | In review, [#189](https://github.com/xiu2809xiu-rgb/orderpilot/pull/189) |
-| P-45  | List template: grid, saved views and operation log    | `feat/list-template-grid`        | Not started                                                              |
+| P-45  | List template: grid, saved views and operation log    | `feat/list-template-grid`        | In progress (pull request not yet opened)                                |
 | P-46  | Form kit                                              | `feat/form-kit`                  | Merged, [#173](https://github.com/xiu2809xiu-rgb/orderpilot/pull/173)    |
 | P-47  | Document form                                         | `feat/document-form`             | Not started                                                              |
 | P-48  | Lines grid                                            | `feat/lines-grid`                | In review, [#190](https://github.com/xiu2809xiu-rgb/orderpilot/pull/190) |

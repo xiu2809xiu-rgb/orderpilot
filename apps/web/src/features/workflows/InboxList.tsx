@@ -64,12 +64,6 @@ export function InboxList({ role, mayPick, above }: InboxListProps) {
   const columns = useMemo<DataTableColumn<WorkflowTask>[]>(
     () => [
       {
-        id: "kind",
-        header: t("inbox.columns.kind"),
-        cell: (task) => t(`task.kinds.${task.kind}`),
-        exportValue: (task) => t(`task.kinds.${task.kind}`),
-      },
-      {
         id: "title",
         header: t("inbox.columns.title"),
         wrap: true,
@@ -88,6 +82,12 @@ export function InboxList({ role, mayPick, above }: InboxListProps) {
           );
         },
         exportValue: (task) => task.title,
+      },
+      {
+        id: "kind",
+        header: t("inbox.columns.kind"),
+        cell: (task) => t(`task.kinds.${task.kind}`),
+        exportValue: (task) => t(`task.kinds.${task.kind}`),
       },
       {
         id: "order",
