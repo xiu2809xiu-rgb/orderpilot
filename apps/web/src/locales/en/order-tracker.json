@@ -42,7 +42,8 @@
       "sample-shipped": "Shipped",
       "sample-invoiced": "Invoiced",
       "sample-closed": "Closed"
-    }
+    },
+    "allStatuses": "All statuses"
   },
   "detail": {
     "back": "Back to the tracker",

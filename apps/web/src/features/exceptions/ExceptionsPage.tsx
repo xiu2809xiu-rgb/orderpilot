@@ -4,10 +4,6 @@ import { Link } from "react-router";
 import { Truck } from "lucide-react";
 import type { CheckException } from "@orderpilot/shared";
 import {
-  DataTable,
-  DemoBadge,
-  FilterChips,
-  PageHeader,
   RelativeTime,
   StatusBadge,
   useUrlQuery,
@@ -16,9 +12,18 @@ import {
 } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { useExceptionsList } from "@/lib/api/generated/endpoints/exceptions/exceptions";
-import { tableStatusOf } from "@/lib/query-status";
+import {
+  ListPage,
+  type ListAction,
+  type ListFilter,
+} from "@/components/list-page";
 
 const URL_FILTERS = ["state"] as const;
+
+const READ = [
+  { id: "export", kind: "export", permission: "exceptions.read" },
+  { id: "print", kind: "print", permission: "exceptions.read" },
+] satisfies ListAction<CheckException>[];
 
 /** The exceptions queue: failed checks waiting for a person, on mock data. Newest first. */
 export default function ExceptionsPage() {
@@ -26,7 +31,7 @@ export default function ExceptionsPage() {
   const { t: tc } = useTranslation("common");
   const [query, setQuery] = useUrlQuery(URL_FILTERS);
   // The queue is the work waiting, so with no state in the link it shows the
-  // open ones, as the server does. Clearing the chip asks for every state.
+  // open ones, as the server does. The State filter asks for the others.
   const state =
     query.filters.state === "RESOLVED" || query.filters.state === "ALL"
       ? query.filters.state
@@ -129,56 +134,52 @@ export default function ExceptionsPage() {
     [t, tc],
   );
 
+  const filters = useMemo<ListFilter[]>(
+    () => [
+      {
+        id: "state",
+        label: t("list.columns.state"),
+        // No value in the link means the open ones, as the server answers.
+        allLabel: t("list.state.OPEN"),
+        options: [
+          { value: "RESOLVED", label: t("list.state.RESOLVED") },
+          { value: "ALL", label: t("list.state.ALL") },
+        ],
+        describe: (value) => t(`list.state.${value}`, { defaultValue: value }),
+      },
+    ],
+    [t],
+  );
+
   return (
-    <div className="space-y-s4">
-      <PageHeader
-        title={t("title")}
-        description={t("description")}
-        meta={<DemoBadge kind="mock" />}
-        total={list.data?.meta.total}
-      />
-      <FilterChips
-        chips={
-          state === "ALL"
-            ? []
-            : [{ id: "state", label: t(`list.state.${state}`) }]
-        }
-        filters={query.filters}
-        onChange={(filters) => {
-          setQuery({
-            ...query,
-            page: 1,
-            filters:
-              "state" in filters ? filters : { ...filters, state: "ALL" },
-          });
-        }}
-      />
-      <DataTable
-        tableId="exceptions"
-        caption={t("list.caption")}
-        columns={columns}
-        rows={list.data?.data ?? []}
-        total={list.data?.meta.total ?? 0}
-        query={query}
-        onQueryChange={setQuery}
-        rowKey={(row) => row.id}
-        rowHref={(row) => `/order-tracker/${row.orderNo}`}
-        status={tableStatusOf(list)}
-        error={list.error}
-        onRetry={() => void list.refetch()}
-        empty={{
-          title: t("list.emptyTitle"),
-          description: t("list.emptyDescription"),
-          action: (
-            <Button asChild variant="outline">
-              <Link to="/order-tracker">
-                <Truck aria-hidden="true" />
-                {t("list.emptyAction")}
-              </Link>
-            </Button>
-          ),
-        }}
-      />
-    </div>
+    <ListPage
+      tableId="exceptions"
+      title={t("title")}
+      description={t("description")}
+      demo="mock"
+      caption={t("list.caption")}
+      columns={columns}
+      rowKey={(row) => row.id}
+      rowLabel={(row) => row.orderNo}
+      rowHref={(row) => `/order-tracker/${row.orderNo}`}
+      query={query}
+      onQueryChange={setQuery}
+      list={list}
+      filters={filters}
+      actions={READ}
+      operationLog={{ entityType: "Exception", entityId: (row) => row.id }}
+      empty={{
+        title: t("list.emptyTitle"),
+        description: t("list.emptyDescription"),
+        action: (
+          <Button asChild variant="outline">
+            <Link to="/order-tracker">
+              <Truck aria-hidden="true" />
+              {t("list.emptyAction")}
+            </Link>
+          </Button>
+        ),
+      }}
+    />
   );
 }

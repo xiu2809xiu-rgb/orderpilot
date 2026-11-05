@@ -24,7 +24,8 @@
     },
     "state": {
       "OPEN": "Open",
-      "RESOLVED": "Resolved"
+      "RESOLVED": "Resolved",
+      "ALL": "All states"
     }
   }
 }
