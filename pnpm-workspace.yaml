@@ -84,6 +84,15 @@ overrides:
   # which we write. Drop this when @prisma/config depends on deepmerge-ts 8.0.0
   # or later. Review: 2026-11-14.
   "deepmerge-ts@<8.0.0": 8.0.0
+  # @sentry/node 11.9.0 depends on @sentry/bundler-plugins, which pulls glob
+  # 13.0.6 (GHSA-3g3m-2fjr-6pw4: a walk cancelled with an AbortSignal keeps
+  # reading directories; affects 9.0.0 up to 14.0.2). Only Sentry's build-time
+  # source-map plugins call it, through entry points the API never imports, and
+  # we never pass glob an AbortSignal. glob 14 keeps the same CommonJS and ESM
+  # entry points; its breaking changes are in matching internals. exceljs's glob
+  # 7 is outside the affected range and stays. Drop this when
+  # @sentry/bundler-plugins depends on glob 14.0.2 or later. Review: 2026-11-14.
+  "glob@>=9.0.0 <14.0.2": 14.0.3
 
 # `pnpm audit` in the verify job fails on high or critical advisories. An
 # accepted advisory goes under `ignore` by its GHSA id, with a reason and a
