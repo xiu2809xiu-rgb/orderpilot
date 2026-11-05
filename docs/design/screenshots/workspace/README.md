@@ -12,6 +12,8 @@ Pictures of the list page template, taken from a production build of this branch
 
 ## The list grid (P-45)
 
+The pictures of the order tracker, exceptions queue, task inbox and users tab below were taken from the first build, which moved those four screens onto the template. That work is parked on the branch `wip/p45-owner-screens`, and the screens on this branch are as they are on `main`. The three `p45-` pictures show the shared template as this branch ships it: `p45-customers-390-light.png` (a phone list shows the name and country under the number), and `p45-gallery-log-390-light.png` and `p45-gallery-log-1440-light.png` (a ticked row with its operation log; the entries in them are made-up sample lines served to the page, not data from the API).
+
 Taken from the real API in demo mode (the Vite dev server on this branch, an API and database of its own), with Playwright at 1440 by 900 and 390 by 844. All data is synthetic demo data.
 
 - `<role>-<page>-<width>-light.png`: each role's two main pages that P-45 touched, in light. The system admin has the users tab, Finance and the Auditor have the exceptions queue, and the rest have the order tracker and the task inbox. The home pages are not retaken: this story does not change them.

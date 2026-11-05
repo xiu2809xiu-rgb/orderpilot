@@ -208,6 +208,7 @@ export function GalleryList() {
         filters={filters}
         actions={actions}
         rowLabel={(row) => row.reference}
+        operationLog={{ entityType: "Order", entityId: (row) => row.reference }}
         exportOptions={{
           fileName: "orders",
           loadRows: () => Promise.resolve(DEMO_ORDERS),

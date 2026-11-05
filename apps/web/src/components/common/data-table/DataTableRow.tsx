@@ -1,5 +1,6 @@
 import type { ComponentProps, MouseEvent } from "react";
 import { TableCell, TableRow } from "@/components/ui/table";
+import { useMediaQuery } from "@/lib/useMediaQuery";
 import { cn } from "@/lib/utils";
 import { gestureOf, useOpenRecord } from "../useOpenRecord";
 import { ACTIONS_CELL, cellClass } from "./cells";
@@ -11,6 +12,10 @@ import {
   type RowActionsColumn,
   type TableSelection,
 } from "./types";
+
+/** Below 768 px a table scrolls sideways, so the first column carries what tells rows apart. */
+const PHONE = "(max-width: 767px)";
+const SUMMARY_COLUMNS = 2;
 
 type RowEvent = MouseEvent<HTMLTableRowElement>;
 
@@ -38,6 +43,27 @@ function opensRow(event: RowEvent): boolean {
   return !window.getSelection()?.toString();
 }
 
+/** The next columns, under the first one, so a phone shows more than a number. */
+function PhoneSummary<Row>({
+  row,
+  columns,
+}: {
+  row: Row;
+  columns: readonly DataTableColumn<Row>[];
+}) {
+  const next = columns.slice(1, 1 + SUMMARY_COLUMNS);
+  if (next.length === 0) return null;
+  return (
+    <div className="mt-0.5 w-[min(14rem,55vw)] truncate text-xs font-normal text-muted-foreground">
+      {next.map((column) => (
+        <span key={column.id} className="mr-2">
+          {column.cell(row)}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 type CellsProps<Row> = Pick<
   DataTableRowProps<Row>,
   "row" | "columns" | "selection" | "rowActions"
@@ -52,6 +78,7 @@ function Cells<Row>({
   ...props
 }: CellsProps<Row>) {
   const first = firstSticky(selection !== undefined);
+  const phone = useMediaQuery(PHONE);
   return (
     <TableRow
       {...props}
@@ -65,6 +92,9 @@ function Cells<Row>({
           data-numeric={alignsEnd(column) ? "" : undefined}
         >
           {column.cell(row)}
+          {phone && position === 0 ? (
+            <PhoneSummary row={row} columns={columns} />
+          ) : null}
         </TableCell>
       ))}
       {rowActions ? (

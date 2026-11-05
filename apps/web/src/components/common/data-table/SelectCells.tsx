@@ -5,9 +5,9 @@ import { cn } from "@/lib/utils";
 import { SELECT_CELL } from "./cells";
 import type { TableSelection } from "./types";
 
-// The box is 16 px; on a touch screen its target grows to 44 px around it.
+// The box is 24 px (WCAG 2.2 AA target size); on a touch screen its target grows to 44 px around it.
 const BOX =
-  "relative after:absolute after:-inset-2 after:content-[''] pointer-coarse:after:-inset-3.5";
+  "relative size-6 rounded-[5px] pointer-coarse:after:absolute pointer-coarse:after:-inset-[11px] pointer-coarse:after:content-['']";
 
 /** The heading of the checkbox column: one box that ticks or clears the page. */
 export function SelectHead<Row>({
