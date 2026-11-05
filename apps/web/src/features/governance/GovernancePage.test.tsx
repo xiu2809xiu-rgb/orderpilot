@@ -307,9 +307,8 @@ describe("GovernancePage", () => {
     renderPage();
     await userEvent.click(await screen.findByRole("tab", { name: "Users" }));
     await userEvent.click(
-      await screen.findByRole("checkbox", { name: "Select Synthetic Person" }),
+      await screen.findByRole("button", { name: "Disable Synthetic Person" }),
     );
-    await userEvent.click(screen.getByRole("button", { name: "Disable" }));
     await waitFor(() => {
       expect(called).toBe(user.id);
     });

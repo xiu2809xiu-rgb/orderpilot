@@ -15,8 +15,6 @@ import { formatDay } from "@/lib/format";
 export function trackerColumns(
   t: TFunction,
   roleLabel: (role: TrackerOrder["ownerRole"]) => string,
-  /** True on a phone, where only the first column is in view. */
-  phone = false,
 ): DataTableColumn<TrackerOrder>[] {
   const day = (value: string | null) =>
     value ? formatDay(value) : t("list.noShipmentDate");
@@ -25,24 +23,12 @@ export function trackerColumns(
       id: "orderNo",
       header: t("list.columns.orderNo"),
       cell: (row) => (
-        <>
-          <RecordLink
-            to={`/order-tracker/${row.orderNo}`}
-            className="-my-0.5 inline-block py-0.5 font-mono font-medium text-primary underline-offset-4 hover:underline"
-          >
-            {row.orderNo}
-          </RecordLink>
-          {phone ? (
-            <span className="mt-1 flex flex-wrap gap-1">
-              <StatusBadge>{row.status.label}</StatusBadge>
-              {row.overdue.overdue ? (
-                <StatusBadge tone="danger">
-                  {t("list.overdueDays", { count: row.overdue.daysOverdue })}
-                </StatusBadge>
-              ) : null}
-            </span>
-          ) : null}
-        </>
+        <RecordLink
+          to={`/order-tracker/${row.orderNo}`}
+          className="-my-0.5 inline-block py-0.5 font-mono font-medium text-primary underline-offset-4 hover:underline"
+        >
+          {row.orderNo}
+        </RecordLink>
       ),
       exportValue: (row) => row.orderNo,
       sortable: true,
@@ -52,13 +38,9 @@ export function trackerColumns(
       id: "customerName",
       header: t("list.columns.customer"),
       cell: (row) => (
-        // A long name is cut with its full text in the title: at 1440 px the
-        // default columns must fit beside the sidebar.
-        <span className="flex max-w-[16rem] items-baseline gap-1 md:max-w-[11rem]">
-          <span className="truncate" title={row.customerName}>
-            {row.customerName}
-          </span>
-          <span className="shrink-0 font-mono text-xs text-muted-foreground">
+        <span>
+          {row.customerName}{" "}
+          <span className="font-mono text-xs text-muted-foreground">
             {row.customerNo}
           </span>
         </span>
@@ -123,9 +105,6 @@ export function trackerColumns(
       exportValue: (row) => row.shipmentDate,
       sortable: true,
       kind: "date",
-      // Shown on request: with it the default view is wider than 1440 px and
-      // the Order date column slides under the row menu.
-      defaultHidden: true,
     },
   ];
 }

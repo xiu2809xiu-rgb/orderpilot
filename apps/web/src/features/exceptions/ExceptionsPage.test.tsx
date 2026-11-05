@@ -1,5 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { MemoryRouter, useLocation } from "react-router";
@@ -84,8 +90,8 @@ describe("the exceptions queue", () => {
     });
   });
 
-  it("shows the open exceptions by default, and every state once the State filter asks", async () => {
-    await i18n.loadNamespaces(["exceptions", "common", "list-page"]);
+  it("shows the open exceptions by default, and every state once the chip is cleared", async () => {
+    await i18n.loadNamespaces(["exceptions", "common"]);
     const asked: (string | null)[] = [];
     server.use(
       http.get("*/api/v1/exceptions", ({ request }) => {
@@ -94,15 +100,17 @@ describe("the exceptions queue", () => {
       }),
     );
     renderPage();
-    const state = await screen.findByRole("combobox", { name: "State" });
+    const clear = await screen.findByRole("button", {
+      name: "Clear filter: Open",
+    });
     expect(asked.at(-1)).toBe("OPEN");
-    await userEvent.selectOptions(state, "ALL");
+    fireEvent.click(clear);
     await waitFor(() => {
       expect(asked.at(-1)).toBe("ALL");
     });
     expect(
-      screen.getByRole("button", { name: "Clear filter: State: All states" }),
-    ).toBeVisible();
+      screen.queryByRole("button", { name: "Clear filter: Open" }),
+    ).toBeNull();
   });
 
   it("shows an empty queue with a next step", async () => {
