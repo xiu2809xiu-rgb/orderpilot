@@ -18,11 +18,11 @@ export interface AccessDecision {
 }
 
 /**
- * Decides whether a signed-in user may use a permission. The default asks the
- * role-permission matrix (MatrixPermissionPolicy). F-1 and F-3 put a richer
- * policy behind this one class (approval limits, segregation of duties, data
- * scope) by providing their own under this token in AppModule; no controller
- * changes, because controllers only say `@RequirePermission(...)`.
+ * Decides whether a signed-in user may use a permission. AuthModule provides
+ * area 4's GovernancePermissionPolicy (F-3) under this token, so the guard asks
+ * the same rules an area's own enforce() does. MatrixPermissionPolicy applies
+ * the matrix alone and stays as the plain fallback. No controller changes when
+ * the policy does, because controllers only say `@RequirePermission(...)`.
  */
 export abstract class PermissionPolicy {
   abstract decide(request: AccessRequest): Promise<AccessDecision>;
