@@ -11,6 +11,7 @@ import {
   RecordLink,
 } from "@/components/common";
 import { Button } from "@/components/ui/button";
+import { useMediaQuery } from "@/lib/useMediaQuery";
 import { useExceptionsList } from "@/lib/api/generated/endpoints/exceptions/exceptions";
 import {
   ListPage,
@@ -46,18 +47,27 @@ export default function ExceptionsPage() {
     { query: { placeholderData: (previous) => previous } },
   );
 
+  const phone = useMediaQuery("(max-width: 767px)");
   const columns = useMemo<DataTableColumn<CheckException>[]>(
     () => [
       {
         id: "order",
         header: t("list.columns.order"),
         cell: (row) => (
-          <RecordLink
-            to={`/order-tracker/${row.orderNo}`}
-            className="-my-0.5 inline-block py-0.5 font-mono font-medium text-primary underline-offset-4 hover:underline"
-          >
-            {row.orderNo}
-          </RecordLink>
+          <>
+            <RecordLink
+              to={`/order-tracker/${row.orderNo}`}
+              className="-my-0.5 inline-block py-0.5 font-mono font-medium text-primary underline-offset-4 hover:underline"
+            >
+              {row.orderNo}
+            </RecordLink>
+            {/* On a phone only this column is in view, so it names the customer. */}
+            {phone ? (
+              <span className="mt-1 block text-xs text-muted-foreground">
+                {row.customerName}
+              </span>
+            ) : null}
+          </>
         ),
         exportValue: (row) => row.orderNo,
         hideable: false,
@@ -131,7 +141,7 @@ export default function ExceptionsPage() {
         exportValue: (row) => row.openedAt,
       },
     ],
-    [t, tc],
+    [t, tc, phone],
   );
 
   const filters = useMemo<ListFilter[]>(

@@ -16,6 +16,7 @@ import {
   TRACKER_URL_FILTERS,
   TRACKER_URL_OPTIONS,
 } from "./trackerParams";
+import { useMediaQuery } from "@/lib/useMediaQuery";
 import { trackerColumns } from "./trackerColumns";
 
 const READ = [
@@ -34,9 +35,10 @@ export default function OrderTrackerPage() {
   const list = useTrackerList(toParams(query), {
     query: { placeholderData: (previous) => previous },
   });
+  const phone = useMediaQuery("(max-width: 767px)");
   const columns = useMemo(
-    () => trackerColumns(t, (role) => tc(`roles.${role}`)),
-    [t, tc],
+    () => trackerColumns(t, (role) => tc(`roles.${role}`), phone),
+    [t, tc, phone],
   );
   // A link can carry several status codes at once, so the select names them
   // all in words (`describe`) as well as offering one at a time.

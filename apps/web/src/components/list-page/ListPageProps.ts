@@ -32,7 +32,7 @@ export interface ListPageProps<Row> {
   /** Names a row for its checkbox and its menu, such as its number. Defaults to `rowKey`. */
   rowLabel?: (row: Row) => string;
   /** The record page a row opens. The row then works like a `RecordLink`, and its menu offers View. */
-  rowHref?: (row: Row) => string;
+  rowHref?: (row: Row) => string | undefined;
   onRowClick?: (row: Row) => void;
   /** From `useUrlQuery`: search, filters, sort, page and page size in the address. */
   query: TableQuery;

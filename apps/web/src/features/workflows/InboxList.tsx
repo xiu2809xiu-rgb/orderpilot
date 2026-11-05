@@ -17,6 +17,7 @@ import {
   useWorkflowsInboxTasks,
   useWorkflowsMyTasks,
 } from "@/lib/api/generated/endpoints/workflows/workflows";
+import { useMediaQuery } from "@/lib/useMediaQuery";
 import { formatDate } from "./format";
 import { RecordRefLine } from "./RecordRefLine";
 
@@ -61,6 +62,7 @@ export function InboxList({ role, mayPick, above }: InboxListProps) {
   });
   const list = mayPick ? theirs : mine;
 
+  const phone = useMediaQuery("(max-width: 767px)");
   const columns = useMemo<DataTableColumn<WorkflowTask>[]>(
     () => [
       {
@@ -70,15 +72,33 @@ export function InboxList({ role, mayPick, above }: InboxListProps) {
         hideable: false,
         cell: (task) => {
           const target = targetOf(task);
-          return target ? (
-            <RecordLink
-              to={target}
-              className="inline-flex min-h-6 items-center font-medium text-primary underline-offset-4 hover:underline pointer-coarse:min-h-11"
-            >
-              {task.title}
-            </RecordLink>
-          ) : (
-            task.title
+          return (
+            <>
+              {target ? (
+                <RecordLink
+                  to={target}
+                  className="inline-flex min-h-6 items-center font-medium text-primary underline-offset-4 hover:underline pointer-coarse:min-h-11"
+                >
+                  {task.title}
+                </RecordLink>
+              ) : (
+                task.title
+              )}
+              {/* On a phone only this column is in view, so it carries the rest. */}
+              {phone ? (
+                <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+                  {task.orderNo ? (
+                    <span data-numeric className="font-mono">
+                      {task.orderNo}
+                    </span>
+                  ) : null}
+                  <span>{formatDate(task.dueAt)}</span>
+                  {task.overdue ? (
+                    <StatusBadge tone="danger">{t("task.overdue")}</StatusBadge>
+                  ) : null}
+                </span>
+              ) : null}
+            </>
           );
         },
         exportValue: (task) => task.title,
@@ -123,7 +143,7 @@ export function InboxList({ role, mayPick, above }: InboxListProps) {
         exportValue: (task) => (task.overdue ? t("task.overdue") : ""),
       },
     ],
-    [t],
+    [t, phone],
   );
 
   const filters = useMemo<ListFilter[]>(
@@ -155,7 +175,7 @@ export function InboxList({ role, mayPick, above }: InboxListProps) {
       columns={columns}
       rowKey={(task) => task.id}
       rowLabel={(task) => task.title}
-      rowHref={(task) => targetOf(task) ?? "/workflows"}
+      rowHref={targetOf}
       query={query}
       onQueryChange={setQuery}
       list={list}

@@ -38,7 +38,7 @@ export interface DataTableProps<Row> {
    */
   onRowClick?: (row: Row) => void;
   /** The record page a row opens. The row then works like a `RecordLink`. */
-  rowHref?: (row: Row) => string;
+  rowHref?: (row: Row) => string | undefined;
   status?: TableStatus;
   error?: unknown;
   onRetry?: () => void;

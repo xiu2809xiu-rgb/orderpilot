@@ -18,7 +18,8 @@ interface DataTableRowProps<Row> {
   row: Row;
   columns: readonly DataTableColumn<Row>[];
   onRowClick?: ((row: Row) => void) | undefined;
-  rowHref?: ((row: Row) => string) | undefined;
+  /** Without a link for a row (it returns nothing), that row is not clickable. */
+  rowHref?: ((row: Row) => string | undefined) | undefined;
   selection?: TableSelection<Row> | undefined;
   rowActions?: RowActionsColumn<Row> | undefined;
 }
@@ -81,19 +82,28 @@ function Cells<Row>({
 function RecordRow<Row>({
   rowHref,
   ...props
-}: DataTableRowProps<Row> & { rowHref: (row: Row) => string }) {
+}: DataTableRowProps<Row> & { rowHref: (row: Row) => string | undefined }) {
   const openRecord = useOpenRecord();
   const { row } = props;
+  const href = rowHref(row);
+  if (href === undefined) {
+    return (
+      <Cells
+        {...props}
+        className="group/row hover:bg-muted data-[selected]:bg-accent"
+      />
+    );
+  }
   return (
     <Cells
       {...props}
       className="group/row cursor-pointer hover:bg-muted data-[selected]:bg-accent"
       onClick={(event: RowEvent) => {
-        if (opensRow(event)) openRecord(rowHref(row), gestureOf(event));
+        if (opensRow(event)) openRecord(href, gestureOf(event));
       }}
       onAuxClick={(event: RowEvent) => {
         if (event.button === 1 && opensRow(event)) {
-          openRecord(rowHref(row), "background");
+          openRecord(href, "background");
         }
       }}
       onMouseDown={(event: RowEvent) => {

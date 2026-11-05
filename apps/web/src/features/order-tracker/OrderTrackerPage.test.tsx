@@ -3,7 +3,7 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { MemoryRouter, useLocation } from "react-router";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import i18n from "@/i18n";
 import { getTrackerListMockHandler } from "@/lib/api/generated/endpoints/tracker/tracker.msw";
 import type { TrackerList200 } from "@/lib/api/generated/model";
@@ -155,5 +155,22 @@ describe("the order tracker", () => {
     expect(
       await screen.findByText(/permission|not allowed|access/i),
     ).toBeVisible();
+  });
+
+  it("on a phone puts the status and the overdue flag under the order number", async () => {
+    await i18n.loadNamespaces(["order-tracker", "common"]);
+    vi.stubGlobal("matchMedia", (query: string) => ({
+      matches: query.includes("max-width"),
+      media: query,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+    }));
+    server.use(getTrackerListMockHandler(page([row(1, true)])));
+    renderPage();
+    const first = (
+      await screen.findByRole("link", { name: "SO-0001" })
+    ).closest("td");
+    expect(first).toHaveTextContent("Status 1");
+    expect(first).toHaveTextContent("3 days overdue");
   });
 });

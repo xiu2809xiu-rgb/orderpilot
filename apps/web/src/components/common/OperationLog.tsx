@@ -80,8 +80,8 @@ export function OperationLog({
         />
       ) : (
         <ScrollRegion label={t("log.region")}>
-          <Table>
-            <TableHeader>
+          <Table className="max-md:block">
+            <TableHeader className="max-md:sr-only">
               <TableRow className="hover:bg-transparent">
                 <TableHead scope="col">{t("log.time")}</TableHead>
                 <TableHead scope="col">{t("log.user")}</TableHead>
@@ -91,19 +91,26 @@ export function OperationLog({
                 <TableHead scope="col">{t("log.change")}</TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
+            <TableBody className="max-md:block">
               {rows.map((row) => (
-                <TableRow key={row.id}>
-                  <TableCell className="whitespace-nowrap">
+                // Below 768 px each entry stacks as time, user, change: a table
+                // column would wrap the user name onto four lines.
+                <TableRow
+                  key={row.id}
+                  className="max-md:flex max-md:flex-col max-md:gap-0.5 max-md:py-2"
+                >
+                  <TableCell className="whitespace-nowrap max-md:px-0 max-md:py-0 max-md:text-xs max-md:text-muted-foreground">
                     <RelativeTime value={row.at} now={now} />
                   </TableCell>
-                  <TableCell>{row.user}</TableCell>
+                  <TableCell className="max-md:px-0 max-md:py-0 max-md:font-medium">
+                    {row.user}
+                  </TableCell>
                   {showIp ? (
                     <TableCell className="font-mono text-xs">
                       {row.ip ?? "-"}
                     </TableCell>
                   ) : null}
-                  <TableCell className="min-w-[16rem] whitespace-normal">
+                  <TableCell className="min-w-[16rem] whitespace-normal max-md:min-w-0 max-md:px-0 max-md:py-0">
                     {row.change}
                   </TableCell>
                 </TableRow>

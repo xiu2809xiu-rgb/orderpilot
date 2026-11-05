@@ -23,7 +23,7 @@ interface DataTableBodyProps<Row> {
   rows: readonly Row[];
   rowKey: (row: Row) => string;
   onRowClick?: ((row: Row) => void) | undefined;
-  rowHref?: ((row: Row) => string) | undefined;
+  rowHref?: ((row: Row) => string | undefined) | undefined;
   status: TableStatus;
   pageSize: number;
   error?: unknown;
