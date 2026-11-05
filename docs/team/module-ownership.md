@@ -23,13 +23,14 @@ T-1 named a backup owner for each area (Azri and Iok Teck back each other up, An
 
 Conventions for every area:
 
-- **API module:** `apps/api/src/modules/<module>/`, with its controllers, services, repositories and domain classes, and its unit tests (`*.spec.ts`) beside them.
+- **API module:** `apps/api/src/modules/<module>/` (area 1's platform modules, such as `auth`, `users` and `health`, sit directly in `apps/api/src/<module>/`), with its controllers, services, repositories and domain classes, and its unit tests (`*.spec.ts`) beside them.
 - **Prisma schema:** the area's own file in `apps/api/prisma/schema/` (a multi-file schema, planned: P-9). Each migration belongs to the area whose schema it changes.
-- **API integration tests:** `apps/api/test/<module>.int-spec.ts`. **Request files:** `apps/api/requests/<module>.http`.
+- **API integration tests:** `apps/api/test/http/<module>.test.ts`. **Request files:** `apps/api/requests/<module>.http`.
 - **Web feature:** `apps/web/src/features/<feature>/`, with its pages, components, hooks and component tests (`*.test.tsx`). Its `index.ts` exports one `defineFeature` object (path, menu entry, permission, role home tiles, lazy page), and `features/registry.ts` lists it: that one line is the only change outside the folder. [ADR 0013](../adr/0013-the-web-stack.md) has the details.
 - **Text:** the area's own i18n namespace, `apps/web/src/locales/en/<namespace>.json`, loaded lazily.
-- **End-to-end tests:** `apps/web/e2e/<feature>.spec.ts`.
+- **End-to-end tests:** `apps/e2e/tests/<feature>.spec.ts`, using the helpers in `apps/e2e/src/`.
 - **Docs:** the area's guide in `docs/team/`, its rows in the shared tables, and its prompts in `docs/ai/prompts/` as `areaN-NNN-…`.
+- **Code owners:** a story adds its folder's line to `.github/CODEOWNERS` when it creates the folder. `pnpm check:codeowners`, also run in CI, fails on a line that matches no file.
 
 ### Area 1: Document AI and integration (Richie)
 
@@ -48,7 +49,7 @@ Conventions for every area:
 | API module    | `workflows`: the state machine, workflow definitions and instances, tasks, SPR approval, the payment gate, reminders, escalations and notifications |
 | Prisma schema | `workflows.prisma`                                                                                                                                  |
 | Web feature   | `workflows`: the task inbox, an order's steps and timeline, the SPR approval page and reminders                                                     |
-| Tests         | `apps/api/test/workflows.int-spec.ts`, `apps/web/e2e/workflows.spec.ts`                                                                             |
+| Tests         | `apps/api/test/http/workflows.test.ts` and `workflow-actions.test.ts`                                                                               |
 
 ### Area 3: Checks, tracker and insights (Iok Teck)
 
@@ -57,7 +58,7 @@ Conventions for every area:
 | API modules   | `checks`: the check rules, check results and exceptions; `insights`: the KPIs                                                  |
 | Prisma schema | `checks.prisma`                                                                                                                |
 | Web features  | `order-tracker`: the tracker and an order's detail timeline; `exceptions`: the exceptions queue; `insights`: the KPI dashboard |
-| Tests         | `apps/api/test/checks.int-spec.ts`, `apps/web/e2e/order-tracker.spec.ts`                                                       |
+| Tests         | `apps/api/test/http/checks.test.ts`                                                                                            |
 
 ### Area 4: Controls, security and monitoring (Angelyn)
 
@@ -67,7 +68,7 @@ Conventions for every area:
 | Prisma schema | `governance.prisma`, `analytics.prisma`                                                                                                                                                                                                                                                                           |
 | Web features  | `governance`: the role-permission matrix screen; `audit`: the audit log viewer; `monitoring`: AI usage and cost, observability and clickstream                                                                                                                                                                    |
 | Web class     | `AnalyticsTracker`, in `apps/web/src/features/monitoring/`                                                                                                                                                                                                                                                        |
-| Tests         | `apps/api/test/governance.int-spec.ts`, `apps/web/e2e/governance.spec.ts`, including E2E #3                                                                                                                                                                                                                       |
+| Tests         | `apps/api/test/http/governance.test.ts`, `governance-controls.test.ts`, `audit-viewer.test.ts`, `audit-controls.test.ts` and `monitoring.test.ts`; `apps/e2e/tests/governance.spec.ts`, which E2E #3 builds on                                                                                                    |
 
 ## Shared files and who reviews them
 

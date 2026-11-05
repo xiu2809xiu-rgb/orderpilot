@@ -8,6 +8,30 @@ Spectra Innovations is a Singapore distributor of IT products and computer perip
 
 OrderPilot is our product for Problem Statement #11 in the IT2134 IT Innovation Project (SCCCI x NYP AI Innovation Challenge, AY2026 Semester 2). All its data is synthetic.
 
+## Project layout
+
+| Folder              | What it holds                                                                                                                |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `apps/web`          | The front end: the React web app                                                                                             |
+| `apps/api`          | The back end: the NestJS API and its worker, with the Prisma schema and migrations                                           |
+| `apps/e2e`          | The end-to-end tests: Playwright against the running stack                                                                   |
+| `packages`          | Shared code: the contracts both sides use, the synthetic data and documents, and the TypeScript and ESLint settings          |
+| `services`          | The mock services that stand in for outside systems: today the template each one starts from (mock Navision comes with P-19) |
+| `docker`, `scripts` | Tooling: the Dockerfiles that are not an app's own, the repository checks and the GitHub scripts                             |
+| `docs`              | The documentation: decisions, architecture, the agile docs, the team guides and the build report                             |
+
+Which folders belong to each of the four areas:
+
+| Area                                           | Its folders                                                                                                                                                                                                                                                                                                                                                |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Document AI and integration (Richie)        | The platform in `apps/api/src/` (sign-in, users, health, storage, queues and the rest), `apps/api/src/modules/master-data/`, the web app's shell and common components, the web features for documents, orders, master data, connectors, mapping and the 3D view, `packages/synthetic-data/`, `packages/synthetic-documents/`, `services/` and `apps/e2e/` |
+| 2. Order workflows and approvals (Azri)        | `apps/api/src/modules/workflows/`, `apps/web/src/features/workflows/` and `workflows.prisma`                                                                                                                                                                                                                                                               |
+| 3. Checks, tracker and insights (Iok Teck)     | `apps/api/src/modules/checks/` and `insights/`, `apps/web/src/features/order-tracker/`, `exceptions/` and `insights/`, and `checks.prisma`                                                                                                                                                                                                                 |
+| 4. Controls, security and monitoring (Angelyn) | `apps/api/src/modules/governance/`, `audit/`, `analytics/` and `monitoring/`, `apps/web/src/features/governance/`, `audit/` and `monitoring/`, and `governance.prisma` and `analytics.prisma`                                                                                                                                                              |
+| Shared by all four                             | `packages/shared/`, `packages/tsconfig/`, `packages/eslint-config/`, `.github/`, `docs/`, `scripts/`, `docker/` and the files at the root                                                                                                                                                                                                                  |
+
+[Module ownership](docs/team/module-ownership.md) lists every path and who reviews it, and [`.github/CODEOWNERS`](.github/CODEOWNERS) applies it on GitHub. [The architecture](docs/architecture/README.md) explains how the API is built and how to add to it.
+
 ## Status
 
 **The base is being built. There is no app to run yet.** This repository holds documents, configuration and the GitHub scripts, and the `pnpm` tooling, but no app and no `docker compose` stack so far.
@@ -20,7 +44,7 @@ OrderPilot is our product for Problem Statement #11 in the IT2134 IT Innovation 
 - **GitHub as code:** issue forms, the pull request template, labels, the sprint milestones, the backlog, the board and the wiki, all kept as code in [`.github/`](.github/) and [`scripts/github/`](scripts/github/README.md), and a sprint recorder that files each finished story under its sprint.
 - **The workspace and its checks:** `pnpm install`, then `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm build`, with Git hooks that check every commit and refuse a push to `main`. See [CONTRIBUTING.md](CONTRIBUTING.md).
 - **CI and security scans:** the verify job, Semgrep, gitleaks and OSV run on every pull request and are required. See [security testing](docs/security/security-testing.md).
-- **GitHub protection on `main`:** the `Protect main` ruleset, secret scanning with push protection, Dependabot alerts and security updates, and private vulnerability reporting.
+- **GitHub protection on `main`:** the `Protect main` ruleset, and Dependabot alerts and security updates. The repository is private, so GitHub's secret scanning and private vulnerability reporting are off; [SECURITY.md](SECURITY.md) says what covers them.
 
 ### What later stories bring
 
@@ -53,7 +77,7 @@ Richie, the team lead, builds the base for every area. Each owner then takes ove
 - [CLAUDE.md](CLAUDE.md): the product brief, stack, standards, UI rules and Definition of Done.
 - [CONTRIBUTING.md](CONTRIBUTING.md): set-up, workflow and how to add a component.
 - [AGENTS.md](AGENTS.md): the rules for every AI tool, and a starter prompt.
-- [SECURITY.md](SECURITY.md): how to report a problem, and what we scan.
+- [SECURITY.md](SECURITY.md): how to report a problem, privately, and what we scan.
 
 **How we work**
 
@@ -72,6 +96,5 @@ Richie, the team lead, builds the base for every area. Each owner then takes ove
 
 - [Issues](https://github.com/xiu2809xiu-rgb/orderpilot/issues), [pull requests](https://github.com/xiu2809xiu-rgb/orderpilot/pulls) and [milestones](https://github.com/xiu2809xiu-rgb/orderpilot/milestones).
 - [The board](https://github.com/xiu2809xiu-rgb/orderpilot/projects) and [the wiki](https://github.com/xiu2809xiu-rgb/orderpilot/wiki).
-- [Report a vulnerability](https://github.com/xiu2809xiu-rgb/orderpilot/security/advisories/new).
 
 The live demo arrives with P-24.

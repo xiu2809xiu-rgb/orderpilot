@@ -121,7 +121,7 @@ OrderPilot is an AI-assisted order-automation layer **beside** Navision, never i
 - Every extracted field keeps its confidence and source. AI output is a draft until a person confirms it.
 - Match customers, vendors and items on their Navision numbers, never on names. A look-alike name is shown as a possible match.
 - Open business rules are configuration until Spectra confirms them: the SPR trigger, the PI sequence, approvers and limits, and delegation.
-- No Spectra document goes to a third-party AI without their written OK, in an approved region.
+- No Spectra document goes to a third-party AI without their written OK, in an approved region. The one exception is the briefing material Spectra gave the team: it stays outside the repository, and coding tools may read it on Richie's PC (A-31).
 
 ### Targets
 
@@ -183,7 +183,7 @@ Each row says whether it exists today or which story brings it. Everything marke
 | Language                | TypeScript, strict, ESM, from `packages/tsconfig`                                                                                                                        | Today                                |
 | Lint and format         | ESLint flat config from `packages/eslint-config` (type-aware, with jsx-a11y, failing on any warning), Prettier and commitlint (config-conventional)                      | Today                                |
 | Git hooks               | Commit message: commitlint. Pre-commit: licence-key guard, samples guard, secretlint, em-dash check and lint-staged. Pre-push: samples guard on every commit             | Today                                |
-| Dependency updates      | Dependabot for npm, Actions and Docker base images, weekly on Monday 06:00 Singapore time, a 7-day cooldown, grouped                                                     | Today                                |
+| Dependency updates      | Dependabot for npm, Actions and Docker base images, monthly on the 1st at 06:00 Singapore time, a 7-day cooldown, grouped                                                | Today                                |
 | CI and scans            | GitHub Actions: `ci.yml` (verify), `security.yml` (Semgrep, gitleaks, OSV) and `docker.yml` (the images with Trivy, and Trivy config)                                    | Today (P-6, P-13)                    |
 | Shared contracts        | `packages/shared`: zod schemas and types                                                                                                                                 | Built: P-7 (draft order contract)    |
 | API                     | NestJS in layers, with Swagger "OrderPilot API" at `/api/docs`                                                                                                           | Today (P-8)                          |
@@ -366,7 +366,7 @@ These apply to all screens.
 Planned with P-11:
 
 - **Design tokens:** a warm neutral base with a deep jade accent; light and dark themes; an 8-pt spacing grid; radius and motion values; the Geist font, with tabular numbers.
-- **UI sources while the repository is public:** shadcn/ui; Magic UI (free); React Bits (free, `@react-bits`); ReUI's free components, only if they install without the licence key.
+- **UI sources until P-22 sets up the Pro kits:** shadcn/ui; Magic UI (free); React Bits (free, `@react-bits`); ReUI's free components, only if they install without the licence key.
 
 [`CONTRIBUTING.md`](CONTRIBUTING.md) says how to add a component.
 
@@ -395,7 +395,7 @@ Planned with P-11:
    - Synthetic data only.
    - Licence keys live only in `apps/web/.env.local`, and AI keys only in the root `.env`. Richie puts them there himself.
    - Never print, echo or ask for a key in chat.
-8. **While the repository is public,** add no React Bits Pro or ReUI Pro code: their licences need a private repository. Richie tells you when it is private. Then check that the ruleset is still active and the wiki still opens, update `SECURITY.md`, `docs/security/security-testing.md` and `.github/rulesets/main.json` for what changed, and do P-22 once he says the keys are in place.
+8. **The repository is private since 5 Nov 2026** (P-81, [ADR 0040](docs/adr/0040-what-going-private-changed.md)). React Bits Pro and ReUI Pro code still waits for P-22, which starts once Richie says the licence keys are in `apps/web/.env.local`. Until then, free kits only.
 9. **Ask Richie first** before anything destructive or irreversible, and before any change to this plan.
 10. **Honesty:** run the commands and report their real results. If something cannot be done, say so and propose the nearest alternative.
 

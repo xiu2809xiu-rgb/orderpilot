@@ -2,8 +2,7 @@
 //
 // The role-permission matrix itself is RolePermission in platform.prisma (P-10
 // created it, area 4 owns its contents). What area 4 adds here is the data
-// scope of a role. Approval limits and substitutes are contracts only for now
-// (packages/shared governance/approval.ts): F-3 gives them a table.
+// scope of a role, and each user's approval setup (F-3).
 
 /// Which records a role may see: "all", "brands" or "own" (the names are in
 /// @orderpilot/shared). A role with no row reads as its default. The base
@@ -12,4 +11,26 @@ model RoleDataScope {
   role      Role     @id
   scope     String
   updatedAt DateTime @updatedAt @db.Timestamptz(3)
+}
+
+/// One user's approval setup, in the shape of Navision's Approval User Setup
+/// (packages/shared governance/approval.ts), plus when they are away, which
+/// Navision does not record. Configuration until Spectra confirms its
+/// approvers and limits (A-14). User ids are plain columns, as in the other
+/// areas' tables. The migration adds CHECKs Prisma cannot express: nobody is
+/// their own substitute, an absence starts before it ends, limits are not
+/// below zero.
+model ApprovalUserSetup {
+  userId                      String    @id @db.Uuid
+  /// Who approves what this user raises, and whom this user escalates to.
+  approverId                  String?   @db.Uuid
+  salesAmountApprovalLimit    Decimal   @db.Decimal(18, 2)
+  purchaseAmountApprovalLimit Decimal   @db.Decimal(18, 2)
+  unlimitedSalesApproval      Boolean   @default(false)
+  unlimitedPurchaseApproval   Boolean   @default(false)
+  substituteUserId            String?   @db.Uuid
+  /// Away from this moment until awayUntil, or until cleared when that is null.
+  awayFrom                    DateTime? @db.Timestamptz(3)
+  awayUntil                   DateTime? @db.Timestamptz(3)
+  updatedAt                   DateTime  @updatedAt @db.Timestamptz(3)
 }

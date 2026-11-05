@@ -99,8 +99,17 @@ jobs:
       - name: Licence-key and env-file guard
         run: pnpm check:licence-key
 
+      - name: Every CODEOWNERS path exists
+        run: pnpm check:codeowners
+
+      # Type-aware ESLint over the whole repository needs more than 2 GB of
+      # heap. V8 sizes its default heap from the machine's memory: about 2 GB on
+      # the 7 GB private runner, and 4 GB on the 16 GB public one this used to run
+      # on (ADR 0040). Only this step gets the larger heap.
       - name: Lint
         run: pnpm lint
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
 
       - name: Typecheck
         run: pnpm typecheck
@@ -189,11 +198,14 @@ jobs:
       # and `up --build` would compile it again. The migrate service applies the migrations and the seed, and
       # the API starts only after it exits with 0, so a healthy stack is a
       # seeded one.
+      # A private runner starts with about 13 GB free, and building the images
+      # ran out of it (ADR 0040). The chain first deletes toolchains this job
+      # never uses, which frees about 21 GB while the installs run in front.
       - name: Build and start the stack in the background
         run: |
           cp .env.example .env
           rm -f "$RUNNER_TEMP/stack.exit"
-          nohup sh -c '{ docker compose build migrate api web && docker compose up -d --no-build --wait api worker web; } > "$RUNNER_TEMP/stack.log" 2>&1; echo $? > "$RUNNER_TEMP/stack.exit"' > /dev/null 2>&1 &
+          nohup sh -c '{ sudo rm -rf /usr/local/lib/android /usr/share/dotnet /usr/local/.ghcup /opt/ghc && df -h / && docker compose build migrate api web && docker compose up -d --no-build --wait api worker web; } > "$RUNNER_TEMP/stack.log" 2>&1; echo $? > "$RUNNER_TEMP/stack.exit"' > /dev/null 2>&1 &
 
       - name: Set up pnpm
         uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0

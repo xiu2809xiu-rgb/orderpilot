@@ -48,7 +48,7 @@ Explain what the command will do and what it could lose, then wait. An earlier y
 ### 6. No attribution, synthetic data only, keys out of Git
 
 - **No AI attribution anywhere.** No Co-Authored-By trailers for AI, no "Generated with" lines, and no AI emojis or session links in commits, pull requests, comments or docs.
-- **Synthetic data only.** Never commit a Spectra document. Client samples go in `samples/`, which Git ignores. No Spectra document goes to a third-party AI without their written OK, in an approved region, and your AI tool counts as one.
+- **Synthetic data only.** Never commit a Spectra document. Client samples go in `samples/`, which Git ignores. No Spectra document goes to a third-party AI without their written OK, in an approved region, and your AI tool counts as one. The one exception is Spectra's briefing material, which stays outside the repository on Richie's PC, where his coding tools may read it (A-31).
 - **Richie's ERP.** Never ask for, open, commit or send to an AI service any screenshot or data from it.
 - **Keys stay out of Git.** Licence keys live only in `apps/web/.env.local`, and AI keys only in the root `.env`. Richie puts them there himself. Never print, echo or ask for a key in chat.
 

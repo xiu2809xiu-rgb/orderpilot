@@ -51,6 +51,15 @@ jobs:
         with:
           persist-credentials: false
 
+      # The private runner's disk is smaller than the public one's. On the first
+      # private run, Trivy's export of the migrate image hit "no space left on
+      # device" (ADR 0040). These preinstalled toolchains are never used here.
+      - name: Make room on the runner's disk
+        run: |
+          df -h /
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /usr/local/.ghcup /opt/ghc
+          df -h /
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
 
@@ -70,6 +79,13 @@ jobs:
           set: |
             minio.cache-from=type=gha,scope=minio
             minio.cache-to=type=gha,scope=minio,mode=max
+
+      # The images are now in Docker's own store, and MinIO's layers are in the
+      # Actions cache, so the builder's copy of every layer only takes disk.
+      - name: Free the builder's cache
+        run: |
+          docker buildx prune --all --force
+          df -h /
 
       - name: Install Trivy
         run: |

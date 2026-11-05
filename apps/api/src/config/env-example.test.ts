@@ -164,7 +164,7 @@ describe("the database roles", () => {
 
 describe("the observability profile", () => {
   it("runs otel-lgtm at one exact tag, only under the observability profile", () => {
-    expect(compose).toContain("image: grafana/otel-lgtm:0.38.0");
+    expect(compose).toContain("image: grafana/otel-lgtm:0.38.1");
     expect(compose).toMatch(/otel-lgtm:\n\s+profiles: \["observability"\]/);
   });
 
