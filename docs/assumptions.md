@@ -32,6 +32,7 @@ Every Navision detail below comes from standard Microsoft Dynamics NAV, as writt
 | A-16 | Forwarders and AWB/BL numbers are recorded in Navision as the Shipping Agent Code and the Package Tracking No.           | The follow-ups keep their own record of them                 | Q-16 | Open   |
 | A-17 | Available stock is Inventory minus Qty. on Sales Order plus Qty. on Purch. Order                                         | The stock check and the SPR suggestion use another formula   | Q-1  | Open   |
 | A-18 | The duplicate-PO check can use Sell-to Customer No. plus External Document No. (the customer's PO number)                | Duplicates need another key, such as the content hash alone  | Q-1  | Open   |
+| A-19 | **Placeholder:** approving a sales order uses the Sales Amount Approval Limit (`sales-order.approve` in area 4's policy) | Only area 4's action map changes (`policy-actions.ts`)       | Q-6  | Open   |
 
 ## The process
 

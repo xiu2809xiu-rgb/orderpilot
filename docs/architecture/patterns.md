@@ -170,6 +170,9 @@ A service that changes something on behalf of a user takes the `AuthContext` and
 | Policy as a function | `domain/ai-destination-policy.ts`                  | One place answers what data may go to which provider; the gateway calls it, the owner widens it | F-1   |
 | Mask on the server   | `domain/masking.ts`, `PolicyService.maskingSample` | A hidden value is null in the response, so it cannot be read from the page                      | F-1   |
 | Shared contract      | `packages/shared/src/governance`                   | The web app and the API read one set of schemas; the owner's policy returns `PolicyDecision`    | F-1   |
+| Chain of rules       | `domain/authorisation-policy.ts`, `policies.ts`    | One class per rule, and the first refusal wins with its reason, so a rule is tested alone       | F-3   |
+| Policy behind a port | `GovernancePermissionPolicy`, `PermissionPolicy`   | The guard asks area 4's rules and no controller changes; the area calls `enforce` for the rest  | F-3   |
+| Rule in the table    | `ApprovalUserSetup` CHECKs in its migration        | A row from any other route cannot break the rules `ApprovalSetupService.save` checks            | F-3   |
 
 ## Monitoring: telemetry, errors and the clickstream
 
