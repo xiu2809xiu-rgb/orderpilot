@@ -1,4 +1,5 @@
-# Dependabot version updates. ADR 0003 records why it is set up this way.
+# Dependabot version updates. ADR 0003 records why it is set up this way, and ADR
+# 0040 why they run monthly: on the first of each month, at 06:00 Singapore time.
 # Security updates are switched on in the repository settings and do not wait
 # for the schedule or the cooldown.
 version: 2
@@ -7,8 +8,7 @@ updates:
   - package-ecosystem: npm
     directory: /
     schedule:
-      interval: weekly
-      day: monday
+      interval: monthly
       time: "06:00"
       timezone: Asia/Singapore
     # Matches minimumReleaseAge in pnpm-workspace.yaml, so every version
@@ -23,7 +23,7 @@ updates:
       - "type: chore"
       - dependencies
     groups:
-      # One pull request a week for everything that should not break.
+      # One pull request a month for everything that should not break.
       npm-minor-and-patch:
         update-types:
           - minor
@@ -42,8 +42,7 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
-      day: monday
+      interval: monthly
       time: "06:00"
       timezone: Asia/Singapore
     cooldown:
@@ -69,8 +68,7 @@ updates:
       - /docker/minio
       - /docker/mock
     schedule:
-      interval: weekly
-      day: monday
+      interval: monthly
       time: "06:00"
       timezone: Asia/Singapore
     cooldown:
@@ -97,8 +95,7 @@ updates:
   - package-ecosystem: docker-compose
     directory: /
     schedule:
-      interval: weekly
-      day: monday
+      interval: monthly
       time: "06:00"
       timezone: Asia/Singapore
     cooldown:

@@ -2,13 +2,13 @@
 
 Rendered from [`scripts/github/data/backlog.json`](../../scripts/github/data/backlog.json) by `node scripts/github/render-docs.mjs`. Change the data, not this file. The same data seeds the issues. The board shows where each story stands.
 
-There are 9 epics and 124 stories. Estimates are story points: a first guess, for the team to change at planning.
+There are 9 epics and 125 stories. Estimates are story points: a first guess, for the team to change at planning.
 
 ## Epics
 
 | Epic   | Title                             | Area                                    | Stories | Points |
 | ------ | --------------------------------- | --------------------------------------- | ------- | ------ |
-| Epic P | The platform base                 | `area: 1 document AI and integration`   | 80      | 456    |
+| Epic P | The platform base                 | `area: 1 document AI and integration`   | 81      | 458    |
 | Epic A | Document intake and AI extraction | `area: 1 document AI and integration`   | 5       | 31     |
 | Epic B | Master data and Navision          | `area: 1 document AI and integration`   | 4       | 14     |
 | Epic C | Order workflows and approvals     | `area: 2 order workflows and approvals` | 5       | 29     |
@@ -138,6 +138,7 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | E-1   | The review screen, with source highlighting                        | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | E-2   | The accuracy harness, with a 95% target and a comparison of models | must     | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-78  | Room in the entry bundle                                           | must     | 3      | `area: 1 document AI and integration`   | M4 best practices, M6 deploy and monitor                       |
+| P-81  | Settle into the private repository                                 | must     | 2      | `area: 1 document AI and integration`   | M4 best practices, M5 team Git workflow                        |
 | C-5   | Area 2 polish left out of the base                                 | should   | 3      | `area: 2 order workflows and approvals` | M4 best practices                                              |
 | P-22  | The design system with the Pro kits                                | should   | 8      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-29  | A unit coverage threshold on domain logic                          | should   | 2      | `area: 1 document AI and integration`   | M4 best practices                                              |
@@ -1872,6 +1873,27 @@ Acceptance criteria:
 - A click on a line's number selects the line, so the mouse can reach Delete too.
 - Column widths can be dragged and are kept for each person.
 - A line can be moved up or down with the keyboard, and the move can be undone.
+
+### P-81: Settle into the private repository
+
+Richie made the repository private on 5 Nov. Rule 8 of CLAUDE.md lists what follows, and two build report items come with it: the first verify run on the smaller private runners (item bk) and Dependabot moving to monthly (item bp).
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 2 points
+- **Requirements:** M4 best practices, M5 team Git workflow
+- **Branch:** `ci/private-repository`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-6
+
+Acceptance criteria:
+
+- The `Protect main` ruleset is still active, `check-ruleset.mjs` finds no drift from `.github/rulesets/main.json`, and the wiki still opens.
+- `SECURITY.md` says how to report a problem now that private vulnerability reporting is gone, and lists only what still runs. `docs/security/security-testing.md` says what changed.
+- Dependabot version updates run monthly in all four ecosystems, with the 7-day cooldown kept, and the docs that said weekly say monthly.
+- The first verify run on the private runners is read, and any check that fails there for want of time, memory or disk is fixed, with the reason beside the fix.
+- What says the repository is public is corrected: `CLAUDE.md`, `CONTRIBUTING.md`, the pull request template and the GRS risks. An ADR records what going private changed.
+- A-31 records Richie's decision of 5 Nov: Spectra's briefing material stays outside the repository and our coding tools may read it on his PC, while real business samples still wait for Spectra's written OK (Q-12).
 
 ## Epic A: Document intake and AI extraction
 
