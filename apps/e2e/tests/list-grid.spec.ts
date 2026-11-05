@@ -56,13 +56,27 @@ test.describe("The list grid on the gallery list", () => {
     await signInAs(page, "SUPPORT");
     await page.goto("/gallery");
     await expect(page.getByRole("button", { name: "Print" })).toBeVisible();
+    // The frame is removed when printing ends, so read what it held on the way out.
+    await page.evaluate(() => {
+      const remove = (el: HTMLIFrameElement) => {
+        el.parentNode?.removeChild(el);
+      };
+      HTMLIFrameElement.prototype.remove = function () {
+        const rows = this.contentDocument?.querySelectorAll("tbody tr").length;
+        (window as unknown as { printedRows: number }).printedRows = rows ?? 0;
+        remove(this);
+      };
+    });
     const attached = page.waitForEvent("frameattached");
     await page.getByRole("button", { name: "Print" }).click();
-    const frame = await attached;
-    expect(frame.parentFrame()).toBe(page.mainFrame());
+    expect((await attached).parentFrame()).toBe(page.mainFrame());
     await expect
-      .poll(async () => (await frame.content()).includes("<table"))
-      .toBe(true);
+      .poll(() =>
+        page.evaluate(
+          () => (window as unknown as { printedRows?: number }).printedRows,
+        ),
+      )
+      .toBeGreaterThan(0);
   });
 
   test("a role that may not read a record is refused the log by the server", async ({
