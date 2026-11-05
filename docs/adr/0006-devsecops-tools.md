@@ -8,7 +8,7 @@
 
 OrderPilot will handle bank details, prices and order documents, even if only synthetic ones for now. The module marks GRS by design (M2) and best practices (M4), and the brief names the controls: Semgrep, gitleaks, OSV, Dependabot, then Trivy and ZAP.
 
-The repository is public today, so GitHub's secret scanning, push protection and private vulnerability reporting are free. When it goes private, they stop, GitHub code scanning (SARIF upload) is no longer free either, and Actions minutes drop to 3,000 a month. Our own scans must work in both cases.
+The repository is public today, so GitHub's secret scanning, push protection and private vulnerability reporting are free. When it goes private, they stop, GitHub code scanning (SARIF upload) is no longer free either, and Actions minutes drop to 3,000 a month. Our own scans must work in both cases. The repository went private on 5 Nov 2026, and [ADR 0040](0040-what-going-private-changed.md) records what changed.
 
 ## Decision
 
@@ -26,7 +26,7 @@ The repository is public today, so GitHub's secret scanning, push protection and
    - **OSV-Scanner:** reads the lockfile directly, uses the open OSV database (which includes GitHub's advisories), and supports accepted entries with a reason and an expiry date.
    - **`pnpm audit`:** a second advisory source inside the install itself, gated at high and critical.
    - **secretlint:** catches a secret in the staged files before the commit exists, which gitleaks in CI cannot.
-   - **Dependabot:** alerts, security updates and weekly grouped version updates (ADR 0003).
+   - **Dependabot:** alerts, security updates and grouped version updates (ADR 0003), monthly since [ADR 0040](0040-what-going-private-changed.md).
    - **Later:** Trivy for images and IaC (P-13), OWASP ZAP against the live URL (P-24), Playwright with axe (P-14).
 4. **Pinned scanners.** Actions are pinned to commit SHAs, each checked against its tag with `gh api`, and Dependabot keeps them current. The Semgrep image is pinned by digest. gitleaks and OSV-Scanner are downloaded at a fixed version and checked against their published SHA-256 before they run.
 5. **Least privilege.** Both workflows grant only `contents: read`, and no checkout keeps its token. No job writes to the repository, comments or uploads to code scanning.
