@@ -99,6 +99,9 @@ jobs:
       - name: Licence-key and env-file guard
         run: pnpm check:licence-key
 
+      - name: Every CODEOWNERS path exists
+        run: pnpm check:codeowners
+
       # Type-aware ESLint over the whole repository needs more than 2 GB of
       # heap. V8 sizes its default heap from the machine's memory: about 2 GB on
       # the 7 GB private runner, and 4 GB on the 16 GB public one this used to run
