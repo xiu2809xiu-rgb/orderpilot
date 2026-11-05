@@ -9,7 +9,7 @@ import { roleSchema } from "./roles.js";
  * the permission that reads that record. A kind not listed has no operation
  * log, and a request for one is refused. The web app reads the same table, so
  * it never asks for a log the server would refuse. Area 4 owns the rule
- * (ADR 0041); a story that gives a new kind of record a log adds its line.
+ * (ADR 0042); a story that gives a new kind of record a log adds its line.
  */
 export const OPERATION_LOG_READERS = {
   User: "users.read",

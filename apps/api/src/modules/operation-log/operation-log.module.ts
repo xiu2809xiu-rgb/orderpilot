@@ -6,7 +6,7 @@ import { OperationLogService } from "./operation-log.service.js";
 
 /**
  * Area 1, the platform: the operation log under a record, read-only over P-9's
- * audit trail. Who may read which record's log is area 4's rule (ADR 0041).
+ * audit trail. Who may read which record's log is area 4's rule (ADR 0042).
  */
 @Module({
   imports: [AuditModule, UsersModule],

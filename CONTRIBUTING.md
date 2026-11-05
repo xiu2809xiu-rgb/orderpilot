@@ -337,13 +337,13 @@ If something destructive or irreversible seems necessary, ask Richie first.
 
    Their text lives in the `components` namespace; your own goes in your area's namespace. If one is missing something, extend it there with a test. Do not copy it into your area. To show the operation log under a record, write its audit events with the record's type and id, then add `<EntityOperationLog entityType="Order" entityId={order.id} />` from `@/features/audit/EntityOperationLog` (steps in [area 4's guide](docs/team/area-4-controls-security-and-monitoring.md#how-another-area-feeds-the-operation-log)).
 
-2. **Choose a free source.** While the repository is public, use only:
+2. **Choose a free source.** Until P-22 sets up the Pro kits, use only:
    - shadcn/ui;
    - Magic UI (free);
    - React Bits (free, `@react-bits`);
    - ReUI's free components, only if they install without the licence key.
 
-   No React Bits Pro or ReUI Pro code goes into a public repository, because their licences need a private one. Once it is private, adding a Pro component goes through Richie.
+   Their licences need a private repository, which this is since 5 Nov 2026, and they need Richie's keys. P-22 sets them up; after that, adding a Pro component goes through Richie.
 
 3. **Add it from `apps/web`,** with the shadcn CLI for a registry item, for example `npx shadcn@latest add tabs` (not `pnpm dlx`, which pnpm's trust policy refuses; see [ADR 0013](docs/adr/0013-the-web-stack.md)). The CLI writes the component into `src/components/ui` and imports `cn` from `cn`, a different package: change that import to `@/lib/utils` and remove the `cn` dependency it added. The component becomes code in this repository, so nobody needs a key to run or build it.
 4. **Pin what it brings.** Registry items can declare caret ranges. Re-pin every new dependency to an exact version, and respect the 7-day release-age rule in `pnpm-workspace.yaml` ([ADR 0003](docs/adr/0003-pnpm-monorepo.md)).
@@ -446,7 +446,7 @@ const list = useMasterDataItems(params, {
 - **Void and Disable** take `reasoned: { title, confirmLabel, doneMessage, run }`. The template asks for a required reason in one dialog, shows the server's words under the field, and ends with a toast.
 - **A status** on a list is `<StatusChip family="waiting">{t("...")}</StatusChip>`. The family is draft, waiting, ready, blocked or done (or none, for neutral); the word is yours. Never list status codes in the web app.
 - **The grid.** Checkboxes appear when an action needs rows or the screen asks for the operation log. The row menu (View, Edit, Copy, Void or Disable) shows the actions the screen declares and the role may use, for that row only. A feature adds an item to every list's row menu once with `registerRowMenuItem` (My work does this in P-57). Saved views keep the search, filters, sort and columns for each person in their browser, and Columns shows, hides and orders them.
-- **Print and the log.** Print streams a long list into a frame of its own a page at a time, so declare `loadPage={(page) => call({ ...params, page, pageSize: 200 })}` for a list that can be long. `operationLog={{ entityType, entityId }}` draws the ticked record's log at the foot: who, when and what, never a value or an IP address ([ADR 0041](docs/adr/0041-the-list-grid-saved-views-and-a-record-scoped-log.md)). The kinds of record are `OPERATION_LOG_READERS` in `packages/shared`.
+- **Print and the log.** Print streams a long list into a frame of its own a page at a time, so declare `loadPage={(page) => call({ ...params, page, pageSize: 200 })}` for a list that can be long. `operationLog={{ entityType, entityId }}` draws the ticked record's log at the foot: who, when and what, never a value or an IP address ([ADR 0042](docs/adr/0042-the-list-grid-saved-views-and-a-record-scoped-log.md)). The kinds of record are `OPERATION_LOG_READERS` in `packages/shared`.
 
 ## Building a lines grid
 

@@ -16,7 +16,7 @@ import {
  * A record's operation log: what was done to the record, newest first. It
  * reads P-9's audit trail through its repository and writes nothing. The
  * permissions guard has already checked that the caller may read the record
- * (ADR 0041), so this only reads and trims each event to who, when and what.
+ * (ADR 0042), so this only reads and trims each event to who, when and what.
  */
 @Injectable()
 export class OperationLogService {
