@@ -50,6 +50,21 @@ test.describe("The list grid on the gallery list", () => {
     await checkPage(page);
   });
 
+  test("Print streams the list into a print frame, not into the page", async ({
+    page,
+  }) => {
+    await signInAs(page, "SUPPORT");
+    await page.goto("/gallery");
+    await expect(page.getByRole("button", { name: "Print" })).toBeVisible();
+    const attached = page.waitForEvent("frameattached");
+    await page.getByRole("button", { name: "Print" }).click();
+    const frame = await attached;
+    expect(frame.parentFrame()).toBe(page.mainFrame());
+    await expect
+      .poll(async () => (await frame.content()).includes("<table"))
+      .toBe(true);
+  });
+
   test("a role that may not read a record is refused the log by the server", async ({
     page,
   }) => {

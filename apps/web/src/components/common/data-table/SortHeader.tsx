@@ -11,6 +11,7 @@ interface SortHeaderProps<Row> {
   onSort: (columnId: string) => void;
   /** The first column stays in view when the table scrolls sideways. */
   first?: Sticky | boolean;
+  className?: string | undefined;
 }
 
 /**
@@ -23,6 +24,7 @@ export function SortHeader<Row>({
   sort,
   onSort,
   first = false,
+  className,
 }: SortHeaderProps<Row>) {
   const { t } = useTranslation("components");
   const active = sort?.columnId === column.id ? sort.direction : null;
@@ -40,7 +42,7 @@ export function SortHeader<Row>({
     <TableHead
       scope="col"
       aria-sort={ariaSort}
-      className={headClass(column, first)}
+      className={cn(headClass(column, first), className)}
     >
       {column.sortable ? (
         <button

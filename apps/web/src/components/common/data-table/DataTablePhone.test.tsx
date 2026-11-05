@@ -83,3 +83,19 @@ describe("the row checkbox", () => {
     expect(box.className).toContain("pointer-coarse:after:-inset-[11px]");
   });
 });
+
+describe("the columns a phone summary absorbs", () => {
+  it("are hidden below 768 px, in the heading and in every row", () => {
+    setPhone(true);
+    draw();
+    const heads = screen.getAllByRole("columnheader");
+    const hidden = heads.filter((h) => h.className.includes("max-md:hidden"));
+    expect(hidden.map((h) => h.textContent)).toEqual(
+      expect.arrayContaining([expect.stringContaining("Name")]),
+    );
+    const cells = screen.getAllByText("Acme").map((n) => n.closest("td"));
+    expect(cells.some((c) => c?.className.includes("max-md:hidden"))).toBe(
+      true,
+    );
+  });
+});

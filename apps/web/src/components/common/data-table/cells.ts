@@ -51,6 +51,14 @@ export function headClass(column: Shape, first: Sticky | boolean): string {
   );
 }
 
+/** Below 768 px the first column carries this many of the next columns, which are then hidden. */
+export const SUMMARY_COLUMNS = 2;
+
+/** True for a column the phone summary absorbs, which is hidden below 768 px. */
+export function absorbedOnPhone(position: number): boolean {
+  return position >= 1 && position <= SUMMARY_COLUMNS;
+}
+
 /** The row checkbox column: 44 px wide, pinned to the left edge. */
 export const SELECT_CELL =
   "sticky left-0 z-[1] w-11 min-w-11 bg-card px-0 py-0 text-center group-hover/row:bg-muted group-data-[selected]/row:bg-accent";

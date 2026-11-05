@@ -1,5 +1,5 @@
 import { TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ACTIONS_CELL, type Sticky } from "./cells";
+import { absorbedOnPhone, ACTIONS_CELL, type Sticky } from "./cells";
 import { SelectHead } from "./SelectCells";
 import { SortHeader } from "./SortHeader";
 import type {
@@ -42,6 +42,7 @@ export function DataTableHead<Row>({
             sort={sort}
             onSort={onSort}
             first={position === 0 ? first : "none"}
+            className={absorbedOnPhone(position) ? "max-md:hidden" : undefined}
           />
         ))}
         {rowActions ? (

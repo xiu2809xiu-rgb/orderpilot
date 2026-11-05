@@ -3,7 +3,12 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { useMediaQuery } from "@/lib/useMediaQuery";
 import { cn } from "@/lib/utils";
 import { gestureOf, useOpenRecord } from "../useOpenRecord";
-import { ACTIONS_CELL, cellClass } from "./cells";
+import {
+  absorbedOnPhone,
+  ACTIONS_CELL,
+  cellClass,
+  SUMMARY_COLUMNS,
+} from "./cells";
 import { firstSticky } from "./DataTableHead";
 import { SelectCell } from "./SelectCells";
 import {
@@ -15,7 +20,6 @@ import {
 
 /** Below 768 px a table scrolls sideways, so the first column carries what tells rows apart. */
 const PHONE = "(max-width: 767px)";
-const SUMMARY_COLUMNS = 2;
 
 type RowEvent = MouseEvent<HTMLTableRowElement>;
 
@@ -54,11 +58,9 @@ function PhoneSummary<Row>({
   const next = columns.slice(1, 1 + SUMMARY_COLUMNS);
   if (next.length === 0) return null;
   return (
-    <div className="mt-0.5 w-[min(14rem,55vw)] truncate text-xs font-normal text-muted-foreground">
+    <div className="mt-0.5 flex max-w-[60vw] flex-wrap gap-x-2 text-xs font-normal text-muted-foreground">
       {next.map((column) => (
-        <span key={column.id} className="mr-2">
-          {column.cell(row)}
-        </span>
+        <span key={column.id}>{column.cell(row)}</span>
       ))}
     </div>
   );
@@ -88,7 +90,10 @@ function Cells<Row>({
       {columns.map((column, position) => (
         <TableCell
           key={column.id}
-          className={cellClass(column, position === 0 ? first : "none")}
+          className={cn(
+            cellClass(column, position === 0 ? first : "none"),
+            absorbedOnPhone(position) && "max-md:hidden",
+          )}
           data-numeric={alignsEnd(column) ? "" : undefined}
         >
           {column.cell(row)}
