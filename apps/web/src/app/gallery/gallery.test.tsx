@@ -30,9 +30,10 @@ describe("the component gallery route", () => {
     );
     expect(screen.getByText("Mock AI")).toBeVisible();
     expect(screen.getByText("Requires approval")).toBeVisible();
+    // The gallery list has a record log of its own, so two headings start with the name.
     expect(
-      screen.getByRole("heading", { name: "Operation log" }),
-    ).toBeVisible();
+      screen.getAllByRole("heading", { name: /^Operation log/ }).length,
+    ).toBe(2);
     expect(await axeViolations(container)).toEqual([]);
   }, 60_000);
 

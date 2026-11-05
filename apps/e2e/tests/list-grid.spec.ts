@@ -25,7 +25,7 @@ test.describe("The list grid on the gallery list", () => {
 
     await rows.first().check();
     await expect(page.getByText("1 selected")).toBeVisible();
-    await expect(page.getByText(/^Operation log: /)).toBeVisible();
+    await expect(page.getByText(/^Operation log: SO-/)).toBeVisible();
 
     await page.getByRole("button", { name: "Clear selection" }).click();
     await expect(page.getByText("1 selected")).toHaveCount(0);
