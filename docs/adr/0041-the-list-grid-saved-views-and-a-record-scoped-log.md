@@ -29,6 +29,12 @@
 - A record's log shows nothing for the mock tracker's orders until they are written through the audit writer. It says so in its empty state.
 - The log is a different sentence to the audit viewer's detail: the viewer shows changes, masked by role, and this shows only who, when and what.
 
+## Review notes for the owners
+
+- **Area 4 (Angelyn) reviews more than a rule.** Besides `OPERATION_LOG_READERS` in `packages/shared`, the story edits files on the enforcement path: `apps/api/src/auth/decorators.ts` (the `@RequirePermissionOf` decorator), `apps/api/src/auth/guards/classification.ts`, `apps/api/src/auth/guards/permissions.guard.ts` (it reads the permission the decorator names), `apps/api/src/audit/audit-event.repository.ts` (a `withoutRefusals` filter) and `apps/api/src/users/user.repository.ts` (role and search filters for the users list). `apps/api/src/modules/governance` is untouched. A test fails when the guard skips the policy loop.
+- **Areas 2, 3 and 4 get more than a line.** The inbox, tracker, exceptions queue and users tab were rewritten onto `ListPage`, and their tests changed. The task inbox is a table now and `TaskCard.tsx` is gone. The tracker's `trackerChips` helper is gone, and its Shipment date column is hidden until asked for and its customer name is cut at 11 rem, so that the default view fits at 1440 px. This needs Richie's explicit yes and each owner's review before merge.
+- **Entity ids for the panel.** The tracker asks for the log of `Order` by order number, and the exceptions queue for `Exception`. No audit writer uses those two types yet, so both panels say "No changes recorded yet". Areas 2 and 4 settle the id convention when orders and exceptions start writing events.
+
 ## Alternatives considered
 
 - **Selection inside the data table.** Every table would own and clear it; the list page, which knows when the query changes, is the one place that can.

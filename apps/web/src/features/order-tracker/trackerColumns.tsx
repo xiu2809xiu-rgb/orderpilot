@@ -52,9 +52,13 @@ export function trackerColumns(
       id: "customerName",
       header: t("list.columns.customer"),
       cell: (row) => (
-        <span>
-          {row.customerName}{" "}
-          <span className="font-mono text-xs text-muted-foreground">
+        // A long name is cut with its full text in the title: at 1440 px the
+        // default columns must fit beside the sidebar.
+        <span className="flex max-w-[16rem] items-baseline gap-1 md:max-w-[11rem]">
+          <span className="truncate" title={row.customerName}>
+            {row.customerName}
+          </span>
+          <span className="shrink-0 font-mono text-xs text-muted-foreground">
             {row.customerNo}
           </span>
         </span>

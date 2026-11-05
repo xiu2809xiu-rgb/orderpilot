@@ -97,7 +97,7 @@ export function OperationLog({
                 // column would wrap the user name onto four lines.
                 <TableRow
                   key={row.id}
-                  className="max-md:flex max-md:flex-col max-md:gap-0.5 max-md:py-2"
+                  className="max-md:flex max-md:flex-col max-md:gap-0.5 max-md:px-3 max-md:py-2"
                 >
                   <TableCell className="whitespace-nowrap max-md:px-0 max-md:py-0 max-md:text-xs max-md:text-muted-foreground">
                     <RelativeTime value={row.at} now={now} />
