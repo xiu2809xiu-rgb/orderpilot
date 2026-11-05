@@ -29,6 +29,7 @@
     "check:samples": "node scripts/check-samples.mjs",
     "check:samples:history": "node scripts/check-samples.mjs --history",
     "check:licence-key": "node scripts/check-licence-key.mjs",
+    "check:codeowners": "node scripts/check-codeowners.mjs",
     "check:secrets": "secretlint --maskSecrets \"**/*\"",
     "db:generate": "pnpm --filter @orderpilot/api db:generate",
     "db:migrate": "pnpm --filter @orderpilot/api db:migrate",
