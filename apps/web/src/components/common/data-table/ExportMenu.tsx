@@ -73,7 +73,7 @@ export function ExportMenu<Row>({
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" className="pointer-coarse:h-11">
             <Download aria-hidden="true" />
             {t("table.export")}
           </Button>

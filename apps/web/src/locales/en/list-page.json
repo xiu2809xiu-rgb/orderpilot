@@ -1,0 +1,43 @@
+{
+  "filters": {
+    "search": "Search",
+    "more": "More filters",
+    "moreTitle": "More filters",
+    "moreApplied": "{{count}} applied",
+    "clearAll": "Clear all",
+    "from": "From",
+    "to": "To",
+    "lookupSearch": "Search {{label}}",
+    "lookupEmpty": "No match.",
+    "rangeFrom": "{{label}} from",
+    "rangeTo": "{{label}} to"
+  },
+  "actions": {
+    "label": "Actions",
+    "new": "New",
+    "edit": "Edit",
+    "void": "Void",
+    "disable": "Disable",
+    "batch": "Run",
+    "import": "Import",
+    "export": "Export",
+    "print": "Print",
+    "needsOne": "Select one row first.",
+    "needsMany": "Select one or more rows first."
+  },
+  "reason": {
+    "label": "Reason",
+    "hint": "Say why. The record is kept, and the reason is shown with it. Ctrl+Enter confirms.",
+    "description": "Give the reason for this change.",
+    "cancel": "Cancel"
+  },
+  "print": {
+    "preparing": "Preparing",
+    "failed": "Could not prepare the print view. Try again.",
+    "filters": "Filters: {{filters}}",
+    "noFilters": "Filters: none",
+    "printedOn": "Printed {{when}}",
+    "rows_one": "{{count}} row",
+    "rows_other": "{{count}} rows"
+  }
+}

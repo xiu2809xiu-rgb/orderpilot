@@ -2,13 +2,13 @@
 
 Rendered from [`scripts/github/data/backlog.json`](../../scripts/github/data/backlog.json) by `node scripts/github/render-docs.mjs`. Change the data, not this file. The same data seeds the issues. The board shows where each story stands.
 
-There are 9 epics and 123 stories. Estimates are story points: a first guess, for the team to change at planning.
+There are 9 epics and 125 stories. Estimates are story points: a first guess, for the team to change at planning.
 
 ## Epics
 
 | Epic   | Title                             | Area                                    | Stories | Points |
 | ------ | --------------------------------- | --------------------------------------- | ------- | ------ |
-| Epic P | The platform base                 | `area: 1 document AI and integration`   | 79      | 453    |
+| Epic P | The platform base                 | `area: 1 document AI and integration`   | 81      | 458    |
 | Epic A | Document intake and AI extraction | `area: 1 document AI and integration`   | 5       | 31     |
 | Epic B | Master data and Navision          | `area: 1 document AI and integration`   | 4       | 14     |
 | Epic C | Order workflows and approvals     | `area: 2 order workflows and approvals` | 5       | 29     |
@@ -138,6 +138,7 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | E-1   | The review screen, with source highlighting                        | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | E-2   | The accuracy harness, with a 95% target and a comparison of models | must     | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-78  | Room in the entry bundle                                           | must     | 3      | `area: 1 document AI and integration`   | M4 best practices, M6 deploy and monitor                       |
+| P-81  | Settle into the private repository                                 | must     | 2      | `area: 1 document AI and integration`   | M4 best practices, M5 team Git workflow                        |
 | C-5   | Area 2 polish left out of the base                                 | should   | 3      | `area: 2 order workflows and approvals` | M4 best practices                                              |
 | P-22  | The design system with the Pro kits                                | should   | 8      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-29  | A unit coverage threshold on domain logic                          | should   | 2      | `area: 1 document AI and integration`   | M4 best practices                                              |
@@ -163,6 +164,7 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | F-8   | Governance base polish                                             | could    | 3      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
 | G-2   | Monitoring base polish                                             | could    | 3      | `area: 4 controls and monitoring`       | M2 GRS by design, M6 deploy and monitor                        |
 | F-9   | Audit viewer polish                                                | could    | 3      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
+| P-80  | Lines grid polish                                                  | could    | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
 
 ## Epic P: The platform base
 
@@ -967,6 +969,7 @@ Acceptance criteria:
 - `GET /orders` and `GET /orders/:orderNo` are paged, sorted and filtered on the server, masked by role, with `.http` requests and API tests for 401, 403, 404 and validation.
 - Orders is a list on the template in the Sales module, and leaves the planned list.
 - Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+- Orders waiting on stock are one filter away, and a short line says by how much, so a person resolves each shortage; nothing is ordered for them.
 
 ### P-37: Document intake and the inbox
 
@@ -1158,6 +1161,8 @@ Acceptance criteria:
 - Saved views hold filters, sort and columns for each person. Column settings show, hide and order columns.
 - The selected record's operation log sits in a panel at the foot.
 - A record-scoped read of the log: anyone who may read the record sees who, when and what, never field values or an IP address. Refusals are audited, and area 4 reviews the rule.
+- Print keeps the title on every page, numbers the pages and prints a long list in a stream, so a list of many thousands of rows does not sit in the page at once (P-44 prints every row in one table).
+- The tracker, the exceptions queue, the users list and the inbox move onto `ListPage`, one line or redirect each in their owners' folders, each owner asked to review (P-44 changes only their URL hook import).
 - Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
 
 ### P-46: Form kit
@@ -1371,6 +1376,7 @@ Acceptance criteria:
 - The order form's footer lists its attachments, and Attach uploads through P-37's route.
 - The Playwright test covers the path from upload to a saved draft.
 - Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+- Create order is offered only once a person has confirmed every field the reader was unsure of and looked at every mismatch, and the order records who confirmed them.
 
 ### P-56: Pins, to-dos and reminders: the records
 
@@ -1491,6 +1497,7 @@ Acceptance criteria:
 - Azri is asked to review.
 - A Playwright test: an allowed role creates, edits and voids a record, and a role without the permission sees no button and gets a 403 from the server.
 - Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+- The pre-filled SPR stays a draft until a person reviews it and submits it, it shows which fields were suggested and from what, and it warns, with a link, when an open SPR already covers the line.
 
 ### P-62: Payment confirmations
 
@@ -1513,6 +1520,7 @@ Acceptance criteria:
 - Azri is asked to review.
 - A Playwright test: an allowed role creates, edits and voids a record, and a role without the permission sees no button and gets a 403 from the server.
 - Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+- Only Finance records, confirms or voids a payment, and the entry keeps the amount received, the bank charges and the payer's reference, so a transfer that arrives a little short can be matched later by area 2 and area 3.
 
 ### P-63: Shipments
 
@@ -1534,6 +1542,7 @@ Acceptance criteria:
 - Area 2's follow-ups can read a shipment, with Azri's yes.
 - A Playwright test: an allowed role creates, edits and voids a record, and a role without the permission sees no button and gets a 403 from the server.
 - Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+- The shipment also holds the shipping terms, and which shipping papers have arrived (the AWB or BL and the import permit) as fields a person ticks; reminders about the missing ones stay area 2's.
 
 ### P-64: Users
 
@@ -1714,6 +1723,7 @@ Acceptance criteria:
 - SPR approval uses the document form, showing the request, the stock picture, the order and the limit as a fact. It computes and enforces nothing.
 - The core logic stays `it.todo`, and Azri reviews the pull request.
 - Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+- It also shows the cost against the selling price where the role may see both, the vendor and the lead time, because the approver decides with them.
 
 ### P-73: Exceptions on the templates
 
@@ -1849,6 +1859,47 @@ Acceptance criteria:
 - The walk for all nine roles ends with 0 FAIL in light and dark, and looks the same as on main.
 - A Playwright script signs in from a cold load as three roles and opens the role switcher, the user menu, the bell and Control K, and lets a session end, with no console error and no CSP violation.
 - The rule for what the shell may import is written in `docs/architecture/patterns.md`.
+
+### P-80: Lines grid polish
+
+Left out of P-48 because no teammate needs it this week.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** could
+- **Estimate:** 3 points
+- **Requirements:** M4 best practices
+- **Branch:** `feat/lines-grid-polish`
+- **Planned for:** Sprint 03 (W4)
+- **Depends on:** P-48
+
+Acceptance criteria:
+
+- Pasting rows from a spreadsheet (a part number and a quantity on each) fills one line per row, each part number resolved on its Navision number, and the rows that match nothing are listed for the person to fix.
+- The shortfall counts every line that asks for the same item together, not each line alone, and says which lines add up to it.
+- A click on a line's number selects the line, so the mouse can reach Delete too.
+- Column widths can be dragged and are kept for each person.
+- A line can be moved up or down with the keyboard, and the move can be undone.
+
+### P-81: Settle into the private repository
+
+Richie made the repository private on 5 Nov. Rule 8 of CLAUDE.md lists what follows, and two build report items come with it: the first verify run on the smaller private runners (item bk) and Dependabot moving to monthly (item bp).
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 2 points
+- **Requirements:** M4 best practices, M5 team Git workflow
+- **Branch:** `ci/private-repository`
+- **Planned for:** Sprint 02 (W3)
+- **Depends on:** P-6
+
+Acceptance criteria:
+
+- The `Protect main` ruleset is still active, `check-ruleset.mjs` finds no drift from `.github/rulesets/main.json`, and the wiki still opens.
+- `SECURITY.md` says how to report a problem now that private vulnerability reporting is gone, and lists only what still runs. `docs/security/security-testing.md` says what changed.
+- Dependabot version updates run monthly in all four ecosystems, with the 7-day cooldown kept, and the docs that said weekly say monthly.
+- The first verify run on the private runners is read, and any check that fails there for want of time, memory or disk is fixed, with the reason beside the fix.
+- What says the repository is public is corrected: `CLAUDE.md`, `CONTRIBUTING.md`, the pull request template and the GRS risks. An ADR records what going private changed.
+- A-31 records Richie's decision of 5 Nov: Spectra's briefing material stays outside the repository and our coding tools may read it on his PC, while real business samples still wait for Spectra's written OK (Q-12).
 
 ## Epic A: Document intake and AI extraction
 

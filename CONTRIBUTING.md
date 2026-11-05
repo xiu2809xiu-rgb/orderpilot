@@ -292,7 +292,7 @@ The full version is in [the path from a story to main](AGENTS.md#the-path-from-a
    - the real results of `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm build`, plus `docker compose up --build` once it exists;
    - for UI changes, screenshots in light and dark from a Docker build of the branch, saved in `docs/design/screenshots/<area>/`.
 6. **Get a review.** The reviewer of the day responds within one working day. Resolve every thread.
-7. **Merge with a merge commit** once every required check is green. The branch is then deleted and the story moves to Done.
+7. **Merge with a merge commit** once every required check is green. `Docker images` and `End-to-end smoke` show as skipped when a change touches none of their inputs, and that counts as green. The branch is then deleted and the story moves to Done.
 
 ### Never
 
@@ -337,13 +337,13 @@ If something destructive or irreversible seems necessary, ask Richie first.
 
    Their text lives in the `components` namespace; your own goes in your area's namespace. If one is missing something, extend it there with a test. Do not copy it into your area. To show the operation log under a record, write its audit events with the record's type and id, then add `<EntityOperationLog entityType="Order" entityId={order.id} />` from `@/features/audit/EntityOperationLog` (steps in [area 4's guide](docs/team/area-4-controls-security-and-monitoring.md#how-another-area-feeds-the-operation-log)).
 
-2. **Choose a free source.** While the repository is public, use only:
+2. **Choose a free source.** Until P-22 sets up the Pro kits, use only:
    - shadcn/ui;
    - Magic UI (free);
    - React Bits (free, `@react-bits`);
    - ReUI's free components, only if they install without the licence key.
 
-   No React Bits Pro or ReUI Pro code goes into a public repository, because their licences need a private one. Once it is private, adding a Pro component goes through Richie.
+   Their licences need a private repository, which this is since 5 Nov 2026, and they need Richie's keys. P-22 sets them up; after that, adding a Pro component goes through Richie.
 
 3. **Add it from `apps/web`,** with the shadcn CLI for a registry item, for example `npx shadcn@latest add tabs` (not `pnpm dlx`, which pnpm's trust policy refuses; see [ADR 0013](docs/adr/0013-the-web-stack.md)). The CLI writes the component into `src/components/ui` and imports `cn` from `cn`, a different package: change that import to `@/lib/utils` and remove the `cn` dependency it added. The component becomes code in this repository, so nobody needs a key to run or build it.
 4. **Pin what it brings.** Registry items can declare caret ranges. Re-pin every new dependency to an exact version, and respect the 7-day release-age rule in `pnpm-workspace.yaml` ([ADR 0003](docs/adr/0003-pnpm-monorepo.md)).
@@ -412,6 +412,81 @@ useSaveShortcut(form, save);
 - **Errors: one line.** Save through `useFormSave` and every error lands for you: each `details` entry on its field in the server's words (`lines.0.quantity` included), the highest one focused, and the rest, a 409, a 403 or a 500, at the top with the trace id. A rule the schema refuses where no field shows it (a list that needs a line) goes to the same place, so Save never seems to do nothing. A path under a lookup (`customer.number`) lands on the lookup. Where the API's names differ from the form's, pass `serverPaths`: `{ customerNo: "customer", "lines.*.itemNo": "lines.*.item" }`. Outside `useFormSave`, call `applyServerError(error, form, map)` in your `catch`.
 - **Drafts.** `useDraft(key, form, { exclude, rowKey })` keeps unsaved changes in this browser for this viewer and this record. Put the record's number in the key, and list every field that can be masked in `exclude`, with `*` for every row. A row's left-out fields come back only from the row with the same `rowKey` field (`id` by default), never by position, so give rows a stable id; a row with none comes back with those fields empty. Mount the form once its record has loaded. A draft goes on save, on Discard and on sign-out, and stays when the session expires. Drafts older than seven days are dropped, whoever's they are. After a save the form is clean again, but anything typed while it ran stays unsaved. Signing out removes drafts only for the tab where it happens: another tab left open can write one again, since tabs share no session signal yet.
 - **Leaving and keys.** `FormShell` asks before a route change or a tab close while the form has unsaved changes; pass `leaveGuard={false}` for a form that keeps nothing, such as a filter. Signing out over a form with changes asks too, and says they will be deleted. The prompt opens on Keep editing, and focus returns to the field. Enter never submits. Ctrl+S or Command+S saves through `useSaveShortcut`, from inside a field too. Save is refused until something has changed: pass `allowClean` for a form that its defaults fill in, such as an SPR raised from a shortage line, and `blockedReason` when the person cannot save yet, in their words. **Pass the same two options to `SaveButton` and to `useSaveShortcut`**, and the button and the key always agree.
+
+## Building a list
+
+Every list is a `ListPage` from `@/components/list-page`. Never hand-roll a toolbar, a filter select or a table around `DataTable`. `/gallery` shows one with its filters, actions, reason dialog, Export and Print.
+
+```tsx
+const [query, setQuery] = useUrlQuery(URL_FILTERS, { pageSize: 25 });
+const params = apiParams(query, SORTABLE);
+const list = useMasterDataItems(params, {
+  query: { placeholderData: (previous) => previous },
+});
+
+<ListPage
+  tableId="master-data-items"
+  title={t("items.title")}
+  caption={t("items.caption")}
+  columns={columns}
+  rowKey={(row) => row.no}
+  rowHref={(row) => `/master-data/items/${row.no}`}
+  query={query}
+  onQueryChange={setQuery}
+  list={list}
+  filters={filters}
+  actions={actions}
+  exportOptions={{ fileName: "items", loadRows }}
+/>;
+```
+
+- **The address.** `useUrlQuery(spec)` keeps search, filters, page, sort and page size in the URL and reads them back on a reload. `spec` is a constant: each filter with the values it allows, or `null` for any text (or a plain list of names). A value the API would refuse falls back to the default. `apiParams` turns the query into the call's parameters, and `allPages` fetches every page for an export.
+- **Filters** are declared: `{ id, label, kind, allLabel, options, more }`. Keep the three or four that matter in the bar and mark the rest `more: true`. A `kind: "toggle"` is a yes/no switch, `"lookup"` is a select with a search box for a long list (the value is the Navision number), and `"range"` is two dates kept as `idFrom` and `idTo`: spread `rangeSpec(id)` into the spec. Every filter id must be in the `useUrlQuery` spec; development throws if one is missing. Applied filters show as chips with Clear all. Give options plain labels, never raw codes.
+- **Actions** are declared too: `{ id, kind, label, icon, permission, needs, onRun }`. The kinds are `new`, `edit`, `void`, `disable`, `batch`, `import`, `export` and `print`, and the bar always draws them in that order. An action is drawn only if the role holds its `permission`, so a screen never shows a button the role cannot use (the server still refuses it). `new` is the one primary button and the N key runs it. An action that needs a selection is blocked with its reason until you pass `selection`. `enabledFor(rows)` returns a reason when the selected rows cannot take it (only SPRs waiting for approval can be approved), so the rule is declared, not hidden in `onRun`. Export and Print are done for you from `exportOptions`.
+- **Void and Disable** take `reasoned: { title, confirmLabel, doneMessage, run }`. The template asks for a required reason in one dialog, shows the server's words under the field, and ends with a toast.
+- **A status** on a list is `<StatusChip family="waiting">{t("...")}</StatusChip>`. The family is draft, waiting, ready, blocked or done (or none, for neutral); the word is yours. Never list status codes in the web app.
+- **Not yet:** row checkboxes, the row menu, saved views beyond filters and the operation log panel come with P-45.
+
+## Building a lines grid
+
+Order and SPR lines are typed into the lines grid in `apps/web/src/components/lines-grid`, imported from `@/components/lines-grid`. It sits inside a `FormShell` whose form has a `lines` array of `LineValue`. `/gallery` shows it as Support uses it, with prices masked, read-only and with 200 lines.
+
+```tsx
+const columns: LineColumn[] = [
+  { kind: "lineNo", header: t("line") },
+  { kind: "item", header: t("item") },
+  { kind: "description", header: t("description"), readOnly: true },
+  { kind: "quantity", header: t("quantity") },
+  { kind: "unitPrice", header: t("unitPrice") },
+  { kind: "amount", header: t("amount") },
+  { kind: "availability", header: t("availability") },
+  { kind: "remove", header: t("remove") },
+]; // An SPR lists only lineNo, item, quantity, availability and remove.
+
+const draft = useDraft(
+  `order.${no}`,
+  form,
+  lineDraftOptions("lines", priceMask !== null),
+);
+
+<LinesGrid
+  label={t("orderLines")}
+  columns={columns}
+  searchItems={searchItems} // (query, signal) => Promise<ItemOption[]>
+  priceMask={priceMask} // { reason, visibleTo } for a role that may not see prices
+  serverTotals={saved?.totals}
+  shortfallAction={(short) => <RaiseSprButton line={short} />}
+/>;
+```
+
+- **A line** is `{ lineId, item, description, quantity, unitPrice, unit, availableStock }`. Make a new one with `emptyLine()`, and give a saved line its own `lineId`. Quantity and price are decimal strings, never numbers. The schema is the screen's, in `packages/shared` when the API checks the same thing; `requiredLookup` refuses a line whose item was not chosen from the list.
+- **The item search** returns `{ number, name, detail, description, unit, availableStock, unitPrice }` for each item, where `number` is the Navision number and `detail` is the part number. `availableStock` is what the API reports from the same formula as master data: never work it out in the web app. `unitPrice` is the API's masked field. Picking an item fills the description, the unit, the stock and, if the role may see prices, the default price.
+- **Keys.** Tab and Shift+Tab walk the cells. Enter moves to the next cell, and on the last one adds a line and lands in its item cell. After an item is picked by Enter, focus goes to the quantity. Esc leaves a cell for its line, where Delete removes it and the arrows change line. Ctrl+Delete removes the line from inside a field, and Alt with the up or down arrow changes line from inside one. Delete and the arrows in a field are the field's own. Removing a line ends with a toast whose Undo puts it back.
+- **Amounts and totals** are worked out from the strings with `lineAmount` and `sumDecimal` from `@orderpilot/shared`, as you type. `useLineTotals` gives a footer of your own the one value it needs; the default footer is `LinesFooter`. After a save pass the server's totals as `serverTotals`: they are shown until a line changes, and the server's answer wins.
+- **Masks.** Pass `priceMask` for a role that may not see prices. The price and amount cells and the total show the mask and its reason, no price is written to the form, and `lineDraftOptions` leaves prices out of the draft. The API sends no price to that role.
+- **Errors.** Save through `useFormSave` with `serverPaths` such as `{ "lines.*.itemNo": "lines.*.item" }`. An error on `lines.2.quantity` lands on that cell and takes the focus, and the line's number is marked.
+- **A shortfall** is flagged in words on the line: what is needed, what is available and how short it is. `shortfallAction` is the slot for Raise SPR. It never stops a save.
+- Pass `readOnly` to draw a saved record: plain text cells, no buttons.
 
 ## Adding an API route
 

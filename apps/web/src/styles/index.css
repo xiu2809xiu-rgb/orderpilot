@@ -6,6 +6,10 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* Where the lines grid stops stacking, measured on its own width: a tablet
+     in landscape, with the side menu open, leaves it about 670 px. */
+  --container-lines: 40rem;
+
   --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono Variable", ui-monospace, monospace;
 
@@ -130,5 +134,28 @@
   }
   to {
     opacity: 1;
+  }
+}
+
+/* Print. The list page's Print puts a print view beside the app, so while it
+   is on the document the app and its overlays step aside and only the view is
+   drawn. Ctrl+P on any other page prints the page as it is. */
+@page {
+  margin: 14mm;
+}
+
+@media print {
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  body:has([data-print-view]) > :not([data-print-view]) {
+    display: none !important;
+  }
+
+  [data-print-view] thead {
+    display: table-header-group;
   }
 }

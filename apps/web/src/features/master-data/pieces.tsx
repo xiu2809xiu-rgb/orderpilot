@@ -3,7 +3,12 @@ import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { NavLink } from "react-router";
 import type { ItemAvailability, MaskedField } from "@orderpilot/shared";
-import { MaskedValue, Money, StatusBadge } from "@/components/common";
+import {
+  MaskedValue,
+  Money,
+  StatusChip,
+  type StatusFamily,
+} from "@/components/common";
 import { formatQuantity } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -63,7 +68,12 @@ export function MaskedText({
   return <span className={mono ? "font-mono" : undefined}>{field.value}</span>;
 }
 
-const BADGE_TONE = { short: "danger", low: "warning", ok: "success" } as const;
+// Short is blocked, low is waiting for the next purchase, ok is ready to promise.
+const AVAILABILITY_FAMILY: Record<ItemAvailability, StatusFamily> = {
+  short: "blocked",
+  low: "waiting",
+  ok: "ready",
+};
 
 export function AvailabilityBadge({
   availability,
@@ -72,9 +82,9 @@ export function AvailabilityBadge({
 }) {
   const { t } = useTranslation("master-data");
   return (
-    <StatusBadge tone={BADGE_TONE[availability]}>
+    <StatusChip family={AVAILABILITY_FAMILY[availability]}>
       {t(`availability.${availability}`)}
-    </StatusBadge>
+    </StatusChip>
   );
 }
 

@@ -18,6 +18,8 @@ interface PageHeaderProps {
   primaryAction?: PrimaryAction;
   /** Other buttons on the right, beside the primary action. */
   actions?: ReactNode;
+  /** 2 for a header inside a page that already has its h1, such as a gallery section. */
+  headingLevel?: 1 | 2;
 }
 
 /** The top of every page: title, a line of context, then actions. */
@@ -28,7 +30,9 @@ export function PageHeader({
   total,
   primaryAction,
   actions,
+  headingLevel = 1,
 }: PageHeaderProps) {
+  const Heading = headingLevel === 1 ? "h1" : "h2";
   const { t } = useTranslation("components");
   usePrimaryAction(primaryAction);
   const Icon = primaryAction?.icon ?? Plus;
@@ -36,7 +40,9 @@ export function PageHeader({
     <header className="flex flex-wrap items-start justify-between gap-s2">
       <div className="space-y-2">
         <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+          <Heading className="text-2xl font-semibold tracking-tight">
+            {title}
+          </Heading>
           {total !== undefined ? (
             <span className="text-sm text-muted-foreground tabular-nums">
               <span aria-hidden="true">{total.toLocaleString("en")}</span>

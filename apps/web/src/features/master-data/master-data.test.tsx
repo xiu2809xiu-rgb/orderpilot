@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { MemoryRouter, Route, Routes } from "react-router";
@@ -20,12 +20,12 @@ import type {
   MasterDataVendor200,
 } from "@/lib/api/generated/model";
 import { axeViolations } from "@/test/axe";
-import { errorBody } from "@/test/fixtures";
+import { useSessionStore } from "@/stores/session";
+import { errorBody, sessionFor } from "@/test/fixtures";
 import { server } from "@/test/server";
 import CustomerDetailPage from "./CustomerDetailPage";
 import ItemDetailPage from "./ItemDetailPage";
 import ItemsPage from "./ItemsPage";
-import { queryFromUrl } from "./useUrlQuery";
 import VendorDetailPage from "./VendorDetailPage";
 
 const shown = (field: string, value: string) => ({
@@ -126,6 +126,7 @@ const shortItem = {
 } as MasterDataItem200;
 
 function renderAt(path: string) {
+  useSessionStore.getState().setSession(sessionFor("SUPPORT"));
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
@@ -149,7 +150,8 @@ function renderAt(path: string) {
   );
 }
 
-const load = () => i18n.loadNamespaces(["master-data", "common", "components"]);
+const load = () =>
+  i18n.loadNamespaces(["master-data", "common", "components", "list-page"]);
 
 describe("the items list", () => {
   it("lists items with the Mock Navision badge, marks the short one and links each record", async () => {
@@ -185,6 +187,31 @@ describe("the items list", () => {
     renderAt("/master-data/items?availability=short");
     await screen.findByText("Synthetic switch I-0004");
     expect(seen[0]).toContain("availability=short");
+  });
+
+  it("stops sending a price sort once the prices are masked for the role", async () => {
+    await load();
+    const seen: string[] = [];
+    const masked = {
+      ...row("I-0004", "short"),
+      unitPrice: {
+        ...shown("item.unitPrice", ""),
+        masked: true,
+        value: "",
+      },
+    };
+    server.use(
+      getMasterDataFiltersMockHandler(filters),
+      http.get("*/api/v1/master-data/items", ({ request }) => {
+        seen.push(new URL(request.url).search);
+        return HttpResponse.json(itemList([masked]));
+      }),
+    );
+    renderAt("/master-data/items?sort=unitPrice&direction=desc");
+    await screen.findByText("Synthetic switch I-0004");
+    await waitFor(() => {
+      expect(seen.at(-1)).not.toContain("sort=");
+    });
   });
 
   it("shows the error with its trace id and a retry", async () => {
@@ -451,15 +478,5 @@ describe("a customer", () => {
     expect(screen.queryByText(/108,000/)).toBeNull();
     expect(screen.getAllByRole("img", { name: "Hidden" })).toHaveLength(2);
     expect(await axeViolations(view.container)).toEqual([]);
-  });
-});
-
-describe("a list's address", () => {
-  it("holds a hand-edited page size to what the API allows", () => {
-    const size = (value: string) =>
-      queryFromUrl(new URLSearchParams({ pageSize: value }), {}).pageSize;
-    expect(size("500")).toBe(200);
-    expect(size("50")).toBe(50);
-    expect(size("-3")).toBe(25);
   });
 });

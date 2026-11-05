@@ -69,7 +69,7 @@ For UI changes only. Otherwise write "n/a".
 - [ ] No AI tool folders, no AI attribution and no em dashes
 - [ ] Authorisation is enforced on the server, and every refusal is audited, where this touches an endpoint
 - [ ] Input crossing a boundary is parsed by a zod schema, where this adds a boundary
-- [ ] No React Bits Pro or ReUI Pro code while the repository is public
+- [ ] No React Bits Pro or ReUI Pro code, until P-22 sets the kits up
 
 ## Definition of Done
 

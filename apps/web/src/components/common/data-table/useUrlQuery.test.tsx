@@ -1,0 +1,195 @@
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { MemoryRouter, useLocation } from "react-router";
+import { describe, expect, it } from "vitest";
+import { DEFAULT_QUERY } from "./types";
+import {
+  isDay,
+  queryFromUrl,
+  rangeIds,
+  rangeSpec,
+  urlFromQuery,
+  useUrlQuery,
+} from "./useUrlQuery";
+
+const SPEC = { brand: null, availability: ["short", "low", "ok"] } as const;
+
+describe("a date range in the address", () => {
+  const spec = { brand: null, ...rangeSpec("orderDate") };
+
+  it("names the two ends idFrom and idTo", () => {
+    expect(rangeIds("orderDate")).toEqual(["orderDateFrom", "orderDateTo"]);
+  });
+
+  it("accepts a real day and drops one the API would refuse", () => {
+    expect(isDay("2026-11-30")).toBe(true);
+    expect(isDay("2026-02-30")).toBe(false);
+    expect(isDay("2026-1-3")).toBe(false);
+    expect(isDay("tomorrow")).toBe(false);
+    expect(isDay("2026-11-30T00:00")).toBe(false);
+    const url = new URLSearchParams({
+      orderDateFrom: "2026-11-01",
+      orderDateTo: "2026-02-30",
+    });
+    expect(queryFromUrl(url, spec).filters).toEqual({
+      orderDateFrom: "2026-11-01",
+    });
+  });
+
+  it("writes both ends back and keeps the round trip", () => {
+    const query = queryFromUrl(
+      new URLSearchParams("orderDateFrom=2026-11-01&orderDateTo=2026-11-30"),
+      spec,
+    );
+    const back = urlFromQuery(new URLSearchParams(), query, spec);
+    expect(back.get("orderDateFrom")).toBe("2026-11-01");
+    expect(back.get("orderDateTo")).toBe("2026-11-30");
+  });
+});
+
+describe("a list's address", () => {
+  it("falls back to the default page size when a hand-edited one is refused by the API", () => {
+    const size = (value: string) =>
+      queryFromUrl(new URLSearchParams({ pageSize: value }), SPEC, {
+        pageSize: 25,
+      }).pageSize;
+    expect(size("500")).toBe(25);
+    expect(size("200")).toBe(200);
+    expect(size("50")).toBe(50);
+    expect(size("-3")).toBe(25);
+    expect(size("abc")).toBe(25);
+    expect(size("2.5")).toBe(25);
+  });
+
+  it("falls back to page 1 for a page the API cannot read as a safe integer", () => {
+    const page = (value: string) =>
+      queryFromUrl(new URLSearchParams({ page: value }), SPEC).page;
+    expect(page("99999999999999999999")).toBe(1);
+    expect(page("9007199254740993")).toBe(1);
+    expect(page("9007199254740991")).toBe(9007199254740991);
+    expect(page("7")).toBe(7);
+  });
+
+  it("cuts a search and a text filter to the length the API takes", () => {
+    const long = "x".repeat(150);
+    const query = queryFromUrl(
+      new URLSearchParams({ search: long, brand: long, status: long }),
+      { brand: null, status: null },
+      { filterMax: { status: 120 } },
+    );
+    expect(query.search).toHaveLength(100);
+    expect(query.filters.brand).toHaveLength(60);
+    expect(query.filters.status).toHaveLength(120);
+    expect(
+      queryFromUrl(new URLSearchParams({ search: long }), SPEC, {
+        searchMax: 120,
+      }).search,
+    ).toHaveLength(120);
+  });
+
+  it("drops a page, a filter value and a direction that mean nothing", () => {
+    const query = queryFromUrl(
+      new URLSearchParams(
+        "page=0&availability=gone&brand=Acme&direction=sideways&sort=name",
+      ),
+      SPEC,
+    );
+    expect(query.page).toBe(1);
+    expect(query.filters).toEqual({ brand: "Acme" });
+    expect(query.sort).toEqual({ columnId: "name", direction: "asc" });
+  });
+
+  it("reads a plain list of names as filters that take any text, and true as a switch", () => {
+    const query = queryFromUrl(
+      new URLSearchParams("status=NEW&overdue=true&other=1"),
+      ["status", "overdue"],
+    );
+    expect(query.filters).toEqual({ status: "NEW", overdue: true });
+  });
+
+  it("writes only what differs from the defaults and leaves other parameters alone", () => {
+    const written = urlFromQuery(
+      new URLSearchParams("tab=history&page=3&brand=old"),
+      {
+        ...DEFAULT_QUERY,
+        search: "switch",
+        filters: { brand: "Acme", overdue: true },
+        sort: { columnId: "name", direction: "desc" },
+      },
+      ["brand", "overdue"],
+    );
+    expect(Object.fromEntries(written)).toEqual({
+      tab: "history",
+      search: "switch",
+      brand: "Acme",
+      overdue: "true",
+      sort: "name",
+      direction: "desc",
+    });
+  });
+});
+
+function Probe() {
+  const [query, setQuery] = useUrlQuery(SPEC, { pageSize: 25 });
+  const { search } = useLocation();
+  return (
+    <>
+      <p data-testid="query">{JSON.stringify(query)}</p>
+      <p data-testid="address">{search}</p>
+      <button
+        onClick={() => {
+          setQuery({
+            ...query,
+            page: 2,
+            search: "cable",
+            filters: { brand: "Acme" },
+            sort: { columnId: "no", direction: "desc" },
+          });
+        }}
+      >
+        Change
+      </button>
+    </>
+  );
+}
+
+describe("useUrlQuery", () => {
+  it("keeps the view in the address and brings it back on a reload", async () => {
+    const first = render(
+      <MemoryRouter initialEntries={["/list?tab=a"]}>
+        <Probe />
+      </MemoryRouter>,
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Change" }));
+    const address = screen.getByTestId("address").textContent;
+    expect(new URLSearchParams(address).get("tab")).toBe("a");
+    const view = screen.getByTestId("query").textContent;
+    first.unmount();
+
+    render(
+      <MemoryRouter initialEntries={[`/list${address}`]}>
+        <Probe />
+      </MemoryRouter>,
+    );
+    expect(screen.getByTestId("query").textContent).toBe(view);
+    expect(JSON.parse(view)).toMatchObject({
+      page: 2,
+      pageSize: 25,
+      search: "cable",
+      filters: { brand: "Acme" },
+      sort: { columnId: "no", direction: "desc" },
+    });
+  });
+
+  it("holds a hand-edited page size to the default", () => {
+    render(
+      <MemoryRouter initialEntries={["/list?pageSize=500&page=x"]}>
+        <Probe />
+      </MemoryRouter>,
+    );
+    expect(JSON.parse(screen.getByTestId("query").textContent)).toMatchObject({
+      page: 1,
+      pageSize: 25,
+    });
+  });
+});

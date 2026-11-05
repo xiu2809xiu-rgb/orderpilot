@@ -3,25 +3,24 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import type { CustomerRow } from "@orderpilot/shared";
 import {
-  DataTable,
-  DemoBadge,
-  PageHeader,
-  StatusBadge,
-  type DataTableColumn,
+  allPages,
+  apiParams,
   RecordLink,
+  StatusChip,
+  useUrlQuery,
+  type DataTableColumn,
 } from "@/components/common";
+import { ListPage, type ListFilter } from "@/components/list-page";
 import {
   masterDataCustomers,
   useMasterDataCustomers,
   useMasterDataFilters,
 } from "@/lib/api/generated/endpoints/master-data/master-data";
 import type { MasterDataCustomersParams } from "@/lib/api/generated/model";
-import { tableStatusOf } from "@/lib/query-status";
-import { FilterSelect } from "./FilterSelect";
+import { readOnlyActions } from "./listActions";
 import { MasterDataTabs, countryName } from "./pieces";
-import { allPages, apiParams, useUrlQuery } from "./useUrlQuery";
 
-const FILTERS = { country: null, paymentTerms: null, priceGroup: null };
+const URL_FILTERS = { country: null, paymentTerms: null, priceGroup: null };
 const SORTABLE = ["no", "name", "openOrders", "overdueOrders"];
 
 function customerColumns(t: TFunction): DataTableColumn<CustomerRow>[] {
@@ -85,7 +84,9 @@ function customerColumns(t: TFunction): DataTableColumn<CustomerRow>[] {
       header: t("customers.columns.overdue"),
       cell: (row) =>
         row.overdueOrders > 0 ? (
-          <StatusBadge tone="danger">{row.overdueOrders}</StatusBadge>
+          <StatusChip family="blocked">
+            {t("customers.overdueCount", { count: row.overdueOrders })}
+          </StatusChip>
         ) : (
           0
         ),
@@ -96,90 +97,74 @@ function customerColumns(t: TFunction): DataTableColumn<CustomerRow>[] {
   ];
 }
 
+const ACTIONS = readOnlyActions<CustomerRow>();
+
 /** Every customer, with what is open and overdue. Read-only. */
 export default function CustomersPage() {
   const { t } = useTranslation("master-data");
-  const [query, setQuery] = useUrlQuery(FILTERS);
+  const [query, setQuery] = useUrlQuery(URL_FILTERS, { pageSize: 25 });
   const params: MasterDataCustomersParams = apiParams(query, SORTABLE);
   const list = useMasterDataCustomers(params, {
     query: { placeholderData: (previous) => previous },
   });
   const options = useMasterDataFilters().data?.data;
   const columns = useMemo(() => customerColumns(t), [t]);
-  const plain = (values: readonly string[] = []) =>
-    values.map((value) => ({ value, label: value }));
+  const filters = useMemo<ListFilter[]>(() => {
+    const plain = (values: readonly string[] = []) =>
+      values.map((value) => ({ value, label: value }));
+    return [
+      {
+        id: "country",
+        label: t("customers.filters.country"),
+        allLabel: t("customers.filters.allCountries"),
+        options: (options?.countries ?? []).map((code) => ({
+          value: code,
+          label: countryName(code),
+        })),
+      },
+      {
+        id: "paymentTerms",
+        label: t("customers.filters.paymentTerms"),
+        allLabel: t("customers.filters.allPaymentTerms"),
+        options: plain(options?.paymentTerms),
+      },
+      {
+        id: "priceGroup",
+        label: t("customers.filters.priceGroup"),
+        allLabel: t("customers.filters.allPriceGroups"),
+        more: true,
+        options: plain(options?.priceGroups),
+      },
+    ];
+  }, [t, options]);
 
   return (
-    <div className="space-y-s3">
-      <PageHeader
-        title={t("customers.title")}
-        description={t("customers.description")}
-        meta={<DemoBadge kind="mockNavision" />}
-        total={list.data?.meta.total}
-      />
-      <MasterDataTabs />
-      <DataTable
-        tableId="master-data-customers"
-        caption={t("customers.caption")}
-        columns={columns}
-        rows={list.data?.data ?? []}
-        total={list.data?.meta.total ?? 0}
-        query={query}
-        onQueryChange={setQuery}
-        rowKey={(row) => row.no}
-        rowHref={(row) => `/master-data/customers/${row.no}`}
-        status={tableStatusOf(list)}
-        error={list.error}
-        onRetry={() => void list.refetch()}
-        exportOptions={{
-          fileName: "customers",
-          loadRows: () =>
-            allPages(async (page) =>
-              masterDataCustomers({ ...params, page, pageSize: 200 }),
-            ),
-        }}
-        filterSlot={({ filters, setFilter }) => {
-          const value = (id: string) => String(filters[id] ?? "");
-          return (
-            <>
-              <FilterSelect
-                label={t("customers.filters.country")}
-                allLabel={t("customers.filters.allCountries")}
-                value={value("country")}
-                options={(options?.countries ?? []).map((code) => ({
-                  value: code,
-                  label: countryName(code),
-                }))}
-                onChange={(next) => {
-                  setFilter("country", next);
-                }}
-              />
-              <FilterSelect
-                label={t("customers.filters.paymentTerms")}
-                allLabel={t("customers.filters.allPaymentTerms")}
-                value={value("paymentTerms")}
-                options={plain(options?.paymentTerms)}
-                onChange={(next) => {
-                  setFilter("paymentTerms", next);
-                }}
-              />
-              <FilterSelect
-                label={t("customers.filters.priceGroup")}
-                allLabel={t("customers.filters.allPriceGroups")}
-                value={value("priceGroup")}
-                options={plain(options?.priceGroups)}
-                onChange={(next) => {
-                  setFilter("priceGroup", next);
-                }}
-              />
-            </>
-          );
-        }}
-        empty={{
-          title: t("customers.emptyTitle"),
-          description: t("emptyDescription"),
-        }}
-      />
-    </div>
+    <ListPage
+      tableId="master-data-customers"
+      title={t("customers.title")}
+      description={t("customers.description")}
+      demo="mockNavision"
+      tabs={<MasterDataTabs />}
+      caption={t("customers.caption")}
+      columns={columns}
+      rowKey={(row) => row.no}
+      rowHref={(row) => `/master-data/customers/${row.no}`}
+      query={query}
+      onQueryChange={setQuery}
+      list={list}
+      filters={filters}
+      actions={ACTIONS}
+      exportOptions={{
+        fileName: "customers",
+        loadRows: () =>
+          allPages(async (page) =>
+            masterDataCustomers({ ...params, page, pageSize: 200 }),
+          ),
+      }}
+      empty={{
+        title: t("customers.emptyTitle"),
+        description: t("emptyDescription"),
+      }}
+    />
   );
 }
