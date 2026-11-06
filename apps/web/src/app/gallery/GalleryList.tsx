@@ -14,7 +14,6 @@ import {
   type ListFilter,
   type ListResult,
 } from "@/components/list-page";
-import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/common/toast";
 import { formatMoney } from "@/lib/format";
 import {
@@ -33,9 +32,9 @@ const FAMILY: Record<DemoStatus, StatusFamily> = {
 };
 
 /**
- * The list page template with a fake server: filters, the action bar, Void with
- * its reason, Export and Print. A switch stands in for the row checkboxes
- * that the grid brings later, so Edit and Void can be tried.
+ * The list page template with a fake server: filters, the action bar, row
+ * checkboxes with a batch action, a row menu with Edit, Copy and Void, saved
+ * views and column settings, Void with its reason, Export and Print.
  */
 export function GalleryList() {
   const { t } = useTranslation("gallery");
@@ -43,7 +42,6 @@ export function GalleryList() {
     ...DEFAULT_QUERY,
     pageSize: 10,
   });
-  const [picked, setPicked] = useState(false);
   const { rows, total } = serveOrders(query);
   const list: ListResult<DemoOrder> = {
     data: { data: rows, meta: { total } },
@@ -138,6 +136,28 @@ export function GalleryList() {
         },
       },
       {
+        id: "copy",
+        kind: "copy",
+        label: t("list.copy"),
+        permission: "orders.read",
+        onRun: ([row]) => {
+          toast.done(t("list.copyDone", { reference: row?.reference }));
+        },
+      },
+      {
+        id: "remind",
+        kind: "batch",
+        label: t("list.remind"),
+        permission: "orders.read",
+        enabledFor: (picked) =>
+          picked.every((row) => row.status === "waiting")
+            ? undefined
+            : t("list.remindOnlyWaiting"),
+        onRun: (picked) => {
+          toast.done(t("list.remindDone", { count: picked.length }));
+        },
+      },
+      {
         id: "void",
         kind: "void",
         label: t("list.void"),
@@ -174,14 +194,6 @@ export function GalleryList() {
           <StatusChip>{t("list.family.none")}</StatusChip>
         </li>
       </ul>
-      <div className="flex items-center gap-2 text-sm">
-        <Switch
-          id="gallery-list-pick"
-          checked={picked}
-          onCheckedChange={setPicked}
-        />
-        <label htmlFor="gallery-list-pick">{t("list.pick")}</label>
-      </div>
       <ListPage
         tableId="gallery-list"
         title={t("list.title")}
@@ -195,7 +207,8 @@ export function GalleryList() {
         list={list}
         filters={filters}
         actions={actions}
-        selection={picked && rows[0] ? [rows[0]] : []}
+        rowLabel={(row) => row.reference}
+        operationLog={{ entityType: "Order", entityId: (row) => row.reference }}
         exportOptions={{
           fileName: "orders",
           loadRows: () => Promise.resolve(DEMO_ORDERS),

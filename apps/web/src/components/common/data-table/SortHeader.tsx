@@ -2,7 +2,7 @@ import { ArrowDown, ArrowUp, ChevronsUpDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { TableHead } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { headClass } from "./cells";
+import { headClass, type Sticky } from "./cells";
 import { alignsEnd, type DataTableColumn, type TableSort } from "./types";
 
 interface SortHeaderProps<Row> {
@@ -10,7 +10,8 @@ interface SortHeaderProps<Row> {
   sort: TableSort | null;
   onSort: (columnId: string) => void;
   /** The first column stays in view when the table scrolls sideways. */
-  first?: boolean;
+  first?: Sticky | boolean;
+  className?: string | undefined;
 }
 
 /**
@@ -23,6 +24,7 @@ export function SortHeader<Row>({
   sort,
   onSort,
   first = false,
+  className,
 }: SortHeaderProps<Row>) {
   const { t } = useTranslation("components");
   const active = sort?.columnId === column.id ? sort.direction : null;
@@ -40,7 +42,7 @@ export function SortHeader<Row>({
     <TableHead
       scope="col"
       aria-sort={ariaSort}
-      className={headClass(column, first)}
+      className={cn(headClass(column, first), className)}
     >
       {column.sortable ? (
         <button

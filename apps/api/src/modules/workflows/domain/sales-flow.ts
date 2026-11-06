@@ -54,7 +54,7 @@ export const STARTER_SALES_STEPS: readonly StepDefinition[] = [
     optional: false,
   },
   { key: "packed", label: "Packed", ownerRole: "WAREHOUSE", optional: false },
-  { key: "invoiced", label: "Invoiced", ownerRole: "FINANCE", optional: false },
+  { key: "invoiced", label: "Invoiced", ownerRole: "SUPPORT", optional: false },
   {
     key: "shipping-documents",
     label: "Shipping documents",

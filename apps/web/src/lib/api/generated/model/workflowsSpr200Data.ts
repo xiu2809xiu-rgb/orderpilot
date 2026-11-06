@@ -10,6 +10,7 @@ import type { WorkflowsSpr200DataBasis } from './workflowsSpr200DataBasis.ts';
 import type { WorkflowsSpr200DataDecision } from './workflowsSpr200DataDecision.ts';
 import type { WorkflowsSpr200DataFieldsItem } from './workflowsSpr200DataFieldsItem.ts';
 import type { WorkflowsSpr200DataItem } from './workflowsSpr200DataItem.ts';
+import type { WorkflowsSpr200DataPassedTo } from './workflowsSpr200DataPassedTo.ts';
 import type { WorkflowsSpr200DataRef } from './workflowsSpr200DataRef.ts';
 import type { WorkflowsSpr200DataRequestedBy } from './workflowsSpr200DataRequestedBy.ts';
 import type { WorkflowsSpr200DataVendor } from './workflowsSpr200DataVendor.ts';
@@ -50,6 +51,9 @@ export type WorkflowsSpr200Data = {
      * @nullable
      */
   escalatesToName: string | null;
+  /** @nullable */
+  passedTo?: WorkflowsSpr200DataPassedTo;
+  decidable?: boolean;
   /** @nullable */
   decision: WorkflowsSpr200DataDecision;
 };

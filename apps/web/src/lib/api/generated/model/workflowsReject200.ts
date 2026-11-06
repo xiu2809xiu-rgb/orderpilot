@@ -6,9 +6,7 @@
  * OpenAPI spec version: 0.0.0
  */
 import type { WorkflowsReject200Data } from './workflowsReject200Data.ts';
-import type { WorkflowsReject200Meta } from './workflowsReject200Meta.ts';
 
 export type WorkflowsReject200 = {
   data: WorkflowsReject200Data;
-  meta: WorkflowsReject200Meta;
 };

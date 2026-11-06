@@ -6,9 +6,7 @@
  * OpenAPI spec version: 0.0.0
  */
 import type { WorkflowsUndoDecision200Data } from './workflowsUndoDecision200Data.ts';
-import type { WorkflowsUndoDecision200Meta } from './workflowsUndoDecision200Meta.ts';
 
 export type WorkflowsUndoDecision200 = {
   data: WorkflowsUndoDecision200Data;
-  meta: WorkflowsUndoDecision200Meta;
 };

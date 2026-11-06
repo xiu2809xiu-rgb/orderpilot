@@ -17,9 +17,10 @@
     "form": "Form kit",
     "formHint": "Fields, server errors, drafts and the prompt before leaving. The save is faked in the browser: choose what the server answers, then press Save or Ctrl+S.",
     "list": "List page",
-    "listHint": "The template every list is built on: filters, the action bar, Void with its reason, Export and Print, and the five status chips. New is left out here because N already runs this page's own primary action. The server is faked in the browser.",
+    "listHint": "The template every list is built on: filters, the action bar, row checkboxes with a batch action, a row menu with Edit, Copy and Void, saved views, column settings, Export and Print, and the five status chips. New is left out here because N already runs this page's own primary action. The server is faked in the browser.",
     "lines": "Lines grid",
-    "linesHint": "Order and SPR lines that are typed into. Search by part number or name, press Enter to move on, and Enter on the last cell adds a line. The save is faked in the browser."
+    "linesHint": "Order and SPR lines that are typed into. Search by part number or name, press Enter to move on, and Enter on the last cell adds a line. The save is faked in the browser.",
+    "logTitle": "Operation log: a detail page"
   },
   "feedback": {
     "title": "Amounts, messages and loading shapes",
@@ -164,14 +165,19 @@
       "done": "Done",
       "none": "No family"
     },
-    "pick": "Pretend the first row is selected (the grid's checkboxes come later)",
     "edit": "Edit order",
     "editDone": "Opened {{reference}} for editing",
     "void": "Void order",
     "voidTitle": "Void this order",
     "voidDescription": "The order is kept, marked void, and the reason is shown with it.",
     "voidConfirm": "Void order",
-    "voidDone": "Voided {{reference}}"
+    "voidDone": "Voided {{reference}}",
+    "copy": "Copy order",
+    "copyDone": "Copied {{reference}} into a new draft",
+    "remind": "Remind the customers",
+    "remindDone_one": "Drafted a reminder for {{count}} order",
+    "remindDone_other": "Drafted reminders for {{count}} orders",
+    "remindOnlyWaiting": "Only orders waiting for approval can be reminded."
   },
   "lines": {
     "formLabel": "Order lines",

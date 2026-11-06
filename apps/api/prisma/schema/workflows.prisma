@@ -4,8 +4,9 @@
 //
 // Two rules for this file:
 // - A workflow instance's `status` is plain text on purpose. Only the state
-//   machine (Azri's C-2) ever writes it, and it decides the values. The base
-//   writes it in one place only: the demo seed, with `sample-` labels.
+//   machine (Azri's C-2) ever writes it, and it decides the values. The only
+//   other writer is the demo seed: `sample-` labels, and the real `AwaitingSpr`
+//   for the orders whose SPR waits for a decision.
 // - No relation points at another area's table (User, orders), because a
 //   relation needs a field on that table and this file may not edit theirs.
 //   The ids are plain UUIDs or Navision numbers, checked by the service.
@@ -62,6 +63,9 @@ model WorkflowInstance {
   /// Plain text. See the note at the top of this file.
   status       String
   currentStep  String?
+  /// What the state machine reads besides the status (prepayment due, the stock
+  /// answer, holds). Null on seeded samples, which the machine has never run.
+  facts        Json?
   /// Counts writes, so two commands on one instance never both win (optimistic lock).
   version      Int       @default(0)
   startedAt    DateTime  @default(now()) @db.Timestamptz(3)

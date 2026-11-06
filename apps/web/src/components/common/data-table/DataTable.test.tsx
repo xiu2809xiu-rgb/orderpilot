@@ -233,7 +233,11 @@ describe("DataTable does not do the server's work", () => {
   });
 });
 
-describe("column settings and saved filters (per viewer, kept in the browser)", () => {
+function headings() {
+  return screen.getAllByRole("columnheader").map((cell) => cell.textContent);
+}
+
+describe("column settings and saved views (per viewer, kept in the browser)", () => {
   it("hides a column by default, shows it on request, and remembers", async () => {
     const user = userEvent.setup();
     const { unmount } = render(<Harness />);
@@ -241,13 +245,9 @@ describe("column settings and saved filters (per viewer, kept in the browser)", 
       screen.queryByRole("columnheader", { name: "Internal note" }),
     ).toBeNull();
     await user.click(screen.getByRole("button", { name: "Columns" }));
-    expect(
-      screen.queryByRole("menuitemcheckbox", { name: "Customer" }),
-    ).toBeNull();
-    await user.click(
-      screen.getByRole("menuitemcheckbox", { name: "Internal note" }),
-    );
-    await user.click(screen.getByRole("menuitemcheckbox", { name: "Active" }));
+    expect(screen.queryByRole("checkbox", { name: "Customer" })).toBeNull();
+    await user.click(screen.getByRole("checkbox", { name: "Internal note" }));
+    await user.click(screen.getByRole("checkbox", { name: "Active" }));
     await user.keyboard("{Escape}");
     expect(
       screen.getByRole("columnheader", { name: "Internal note" }),
@@ -262,6 +262,53 @@ describe("column settings and saved filters (per viewer, kept in the browser)", 
     expect(screen.queryByRole("columnheader", { name: "Active" })).toBeNull();
   });
 
+  it("orders the columns from the keyboard, keeps the focus on the moved button, and resets", async () => {
+    const user = userEvent.setup();
+    const { unmount } = render(<Harness />);
+    expect(headings()).toEqual(["Customer", "Total", "Active"]);
+    await user.click(screen.getByRole("button", { name: "Columns" }));
+    const up = screen.getByRole("button", { name: "Move Active up" });
+    await user.click(up);
+    expect(headings()).toEqual(["Customer", "Active", "Total"]);
+    // Now first among the columns that move: it cannot go higher, and says so.
+    const moved = screen.getByRole("button", { name: "Move Active up" });
+    expect(moved).toHaveFocus();
+    expect(moved).toHaveAttribute("aria-disabled", "true");
+    await user.click(moved);
+    expect(headings()).toEqual(["Customer", "Active", "Total"]);
+    await user.keyboard("{Escape}");
+    unmount();
+
+    render(<Harness />);
+    // The record number never moves, and the order survives a reload.
+    expect(headings()).toEqual(["Customer", "Active", "Total"]);
+    await user.click(screen.getByRole("button", { name: "Columns" }));
+    await user.click(screen.getByRole("button", { name: "Reset columns" }));
+    expect(headings()).toEqual(["Customer", "Total", "Active"]);
+  });
+
+  it("saves a view with its columns and applies them again", async () => {
+    const user = userEvent.setup();
+    render(<Harness />);
+    await user.click(screen.getByRole("button", { name: "Columns" }));
+    await user.click(screen.getByRole("checkbox", { name: "Active" }));
+    await user.click(screen.getByRole("button", { name: "Move Total down" }));
+    await user.keyboard("{Escape}");
+    await user.click(screen.getByRole("button", { name: "Saved views" }));
+    await user.type(screen.getByLabelText("Name for this view"), "Lean");
+    await user.click(screen.getByRole("button", { name: "Save current view" }));
+    await user.keyboard("{Escape}");
+
+    await user.click(screen.getByRole("button", { name: "Columns" }));
+    await user.click(screen.getByRole("button", { name: "Reset columns" }));
+    await user.keyboard("{Escape}");
+    expect(headings()).toEqual(["Customer", "Total", "Active"]);
+
+    await user.click(screen.getByRole("button", { name: "Saved views" }));
+    await user.click(screen.getByRole("button", { name: "Apply Lean" }));
+    expect(headings()).toEqual(["Customer", "Total"]);
+  });
+
   it("saves a filter, survives a reload, applies it, and keeps viewers apart", async () => {
     const user = userEvent.setup();
     const { unmount } = render(<Harness />);
@@ -270,11 +317,9 @@ describe("column settings and saved filters (per viewer, kept in the browser)", 
       "customer b",
     );
     await user.click(screen.getByRole("switch", { name: "Show active only" }));
-    await user.click(screen.getByRole("button", { name: "Saved filters" }));
-    await user.type(screen.getByLabelText("Name for this filter"), "Active Bs");
-    await user.click(
-      screen.getByRole("button", { name: "Save current filter" }),
-    );
+    await user.click(screen.getByRole("button", { name: "Saved views" }));
+    await user.type(screen.getByLabelText("Name for this view"), "Active Bs");
+    await user.click(screen.getByRole("button", { name: "Save current view" }));
     expect(
       screen.getByRole("button", { name: "Apply Active Bs" }),
     ).toBeVisible();
@@ -283,7 +328,7 @@ describe("column settings and saved filters (per viewer, kept in the browser)", 
     // A reload: a fresh tree, same browser storage.
     render(<Harness />);
     expect(names()).toHaveLength(10);
-    await user.click(screen.getByRole("button", { name: "Saved filters" }));
+    await user.click(screen.getByRole("button", { name: "Saved views" }));
     await user.click(screen.getByRole("button", { name: "Apply Active Bs" }));
     expect(screen.getByRole("searchbox", { name: "Search" })).toHaveValue(
       "customer b",
@@ -292,23 +337,21 @@ describe("column settings and saved filters (per viewer, kept in the browser)", 
       screen.getByRole("switch", { name: "Show active only" }),
     ).toBeChecked();
     await user.click(screen.getByRole("button", { name: "Delete Active Bs" }));
-    expect(screen.getByText("No saved filters yet.")).toBeVisible();
+    expect(screen.getByText("No saved views yet.")).toBeVisible();
   });
 
-  it("does not show one viewer's saved filters to another", async () => {
+  it("does not show one viewer's saved views to another", async () => {
     const user = userEvent.setup();
     const first = render(<Harness />);
-    await user.click(screen.getByRole("button", { name: "Saved filters" }));
-    await user.type(screen.getByLabelText("Name for this filter"), "Mine");
-    await user.click(
-      screen.getByRole("button", { name: "Save current filter" }),
-    );
+    await user.click(screen.getByRole("button", { name: "Saved views" }));
+    await user.type(screen.getByLabelText("Name for this view"), "Mine");
+    await user.click(screen.getByRole("button", { name: "Save current view" }));
     first.unmount();
 
     useSessionStore.getState().setSession(sessionFor("FINANCE"));
     render(<Harness />);
-    await user.click(screen.getByRole("button", { name: "Saved filters" }));
-    expect(screen.getByText("No saved filters yet.")).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Saved views" }));
+    expect(screen.getByText("No saved views yet.")).toBeVisible();
   });
 });
 

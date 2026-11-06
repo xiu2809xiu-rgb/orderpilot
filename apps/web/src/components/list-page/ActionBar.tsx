@@ -1,25 +1,32 @@
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { DataTableColumn, ExportOptions } from "@/components/common";
 import { ExportMenu } from "@/components/common/data-table/ExportMenu";
+import type { RowPage } from "@/components/common/data-table/useUrlQuery";
 import { cn } from "@/lib/utils";
 import { ActionButton } from "./ActionButton";
 import { blockedReason, KIND_ICONS, labelOf, LEFT_KINDS } from "./actions";
 import { PrintButton } from "./PrintButton";
-import { ReasonDialog } from "./ReasonDialog";
+import { SelectionCount } from "./SelectionCount";
 import type { ListAction } from "./types";
 
 interface ActionBarProps<Row> {
   /** Only the actions this role may use, in the bar's order. */
   actions: readonly ListAction<Row>[];
-  /** The rows ticked in the grid. P-45 brings the checkboxes: until then it is empty. */
+  /** The rows ticked in the grid. */
   selection: readonly Row[];
+  /** Whether the grid has checkboxes, so the bar counts what is ticked. */
+  selectable: boolean;
+  onClearSelection: () => void;
+  /** Runs an action with the ticked rows, asking for a reason first when it needs one. */
+  onRun: (action: ListAction<Row>, rows: readonly Row[]) => void;
   title: string;
   /** The applied filters in words, for the print view. */
   filterWords: readonly string[];
   columns: readonly DataTableColumn<Row>[];
   rows: readonly Row[];
   exportOptions?: ExportOptions<Row> | undefined;
+  /** Every row the filter shows, a page at a time, for Print. */
+  pages?: (() => AsyncIterable<RowPage<Row>>) | undefined;
   /**
    * Draws no row of its own: used when the screen has only Import, Export and
    * Print, which then share the filter bar's row instead of leaving one empty.
@@ -29,27 +36,26 @@ interface ActionBarProps<Row> {
 
 /**
  * New, Edit, Void or Disable, batch actions, Import, Export and Print, in that
- * order. Export and Print are done here; the rest call the screen. An action
- * that needs a selection says so until rows are selected.
+ * order, with the count of ticked rows. Export and Print are done here; the
+ * rest call the screen. An action that needs a selection says so until rows
+ * are selected.
  */
 export function ActionBar<Row>({
   actions,
   selection,
+  selectable,
+  onClearSelection,
+  onRun,
   title,
   filterWords,
   columns,
   rows,
   exportOptions,
+  pages,
   compact = false,
 }: ActionBarProps<Row>) {
   const { t } = useTranslation("list-page");
-  const [asking, setAsking] = useState<ListAction<Row> | null>(null);
-  if (actions.length === 0) return null;
-
-  function run(action: ListAction<Row>) {
-    if (action.reasoned) setAsking(action);
-    else action.onRun?.(selection);
-  }
+  if (actions.length === 0 && !selectable) return null;
 
   const draw = (action: ListAction<Row>) => {
     const label = labelOf(action, t);
@@ -72,7 +78,7 @@ export function ActionBar<Row>({
           filters={filterWords}
           columns={columns}
           rows={rows}
-          loadRows={exportOptions?.loadRows}
+          pages={pages}
         />
       );
     }
@@ -84,7 +90,7 @@ export function ActionBar<Row>({
         primary={action.kind === "new"}
         blocked={blockedReason(action, selection, t)}
         onRun={() => {
-          run(action);
+          onRun(action, selection);
         }}
       />
     );
@@ -92,7 +98,6 @@ export function ActionBar<Row>({
 
   const left = actions.filter((a) => LEFT_KINDS.includes(a.kind));
   const right = actions.filter((a) => !LEFT_KINDS.includes(a.kind));
-  const reasoned = asking?.reasoned;
   return (
     <div
       role="group"
@@ -100,6 +105,9 @@ export function ActionBar<Row>({
       className="flex flex-wrap items-center gap-2"
     >
       {left.map(draw)}
+      {selectable ? (
+        <SelectionCount count={selection.length} onClear={onClearSelection} />
+      ) : null}
       {right.length > 0 ? (
         <div
           className={cn(
@@ -109,21 +117,6 @@ export function ActionBar<Row>({
         >
           {right.map(draw)}
         </div>
-      ) : null}
-      {reasoned ? (
-        <ReasonDialog
-          open
-          onOpenChange={(open) => {
-            if (!open) setAsking(null);
-          }}
-          title={reasoned.title}
-          {...(reasoned.description
-            ? { description: reasoned.description }
-            : {})}
-          confirmLabel={reasoned.confirmLabel}
-          doneMessage={reasoned.doneMessage(selection)}
-          onConfirm={(reason) => reasoned.run(selection, reason)}
-        />
       ) : null}
     </div>
   );

@@ -1,12 +1,14 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { arrangeColumns } from "./columnOrder";
 import type { DataTableColumn, TableFilters, TableQuery } from "./types";
 import { useTablePrefs } from "./useTablePrefs";
 
 /**
  * What a table works out from its query and the viewer's column settings: the
- * columns on screen, and the changes a toolbar or a header may ask for. Every
- * change goes back to the first page. The server does the real work.
+ * columns on screen, in the viewer's order, and the changes a toolbar or a
+ * header may ask for. Every change goes back to the first page. The server
+ * does the real work.
  */
 export function useDataTableState<Row>(
   tableId: string,
@@ -29,7 +31,11 @@ export function useDataTableState<Row>(
       ),
     [columns, prefs.hidden],
   );
-  const shown = columns.filter(
+  const arranged = useMemo(
+    () => arrangeColumns(columns, prefs.order),
+    [columns, prefs.order],
+  );
+  const shown = arranged.filter(
     (column) => column.hideable === false || visibleIds.has(column.id),
   );
 
@@ -65,6 +71,8 @@ export function useDataTableState<Row>(
   return {
     prefs,
     visibleIds,
+    /** Every column, in the viewer's order: what the column settings list. */
+    arranged,
     shown,
     change,
     setFilter,

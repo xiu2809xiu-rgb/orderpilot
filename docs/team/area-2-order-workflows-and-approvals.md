@@ -27,7 +27,7 @@ How area 2 meets the others ([How the areas connect](../../CLAUDE.md#how-the-are
 | Area 4 | Each approval, release and payment action, to be checked before it happens                                 | The policy's decision on each action; payment holds (`payment.held`, `payment.hold-cleared`)           |
 
 - **Order status lives only here.** No other area stores or computes an order's status. The order's data belongs to area 1; area 3 only reads the status.
-- **Every transition is checked by area 4's policy,** on the server, before it runs. A refusal leaves the order as it was.
+- **Every transition is checked on the server before it runs:** by role in the state machine's table, or, for SPR decisions, by area 4's policy. A refusal leaves the order as it was.
 - **Every transition is audited,** with who, when, from which state to which, and why.
 - **Open rules are configuration:** the SPR trigger, the PI sequence, approvers and limits, and delegation ([assumptions](../assumptions.md) A-21 to A-24).
 - **Approval limits and delegation** follow the shape of Navision's Approval User Setup (Approver ID, Sales and Purchase Amount Approval Limits, Unlimited flags, Substitute), shared with area 4 ([domain notes](../research/domain-notes.md)).
@@ -39,10 +39,6 @@ How area 2 meets the others ([How the areas connect](../../CLAUDE.md#how-the-are
 - **Events out, through the outbox** (planned: P-15). A transition and its events commit in the same transaction, so a retry never loses or doubles one. Idempotency keys make a repeated command harmless.
 - **Strategies for timing.** Reminder and escalation schedules are a Strategy, configured per step, run by BullMQ jobs (planned: P-9, P-15). Deadlines are in Singapore time.
 - **Numbers.** OrderPilot's own records take a type prefix, the date and a running number, such as `SPR-20261102-0001` (planned: P-7 and C-1), shown beside Navision's numbers.
-
-A first sketch of the sales flow's states, for Azri to rework in C-2:
-
-`Received` → `Confirmed` → `StockChecked` → (`AwaitingSpr` → `SprApproved`) → `PiSent` → `AwaitingPayment` → `Paid` → `Packing` → `Invoiced` → `Released` → `AwaitingShippingDocuments` → `Closed`, with `OnHold` (an exception or a payment hold) and `Cancelled` reachable from most states.
 
 The PO-to-approval sequence:
 
@@ -62,6 +58,55 @@ sequenceDiagram
   P-->>W: Allowed
   W->>W: SprApproved, audited, events out
 ```
+
+## The state machine (C-2)
+
+`workflows/domain/order-state-machine.ts` holds the sales flow as a table, and `OrderWorkflowService` runs it against the database ([ADR 0042](../adr/0042-the-order-state-machine-as-a-table.md)). No other code decides an order's status.
+
+| Event                         | From                                            | To                          | Who                                |
+| ----------------------------- | ----------------------------------------------- | --------------------------- | ---------------------------------- |
+| `FIELDS_CONFIRMED`            | `Received`                                      | `Confirmed`                 | `SUPPORT`                          |
+| `STOCK_CHECKED`               | `Confirmed`                                     | `StockChecked`              | `PRODUCT_MANAGER`                  |
+| `SPR_RAISED`                  | `StockChecked`                                  | `AwaitingSpr`               | `PRODUCT_MANAGER`                  |
+| `SPR_APPROVED`                | `AwaitingSpr`                                   | `SprApproved`               | a person; area 4's policy says who |
+| `SPR_REJECTED`                | `AwaitingSpr`                                   | `StockChecked`              | a person; area 4's policy says who |
+| `SPR_DECISION_UNDONE`         | `SprApproved`, `StockChecked`                   | `AwaitingSpr`               | a person; area 4's policy says who |
+| `PI_SENT`                     | `StockChecked`, `SprApproved`                   | `AwaitingPayment`           | `SUPPORT`                          |
+| `PAYMENT_CONFIRMED`           | `AwaitingPayment`                               | `Paid`                      | `FINANCE`                          |
+| `PACKING_STARTED`             | `AwaitingPayment`, `Paid`                       | `Packing`                   | `WAREHOUSE`                        |
+| `INVOICED`                    | `Packing`                                       | `Invoiced`                  | `SUPPORT`                          |
+| `RELEASED`                    | `Invoiced`                                      | `Released`                  | `WAREHOUSE`                        |
+| `SHIPPING_DETAILS_SENT`       | `Released`                                      | `AwaitingShippingDocuments` | `SUPPORT`                          |
+| `SHIPPING_DOCUMENTS_RECEIVED` | `AwaitingShippingDocuments`                     | `Closed`                    | `LOGISTICS`                        |
+| `HOLD_RAISED`                 | any but `Closed` and `Cancelled`                | `OnHold`                    | the system                         |
+| `HOLD_CLEARED`                | `OnHold`                                        | back where it was           | the system                         |
+| `CANCELLED`                   | up to `Invoiced`, or `OnHold` if held from them | `Cancelled`                 | `SUPPORT`                          |
+
+`Closed` and `Cancelled` are final. The rules the table cannot express:
+
+- **The stock check:** `FIELDS_CONFIRMED` needs every uncertain field confirmed. On a shortfall, `PI_SENT` from `StockChecked` is refused until an SPR is approved (`sprRequiredOnShortfall`, an open rule: A-21).
+- **The payment gate:** with a prepayment due, `PACKING_STARTED` from `AwaitingPayment` is refused. `PAYMENT_CONFIRMED` opens the gate only for `prepayment` or `full-payment`, and only if it covers the amount due. With no prepayment, packing goes straight ahead.
+- **Rejecting an SPR:** needs a reason, and returns the order to `StockChecked`.
+- **Holds:** a failed check or a payment hold moves the order to `OnHold`. A check's hold belongs to its rule, so one rule passing never frees an order another rule still holds. The order returns only when every hold has cleared.
+- **Cancelling:** needs a reason, and is refused once the goods have gone.
+
+A wrong actor is refused with 403 and an illegal move with 409, in the one error envelope, and each refusal is audited. Where a status meets Navision's Sales Header Status is `navisionStatusOf`, an assumption to confirm (A-36).
+
+**SPR approval (C-3).** `POST /workflows/sprs/:recordNo/approve`, `reject` and `undo` are real: `SprApprovalService` asks area 4's policy, the machine moves the order, and the decision commits with the move. The amount and the requester come from the SPR's own record (`WorkflowRecord.data`), never from the request. Above the decider's limit, approving or rejecting decides nothing: the SPR passes to the next person on the chain (`deciderFor`), and area 4's route rule follows the chain from that hand-off: the person who passed it on, or the absent approver a substitute stood in for. The original requester is refused separately, whoever it has passed through. The seed puts the orders with a submitted SPR on the machine as `AwaitingSpr`; the rest stay samples, and deciding one is refused.
+
+**How other areas use it:** `WorkflowOrderStatusReader` implements area 3's `OrderStatusReader`, and `WorkflowCheckReporter` implements its `CheckReporter`: a failed check holds the order and that rule passing clears it. Both are exported from `WorkflowsModule` for area 3 to bind in place of its mock. `OrderWorkflowService` underneath has `statusOf`, `statusOfMany`, `start`, `apply`, and `decideSpr`, which asks area 4's policy first.
+
+**Not done yet:**
+
+- The routes and screens still answer from the mock until a story binds them (C-3 is the first). A seeded sample order is not the machine's to run, so the tracker needs its mock until the demo's orders run on the machine.
+- Events are saved as rows and not published until P-15. Retries with an idempotency key are still to do.
+- Area 4's policy knows only approval actions, so other moves are checked by role alone.
+- **No task reaches a substitute or the next approver.** They can open the SPR and decide it, and the page tells them, but nothing appears in their inbox: the inbox reads the mock by role. That needs real task routing through `deciderFor`, so criterion 5 of C-3 is not met yet.
+- An SPR passed up the chain reaches Management, which does not hold `approvals.decide` (Richie's call: ADR 0041), so it stops there for now.
+- The approver and limits panel on the SPR page still comes from `MockApprovalPolicy`, and the page still shows the Mock badge because most of it is sample data.
+- The demo data has no SPR above 5,000.00, and only orders with a submitted SPR run on the machine.
+- The PI sequence (A-22) is in the table, not yet a setting, and `sprRequiredOnShortfall` has only its default. `SHIPPING_DOCUMENTS_RECEIVED` is one event for the AWB/BL and the permit until the follow-ups (Should 4) split them.
+- A deposit followed by a balance does not open the gate, even if together they cover the prepayment: a question for Spectra.
 
 ## What the base gives you
 
@@ -93,16 +138,16 @@ C-1 landed these. Every route and screen answers with typed mock data from `@ord
 
 **Starter stories,** ready to pull on the board (planned: P-2 seeds them):
 
-- **C-2: the state machine,** with the sales flow's states and transitions. Written again by Azri as his first story, so that it stays his work.
-- **C-3: SPR approval within limits,** with escalation above the limit.
+- **C-2: the state machine:** built, in [the section above](#the-state-machine-c-2).
+- **C-3: SPR approval within limits:** the decisions are built ([above](#the-state-machine-c-2)); getting a task to the next approver or a substitute is still to do.
 - **C-4: reminders and escalations,** per step, from configuration.
 
 **Left out of the base on purpose,** so it stays yours:
 
-- the state machine and the order's real status (C-2): the steps list in `domain/sales-flow.ts` is keys, labels and owners only, with no transitions, guards or due dates;
+- the routes' move onto the state machine (C-2 built the machine; the steps list in `domain/sales-flow.ts` is still keys, labels and owners only);
 - Spectra's sales and purchase flows;
 - the SPR rules: when an SPR is raised, the limit check, escalation above the limit, vendor choice and pack-size rounding (C-3);
-- the payment gate;
+- the payment gate's route and screen (C-2 built its rule in the machine);
 - the SLA logic: the due dates in the mock data are fixtures, not a rule (C-4);
 - area 4's real approval policy: `MockApprovalPolicy` is the stand-in, and area 4 owns the limits and substitutes;
 - a Prisma-backed read model and the commands' real effects: the routes answer from the mock until you bind your own.

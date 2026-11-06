@@ -42,6 +42,14 @@ export const mockRecordedSchema = z.object({
 export const MOCK_RECORDED_MESSAGE =
   "Recorded on mock data. The order's status has not changed, and a restart of the API forgets this.";
 
+/** What the SPR commands answer, now that a decision moves the order. */
+export const SPR_DECISION_RECORDED_MESSAGE =
+  "Recorded. The order has moved on.";
+export const SPR_DECISION_UNDONE_MESSAGE =
+  "Undone. The request is waiting for a decision again.";
+export const SPR_PASSED_ON_MESSAGE =
+  "This is above your approval limit, so it has gone to the next approver.";
+
 /** A task in an inbox: the path of its Complete and Undo routes. */
 export const taskParamsSchema = z.object({ taskId: z.uuid() });
 

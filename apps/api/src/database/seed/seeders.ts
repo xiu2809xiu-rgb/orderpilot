@@ -14,6 +14,7 @@ import { Database } from "../database.js";
 import { UserRepository } from "../../users/user.repository.js";
 import { AuditEventRepository } from "../../audit/audit-event.repository.js";
 import { AuditService } from "../../audit/audit.service.js";
+import { seedApprovalSetups } from "../../modules/governance/approval-setup-seed.js";
 import { seedWorkflows } from "../../modules/workflows/workflows-seed.js";
 import { ObjectStorage } from "../../storage/object-storage.js";
 
@@ -141,6 +142,14 @@ const demoUsers: Seeder = {
   },
 };
 
+/** Area 4's sample approval chain (F-3), which needs the demo accounts above. */
+const approvalSetups: Seeder = {
+  name: "approval setups",
+  run(app) {
+    return seedApprovalSetups(app);
+  },
+};
+
 /**
  * The synthetic dataset, built for today in Asia/Singapore, and the same set
  * the mock read models answer from. The workflow tables below load their part
@@ -172,6 +181,7 @@ export const SEEDERS: readonly Seeder[] = [
   auditGenesis,
   rolePermissions,
   demoUsers,
+  approvalSetups,
   syntheticData,
   workflowSamples,
 ];

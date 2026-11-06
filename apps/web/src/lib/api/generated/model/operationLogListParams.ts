@@ -6,6 +6,15 @@
  * OpenAPI spec version: 0.0.0
  */
 
-export type WorkflowsReject200Meta = {
-  mock: true;
+export type OperationLogListParams = {
+/**
+ * @minimum 1
+ * @maximum 9007199254740991
+ */
+page?: number;
+/**
+ * @minimum 1
+ * @maximum 200
+ */
+pageSize?: number;
 };

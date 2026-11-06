@@ -1,7 +1,7 @@
 import { syntheticDataset } from "@orderpilot/synthetic-data";
 import {
   INBOX_ROLES,
-  MOCK_RECORDED_MESSAGE,
+  SPR_DECISION_RECORDED_MESSAGE,
   ROLES,
   errorEnvelopeSchema,
   type Role,
@@ -30,6 +30,10 @@ if (!waiting || !suggested)
   throw new Error("The dataset has no sample to test");
 const ORDER = waiting.header.no;
 const SPR = suggested.recordNo;
+const submitted = data.sprs.find((s) => s.status === "submitted");
+if (!submitted) throw new Error("The dataset has no submitted SPR");
+/** One the state machine runs, because a decision really moves its order. */
+const WAITING_SPR = submitted.recordNo;
 
 describe("the area 2 routes", () => {
   let t: TestApp;
@@ -158,9 +162,9 @@ describe("the area 2 routes", () => {
       );
     });
 
-    it("lets the approver approve or reject with a comment, and keeps it on mock data", async () => {
+    it("lets the approver approve or reject with a comment, and moves the order", async () => {
       const undo = () =>
-        call(t, as("APPROVER"), "post", `${W}/sprs/${SPR}/undo`, {
+        call(t, as("APPROVER"), "post", `${W}/sprs/${WAITING_SPR}/undo`, {
           csrf: true,
         });
       for (const action of ["approve", "reject"] as const) {
@@ -168,14 +172,19 @@ describe("the area 2 routes", () => {
           t,
           as("APPROVER"),
           "post",
-          `${W}/sprs/${SPR}/${action}`,
+          `${W}/sprs/${WAITING_SPR}/${action}`,
           { csrf: true, body: { comment: "Checked against the quote." } },
         );
         expect(res.status, action).toBe(200);
         const body = sprDecisionResponseSchema.parse(res.body);
         expect(body.data.applied).toBe(true);
-        expect(body.data.message).toBe(MOCK_RECORDED_MESSAGE);
-        const after = await call(t, as("APPROVER"), "get", `${W}/sprs/${SPR}`);
+        expect(body.data.message).toBe(SPR_DECISION_RECORDED_MESSAGE);
+        const after = await call(
+          t,
+          as("APPROVER"),
+          "get",
+          `${W}/sprs/${WAITING_SPR}`,
+        );
         expect(sprResponseSchema.parse(after.body).data.decision?.outcome).toBe(
           action === "approve" ? "approved" : "rejected",
         );

@@ -137,9 +137,9 @@
   }
 }
 
-/* Print. The list page's Print puts a print view beside the app, so while it
-   is on the document the app and its overlays step aside and only the view is
-   drawn. Ctrl+P on any other page prints the page as it is. */
+/* Print. The list page's Print writes the list into a print document of its
+   own, in a hidden frame (components/list-page/printDocument.ts), with its own
+   styles. Ctrl+P on any other page prints the page as it is. */
 @page {
   margin: 14mm;
 }
@@ -149,13 +149,5 @@
   body {
     background: #fff !important;
     color: #000 !important;
-  }
-
-  body:has([data-print-view]) > :not([data-print-view]) {
-    display: none !important;
-  }
-
-  [data-print-view] thead {
-    display: table-header-group;
   }
 }

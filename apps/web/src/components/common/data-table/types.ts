@@ -76,11 +76,38 @@ export interface ToggleFilter {
   label: string;
 }
 
-/** A named set of search, filters and sort, kept on this device for one viewer. */
-export interface SavedFilter {
+/**
+ * A saved view: a named search, filters and sort, and the columns as they were
+ * shown and ordered, kept on this device for one viewer. A view saved before
+ * columns were kept has no `hidden` or `order`, and leaves the columns alone.
+ */
+export interface SavedView {
   id: string;
   name: string;
   search: string;
   filters: TableFilters;
   sort: TableSort | null;
+  hidden?: string[] | null | undefined;
+  order?: string[] | null | undefined;
+}
+
+/**
+ * Row checkboxes. The table draws them and reports each tick; whoever passes
+ * this keeps what is ticked (the list page template does).
+ */
+export interface TableSelection<Row> {
+  isSelected: (row: Row) => boolean;
+  onToggle: (row: Row) => void;
+  /** Ticks every row on the page, or clears them all when every one is ticked. */
+  onTogglePage: () => void;
+  /** How many of the page's rows are ticked, for the box in the heading. */
+  pageState: "all" | "some" | "none";
+  /** Names a row for its box, such as "SO-10001": "Select SO-10001". */
+  rowLabel: (row: Row) => string;
+}
+
+/** The last cell of every row, such as its row menu, under a heading screen readers hear. */
+export interface RowActionsColumn<Row> {
+  header: string;
+  cell: (row: Row) => ReactNode;
 }
