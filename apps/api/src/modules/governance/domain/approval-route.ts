@@ -31,6 +31,10 @@ function isAvailable(approver: Approver | undefined, now: Date): boolean {
  * absent approver's own Approver ID. One level only: if that person cannot act
  * either, nobody may decide, rather than the request reaching someone the
  * setup never named.
+ *
+ * The requester is never handed their own request (F-4): wherever they appear
+ * on the chain, they are passed over like someone away, and the request moves
+ * on. The no-self-approval rule still refuses them if they act anyway.
  */
 export function deciderFor(
   requesterUserId: string,
@@ -51,30 +55,37 @@ export function deciderFor(
       reason: "the requester's approver has no approval setup",
     };
   }
-  if (isAvailable(approver, now))
-    return { kind: "approver", userId: approverId };
+  const canDecide = (userId: string | null): userId is string =>
+    userId !== null &&
+    userId !== requesterUserId &&
+    isAvailable(approvers.get(userId), now);
+  if (canDecide(approverId)) return { kind: "approver", userId: approverId };
 
   // A row naming the approver as their own substitute, or as the person they
   // escalate to, needs no check of its own: that person is the absent approver,
   // never available, so the request moves on up the chain.
   const { substituteUserId, approverId: escalatesTo } = approver.setup;
-  if (
-    substituteUserId !== null &&
-    isAvailable(approvers.get(substituteUserId), now)
-  ) {
+  if (canDecide(substituteUserId)) {
     return {
       kind: "substitute",
       userId: substituteUserId,
       standsInFor: approverId,
     };
   }
-  if (escalatesTo !== null && isAvailable(approvers.get(escalatesTo), now)) {
+  if (canDecide(escalatesTo)) {
     return { kind: "escalated", userId: escalatesTo, from: approverId };
   }
+  const onTheChain: readonly (string | null)[] = [
+    approverId,
+    substituteUserId,
+    escalatesTo,
+  ];
+  const passedOver = onTheChain.includes(requesterUserId);
   return {
     kind: "none",
-    reason:
-      "the approver cannot act, and neither can their substitute or the person they escalate to",
+    reason: passedOver
+      ? "nobody else on the chain can act, and the one who could raised the request"
+      : "the approver cannot act, and neither can their substitute or the person they escalate to",
   };
 }
 
@@ -88,13 +99,13 @@ const WHO: Record<Exclude<Decider["kind"], "none">, string> = {
 export class ApprovalRouteRule implements PolicyRule {
   readonly name = "approval-route";
 
-  refusal({ actor, approval }: PolicyContext): string | null {
+  refusal({ actor, approval, requesterUserId }: PolicyContext): string | null {
     if (!approval) return null;
-    if (approval.requesterUserId === undefined) {
+    if (requesterUserId === undefined) {
       return "an approval needs the person who raised the request";
     }
     const decider = deciderFor(
-      approval.requesterUserId,
+      requesterUserId,
       approval.approvers,
       approval.now,
     );
