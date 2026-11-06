@@ -55,7 +55,9 @@ test.describe("The list grid on the gallery list", () => {
   }) => {
     await signInAs(page, "SUPPORT");
     await page.goto("/gallery");
-    await expect(page.getByRole("button", { name: "Print" })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Print", exact: true }),
+    ).toBeVisible();
     // The frame is removed when printing ends, so read what it held on the way out.
     await page.evaluate(() => {
       const remove = (el: HTMLIFrameElement) => {
@@ -68,7 +70,7 @@ test.describe("The list grid on the gallery list", () => {
       };
     });
     const attached = page.waitForEvent("frameattached");
-    await page.getByRole("button", { name: "Print" }).click();
+    await page.getByRole("button", { name: "Print", exact: true }).click();
     expect((await attached).parentFrame()).toBe(page.mainFrame());
     await expect
       .poll(() =>

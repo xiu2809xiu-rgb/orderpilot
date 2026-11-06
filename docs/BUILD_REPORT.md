@@ -254,7 +254,7 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 | P-44  | List template: filter bar, action bar and status chip | `feat/list-template-bars`        | Merged, [#189](https://github.com/xiu2809xiu-rgb/orderpilot/pull/189)     |
 | P-45  | List template: grid, saved views and operation log    | `feat/list-template-grid`        | In review ([#206](https://github.com/xiu2809xiu-rgb/orderpilot/pull/206)) |
 | P-46  | Form kit                                              | `feat/form-kit`                  | Merged, [#173](https://github.com/xiu2809xiu-rgb/orderpilot/pull/173)     |
-| P-47  | Document form                                         | `feat/document-form`             | Not started                                                               |
+| P-47  | Document form                                         | `feat/document-form`             | In review (pull request link when opened)                                 |
 | P-48  | Lines grid                                            | `feat/lines-grid`                | Merged, [#190](https://github.com/xiu2809xiu-rgb/orderpilot/pull/190)     |
 | P-22  | The design system with the Pro kits                   | `feat/platform-design-system`    | Waits for the licence keys in `apps/web/.env.local`                       |
 | P-36  | Orders: the reader and the list                       | `feat/product-pass-orders`       | Not started                                                               |

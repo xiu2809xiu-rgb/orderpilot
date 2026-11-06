@@ -489,6 +489,62 @@ const draft = useDraft(
 - **A shortfall** is flagged in words on the line: what is needed, what is available and how short it is. `shortfallAction` is the slot for Raise SPR. It never stops a save.
 - Pass `readOnly` to draw a saved record: plain text cells, no buttons.
 
+## Building a document form
+
+Orders, SPRs, payment confirmations and shipments are edited on the document form in `apps/web/src/components/document-form`, imported from `@/components/document-form` ([ADR 0044](docs/adr/0044-a-document-form-is-declared-and-the-template-draws-it.md)). A screen declares; the template draws the title, the action bar, the header, the lines, the footer and the tabs. `/gallery` shows a sales order with a fake server.
+
+```tsx
+const form = useZodForm({ schema, defaultValues });
+
+<DocumentForm
+  formId="sales-order"
+  form={form}
+  title={t("title", { number })}
+  number={number}
+  formLabel={t("formLabel")}
+  header={<OrderHeaderFields form={form} />} // a FormGrid of kit fields
+  lines={
+    <LinesGrid label={t("lines")} columns={columns} searchItems={search} />
+  }
+  status={{ family: "waiting", label: t("status.waiting") }}
+  attachments={attachments}
+  totals={[{ id: "total", label: t("total"), value: <Money value={total} /> }]}
+  actions={[
+    { id: "save", kind: "save", permission: "orders.read" },
+    {
+      id: "submit",
+      kind: "submit",
+      permission: "orders.read",
+      blocked,
+      run: submit,
+    },
+    {
+      id: "void",
+      kind: "void",
+      permission: "orders.read",
+      reasoned: { title, confirmLabel, doneMessage, run },
+    },
+  ]}
+  draftKey={`order.${number}`}
+  onSave={(values, andNew) => save(values)}
+  onSaved={(saved, andNew) => (andNew ? startNext() : undefined)}
+  print={() => ({ title, fields, lines, totals })}
+  tabs={{
+    timeline,
+    checks,
+    documents,
+    log: { entityType: "Order", entityId: number },
+  }}
+/>;
+```
+
+- **Actions.** Declare each with its `kind` (`save`, `saveNew`, `submit`, `approve`, `reject`, `print`, `void`) and the permission that uses it. The template draws only those the role holds, in a fixed order, and never changes a status: Submit, Approve and Reject call your `run`, and the status lives in area 2's state machine. Give `blocked` (already worded) when the document cannot take the action now. Void and Reject take a `reasoned` block and the template asks for the reason.
+- **Saving.** `onSave` receives the checked values and whether Save and new was pressed. A throw lands on the fields through `serverPaths`, as in "Building a form". Submit, Approve, Reject and Void wait, with a reason, while the form has unsaved changes. Pass `allowClean` for a document filled in by its defaults.
+- **Drafts.** The template keeps the draft under `draftKey`. Pass `draftOptions.exclude` for masked fields. Mount the form once the record has loaded.
+- **Tabs.** Timeline, Checks and Documents take `{ count, content }`; `count` is what needs attention, and `content: null` draws the empty line. The operation log tab needs `log`, and is not drawn for a role that may not read that record.
+- **Print or PDF.** Give `print` a function that returns the document as text. It opens the browser's print view, where "Save as PDF" is the PDF, until generated documents arrive (B-3).
+- **Shared actions.** `registerDocumentFormItem({ id, label, icon, permission, run })` adds an action to every form's More menu. P-57 uses it for My work.
+
 ## Adding an API route
 
 The web app never hand-writes a call to the API. It uses hooks and mock handlers that orval generates from the API's OpenAPI file ([ADR 0019](docs/adr/0019-generated-api-hooks-and-mocks.md)).
