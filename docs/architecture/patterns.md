@@ -231,3 +231,11 @@ The first screen (the sign-in page or a role's home page) waits for the entry ch
 | Stream, not hold               | `components/list-page/printDocument.ts`, `useUrlQuery.ts` (`rowPages`)                        | A print writes each page of rows into its own frame as it arrives, so the app never holds a long list in its page                                                                                   | P-45  |
 | Named variant (status family)  | `components/common/StatusChip.tsx`                                                            | A status is drawn by one of five families with one colour and one icon each; the screen supplies the word, so no status code is listed in the web app                                               | P-44  |
 | Portal print view              | `components/list-page/PrintView.tsx`, `@media print` in `styles/index.css`                    | Print renders every row beside the app and a print rule hides the app, with no print library                                                                                                        | P-44  |
+
+## Area 2's state machine (C-2)
+
+| Pattern                | Where                                                           | Why                                                                                                                                    | Story |
+| ---------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| State machine, as data | `workflows/domain/order-state-machine.ts`                       | One table says what can follow what and who may do it, so the routes, the jobs and the screens cannot disagree about an order's status | C-2   |
+| Optimistic lock        | `workflows/order-workflow.repository.ts`                        | A save counts only if nobody moved the order since it was read, so two decisions at one moment cannot both win                         | C-2   |
+| Adapter over a port    | `workflow-order-status-reader.ts`, `workflow-check-reporter.ts` | Area 3's ports are answered from the machine, and area 3 stays free of any status logic                                                | C-2   |

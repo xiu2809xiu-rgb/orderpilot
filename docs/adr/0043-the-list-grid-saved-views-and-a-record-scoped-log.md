@@ -1,4 +1,4 @@
-# ADR 0042: The list grid, saved views, a streamed print and a record-scoped operation log
+# ADR 0043: The list grid, saved views, a streamed print and a record-scoped operation log
 
 - **Status:** Accepted
 - **Date:** 2026-11-05

@@ -36,8 +36,9 @@ Never paste a key or a Spectra document into a prompt, and keep real data out of
 
 ## Area 2: Order workflows and approvals (Azri)
 
-| Date | Story or task | Tool | What the AI did | What the person did | Prompt |
-| ---- | ------------- | ---- | --------------- | ------------------- | ------ |
+| Date       | Story or task                     | Tool        | What the AI did                                                                                                                                                                                                                                                                                                         | What the person did                                                                             | Prompt                                             |
+| ---------- | --------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| 2026-11-06 | C-2 the order state machine (#38) | Claude Code | Proposed the plan and the state table, wrote the tests first, then the machine, the service, the repository and the migration. Broke the code on purpose in 30 ways to prove the tests catch it (all caught). Ran a three-agent review and a second pass over the fixes, and listed what they found in the pull request | Chose to include the SPR rejection, and told the AI to go ahead with the design calls as listed | [area2-001](prompts/area2-001-c2-state-machine.md) |
 
 ## Area 3: Checks, tracker and insights (Iok Teck)
 

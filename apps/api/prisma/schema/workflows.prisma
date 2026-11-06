@@ -62,6 +62,9 @@ model WorkflowInstance {
   /// Plain text. See the note at the top of this file.
   status       String
   currentStep  String?
+  /// What the state machine reads besides the status (prepayment due, the stock
+  /// answer, holds). Null on seeded samples, which the machine has never run.
+  facts        Json?
   /// Counts writes, so two commands on one instance never both win (optimistic lock).
   version      Int       @default(0)
   startedAt    DateTime  @default(now()) @db.Timestamptz(3)
