@@ -10,6 +10,23 @@ When an answer arrives:
 - never paste Spectra's documents, figures or screenshots into this file, an issue or an AI tool;
 - label any issue that waits on an answer `status: needs client input` (planned: P-2).
 
+## The briefing call
+
+Held in the week of 2 Nov 2026, with Spectra's representative. The team's minutes stay outside this repository. [What the briefing said](../assumptions.md#what-the-briefing-said) records the answers in our own words. **Answered in part:** Q-1, Q-2, Q-3, Q-6, Q-7, Q-8, Q-11, Q-14 and Q-18. **Not answered:** every other question above Q-25, including the three requests for samples, an export and a timeline.
+
+**Not asked yet.** To send to Spectra in writing, in order of how much they change what is built:
+
+| #    | Question                                                                                                                                                                        | Why it matters                                                      | Assumptions |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ----------- |
+| Q-25 | When a customer's order is short of stock and they want the full quantity, is an SPR ever raised for that order? Or are SPRs raised only when purchasing for stock?             | Our sales flow holds an order at an SPR when stock is short         | A-21        |
+| Q-26 | When you say amendments and new customer cards go back into Navision, must OrderPilot write them itself? May it do so only after a person approves each one?                    | We read and staff post, and AI never posts. This is the largest gap | A-12        |
+| Q-27 | Your first priority names sales and purchases. If the proof of concept can finish only one properly by February, which one?                                                     | Sets the Must list                                                  | A-20        |
+| Q-28 | Of the three approvers, must one, most or all approve an SPR? What if they disagree? Do any limits apply? Who decides while they are away, and what does the facilitator check? | We built one approver with a limit, then a chain above it           | A-23, A-24  |
+| Q-29 | Who is the management team that gets the 24-hour reminder: the three approvers, or others? Does it repeat? May a demo send real email? Do other tasks need reminders too?       | Sets the reminder's recipient, and whether we build email           | A-33, A-37  |
+| Q-30 | "Return remarks if clarification is needed": does that send the SPR back to be corrected, or only ask a question while it stays open?                                           | We have approve and reject. This may be a third outcome             | A-23        |
+| Q-31 | "100% accurate" with no tolerance: is a person confirming every extracted field acceptable, given that no AI reads perfectly?                                                   | The brief and our design keep a person in the loop, for this reason | A-26        |
+| Q-32 | May we have your written permission to use a cloud AI service on your documents, in which region? Which information is off-limits?                                              | No restrictions were raised, but our rules need this in writing     | Q-12        |
+
 ## Ask for these first
 
 1. **Samples of every document type,** with names, prices and bank details blacked out: five to ten each of customer POs, PIs, invoices, packing lists, AWB/BL, import permits, vendor PIs and **the SPR form**, with normal and messy cases. They go to `samples/` on one machine, never into Git ([how to try a sample safely](../data-formats.md#trying-a-client-sample-safely)).

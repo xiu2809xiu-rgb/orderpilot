@@ -96,6 +96,12 @@ A wrong actor is refused with 403 and an illegal move with 409, in the one error
 
 **Who receives an SPR (C-3).** `SprRoutingService` asks area 4's `deciderFor` who holds each SPR waiting for a decision, on every read. It is never stored, so a task follows an approver going away and coming back, or a change to the setup, with nothing to move it. An SPR with a substitute, an escalation, a pass-on, or a named approver outside the Approver role leaves the Approver's inbox and appears under "Waiting for you" for that person, with why it came to them. Management has no role inbox, which is why this is its own route and section. Each task says whether the person can act, from area 4's policy, because a role can be named on the chain without holding `approvals.decide`. When nobody on the chain can act, only the requester, or someone who cannot see tasks at all, the SPR stays in the Approver's inbox, so that it stays in sight.
 
+**What the briefing changes for this area.** [What Spectra said](../assumptions.md#what-the-briefing-said) conflicts with what is built in three ways, and each waits on an answer, so nothing has been rebuilt on a guess:
+
+- **Who approves.** Built: one approver with a limit, then a chain above them. Spectra: a facilitator passes each SPR to a group of three, and no limits were mentioned (Q-28). The seeded 5,000.00 limit and the chain are placeholders. Group approval is not built.
+- **What a shortage does.** Built: the sales flow holds an order at an SPR when stock is short. Spectra: the customer revises the PO or takes what is there, and SPRs are for purchases (Q-25). If that holds, C-3's approval belongs to the purchase flow, and the sales flow's rule `sprRequiredOnShortfall` should default to off.
+- **"Return remarks."** Built: approve or reject. Spectra may mean a third outcome (Q-30).
+
 **How other areas use it:** `WorkflowOrderStatusReader` implements area 3's `OrderStatusReader`, and `WorkflowCheckReporter` implements its `CheckReporter`: a failed check holds the order and that rule passing clears it. Both are exported from `WorkflowsModule` for area 3 to bind in place of its mock. `OrderWorkflowService` underneath has `statusOf`, `statusOfMany`, `start`, `apply`, and `decideSpr`, which asks area 4's policy first.
 
 **Not done yet:**
