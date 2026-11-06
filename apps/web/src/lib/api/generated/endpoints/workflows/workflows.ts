@@ -27,6 +27,8 @@ import type {
   WorkflowsConfirmPayment200,
   WorkflowsConfirmPaymentBody,
   WorkflowsDocumentConfig200,
+  WorkflowsHandedToMe200,
+  WorkflowsHandedToMeParams,
   WorkflowsInboxReminders200,
   WorkflowsInboxRemindersParams,
   WorkflowsInboxTasks200,
@@ -148,6 +150,99 @@ export function useWorkflowsMyTasks<TData = Awaited<ReturnType<typeof workflowsM
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getWorkflowsMyTasksQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary The SPRs the approval chain has handed to the caller, whatever their role (tasks from mock data, the routing is real)
+ */
+export const workflowsHandedToMe = (
+    params?: WorkflowsHandedToMeParams,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<WorkflowsHandedToMe200>(
+      {url: `/api/v1/workflows/tasks/handed-to-me`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getWorkflowsHandedToMeQueryKey = (params?: WorkflowsHandedToMeParams,) => {
+    return [
+    `/api/v1/workflows/tasks/handed-to-me`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getWorkflowsHandedToMeQueryOptions = <TData = Awaited<ReturnType<typeof workflowsHandedToMe>>, TError = ErrorType<unknown>>(params?: WorkflowsHandedToMeParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsHandedToMe>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getWorkflowsHandedToMeQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof workflowsHandedToMe>>> = ({ signal }) => workflowsHandedToMe(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof workflowsHandedToMe>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type WorkflowsHandedToMeQueryResult = NonNullable<Awaited<ReturnType<typeof workflowsHandedToMe>>>
+export type WorkflowsHandedToMeQueryError = ErrorType<unknown>
+
+
+export function useWorkflowsHandedToMe<TData = Awaited<ReturnType<typeof workflowsHandedToMe>>, TError = ErrorType<unknown>>(
+ params: undefined |  WorkflowsHandedToMeParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsHandedToMe>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof workflowsHandedToMe>>,
+          TError,
+          Awaited<ReturnType<typeof workflowsHandedToMe>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useWorkflowsHandedToMe<TData = Awaited<ReturnType<typeof workflowsHandedToMe>>, TError = ErrorType<unknown>>(
+ params?: WorkflowsHandedToMeParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsHandedToMe>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof workflowsHandedToMe>>,
+          TError,
+          Awaited<ReturnType<typeof workflowsHandedToMe>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useWorkflowsHandedToMe<TData = Awaited<ReturnType<typeof workflowsHandedToMe>>, TError = ErrorType<unknown>>(
+ params?: WorkflowsHandedToMeParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsHandedToMe>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary The SPRs the approval chain has handed to the caller, whatever their role (tasks from mock data, the routing is real)
+ */
+
+export function useWorkflowsHandedToMe<TData = Awaited<ReturnType<typeof workflowsHandedToMe>>, TError = ErrorType<unknown>>(
+ params?: WorkflowsHandedToMeParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsHandedToMe>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getWorkflowsHandedToMeQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

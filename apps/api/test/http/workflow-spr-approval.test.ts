@@ -12,6 +12,7 @@ import { ApprovalSetupRepository } from "../../src/modules/governance/approval-s
 import { OrderWorkflowService } from "../../src/modules/workflows/order-workflow.service.js";
 import { SprRecordRepository } from "../../src/modules/workflows/spr-record.repository.js";
 import {
+  handedTaskListResponseSchema,
   sprDecisionResponseSchema,
   sprResponseSchema,
 } from "../../src/modules/workflows/workflows.schemas.js";
@@ -581,6 +582,363 @@ describe("SPR approval within limits (C-3), on the real state machine and area 4
     const res = await decide("APPROVER", SUGGESTED.recordNo, "approve");
 
     expect(res.status).toBe(409);
+  });
+
+  describe("who receives an SPR", () => {
+    const handedTo = async (role: Role, query = "pageSize=100") => {
+      const res = await call(
+        t,
+        as(role),
+        "get",
+        `${W}/tasks/handed-to-me?${query}`,
+      );
+      expect(res.status).toBe(200);
+      return handedTaskListResponseSchema.parse(res.body);
+    };
+    const handedFor = async (role: Role, recordNo: string) =>
+      (await handedTo(role)).data.find(
+        (task) => task.ref?.recordNo === recordNo,
+      );
+    const approverInbox = async () => {
+      const res = await call(
+        t,
+        as("APPROVER"),
+        "get",
+        `${W}/tasks?kind=APPROVE_SPR&pageSize=100`,
+      );
+      return (
+        res.body as { data: { ref: { recordNo: string } | null }[] }
+      ).data.map((task) => task.ref?.recordNo);
+    };
+    /** An SPR the approver's inbox really shows, so a later absence means something. */
+    const waiting = async (amount: string) => {
+      const spr = await pendingSpr(amount);
+      expect(await approverInbox()).toContain(spr.recordNo);
+      return spr;
+    };
+    const away = {
+      awayFrom: new Date(Date.now() - 60_000),
+      awayUntil: new Date(Date.now() + 3_600_000),
+    };
+
+    it("gives the SPR to the substitute while the approver is away, and back when they return", async () => {
+      const spr = await waiting("100.00");
+      const management = await idOf("MANAGEMENT");
+      expect(await approverInbox()).toContain(spr.recordNo);
+      expect(await handedFor("MANAGEMENT", spr.recordNo)).toBeUndefined();
+
+      await withApprover(
+        { substituteUserId: management, ...away },
+        async () => {
+          expect(await approverInbox()).not.toContain(spr.recordNo);
+          expect(await handedFor("MANAGEMENT", spr.recordNo)).toMatchObject({
+            kind: "APPROVE_SPR",
+            orderNo: spr.orderNo,
+            handedOver: { reason: "substitute", fromName: "Janet Lim" },
+          });
+        },
+      );
+
+      expect(await approverInbox()).toContain(spr.recordNo);
+      expect(await handedFor("MANAGEMENT", spr.recordNo)).toBeUndefined();
+    });
+
+    it("gives it to the person the approver escalates to when there is no substitute", async () => {
+      const spr = await waiting("100.00");
+
+      await withApprover({ substituteUserId: null, ...away }, async () => {
+        expect(await approverInbox()).not.toContain(spr.recordNo);
+        expect(await handedFor("MANAGEMENT", spr.recordNo)).toMatchObject({
+          handedOver: { reason: "escalated", fromName: "Janet Lim" },
+        });
+      });
+    });
+
+    it("gives an SPR above the limit to the next approver, saying who passed it on", async () => {
+      const spr = await waiting("9000.00");
+
+      await decide("APPROVER", spr.recordNo, "approve");
+
+      expect(await approverInbox()).not.toContain(spr.recordNo);
+      expect(await handedFor("MANAGEMENT", spr.recordNo)).toMatchObject({
+        handedOver: { reason: "passed-on", fromName: "Janet Lim" },
+      });
+    });
+
+    it("takes the task away once the person it went to has decided", async () => {
+      const spr = await waiting("9000.00");
+      await decide("APPROVER", spr.recordNo, "approve");
+
+      await withManagementDeciding(async () => {
+        expect(
+          (await decide("MANAGEMENT", spr.recordNo, "approve")).status,
+        ).toBe(200);
+      });
+
+      expect(await handedFor("MANAGEMENT", spr.recordNo)).toBeUndefined();
+      expect(await approverInbox()).not.toContain(spr.recordNo);
+    });
+
+    it("says whether the person can act, as area 4's policy would answer", async () => {
+      const spr = await waiting("9000.00");
+      await decide("APPROVER", spr.recordNo, "approve");
+
+      expect(await handedFor("MANAGEMENT", spr.recordNo)).toMatchObject({
+        handedOver: { canAct: false },
+      });
+      await withManagementDeciding(async () => {
+        expect(await handedFor("MANAGEMENT", spr.recordNo)).toMatchObject({
+          handedOver: { canAct: true },
+        });
+      });
+    });
+
+    it("lets a substitute with the permission really decide what they received", async () => {
+      const spr = await waiting("100.00");
+
+      await withApprover(
+        { substituteUserId: await idOf("MANAGEMENT"), ...away },
+        () =>
+          withManagementDeciding(async () => {
+            expect(await handedFor("MANAGEMENT", spr.recordNo)).toMatchObject({
+              handedOver: { canAct: true },
+            });
+            const res = await decide("MANAGEMENT", spr.recordNo, "approve");
+            expect(res.status).toBe(200);
+            expect(await handedFor("MANAGEMENT", spr.recordNo)).toBeUndefined();
+          }),
+      );
+      expect(await statusOf(spr.orderNo)).toBe("SprApproved");
+    });
+
+    it("tells a substitute whose role cannot decide, rather than leaving a dead task", async () => {
+      const spr = await waiting("100.00");
+
+      await withApprover(
+        { substituteUserId: await idOf("MANAGEMENT"), ...away },
+        async () => {
+          expect(await handedFor("MANAGEMENT", spr.recordNo)).toMatchObject({
+            handedOver: { reason: "substitute", canAct: false },
+          });
+        },
+      );
+    });
+
+    it("counts a person above their own limit as able to act, because deciding tries to pass it on", async () => {
+      const spr = await waiting("9000.00");
+      const management = await idOf("MANAGEMENT");
+      const setups = t.app.get(ApprovalSetupRepository);
+      const own = await setups.find(management);
+      if (!own) throw new Error("Management has no setup");
+      await decide("APPROVER", spr.recordNo, "approve");
+
+      await setups.save({
+        ...own,
+        unlimitedPurchaseApproval: false,
+        purchaseAmountApprovalLimit: "1.00",
+      });
+      try {
+        await withManagementDeciding(async () => {
+          expect(await handedFor("MANAGEMENT", spr.recordNo)).toMatchObject({
+            handedOver: { canAct: true },
+          });
+        });
+      } finally {
+        await setups.save(own);
+      }
+    });
+
+    it("brings a passed-on SPR back to the approver when nobody above can act", async () => {
+      const spr = await waiting("9000.00");
+      const management = await idOf("MANAGEMENT");
+      const setups = t.app.get(ApprovalSetupRepository);
+      const own = await setups.find(management);
+      if (!own) throw new Error("Management has no setup");
+      await decide("APPROVER", spr.recordNo, "approve");
+      expect(await approverInbox()).not.toContain(spr.recordNo);
+
+      await setups.save({ ...own, ...away });
+      try {
+        expect(await approverInbox()).toContain(spr.recordNo);
+        expect(await handedFor("MANAGEMENT", spr.recordNo)).toBeUndefined();
+      } finally {
+        await setups.save(own);
+      }
+    });
+
+    it("leaves an SPR in sight when the person named cannot see tasks at all", async () => {
+      const spr = await waiting("100.00");
+      const admin = await idOf("SYSTEM_ADMIN");
+      const setups = t.app.get(ApprovalSetupRepository);
+      const row = {
+        userId: admin,
+        approverId: null,
+        salesAmountApprovalLimit: "0.00",
+        purchaseAmountApprovalLimit: "0.00",
+        unlimitedSalesApproval: false,
+        unlimitedPurchaseApproval: false,
+        substituteUserId: null,
+        awayFrom: null,
+        awayUntil: null,
+      };
+      await setups.save(row);
+      try {
+        await withApprover({ substituteUserId: admin, ...away }, async () => {
+          expect(await approverInbox()).toContain(spr.recordNo);
+        });
+      } finally {
+        await database.client.approvalUserSetup.delete({
+          where: { userId: admin },
+        });
+      }
+    });
+
+    it("hands an SPR to a named approver in another role, whose inbox would never show it", async () => {
+      const raisedBy = await idOf("APPROVER");
+      const spr = await pendingSpr("100.00", { requesterUserId: raisedBy });
+
+      expect(await approverInbox()).not.toContain(spr.recordNo);
+      expect(await handedFor("MANAGEMENT", spr.recordNo)).toMatchObject({
+        handedOver: { reason: "named", fromName: "Janet Lim" },
+      });
+    });
+
+    it("keeps a passed-on SPR away from the approver while its order is on hold", async () => {
+      const spr = await waiting("9000.00");
+      await decide("APPROVER", spr.recordNo, "approve");
+      await database.client.workflowInstance.updateMany({
+        where: { orderRef: spr.orderNo },
+        data: { status: "OnHold" },
+      });
+
+      expect(await approverInbox()).not.toContain(spr.recordNo);
+    });
+
+    it("does not bring back a decided SPR when the approver goes away", async () => {
+      const spr = await waiting("100.00");
+      await decide("APPROVER", spr.recordNo, "approve");
+
+      await withApprover(
+        { substituteUserId: await idOf("MANAGEMENT"), ...away },
+        async () => {
+          expect(await handedFor("MANAGEMENT", spr.recordNo)).toBeUndefined();
+        },
+      );
+    });
+
+    it("does not hand over an SPR that has a decision, even if its order still reads as waiting", async () => {
+      const spr = await pendingSpr("100.00", {
+        decision: {
+          outcome: "approved",
+          by: "Janet Lim",
+          comment: "Recorded",
+          at: new Date().toISOString(),
+        },
+      });
+
+      await withApprover(
+        { substituteUserId: await idOf("MANAGEMENT"), ...away },
+        async () => {
+          expect(await handedFor("MANAGEMENT", spr.recordNo)).toBeUndefined();
+        },
+      );
+    });
+
+    it("stops reminding the approver about an SPR that has left them, until it comes back", async () => {
+      const reminded = async () => {
+        const res = await call(
+          t,
+          as("APPROVER"),
+          "get",
+          `${W}/reminders?pageSize=100`,
+        );
+        return (res.body as { data: { orderNo: string }[] }).data.map(
+          (reminder) => reminder.orderNo,
+        );
+      };
+      let spr = await waiting("100.00");
+      for (let tried = 1; !(await reminded()).includes(spr.orderNo); tried++) {
+        if (tried > PENDING.length) {
+          throw new Error("No pending SPR has a reminder to the approver");
+        }
+        spr = await waiting("100.00");
+      }
+
+      await withApprover(
+        { substituteUserId: await idOf("MANAGEMENT"), ...away },
+        async () => {
+          expect(await reminded()).not.toContain(spr.orderNo);
+        },
+      );
+
+      expect(await reminded()).toContain(spr.orderNo);
+    });
+
+    it("never hands an SPR to the person who raised it, and leaves it visible instead", async () => {
+      const spr = await waiting("100.00");
+
+      await withApprover(
+        {
+          substituteUserId: await idOf("PRODUCT_MANAGER"),
+          approverId: null,
+          ...away,
+        },
+        async () => {
+          expect(
+            await handedFor("PRODUCT_MANAGER", spr.recordNo),
+          ).toBeUndefined();
+          expect(await approverInbox()).toContain(spr.recordNo);
+        },
+      );
+    });
+
+    it("leaves an SPR in the approver's inbox when nobody on the chain can act", async () => {
+      const spr = await waiting("100.00");
+
+      await withApprover(
+        { substituteUserId: null, approverId: null, ...away },
+        async () => {
+          expect(await approverInbox()).toContain(spr.recordNo);
+          expect(await handedFor("MANAGEMENT", spr.recordNo)).toBeUndefined();
+        },
+      );
+    });
+
+    it("hands over nothing for an order no longer waiting for a decision", async () => {
+      const spr = await waiting("100.00");
+      await database.client.workflowInstance.updateMany({
+        where: { orderRef: spr.orderNo },
+        data: { status: "OnHold" },
+      });
+
+      await withApprover(
+        { substituteUserId: await idOf("MANAGEMENT"), ...away },
+        async () => {
+          expect(await handedFor("MANAGEMENT", spr.recordNo)).toBeUndefined();
+        },
+      );
+    });
+
+    it("shows nobody else's handed tasks, and pages the list", async () => {
+      const first = await waiting("9000.00");
+      const second = await waiting("9000.00");
+      await decide("APPROVER", first.recordNo, "approve");
+      await decide("APPROVER", second.recordNo, "approve");
+
+      expect(await handedFor("SUPPORT", first.recordNo)).toBeUndefined();
+      expect(await handedFor("MANAGEMENT", first.recordNo)).toBeDefined();
+      expect(await handedFor("MANAGEMENT", second.recordNo)).toBeDefined();
+      const page = await handedTo("MANAGEMENT", "page=1&pageSize=1");
+      expect(page.data).toHaveLength(1);
+      expect(page.meta.total).toBeGreaterThanOrEqual(2);
+      expect(page.meta.mock).toBe(true);
+    });
+
+    it("needs a signed-in caller", async () => {
+      expect(
+        (await call(t, null, "get", `${W}/tasks/handed-to-me`)).status,
+      ).toBe(401);
+    });
   });
 
   it("keeps the audit chain whole", async () => {

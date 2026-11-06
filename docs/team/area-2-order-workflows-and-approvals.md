@@ -94,6 +94,8 @@ A wrong actor is refused with 403 and an illegal move with 409, in the one error
 
 **SPR approval (C-3).** `POST /workflows/sprs/:recordNo/approve`, `reject` and `undo` are real: `SprApprovalService` asks area 4's policy, the machine moves the order, and the decision commits with the move. The amount and the requester come from the SPR's own record (`WorkflowRecord.data`), never from the request. Above the decider's limit, approving or rejecting decides nothing: the SPR passes to the next person on the chain (`deciderFor`), and area 4's route rule follows the chain from that hand-off: the person who passed it on, or the absent approver a substitute stood in for. The original requester is refused separately, whoever it has passed through. The seed puts the orders with a submitted SPR on the machine as `AwaitingSpr`; the rest stay samples, and deciding one is refused.
 
+**Who receives an SPR (C-3).** `SprRoutingService` asks area 4's `deciderFor` who holds each SPR waiting for a decision, on every read. It is never stored, so a task follows an approver going away and coming back, or a change to the setup, with nothing to move it. An SPR with a substitute, an escalation, a pass-on, or a named approver outside the Approver role leaves the Approver's inbox and appears under "Waiting for you" for that person, with why it came to them. Management has no role inbox, which is why this is its own route and section. Each task says whether the person can act, from area 4's policy, because a role can be named on the chain without holding `approvals.decide`. When nobody on the chain can act, only the requester, or someone who cannot see tasks at all, the SPR stays in the Approver's inbox, so that it stays in sight.
+
 **How other areas use it:** `WorkflowOrderStatusReader` implements area 3's `OrderStatusReader`, and `WorkflowCheckReporter` implements its `CheckReporter`: a failed check holds the order and that rule passing clears it. Both are exported from `WorkflowsModule` for area 3 to bind in place of its mock. `OrderWorkflowService` underneath has `statusOf`, `statusOfMany`, `start`, `apply`, and `decideSpr`, which asks area 4's policy first.
 
 **Not done yet:**
@@ -101,7 +103,12 @@ A wrong actor is refused with 403 and an illegal move with 409, in the one error
 - The routes and screens still answer from the mock until a story binds them (C-3 is the first). A seeded sample order is not the machine's to run, so the tracker needs its mock until the demo's orders run on the machine.
 - Events are saved as rows and not published until P-15. Retries with an idempotency key are still to do.
 - Area 4's policy knows only approval actions, so other moves are checked by role alone.
-- **No task reaches a substitute or the next approver.** They can open the SPR and decide it, and the page tells them, but nothing appears in their inbox: the inbox reads the mock by role. That needs real task routing through `deciderFor`, so criterion 5 of C-3 is not met yet.
+- **Reminders do not follow a handed SPR.** It leaves the approver's reminders, and nothing reminds the person holding it: that is C-4's.
+- **"Waiting for you" is only on the task inbox page.** The home page's queue and the My tasks count read the role's inbox, so they do not show it. The home page is area 1's.
+- **An oversight role picking the Approver's inbox does not see a handed SPR.** The holder does, and the order tracker shows the order.
+- **The inbox is still by role.** With more than one approver, each sees the others' tasks and is refused if they try to decide. This needs the real read model.
+- **Every inbox read works out the routing for every waiting SPR.** That is cheap on the demo's dozens, but needs batching once real volumes arrive.
+- **When a passed-on SPR comes back because nobody above can act,** the Approver sees it again, but the page still says it waits for the person it was passed to. Deciding it above the limit is refused with a plain message.
 - An SPR passed up the chain reaches Management, which does not hold `approvals.decide` (Richie's call: ADR 0041), so it stops there for now.
 - The approver and limits panel on the SPR page still comes from `MockApprovalPolicy`, and the page still shows the Mock badge because most of it is sample data.
 - The demo data has no SPR above 5,000.00, and only orders with a submitted SPR run on the machine.
@@ -116,6 +123,7 @@ C-1 landed these. Every route and screen answers with typed mock data from `@ord
 - **Contracts** (`packages/shared/src/workflows`): tasks, order steps and timeline, SPR detail and decisions, reminders, payments with their type, the document configuration, and `ApprovalUserSetup`, the shape of Navision's Approval User Setup (approver, sales and purchase limits, the two unlimited flags, substitute). New permissions are additive: `workflows.read`, `spr.read`, `approvals.decide`, `payments.confirm` and `workflows.inboxes.any`, with the default matrix extended in `DEFAULT_ROLE_PERMISSIONS`.
 - **Routes** (`apps/api/src/modules/workflows`, in layers; every one behind the global guards):
   - `GET /workflows/tasks` and `GET /workflows/reminders`: the caller's own inbox (`workflows.read`).
+  - `GET /workflows/tasks/handed-to-me`: the SPRs the approval chain has handed to the caller, whatever their role (`workflows.read`).
   - `GET /workflows/inboxes/:role/tasks` and `.../reminders`: any role's inbox (`workflows.inboxes.any`, which Management and Auditor hold).
   - `GET /workflows/orders/:orderNo/flow`: an order's steps, timeline and payment.
   - `POST /workflows/orders/:orderNo/payments`: a payment confirmation with its type (`payments.confirm`).
@@ -139,7 +147,7 @@ C-1 landed these. Every route and screen answers with typed mock data from `@ord
 **Starter stories,** ready to pull on the board (planned: P-2 seeds them):
 
 - **C-2: the state machine:** built, in [the section above](#the-state-machine-c-2).
-- **C-3: SPR approval within limits:** the decisions are built ([above](#the-state-machine-c-2)); getting a task to the next approver or a substitute is still to do.
+- **C-3: SPR approval within limits:** built, in [the section above](#the-state-machine-c-2). An SPR above the approver's limit reaches Management, but nobody can decide it until Management's permission is settled (ADR 0041), so the issue stays open.
 - **C-4: reminders and escalations,** per step, from configuration.
 
 **Left out of the base on purpose,** so it stays yours:
@@ -159,7 +167,7 @@ C-1 landed these. Every route and screen answers with typed mock data from `@ord
 - the PI draft for Support (Should 2), on area 1's template engine;
 - AWB/BL and import-permit follow-ups (Should 4);
 - notifications with drafts that the AI writes and a person sends (Should 5, with area 1);
-- delegation and substitutes while the approver is away;
+- reminders that follow an SPR to whoever holds it (C-4);
 - the purchase flow (phase 2): an SPR becomes a vendor PO draft, payment holds from area 4 block it, and a reminder fires when payment falls due;
 - full test coverage: every legal transition, every illegal one refused, retries and duplicate commands, and timeouts that escalate. 100% of workflow tests pass.
 

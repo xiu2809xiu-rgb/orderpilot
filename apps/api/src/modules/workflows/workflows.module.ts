@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { AuditModule } from "../../audit/audit.module.js";
+import { RolePermissionRepository } from "../../auth/role-permission.repository.js";
 import { syntheticSourceProvider } from "../../common/synthetic-source.js";
 import { UsersModule } from "../../users/users.module.js";
 import { GovernanceModule } from "../governance/governance.module.js";
@@ -16,6 +17,7 @@ import { MockWorkflowReadModel } from "./mock-workflow-read-model.js";
 import { OrderWorkflowRepository } from "./order-workflow.repository.js";
 import { SprApprovalService } from "./spr-approval.service.js";
 import { SprRecordRepository } from "./spr-record.repository.js";
+import { SprRoutingService } from "./spr-routing.service.js";
 import { OrderWorkflowService } from "./order-workflow.service.js";
 import { WorkflowCheckReporter } from "./workflow-check-reporter.js";
 import { WorkflowOrderStatusReader } from "./workflow-order-status-reader.js";
@@ -46,6 +48,9 @@ import { WorkflowsService } from "./workflows.service.js";
     OrderWorkflowRepository,
     SprRecordRepository,
     SprApprovalService,
+    SprRoutingService,
+    // Stateless, so a second instance beside AuthModule's is harmless.
+    RolePermissionRepository,
     OrderWorkflowService,
     WorkflowOrderStatusReader,
     WorkflowCheckReporter,

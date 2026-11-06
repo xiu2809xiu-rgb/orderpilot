@@ -15,9 +15,15 @@ import { RecordRefLine } from "./RecordRefLine";
 export function TaskCard({
   task,
   touch,
+  note,
+  canOpen = true,
 }: {
   task: WorkflowTask;
   touch: boolean;
+  /** Why this task is here, when that is not obvious from the task. */
+  note?: string;
+  /** False when the person's role would be refused the page it links to. */
+  canOpen?: boolean;
 }) {
   const { t } = useTranslation("workflows");
   const target = task.ref
@@ -56,8 +62,9 @@ export function TaskCard({
           <span>{t("task.dueOn", { date: formatDate(task.dueAt) })}</span>
         </p>
         {task.ref ? <RecordRefLine value={task.ref} /> : null}
+        {note ? <p className="text-sm">{note}</p> : null}
       </div>
-      {target ? (
+      {target && canOpen ? (
         <RecordLink
           to={target}
           className={cn(
