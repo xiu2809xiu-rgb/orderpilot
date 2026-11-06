@@ -96,6 +96,16 @@ A wrong actor is refused with 403 and an illegal move with 409, in the one error
 
 **Who receives an SPR (C-3).** `SprRoutingService` asks area 4's `deciderFor` who holds each SPR waiting for a decision, on every read. It is never stored, so a task follows an approver going away and coming back, or a change to the setup, with nothing to move it. An SPR with a substitute, an escalation, a pass-on, or a named approver outside the Approver role leaves the Approver's inbox and appears under "Waiting for you" for that person, with why it came to them. Management has no role inbox, which is why this is its own route and section. Each task says whether the person can act, from area 4's policy, because a role can be named on the chain without holding `approvals.decide`. When nobody on the chain can act, only the requester, or someone who cannot see tasks at all, the SPR stays in the Approver's inbox, so that it stays in sight.
 
+**What the briefing changes for this area.** [What Spectra said](../assumptions.md#what-the-briefing-said) conflicts with what is built in three ways, and each waits on an answer, so nothing has been rebuilt on a guess:
+
+- **Who approves.** Built: one approver with a limit, then a chain above them. Spectra: a facilitator passes each SPR to a group of three, and no limits were mentioned (Q-28). The seeded 5,000.00 limit and the chain are placeholders. Group approval is not built.
+- **What a shortage does.** Built: the sales flow holds an order at an SPR when stock is short. Spectra: the customer revises the PO or takes what is there, and SPRs are for purchases (Q-25). If that holds, C-3's approval belongs to the purchase flow, and the sales flow's rule `sprRequiredOnShortfall` should default to off.
+- **"Return remarks."** Built: approve or reject. Spectra may mean a third outcome (Q-30).
+
+**Reminders and escalations (C-4).** `WorkflowTaskSla` holds, per kind of task, when it is due, how long before that the owner is reminded, how long after it escalates, and to which role. `GET /workflows/sla-settings` reads it, and `PUT /workflows/sla-settings/:taskKind` changes it (`settings.manage`, audited). There is no screen yet. Spectra asked for one of these: an approval not actioned in 24 hours goes to the management team, which is the seeded `APPROVE_SPR` row. The rest are our drafts (A-37). `TaskSweepService` finds open tasks on orders the machine runs and sends what has come due, as a repeating BullMQ job (`WorkflowSweepJob`, every `WORKFLOW_SWEEP_SECONDS`). A notice, its workflow event and its audit event commit together, and `task.overdue` is recorded at the due time itself. D-4 can read these events for the tracker's overdue flag, but the tracker does not yet: it still uses its mock. Each notice has a key the database holds only once, so a retried or doubled job cannot send it twice. A reminder goes to whoever holds the SPR, and a new holder is told once too, while an escalation goes once, to the role in the settings. A task on a held order gets no notices, because nobody can act on it. If the role named for an escalation can no longer see tasks, the sweep fails loudly and sends it once it can. A decision closes the task, which stops its notices and takes them off `GET /workflows/reminders/for-me`, and an undo reopens it. There is no code in this that sends anything outside the app.
+
+**What happens when the worker restarts.** Nothing is lost and nothing is sent twice: the sweep works out what is due from each task's start time and the settings, and the next run finds whatever was missed. A long outage can send a reminder and an escalation together.
+
 **How other areas use it:** `WorkflowOrderStatusReader` implements area 3's `OrderStatusReader`, and `WorkflowCheckReporter` implements its `CheckReporter`: a failed check holds the order and that rule passing clears it. Both are exported from `WorkflowsModule` for area 3 to bind in place of its mock. `OrderWorkflowService` underneath has `statusOf`, `statusOfMany`, `start`, `apply`, and `decideSpr`, which asks area 4's policy first.
 
 **Not done yet:**
@@ -103,11 +113,21 @@ A wrong actor is refused with 403 and an illegal move with 409, in the one error
 - The routes and screens still answer from the mock until a story binds them (C-3 is the first). A seeded sample order is not the machine's to run, so the tracker needs its mock until the demo's orders run on the machine.
 - Events are saved as rows and not published until P-15. Retries with an idempotency key are still to do.
 - Area 4's policy knows only approval actions, so other moves are checked by role alone.
-- **Reminders do not follow a handed SPR.** It leaves the approver's reminders, and nothing reminds the person holding it: that is C-4's.
 - **"Waiting for you" is only on the task inbox page.** The home page's queue and the My tasks count read the role's inbox, so they do not show it. The home page is area 1's.
 - **An oversight role picking the Approver's inbox does not see a handed SPR.** The holder does, and the order tracker shows the order.
 - **The inbox is still by role.** With more than one approver, each sees the others' tasks and is refused if they try to decide. This needs the real read model.
 - **Every inbox read works out the routing for every waiting SPR.** That is cheap on the demo's dozens, but needs batching once real volumes arrive.
+- **Spectra asked for an email, and this sends an in-app notice.** Whether we may send real email, and to whom, is Q-29.
+- **The sweep runs inside the API,** because the worker consumes no queue until P-15. Moving it means giving the worker a way to start `WorkflowSweepJob`. If its scheduler cannot be registered when the API starts, it is logged and tried again only at the next start.
+- **Only tasks on orders the machine runs get real notices,** which today means SPR approvals. The state machine does not create tasks yet, so other steps have only seeded samples, and their reminders on the Reminders page are still mock data.
+- **The Reminders page shows two things:** "Sent to you" is real, and the list below it is still the mock.
+- **The bell still reads the mock for every role, and is off for roles with no inbox** (`Notifications.tsx`, area 1), so real notices appear only on the Reminders page.
+- **Every overdue follow-up is not yet visible to everyone.** The role the settings name sees an escalation, but an oversight role has no list of them, and between the due time and the escalation only the owner's reminder shows. The tracker's flag (D-4) is what closes this.
+- **An undo keeps the task's original clock,** and notices already sent do not go again. An undo long after a decision can therefore send a reminder and an escalation straight away.
+- **A hold does not stop the clock.** After a long hold, the first sweep can send a reminder and an escalation together, though nobody could act during it.
+- **A former holder keeps the reminder they were sent** while the task stays open, after the SPR moves on.
+- **A run in progress at shutdown can fail,** if the database closes first. Each notice rolls back, and the next run sends it.
+- **A notice cannot be marked as read.** It clears when the task is done.
 - **When a passed-on SPR comes back because nobody above can act,** the Approver sees it again, but the page still says it waits for the person it was passed to. Deciding it above the limit is refused with a plain message.
 - An SPR passed up the chain reaches Management, which does not hold `approvals.decide` (Richie's call: ADR 0041), so it stops there for now.
 - The approver and limits panel on the SPR page still comes from `MockApprovalPolicy`, and the page still shows the Mock badge because most of it is sample data.
@@ -124,6 +144,8 @@ C-1 landed these. Every route and screen answers with typed mock data from `@ord
 - **Routes** (`apps/api/src/modules/workflows`, in layers; every one behind the global guards):
   - `GET /workflows/tasks` and `GET /workflows/reminders`: the caller's own inbox (`workflows.read`).
   - `GET /workflows/tasks/handed-to-me`: the SPRs the approval chain has handed to the caller, whatever their role (`workflows.read`).
+  - `GET /workflows/reminders/for-me`: the reminders and escalations sent to the caller or their role (`workflows.read`).
+  - `GET /workflows/sla-settings` and `PUT /workflows/sla-settings/:taskKind`: the timing of each kind of task (`settings.manage`).
   - `GET /workflows/inboxes/:role/tasks` and `.../reminders`: any role's inbox (`workflows.inboxes.any`, which Management and Auditor hold).
   - `GET /workflows/orders/:orderNo/flow`: an order's steps, timeline and payment.
   - `POST /workflows/orders/:orderNo/payments`: a payment confirmation with its type (`payments.confirm`).
@@ -148,7 +170,7 @@ C-1 landed these. Every route and screen answers with typed mock data from `@ord
 
 - **C-2: the state machine:** built, in [the section above](#the-state-machine-c-2).
 - **C-3: SPR approval within limits:** built, in [the section above](#the-state-machine-c-2). An SPR above the approver's limit reaches Management, but nobody can decide it until Management's permission is settled (ADR 0041), so the issue stays open.
-- **C-4: reminders and escalations,** per step, from configuration.
+- **C-4: reminders and escalations:** built for tasks on orders the machine runs, in [the section above](#the-state-machine-c-2). Still to do: a reminder to Logistics about shipping documents, because that step creates no real task yet, and drafts to customers and vendors (Should 5). E2E #1's reminder works only on the seeded orders the machine runs, until the machine creates tasks.
 
 **Left out of the base on purpose,** so it stays yours:
 
@@ -156,7 +178,7 @@ C-1 landed these. Every route and screen answers with typed mock data from `@ord
 - Spectra's sales and purchase flows;
 - the SPR rules: when an SPR is raised, the limit check, escalation above the limit, vendor choice and pack-size rounding (C-3);
 - the payment gate's route and screen (C-2 built its rule in the machine);
-- the SLA logic: the due dates in the mock data are fixtures, not a rule (C-4);
+- the due dates shown in the inbox are still fixtures, because the inbox reads the mock. The stored ones and "Sent to you" follow the settings (C-4);
 - area 4's real approval policy: `MockApprovalPolicy` is the stand-in, and area 4 owns the limits and substitutes;
 - a Prisma-backed read model and the commands' real effects: the routes answer from the mock until you bind your own.
 - a count on the role home tiles: the tile system shows a dash for every area, so a live count is a change to the shared tile, left for a later story (C-5 in the backlog).
@@ -167,7 +189,6 @@ C-1 landed these. Every route and screen answers with typed mock data from `@ord
 - the PI draft for Support (Should 2), on area 1's template engine;
 - AWB/BL and import-permit follow-ups (Should 4);
 - notifications with drafts that the AI writes and a person sends (Should 5, with area 1);
-- reminders that follow an SPR to whoever holds it (C-4);
 - the purchase flow (phase 2): an SPR becomes a vendor PO draft, payment holds from area 4 block it, and a reminder fires when payment falls due;
 - full test coverage: every legal transition, every illegal one refused, retries and duplicate commands, and timeouts that escalate. 100% of workflow tests pass.
 

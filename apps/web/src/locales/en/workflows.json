@@ -61,6 +61,19 @@
       "ADD_SHIPPING_DOCUMENTS": "Add shipping documents"
     }
   },
+  "forYou": {
+    "title": "Sent to you",
+    "description": "Reminders and escalations on tasks still open. They clear when the task is done.",
+    "sentOn": "Sent {{date}}",
+    "messages": {
+      "REMINDER": "{{task}} on {{order}} needs you.",
+      "ESCALATION": "{{task}} on {{order}} is overdue."
+    },
+    "kinds": {
+      "REMINDER": "Reminder",
+      "ESCALATION": "Escalation"
+    }
+  },
   "reminders": {
     "heading": "Reminders",
     "description": "What is due, who has been told, and where it goes if nobody acts.",

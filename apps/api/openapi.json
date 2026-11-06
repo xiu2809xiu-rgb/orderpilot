@@ -1906,6 +1906,352 @@
         "tags": ["Workflows"]
       }
     },
+    "/api/v1/workflows/reminders/for-me": {
+      "get": {
+        "operationId": "Workflows_noticesForMe",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 25,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          "kind": {
+                            "type": "string",
+                            "enum": ["REMINDER", "ESCALATION"]
+                          },
+                          "taskKind": {
+                            "type": "string",
+                            "enum": [
+                              "REVIEW_FIELDS",
+                              "RAISE_SPR",
+                              "APPROVE_SPR",
+                              "SEND_PI",
+                              "CONFIRM_PAYMENT",
+                              "PACK_ORDER",
+                              "RECOUNT_CARTONS",
+                              "ADD_SHIPPING_DOCUMENTS"
+                            ]
+                          },
+                          "orderNo": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9-]{1,30}$"
+                          },
+                          "dueAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "sentAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "kind",
+                          "taskKind",
+                          "orderNo",
+                          "dueAt",
+                          "sentAt"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        "pageSize": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 200
+                        },
+                        "total": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": ["page", "pageSize", "total"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "The reminders and escalations that have gone out to the caller or their role, on tasks still open",
+        "tags": ["Workflows"]
+      }
+    },
+    "/api/v1/workflows/sla-settings": {
+      "get": {
+        "operationId": "Workflows_slaSettings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "dueAfterMinutes": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "exclusiveMinimum": true,
+                            "maximum": 525600
+                          },
+                          "remindBeforeMinutes": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "exclusiveMinimum": true,
+                            "maximum": 525600
+                          },
+                          "escalateAfterMinutes": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 525600
+                          },
+                          "escalateToRole": {
+                            "type": "string",
+                            "enum": [
+                              "SYSTEM_ADMIN",
+                              "PRODUCT_MANAGER",
+                              "APPROVER",
+                              "SUPPORT",
+                              "WAREHOUSE",
+                              "FINANCE",
+                              "LOGISTICS",
+                              "MANAGEMENT",
+                              "AUDITOR"
+                            ]
+                          },
+                          "taskKind": {
+                            "type": "string",
+                            "enum": [
+                              "REVIEW_FIELDS",
+                              "RAISE_SPR",
+                              "APPROVE_SPR",
+                              "SEND_PI",
+                              "CONFIRM_PAYMENT",
+                              "PACK_ORDER",
+                              "RECOUNT_CARTONS",
+                              "ADD_SHIPPING_DOCUMENTS"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "dueAfterMinutes",
+                          "remindBeforeMinutes",
+                          "escalateAfterMinutes",
+                          "escalateToRole",
+                          "taskKind"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "When each kind of task is due, and who it escalates to",
+        "tags": ["Workflows"]
+      }
+    },
+    "/api/v1/workflows/sla-settings/{taskKind}": {
+      "put": {
+        "operationId": "Workflows_changeSla",
+        "parameters": [
+          {
+            "name": "taskKind",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "dueAfterMinutes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "exclusiveMinimum": true,
+                    "maximum": 525600
+                  },
+                  "remindBeforeMinutes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "exclusiveMinimum": true,
+                    "maximum": 525600
+                  },
+                  "escalateAfterMinutes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 525600
+                  },
+                  "escalateToRole": {
+                    "type": "string",
+                    "enum": [
+                      "SYSTEM_ADMIN",
+                      "PRODUCT_MANAGER",
+                      "APPROVER",
+                      "SUPPORT",
+                      "WAREHOUSE",
+                      "FINANCE",
+                      "LOGISTICS",
+                      "MANAGEMENT",
+                      "AUDITOR"
+                    ]
+                  }
+                },
+                "required": [
+                  "dueAfterMinutes",
+                  "remindBeforeMinutes",
+                  "escalateAfterMinutes",
+                  "escalateToRole"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "dueAfterMinutes": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "exclusiveMinimum": true,
+                          "maximum": 525600
+                        },
+                        "remindBeforeMinutes": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "exclusiveMinimum": true,
+                          "maximum": 525600
+                        },
+                        "escalateAfterMinutes": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 525600
+                        },
+                        "escalateToRole": {
+                          "type": "string",
+                          "enum": [
+                            "SYSTEM_ADMIN",
+                            "PRODUCT_MANAGER",
+                            "APPROVER",
+                            "SUPPORT",
+                            "WAREHOUSE",
+                            "FINANCE",
+                            "LOGISTICS",
+                            "MANAGEMENT",
+                            "AUDITOR"
+                          ]
+                        },
+                        "taskKind": {
+                          "type": "string",
+                          "enum": [
+                            "REVIEW_FIELDS",
+                            "RAISE_SPR",
+                            "APPROVE_SPR",
+                            "SEND_PI",
+                            "CONFIRM_PAYMENT",
+                            "PACK_ORDER",
+                            "RECOUNT_CARTONS",
+                            "ADD_SHIPPING_DOCUMENTS"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "dueAfterMinutes",
+                        "remindBeforeMinutes",
+                        "escalateAfterMinutes",
+                        "escalateToRole",
+                        "taskKind"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Change when a kind of task is due. Audited",
+        "tags": ["Workflows"]
+      }
+    },
     "/api/v1/workflows/inboxes/{role}/reminders": {
       "get": {
         "operationId": "Workflows_inboxReminders",

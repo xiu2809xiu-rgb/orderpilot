@@ -28,6 +28,8 @@ export function testInfrastructureEnv(): NodeJS.ProcessEnv {
   return {
     DATABASE_URL: need("TEST_DATABASE_URL"),
     REDIS_URL: need("TEST_REDIS_URL"),
+    // A test runs the sweep itself, at the time it chooses.
+    WORKFLOW_SWEEP_SECONDS: "0",
     S3_ENDPOINT: process.env.S3_ENDPOINT,
     S3_REGION: process.env.S3_REGION,
     S3_ACCESS_KEY_ID: need("S3_ACCESS_KEY_ID"),

@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 import { AuditModule } from "../../audit/audit.module.js";
 import { RolePermissionRepository } from "../../auth/role-permission.repository.js";
 import { syntheticSourceProvider } from "../../common/synthetic-source.js";
+import { QueueModule } from "../../queue/queue.module.js";
 import { UsersModule } from "../../users/users.module.js";
 import { GovernanceModule } from "../governance/governance.module.js";
 import { ApprovalPolicy } from "./domain/approval-policy.js";
@@ -19,7 +20,12 @@ import { SprApprovalService } from "./spr-approval.service.js";
 import { SprRecordRepository } from "./spr-record.repository.js";
 import { SprRoutingService } from "./spr-routing.service.js";
 import { OrderWorkflowService } from "./order-workflow.service.js";
+import { TaskSlaService } from "./task-sla.service.js";
+import { TaskSweepService } from "./task-sweep.service.js";
 import { WorkflowCheckReporter } from "./workflow-check-reporter.js";
+import { WorkflowNoticeRepository } from "./workflow-notice.repository.js";
+import { WorkflowSweepJob } from "./workflow-sweep.job.js";
+import { WorkflowTaskRepository } from "./workflow-task.repository.js";
 import { WorkflowOrderStatusReader } from "./workflow-order-status-reader.js";
 import { RecordNumberRepository } from "./record-number.repository.js";
 import { RecordNumberService } from "./record-number.service.js";
@@ -35,7 +41,7 @@ import { WorkflowsService } from "./workflows.service.js";
  * which runs the state machine (C-2) and is what other areas read status from.
  */
 @Module({
-  imports: [AuditModule, GovernanceModule, UsersModule],
+  imports: [AuditModule, GovernanceModule, QueueModule, UsersModule],
   controllers: [WorkflowsController],
   providers: [
     WorkflowsService,
@@ -49,6 +55,11 @@ import { WorkflowsService } from "./workflows.service.js";
     SprRecordRepository,
     SprApprovalService,
     SprRoutingService,
+    WorkflowTaskRepository,
+    WorkflowNoticeRepository,
+    TaskSlaService,
+    TaskSweepService,
+    WorkflowSweepJob,
     // Stateless, so a second instance beside AuthModule's is harmless.
     RolePermissionRepository,
     OrderWorkflowService,
