@@ -202,16 +202,35 @@ export function apiParams(
   return params;
 }
 
-/** Every row of a list, a page at a time, for an export or a print. */
-export async function allPages<Row>(
-  fetchPage: (
-    page: number,
-  ) => Promise<{ data: readonly Row[]; meta: { total: number } }>,
-): Promise<Row[]> {
-  const rows: Row[] = [];
+type FetchPage<Row> = (
+  page: number,
+) => Promise<{ data: readonly Row[]; meta: { total: number } }>;
+
+/** One page of a list as it streams: its rows, and how many there are in all. */
+export interface RowPage<Row> {
+  rows: readonly Row[];
+  total: number;
+}
+
+/**
+ * Every row of a list, one page at a time, as each arrives. A print streams
+ * these, so a list of many thousands is never held whole.
+ */
+export async function* rowPages<Row>(
+  fetchPage: FetchPage<Row>,
+): AsyncGenerator<RowPage<Row>> {
+  let seen = 0;
   for (let page = 1; ; page++) {
     const { data, meta } = await fetchPage(page);
-    rows.push(...data);
-    if (data.length === 0 || rows.length >= meta.total) return rows;
+    seen += data.length;
+    if (data.length > 0) yield { rows: data, total: meta.total };
+    if (data.length === 0 || seen >= meta.total) return;
   }
+}
+
+/** Every row of a list, a page at a time, for an export. */
+export async function allPages<Row>(fetchPage: FetchPage<Row>): Promise<Row[]> {
+  const rows: Row[] = [];
+  for await (const page of rowPages(fetchPage)) rows.push(...page.rows);
+  return rows;
 }

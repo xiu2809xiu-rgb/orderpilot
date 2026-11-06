@@ -1,0 +1,22 @@
+### The operation log under a record (P-45): who did what and when, newest
+### first. Never a field value, an IP address or a hash. Sign in first
+### (requests/auth.http). Whoever may read the record may read its log: a
+### user's needs users.read, an order's orders.read, an SPR's spr.read, a task's
+### workflows.read (OPERATION_LOG_READERS in packages/shared). Any other role
+### gets 403 FORBIDDEN with a traceId, and the refusal is audited.
+@baseUrl = http://localhost:3000
+
+### A user's log, as the System admin's users list shows it under the grid.
+GET {{baseUrl}}/api/v1/operation-log/User/paste-a-user-id-here?pageSize=10
+
+### An order's log. Empty until an order is changed in OrderPilot.
+GET {{baseUrl}}/api/v1/operation-log/Order/SO-10001
+
+### A task's log: completing a task in requests/workflows.http writes to it.
+GET {{baseUrl}}/api/v1/operation-log/WorkflowTask/paste-a-task-id-here
+
+### A kind of record with no log: 403, and the refusal is audited.
+GET {{baseUrl}}/api/v1/operation-log/ApiRoute/anything
+
+### A page size the API never serves: 400 VALIDATION_FAILED.
+GET {{baseUrl}}/api/v1/operation-log/User/paste-a-user-id-here?pageSize=500

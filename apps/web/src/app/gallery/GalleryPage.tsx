@@ -82,6 +82,7 @@ export function GalleryPage() {
       <GalleryPieces />
       <GalleryFeedback />
       <OperationLog
+        title={t("sections.logTitle")}
         rows={rows}
         demo
         now={GALLERY_NOW}

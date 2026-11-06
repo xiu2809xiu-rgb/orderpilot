@@ -11,13 +11,15 @@ import { DomainError } from "../../common/domain-error.js";
 import { AuthAuditor } from "../auth-auditor.js";
 import type { AuthedRequest } from "../auth-context.js";
 import { PermissionPolicy } from "../permission-policy.js";
-import { accessOf } from "./classification.js";
+import { accessOf, type Access } from "./classification.js";
 import { refusalSummary } from "./refusal-wording.js";
 
 /**
- * Asks the PermissionPolicy about every @RequirePermission route. A route with
- * no decorator at all is refused too (deny by default), so forgetting one is
- * caught the first time the route is called. Every refusal is audited.
+ * Asks the PermissionPolicy about every @RequirePermission route, and about
+ * the permission a @RequirePermissionOf route names from its params. A route
+ * with no decorator at all is refused too (deny by default), so forgetting one
+ * is caught the first time the route is called, and so is a request whose
+ * params name no permission. Every refusal is audited.
  */
 @Injectable()
 export class PermissionsGuard implements CanActivate {
@@ -41,7 +43,12 @@ export class PermissionsGuard implements CanActivate {
       await this.refuse(req, auth.user, "route-has-no-access-rule");
       throw forbidden();
     }
-    for (const permission of access.permissions) {
+    const permissions = permissionsOf(access, req);
+    if (permissions.length === 0) {
+      await this.refuse(req, auth.user, "params-name-no-permission");
+      throw forbidden();
+    }
+    for (const permission of permissions) {
       const decision = await this.policy.decide({
         user: auth.user,
         permission,
@@ -76,6 +83,18 @@ export class PermissionsGuard implements CanActivate {
       ...(permission ? { changes: { permission } } : {}),
     });
   }
+}
+
+/** The permissions a request needs. Empty only when its params name none. */
+function permissionsOf(
+  access: Extract<Access, { kind: "permission" | "permissionOf" }>,
+  req: Request,
+): readonly Permission[] {
+  if (access.kind === "permission") return access.permissions;
+  const named = access.resolve(
+    req.params as Record<string, string | undefined>,
+  );
+  return named ? [named] : [];
 }
 
 function forbidden(): DomainError {

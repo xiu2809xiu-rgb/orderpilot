@@ -1,10 +1,10 @@
 import { useTranslation } from "react-i18next";
 import type {
-  DataTableColumn,
   DataTableState,
   ExportOptions,
   TableQuery,
 } from "@/components/common";
+import type { RowPage } from "@/components/common/data-table/useUrlQuery";
 import { ActionBar } from "./ActionBar";
 import { hasLeftActions } from "./actions";
 import { AppliedFilters } from "./AppliedFilters";
@@ -15,16 +15,20 @@ import { ViewSettings } from "./ViewSettings";
 
 interface ListToolbarProps<Row> {
   table: DataTableState<Row> & { rows: readonly Row[] };
-  /** Every column, for the column settings. */
-  columns: readonly DataTableColumn<Row>[];
   query: TableQuery;
   title: string;
   searchLabel: string;
+  /** False when the list's API cannot search: no search box is drawn. */
+  searchable: boolean;
   filters: readonly ListFilter[];
-  /** Only the actions this role may use. */
+  /** Only the bar's actions this role may use. */
   actions: readonly ListAction<Row>[];
   selection: readonly Row[];
+  selectable: boolean;
+  onClearSelection: () => void;
+  onRun: (action: ListAction<Row>, rows: readonly Row[]) => void;
   exportOptions?: ExportOptions<Row> | undefined;
+  pages?: (() => AsyncIterable<RowPage<Row>>) | undefined;
   searchDebounceMs: number;
 }
 
@@ -35,18 +39,22 @@ interface ListToolbarProps<Row> {
  */
 export function ListToolbar<Row>({
   table,
-  columns,
   query,
   title,
   searchLabel,
+  searchable,
   filters,
   actions,
   selection,
+  selectable,
+  onClearSelection,
+  onRun,
   exportOptions,
+  pages,
   searchDebounceMs,
 }: ListToolbarProps<Row>) {
   const { t } = useTranslation("list-page");
-  const { shown, rows, change, setFilter, prefs, visibleIds } = table;
+  const { shown, arranged, rows, change, setFilter, prefs, visibleIds } = table;
   const chips = appliedChips(filters, query, searchLabel, {
     from: (label) => t("filters.rangeFrom", { label }),
     to: (label) => t("filters.rangeTo", { label }),
@@ -56,11 +64,15 @@ export function ListToolbar<Row>({
     <ActionBar
       actions={actions}
       selection={selection}
+      selectable={selectable}
+      onClearSelection={onClearSelection}
+      onRun={onRun}
       title={title}
       filterWords={chips.map((chip) => chip.label)}
       columns={shown}
       rows={rows}
       exportOptions={exportOptions}
+      pages={pages}
       compact={!ownRow}
     />
   );
@@ -70,7 +82,7 @@ export function ListToolbar<Row>({
       <FilterBar
         filters={filters}
         values={query.filters}
-        search={query.search}
+        search={searchable ? query.search : undefined}
         onSearch={(search) => {
           change({ search });
         }}
@@ -79,7 +91,7 @@ export function ListToolbar<Row>({
         trailing={
           <>
             <ViewSettings
-              columns={columns}
+              columns={arranged}
               visibleIds={visibleIds}
               prefs={prefs}
               query={query}

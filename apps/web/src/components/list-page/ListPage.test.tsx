@@ -16,6 +16,7 @@ import { useSessionStore } from "@/stores/session";
 import { axeViolations } from "@/test/axe";
 import { sessionFor } from "@/test/fixtures";
 import { ListPage } from "./ListPage";
+import { printer } from "./printDocument";
 import type { ListAction, ListFilter, ListResult } from "./types";
 
 interface Row {
@@ -112,7 +113,6 @@ const READ = [
 
 interface HarnessProps {
   actions?: ListAction<Row>[];
-  selection?: Row[];
   list?: ListResult<Row>;
   loadRows?: () => Promise<readonly Row[]>;
   filters?: ListFilter[];
@@ -121,7 +121,6 @@ interface HarnessProps {
 
 function Harness({
   actions = READ,
-  selection,
   list = ok,
   loadRows,
   filters = FILTERS,
@@ -141,11 +140,18 @@ function Harness({
       list={list}
       filters={filters}
       actions={actions}
-      {...(selection ? { selection } : {})}
       searchDebounceMs={0}
       exportOptions={{ fileName: "items", ...(loadRows ? { loadRows } : {}) }}
     />
   );
+}
+
+async function pick(...numbers: string[]) {
+  for (const no of numbers) {
+    await userEvent.click(
+      screen.getByRole("checkbox", { name: `Select ${no}` }),
+    );
+  }
 }
 
 function renderList(
@@ -270,7 +276,8 @@ describe("the action bar", () => {
     expect(onRun).not.toHaveBeenCalled();
     view.unmount();
 
-    renderList({ actions: [action], selection: [FIRST] });
+    renderList({ actions: [action] });
+    await pick("I-0001");
     const ready = screen.getByRole("button", { name: "Edit" });
     expect(ready).not.toHaveAttribute("aria-disabled");
     await userEvent.click(ready);
@@ -290,10 +297,8 @@ describe("the action bar", () => {
           : "Only Quillon rows can be approved.",
       onRun,
     };
-    const view = renderList({
-      actions: [action],
-      selection: ROWS,
-    });
+    const view = renderList({ actions: [action] });
+    await pick("I-0001", "I-0002");
     const blocked = screen.getByRole("button", { name: "Approve" });
     expect(blocked).toHaveAttribute("aria-disabled", "true");
     expect(blocked).toHaveAccessibleDescription(
@@ -303,7 +308,8 @@ describe("the action bar", () => {
     expect(onRun).not.toHaveBeenCalled();
     view.unmount();
 
-    renderList({ actions: [action], selection: [FIRST] });
+    renderList({ actions: [action] });
+    await pick("I-0001");
     await userEvent.click(screen.getByRole("button", { name: "Approve" }));
     expect(onRun).toHaveBeenCalledWith([FIRST]);
   });
@@ -321,7 +327,8 @@ describe("the action bar", () => {
         run,
       },
     };
-    renderList({ actions: [action], selection: [FIRST] });
+    renderList({ actions: [action] });
+    await pick("I-0001");
     await userEvent.click(screen.getByRole("button", { name: "Void" }));
     const dialog = await screen.findByRole("dialog", {
       name: "Void item I-0001",
@@ -372,7 +379,8 @@ describe("the action bar", () => {
         run,
       },
     };
-    renderList({ actions: [action], selection: [FIRST] });
+    renderList({ actions: [action] });
+    await pick("I-0001");
     await userEvent.click(screen.getByRole("button", { name: "Disable" }));
     const dialog = await screen.findByRole("dialog", { name: "Disable item" });
     await userEvent.type(within(dialog).getByLabelText(/Reason/), "Same again");
@@ -475,38 +483,41 @@ describe("the filter bar", () => {
 });
 
 describe("Print", () => {
-  it("renders the print view with the title, the filters, the date and the demo label", async () => {
-    const print = vi.fn();
-    vi.stubGlobal("print", print);
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("writes the title, the filters, the date and the demo label into a print frame", async () => {
+    let printed: Document | undefined;
+    vi.spyOn(printer, "print").mockImplementation((frame) => {
+      printed = frame.document.cloneNode(true) as Document;
+      frame.dispatchEvent(new Event("afterprint"));
+    });
     const loadRows = vi.fn().mockResolvedValue(ROWS);
     renderList({ loadRows }, { path: "/items?brand=Quillon" });
     await userEvent.click(screen.getByRole("button", { name: "Print" }));
     await waitFor(() => {
-      expect(print).toHaveBeenCalledOnce();
+      expect(printed).toBeDefined();
     });
-    const sheet = document.body.querySelector<HTMLElement>("[data-print-view]");
-    if (!sheet) throw new Error("no print view");
+    const doc = printed;
+    if (!doc) throw new Error("nothing was printed");
     expect(loadRows).toHaveBeenCalledOnce();
-    expect(
-      within(sheet).getByRole("heading", { name: "Items" }),
-    ).toBeInTheDocument();
-    expect(
-      within(sheet).getByText("Filters: Brand: Quillon"),
-    ).toBeInTheDocument();
-    expect(within(sheet).getByText(/Printed .*20\d\d/)).toBeInTheDocument();
-    expect(within(sheet).getByText(/2 rows/)).toBeInTheDocument();
-    expect(within(sheet).getByText("Synthetic demo data")).toBeInTheDocument();
-    expect(within(sheet).getByText("I-0002")).toBeInTheDocument();
-
-    window.dispatchEvent(new Event("afterprint"));
+    const text = doc.body.textContent;
+    expect(text).toContain("Items");
+    expect(text).toContain("Filters: Brand: Quillon");
+    expect(text).toMatch(/Printed .*20\d\d.*2 rows/);
+    expect(text).toContain("Synthetic demo data");
+    expect(text).toContain("I-0002");
+    // The title row is in the head, so every printed page repeats it.
+    expect(doc.querySelector("thead")?.textContent).toContain("Items");
+    expect(doc.head.textContent).toContain("counter(page)");
     await waitFor(() => {
-      expect(document.body.querySelector("[data-print-view]")).toBeNull();
+      expect(document.querySelector("iframe")).toBeNull();
     });
   });
 
   it("says so, and prints nothing, when the rows cannot be fetched", async () => {
-    const print = vi.fn();
-    vi.stubGlobal("print", print);
+    const print = vi.spyOn(printer, "print");
     renderList({ loadRows: () => Promise.reject(new Error("down")) });
     await userEvent.click(screen.getByRole("button", { name: "Print" }));
     await waitFor(() => {

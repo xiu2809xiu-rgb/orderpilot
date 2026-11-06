@@ -8,11 +8,12 @@ import type { ListFilter } from "./types";
 interface FilterBarProps {
   filters: readonly ListFilter[];
   values: TableFilters;
-  search: string;
+  /** Undefined draws no search box, for a list whose API cannot search. */
+  search: string | undefined;
   onSearch: (search: string) => void;
   setFilter: (id: string, value: string | boolean | undefined) => void;
   searchDebounceMs: number;
-  /** Saved filters and column settings, at the far end. */
+  /** Saved views and column settings, at the far end. */
   trailing?: ReactNode;
 }
 
@@ -33,11 +34,13 @@ export function FilterBar({
   const more = filters.filter((filter) => filter.more);
   return (
     <div className="flex flex-wrap items-center gap-s1">
-      <SearchBox
-        value={search}
-        onSearch={onSearch}
-        debounceMs={searchDebounceMs}
-      />
+      {search === undefined ? null : (
+        <SearchBox
+          value={search}
+          onSearch={onSearch}
+          debounceMs={searchDebounceMs}
+        />
+      )}
       {main.map((filter) => (
         <FilterControl
           key={filter.id}

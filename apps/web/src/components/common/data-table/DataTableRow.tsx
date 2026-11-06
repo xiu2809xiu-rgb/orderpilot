@@ -1,9 +1,25 @@
 import type { ComponentProps, MouseEvent } from "react";
 import { TableCell, TableRow } from "@/components/ui/table";
+import { useMediaQuery } from "@/lib/useMediaQuery";
 import { cn } from "@/lib/utils";
 import { gestureOf, useOpenRecord } from "../useOpenRecord";
-import { cellClass } from "./cells";
-import { alignsEnd, type DataTableColumn } from "./types";
+import {
+  absorbedOnPhone,
+  ACTIONS_CELL,
+  cellClass,
+  SUMMARY_COLUMNS,
+} from "./cells";
+import { firstSticky } from "./DataTableHead";
+import { SelectCell } from "./SelectCells";
+import {
+  alignsEnd,
+  type DataTableColumn,
+  type RowActionsColumn,
+  type TableSelection,
+} from "./types";
+
+/** Below 768 px a table scrolls sideways, so the first column carries what tells rows apart. */
+const PHONE = "(max-width: 767px)";
 
 type RowEvent = MouseEvent<HTMLTableRowElement>;
 
@@ -11,13 +27,17 @@ interface DataTableRowProps<Row> {
   row: Row;
   columns: readonly DataTableColumn<Row>[];
   onRowClick?: ((row: Row) => void) | undefined;
-  rowHref?: ((row: Row) => string) | undefined;
+  /** Without a link for a row (it returns nothing), that row is not clickable. */
+  rowHref?: ((row: Row) => string | undefined) | undefined;
+  selection?: TableSelection<Row> | undefined;
+  rowActions?: RowActionsColumn<Row> | undefined;
 }
 
 /**
  * True for a click on the row itself. A click on a link or a button in the row
- * is that control's own, a popover's clicks bubble here through its portal
- * without being inside the row, and dragging over text is copying.
+ * is that control's own (a checkbox and the row menu are buttons), a popover's
+ * clicks bubble here through its portal without being inside the row, and
+ * dragging over text is copying.
  */
 function opensRow(event: RowEvent): boolean {
   const target = event.target;
@@ -27,21 +47,64 @@ function opensRow(event: RowEvent): boolean {
   return !window.getSelection()?.toString();
 }
 
-type CellsProps<Row> = Pick<DataTableRowProps<Row>, "row" | "columns"> &
+/** The next columns, under the first one, so a phone shows more than a number. */
+function PhoneSummary<Row>({
+  row,
+  columns,
+}: {
+  row: Row;
+  columns: readonly DataTableColumn<Row>[];
+}) {
+  const next = columns.slice(1, 1 + SUMMARY_COLUMNS);
+  if (next.length === 0) return null;
+  return (
+    <div className="mt-0.5 flex max-w-[60vw] flex-wrap gap-x-2 text-xs font-normal text-muted-foreground">
+      {next.map((column) => (
+        <span key={column.id}>{column.cell(row)}</span>
+      ))}
+    </div>
+  );
+}
+
+type CellsProps<Row> = Pick<
+  DataTableRowProps<Row>,
+  "row" | "columns" | "selection" | "rowActions"
+> &
   ComponentProps<typeof TableRow>;
 
-function Cells<Row>({ row, columns, ...props }: CellsProps<Row>) {
+function Cells<Row>({
+  row,
+  columns,
+  selection,
+  rowActions,
+  ...props
+}: CellsProps<Row>) {
+  const first = firstSticky(selection !== undefined);
+  const phone = useMediaQuery(PHONE);
   return (
-    <TableRow {...props}>
+    <TableRow
+      {...props}
+      data-selected={selection?.isSelected(row) ? "" : undefined}
+    >
+      {selection ? <SelectCell row={row} selection={selection} /> : null}
       {columns.map((column, position) => (
         <TableCell
           key={column.id}
-          className={cellClass(column, position === 0)}
+          className={cn(
+            cellClass(column, position === 0 ? first : "none"),
+            absorbedOnPhone(position) && "max-md:hidden",
+          )}
           data-numeric={alignsEnd(column) ? "" : undefined}
         >
           {column.cell(row)}
+          {phone && position === 0 ? (
+            <PhoneSummary row={row} columns={columns} />
+          ) : null}
         </TableCell>
       ))}
+      {rowActions ? (
+        <TableCell className={ACTIONS_CELL}>{rowActions.cell(row)}</TableCell>
+      ) : null}
     </TableRow>
   );
 }
@@ -52,22 +115,30 @@ function Cells<Row>({ row, columns, ...props }: CellsProps<Row>) {
  * opens it in a background tab and stays on the list.
  */
 function RecordRow<Row>({
-  row,
-  columns,
   rowHref,
-}: DataTableRowProps<Row> & { rowHref: (row: Row) => string }) {
+  ...props
+}: DataTableRowProps<Row> & { rowHref: (row: Row) => string | undefined }) {
   const openRecord = useOpenRecord();
+  const { row } = props;
+  const href = rowHref(row);
+  if (href === undefined) {
+    return (
+      <Cells
+        {...props}
+        className="group/row hover:bg-muted data-[selected]:bg-accent"
+      />
+    );
+  }
   return (
     <Cells
-      row={row}
-      columns={columns}
-      className="group/row cursor-pointer hover:bg-muted"
+      {...props}
+      className="group/row cursor-pointer hover:bg-muted data-[selected]:bg-accent"
       onClick={(event: RowEvent) => {
-        if (opensRow(event)) openRecord(rowHref(row), gestureOf(event));
+        if (opensRow(event)) openRecord(href, gestureOf(event));
       }}
       onAuxClick={(event: RowEvent) => {
         if (event.button === 1 && opensRow(event)) {
-          openRecord(rowHref(row), "background");
+          openRecord(href, "background");
         }
       }}
       onMouseDown={(event: RowEvent) => {
@@ -80,15 +151,16 @@ function RecordRow<Row>({
 
 /** One row of data. Router hooks run only for a row that opens a record. */
 export function DataTableRow<Row>(props: DataTableRowProps<Row>) {
-  const { row, columns, onRowClick, rowHref } = props;
-  if (rowHref) {
-    return <RecordRow row={row} columns={columns} rowHref={rowHref} />;
-  }
+  const { row, onRowClick, rowHref, ...rest } = props;
+  if (rowHref) return <RecordRow row={row} rowHref={rowHref} {...rest} />;
   return (
     <Cells
       row={row}
-      columns={columns}
-      className={cn("group/row hover:bg-muted", onRowClick && "cursor-pointer")}
+      {...rest}
+      className={cn(
+        "group/row hover:bg-muted data-[selected]:bg-accent",
+        onRowClick && "cursor-pointer",
+      )}
       onClick={
         onRowClick
           ? (event: RowEvent) => {

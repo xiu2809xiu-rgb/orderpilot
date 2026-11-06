@@ -1,4 +1,4 @@
-import type { Permission } from "@orderpilot/shared";
+import type { OperationLogEntity, Permission } from "@orderpilot/shared";
 import type { LucideIcon } from "lucide-react";
 
 export interface FilterOption {
@@ -24,11 +24,17 @@ export interface ListFilter {
   /** The first option of a select, such as "All brands". */
   allLabel?: string;
   more?: boolean;
+  /**
+   * Says a value in words when the options cannot, such as a link that asks
+   * for several statuses at once. The chip and the select use it.
+   */
+  describe?: (value: string) => string;
 }
 
 /**
- * The kinds of action the bar draws, in the order it draws them. Export and
- * Print are done by the template; the others call `onRun`.
+ * The kinds of action, in the order the bar draws them. Export and Print are
+ * done by the template; the others call `onRun`. View and Copy are for one
+ * row, so only the row menu offers them; Edit, Void and Disable are in both.
  */
 export const ACTION_KINDS = [
   "new",
@@ -39,6 +45,8 @@ export const ACTION_KINDS = [
   "import",
   "export",
   "print",
+  "view",
+  "copy",
 ] as const;
 export type ActionKind = (typeof ACTION_KINDS)[number];
 
@@ -73,11 +81,19 @@ export interface ListAction<Row> {
    * reason, as it does when nothing is selected.
    */
   enabledFor?: (rows: readonly Row[]) => string | undefined;
-  /** Runs the action with the selected rows. */
+  /** Runs the action with the selected rows, or with the one row of a row menu. */
   onRun?: (rows: readonly Row[]) => void;
   /** For Void and Disable: the template asks for a reason, then runs this. */
   reasoned?: ReasonedAction<Row>;
 }
+
+/**
+ * One page of every row the filter shows, as the generated call returns it,
+ * such as `(page) => masterDataItems({ ...params, page, pageSize: 200 })`.
+ */
+export type LoadPage<Row> = (
+  page: number,
+) => Promise<{ data: readonly Row[]; meta: { total: number } }>;
 
 /** What a list page needs from the query hook that fetched it. */
 export interface ListResult<Row> {
@@ -86,6 +102,17 @@ export interface ListResult<Row> {
   isError: boolean;
   error: unknown;
   refetch: () => unknown;
+}
+
+/**
+ * The operation log under a list: the selected record's who, when and what.
+ * `entityType` is the kind as the audit writer names it; the role must be able
+ * to read that kind of record (OPERATION_LOG_READERS), or no panel is drawn.
+ */
+export interface OperationLogSpec<Row> {
+  entityType: OperationLogEntity;
+  /** The record's id as the audit writer stored it. */
+  entityId: (row: Row) => string;
 }
 
 const DEFAULT_NEEDS: Record<ActionKind, ActionNeeds> = {
@@ -97,6 +124,8 @@ const DEFAULT_NEEDS: Record<ActionKind, ActionNeeds> = {
   import: "none",
   export: "none",
   print: "none",
+  view: "one",
+  copy: "one",
 };
 
 export function needsOf<Row>(action: ListAction<Row>): ActionNeeds {

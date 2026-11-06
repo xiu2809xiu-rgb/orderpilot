@@ -54,6 +54,7 @@ describe("the OpenAPI document (what orval reads)", () => {
       "/api/v1/monitoring/ai-usage",
       "/api/v1/monitoring/clickstream",
       "/api/v1/monitoring/observability",
+      "/api/v1/operation-log/{entityType}/{entityId}",
       "/api/v1/system/checks",
       "/api/v1/tracker/flow",
       "/api/v1/tracker/orders",

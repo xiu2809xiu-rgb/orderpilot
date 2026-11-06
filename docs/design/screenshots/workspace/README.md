@@ -9,3 +9,11 @@ Pictures of the list page template, taken from a production build of this branch
 - `gallery-filters-*`: the gallery's list demo with a customer lookup and an Updated date range under More filters, at 1440 and 390 wide.
 - `print-items-support.png`: the print view as the browser draws it for paper.
 - `gallery-lookup-touch-1024.png` and `gallery-date-range-touch-1024.png`: the lookup and the date range popovers in a real browser (Chromium with touch, so the coarse-pointer rules apply) at 1024 by 768, from the real API in demo mode. Every control in them measures 44 px or more.
+
+## The list grid (P-45)
+
+Taken from a Docker build of this branch (the `migrate`, `api` and `web` images, in a compose project of their own), with Playwright at 1440 by 900 and 390 by 844, in light and dark. All data is synthetic demo data. The order tracker, exceptions queue, task inbox and users tab are not shown: this story leaves them as they are on `main`, and their move onto the template is parked on `wip/p45-owner-screens` for each owner's own pull request.
+
+- `p45-product_manager-<items|customers|vendors>-<width>-<theme>.png`: the three master data lists as Product manager. At 390 the first column carries the next two columns under it, and the row menu stays at the right. The Saved views, Columns, Export and Print buttons sit above the table.
+- `p45-support-gallery-<width>-<theme>.png`: the gallery's list, which declares every feature: row checkboxes (24 px, with a 44 px touch target on a phone), select all, the row menu, saved views and columns.
+- `p45-support-gallery-selected-<width>-<theme>.png`: the same list with the first row ticked, scrolled to that record's operation log. It says "No changes recorded yet" because the sample orders have no audit events.

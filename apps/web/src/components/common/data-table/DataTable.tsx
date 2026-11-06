@@ -1,19 +1,21 @@
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { Table, TableHeader, TableRow } from "@/components/ui/table";
+import { Table } from "@/components/ui/table";
 import { ScrollRegion } from "../ScrollRegion";
 import { PartialNotice } from "../states";
 import { DataTableToolbar } from "./DataTableToolbar";
 import { useDataTableState, type DataTableState } from "./useDataTableState";
 import type { ExportOptions } from "./ExportMenu";
 import { DataTableBody, type TableStatus } from "./DataTableBody";
+import { DataTableHead } from "./DataTableHead";
 import { Pagination } from "./Pagination";
-import { SortHeader } from "./SortHeader";
-import {
-  type DataTableColumn,
-  type TableFilters,
-  type TableQuery,
-  type ToggleFilter,
+import type {
+  DataTableColumn,
+  RowActionsColumn,
+  TableFilters,
+  TableQuery,
+  TableSelection,
+  ToggleFilter,
 } from "./types";
 
 export interface DataTableProps<Row> {
@@ -36,7 +38,7 @@ export interface DataTableProps<Row> {
    */
   onRowClick?: (row: Row) => void;
   /** The record page a row opens. The row then works like a `RecordLink`. */
-  rowHref?: (row: Row) => string;
+  rowHref?: (row: Row) => string | undefined;
   status?: TableStatus;
   error?: unknown;
   onRetry?: () => void;
@@ -60,6 +62,10 @@ export interface DataTableProps<Row> {
   exportOptions?: ExportOptions<Row>;
   pageSizes?: readonly number[];
   searchDebounceMs?: number;
+  /** Row checkboxes. The caller keeps what is ticked. */
+  selection?: TableSelection<Row>;
+  /** The last cell of every row, such as its row menu. */
+  rowActions?: RowActionsColumn<Row>;
 }
 
 /**
@@ -89,6 +95,8 @@ export function DataTable<Row>({
   exportOptions,
   pageSizes = [10, 25, 50],
   searchDebounceMs = 300,
+  selection,
+  rowActions,
 }: DataTableProps<Row>) {
   const { t } = useTranslation("components");
   const state = useDataTableState(tableId, columns, query, onQueryChange);
@@ -100,7 +108,7 @@ export function DataTable<Row>({
         toolbar({ ...state, rows })
       ) : (
         <DataTableToolbar
-          columns={columns}
+          columns={state.arranged}
           shown={shown}
           rows={rows}
           query={query}
@@ -125,19 +133,13 @@ export function DataTable<Row>({
       >
         <Table aria-busy={status === "loading"}>
           <caption className="sr-only">{caption}</caption>
-          <TableHeader>
-            <TableRow className="hover:bg-transparent">
-              {shown.map((column, position) => (
-                <SortHeader
-                  key={column.id}
-                  column={column}
-                  sort={query.sort}
-                  onSort={sortBy}
-                  first={position === 0}
-                />
-              ))}
-            </TableRow>
-          </TableHeader>
+          <DataTableHead
+            columns={shown}
+            sort={query.sort}
+            onSort={sortBy}
+            selection={selection}
+            rowActions={rowActions}
+          />
           <DataTableBody
             columns={shown}
             rows={rows}
@@ -153,6 +155,8 @@ export function DataTable<Row>({
             onClearFilters={() => {
               change({ search: "", filters: {} });
             }}
+            selection={selection}
+            rowActions={rowActions}
           />
         </Table>
       </ScrollRegion>

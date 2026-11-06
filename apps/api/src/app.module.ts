@@ -18,6 +18,7 @@ import { InsightsModule } from "./modules/insights/insights.module.js";
 import { GovernanceModule } from "./modules/governance/governance.module.js";
 import { MasterDataModule } from "./modules/master-data/master-data.module.js";
 import { MonitoringModule } from "./modules/monitoring/monitoring.module.js";
+import { OperationLogModule } from "./modules/operation-log/operation-log.module.js";
 import { QueueModule } from "./queue/queue.module.js";
 import { RedisModule } from "./redis/redis.module.js";
 import { StorageModule } from "./storage/storage.module.js";
@@ -68,6 +69,7 @@ export class AppModule {
         MonitoringModule,
         AnalyticsModule,
         AuditViewerModule,
+        OperationLogModule,
       ],
       // The order is the rule: throttle, then who are you, then is the
       // request really from our page, then may you. Every route is covered;

@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.0.0
  */
 import type { UsersListActive } from './usersListActive.ts';
+import type { UsersListRole } from './usersListRole.ts';
 
 export type UsersListParams = {
 /**
@@ -19,4 +20,10 @@ page?: number;
  */
 pageSize?: number;
 active?: UsersListActive;
+role?: UsersListRole;
+/**
+ * @minLength 1
+ * @maxLength 100
+ */
+search?: string;
 };
