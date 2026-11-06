@@ -76,7 +76,7 @@ export function RecordLogPanel<Row>({
   );
 }
 
-function SelectedLog<Row>({
+export function SelectedLog<Row>({
   spec,
   entityId,
   label,

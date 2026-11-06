@@ -1,0 +1,46 @@
+{
+  "bar": {
+    "label": "Document actions",
+    "save": "Save",
+    "saveNew": "Save and new",
+    "submit": "Submit for approval",
+    "approve": "Approve",
+    "reject": "Reject",
+    "print": "Print or PDF",
+    "void": "Void",
+    "more": "More",
+    "saving": "Saving.",
+    "working": "Another action is running.",
+    "saveFirst": "Save your changes first."
+  },
+  "actionFailed": "That did not work. Try again, or check the document's status.",
+  "sections": {
+    "header": "Header",
+    "lines": "Lines"
+  },
+  "footer": {
+    "attachments": "Attachments",
+    "attachmentsCount_one": "{{count}} attachment",
+    "attachmentsCount_other": "{{count}} attachments",
+    "noAttachments": "No attachments yet.",
+    "status": "Status"
+  },
+  "print": {
+    "printedOn": "Printed {{when}}",
+    "failed": "Could not prepare the print view. Try again."
+  },
+  "tabs": {
+    "label": "Document details",
+    "timeline": "Timeline",
+    "checks": "Checks",
+    "documents": "Documents",
+    "log": "Operation log",
+    "attention_one": "{{count}} item needs attention",
+    "attention_other": "{{count}} items need attention",
+    "empty": {
+      "timeline": "No steps yet. They appear as the document moves.",
+      "checks": "No checks have run on this document.",
+      "documents": "No documents are linked to this one."
+    }
+  }
+}
