@@ -21,7 +21,11 @@ import request from "supertest";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { z } from "zod";
 import type { AuthContext } from "../../src/auth/auth-context.js";
-import { Auth, RequirePermission } from "../../src/auth/decorators.js";
+import {
+  Auth,
+  Authenticated,
+  RequirePermission,
+} from "../../src/auth/decorators.js";
 import { PasswordHasher } from "../../src/auth/domain/password-hasher.js";
 import { PermissionPolicy } from "../../src/auth/permission-policy.js";
 import { requestIdOf } from "../../src/common/request-id.js";
@@ -91,6 +95,54 @@ class StandInApprovalController {
       { ip: req.ip ?? null, traceId: requestIdOf(req) },
     );
     return { data: { approved: recordNo } };
+  }
+}
+
+const standInActionSchema = z.object({
+  action: z.string().min(1),
+  requesterUserId: z.uuid().optional(),
+  earlierDuties: z
+    .object({
+      "vendor-payment.approve": z.uuid().optional(),
+      "vendor-bank.change": z.uuid().optional(),
+    })
+    .optional(),
+});
+type StandInAction = z.infer<typeof standInActionSchema>;
+
+/**
+ * Stands in for the payment steps (area 2, and F-5's hold) until they ask the
+ * policy. It is open to any signed-in user on purpose, so that the chain's
+ * own permission rule is what refuses, as it must for a direct call. A real
+ * caller reads the requester and the earlier duties from its stored records;
+ * this one takes them from the body only to play those records. Registered
+ * only in this file's test app, never in production code.
+ */
+@Controller("test-only/actions")
+class StandInActionController {
+  constructor(@Inject(ModuleRef) private readonly modules: ModuleRef) {}
+
+  @Post(":recordNo")
+  @HttpCode(200)
+  @Authenticated()
+  async act(
+    @Param("recordNo") recordNo: string,
+    @Body(new ZodValidationPipe(standInActionSchema)) body: StandInAction,
+    @Auth() auth: AuthContext,
+    @Req() req: Request,
+  ) {
+    const policy = this.modules.get(AuthorisationService, { strict: false });
+    await policy.enforce(
+      {
+        actor: { userId: auth.user.id, role: auth.user.role },
+        action: body.action,
+        resource: { type: "Payment", id: recordNo },
+        requesterUserId: body.requesterUserId,
+        earlierDuties: body.earlierDuties,
+      },
+      { ip: req.ip ?? null, traceId: requestIdOf(req) },
+    );
+    return { data: { done: recordNo } };
   }
 }
 
@@ -540,10 +592,401 @@ describe("the approval setup seed (F-3)", () => {
   });
 });
 
-describe("no self-approval (F-4)", () => {
-  it.todo("refuses an approver approving a request they raised");
-  it.todo("refuses the same person clearing a bank-detail hold they raised");
-  it.todo("audits the refusal with the rule that decided");
+describe("no self-approval and segregation of duties (F-4)", () => {
+  let t: TestApp;
+  const ids = new Map<string, string>();
+  const sessions = new Map<string, Browser>();
+  const id = (who: string): string => {
+    const found = ids.get(who);
+    if (!found) throw new Error(`no user for ${who}`);
+    return found;
+  };
+  const as = (who: string): Browser => {
+    const found = sessions.get(who);
+    if (!found) throw new Error(`no session for ${who}`);
+    return found;
+  };
+
+  /** F-3's sample chain: requester, approver, substitute, then Management. */
+  const sample = (userId: string): ApprovalSetup => {
+    const base = {
+      userId,
+      approverId: null,
+      salesAmountApprovalLimit: "0.00",
+      purchaseAmountApprovalLimit: "0.00",
+      unlimitedSalesApproval: false,
+      unlimitedPurchaseApproval: false,
+      substituteUserId: null,
+      awayFrom: null,
+      awayUntil: null,
+    };
+    if (userId === id("requester")) {
+      return { ...base, approverId: id("approver") };
+    }
+    if (userId === id("approver")) {
+      return {
+        ...base,
+        approverId: id("management"),
+        substituteUserId: id("substitute"),
+        salesAmountApprovalLimit: "20000.00",
+        purchaseAmountApprovalLimit: "5000.00",
+      };
+    }
+    if (userId === id("substitute")) {
+      return {
+        ...base,
+        approverId: id("management"),
+        purchaseAmountApprovalLimit: "3000.00",
+      };
+    }
+    if (userId === id("management")) {
+      return {
+        ...base,
+        unlimitedSalesApproval: true,
+        unlimitedPurchaseApproval: true,
+      };
+    }
+    return base;
+  };
+  const change = (userId: string, overrides: Partial<ApprovalSetup> = {}) =>
+    t.app
+      .get(ApprovalSetupService)
+      .save({ ...sample(userId), ...overrides }, BY_THE_TEST);
+  const byUser = (who: string, role: Role) => ({
+    actor: { kind: "user" as const, userId: id(who), role },
+    ip: null,
+    traceId: `f4-${who}`,
+  });
+
+  const approveSpr = (who: string, raisedBy: string, recordNo = "SPR-F4-1") =>
+    call(t, as(who), "post", STAND_IN(recordNo), {
+      csrf: true,
+      body: {
+        action: "spr.approve",
+        amount: "100.00",
+        requesterUserId: id(raisedBy),
+      },
+    });
+  const act = (
+    who: string,
+    action: string,
+    earlierDuties: Record<string, string> = {},
+    recordNo = "PAY-F4-1",
+  ) =>
+    call(t, as(who), "post", `${API}/test-only/actions/${recordNo}`, {
+      csrf: true,
+      body: { action, earlierDuties },
+    });
+  const lastRefusal = async () =>
+    (await auditEvents(t))
+      .filter((event) => event.action === "governance.policy.refused")
+      .at(-1);
+  /** Grants a permission for the length of one piece of work, through the matrix route. */
+  const withGrant = async (
+    role: Role,
+    permission: string,
+    work: () => Promise<void>,
+  ) => {
+    const cell = `${API}/governance/matrix/${role}/permissions/${permission}`;
+    const grant = (granted: boolean) =>
+      call(t, as("SYSTEM_ADMIN"), "put", cell, {
+        csrf: true,
+        body: { granted },
+      });
+    expect((await grant(true)).status).toBe(200);
+    try {
+      await work();
+    } finally {
+      await grant(false);
+    }
+  };
+
+  beforeAll(async () => {
+    await resetTestData();
+    t = await createTestApp(
+      {},
+      [StandInApprovalController, StandInActionController],
+      (builder) =>
+        builder
+          .overrideProvider(PermissionPolicy)
+          .useClass(GovernancePermissionPolicy),
+    );
+    const users = t.app.get(UserRepository);
+    const hasher = t.app.get(PasswordHasher);
+    for (const [who, role] of [
+      ["requester", "PRODUCT_MANAGER"],
+      ["approver", "APPROVER"],
+      ["management", "MANAGEMENT"],
+      ["admin", "SYSTEM_ADMIN"],
+      ["finance", "FINANCE"],
+    ] as const) {
+      const user = await users.findByEmail(await emailForRole(role));
+      if (!user) throw new Error(`no demo user for ${role}`);
+      ids.set(who, user.id);
+      sessions.set(role, await demoSignIn(t, role));
+    }
+    for (const [who, email, role, name] of [
+      ["substitute", SECOND_APPROVER, "APPROVER", "Second Approver"],
+      ["finance2", "finance.second@example.test", "FINANCE", "Second Finance"],
+    ] as const) {
+      const user = await users.create({
+        email,
+        displayName: name,
+        role,
+        passwordHash: await hasher.hash(TEST_DEMO_PASSWORD),
+      });
+      ids.set(who, user.id);
+      sessions.set(who, await passwordSignIn(t, email));
+    }
+  });
+  beforeEach(async () => {
+    for (const who of ["requester", "approver", "substitute", "management"]) {
+      await change(id(who));
+    }
+  });
+  afterAll(async () => {
+    await t.close();
+  });
+
+  describe("no self-approval", () => {
+    it("refuses an approver approving a request they raised", async () => {
+      // The approver's own requests go to Management, so the route would not
+      // name them: the refusal must come from no-self-approval itself.
+      const res = await approveSpr("APPROVER", "approver");
+      expect(res.status).toBe(403);
+      expect((await lastRefusal())?.changes).toMatchObject({
+        rule: "no-self-approval",
+        requesterUserId: id("approver"),
+      });
+    });
+
+    it("refuses a substitute who raised the request, and passes it up to the escalation", async () => {
+      await change(id("substitute"), { approverId: id("approver") });
+      await change(id("approver"), awayNow());
+      expect((await approveSpr("substitute", "substitute")).status).toBe(403);
+      expect((await lastRefusal())?.changes).toMatchObject({
+        rule: "no-self-approval",
+      });
+      expect(
+        await t.app.get(AuthorisationService).deciderFor(id("substitute")),
+      ).toEqual({
+        kind: "escalated",
+        userId: id("management"),
+        from: id("approver"),
+      });
+      await withGrant("MANAGEMENT", "approvals.decide", async () => {
+        expect((await approveSpr("MANAGEMENT", "substitute")).status).toBe(200);
+      });
+    });
+
+    it("refuses the requester when the escalation leads back to them, and records that nobody may decide", async () => {
+      await change(id("management"), { approverId: id("approver") });
+      await change(id("approver"), awayNow());
+      await change(id("substitute"), awayNow());
+      const decider = await t.app
+        .get(AuthorisationService)
+        .deciderFor(id("management"));
+      expect(decider.kind).toBe("none");
+      await withGrant("MANAGEMENT", "approvals.decide", async () => {
+        expect((await approveSpr("MANAGEMENT", "management")).status).toBe(403);
+        expect((await lastRefusal())?.changes).toMatchObject({
+          rule: "no-self-approval",
+        });
+      });
+      expect((await approveSpr("APPROVER", "management")).status).toBe(403);
+      const refusal = await lastRefusal();
+      expect(refusal?.changes).toMatchObject({ rule: "approval-route" });
+      expect(refusal?.changes?.reason).toContain("raised the request");
+    });
+
+    it("refuses the requester after a change of role", async () => {
+      const database = t.app.get(Database).client;
+      // The guard reads the role on every request, so the same session now
+      // passes as an approver; only the policy still knows who raised it.
+      await database.user.update({
+        where: { id: id("requester") },
+        data: { role: "APPROVER" },
+      });
+      try {
+        expect((await approveSpr("PRODUCT_MANAGER", "requester")).status).toBe(
+          403,
+        );
+        expect((await lastRefusal())?.changes).toMatchObject({
+          rule: "no-self-approval",
+        });
+      } finally {
+        await database.user.update({
+          where: { id: id("requester") },
+          data: { role: "PRODUCT_MANAGER" },
+        });
+      }
+    });
+
+    it("never lets the system admin approve, post or pay, even by a direct call", async () => {
+      const guarded = await approveSpr("SYSTEM_ADMIN", "requester");
+      expect(guarded.status).toBe(403);
+      const atTheGuard = (await auditEvents(t))
+        .filter((event) => event.action === "auth.permission.refused")
+        .at(-1);
+      expect(atTheGuard?.changes).toMatchObject({
+        reason: "the system admin never holds this permission",
+      });
+      for (const action of [
+        "customer-payment.confirm",
+        "vendor-payment.approve",
+        "vendor-payment.release",
+      ]) {
+        expect((await act("SYSTEM_ADMIN", action)).status, action).toBe(403);
+        expect((await lastRefusal())?.changes, action).toMatchObject({
+          rule: "system-admin",
+        });
+      }
+    });
+  });
+
+  describe("nobody changes their own approval setup", () => {
+    it("refuses anyone changing their own limit or substitute, even with roles.manage", async () => {
+      await t.app
+        .get(ApprovalSetupService)
+        .save(sample(id("admin")), BY_THE_TEST);
+      const service = t.app.get(ApprovalSetupService);
+      for (const own of [
+        { purchaseAmountApprovalLimit: "1000000.00" },
+        { substituteUserId: id("approver") },
+      ]) {
+        await expect(
+          service.save(
+            { ...sample(id("admin")), ...own },
+            byUser("admin", "SYSTEM_ADMIN"),
+          ),
+        ).rejects.toMatchObject({ code: "FORBIDDEN" });
+        expect(await lastRefusal()).toMatchObject({
+          entityType: "ApprovalUserSetup",
+          entityId: id("admin"),
+          changes: { action: "approval-setup.change", rule: "own-setup" },
+        });
+      }
+    });
+
+    it("lets someone holding roles.manage change another person's setup, audited as them", async () => {
+      const saved = await t.app
+        .get(ApprovalSetupService)
+        .save(
+          { ...sample(id("approver")), purchaseAmountApprovalLimit: "6000.00" },
+          byUser("admin", "SYSTEM_ADMIN"),
+        );
+      expect(saved).toBe(true);
+      const event = (await auditEvents(t))
+        .filter((e) => e.action === "governance.approval-setup.changed")
+        .at(-1);
+      expect(event?.actor).toMatchObject({
+        kind: "user",
+        userId: id("admin"),
+      });
+    });
+
+    it("refuses someone without roles.manage changing any setup", async () => {
+      await expect(
+        t.app
+          .get(ApprovalSetupService)
+          .save(
+            { ...sample(id("requester")), purchaseAmountApprovalLimit: "1.00" },
+            byUser("approver", "APPROVER"),
+          ),
+      ).rejects.toMatchObject({ code: "FORBIDDEN" });
+      expect((await lastRefusal())?.changes).toMatchObject({
+        rule: "permission",
+      });
+    });
+  });
+
+  describe("segregation of duties", () => {
+    it("refuses the same person approving a vendor payment and clearing its hold", async () => {
+      const approvedBy = { "vendor-payment.approve": id("finance") };
+      expect(
+        (await act("FINANCE", "payment-hold.clear", approvedBy)).status,
+      ).toBe(403);
+      expect((await lastRefusal())?.changes).toMatchObject({
+        rule: "segregation-of-duties",
+        earlierDuties: approvedBy,
+      });
+      expect(
+        (await act("finance2", "payment-hold.clear", approvedBy)).status,
+      ).toBe(200);
+    });
+
+    it("refuses the same person clearing a bank-detail hold after changing the details", async () => {
+      const changedBy = { "vendor-bank.change": id("finance") };
+      expect(
+        (await act("FINANCE", "payment-hold.clear", changedBy)).status,
+      ).toBe(403);
+      expect(
+        (await act("finance2", "payment-hold.clear", changedBy)).status,
+      ).toBe(200);
+    });
+
+    it("refuses whoever changed a vendor's bank details approving or releasing a payment to that vendor", async () => {
+      const changedBy = { "vendor-bank.change": id("finance") };
+      await withGrant("FINANCE", "payments.post", async () => {
+        for (const action of [
+          "vendor-payment.approve",
+          "vendor-payment.release",
+        ]) {
+          expect((await act("FINANCE", action, changedBy)).status, action).toBe(
+            403,
+          );
+          expect((await lastRefusal())?.changes, action).toMatchObject({
+            rule: "segregation-of-duties",
+          });
+          expect(
+            (await act("finance2", action, changedBy)).status,
+            action,
+          ).toBe(200);
+        }
+      });
+    });
+
+    it("keeps confirming a customer's payment out of every pair", async () => {
+      const everything = {
+        "vendor-payment.approve": id("finance"),
+        "vendor-bank.change": id("finance"),
+      };
+      expect(
+        (await act("FINANCE", "customer-payment.confirm", everything)).status,
+      ).toBe(200);
+    });
+  });
+
+  it("audits the refusal with the rule that decided, shown the way F-1 shows one", async () => {
+    const cases = [
+      () => approveSpr("APPROVER", "approver", "SPR-F4-AUDIT"),
+      () =>
+        act(
+          "FINANCE",
+          "payment-hold.clear",
+          {
+            "vendor-payment.approve": id("finance"),
+          },
+          "PAY-F4-AUDIT",
+        ),
+    ];
+    for (const [index, run] of cases.entries()) {
+      const res = await run();
+      const { error } = errorEnvelopeSchema.parse(res.body);
+      expect({ ...error, traceId: "" }, String(index)).toEqual({
+        code: "FORBIDDEN",
+        message: "You do not have access to this.",
+        details: null,
+        traceId: "",
+      });
+      const event = await lastRefusal();
+      expect(event?.traceId, String(index)).toBe(res.headers["x-request-id"]);
+      expect(event?.changes?.rule, String(index)).toMatch(
+        /^(no-self-approval|segregation-of-duties)$/,
+      );
+      expect(event?.summary, String(index)).toContain("was refused");
+    }
+  });
 });
 
 describe("the bank-detail hold (F-5)", () => {
