@@ -107,7 +107,9 @@ export function SprDecisionForm({
     return (
       <div className="space-y-s2">
         {handedToYou}
-        <p className="text-muted-foreground">{t("spr.readOnly")}</p>
+        <p className="text-muted-foreground">
+          {t(handedToYou ? "spr.handedNoPermission" : "spr.readOnly")}
+        </p>
       </div>
     );
   }

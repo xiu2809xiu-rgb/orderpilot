@@ -1,5 +1,9 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { decimalStringSchema, SPR_DECISIONS } from "@orderpilot/shared";
+import {
+  decimalStringSchema,
+  SPR_DECISIONS,
+  type OrderStatus,
+} from "@orderpilot/shared";
 import { z } from "zod";
 import { ConflictError } from "../../common/domain-error.js";
 import { Database } from "../../database/database.js";
@@ -43,6 +47,7 @@ export interface StoredSpr extends SprData {
 }
 
 const SPR_TYPE = "SPR";
+const AWAITING_SPR = "AwaitingSpr" satisfies OrderStatus;
 
 /**
  * An SPR's own record: what its limit and its requester are read from. It is
@@ -69,22 +74,58 @@ export class SprRecordRepository {
     };
   }
 
-  /** The orders among these whose SPR task is finished: decided, or passed on. */
-  async finished(orderRefs: readonly string[]): Promise<ReadonlySet<string>> {
+  /** Every SPR the workflow runs whose order is waiting for its decision. */
+  async awaitingDecision(): Promise<StoredSpr[]> {
+    const rows = await this.database.client.workflowRecord.findMany({
+      where: { recordType: SPR_TYPE, instance: { status: AWAITING_SPR } },
+      select: {
+        id: true,
+        data: true,
+        updatedAt: true,
+        instance: { select: { orderRef: true } },
+      },
+    });
+    return rows.flatMap((row) => {
+      // One damaged record must not empty everyone's inbox. Deciding it still
+      // fails loudly, through findByOrder.
+      const data = sprDataSchema.safeParse(row.data);
+      return row.instance && data.success && !data.data.decision
+        ? [
+            {
+              ...data.data,
+              id: row.id,
+              orderRef: row.instance.orderRef,
+              updatedAt: row.updatedAt,
+            },
+          ]
+        : [];
+    });
+  }
+
+  /**
+   * The orders among these whose SPR is finished with as far as its approver goes:
+   * decided, or passed on and no longer waiting. A passed-on SPR on a waiting order
+   * is the routing's to place, because it comes back if nobody above can act.
+   */
+  async settled(orderRefs: readonly string[]): Promise<ReadonlySet<string>> {
     if (orderRefs.length === 0) return new Set();
     const rows = await this.database.client.workflowRecord.findMany({
       where: {
         recordType: SPR_TYPE,
         instance: { orderRef: { in: [...orderRefs] } },
       },
-      select: { data: true, instance: { select: { orderRef: true } } },
+      select: {
+        data: true,
+        instance: { select: { orderRef: true, status: true } },
+      },
     });
     return new Set(
       rows.flatMap((row) => {
         const data = sprDataSchema.safeParse(row.data);
         return row.instance &&
           data.success &&
-          (data.data.decision || data.data.passedOn)
+          (data.data.decision ||
+            (data.data.passedOn && row.instance.status !== AWAITING_SPR))
           ? [row.instance.orderRef]
           : [];
       }),
