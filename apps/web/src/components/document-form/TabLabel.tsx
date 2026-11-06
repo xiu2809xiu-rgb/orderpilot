@@ -14,7 +14,7 @@ export function TabLabel({ name, count }: { name: string; count: number }) {
         <>
           <Badge variant="secondary" aria-hidden="true" className="ml-1.5">
             {count}
-          </Badge>
+          </Badge>{" "}
           <span className="sr-only">{t("tabs.attention", { count })}</span>
         </>
       ) : null}

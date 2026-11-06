@@ -23,10 +23,10 @@ export function DocumentFooter({
   return (
     <footer className="grid gap-s2 border-t pt-s2 md:grid-cols-[1fr_auto_auto] md:items-start">
       <section aria-label={t("footer.attachments")} className="space-y-1">
-        <h3 className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
+        <p className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
           <Paperclip className="size-3.5" aria-hidden="true" />
           {t("footer.attachmentsCount", { count: attachments.length })}
-        </h3>
+        </p>
         {attachments.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             {t("footer.noAttachments")}

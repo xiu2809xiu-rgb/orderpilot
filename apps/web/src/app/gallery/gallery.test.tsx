@@ -37,6 +37,24 @@ describe("the component gallery route", () => {
     expect(await axeViolations(container)).toEqual([]);
   }, 60_000);
 
+  it("shows the document form with the actions this role may use", async () => {
+    renderApp("/gallery", { session: sessionFor("AUDITOR") });
+    const title = await screen.findByRole("heading", {
+      level: 2,
+      name: "Sales order SO-20261106-0001",
+    });
+    expect(title).toBeVisible();
+    const form = screen.getByRole("form", { name: "Sales order" });
+    expect(within(form).getByRole("button", { name: "Save" })).toBeVisible();
+    expect(
+      within(form).getByRole("button", { name: "Submit for approval" }),
+    ).toBeVisible();
+    // The auditor may read orders but not decide: Approve is not drawn at all.
+    expect(within(form).queryByRole("button", { name: "Approve" })).toBeNull();
+    expect(within(form).getByText("Draft")).toBeVisible();
+    expect(screen.getByRole("tab", { name: /Checks/ })).toBeVisible();
+  });
+
   it("lets the table be forced into its states", async () => {
     const user = userEvent.setup();
     renderApp("/gallery", { session: sessionFor("AUDITOR") });
