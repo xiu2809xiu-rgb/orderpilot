@@ -67,3 +67,24 @@ GET {{baseUrl}}/api/v1/workflows/open-rules
 
 ### Field settings and defaults for each document type, read from the table.
 GET {{baseUrl}}/api/v1/workflows/document-config
+
+### The SPRs the approval chain has handed to the caller, whatever their role. Real data.
+GET {{baseUrl}}/api/v1/workflows/tasks/handed-to-me?page=1&pageSize=25
+
+### The reminders and escalations sent to the caller or their role. Real data.
+GET {{baseUrl}}/api/v1/workflows/reminders/for-me?page=1&pageSize=25
+
+### The timing of each kind of task. Needs settings.manage.
+GET {{baseUrl}}/api/v1/workflows/sla-settings
+
+### Change one kind of task's timing, in minutes. Needs settings.manage, and is audited.
+PUT {{baseUrl}}/api/v1/workflows/sla-settings/APPROVE_SPR
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{
+  "dueAfterMinutes": 1440,
+  "remindBeforeMinutes": 240,
+  "escalateAfterMinutes": 0,
+  "escalateToRole": "MANAGEMENT"
+}
