@@ -140,6 +140,17 @@ model WorkflowEvent {
   @@index([type, occurredAt])
 }
 
+/// When a kind of task is due, and who is told if nobody acts. Configuration:
+/// the seed starts it from draft values (A-37), and an edit is audited.
+model WorkflowTaskSla {
+  taskKind             String   @id
+  dueAfterMinutes      Int
+  remindBeforeMinutes  Int
+  escalateAfterMinutes Int
+  escalateToRole       Role
+  updatedAt            DateTime @updatedAt @db.Timestamptz(3)
+}
+
 /// A reminder, an escalation or a notice to a role or a person.
 model WorkflowNotification {
   id              String           @id @default(uuid(7)) @db.Uuid
@@ -156,6 +167,9 @@ model WorkflowNotification {
   escalatesAt     DateTime?        @db.Timestamptz(3)
   sentAt          DateTime?        @db.Timestamptz(3)
   readAt          DateTime?        @db.Timestamptz(3)
+  /// Set by the sweep. The same key is the same notice, so a retry cannot send
+  /// it twice. Seeded samples have none.
+  dedupeKey       String?          @unique
   createdAt       DateTime         @default(now()) @db.Timestamptz(3)
 
   instance WorkflowInstance? @relation(fields: [instanceId], references: [id])

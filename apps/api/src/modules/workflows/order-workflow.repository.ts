@@ -37,6 +37,26 @@ export class OrderWorkflowRepository {
     return found?.stored ?? null;
   }
 
+  /** False when this event is already there. The key is unique per order. */
+  async recordTaskEvent(event: NewTaskEvent): Promise<boolean> {
+    const { count } = await this.database.client.workflowEvent.createMany({
+      data: [
+        {
+          instanceId: event.instanceId,
+          type: event.type,
+          actorKind: "system",
+          actorName: event.actorName,
+          summary: event.summary,
+          data: event.data,
+          idempotencyKey: event.key,
+          occurredAt: event.occurredAt,
+        },
+      ],
+      skipDuplicates: true,
+    });
+    return count === 1;
+  }
+
   /** One read for many orders, because the tracker asks about a whole page at once. */
   async findMany(
     orderRefs: readonly string[],
@@ -153,6 +173,16 @@ export class OrderWorkflowRepository {
       },
     });
   }
+}
+
+export interface NewTaskEvent {
+  readonly key: string;
+  readonly type: string;
+  readonly instanceId: string;
+  readonly actorName: string;
+  readonly summary: string;
+  readonly data: Prisma.InputJsonObject;
+  readonly occurredAt: Date;
 }
 
 /**

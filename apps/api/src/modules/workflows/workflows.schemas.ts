@@ -13,6 +13,9 @@ import {
   taskActionResultSchema,
   workflowReminderSchema,
   handedTaskSchema,
+  pageEnvelope,
+  taskSlaSchema,
+  workflowNoticeSchema,
   workflowTaskSchema,
 } from "@orderpilot/shared";
 import { z } from "zod";
@@ -20,6 +23,9 @@ import { z } from "zod";
 // The response shapes of the area 2 routes, written once so the controller and
 // the OpenAPI file (and so the generated web hooks) cannot drift apart.
 export const taskListResponseSchema = mockPageEnvelope(workflowTaskSchema);
+export const noticeListResponseSchema = pageEnvelope(workflowNoticeSchema);
+export const taskSlaListResponseSchema = dataEnvelope(z.array(taskSlaSchema));
+export const taskSlaResponseSchema = dataEnvelope(taskSlaSchema);
 export const handedTaskListResponseSchema = mockPageEnvelope(handedTaskSchema);
 export const reminderListResponseSchema = mockPageEnvelope(
   workflowReminderSchema,

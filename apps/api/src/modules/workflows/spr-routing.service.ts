@@ -13,6 +13,7 @@ type Decider = Awaited<ReturnType<AuthorisationService["deciderFor"]>>;
 /** An SPR now waiting on someone other than the requester's approver. */
 export interface SprHandover {
   readonly userId: string;
+  readonly role: Role;
   readonly reason: HandoverReason;
   readonly fromName: string;
   /** What area 4's policy compares when this person decides. */
@@ -74,20 +75,27 @@ export class SprRoutingService {
       ),
     );
     return new Map(
-      routed.map(({ spr, route }) => [
-        spr.orderRef,
-        {
-          userId: route.userId,
-          reason: route.reason,
-          fromName:
-            "userId" in route.from
-              ? (names.get(route.from.userId) ?? route.from.userId)
-              : route.from.name,
-          amount: spr.amount,
-          chainStart: chainStart(spr),
-          canOpen: holders.get(route.userId)?.canOpen === true,
-        },
-      ]),
+      routed.flatMap(({ spr, route }) => {
+        const holder = holders.get(route.userId);
+        if (!holder) return [];
+        return [
+          [
+            spr.orderRef,
+            {
+              userId: route.userId,
+              role: holder.role,
+              reason: route.reason,
+              fromName:
+                "userId" in route.from
+                  ? (names.get(route.from.userId) ?? route.from.userId)
+                  : route.from.name,
+              amount: spr.amount,
+              chainStart: chainStart(spr),
+              canOpen: holder.canOpen,
+            },
+          ] as const,
+        ];
+      }),
     );
   }
 
