@@ -1,6 +1,7 @@
 import { Module, type DynamicModule } from "@nestjs/common";
 import { AuditModule } from "../audit/audit.module.js";
 import { AppConfig } from "../config/app-config.js";
+import { GovernancePermissionPolicy } from "../modules/governance/governance-permission-policy.js";
 import { SessionsModule } from "../sessions/sessions.module.js";
 import { UsersModule } from "../users/users.module.js";
 import { AuthAuditor } from "./auth-auditor.js";
@@ -14,7 +15,6 @@ import { PasswordHasher } from "./domain/password-hasher.js";
 import { AuthGuard } from "./guards/auth.guard.js";
 import { CsrfGuard } from "./guards/csrf.guard.js";
 import { PermissionsGuard } from "./guards/permissions.guard.js";
-import { MatrixPermissionPolicy } from "./matrix-permission-policy.js";
 import { PermissionPolicy } from "./permission-policy.js";
 import { RolePermissionRepository } from "./role-permission.repository.js";
 
@@ -50,7 +50,9 @@ export class AuthModule {
           useFactory: (c: AppConfig) => new CsrfTokens(c.auth.jwtSecret),
           inject: [AppConfig],
         },
-        { provide: PermissionPolicy, useClass: MatrixPermissionPolicy },
+        // Area 4's policy (F-3, ADR 0041) answers every route check, so the
+        // guard and an area's own enforce() ask the same rules.
+        { provide: PermissionPolicy, useClass: GovernancePermissionPolicy },
         AuthGuard,
         CsrfGuard,
         PermissionsGuard,

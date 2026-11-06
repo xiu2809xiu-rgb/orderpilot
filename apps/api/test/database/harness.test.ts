@@ -83,17 +83,19 @@ describe("the test harness", () => {
     const events = t.app.get(AuditEventRepository);
     const count = async () =>
       (await events.list({ page: 1, pageSize: 50 })).meta.total;
-    // The first link of the chain, then one event for each of the nine users.
-    expect(await count()).toBe(10);
+    // The first link of the chain, one event for each of the nine users, and
+    // one for each of the three rows of area 4's sample approval chain.
+    expect(await count()).toBe(13);
     const lines: string[] = [];
     await runSeed(testConfig(), (line) => lines.push(line));
     await runSeed(testConfig());
-    expect(await count()).toBe(10);
+    expect(await count()).toBe(13);
     expect(lines.map((l) => l.split(":")[0])).toEqual([
       "seed storage",
       "seed audit",
       "seed role permissions",
       "seed users",
+      "seed approval setups",
       "seed synthetic data",
       "seed workflows",
     ]);
