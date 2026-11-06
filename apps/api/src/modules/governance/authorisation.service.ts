@@ -10,6 +10,18 @@ import { deciderFor, type Decider } from "./domain/approval-route.js";
 import type { ApprovalSetup, Approver } from "./domain/approval-setup.js";
 import { ACTION_POLICY } from "./domain/policies.js";
 import { policyActionOf } from "./domain/policy-actions.js";
+import type { EarlierDuties } from "./domain/segregation-of-duties.js";
+
+/**
+ * F-1's PolicyRequest, plus who did the earlier duties on this record, for
+ * segregation of duties (F-4). The caller takes `requesterUserId` and every
+ * person in `earlierDuties` from its own stored records (the SPR's raisedBy,
+ * the payment's approvedBy), never from the request body. Copied from a body,
+ * they would let a caller name someone else and pass every rule they guard.
+ */
+export interface GovernanceRequest extends PolicyRequest {
+  readonly earlierDuties?: EarlierDuties;
+}
 
 /** Where a request came from, for the audit trail. Area 2's ActionInfo has this shape. */
 export interface RequestInfo {
@@ -38,7 +50,7 @@ export class AuthorisationService {
 
   /** The decision on one action, without acting on it. */
   async decide(
-    request: PolicyRequest,
+    request: GovernanceRequest,
     now: Date = new Date(),
   ): Promise<PolicyDecision> {
     const action = policyActionOf(request.action);
@@ -49,21 +61,24 @@ export class AuthorisationService {
         reason: "the policy knows no such action",
       };
     }
+    const { limit } = action;
     const [roleHoldsPermission, approvers] = await Promise.all([
       this.matrix.has(request.actor.role, action.permission),
-      this.approversAround(request.requesterUserId, request.actor.userId),
+      limit
+        ? this.approversAround(request.requesterUserId, request.actor.userId)
+        : undefined,
     ]);
     return ACTION_POLICY.decide({
       actor: request.actor,
+      action: request.action,
       permission: action.permission,
       roleHoldsPermission,
-      approval: {
-        limit: action.limit,
-        amount: request.amount,
-        requesterUserId: request.requesterUserId,
-        approvers,
-        now,
-      },
+      resource: request.resource,
+      requesterUserId: request.requesterUserId,
+      earlierDuties: request.earlierDuties,
+      ...(limit && approvers
+        ? { approval: { limit, amount: request.amount, approvers, now } }
+        : {}),
     });
   }
 
@@ -73,7 +88,7 @@ export class AuthorisationService {
    * message says nothing about the rules.
    */
   async enforce(
-    request: PolicyRequest,
+    request: GovernanceRequest,
     info: RequestInfo,
     now: Date = new Date(),
   ): Promise<void> {
@@ -148,7 +163,7 @@ export class AuthorisationService {
    * for the guard's refusals (ADR 0012).
    */
   private async auditRefusal(
-    request: PolicyRequest,
+    request: GovernanceRequest,
     decision: PolicyDecision,
     info: RequestInfo,
   ): Promise<void> {
@@ -169,6 +184,7 @@ export class AuthorisationService {
           reason: decision.reason,
           amount: request.amount ?? null,
           requesterUserId: request.requesterUserId ?? null,
+          earlierDuties: request.earlierDuties ?? null,
         },
         ip: info.ip,
         traceId: info.traceId,

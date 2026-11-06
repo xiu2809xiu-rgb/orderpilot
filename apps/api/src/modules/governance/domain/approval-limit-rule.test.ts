@@ -85,22 +85,31 @@ const away = { awayFrom: at(-1), awayUntil: at(1) };
 /** An action that needs no approval, such as reading. */
 const plain = (actorUserId: string): PolicyContext => ({
   actor: { userId: actorUserId, role: "APPROVER" },
+  action: "spr.approve",
   permission: "approvals.decide",
   roleHoldsPermission: true,
 });
 
 function context(
   actorUserId: string,
-  approval: Partial<ApprovalFacts> = {},
+  overrides: Partial<ApprovalFacts> & {
+    readonly requesterUserId?: string | undefined;
+  } = {},
 ): PolicyContext {
+  // An explicit `requesterUserId: undefined` must survive, so no default parameter.
+  const { requesterUserId, ...approval } = {
+    requesterUserId: REQUESTER,
+    ...overrides,
+  };
   return {
     actor: { userId: actorUserId, role: "APPROVER" },
+    action: "spr.approve",
     permission: "approvals.decide",
     roleHoldsPermission: true,
+    requesterUserId,
     approval: {
       limit: "purchase",
       amount: "100.00",
-      requesterUserId: REQUESTER,
       approvers: chain(),
       now: NOW,
       ...approval,

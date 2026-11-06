@@ -4,6 +4,7 @@ import { AuditService } from "../../audit/audit.service.js";
 import { Database } from "../../database/database.js";
 import { UserRepository } from "../../users/user.repository.js";
 import { ApprovalSetupRepository } from "./approval-setup.repository.js";
+import { AuthorisationService } from "./authorisation.service.js";
 import {
   assertValidSetup,
   changesBetween,
@@ -30,11 +31,28 @@ export class ApprovalSetupService {
     private readonly setups: ApprovalSetupRepository,
     @Inject(UserRepository) private readonly users: UserRepository,
     @Inject(AuditService) private readonly audit: AuditService,
+    @Inject(AuthorisationService)
+    private readonly policy: AuthorisationService,
   ) {}
 
-  /** Saves one row. Resolves to false when nothing changed. */
+  /**
+   * Saves one row. Resolves to false when nothing changed. A person's change
+   * asks the policy first (roles.manage, and never their own row); a system
+   * actor such as the seed is not a person and has no row of its own.
+   */
   async save(setup: ApprovalSetup, by: ChangeInfo): Promise<boolean> {
     assertValidSetup(setup);
+    if (by.actor.kind === "user") {
+      // Before the transaction, so a refusal's audit event is not rolled back.
+      await this.policy.enforce(
+        {
+          actor: { userId: by.actor.userId, role: by.actor.role },
+          action: "approval-setup.change",
+          resource: { type: "ApprovalUserSetup", id: setup.userId },
+        },
+        by,
+      );
+    }
     return this.database.transaction(async () => {
       const before = await this.setups.find(setup.userId);
       const changes = changesBetween(before, setup);

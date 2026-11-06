@@ -5,18 +5,26 @@ import type {
 } from "@orderpilot/shared";
 import type { Approver } from "./approval-setup.js";
 import type { LimitKind } from "./policy-actions.js";
+import type { EarlierDuties } from "./segregation-of-duties.js";
 
 /**
- * Everything a rule may read about one request: who asks, for which
- * permission, and, for an approval, the amount, the requester and the
- * approval setups on the requester's chain. The service gathers it; the rules
- * only read it, so each one is a plain unit test.
+ * Everything a rule may read about one request: who asks, to do what, on which
+ * record, who raised it and who did its earlier duties, and, for an approval,
+ * the amount and the approval setups on the requester's chain. The service
+ * gathers it; the rules only read it, so each one is a plain unit test.
  */
 export interface PolicyContext {
   readonly actor: PolicyRequest["actor"];
+  /** The action asked about, such as "spr.approve". */
+  readonly action: string;
   readonly permission: Permission;
   /** Whether the actor's role holds the permission in the role-permission matrix. */
   readonly roleHoldsPermission: boolean;
+  readonly resource?: PolicyRequest["resource"];
+  /** Who raised the request, from the caller's stored record. */
+  readonly requesterUserId?: string | undefined;
+  /** Who did each earlier duty on this record, from the caller's stored records. */
+  readonly earlierDuties?: EarlierDuties | undefined;
   /** Present only when the action is an approval with a limit. */
   readonly approval?: ApprovalFacts;
 }
@@ -24,7 +32,6 @@ export interface PolicyContext {
 export interface ApprovalFacts {
   readonly limit: LimitKind;
   readonly amount: string | undefined;
-  readonly requesterUserId: string | undefined;
   /** The setups the rules may need, by user id. */
   readonly approvers: ReadonlyMap<string, Approver>;
   readonly now: Date;
