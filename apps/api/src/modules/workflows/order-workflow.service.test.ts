@@ -592,7 +592,7 @@ describe("order transitions (the state machine)", () => {
     }
   });
 
-  it("leaves the seed writing only labels the machine would refuse as a status", () => {
+  it("gives the dataset only labels the machine would refuse, so the seed chooses which orders it runs", () => {
     for (const order of syntheticDataset().orders) {
       expect(orderStatusSchema.safeParse(order.sampleScreenState).success).toBe(
         false,

@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { AuditModule } from "../../audit/audit.module.js";
 import { syntheticSourceProvider } from "../../common/synthetic-source.js";
+import { UsersModule } from "../../users/users.module.js";
 import { GovernanceModule } from "../governance/governance.module.js";
 import { ApprovalPolicy } from "./domain/approval-policy.js";
 import {
@@ -13,6 +14,8 @@ import { MockDecisionOverlay } from "./mock/mock-decision-overlay.js";
 import { MockWorkflowActions } from "./mock/mock-workflow-actions.js";
 import { MockWorkflowReadModel } from "./mock-workflow-read-model.js";
 import { OrderWorkflowRepository } from "./order-workflow.repository.js";
+import { SprApprovalService } from "./spr-approval.service.js";
+import { SprRecordRepository } from "./spr-record.repository.js";
 import { OrderWorkflowService } from "./order-workflow.service.js";
 import { WorkflowCheckReporter } from "./workflow-check-reporter.js";
 import { WorkflowOrderStatusReader } from "./workflow-order-status-reader.js";
@@ -30,7 +33,7 @@ import { WorkflowsService } from "./workflows.service.js";
  * which runs the state machine (C-2) and is what other areas read status from.
  */
 @Module({
-  imports: [AuditModule, GovernanceModule],
+  imports: [AuditModule, GovernanceModule, UsersModule],
   controllers: [WorkflowsController],
   providers: [
     WorkflowsService,
@@ -41,6 +44,8 @@ import { WorkflowsService } from "./workflows.service.js";
     RecordNumberRepository,
     RecordNumberService,
     OrderWorkflowRepository,
+    SprRecordRepository,
+    SprApprovalService,
     OrderWorkflowService,
     WorkflowOrderStatusReader,
     WorkflowCheckReporter,

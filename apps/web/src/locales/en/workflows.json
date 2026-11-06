@@ -178,8 +178,12 @@
     "noSubstitute": "None",
     "decisionHeading": "Your decision",
     "decisionDone": "Decided: {{outcome}} by {{name}} on {{date}}",
+    "passedOn": "Above the limit: {{by}} passed this on to {{name}} on {{date}}. It is waiting for their decision.",
+    "passedToYou": "{{by}} passed this on to you on {{date}}, because it is above their limit. They would have marked it {{asked}}. It waits for your decision.",
+    "notRunnable": "This is a sample the workflow does not run yet, so it cannot be decided here.",
     "toast": {
       "done": "{{ref}} {{outcome}}",
+      "passedOn": "{{ref}} is above your limit, so it went to {{name}}",
       "failed": "The decision was not saved"
     },
     "outcomes": {

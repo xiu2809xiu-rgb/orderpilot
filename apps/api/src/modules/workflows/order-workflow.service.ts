@@ -34,7 +34,7 @@ import {
 
 type SprDecision = Extract<
   OrderCommand,
-  { type: "SPR_APPROVED" | "SPR_REJECTED" }
+  { type: "SPR_APPROVED" | "SPR_REJECTED" | "SPR_DECISION_UNDONE" }
 >;
 
 /**
@@ -173,7 +173,11 @@ export class OrderWorkflowService {
   ): Promise<OrderTransitionResult> {
     // The signature leaves these out; this keeps a cast from getting past the policy.
     const type: string = command.type;
-    if (type === "SPR_APPROVED" || type === "SPR_REJECTED") {
+    if (
+      type === "SPR_APPROVED" ||
+      type === "SPR_REJECTED" ||
+      type === "SPR_DECISION_UNDONE"
+    ) {
       throw new Error(`${type} must go through decideSpr.`);
     }
     return this.transition(orderRef, command, actor, info, now);
@@ -190,8 +194,10 @@ export class OrderWorkflowService {
     actor: OrderActor,
     info: RequestInfo,
     now: Date = new Date(),
+    /** Writes that must commit or roll back with the move, such as the SPR's own record. */
+    alongside?: () => Promise<void>,
   ): Promise<OrderTransitionResult> {
-    return this.transition(orderRef, decision, actor, info, now, async () => {
+    const askPolicy = async () => {
       // The machine lets only people through to here; this satisfies the type.
       if (actor.kind !== "user") return;
       await this.policy.enforce(
@@ -205,7 +211,16 @@ export class OrderWorkflowService {
         info,
         now,
       );
-    });
+    };
+    return this.transition(
+      orderRef,
+      decision,
+      actor,
+      info,
+      now,
+      askPolicy,
+      alongside,
+    );
   }
 
   /** Null for an order with no workflow, and for a sample the machine never ran. */
@@ -255,6 +270,7 @@ export class OrderWorkflowService {
     info: RequestInfo,
     now: Date,
     askPolicy?: () => Promise<void>,
+    alongside?: () => Promise<void>,
   ): Promise<OrderTransitionResult> {
     const stored = await this.repository.find(orderRef);
     if (!stored) throw new NotFoundError(`Order ${orderRef}'s workflow`);
@@ -308,6 +324,7 @@ export class OrderWorkflowService {
         ip: info.ip,
         traceId: info.traceId,
       });
+      await alongside?.();
       return true;
     });
     if (!saved) {

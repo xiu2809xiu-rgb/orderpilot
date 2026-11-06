@@ -43,6 +43,7 @@ export type OrderCommand =
   | { readonly type: "SPR_RAISED" }
   | { readonly type: "SPR_APPROVED" }
   | { readonly type: "SPR_REJECTED"; readonly reason: string }
+  | { readonly type: "SPR_DECISION_UNDONE" }
   | { readonly type: "PI_SENT" }
   | {
       readonly type: "PAYMENT_CONFIRMED";
@@ -117,6 +118,12 @@ export const ORDER_FLOW_RULES = Symbol("ORDER_FLOW_RULES");
 /** `SYSTEM`: another area reports it. No person can press it directly. */
 const SYSTEM = "SYSTEM";
 
+/**
+ * `POLICY`: a person, and which person is area 4's policy to say: limits,
+ * substitutes and escalation reach beyond one role. The service asks it first.
+ */
+const POLICY = "POLICY";
+
 /** `RESUME`: back to wherever the order was when it was held. */
 const RESUME = "RESUME";
 
@@ -124,7 +131,7 @@ interface Transition {
   readonly on: OrderCommandType;
   readonly from: readonly OrderStatus[];
   readonly to: OrderStatus | typeof RESUME;
-  readonly by: Role | typeof SYSTEM;
+  readonly by: Role | typeof SYSTEM | typeof POLICY;
 }
 
 // Goods have left once an order is Released, so these cannot be cancelled.
@@ -168,7 +175,7 @@ const TRANSITIONS: readonly Transition[] = [
     on: "SPR_APPROVED",
     from: ["AwaitingSpr"],
     to: "SprApproved",
-    by: "APPROVER",
+    by: POLICY,
   },
   // Back to the stock check, so that a corrected SPR is raised and approved
   // afresh. If the stock is short, the PI stays blocked until one is.
@@ -176,7 +183,14 @@ const TRANSITIONS: readonly Transition[] = [
     on: "SPR_REJECTED",
     from: ["AwaitingSpr"],
     to: "StockChecked",
-    by: "APPROVER",
+    by: POLICY,
+  },
+  // Only until the order moves on: once a PI has gone, the table refuses it.
+  {
+    on: "SPR_DECISION_UNDONE",
+    from: ["SprApproved", "StockChecked"],
+    to: "AwaitingSpr",
+    by: POLICY,
   },
   {
     on: "PI_SENT",
@@ -425,7 +439,10 @@ export class OrderStateMachine {
   private assertActor(type: OrderCommandType, actor: OrderActor): void {
     // Every row of one event names the same actor.
     const by = TRANSITIONS.find((t) => t.on === type)?.by;
-    const allowed = actor.kind === "system" ? by === SYSTEM : by === actor.role;
+    const allowed =
+      actor.kind === "system"
+        ? by === SYSTEM
+        : by === POLICY || by === actor.role;
     if (!allowed) {
       throw new DomainError("FORBIDDEN", `You may not make ${type}.`);
     }

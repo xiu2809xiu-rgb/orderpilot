@@ -65,6 +65,22 @@ export const sprDetailSchema = z.object({
   substituteName: z.string().min(1).nullable(),
   /** The name of the person behind `approver.setup.approverId`, who is told when the approver does not act. */
   escalatesToName: z.string().min(1).nullable(),
+  /** Who it went to, when it was above someone's limit. It still waits for a decision. */
+  passedTo: z
+    .object({
+      name: z.string().min(1),
+      byName: z.string().min(1),
+      at: z.iso.datetime(),
+      /** What the person who passed it on would have decided, and why. Nothing was decided. */
+      askedOutcome: z.enum(SPR_DECISIONS),
+      comment: z.string(),
+      /** True when the person reading is who it waits for. */
+      youDecide: z.boolean(),
+    })
+    .nullable()
+    .optional(),
+  /** False for a sample the workflow does not run, which nobody can decide. */
+  decidable: z.boolean().optional(),
   /** Null until someone decides. */
   decision: z
     .object({
@@ -87,6 +103,8 @@ export const sprDecisionResultSchema = mockRecordedSchema.extend({
   outcome: z.enum(SPR_DECISIONS),
   /** The comment as it was understood, so the screen can show it was heard. */
   comment: z.string(),
+  /** Set when it was above the person's limit: nothing was decided, and it went to this person. */
+  passedToName: z.string().min(1).optional(),
 });
 export type SprDecisionResult = z.infer<typeof sprDecisionResultSchema>;
 

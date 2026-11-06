@@ -4,8 +4,9 @@
 //
 // Two rules for this file:
 // - A workflow instance's `status` is plain text on purpose. Only the state
-//   machine (Azri's C-2) ever writes it, and it decides the values. The base
-//   writes it in one place only: the demo seed, with `sample-` labels.
+//   machine (Azri's C-2) ever writes it, and it decides the values. The only
+//   other writer is the demo seed: `sample-` labels, and the real `AwaitingSpr`
+//   for the orders whose SPR waits for a decision.
 // - No relation points at another area's table (User, orders), because a
 //   relation needs a field on that table and this file may not edit theirs.
 //   The ids are plain UUIDs or Navision numbers, checked by the service.

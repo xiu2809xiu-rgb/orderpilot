@@ -5,19 +5,6 @@ import { describe, it } from "vitest";
 // one into a real test in the story that builds the behaviour, then delete the
 // todo line.
 
-describe("SPR approval within limits", () => {
-  it.todo(
-    "approves an SPR whose amount is within the approver's purchase limit",
-  );
-  it.todo("sends an SPR above the approver's limit to the next approver");
-  it.todo(
-    "accepts any amount from an approver with unlimited purchase approval",
-  );
-  it.todo("passes the SPR to the substitute while the approver is away");
-  it.todo("refuses a requester approving their own SPR");
-  it.todo("keeps the comment with the decision and the person who made it");
-});
-
 describe("reminders and escalations", () => {
   it.todo("schedules a reminder before a task is due");
   it.todo("sends the reminder once, however many times the job runs");

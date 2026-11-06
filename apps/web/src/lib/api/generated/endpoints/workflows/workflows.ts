@@ -1021,7 +1021,7 @@ export function useWorkflowsSpr<TData = Awaited<ReturnType<typeof workflowsSpr>>
 
 
 /**
- * @summary Approve a stock purchase request, with a comment. Kept in the mock overlay, audited
+ * @summary Approve a stock purchase request, with a comment. Above the approver's limit it goes on up the chain instead. Audited
  */
 export const workflowsApprove = (
     recordNo: string,
@@ -1100,7 +1100,7 @@ export function useWorkflowsApprove<TData = Awaited<ReturnType<typeof workflowsA
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary Approve a stock purchase request, with a comment. Kept in the mock overlay, audited
+ * @summary Approve a stock purchase request, with a comment. Above the approver's limit it goes on up the chain instead. Audited
  */
 
 export function useWorkflowsApprove<TData = Awaited<ReturnType<typeof workflowsApprove>>, TError = ErrorType<unknown>>(
@@ -1122,7 +1122,7 @@ export function useWorkflowsApprove<TData = Awaited<ReturnType<typeof workflowsA
 
 
 /**
- * @summary Reject a stock purchase request, with a comment. Kept in the mock overlay, audited
+ * @summary Reject a stock purchase request, with a comment. Above the approver's limit it goes on up the chain instead. Audited
  */
 export const workflowsReject = (
     recordNo: string,
@@ -1201,7 +1201,7 @@ export function useWorkflowsReject<TData = Awaited<ReturnType<typeof workflowsRe
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary Reject a stock purchase request, with a comment. Kept in the mock overlay, audited
+ * @summary Reject a stock purchase request, with a comment. Above the approver's limit it goes on up the chain instead. Audited
  */
 
 export function useWorkflowsReject<TData = Awaited<ReturnType<typeof workflowsReject>>, TError = ErrorType<unknown>>(

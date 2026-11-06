@@ -24,10 +24,10 @@ export const reminderListResponseSchema = mockPageEnvelope(
 );
 export const orderFlowResponseSchema = mockEnvelope(orderFlowSchema);
 export const sprResponseSchema = mockEnvelope(sprDetailSchema);
-export const sprDecisionResponseSchema = mockEnvelope(sprDecisionResultSchema);
+export const sprDecisionResponseSchema = dataEnvelope(sprDecisionResultSchema);
 export const paymentResponseSchema = mockEnvelope(paymentResultSchema);
 export const paymentUndoResponseSchema = mockEnvelope(paymentUndoResultSchema);
-export const sprDecisionUndoResponseSchema = mockEnvelope(
+export const sprDecisionUndoResponseSchema = dataEnvelope(
   sprDecisionUndoResultSchema,
 );
 export const taskActionResponseSchema = mockEnvelope(taskActionResultSchema);
