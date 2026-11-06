@@ -12,6 +12,7 @@ import {
   sprDetailSchema,
   taskActionResultSchema,
   workflowReminderSchema,
+  handedTaskSchema,
   workflowTaskSchema,
 } from "@orderpilot/shared";
 import { z } from "zod";
@@ -19,6 +20,7 @@ import { z } from "zod";
 // The response shapes of the area 2 routes, written once so the controller and
 // the OpenAPI file (and so the generated web hooks) cannot drift apart.
 export const taskListResponseSchema = mockPageEnvelope(workflowTaskSchema);
+export const handedTaskListResponseSchema = mockPageEnvelope(handedTaskSchema);
 export const reminderListResponseSchema = mockPageEnvelope(
   workflowReminderSchema,
 );

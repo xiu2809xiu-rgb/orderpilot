@@ -76,6 +76,7 @@ describe("the OpenAPI document (what orval reads)", () => {
       "/api/v1/workflows/sprs/{recordNo}/reject",
       "/api/v1/workflows/sprs/{recordNo}/undo",
       "/api/v1/workflows/tasks",
+      "/api/v1/workflows/tasks/handed-to-me",
       "/api/v1/workflows/tasks/{taskId}/complete",
       "/api/v1/workflows/tasks/{taskId}/undo",
       "/health",

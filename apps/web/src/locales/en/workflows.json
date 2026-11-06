@@ -12,6 +12,18 @@
   "notice": {
     "notApplied": "Nothing was changed"
   },
+  "handed": {
+    "title": "Waiting for you",
+    "description": "These came to you personally, so only you can see them here.",
+    "reason": {
+      "substitute": "You are standing in for {{name}}.",
+      "escalated": "{{name}} cannot act and no substitute is available, so this came to you.",
+      "passed-on": "{{name}} passed this on to you, because it is above their limit.",
+      "named": "{{name}} raised this, and you are named as their approver."
+    },
+    "cannotDecide": "Your role cannot decide this yet. An administrator can give it the permission.",
+    "cannotOpen": "Your role cannot open or decide this yet. An administrator can give it the permissions."
+  },
   "inbox": {
     "heading": "Task inbox",
     "forRole": "Tasks for {{role}}",
@@ -179,7 +191,7 @@
     "decisionHeading": "Your decision",
     "decisionDone": "Decided: {{outcome}} by {{name}} on {{date}}",
     "passedOn": "Above the limit: {{by}} passed this on to {{name}} on {{date}}. It is waiting for their decision.",
-    "passedToYou": "{{by}} passed this on to you on {{date}}, because it is above their limit. They would have marked it {{asked}}. It waits for your decision.",
+    "passedToYou": "{{by}} passed this on to you on {{date}}, because it is above their limit. They would have marked it {{asked}}.",
     "notRunnable": "This is a sample the workflow does not run yet, so it cannot be decided here.",
     "toast": {
       "done": "{{ref}} {{outcome}}",
@@ -197,6 +209,7 @@
     "reject": "Reject",
     "sending": "Checking",
     "readOnly": "Your role can read this request but not decide it.",
+    "handedNoPermission": "Your role cannot decide this yet, so it stays waiting until an administrator gives it the permission.",
     "notFoundTitle": "This request is not in the sample data",
     "notFoundDescription": "Check the number, or go back to the task inbox.",
     "crumb": "Stock purchase request"
