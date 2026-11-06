@@ -12,9 +12,11 @@ import type {
   WorkflowTask,
 } from "@orderpilot/shared";
 import { NotFoundError } from "../../common/domain-error.js";
+import { AuthorisationService } from "../governance/authorisation.service.js";
 import { ApprovalPolicy } from "./domain/approval-policy.js";
 import { DocumentConfigRepository } from "./document-config.repository.js";
 import { mockOpenRules } from "./mock/mock-open-rules.js";
+import { SprRecordRepository } from "./spr-record.repository.js";
 import { WorkflowReadModel } from "./workflow-read-model.js";
 
 export interface Page<T> {
@@ -53,11 +55,16 @@ export class WorkflowsService {
     @Inject(ApprovalPolicy) private readonly approvals: ApprovalPolicy,
     @Inject(DocumentConfigRepository)
     private readonly config: DocumentConfigRepository,
+    @Inject(SprRecordRepository)
+    private readonly sprRecords: SprRecordRepository,
+    @Inject(AuthorisationService)
+    private readonly policy: AuthorisationService,
   ) {}
 
   /** A role's tasks, filtered and paged on the server so a long inbox stays quick. */
   async tasks(role: InboxRole, query: TasksQuery): Promise<Page<WorkflowTask>> {
-    const shown = (await this.model.tasksFor(role)).filter(
+    const open = await this.openTasks(role);
+    const shown = open.filter(
       (task) =>
         (query.overdue !== "true" || task.overdue) &&
         (!query.kind || task.kind === query.kind) &&
@@ -66,11 +73,35 @@ export class WorkflowsService {
     return paged(shown.sort(byUrgency), query);
   }
 
+  /**
+   * The inbox reads from the mock until a story binds a real read model, but a
+   * decided SPR is real and must not come back after a restart.
+   */
+  private async openTasks(role: InboxRole): Promise<WorkflowTask[]> {
+    const tasks = await this.model.tasksFor(role);
+    const orders = tasks.flatMap((task) =>
+      task.kind === "APPROVE_SPR" && task.orderNo ? [task.orderNo] : [],
+    );
+    const finished = await this.sprRecords.finished(orders);
+    return tasks.filter(
+      (task) =>
+        task.kind !== "APPROVE_SPR" ||
+        !task.orderNo ||
+        !finished.has(task.orderNo),
+    );
+  }
+
   async reminders(
     role: InboxRole,
     query: PageQuery,
   ): Promise<Page<WorkflowReminder>> {
-    const reminders = await this.model.remindersFor(role);
+    const all = await this.model.remindersFor(role);
+    // As for the task: nobody should be chased over an SPR that has been dealt with.
+    const finished =
+      role === "APPROVER"
+        ? await this.sprRecords.finished(all.map((r) => r.orderNo))
+        : new Set<string>();
+    const reminders = all.filter((r) => !finished.has(r.orderNo));
     return paged(
       [...reminders].sort((a, b) => a.remindAt.localeCompare(b.remindAt)),
       query,
@@ -83,13 +114,35 @@ export class WorkflowsService {
     return flow;
   }
 
-  async spr(recordNo: string): Promise<SprDetail> {
+  async spr(recordNo: string, viewerUserId?: string): Promise<SprDetail> {
     const record = await this.model.sprByRecordNo(recordNo);
     if (!record) throw new NotFoundError(`Stock purchase request ${recordNo}`);
     const approver = await this.approvals.approverFor(record.requestedBy.role);
     if (!approver) throw new NotFoundError(`An approver for ${recordNo}`);
+    const stored = record.orderNo
+      ? await this.sprRecords.findByOrder(record.orderNo)
+      : null;
+    const next = stored?.passedOn
+      ? await this.policy.deciderFor(stored.passedOn.byUserId)
+      : null;
     return {
       ...record,
+      // Once the workflow runs this SPR, its own record is what is true of it.
+      decision: stored ? stored.decision : record.decision,
+      decidable: stored !== null,
+      passedTo: stored?.passedOn
+        ? {
+            name: stored.passedOn.toName,
+            byName: stored.passedOn.byName,
+            at: stored.passedOn.at,
+            askedOutcome: stored.passedOn.outcome,
+            comment: stored.passedOn.comment,
+            youDecide:
+              next !== null &&
+              next.kind !== "none" &&
+              next.userId === viewerUserId,
+          }
+        : null,
       approver: { displayName: approver.displayName, setup: approver.setup },
       substituteName: approver.substituteName,
       escalatesToName: approver.escalatesToName,

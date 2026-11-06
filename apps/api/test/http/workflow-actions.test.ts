@@ -220,7 +220,11 @@ describe("acting on the mock tasks", () => {
       const record = APPROVE.ref?.recordNo ?? "";
       const opened = await auditCount(t, "workflows.task.reopened");
       const before = await total("APPROVER", "&kind=APPROVE_SPR");
-      await post("APPROVER", `/sprs/${record}/approve`, { comment: "Fine." });
+      const decided = await post("APPROVER", `/sprs/${record}/approve`, {
+        comment: "Fine.",
+      });
+      expect(decided.status).toBe(200);
+      expect(await total("APPROVER", "&kind=APPROVE_SPR")).toBe(before - 1);
 
       const undo = await post("APPROVER", `/tasks/${APPROVE.id}/undo`);
       expect(undo.status).toBe(409);

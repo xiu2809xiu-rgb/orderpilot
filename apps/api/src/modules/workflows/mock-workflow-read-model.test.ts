@@ -11,6 +11,8 @@ import type { DocumentConfigRepository } from "./document-config.repository.js";
 import { SprSuggestion } from "./domain/spr-suggestion.js";
 import { MockApprovalPolicy } from "./mock/mock-approval-policy.js";
 import { MockWorkflowReadModel } from "./mock-workflow-read-model.js";
+import type { AuthorisationService } from "../governance/authorisation.service.js";
+import type { SprRecordRepository } from "./spr-record.repository.js";
 import { WorkflowsService } from "./workflows.service.js";
 
 const dataset = createSyntheticDataset();
@@ -146,7 +148,16 @@ describe("the service over the mock", () => {
   const config = {
     list: () => Promise.resolve([]),
   } as unknown as DocumentConfigRepository;
-  const service = new WorkflowsService(model, new MockApprovalPolicy(), config);
+  const service = new WorkflowsService(
+    model,
+    new MockApprovalPolicy(),
+    config,
+    {
+      findByOrder: () => Promise.resolve(null),
+      finished: () => Promise.resolve(new Set<string>()),
+    } as unknown as SprRecordRepository,
+    {} as unknown as AuthorisationService,
+  );
   const sprNo = dataset.sprs[0]?.recordNo ?? "";
 
   it("adds the approver in the shape of Navision's Approval User Setup", async () => {

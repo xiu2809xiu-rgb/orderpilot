@@ -14,4 +14,6 @@ export type WorkflowsApprove200Data = {
   recordNo: string;
   outcome: WorkflowsApprove200DataOutcome;
   comment: string;
+  /** @minLength 1 */
+  passedToName?: string;
 };

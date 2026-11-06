@@ -81,6 +81,11 @@ const CASES: readonly CommandCase[] = [
     legal: { AwaitingSpr: "StockChecked" },
   },
   {
+    command: { type: "SPR_DECISION_UNDONE" },
+    actor: person("APPROVER"),
+    legal: { SprApproved: "AwaitingSpr", StockChecked: "AwaitingSpr" },
+  },
+  {
     command: { type: "PI_SENT" },
     actor: person("SUPPORT"),
     legal: { StockChecked: "AwaitingPayment", SprApproved: "AwaitingPayment" },
@@ -219,7 +224,7 @@ describe("every status against every event", () => {
 
   it("covers every status and every event in the machine", () => {
     expect(ORDER_STATUSES).toHaveLength(14);
-    expect(every).toHaveLength(14 * 15);
+    expect(every).toHaveLength(14 * 16);
   });
 });
 
@@ -227,7 +232,25 @@ describe("who may make each transition", () => {
   const firstLegal = (c: CommandCase): OrderStatus =>
     Object.keys(c.legal)[0] as OrderStatus;
 
-  const wrongPeople = CASES.flatMap((c) =>
+  // Who may decide an SPR reaches beyond one role, so area 4's policy says, not the table.
+  const BY_POLICY = ["SPR_APPROVED", "SPR_REJECTED", "SPR_DECISION_UNDONE"];
+
+  it.each(BY_POLICY)(
+    "lets any person try %s, for the policy to judge",
+    (type) => {
+      const c = CASES.find((entry) => entry.command.type === type);
+      if (!c) throw new Error(type);
+      for (const role of ROLES) {
+        expect(() =>
+          machine.apply(snapshot(firstLegal(c)), c.command, person(role), AT),
+        ).not.toThrow();
+      }
+    },
+  );
+
+  const wrongPeople = CASES.filter(
+    (c) => !BY_POLICY.includes(c.command.type),
+  ).flatMap((c) =>
     ROLES.filter(
       (role) => c.actor.kind !== "user" || role !== c.actor.role,
     ).map((role) => ({ ...c, role })),
@@ -257,8 +280,8 @@ describe("who may make each transition", () => {
     const error = refusal(() =>
       machine.apply(
         snapshot("Closed"),
-        { type: "SPR_APPROVED" },
-        person("WAREHOUSE"),
+        { type: "RELEASED" },
+        person("APPROVER"),
         AT,
       ),
     );

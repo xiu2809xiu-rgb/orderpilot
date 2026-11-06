@@ -35,8 +35,18 @@ export function SprDecisionForm({
       outcome === "approved"
         ? workflowsApprove(spr.ref.recordNo, { comment })
         : workflowsReject(spr.ref.recordNo, { comment }),
-    onSuccess: async (_result, outcome) => {
+    onSuccess: async (result, outcome) => {
       await queryClient.invalidateQueries();
+      // Above their limit nothing was decided, so there is nothing to undo.
+      if (result.data.passedToName) {
+        toast.done(
+          t("spr.toast.passedOn", {
+            ref: spr.ref.recordNo,
+            name: result.data.passedToName,
+          }),
+        );
+        return;
+      }
       toast.done(
         t("spr.toast.done", {
           outcome: t(`spr.outcomes.${outcome}`),
@@ -67,8 +77,39 @@ export function SprDecisionForm({
       </p>
     );
   }
+  if (spr.passedTo && !spr.passedTo.youDecide) {
+    return (
+      <p role="status" className="font-medium">
+        {t("spr.passedOn", {
+          name: spr.passedTo.name,
+          by: spr.passedTo.byName,
+          date: formatDateTime(spr.passedTo.at),
+        })}
+      </p>
+    );
+  }
+  if (spr.decidable === false) {
+    return <p className="text-muted-foreground">{t("spr.notRunnable")}</p>;
+  }
+  const handedToYou = spr.passedTo?.youDecide ? (
+    <p role="status" className="font-medium">
+      {t("spr.passedToYou", {
+        by: spr.passedTo.byName,
+        asked: t(`spr.outcomes.${spr.passedTo.askedOutcome}`),
+        date: formatDateTime(spr.passedTo.at),
+      })}
+      <span className="mt-1 block font-normal text-muted-foreground">
+        {spr.passedTo.comment}
+      </span>
+    </p>
+  ) : null;
   if (!canDecide) {
-    return <p className="text-muted-foreground">{t("spr.readOnly")}</p>;
+    return (
+      <div className="space-y-s2">
+        {handedToYou}
+        <p className="text-muted-foreground">{t("spr.readOnly")}</p>
+      </div>
+    );
   }
 
   function submit(outcome: Outcome) {
@@ -86,6 +127,7 @@ export function SprDecisionForm({
       }}
       className="space-y-s2"
     >
+      {handedToYou}
       <div className="space-y-1">
         <Label htmlFor="spr-comment">{t("spr.comment")}</Label>
         <textarea

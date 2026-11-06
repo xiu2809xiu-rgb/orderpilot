@@ -14,4 +14,6 @@ export type WorkflowsReject200Data = {
   recordNo: string;
   outcome: WorkflowsReject200DataOutcome;
   comment: string;
+  /** @minLength 1 */
+  passedToName?: string;
 };

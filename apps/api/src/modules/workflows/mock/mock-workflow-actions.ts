@@ -8,8 +8,6 @@ import {
   type PaymentConfirmationInput,
   type PaymentResult,
   type PaymentUndoResult,
-  type SprDecisionResult,
-  type SprDecisionUndoResult,
   type TaskActionResult,
   type WorkflowTask,
 } from "@orderpilot/shared";
@@ -45,7 +43,7 @@ function assertCompletable(task: WorkflowTask): void {
  * result in the `MockDecisionOverlay`, and answers that it was recorded. The
  * audit comes first, so a failed write leaves nothing behind. Only the
  * permission on the route and the inbox the task sits in decide who may act.
- * Azri's state machine replaces this class, and then the rules are his.
+ * SPR decisions have left this class for the state machine; the rest follow.
  */
 @Injectable()
 export class MockWorkflowActions {
@@ -100,69 +98,6 @@ export class MockWorkflowActions {
       });
       this.overlay.reopenTask(taskId);
       return this.taskResult(taskId, "OPEN");
-    });
-  }
-
-  async decide(
-    recordNo: string,
-    outcome: SprDecisionResult["outcome"],
-    comment: string,
-    auth: AuthContext,
-    info: ActionInfo,
-  ): Promise<SprDecisionResult> {
-    return this.oneAtATime(`spr:${recordNo}`, async () => {
-      if (this.overlay.decisionOf(recordNo)) {
-        throw new ConflictError(
-          "This request already has a decision. Undo it to decide again.",
-        );
-      }
-      const task = (await this.model.tasksFor("APPROVER")).find(
-        (entry) => entry.ref?.recordNo === recordNo,
-      );
-      await this.write(auth, info, {
-        action: `workflows.spr.${outcome}`,
-        entityType: "Spr",
-        entityId: recordNo,
-        summary: `${auth.user.displayName} ${outcome} ${recordNo} (mock)`,
-        changes: { outcome, comment },
-      });
-      this.overlay.recordDecision(
-        recordNo,
-        {
-          outcome,
-          by: auth.user.displayName,
-          comment,
-          at: new Date().toISOString(),
-        },
-        task?.id ?? null,
-      );
-      return {
-        applied: true,
-        message: MOCK_RECORDED_MESSAGE,
-        recordNo,
-        outcome,
-        comment,
-      };
-    });
-  }
-
-  async undoDecision(
-    recordNo: string,
-    auth: AuthContext,
-    info: ActionInfo,
-  ): Promise<SprDecisionUndoResult> {
-    return this.oneAtATime(`spr:${recordNo}`, async () => {
-      if (!this.overlay.decisionOf(recordNo)) {
-        throw new NotFoundError(`A decision on ${recordNo}`);
-      }
-      await this.write(auth, info, {
-        action: "workflows.spr.decision-undone",
-        entityType: "Spr",
-        entityId: recordNo,
-        summary: `${auth.user.displayName} undid the decision on ${recordNo} (mock)`,
-      });
-      this.overlay.undoDecision(recordNo);
-      return { applied: true, message: MOCK_RECORDED_MESSAGE, recordNo };
     });
   }
 

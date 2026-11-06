@@ -80,7 +80,11 @@ describe("the order workflow, against the real database and area 4's real policy
   }
 
   function applyAny(ref: string, command: OrderCommand, actor: OrderActor) {
-    if (command.type === "SPR_APPROVED" || command.type === "SPR_REJECTED") {
+    if (
+      command.type === "SPR_APPROVED" ||
+      command.type === "SPR_REJECTED" ||
+      command.type === "SPR_DECISION_UNDONE"
+    ) {
       throw new Error("An SPR decision goes through decideSpr");
     }
     return workflow.apply(ref, command, actor, INFO, tick());

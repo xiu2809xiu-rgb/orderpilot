@@ -1,9 +1,13 @@
 import {
   DEFAULT_DOCUMENT_CONFIG,
+  compareDecimal,
+  multiplyDecimal,
   parseRecordNumber,
+  roundToCents,
   type RecordType,
 } from "@orderpilot/shared";
 import { syntheticDataset } from "@orderpilot/synthetic-data";
+import { demoEmail } from "../../auth/demo-accounts.js";
 import type { DbClient } from "../../database/database.js";
 import {
   SALES_FLOW_KEY,
@@ -14,10 +18,11 @@ import { mockId } from "./mock/fixtures.js";
 import { MOCK_CURRENT_STEP } from "./mock/mock-flows.js";
 
 /**
- * The area 2 sample rows, safe to run again. This is the one place the base
- * writes a workflow instance's `status`, and it writes the dataset's
- * `sample-` label, never a real status: the values are the state machine's to
- * decide (C-2). Every row has a fixed id, so a second run finds what the first
+ * The area 2 sample rows, safe to run again. Beside the state machine's
+ * repository, this is the one place that writes a workflow instance's `status`.
+ * It writes the dataset's `sample-` label, which the machine refuses to run,
+ * except for the orders whose SPR waits for a decision (see
+ * `seedOrdersAwaitingSpr`). Every row has a fixed id, so a second run finds what the first
  * left and adds nothing, even on another day (the rows keep the dates of the
  * day they were first written).
  */
@@ -154,6 +159,8 @@ export async function seedWorkflows(client: DbClient): Promise<string> {
     })),
     skipDuplicates: true,
   });
+  await seedOrdersAwaitingSpr(client, dataset, instanceIds);
+
   const highest = new Map<
     string,
     { type: RecordType; day: string; value: number }
@@ -174,4 +181,72 @@ export async function seedWorkflows(client: DbClient): Promise<string> {
   }
 
   return `${String(instances.length)} sample orders, ${String(dataset.tasks.length)} tasks, ${String(dataset.reminders.length)} reminders, ${String(records.length)} record numbers and ${String(DEFAULT_DOCUMENT_CONFIG.length)} document types`;
+}
+
+/**
+ * Puts the orders with a submitted SPR on the state machine, so the approval
+ * page really works in the demo. A label that a person's decision has already
+ * moved on is left alone, and so is a record that already has its data, so a
+ * second run changes nothing.
+ */
+async function seedOrdersAwaitingSpr(
+  client: DbClient,
+  dataset: ReturnType<typeof syntheticDataset>,
+  instanceIds: ReadonlyMap<string, string>,
+): Promise<void> {
+  const requester = await client.user.findUnique({
+    where: { email: demoEmail("PRODUCT_MANAGER") },
+    select: { id: true },
+  });
+  if (!requester) return;
+
+  const orders = new Map(
+    dataset.orders.map((order) => [order.header.no, order]),
+  );
+  for (const spr of dataset.sprs.filter((s) => s.status === "submitted")) {
+    const order = orders.get(spr.orderNo);
+    const instanceId = instanceIds.get(spr.orderNo);
+    if (order?.sampleScreenState !== "sample-pending-approval" || !instanceId) {
+      continue;
+    }
+    const due = roundToCents(
+      multiplyDecimal(
+        multiplyDecimal(order.total, order.header.prepaymentPercent),
+        "0.01",
+      ),
+    );
+    await client.workflowInstance.updateMany({
+      where: { id: instanceId, status: "sample-pending-approval" },
+      data: {
+        status: "AwaitingSpr",
+        currentStep: "spr-approval",
+        facts: {
+          prepaymentDue: compareDecimal(due, "0") > 0 ? due : null,
+          stockCoversOrder: false,
+          holds: [],
+          resumeTo: null,
+          enteredAt: spr.requestedAt,
+        },
+      },
+    });
+    // By the order, not the number: the dataset's SPR numbers move with the date,
+    // so on a later day the record keeps the number it was first written with.
+    const record = await client.workflowRecord.findFirst({
+      where: { recordType: "SPR", instanceId },
+      select: { id: true, data: true },
+    });
+    if (!record) continue;
+    if (record.data !== null) continue;
+    await client.workflowRecord.update({
+      where: { id: record.id },
+      data: {
+        data: {
+          amount: spr.amount,
+          requesterUserId: requester.id,
+          decision: null,
+          passedOn: null,
+        },
+      },
+    });
+  }
 }
