@@ -1,11 +1,13 @@
 import { Inject, Injectable } from "@nestjs/common";
 import type {
   DocumentTypeConfig,
+  HandedTask,
   InboxRole,
   OpenRule,
   OrderFlow,
   PageMeta,
   PageQuery,
+  PolicyRequest,
   SprDetail,
   TasksQuery,
   WorkflowReminder,
@@ -17,6 +19,7 @@ import { ApprovalPolicy } from "./domain/approval-policy.js";
 import { DocumentConfigRepository } from "./document-config.repository.js";
 import { mockOpenRules } from "./mock/mock-open-rules.js";
 import { SprRecordRepository } from "./spr-record.repository.js";
+import { SprRoutingService, type SprHandover } from "./spr-routing.service.js";
 import { WorkflowReadModel } from "./workflow-read-model.js";
 
 export interface Page<T> {
@@ -59,6 +62,7 @@ export class WorkflowsService {
     private readonly sprRecords: SprRecordRepository,
     @Inject(AuthorisationService)
     private readonly policy: AuthorisationService,
+    @Inject(SprRoutingService) private readonly routing: SprRoutingService,
   ) {}
 
   /** A role's tasks, filtered and paged on the server so a long inbox stays quick. */
@@ -73,22 +77,81 @@ export class WorkflowsService {
     return paged(shown.sort(byUrgency), query);
   }
 
+  /** The SPRs the approval chain has handed to this person, whatever their role. */
+  async handedTo(
+    actor: PolicyRequest["actor"],
+    query: PageQuery,
+  ): Promise<Page<HandedTask>> {
+    const handovers = await this.routing.handovers();
+    const tasks = await this.model.tasksFor("APPROVER");
+    const mine = tasks.flatMap((task) => {
+      const handover =
+        task.kind === "APPROVE_SPR" && task.orderNo
+          ? handovers.get(task.orderNo)
+          : undefined;
+      return handover?.userId === actor.userId ? [{ task, handover }] : [];
+    });
+    const handed = await Promise.all(
+      mine.map(async ({ task, handover }) => ({
+        ...task,
+        // It names the role's approver, who no longer holds this.
+        assigneeName: undefined,
+        handedOver: {
+          reason: handover.reason,
+          fromName: handover.fromName,
+          canAct: await this.canAct(actor, task, handover),
+        },
+      })),
+    );
+    return paged(handed.sort(byUrgency), query);
+  }
+
+  /**
+   * Asked of area 4's policy, so the screen never offers what it would refuse
+   * outright. Above their limit still counts: deciding then tries to pass it on.
+   */
+  private async canAct(
+    actor: PolicyRequest["actor"],
+    task: WorkflowTask,
+    handover: SprHandover,
+  ): Promise<boolean> {
+    if (!handover.canOpen) return false;
+    const verdict = await this.policy.decide({
+      actor,
+      action: "spr.approve",
+      resource: { type: "Spr", id: task.ref?.recordNo ?? task.id },
+      amount: handover.amount,
+      requesterUserId: handover.chainStart,
+    });
+    return verdict.outcome !== "refused" || verdict.rule === "approval-limit";
+  }
+
   /**
    * The inbox reads from the mock until a story binds a real read model, but a
-   * decided SPR is real and must not come back after a restart.
+   * decided SPR is real and must not come back after a restart, and one handed
+   * on is someone else's now.
    */
   private async openTasks(role: InboxRole): Promise<WorkflowTask[]> {
     const tasks = await this.model.tasksFor(role);
     const orders = tasks.flatMap((task) =>
       task.kind === "APPROVE_SPR" && task.orderNo ? [task.orderNo] : [],
     );
-    const finished = await this.sprRecords.finished(orders);
+    const gone = await this.sprsNoLongerWithApprover(orders);
     return tasks.filter(
       (task) =>
-        task.kind !== "APPROVE_SPR" ||
-        !task.orderNo ||
-        !finished.has(task.orderNo),
+        task.kind !== "APPROVE_SPR" || !task.orderNo || !gone.has(task.orderNo),
     );
+  }
+
+  private async sprsNoLongerWithApprover(
+    orders: readonly string[],
+  ): Promise<ReadonlySet<string>> {
+    if (orders.length === 0) return new Set();
+    const [settled, handovers] = await Promise.all([
+      this.sprRecords.settled(orders),
+      this.routing.handovers(),
+    ]);
+    return new Set([...settled, ...handovers.keys()]);
   }
 
   async reminders(
@@ -97,11 +160,11 @@ export class WorkflowsService {
   ): Promise<Page<WorkflowReminder>> {
     const all = await this.model.remindersFor(role);
     // As for the task: nobody should be chased over an SPR that has been dealt with.
-    const finished =
+    const gone =
       role === "APPROVER"
-        ? await this.sprRecords.finished(all.map((r) => r.orderNo))
+        ? await this.sprsNoLongerWithApprover(all.map((r) => r.orderNo))
         : new Set<string>();
-    const reminders = all.filter((r) => !finished.has(r.orderNo));
+    const reminders = all.filter((r) => !gone.has(r.orderNo));
     return paged(
       [...reminders].sort((a, b) => a.remindAt.localeCompare(b.remindAt)),
       query,

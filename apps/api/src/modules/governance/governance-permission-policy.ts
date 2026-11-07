@@ -22,9 +22,16 @@ export class GovernancePermissionPolicy extends PermissionPolicy {
     super();
   }
 
-  async decide({ user, permission }: AccessRequest): Promise<AccessDecision> {
+  async decide({
+    user,
+    permission,
+    method,
+    path,
+  }: AccessRequest): Promise<AccessDecision> {
     const decision = ROUTE_POLICY.decide({
       actor: { userId: user.id, role: user.role },
+      // A route check names no action, so no action-specific rule can match it.
+      action: `${method} ${path}`,
       permission,
       roleHoldsPermission: await this.matrix.has(user.role, permission),
     });

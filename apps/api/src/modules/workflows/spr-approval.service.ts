@@ -27,6 +27,7 @@ import {
   type StoredSpr,
 } from "./spr-record.repository.js";
 import { WorkflowReadModel } from "./workflow-read-model.js";
+import { WorkflowTaskRepository } from "./workflow-task.repository.js";
 
 type Outcome = SprDecisionResult["outcome"];
 
@@ -57,6 +58,8 @@ export class SprApprovalService {
     @Inject(UserRepository) private readonly users: UserRepository,
     @Inject(Database) private readonly database: Database,
     @Inject(AuditService) private readonly audit: AuditService,
+    @Inject(WorkflowTaskRepository)
+    private readonly tasks: WorkflowTaskRepository,
   ) {}
 
   async decide(
@@ -123,6 +126,7 @@ export class SprApprovalService {
       now,
       async () => {
         await this.records.save(spr, { decision });
+        await this.tasks.setOpen(spr.orderRef, "APPROVE_SPR", false, now);
         await this.audit.record({
           actor: { kind: "user", userId: auth.user.id, role: auth.user.role },
           action: `workflows.spr.${outcome}`,
@@ -162,6 +166,7 @@ export class SprApprovalService {
       now,
       async () => {
         await this.records.save(spr, { decision: null });
+        await this.tasks.setOpen(spr.orderRef, "APPROVE_SPR", true, now);
         await this.audit.record({
           actor: { kind: "user", userId: auth.user.id, role: auth.user.role },
           action: "workflows.spr.decision-undone",

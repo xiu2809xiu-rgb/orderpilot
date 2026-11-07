@@ -82,7 +82,7 @@ Each row is a case some test must cover. The story is the one that brings the te
 | C4  | Stock is short: inventory minus quantity on sales orders plus quantity on purchase orders | An SPR is suggested and pre-filled, never raised by the AI alone                | Unit              | Planned: C-1, P-19    |
 | C5  | An SPR is exactly at, just below and just above the approver's limit                      | At or below: the approver may approve. Above: it escalates                      | Unit              | Planned: C-1 (area 2) |
 | C6  | The person who raised an SPR tries to approve it                                          | Refused (no self-approval), and audited                                         | Unit, integration | Planned: C-1, F-1     |
-| C7  | An approval or payment is overdue                                                         | A reminder, then an escalation, and the overdue flag in the tracker             | Unit              | Planned: C-1 (area 2) |
+| C7  | An approval or payment is overdue                                                         | A reminder, then an escalation, and the overdue flag in the tracker             | Unit              | Partly: C-4 (area 2)  |
 | C8  | Finance has not confirmed payment (the payment gate)                                      | Packing stays blocked                                                           | Unit, integration | Today (C-2)           |
 | C9  | The sales pilot end to end (E2E #1)                                                       | Upload, two fields confirmed, stock, SPR, a reminder, the mismatch, the tracker | End-to-end        | Planned: P-14         |
 

@@ -254,7 +254,7 @@ describe("the SPR approval page", () => {
       await screen.findByText(/Anita Rao passed this on to you/),
     ).toBeInTheDocument();
     expect(
-      screen.getByText("Your role can read this request but not decide it."),
+      screen.getByText(/Your role cannot decide this yet/),
     ).toBeInTheDocument();
   });
 

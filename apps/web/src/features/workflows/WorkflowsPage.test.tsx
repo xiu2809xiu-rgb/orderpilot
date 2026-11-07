@@ -1,9 +1,11 @@
 import { fireEvent, screen, within } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
-import { beforeAll, describe, expect, it } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import i18n from "@/i18n";
 import {
   getWorkflowsInboxTasksMockHandler,
+  getWorkflowsHandedToMeMockHandler,
+  getWorkflowsHandedToMeResponseMock,
   getWorkflowsInboxTasksResponseMock,
   getWorkflowsMyTasksMockHandler,
   getWorkflowsMyTasksResponseMock,
@@ -50,6 +52,18 @@ function page(data: unknown[]) {
   });
 }
 
+function handed(data: unknown[]) {
+  return getWorkflowsHandedToMeResponseMock({
+    data: data as never,
+    meta: { page: 1, pageSize: 25, total: data.length, mock: true },
+  });
+}
+
+const HANDED_TASK = {
+  ...SPR_TASK,
+  handedOver: { reason: "passed-on", fromName: "Janet Lim", canAct: true },
+} as const;
+
 function open(role: "APPROVER" | "WAREHOUSE" | "MANAGEMENT", route = "/") {
   return renderWorkflowPage(<WorkflowsPage />, { role, route, path: "/" });
 }
@@ -57,6 +71,10 @@ function open(role: "APPROVER" | "WAREHOUSE" | "MANAGEMENT", route = "/") {
 describe("the task inbox", () => {
   beforeAll(async () => {
     await i18n.loadNamespaces("workflows");
+  });
+
+  beforeEach(() => {
+    server.use(getWorkflowsHandedToMeMockHandler(handed([])));
   });
 
   it("lists the caller's tasks with both record numbers and the mock labels", async () => {
@@ -75,6 +93,106 @@ describe("the task inbox", () => {
       "/workflows/sprs/SPR-20261102-0002",
     );
     expect(await axeViolations(container)).toEqual([]);
+  });
+
+  it("shows an SPR handed to this person above their inbox, saying why", async () => {
+    server.use(
+      getWorkflowsHandedToMeMockHandler(handed([HANDED_TASK])),
+      getWorkflowsMyTasksMockHandler(page([TASK])),
+    );
+    const { container } = open("APPROVER");
+    expect(
+      await screen.findByRole("region", { name: "Waiting for you" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Janet Lim passed this on to you, because it is above their limit.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Open request/ })).toHaveAttribute(
+      "href",
+      "/workflows/sprs/SPR-20261102-0002",
+    );
+    expect(screen.queryByText(/Your role cannot/)).not.toBeInTheDocument();
+    expect(await axeViolations(container)).toEqual([]);
+  });
+
+  it("reaches a role with no inbox of its own", async () => {
+    server.use(
+      getWorkflowsHandedToMeMockHandler(
+        handed([
+          {
+            ...HANDED_TASK,
+            handedOver: {
+              reason: "substitute",
+              fromName: "Janet Lim",
+              canAct: false,
+            },
+          },
+        ]),
+      ),
+      getWorkflowsInboxTasksMockHandler(
+        getWorkflowsInboxTasksResponseMock({
+          data: [],
+          meta: { page: 1, pageSize: 25, total: 0, mock: true },
+        }),
+      ),
+    );
+    open("MANAGEMENT");
+    expect(
+      await screen.findByText(/You are standing in for Janet Lim\./),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Your role cannot decide this yet/),
+    ).toBeInTheDocument();
+  });
+
+  it("offers no link to a page the person's role would be refused", async () => {
+    server.use(
+      getWorkflowsHandedToMeMockHandler(
+        handed([
+          {
+            ...HANDED_TASK,
+            handedOver: {
+              reason: "substitute",
+              fromName: "Janet Lim",
+              canAct: false,
+            },
+          },
+        ]),
+      ),
+      getWorkflowsMyTasksMockHandler(page([])),
+    );
+    open("WAREHOUSE");
+    expect(
+      await screen.findByText(/Your role cannot open or decide this yet/),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /Open request/ }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows nothing extra when nothing has been handed over", async () => {
+    server.use(getWorkflowsMyTasksMockHandler(page([TASK])));
+    open("APPROVER");
+    await screen.findByText("Add the air waybill");
+    expect(screen.queryByText("Waiting for you")).not.toBeInTheDocument();
+  });
+
+  it("says so when the handed tasks cannot be loaded, because one may be waiting", async () => {
+    server.use(
+      getWorkflowsMyTasksMockHandler(page([TASK])),
+      http.get("*/api/v1/workflows/tasks/handed-to-me", () =>
+        HttpResponse.json(errorBody("INTERNAL_ERROR", "trace-handed-1"), {
+          status: 500,
+        }),
+      ),
+    );
+    open("APPROVER");
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "trace-handed-1",
+    );
+    expect(await screen.findByText("Add the air waybill")).toBeInTheDocument();
   });
 
   it("gives the warehouse big touch targets", async () => {

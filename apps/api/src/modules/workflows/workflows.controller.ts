@@ -6,6 +6,7 @@ import {
   Inject,
   Param,
   Post,
+  Put,
   Query,
   Req,
 } from "@nestjs/common";
@@ -18,6 +19,12 @@ import {
 } from "@nestjs/swagger";
 import {
   inboxParamsSchema,
+  noticesQuerySchema,
+  taskSlaChangeSchema,
+  taskSlaParamsSchema,
+  type TaskKind,
+  type TaskSlaChange,
+  pageQuerySchema,
   orderParamsSchema,
   paymentConfirmationInputSchema,
   paymentUndoParamsSchema,
@@ -27,6 +34,7 @@ import {
   taskParamsSchema,
   tasksQuerySchema,
   type InboxRole,
+  type PageQuery,
   type PaymentConfirmationInput,
   type RemindersQuery,
   type SprDecisionInput,
@@ -54,9 +62,14 @@ import {
   sprDecisionUndoResponseSchema,
   sprResponseSchema,
   taskActionResponseSchema,
+  handedTaskListResponseSchema,
+  noticeListResponseSchema,
+  taskSlaListResponseSchema,
+  taskSlaResponseSchema,
   taskListResponseSchema,
 } from "./workflows.schemas.js";
 import { SprApprovalService } from "./spr-approval.service.js";
+import { TaskSlaService } from "./task-sla.service.js";
 import { WorkflowsService } from "./workflows.service.js";
 
 const MOCK = { mock: true } as const;
@@ -101,6 +114,7 @@ export class WorkflowsController {
     @Inject(WorkflowsService) private readonly workflows: WorkflowsService,
     @Inject(MockWorkflowActions) private readonly actions: MockWorkflowActions,
     @Inject(SprApprovalService) private readonly sprs: SprApprovalService,
+    @Inject(TaskSlaService) private readonly slas: TaskSlaService,
   ) {}
 
   @Get("tasks")
@@ -113,6 +127,25 @@ export class WorkflowsController {
     @Query(new ZodValidationPipe(tasksQuerySchema)) query: TasksQuery,
   ) {
     return this.tasksOf(InboxScope.own(auth.user.role), query);
+  }
+
+  @Get("tasks/handed-to-me")
+  @RequirePermission("workflows.read")
+  @ApiOperation({
+    summary:
+      "The SPRs the approval chain has handed to the caller, whatever their role (tasks from mock data, the routing is real)",
+  })
+  @openApiQuery(pageQuerySchema)
+  @ApiOkResponse({ schema: openApiSchema(handedTaskListResponseSchema) })
+  async handedToMe(
+    @Auth() auth: AuthContext,
+    @Query(new ZodValidationPipe(pageQuerySchema)) query: PageQuery,
+  ) {
+    const page = await this.workflows.handedTo(
+      { userId: auth.user.id, role: auth.user.role },
+      query,
+    );
+    return { data: page.items, meta: { ...page.meta, ...MOCK } };
   }
 
   @Post("tasks/:taskId/complete")
@@ -178,6 +211,50 @@ export class WorkflowsController {
     @Query(new ZodValidationPipe(remindersQuerySchema)) query: RemindersQuery,
   ) {
     return this.remindersOf(InboxScope.own(auth.user.role), query);
+  }
+
+  @Get("reminders/for-me")
+  @RequirePermission("workflows.read")
+  @ApiOperation({
+    summary:
+      "The reminders and escalations that have gone out to the caller or their role, on tasks still open",
+  })
+  @openApiQuery(noticesQuerySchema)
+  @ApiOkResponse({ schema: openApiSchema(noticeListResponseSchema) })
+  async noticesForMe(
+    @Auth() auth: AuthContext,
+    @Query(new ZodValidationPipe(noticesQuerySchema)) query: PageQuery,
+  ) {
+    const page = await this.slas.noticesFor(auth, query);
+    return { data: page.items, meta: page.meta };
+  }
+
+  @Get("sla-settings")
+  @RequirePermission("settings.manage")
+  @ApiOperation({
+    summary: "When each kind of task is due, and who it escalates to",
+  })
+  @ApiOkResponse({ schema: openApiSchema(taskSlaListResponseSchema) })
+  async slaSettings() {
+    return { data: await this.slas.list() };
+  }
+
+  @Put("sla-settings/:taskKind")
+  @RequirePermission("settings.manage")
+  @ApiParam({ name: "taskKind", type: String })
+  @ApiBody({ schema: openApiSchema(taskSlaChangeSchema) })
+  @ApiOperation({ summary: "Change when a kind of task is due. Audited" })
+  @ApiOkResponse({ schema: openApiSchema(taskSlaResponseSchema) })
+  async changeSla(
+    @Param(new ZodValidationPipe(taskSlaParamsSchema))
+    params: { taskKind: TaskKind },
+    @Body(new ZodValidationPipe(taskSlaChangeSchema)) body: TaskSlaChange,
+    @Auth() auth: AuthContext,
+    @Req() req: Request,
+  ) {
+    return {
+      data: await this.slas.change(params.taskKind, body, auth, infoOf(req)),
+    };
   }
 
   @Get("inboxes/:role/reminders")

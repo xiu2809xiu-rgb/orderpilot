@@ -15,6 +15,7 @@ import {
   useWorkflowsInboxTasks,
   useWorkflowsMyTasks,
 } from "@/lib/api/generated/endpoints/workflows/workflows";
+import { HandedToYou } from "./HandedToYou";
 import { MockBadges } from "./MockBadges";
 import { QueryBoundary } from "./QueryBoundary";
 import { RolePicker } from "./RolePicker";
@@ -77,6 +78,7 @@ export default function WorkflowsPage() {
         meta={<MockBadges mock={query.data?.meta.mock} />}
       />
       <WorkflowNav />
+      <HandedToYou />
       <FilterChips chips={chips} filters={filters} onChange={setFilters} />
       {mayPick ? (
         <RolePicker value={role ?? "SUPPORT"} onChange={setRole} />

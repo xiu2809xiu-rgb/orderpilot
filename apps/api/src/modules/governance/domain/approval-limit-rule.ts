@@ -27,13 +27,13 @@ export class ApprovalLimitRule implements PolicyRule {
     private readonly substituteLimits: SubstituteLimits = SUBSTITUTE_LIMITS,
   ) {}
 
-  refusal({ actor, approval }: PolicyContext): string | null {
+  refusal({ actor, approval, requesterUserId }: PolicyContext): string | null {
     if (!approval) return null;
     const { amount, limit } = approval;
     if (amount === undefined) return "an approval needs the amount at stake";
     if (compareDecimal(amount, "0") < 0) return "the amount is below zero";
 
-    const holder = this.limitHolder(actor.userId, approval);
+    const holder = this.limitHolder(actor.userId, requesterUserId, approval);
     const setup = approval.approvers.get(holder)?.setup;
     if (!setup) return "the approver has no approval setup";
     const [unlimited, ceiling] =
@@ -47,15 +47,16 @@ export class ApprovalLimitRule implements PolicyRule {
   }
 
   /** Whose setup holds the limit: the actor's, unless a substitute borrows the approver's. */
-  private limitHolder(actorUserId: string, approval: ApprovalFacts): string {
-    if (
-      this.substituteLimits === "own" ||
-      approval.requesterUserId === undefined
-    ) {
+  private limitHolder(
+    actorUserId: string,
+    requesterUserId: string | undefined,
+    approval: ApprovalFacts,
+  ): string {
+    if (this.substituteLimits === "own" || requesterUserId === undefined) {
       return actorUserId;
     }
     const decider = deciderFor(
-      approval.requesterUserId,
+      requesterUserId,
       approval.approvers,
       approval.now,
     );

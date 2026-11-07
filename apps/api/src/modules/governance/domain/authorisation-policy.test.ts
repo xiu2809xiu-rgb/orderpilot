@@ -4,6 +4,8 @@ import {
   type PolicyContext,
   type PolicyRule,
 } from "./authorisation-policy.js";
+import type { ApprovalSetup, Approver } from "./approval-setup.js";
+import { ACTION_POLICY } from "./policies.js";
 import { policyActionOf } from "./policy-actions.js";
 import { PermissionRule, SystemAdminRule } from "./policy-rules.js";
 
@@ -14,6 +16,7 @@ const ACTOR = {
 
 const context = (overrides: Partial<PolicyContext> = {}): PolicyContext => ({
   actor: ACTOR,
+  action: "spr.approve",
   permission: "approvals.decide",
   roleHoldsPermission: true,
   ...overrides,
@@ -118,5 +121,112 @@ describe("the actions the policy knows", () => {
     expect(policyActionOf("order.delete")).toBeUndefined();
     expect(policyActionOf("toString")).toBeUndefined();
     expect(policyActionOf("__proto__")).toBeUndefined();
+  });
+});
+
+describe("the payment actions (F-4)", () => {
+  it("keeps confirming a customer's payment apart from paying a vendor", () => {
+    expect(policyActionOf("customer-payment.confirm")).toEqual({
+      permission: "payments.confirm",
+    });
+    expect(policyActionOf("payment-hold.clear")).toEqual({
+      permission: "payments.confirm",
+    });
+    expect(policyActionOf("vendor-payment.approve")).toEqual({
+      permission: "payments.post",
+    });
+    expect(policyActionOf("vendor-payment.release")).toEqual({
+      permission: "payments.post",
+    });
+  });
+
+  it("puts changing an approval setup behind roles.manage", () => {
+    expect(policyActionOf("approval-setup.change")).toEqual({
+      permission: "roles.manage",
+    });
+  });
+});
+
+describe("the order of the rules (F-4)", () => {
+  const ME = ACTOR.userId;
+  const MANAGEMENT = "00000000-0000-4000-8000-000000000009";
+  const row = (userId: string, overrides: Partial<ApprovalSetup> = {}) => ({
+    setup: {
+      userId,
+      approverId: null,
+      salesAmountApprovalLimit: "0.00",
+      purchaseAmountApprovalLimit: "100.00",
+      unlimitedSalesApproval: false,
+      unlimitedPurchaseApproval: false,
+      substituteUserId: null,
+      awayFrom: null,
+      awayUntil: null,
+      ...overrides,
+    },
+    disabled: false,
+  });
+  // I raised the SPR, my requests go to Management, and it is over my limit.
+  const approvers = new Map<string, Approver>([
+    [ME, row(ME, { approverId: MANAGEMENT })],
+    [MANAGEMENT, row(MANAGEMENT)],
+  ]);
+  const myOwnSpr: PolicyContext = {
+    actor: ACTOR,
+    action: "spr.approve",
+    permission: "approvals.decide",
+    roleHoldsPermission: true,
+    requesterUserId: ME,
+    approval: {
+      limit: "purchase",
+      amount: "999.00",
+      approvers,
+      now: new Date("2026-11-06T09:00:00.000Z"),
+    },
+  };
+
+  it("tells the system admin first that they never approve", () => {
+    expect(
+      ACTION_POLICY.decide({
+        ...myOwnSpr,
+        actor: { ...ACTOR, role: "SYSTEM_ADMIN" },
+      }).rule,
+    ).toBe("system-admin");
+  });
+
+  it("tells a role without the right that before anything else", () => {
+    expect(
+      ACTION_POLICY.decide({ ...myOwnSpr, roleHoldsPermission: false }).rule,
+    ).toBe("permission");
+  });
+
+  it("refuses a requester for raising it, before the route or the limit", () => {
+    expect(ACTION_POLICY.decide(myOwnSpr)).toMatchObject({
+      outcome: "refused",
+      rule: "no-self-approval",
+    });
+  });
+
+  it("refuses a change to one's own setup even with roles.manage", () => {
+    expect(
+      ACTION_POLICY.decide({
+        actor: { userId: ME, role: "SYSTEM_ADMIN" },
+        action: "approval-setup.change",
+        permission: "roles.manage",
+        roleHoldsPermission: true,
+        resource: { type: "ApprovalUserSetup", id: ME },
+      }).rule,
+    ).toBe("own-setup");
+  });
+
+  it("refuses an earlier duty's person before looking at any limit", () => {
+    expect(
+      ACTION_POLICY.decide({
+        actor: { userId: ME, role: "FINANCE" },
+        action: "vendor-payment.release",
+        permission: "payments.post",
+        roleHoldsPermission: true,
+        earlierDuties: { "vendor-bank.change": ME },
+      }).rule,
+    ).toBe("segregation-of-duties");
   });
 });
