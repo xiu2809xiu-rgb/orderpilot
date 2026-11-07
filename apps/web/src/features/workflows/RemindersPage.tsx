@@ -13,6 +13,7 @@ import {
 } from "@/lib/api/generated/endpoints/workflows/workflows";
 import { formatDate } from "./format";
 import { MockBadges } from "./MockBadges";
+import { RemindersForYou } from "./RemindersForYou";
 import { QueryBoundary } from "./QueryBoundary";
 import { RolePicker } from "./RolePicker";
 import { useInboxRole } from "./useInboxRole";
@@ -45,6 +46,7 @@ export default function RemindersPage() {
         meta={<MockBadges mock={query.data?.meta.mock} />}
       />
       <WorkflowNav />
+      <RemindersForYou />
       {mayPick ? (
         <RolePicker value={role ?? "SUPPORT"} onChange={setRole} />
       ) : null}

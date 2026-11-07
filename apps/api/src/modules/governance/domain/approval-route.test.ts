@@ -86,22 +86,31 @@ const away = { awayFrom: at(-1), awayUntil: at(1) };
 /** An action that needs no approval, such as reading. */
 const plain = (actorUserId: string): PolicyContext => ({
   actor: { userId: actorUserId, role: "APPROVER" },
+  action: "spr.approve",
   permission: "approvals.decide",
   roleHoldsPermission: true,
 });
 
 function context(
   actorUserId: string,
-  approval: Partial<ApprovalFacts> = {},
+  overrides: Partial<ApprovalFacts> & {
+    readonly requesterUserId?: string | undefined;
+  } = {},
 ): PolicyContext {
+  // An explicit `requesterUserId: undefined` must survive, so no default parameter.
+  const { requesterUserId, ...approval } = {
+    requesterUserId: REQUESTER,
+    ...overrides,
+  };
   return {
     actor: { userId: actorUserId, role: "APPROVER" },
+    action: "spr.approve",
     permission: "approvals.decide",
     roleHoldsPermission: true,
+    requesterUserId,
     approval: {
       limit: "purchase",
       amount: "100.00",
-      requesterUserId: REQUESTER,
       approvers: chain(),
       now: NOW,
       ...approval,
@@ -218,6 +227,44 @@ describe("who may decide a request", () => {
       });
       expect(deciderFor(REQUESTER, approvers, NOW).kind).toBe("none");
     });
+  });
+});
+
+describe("a request is never handed back to its requester (F-4)", () => {
+  it("passes over a substitute who raised the request, to the escalation", () => {
+    const approvers = chain({
+      approver: away,
+      substitute: { approverId: APPROVER },
+    });
+    expect(deciderFor(SUBSTITUTE, approvers, NOW)).toEqual({
+      kind: "escalated",
+      userId: MANAGEMENT,
+      from: APPROVER,
+    });
+  });
+
+  it("finds nobody, and says why, when the escalation is the requester", () => {
+    const approvers = chain({
+      approver: away,
+      substitute: away,
+      management: { approverId: APPROVER },
+    });
+    const decider = deciderFor(MANAGEMENT, approvers, NOW);
+    expect(decider.kind).toBe("none");
+    expect(decider.kind === "none" && decider.reason).toContain(
+      "raised the request",
+    );
+  });
+
+  it("names the escalation, not the requester, as the one who decides", () => {
+    const approvers = chain({
+      approver: away,
+      substitute: { approverId: APPROVER },
+    });
+    const refusal = new ApprovalRouteRule().refusal(
+      context(SUBSTITUTE, { requesterUserId: SUBSTITUTE, approvers }),
+    );
+    expect(refusal).toContain(MANAGEMENT);
   });
 });
 

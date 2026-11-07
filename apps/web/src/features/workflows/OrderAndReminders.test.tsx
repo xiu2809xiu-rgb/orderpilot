@@ -1,11 +1,13 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
-import { beforeAll, describe, expect, it } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import i18n from "@/i18n";
 import {
   getWorkflowsConfirmPaymentMockHandler,
   getWorkflowsMyRemindersMockHandler,
   getWorkflowsMyRemindersResponseMock,
+  getWorkflowsNoticesForMeMockHandler,
+  getWorkflowsNoticesForMeResponseMock,
   getWorkflowsOrderFlowMockHandler,
   getWorkflowsOrderFlowResponseMock,
 } from "@/lib/api/generated/endpoints/workflows/workflows.msw";
@@ -16,6 +18,22 @@ import { server } from "@/test/server";
 import OrderStepsPage from "./OrderStepsPage";
 import { renderWorkflowPage } from "./render";
 import RemindersPage from "./RemindersPage";
+
+function notices(data: unknown[]) {
+  return getWorkflowsNoticesForMeResponseMock({
+    data: data as never,
+    meta: { page: 1, pageSize: 50, total: data.length },
+  });
+}
+
+const NOTICE = {
+  id: "00000000-0000-4000-8000-000000000099",
+  kind: "ESCALATION",
+  orderNo: "SO-0005",
+  taskKind: "APPROVE_SPR",
+  dueAt: "2026-11-02T01:00:00.000Z",
+  sentAt: "2026-11-02T05:00:00.000Z",
+} as const;
 
 const FLOW = getWorkflowsOrderFlowResponseMock({
   data: {
@@ -139,6 +157,10 @@ describe("an order's steps and timeline", () => {
 });
 
 describe("reminders", () => {
+  beforeEach(() => {
+    server.use(getWorkflowsNoticesForMeMockHandler(notices([])));
+  });
+
   beforeAll(async () => {
     await i18n.loadNamespaces("workflows");
   });
@@ -201,5 +223,74 @@ describe("reminders", () => {
       path: "/",
     });
     expect(await screen.findByText("No reminders")).toBeInTheDocument();
+  });
+});
+
+describe("what has been sent to you", () => {
+  beforeAll(async () => {
+    await i18n.loadNamespaces("workflows");
+  });
+
+  beforeEach(() => {
+    server.use(
+      getWorkflowsMyRemindersMockHandler(
+        getWorkflowsMyRemindersResponseMock({
+          data: [],
+          meta: { page: 1, pageSize: 25, total: 0, mock: true },
+        }),
+      ),
+    );
+  });
+
+  const open = () =>
+    renderWorkflowPage(<RemindersPage />, {
+      role: "APPROVER",
+      route: "/",
+      path: "/",
+    });
+
+  it("shows a sent notice with its kind and a link to the order", async () => {
+    server.use(getWorkflowsNoticesForMeMockHandler(notices([NOTICE])));
+    const { container } = open();
+    expect(
+      await screen.findByRole("region", { name: "Sent to you" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Escalation")).toBeInTheDocument();
+    expect(screen.getByText(/on SO-0005 is overdue/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "SO-0005" })).toHaveAttribute(
+      "href",
+      "/workflows/orders/SO-0005",
+    );
+    expect(await axeViolations(container)).toEqual([]);
+  });
+
+  it("shows nothing extra when nothing has been sent", async () => {
+    let answered = false;
+    server.use(
+      http.get("*/api/v1/workflows/reminders/for-me", () => {
+        answered = true;
+        return HttpResponse.json(notices([]));
+      }),
+    );
+    open();
+    expect(await screen.findByText("No reminders")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(answered).toBe(true);
+    });
+    expect(screen.queryByText("Sent to you")).not.toBeInTheDocument();
+  });
+
+  it("says so when they cannot be loaded, because one may be waiting", async () => {
+    server.use(
+      http.get("*/api/v1/workflows/reminders/for-me", () =>
+        HttpResponse.json(errorBody("INTERNAL_ERROR", "trace-notices-1"), {
+          status: 500,
+        }),
+      ),
+    );
+    open();
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "trace-notices-1",
+    );
   });
 });

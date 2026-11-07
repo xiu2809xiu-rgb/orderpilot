@@ -68,6 +68,27 @@ export const workflowTaskSchema = z.object({
 });
 export type WorkflowTask = z.infer<typeof workflowTaskSchema>;
 
+/** Why an SPR left its approver's inbox for someone else. */
+export const HANDOVER_REASONS = [
+  "substitute",
+  "escalated",
+  "passed-on",
+  "named",
+] as const;
+export type HandoverReason = (typeof HANDOVER_REASONS)[number];
+
+/** A task the approval chain has handed to one person, and why it is theirs. */
+export const handedTaskSchema = workflowTaskSchema.extend({
+  handedOver: z.object({
+    reason: z.enum(HANDOVER_REASONS),
+    /** Who it came from: the person away, the person who passed it on, or the requester. */
+    fromName: z.string().min(1),
+    /** False when area 4's policy would refuse this person outright, so the screen can say so. */
+    canAct: z.boolean(),
+  }),
+});
+export type HandedTask = z.infer<typeof handedTaskSchema>;
+
 export const tasksQuerySchema = pageQuerySchema.extend({
   /** "true" keeps only overdue tasks. */
   overdue: z.enum(["true", "false"]).optional(),

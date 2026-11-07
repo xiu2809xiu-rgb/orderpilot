@@ -19,16 +19,20 @@ import type {
 
 import type {
   WorkflowsApprove200,
+  WorkflowsChangeSla200,
   WorkflowsCompleteTask200,
   WorkflowsConfirmPayment200,
   WorkflowsDocumentConfig200,
+  WorkflowsHandedToMe200,
   WorkflowsInboxReminders200,
   WorkflowsInboxTasks200,
   WorkflowsMyReminders200,
   WorkflowsMyTasks200,
+  WorkflowsNoticesForMe200,
   WorkflowsOpenRules200,
   WorkflowsOrderFlow200,
   WorkflowsReject200,
+  WorkflowsSlaSettings200,
   WorkflowsSpr200,
   WorkflowsUndoDecision200,
   WorkflowsUndoPayment200,
@@ -38,6 +42,8 @@ import type {
 
 export const getWorkflowsMyTasksResponseMock = (overrideResponse: Partial<Extract<WorkflowsMyTasks200, object>> = {}): WorkflowsMyTasks200 => ({data: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.string.uuid(), kind: faker.helpers.arrayElement(['REVIEW_FIELDS','RAISE_SPR','APPROVE_SPR','SEND_PI','CONFIRM_PAYMENT','PACK_ORDER','RECOUNT_CARTONS','ADD_SHIPPING_DOCUMENTS'] as const), title: faker.string.alpha({length: {min: 1, max: 20}}), assigneeRole: faker.helpers.arrayElement(['SYSTEM_ADMIN','PRODUCT_MANAGER','APPROVER','SUPPORT','WAREHOUSE','FINANCE','LOGISTICS','MANAGEMENT','AUDITOR'] as const), orderNo: faker.helpers.arrayElement([faker.helpers.fromRegExp("^[A-Za-z0-9-]{1,30}$"), null]), ref: faker.helpers.arrayElement([{recordNo: faker.helpers.fromRegExp("^(SPR|PI|EXC)-\\d{8}-\\d{4,}$"), navisionNo: faker.helpers.arrayElement([faker.string.alpha({length: {min: 1, max: 20}}), null])},null,]), status: faker.helpers.arrayElement(['OPEN','DONE','CANCELLED'] as const), createdAt: faker.date.past().toISOString().slice(0, 19) + 'Z', dueAt: faker.date.past().toISOString().slice(0, 19) + 'Z', overdue: faker.datatype.boolean(), customerNo: faker.helpers.arrayElement([faker.string.alpha({length: {min: 1, max: 20}}), undefined]), customerName: faker.helpers.arrayElement([faker.string.alpha({length: {min: 1, max: 20}}), undefined]), amount: faker.helpers.arrayElement([faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), undefined]), currencyCode: faker.helpers.arrayElement([faker.string.alpha({length: {min: 3, max: 3}}), undefined]), priority: faker.helpers.arrayElement([faker.helpers.arrayElement(['high','normal','low'] as const), undefined]), assigneeName: faker.helpers.arrayElement([faker.string.alpha({length: {min: 1, max: 20}}), undefined]), expectedPayment: faker.helpers.arrayElement([{paymentType: faker.helpers.arrayElement(['prepayment','deposit','balance','full-payment'] as const), amount: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), currencyCode: faker.string.alpha({length: {min: 3, max: 3}})}, undefined])})), meta: {page: faker.number.int({min: 1, max: 9007199254740991}), pageSize: faker.number.int({min: 1, max: 200}), total: faker.number.int({min: 0, max: 9007199254740991}), mock: faker.helpers.arrayElement([true] as const)}, ...overrideResponse})
 
+export const getWorkflowsHandedToMeResponseMock = (overrideResponse: Partial<Extract<WorkflowsHandedToMe200, object>> = {}): WorkflowsHandedToMe200 => ({data: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.string.uuid(), kind: faker.helpers.arrayElement(['REVIEW_FIELDS','RAISE_SPR','APPROVE_SPR','SEND_PI','CONFIRM_PAYMENT','PACK_ORDER','RECOUNT_CARTONS','ADD_SHIPPING_DOCUMENTS'] as const), title: faker.string.alpha({length: {min: 1, max: 20}}), assigneeRole: faker.helpers.arrayElement(['SYSTEM_ADMIN','PRODUCT_MANAGER','APPROVER','SUPPORT','WAREHOUSE','FINANCE','LOGISTICS','MANAGEMENT','AUDITOR'] as const), orderNo: faker.helpers.arrayElement([faker.helpers.fromRegExp("^[A-Za-z0-9-]{1,30}$"), null]), ref: faker.helpers.arrayElement([{recordNo: faker.helpers.fromRegExp("^(SPR|PI|EXC)-\\d{8}-\\d{4,}$"), navisionNo: faker.helpers.arrayElement([faker.string.alpha({length: {min: 1, max: 20}}), null])},null,]), status: faker.helpers.arrayElement(['OPEN','DONE','CANCELLED'] as const), createdAt: faker.date.past().toISOString().slice(0, 19) + 'Z', dueAt: faker.date.past().toISOString().slice(0, 19) + 'Z', overdue: faker.datatype.boolean(), customerNo: faker.helpers.arrayElement([faker.string.alpha({length: {min: 1, max: 20}}), undefined]), customerName: faker.helpers.arrayElement([faker.string.alpha({length: {min: 1, max: 20}}), undefined]), amount: faker.helpers.arrayElement([faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), undefined]), currencyCode: faker.helpers.arrayElement([faker.string.alpha({length: {min: 3, max: 3}}), undefined]), priority: faker.helpers.arrayElement([faker.helpers.arrayElement(['high','normal','low'] as const), undefined]), assigneeName: faker.helpers.arrayElement([faker.string.alpha({length: {min: 1, max: 20}}), undefined]), expectedPayment: faker.helpers.arrayElement([{paymentType: faker.helpers.arrayElement(['prepayment','deposit','balance','full-payment'] as const), amount: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), currencyCode: faker.string.alpha({length: {min: 3, max: 3}})}, undefined]), handedOver: {reason: faker.helpers.arrayElement(['substitute','escalated','passed-on','named'] as const), fromName: faker.string.alpha({length: {min: 1, max: 20}}), canAct: faker.datatype.boolean()}})), meta: {page: faker.number.int({min: 1, max: 9007199254740991}), pageSize: faker.number.int({min: 1, max: 200}), total: faker.number.int({min: 0, max: 9007199254740991}), mock: faker.helpers.arrayElement([true] as const)}, ...overrideResponse})
+
 export const getWorkflowsCompleteTaskResponseMock = (overrideResponse: Partial<Extract<WorkflowsCompleteTask200, object>> = {}): WorkflowsCompleteTask200 => ({data: {applied: faker.helpers.arrayElement([true] as const), message: faker.string.alpha({length: {min: 10, max: 20}}), taskId: faker.string.uuid(), status: faker.helpers.arrayElement(['OPEN','DONE','CANCELLED'] as const)}, meta: {mock: faker.helpers.arrayElement([true] as const)}, ...overrideResponse})
 
 export const getWorkflowsUndoTaskResponseMock = (overrideResponse: Partial<Extract<WorkflowsUndoTask200, object>> = {}): WorkflowsUndoTask200 => ({data: {applied: faker.helpers.arrayElement([true] as const), message: faker.string.alpha({length: {min: 10, max: 20}}), taskId: faker.string.uuid(), status: faker.helpers.arrayElement(['OPEN','DONE','CANCELLED'] as const)}, meta: {mock: faker.helpers.arrayElement([true] as const)}, ...overrideResponse})
@@ -45,6 +51,12 @@ export const getWorkflowsUndoTaskResponseMock = (overrideResponse: Partial<Extra
 export const getWorkflowsInboxTasksResponseMock = (overrideResponse: Partial<Extract<WorkflowsInboxTasks200, object>> = {}): WorkflowsInboxTasks200 => ({data: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.string.uuid(), kind: faker.helpers.arrayElement(['REVIEW_FIELDS','RAISE_SPR','APPROVE_SPR','SEND_PI','CONFIRM_PAYMENT','PACK_ORDER','RECOUNT_CARTONS','ADD_SHIPPING_DOCUMENTS'] as const), title: faker.string.alpha({length: {min: 1, max: 20}}), assigneeRole: faker.helpers.arrayElement(['SYSTEM_ADMIN','PRODUCT_MANAGER','APPROVER','SUPPORT','WAREHOUSE','FINANCE','LOGISTICS','MANAGEMENT','AUDITOR'] as const), orderNo: faker.helpers.arrayElement([faker.helpers.fromRegExp("^[A-Za-z0-9-]{1,30}$"), null]), ref: faker.helpers.arrayElement([{recordNo: faker.helpers.fromRegExp("^(SPR|PI|EXC)-\\d{8}-\\d{4,}$"), navisionNo: faker.helpers.arrayElement([faker.string.alpha({length: {min: 1, max: 20}}), null])},null,]), status: faker.helpers.arrayElement(['OPEN','DONE','CANCELLED'] as const), createdAt: faker.date.past().toISOString().slice(0, 19) + 'Z', dueAt: faker.date.past().toISOString().slice(0, 19) + 'Z', overdue: faker.datatype.boolean(), customerNo: faker.helpers.arrayElement([faker.string.alpha({length: {min: 1, max: 20}}), undefined]), customerName: faker.helpers.arrayElement([faker.string.alpha({length: {min: 1, max: 20}}), undefined]), amount: faker.helpers.arrayElement([faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), undefined]), currencyCode: faker.helpers.arrayElement([faker.string.alpha({length: {min: 3, max: 3}}), undefined]), priority: faker.helpers.arrayElement([faker.helpers.arrayElement(['high','normal','low'] as const), undefined]), assigneeName: faker.helpers.arrayElement([faker.string.alpha({length: {min: 1, max: 20}}), undefined]), expectedPayment: faker.helpers.arrayElement([{paymentType: faker.helpers.arrayElement(['prepayment','deposit','balance','full-payment'] as const), amount: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), currencyCode: faker.string.alpha({length: {min: 3, max: 3}})}, undefined])})), meta: {page: faker.number.int({min: 1, max: 9007199254740991}), pageSize: faker.number.int({min: 1, max: 200}), total: faker.number.int({min: 0, max: 9007199254740991}), mock: faker.helpers.arrayElement([true] as const)}, ...overrideResponse})
 
 export const getWorkflowsMyRemindersResponseMock = (overrideResponse: Partial<Extract<WorkflowsMyReminders200, object>> = {}): WorkflowsMyReminders200 => ({data: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.string.uuid(), kind: faker.helpers.arrayElement(['TASK_DUE','PAYMENT_DUE','SHIPPING_DOCUMENT_MISSING','IMPORT_PERMIT_MISSING'] as const), stage: faker.helpers.arrayElement(['scheduled','sent','escalated'] as const), orderNo: faker.helpers.fromRegExp("^[A-Za-z0-9-]{1,30}$"), message: faker.string.alpha({length: {min: 1, max: 20}}), toRole: faker.helpers.arrayElement(['SYSTEM_ADMIN','PRODUCT_MANAGER','APPROVER','SUPPORT','WAREHOUSE','FINANCE','LOGISTICS','MANAGEMENT','AUDITOR'] as const), dueAt: faker.date.past().toISOString().slice(0, 19) + 'Z', remindAt: faker.date.past().toISOString().slice(0, 19) + 'Z', escalatesAt: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), escalatedTo: faker.helpers.arrayElement([faker.helpers.arrayElement(['SYSTEM_ADMIN','PRODUCT_MANAGER','APPROVER','SUPPORT','WAREHOUSE','FINANCE','LOGISTICS','MANAGEMENT','AUDITOR'] as const), null])})), meta: {page: faker.number.int({min: 1, max: 9007199254740991}), pageSize: faker.number.int({min: 1, max: 200}), total: faker.number.int({min: 0, max: 9007199254740991}), mock: faker.helpers.arrayElement([true] as const)}, ...overrideResponse})
+
+export const getWorkflowsNoticesForMeResponseMock = (overrideResponse: Partial<Extract<WorkflowsNoticesForMe200, object>> = {}): WorkflowsNoticesForMe200 => ({data: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.string.uuid(), kind: faker.helpers.arrayElement(['REMINDER','ESCALATION'] as const), taskKind: faker.helpers.arrayElement(['REVIEW_FIELDS','RAISE_SPR','APPROVE_SPR','SEND_PI','CONFIRM_PAYMENT','PACK_ORDER','RECOUNT_CARTONS','ADD_SHIPPING_DOCUMENTS'] as const), orderNo: faker.helpers.fromRegExp("^[A-Za-z0-9-]{1,30}$"), dueAt: faker.date.past().toISOString().slice(0, 19) + 'Z', sentAt: faker.date.past().toISOString().slice(0, 19) + 'Z'})), meta: {page: faker.number.int({min: 1, max: 9007199254740991}), pageSize: faker.number.int({min: 1, max: 200}), total: faker.number.int({min: 0, max: 9007199254740991})}, ...overrideResponse})
+
+export const getWorkflowsSlaSettingsResponseMock = (overrideResponse: Partial<Extract<WorkflowsSlaSettings200, object>> = {}): WorkflowsSlaSettings200 => ({data: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({dueAfterMinutes: faker.number.int({min: 0, max: 525600}), remindBeforeMinutes: faker.number.int({min: 0, max: 525600}), escalateAfterMinutes: faker.number.int({min: 0, max: 525600}), escalateToRole: faker.helpers.arrayElement(['SYSTEM_ADMIN','PRODUCT_MANAGER','APPROVER','SUPPORT','WAREHOUSE','FINANCE','LOGISTICS','MANAGEMENT','AUDITOR'] as const), taskKind: faker.helpers.arrayElement(['REVIEW_FIELDS','RAISE_SPR','APPROVE_SPR','SEND_PI','CONFIRM_PAYMENT','PACK_ORDER','RECOUNT_CARTONS','ADD_SHIPPING_DOCUMENTS'] as const)})), ...overrideResponse})
+
+export const getWorkflowsChangeSlaResponseMock = (overrideResponse: Partial<Extract<WorkflowsChangeSla200, object>> = {}): WorkflowsChangeSla200 => ({data: {dueAfterMinutes: faker.number.int({min: 0, max: 525600}), remindBeforeMinutes: faker.number.int({min: 0, max: 525600}), escalateAfterMinutes: faker.number.int({min: 0, max: 525600}), escalateToRole: faker.helpers.arrayElement(['SYSTEM_ADMIN','PRODUCT_MANAGER','APPROVER','SUPPORT','WAREHOUSE','FINANCE','LOGISTICS','MANAGEMENT','AUDITOR'] as const), taskKind: faker.helpers.arrayElement(['REVIEW_FIELDS','RAISE_SPR','APPROVE_SPR','SEND_PI','CONFIRM_PAYMENT','PACK_ORDER','RECOUNT_CARTONS','ADD_SHIPPING_DOCUMENTS'] as const)}, ...overrideResponse})
 
 export const getWorkflowsInboxRemindersResponseMock = (overrideResponse: Partial<Extract<WorkflowsInboxReminders200, object>> = {}): WorkflowsInboxReminders200 => ({data: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.string.uuid(), kind: faker.helpers.arrayElement(['TASK_DUE','PAYMENT_DUE','SHIPPING_DOCUMENT_MISSING','IMPORT_PERMIT_MISSING'] as const), stage: faker.helpers.arrayElement(['scheduled','sent','escalated'] as const), orderNo: faker.helpers.fromRegExp("^[A-Za-z0-9-]{1,30}$"), message: faker.string.alpha({length: {min: 1, max: 20}}), toRole: faker.helpers.arrayElement(['SYSTEM_ADMIN','PRODUCT_MANAGER','APPROVER','SUPPORT','WAREHOUSE','FINANCE','LOGISTICS','MANAGEMENT','AUDITOR'] as const), dueAt: faker.date.past().toISOString().slice(0, 19) + 'Z', remindAt: faker.date.past().toISOString().slice(0, 19) + 'Z', escalatesAt: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), escalatedTo: faker.helpers.arrayElement([faker.helpers.arrayElement(['SYSTEM_ADMIN','PRODUCT_MANAGER','APPROVER','SUPPORT','WAREHOUSE','FINANCE','LOGISTICS','MANAGEMENT','AUDITOR'] as const), null])})), meta: {page: faker.number.int({min: 1, max: 9007199254740991}), pageSize: faker.number.int({min: 1, max: 200}), total: faker.number.int({min: 0, max: 9007199254740991}), mock: faker.helpers.arrayElement([true] as const)}, ...overrideResponse})
 
@@ -74,6 +86,18 @@ export const getWorkflowsMyTasksMockHandler = (overrideResponse?: WorkflowsMyTas
     return HttpResponse.json(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
     : getWorkflowsMyTasksResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getWorkflowsHandedToMeMockHandler = (overrideResponse?: WorkflowsHandedToMe200 | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<WorkflowsHandedToMe200> | WorkflowsHandedToMe200), options?: RequestHandlerOptions) => {
+  return http.get('*/api/v1/workflows/tasks/handed-to-me', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getWorkflowsHandedToMeResponseMock(),
       { status: 200
       })
   }, options)
@@ -122,6 +146,42 @@ export const getWorkflowsMyRemindersMockHandler = (overrideResponse?: WorkflowsM
     return HttpResponse.json(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
     : getWorkflowsMyRemindersResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getWorkflowsNoticesForMeMockHandler = (overrideResponse?: WorkflowsNoticesForMe200 | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<WorkflowsNoticesForMe200> | WorkflowsNoticesForMe200), options?: RequestHandlerOptions) => {
+  return http.get('*/api/v1/workflows/reminders/for-me', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getWorkflowsNoticesForMeResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getWorkflowsSlaSettingsMockHandler = (overrideResponse?: WorkflowsSlaSettings200 | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<WorkflowsSlaSettings200> | WorkflowsSlaSettings200), options?: RequestHandlerOptions) => {
+  return http.get('*/api/v1/workflows/sla-settings', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getWorkflowsSlaSettingsResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getWorkflowsChangeSlaMockHandler = (overrideResponse?: WorkflowsChangeSla200 | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<WorkflowsChangeSla200> | WorkflowsChangeSla200), options?: RequestHandlerOptions) => {
+  return http.put('*/api/v1/workflows/sla-settings/:taskKind', async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getWorkflowsChangeSlaResponseMock(),
       { status: 200
       })
   }, options)
@@ -248,10 +308,14 @@ export const getWorkflowsOpenRulesMockHandler = (overrideResponse?: WorkflowsOpe
 }
 export const getWorkflowsMock = () => [
   getWorkflowsMyTasksMockHandler(),
+  getWorkflowsHandedToMeMockHandler(),
   getWorkflowsCompleteTaskMockHandler(),
   getWorkflowsUndoTaskMockHandler(),
   getWorkflowsInboxTasksMockHandler(),
   getWorkflowsMyRemindersMockHandler(),
+  getWorkflowsNoticesForMeMockHandler(),
+  getWorkflowsSlaSettingsMockHandler(),
+  getWorkflowsChangeSlaMockHandler(),
   getWorkflowsInboxRemindersMockHandler(),
   getWorkflowsOrderFlowMockHandler(),
   getWorkflowsConfirmPaymentMockHandler(),

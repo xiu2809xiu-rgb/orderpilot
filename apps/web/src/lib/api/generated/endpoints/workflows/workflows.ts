@@ -23,10 +23,14 @@ import type {
 import type {
   WorkflowsApprove200,
   WorkflowsApproveBody,
+  WorkflowsChangeSla200,
+  WorkflowsChangeSlaBody,
   WorkflowsCompleteTask200,
   WorkflowsConfirmPayment200,
   WorkflowsConfirmPaymentBody,
   WorkflowsDocumentConfig200,
+  WorkflowsHandedToMe200,
+  WorkflowsHandedToMeParams,
   WorkflowsInboxReminders200,
   WorkflowsInboxRemindersParams,
   WorkflowsInboxTasks200,
@@ -35,10 +39,13 @@ import type {
   WorkflowsMyRemindersParams,
   WorkflowsMyTasks200,
   WorkflowsMyTasksParams,
+  WorkflowsNoticesForMe200,
+  WorkflowsNoticesForMeParams,
   WorkflowsOpenRules200,
   WorkflowsOrderFlow200,
   WorkflowsReject200,
   WorkflowsRejectBody,
+  WorkflowsSlaSettings200,
   WorkflowsSpr200,
   WorkflowsUndoDecision200,
   WorkflowsUndoPayment200,
@@ -148,6 +155,99 @@ export function useWorkflowsMyTasks<TData = Awaited<ReturnType<typeof workflowsM
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getWorkflowsMyTasksQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary The SPRs the approval chain has handed to the caller, whatever their role (tasks from mock data, the routing is real)
+ */
+export const workflowsHandedToMe = (
+    params?: WorkflowsHandedToMeParams,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<WorkflowsHandedToMe200>(
+      {url: `/api/v1/workflows/tasks/handed-to-me`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getWorkflowsHandedToMeQueryKey = (params?: WorkflowsHandedToMeParams,) => {
+    return [
+    `/api/v1/workflows/tasks/handed-to-me`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getWorkflowsHandedToMeQueryOptions = <TData = Awaited<ReturnType<typeof workflowsHandedToMe>>, TError = ErrorType<unknown>>(params?: WorkflowsHandedToMeParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsHandedToMe>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getWorkflowsHandedToMeQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof workflowsHandedToMe>>> = ({ signal }) => workflowsHandedToMe(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof workflowsHandedToMe>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type WorkflowsHandedToMeQueryResult = NonNullable<Awaited<ReturnType<typeof workflowsHandedToMe>>>
+export type WorkflowsHandedToMeQueryError = ErrorType<unknown>
+
+
+export function useWorkflowsHandedToMe<TData = Awaited<ReturnType<typeof workflowsHandedToMe>>, TError = ErrorType<unknown>>(
+ params: undefined |  WorkflowsHandedToMeParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsHandedToMe>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof workflowsHandedToMe>>,
+          TError,
+          Awaited<ReturnType<typeof workflowsHandedToMe>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useWorkflowsHandedToMe<TData = Awaited<ReturnType<typeof workflowsHandedToMe>>, TError = ErrorType<unknown>>(
+ params?: WorkflowsHandedToMeParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsHandedToMe>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof workflowsHandedToMe>>,
+          TError,
+          Awaited<ReturnType<typeof workflowsHandedToMe>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useWorkflowsHandedToMe<TData = Awaited<ReturnType<typeof workflowsHandedToMe>>, TError = ErrorType<unknown>>(
+ params?: WorkflowsHandedToMeParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsHandedToMe>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary The SPRs the approval chain has handed to the caller, whatever their role (tasks from mock data, the routing is real)
+ */
+
+export function useWorkflowsHandedToMe<TData = Awaited<ReturnType<typeof workflowsHandedToMe>>, TError = ErrorType<unknown>>(
+ params?: WorkflowsHandedToMeParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsHandedToMe>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getWorkflowsHandedToMeQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -525,6 +625,292 @@ export function useWorkflowsMyReminders<TData = Awaited<ReturnType<typeof workfl
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getWorkflowsMyRemindersQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary The reminders and escalations that have gone out to the caller or their role, on tasks still open
+ */
+export const workflowsNoticesForMe = (
+    params?: WorkflowsNoticesForMeParams,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<WorkflowsNoticesForMe200>(
+      {url: `/api/v1/workflows/reminders/for-me`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getWorkflowsNoticesForMeQueryKey = (params?: WorkflowsNoticesForMeParams,) => {
+    return [
+    `/api/v1/workflows/reminders/for-me`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getWorkflowsNoticesForMeQueryOptions = <TData = Awaited<ReturnType<typeof workflowsNoticesForMe>>, TError = ErrorType<unknown>>(params?: WorkflowsNoticesForMeParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsNoticesForMe>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getWorkflowsNoticesForMeQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof workflowsNoticesForMe>>> = ({ signal }) => workflowsNoticesForMe(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof workflowsNoticesForMe>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type WorkflowsNoticesForMeQueryResult = NonNullable<Awaited<ReturnType<typeof workflowsNoticesForMe>>>
+export type WorkflowsNoticesForMeQueryError = ErrorType<unknown>
+
+
+export function useWorkflowsNoticesForMe<TData = Awaited<ReturnType<typeof workflowsNoticesForMe>>, TError = ErrorType<unknown>>(
+ params: undefined |  WorkflowsNoticesForMeParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsNoticesForMe>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof workflowsNoticesForMe>>,
+          TError,
+          Awaited<ReturnType<typeof workflowsNoticesForMe>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useWorkflowsNoticesForMe<TData = Awaited<ReturnType<typeof workflowsNoticesForMe>>, TError = ErrorType<unknown>>(
+ params?: WorkflowsNoticesForMeParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsNoticesForMe>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof workflowsNoticesForMe>>,
+          TError,
+          Awaited<ReturnType<typeof workflowsNoticesForMe>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useWorkflowsNoticesForMe<TData = Awaited<ReturnType<typeof workflowsNoticesForMe>>, TError = ErrorType<unknown>>(
+ params?: WorkflowsNoticesForMeParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsNoticesForMe>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary The reminders and escalations that have gone out to the caller or their role, on tasks still open
+ */
+
+export function useWorkflowsNoticesForMe<TData = Awaited<ReturnType<typeof workflowsNoticesForMe>>, TError = ErrorType<unknown>>(
+ params?: WorkflowsNoticesForMeParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsNoticesForMe>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getWorkflowsNoticesForMeQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary When each kind of task is due, and who it escalates to
+ */
+export const workflowsSlaSettings = (
+
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<WorkflowsSlaSettings200>(
+      {url: `/api/v1/workflows/sla-settings`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getWorkflowsSlaSettingsQueryKey = () => {
+    return [
+    `/api/v1/workflows/sla-settings`
+    ] as const;
+    }
+
+
+export const getWorkflowsSlaSettingsQueryOptions = <TData = Awaited<ReturnType<typeof workflowsSlaSettings>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsSlaSettings>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getWorkflowsSlaSettingsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof workflowsSlaSettings>>> = ({ signal }) => workflowsSlaSettings(signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof workflowsSlaSettings>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type WorkflowsSlaSettingsQueryResult = NonNullable<Awaited<ReturnType<typeof workflowsSlaSettings>>>
+export type WorkflowsSlaSettingsQueryError = ErrorType<unknown>
+
+
+export function useWorkflowsSlaSettings<TData = Awaited<ReturnType<typeof workflowsSlaSettings>>, TError = ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsSlaSettings>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof workflowsSlaSettings>>,
+          TError,
+          Awaited<ReturnType<typeof workflowsSlaSettings>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useWorkflowsSlaSettings<TData = Awaited<ReturnType<typeof workflowsSlaSettings>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsSlaSettings>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof workflowsSlaSettings>>,
+          TError,
+          Awaited<ReturnType<typeof workflowsSlaSettings>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useWorkflowsSlaSettings<TData = Awaited<ReturnType<typeof workflowsSlaSettings>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsSlaSettings>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary When each kind of task is due, and who it escalates to
+ */
+
+export function useWorkflowsSlaSettings<TData = Awaited<ReturnType<typeof workflowsSlaSettings>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsSlaSettings>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getWorkflowsSlaSettingsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary Change when a kind of task is due. Audited
+ */
+export const workflowsChangeSla = (
+    taskKind: string,
+    workflowsChangeSlaBody: WorkflowsChangeSlaBody,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<WorkflowsChangeSla200>(
+      {url: `/api/v1/workflows/sla-settings/${taskKind}`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: workflowsChangeSlaBody, signal
+    },
+      );
+    }
+
+
+
+
+export const getWorkflowsChangeSlaQueryKey = (taskKind: string,
+    workflowsChangeSlaBody?: WorkflowsChangeSlaBody,) => {
+    return [
+    'PUT', `/api/v1/workflows/sla-settings/${taskKind}`, workflowsChangeSlaBody
+    ] as const;
+    }
+
+
+export const getWorkflowsChangeSlaQueryOptions = <TData = Awaited<ReturnType<typeof workflowsChangeSla>>, TError = ErrorType<unknown>>(taskKind: string,
+    workflowsChangeSlaBody: WorkflowsChangeSlaBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsChangeSla>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getWorkflowsChangeSlaQueryKey(taskKind,workflowsChangeSlaBody);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof workflowsChangeSla>>> = ({ signal }) => workflowsChangeSla(taskKind,workflowsChangeSlaBody, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: taskKind !== null && taskKind !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof workflowsChangeSla>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type WorkflowsChangeSlaQueryResult = NonNullable<Awaited<ReturnType<typeof workflowsChangeSla>>>
+export type WorkflowsChangeSlaQueryError = ErrorType<unknown>
+
+
+export function useWorkflowsChangeSla<TData = Awaited<ReturnType<typeof workflowsChangeSla>>, TError = ErrorType<unknown>>(
+ taskKind: string,
+    workflowsChangeSlaBody: WorkflowsChangeSlaBody, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsChangeSla>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof workflowsChangeSla>>,
+          TError,
+          Awaited<ReturnType<typeof workflowsChangeSla>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useWorkflowsChangeSla<TData = Awaited<ReturnType<typeof workflowsChangeSla>>, TError = ErrorType<unknown>>(
+ taskKind: string,
+    workflowsChangeSlaBody: WorkflowsChangeSlaBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsChangeSla>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof workflowsChangeSla>>,
+          TError,
+          Awaited<ReturnType<typeof workflowsChangeSla>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useWorkflowsChangeSla<TData = Awaited<ReturnType<typeof workflowsChangeSla>>, TError = ErrorType<unknown>>(
+ taskKind: string,
+    workflowsChangeSlaBody: WorkflowsChangeSlaBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsChangeSla>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Change when a kind of task is due. Audited
+ */
+
+export function useWorkflowsChangeSla<TData = Awaited<ReturnType<typeof workflowsChangeSla>>, TError = ErrorType<unknown>>(
+ taskKind: string,
+    workflowsChangeSlaBody: WorkflowsChangeSlaBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsChangeSla>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getWorkflowsChangeSlaQueryOptions(taskKind,workflowsChangeSlaBody,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

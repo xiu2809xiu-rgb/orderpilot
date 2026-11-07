@@ -1,5 +1,6 @@
 import {
   DEFAULT_DOCUMENT_CONFIG,
+  DEFAULT_TASK_SLAS,
   compareDecimal,
   multiplyDecimal,
   parseRecordNumber,
@@ -14,6 +15,7 @@ import {
   SALES_FLOW_VERSION,
   STARTER_SALES_STEPS,
 } from "./domain/sales-flow.js";
+import { scheduleOf } from "./domain/task-schedule.js";
 import { mockId } from "./mock/fixtures.js";
 import { MOCK_CURRENT_STEP } from "./mock/mock-flows.js";
 
@@ -161,6 +163,11 @@ export async function seedWorkflows(client: DbClient): Promise<string> {
   });
   await seedOrdersAwaitingSpr(client, dataset, instanceIds);
 
+  await client.workflowTaskSla.createMany({
+    data: DEFAULT_TASK_SLAS.map((sla) => ({ ...sla })),
+    skipDuplicates: true,
+  });
+
   const highest = new Map<
     string,
     { type: RecordType; day: string; value: number }
@@ -199,6 +206,10 @@ async function seedOrdersAwaitingSpr(
     select: { id: true },
   });
   if (!requester) return;
+  const now = new Date();
+  const approveSprSla = DEFAULT_TASK_SLAS.find(
+    (sla) => sla.taskKind === "APPROVE_SPR",
+  );
 
   const orders = new Map(
     dataset.orders.map((order) => [order.header.no, order]),
@@ -237,6 +248,14 @@ async function seedOrdersAwaitingSpr(
     });
     if (!record) continue;
     if (record.data !== null) continue;
+    // Its clock starts now, so the demo's dated fixtures do not arrive overdue.
+    await client.workflowTask.updateMany({
+      where: { instanceId, kind: "APPROVE_SPR" },
+      data: {
+        createdAt: now,
+        dueAt: approveSprSla ? scheduleOf(now, approveSprSla).dueAt : now,
+      },
+    });
     await client.workflowRecord.update({
       where: { id: record.id },
       data: {

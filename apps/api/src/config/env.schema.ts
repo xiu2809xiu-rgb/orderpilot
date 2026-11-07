@@ -93,6 +93,9 @@ export const envSchema = z
       .string()
       .regex(/^postgres(ql)?:\/\/\S+$/, "Must start with postgresql://"),
 
+    // How often the workflow sweep sends what has come due. 0 switches it off.
+    WORKFLOW_SWEEP_SECONDS: z.coerce.number().int().min(0).default(60),
+
     // Redis, with the database number at the end (redis://host:6379/0).
     REDIS_URL: z
       .string()

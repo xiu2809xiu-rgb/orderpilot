@@ -139,6 +139,21 @@ await this.authorisation.enforce(
 
 - **A refusal** throws the standard 403 `FORBIDDEN` and is already audited, so let it through.
 - **To route a task,** `deciderFor(requesterUserId)` says who should receive it: the approver, their substitute, or the person the absent approver escalates to.
+- **Take `requesterUserId` and `earlierDuties` from your stored records,** never from the request body: the SPR's raisedBy, the payment's approvedBy. A caller that copied them from the body would let anyone name someone else and pass the rules they guard.
+
+For a payment step, add who did each earlier duty on the same record (F-4):
+
+```ts
+await this.authorisation.enforce(
+  {
+    actor: { userId: auth.user.id, role: auth.user.role },
+    action: "payment-hold.clear",
+    resource: { type: "Payment", id: payment.no },
+    earlierDuties: { "vendor-payment.approve": payment.approvedByUserId },
+  },
+  { ip: req.ip ?? null, traceId: requestIdOf(req) },
+);
+```
 
 ### The absence and escalation rule (Q-6)
 
@@ -160,13 +175,39 @@ An open rule, configuration until Spectra answers [Q-6](../client/questions-for-
 - Today it is their own: `SUBSTITUTE_LIMITS = "own"` in `domain/approval-limit-rule.ts`.
 - Flipping it to `"approver"` changes nothing else, and the unit tests cover both settings.
 
+## No self-approval and segregation of duties (F-4)
+
+F-4 adds three rules to the same chain ([ADR 0044](../adr/0044-no-self-approval-and-segregation-of-duties.md)). The full order is:
+
+1. `system-admin`
+2. `permission`
+3. `no-self-approval`: whoever raised a request never decides it, as the approver, a substitute or through an escalation. It compares user ids, so a change of role changes nothing.
+4. `own-setup`: nobody changes their own approval limits or substitute, even holding `roles.manage`. `ApprovalSetupService.save` asks the policy whenever a person makes the change.
+5. `segregation-of-duties`: the pairs in `SEGREGATED_DUTIES`, below.
+6. `approval-route`
+7. `approval-limit`
+
+**The chain never hands a request back to its requester.** Wherever the requester appears on it, they are passed over like someone away, and the request moves on. If that leaves nobody, the refusal records that the only person who could decide raised the request.
+
+**The duties kept apart**, configuration until Spectra confirms them:
+
+| Earlier duty                | Rules out, on the same record                                            |
+| --------------------------- | ------------------------------------------------------------------------ |
+| `spr.raise` (the requester) | `spr.approve`                                                            |
+| `vendor-payment.approve`    | `payment-hold.clear`                                                     |
+| `vendor-bank.change`        | `payment-hold.clear`, `vendor-payment.approve`, `vendor-payment.release` |
+
+Confirming a customer's payment (`customer-payment.confirm`) and paying a vendor (`vendor-payment.approve`, `vendor-payment.release`) are separate actions, and the customer's payment sits in no pair.
+
 ### Still to come
 
+- **F-5 and area 2's payment steps** call `enforce` with `earlierDuties`. Until they do, nothing feeds the payment pairs: OrderPilot cannot change a vendor's bank details (A-15), and the payment steps don't ask the policy yet.
+- **`payments.post`** is held by no role by default, so the vendor payment actions are refused for everyone until the matrix grants it.
 - **Richie's one-line changes:**
   - the policy behind the `PermissionPolicy` token (`auth.module.ts`);
   - the seeder (`seeders.ts`);
   - `approvals.decide` for Management in the default matrix, with its description in `CLAUDE.md`, so an escalated request can be decided.
-- **C-3 (Azri)** calls `enforce` from the SPR approval route. E2E #3 through that route stays `it.todo` until then.
+- **Azri** points `POST /workflows/sprs/:no/approve` at `decideSpr`, which already calls `enforce`. Today the route still uses the mock overlay, so E2E #3 through it stays `it.todo`.
 - **The routes** to read and change a setup (`roles.read`, `roles.manage`), in a follow-up pull request that P-66's form needs.
 - **The data scope,** as a second slice once Q-17 is answered.
 
