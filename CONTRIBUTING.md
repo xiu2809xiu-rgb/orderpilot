@@ -491,7 +491,7 @@ const draft = useDraft(
 
 ## Building a document form
 
-Orders, SPRs, payment confirmations and shipments are edited on the document form in `apps/web/src/components/document-form`, imported from `@/components/document-form` ([ADR 0044](docs/adr/0044-a-document-form-is-declared-and-the-template-draws-it.md)). A screen declares; the template draws the title, the action bar, the header, the lines, the footer and the tabs. `/gallery` shows a sales order with a fake server.
+Orders, SPRs, payment confirmations and shipments are edited on the document form in `apps/web/src/components/document-form`, imported from `@/components/document-form` ([ADR 0045](docs/adr/0045-a-document-form-is-declared-and-the-template-draws-it.md)). A screen declares; the template draws the title, the action bar, the header, the lines, the footer and the tabs. `/gallery` shows a sales order with a fake server.
 
 ```tsx
 const form = useZodForm({ schema, defaultValues });

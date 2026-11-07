@@ -1,4 +1,4 @@
-# ADR 0044: A document form is declared, and the document form template draws it
+# ADR 0045: A document form is declared, and the document form template draws it
 
 - **Status:** Accepted
 - **Date:** 2026-11-06
