@@ -37,8 +37,8 @@ github.com/klauspost/compress@v1.18.7 \
 github.com/prometheus/prometheus@v0.311.3 \
 github.com/rabbitmq/amqp091-go@v1.13.0 \
 go.opentelemetry.io/otel/sdk@v1.44.0 \
-golang.org/x/crypto@v0.57.0 \
-golang.org/x/net@v0.60.0 \
+golang.org/x/crypto@v0.58.0 \
+golang.org/x/net@v0.62.0 \
 google.golang.org/grpc@v1.83.2"
 RUN --mount=type=cache,id=orderpilot-go-mod,target=/go/pkg/mod \
     --mount=type=cache,id=orderpilot-go-build,target=/root/.cache/go-build \
