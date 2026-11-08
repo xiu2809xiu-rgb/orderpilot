@@ -72,6 +72,7 @@
 /apps/api/prisma/schema/ai.prisma                                 @xiu2809xiu-rgb @angelynnmr
 /apps/api/prisma/schema/platform.prisma                           @xiu2809xiu-rgb @angelynnmr
 /apps/api/test/http/master-data.test.ts                           @xiu2809xiu-rgb @angelynnmr
+/apps/api/test/http/orders.test.ts                                 @xiu2809xiu-rgb @angelynnmr
 /apps/api/test/database/sales-order.test.ts                       @xiu2809xiu-rgb @angelynnmr
 /apps/web/src/features/documents/                                 @xiu2809xiu-rgb @angelynnmr
 /apps/web/src/features/orders/                                    @xiu2809xiu-rgb @angelynnmr
