@@ -243,7 +243,7 @@ Merged: the plan (P-42), Docker images (P-13), the end-to-end smoke test (P-14),
 
 In flight: the glob override (P-28, [#197](https://github.com/xiu2809xiu-rgb/orderpilot/pull/197)), due before the accepted advisory expires on 6 Nov, and the rest of the list template (P-45, [#206](https://github.com/xiu2809xiu-rgb/orderpilot/pull/206)). P-45 ships the grid, saved views, streamed print and record-scoped operation log on the shared template, the master data lists and the gallery only. The task inbox, exceptions, tracker and users tab are as on `main`: their moves onto the template wait on the parked branch `wip/p45-owner-screens` (a complete first build) and go in P-38, P-73, P-74 and P-76, each its own small pull request reviewed by its owner (Azri, Iok Teck and Angelyn). The Order and Exception logs stay empty until those areas write their audit events.
 
-Next, in section 9's order: the rest of the list template (P-45) and the document form (P-47), then the Pro kits (P-22) once Richie says the keys are in `apps/web/.env.local`, then orders on the templates (P-36, P-49 to P-51) and documents (P-37, P-53 to P-55).
+Next, in section 9's order: the rest of the list template (P-45, in review) and the document form (P-47, built on `feat/document-form`, in review, #216), then the Pro kits (P-22) once Richie says the keys are in `apps/web/.env.local`, then orders on the templates (P-36, P-49 to P-51) and documents (P-37, P-53 to P-55).
 
 Why it is slower than planned: every builder stopped at a usage limit several times, and two of the accounts that run them reached their weekly limits on 2 Nov (item bl). Pushed work survived every stop. The last walk of all nine roles has still to run on main, now that Docker Desktop is back. The [screenshot index](design/product-pass-screenshots.md) holds every picture the stories took.
 
@@ -258,7 +258,7 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 | P-44  | List template: filter bar, action bar and status chip | `feat/list-template-bars`        | Merged, [#189](https://github.com/xiu2809xiu-rgb/orderpilot/pull/189)     |
 | P-45  | List template: grid, saved views and operation log    | `feat/list-template-grid`        | In review ([#206](https://github.com/xiu2809xiu-rgb/orderpilot/pull/206)) |
 | P-46  | Form kit                                              | `feat/form-kit`                  | Merged, [#173](https://github.com/xiu2809xiu-rgb/orderpilot/pull/173)     |
-| P-47  | Document form                                         | `feat/document-form`             | Not started                                                               |
+| P-47  | Document form                                         | `feat/document-form`             | In review (#216)                                                          |
 | P-48  | Lines grid                                            | `feat/lines-grid`                | Merged, [#190](https://github.com/xiu2809xiu-rgb/orderpilot/pull/190)     |
 | P-22  | The design system with the Pro kits                   | `feat/platform-design-system`    | Waits for the licence keys in `apps/web/.env.local`                       |
 | P-36  | Orders: the reader and the list                       | `feat/product-pass-orders`       | Not started                                                               |

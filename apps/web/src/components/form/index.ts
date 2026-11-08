@@ -22,6 +22,7 @@ export { SaveButton } from "./SaveButton";
 export { SelectField, type SelectOption } from "./SelectField";
 export {
   applyServerError,
+  formMessage,
   readFormError,
   showInvalidOnForm,
   type PathMap,
@@ -31,7 +32,11 @@ export { TextField } from "./TextField";
 export { useDraft, type DraftControl, type DraftOptions } from "./useDraft";
 export { useFormSave } from "./useFormSave";
 export { useSaveShortcut } from "./useSaveShortcut";
-export { type SaveOptions } from "./useSaveReason";
+export { useSaveReason, type SaveOptions } from "./useSaveReason";
 export { useUnsavedChanges } from "./useUnsavedChanges";
-export { useViewerChanged } from "./useViewerChanged";
+export {
+  isSameViewer,
+  useMountViewer,
+  useViewerChanged,
+} from "./useViewerChanged";
 export { useZodForm } from "./useZodForm";
