@@ -311,6 +311,80 @@ describe("Print or PDF", () => {
     });
   });
 
+  it("prints the status, one translated note and the page language", async () => {
+    signInAs("SUPPORT");
+    let printed = "";
+    let lang = "";
+    vi.spyOn(printer, "print").mockImplementation((frame) => {
+      printed = frame.document.body.textContent;
+      lang = frame.document.documentElement.lang;
+      frame.dispatchEvent(new Event("afterprint"));
+    });
+    renderDocument({
+      print: () => ({
+        title: "Sales order SO-1",
+        fields: [{ label: "Customer PO", value: "CPO-1" }],
+      }),
+    });
+    await userEvent.click(screen.getByRole("button", { name: "Print or PDF" }));
+    await waitFor(() => {
+      expect(printed).toContain("Sales order SO-1");
+    });
+    expect(printed).toContain("StatusWaiting for approval");
+    expect(printed).toMatch(/Synthetic demo data - Printed /);
+    expect(lang).toBe(i18n.language);
+  });
+
+  it("waits while the form has unsaved changes", async () => {
+    signInAs("SUPPORT");
+    const spy = vi.spyOn(printer, "print");
+    renderDocument({
+      print: () => ({ title: "Sales order SO-1", fields: [] }),
+    });
+    await userEvent.type(po(), "9");
+    await userEvent.click(screen.getByRole("button", { name: "Print or PDF" }));
+    expect(spy).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole("button", { name: "Print or PDF" }),
+    ).toHaveAccessibleDescription(/Save your changes first/);
+  });
+
+  it("ends in the failure toast when the screen's builder throws", async () => {
+    signInAs("SUPPORT");
+    const spy = vi.spyOn(printer, "print");
+    renderDocument({
+      print: () => {
+        throw new Error("record not loaded");
+      },
+    });
+    await userEvent.click(screen.getByRole("button", { name: "Print or PDF" }));
+    await waitFor(() => {
+      expect(useToastStore.getState().items[0]?.kind).toBe("error");
+    });
+    expect(spy).not.toHaveBeenCalled();
+  });
+
+  it("opens one frame, however many times Print is pressed", async () => {
+    signInAs("SUPPORT");
+    const spy = vi.spyOn(printer, "print").mockImplementation(() => undefined);
+    renderDocument({
+      print: () => ({ title: "Sales order SO-1", fields: [] }),
+    });
+    const print = screen.getByRole("button", { name: "Print or PDF" });
+    await userEvent.click(print);
+    await userEvent.click(print);
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledTimes(1);
+    });
+    expect(document.querySelectorAll("iframe")).toHaveLength(1);
+    // Closing the dialog frees the next print.
+    const frame = document.querySelector("iframe")?.contentWindow;
+    frame?.dispatchEvent(new Event("afterprint"));
+    await waitFor(() => {
+      expect(document.querySelector("iframe")).toBeNull();
+    });
+  });
+
   it("is not drawn when the form has nothing to print", () => {
     signInAs("SUPPORT");
     renderDocument();

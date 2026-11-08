@@ -83,7 +83,7 @@ export function DocumentForm<T extends FieldValues, O, R = unknown>(
   props: DocumentFormProps<T, O, R>,
 ) {
   const { form, formId, title, number, formLabel, tabs } = props;
-  const { t } = useTranslation("document-form");
+  const { t, i18n } = useTranslation("document-form");
   const { t: tc } = useTranslation("components");
   const draft = useDraft(props.draftKey, form, props.draftOptions);
   const session = useSessionStore((state) => state.session);
@@ -106,10 +106,27 @@ export function DocumentForm<T extends FieldValues, O, R = unknown>(
   const { print } = props;
   const onPrint = print
     ? () => {
-        printForm(print(), {
-          demo: tc("badges.synthetic"),
-          printedOn: t("print.printedOn", { when: WHEN.format(new Date()) }),
-        }).catch(() => {
+        // Built inside the try so a throw in the screen's builder ends in the
+        // same toast as a failed print.
+        void (async () => {
+          const spec = print();
+          await printForm(
+            {
+              ...spec,
+              fields: [
+                { label: t("footer.status"), value: props.status.label },
+                ...spec.fields,
+              ],
+            },
+            {
+              note: t("print.note", {
+                demo: tc("badges.synthetic"),
+                when: WHEN.format(new Date()),
+              }),
+              lang: i18n.language,
+            },
+          );
+        })().catch(() => {
           toast.failed(t("print.failed"));
         });
       }

@@ -28,7 +28,7 @@
     "status": "Status"
   },
   "print": {
-    "printedOn": "Printed {{when}}",
+    "note": "{{demo}} - Printed {{when}}",
     "failed": "Could not prepare the print view. Try again."
   },
   "tabs": {

@@ -3,10 +3,10 @@ import type { DocumentPrint } from "./types";
 
 /** The words a printed form needs besides its own: already translated. */
 export interface PrintFormWords {
-  /** "Synthetic demo data". */
-  demo: string;
-  /** "Printed 5 Nov 2026, 10:04 am". */
-  printedOn: string;
+  /** One translated line with both values: "Synthetic demo data - Printed 5 Nov 2026, 10:04 am". */
+  note: string;
+  /** The app's language, so the frame's text is read and hyphenated as the page is. */
+  lang: string;
 }
 
 const STYLES = `
@@ -60,6 +60,9 @@ function table(
   return element;
 }
 
+/** True while a print frame is open, so a second click cannot stack another. */
+let frameOpen = false;
+
 /** The wait before a browser that does not hold print() open loses the frame. */
 const LAST_CHANCE_MS = 60_000;
 
@@ -74,6 +77,8 @@ export async function printForm(
   spec: DocumentPrint,
   words: PrintFormWords,
 ): Promise<void> {
+  if (frameOpen) return;
+  frameOpen = true;
   const holder = document.createElement("iframe");
   holder.title = spec.title;
   holder.tabIndex = -1;
@@ -84,15 +89,18 @@ export async function printForm(
     const win = holder.contentWindow;
     const doc = holder.contentDocument;
     if (!win || !doc) throw new Error("The print frame did not open");
-    doc.documentElement.lang = "en";
+    doc.documentElement.lang = words.lang;
     doc.title = spec.title;
+    // The frame is an about:blank document, so it inherits the page's policy
+    // (apps/web/security-headers.ts). These styles print only while style-src
+    // allows 'unsafe-inline'; tightening it (ADR 0015) needs a nonce here.
     const style = doc.createElement("style");
     style.textContent = STYLES;
     doc.head.append(style);
     const heading = doc.createElement("h1");
     heading.textContent = spec.title;
     const note = doc.createElement("p");
-    note.textContent = `${words.demo} - ${words.printedOn}`;
+    note.textContent = words.note;
     doc.body.append(heading, note, list(doc, spec.fields));
     if (spec.lines) doc.body.append(table(doc, spec.lines));
     if (spec.totals) doc.body.append(list(doc, spec.totals));
@@ -108,5 +116,6 @@ export async function printForm(
     ]);
   } finally {
     holder.remove();
+    frameOpen = false;
   }
 }

@@ -76,7 +76,6 @@ export function DocumentActionBar<T extends FieldValues, O>({
       if (saveState.isSubmitting) return t("bar.saving");
       return saveState.reason;
     }
-    if (action.kind === "print") return busy ? t("bar.working") : undefined;
     if (action.blocked) return action.blocked;
     if (busy) return t("bar.working");
     if (NEEDS_SAVED.includes(action.kind) && isDirty) return t("bar.saveFirst");

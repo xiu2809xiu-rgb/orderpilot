@@ -36,12 +36,17 @@ export function usableActions(
     );
 }
 
-/** Actions that act on what is saved, so unsaved changes must be saved first. */
+/**
+ * Actions that act on what is saved, so unsaved changes must be saved first.
+ * Print is here too: the print view is the paper record, so it must not show
+ * values the server never accepted.
+ */
 export const NEEDS_SAVED: readonly DocumentActionKind[] = [
   "submit",
   "approve",
   "reject",
   "void",
+  "print",
 ];
 
 const warned = new Set<string>();
