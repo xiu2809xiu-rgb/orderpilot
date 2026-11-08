@@ -2,6 +2,7 @@ import { createSyntheticDataset } from "@orderpilot/synthetic-data";
 import { compareDecimal } from "@orderpilot/shared";
 import { describe, expect, it } from "vitest";
 import { NotFoundError } from "../../common/domain-error.js";
+import { SampleOrderSource } from "../orders/directory/sample-order-source.js";
 import { MockChecksRepository } from "../checks/mock-checks.repository.js";
 import { MockOrderStatusReader } from "../checks/mock-order-status-reader.js";
 import { TrackerService } from "../checks/tracker.service.js";
@@ -17,6 +18,7 @@ import { MockNavisionMasterData } from "./mock-navision-master-data.js";
 const dataset = createSyntheticDataset();
 const service = new MasterDataService(
   new MockNavisionMasterData(() => dataset),
+  new SampleOrderSource(() => dataset),
 );
 const tracker = new TrackerService(
   new MockChecksRepository(() => dataset),

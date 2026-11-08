@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { syntheticSourceProvider } from "../../common/synthetic-source.js";
+import { OrderDirectoryModule } from "../orders/directory/order-directory.module.js";
 import { MASTER_DATA_READER } from "./domain/master-data-reader.js";
 import { MasterDataController } from "./master-data.controller.js";
 import { MasterDataService } from "./master-data.service.js";
@@ -12,6 +13,7 @@ import { MockNavisionMasterData } from "./mock-navision-master-data.js";
  * nothing else changes.
  */
 @Module({
+  imports: [OrderDirectoryModule],
   controllers: [MasterDataController],
   providers: [
     syntheticSourceProvider,
