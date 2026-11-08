@@ -1,9 +1,12 @@
 ### Orders: the 120 sample orders and the orders OrderPilot stores itself.
-### Read-only today: there is no write route until P-49. Each row says its source
-### (sample or stored). A stored order has no workflow status, only a capture
-### state (draft, submitted or void), which is not the order's status.
-### Sign in first (see auth.http): REST Client keeps the cookies.
+### Each row says its source (sample or stored). A stored order has no workflow
+### status, only a capture state (draft, submitted or void), which is not the
+### order's status. Support and the Product Manager start and change drafts;
+### nothing submits an order yet. A sample can be read but never written.
+### Sign in first (see auth.http): REST Client keeps the cookies. The writes also
+### need the CSRF header: paste the op_csrf cookie's value into @csrf, as auth.http says.
 @baseUrl = http://localhost:3000
+@csrf = paste the op_csrf cookie value here after signing in
 
 ### Sign in as Support, who sees amounts.
 POST {{baseUrl}}/api/v1/auth/demo-login
@@ -67,3 +70,84 @@ Content-Type: application/json
 
 ###
 GET {{baseUrl}}/api/v1/orders
+
+### ---- Writing a draft (P-49, ADR 0047) ----------------------------------------
+### Sign back in as Support (and paste the new op_csrf cookie into @csrf).
+POST {{baseUrl}}/api/v1/auth/demo-login
+Content-Type: application/json
+
+{ "role": "SUPPORT" }
+
+### Start a draft: 201, with the number, version 1 and the lines. Support must
+### send a price on every line. A role that cannot see prices must send none.
+# @name created
+POST {{baseUrl}}/api/v1/orders
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{
+  "customerNo": "C-0001",
+  "externalDocumentNo": "PO-HTTP-1",
+  "orderDate": "2026-11-10",
+  "shipmentDate": null,
+  "prepaymentPercent": "30",
+  "lines": [{ "itemNo": "I-0001", "quantity": "5", "unitPrice": "12.50" }]
+}
+
+### The same customer and PO number again, in any case: 409. The issue on the path
+### `existingOrderNo` carries the number of the order that already holds it.
+POST {{baseUrl}}/api/v1/orders
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{
+  "customerNo": "C-0001",
+  "externalDocumentNo": "po-http-1",
+  "orderDate": "2026-11-10",
+  "shipmentDate": null,
+  "prepaymentPercent": "30",
+  "lines": [{ "itemNo": "I-0001", "quantity": "5", "unitPrice": "12.50" }]
+}
+
+### Change a draft. Send the version you read and only the fields that change.
+### A stale version, a submitted order and a void order each answer 409.
+@orderNo = {{created.response.body.$.data.orderNo}}
+PATCH {{baseUrl}}/api/v1/orders/{{orderNo}}
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "version": 1, "prepaymentPercent": "50" }
+
+### Void a draft, with a reason. The version is now 2. This frees the PO number.
+POST {{baseUrl}}/api/v1/orders/{{orderNo}}/void
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "version": 2, "reason": "Entered twice." }
+
+### A sample is not stored: 404.
+PATCH {{baseUrl}}/api/v1/orders/SO-0001
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "version": 1, "prepaymentPercent": "50" }
+
+### Warehouse holds neither orders.create nor orders.edit: 403, audited.
+POST {{baseUrl}}/api/v1/auth/demo-login
+Content-Type: application/json
+
+{ "role": "WAREHOUSE" }
+
+###
+POST {{baseUrl}}/api/v1/orders
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{
+  "customerNo": "C-0001",
+  "externalDocumentNo": "PO-HTTP-2",
+  "orderDate": "2026-11-10",
+  "shipmentDate": null,
+  "prepaymentPercent": "0",
+  "lines": [{ "itemNo": "I-0001", "quantity": "1" }]
+}

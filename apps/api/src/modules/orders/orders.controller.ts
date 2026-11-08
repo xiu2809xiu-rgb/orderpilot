@@ -1,29 +1,63 @@
-import { Controller, Get, Inject, Param, Query } from "@nestjs/common";
 import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Inject,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Req,
+} from "@nestjs/common";
+import {
+  ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiTags,
 } from "@nestjs/swagger";
 import {
+  createSalesOrderSchema,
   navisionNoSchema,
+  patchSalesOrderSchema,
   salesOrderListSchema,
   salesOrderQuerySchema,
   salesOrderResponseSchema,
+  voidSalesOrderSchema,
+  type CreateSalesOrderBody,
+  type PatchSalesOrderBody,
   type SalesOrderQuery,
+  type VoidSalesOrderBody,
 } from "@orderpilot/shared";
+import type { Request } from "express";
 import type { AuthContext } from "../../auth/auth-context.js";
 import { Auth, RequirePermission } from "../../auth/decorators.js";
 import { openApiQuery, openApiSchema } from "../../common/openapi.js";
+import { requestIdOf } from "../../common/request-id.js";
 import { ZodValidationPipe } from "../../common/zod-validation.pipe.js";
 import { OrdersService } from "./orders.service.js";
+import { OrdersWriteService, type WriteInfo } from "./orders-write.service.js";
 
-/** Read-only: new orders get their write route in P-49. */
+const orderNoParam = new ZodValidationPipe(navisionNoSchema);
+
+function infoOf(req: Request): WriteInfo {
+  return { ip: req.ip ?? null, traceId: requestIdOf(req) };
+}
+
+/**
+ * Reads need `orders.read`. A write names its own permission on the handler,
+ * and a handler's decorator wins over the class's, so a role that can only read
+ * is refused there. Only drafts are written (ADR 0047).
+ */
 @ApiTags("Orders")
 @Controller("orders")
 @RequirePermission("orders.read")
 export class OrdersController {
-  constructor(@Inject(OrdersService) private readonly orders: OrdersService) {}
+  constructor(
+    @Inject(OrdersService) private readonly orders: OrdersService,
+    @Inject(OrdersWriteService) private readonly writes: OrdersWriteService,
+  ) {}
 
   @Get()
   @ApiOperation({
@@ -51,9 +85,65 @@ export class OrdersController {
   })
   @ApiOkResponse({ schema: openApiSchema(salesOrderResponseSchema) })
   async one(
-    @Param("orderNo", new ZodValidationPipe(navisionNoSchema)) orderNo: string,
+    @Param("orderNo", orderNoParam) orderNo: string,
     @Auth() auth: AuthContext,
   ) {
     return { data: await this.orders.one(orderNo, auth.user.role) };
+  }
+
+  @Post()
+  @RequirePermission("orders.create")
+  @ApiOperation({
+    summary:
+      "Start a draft order. One customer and PO number is one order: a repeat is a 409 that names it",
+  })
+  @ApiCreatedResponse({ schema: openApiSchema(salesOrderResponseSchema) })
+  async create(
+    @Body(new ZodValidationPipe(createSalesOrderSchema))
+    body: CreateSalesOrderBody,
+    @Auth() auth: AuthContext,
+    @Req() req: Request,
+  ) {
+    return { data: await this.writes.create(body, auth.user, infoOf(req)) };
+  }
+
+  @Patch(":orderNo")
+  @RequirePermission("orders.edit")
+  @ApiParam({ name: "orderNo", schema: { type: "string" } })
+  @ApiOperation({
+    summary:
+      "Change a draft order. Send the version you read: a stale one is a 409",
+  })
+  @ApiOkResponse({ schema: openApiSchema(salesOrderResponseSchema) })
+  async update(
+    @Param("orderNo", orderNoParam) orderNo: string,
+    @Body(new ZodValidationPipe(patchSalesOrderSchema))
+    body: PatchSalesOrderBody,
+    @Auth() auth: AuthContext,
+    @Req() req: Request,
+  ) {
+    return {
+      data: await this.writes.update(orderNo, body, auth.user, infoOf(req)),
+    };
+  }
+
+  @Post(":orderNo/void")
+  @HttpCode(200)
+  @RequirePermission("orders.edit")
+  @ApiParam({ name: "orderNo", schema: { type: "string" } })
+  @ApiOperation({
+    summary: "Void a draft order, with a reason. This frees its PO number",
+  })
+  @ApiOkResponse({ schema: openApiSchema(salesOrderResponseSchema) })
+  async voidDraft(
+    @Param("orderNo", orderNoParam) orderNo: string,
+    @Body(new ZodValidationPipe(voidSalesOrderSchema))
+    body: VoidSalesOrderBody,
+    @Auth() auth: AuthContext,
+    @Req() req: Request,
+  ) {
+    return {
+      data: await this.writes.voidDraft(orderNo, body, auth.user, infoOf(req)),
+    };
   }
 }
