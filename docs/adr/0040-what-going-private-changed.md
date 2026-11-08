@@ -12,7 +12,7 @@ Three things were still open: how to report a security problem once GitHub's rou
 
 ## Decision
 
-1. **Security problems go to Richie directly.** GitHub's private vulnerability reporting and repository security advisories exist only on public repositories, and an issue is readable by everyone with access. `SECURITY.md` says so, and keeps the rule that a report never contains a working key.
+1. **Security problems go to Richie directly, or to Angelyn (`angelynnmr`), who owns area 4, when he is away.** Richie named her as the second contact on 5 Nov. GitHub's private vulnerability reporting and repository security advisories exist only on public repositories, and an issue is readable by everyone with access. `SECURITY.md` says so, and keeps the rule that a report never contains a working key.
 2. **Dependabot version updates run monthly,** on the 1st of each month at 06:00 Singapore time, in all four ecosystems, with the same groups and the 7-day cooldown. Security updates are unchanged: they do not wait for the schedule.
 3. **A check that fails on the smaller runners for want of memory, disk or time gets that resource, in that step only:** see "The first private run" below.
 4. **The ruleset and the wiki stay as they are.** GitHub Pro keeps rulesets enforced and wikis open on a private repository. `check-ruleset.mjs` finds no drift, so `.github/rulesets/main.json` is unchanged.
@@ -32,7 +32,7 @@ The next run of the same pull request failed "End-to-end smoke": it ran out of d
 
 - A non-security version update can wait up to a month. A pressing one is done by hand in its own pull request, with the release-age rule still applying.
 - The 1st of each month brings the grouped proposals together, so that is a heavy day for CI minutes.
-- One person receives security reports. If Richie is away, a report waits for him; a second contact is his call.
+- Two people receive security reports: Richie, and Angelyn when he is away.
 - If the repository goes public again, for example for the final, secret scanning, push protection and private vulnerability reporting must be switched back on by hand, and `SECURITY.md`'s reporting route put back.
 
 ## Alternatives considered

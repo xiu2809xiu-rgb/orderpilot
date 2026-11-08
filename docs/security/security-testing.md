@@ -39,13 +39,13 @@ The licence-key guard reads the real values from `apps/web/.env.local` on your m
 
 ### On GitHub
 
-| Control                                                                                      | Status                                                                              |
-| -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| Dependabot alerts and security updates                                                       | Today, reading `pnpm-lock.yaml` from P-5                                            |
-| Dependabot version updates, monthly on the 1st at 06:00 SGT                                  | Today (P-5), monthly since P-81                                                     |
-| Secret scanning with push protection                                                         | Stopped on 5 Nov 2026, when the repository went private (P-81)                      |
-| Private vulnerability reporting                                                              | Stopped on 5 Nov 2026 (P-81). Problems go to Richie directly, as `SECURITY.md` says |
-| The `Protect main` ruleset, with seven required checks: the six above and `End-to-end smoke` | Today. `check-ruleset.mjs` compares it with `.github/rulesets/main.json`            |
+| Control                                                                                      | Status                                                                                                                   |
+| -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Dependabot alerts and security updates                                                       | Today, reading `pnpm-lock.yaml` from P-5                                                                                 |
+| Dependabot version updates, monthly on the 1st at 06:00 SGT                                  | Today (P-5), monthly since P-81                                                                                          |
+| Secret scanning with push protection                                                         | Stopped on 5 Nov 2026, when the repository went private (P-81)                                                           |
+| Private vulnerability reporting                                                              | Stopped on 5 Nov 2026 (P-81). Problems go to Richie, or to Angelyn (`angelynnmr`) when he is away, as `SECURITY.md` says |
+| The `Protect main` ruleset, with seven required checks: the six above and `End-to-end smoke` | Today. `check-ruleset.mjs` compares it with `.github/rulesets/main.json`                                                 |
 
 ### Later
 

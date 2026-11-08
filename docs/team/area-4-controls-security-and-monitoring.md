@@ -203,10 +203,6 @@ Confirming a customer's payment (`customer-payment.confirm`) and paying a vendor
 
 - **F-5 and area 2's payment steps** call `enforce` with `earlierDuties`. Until they do, nothing feeds the payment pairs: OrderPilot cannot change a vendor's bank details (A-15), and the payment steps don't ask the policy yet.
 - **`payments.post`** is held by no role by default, so the vendor payment actions are refused for everyone until the matrix grants it.
-- **Richie's one-line changes:**
-  - the policy behind the `PermissionPolicy` token (`auth.module.ts`);
-  - the seeder (`seeders.ts`);
-  - `approvals.decide` for Management in the default matrix, with its description in `CLAUDE.md`, so an escalated request can be decided.
 - **Azri** points `POST /workflows/sprs/:no/approve` at `decideSpr`, which already calls `enforce`. Today the route still uses the mock overlay, so E2E #3 through it stays `it.todo`.
 - **The routes** to read and change a setup (`roles.read`, `roles.manage`), in a follow-up pull request that P-66's form needs.
 - **The data scope,** as a second slice once Q-17 is answered.

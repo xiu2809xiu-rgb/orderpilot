@@ -46,6 +46,7 @@ F-1 left area 4 the contracts (`PolicyRequest`, `PolicyDecision` and `ApprovalUs
   - Richie: run `seedApprovalSetups` from `seeders.ts`, one line.
   - Richie: decide whether Management holds `approvals.decide` in `DEFAULT_ROLE_PERMISSIONS`, and update the role's description in `CLAUDE.md`. Until then an escalated request reaches Management and the guard refuses them. The tests grant the permission through the matrix route to prove the escalation.
   - Richie: update the comment in `approval.ts` if "own limit" is confirmed.
+  - **Update, 8 Nov 2026:** Richie's four items are done. #205 put the policy behind the token and ran the seeder. #215 gave Management `approvals.decide` in the default matrix, with its description in `CLAUDE.md`, and the contract's comment in `approval.ts` now describes the substitute's own limit, as Richie asked.
   - Azri (C-3): call `enforce` from the SPR approval route before its transaction, and route tasks with `AuthorisationService.deciderFor`.
 - **Data scope** (the story's second criterion) is not in this pull request. It waits for Q-17.
 - **E2E #3 through `POST /workflows/sprs/:no/approve`** stays `it.todo` until C-3 calls `enforce`.

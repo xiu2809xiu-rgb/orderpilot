@@ -92,6 +92,12 @@ export default defineConfig(({ mode }) => {
       setupFiles: ["./src/test/setup.ts"],
       include: ["src/**/*.test.{ts,tsx}", "scripts/**/*.test.mjs"],
       testTimeout: 15_000,
+      // On a laptop with many threads and little free memory, one worker per
+      // thread starves the slow axe tests past their limit (build report item
+      // bk); six workers passed them all. CI keeps Vitest's default: its 2-CPU
+      // runner runs one worker, and its slowest test takes 9 s of the 15
+      // (ADR 0040).
+      ...(process.env.CI ? {} : { maxWorkers: 6 }),
       css: false,
     },
   };

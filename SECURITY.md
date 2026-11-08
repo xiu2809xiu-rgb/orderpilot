@@ -4,7 +4,7 @@ OrderPilot is a student project, and all its data is synthetic. There is no runn
 
 ## How to report
 
-The repository is private, so GitHub's private vulnerability reporting is not available. Tell Richie, the repository's owner, directly instead: in person, or in a private message.
+The repository is private, so GitHub's private vulnerability reporting is not available. Tell Richie, the repository's owner, directly instead: in person, or in a private message. If he is away, tell Angelyn (`angelynnmr` on GitHub), who owns security (area 4).
 
 1. Say what you found, where it is, and how to reproduce it.
 2. Say what you think the impact is.

@@ -69,7 +69,7 @@ OrderPilot is an AI-assisted order-automation layer **beside** Navision, never i
 | `WAREHOUSE`       | Checks goods against documents, then packs and releases them                                                    |
 | `FINANCE`         | Confirms payments, pays vendors, and clears payment holds with a second approver                                |
 | `LOGISTICS`       | Arranges forwarders, and follows shipment dates, AWB/BL and import permits                                      |
-| `MANAGEMENT`      | Reads the tracker, dashboards and reports                                                                       |
+| `MANAGEMENT`      | Reads the tracker, dashboards and reports, and decides approvals above an approver's limit                      |
 | `AUDITOR`         | Reads the audit trail                                                                                           |
 
 ### Capabilities
