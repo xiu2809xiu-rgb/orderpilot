@@ -16,13 +16,12 @@ afterEach(() => {
 });
 
 describe("planned features", () => {
-  it("are the five that still render a placeholder", () => {
+  it("are the four that still render a placeholder", () => {
     expect(planned.map((f) => f.id).sort()).toEqual([
       "connectors",
       "constellation",
       "documents",
       "mapping",
-      "orders",
     ]);
   });
 

@@ -3,11 +3,6 @@
   "heading": "What arrives here",
   "developerNote": "Developer view: this page is not built yet, and it is hidden from everyone else.",
   "lists": {
-    "orders": [
-      "A list of orders with status and filters",
-      "An order's lines, checks and documents on one page",
-      "Draft sales orders and vendor POs, ready for the ERP"
-    ],
     "documents": [
       "Upload a customer PO and see what the AI read",
       "Field-by-field confidence, with the source highlighted",

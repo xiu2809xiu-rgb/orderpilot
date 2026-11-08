@@ -1,7 +1,52 @@
 {
   "title": "Orders",
-  "description": "Sales orders from the customer's PO to delivery.",
+  "description": "Sales orders: the samples Spectra gave us and the orders entered here.",
   "menu": {
     "orders": "Orders"
+  },
+  "caption": "Orders",
+  "hint": "Nothing is ordered from this list.",
+  "emptyTitle": "No orders yet",
+  "emptyDescription": "Orders appear here once they are entered.",
+  "columns": {
+    "orderNo": "Order",
+    "customerNo": "Customer",
+    "workflowStatus": "Status",
+    "captureState": "Entry",
+    "externalDocumentNo": "PO number",
+    "orderDate": "Order date",
+    "shipmentDate": "Shipment date",
+    "amount": "Amount",
+    "stock": "Stock"
+  },
+  "noStatus": "Not started",
+  "hiddenAmount": "Hidden",
+  "sampleTag": "Sample",
+  "captureStates": {
+    "draft": "Draft",
+    "submitted": "Submitted",
+    "void": "Void"
+  },
+  "sources": {
+    "sample": "Sample",
+    "stored": "Entered here"
+  },
+  "filters": {
+    "customer": "Customer",
+    "allCustomers": "All customers",
+    "captureState": "Entry",
+    "allCaptureStates": "Any entry state",
+    "source": "Source",
+    "allSources": "All sources",
+    "stock": "Stock",
+    "allStock": "Any stock",
+    "waiting": "Waiting on stock",
+    "orderDate": "Order date"
+  },
+  "shortage": {
+    "line": "Short by {{quantity}} of {{itemNo}}",
+    "more_one": "and {{count}} more item",
+    "more_other": "and {{count}} more items",
+    "none": "No shortage"
   }
 }
