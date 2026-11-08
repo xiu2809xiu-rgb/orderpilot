@@ -1,9 +1,14 @@
 import type { FieldValues, UseFormReturn } from "react-hook-form";
 import { useFormState } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { useSaveReason } from "@/components/form";
+import { useSaveReason, useViewerChanged } from "@/components/form";
 import { useSessionStore } from "@/stores/session";
-import { KIND_ICONS, NEEDS_SAVED, usableActions } from "./actions";
+import {
+  KIND_ICONS,
+  NEEDS_SAVED,
+  usableActions,
+  warnDuplicateKinds,
+} from "./actions";
 import { BarButton } from "./BarButton";
 import { ExtraActions } from "./ExtraActions";
 import type {
@@ -25,7 +30,7 @@ interface DocumentActionBarProps<T extends FieldValues, O> {
   allowClean: boolean;
 }
 
-/** Save is the form's one primary button; without it, the first of these. */
+/** The one primary button is the first of these that can run now. */
 const PRIMARY_ORDER: readonly DocumentActionKind[] = [
   "save",
   "approve",
@@ -56,24 +61,34 @@ export function DocumentActionBar<T extends FieldValues, O>({
     allowClean,
   });
   const { run, dialog, busy } = useActionRunner();
+  const otherViewer = useViewerChanged();
+  if (import.meta.env.DEV) warnDuplicateKinds(target.formId, actions);
   const usable = usableActions(actions, session).filter(
     (action) => action.kind !== "print" || onPrint !== undefined,
   );
-  const primary = PRIMARY_ORDER.find((kind) =>
-    usable.some((action) => action.kind === kind),
-  );
 
   function blockedOf(action: DocumentAction): string | undefined {
+    // Before anything else: the values and the record on screen belong to the
+    // first person, so nothing, Print included, acts on them for the next.
+    if (otherViewer) return t("bar.otherViewer");
     if (action.kind === "save" || action.kind === "saveNew") {
+      if (busy) return t("bar.working");
       if (saveState.isSubmitting) return t("bar.saving");
       return saveState.reason;
     }
-    if (action.kind === "print") return undefined;
+    if (action.kind === "print") return busy ? t("bar.working") : undefined;
     if (action.blocked) return action.blocked;
     if (busy) return t("bar.working");
     if (NEEDS_SAVED.includes(action.kind) && isDirty) return t("bar.saveFirst");
     return undefined;
   }
+
+  // What the person can do next is emphasised; a blocked Save is not.
+  const primary =
+    PRIMARY_ORDER.find((kind) =>
+      usable.some((action) => action.kind === kind && !blockedOf(action)),
+    ) ??
+    PRIMARY_ORDER.find((kind) => usable.some((action) => action.kind === kind));
 
   function runOf(action: DocumentAction): void {
     if (action.kind === "save") void save();

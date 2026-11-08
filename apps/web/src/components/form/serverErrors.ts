@@ -71,7 +71,8 @@ function byPosition(a: Element | null, b: Element | null): number {
     : 1;
 }
 
-function formMessage(error: unknown): {
+/** The server's words for a person and the trace id to quote, as a form shows them. */
+export function formMessage(error: unknown): {
   message: string;
   traceId: string | undefined;
 } {

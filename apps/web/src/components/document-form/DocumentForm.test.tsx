@@ -197,11 +197,11 @@ describe("Save and Save and new", () => {
 });
 
 describe("actions on what is saved", () => {
-  const submit: DocumentAction = {
+  const submit = {
     id: "submit",
     kind: "submit",
     permission: "orders.read",
-  };
+  } as const;
 
   it("waits for a save while the form has changes", async () => {
     signInAs("SUPPORT");

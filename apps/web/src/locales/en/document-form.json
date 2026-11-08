@@ -11,9 +11,11 @@
     "more": "More",
     "saving": "Saving.",
     "working": "Another action is running.",
-    "saveFirst": "Save your changes first."
+    "saveFirst": "Save your changes first.",
+    "otherViewer": "Someone else signed in. Reopen this document to act on it.",
+    "noSave": "You cannot save this document."
   },
-  "actionFailed": "That did not work. Try again, or check the document's status.",
+  "failureTrace": "Trace ID: {{traceId}}",
   "sections": {
     "header": "Header",
     "lines": "Lines"

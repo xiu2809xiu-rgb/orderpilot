@@ -43,3 +43,26 @@ export const NEEDS_SAVED: readonly DocumentActionKind[] = [
   "reject",
   "void",
 ];
+
+const warned = new Set<string>();
+
+/**
+ * Development only: two actions of one kind would both be drawn and both run
+ * the same save, so the form is wrong. Warns once per form and kind.
+ */
+export function warnDuplicateKinds(
+  formId: string,
+  actions: readonly DocumentAction[],
+): void {
+  const seen = new Set<DocumentActionKind>();
+  for (const { kind } of actions) {
+    const key = `${formId}:${kind}`;
+    if (seen.has(kind) && !warned.has(key)) {
+      warned.add(key);
+      console.warn(
+        `The "${formId}" document form declares two "${kind}" actions. Declare each kind once.`,
+      );
+    }
+    seen.add(kind);
+  }
+}

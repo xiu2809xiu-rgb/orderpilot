@@ -30,9 +30,8 @@ export interface DocumentReasoned {
   run: (reason: string) => Promise<unknown>;
 }
 
-export interface DocumentAction {
+interface DocumentActionBase {
   id: string;
-  kind: DocumentActionKind;
   /** Already translated. Each kind has a default. */
   label?: string;
   icon?: LucideIcon;
@@ -44,11 +43,26 @@ export interface DocumentAction {
    * stays reachable and gives the reason.
    */
   blocked?: string | undefined;
-  /** For Submit and Approve; the template asks Save first if the form has changes. */
-  run?: () => unknown;
-  /** For Void and Reject: the template asks for a reason, then runs this. */
-  reasoned?: DocumentReasoned;
 }
+
+/**
+ * One action of a document, by kind, so the type says what each kind needs:
+ * Save, Save and new and Print are the template's own work; Submit and
+ * Approve call the screen (`run`); Void and Reject ask for a reason first
+ * (`reasoned`). A kind declared without its handler does not compile, and
+ * declaring two of one kind warns in development.
+ */
+export type DocumentAction = DocumentActionBase &
+  (
+    | { kind: "save" | "saveNew" | "print"; run?: never; reasoned?: never }
+    | {
+        kind: "submit" | "approve";
+        /** While the form has unsaved changes the button waits, with "Save your changes first". */
+        run: () => unknown;
+        reasoned?: never;
+      }
+    | { kind: "void" | "reject"; reasoned: DocumentReasoned; run?: never }
+  );
 
 /** One attachment on the document, such as the customer's PO as received. */
 export interface AttachmentItem {

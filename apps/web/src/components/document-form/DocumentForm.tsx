@@ -9,6 +9,8 @@ import {
   type DraftOptions,
   type PathMap,
 } from "@/components/form";
+import { useSessionStore } from "@/stores/session";
+import { usableActions } from "./actions";
 import { DocumentActionBar } from "./DocumentActionBar";
 import { DocumentFooter } from "./DocumentFooter";
 import { DocumentTabs } from "./DocumentTabs";
@@ -84,11 +86,19 @@ export function DocumentForm<T extends FieldValues, O, R = unknown>(
   const { t } = useTranslation("document-form");
   const { t: tc } = useTranslation("components");
   const draft = useDraft(props.draftKey, form, props.draftOptions);
+  const session = useSessionStore((state) => state.session);
   const allowClean = props.allowClean ?? false;
+  // Ctrl+S has no button to be blocked with, so it follows the same rule as the
+  // bar: no usable Save action, no saving from the keyboard.
+  const canSave = usableActions(props.actions, session).some(
+    (action) => action.kind === "save",
+  );
+  const shortcutBlocked =
+    props.saveBlocked ?? (canSave ? undefined : t("bar.noSave"));
   const { save, saveNew } = useDocumentSave(form, {
     onSave: props.onSave,
     draft,
-    blockedReason: props.saveBlocked,
+    blockedReason: shortcutBlocked,
     allowClean,
     serverPaths: props.serverPaths,
     ...(props.onSaved ? { onSaved: props.onSaved } : {}),
