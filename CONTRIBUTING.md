@@ -541,9 +541,11 @@ const form = useZodForm({ schema, defaultValues });
 - **Actions.** Declare each with its `kind` (`save`, `saveNew`, `submit`, `approve`, `reject`, `print`, `void`) and the permission that uses it. The template draws only those the role holds, in a fixed order, and never changes a status: Submit, Approve and Reject call your `run`, and the status lives in area 2's state machine. Give `blocked` (already worded) when the document cannot take the action now. Void and Reject take a `reasoned` block and the template asks for the reason.
 - **Saving.** `onSave` receives the checked values and whether Save and new was pressed. A throw lands on the fields through `serverPaths`, as in "Building a form". Submit, Approve, Reject and Void wait, with a reason, while the form has unsaved changes. Pass `allowClean` for a document filled in by its defaults.
 - **Drafts.** The template keeps the draft under `draftKey`. Pass `draftOptions.exclude` for masked fields. Mount the form once the record has loaded.
+- **Notices.** Pass `notices` (any node) to draw something between the action bar and the header: P-61 puts the approval route there, and P-62 the payment hold.
+- **What a role may not see.** A figure a role may not see is a `MaskedValue`, which carries its reason. An attachment a role may not open is left out of `attachments`, and the API refuses the download too. The template draws what it is given, and links only relative and http(s) addresses.
 - **Tabs.** Timeline, Checks and Documents take `{ count, content }`; `count` is what needs attention, and `content: null` draws the empty line. The operation log tab needs `log`, and is not drawn for a role that may not read that record.
 - **Print or PDF.** Give `print` a function that returns the document as text. It opens the browser's print view, where "Save as PDF" is the PDF, until generated documents arrive (B-3).
-- **Shared actions.** `registerDocumentFormItem({ id, label, icon, permission, run })` adds an action to every form's More menu. P-57 uses it for My work.
+- **Shared actions.** `registerDocumentFormItem({ id, label, icon, permission, appliesTo, run })` adds an action to every form's More menu. `appliesTo(target)` limits it to the documents it fits, and a throw or rejection in `run` is shown as a failure. Registering an id twice warns in development. P-57 uses it for My work.
 
 ## Adding an API route
 
