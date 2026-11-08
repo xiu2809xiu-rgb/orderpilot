@@ -17,3 +17,7 @@ Taken from a Docker build of this branch (the `migrate`, `api` and `web` images,
 - `p45-product_manager-<items|customers|vendors>-<width>-<theme>.png`: the three master data lists as Product manager. At 390 the first column carries the next two columns under it, and the row menu stays at the right. The Saved views, Columns, Export and Print buttons sit above the table.
 - `p45-support-gallery-<width>-<theme>.png`: the gallery's list, which declares every feature: row checkboxes (24 px, with a 44 px touch target on a phone), select all, the row menu, saved views and columns.
 - `p45-support-gallery-selected-<width>-<theme>.png`: the same list with the first row ticked, scrolled to that record's operation log. It says "No changes recorded yet" because the sample orders have no audit events.
+
+## The document form (P-47)
+
+`p47-*`: the gallery's document form from a Docker build of the branch, as Support, the Approver and Warehouse, at 1440, 390 and 1024 (coarse pointer), in light and dark. `docs/design/product-pass-screenshots.md` lists each one and says what it shows.
