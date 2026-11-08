@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { ValidationFailedError } from "../../../common/domain-error.js";
+import {
+  ConflictError,
+  ValidationFailedError,
+} from "../../../common/domain-error.js";
 import { SalesOrder, type SalesOrderInput } from "./sales-order.js";
 
 function input(over: Partial<SalesOrderInput> = {}): SalesOrderInput {
@@ -49,6 +52,26 @@ describe("SalesOrder", () => {
     });
   });
 
+  it("refuses lines whose total is not a decimal string, at lines", () => {
+    const big = (lineNo: number) => ({
+      lineNo,
+      itemNo: "I-0001",
+      description: "Synthetic demo item",
+      quantity: "1",
+      unitPrice: "999999999999999",
+      qtyToShip: "1",
+    });
+    try {
+      new SalesOrder(input({ lines: [big(1), big(2)] }));
+      throw new Error("did not throw");
+    } catch (error) {
+      expect(error).toBeInstanceOf(ValidationFailedError);
+      expect((error as ValidationFailedError).details).toEqual([
+        { path: "lines", message: expect.any(String) as string },
+      ]);
+    }
+  });
+
   it.each([
     ["a sample number", { orderNo: "SO-0001" }],
     ["another record type", { orderNo: "SPR-20261108-0001" }],
@@ -68,5 +91,53 @@ describe("SalesOrder", () => {
     expect(
       () => new SalesOrder(input({ lines: [{ ...first, quantity: "0" }] })),
     ).toThrow(ValidationFailedError);
+  });
+
+  describe("drafts", () => {
+    it("starts at version 1 and reports whether it is a draft", () => {
+      const order = new SalesOrder(input());
+      expect(order.version).toBe(1);
+      expect(order.isDraft).toBe(true);
+      expect(new SalesOrder(input({ version: 4 })).toFacts().version).toBe(4);
+    });
+
+    it("edits only what was sent and keeps the rest", () => {
+      const order = new SalesOrder(input());
+      const edited = order.edit({
+        externalDocumentNo: "PO-1",
+        shipmentDate: undefined,
+      });
+      expect(edited.externalDocumentNo).toBe("PO-1");
+      expect(edited.prepaymentPercent).toBe("30.00");
+      expect(edited.orderNo).toBe(order.orderNo);
+      expect(edited.createdBy).toBe(order.createdBy);
+    });
+
+    it("runs every rule again on an edit", () => {
+      const order = new SalesOrder(input());
+      expect(() => order.edit({ prepaymentPercent: "101" })).toThrow(
+        ValidationFailedError,
+      );
+      expect(() => order.edit({ lines: [] })).toThrow(ValidationFailedError);
+    });
+
+    it.each(["submitted", "void"] as const)(
+      "refuses to edit or void a %s order",
+      (captureState) => {
+        const order = new SalesOrder(input({ captureState }));
+        expect(() => order.edit({ externalDocumentNo: "PO-2" })).toThrow(
+          ConflictError,
+        );
+        expect(() => order.voided()).toThrow(ConflictError);
+      },
+    );
+
+    it("voids a draft into a copy and leaves the original", () => {
+      const order = new SalesOrder(input());
+      const closed = order.voided();
+      expect(closed.captureState).toBe("void");
+      expect(closed.isDraft).toBe(false);
+      expect(order.captureState).toBe("draft");
+    });
   });
 });

@@ -1,9 +1,9 @@
 import type { ListAction } from "@/components/list-page";
 
 /**
- * What the Orders list offers: Export and Print, for anyone who may read
- * orders. There is no New yet, because entering an order arrives with its own
- * story, and no action that orders stock, because a person decides that.
+ * What the Orders list offers beside New order: Export and Print, for anyone
+ * who may read orders. There is no action that orders stock, because a person
+ * decides that.
  */
 export function readOnlyActions<Row>(): ListAction<Row>[] {
   return [

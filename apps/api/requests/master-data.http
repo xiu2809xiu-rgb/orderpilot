@@ -45,3 +45,8 @@ GET {{baseUrl}}/api/v1/master-data/vendors?sort=balanceLcy&direction=desc
 ### One vendor. Finance sees the bank account. Sign in as WAREHOUSE and the same
 ### request answers masked: true, value: null and the reason.
 GET {{baseUrl}}/api/v1/master-data/vendors/V-0001
+
+### The available stock of many items at once (at most 200, comma-separated), for
+### the lines of an order. It is the figure an item's own page gives, with no band.
+### An unknown number is left out; a bad format or too many numbers is a 400.
+GET {{baseUrl}}/api/v1/master-data/available-stock?itemNos=I-0001,I-0002

@@ -5,13 +5,18 @@ import {
 } from "@orderpilot/shared";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router";
 import {
   allPages,
   apiParams,
   useUrlQuery,
   type TableQuery,
 } from "@/components/common";
-import { ListPage, type ListFilter } from "@/components/list-page";
+import {
+  ListPage,
+  type ListAction,
+  type ListFilter,
+} from "@/components/list-page";
 import { useMasterDataCustomers } from "@/lib/api/generated/endpoints/master-data/master-data";
 import {
   ordersList,
@@ -22,7 +27,7 @@ import { readOnlyActions } from "./listActions";
 import { orderColumns, orderHref } from "./orderColumns";
 import { SORTABLE, URL_FILTERS } from "./orderParams";
 
-const ACTIONS = readOnlyActions<SalesOrderRow>();
+const READ_ACTIONS = readOnlyActions<SalesOrderRow>();
 
 /** A role that cannot see amounts cannot sort by them, whatever the address says. */
 function withoutAmountSort(query: TableQuery, hidden: boolean): TableQuery {
@@ -33,10 +38,28 @@ function withoutAmountSort(query: TableQuery, hidden: boolean): TableQuery {
 
 /**
  * Every order, the samples and the ones entered here, with how far each has got
- * and what stock it waits on. Read-only: nothing is ordered from this list.
+ * and what stock it waits on. New order is the page's one primary action, and
+ * only a role that may start an order is shown it. Nothing is ordered from this
+ * list: stock is a person's decision.
  */
 export default function OrdersPage() {
   const { t } = useTranslation("orders");
+  const navigate = useNavigate();
+  const actions = useMemo<ListAction<SalesOrderRow>[]>(
+    () => [
+      {
+        id: "new",
+        kind: "new",
+        label: t("new"),
+        permission: "orders.create",
+        onRun: () => {
+          void navigate("/orders/new");
+        },
+      },
+      ...READ_ACTIONS,
+    ],
+    [t, navigate],
+  );
   const [asked, setQuery] = useUrlQuery(URL_FILTERS, { pageSize: 25 });
   // The server ignores an amount sort for a role that cannot see amounts, so
   // the first request may carry it. Once a row says amounts are masked, the
@@ -118,7 +141,7 @@ export default function OrdersPage() {
       onQueryChange={setQuery}
       list={list}
       filters={filters}
-      actions={ACTIONS}
+      actions={actions}
       operationLog={{ entityType: "Order", entityId: (row) => row.orderNo }}
       exportOptions={{
         fileName: "orders",

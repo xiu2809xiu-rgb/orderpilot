@@ -1,5 +1,7 @@
 import {
   ROLES,
+  AVAILABLE_STOCK_MAX_ITEMS,
+  availableStockResponseSchema,
   customerListSchema,
   customerResponseSchema,
   itemListSchema,
@@ -142,6 +144,68 @@ describe("master data routes (mock Navision)", () => {
     );
     expect(filters.data.brands).toContain(item.brand);
     expect(filters.data.vendors.map((v) => v.no)).toContain(vendor.no);
+  });
+
+  describe("available stock for many items", () => {
+    const route = `${M}/available-stock`;
+    const [first, second] = dataset.items;
+    if (!first || !second) throw new Error("the set is empty");
+
+    it("answers 401 with no session and 403 without orders.read", async () => {
+      const path = `${route}?itemNos=${item.no}`;
+      expect((await call(t, null, "get", path)).status).toBe(401);
+      expect((await get("SYSTEM_ADMIN", path)).status).toBe(403);
+    });
+
+    it("refuses a bad format and more items than an order may hold", async () => {
+      const tooMany = Array.from(
+        { length: AVAILABLE_STOCK_MAX_ITEMS + 1 },
+        (_, i) => `I-${String(i)}`,
+      ).join(",");
+      for (const query of [
+        "",
+        "itemNos=",
+        "itemNos=I-1,,I-2",
+        `itemNos=${encodeURIComponent("I 1;")}`,
+        `itemNos=${tooMany}`,
+      ]) {
+        const res = await get("SUPPORT", `${route}?${query}`);
+        expect(res.status, query).toBe(400);
+        expect(res.body).toMatchObject({
+          error: { code: "VALIDATION_FAILED" },
+        });
+      }
+    });
+
+    it("accepts as many items as an order may hold", async () => {
+      const many = Array.from(
+        { length: AVAILABLE_STOCK_MAX_ITEMS },
+        (_, i) => `I-${String(i)}`,
+      ).join(",");
+      expect((await get("SUPPORT", `${route}?itemNos=${many}`)).status).toBe(
+        200,
+      );
+    });
+
+    it("gives each item the figure its own page gives, and leaves an unknown one out", async () => {
+      const res = await get(
+        "WAREHOUSE",
+        `${route}?itemNos=${first.no},${second.no},I-NOPE`,
+      );
+      expect(res.status).toBe(200);
+      const body = availableStockResponseSchema.parse(res.body);
+      expect(body.meta.mock).toBe(true);
+      expect(body.data.map((row) => row.itemNo).sort()).toEqual(
+        [first.no, second.no].sort(),
+      );
+      for (const row of body.data) {
+        const page = itemResponseSchema.parse(
+          (await get("SUPPORT", `${M}/items/${row.itemNo}`)).body,
+        );
+        expect(row.availableStock).toBe(page.data.availableStock);
+        expect(row.unit).toBe(page.data.baseUnitOfMeasure);
+      }
+    });
   });
 
   describe("masking in the response body", () => {

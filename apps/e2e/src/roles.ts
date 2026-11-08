@@ -10,6 +10,7 @@ const home: SmokePage = { path: "/", name: "Home" };
 const tracker: SmokePage = { path: "/order-tracker", name: "Order tracker" };
 const workflows: SmokePage = { path: "/workflows", name: "Workflows" };
 const orders: SmokePage = { path: "/orders", name: "Orders" };
+const newOrder: SmokePage = { path: "/orders/new", name: "New order" };
 
 /**
  * Each role's home page and its main pages, in the order the smoke test
@@ -27,9 +28,9 @@ export const SMOKE_PAGES: Readonly<Record<Role, readonly SmokePage[]>> = {
     { path: "/governance", name: "Governance" },
     { path: "/settings", name: "Settings" },
   ],
-  PRODUCT_MANAGER: [home, tracker, workflows, orders],
+  PRODUCT_MANAGER: [home, tracker, workflows, orders, newOrder],
   APPROVER: [home, workflows, tracker, orders],
-  SUPPORT: [home, workflows, tracker, orders],
+  SUPPORT: [home, workflows, tracker, orders, newOrder],
   WAREHOUSE: [home, workflows, tracker, orders],
   FINANCE: [
     home,

@@ -30,6 +30,7 @@ function toFacts(order: SampleOrder, dataset: SyntheticDataset): OrderFacts {
     prepaymentPercent: order.header.prepaymentPercent,
     // A sample's number is the one Navision gives it.
     navisionNo: order.header.no,
+    version: null,
     workflowStatus: sampleStepFor(order.sampleScreenState).status.label,
     total: order.total,
     lines: order.lines.map((line, index) => ({

@@ -17,6 +17,9 @@ export const PERMISSIONS = [
   "documents.read",
   "documents.upload",
   "orders.read",
+  // P-49: making an order and editing a draft. The system admin never holds them.
+  "orders.create",
+  "orders.edit",
   // Area 3 (D-1): the tracker and an order's timeline, the exceptions queue and the KPIs.
   "tracker.read",
   "exceptions.read",
@@ -60,6 +63,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
   ],
   PRODUCT_MANAGER: [
     "orders.read",
+    "orders.create",
+    "orders.edit",
     "documents.read",
     "tracker.read",
     "insights.read",
@@ -78,6 +83,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
   ],
   SUPPORT: [
     "orders.read",
+    "orders.create",
+    "orders.edit",
     "documents.read",
     "documents.upload",
     "tracker.read",

@@ -15,6 +15,7 @@ export function facts(patch: Partial<OrderFacts> = {}): OrderFacts {
     currencyCode: "USD",
     prepaymentPercent: "0.00",
     navisionNo: null,
+    version: 1,
     workflowStatus: null,
     total: "100.00",
     lines: [

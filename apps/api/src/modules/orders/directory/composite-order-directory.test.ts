@@ -16,6 +16,7 @@ function facts(orderNo: string, source: "sample" | "stored"): OrderFacts {
     currencyCode: "USD",
     prepaymentPercent: "0.00",
     navisionNo: null,
+    version: source === "stored" ? 1 : null,
     workflowStatus: null,
     total: "0",
     lines: [],

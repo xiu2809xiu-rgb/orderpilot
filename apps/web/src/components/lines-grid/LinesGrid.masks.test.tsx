@@ -109,7 +109,7 @@ describe("what a screen needs for its draft", () => {
   it("matches rows on the line id and leaves prices out only when masked", () => {
     expect(lineDraftOptions("lines", false)).toEqual({
       rowKey: "lineId",
-      exclude: ["lines.*.availableStock"],
+      exclude: ["lines.*.availableStock", "lines.*.listPrice"],
     });
     expect(lineDraftOptions("lines", true).exclude).toContain(
       "lines.*.unitPrice",

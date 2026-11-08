@@ -25,7 +25,7 @@ export function AmountCell({ row }: { row: string }) {
     line !== undefined &&
     isLineAmountTooLarge(line.quantity ?? "", line.unitPrice ?? "");
   return (
-    <span className="block min-h-8 py-1.5 text-sm @lines:text-right">
+    <span className="block min-h-8 py-1.5 text-sm [overflow-wrap:anywhere] @lines:text-right">
       {tooLarge ? (
         <span className="text-warning">{t("amountTooLarge")}</span>
       ) : amount === null ? (

@@ -8,9 +8,14 @@ import { OrderAmount } from "./OrderAmount";
 import { ShortageLine } from "./ShortageLine";
 import { shortageLabel } from "./shortageLabel";
 
-/** A sample opens in the tracker. A stored order has no page until its own story. */
-export const orderHref = (row: SalesOrderRow): string | undefined =>
-  row.source === "sample" ? `/order-tracker/${row.orderNo}` : undefined;
+/**
+ * A sample opens in the tracker, and a stored order on its own page, where a
+ * draft is edited and anything else is read.
+ */
+export const orderHref = (row: SalesOrderRow): string =>
+  row.source === "sample"
+    ? `/order-tracker/${row.orderNo}`
+    : `/orders/${row.orderNo}`;
 
 function orderCell(row: SalesOrderRow, t: TFunction) {
   const href = orderHref(row);

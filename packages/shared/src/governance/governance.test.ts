@@ -22,6 +22,16 @@ describe("the default matrix", () => {
     }
   });
 
+  it("lets only Support and the Product Manager make and edit an order", () => {
+    for (const permission of ["orders.create", "orders.edit"] as const) {
+      const holders = ROLES.filter((role) =>
+        DEFAULT_ROLE_PERMISSIONS[role].includes(permission),
+      );
+      expect(holders.sort()).toEqual(["PRODUCT_MANAGER", "SUPPORT"]);
+      expect(NEVER_FOR_SYSTEM_ADMIN).toContain(permission);
+    }
+  });
+
   it("keeps the permission that edits the matrix on the system admin", () => {
     for (const permission of ALWAYS_FOR_SYSTEM_ADMIN) {
       expect(DEFAULT_ROLE_PERMISSIONS.SYSTEM_ADMIN).toContain(permission);

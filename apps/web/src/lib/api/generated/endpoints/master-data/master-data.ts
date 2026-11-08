@@ -21,6 +21,8 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  MasterDataAvailableStock200,
+  MasterDataAvailableStockParams,
   MasterDataCustomer200,
   MasterDataCustomers200,
   MasterDataCustomersParams,
@@ -228,6 +230,99 @@ export function useMasterDataItems<TData = Awaited<ReturnType<typeof masterDataI
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getMasterDataItemsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary The available stock of many items at once, for the lines of an order. Mock Navision data
+ */
+export const masterDataAvailableStock = (
+    params: MasterDataAvailableStockParams,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<MasterDataAvailableStock200>(
+      {url: `/api/v1/master-data/available-stock`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getMasterDataAvailableStockQueryKey = (params?: MasterDataAvailableStockParams,) => {
+    return [
+    `/api/v1/master-data/available-stock`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getMasterDataAvailableStockQueryOptions = <TData = Awaited<ReturnType<typeof masterDataAvailableStock>>, TError = ErrorType<unknown>>(params: MasterDataAvailableStockParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataAvailableStock>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getMasterDataAvailableStockQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof masterDataAvailableStock>>> = ({ signal }) => masterDataAvailableStock(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof masterDataAvailableStock>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type MasterDataAvailableStockQueryResult = NonNullable<Awaited<ReturnType<typeof masterDataAvailableStock>>>
+export type MasterDataAvailableStockQueryError = ErrorType<unknown>
+
+
+export function useMasterDataAvailableStock<TData = Awaited<ReturnType<typeof masterDataAvailableStock>>, TError = ErrorType<unknown>>(
+ params: MasterDataAvailableStockParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataAvailableStock>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof masterDataAvailableStock>>,
+          TError,
+          Awaited<ReturnType<typeof masterDataAvailableStock>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useMasterDataAvailableStock<TData = Awaited<ReturnType<typeof masterDataAvailableStock>>, TError = ErrorType<unknown>>(
+ params: MasterDataAvailableStockParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataAvailableStock>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof masterDataAvailableStock>>,
+          TError,
+          Awaited<ReturnType<typeof masterDataAvailableStock>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useMasterDataAvailableStock<TData = Awaited<ReturnType<typeof masterDataAvailableStock>>, TError = ErrorType<unknown>>(
+ params: MasterDataAvailableStockParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataAvailableStock>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary The available stock of many items at once, for the lines of an order. Mock Navision data
+ */
+
+export function useMasterDataAvailableStock<TData = Awaited<ReturnType<typeof masterDataAvailableStock>>, TError = ErrorType<unknown>>(
+ params: MasterDataAvailableStockParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataAvailableStock>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getMasterDataAvailableStockQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

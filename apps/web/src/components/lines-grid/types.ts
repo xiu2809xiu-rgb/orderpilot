@@ -22,6 +22,11 @@ export interface LineValue {
   unit: string;
   /** As the API reports it, or null while it is not known. */
   availableStock: string | null;
+  /**
+   * The item's list price, kept only when the grid shows it as context
+   * (`itemPrice: "reference"`). It is never a price of the line.
+   */
+  listPrice?: string | null | undefined;
 }
 
 /** A record the item lookup found, with what picking it fills in. */
@@ -115,6 +120,13 @@ export interface LinesGridProps {
   label: string;
   readOnly?: boolean;
   priceMask?: PriceMask | null;
+  /**
+   * What picking an item does to the price. "fill" (the default) starts the
+   * line at the item's list price. "reference" leaves the price empty for the
+   * person to type, and shows the list price beside it as context, for a
+   * screen where a document sets the price (an order's PO).
+   */
+  itemPrice?: "fill" | "reference";
   /** Draws the footer from the totals. The default shows lines, quantity and total. */
   footer?: (totals: LineTotals) => ReactNode;
   serverTotals?: ServerTotals;

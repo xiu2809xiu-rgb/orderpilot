@@ -9,6 +9,8 @@
     "quantity": "Quantity, line {{n}}",
     "unitPrice": "Unit price, line {{n}}"
   },
+  "listPrice": "List price {{price}}",
+  "listPriceNote": ", for reference",
   "placeholders": {
     "item": "Part number or name"
   },

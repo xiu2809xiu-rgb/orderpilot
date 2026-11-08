@@ -47,5 +47,86 @@
     "lineWithMore_one": "Short by {{quantity}} of {{itemNo}} and {{count}} more item",
     "lineWithMore_other": "Short by {{quantity}} of {{itemNo}} and {{count}} more items",
     "none": "No shortage"
+  },
+  "new": "New order",
+  "newCrumb": "New order",
+  "form": {
+    "title": "Sales order {{number}}",
+    "newTitle": "New order",
+    "newDescription": "Enter a customer's PO as a draft. Nothing is posted to Navision from here.",
+    "draftDescription": "A draft: entry is not finished and nothing is reserved. Stock figures are from the mock Navision.",
+    "formLabel": "Sales order",
+    "statusNew": "Not saved yet",
+    "tabsEmpty": "Nothing here yet.",
+    "fields": {
+      "customer": "Customer",
+      "customerHint": "Search by Navision number or name. The number is what is saved.",
+      "externalDocumentNo": "Customer PO number",
+      "externalDocumentNoHint": "One customer and PO number is one order.",
+      "orderDate": "Order date",
+      "shipmentDate": "Shipment date",
+      "prepaymentPercent": "Prepayment",
+      "currency": "Currency",
+      "percentUnit": "%"
+    },
+    "errors": {
+      "customer": "Choose the customer.",
+      "po": "Enter the customer's PO number.",
+      "poLong": "A PO number has 35 characters at most.",
+      "orderDate": "Enter the order date.",
+      "shipmentDate": "Enter a valid shipment date, or leave it empty.",
+      "prepayment": "Enter a percentage from 0 to 100, with two decimals at most.",
+      "item": "Choose an item.",
+      "description": "A description has 100 characters at most.",
+      "quantity": "Enter a quantity above zero, with three decimals at most.",
+      "unitPrice": "Enter a price with two decimals at most.",
+      "none": "Add at least one line.",
+      "tooMany": "An order has 200 lines at most."
+    },
+    "lines": {
+      "tableLabel": "Order lines",
+      "visibleTo": "Roles that handle prices",
+      "hint": "Availability is mock Navision's figure, refreshed every 30 seconds. A draft reserves nothing.",
+      "priceHint": "The price comes from the customer's PO. The list price under a price is for reference only.",
+      "columns": {
+        "lineNo": "Line",
+        "item": "Item",
+        "description": "Description",
+        "quantity": "Quantity",
+        "unitPrice": "Unit price",
+        "amount": "Amount",
+        "availability": "Availability",
+        "remove": "Remove line"
+      }
+    },
+    "notices": {
+      "duplicateTitle": "This order already exists",
+      "duplicateBody": "This customer and PO number already have an order, {{orderNo}}. Open it to make changes.",
+      "duplicateOpen": "Open {{orderNo}}",
+      "staleTitle": "This draft changed",
+      "staleBody": "It was changed by someone else, or it is no longer a draft. Reload to see its current state before you save again.",
+      "reload": "Reload",
+      "readOnlyTitle": "This order is read-only",
+      "readOnly": {
+        "sample": "This is a sample order from Spectra. Samples are not edited here.",
+        "submitted": "This order is submitted. Only a draft can be changed.",
+        "void": "This order is void. It cannot be changed.",
+        "permission": "Your role may read orders but not change them."
+      }
+    },
+    "toast": {
+      "created": "Order {{orderNo}} saved as a draft",
+      "createdNew": "Order {{orderNo}} saved. Ready for the next one.",
+      "updated": "Order {{orderNo}} saved"
+    },
+    "void": {
+      "title": "Void this draft?",
+      "description": "A voided order cannot be changed, and its PO number is free to use again. Say why.",
+      "confirm": "Void order",
+      "done": "Order {{orderNo}} voided",
+      "unsaved": "Save the order before you void it."
+    },
+    "denied": "Your role may read orders but not start them.",
+    "notFoundDescription": "This order does not exist, or the number is wrong."
   }
 }

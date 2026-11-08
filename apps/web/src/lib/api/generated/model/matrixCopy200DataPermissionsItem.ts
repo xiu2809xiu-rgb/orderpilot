@@ -20,6 +20,8 @@ export const MatrixCopy200DataPermissionsItem = {
   documentsread: 'documents.read',
   documentsupload: 'documents.upload',
   ordersread: 'orders.read',
+  orderscreate: 'orders.create',
+  ordersedit: 'orders.edit',
   trackerread: 'tracker.read',
   exceptionsread: 'exceptions.read',
   insightsread: 'insights.read',

@@ -2,8 +2,8 @@ import { Inject, Injectable } from "@nestjs/common";
 import type { OrderCaptureState } from "@orderpilot/shared";
 import { Prisma } from "../../generated/prisma/client.js";
 import type { OrderCaptureState as RowCaptureState } from "../../generated/prisma/enums.js";
-import { ConflictError } from "../../common/domain-error.js";
 import { Database } from "../../database/database.js";
+import { OrderConflictError } from "./domain/order-errors.js";
 import { SalesOrder } from "./domain/sales-order.js";
 
 /**
@@ -49,6 +49,7 @@ function toDomain(row: Row): SalesOrder {
     currencyCode: row.currencyCode,
     prepaymentPercent: row.prepaymentPercent.toFixed(2),
     createdBy: row.createdBy,
+    version: row.version,
     lines: row.lines.map((line) => ({
       lineNo: line.lineNo,
       itemNo: line.itemNo,
@@ -58,6 +59,22 @@ function toDomain(row: Row): SalesOrder {
       qtyToShip: line.qtyToShip.toFixed(3),
     })),
   });
+}
+
+/**
+ * A unique key said no: the order number, or the live customer and PO pair.
+ * Which one is the service's to judge once the transaction has ended, so
+ * nothing here reads `meta.target`.
+ */
+function asConflict(error: unknown, order: SalesOrder): unknown {
+  if (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === "P2002"
+  )
+    return new OrderConflictError(
+      `Order ${order.orderNo} conflicts with one already stored.`,
+    );
+  return error;
 }
 
 /** The only place the sales order tables are read or written. */
@@ -94,13 +111,88 @@ export class SalesOrderRepository {
       });
       return toDomain(row);
     } catch (error) {
-      if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === "P2002"
-      )
-        throw new ConflictError(`Order ${order.orderNo} already exists.`);
-      throw error;
+      throw asConflict(error, order);
     }
+  }
+
+  /**
+   * Saves a draft's header and lines, but only if nobody saved it since the
+   * caller read `expectedVersion`, and only while it is still a draft. False
+   * means the guard refused and nothing changed; the caller re-reads to say why.
+   */
+  update(order: SalesOrder, expectedVersion: number): Promise<boolean> {
+    return this.database.transaction(async () => {
+      const client = this.database.client;
+      try {
+        const { count } = await client.salesOrder.updateMany({
+          where: {
+            orderNo: order.orderNo,
+            version: expectedVersion,
+            captureState: "DRAFT",
+          },
+          data: {
+            customerNo: order.customerNo,
+            externalDocumentNo: order.externalDocumentNo,
+            orderDate: asDate(order.orderDate),
+            shipmentDate: order.shipmentDate
+              ? asDate(order.shipmentDate)
+              : null,
+            prepaymentPercent: order.prepaymentPercent,
+            version: { increment: 1 },
+          },
+        });
+        if (count === 0) return false;
+        const { id } = await client.salesOrder.findUniqueOrThrow({
+          where: { orderNo: order.orderNo },
+          select: { id: true },
+        });
+        await client.salesOrderLine.deleteMany({ where: { orderId: id } });
+        await client.salesOrderLine.createMany({
+          data: order.lines.map((line) => ({
+            orderId: id,
+            lineNo: line.lineNo,
+            itemNo: line.itemNo,
+            description: line.description,
+            quantity: line.quantity,
+            unitPrice: line.unitPrice,
+            qtyToShip: line.qtyToShip,
+          })),
+        });
+        return true;
+      } catch (error) {
+        throw asConflict(error, order);
+      }
+    });
+  }
+
+  /** Closes a draft under the same guard as `update`. False means it refused. */
+  async markVoid(orderNo: string, expectedVersion: number): Promise<boolean> {
+    const { count } = await this.database.client.salesOrder.updateMany({
+      where: { orderNo, version: expectedVersion, captureState: "DRAFT" },
+      data: { captureState: "VOID", version: { increment: 1 } },
+    });
+    return count > 0;
+  }
+
+  /**
+   * The number of the live order that holds this customer and PO number, or
+   * null. It uses the index's own expression: `mode: "insensitive"` would
+   * compile to ILIKE, where `_` and `%` in a PO number are wildcards.
+   */
+  async findLiveByPo(
+    customerNo: string,
+    po: string,
+    exceptOrderNo?: string,
+  ): Promise<string | null> {
+    const except = exceptOrderNo ?? null;
+    const rows = await this.database.client.$queryRaw<{ orderNo: string }[]>`
+      SELECT "orderNo" FROM "SalesOrder"
+      WHERE "customerNo" = ${customerNo}
+        AND upper("externalDocumentNo") = upper(${po})
+        AND "captureState" <> 'VOID'
+        AND (${except}::text IS NULL OR "orderNo" <> ${except}::text)
+      LIMIT 1`;
+    return rows[0]?.orderNo ?? null;
   }
 
   async findByNo(orderNo: string): Promise<SalesOrder | null> {

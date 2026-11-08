@@ -1,7 +1,10 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
-import { MemoryRouter } from "react-router";
+import { MemoryRouter, Route, Routes, useLocation } from "react-router";
+import userEvent from "@testing-library/user-event";
+import type { Role } from "@orderpilot/shared";
+import { useGlobalShortcuts } from "@/app/shell/shortcuts";
 import { describe, expect, it } from "vitest";
 import i18n from "@/i18n";
 import { getMasterDataCustomersMockHandler } from "@/lib/api/generated/endpoints/master-data/master-data.msw";
@@ -84,7 +87,15 @@ const customers = {
 const load = () =>
   i18n.loadNamespaces(["orders", "common", "components", "list-page"]);
 
-function renderAt(path = "/orders", role: "SUPPORT" | "WAREHOUSE" = "SUPPORT") {
+const HERE = "here";
+
+/** Draws where the router is, and turns on the N key as the app shell does. */
+function Probe() {
+  useGlobalShortcuts();
+  return <output aria-label={HERE}>{useLocation().pathname}</output>;
+}
+
+function renderAt(path = "/orders", role: Role = "SUPPORT") {
   useSessionStore.getState().setSession(sessionFor(role));
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
@@ -92,14 +103,18 @@ function renderAt(path = "/orders", role: "SUPPORT" | "WAREHOUSE" = "SUPPORT") {
   return render(
     <QueryClientProvider client={client}>
       <MemoryRouter initialEntries={[path]}>
-        <OrdersPage />
+        <Probe />
+        <Routes>
+          <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/orders/new" element={<main />} />
+        </Routes>
       </MemoryRouter>
     </QueryClientProvider>,
   );
 }
 
 describe("the Orders list", () => {
-  it("lists samples with a Sample tag and a link, and a stored order without a link", async () => {
+  it("lists samples with a Sample tag and a link, and a stored order with a link to its own page", async () => {
     await load();
     server.use(
       getMasterDataCustomersMockHandler(customers),
@@ -111,14 +126,16 @@ describe("the Orders list", () => {
     ).toHaveAttribute("href", "/order-tracker/SO-0001");
     expect(screen.getByText("Sample")).toBeInTheDocument();
     expect(screen.getByText("SO-20261108-0001")).toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: "SO-20261108-0001" })).toBeNull();
+    expect(
+      screen.getByRole("link", { name: "SO-20261108-0001" }),
+    ).toHaveAttribute("href", "/orders/SO-20261108-0001");
     // Twice: the Entry column, and the chip beside the number for a phone.
     const drafts = within(screen.getByRole("table")).getAllByText("Draft");
     expect(drafts).toHaveLength(2);
     expect(drafts.some((d) => d.closest('[class~="md:hidden"]'))).toBe(true);
     expect(screen.getByText("Synthetic demo data")).toBeInTheDocument();
     expect(screen.getAllByText(/USD\s?1,200\.00/)).toHaveLength(2);
-    expect(screen.queryByRole("button", { name: /^New/ })).toBeNull();
+    expect(screen.getByRole("button", { name: "New order" })).toBeVisible();
     expect(await axeViolations(view.container)).toEqual([]);
   });
 
@@ -343,7 +360,7 @@ describe("the Orders list", () => {
     expect(voided?.className).toContain("line-through");
   });
 
-  it("gives a sample a row menu and a stored order none, so there is no dead control", async () => {
+  it("gives a sample and a stored order each a row menu, since each opens a page", async () => {
     await load();
     server.use(
       getMasterDataCustomersMockHandler(customers),
@@ -355,9 +372,48 @@ describe("the Orders list", () => {
       screen.getByRole("button", { name: "Actions for SO-0001" }),
     ).toBeVisible();
     expect(
-      screen.queryByRole("button", { name: "Actions for SO-20261108-0001" }),
-    ).toBeNull();
+      screen.getByRole("button", { name: "Actions for SO-20261108-0001" }),
+    ).toBeVisible();
   });
+
+  it.each(["SUPPORT", "PRODUCT_MANAGER"] as const)(
+    "gives %s one primary button, New order, and the N key goes to the form",
+    async (role) => {
+      await load();
+      const user = userEvent.setup();
+      server.use(
+        getMasterDataCustomersMockHandler(customers),
+        getOrdersListMockHandler(page([sample(1)])),
+      );
+      const view = renderAt("/orders", role);
+      await screen.findByRole("link", { name: "SO-0001" });
+      const primary = view.container.querySelectorAll(
+        'button[data-variant="default"]',
+      );
+      expect(primary).toHaveLength(1);
+      expect(primary[0]).toHaveTextContent("New order");
+      await user.keyboard("n");
+      expect(screen.getByLabelText(HERE)).toHaveTextContent("/orders/new");
+    },
+  );
+
+  it.each(["WAREHOUSE", "AUDITOR"] as const)(
+    "shows %s no New order button, and the N key does nothing",
+    async (role) => {
+      await load();
+      const user = userEvent.setup();
+      server.use(
+        getMasterDataCustomersMockHandler(customers),
+        getOrdersListMockHandler(page([sample(1)])),
+      );
+      renderAt("/orders", role);
+      await screen.findByRole("link", { name: "SO-0001" });
+      expect(screen.queryByRole("button", { name: /^New/ })).toBeNull();
+      await user.keyboard("n");
+      expect(screen.getByLabelText(HERE)).toHaveTextContent("/orders");
+      expect(screen.getByLabelText(HERE)).not.toHaveTextContent("/orders/new");
+    },
+  );
 
   it("sends the date range and the customer from the address to the server", async () => {
     await load();

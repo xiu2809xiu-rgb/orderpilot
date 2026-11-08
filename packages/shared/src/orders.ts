@@ -5,7 +5,9 @@
 
 import { z } from "zod";
 import { dataEnvelope, pageEnvelope, pageQuerySchema } from "./envelope.js";
+import type { FieldIssue } from "./errors.js";
 import { maskedFieldSchema } from "./governance/masking.js";
+import { AVAILABLE_STOCK_MAX_ITEMS, navisionNoSchema } from "./master-data.js";
 import { decimalStringSchema } from "./money.js";
 
 /**
@@ -98,6 +100,8 @@ export type SalesOrderLine = z.infer<typeof salesOrderLineSchema>;
 export const salesOrderDetailSchema = salesOrderRowSchema.extend({
   prepaymentPercent: decimalStringSchema,
   navisionNo: z.string().min(1).nullable(),
+  /** Counts the saves of a draft. Null for a sample: it cannot be edited. */
+  version: z.int().min(1).nullable(),
   lines: z.array(salesOrderLineSchema),
 });
 export type SalesOrderDetail = z.infer<typeof salesOrderDetailSchema>;
@@ -105,3 +109,65 @@ export type SalesOrderDetail = z.infer<typeof salesOrderDetailSchema>;
 /** A stored order is real, so unlike master data these carry no `meta.mock`. */
 export const salesOrderListSchema = pageEnvelope(salesOrderRowSchema);
 export const salesOrderResponseSchema = dataEnvelope(salesOrderDetailSchema);
+
+// ---- Writing a draft order (ADR 0047) -----------------------------------------
+// No `.default` and no `.transform` below: a default survives `.partial()` and
+// would wipe a field the caller did not send, and the OpenAPI writer
+// (`openApiSchema`) throws on a transform.
+
+export const ORDER_MAX_LINES = AVAILABLE_STOCK_MAX_ITEMS;
+/** Above zero, three decimals at most: the column is a Decimal(18, 3). */
+export const ORDER_QUANTITY_PATTERN = /^(?!0+(\.0+)?$)\d{1,15}(\.\d{1,3})?$/;
+/** Two decimals at most: the column is a Decimal(18, 2). */
+export const ORDER_PRICE_PATTERN = /^\d{1,15}(\.\d{1,2})?$/;
+/** Zero to 999.99: the column is a Decimal(5, 2), and the server holds 100. */
+export const ORDER_PERCENT_PATTERN = /^\d{1,3}(\.\d{1,2})?$/;
+
+const orderLineBodySchema = z.object({
+  itemNo: navisionNoSchema,
+  /** Blank takes the item's own description. */
+  description: z.string().trim().max(100).optional(),
+  quantity: z.string().regex(ORDER_QUANTITY_PATTERN),
+  /** Required for a role that sees prices, and refused for one that does not. */
+  unitPrice: z.string().regex(ORDER_PRICE_PATTERN).optional(),
+});
+
+export const createSalesOrderSchema = z.object({
+  customerNo: navisionNoSchema,
+  externalDocumentNo: z.string().trim().min(1).max(35),
+  orderDate: z.iso.date(),
+  shipmentDate: z.iso.date().nullable(),
+  prepaymentPercent: z.string().regex(ORDER_PERCENT_PATTERN),
+  lines: z.array(orderLineBodySchema).min(1).max(ORDER_MAX_LINES),
+});
+export type CreateSalesOrderBody = z.infer<typeof createSalesOrderSchema>;
+
+/** Only the fields sent change. `version` is the one the form was typed against. */
+export const patchSalesOrderSchema = createSalesOrderSchema
+  .partial()
+  .extend({ version: z.int().min(1) })
+  .refine((body) => Object.keys(body).some((key) => key !== "version"), {
+    message: "Send at least one field to change",
+  });
+export type PatchSalesOrderBody = z.infer<typeof patchSalesOrderSchema>;
+
+export const voidSalesOrderSchema = z.object({
+  version: z.int().min(1),
+  reason: z.string().trim().min(1).max(500),
+});
+export type VoidSalesOrderBody = z.infer<typeof voidSalesOrderSchema>;
+
+/**
+ * The 409 for a repeated customer and PO number keeps the one error envelope.
+ * It carries the existing order's number as the message of an issue on this
+ * path, so the form can link to it.
+ */
+export const DUPLICATE_ORDER_PATH = "existingOrderNo";
+
+/** The number of the order a 409 names, or null when it names none. */
+export function existingOrderOf(
+  details: readonly FieldIssue[] | null | undefined,
+): string | null {
+  const issue = details?.find((item) => item.path === DUPLICATE_ORDER_PATH);
+  return issue && issue.message.length > 0 ? issue.message : null;
+}

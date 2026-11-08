@@ -4,6 +4,7 @@ import {
   addDecimal,
   compareDecimal,
   type CustomerDetail,
+  type AvailableStockResponse,
   type CustomerQuery,
   type CustomerRow,
   type ItemDetail,
@@ -262,6 +263,25 @@ export class MasterDataService {
     const hidden = this.field(role, "item.unitPrice", "").masked;
     const sort = query.sort === "unitPrice" && hidden ? undefined : query.sort;
     return paged(rows, query, sort && ITEM_SORT[sort]);
+  }
+
+  /**
+   * The available stock of the items asked for, from the formula an item's own
+   * page uses: the item's figures alone, with no band, because a band needs
+   * the orders and would disagree with the list. An unknown number is left out.
+   */
+  async availableStock(
+    itemNos: readonly string[],
+  ): Promise<AvailableStockResponse["data"]> {
+    const wanted = new Set(itemNos);
+    const items = await this.reader.items();
+    return items
+      .filter((item) => wanted.has(item.no))
+      .map((item) => ({
+        itemNo: item.no,
+        availableStock: new StockPosition(item, []).availableStock,
+        unit: item.baseUnitOfMeasure,
+      }));
   }
 
   async item(no: string, role: Role): Promise<ItemDetail> {

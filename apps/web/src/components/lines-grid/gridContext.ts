@@ -10,6 +10,7 @@ export interface GridContextValue {
   debounceMs: number;
   readOnly: boolean;
   priceMask: PriceMask | null;
+  itemPrice: "fill" | "reference";
   shortfallAction: ((shortfall: Shortfall) => ReactNode) | undefined;
   pick: (index: number, option: LookupOption) => void;
   remove: (index: number, from: ColumnKind | null) => void;
