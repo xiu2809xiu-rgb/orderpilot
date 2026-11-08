@@ -22,7 +22,7 @@
     "linesHint": "Order and SPR lines that are typed into. Search by part number or name, press Enter to move on, and Enter on the last cell adds a line. The save is faked in the browser.",
     "logTitle": "Operation log: a detail page",
     "document": "Document form",
-    "documentHint": "The page every order, SPR, payment and shipment is edited on: a header, the lines grid, a footer with attachments, status and totals, an action bar for the signed-in role and the tabs below. Choose a status to see its actions. The actions borrow orders.read, because no write permission exists yet, so every role that reads orders sees Save, Submit and Void; the role rule shows on Approve and Reject, which need approvals.decide. The save is faked in the browser; use the PO number CPO-USED to see the server refuse a field."
+    "documentHint": "The page every order, SPR, payment and shipment is edited on: a header, the lines grid, a footer with attachments, status and totals, an action bar for the signed-in role and the tabs below. Choose a status to see its actions. The actions borrow orders.read, so that this demo does not depend on a real form, so every role that reads orders sees Save, Submit and Void; the role rule shows on Approve and Reject, which need approvals.decide. The save is faked in the browser; use the PO number CPO-USED to see the server refuse a field."
   },
   "feedback": {
     "title": "Amounts, messages and loading shapes",

@@ -7,10 +7,10 @@ import type { DocumentInput, DocumentOutput } from "./documentDemo";
 
 /**
  * The gallery document's actions. Every one is declared; the template draws
- * those the role may use. No write permission exists in packages/shared yet, and
- * the matrix is area 4's, so the gallery borrows the ones that exist
- * (reading orders for the document's own work, and the approver's
- * permission to decide).
+ * those the role may use. The order form has its own permissions (orders.create
+ * and orders.edit), but the gallery is a demo that must not depend on a real
+ * form, so it borrows ones every reader holds (reading orders for the
+ * document's own work, and the approver's permission to decide).
  */
 export function useDocumentActions(
   form: UseFormReturn<DocumentInput, unknown, DocumentOutput>,
