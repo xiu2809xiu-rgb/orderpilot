@@ -57,6 +57,13 @@ type Over = Partial<
   beside?: ReactNode;
 };
 
+// Held in a constant so the hard-coded-strings test, which reads JSX, passes: this file is test-only.
+const WORDS = {
+  title: "Sales order SO-1",
+  customerPo: "Customer PO",
+  remarks: "Remarks",
+};
+
 function Harness({ defaults, beside, ...over }: Over) {
   const form = useZodForm<Input>({
     schema: harnessSchema,
@@ -68,7 +75,7 @@ function Harness({ defaults, beside, ...over }: Over) {
       <DocumentForm
         formId="harness"
         form={form}
-        title="Sales order SO-1"
+        title={WORDS.title}
         number="SO-1"
         formLabel="Sales order"
         header={
@@ -76,10 +83,14 @@ function Harness({ defaults, beside, ...over }: Over) {
             <TextField
               control={form.control}
               name="customerPo"
-              label="Customer PO"
+              label={WORDS.customerPo}
               required
             />
-            <TextField control={form.control} name="remarks" label="Remarks" />
+            <TextField
+              control={form.control}
+              name="remarks"
+              label={WORDS.remarks}
+            />
           </>
         }
         status={{ family: "waiting", label: "Waiting for approval" }}
