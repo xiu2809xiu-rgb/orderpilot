@@ -32,6 +32,8 @@ The 120 sample orders (`SO-0001` to `SO-0120`) come from `packages/synthetic-dat
 - Criterion 3 holds for the Orders list, the order reader and master data's sales order listing. These consumers still read the synthetic set directly, and each is out of P-36's scope until its owner adopts `ORDER_DIRECTORY`. A stored order is absent from all of them meanwhile. A stored row has no link in the list either.
   - **Area 3:** the checks (`checks.module`, the mock checks repository, the mock order status reader) and the tracker service.
   - **Area 2:** the workflows read model, the workflows seed and the task sweep.
+  - **Area 4:** the policy service and the monitoring mock.
+  - **Area 3, insights:** the KPI controller and its mock KPIs.
   - **Area 1, the master-data reader's own figures:** `mock-navision-master-data` still serves items, purchase orders, SPRs and its retained `salesOrders()` port method from the synthetic set. Its stock figures never include a stored order (decision 5).
 - The list shows each row's customer name beside the number. A sample has its name in the synthetic set. A stored order has none, so the service asks master data for it by the number, never by name.
 - `StockLookup` reads every item to judge a few lines. That is noted for P-20, where the connector gets a by-number read.
