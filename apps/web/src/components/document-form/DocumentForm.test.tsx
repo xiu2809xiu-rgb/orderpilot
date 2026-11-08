@@ -131,6 +131,36 @@ describe("the action bar", () => {
     });
   });
 
+  it("does not bring an old reason line back when the action is blocked again", async () => {
+    signInAs("SUPPORT");
+    renderDocument({
+      actions: [
+        { id: "save", kind: "save", permission: "orders.read" },
+        {
+          id: "submit",
+          kind: "submit",
+          permission: "orders.read",
+          run: () => 1,
+        },
+      ],
+    });
+    await userEvent.type(po(), "2");
+    await userEvent.click(
+      screen.getByRole("button", { name: "Submit for approval" }),
+    );
+    expect(screen.getByRole("status")).toHaveTextContent("Save your changes");
+    // The shortcut, not a button, saves: pressing a button would clear the line itself.
+    await userEvent.keyboard("{Control>}s{/Control}");
+    await waitFor(() => {
+      expect(screen.getByRole("status")).toBeEmptyDOMElement();
+    });
+    await userEvent.type(po(), "3");
+    expect(
+      screen.getByRole("button", { name: "Submit for approval" }),
+    ).toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByRole("status")).toBeEmptyDOMElement();
+  });
+
   it("draws the screen's notices between the bar and the header", () => {
     signInAs("SUPPORT");
     renderDocument({ notices: <p>Payment on hold</p> });

@@ -234,6 +234,7 @@
     "submitted": "{{number}} submitted for approval",
     "approved": "{{number}} approved",
     "attachment": "Customer PO as received.pdf",
+    "attachmentSize": "182 KB",
     "checkFailed": "Quantity on the packing list differs from the PO (synthetic).",
     "status": {
       "draft": "Draft",

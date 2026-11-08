@@ -108,6 +108,29 @@ describe("one action at a time", () => {
     expect(btn("Save")).not.toHaveAttribute("aria-disabled");
   });
 
+  it("makes Submit wait while a save is in flight, even on a clean form", async () => {
+    signInAs("SUPPORT");
+    const pending = never();
+    const run = vi.fn();
+    renderDocument({
+      actions: [submitWith(run), save],
+      allowClean: true,
+      onSave: pending.run,
+    });
+    await userEvent.click(btn("Save"));
+    expect(btn("Submit for approval")).toHaveAttribute("aria-disabled", "true");
+    expect(btn("Submit for approval")).toHaveAccessibleDescription("Saving.");
+    await userEvent.click(btn("Submit for approval"));
+    expect(run).not.toHaveBeenCalled();
+    await act(async () => {
+      pending.finish();
+      await Promise.resolve();
+    });
+    await waitFor(() => {
+      expect(btn("Submit for approval")).not.toHaveAttribute("aria-disabled");
+    });
+  });
+
   it("refuses a second run even before the bar is drawn again", () => {
     signInAs("SUPPORT");
     const pending = never();

@@ -128,7 +128,11 @@ export function GalleryDocument() {
           label: t(`document.status.${status}`),
         }}
         attachments={[
-          { id: "po", name: t("document.attachment"), size: "182 KB" },
+          {
+            id: "po",
+            name: t("document.attachment"),
+            size: t("document.attachmentSize"),
+          },
         ]}
         actions={actions}
         draftKey="gallery.document-form"

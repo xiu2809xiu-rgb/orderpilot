@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FieldValues, UseFormReturn } from "react-hook-form";
 import { useFormState } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -82,6 +82,8 @@ export function DocumentActionBar<T extends FieldValues, O>({
     }
     if (action.blocked) return action.blocked;
     if (busy) return t("bar.working");
+    // A save in flight changes what is saved, so nothing acts on it until it ends.
+    if (saveState.isSubmitting) return t("bar.saving");
     if (NEEDS_SAVED.includes(action.kind) && isDirty) return t("bar.saveFirst");
     return undefined;
   }
@@ -102,6 +104,10 @@ export function DocumentActionBar<T extends FieldValues, O>({
 
   const explainedAction = usable.find((action) => action.id === explained);
   const explanation = explainedAction ? blockedOf(explainedAction) : undefined;
+  // Once the action can run, forget it, so a later block needs a new press.
+  useEffect(() => {
+    if (explained !== null && explanation === undefined) setExplained(null);
+  }, [explained, explanation]);
 
   return (
     <div
