@@ -28,7 +28,13 @@ function orderCell(row: SalesOrderRow, t: TFunction) {
       )}
       {row.source === "sample" ? (
         <Badge variant="outline">{t("sampleTag")}</Badge>
-      ) : null}
+      ) : (
+        // The Entry column is not in the phone summary, and a draft must not
+        // pass for a submitted order. Wide screens have the column itself.
+        <span className="md:hidden">
+          <CaptureChip state={row.captureState} />
+        </span>
+      )}
     </span>
   );
 }
@@ -36,8 +42,14 @@ function orderCell(row: SalesOrderRow, t: TFunction) {
 /**
  * A phone shows the first three columns: the order, what it is short of and its
  * amount (or the dots that hide it). So those come first, and the customer,
- * who is on every wide screen, follows. The amount cannot sort for a role that cannot see prices: the server ignores it,
- * and sorting would leak the order of the hidden figures.
+ * who is on every wide screen, follows.
+ *
+ * The PO number and the order date start hidden under Columns: with the
+ * sidebar open, the rest already fill a 1440 px screen, and a clipped column
+ * is worse than a hidden one.
+ *
+ * The amount cannot sort for a role that cannot see prices: the server ignores
+ * it, and sorting would leak the order of the hidden figures.
  */
 export function orderColumns(
   t: TFunction,
@@ -67,7 +79,11 @@ export function orderColumns(
       cell: (row) => (
         <OrderAmount field={row.amount} currency={row.currencyCode} />
       ),
-      exportValue: (row) => row.amount.value ?? t("hiddenAmount"),
+      // The screen shows the currency; a bare number in a file would not.
+      exportValue: (row) =>
+        row.amount.value === null
+          ? t("hiddenAmount")
+          : `${row.currencyCode} ${row.amount.value}`,
       kind: "money",
       sortable: !amountHidden,
     },
@@ -109,6 +125,7 @@ export function orderColumns(
         <span className="font-mono">{row.externalDocumentNo}</span>
       ),
       exportValue: (row) => row.externalDocumentNo,
+      defaultHidden: true,
     },
     {
       id: "orderDate",
@@ -116,6 +133,7 @@ export function orderColumns(
       cell: (row) => formatDay(row.orderDate),
       exportValue: (row) => row.orderDate,
       sortable: true,
+      defaultHidden: true,
     },
     {
       id: "shipmentDate",

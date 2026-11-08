@@ -112,9 +112,10 @@ describe("the Orders list", () => {
     expect(screen.getByText("Sample")).toBeInTheDocument();
     expect(screen.getByText("SO-20261108-0001")).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "SO-20261108-0001" })).toBeNull();
-    expect(
-      within(screen.getByRole("table")).getByText("Draft"),
-    ).toBeInTheDocument();
+    // Twice: the Entry column, and the chip beside the number for a phone.
+    const drafts = within(screen.getByRole("table")).getAllByText("Draft");
+    expect(drafts).toHaveLength(2);
+    expect(drafts.some((d) => d.closest('[class~="md:hidden"]'))).toBe(true);
     expect(screen.getByText("Synthetic demo data")).toBeInTheDocument();
     expect(screen.getAllByText(/USD\s?1,200\.00/)).toHaveLength(2);
     expect(screen.queryByRole("button", { name: /^New/ })).toBeNull();
@@ -277,6 +278,25 @@ describe("the Orders list", () => {
     expect(stock?.exportValue?.(sample(1))).toBe("");
   });
 
+  it("starts with the PO number, the order date and the shipment date under Columns", () => {
+    const t = i18n.getFixedT("en", "orders");
+    const hiddenIds = orderColumns(t, false)
+      .filter((c) => c.defaultHidden)
+      .map((c) => c.id);
+    expect(hiddenIds).toEqual([
+      "externalDocumentNo",
+      "orderDate",
+      "shipmentDate",
+    ]);
+  });
+
+  it("exports the amount with its currency, and the dots word when it is hidden", () => {
+    const t = i18n.getFixedT("en", "orders");
+    const amount = orderColumns(t, false).find((c) => c.id === "amount");
+    expect(amount?.exportValue?.(sample(1))).toBe("USD 1200.00");
+    expect(amount?.exportValue?.(sample(1, hidden))).toBe("Hidden");
+  });
+
   it("shows the customer's name beside its number", async () => {
     await load();
     server.use(
@@ -313,12 +333,12 @@ describe("the Orders list", () => {
     renderAt();
     await screen.findByText("SO-20261108-0002");
     const table = within(screen.getByRole("table"));
-    const submitted = table.getByText("Submitted");
-    expect(submitted.closest("[data-family]")).toHaveAttribute(
+    const submitted = table.getAllByText("Submitted").at(0);
+    expect(submitted?.closest("[data-family]")).toHaveAttribute(
       "data-family",
       "neutral",
     );
-    const voided = table.getByText("Void").closest("[data-family]");
+    const voided = table.getAllByText("Void").at(0)?.closest("[data-family]");
     expect(voided).not.toHaveAttribute("data-family", "ready");
     expect(voided?.className).toContain("line-through");
   });
