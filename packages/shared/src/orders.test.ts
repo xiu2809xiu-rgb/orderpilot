@@ -18,6 +18,7 @@ const row = {
   source: "stored",
   captureState: "draft",
   customerNo: "C-10010",
+  customerName: "Synthetic Customer 10",
   externalDocumentNo: "PO-7788",
   orderDate: "2026-11-08",
   shipmentDate: null,
