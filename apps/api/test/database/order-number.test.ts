@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { renderError } from "../../src/common/all-exceptions.filter.js";
 import { Database } from "../../src/database/database.js";
 import { SalesOrder } from "../../src/modules/orders/domain/sales-order.js";
 import { OrderNumberAllocator } from "../../src/modules/orders/order-number.allocator.js";
@@ -94,6 +95,22 @@ describe("stored orders and their numbers, against the real database", () => {
     expect(await numbers.next(day)).toBe("SO-20261201-0001");
   });
 
+  it("gives two allocations at the same moment two different numbers", async () => {
+    const day = new Date("2026-12-02T02:00:00.000Z");
+    const given = await Promise.all(
+      Array.from({ length: 6 }, () => db.transaction(() => numbers.next(day))),
+    );
+    expect(new Set(given).size).toBe(6);
+    expect([...given].sort()).toEqual([
+      "SO-20261202-0001",
+      "SO-20261202-0002",
+      "SO-20261202-0003",
+      "SO-20261202-0004",
+      "SO-20261202-0005",
+      "SO-20261202-0006",
+    ]);
+  });
+
   it("refuses a repeated number with a conflict", async () => {
     await expect(
       orders.insert(draft("SO-20261108-0001", "PO-D")),
@@ -112,8 +129,12 @@ describe("stored orders and their numbers, against the real database", () => {
     await db.client.salesOrder.createMany({ data: rows });
     // The two orders above and these make one more than the bound.
     expect(await orders.countAll()).toBe(MAX_STORED_READ + 1);
-    await expect(orders.listAll()).rejects.toMatchObject({
-      code: "INTERNAL_ERROR",
-    });
+    const failure: unknown = await orders.listAll().catch((e: unknown) => e);
+    expect(failure).toBeInstanceOf(Error);
+    // The detail stays in the log: the caller gets the standard internal error.
+    const { status, body } = renderError(failure, "trace-1");
+    expect(status).toBe(500);
+    expect(body.error.code).toBe("INTERNAL_ERROR");
+    expect(body.error.message).not.toMatch(/2000|stored orders|SQL/);
   });
 });

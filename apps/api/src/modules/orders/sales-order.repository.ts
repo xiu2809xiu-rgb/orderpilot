@@ -2,7 +2,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import type { OrderCaptureState } from "@orderpilot/shared";
 import { Prisma } from "../../generated/prisma/client.js";
 import type { OrderCaptureState as RowCaptureState } from "../../generated/prisma/enums.js";
-import { ConflictError, DomainError } from "../../common/domain-error.js";
+import { ConflictError } from "../../common/domain-error.js";
 import { Database } from "../../database/database.js";
 import { SalesOrder } from "./domain/sales-order.js";
 
@@ -10,7 +10,9 @@ import { SalesOrder } from "./domain/sales-order.js";
  * The most stored orders one read takes. The list merges them with the samples
  * in memory (ADR 0046), so past this the plan is a keyset page in SQL, and
  * until then a read that hits the bound fails loudly instead of cutting the
- * list short.
+ * list short. The failure is a plain Error on purpose: the exception filter
+ * logs its message against the trace id and gives the caller only the standard
+ * internal error, so no internal limit reaches a client.
  */
 export const MAX_STORED_READ = 2000;
 
@@ -117,8 +119,7 @@ export class SalesOrderRepository {
       take: MAX_STORED_READ + 1,
     });
     if (rows.length > MAX_STORED_READ)
-      throw new DomainError(
-        "INTERNAL_ERROR",
+      throw new Error(
         `More than ${String(MAX_STORED_READ)} stored orders: the list needs a page in SQL before it can grow.`,
       );
     return rows.map(toDomain);
