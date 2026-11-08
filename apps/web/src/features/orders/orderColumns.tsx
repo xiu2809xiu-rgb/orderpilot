@@ -6,6 +6,7 @@ import { formatDay } from "@/lib/format";
 import { CaptureChip } from "./CaptureChip";
 import { OrderAmount } from "./OrderAmount";
 import { ShortageLine } from "./ShortageLine";
+import { shortageLabel } from "./shortageLabel";
 
 /** A sample opens in the tracker. A stored order has no page until its own story. */
 export const orderHref = (row: SalesOrderRow): string | undefined =>
@@ -32,17 +33,10 @@ function orderCell(row: SalesOrderRow, t: TFunction) {
   );
 }
 
-function shortageText(row: SalesOrderRow, t: TFunction): string {
-  if (!row.shortage) return "";
-  return t("shortage.line", {
-    quantity: row.shortage.shortBy,
-    itemNo: row.shortage.itemNo,
-  });
-}
-
 /**
- * Order, customer and status come first, so a phone shows those three. The
- * amount cannot sort for a role that cannot see prices: the server ignores it,
+ * A phone shows the first three columns: the order, what it is short of and its
+ * amount (or the dots that hide it). So those come first, and the customer,
+ * who is on every wide screen, follows. The amount cannot sort for a role that cannot see prices: the server ignores it,
  * and sorting would leak the order of the hidden figures.
  */
 export function orderColumns(
@@ -59,10 +53,39 @@ export function orderColumns(
       hideable: false,
     },
     {
+      id: "stock",
+      header: t("columns.stock"),
+      cell: (row) => (
+        <ShortageLine shortage={row.shortage} count={row.shortageCount} />
+      ),
+      exportValue: (row) =>
+        row.shortage ? shortageLabel(row.shortage, row.shortageCount, t) : "",
+    },
+    {
+      id: "amount",
+      header: t("columns.amount"),
+      cell: (row) => (
+        <OrderAmount field={row.amount} currency={row.currencyCode} />
+      ),
+      exportValue: (row) => row.amount.value ?? t("hiddenAmount"),
+      kind: "money",
+      sortable: !amountHidden,
+    },
+    {
       id: "customerNo",
       header: t("columns.customerNo"),
-      cell: (row) => <span className="font-mono">{row.customerNo}</span>,
-      exportValue: (row) => row.customerNo,
+      cell: (row) => (
+        <span className="inline-flex flex-wrap items-baseline gap-x-2">
+          <span className="font-mono">{row.customerNo}</span>
+          {row.customerName ? (
+            <span className="text-muted-foreground">{row.customerName}</span>
+          ) : null}
+        </span>
+      ),
+      exportValue: (row) =>
+        row.customerName
+          ? `${row.customerNo} ${row.customerName}`
+          : row.customerNo,
       sortable: true,
     },
     {
@@ -101,24 +124,6 @@ export function orderColumns(
       exportValue: (row) => row.shipmentDate ?? "",
       sortable: true,
       defaultHidden: true,
-    },
-    {
-      id: "amount",
-      header: t("columns.amount"),
-      cell: (row) => (
-        <OrderAmount field={row.amount} currency={row.currencyCode} />
-      ),
-      exportValue: (row) => row.amount.value ?? t("hiddenAmount"),
-      kind: "money",
-      sortable: !amountHidden,
-    },
-    {
-      id: "stock",
-      header: t("columns.stock"),
-      cell: (row) => (
-        <ShortageLine shortage={row.shortage} count={row.shortageCount} />
-      ),
-      exportValue: (row) => shortageText(row, t),
     },
   ];
 }

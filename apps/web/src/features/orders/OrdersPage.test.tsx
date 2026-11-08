@@ -16,6 +16,7 @@ import { axeViolations } from "@/test/axe";
 import { errorBody, sessionFor } from "@/test/fixtures";
 import { server } from "@/test/server";
 import OrdersPage from "./OrdersPage";
+import { orderColumns } from "./orderColumns";
 
 const shown = (value: string): OrdersList200DataItem["amount"] => ({
   field: "item.unitPrice",
@@ -242,5 +243,132 @@ describe("the Orders list", () => {
       screen.getAllByRole("button", { name: "Clear search and filters" })
         .length,
     ).toBeGreaterThan(0);
+  });
+
+  it("never cuts the shortage: the whole sentence, with the other items, is in the list", async () => {
+    await load();
+    server.use(
+      getMasterDataCustomersMockHandler(customers),
+      getOrdersListMockHandler(page([stored])),
+    );
+    renderAt();
+    const line = await screen.findByText(
+      "Short by 6 of I-0004 and 2 more items",
+    );
+    expect(line.parentElement?.className).toContain("whitespace-normal");
+  });
+
+  it("exports the same Stock text as the screen, with grouped numbers and the other items", async () => {
+    await load();
+    const t = i18n.getFixedT("en", "orders");
+    const long: OrdersList200DataItem = {
+      ...stored,
+      shortage: {
+        itemNo: "I-0004",
+        ordered: "1260.000",
+        availableStock: "10.000",
+        shortBy: "1250.000",
+      },
+    };
+    const stock = orderColumns(t, false).find((c) => c.id === "stock");
+    expect(stock?.exportValue?.(long)).toBe(
+      "Short by 1,250 of I-0004 and 2 more items",
+    );
+    expect(stock?.exportValue?.(sample(1))).toBe("");
+  });
+
+  it("shows the customer's name beside its number", async () => {
+    await load();
+    server.use(
+      getMasterDataCustomersMockHandler(customers),
+      getOrdersListMockHandler(page([sample(1)])),
+    );
+    renderAt();
+    await screen.findByRole("link", { name: "SO-0001" });
+    expect(screen.getByText("C-0001")).toBeVisible();
+    expect(screen.getByText("Alpha Synthetic Ltd")).toBeVisible();
+  });
+
+  it("puts what a phone shows first: the order, its shortage and its amount", async () => {
+    await load();
+    const t = i18n.getFixedT("en", "orders");
+    expect(
+      orderColumns(t, false)
+        .slice(0, 3)
+        .map((column) => column.id),
+    ).toEqual(["orderNo", "stock", "amount"]);
+  });
+
+  it("draws a Submitted order in the neutral chip and a Void one struck through, never as approved", async () => {
+    await load();
+    server.use(
+      getMasterDataCustomersMockHandler(customers),
+      getOrdersListMockHandler(
+        page([
+          { ...stored, orderNo: "SO-20261108-0002", captureState: "submitted" },
+          { ...stored, orderNo: "SO-20261108-0003", captureState: "void" },
+        ]),
+      ),
+    );
+    renderAt();
+    await screen.findByText("SO-20261108-0002");
+    const table = within(screen.getByRole("table"));
+    const submitted = table.getByText("Submitted");
+    expect(submitted.closest("[data-family]")).toHaveAttribute(
+      "data-family",
+      "neutral",
+    );
+    const voided = table.getByText("Void").closest("[data-family]");
+    expect(voided).not.toHaveAttribute("data-family", "ready");
+    expect(voided?.className).toContain("line-through");
+  });
+
+  it("gives a sample a row menu and a stored order none, so there is no dead control", async () => {
+    await load();
+    server.use(
+      getMasterDataCustomersMockHandler(customers),
+      getOrdersListMockHandler(page([sample(1), stored])),
+    );
+    renderAt();
+    await screen.findByRole("link", { name: "SO-0001" });
+    expect(
+      screen.getByRole("button", { name: "Actions for SO-0001" }),
+    ).toBeVisible();
+    expect(
+      screen.queryByRole("button", { name: "Actions for SO-20261108-0001" }),
+    ).toBeNull();
+  });
+
+  it("sends the date range and the customer from the address to the server", async () => {
+    await load();
+    const seen: string[] = [];
+    server.use(
+      getMasterDataCustomersMockHandler(customers),
+      http.get("*/api/v1/orders", ({ request }) => {
+        seen.push(new URL(request.url).search);
+        return HttpResponse.json(page([sample(1)]));
+      }),
+    );
+    renderAt(
+      "/orders?orderDateFrom=2026-10-01&orderDateTo=2026-10-31&customerNo=C-0001",
+    );
+    await screen.findByRole("link", { name: "SO-0001" });
+    expect(seen[0]).toContain("orderDateFrom=2026-10-01");
+    expect(seen[0]).toContain("orderDateTo=2026-10-31");
+    expect(seen[0]).toContain("customerNo=C-0001");
+  });
+
+  it("still lists the orders when the customer filter cannot load", async () => {
+    await load();
+    server.use(
+      http.get("*/api/v1/master-data/customers", () =>
+        HttpResponse.json(errorBody("INTERNAL_ERROR", "trace-orders-3"), {
+          status: 500,
+        }),
+      ),
+      getOrdersListMockHandler(page([sample(1)])),
+    );
+    renderAt();
+    expect(await screen.findByRole("link", { name: "SO-0001" })).toBeVisible();
   });
 });

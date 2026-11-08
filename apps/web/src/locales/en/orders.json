@@ -1,11 +1,10 @@
 {
   "title": "Orders",
-  "description": "Sales orders: the samples Spectra gave us and the orders entered here.",
+  "description": "Sales orders: the samples Spectra gave us and the orders entered here. Nothing is ordered from this list.",
   "menu": {
     "orders": "Orders"
   },
   "caption": "Orders",
-  "hint": "Nothing is ordered from this list.",
   "emptyTitle": "No orders yet",
   "emptyDescription": "Orders appear here once they are entered.",
   "columns": {
@@ -45,8 +44,8 @@
   },
   "shortage": {
     "line": "Short by {{quantity}} of {{itemNo}}",
-    "more_one": "and {{count}} more item",
-    "more_other": "and {{count}} more items",
+    "lineWithMore_one": "Short by {{quantity}} of {{itemNo}} and {{count}} more item",
+    "lineWithMore_other": "Short by {{quantity}} of {{itemNo}} and {{count}} more items",
     "none": "No shortage"
   }
 }

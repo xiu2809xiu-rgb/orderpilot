@@ -108,7 +108,7 @@ export default function OrdersPage() {
     <ListPage
       tableId="orders"
       title={t("title")}
-      description={`${t("description")} ${t("hint")}`}
+      description={t("description")}
       demo="synthetic"
       caption={t("caption")}
       columns={columns}
