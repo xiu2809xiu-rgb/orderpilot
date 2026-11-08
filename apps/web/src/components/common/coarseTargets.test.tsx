@@ -52,5 +52,16 @@ describe("touch targets on a coarse pointer", () => {
     const button = screen.getByRole("button", { name: /Order/ });
     expect(button.className).toContain(COARSE);
     expect(button.className).toContain("relative");
+    // The hit area must fit inside the heading, or the sticky edge clips it.
+    expect(screen.getByRole("columnheader").className).toContain(
+      "pointer-coarse:h-11",
+    );
+  });
+
+  it("reaches 48 px around the Why is this hidden button, past the row padding", () => {
+    render(<MaskedValue masked reason="price" />);
+    expect(screen.getByRole("button", { name: /hidden/i }).className).toContain(
+      "pointer-coarse:after:-inset-3",
+    );
   });
 });

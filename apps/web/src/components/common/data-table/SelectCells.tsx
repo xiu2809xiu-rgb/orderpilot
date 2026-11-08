@@ -22,7 +22,7 @@ export function SelectHead<Row>({
       scope="col"
       className={cn(
         SELECT_CELL,
-        "top-0 z-20 h-9 shadow-[inset_0_-1px_0_var(--border)]",
+        "top-0 z-20 h-9 pointer-coarse:h-11 shadow-[inset_0_-1px_0_var(--border)]",
       )}
     >
       <Checkbox
