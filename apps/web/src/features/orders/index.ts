@@ -1,6 +1,7 @@
 import { ClipboardList } from "lucide-react";
 import { lazy } from "react";
 import { defineFeature } from "../define";
+import { orderRoutes } from "./routes";
 
 export default defineFeature({
   id: "orders",
@@ -18,4 +19,5 @@ export default defineFeature({
   ],
   cues: [],
   Page: lazy(() => import("./OrdersPage")),
+  children: orderRoutes,
 });
