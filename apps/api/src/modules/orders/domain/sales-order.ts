@@ -11,6 +11,7 @@ import {
   ConflictError,
   ValidationFailedError,
 } from "../../../common/domain-error.js";
+import { isTotalHoldable, TOTAL_TOO_LARGE } from "./draft-lines.js";
 import type { OrderFacts, OrderFactsLine } from "./order-facts.js";
 
 export type SalesOrderLineInput = OrderFactsLine;
@@ -133,6 +134,9 @@ export class SalesOrder {
       add("lines", "Each line number is used once.");
     if (issues.length > 0) throw new ValidationFailedError(issues);
     this.lines = input.lines.map((line) => new SalesOrderLine(line));
+    // The order's own guard, whoever built the lines: the list sorts and filters on the total.
+    if (!isTotalHoldable(input.lines)) add("lines", TOTAL_TOO_LARGE);
+    if (issues.length > 0) throw new ValidationFailedError(issues);
   }
 
   get orderNo(): string {
@@ -192,7 +196,8 @@ export class SalesOrder {
     return new SalesOrder({ ...this.input, captureState: "void" });
   }
 
-  private requireDraft(verb: string): void {
+  /** Throws, with the rule's own words, for anything but a draft. */
+  requireDraft(verb: string): void {
     if (!this.isDraft)
       throw new ConflictError(
         `Order ${this.orderNo} is ${this.captureState}, so it cannot be ${verb}. Only a draft can.`,

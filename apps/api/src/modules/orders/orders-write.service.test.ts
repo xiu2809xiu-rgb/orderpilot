@@ -4,6 +4,7 @@ import type { AuditService } from "../../audit/audit.service.js";
 import type { Database } from "../../database/database.js";
 import type { CustomerLookup } from "../master-data/customer-lookup.js";
 import type { ItemLookup } from "../master-data/item-lookup.js";
+import { SalesOrder } from "./domain/sales-order.js";
 import { OrderMasking } from "./domain/order-masking.js";
 import {
   DuplicateOrderError,
@@ -116,5 +117,83 @@ describe("OrdersWriteService.create", () => {
     await expect(service.create(body, actor, info)).rejects.toBeInstanceOf(
       OrderConflictError,
     );
+  });
+});
+
+describe("OrdersWriteService.update", () => {
+  const stored = new SalesOrder({
+    orderNo: "SO-20261110-0001",
+    navisionNo: null,
+    captureState: "draft",
+    customerNo: "C-0001",
+    externalDocumentNo: "PO-1",
+    orderDate: "2026-11-10",
+    shipmentDate: null,
+    currencyCode: "USD",
+    prepaymentPercent: "0",
+    createdBy: actor.id,
+    lines: [
+      {
+        lineNo: 1,
+        itemNo: "I-0001",
+        description: "Item",
+        quantity: "1",
+        unitPrice: "2.00",
+        qtyToShip: "1",
+      },
+    ],
+  });
+
+  function buildUpdate() {
+    let reads = 0;
+    const service = new OrdersWriteService(
+      {
+        transaction: <T>(work: () => Promise<T>) => work(),
+      } as unknown as Database,
+      {
+        findByNo: () => Promise.resolve(stored),
+        findLiveByPo: () => {
+          reads += 1;
+          return Promise.resolve(null);
+        },
+        update: () => Promise.resolve(true),
+      } as unknown as SalesOrderRepository,
+      {} as unknown as OrderNumberAllocator,
+      { record: () => Promise.resolve({}) } as unknown as AuditService,
+      {
+        namesOf: () => Promise.resolve(new Map([["C-0001", "Synthetic Co"]])),
+      } as unknown as CustomerLookup,
+      {
+        detailsOf: () =>
+          Promise.resolve(
+            new Map([["I-0001", { description: "Item", unitPrice: "2.00" }]]),
+          ),
+      } as unknown as ItemLookup,
+      new OrderMasking(),
+      { one: () => Promise.resolve({}) } as unknown as OrdersService,
+    );
+    return { service, reads: () => reads };
+  }
+
+  it("skips the early duplicate read when neither the customer nor the PO number changes", async () => {
+    const { service, reads } = buildUpdate();
+    await service.update(
+      stored.orderNo,
+      { version: 1, prepaymentPercent: "10", externalDocumentNo: "PO-1" },
+      actor,
+      info,
+    );
+    expect(reads()).toBe(0);
+  });
+
+  it("reads early when the PO number changes", async () => {
+    const { service, reads } = buildUpdate();
+    await service.update(
+      stored.orderNo,
+      { version: 1, externalDocumentNo: "PO-2" },
+      actor,
+      info,
+    );
+    expect(reads()).toBe(1);
   });
 });

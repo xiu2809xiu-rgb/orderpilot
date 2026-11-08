@@ -132,12 +132,40 @@ describe("writing draft orders over HTTP", () => {
       expect(after.prepaymentPercent).toBe("30.00");
     });
 
-    it("answers CSRF_INVALID without the header, and writes nothing", async () => {
+    it("answers CSRF_INVALID without the header on every write, and writes nothing", async () => {
+      const mine = await create();
       const before = await storedCount();
-      const res = await send("post", "SUPPORT", O, body(), false);
-      expect(res.status).toBe(403);
-      expect(errorOf(res).code).toBe("CSRF_INVALID");
+      const calls = [
+        () => send("post", "SUPPORT", O, body(), false),
+        () =>
+          send(
+            "patch",
+            "SUPPORT",
+            `${O}/${mine.orderNo}`,
+            { version: 1, prepaymentPercent: "10" },
+            false,
+          ),
+        () =>
+          send(
+            "post",
+            "SUPPORT",
+            `${O}/${mine.orderNo}/void`,
+            { version: 1, reason: "No csrf." },
+            false,
+          ),
+      ];
+      for (const run of calls) {
+        const res = await run();
+        expect(res.status, res.text).toBe(403);
+        expect(errorOf(res).code).toBe("CSRF_INVALID");
+      }
       expect(await storedCount()).toBe(before);
+      const after = detail(await read("SUPPORT", `${O}/${mine.orderNo}`));
+      expect(after).toMatchObject({
+        version: 1,
+        captureState: "draft",
+        prepaymentPercent: "30.00",
+      });
     });
 
     it("answers 404 for an unknown number and for a sample", async () => {
@@ -199,17 +227,50 @@ describe("writing draft orders over HTTP", () => {
       );
     });
 
+    it("refuses 201 lines and takes 200", async () => {
+      const many = (count: number) => ({
+        lines: Array.from({ length: count }, () => ({
+          itemNo: item.no,
+          quantity: "1",
+          unitPrice: "1.00",
+        })),
+      });
+      await refused(many(201), "lines");
+      const res = await send("post", "SUPPORT", O, body(many(200)));
+      expect(res.status, res.text).toBe(201);
+    });
+
+    it("refuses lines whose total is too large to hold, at lines", async () => {
+      const big = {
+        itemNo: item.no,
+        quantity: "1",
+        unitPrice: "999999999999999",
+      };
+      await refused({ lines: [big, big] }, "lines");
+    });
+
     it("refuses an empty change and a change with no version", async () => {
       const mine = await create();
       for (const bad of [{ version: 1 }, { prepaymentPercent: "10" }]) {
         const res = await send("patch", "SUPPORT", `${O}/${mine.orderNo}`, bad);
         expect(res.status).toBe(400);
       }
-      const res = await send("post", "SUPPORT", `${O}/${mine.orderNo}/void`, {
-        version: 1,
-        reason: " ",
-      });
-      expect(res.status).toBe(400);
+    });
+
+    it("refuses a void with a blank reason, and leaves the draft", async () => {
+      const mine = await create();
+      for (const reason of [" ", "   "]) {
+        const res = await send("post", "SUPPORT", `${O}/${mine.orderNo}/void`, {
+          version: 1,
+          reason,
+        });
+        expect(res.status, res.text).toBe(400);
+        expect(errorOf(res).code).toBe("VALIDATION_FAILED");
+        expect(JSON.stringify(errorOf(res).details)).toContain("reason");
+      }
+      expect(
+        detail(await read("SUPPORT", `${O}/${mine.orderNo}`)).captureState,
+      ).toBe("draft");
     });
   });
 
@@ -423,6 +484,26 @@ describe("writing draft orders over HTTP", () => {
         expect(voided.status, order.orderNo).toBe(409);
       }
     });
+
+    it("gives the draft rule's words, not the stale one, for a closed order with an old version", async () => {
+      const closed = await create("SUPPORT");
+      const repo = t.app.get(SalesOrderRepository, { strict: false });
+      expect(await repo.markVoid(closed.orderNo, 1)).toBe(true);
+      const patch = await send("patch", "SUPPORT", `${O}/${closed.orderNo}`, {
+        version: 1,
+        prepaymentPercent: "10",
+      });
+      expect(patch.status).toBe(409);
+      expect(errorOf(patch).message).toContain("Only a draft can");
+      const voided = await send(
+        "post",
+        "SUPPORT",
+        `${O}/${closed.orderNo}/void`,
+        { version: 1, reason: "Again." },
+      );
+      expect(voided.status).toBe(409);
+      expect(errorOf(voided).message).toContain("Only a draft can");
+    });
   });
 
   describe("voiding", () => {
@@ -494,7 +575,8 @@ describe("writing draft orders over HTTP", () => {
       await permissions.revoke("WAREHOUSE", "orders.edit");
     });
 
-    it("is refused a price it sends, and takes the list price when it sends none", async () => {
+    it("is refused a price it sends, and a new line with none: the PO's price is typed by a role that sees prices", async () => {
+      const before = await storedCount();
       const sent = await send(
         "post",
         "WAREHOUSE",
@@ -507,21 +589,17 @@ describe("writing draft orders over HTTP", () => {
       expect(JSON.stringify(errorOf(sent).details)).toContain(
         "lines.0.unitPrice",
       );
-      const res = await send(
+      const none = await send(
         "post",
         "WAREHOUSE",
         O,
         body({ lines: [{ itemNo: item.no, quantity: "1" }] }),
       );
-      expect(res.status, res.text).toBe(201);
-      const masked = detail(res);
-      expect(masked.amount).toMatchObject({ masked: true, value: null });
-      expect(masked.lines[0]?.unitPrice).toMatchObject({
-        masked: true,
-        value: null,
-      });
-      const seen = detail(await read("SUPPORT", `${O}/${masked.orderNo}`));
-      expect(seen.lines[0]?.unitPrice.value).toBe(item.unitPrice);
+      expect(none.status, none.text).toBe(400);
+      expect(JSON.stringify(errorOf(none).details)).toContain(
+        "lines.0.unitPrice",
+      );
+      expect(await storedCount()).toBe(before);
     });
 
     it("keeps a negotiated price when it edits the line's quantity", async () => {
@@ -537,6 +615,48 @@ describe("writing draft orders over HTTP", () => {
       const seen = detail(await read("SUPPORT", `${O}/${made.orderNo}`));
       expect(seen.lines[0]).toMatchObject({ quantity: "4.000" });
       expect(seen.lines[0]?.unitPrice.value).toBe("3.25");
+    });
+
+    it("keeps each line's own price when one item is on two lines", async () => {
+      const made = await create("SUPPORT", {
+        lines: [
+          { itemNo: item.no, quantity: "1", unitPrice: "3.00" },
+          { itemNo: item.no, quantity: "1", unitPrice: "7.00" },
+        ],
+      });
+      const res = await send("patch", "WAREHOUSE", `${O}/${made.orderNo}`, {
+        version: 1,
+        lines: [
+          { itemNo: item.no, quantity: "2" },
+          { itemNo: item.no, quantity: "2" },
+        ],
+      });
+      expect(res.status, res.text).toBe(200);
+      const seen = detail(await read("SUPPORT", `${O}/${made.orderNo}`));
+      expect(seen.lines.map((l) => l.unitPrice.value)).toEqual([
+        "3.00",
+        "7.00",
+      ]);
+    });
+
+    it("refuses a line whose position or item no longer matches a stored one", async () => {
+      const made = await create("SUPPORT", {
+        lines: [{ itemNo: item.no, quantity: "1", unitPrice: "3.00" }],
+      });
+      const res = await send("patch", "WAREHOUSE", `${O}/${made.orderNo}`, {
+        version: 1,
+        lines: [
+          { itemNo: second.no, quantity: "1" },
+          { itemNo: item.no, quantity: "1" },
+        ],
+      });
+      expect(res.status).toBe(400);
+      expect(JSON.stringify(errorOf(res).details)).toContain(
+        "lines.0.unitPrice",
+      );
+      expect(JSON.stringify(errorOf(res).details)).toContain(
+        "lines.1.unitPrice",
+      );
     });
   });
 });

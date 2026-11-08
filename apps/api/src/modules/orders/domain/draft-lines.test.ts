@@ -116,29 +116,66 @@ describe("draftLines", () => {
       ).toEqual(["lines.0.unitPrice"]);
     });
 
-    it("starts at the list price and keeps a stored price of the same item", () => {
+    const stored = (lineNo: number, itemNo: string, unitPrice: string) => ({
+      lineNo,
+      itemNo,
+      description: "Stored",
+      quantity: "1",
+      unitPrice,
+      qtyToShip: "1",
+    });
+
+    it("keeps the stored price of the same position and item", () => {
+      const lines = draftLines(
+        { lines: [{ itemNo: "I-0002", quantity: "2" }] },
+        context({ ...masked, stored: [stored(1, "I-0002", "1.75")] }),
+      );
+      expect(lines.map((l) => l.unitPrice)).toEqual(["1.75"]);
+    });
+
+    it("never falls back to the list price: a new or moved line needs a price from the PO", () => {
+      expect(
+        issuesOf(() =>
+          draftLines(
+            {
+              lines: [
+                { itemNo: "I-0001", quantity: "1" },
+                { itemNo: "I-0002", quantity: "1" },
+              ],
+            },
+            context({ ...masked, stored: [stored(1, "I-0002", "1.75")] }),
+          ),
+        ).map((i) => i.path),
+      ).toEqual(["lines.0.unitPrice", "lines.1.unitPrice"]);
+    });
+
+    it("keeps each price when one item is on two lines at two prices", () => {
       const lines = draftLines(
         {
           lines: [
-            { itemNo: "I-0001", quantity: "1" },
-            { itemNo: "I-0002", quantity: "2" },
+            { itemNo: "I-0001", quantity: "5" },
+            { itemNo: "I-0001", quantity: "6" },
           ],
         },
         context({
           ...masked,
-          stored: [
-            {
-              lineNo: 1,
-              itemNo: "I-0002",
-              description: "Cable",
-              quantity: "1",
-              unitPrice: "1.75",
-              qtyToShip: "1",
-            },
-          ],
+          stored: [stored(1, "I-0001", "9.00"), stored(2, "I-0001", "11.00")],
         }),
       );
-      expect(lines.map((l) => l.unitPrice)).toEqual(["10.00", "1.75"]);
+      expect(lines.map((l) => l.unitPrice)).toEqual(["9.00", "11.00"]);
     });
+  });
+
+  it("refuses lines whose total is too large to hold, at lines", () => {
+    const big = {
+      itemNo: "I-0001",
+      quantity: "1",
+      unitPrice: "999999999999999",
+    };
+    expect(
+      issuesOf(() => draftLines({ lines: [big, big] }, context())).map(
+        (i) => i.path,
+      ),
+    ).toEqual(["lines"]);
   });
 });

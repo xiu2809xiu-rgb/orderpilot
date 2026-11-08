@@ -123,6 +123,8 @@ export class OrdersWriteService {
     info: WriteInfo,
   ): Promise<SalesOrderDetail> {
     const stored = await this.requireOrder(orderNo);
+    // The draft rule first: a closed order is never "changed by someone else".
+    stored.requireDraft("changed");
     if (stored.version !== body.version) throw new ConflictError(STALE);
     const { version, ...sent } = body;
     const po =
@@ -153,11 +155,16 @@ export class OrdersWriteService {
       lines,
     };
     const edited = stored.edit(changes);
-    await this.refuseDuplicate(
-      edited.customerNo,
-      edited.externalDocumentNo,
-      orderNo,
-    );
+    // A lines-only edit cannot make a duplicate; the index still decides a race.
+    if (
+      edited.customerNo !== stored.customerNo ||
+      edited.externalDocumentNo !== stored.externalDocumentNo
+    )
+      await this.refuseDuplicate(
+        edited.customerNo,
+        edited.externalDocumentNo,
+        orderNo,
+      );
     try {
       const saved = await this.database.transaction(async () => {
         if (!(await this.repository.update(edited, version))) return false;
@@ -196,9 +203,8 @@ export class OrdersWriteService {
     info: WriteInfo,
   ): Promise<SalesOrderDetail> {
     const stored = await this.requireOrder(orderNo);
+    stored.requireDraft("voided");
     if (stored.version !== body.version) throw new ConflictError(STALE);
-    // Throws for anything but a draft, with the rule's own words.
-    stored.voided();
     const done = await this.database.transaction(async () => {
       if (!(await this.repository.markVoid(orderNo, body.version)))
         return false;

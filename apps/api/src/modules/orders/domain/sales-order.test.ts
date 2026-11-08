@@ -52,6 +52,26 @@ describe("SalesOrder", () => {
     });
   });
 
+  it("refuses lines whose total is not a decimal string, at lines", () => {
+    const big = (lineNo: number) => ({
+      lineNo,
+      itemNo: "I-0001",
+      description: "Synthetic demo item",
+      quantity: "1",
+      unitPrice: "999999999999999",
+      qtyToShip: "1",
+    });
+    try {
+      new SalesOrder(input({ lines: [big(1), big(2)] }));
+      throw new Error("did not throw");
+    } catch (error) {
+      expect(error).toBeInstanceOf(ValidationFailedError);
+      expect((error as ValidationFailedError).details).toEqual([
+        { path: "lines", message: expect.any(String) as string },
+      ]);
+    }
+  });
+
   it.each([
     ["a sample number", { orderNo: "SO-0001" }],
     ["another record type", { orderNo: "SPR-20261108-0001" }],
