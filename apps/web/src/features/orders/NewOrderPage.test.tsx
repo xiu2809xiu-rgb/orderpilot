@@ -88,6 +88,29 @@ describe("the New order page", () => {
     ]);
   });
 
+  it("opens the saved draft clean, with the stock already known and Void usable at once", async () => {
+    const user = userEvent.setup();
+    fakeServer();
+    const { router } = renderOrders("/orders/new");
+    answerWrite("post", "*/api/v1/orders", [], saved(draftDetail()));
+    await fillOrder(user, "PO-7733");
+    // The stock of the picked item is in the cache when the draft page opens,
+    // so its figures land in the form while the form is being mounted.
+    await screen.findByText(/40 PCS available/);
+    await user.click(save());
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe(`/orders/${NEW_ORDER_NO}`);
+    });
+    expect(
+      await screen.findByRole("heading", {
+        name: `Sales order ${NEW_ORDER_NO}`,
+      }),
+    ).toBeVisible();
+    await screen.findByText(/40 PCS available/);
+    await user.click(screen.getByRole("button", { name: "Void" }));
+    expect(await screen.findByText("Void this draft?")).toBeVisible();
+  });
+
   it("saves and starts the next order on the same page", async () => {
     const user = userEvent.setup();
     const server = fakeServer();

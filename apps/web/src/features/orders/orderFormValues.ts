@@ -115,3 +115,52 @@ export function setOrderVersion(form: OrderForm, version: number): void {
   );
   form.setValue("version", version);
 }
+
+/** The stock and the unit the server reported for one line. */
+export interface LineFigures {
+  index: number;
+  itemNo: string;
+  availableStock: string;
+  /** Null keeps the unit the line already has. */
+  unit: string | null;
+}
+
+/**
+ * Writes what a poll learned about the lines, as the lines' defaults and as
+ * their values, without marking the form changed. A value alone is not
+ * enough: the form then differs from its defaults, and the next recount of
+ * "changed" (a focus or a blur) calls a form nobody touched edited, which
+ * blocks Void. It matters when the figures are already known as the page
+ * opens, such as for a draft just saved from the new-order page. A default
+ * counts only for the same item on the same line, so a line moved or
+ * replaced since the page opened is left to the person's edit.
+ */
+export function setLineFigures(
+  form: OrderForm,
+  figures: readonly LineFigures[],
+): void {
+  if (figures.length === 0) return;
+  const defaults = form.control._defaultValues;
+  const lines = (defaults.lines ?? []).map((line, index) => {
+    const figure = figures.find((entry) => entry.index === index);
+    if (!line || !figure || line.item?.number !== figure.itemNo) return line;
+    return {
+      ...line,
+      availableStock: figure.availableStock,
+      ...(figure.unit === null ? {} : { unit: figure.unit }),
+    };
+  });
+  form.reset(
+    { ...defaults, lines },
+    { keepValues: true, keepDirty: true, keepErrors: true, keepTouched: true },
+  );
+  for (const figure of figures) {
+    const at = `lines.${String(figure.index)}` as `lines.${number}`;
+    form.setValue(`${at}.availableStock`, figure.availableStock, {
+      shouldDirty: false,
+    });
+    if (figure.unit !== null) {
+      form.setValue(`${at}.unit`, figure.unit, { shouldDirty: false });
+    }
+  }
+}

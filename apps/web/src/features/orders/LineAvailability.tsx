@@ -1,7 +1,11 @@
 import { useEffect } from "react";
 import { useFormState, useWatch } from "react-hook-form";
 import { useMasterDataAvailableStock } from "@/lib/api/generated/endpoints/master-data/master-data";
-import type { OrderForm } from "./orderFormValues";
+import {
+  setLineFigures,
+  type LineFigures,
+  type OrderForm,
+} from "./orderFormValues";
 
 /** Mock Navision's figures move slowly, so a half minute is live enough. */
 const REFRESH_MS = 30_000;
@@ -44,19 +48,20 @@ export function LineAvailability({
   useEffect(() => {
     if (!answer || isSubmitting) return;
     const byItem = new Map(answer.data.map((entry) => [entry.itemNo, entry]));
+    const figures: LineFigures[] = [];
     form.getValues("lines").forEach((line, index) => {
       const found = line.item ? byItem.get(line.item.number) : undefined;
-      if (!found) return;
-      const at = `lines.${String(index)}` as `lines.${number}`;
-      if (line.availableStock !== found.availableStock) {
-        form.setValue(`${at}.availableStock`, found.availableStock, {
-          shouldDirty: false,
-        });
-      }
-      if (line.unit === "") {
-        form.setValue(`${at}.unit`, found.unit, { shouldDirty: false });
-      }
+      if (!line.item || !found) return;
+      const unit = line.unit === "" ? found.unit : null;
+      if (line.availableStock === found.availableStock && unit === null) return;
+      figures.push({
+        index,
+        itemNo: line.item.number,
+        availableStock: found.availableStock,
+        unit,
+      });
     });
+    setLineFigures(form, figures);
   }, [answer, isSubmitting, form]);
 
   return null;
