@@ -16,13 +16,22 @@ export interface DocumentFormItem {
   icon: LucideIcon;
   /** The role must hold it, or the item is not offered. */
   permission?: Permission;
-  run: (target: DocumentTarget) => void;
+  /** Offered only on a document it returns true for, such as an open order. Absent: every form. */
+  appliesTo?: (target: DocumentTarget) => boolean;
+  /** A throw or a rejected promise is shown as the action's failure. */
+  run: (target: DocumentTarget) => unknown;
 }
 
 const items = new Map<string, DocumentFormItem>();
 
 /** Adds an item to every document form. Returns a function that takes it out again. */
 export function registerDocumentFormItem(item: DocumentFormItem): () => void {
+  const earlier = items.get(item.id);
+  if (import.meta.env.DEV && earlier && earlier !== item) {
+    console.warn(
+      `Document form item "${item.id}" is registered twice; the later one replaces the earlier.`,
+    );
+  }
   items.set(item.id, item);
   return () => {
     if (items.get(item.id) === item) items.delete(item.id);

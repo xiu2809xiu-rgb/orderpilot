@@ -11,8 +11,10 @@ import {
   it,
   vi,
 } from "vitest";
+import { useToastStore } from "@/components/common/toast";
 import { signInAs } from "@/components/form/kitHarness";
 import i18n from "@/i18n";
+import { ApiError } from "@/lib/api/errors";
 import { getOperationLogListMockHandler } from "@/lib/api/generated/endpoints/operation-log/operation-log.msw";
 import { axeViolations } from "@/test/axe";
 import { errorBody } from "@/test/fixtures";
@@ -233,6 +235,43 @@ describe("the footer", () => {
   });
 });
 
+describe("the tab list's name", () => {
+  it("is on the element with the tablist role", () => {
+    signInAs("SUPPORT");
+    renderDocument();
+    expect(
+      screen.getByRole("tablist", { name: "Document details" }),
+    ).toBeVisible();
+  });
+});
+
+describe("attachment links", () => {
+  it("draw a link only for a relative or http(s) address", () => {
+    signInAs("SUPPORT");
+    renderDocument({
+      attachments: [
+        { id: "a", name: "relative.pdf", href: "/files/relative.pdf" },
+        { id: "b", name: "secure.pdf", href: "https://example.test/b.pdf" },
+        { id: "c", name: "script.pdf", href: "javascript:alert(1)" },
+        { id: "d", name: "data.pdf", href: "data:text/html,<b>x</b>" },
+        { id: "e", name: "blob.pdf", href: "blob:https://example.test/1" },
+        { id: "f", name: "padded.pdf", href: "  javascript:alert(1)" },
+      ],
+    });
+    const footer = screen.getByRole("contentinfo");
+    expect(
+      within(footer).getByRole("link", { name: "relative.pdf" }),
+    ).toBeVisible();
+    expect(
+      within(footer).getByRole("link", { name: "secure.pdf" }),
+    ).toBeVisible();
+    for (const name of ["script.pdf", "data.pdf", "blob.pdf", "padded.pdf"]) {
+      expect(within(footer).getByText(name)).toBeVisible();
+      expect(within(footer).queryByRole("link", { name })).toBeNull();
+    }
+  });
+});
+
 describe("actions every form shares", () => {
   let unregister: () => void = () => undefined;
   afterEach(() => {
@@ -270,5 +309,68 @@ describe("actions every form shares", () => {
     });
     renderDocument();
     expect(screen.queryByRole("button", { name: "More" })).toBeNull();
+  });
+
+  it("offers an item only where it applies", () => {
+    signInAs("SUPPORT");
+    unregister = registerDocumentFormItem({
+      id: "remind",
+      label: "myWork.pin",
+      icon: Pin,
+      appliesTo: (target) => target.label !== "SO-1",
+      run: vi.fn(),
+    });
+    renderDocument();
+    expect(screen.queryByRole("button", { name: "More" })).toBeNull();
+  });
+
+  it("shows a failure of the item, thrown at once or later", async () => {
+    signInAs("SUPPORT");
+    const run = vi
+      .fn()
+      .mockImplementationOnce(() => {
+        throw new ApiError("CONFLICT", "Sync failure", 409, "t-1", []);
+      })
+      .mockRejectedValueOnce(
+        new ApiError("CONFLICT", "Async failure", 409, "t-2", []),
+      );
+    unregister = registerDocumentFormItem({
+      id: "pin",
+      label: "myWork.pin",
+      icon: Pin,
+      run,
+    });
+    renderDocument();
+    for (const message of ["Sync failure", "Async failure"]) {
+      await userEvent.click(screen.getByRole("button", { name: "More" }));
+      await userEvent.click(
+        await screen.findByRole("menuitem", { name: /pin/i }),
+      );
+      await waitFor(() => {
+        expect(
+          useToastStore
+            .getState()
+            .items.some((item) => item.message === message),
+        ).toBe(true);
+      });
+    }
+  });
+
+  it("warns in development when an id replaces a different item", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const first = registerDocumentFormItem({
+      id: "pin",
+      label: "myWork.pin",
+      icon: Pin,
+      run: vi.fn(),
+    });
+    unregister = registerDocumentFormItem({
+      id: "pin",
+      label: "myWork.pin",
+      icon: Pin,
+      run: vi.fn(),
+    });
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('"pin"'));
+    first();
   });
 });

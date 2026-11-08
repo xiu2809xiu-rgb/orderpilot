@@ -46,6 +46,11 @@ export interface DocumentFormProps<T extends FieldValues, O, R> {
   headingLevel?: 1 | 2;
   /** Names the form for screen readers. */
   formLabel: string;
+  /**
+   * Between the action bar and the header: what the whole document needs to
+   * say first, such as the approval route (P-61) or a payment hold (P-62).
+   */
+  notices?: ReactNode;
   /** The header fields: a `FormGrid` of kit fields. */
   header: ReactNode;
   /** The lines grid, between the header and the footer. */
@@ -151,6 +156,7 @@ export function DocumentForm<T extends FieldValues, O, R = unknown>(
           saveBlocked={props.saveBlocked}
           allowClean={allowClean}
         />
+        {props.notices}
         <section aria-label={t("sections.header")}>{props.header}</section>
         {props.lines ? (
           <section aria-label={t("sections.lines")}>{props.lines}</section>

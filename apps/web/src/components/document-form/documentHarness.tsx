@@ -46,6 +46,7 @@ type Over = Partial<
     | "saveBlocked"
     | "allowClean"
     | "draftOptions"
+    | "notices"
   >
 > & { defaults?: Partial<Input> };
 

@@ -10,6 +10,7 @@ import {
 import { useSessionStore } from "@/stores/session";
 import { documentFormItemsFor } from "./registry";
 import type { DocumentTarget } from "./types";
+import { useReportFailure } from "./useReportFailure";
 
 /**
  * The More menu: the actions every document form shares, registered once
@@ -20,7 +21,10 @@ export function ExtraActions({ target }: { target: DocumentTarget }) {
   const { t } = useTranslation("document-form");
   const { t: tc } = useTranslation("common");
   const session = useSessionStore((state) => state.session);
-  const items = documentFormItemsFor(session);
+  const report = useReportFailure();
+  const items = documentFormItemsFor(session).filter(
+    (item) => item.appliesTo?.(target) ?? true,
+  );
   if (items.length === 0) return null;
   return (
     <DropdownMenu>
@@ -41,7 +45,10 @@ export function ExtraActions({ target }: { target: DocumentTarget }) {
             key={id}
             className="pointer-coarse:min-h-11"
             onSelect={() => {
-              run(target);
+              // Sync throws and rejected promises both end in the failure toast.
+              void (async () => {
+                await run(target);
+              })().catch(report);
             }}
           >
             <Icon aria-hidden="true" />

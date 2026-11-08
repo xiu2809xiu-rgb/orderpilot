@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { FieldValues, UseFormReturn } from "react-hook-form";
 import { useFormState } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -62,6 +63,9 @@ export function DocumentActionBar<T extends FieldValues, O>({
   });
   const { run, dialog, busy } = useActionRunner();
   const otherViewer = useViewerChanged();
+  // The id of the blocked button last pressed. Its reason is read again on
+  // every render, so the line goes away as soon as the action can run.
+  const [explained, setExplained] = useState<string | null>(null);
   if (import.meta.env.DEV) warnDuplicateKinds(target.formId, actions);
   const usable = usableActions(actions, session).filter(
     (action) => action.kind !== "print" || onPrint !== undefined,
@@ -96,6 +100,9 @@ export function DocumentActionBar<T extends FieldValues, O>({
     else run(action);
   }
 
+  const explainedAction = usable.find((action) => action.id === explained);
+  const explanation = explainedAction ? blockedOf(explainedAction) : undefined;
+
   return (
     <div
       role="group"
@@ -111,11 +118,22 @@ export function DocumentActionBar<T extends FieldValues, O>({
           blocked={blockedOf(action)}
           {...(action.kind === "save" ? { shortcut: "Control+S" } : {})}
           onRun={() => {
+            setExplained(null);
             runOf(action);
+          }}
+          onBlockedPress={() => {
+            setExplained(action.id);
           }}
         />
       ))}
       <ExtraActions target={target} />
+      {/* Always mounted, so a screen reader hears the text when it appears. */}
+      <p
+        role="status"
+        className="w-full text-sm text-muted-foreground empty:hidden"
+      >
+        {explanation}
+      </p>
       {dialog}
     </div>
   );

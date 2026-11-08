@@ -15,12 +15,15 @@ interface BarButtonProps {
   blocked?: string | undefined;
   shortcut?: string;
   onRun: () => void;
+  /** Called when a blocked button is pressed, so the bar can say why in plain sight. */
+  onBlockedPress?: () => void;
 }
 
 /**
  * One button of the form's action bar. A button that cannot run yet is not
  * plain `disabled`: it stays reachable, and its reason is a tooltip and is
- * read out, so a keyboard or touch user learns why too.
+ * read out. A tooltip does not open on a tap, so pressing it also asks the bar
+ * to show the reason as text.
  */
 export function BarButton({
   label,
@@ -29,6 +32,7 @@ export function BarButton({
   blocked,
   shortcut,
   onRun,
+  onBlockedPress,
 }: BarButtonProps) {
   const reasonId = useId();
   const button = (
@@ -41,7 +45,8 @@ export function BarButton({
       aria-keyshortcuts={shortcut}
       className="pointer-coarse:h-11 aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
       onClick={() => {
-        if (!blocked) onRun();
+        if (blocked) onBlockedPress?.();
+        else onRun();
       }}
     >
       {Icon ? <Icon aria-hidden="true" /> : null}

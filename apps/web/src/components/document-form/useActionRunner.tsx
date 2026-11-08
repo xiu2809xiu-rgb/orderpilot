@@ -1,4 +1,10 @@
-import { useCallback, useRef, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { isSameViewer, useMountViewer } from "@/components/form";
 import { ReasonDialog } from "@/components/list-page";
@@ -24,6 +30,17 @@ export function useActionRunner(): {
   // A ref as well as state: two clicks before a re-render must still see it.
   const inFlight = useRef(false);
 
+  // Radix returns focus only to a DialogTrigger, and this dialog has none, so
+  // the button that opened it is remembered and focused again once it closes.
+  const opener = useRef<HTMLElement | null>(null);
+  const isAsking = asking !== null;
+  useEffect(() => {
+    if (isAsking) return;
+    const button = opener.current;
+    opener.current = null;
+    if (button?.isConnected) button.focus();
+  }, [isAsking]);
+
   const begin = useCallback((): boolean => {
     if (inFlight.current) return false;
     inFlight.current = true;
@@ -41,7 +58,13 @@ export function useActionRunner(): {
       // screen belongs to the person who opened it.
       if (!isSameViewer(mountViewer)) return;
       if (action.reasoned) {
-        if (!inFlight.current) setAsking(action);
+        if (!inFlight.current) {
+          opener.current =
+            document.activeElement instanceof HTMLElement
+              ? document.activeElement
+              : null;
+          setAsking(action);
+        }
         return;
       }
       const work = action.run;

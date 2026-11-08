@@ -29,8 +29,9 @@ export function DocumentTabs({ spec, label }: DocumentTabsProps) {
   });
   const { log } = spec;
   return (
-    <Tabs defaultValue="timeline" aria-label={t("tabs.label")}>
-      <TabsList className="max-w-full">
+    <Tabs defaultValue="timeline">
+      {/* The label goes on the element with role="tablist", not on the root div. */}
+      <TabsList className="max-w-full" aria-label={t("tabs.label")}>
         {PLAIN.map((key) => (
           <TabsTrigger key={key} value={key} className="pointer-coarse:h-11">
             <TabLabel name={t(`tabs.${key}`)} count={spec[key].count ?? 0} />

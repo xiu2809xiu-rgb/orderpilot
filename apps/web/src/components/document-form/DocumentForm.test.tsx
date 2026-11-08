@@ -98,6 +98,51 @@ describe("the action bar", () => {
     );
     await userEvent.click(submit);
     expect(run).not.toHaveBeenCalled();
+    // A tooltip does not open on a tap, so the reason is also plain text.
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Only a draft can be submitted.",
+    );
+    expect(useToastStore.getState().items).toHaveLength(0);
+  });
+
+  it("drops the reason line once the action can run", async () => {
+    signInAs("SUPPORT");
+    renderDocument({
+      actions: [
+        { id: "save", kind: "save", permission: "orders.read" },
+        {
+          id: "submit",
+          kind: "submit",
+          permission: "orders.read",
+          run: () => 1,
+        },
+      ],
+    });
+    await userEvent.type(po(), "2");
+    await userEvent.click(
+      screen.getByRole("button", { name: "Submit for approval" }),
+    );
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Save your changes first.",
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+    await waitFor(() => {
+      expect(screen.getByRole("status")).toBeEmptyDOMElement();
+    });
+  });
+
+  it("draws the screen's notices between the bar and the header", () => {
+    signInAs("SUPPORT");
+    renderDocument({ notices: <p>Payment on hold</p> });
+    const notice = screen.getByText("Payment on hold");
+    const bar = screen.getByRole("group", { name: "Document actions" });
+    const header = screen.getByRole("region", { name: "Header" });
+    expect(
+      bar.compareDocumentPosition(notice) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(
+      notice.compareDocumentPosition(header) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
   });
 
   it("has no accessibility violations", async () => {
@@ -265,6 +310,44 @@ describe("actions on what is saved", () => {
       expect(voidRun).toHaveBeenCalledWith("Customer withdrew");
     });
     expect(useToastStore.getState().items[0]?.message).toBe("SO-1 voided");
+  });
+
+  it("moves focus into the reason dialog and back to the trigger on cancel", async () => {
+    signInAs("SUPPORT");
+    const voidRun = vi.fn();
+    renderDocument({
+      actions: [
+        {
+          id: "void",
+          kind: "void",
+          permission: "orders.read",
+          reasoned: {
+            title: "Void this order?",
+            confirmLabel: "Void order",
+            doneMessage: "SO-1 voided",
+            run: voidRun,
+          },
+        },
+      ],
+    });
+    const trigger = screen.getByRole("button", { name: "Void" });
+    await userEvent.click(trigger);
+    const dialog = await screen.findByRole("dialog", {
+      name: "Void this order?",
+    });
+    await waitFor(() => {
+      expect(dialog).toContainElement(document.activeElement as HTMLElement);
+    });
+    await userEvent.click(
+      within(dialog).getByRole("button", { name: "Cancel" }),
+    );
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).toBeNull();
+    });
+    await waitFor(() => {
+      expect(trigger).toHaveFocus();
+    });
+    expect(voidRun).not.toHaveBeenCalled();
   });
 });
 

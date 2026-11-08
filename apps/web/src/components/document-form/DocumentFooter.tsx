@@ -1,6 +1,7 @@
 import { Paperclip } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { StatusChip } from "@/components/common";
+import { safeHref } from "./safeHref";
 import type { AttachmentItem, DocumentStatus, FooterFigure } from "./types";
 
 interface DocumentFooterProps {
@@ -33,25 +34,28 @@ export function DocumentFooter({
           </p>
         ) : (
           <ul className="flex flex-wrap gap-2">
-            {attachments.map((item) => (
-              <li
-                key={item.id}
-                className="rounded-md border px-2 py-1 text-sm pointer-coarse:py-2.5"
-              >
-                {item.href ? (
-                  <a href={item.href} className="underline underline-offset-2">
-                    {item.name}
-                  </a>
-                ) : (
-                  item.name
-                )}
-                {item.size ? (
-                  <span className="ml-1 text-xs text-muted-foreground tabular-nums">
-                    {item.size}
-                  </span>
-                ) : null}
-              </li>
-            ))}
+            {attachments.map((item) => {
+              const href = safeHref(item.href);
+              return (
+                <li
+                  key={item.id}
+                  className="rounded-md border px-2 py-1 text-sm pointer-coarse:py-2.5"
+                >
+                  {href ? (
+                    <a href={href} className="underline underline-offset-2">
+                      {item.name}
+                    </a>
+                  ) : (
+                    item.name
+                  )}
+                  {item.size ? (
+                    <span className="ml-1 text-xs text-muted-foreground tabular-nums">
+                      {item.size}
+                    </span>
+                  ) : null}
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>
