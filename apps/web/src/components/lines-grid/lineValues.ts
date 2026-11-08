@@ -39,6 +39,7 @@ export function lineDraftOptions(
     rowKey: "lineId",
     exclude: [
       `${name}.*.availableStock`,
+      `${name}.*.listPrice`,
       ...(priceMasked ? [`${name}.*.unitPrice`] : []),
     ],
   };
@@ -50,7 +51,8 @@ const DEFAULT_WIDTH: Record<ColumnKind, string> = {
   description: "minmax(0, 2fr)",
   quantity: "5.5rem",
   unitPrice: "6.5rem",
-  amount: "6.5rem",
+  // Grows to a wide amount and never shrinks below it, so it is not drawn over its neighbour.
+  amount: "minmax(6.5rem, max-content)",
   availability: "minmax(7rem, 1.2fr)",
   remove: "2.75rem",
 };
@@ -64,7 +66,7 @@ const COMPACT_WIDTH: Partial<Record<ColumnKind, string>> = {
   description: "minmax(0, 1fr)",
   quantity: "5rem",
   unitPrice: "5.5rem",
-  amount: "5.5rem",
+  amount: "minmax(5.5rem, max-content)",
   availability: "minmax(6.5rem, 1fr)",
 };
 

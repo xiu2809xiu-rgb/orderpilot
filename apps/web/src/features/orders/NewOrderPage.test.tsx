@@ -34,7 +34,11 @@ const item = () => screen.findByRole("combobox", { name: "Item, line 1" });
 const save = () => screen.getByRole("button", { name: /^Save$/ });
 
 /** Fills a whole order the way a person would: by searching, and by number. */
-async function fillOrder(user: ReturnType<typeof userEvent.setup>, po: string) {
+async function fillOrder(
+  user: ReturnType<typeof userEvent.setup>,
+  po: string,
+  price: string | null = "18.40",
+) {
   await user.type(await customer(), "C-0001");
   await user.click(await screen.findByRole("option", { name: /Quillon/ }));
   await user.type(screen.getByRole("textbox", { name: /PO number/ }), po);
@@ -45,18 +49,25 @@ async function fillOrder(user: ReturnType<typeof userEvent.setup>, po: string) {
     expect(quantity).toHaveFocus();
   });
   await user.keyboard("2");
+  // The PO sets the price, so it is typed and never filled from the list.
+  if (price !== null) await user.type(unitPrice(), price);
 }
+
+const unitPrice = () =>
+  screen.getByRole("textbox", { name: /Unit price, line 1/ });
 
 describe("the New order page", () => {
   it("picks the customer by search and sends its Navision number", async () => {
     const user = userEvent.setup();
     const server = fakeServer();
     const { router } = renderOrders("/orders/new");
-    await fillOrder(user, "PO-7731");
+    await fillOrder(user, "PO-7731", null);
     expect(await item()).toHaveValue("I-0001  Norvale Wireless Mouse");
-    expect(
-      screen.getByRole("textbox", { name: /Unit price, line 1/ }),
-    ).toHaveValue("18.40");
+    // Picking the item shows the list price as context and leaves the price empty.
+    expect(unitPrice()).toHaveValue("");
+    expect(await screen.findByText(/List price 18.40/)).toBeVisible();
+    await user.type(unitPrice(), "17.25");
+    expect(unitPrice()).toHaveValue("17.25");
     expect(await screen.findByText(/40 PCS available/)).toBeVisible();
 
     answerWrite(
@@ -81,7 +92,7 @@ describe("the New order page", () => {
             itemNo: "I-0001",
             description: "Norvale Wireless Mouse",
             quantity: "2",
-            unitPrice: "18.40",
+            unitPrice: "17.25",
           },
         ],
       },
@@ -154,6 +165,12 @@ describe("the New order page", () => {
       name: "Open SO-20261108-0007",
     });
     expect(link).toHaveAttribute("href", "/orders/SO-20261108-0007");
+    // True for a revised PO too: it promises nothing that is not built.
+    expect(
+      screen.getByText(
+        "This customer and PO number already have an order, SO-20261108-0007. Open it to make changes.",
+      ),
+    ).toBeVisible();
     expect(
       screen.getByText("This customer already has an order with this PO."),
     ).toBeVisible();
@@ -191,7 +208,7 @@ describe("the New order page", () => {
       server.requests.posts,
       saved(draftDetail()),
     );
-    await fillOrder(user, "PO-7734");
+    await fillOrder(user, "PO-7734", null);
     await user.click(save());
     await waitFor(() => {
       expect(server.requests.posts).toHaveLength(1);
@@ -207,6 +224,7 @@ describe("the New order page", () => {
       await screen.findByText("Your role may read orders but not start them."),
     ).toBeVisible();
     expect(screen.queryByRole("button", { name: /^Save/ })).toBeNull();
+    expect(screen.queryByRole("heading", { name: "New order" })).toBeNull();
     expect(server.requests.itemReads).toBe(0);
     expect(await axeViolations(view.container)).toEqual([]);
   });

@@ -1,4 +1,4 @@
-import { useFormContext } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
   LookupField,
@@ -70,16 +70,33 @@ export function QuantityCell({ index, row, readOnly }: CellProps) {
 export function PriceCell({ index, row, readOnly }: CellProps) {
   const { t } = useTranslation("linesGrid");
   const { control } = useFormContext();
-  const { priceMask } = useGrid();
+  const { priceMask, itemPrice } = useGrid();
   if (priceMask !== null) return <MaskedPrice />;
   if (readOnly) return <ReadText field="unitPrice" row={row} numeric />;
   return (
-    <NumberField
-      control={control}
-      name={`${row}.unitPrice`}
-      label={t("cells.unitPrice", { n: index + 1 })}
-      hideLabel
-      scale={2}
-    />
+    <>
+      <NumberField
+        control={control}
+        name={`${row}.unitPrice`}
+        label={t("cells.unitPrice", { n: index + 1 })}
+        hideLabel
+        scale={2}
+      />
+      {itemPrice === "reference" ? <ListPrice row={row} /> : null}
+    </>
+  );
+}
+
+/** What master data lists the item at: context for the typed price, never its value. */
+function ListPrice({ row }: { row: string }) {
+  const { t } = useTranslation("linesGrid");
+  const { control } = useFormContext();
+  const value: unknown = useWatch({ control, name: `${row}.listPrice` });
+  if (typeof value !== "string" || value === "") return null;
+  return (
+    <span className="mt-0.5 block text-xs break-words text-muted-foreground tabular-nums @lines:text-right">
+      {t("listPrice", { price: value })}
+      <span className="sr-only">{t("listPriceNote")}</span>
+    </span>
   );
 }

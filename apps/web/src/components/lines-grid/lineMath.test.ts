@@ -96,6 +96,12 @@ describe("a screen's column declaration", () => {
     );
   });
 
+  it("lets the amount grow to its content, never below its minimum", () => {
+    const amount = [{ kind: "amount", header: "Amount" }] as const;
+    expect(trackTemplate(amount)).toBe("minmax(6.5rem, max-content)");
+    expect(trackTemplate(amount, true)).toBe("minmax(5.5rem, max-content)");
+  });
+
   it("tightens only the default widths for a tablet in landscape", () => {
     expect(trackTemplate(order, true)).toBe(
       "2.25rem minmax(0, 2fr) minmax(0, 1fr) 5rem 8rem 2.75rem",

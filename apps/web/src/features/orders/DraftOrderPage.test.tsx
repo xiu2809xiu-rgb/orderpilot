@@ -268,6 +268,10 @@ describe("a draft order's page", () => {
       expect(
         screen.getByRole("textbox", { name: /PO number/ }),
       ).toHaveAttribute("readonly");
+      // Nothing can be typed, so nothing is asked for and nothing is hinted.
+      expect(document.body.textContent).not.toContain("*");
+      expect(screen.queryByText(/Search by Navision number/)).toBeNull();
+      expect(screen.queryByText(/One customer and PO number/)).toBeNull();
       const row = await screen.findByRole("row", { name: "Line 1" });
       expect(within(row).queryByRole("textbox")).toBeNull();
       await user.click(screen.getByRole("textbox", { name: /PO number/ }));
@@ -293,6 +297,15 @@ describe("a draft order's page", () => {
     await screen.findByRole("row", { name: "Line 1" });
     expect(screen.queryByText(/18\.40|36\.80/)).toBeNull();
     expect(screen.getAllByLabelText("Hidden").length).toBeGreaterThan(0);
+    // The reason names no role by name: area 4 owns who sees prices.
+    const row = screen.getByRole("row", { name: "Line 1" });
+    const [why] = within(row).getAllByRole("button", {
+      name: "Why is this hidden?",
+    });
+    if (!why) throw new Error("no reason button");
+    await userEvent.setup().click(why);
+    expect(await screen.findByText(/Roles that handle prices/)).toBeVisible();
+    expect(screen.queryByText(/Support and Finance/)).toBeNull();
     expect(await axeViolations(view.container)).toEqual([]);
   });
 

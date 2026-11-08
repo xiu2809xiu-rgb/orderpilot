@@ -23,23 +23,26 @@ export function OrderHeaderFields({
 }) {
   const { t } = useTranslation("orders");
   const common = { control: form.control, readOnly };
+  // A page nobody can type in asks for nothing: no asterisks, no entry hints.
+  const needed = readOnly ? {} : { required: true as const };
+  const hint = (key: string) => (readOnly ? {} : { hint: t(key) });
   return (
     <FormGrid>
       <LookupField
         {...common}
         name="customer"
         label={t("form.fields.customer")}
-        hint={t("form.fields.customerHint")}
+        {...hint("form.fields.customerHint")}
         search={searchCustomers}
-        required
+        {...needed}
         className="sm:col-span-2"
       />
       <TextField
         {...common}
         name="externalDocumentNo"
         label={t("form.fields.externalDocumentNo")}
-        hint={t("form.fields.externalDocumentNoHint")}
-        required
+        {...hint("form.fields.externalDocumentNoHint")}
+        {...needed}
         code
         maxLength={35}
       />
@@ -47,7 +50,7 @@ export function OrderHeaderFields({
         {...common}
         name="orderDate"
         label={t("form.fields.orderDate")}
-        required
+        {...needed}
       />
       <DateField
         {...common}
@@ -60,7 +63,7 @@ export function OrderHeaderFields({
         label={t("form.fields.prepaymentPercent")}
         unit={t("form.fields.percentUnit")}
         scale={2}
-        required
+        {...needed}
       />
       <TextField
         control={form.control}

@@ -115,13 +115,16 @@ export function OrderDocument({
         ? `order.${orderNo}`
         : `order.${orderNo}.read`;
 
+  // A refused role is not starting an order, so the page does not say so.
+  const pageTitle = orderNo
+    ? t("form.title", { number: orderNo })
+    : t(state?.kind === "denied" ? "title" : "form.newTitle");
+
   return (
     <DocumentForm
       formId="order-form"
       form={form}
-      title={
-        orderNo ? t("form.title", { number: orderNo }) : t("form.newTitle")
-      }
+      title={pageTitle}
       number={orderNo ?? ""}
       demo="synthetic"
       formLabel={t("form.formLabel")}
@@ -152,6 +155,7 @@ export function OrderDocument({
             searchItems={searchItems}
             readOnly={readOnly !== null}
             priceMask={priceMask}
+            itemPrice="reference"
             footer={(totals: LineTotals) => (
               <div className="space-y-s1">
                 <LinesFooter totals={totals} />

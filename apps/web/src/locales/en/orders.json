@@ -85,8 +85,8 @@
     },
     "lines": {
       "tableLabel": "Order lines",
-      "visibleTo": "Support and Finance",
-      "hint": "Availability is mock Navision's figure, refreshed every 30 seconds. A draft reserves nothing. The price starts at the list price and can be changed.",
+      "visibleTo": "Roles that handle prices",
+      "hint": "Availability is mock Navision's figure, refreshed every 30 seconds. A draft reserves nothing. The price comes from the customer's PO. The list price under a price is for reference only.",
       "columns": {
         "lineNo": "Line",
         "item": "Item",
@@ -100,7 +100,7 @@
     },
     "notices": {
       "duplicateTitle": "This order already exists",
-      "duplicateBody": "The customer and PO number are already on order {{orderNo}}.",
+      "duplicateBody": "This customer and PO number already have an order, {{orderNo}}. Open it to make changes.",
       "duplicateOpen": "Open {{orderNo}}",
       "staleTitle": "This draft changed",
       "staleBody": "It was changed by someone else, or it is no longer a draft. Reload to see its current state before you save again.",
