@@ -351,11 +351,15 @@ describe("the stock beside each line", () => {
       expect(requests.patches).toHaveLength(1);
     });
     api.stock = () => "30.000";
+    const before = requests.stockReads;
     await act(() =>
       client.invalidateQueries({
         queryKey: ["/api/v1/master-data/available-stock"],
       }),
     );
+    expect(requests.stockReads).toBeGreaterThan(before);
+    // Lets the answer reach the page while the save is still held.
+    await act(() => new Promise((resolve) => setTimeout(resolve, 100)));
     release();
     await screen.findAllByText(`Order ${NEW_ORDER_NO} saved`);
     expect(await screen.findByText(/30 PCS available/)).toBeVisible();
