@@ -16,7 +16,7 @@ model SalesOrder {
   id                 String            @id @default(uuid(7)) @db.Uuid
   /// OrderPilot's own number, `SO-20261108-0001`, from the record number service.
   orderNo            String            @unique
-  /// Stays null until the order exists in Navision (ADR 0007).
+  /// Stays null until the order exists in Navision (ADR 0046).
   navisionNo         String?
   captureState       OrderCaptureState @default(DRAFT)
   customerNo         String
