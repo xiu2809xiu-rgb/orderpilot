@@ -18,7 +18,7 @@ import type {
 } from "./domain/master-data-reader.js";
 
 /** What is late: the transport document for an overdue AWB or bill of lading, else the step. */
-function lateStep(order: SampleOrder): string {
+export function lateStep(order: SampleOrder): string {
   const { scenario } = order;
   if (scenario.kind === "awb-overdue")
     return scenario.documentType === "AWB" ? "AWB" : "Bill of lading";
