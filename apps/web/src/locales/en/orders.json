@@ -86,7 +86,8 @@
     "lines": {
       "tableLabel": "Order lines",
       "visibleTo": "Roles that handle prices",
-      "hint": "Availability is mock Navision's figure, refreshed every 30 seconds. A draft reserves nothing. The price comes from the customer's PO. The list price under a price is for reference only.",
+      "hint": "Availability is mock Navision's figure, refreshed every 30 seconds. A draft reserves nothing.",
+      "priceHint": "The price comes from the customer's PO. The list price under a price is for reference only.",
       "columns": {
         "lineNo": "Line",
         "item": "Item",

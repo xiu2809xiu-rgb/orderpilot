@@ -272,6 +272,8 @@ describe("a draft order's page", () => {
       expect(document.body.textContent).not.toContain("*");
       expect(screen.queryByText(/Search by Navision number/)).toBeNull();
       expect(screen.queryByText(/One customer and PO number/)).toBeNull();
+      expect(screen.queryByText(/comes from the customer's PO/)).toBeNull();
+      expect(screen.getByText(/Availability is mock/)).toBeVisible();
       const row = await screen.findByRole("row", { name: "Line 1" });
       expect(within(row).queryByRole("textbox")).toBeNull();
       await user.click(screen.getByRole("textbox", { name: /PO number/ }));

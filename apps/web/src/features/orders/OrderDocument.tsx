@@ -161,6 +161,9 @@ export function OrderDocument({
                 <LinesFooter totals={totals} />
                 <p className="measure text-xs text-muted-foreground">
                   {t("form.lines.hint")}
+                  {readOnly === null && !priceMasked ? (
+                    <> {t("form.lines.priceHint")}</>
+                  ) : null}
                 </p>
               </div>
             )}

@@ -155,6 +155,15 @@ describe("what picking an item does to the price", () => {
     expect(screen.getByText(", for reference")).toBeInTheDocument();
   });
 
+  it("drops the list price when the item is cleared", async () => {
+    const user = userEvent.setup();
+    renderGrid({ itemPrice: "reference" });
+    await user.type(await item(1), "NV-WM-100{Enter}");
+    expect(await screen.findByText("List price 18.40")).toBeVisible();
+    await user.clear(await item(1));
+    expect(screen.queryByText("List price 18.40")).not.toBeInTheDocument();
+  });
+
   it("keeps a typed price when the item changes in reference mode", async () => {
     const user = userEvent.setup();
     renderGrid({ itemPrice: "reference", lines: [SAVED[0] ?? line()] });

@@ -92,7 +92,11 @@ function ListPrice({ row }: { row: string }) {
   const { t } = useTranslation("linesGrid");
   const { control } = useFormContext();
   const value: unknown = useWatch({ control, name: `${row}.listPrice` });
+  const item: unknown = useWatch({ control, name: `${row}.item` });
+  // Only the pick writes the list price, so a cleared item would keep the old
+  // one: it is shown for an item that is there.
   if (typeof value !== "string" || value === "") return null;
+  if (item === undefined || item === null || item === "") return null;
   return (
     <span className="mt-0.5 block text-xs break-words text-muted-foreground tabular-nums @lines:text-right">
       {t("listPrice", { price: value })}
