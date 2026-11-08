@@ -526,7 +526,10 @@ const form = useZodForm({ schema, defaultValues });
     },
   ]}
   draftKey={`order.${number}`}
-  onSave={(values, andNew) => save(values)}
+  allowClean={false}
+  saveBlocked={closed ? t("closed") : undefined} // "A voided order cannot be changed."
+  onSave={(values, andNew) => save(values, andNew)}
+  nextValues={() => blankOrder()} // what Save and new opens: blank fields
   onSaved={(saved, andNew) => (andNew ? startNext() : undefined)}
   print={() => ({ title, fields, lines, totals })}
   tabs={{
@@ -539,12 +542,13 @@ const form = useZodForm({ schema, defaultValues });
 ```
 
 - **Actions.** Declare each with its `kind` (`save`, `saveNew`, `submit`, `approve`, `reject`, `print`, `void`) and the permission that uses it. The template draws only those the role holds, in a fixed order, and never changes a status: Submit, Approve and Reject call your `run`, and the status lives in area 2's state machine. Give `blocked` (already worded) when the document cannot take the action now. Void and Reject take a `reasoned` block and the template asks for the reason.
-- **Saving.** `onSave` receives the checked values and whether Save and new was pressed. A throw lands on the fields through `serverPaths`, as in "Building a form". Submit, Approve, Reject and Void wait, with a reason, while the form has unsaved changes. Pass `allowClean` for a document filled in by its defaults. After Save and new the template resets the form to what `nextValues()` returns (the next document's blank values, with a fresh number) and clears the draft, then calls `onSaved`; without `nextValues` the saved values stay.
+- **Saving.** `onSave` receives the checked values and whether Save and new was pressed. A throw lands on the fields through `serverPaths`, as in "Building a form". Submit, Approve, Reject, Void and Print wait, with "Save your changes first", while the form has unsaved changes. While one action runs, every other action and both saves wait with "Working". A failure shows the server's words and its trace id in a toast, and a throw in `onSaved` is shown the same way. Pass `saveBlocked` for a closed document (void, approved), and the header and lines read-only. A click on a blocked button shows its reason as text beside the bar. Pass `allowClean` for a document filled in by its defaults. After Save and new the template resets the form to what `nextValues()` returns (the next document's blank values, with a fresh number) and clears the draft, then calls `onSaved`; without `nextValues` the saved values stay.
 - **Drafts.** The template keeps the draft under `draftKey`. Pass `draftOptions.exclude` for masked fields. While the record is not in hand, pass `state` (`loading`, `error` with the error and `onRetry`, `denied` or `notFound`): the template draws it under the title, from the same pieces as the lists, and mounts the form, and so restores a draft, only once `state` is gone.
 - **Notices.** Pass `notices` (any node) to draw something between the action bar and the header: P-61 puts the approval route there, and P-62 the payment hold.
 - **What a role may not see.** A figure a role may not see is a `MaskedValue`, which carries its reason. An attachment a role may not open is left out of `attachments`, and the API refuses the download too. The template draws what it is given, and links only relative and http(s) addresses.
 - **Tabs.** Timeline, Checks and Documents take `{ count, content }`; `count` is what needs attention, and `content: null` draws the empty line. The operation log tab needs `log`, and is not drawn for a role that may not read that record.
-- **Print or PDF.** Give `print` a function that returns the document as text. It opens the browser's print view, where "Save as PDF" is the PDF, until generated documents arrive (B-3).
+- **Permissions.** No write permission exists in `packages/shared` yet, and the matrix is area 4's. The gallery borrows `orders.read` for Save, Submit, Print and Void, so every role that reads orders sees them there; Approve and Reject use `approvals.decide`, which shows the role rule. A real form names the permission its story adds (P-49, P-61, P-62, P-63).
+- **Print or PDF.** Give `print` a function that returns the document as text; the template adds the status first. It opens the browser's print view, where "Save as PDF" is the PDF, until generated documents arrive (B-3).
 - **Shared actions.** `registerDocumentFormItem({ id, label, icon, permission, appliesTo, run })` adds an action to every form's More menu. `appliesTo(target)` limits it to the documents it fits, and a throw or rejection in `run` is shown as a failure. Registering an id twice warns in development. P-57 uses it for My work.
 
 ## Adding an API route
