@@ -52,5 +52,11 @@ export type OrdersOne200Data = {
      * @nullable
      */
   navisionNo: string | null;
+  /**
+     * @minimum 1
+     * @maximum 9007199254740991
+     * @nullable
+     */
+  version: number | null;
   lines: OrdersOne200DataLinesItem[];
 };

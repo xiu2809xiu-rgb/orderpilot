@@ -425,6 +425,8 @@
                               "documents.read",
                               "documents.upload",
                               "orders.read",
+                              "orders.create",
+                              "orders.edit",
                               "tracker.read",
                               "exceptions.read",
                               "insights.read",
@@ -527,6 +529,8 @@
                               "documents.read",
                               "documents.upload",
                               "orders.read",
+                              "orders.create",
+                              "orders.edit",
                               "tracker.read",
                               "exceptions.read",
                               "insights.read",
@@ -664,6 +668,8 @@
                               "documents.read",
                               "documents.upload",
                               "orders.read",
+                              "orders.create",
+                              "orders.edit",
                               "tracker.read",
                               "exceptions.read",
                               "insights.read",
@@ -794,6 +800,8 @@
                               "documents.read",
                               "documents.upload",
                               "orders.read",
+                              "orders.create",
+                              "orders.edit",
                               "tracker.read",
                               "exceptions.read",
                               "insights.read",
@@ -4048,6 +4056,73 @@
         "tags": ["MasterData"]
       }
     },
+    "/api/v1/master-data/available-stock": {
+      "get": {
+        "operationId": "MasterData_availableStock",
+        "parameters": [
+          {
+            "name": "itemNos",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9-]{1,20}(,[A-Za-z0-9-]{1,20})*$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "itemNo": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "availableStock": {
+                            "type": "string",
+                            "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                          },
+                          "unit": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "required": ["itemNo", "availableStock", "unit"],
+                        "additionalProperties": false
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "mock": {
+                          "type": "boolean",
+                          "enum": [true]
+                        }
+                      },
+                      "required": ["mock"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "The available stock of many items at once, for the lines of an order. Mock Navision data",
+        "tags": ["MasterData"]
+      }
+    },
     "/api/v1/master-data/items/{no}": {
       "get": {
         "operationId": "MasterData_item",
@@ -5898,6 +5973,314 @@
         },
         "summary": "Orders, samples and stored, a page at a time. Amounts are masked by role",
         "tags": ["Orders"]
+      },
+      "post": {
+        "operationId": "Orders_create",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "orderNo": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "source": {
+                          "type": "string",
+                          "enum": ["sample", "stored"]
+                        },
+                        "captureState": {
+                          "nullable": true,
+                          "type": "string",
+                          "enum": ["draft", "submitted", "void"]
+                        },
+                        "customerNo": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "customerName": {
+                          "nullable": true,
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "externalDocumentNo": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "orderDate": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "shipmentDate": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "workflowStatus": {
+                          "nullable": true,
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "amount": {
+                          "type": "object",
+                          "properties": {
+                            "field": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "classification": {
+                              "type": "string",
+                              "enum": [
+                                "public",
+                                "internal",
+                                "confidential",
+                                "restricted"
+                              ]
+                            },
+                            "masked": {
+                              "type": "boolean"
+                            },
+                            "value": {
+                              "nullable": true,
+                              "type": "string"
+                            },
+                            "reason": {
+                              "nullable": true,
+                              "type": "string",
+                              "enum": ["role", "bankDetails", "price", "policy"]
+                            }
+                          },
+                          "required": [
+                            "field",
+                            "classification",
+                            "masked",
+                            "value",
+                            "reason"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "currencyCode": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "shortage": {
+                          "nullable": true,
+                          "type": "object",
+                          "properties": {
+                            "itemNo": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "ordered": {
+                              "type": "string",
+                              "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                            },
+                            "availableStock": {
+                              "type": "string",
+                              "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                            },
+                            "shortBy": {
+                              "type": "string",
+                              "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                            }
+                          },
+                          "required": [
+                            "itemNo",
+                            "ordered",
+                            "availableStock",
+                            "shortBy"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "shortageCount": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "prepaymentPercent": {
+                          "type": "string",
+                          "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                        },
+                        "navisionNo": {
+                          "nullable": true,
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "version": {
+                          "nullable": true,
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        "lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "lineNo": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 9007199254740991
+                              },
+                              "itemNo": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "description": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "quantity": {
+                                "type": "string",
+                                "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                              },
+                              "qtyToShip": {
+                                "type": "string",
+                                "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                              },
+                              "unitPrice": {
+                                "type": "object",
+                                "properties": {
+                                  "field": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "classification": {
+                                    "type": "string",
+                                    "enum": [
+                                      "public",
+                                      "internal",
+                                      "confidential",
+                                      "restricted"
+                                    ]
+                                  },
+                                  "masked": {
+                                    "type": "boolean"
+                                  },
+                                  "value": {
+                                    "nullable": true,
+                                    "type": "string"
+                                  },
+                                  "reason": {
+                                    "nullable": true,
+                                    "type": "string",
+                                    "enum": [
+                                      "role",
+                                      "bankDetails",
+                                      "price",
+                                      "policy"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "field",
+                                  "classification",
+                                  "masked",
+                                  "value",
+                                  "reason"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "lineAmount": {
+                                "type": "object",
+                                "properties": {
+                                  "field": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "classification": {
+                                    "type": "string",
+                                    "enum": [
+                                      "public",
+                                      "internal",
+                                      "confidential",
+                                      "restricted"
+                                    ]
+                                  },
+                                  "masked": {
+                                    "type": "boolean"
+                                  },
+                                  "value": {
+                                    "nullable": true,
+                                    "type": "string"
+                                  },
+                                  "reason": {
+                                    "nullable": true,
+                                    "type": "string",
+                                    "enum": [
+                                      "role",
+                                      "bankDetails",
+                                      "price",
+                                      "policy"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "field",
+                                  "classification",
+                                  "masked",
+                                  "value",
+                                  "reason"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "shortBy": {
+                                "nullable": true,
+                                "type": "string",
+                                "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                              }
+                            },
+                            "required": [
+                              "lineNo",
+                              "itemNo",
+                              "description",
+                              "quantity",
+                              "qtyToShip",
+                              "unitPrice",
+                              "lineAmount",
+                              "shortBy"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "orderNo",
+                        "source",
+                        "captureState",
+                        "customerNo",
+                        "customerName",
+                        "externalDocumentNo",
+                        "orderDate",
+                        "shipmentDate",
+                        "workflowStatus",
+                        "amount",
+                        "currencyCode",
+                        "shortage",
+                        "shortageCount",
+                        "prepaymentPercent",
+                        "navisionNo",
+                        "version",
+                        "lines"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Start a draft order. One customer and PO number is one order: a repeat is a 409 that names it",
+        "tags": ["Orders"]
       }
     },
     "/api/v1/orders/{orderNo}": {
@@ -6048,6 +6431,12 @@
                           "type": "string",
                           "minLength": 1
                         },
+                        "version": {
+                          "nullable": true,
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
                         "lines": {
                           "type": "array",
                           "items": {
@@ -6196,6 +6585,7 @@
                         "shortageCount",
                         "prepaymentPercent",
                         "navisionNo",
+                        "version",
                         "lines"
                       ],
                       "additionalProperties": false
@@ -6209,6 +6599,642 @@
           }
         },
         "summary": "One order with its lines and what falls short of stock",
+        "tags": ["Orders"]
+      },
+      "patch": {
+        "operationId": "Orders_update",
+        "parameters": [
+          {
+            "name": "orderNo",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "orderNo": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "source": {
+                          "type": "string",
+                          "enum": ["sample", "stored"]
+                        },
+                        "captureState": {
+                          "nullable": true,
+                          "type": "string",
+                          "enum": ["draft", "submitted", "void"]
+                        },
+                        "customerNo": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "customerName": {
+                          "nullable": true,
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "externalDocumentNo": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "orderDate": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "shipmentDate": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "workflowStatus": {
+                          "nullable": true,
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "amount": {
+                          "type": "object",
+                          "properties": {
+                            "field": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "classification": {
+                              "type": "string",
+                              "enum": [
+                                "public",
+                                "internal",
+                                "confidential",
+                                "restricted"
+                              ]
+                            },
+                            "masked": {
+                              "type": "boolean"
+                            },
+                            "value": {
+                              "nullable": true,
+                              "type": "string"
+                            },
+                            "reason": {
+                              "nullable": true,
+                              "type": "string",
+                              "enum": ["role", "bankDetails", "price", "policy"]
+                            }
+                          },
+                          "required": [
+                            "field",
+                            "classification",
+                            "masked",
+                            "value",
+                            "reason"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "currencyCode": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "shortage": {
+                          "nullable": true,
+                          "type": "object",
+                          "properties": {
+                            "itemNo": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "ordered": {
+                              "type": "string",
+                              "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                            },
+                            "availableStock": {
+                              "type": "string",
+                              "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                            },
+                            "shortBy": {
+                              "type": "string",
+                              "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                            }
+                          },
+                          "required": [
+                            "itemNo",
+                            "ordered",
+                            "availableStock",
+                            "shortBy"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "shortageCount": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "prepaymentPercent": {
+                          "type": "string",
+                          "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                        },
+                        "navisionNo": {
+                          "nullable": true,
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "version": {
+                          "nullable": true,
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        "lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "lineNo": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 9007199254740991
+                              },
+                              "itemNo": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "description": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "quantity": {
+                                "type": "string",
+                                "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                              },
+                              "qtyToShip": {
+                                "type": "string",
+                                "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                              },
+                              "unitPrice": {
+                                "type": "object",
+                                "properties": {
+                                  "field": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "classification": {
+                                    "type": "string",
+                                    "enum": [
+                                      "public",
+                                      "internal",
+                                      "confidential",
+                                      "restricted"
+                                    ]
+                                  },
+                                  "masked": {
+                                    "type": "boolean"
+                                  },
+                                  "value": {
+                                    "nullable": true,
+                                    "type": "string"
+                                  },
+                                  "reason": {
+                                    "nullable": true,
+                                    "type": "string",
+                                    "enum": [
+                                      "role",
+                                      "bankDetails",
+                                      "price",
+                                      "policy"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "field",
+                                  "classification",
+                                  "masked",
+                                  "value",
+                                  "reason"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "lineAmount": {
+                                "type": "object",
+                                "properties": {
+                                  "field": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "classification": {
+                                    "type": "string",
+                                    "enum": [
+                                      "public",
+                                      "internal",
+                                      "confidential",
+                                      "restricted"
+                                    ]
+                                  },
+                                  "masked": {
+                                    "type": "boolean"
+                                  },
+                                  "value": {
+                                    "nullable": true,
+                                    "type": "string"
+                                  },
+                                  "reason": {
+                                    "nullable": true,
+                                    "type": "string",
+                                    "enum": [
+                                      "role",
+                                      "bankDetails",
+                                      "price",
+                                      "policy"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "field",
+                                  "classification",
+                                  "masked",
+                                  "value",
+                                  "reason"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "shortBy": {
+                                "nullable": true,
+                                "type": "string",
+                                "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                              }
+                            },
+                            "required": [
+                              "lineNo",
+                              "itemNo",
+                              "description",
+                              "quantity",
+                              "qtyToShip",
+                              "unitPrice",
+                              "lineAmount",
+                              "shortBy"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "orderNo",
+                        "source",
+                        "captureState",
+                        "customerNo",
+                        "customerName",
+                        "externalDocumentNo",
+                        "orderDate",
+                        "shipmentDate",
+                        "workflowStatus",
+                        "amount",
+                        "currencyCode",
+                        "shortage",
+                        "shortageCount",
+                        "prepaymentPercent",
+                        "navisionNo",
+                        "version",
+                        "lines"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Change a draft order. Send the version you read: a stale one is a 409",
+        "tags": ["Orders"]
+      }
+    },
+    "/api/v1/orders/{orderNo}/void": {
+      "post": {
+        "operationId": "Orders_voidDraft",
+        "parameters": [
+          {
+            "name": "orderNo",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "orderNo": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "source": {
+                          "type": "string",
+                          "enum": ["sample", "stored"]
+                        },
+                        "captureState": {
+                          "nullable": true,
+                          "type": "string",
+                          "enum": ["draft", "submitted", "void"]
+                        },
+                        "customerNo": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "customerName": {
+                          "nullable": true,
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "externalDocumentNo": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "orderDate": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "shipmentDate": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "workflowStatus": {
+                          "nullable": true,
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "amount": {
+                          "type": "object",
+                          "properties": {
+                            "field": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "classification": {
+                              "type": "string",
+                              "enum": [
+                                "public",
+                                "internal",
+                                "confidential",
+                                "restricted"
+                              ]
+                            },
+                            "masked": {
+                              "type": "boolean"
+                            },
+                            "value": {
+                              "nullable": true,
+                              "type": "string"
+                            },
+                            "reason": {
+                              "nullable": true,
+                              "type": "string",
+                              "enum": ["role", "bankDetails", "price", "policy"]
+                            }
+                          },
+                          "required": [
+                            "field",
+                            "classification",
+                            "masked",
+                            "value",
+                            "reason"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "currencyCode": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "shortage": {
+                          "nullable": true,
+                          "type": "object",
+                          "properties": {
+                            "itemNo": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "ordered": {
+                              "type": "string",
+                              "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                            },
+                            "availableStock": {
+                              "type": "string",
+                              "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                            },
+                            "shortBy": {
+                              "type": "string",
+                              "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                            }
+                          },
+                          "required": [
+                            "itemNo",
+                            "ordered",
+                            "availableStock",
+                            "shortBy"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "shortageCount": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "prepaymentPercent": {
+                          "type": "string",
+                          "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                        },
+                        "navisionNo": {
+                          "nullable": true,
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "version": {
+                          "nullable": true,
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        "lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "lineNo": {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 9007199254740991
+                              },
+                              "itemNo": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "description": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "quantity": {
+                                "type": "string",
+                                "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                              },
+                              "qtyToShip": {
+                                "type": "string",
+                                "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                              },
+                              "unitPrice": {
+                                "type": "object",
+                                "properties": {
+                                  "field": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "classification": {
+                                    "type": "string",
+                                    "enum": [
+                                      "public",
+                                      "internal",
+                                      "confidential",
+                                      "restricted"
+                                    ]
+                                  },
+                                  "masked": {
+                                    "type": "boolean"
+                                  },
+                                  "value": {
+                                    "nullable": true,
+                                    "type": "string"
+                                  },
+                                  "reason": {
+                                    "nullable": true,
+                                    "type": "string",
+                                    "enum": [
+                                      "role",
+                                      "bankDetails",
+                                      "price",
+                                      "policy"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "field",
+                                  "classification",
+                                  "masked",
+                                  "value",
+                                  "reason"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "lineAmount": {
+                                "type": "object",
+                                "properties": {
+                                  "field": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "classification": {
+                                    "type": "string",
+                                    "enum": [
+                                      "public",
+                                      "internal",
+                                      "confidential",
+                                      "restricted"
+                                    ]
+                                  },
+                                  "masked": {
+                                    "type": "boolean"
+                                  },
+                                  "value": {
+                                    "nullable": true,
+                                    "type": "string"
+                                  },
+                                  "reason": {
+                                    "nullable": true,
+                                    "type": "string",
+                                    "enum": [
+                                      "role",
+                                      "bankDetails",
+                                      "price",
+                                      "policy"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "field",
+                                  "classification",
+                                  "masked",
+                                  "value",
+                                  "reason"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "shortBy": {
+                                "nullable": true,
+                                "type": "string",
+                                "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                              }
+                            },
+                            "required": [
+                              "lineNo",
+                              "itemNo",
+                              "description",
+                              "quantity",
+                              "qtyToShip",
+                              "unitPrice",
+                              "lineAmount",
+                              "shortBy"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "orderNo",
+                        "source",
+                        "captureState",
+                        "customerNo",
+                        "customerName",
+                        "externalDocumentNo",
+                        "orderDate",
+                        "shipmentDate",
+                        "workflowStatus",
+                        "amount",
+                        "currencyCode",
+                        "shortage",
+                        "shortageCount",
+                        "prepaymentPercent",
+                        "navisionNo",
+                        "version",
+                        "lines"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Void a draft order, with a reason. This frees its PO number",
         "tags": ["Orders"]
       }
     },
@@ -7243,6 +8269,8 @@
                               "documents.read",
                               "documents.upload",
                               "orders.read",
+                              "orders.create",
+                              "orders.edit",
                               "tracker.read",
                               "exceptions.read",
                               "insights.read",
@@ -7290,6 +8318,8 @@
                                     "documents.read",
                                     "documents.upload",
                                     "orders.read",
+                                    "orders.create",
+                                    "orders.edit",
                                     "tracker.read",
                                     "exceptions.read",
                                     "insights.read",
@@ -7344,6 +8374,8 @@
                                   "documents.read",
                                   "documents.upload",
                                   "orders.read",
+                                  "orders.create",
+                                  "orders.edit",
                                   "tracker.read",
                                   "exceptions.read",
                                   "insights.read",
@@ -7486,6 +8518,8 @@
                 "documents.read",
                 "documents.upload",
                 "orders.read",
+                "orders.create",
+                "orders.edit",
                 "tracker.read",
                 "exceptions.read",
                 "insights.read",
@@ -7576,6 +8610,8 @@
                               "documents.read",
                               "documents.upload",
                               "orders.read",
+                              "orders.create",
+                              "orders.edit",
                               "tracker.read",
                               "exceptions.read",
                               "insights.read",
@@ -7754,6 +8790,8 @@
                               "documents.read",
                               "documents.upload",
                               "orders.read",
+                              "orders.create",
+                              "orders.edit",
                               "tracker.read",
                               "exceptions.read",
                               "insights.read",
@@ -7936,6 +8974,8 @@
                               "documents.read",
                               "documents.upload",
                               "orders.read",
+                              "orders.create",
+                              "orders.edit",
                               "tracker.read",
                               "exceptions.read",
                               "insights.read",

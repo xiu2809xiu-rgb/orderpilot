@@ -21,9 +21,12 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  OrdersCreate201,
   OrdersList200,
   OrdersListParams,
-  OrdersOne200
+  OrdersOne200,
+  OrdersUpdate200,
+  OrdersVoidDraft200
 } from '../../model';
 
 import { apiMutator } from '../../../mutator.ts';
@@ -141,6 +144,98 @@ export function useOrdersList<TData = Awaited<ReturnType<typeof ordersList>>, TE
 
 
 /**
+ * @summary Start a draft order. One customer and PO number is one order: a repeat is a 409 that names it
+ */
+export const ordersCreate = (
+
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<OrdersCreate201>(
+      {url: `/api/v1/orders`, method: 'POST', signal
+    },
+      );
+    }
+
+
+
+
+export const getOrdersCreateQueryKey = () => {
+    return [
+    'POST', `/api/v1/orders`
+    ] as const;
+    }
+
+
+export const getOrdersCreateQueryOptions = <TData = Awaited<ReturnType<typeof ordersCreate>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersCreate>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getOrdersCreateQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof ordersCreate>>> = ({ signal }) => ordersCreate(signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof ordersCreate>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type OrdersCreateQueryResult = NonNullable<Awaited<ReturnType<typeof ordersCreate>>>
+export type OrdersCreateQueryError = ErrorType<unknown>
+
+
+export function useOrdersCreate<TData = Awaited<ReturnType<typeof ordersCreate>>, TError = ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersCreate>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof ordersCreate>>,
+          TError,
+          Awaited<ReturnType<typeof ordersCreate>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useOrdersCreate<TData = Awaited<ReturnType<typeof ordersCreate>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersCreate>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof ordersCreate>>,
+          TError,
+          Awaited<ReturnType<typeof ordersCreate>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useOrdersCreate<TData = Awaited<ReturnType<typeof ordersCreate>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersCreate>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Start a draft order. One customer and PO number is one order: a repeat is a 409 that names it
+ */
+
+export function useOrdersCreate<TData = Awaited<ReturnType<typeof ordersCreate>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersCreate>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getOrdersCreateQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
  * @summary One order with its lines and what falls short of stock
  */
 export const ordersOne = (
@@ -221,6 +316,190 @@ export function useOrdersOne<TData = Awaited<ReturnType<typeof ordersOne>>, TErr
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getOrdersOneQueryOptions(orderNo,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary Change a draft order. Send the version you read: a stale one is a 409
+ */
+export const ordersUpdate = (
+    orderNo: string,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<OrdersUpdate200>(
+      {url: `/api/v1/orders/${orderNo}`, method: 'PATCH', signal
+    },
+      );
+    }
+
+
+
+
+export const getOrdersUpdateQueryKey = (orderNo: string,) => {
+    return [
+    'PATCH', `/api/v1/orders/${orderNo}`
+    ] as const;
+    }
+
+
+export const getOrdersUpdateQueryOptions = <TData = Awaited<ReturnType<typeof ordersUpdate>>, TError = ErrorType<unknown>>(orderNo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersUpdate>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getOrdersUpdateQueryKey(orderNo);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof ordersUpdate>>> = ({ signal }) => ordersUpdate(orderNo, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: orderNo !== null && orderNo !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof ordersUpdate>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type OrdersUpdateQueryResult = NonNullable<Awaited<ReturnType<typeof ordersUpdate>>>
+export type OrdersUpdateQueryError = ErrorType<unknown>
+
+
+export function useOrdersUpdate<TData = Awaited<ReturnType<typeof ordersUpdate>>, TError = ErrorType<unknown>>(
+ orderNo: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersUpdate>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof ordersUpdate>>,
+          TError,
+          Awaited<ReturnType<typeof ordersUpdate>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useOrdersUpdate<TData = Awaited<ReturnType<typeof ordersUpdate>>, TError = ErrorType<unknown>>(
+ orderNo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersUpdate>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof ordersUpdate>>,
+          TError,
+          Awaited<ReturnType<typeof ordersUpdate>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useOrdersUpdate<TData = Awaited<ReturnType<typeof ordersUpdate>>, TError = ErrorType<unknown>>(
+ orderNo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersUpdate>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Change a draft order. Send the version you read: a stale one is a 409
+ */
+
+export function useOrdersUpdate<TData = Awaited<ReturnType<typeof ordersUpdate>>, TError = ErrorType<unknown>>(
+ orderNo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersUpdate>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getOrdersUpdateQueryOptions(orderNo,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary Void a draft order, with a reason. This frees its PO number
+ */
+export const ordersVoidDraft = (
+    orderNo: string,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<OrdersVoidDraft200>(
+      {url: `/api/v1/orders/${orderNo}/void`, method: 'POST', signal
+    },
+      );
+    }
+
+
+
+
+export const getOrdersVoidDraftQueryKey = (orderNo: string,) => {
+    return [
+    'POST', `/api/v1/orders/${orderNo}/void`
+    ] as const;
+    }
+
+
+export const getOrdersVoidDraftQueryOptions = <TData = Awaited<ReturnType<typeof ordersVoidDraft>>, TError = ErrorType<unknown>>(orderNo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersVoidDraft>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getOrdersVoidDraftQueryKey(orderNo);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof ordersVoidDraft>>> = ({ signal }) => ordersVoidDraft(orderNo, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: orderNo !== null && orderNo !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof ordersVoidDraft>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type OrdersVoidDraftQueryResult = NonNullable<Awaited<ReturnType<typeof ordersVoidDraft>>>
+export type OrdersVoidDraftQueryError = ErrorType<unknown>
+
+
+export function useOrdersVoidDraft<TData = Awaited<ReturnType<typeof ordersVoidDraft>>, TError = ErrorType<unknown>>(
+ orderNo: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersVoidDraft>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof ordersVoidDraft>>,
+          TError,
+          Awaited<ReturnType<typeof ordersVoidDraft>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useOrdersVoidDraft<TData = Awaited<ReturnType<typeof ordersVoidDraft>>, TError = ErrorType<unknown>>(
+ orderNo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersVoidDraft>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof ordersVoidDraft>>,
+          TError,
+          Awaited<ReturnType<typeof ordersVoidDraft>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useOrdersVoidDraft<TData = Awaited<ReturnType<typeof ordersVoidDraft>>, TError = ErrorType<unknown>>(
+ orderNo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersVoidDraft>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Void a draft order, with a reason. This frees its PO number
+ */
+
+export function useOrdersVoidDraft<TData = Awaited<ReturnType<typeof ordersVoidDraft>>, TError = ErrorType<unknown>>(
+ orderNo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersVoidDraft>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getOrdersVoidDraftQueryOptions(orderNo,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
