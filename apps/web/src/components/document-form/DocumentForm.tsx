@@ -1,8 +1,11 @@
 import type { ReactNode } from "react";
-import type { FieldValues, UseFormReturn } from "react-hook-form";
+import type {
+  DefaultValues,
+  FieldValues,
+  UseFormReturn,
+} from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { DemoBadge, PageHeader, type DemoBadgeKind } from "@/components/common";
-import { toast } from "@/components/common/toast";
 import {
   FormShell,
   useDraft,
@@ -13,12 +16,14 @@ import { useSessionStore } from "@/stores/session";
 import { usableActions } from "./actions";
 import { DocumentActionBar } from "./DocumentActionBar";
 import { DocumentFooter } from "./DocumentFooter";
+import { DocumentRecordStatePanel } from "./DocumentRecordStatePanel";
 import { DocumentTabs } from "./DocumentTabs";
-import { printForm } from "./printForm";
+import { usePrintAction } from "./usePrintAction";
 import type {
   AttachmentItem,
   DocumentAction,
   DocumentPrint,
+  DocumentRecordState,
   DocumentStatus,
   DocumentTabsSpec,
   FooterFigure,
@@ -26,12 +31,6 @@ import type {
 import { useDocumentSave } from "./useDocumentSave";
 
 const NONE: readonly never[] = [];
-
-const WHEN = new Intl.DateTimeFormat("en-SG", {
-  dateStyle: "medium",
-  timeStyle: "short",
-  timeZone: "Asia/Singapore",
-});
 
 export interface DocumentFormProps<T extends FieldValues, O, R> {
   /** Names this form for the shared actions and for the draft's owner. */
@@ -69,11 +68,21 @@ export interface DocumentFormProps<T extends FieldValues, O, R> {
   serverPaths?: PathMap;
   /** Why saving is not allowed now, already translated. */
   saveBlocked?: string;
+  /**
+   * The next document's blank values. After Save and new the form is reset to
+   * them and the draft is cleared, then `onSaved` runs.
+   */
+  nextValues?: () => NoInfer<DefaultValues<T>>;
   /** Lets an unchanged form save, for a document filled in by its defaults. */
   allowClean?: boolean;
   /** What Print or PDF shows; called when pressed. Without it Print is not drawn. */
   print?: () => DocumentPrint;
   tabs: DocumentTabsSpec;
+  /**
+   * While the record is loading, failed, forbidden or missing: the template
+   * draws that under the title instead of the form.
+   */
+  state?: DocumentRecordState;
 }
 
 /**
@@ -87,9 +96,26 @@ export interface DocumentFormProps<T extends FieldValues, O, R> {
 export function DocumentForm<T extends FieldValues, O, R = unknown>(
   props: DocumentFormProps<T, O, R>,
 ) {
+  if (!props.state) return <LoadedDocument {...props} />;
+  return (
+    <div className="space-y-s2">
+      <PageHeader
+        title={props.title}
+        headingLevel={props.headingLevel ?? 1}
+        meta={props.demo ? <DemoBadge kind={props.demo} /> : null}
+      />
+      <DocumentRecordStatePanel state={props.state} />
+    </div>
+  );
+}
+
+// A component of its own so the draft, the shortcut and the viewer are
+// read only once the record is in hand.
+function LoadedDocument<T extends FieldValues, O, R>(
+  props: DocumentFormProps<T, O, R>,
+) {
   const { form, formId, title, number, formLabel, tabs } = props;
-  const { t, i18n } = useTranslation("document-form");
-  const { t: tc } = useTranslation("components");
+  const { t } = useTranslation("document-form");
   const draft = useDraft(props.draftKey, form, props.draftOptions);
   const session = useSessionStore((state) => state.session);
   const allowClean = props.allowClean ?? false;
@@ -105,37 +131,11 @@ export function DocumentForm<T extends FieldValues, O, R = unknown>(
     draft,
     blockedReason: shortcutBlocked,
     allowClean,
+    nextValues: props.nextValues,
     serverPaths: props.serverPaths,
     ...(props.onSaved ? { onSaved: props.onSaved } : {}),
   });
-  const { print } = props;
-  const onPrint = print
-    ? () => {
-        // Built inside the try so a throw in the screen's builder ends in the
-        // same toast as a failed print.
-        void (async () => {
-          const spec = print();
-          await printForm(
-            {
-              ...spec,
-              fields: [
-                { label: t("footer.status"), value: props.status.label },
-                ...spec.fields,
-              ],
-            },
-            {
-              note: t("print.note", {
-                demo: tc("badges.synthetic"),
-                when: WHEN.format(new Date()),
-              }),
-              lang: i18n.language,
-            },
-          );
-        })().catch(() => {
-          toast.failed(t("print.failed"));
-        });
-      }
-    : undefined;
+  const onPrint = usePrintAction(props.print, props.status.label);
 
   return (
     <div className="space-y-s2">

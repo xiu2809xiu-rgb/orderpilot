@@ -119,3 +119,19 @@ export interface DocumentTarget {
   /** The document's number, such as "SO-10001". */
   label: string;
 }
+
+/**
+ * What a screen passes while its record is not in hand. The template draws the
+ * state under the title and mounts the form only once none is passed, so a
+ * draft is never restored over values that have not loaded.
+ */
+export type DocumentRecordState =
+  | { kind: "loading" }
+  | {
+      kind: "error";
+      /** Any thrown value: the words and the trace id come from it. */
+      error: unknown;
+      onRetry?: () => void;
+    }
+  | { kind: "denied"; description?: string }
+  | { kind: "notFound"; description?: string };

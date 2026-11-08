@@ -1,5 +1,6 @@
 // Test-only: a small document form built from the template, so each test
 // drives a real one.
+import type { ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { z } from "zod";
 import { TextField, useZodForm } from "@/components/form";
@@ -47,40 +48,49 @@ type Over = Partial<
     | "allowClean"
     | "draftOptions"
     | "notices"
+    | "state"
+    | "nextValues"
   >
-> & { defaults?: Partial<Input> };
+> & {
+  defaults?: Partial<Input>;
+  /** Drawn beside the form, such as the session-ended dialog. */
+  beside?: ReactNode;
+};
 
-function Harness({ defaults, ...over }: Over) {
+function Harness({ defaults, beside, ...over }: Over) {
   const form = useZodForm<Input>({
     schema: harnessSchema,
     defaultValues: { customerPo: "CPO-1", remarks: "", ...defaults },
   });
   return (
-    <DocumentForm
-      formId="harness"
-      form={form}
-      title="Sales order SO-1"
-      number="SO-1"
-      formLabel="Sales order"
-      header={
-        <>
-          <TextField
-            control={form.control}
-            name="customerPo"
-            label="Customer PO"
-            required
-          />
-          <TextField control={form.control} name="remarks" label="Remarks" />
-        </>
-      }
-      status={{ family: "waiting", label: "Waiting for approval" }}
-      actions={ALL}
-      draftKey="test.document"
-      draftOptions={{ debounceMs: 0 }}
-      onSave={() => Promise.resolve()}
-      tabs={EMPTY_TABS}
-      {...over}
-    />
+    <>
+      {beside}
+      <DocumentForm
+        formId="harness"
+        form={form}
+        title="Sales order SO-1"
+        number="SO-1"
+        formLabel="Sales order"
+        header={
+          <>
+            <TextField
+              control={form.control}
+              name="customerPo"
+              label="Customer PO"
+              required
+            />
+            <TextField control={form.control} name="remarks" label="Remarks" />
+          </>
+        }
+        status={{ family: "waiting", label: "Waiting for approval" }}
+        actions={ALL}
+        draftKey="test.document"
+        draftOptions={{ debounceMs: 0 }}
+        onSave={() => Promise.resolve()}
+        tabs={EMPTY_TABS}
+        {...over}
+      />
+    </>
   );
 }
 

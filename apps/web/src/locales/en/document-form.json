@@ -15,6 +15,10 @@
     "otherViewer": "Someone else signed in. Reopen this document to act on it.",
     "noSave": "You cannot save this document."
   },
+  "state": {
+    "notFoundTitle": "This document was not found",
+    "notFoundDescription": "It may have been removed, or the number may be wrong."
+  },
   "failureTrace": "Trace ID: {{traceId}}",
   "sections": {
     "header": "Header",

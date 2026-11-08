@@ -10,6 +10,7 @@ export {
   type DocumentActionKind,
   type DocumentPrint,
   type DocumentReasoned,
+  type DocumentRecordState,
   type DocumentStatus,
   type DocumentTabSpec,
   type DocumentTabsSpec,

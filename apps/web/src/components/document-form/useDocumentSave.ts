@@ -1,14 +1,20 @@
-import type { FieldValues, UseFormReturn } from "react-hook-form";
+import type {
+  DefaultValues,
+  FieldValues,
+  UseFormReturn,
+} from "react-hook-form";
 import { useReportFailure } from "./useReportFailure";
 import { useFormSave, useSaveShortcut, type PathMap } from "@/components/form";
 import type { DraftControl } from "@/components/form";
 
-export interface DocumentSaveOptions<O, R> {
+export interface DocumentSaveOptions<T extends FieldValues, O, R> {
   /** Sends the checked values. The server's refusals land on the fields. */
   onSave: (values: O, andNew: boolean) => Promise<R>;
   /** Runs after the form is clean: navigate, or start the next document. */
   onSaved?: (result: R, andNew: boolean) => void | Promise<void>;
   draft: DraftControl;
+  /** The next document's blank values, for Save and new. */
+  nextValues?: (() => DefaultValues<T>) | undefined;
   serverPaths?: PathMap | undefined;
   /** Why saving is not allowed now, or undefined. */
   blockedReason?: string | undefined;
@@ -22,15 +28,28 @@ export interface DocumentSaveOptions<O, R> {
  */
 export function useDocumentSave<T extends FieldValues, O, R>(
   form: UseFormReturn<T, unknown, O>,
-  options: DocumentSaveOptions<O, R>,
+  options: DocumentSaveOptions<T, O, R>,
 ): { save: () => Promise<void>; saveNew: () => Promise<void> } {
-  const { onSave, onSaved, draft, serverPaths, blockedReason, allowClean } =
-    options;
+  const {
+    onSave,
+    onSaved,
+    draft,
+    serverPaths,
+    blockedReason,
+    allowClean,
+    nextValues,
+  } = options;
   const report = useReportFailure();
   // The form is clean by then, and react-hook-form would rethrow a failure of
   // the screen's own follow-up into a click handler with no one to tell.
   const afterSave = async (result: R, andNew: boolean) => {
     try {
+      if (andNew && nextValues) {
+        // The saved document stays saved; the form becomes the next, blank one,
+        // and the draft of the old values must not come back on a reload.
+        form.reset(nextValues());
+        draft.clear();
+      }
       await onSaved?.(result, andNew);
     } catch (error) {
       report(error);
