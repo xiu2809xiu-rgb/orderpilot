@@ -40,7 +40,7 @@ export function OrderNotices({
             className="mt-0.5 size-4 shrink-0 text-destructive"
             aria-hidden="true"
           />
-          <div className="min-w-0 flex-1 space-y-1">
+          <div className="min-w-0 flex-1 basis-48 space-y-1">
             <p className="font-medium">{t("form.notices.duplicateTitle")}</p>
             <p className="text-muted-foreground">
               {t("form.notices.duplicateBody", { orderNo: notice.orderNo })}
@@ -64,7 +64,7 @@ export function OrderNotices({
             className="mt-0.5 size-4 shrink-0 text-destructive"
             aria-hidden="true"
           />
-          <div className="min-w-0 flex-1 space-y-1">
+          <div className="min-w-0 flex-1 basis-48 space-y-1">
             <p className="font-medium">{t("form.notices.staleTitle")}</p>
             <p className="max-w-[70ch] text-muted-foreground">
               {t("form.notices.staleBody")}
@@ -88,7 +88,7 @@ export function OrderNotices({
             className="mt-0.5 size-4 shrink-0 text-muted-foreground"
             aria-hidden="true"
           />
-          <div className="min-w-0 flex-1 space-y-1">
+          <div className="min-w-0 flex-1 basis-48 space-y-1">
             <p className="font-medium">{t("form.notices.readOnlyTitle")}</p>
             <p className="max-w-[70ch] text-muted-foreground">
               {t(`form.notices.readOnly.${readOnly}`)}
