@@ -7,7 +7,10 @@ import {
   type FieldIssue,
   type OrderCaptureState,
 } from "@orderpilot/shared";
-import { ValidationFailedError } from "../../../common/domain-error.js";
+import {
+  ConflictError,
+  ValidationFailedError,
+} from "../../../common/domain-error.js";
 import type { OrderFacts, OrderFactsLine } from "./order-facts.js";
 
 export type SalesOrderLineInput = OrderFactsLine;
@@ -83,7 +86,19 @@ export interface SalesOrderInput {
   readonly currencyCode: string;
   readonly prepaymentPercent: string;
   readonly createdBy: string;
+  /** Counts the saves. Many fixtures leave it out, and a new order is at 1. */
+  readonly version?: number | undefined;
   readonly lines: readonly SalesOrderLineInput[];
+}
+
+/** What a person may change on a draft. The number, the creator and the state are not here. */
+export interface SalesOrderChanges {
+  readonly customerNo?: string | undefined;
+  readonly externalDocumentNo?: string | undefined;
+  readonly orderDate?: string | undefined;
+  readonly shipmentDate?: string | null | undefined;
+  readonly prepaymentPercent?: string | undefined;
+  readonly lines?: readonly SalesOrderLineInput[] | undefined;
 }
 
 /**
@@ -150,6 +165,39 @@ export class SalesOrder {
   get createdBy(): string {
     return this.input.createdBy;
   }
+  get version(): number {
+    return this.input.version ?? 1;
+  }
+  get isDraft(): boolean {
+    return this.input.captureState === "draft";
+  }
+
+  /**
+   * A copy with the changes, built through the constructor so every rule runs
+   * again. Only a draft changes: a submitted order is the record of what was
+   * asked for, and a void one is closed.
+   */
+  edit(changes: SalesOrderChanges): SalesOrder {
+    this.requireDraft("changed");
+    // An undefined key would overwrite what is held, so only sent keys are kept.
+    const sent = Object.fromEntries(
+      Object.entries(changes).filter(([, value]) => value !== undefined),
+    ) as SalesOrderChanges;
+    return new SalesOrder({ ...this.input, ...sent });
+  }
+
+  /** A copy that is void. Only a draft can be: cancelling a submitted order is P-50. */
+  voided(): SalesOrder {
+    this.requireDraft("voided");
+    return new SalesOrder({ ...this.input, captureState: "void" });
+  }
+
+  private requireDraft(verb: string): void {
+    if (!this.isDraft)
+      throw new ConflictError(
+        `Order ${this.orderNo} is ${this.captureState}, so it cannot be ${verb}. Only a draft can.`,
+      );
+  }
 
   /** The sum of the line amounts. */
   get total(): string {
@@ -170,6 +218,7 @@ export class SalesOrder {
       currencyCode: this.currencyCode,
       prepaymentPercent: this.prepaymentPercent,
       navisionNo: this.navisionNo,
+      version: this.version,
       workflowStatus: null,
       total: this.total,
       lines: this.lines.map((line) => line.toFacts()),

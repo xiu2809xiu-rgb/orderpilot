@@ -46,6 +46,8 @@ export interface OrderFacts {
   readonly currencyCode: string;
   readonly prepaymentPercent: string;
   readonly navisionNo: string | null;
+  /** Counts the saves of a stored order. Null for a sample: it cannot be edited. */
+  readonly version: number | null;
   /** Area 2's label as text, or null when the order has no workflow. */
   readonly workflowStatus: string | null;
   readonly total: string;
