@@ -39,6 +39,8 @@ async function fillNewOrder(page: Page, po: string): Promise<void> {
   const quantity = page.getByRole("textbox", { name: "Quantity, line 1" });
   await expect(quantity).toBeFocused();
   await quantity.fill("2");
+  // The PO sets the price: picking an item leaves it empty.
+  await page.getByRole("textbox", { name: "Unit price, line 1" }).fill("18.40");
 }
 
 const saveButton = (page: Page) =>
