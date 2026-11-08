@@ -173,6 +173,7 @@
     "users": "Manage users",
     "matrix": "Roles and permissions",
     "audit": "Open the audit trail",
-    "aiUse": "See AI use"
+    "aiUse": "See AI use",
+    "newOrder": "Start a new order"
   }
 }
