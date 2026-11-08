@@ -120,7 +120,8 @@ export function setOrderVersion(form: OrderForm, version: number): void {
 export interface LineFigures {
   index: number;
   itemNo: string;
-  availableStock: string;
+  /** Null is Not known: the poll failed, or the answer left the item out. */
+  availableStock: string | null;
   /** Null keeps the unit the line already has. */
   unit: string | null;
 }

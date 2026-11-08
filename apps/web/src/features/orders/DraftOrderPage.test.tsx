@@ -1,6 +1,6 @@
 import { act, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import i18n from "@/i18n";
 import { draftKey, writeDraft } from "@/lib/draft-store";
 import { axeViolations } from "@/test/axe";
@@ -9,6 +9,7 @@ import { fromDetail } from "./orderFormValues";
 import {
   answerWrite,
   draftDetail,
+  errorBody,
   fakeServer,
   http,
   HttpResponse,
@@ -327,6 +328,63 @@ describe("the stock beside each line", () => {
     await act(() => router.navigate("/orders"));
     expect(router.state.location.pathname).toBe("/orders");
     expect(storedDrafts()).toEqual([]);
+  });
+
+  it("turns the figure into Not known when a later refresh fails, and keeps the form clean", async () => {
+    const user = userEvent.setup();
+    fakeServer();
+    const { client, router } = renderOrders(PATH);
+    await screen.findByText(/40 PCS available/);
+    server.use(
+      http.get("*/api/v1/master-data/available-stock", () =>
+        HttpResponse.json(errorBody("INTERNAL_ERROR"), { status: 500 }),
+      ),
+    );
+    await act(() =>
+      client.invalidateQueries({
+        queryKey: ["/api/v1/master-data/available-stock"],
+      }),
+    );
+    expect(await screen.findByText("Not known")).toBeVisible();
+    expect(screen.queryByText(/40 PCS available/)).toBeNull();
+    await user.click(voidButton());
+    expect(await screen.findByText("Void this draft?")).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    await act(() => router.navigate("/orders"));
+    expect(storedDrafts()).toEqual([]);
+  });
+
+  it("turns the figure into Not known when the answer leaves the item out", async () => {
+    fakeServer();
+    const { client } = renderOrders(PATH);
+    await screen.findByText(/40 PCS available/);
+    server.use(
+      http.get("*/api/v1/master-data/available-stock", () =>
+        HttpResponse.json({ data: [], meta: { mock: true } }),
+      ),
+    );
+    await act(() =>
+      client.invalidateQueries({
+        queryKey: ["/api/v1/master-data/available-stock"],
+      }),
+    );
+    expect(await screen.findByText("Not known")).toBeVisible();
+  });
+
+  it("asks again every 30 seconds", async () => {
+    vi.useFakeTimers({ toFake: ["setInterval", "clearInterval"] });
+    try {
+      const { requests } = fakeServer();
+      renderOrders(PATH);
+      await screen.findByText(/40 PCS available/);
+      const first = requests.stockReads;
+      await act(() => vi.advanceTimersByTimeAsync(30_000));
+      await waitFor(() => {
+        expect(requests.stockReads).toBeGreaterThan(first);
+      });
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("leaves a saved form clean when a refresh lands during the save", async () => {

@@ -44,25 +44,34 @@ export function LineAvailability({
     },
   );
   const answer = stock.data;
+  // React Query keeps the last answer when a refresh fails, and that figure
+  // would stay on screen as if it were live.
+  const failed = stock.isError;
 
   useEffect(() => {
-    if (!answer || isSubmitting) return;
-    const byItem = new Map(answer.data.map((entry) => [entry.itemNo, entry]));
+    if ((!answer && !failed) || isSubmitting) return;
+    const byItem = new Map(
+      failed || !answer
+        ? []
+        : answer.data.map((entry) => [entry.itemNo, entry]),
+    );
     const figures: LineFigures[] = [];
     form.getValues("lines").forEach((line, index) => {
-      const found = line.item ? byItem.get(line.item.number) : undefined;
-      if (!line.item || !found) return;
-      const unit = line.unit === "" ? found.unit : null;
-      if (line.availableStock === found.availableStock && unit === null) return;
+      if (!line.item) return;
+      // An item missing from the answer is Not known, never its last figure.
+      const found = byItem.get(line.item.number);
+      const next = found?.availableStock ?? null;
+      const unit = found && line.unit === "" ? found.unit : null;
+      if ((line.availableStock ?? null) === next && unit === null) return;
       figures.push({
         index,
         itemNo: line.item.number,
-        availableStock: found.availableStock,
+        availableStock: next,
         unit,
       });
     });
     setLineFigures(form, figures);
-  }, [answer, isSubmitting, form]);
+  }, [answer, failed, isSubmitting, form]);
 
   return null;
 }
