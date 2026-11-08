@@ -33,9 +33,9 @@ model SalesOrder {
   updatedAt          DateTime          @updatedAt @db.Timestamptz(3)
   lines              SalesOrderLine[]
 
+  // For P-49's check for a repeated PO. The list reads in memory (ADR 0046), so
+  // no index on the state or the date until a SQL-side page needs one.
   @@index([customerNo, externalDocumentNo])
-  @@index([captureState, orderDate])
-  @@index([customerNo])
 }
 
 /// One line of a stored order. The line amount is worked out (quantity times

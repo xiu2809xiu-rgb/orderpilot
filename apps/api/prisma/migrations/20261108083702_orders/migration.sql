@@ -41,12 +41,6 @@ CREATE UNIQUE INDEX "SalesOrder_orderNo_key" ON "SalesOrder"("orderNo");
 CREATE INDEX "SalesOrder_customerNo_externalDocumentNo_idx" ON "SalesOrder"("customerNo", "externalDocumentNo");
 
 -- CreateIndex
-CREATE INDEX "SalesOrder_captureState_orderDate_idx" ON "SalesOrder"("captureState", "orderDate");
-
--- CreateIndex
-CREATE INDEX "SalesOrder_customerNo_idx" ON "SalesOrder"("customerNo");
-
--- CreateIndex
 CREATE INDEX "SalesOrderLine_itemNo_idx" ON "SalesOrderLine"("itemNo");
 
 -- CreateIndex
