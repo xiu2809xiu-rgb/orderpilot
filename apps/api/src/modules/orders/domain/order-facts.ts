@@ -38,6 +38,8 @@ export interface OrderFacts {
   readonly source: OrderSource;
   readonly captureState: OrderCaptureState | null;
   readonly customerNo: string;
+  /** The name the source knows, or null: a stored order carries none, master data supplies it. */
+  readonly customerName: string | null;
   readonly externalDocumentNo: string;
   readonly orderDate: string;
   readonly shipmentDate: string | null;

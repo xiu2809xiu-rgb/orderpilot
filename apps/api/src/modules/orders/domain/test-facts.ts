@@ -8,6 +8,7 @@ export function facts(patch: Partial<OrderFacts> = {}): OrderFacts {
     source: "stored",
     captureState: "draft",
     customerNo: "C-0001",
+    customerName: null,
     externalDocumentNo: "PO-1",
     orderDate: "2026-11-08",
     shipmentDate: null,

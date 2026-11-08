@@ -127,6 +127,11 @@ describe("the orders routes", () => {
       expect(first.data).toHaveLength(50);
       expect(first.meta).toMatchObject({ page: 1, pageSize: 50, total: 120 });
       expect("mock" in first.meta).toBe(false);
+      // The name comes from the synthetic set beside the number.
+      for (const row of first.data) {
+        const owner = dataset.customers.find((c) => c.no === row.customerNo);
+        expect(row.customerName).toBe(owner?.name);
+      }
       const last = await list("SUPPORT", "page=3&pageSize=50");
       expect(last.data).toHaveLength(20);
       const filtered = await list("SUPPORT", `customerNo=${customer.no}`);
@@ -291,7 +296,17 @@ describe("the orders routes", () => {
         source: "stored",
         captureState: "draft",
         workflowStatus: null,
+        // Looked up in master data by the number, never by name.
+        customerNo: customer.no,
+        customerName: customer.name,
       });
+      const waiting = await list("SUPPORT", "stock=waiting&pageSize=200");
+      const formats = waiting.data.map((r) => r.shortage?.ordered ?? "");
+      // Samples and stored orders write the quantity the same way.
+      expect(formats.every((q) => /^\d+\.\d{2}$/.test(q))).toBe(true);
+      expect(
+        (await list("SUPPORT", "source=sample&pageSize=200")).data,
+      ).toHaveLength(120);
       expect((await list("SUPPORT")).meta.total).toBe(122);
       const shown = salesOrderResponseSchema.parse(
         (await get("SUPPORT", `${O}/${STORED_DRAFT}`)).body,

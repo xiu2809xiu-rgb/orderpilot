@@ -3,6 +3,7 @@ import { parseRecordNumber } from "@orderpilot/shared";
 import type {
   OrderDirectory,
   OrderFactsSource,
+  OrderListOptions,
 } from "../domain/order-directory.js";
 import type { OrderFacts } from "../domain/order-facts.js";
 import { SampleOrderSource } from "./sample-order-source.js";
@@ -16,10 +17,11 @@ export class CompositeOrderDirectory implements OrderDirectory {
     @Inject(StoredOrderSource) private readonly stored: OrderFactsSource,
   ) {}
 
-  async list(): Promise<readonly OrderFacts[]> {
+  async list(options: OrderListOptions = {}): Promise<readonly OrderFacts[]> {
+    // A kind that was not asked for is not read: the stored read is a query.
     const [samples, stored] = await Promise.all([
-      this.samples.list(),
-      this.stored.list(),
+      options.source === "stored" ? [] : this.samples.list(),
+      options.source === "sample" ? [] : this.stored.list(),
     ]);
     return [...samples, ...stored];
   }

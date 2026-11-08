@@ -20,6 +20,9 @@ function toFacts(order: SampleOrder, dataset: SyntheticDataset): OrderFacts {
     // A sample was never entered here, so it has no capture state to show.
     captureState: null,
     customerNo: order.header.sellToCustomerNo,
+    customerName:
+      dataset.customers.find((c) => c.no === order.header.sellToCustomerNo)
+        ?.name ?? null,
     externalDocumentNo: order.header.externalDocumentNo,
     orderDate: order.header.orderDate,
     shipmentDate: order.header.shipmentDate,

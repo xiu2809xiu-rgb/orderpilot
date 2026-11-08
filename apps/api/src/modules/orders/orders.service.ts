@@ -1,5 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import {
+  addDecimal,
   lineAmount,
   type Role,
   type SalesOrderDetail,
@@ -8,6 +9,7 @@ import {
   type SalesOrderShortage,
 } from "@orderpilot/shared";
 import { NotFoundError } from "../../common/domain-error.js";
+import { CustomerLookup } from "../master-data/customer-lookup.js";
 import { StockLookup } from "../master-data/stock-lookup.js";
 import {
   ORDER_DIRECTORY,
@@ -27,16 +29,20 @@ export interface OrderPage {
   readonly total: number;
 }
 
-/** A sample waiting on its SPR is short; one an approved SPR covers is not. */
+/**
+ * A sample waiting on its SPR is short; one an approved SPR covers is not.
+ * The figures are written the way the calculator writes a stored order's, so
+ * the API gives one format for both kinds.
+ */
 function sampleShortages(facts: OrderFacts): SalesOrderShortage[] {
   const gap = facts.stockShortfall;
   if (gap?.coveredBy !== null) return [];
   return [
     {
       itemNo: gap.itemNo,
-      ordered: gap.ordered,
-      availableStock: gap.availableStock,
-      shortBy: gap.shortBy,
+      ordered: addDecimal(gap.ordered, "0"),
+      availableStock: addDecimal(gap.availableStock, "0"),
+      shortBy: addDecimal(gap.shortBy, "0"),
     },
   ];
 }
@@ -52,6 +58,7 @@ export class OrdersService {
   constructor(
     @Inject(ORDER_DIRECTORY) private readonly directory: OrderDirectory,
     @Inject(StockLookup) private readonly stock: StockLookup,
+    @Inject(CustomerLookup) private readonly customers: CustomerLookup,
     @Inject(OrderMasking) private readonly masking: OrderMasking,
   ) {}
 
@@ -77,13 +84,30 @@ export class OrdersService {
     });
   }
 
-  private row(entry: OrderEntry, role: Role): SalesOrderRow {
+  /** The names of the customers on the rows being shown, from master data by number. */
+  private namesFor(
+    entries: readonly OrderEntry[],
+  ): Promise<ReadonlyMap<string, string>> {
+    const missing = entries
+      .filter((e) => e.facts.customerName === null)
+      .map((e) => e.facts.customerNo);
+    return missing.length > 0
+      ? this.customers.namesOf(missing)
+      : Promise.resolve(new Map());
+  }
+
+  private row(
+    entry: OrderEntry,
+    role: Role,
+    names: ReadonlyMap<string, string>,
+  ): SalesOrderRow {
     const { facts, shortages } = entry;
     return {
       orderNo: facts.orderNo,
       source: facts.source,
       captureState: facts.captureState,
       customerNo: facts.customerNo,
+      customerName: facts.customerName ?? names.get(facts.customerNo) ?? null,
       externalDocumentNo: facts.externalDocumentNo,
       orderDate: facts.orderDate,
       shipmentDate: facts.shipmentDate,
@@ -97,17 +121,19 @@ export class OrdersService {
 
   async list(query: SalesOrderQuery, role: Role): Promise<OrderPage> {
     const canSeeAmount = this.masking.canSeeAmount(role);
-    const all = await this.entries(await this.directory.list());
+    const all = await this.entries(
+      await this.directory.list({ source: query.source }),
+    );
     const found = sortOrders(
       filterOrders(all, query, canSeeAmount),
       query,
       canSeeAmount,
     );
     const start = (query.page - 1) * query.pageSize;
+    const shown = found.slice(start, start + query.pageSize);
+    const names = await this.namesFor(shown);
     return {
-      items: found
-        .slice(start, start + query.pageSize)
-        .map((entry) => this.row(entry, role)),
+      items: shown.map((entry) => this.row(entry, role, names)),
       page: query.page,
       pageSize: query.pageSize,
       total: found.length,
@@ -120,8 +146,9 @@ export class OrdersService {
     const [entry] = await this.entries([facts]);
     if (!entry) throw new NotFoundError("Order");
     const short = new Map(entry.shortages.map((s) => [s.itemNo, s.shortBy]));
+    const names = await this.namesFor([entry]);
     return {
-      ...this.row(entry, role),
+      ...this.row(entry, role, names),
       prepaymentPercent: facts.prepaymentPercent,
       navisionNo: facts.navisionNo,
       lines: facts.lines.map((line) => ({

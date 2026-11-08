@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { NotFoundError } from "../../common/domain-error.js";
+import type { CustomerLookup } from "../master-data/customer-lookup.js";
 import type { StockLookup } from "../master-data/stock-lookup.js";
 import type { OrderDirectory } from "./domain/order-directory.js";
 import type { OrderFacts } from "./domain/order-facts.js";
@@ -16,10 +17,19 @@ const line = (itemNo: string, quantity: string) => ({
   qtyToShip: quantity,
 });
 
-function service(orders: OrderFacts[], stock: Record<string, string>) {
+function service(
+  orders: OrderFacts[],
+  stock: Record<string, string>,
+  names: Record<string, string> = {},
+) {
   const asked: string[][] = [];
+  const listed: (string | undefined)[] = [];
+  const nameAsks: string[][] = [];
   const directory: OrderDirectory = {
-    list: () => Promise.resolve(orders),
+    list: (options) => {
+      listed.push(options?.source);
+      return Promise.resolve(orders);
+    },
     find: (no) => Promise.resolve(orders.find((o) => o.orderNo === no) ?? null),
   };
   const lookup = {
@@ -28,9 +38,17 @@ function service(orders: OrderFacts[], stock: Record<string, string>) {
       return Promise.resolve(new Map(Object.entries(stock)));
     },
   } as unknown as StockLookup;
+  const customers = {
+    namesOf: (nos: readonly string[]) => {
+      nameAsks.push([...nos]);
+      return Promise.resolve(new Map(Object.entries(names)));
+    },
+  } as unknown as CustomerLookup;
   return {
-    svc: new OrdersService(directory, lookup, new OrderMasking()),
+    svc: new OrdersService(directory, lookup, customers, new OrderMasking()),
     asked,
+    listed,
+    nameAsks,
   };
 }
 
@@ -65,8 +83,69 @@ describe("the orders service", () => {
     expect(page.items.map((r) => r.orderNo)).toEqual(["SO-0001"]);
     expect(page.items[0]).toMatchObject({
       shortageCount: 1,
-      shortage: { itemNo: "I-9", shortBy: "5" },
+      shortage: { itemNo: "I-9", shortBy: "5.00" },
     });
+  });
+
+  it("writes a sample's shortage the way a stored order's is written", async () => {
+    const odd = facts({
+      orderNo: "SO-0009",
+      source: "sample",
+      captureState: null,
+      stockShortfall: {
+        itemNo: "I-9",
+        ordered: "64",
+        availableStock: "47.00",
+        shortBy: "17",
+        coveredBy: null,
+      },
+    });
+    const { svc } = service([odd, shortStored], { "I-1": "5.00" });
+    const page = await svc.list({ ...query, stock: "waiting" }, "SUPPORT");
+    const [sample, stored] = page.items;
+    expect(sample?.shortage).toEqual({
+      itemNo: "I-9",
+      ordered: "64.00",
+      availableStock: "47.00",
+      shortBy: "17.00",
+    });
+    expect(stored?.shortage?.ordered).toMatch(/^\d+\.\d{2}$/);
+  });
+
+  it("asks the directory for one kind only when the filter names it", async () => {
+    const { svc, listed } = service([waitingSample], {});
+    await svc.list({ ...query, source: "sample" }, "SUPPORT");
+    await svc.list(query, "SUPPORT");
+    expect(listed).toEqual(["sample", undefined]);
+  });
+
+  it("puts a customer's name beside its number, from the sample or from master data", async () => {
+    const named = facts({
+      orderNo: "SO-0003",
+      source: "sample",
+      captureState: null,
+      customerNo: "C-0007",
+      customerName: "Sample Named Ltd",
+    });
+    const { svc, nameAsks } = service(
+      [named, shortStored],
+      {},
+      {
+        "C-0001": "Stored Customer Pte",
+      },
+    );
+    const page = await svc.list(query, "SUPPORT");
+    const names = Object.fromEntries(
+      page.items.map((r) => [r.orderNo, r.customerName]),
+    );
+    expect(names).toEqual({
+      "SO-0003": "Sample Named Ltd",
+      "SO-20261108-0001": "Stored Customer Pte",
+    });
+    // Only the number is sent to master data, and only for rows with no name.
+    expect(nameAsks).toEqual([["C-0001"]]);
+    const detail = await svc.one("SO-20261108-0001", "SUPPORT");
+    expect(detail.customerName).toBe("Stored Customer Pte");
   });
 
   it("judges a stored order against stock and reports the gap", async () => {

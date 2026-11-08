@@ -41,6 +41,7 @@ const sample = (
   source: "sample" as const,
   captureState: null,
   customerNo: "C-0001",
+  customerName: "Alpha Synthetic Ltd",
   externalDocumentNo: `PO-${String(n)}`,
   orderDate: "2026-10-20",
   shipmentDate: null,

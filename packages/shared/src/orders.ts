@@ -65,6 +65,8 @@ export const salesOrderRowSchema = z.object({
   /** Null for a sample: it was never entered here. */
   captureState: orderCaptureStateSchema.nullable(),
   customerNo: z.string().min(1),
+  /** Master data's name for the number, shown beside it. Null when none is known; matching stays on the number. */
+  customerName: z.string().min(1).nullable(),
   externalDocumentNo: z.string().min(1),
   orderDate: z.string().min(1),
   shipmentDate: z.string().nullable(),

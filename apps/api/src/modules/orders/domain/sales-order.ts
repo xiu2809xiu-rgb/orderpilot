@@ -163,6 +163,7 @@ export class SalesOrder {
       source: "stored",
       captureState: this.captureState,
       customerNo: this.customerNo,
+      customerName: null,
       externalDocumentNo: this.externalDocumentNo,
       orderDate: this.orderDate,
       shipmentDate: this.shipmentDate,

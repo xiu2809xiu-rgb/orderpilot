@@ -5744,6 +5744,11 @@
                             "type": "string",
                             "minLength": 1
                           },
+                          "customerName": {
+                            "nullable": true,
+                            "type": "string",
+                            "minLength": 1
+                          },
                           "externalDocumentNo": {
                             "type": "string",
                             "minLength": 1
@@ -5848,6 +5853,7 @@
                           "source",
                           "captureState",
                           "customerNo",
+                          "customerName",
                           "externalDocumentNo",
                           "orderDate",
                           "shipmentDate",
@@ -5932,6 +5938,11 @@
                           "enum": ["draft", "submitted", "void"]
                         },
                         "customerNo": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "customerName": {
+                          "nullable": true,
                           "type": "string",
                           "minLength": 1
                         },
@@ -6174,6 +6185,7 @@
                         "source",
                         "captureState",
                         "customerNo",
+                        "customerName",
                         "externalDocumentNo",
                         "orderDate",
                         "shipmentDate",

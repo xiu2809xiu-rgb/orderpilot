@@ -18,6 +18,11 @@ export type OrdersList200DataItem = {
   captureState: OrdersList200DataItemCaptureState;
   /** @minLength 1 */
   customerNo: string;
+  /**
+     * @minLength 1
+     * @nullable
+     */
+  customerName: string | null;
   /** @minLength 1 */
   externalDocumentNo: string;
   /** @minLength 1 */

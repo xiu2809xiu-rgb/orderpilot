@@ -1,3 +1,4 @@
+import type { OrderSource } from "@orderpilot/shared";
 import type { OrderFacts } from "./order-facts.js";
 
 /**
@@ -5,9 +6,17 @@ import type { OrderFacts } from "./order-facts.js";
  * order's facts asks this, so a new order shows up wherever a sample does.
  */
 export interface OrderDirectory {
-  list(): Promise<readonly OrderFacts[]>;
+  /**
+   * Every order, samples first. A caller that wants one kind says so, so the
+   * other kind is not read at all.
+   */
+  list(options?: OrderListOptions): Promise<readonly OrderFacts[]>;
   /** The order with this number, or null. */
   find(orderNo: string): Promise<OrderFacts | null>;
+}
+
+export interface OrderListOptions {
+  readonly source?: OrderSource | undefined;
 }
 
 export const ORDER_DIRECTORY = Symbol("ORDER_DIRECTORY");

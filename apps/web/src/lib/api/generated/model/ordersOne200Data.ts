@@ -19,6 +19,11 @@ export type OrdersOne200Data = {
   captureState: OrdersOne200DataCaptureState;
   /** @minLength 1 */
   customerNo: string;
+  /**
+     * @minLength 1
+     * @nullable
+     */
+  customerName: string | null;
   /** @minLength 1 */
   externalDocumentNo: string;
   /** @minLength 1 */

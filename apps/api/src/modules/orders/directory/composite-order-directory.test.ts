@@ -9,6 +9,7 @@ function facts(orderNo: string, source: "sample" | "stored"): OrderFacts {
     source,
     captureState: source === "stored" ? "draft" : null,
     customerNo: "C-10010",
+    customerName: null,
     externalDocumentNo: "PO-1",
     orderDate: "2026-11-08",
     shipmentDate: null,
@@ -23,9 +24,12 @@ function facts(orderNo: string, source: "sample" | "stored"): OrderFacts {
   };
 }
 
-function fake(rows: OrderFacts[]): OrderFactsSource {
+function fake(rows: OrderFacts[], reads: string[] = []): OrderFactsSource {
   return {
-    list: () => Promise.resolve(rows),
+    list: () => {
+      reads.push("list");
+      return Promise.resolve(rows);
+    },
     find: (no) => Promise.resolve(rows.find((r) => r.orderNo === no) ?? null),
   };
 }
@@ -37,6 +41,20 @@ const directory = new CompositeOrderDirectory(fake([sample]), fake([stored]));
 describe("CompositeOrderDirectory", () => {
   it("lists the samples, then the stored orders", async () => {
     expect(await directory.list()).toEqual([sample, stored]);
+  });
+
+  it("reads only the kind that was asked for", async () => {
+    const sampleReads: string[] = [];
+    const storedReads: string[] = [];
+    const counted = new CompositeOrderDirectory(
+      fake([sample], sampleReads),
+      fake([stored], storedReads),
+    );
+    expect(await counted.list({ source: "sample" })).toEqual([sample]);
+    expect(storedReads).toEqual([]);
+    expect(await counted.list({ source: "stored" })).toEqual([stored]);
+    expect(sampleReads).toEqual(["list"]);
+    expect(await counted.list({})).toEqual([sample, stored]);
   });
 
   it("sends a sample number to the samples and a record number to the stored orders", async () => {
