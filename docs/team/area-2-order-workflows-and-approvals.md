@@ -129,7 +129,6 @@ A wrong actor is refused with 403 and an illegal move with 409, in the one error
 - **A run in progress at shutdown can fail,** if the database closes first. Each notice rolls back, and the next run sends it.
 - **A notice cannot be marked as read.** It clears when the task is done.
 - **When a passed-on SPR comes back because nobody above can act,** the Approver sees it again, but the page still says it waits for the person it was passed to. Deciding it above the limit is refused with a plain message.
-- An SPR passed up the chain reaches Management, which does not hold `approvals.decide` (Richie's call: ADR 0041), so it stops there for now.
 - The approver and limits panel on the SPR page still comes from `MockApprovalPolicy`, and the page still shows the Mock badge because most of it is sample data.
 - The demo data has no SPR above 5,000.00, and only orders with a submitted SPR run on the machine.
 - The PI sequence (A-22) is in the table, not yet a setting, and `sprRequiredOnShortfall` has only its default. `SHIPPING_DOCUMENTS_RECEIVED` is one event for the AWB/BL and the permit until the follow-ups (Should 4) split them.
@@ -169,7 +168,7 @@ C-1 landed these. Every route and screen answers with typed mock data from `@ord
 **Starter stories,** ready to pull on the board (planned: P-2 seeds them):
 
 - **C-2: the state machine:** built, in [the section above](#the-state-machine-c-2).
-- **C-3: SPR approval within limits:** built, in [the section above](#the-state-machine-c-2). An SPR above the approver's limit reaches Management, but nobody can decide it until Management's permission is settled (ADR 0041), so the issue stays open.
+- **C-3: SPR approval within limits:** built, in [the section above](#the-state-machine-c-2). An SPR above the approver's limit reaches Management, which may decide it within its own limit since Management's permission was settled on 8 Nov 2026 (#215, ADR 0041).
 - **C-4: reminders and escalations:** built for tasks on orders the machine runs, in [the section above](#the-state-machine-c-2). Still to do: a reminder to Logistics about shipping documents, because that step creates no real task yet, and drafts to customers and vendors (Should 5). E2E #1's reminder works only on the seeded orders the machine runs, until the machine creates tasks.
 
 **Left out of the base on purpose,** so it stays yours:

@@ -23,8 +23,10 @@ export const PERMISSIONS = [
   "insights.read",
   // Acting on money and approvals. The system admin role never holds these
   // (see governance/matrix.ts). The default matrix below grants approvals.decide
-  // to the approver and payments.confirm to finance. payments.post stays
-  // ungranted: no route uses it yet, and area 4 decides it.
+  // to the approver and to Management, which decides what is above an
+  // approver's limit and what escalates while the approver is away (ADR 0041),
+  // and payments.confirm to finance. payments.post stays ungranted: no route
+  // uses it yet, and area 4 decides it.
   "approvals.decide",
   "payments.confirm",
   "payments.post",
@@ -117,6 +119,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "insights.read",
     "workflows.read",
     "spr.read",
+    "approvals.decide",
     "workflows.inboxes.any",
   ],
   AUDITOR: [
