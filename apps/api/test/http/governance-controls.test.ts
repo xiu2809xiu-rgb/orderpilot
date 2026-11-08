@@ -256,21 +256,21 @@ describe("approval limits (F-3)", () => {
       .filter((event) => event.action === "governance.policy.refused")
       .at(-1);
   /**
-   * Management does not hold approvals.decide in the default matrix, so the
-   * guard refuses them before the policy is asked. Richie's change to the
-   * default settles it; until then a test that needs it grants it for itself.
+   * Management holds approvals.decide in the default matrix, so an escalated
+   * request reaches someone who may decide it. A test that proves the guard
+   * still refuses a role without the permission takes it away for itself.
    */
-  const withManagementApproving = async (work: () => Promise<void>) => {
+  const withoutManagementApproving = async (work: () => Promise<void>) => {
     const grant = (granted: boolean) =>
       call(t, as("SYSTEM_ADMIN"), "put", MANAGEMENT_APPROVES, {
         csrf: true,
         body: { granted },
       });
-    expect((await grant(true)).status).toBe(200);
+    expect((await grant(false)).status).toBe(200);
     try {
       await work();
     } finally {
-      await grant(false);
+      await grant(true);
     }
   };
 
@@ -422,23 +422,21 @@ describe("approval limits (F-3)", () => {
     expect((await lastRefusal())?.changes).toMatchObject({
       rule: "approval-route",
     });
-    expect((await approve("MANAGEMENT", "spr.approve", "100.00")).status).toBe(
-      403,
-    );
-    await withManagementApproving(async () => {
+    await withoutManagementApproving(async () => {
       expect(
-        (await approve("MANAGEMENT", "spr.approve", "250000.00")).status,
-      ).toBe(200);
+        (await approve("MANAGEMENT", "spr.approve", "100.00")).status,
+      ).toBe(403);
     });
+    expect(
+      (await approve("MANAGEMENT", "spr.approve", "250000.00")).status,
+    ).toBe(200);
   });
 
   it("escalates when the absent approver has no substitute", async () => {
     await change(idOf("approver"), { ...awayNow(), substituteUserId: null });
-    await withManagementApproving(async () => {
-      expect(
-        (await approve("MANAGEMENT", "spr.approve", "100.00")).status,
-      ).toBe(200);
-    });
+    expect((await approve("MANAGEMENT", "spr.approve", "100.00")).status).toBe(
+      200,
+    );
     expect(
       (await approve("SECOND_APPROVER", "spr.approve", "100.00")).status,
     ).toBe(403);

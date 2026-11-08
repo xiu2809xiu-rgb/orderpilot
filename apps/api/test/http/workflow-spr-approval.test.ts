@@ -113,18 +113,21 @@ describe("SPR approval within limits (C-3), on the real state machine and area 4
     }
   }
 
-  /** ADR 0041 leaves Management's permission to Richie, so a test grants it for itself. */
-  async function withManagementDeciding(work: () => Promise<void>) {
+  /**
+   * Management holds approvals.decide in the default matrix (ADR 0041), so a
+   * test of a role that cannot decide takes the permission away for itself.
+   */
+  async function withoutManagementDeciding(work: () => Promise<void>) {
     const grant = (granted: boolean) =>
       call(t, as("SYSTEM_ADMIN"), "put", MANAGEMENT_APPROVES, {
         csrf: true,
         body: { granted },
       });
-    expect((await grant(true)).status).toBe(200);
+    expect((await grant(false)).status).toBe(200);
     try {
       await work();
     } finally {
-      await grant(false);
+      await grant(true);
     }
   }
 
@@ -252,11 +255,9 @@ describe("SPR approval within limits (C-3), on the real state machine and area 4
     expect(again.status).toBe(403);
     expect(await statusOf(spr.orderNo)).toBe("AwaitingSpr");
 
-    await withManagementDeciding(async () => {
-      const decided = await decide("MANAGEMENT", spr.recordNo, "approve");
-      expect(decided.status).toBe(200);
-      expect(await statusOf(spr.orderNo)).toBe("SprApproved");
-    });
+    const decided = await decide("MANAGEMENT", spr.recordNo, "approve");
+    expect(decided.status).toBe(200);
+    expect(await statusOf(spr.orderNo)).toBe("SprApproved");
   });
 
   it("passes on a rejection above the limit too, for someone with authority to decide", async () => {
@@ -332,11 +333,10 @@ describe("SPR approval within limits (C-3), on the real state machine and area 4
           awayFrom: new Date(Date.now() - 60_000),
           awayUntil: new Date(Date.now() + 3_600_000),
         },
-        () =>
-          withManagementDeciding(async () => {
-            const res = await decide("MANAGEMENT", spr.recordNo, "approve");
-            expect(res.status).toBe(409);
-          }),
+        async () => {
+          const res = await decide("MANAGEMENT", spr.recordNo, "approve");
+          expect(res.status).toBe(409);
+        },
       );
     } finally {
       await setups.save(own);
@@ -370,9 +370,7 @@ describe("SPR approval within limits (C-3), on the real state machine and area 4
     };
 
     expect(await seen("APPROVER")).toBe(false);
-    await withManagementDeciding(async () => {
-      expect(await seen("MANAGEMENT")).toBe(true);
-    });
+    expect(await seen("MANAGEMENT")).toBe(true);
   });
 
   it("finds an SPR through its order after the dataset's numbers have moved to a new day", async () => {
@@ -472,14 +470,16 @@ describe("SPR approval within limits (C-3), on the real state machine and area 4
     expect((await records.findByOrder(spr.orderNo))?.amount).toBe("200.00");
   });
 
-  it("stops at Management until Richie decides whether it holds the permission (ADR 0041)", async () => {
+  it("stops at Management while its role cannot decide (ADR 0041)", async () => {
     const spr = await pendingSpr("9000.00");
     await decide("APPROVER", spr.recordNo, "approve");
 
-    const res = await decide("MANAGEMENT", spr.recordNo, "approve");
+    await withoutManagementDeciding(async () => {
+      const res = await decide("MANAGEMENT", spr.recordNo, "approve");
 
-    expect(res.status).toBe(403);
-    expect(await statusOf(spr.orderNo)).toBe("AwaitingSpr");
+      expect(res.status).toBe(403);
+      expect(await statusOf(spr.orderNo)).toBe("AwaitingSpr");
+    });
   });
 
   it("takes an SPR it passed on out of the approver's inbox", async () => {
@@ -530,15 +530,14 @@ describe("SPR approval within limits (C-3), on the real state machine and area 4
         awayFrom: new Date(Date.now() - 60_000),
         awayUntil: new Date(Date.now() + 3_600_000),
       },
-      () =>
-        withManagementDeciding(async () => {
-          const absent = await decide("APPROVER", spr.recordNo, "approve");
-          expect(absent.status).toBe(403);
-          expect(await statusOf(spr.orderNo)).toBe("AwaitingSpr");
+      async () => {
+        const absent = await decide("APPROVER", spr.recordNo, "approve");
+        expect(absent.status).toBe(403);
+        expect(await statusOf(spr.orderNo)).toBe("AwaitingSpr");
 
-          const res = await decide("MANAGEMENT", spr.recordNo, "approve");
-          expect(res.status).toBe(200);
-        }),
+        const res = await decide("MANAGEMENT", spr.recordNo, "approve");
+        expect(res.status).toBe(200);
+      },
     );
     expect(await statusOf(spr.orderNo)).toBe("SprApproved");
   });
@@ -669,11 +668,9 @@ describe("SPR approval within limits (C-3), on the real state machine and area 4
       const spr = await waiting("9000.00");
       await decide("APPROVER", spr.recordNo, "approve");
 
-      await withManagementDeciding(async () => {
-        expect(
-          (await decide("MANAGEMENT", spr.recordNo, "approve")).status,
-        ).toBe(200);
-      });
+      expect((await decide("MANAGEMENT", spr.recordNo, "approve")).status).toBe(
+        200,
+      );
 
       expect(await handedFor("MANAGEMENT", spr.recordNo)).toBeUndefined();
       expect(await approverInbox()).not.toContain(spr.recordNo);
@@ -683,13 +680,13 @@ describe("SPR approval within limits (C-3), on the real state machine and area 4
       const spr = await waiting("9000.00");
       await decide("APPROVER", spr.recordNo, "approve");
 
-      expect(await handedFor("MANAGEMENT", spr.recordNo)).toMatchObject({
-        handedOver: { canAct: false },
-      });
-      await withManagementDeciding(async () => {
+      await withoutManagementDeciding(async () => {
         expect(await handedFor("MANAGEMENT", spr.recordNo)).toMatchObject({
-          handedOver: { canAct: true },
+          handedOver: { canAct: false },
         });
+      });
+      expect(await handedFor("MANAGEMENT", spr.recordNo)).toMatchObject({
+        handedOver: { canAct: true },
       });
     });
 
@@ -698,15 +695,14 @@ describe("SPR approval within limits (C-3), on the real state machine and area 4
 
       await withApprover(
         { substituteUserId: await idOf("MANAGEMENT"), ...away },
-        () =>
-          withManagementDeciding(async () => {
-            expect(await handedFor("MANAGEMENT", spr.recordNo)).toMatchObject({
-              handedOver: { canAct: true },
-            });
-            const res = await decide("MANAGEMENT", spr.recordNo, "approve");
-            expect(res.status).toBe(200);
-            expect(await handedFor("MANAGEMENT", spr.recordNo)).toBeUndefined();
-          }),
+        async () => {
+          expect(await handedFor("MANAGEMENT", spr.recordNo)).toMatchObject({
+            handedOver: { canAct: true },
+          });
+          const res = await decide("MANAGEMENT", spr.recordNo, "approve");
+          expect(res.status).toBe(200);
+          expect(await handedFor("MANAGEMENT", spr.recordNo)).toBeUndefined();
+        },
       );
       expect(await statusOf(spr.orderNo)).toBe("SprApproved");
     });
@@ -716,11 +712,12 @@ describe("SPR approval within limits (C-3), on the real state machine and area 4
 
       await withApprover(
         { substituteUserId: await idOf("MANAGEMENT"), ...away },
-        async () => {
-          expect(await handedFor("MANAGEMENT", spr.recordNo)).toMatchObject({
-            handedOver: { reason: "substitute", canAct: false },
-          });
-        },
+        () =>
+          withoutManagementDeciding(async () => {
+            expect(await handedFor("MANAGEMENT", spr.recordNo)).toMatchObject({
+              handedOver: { reason: "substitute", canAct: false },
+            });
+          }),
       );
     });
 
@@ -738,10 +735,8 @@ describe("SPR approval within limits (C-3), on the real state machine and area 4
         purchaseAmountApprovalLimit: "1.00",
       });
       try {
-        await withManagementDeciding(async () => {
-          expect(await handedFor("MANAGEMENT", spr.recordNo)).toMatchObject({
-            handedOver: { canAct: true },
-          });
+        expect(await handedFor("MANAGEMENT", spr.recordNo)).toMatchObject({
+          handedOver: { canAct: true },
         });
       } finally {
         await setups.save(own);
