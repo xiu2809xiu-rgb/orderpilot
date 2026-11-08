@@ -22,11 +22,14 @@ import type {
 
 import type {
   OrdersCreate201,
+  OrdersCreateBody,
   OrdersList200,
   OrdersListParams,
   OrdersOne200,
   OrdersUpdate200,
-  OrdersVoidDraft200
+  OrdersUpdateBody,
+  OrdersVoidDraft200,
+  OrdersVoidDraftBody
 } from '../../model';
 
 import { apiMutator } from '../../../mutator.ts';
@@ -147,13 +150,15 @@ export function useOrdersList<TData = Awaited<ReturnType<typeof ordersList>>, TE
  * @summary Start a draft order. One customer and PO number is one order: a repeat is a 409 that names it
  */
 export const ordersCreate = (
-
+    ordersCreateBody: OrdersCreateBody,
  signal?: AbortSignal
 ) => {
 
 
       return apiMutator<OrdersCreate201>(
-      {url: `/api/v1/orders`, method: 'POST', signal
+      {url: `/api/v1/orders`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: ordersCreateBody, signal
     },
       );
     }
@@ -161,23 +166,23 @@ export const ordersCreate = (
 
 
 
-export const getOrdersCreateQueryKey = () => {
+export const getOrdersCreateQueryKey = (ordersCreateBody?: OrdersCreateBody,) => {
     return [
-    'POST', `/api/v1/orders`
+    'POST', `/api/v1/orders`, ordersCreateBody
     ] as const;
     }
 
 
-export const getOrdersCreateQueryOptions = <TData = Awaited<ReturnType<typeof ordersCreate>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersCreate>>, TError, TData>>, }
+export const getOrdersCreateQueryOptions = <TData = Awaited<ReturnType<typeof ordersCreate>>, TError = ErrorType<unknown>>(ordersCreateBody: OrdersCreateBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersCreate>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getOrdersCreateQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getOrdersCreateQueryKey(ordersCreateBody);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof ordersCreate>>> = ({ signal }) => ordersCreate(signal);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof ordersCreate>>> = ({ signal }) => ordersCreate(ordersCreateBody, signal);
 
 
 
@@ -191,7 +196,7 @@ export type OrdersCreateQueryError = ErrorType<unknown>
 
 
 export function useOrdersCreate<TData = Awaited<ReturnType<typeof ordersCreate>>, TError = ErrorType<unknown>>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersCreate>>, TError, TData>> & Pick<
+ ordersCreateBody: OrdersCreateBody, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersCreate>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof ordersCreate>>,
           TError,
@@ -201,7 +206,7 @@ export function useOrdersCreate<TData = Awaited<ReturnType<typeof ordersCreate>>
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useOrdersCreate<TData = Awaited<ReturnType<typeof ordersCreate>>, TError = ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersCreate>>, TError, TData>> & Pick<
+ ordersCreateBody: OrdersCreateBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersCreate>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof ordersCreate>>,
           TError,
@@ -211,7 +216,7 @@ export function useOrdersCreate<TData = Awaited<ReturnType<typeof ordersCreate>>
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useOrdersCreate<TData = Awaited<ReturnType<typeof ordersCreate>>, TError = ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersCreate>>, TError, TData>>, }
+ ordersCreateBody: OrdersCreateBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersCreate>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -219,11 +224,11 @@ export function useOrdersCreate<TData = Awaited<ReturnType<typeof ordersCreate>>
  */
 
 export function useOrdersCreate<TData = Awaited<ReturnType<typeof ordersCreate>>, TError = ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersCreate>>, TError, TData>>, }
+ ordersCreateBody: OrdersCreateBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersCreate>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getOrdersCreateQueryOptions(options)
+  const queryOptions = getOrdersCreateQueryOptions(ordersCreateBody,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -332,12 +337,15 @@ export function useOrdersOne<TData = Awaited<ReturnType<typeof ordersOne>>, TErr
  */
 export const ordersUpdate = (
     orderNo: string,
+    ordersUpdateBody: OrdersUpdateBody,
  signal?: AbortSignal
 ) => {
 
 
       return apiMutator<OrdersUpdate200>(
-      {url: `/api/v1/orders/${orderNo}`, method: 'PATCH', signal
+      {url: `/api/v1/orders/${orderNo}`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: ordersUpdateBody, signal
     },
       );
     }
@@ -345,23 +353,25 @@ export const ordersUpdate = (
 
 
 
-export const getOrdersUpdateQueryKey = (orderNo: string,) => {
+export const getOrdersUpdateQueryKey = (orderNo: string,
+    ordersUpdateBody?: OrdersUpdateBody,) => {
     return [
-    'PATCH', `/api/v1/orders/${orderNo}`
+    'PATCH', `/api/v1/orders/${orderNo}`, ordersUpdateBody
     ] as const;
     }
 
 
-export const getOrdersUpdateQueryOptions = <TData = Awaited<ReturnType<typeof ordersUpdate>>, TError = ErrorType<unknown>>(orderNo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersUpdate>>, TError, TData>>, }
+export const getOrdersUpdateQueryOptions = <TData = Awaited<ReturnType<typeof ordersUpdate>>, TError = ErrorType<unknown>>(orderNo: string,
+    ordersUpdateBody: OrdersUpdateBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersUpdate>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getOrdersUpdateQueryKey(orderNo);
+  const queryKey =  queryOptions?.queryKey ?? getOrdersUpdateQueryKey(orderNo,ordersUpdateBody);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof ordersUpdate>>> = ({ signal }) => ordersUpdate(orderNo, signal);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof ordersUpdate>>> = ({ signal }) => ordersUpdate(orderNo,ordersUpdateBody, signal);
 
 
 
@@ -375,7 +385,8 @@ export type OrdersUpdateQueryError = ErrorType<unknown>
 
 
 export function useOrdersUpdate<TData = Awaited<ReturnType<typeof ordersUpdate>>, TError = ErrorType<unknown>>(
- orderNo: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersUpdate>>, TError, TData>> & Pick<
+ orderNo: string,
+    ordersUpdateBody: OrdersUpdateBody, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersUpdate>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof ordersUpdate>>,
           TError,
@@ -385,7 +396,8 @@ export function useOrdersUpdate<TData = Awaited<ReturnType<typeof ordersUpdate>>
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useOrdersUpdate<TData = Awaited<ReturnType<typeof ordersUpdate>>, TError = ErrorType<unknown>>(
- orderNo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersUpdate>>, TError, TData>> & Pick<
+ orderNo: string,
+    ordersUpdateBody: OrdersUpdateBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersUpdate>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof ordersUpdate>>,
           TError,
@@ -395,7 +407,8 @@ export function useOrdersUpdate<TData = Awaited<ReturnType<typeof ordersUpdate>>
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useOrdersUpdate<TData = Awaited<ReturnType<typeof ordersUpdate>>, TError = ErrorType<unknown>>(
- orderNo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersUpdate>>, TError, TData>>, }
+ orderNo: string,
+    ordersUpdateBody: OrdersUpdateBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersUpdate>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -403,11 +416,12 @@ export function useOrdersUpdate<TData = Awaited<ReturnType<typeof ordersUpdate>>
  */
 
 export function useOrdersUpdate<TData = Awaited<ReturnType<typeof ordersUpdate>>, TError = ErrorType<unknown>>(
- orderNo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersUpdate>>, TError, TData>>, }
+ orderNo: string,
+    ordersUpdateBody: OrdersUpdateBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersUpdate>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getOrdersUpdateQueryOptions(orderNo,options)
+  const queryOptions = getOrdersUpdateQueryOptions(orderNo,ordersUpdateBody,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -424,12 +438,15 @@ export function useOrdersUpdate<TData = Awaited<ReturnType<typeof ordersUpdate>>
  */
 export const ordersVoidDraft = (
     orderNo: string,
+    ordersVoidDraftBody: OrdersVoidDraftBody,
  signal?: AbortSignal
 ) => {
 
 
       return apiMutator<OrdersVoidDraft200>(
-      {url: `/api/v1/orders/${orderNo}/void`, method: 'POST', signal
+      {url: `/api/v1/orders/${orderNo}/void`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: ordersVoidDraftBody, signal
     },
       );
     }
@@ -437,23 +454,25 @@ export const ordersVoidDraft = (
 
 
 
-export const getOrdersVoidDraftQueryKey = (orderNo: string,) => {
+export const getOrdersVoidDraftQueryKey = (orderNo: string,
+    ordersVoidDraftBody?: OrdersVoidDraftBody,) => {
     return [
-    'POST', `/api/v1/orders/${orderNo}/void`
+    'POST', `/api/v1/orders/${orderNo}/void`, ordersVoidDraftBody
     ] as const;
     }
 
 
-export const getOrdersVoidDraftQueryOptions = <TData = Awaited<ReturnType<typeof ordersVoidDraft>>, TError = ErrorType<unknown>>(orderNo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersVoidDraft>>, TError, TData>>, }
+export const getOrdersVoidDraftQueryOptions = <TData = Awaited<ReturnType<typeof ordersVoidDraft>>, TError = ErrorType<unknown>>(orderNo: string,
+    ordersVoidDraftBody: OrdersVoidDraftBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersVoidDraft>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getOrdersVoidDraftQueryKey(orderNo);
+  const queryKey =  queryOptions?.queryKey ?? getOrdersVoidDraftQueryKey(orderNo,ordersVoidDraftBody);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof ordersVoidDraft>>> = ({ signal }) => ordersVoidDraft(orderNo, signal);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof ordersVoidDraft>>> = ({ signal }) => ordersVoidDraft(orderNo,ordersVoidDraftBody, signal);
 
 
 
@@ -467,7 +486,8 @@ export type OrdersVoidDraftQueryError = ErrorType<unknown>
 
 
 export function useOrdersVoidDraft<TData = Awaited<ReturnType<typeof ordersVoidDraft>>, TError = ErrorType<unknown>>(
- orderNo: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersVoidDraft>>, TError, TData>> & Pick<
+ orderNo: string,
+    ordersVoidDraftBody: OrdersVoidDraftBody, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersVoidDraft>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof ordersVoidDraft>>,
           TError,
@@ -477,7 +497,8 @@ export function useOrdersVoidDraft<TData = Awaited<ReturnType<typeof ordersVoidD
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useOrdersVoidDraft<TData = Awaited<ReturnType<typeof ordersVoidDraft>>, TError = ErrorType<unknown>>(
- orderNo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersVoidDraft>>, TError, TData>> & Pick<
+ orderNo: string,
+    ordersVoidDraftBody: OrdersVoidDraftBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersVoidDraft>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof ordersVoidDraft>>,
           TError,
@@ -487,7 +508,8 @@ export function useOrdersVoidDraft<TData = Awaited<ReturnType<typeof ordersVoidD
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useOrdersVoidDraft<TData = Awaited<ReturnType<typeof ordersVoidDraft>>, TError = ErrorType<unknown>>(
- orderNo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersVoidDraft>>, TError, TData>>, }
+ orderNo: string,
+    ordersVoidDraftBody: OrdersVoidDraftBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersVoidDraft>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -495,11 +517,12 @@ export function useOrdersVoidDraft<TData = Awaited<ReturnType<typeof ordersVoidD
  */
 
 export function useOrdersVoidDraft<TData = Awaited<ReturnType<typeof ordersVoidDraft>>, TError = ErrorType<unknown>>(
- orderNo: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersVoidDraft>>, TError, TData>>, }
+ orderNo: string,
+    ordersVoidDraftBody: OrdersVoidDraftBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersVoidDraft>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getOrdersVoidDraftQueryOptions(orderNo,options)
+  const queryOptions = getOrdersVoidDraftQueryOptions(orderNo,ordersVoidDraftBody,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

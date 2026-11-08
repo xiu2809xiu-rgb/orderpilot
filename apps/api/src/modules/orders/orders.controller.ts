@@ -11,6 +11,7 @@ import {
   Req,
 } from "@nestjs/common";
 import {
+  ApiBody,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
@@ -97,6 +98,7 @@ export class OrdersController {
     summary:
       "Start a draft order. One customer and PO number is one order: a repeat is a 409 that names it",
   })
+  @ApiBody({ schema: openApiSchema(createSalesOrderSchema) })
   @ApiCreatedResponse({ schema: openApiSchema(salesOrderResponseSchema) })
   async create(
     @Body(new ZodValidationPipe(createSalesOrderSchema))
@@ -114,6 +116,7 @@ export class OrdersController {
     summary:
       "Change a draft order. Send the version you read: a stale one is a 409",
   })
+  @ApiBody({ schema: openApiSchema(patchSalesOrderSchema) })
   @ApiOkResponse({ schema: openApiSchema(salesOrderResponseSchema) })
   async update(
     @Param("orderNo", orderNoParam) orderNo: string,
@@ -134,6 +137,7 @@ export class OrdersController {
   @ApiOperation({
     summary: "Void a draft order, with a reason. This frees its PO number",
   })
+  @ApiBody({ schema: openApiSchema(voidSalesOrderSchema) })
   @ApiOkResponse({ schema: openApiSchema(salesOrderResponseSchema) })
   async voidDraft(
     @Param("orderNo", orderNoParam) orderNo: string,
