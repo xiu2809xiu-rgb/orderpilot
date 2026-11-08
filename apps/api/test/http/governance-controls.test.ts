@@ -772,9 +772,7 @@ describe("no self-approval and segregation of duties (F-4)", () => {
         userId: id("management"),
         from: id("approver"),
       });
-      await withGrant("MANAGEMENT", "approvals.decide", async () => {
-        expect((await approveSpr("MANAGEMENT", "substitute")).status).toBe(200);
-      });
+      expect((await approveSpr("MANAGEMENT", "substitute")).status).toBe(200);
     });
 
     it("refuses the requester when the escalation leads back to them, and records that nobody may decide", async () => {
@@ -785,11 +783,9 @@ describe("no self-approval and segregation of duties (F-4)", () => {
         .get(AuthorisationService)
         .deciderFor(id("management"));
       expect(decider.kind).toBe("none");
-      await withGrant("MANAGEMENT", "approvals.decide", async () => {
-        expect((await approveSpr("MANAGEMENT", "management")).status).toBe(403);
-        expect((await lastRefusal())?.changes).toMatchObject({
-          rule: "no-self-approval",
-        });
+      expect((await approveSpr("MANAGEMENT", "management")).status).toBe(403);
+      expect((await lastRefusal())?.changes).toMatchObject({
+        rule: "no-self-approval",
       });
       expect((await approveSpr("APPROVER", "management")).status).toBe(403);
       const refusal = await lastRefusal();
