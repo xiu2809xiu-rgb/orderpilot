@@ -6,6 +6,8 @@ import {
   ApiTags,
 } from "@nestjs/swagger";
 import {
+  availableStockQuerySchema,
+  availableStockResponseSchema,
   customerListSchema,
   customerQuerySchema,
   customerResponseSchema,
@@ -17,6 +19,7 @@ import {
   vendorListSchema,
   vendorQuerySchema,
   vendorResponseSchema,
+  type AvailableStockQuery,
   type CustomerQuery,
   type ItemQuery,
   type VendorQuery,
@@ -77,6 +80,23 @@ export class MasterDataController {
     @Auth() auth: AuthContext,
   ) {
     return pageOf(await this.masterData.listItems(query, auth.user.role));
+  }
+
+  @Get("available-stock")
+  @ApiOperation({
+    summary:
+      "The available stock of many items at once, for the lines of an order. Mock Navision data",
+  })
+  @openApiQuery(availableStockQuerySchema)
+  @ApiOkResponse({ schema: openApiSchema(availableStockResponseSchema) })
+  async availableStock(
+    @Query(new ZodValidationPipe(availableStockQuerySchema))
+    query: AvailableStockQuery,
+  ) {
+    return {
+      data: await this.masterData.availableStock(query.itemNos.split(",")),
+      meta: { mock: true as const },
+    };
   }
 
   @Get("items/:no")

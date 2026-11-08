@@ -322,8 +322,13 @@ export const masterDataFiltersResponseSchema = mockEnvelope(
 export const AVAILABLE_STOCK_MAX_ITEMS = 200;
 
 export const availableStockQuerySchema = z.object({
-  /** Navision numbers, separated by commas. */
-  itemNos: z.string().regex(/^[A-Za-z0-9-]{1,20}(,[A-Za-z0-9-]{1,20})*$/),
+  /** Navision numbers, separated by commas, at most one order's worth. */
+  itemNos: z
+    .string()
+    .regex(/^[A-Za-z0-9-]{1,20}(,[A-Za-z0-9-]{1,20})*$/)
+    .refine((value) => value.split(",").length <= AVAILABLE_STOCK_MAX_ITEMS, {
+      message: `Ask for at most ${String(AVAILABLE_STOCK_MAX_ITEMS)} items at once`,
+    }),
 });
 export type AvailableStockQuery = z.infer<typeof availableStockQuerySchema>;
 
