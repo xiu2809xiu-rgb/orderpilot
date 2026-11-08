@@ -291,7 +291,7 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 | P-48  | Lines grid                                            | `feat/lines-grid`                | Merged, [#190](https://github.com/xiu2809xiu-rgb/orderpilot/pull/190)               |
 | P-22  | The design system with the Pro kits                   | `feat/platform-design-system`    | Waits for the licence keys in `apps/web/.env.local`                                 |
 | P-36  | Orders: the reader and the list                       | `feat/product-pass-orders`       | Merged, [#217](https://github.com/xiu2809xiu-rgb/orderpilot/pull/217), part of #122 |
-| P-49  | New order and draft editing                           | `feat/order-form`                | In progress on `feat/order-form`                                                    |
+| P-49  | New order and draft editing                           | `feat/order-form`                | In review (#218)                                                                    |
 | P-50  | Submit, cancel and copy an order                      | `feat/order-actions`             | Not started                                                                         |
 | P-51  | The one order page                                    | `feat/one-order-page`            | Not started                                                                         |
 | P-37  | Document intake and the inbox                         | `feat/product-pass-documents`    | Not started                                                                         |
