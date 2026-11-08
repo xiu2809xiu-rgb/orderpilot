@@ -1,4 +1,4 @@
-import { screen, within } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { axeViolations } from "@/test/axe";
@@ -36,6 +36,78 @@ describe("the component gallery route", () => {
     ).toBe(2);
     expect(await axeViolations(container)).toEqual([]);
   }, 60_000);
+
+  it("shows the document form with the actions this role may use", async () => {
+    renderApp("/gallery", { session: sessionFor("AUDITOR") });
+    const title = await screen.findByRole("heading", {
+      level: 2,
+      name: "Sales order SO-20261106-0001",
+    });
+    expect(title).toBeVisible();
+    const form = screen.getByRole("form", { name: "Sales order" });
+    expect(within(form).getByRole("button", { name: "Save" })).toBeVisible();
+    expect(
+      within(form).getByRole("button", { name: "Submit for approval" }),
+    ).toBeVisible();
+    // The auditor may read orders but not decide: Approve is not drawn at all.
+    expect(within(form).queryByRole("button", { name: "Approve" })).toBeNull();
+    expect(within(form).getByText("Draft")).toBeVisible();
+    expect(screen.getByRole("tab", { name: /Checks/ })).toBeVisible();
+  });
+
+  it("opens a blank order with the next number after Save and new", async () => {
+    const user = userEvent.setup();
+    renderApp("/gallery", { session: sessionFor("SUPPORT") });
+    const form = await screen.findByRole("form", { name: "Sales order" });
+    const po = within(form).getByRole("textbox", {
+      name: /Customer PO number/,
+    });
+    expect(po).toHaveValue("CPO-7731");
+    await user.clear(po);
+    await user.type(po, "CPO-8800");
+    await user.click(
+      within(form).getByRole("button", { name: "Save and new" }),
+    );
+    expect(await screen.findByText(/A new order is ready/)).toBeVisible();
+    expect(po).toHaveValue("");
+    expect(
+      screen.getByRole("heading", {
+        level: 2,
+        name: "Sales order SO-20261106-0002",
+      }),
+    ).toBeVisible();
+    // A blank order has no record yet: nothing attached, no steps and no
+    // checks, and nothing to submit, print or void until it is saved.
+    expect(screen.queryByText("Customer PO as received.pdf")).toBeNull();
+    expect(screen.getByText("No attachments yet.")).toBeVisible();
+    expect(
+      screen.getByText("No steps yet. They appear as the document moves."),
+    ).toBeVisible();
+    expect(screen.getByRole("tab", { name: "Checks" })).toBeVisible();
+    for (const name of ["Submit for approval", "Print or PDF", "Void"]) {
+      const button = within(form).getByRole("button", { name });
+      expect(button, name).toHaveAttribute("aria-disabled", "true");
+      expect(button, name).toHaveAccessibleDescription("Save the order first.");
+    }
+  }, 20_000);
+
+  it("blocks Save on an approved order and says why", async () => {
+    const user = userEvent.setup();
+    renderApp("/gallery", { session: sessionFor("APPROVER") });
+    const form = await screen.findByRole("form", { name: "Sales order" });
+    await user.click(
+      within(form).getByRole("button", { name: "Submit for approval" }),
+    );
+    await user.click(
+      await within(form).findByRole("button", { name: "Approve" }),
+    );
+    await user.click(within(form).getByRole("button", { name: "Save" }));
+    await waitFor(() =>
+      expect(within(form).getByRole("status")).toHaveTextContent(
+        "An approved order cannot be changed.",
+      ),
+    );
+  }, 20_000);
 
   it("lets the table be forced into its states", async () => {
     const user = userEvent.setup();

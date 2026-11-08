@@ -20,7 +20,9 @@
     "listHint": "The template every list is built on: filters, the action bar, row checkboxes with a batch action, a row menu with Edit, Copy and Void, saved views, column settings, Export and Print, and the five status chips. New is left out here because N already runs this page's own primary action. The server is faked in the browser.",
     "lines": "Lines grid",
     "linesHint": "Order and SPR lines that are typed into. Search by part number or name, press Enter to move on, and Enter on the last cell adds a line. The save is faked in the browser.",
-    "logTitle": "Operation log: a detail page"
+    "logTitle": "Operation log: a detail page",
+    "document": "Document form",
+    "documentHint": "The page every order, SPR, payment and shipment is edited on: a header, the lines grid, a footer with attachments, status and totals, an action bar for the signed-in role and the tabs below. Choose a status to see its actions. The actions borrow orders.read, because no write permission exists yet, so every role that reads orders sees Save, Submit and Void; the role rule shows on Approve and Reject, which need approvals.decide. The save is faked in the browser; use the PO number CPO-USED to see the server refuse a field."
   },
   "feedback": {
     "title": "Amounts, messages and loading shapes",
@@ -221,6 +223,63 @@
     },
     "server": {
       "stock": "Only 8 units of {{item}} can be promised on this date."
+    }
+  },
+  "document": {
+    "title": "Sales order {{number}}",
+    "formLabel": "Sales order",
+    "statusLabel": "Status of the demo order",
+    "saved": "Saved. Nothing was sent: this form fakes its save.",
+    "savedNew": "Saved. A new order is ready.",
+    "submitted": "{{number}} submitted for approval",
+    "approved": "{{number}} approved",
+    "attachment": "Customer PO as received.pdf",
+    "attachmentSize": "182 KB",
+    "checkFailed": "Quantity on the packing list differs from the PO (synthetic).",
+    "status": {
+      "draft": "Draft",
+      "waiting": "Waiting for approval",
+      "approved": "Approved",
+      "void": "Void"
+    },
+    "fields": {
+      "customer": "Customer",
+      "customerPo": "Customer PO number",
+      "customerPoHint": "Try CPO-USED to see a server refusal.",
+      "orderDate": "Order date",
+      "paymentTerms": "Payment terms"
+    },
+    "errors": {
+      "customer": "Choose a customer from the list.",
+      "customerPo": "Enter the customer PO number.",
+      "orderDate": "Enter the order date.",
+      "paymentTerms": "Choose the payment terms."
+    },
+    "server": {
+      "poUsed": "PO {{po}} is already on another order."
+    },
+    "blocked": {
+      "submit": "Only a draft can be submitted.",
+      "approve": "Only a document waiting for approval can be approved or rejected.",
+      "void": "This document is already void.",
+      "closed": {
+        "approved": "An approved order cannot be changed.",
+        "void": "A voided order cannot be changed."
+      },
+      "unsaved": "Save the order first."
+    },
+    "rejectTitle": "Reject this order?",
+    "rejectDescription": "The order goes back to draft. The reason is shown with it.",
+    "rejectConfirm": "Reject",
+    "rejectDone": "{{number}} rejected",
+    "voidTitle": "Void this order?",
+    "voidDescription": "The order is kept, marked void, with your reason.",
+    "voidConfirm": "Void",
+    "voidDone": "{{number}} voided",
+    "timeline": {
+      "created": "Order created",
+      "submitted": "Submitted for approval",
+      "approved": "Approved by the approver"
     }
   }
 }
