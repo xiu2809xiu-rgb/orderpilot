@@ -16,6 +16,8 @@ const ATTEMPT: Readonly<Record<Permission, string>> = {
   "documents.read": "viewing a document",
   "documents.upload": "uploading a document",
   "orders.read": "viewing an order",
+  "orders.create": "creating an order",
+  "orders.edit": "changing a draft order",
   "tracker.read": "viewing the tracker",
   "exceptions.read": "viewing the exceptions",
   "insights.read": "viewing the KPIs",

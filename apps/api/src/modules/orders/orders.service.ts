@@ -151,6 +151,7 @@ export class OrdersService {
       ...this.row(entry, role, names),
       prepaymentPercent: facts.prepaymentPercent,
       navisionNo: facts.navisionNo,
+      version: null,
       lines: facts.lines.map((line) => ({
         lineNo: line.lineNo,
         itemNo: line.itemNo,
