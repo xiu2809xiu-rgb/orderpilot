@@ -19,7 +19,11 @@ P-49 lets Support and a Product Manager make an order and edit it while it is a 
 7. **No empty drafts.** An order has at least one line, so a draft always has something to show.
 8. **No scope rule.** Any Support user or Product Manager may edit any draft, because no brand data exists yet. An own-draft check is the alternative, and it is a decision for Richie.
 9. **Stock is fetched every 30 seconds.** Each line shows mock Navision's available stock, from the same formula as master data, refreshed every 30 seconds. A draft reserves nothing.
-10. **A masked writer.** A role that may write an order but may not see prices (a grant made by the policy owner) cannot send a price. An omitted price keeps the stored price of the same item, else the item's list price, and the answer is masked as every read is.
+10. **The PO sets the price.** The 5 Nov briefing settled it: the customer's PO price is the agreed price, and the PO, PI, invoice and packing list must match it exactly. Master data's price is context only. Picking an item leaves the line's price empty, and the form shows the item's list price beside it, labelled for reference. A role that sees prices types the price from the PO, and the server requires it.
+11. **A masked writer.** A role that may write an order but may not see prices (a grant made by the policy owner) cannot send a price. It keeps a stored price only for a line whose position and item both match the stored line, so two lines of one item keep two prices. Any other line from such a role is a 400 on `lines.N.unitPrice`, asking for the price to be entered by a role that can see prices. There is no list-price fallback. The answer is masked as every read is.
+12. **A total that fits.** Each line is held to 15 whole digits, and so is the order total, which is a sum of up to 200 lines. An order whose total is not a valid decimal string is a 400 on `lines`, raised in the draft-line mapping and again by the `SalesOrder` class, so the list's amount sort and filter never meet a total they cannot compare.
+13. **The draft rule comes before the version.** An edit or a void of an order that is not a draft is refused with the draft rule's words, whatever version the form holds, so a closed order is never reported as changed by someone else.
+14. **What the audit keeps.** An edit is audited by the names of the fields sent, the number of lines and the two versions, never by a price. A price change on a draft therefore leaves no before and after value, which keeps prices out of the trail by design. The order's own versions are the record that it moved.
 
 ## The migration check
 
@@ -41,6 +45,7 @@ The real output was `No difference detected.` and the exit code was 0. With `--s
 
 ## Consequences
 
+- The migration builds a unique index, so it fails on a database that already holds two live orders for one customer and PO number. None can exist before this story, because nothing wrote orders: the 120 samples are generated, not stored. Only a test database left by an interrupted run can hold one, as the next point says.
 - A test database left by an interrupted run of the sales order tests may hold duplicate rows. The migration would then fail on it, so drop the test database and let the setup make it again.
 - Developers who run `pnpm dev` have no stored orders to clash, and run `pnpm db:seed` once. Compose seeds again by itself.
 - P-50 copies an order without the PO number, or the first save gets a 409. P-50 also widens the void. P-51 replaces the element at `/orders/:orderNo`. P-55 voids its draft in its test, or a rerun gets the 409.
