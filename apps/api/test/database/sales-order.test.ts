@@ -5,7 +5,7 @@ import { createTestContext, type TestContext } from "../support/test-app.js";
 
 const CREATOR = "00000000-0000-4000-8000-000000000001";
 
-function header(orderNo: string, poNo = "PO-1") {
+function header(orderNo: string, poNo = orderNo) {
   return {
     orderNo,
     customerNo: "C-10010",
@@ -82,18 +82,79 @@ describe("the sales order tables", () => {
     ).rejects.toMatchObject({ code: "P2002" });
   });
 
-  it("accepts two orders with the same customer and PO number", async () => {
-    // The duplicate rule is decided with the write route (P-49), not here.
-    await db.client.salesOrder.create({
-      data: header("SO-20261108-0005", "PO-DUP"),
+  describe("one live order per customer and PO number", () => {
+    const make = (orderNo: string, po: string, extra = {}) =>
+      db.client.salesOrder.create({
+        data: { ...header(orderNo, po), ...extra },
+      });
+
+    it("refuses the same customer and PO number twice", async () => {
+      await make("SO-20261108-0005", "PO-DUP");
+      await expect(make("SO-20261108-0006", "PO-DUP")).rejects.toMatchObject({
+        code: "P2002",
+      });
     });
-    await db.client.salesOrder.create({
-      data: header("SO-20261108-0006", "PO-DUP"),
+
+    it("refuses a PO number that differs only in case", async () => {
+      await make("SO-20261108-0007", "PO-Case");
+      await expect(make("SO-20261108-0008", "po-case")).rejects.toMatchObject({
+        code: "P2002",
+      });
     });
-    expect(
-      await db.client.salesOrder.count({
-        where: { customerNo: "C-10010", externalDocumentNo: "PO-DUP" },
-      }),
-    ).toBe(2);
+
+    it("allows the same PO number for another customer", async () => {
+      await make("SO-20261108-0009", "PO-SHARED");
+      await db.client.salesOrder.create({
+        data: {
+          ...header("SO-20261108-0010", "PO-SHARED"),
+          customerNo: "C-10011",
+        },
+      });
+      expect(
+        await db.client.salesOrder.count({
+          where: { externalDocumentNo: "PO-SHARED" },
+        }),
+      ).toBe(2);
+    });
+
+    it("frees the pair when the order is void", async () => {
+      const first = await make("SO-20261108-0011", "PO-FREE");
+      await db.client.salesOrder.update({
+        where: { id: first.id },
+        data: { captureState: "VOID" },
+      });
+      await make("SO-20261108-0012", "PO-FREE");
+      await expect(make("SO-20261108-0013", "PO-FREE")).rejects.toMatchObject({
+        code: "P2002",
+      });
+    });
+
+    it("allows any number of void orders with one pair", async () => {
+      await make("SO-20261108-0014", "PO-VOIDS", { captureState: "VOID" });
+      await make("SO-20261108-0015", "PO-VOIDS", { captureState: "VOID" });
+      expect(
+        await db.client.salesOrder.count({
+          where: { externalDocumentNo: "PO-VOIDS" },
+        }),
+      ).toBe(2);
+    });
+
+    it("starts every order at version 1", async () => {
+      const order = await make("SO-20261108-0016", "PO-VERSION");
+      expect(order.version).toBe(1);
+    });
+
+    it("holds the rule as a partial unique index in the database", async () => {
+      // Prisma cannot declare this index, so a later migrate dev could drop it.
+      const rows = await db.client.$queryRaw<{ indexdef: string }[]>`
+        SELECT indexdef FROM pg_indexes
+        WHERE tablename = 'SalesOrder'
+          AND indexname = 'SalesOrder_live_customer_po_key'`;
+      expect(rows).toHaveLength(1);
+      expect(rows[0]?.indexdef).toContain("UNIQUE");
+      expect(rows[0]?.indexdef).toContain("upper(");
+      expect(rows[0]?.indexdef).toContain("WHERE");
+      expect(rows[0]?.indexdef).toContain("VOID");
+    });
   });
 });

@@ -20,8 +20,8 @@ model SalesOrder {
   navisionNo         String?
   captureState       OrderCaptureState @default(DRAFT)
   customerNo         String
-  /// The customer's PO number. The index is not unique: whether a revised PO may
-  /// keep its number is decided with the write route (P-49).
+  /// The customer's PO number. One live order per customer and PO number is held
+  /// by a partial unique index written by hand in the migration (ADR 0047).
   externalDocumentNo String
   orderDate          DateTime          @db.Date
   shipmentDate       DateTime?         @db.Date
@@ -31,10 +31,13 @@ model SalesOrder {
   createdBy          String            @db.Uuid
   createdAt          DateTime          @default(now()) @db.Timestamptz(3)
   updatedAt          DateTime          @updatedAt @db.Timestamptz(3)
+  /// Counts the saves of a draft, so that a stale form is refused (ADR 0047).
+  version            Int               @default(1)
   lines              SalesOrderLine[]
 
-  // For P-49's check for a repeated PO. The list reads in memory (ADR 0046), so
-  // no index on the state or the date until a SQL-side page needs one.
+  // The lookup for a repeated PO. The unique rule itself is the partial index in
+  // the migration, which this schema cannot express. The list reads in memory
+  // (ADR 0046), so no index on the state or the date until a SQL page needs one.
   @@index([customerNo, externalDocumentNo])
 }
 
