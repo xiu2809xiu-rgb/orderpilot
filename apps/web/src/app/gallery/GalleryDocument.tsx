@@ -47,6 +47,9 @@ export function GalleryDocument() {
   const { t } = useTranslation("gallery");
   const [status, setStatus] = useState<DocStatus>("draft");
   const [sequence, setSequence] = useState(1);
+  // A blank order from Save and new has no record yet: nothing attached, no
+  // steps, and nothing to submit, print or void until it is saved.
+  const [fresh, setFresh] = useState(false);
   const number = documentNumber(sequence);
   const schema = useMemo(() => makeDocumentSchema(t), [t]);
   const form = useZodForm<DocumentInput, DocumentOutput>({
@@ -59,7 +62,7 @@ export function GalleryDocument() {
       lines: startingLines(true),
     },
   });
-  const actions = useDocumentActions(form, status, number, setStatus);
+  const actions = useDocumentActions(form, status, number, setStatus, fresh);
   const columns = useMemo<LineColumn[]>(
     () =>
       (
@@ -87,7 +90,9 @@ export function GalleryDocument() {
         <Select
           value={status}
           onValueChange={(value) => {
-            if (isStatus(value)) setStatus(value);
+            if (!isStatus(value)) return;
+            setStatus(value);
+            setFresh(false);
           }}
         >
           <SelectTrigger
@@ -127,19 +132,24 @@ export function GalleryDocument() {
           family: DOC_FAMILY[status],
           label: t(`document.status.${status}`),
         }}
-        attachments={[
-          {
-            id: "po",
-            name: t("document.attachment"),
-            size: t("document.attachmentSize"),
-          },
-        ]}
+        attachments={
+          fresh
+            ? []
+            : [
+                {
+                  id: "po",
+                  name: t("document.attachment"),
+                  size: t("document.attachmentSize"),
+                },
+              ]
+        }
         actions={actions}
         draftKey="gallery.document-form"
         onSave={(values) => fakeDocumentSave(values, t)}
         onSaved={(_result, andNew) => {
           toast.done(t(andNew ? "document.savedNew" : "document.saved"));
           // The template has already reset the fields to nextValues.
+          setFresh(andNew);
           if (andNew) {
             setStatus("draft");
             setSequence((n) => n + 1);
@@ -163,7 +173,7 @@ export function GalleryDocument() {
             },
           ],
         })}
-        tabs={galleryDocumentTabs(t, status, number)}
+        tabs={galleryDocumentTabs(t, status, number, fresh)}
       />
     </div>
   );

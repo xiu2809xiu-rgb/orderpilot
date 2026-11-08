@@ -17,10 +17,13 @@ export function useDocumentActions(
   status: DocStatus,
   number: string,
   setStatus: (status: DocStatus) => void,
+  /** A blank order from Save and new, not saved yet. */
+  fresh = false,
 ): DocumentAction[] {
   const { t } = useTranslation("gallery");
+  const unsaved = fresh ? t("document.blocked.unsaved") : undefined;
   const only = (ok: boolean, key: string) =>
-    ok ? undefined : t(`document.blocked.${key}`);
+    unsaved ?? (ok ? undefined : t(`document.blocked.${key}`));
   const done = (next: DocStatus, key: string) => () => {
     setStatus(next);
     toast.done(t(`document.${key}`, { number }));
@@ -59,7 +62,7 @@ export function useDocumentActions(
       blocked: only(status === "waiting", "approve"),
       reasoned: reasoned("draft", "reject"),
     },
-    { id: "print", kind: "print", permission: "orders.read" },
+    { id: "print", kind: "print", permission: "orders.read", blocked: unsaved },
     {
       id: "void",
       kind: "void",

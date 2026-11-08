@@ -76,6 +76,19 @@ describe("the component gallery route", () => {
         name: "Sales order SO-20261106-0002",
       }),
     ).toBeVisible();
+    // A blank order has no record yet: nothing attached, no steps and no
+    // checks, and nothing to submit, print or void until it is saved.
+    expect(screen.queryByText("Customer PO as received.pdf")).toBeNull();
+    expect(screen.getByText("No attachments yet.")).toBeVisible();
+    expect(
+      screen.getByText("No steps yet. They appear as the document moves."),
+    ).toBeVisible();
+    expect(screen.getByRole("tab", { name: "Checks" })).toBeVisible();
+    for (const name of ["Submit for approval", "Print or PDF", "Void"]) {
+      const button = within(form).getByRole("button", { name });
+      expect(button, name).toHaveAttribute("aria-disabled", "true");
+      expect(button, name).toHaveAccessibleDescription("Save the order first.");
+    }
   }, 20_000);
 
   it("blocks Save on an approved order and says why", async () => {

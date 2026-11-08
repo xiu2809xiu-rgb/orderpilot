@@ -265,7 +265,8 @@
       "closed": {
         "approved": "An approved order cannot be changed.",
         "void": "A voided order cannot be changed."
-      }
+      },
+      "unsaved": "Save the order first."
     },
     "rejectTitle": "Reject this order?",
     "rejectDescription": "The order goes back to draft. The reason is shown with it.",
