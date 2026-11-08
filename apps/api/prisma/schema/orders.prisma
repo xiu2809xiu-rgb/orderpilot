@@ -1,0 +1,56 @@
+// Area 1 models: the sales orders OrderPilot stores itself (ADR 0046). The 120
+// sample orders are never stored: their dates move with today, so they are
+// generated each day. Nothing here is written to Navision.
+
+/// How far the entry of an order has got. It is not the order's status: that
+/// stays in area 2's state machine.
+enum OrderCaptureState {
+  DRAFT
+  SUBMITTED
+  VOID
+}
+
+/// A sales order made in OrderPilot. Customers and items are matched on their
+/// Navision numbers, kept here as plain text, never on names.
+model SalesOrder {
+  id                 String            @id @default(uuid(7)) @db.Uuid
+  /// OrderPilot's own number, `SO-20261108-0001`, from the record number service.
+  orderNo            String            @unique
+  /// Stays null until the order exists in Navision (ADR 0046).
+  navisionNo         String?
+  captureState       OrderCaptureState @default(DRAFT)
+  customerNo         String
+  /// The customer's PO number. The index is not unique: whether a revised PO may
+  /// keep its number is decided with the write route (P-49).
+  externalDocumentNo String
+  orderDate          DateTime          @db.Date
+  shipmentDate       DateTime?         @db.Date
+  currencyCode       String            @default("USD")
+  prepaymentPercent  Decimal           @default(0) @db.Decimal(5, 2)
+  /// The person who made it, as a plain id: no relation into another area's table.
+  createdBy          String            @db.Uuid
+  createdAt          DateTime          @default(now()) @db.Timestamptz(3)
+  updatedAt          DateTime          @updatedAt @db.Timestamptz(3)
+  lines              SalesOrderLine[]
+
+  // For P-49's check for a repeated PO. The list reads in memory (ADR 0046), so
+  // no index on the state or the date until a SQL-side page needs one.
+  @@index([customerNo, externalDocumentNo])
+}
+
+/// One line of a stored order. The line amount is worked out (quantity times
+/// unit price), never stored.
+model SalesOrderLine {
+  id          String     @id @default(uuid(7)) @db.Uuid
+  orderId     String     @db.Uuid
+  order       SalesOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  lineNo      Int
+  itemNo      String
+  description String
+  quantity    Decimal    @db.Decimal(18, 3)
+  unitPrice   Decimal    @db.Decimal(18, 2)
+  qtyToShip   Decimal    @db.Decimal(18, 3)
+
+  @@unique([orderId, lineNo])
+  @@index([itemNo])
+}

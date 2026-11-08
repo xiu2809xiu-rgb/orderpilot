@@ -6,18 +6,18 @@ import { PlannedPage } from "./PlannedPage";
 
 describe("PlannedPage", () => {
   beforeAll(async () => {
-    await i18n.loadNamespaces(["orders", "planned"]);
+    await i18n.loadNamespaces(["documents", "planned"]);
   });
 
   it("shows the area's title, a Planned badge, a note for developers and what arrives", async () => {
-    const { container } = render(<PlannedPage namespace="orders" />);
+    const { container } = render(<PlannedPage namespace="documents" />);
     expect(await screen.findByRole("heading", { level: 1 })).toHaveTextContent(
-      i18n.t("title", { ns: "orders" }),
+      i18n.t("title", { ns: "documents" }),
     );
     expect(screen.getByText("Planned")).toBeInTheDocument();
     expect(screen.getByText(/Developer view/)).toBeInTheDocument();
     const list = screen.getByRole("list");
-    const arrives = i18n.t("lists.orders", {
+    const arrives = i18n.t("lists.documents", {
       ns: "planned",
       returnObjects: true,
     }) as string[];

@@ -156,7 +156,7 @@ describe("signed in", () => {
   });
 
   it("shows the not-found page for a planned area, as for any unknown address", async () => {
-    renderApp("/orders", { session: sessionFor("SUPPORT") });
+    renderApp("/constellation", { session: sessionFor("SUPPORT") });
     expect(
       await screen.findByRole("heading", { name: "Page not found" }),
     ).toBeInTheDocument();
@@ -171,18 +171,18 @@ describe("signed in", () => {
     document.cookie = "op_csrf=csrf-token-1";
     apiClient.markSessionStarted();
     // The shell loads the text of reachable areas; this run adds a planned one.
-    await i18n.loadNamespaces(["orders", "planned"]);
+    await i18n.loadNamespaces(["constellation", "planned"]);
     const router = createMemoryRouter(buildRoutes(allFeatures, true), {
-      initialEntries: ["/orders"],
+      initialEntries: ["/constellation"],
     });
     render(<App router={router} />);
     expect(
-      await screen.findByRole("heading", { name: "Orders" }),
+      await screen.findByRole("heading", { name: "Constellation" }),
     ).toBeInTheDocument();
     expect(screen.getByText("Planned")).toBeInTheDocument();
     expect(screen.getByText(/Developer view/)).toBeInTheDocument();
     const crumbs = screen.getByRole("navigation", { name: "Breadcrumb" });
-    expect(within(crumbs).getByText("Orders")).toHaveAttribute(
+    expect(within(crumbs).getByText("Constellation")).toHaveAttribute(
       "aria-current",
       "page",
     );
@@ -391,7 +391,7 @@ describe("accessibility (axe)", () => {
   });
 
   it("finds nothing on the not-found page or the settings page", async () => {
-    const first = renderApp("/orders", { session: sessionFor("SUPPORT") });
+    const first = renderApp("/documents", { session: sessionFor("SUPPORT") });
     await screen.findByRole("heading", { name: "Page not found" });
     expect(await violations(first.container)).toEqual([]);
     first.unmount();

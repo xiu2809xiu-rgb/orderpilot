@@ -11,6 +11,8 @@ import {
 } from "@orderpilot/shared";
 import { syntheticDataset } from "@orderpilot/synthetic-data";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { SalesOrder } from "../../src/modules/orders/domain/sales-order.js";
+import { SalesOrderRepository } from "../../src/modules/orders/sales-order.repository.js";
 import { API, call, demoSignIn, type Browser } from "../support/auth.js";
 import { resetTestData } from "../support/reset.js";
 import { createTestApp, type TestApp } from "../support/test-app.js";
@@ -228,6 +230,57 @@ describe("master data routes (mock Navision)", () => {
         const support = JSON.stringify((await get("SUPPORT", path)).body);
         expect(support).toContain(`"${value}"`);
       }
+    });
+  });
+  describe("a stored order", () => {
+    const orderNo = "SO-20261108-0001";
+
+    it("shows up on the customer and the item once it is submitted, and not before", async () => {
+      const customer = dataset.customers[0];
+      if (!customer) throw new Error("no customer");
+      const repository = t.app.get(SalesOrderRepository, { strict: false });
+      const make = (no: string, captureState: "draft" | "submitted") =>
+        new SalesOrder({
+          orderNo: no,
+          navisionNo: null,
+          captureState,
+          customerNo: customer.no,
+          externalDocumentNo: `PO-${no.slice(-4)}`,
+          orderDate: "2026-11-08",
+          shipmentDate: null,
+          currencyCode: "USD",
+          prepaymentPercent: "0.00",
+          createdBy: "00000000-0000-4000-8000-000000000001",
+          lines: [
+            {
+              lineNo: 1,
+              itemNo: item.no,
+              description: item.description,
+              quantity: "2",
+              unitPrice: "12.50",
+              qtyToShip: "2",
+            },
+          ],
+        });
+      const figures = async () =>
+        itemResponseSchema.parse(
+          (await get("SUPPORT", `${M}/items/${item.no}`)).body,
+        ).data;
+      const before = await figures();
+      await repository.insert(make("SO-20261108-0002", "draft"));
+      await repository.insert(make(orderNo, "submitted"));
+
+      const shown = customerResponseSchema.parse(
+        (await get("SUPPORT", `${M}/customers/${customer.no}`)).body,
+      );
+      const numbers = shown.data.openOrders.map((o) => o.orderNo);
+      expect(numbers).toContain(orderNo);
+      expect(numbers).not.toContain("SO-20261108-0002");
+      const after = await figures();
+      expect(after.orderLines.map((l) => l.orderNo)).toContain(orderNo);
+      expect(after.orderLines).toHaveLength(before.orderLines.length + 1);
+      expect(after.qtyOnSalesOrder).toBe(before.qtyOnSalesOrder);
+      expect(after.availableStock).toBe(before.availableStock);
     });
   });
 });

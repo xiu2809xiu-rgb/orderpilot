@@ -34,6 +34,13 @@ export function RowMenu<Row>({
   onRun,
 }: RowMenuProps<Row>) {
   const { t } = useTranslation("list-page");
+  const session = useSessionStore((state) => state.session);
+  // A menu with nothing in it is a dead control, so such a row draws none.
+  const empty =
+    actions.length === 0 &&
+    !target.href &&
+    rowMenuItemsFor(session, target).length === 0;
+  if (empty) return null;
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

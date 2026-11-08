@@ -1,5 +1,6 @@
-import { Package } from "lucide-react";
-import { defineFeature, devOnlyPage } from "../define";
+import { ClipboardList } from "lucide-react";
+import { lazy } from "react";
+import { defineFeature } from "../define";
 
 export default defineFeature({
   id: "orders",
@@ -12,12 +13,9 @@ export default defineFeature({
       module: "sales",
       label: "orders:menu.orders",
       to: "/orders",
-      icon: Package,
+      icon: ClipboardList,
     },
   ],
   cues: [],
-  planned: true,
-  Page: devOnlyPage(
-    import.meta.env.DEV ? () => import("./OrdersPage") : undefined,
-  ),
+  Page: lazy(() => import("./OrdersPage")),
 });

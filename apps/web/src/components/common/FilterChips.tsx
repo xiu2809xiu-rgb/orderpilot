@@ -31,7 +31,7 @@ export function FilterChips({
           <button
             type="button"
             aria-label={t("filterChips.clear", { label: chip.label })}
-            className="grid size-7 shrink-0 place-items-center rounded-full hover:bg-background/60 focus-visible:outline-2 focus-visible:outline-ring"
+            className="relative grid size-7 shrink-0 place-items-center rounded-full hover:bg-background/60 focus-visible:outline-2 focus-visible:outline-ring pointer-coarse:after:absolute pointer-coarse:after:-inset-2 pointer-coarse:after:content-['']"
             onClick={() => {
               const next = Object.fromEntries(
                 Object.entries(filters).filter(([key]) => key !== chip.id),

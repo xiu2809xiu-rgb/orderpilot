@@ -17,6 +17,10 @@ import {
   type VendorRow,
 } from "@orderpilot/shared";
 import { NotFoundError } from "../../common/domain-error.js";
+import {
+  ORDER_DIRECTORY,
+  type OrderDirectory,
+} from "../orders/domain/order-directory.js";
 import { SAMPLE_RULES, mask } from "../governance/domain/masking.js";
 import {
   MASTER_DATA_READER,
@@ -26,6 +30,10 @@ import {
   type MasterDataSalesOrder,
   type MasterDataSpr,
 } from "./domain/master-data-reader.js";
+import {
+  toMasterDataSalesOrder,
+  listedInMasterData,
+} from "./domain/order-mapping.js";
 import { StockPosition, isOpenOrder } from "./domain/stock-position.js";
 
 export interface MasterDataPage<Row> {
@@ -178,7 +186,19 @@ function orderLinesOf(
 export class MasterDataService {
   constructor(
     @Inject(MASTER_DATA_READER) private readonly reader: MasterDataReader,
+    @Inject(ORDER_DIRECTORY) private readonly directory: OrderDirectory,
   ) {}
+
+  /**
+   * Every order master data lists, sample or stored, through the one directory.
+   * `MasterDataReader.salesOrders()` stays on the port for P-20, but nothing
+   * here asks it, or a stored order would be missing from items and customers.
+   */
+  private async salesOrders(): Promise<readonly MasterDataSalesOrder[]> {
+    return (await this.directory.list())
+      .filter(listedInMasterData)
+      .map(toMasterDataSalesOrder);
+  }
 
   private field(role: Role, field: string, value: string): MaskedField {
     return mask(SAMPLE_RULES, role, field, value);
@@ -220,7 +240,7 @@ export class MasterDataService {
   ): Promise<MasterDataPage<ItemRow>> {
     const [items, orders, names] = await Promise.all([
       this.reader.items(),
-      this.reader.salesOrders(),
+      this.salesOrders(),
       this.vendorNames(),
     ]);
     const rows = items
@@ -248,7 +268,7 @@ export class MasterDataService {
     const [items, orders, purchaseOrders, sprs, names, customers] =
       await Promise.all([
         this.reader.items(),
-        this.reader.salesOrders(),
+        this.salesOrders(),
         this.reader.purchaseOrders(),
         this.reader.sprs(),
         this.vendorNames(),
@@ -309,7 +329,7 @@ export class MasterDataService {
   ): Promise<MasterDataPage<CustomerRow>> {
     const [customers, orders] = await Promise.all([
       this.reader.customers(),
-      this.reader.salesOrders(),
+      this.salesOrders(),
     ]);
     const rows = customers
       .filter(
@@ -340,7 +360,7 @@ export class MasterDataService {
   async customer(no: string, role: Role): Promise<CustomerDetail> {
     const [customers, orders] = await Promise.all([
       this.reader.customers(),
-      this.reader.salesOrders(),
+      this.salesOrders(),
     ]);
     const customer = customers.find((candidate) => candidate.no === no);
     if (!customer) throw new NotFoundError("Customer");
@@ -415,7 +435,7 @@ export class MasterDataService {
       this.reader.vendors(),
       this.reader.items(),
       this.reader.purchaseOrders(),
-      this.reader.salesOrders(),
+      this.salesOrders(),
     ]);
     const vendor = vendors.find((candidate) => candidate.no === no);
     if (!vendor) throw new NotFoundError("Vendor");

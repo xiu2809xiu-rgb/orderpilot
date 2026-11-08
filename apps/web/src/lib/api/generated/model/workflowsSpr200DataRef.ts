@@ -7,7 +7,7 @@
  */
 
 export type WorkflowsSpr200DataRef = {
-  /** @pattern ^(SPR|PI|EXC)-\d{8}-\d{4,}$ */
+  /** @pattern ^(SPR|PI|EXC|SO)-\d{8}-\d{4,}$ */
   recordNo: string;
   /**
      * @minLength 1

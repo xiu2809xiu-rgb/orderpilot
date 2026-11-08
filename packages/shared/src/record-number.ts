@@ -1,14 +1,20 @@
 import { z } from "zod";
 
 /** OrderPilot's own record types and their number prefixes. */
-export const RECORD_TYPES = ["SPR", "PI", "EXC"] as const;
+export const RECORD_TYPES = ["SPR", "PI", "EXC", "SO"] as const;
 export const recordTypeSchema = z.enum(RECORD_TYPES);
 export type RecordType = z.infer<typeof recordTypeSchema>;
+
+// Both patterns come from the list, so a new type cannot be added to one and forgotten in the other.
+const TYPE_PATTERN = RECORD_TYPES.join("|");
 
 /** `SPR-20261102-0001`: type prefix, date (Singapore), running number for that day and type. */
 export const recordNumberSchema = z
   .string()
-  .regex(/^(SPR|PI|EXC)-\d{8}-\d{4,}$/, "Use a number like SPR-20261102-0001");
+  .regex(
+    new RegExp(`^(${TYPE_PATTERN})-\\d{8}-\\d{4,}$`),
+    "Use a number like SPR-20261102-0001",
+  );
 export type RecordNumber = z.infer<typeof recordNumberSchema>;
 
 const SINGAPORE_OFFSET_MS = 8 * 60 * 60 * 1000;
@@ -42,7 +48,9 @@ export interface ParsedRecordNumber {
 }
 
 export function parseRecordNumber(value: string): ParsedRecordNumber | null {
-  const match = /^(SPR|PI|EXC)-(\d{8})-(\d{4,})$/.exec(value);
+  const match = new RegExp(`^(${TYPE_PATTERN})-(\\d{8})-(\\d{4,})$`).exec(
+    value,
+  );
   if (!match) return null;
   return {
     type: match[1] as RecordType,
