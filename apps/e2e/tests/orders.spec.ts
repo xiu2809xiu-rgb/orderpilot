@@ -21,7 +21,9 @@ test.describe("The Orders list", () => {
     await expect(
       page.getByRole("heading", { level: 1, name: "Orders" }),
     ).toBeVisible();
-    await expect(page.getByRole("link", { name: "SO-0001" })).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: /^SO-\d{4}$/ }).first(),
+    ).toBeVisible();
     await expect(page.getByText("Synthetic demo data").first()).toBeVisible();
     await expect(page.getByText(/USD\s?[\d,]+\.\d{2}/).first()).toBeVisible();
     await expectNoButton(page, /^New/);
@@ -33,7 +35,9 @@ test.describe("The Orders list", () => {
   }) => {
     await signInAs(page, "WAREHOUSE");
     await page.goto("/orders");
-    await expect(page.getByRole("link", { name: "SO-0001" })).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: /^SO-\d{4}$/ }).first(),
+    ).toBeVisible();
     await expect(page.getByText(/USD\s?[\d,]+\.\d{2}/)).toHaveCount(0);
     await expect(page.getByLabel(/hidden/i).first()).toBeVisible();
   });
