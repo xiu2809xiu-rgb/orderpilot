@@ -39,9 +39,9 @@ export function useActionRunner(): {
     (action: DocumentAction) => {
       // Checked at the click as well as when the bar was drawn: what is on
       // screen belongs to the person who opened it.
-      if (!isSameViewer(mountViewer) || inFlight.current) return;
+      if (!isSameViewer(mountViewer)) return;
       if (action.reasoned) {
-        setAsking(action);
+        if (!inFlight.current) setAsking(action);
         return;
       }
       const work = action.run;
