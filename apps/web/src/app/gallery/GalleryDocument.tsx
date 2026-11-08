@@ -16,8 +16,9 @@ import { GalleryDocumentFields } from "./GalleryDocumentFields";
 import { useDocumentActions } from "./useDocumentActions";
 import {
   DOC_FAMILY,
-  DOC_NUMBER,
+  blankDocument,
   DOC_STATUSES,
+  documentNumber,
   fakeDocumentSave,
   makeDocumentSchema,
   type DocStatus,
@@ -45,6 +46,8 @@ function today(): string {
 export function GalleryDocument() {
   const { t } = useTranslation("gallery");
   const [status, setStatus] = useState<DocStatus>("draft");
+  const [sequence, setSequence] = useState(1);
+  const number = documentNumber(sequence);
   const schema = useMemo(() => makeDocumentSchema(t), [t]);
   const form = useZodForm<DocumentInput, DocumentOutput>({
     schema,
@@ -56,7 +59,7 @@ export function GalleryDocument() {
       lines: startingLines(true),
     },
   });
-  const actions = useDocumentActions(form, status, setStatus);
+  const actions = useDocumentActions(form, status, number, setStatus);
   const columns = useMemo<LineColumn[]>(
     () =>
       (
@@ -106,8 +109,8 @@ export function GalleryDocument() {
       <DocumentForm
         formId="gallery-document"
         form={form}
-        title={t("document.title", { number: DOC_NUMBER })}
-        number={DOC_NUMBER}
+        title={t("document.title", { number })}
+        number={number}
         headingLevel={2}
         demo="synthetic"
         formLabel={t("document.formLabel")}
@@ -132,11 +135,19 @@ export function GalleryDocument() {
         onSave={(values) => fakeDocumentSave(values, t)}
         onSaved={(_result, andNew) => {
           toast.done(t(andNew ? "document.savedNew" : "document.saved"));
-          if (andNew) form.reset();
+          // The template has already reset the fields to nextValues.
+          if (andNew) {
+            setStatus("draft");
+            setSequence((n) => n + 1);
+          }
         }}
+        nextValues={() => blankDocument(today())}
+        {...(closed
+          ? { saveBlocked: t(`document.blocked.closed.${status}`) }
+          : {})}
         allowClean
         print={() => ({
-          title: t("document.title", { number: DOC_NUMBER }),
+          title: t("document.title", { number }),
           fields: [
             {
               label: t("document.fields.customerPo"),
@@ -148,7 +159,7 @@ export function GalleryDocument() {
             },
           ],
         })}
-        tabs={galleryDocumentTabs(t, status)}
+        tabs={galleryDocumentTabs(t, status, number)}
       />
     </div>
   );

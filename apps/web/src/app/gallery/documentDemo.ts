@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { StatusFamily } from "@/components/common";
 import { requiredLookup } from "@/components/form";
 import { ApiError } from "@/lib/api/errors";
+import { emptyLine } from "@/components/lines-grid";
 import { makeLinesSchema, type LinesOutput } from "./linesDemo";
 
 export const DOC_STATUSES = ["draft", "waiting", "approved", "void"] as const;
@@ -12,10 +13,25 @@ export const DOC_FAMILY: Record<DocStatus, StatusFamily> = {
   draft: "draft",
   waiting: "waiting",
   approved: "ready",
-  void: "done",
+  void: "blocked",
 };
 
-export const DOC_NUMBER = "SO-20261106-0001";
+/** Numbers run on from the one the demo starts with, as a real series would. */
+export function documentNumber(sequence: number): string {
+  return `SO-20261106-${String(sequence).padStart(4, "0")}`;
+}
+export const DOC_NUMBER = documentNumber(1);
+
+/** A document with nothing in it yet: what Save and new opens. */
+export function blankDocument(orderDate: string): DocumentInput {
+  return {
+    customer: null,
+    customerPo: "",
+    orderDate,
+    paymentTerms: "",
+    lines: [emptyLine()],
+  };
+}
 
 /** The gallery's own schema: a header and the lines grid's lines. */
 export function makeDocumentSchema(t: TFunction<"gallery">) {

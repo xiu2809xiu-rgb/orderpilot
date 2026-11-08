@@ -1,4 +1,4 @@
-import { screen, within } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { axeViolations } from "@/test/axe";
@@ -54,6 +54,47 @@ describe("the component gallery route", () => {
     expect(within(form).getByText("Draft")).toBeVisible();
     expect(screen.getByRole("tab", { name: /Checks/ })).toBeVisible();
   });
+
+  it("opens a blank order with the next number after Save and new", async () => {
+    const user = userEvent.setup();
+    renderApp("/gallery", { session: sessionFor("SUPPORT") });
+    const form = await screen.findByRole("form", { name: "Sales order" });
+    const po = within(form).getByRole("textbox", {
+      name: /Customer PO number/,
+    });
+    expect(po).toHaveValue("CPO-7731");
+    await user.clear(po);
+    await user.type(po, "CPO-8800");
+    await user.click(
+      within(form).getByRole("button", { name: "Save and new" }),
+    );
+    expect(await screen.findByText(/A new order is ready/)).toBeVisible();
+    expect(po).toHaveValue("");
+    expect(
+      screen.getByRole("heading", {
+        level: 2,
+        name: "Sales order SO-20261106-0002",
+      }),
+    ).toBeVisible();
+  }, 20_000);
+
+  it("blocks Save on an approved order and says why", async () => {
+    const user = userEvent.setup();
+    renderApp("/gallery", { session: sessionFor("APPROVER") });
+    const form = await screen.findByRole("form", { name: "Sales order" });
+    await user.click(
+      within(form).getByRole("button", { name: "Submit for approval" }),
+    );
+    await user.click(
+      await within(form).findByRole("button", { name: "Approve" }),
+    );
+    await user.click(within(form).getByRole("button", { name: "Save" }));
+    await waitFor(() =>
+      expect(within(form).getByRole("status")).toHaveTextContent(
+        "An approved order cannot be changed.",
+      ),
+    );
+  }, 20_000);
 
   it("lets the table be forced into its states", async () => {
     const user = userEvent.setup();

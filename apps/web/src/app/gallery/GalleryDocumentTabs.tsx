@@ -1,6 +1,6 @@
 import type { TFunction } from "i18next";
 import type { DocumentTabsSpec } from "@/components/document-form";
-import { DOC_NUMBER, type DocStatus } from "./documentDemo";
+import type { DocStatus } from "./documentDemo";
 
 const STEPS = ["created", "submitted", "approved"] as const;
 
@@ -8,6 +8,7 @@ const STEPS = ["created", "submitted", "approved"] as const;
 export function galleryDocumentTabs(
   t: TFunction<"gallery">,
   status: DocStatus,
+  number: string,
 ): DocumentTabsSpec {
   const reached = status === "draft" ? 1 : status === "waiting" ? 2 : 3;
   return {
@@ -26,6 +27,6 @@ export function galleryDocumentTabs(
       content: <p className="text-sm">{t("document.checkFailed")}</p>,
     },
     documents: { count: 0, content: null },
-    log: { entityType: "Order", entityId: DOC_NUMBER },
+    log: { entityType: "Order", entityId: number },
   };
 }
