@@ -39,6 +39,6 @@ The sales flow, today and with OrderPilot. Today's map is our reading of the bri
 The steps where OrderPilot must earn trust, so the prototype gets them right first:
 
 1. **Step 1, the confirm screen.** If confirming takes longer than typing, Support will not use it.
-2. **Step 2, the approver's view.** Janet must trust the checks enough to approve from one screen.
+2. **Step 2, the approver's view.** Rachel must trust the checks enough to approve from one screen.
 3. **Step 4, the payment gate.** A false "paid" ships unpaid goods; a missed "paid" delays a customer who has paid.
 4. **Step 6, the mismatch.** One mismatch caught before shipping is the demo's proof.

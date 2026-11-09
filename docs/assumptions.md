@@ -41,7 +41,7 @@ Every detail below comes from the standard product, as written up in [the domain
 | A-20 | The pilot is the sales flow, from the customer's PO to the tracker                                             | The Must list moves to the purchase flow                    | Q-3  | Challenged |
 | A-21 | **Open rule, configurable:** an SPR is raised when stock is short. In the MVP a person raises it with a button | Only the configuration changes                              | Q-5  | Challenged |
 | A-22 | **Open rule, configurable:** the PI goes to the customer first, and to the warehouse after payment             | Only the configuration changes                              | Q-4  | Open       |
-| A-23 | **Open rule, configurable:** one approver (Janet) approves SPRs up to a limit, and amounts above it escalate   | Only the configuration changes                              | Q-6  | Changed    |
+| A-23 | **Open rule, configurable:** one approver (Rachel) approves SPRs up to a limit, and amounts above it escalate  | Only the configuration changes                              | Q-6  | Changed    |
 | A-24 | **Open rule, configurable:** while the approver is away, a named substitute approves                           | Only the configuration changes                              | Q-6  | Open       |
 | A-25 | Packing starts only after Finance confirms the payment                                                         | The payment gate becomes a warning, not a block             | Q-9  | Open       |
 | A-26 | A quantity difference between the packing list and the PO is a mismatch, with no tolerance                     | The rule gets a tolerance, or partial shipments are allowed | Q-8  | Partly     |
