@@ -44,7 +44,7 @@ Each document lists the fields OrderPilot reads, and the Business Central field 
 
 - **From:** a Product Manager, who is also the purchase manager at Spectra. It is raised from stock on hand and the last three months' run rate, not from one order's shortfall (the planned story P-61 moves the pre-fill; today it still comes from an order). **Format today:** unknown; we have asked for the form (request 1). In OrderPilot it is a record of its own, numbered like `SPR-20261102-0001`.
 - **Routed by:** a coordinator, a Support user, to the group of three management approvers. Any one of them decides, and there is no substitute. A reminder goes to the whole group after 24 hours.
-- **Becomes:** an approval task, then a vendor PO draft, which the Product Manager places (planned: phase 2). Where the vendor makes Spectra use its own portal, the portal's reference is recorded instead.
+- **Becomes:** an approval task, then a vendor PO draft, which the Product Manager places (planned: the thin purchase flow, A-20). Where the vendor makes Spectra use its own portal, the portal's reference is recorded instead.
 
 | Field                                 | Business Central field it relates to                      |
 | ------------------------------------- | --------------------------------------------------------- |
@@ -106,7 +106,7 @@ Fields: the permit number, the country, the issue and expiry dates, the importer
 ### Vendor PI
 
 - **From:** the vendor, by email, quoting our PO number. **Format:** PDF.
-- **OrderPilot's part:** checked against the vendor PO, and its bank details against the Vendor Bank Account on record. Any difference holds the payment until Finance and a second approver release it (planned: phase 2, area 4, E2E #4).
+- **OrderPilot's part:** checked against the vendor PO, and its bank details against the Vendor Bank Account on record. Any difference holds the payment until Finance and a second approver release it (planned: the purchase flow, area 4, E2E #4).
 
 | Field on the vendor PI   | Business Central field                                  |
 | ------------------------ | ------------------------------------------------------- |
@@ -174,7 +174,7 @@ The exact envelope, paging and filters are P-19's to fix, and it updates this se
 When Spectra sends samples, they are used to confirm the formats above and nothing else.
 
 1. **Only with Spectra's OK,** and only on one machine. The person who receives them saves them in `samples/` at the repository root, which Git ignores (today). The samples guards in the Git hooks (planned: P-5) refuse any sample file in a commit or a push.
-2. **Never to an AI.** Don't open a sample in an AI tool, paste it into a chat or send it to a third-party AI service. No Spectra document goes to one without Spectra's written OK, in an approved region (A-31). OrderPilot's AI provider stays on `mock` (planned: P-17).
+2. **Never to an AI.** Don't open a sample in an AI tool, paste it into a chat or send it to a third-party AI service. No Spectra document goes to one without Spectra's written OK (A-31). Spectra said aloud on 5 Nov that it has no restrictions for the proof of concept, but until one written line arrives, OrderPilot's AI provider stays on `mock` (planned: P-17). After it arrives, samples may go to a cloud AI service that does not train on inputs, in a named region, and still only from `samples/` on one machine.
 3. **On the throwaway stack only.** Run OrderPilot against a sample only on the samples stack, which only that machine can reach and which is deleted afterwards: `pnpm samples:up`, then `pnpm samples:down` (P-13, `docker-compose.samples.yml`).
 4. **Write down shapes, not values.** Record what you learn in this file, in our own words: the fields, their order, the layout, the number formats. Never a name, a price, an account number or a screenshot.
 5. **Delete when done.** Delete the samples from `samples/` once the formats are recorded, or sooner if Spectra asks, and add a line to the log below.
