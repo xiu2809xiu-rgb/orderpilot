@@ -37,6 +37,14 @@ X-CSRF-Token: {{csrf}}
 
 { "comment": "Within my limit." }
 
+### The same approve with an Idempotency-Key. Send it twice: the second answer is the first one, and nothing runs again.
+POST {{baseUrl}}/api/v1/workflows/sprs/SPR-20261102-0001/approve
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+Idempotency-Key: try-approve-SPR-20261102-0001
+
+{ "comment": "Within my limit." }
+
 ### A comment is required: this one is refused with VALIDATION_FAILED.
 POST {{baseUrl}}/api/v1/workflows/sprs/SPR-20261102-0001/reject
 Content-Type: application/json
