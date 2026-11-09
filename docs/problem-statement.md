@@ -25,7 +25,7 @@ Problem Statement #11, Spectra Innovations. Written on 31 Oct 2026, before the b
 
 **What the brief asks for.** A tool that pulls part numbers, quantities, prices and shipment details out of these documents; compares the documents with each other and raises disagreements for a person; sends each approval and task to the right group, with reminders; and shows every order's status, owner, open actions and exceptions in one place. It suggests starting with one flow, probably sales, while staff keep posting in Business Central. Human approvals and the financial controls stay.
 
-**Spectra's own idea.** AI handles the reading and the variety of documents; a workflow engine applies the business rules, the limits and the order of the steps. Spectra would judge success by five measures: order-processing time, manual touches per order, data-entry errors, approval turnaround and overdue orders.
+**Spectra's own idea.** AI handles the reading and the variety of documents; a workflow engine applies the business rules, the limits and the order of the steps. Spectra would judge success by six measures, ranked as time first, then seeing where an order is held up, then fewer errors: PO received to PI sent, PO received to shipped, time stuck at each step, mismatches caught before anything is issued, time to decide an SPR, and time to produce an audit pack. They replace the five of the brief (order-processing time, manual touches per order, data-entry errors, approval turnaround and overdue orders), each old measure mapped to a new one in [CLAUDE.md](../CLAUDE.md#targets).
 
 **Our answer: OrderPilot.** An order-automation layer that sits beside Business Central and never replaces it, under one tagline: **AI reads, rules decide, people approve.** A document is read once, a person confirms what the AI is unsure of, and the confirmed data feeds every group's tasks and one tracker. Fixed rules do the comparing and routing. People approve, release, post and pay, and every one of those actions is audited.
 
@@ -51,7 +51,7 @@ OrderPilot's users are Spectra's staff only. Customers, vendors and forwarders n
 | Warehouse                                                   | `WAREHOUSE`       | Packs only paid orders, and checks incoming goods                                     | A packing task that appears only after payment, and documents side by side with mismatches |
 | Finance                                                     | `FINANCE`         | Confirms customer payments and pays vendors                                           | Payment status per order, and a hold whenever a vendor's bank details change               |
 | Logistics                                                   | `LOGISTICS`       | Forwarders, shipment dates, AWB/BL and import permits                                 | Overdue paperwork flagged, and shipping details sent without re-typing                     |
-| Management                                                  | `MANAGEMENT`      | Throughput, delays and errors                                                         | One tracker, and the five measures actually measured                                       |
+| Management                                                  | `MANAGEMENT`      | Throughput, delays and errors                                                         | One tracker, and the six measures actually measured                                        |
 | Auditors                                                    | `AUDITOR`         | Proof that approvals and payments followed the controls                               | A tamper-evident trail, read-only                                                          |
 | IT and whoever supports Business Central                    | `SYSTEM_ADMIN`    | Keep Business Central stable and the system of record                                 | Supported interfaces only, least privilege, health and logs                                |
 | Customers (South Asia, the Middle East and South-East Asia) | None              | Pay first or on credit terms, then wait for goods and papers                          | Correct PIs and invoices, and timely shipping updates                                      |
@@ -153,7 +153,7 @@ Not legal advice: Spectra and its advisers decide what applies. The prototype ru
 5. Email intake, with updates that AI drafts and a person sends (areas 1 and 2).
 6. More check rules (area 3).
 
-**Phase 2, built in Weeks 8 to 12, shown at the Week 18 final:** the purchase flow. An SPR becomes a vendor PO draft, the vendor's PI is checked against the vendor's bank details on record, a changed account holds the payment, the received goods are compared with their documents, and a reminder fires when payment falls due.
+**The purchase flow, started thin beside the sales flow (A-20) and deepened in Weeks 8 to 12, shown in full at the Week 18 final.** An SPR becomes a vendor PO draft, the vendor's PI is checked against the vendor's bank details on record, a changed account holds the payment, the received goods are compared with their documents, and a reminder fires when payment falls due.
 
 **Throughout:** layout mappings, master data from mock Business Central, the template engine, governance (roles, segregation of duties, limits, masking, audit, retention and the rules for data sent to AI), monitoring (logs, traces, metrics, clickstream and AI cost), and an English UI in light and dark themes that meets WCAG 2.2 AA.
 
@@ -176,15 +176,16 @@ Not legal advice: Spectra and its advisers decide what applies. The prototype ru
 
 ## 7. Success metrics
 
-Spectra's five measures come first. There are no baselines yet, so each is a lab estimate on synthetic data until Spectra gives real numbers. [The measurement protocol](design-thinking/success-metrics.md) says how each is measured, manual against OrderPilot.
+Spectra's six measures come first. They replace the five of the brief, and the dashboard still shows the five until area 3 changes them (issue #253). There are no baselines yet, so each is a lab estimate on synthetic data until Spectra gives real numbers. [The measurement protocol](design-thinking/success-metrics.md) says how each is measured, manual against OrderPilot.
 
-| Spectra's measure        | How OrderPilot measures it                                                         | Baseline |
-| ------------------------ | ---------------------------------------------------------------------------------- | -------- |
-| Order-processing time    | Elapsed time per step, PO received to goods released, read from the order's events | To ask   |
-| Manual touches per order | Hand-typed or hand-corrected fields, plus hand-offs between groups                 | To ask   |
-| Data-entry errors        | Confirmed values later found wrong, per 100 fields                                 | To ask   |
-| Approval turnaround      | Hours between an SPR being raised and decided                                      | To ask   |
-| Overdue orders           | Orders late on any step, counted by step and owner                                 | To ask   |
+| Spectra's measure       | How OrderPilot measures it                                                      | Baseline |
+| ----------------------- | ------------------------------------------------------------------------------- | -------- |
+| PO received to PI sent  | Elapsed time from the PO arriving to the PI going out, from the order's events  | To ask   |
+| PO received to shipped  | Elapsed time from the PO arriving to the goods leaving, from the order's events | To ask   |
+| Time stuck at each step | Time at each step and who holds it, with the tracker's overdue flags            | To ask   |
+| Mismatches caught early | Mismatches found before anything is issued, against those found afterwards      | To ask   |
+| Time to decide an SPR   | Hours between an SPR being raised and decided                                   | To ask   |
+| Time for an audit pack  | Minutes to produce a pack of every document for a customer or month             | To ask   |
 
 Our own targets, each with a test:
 
@@ -214,7 +215,7 @@ These change the design most. They are written out in full, in priority order, i
 - What counts as a mismatch, and what happens next.
 - How payments are confirmed, and how vendor bank details are checked.
 - Forwarders, AWB/BL formats and each country's import permits.
-- Baselines for the five measures, and the costliest errors.
+- Baselines for the six measures, and the costliest errors.
 - Which channels staff use, and whether OrderPilot may send or only draft.
 - Whether an AI service may be used, in which region, and what it must never see.
 - Who signs off the results.

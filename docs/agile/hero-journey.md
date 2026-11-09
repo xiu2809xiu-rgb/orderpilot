@@ -57,7 +57,7 @@ Area 4, on area 1's permissions guard. Built in P-10, F-1, F-3 and F-4.
 3. The goods arrive, and the receipt is compared with the invoice, packing list and AWB/BL.
 4. The payment-due reminder fires.
 
-Areas 2, 3 and 4, on area 1's documents. Built in Weeks 8 to 12: F-5 brings the bank-detail hold, and the rest comes from the owners' phase 2 stories.
+Areas 2, 3 and 4, on area 1's documents. The purchase flow starts thin beside the sales flow (A-20) and is deepened in Weeks 8 to 12: F-5 brings the bank-detail hold, and the rest comes from the owners' purchase-flow stories.
 
 ## Presenter slots
 

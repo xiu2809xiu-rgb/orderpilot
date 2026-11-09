@@ -79,7 +79,7 @@ OrderPilot is an AI-assisted order-automation layer **beside** Business Central,
 - **A. Document intake and AI extraction:** email or upload; classification; extraction with a confidence score and a source link per field; layout mappings that AI proposes and a person approves.
 - **B. Master data and Business Central:** items, customers, vendors, prices and stock behind a connector; any write-back needs a preview and an approval.
 - **C. Order workflows and approvals:** a state machine; tasks for each role; SPR approval by the approver group, with limits switchable and none set; the payment gate; reminders and escalations; generated PIs, invoices and packing lists.
-- **D. Checks, the tracker and insights:** part number, quantity, unit price and currency must match exactly across the PO, PI, invoice and packing list, with no tolerance setting for those four, and other differences are warnings; an exceptions queue; one tracker with every order's trail; Spectra's five measures as KPIs.
+- **D. Checks, the tracker and insights:** part number, quantity, unit price and currency must match exactly across the PO, PI, invoice and packing list, with no tolerance setting for those four, and other differences are warnings; an exceptions queue; one tracker with every order's trail; Spectra's six measures as KPIs (planned, replacing the five).
 - **E. AI with a person in the loop:** extraction, mismatch explanations, and drafts that a person sends.
 - **F. Financial controls and governance:** no self-approval; approval limits; bank-detail change control; masking of bank details and prices by role; a tamper-evident audit trail.
 - **G. Monitoring:** tracing, metrics, clickstream analytics, and the AI cost per document.
@@ -95,7 +95,7 @@ OrderPilot is an AI-assisted order-automation layer **beside** Business Central,
   - One mismatch: a packing list whose quantity differs from the PO.
   - The permission check, enforced on the server.
 - **Should, by Week 13, in order:** the payment gate; a PI draft; full matching; AWB/BL and permit follow-ups; email intake with AI-drafted updates; more rules.
-- **Phase 2, Weeks 8 to 12, in the Week 18 final:** the purchase flow, with the bank-detail check.
+- **The purchase flow, brought forward and kept thin (A-20, decided 9 Nov):** Spectra named sales and purchasing as one first priority. The SPR and its approval are already in the Must list. The vendor PO, the vendor PI check, inbound shipments, goods receipt and vendor payments grow beside the sales flow once the sales pilot stands, and are deepened until the Week 18 final, with the bank-detail check.
 - **Out of scope:** replacing Business Central, automatic postings, real payments, and real customer emails.
 
 ### The AI rules
@@ -123,7 +123,7 @@ OrderPilot is an AI-assisted order-automation layer **beside** Business Central,
 - Every extracted field keeps its confidence and source. AI output is a draft until a person confirms it.
 - Match customers, vendors and items on their Business Central numbers, never on names. A look-alike name is shown as a possible match.
 - Open business rules are configuration until Spectra confirms them: the PI sequence and the approver group's limits, which are switchable and have none set. There is no delegation or substitute: any one of the three approvers decides. The SPR trigger is settled: a person raises it from stock and run rate.
-- No Spectra document goes to a third-party AI without their written OK, in an approved region. The one exception is the briefing material Spectra gave the team: it stays outside the repository, and coding tools may read it on Richie's PC (A-31).
+- No Spectra document goes to a third-party AI without their written OK. On the recording of 5 Nov, Spectra said it has no restrictions on AI for the proof of concept, but that is not in writing, so until one written line arrives, samples go only to the mock AI. After it arrives, samples may go to a cloud AI service that does not train on inputs, in a named region, and still only from `samples/` on one machine, never into Git (A-31). Area 4's policy keeps refusing real data until Angelyn reviews the change. The one exception is the briefing material: it stays outside the repository, and coding tools may read it on Richie's PC.
 
 ### Targets
 
@@ -134,7 +134,18 @@ OrderPilot is an AI-assisted order-automation layer **beside** Business Central,
 - time and touches per order measured;
 - every overdue follow-up visible.
 
-Spectra's own five measures sit alongside these: order-processing time, manual touches per order, data-entry errors, approval turnaround and overdue orders.
+Spectra's own measures sit alongside these. Spectra ranked them: time first, then seeing where an order is held up, then fewer errors. They are six, and they replace the five of the brief, each old measure mapped to a new one:
+
+| The five of the brief    | Becomes                                                                       |
+| ------------------------ | ----------------------------------------------------------------------------- |
+| Order-processing time    | PO received to PI sent, and PO received to shipped                            |
+| Manual touches per order | Time stuck at each step, and who holds it                                     |
+| Overdue orders           | Time stuck at each step (the tracker keeps its overdue flags)                 |
+| Data-entry errors        | Mismatches caught before anything is issued                                   |
+| Approval turnaround      | Time to decide an SPR                                                         |
+| (new)                    | Time to produce an audit pack, which Spectra wants in minutes instead of days |
+
+The six are the plan. Today the dashboard still shows the five, as mock lab estimates, until area 3 changes them (issue #253).
 
 ### End-to-end tests
 
