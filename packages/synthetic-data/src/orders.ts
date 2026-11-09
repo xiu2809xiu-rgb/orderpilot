@@ -11,6 +11,7 @@ import { addDays, daysBetween } from "./dates.js";
 import { makeDocuments, type DocumentFactory } from "./documents.js";
 import type { Journey } from "./journey.js";
 import { planCatalogue } from "./catalogue-plan.js";
+import { agreedPrice } from "./last-price.js";
 import { priorityOf } from "./priority.js";
 import type { SeededRandom } from "./random.js";
 import { availableStock } from "./stock.js";
@@ -50,6 +51,7 @@ const pad = (n: number, width = 4): string => String(n).padStart(width, "0");
 
 export interface OrderInputs {
   random: SeededRandom;
+  seed: number;
   reference: string;
   customers: readonly Customer[];
   items: readonly Item[];
@@ -59,14 +61,19 @@ export interface OrderInputs {
   documents: DocumentFactory;
 }
 
-function line(item: Item, quantity: string, shipped: boolean): SalesLine {
+function line(
+  item: Item,
+  quantity: string,
+  shipped: boolean,
+  unitPrice: string,
+): SalesLine {
   return {
     type: "Item",
     no: item.no,
     description: item.description,
     quantity,
-    unitPrice: item.unitPrice,
-    lineAmount: multiplyDecimal(quantity, item.unitPrice),
+    unitPrice,
+    lineAmount: multiplyDecimal(quantity, unitPrice),
     qtyToShip: shipped ? "0" : quantity,
     quantityShipped: shipped ? quantity : "0",
   };
@@ -170,7 +177,7 @@ function scenarioFor(
  * purchase request has one line that wants more than the item can cover.
  */
 export function makeOrders(inputs: OrderInputs): SampleOrder[] {
-  const { random, reference, customers, items, journeys } = inputs;
+  const { random, seed, reference, customers, items, journeys } = inputs;
   const names = (role: Person["role"]) =>
     inputs.people.filter((p) => p.role === role).map((p) => p.name);
   const supports = supportsInRotation(inputs.people);
@@ -247,7 +254,14 @@ export function makeOrders(inputs: OrderInputs): SampleOrder[] {
       );
       const shortBy = Math.max(1, Math.min(random.int(2, 20) * 10, affordable));
       const ordered = String(Number(available) + shortBy);
-      lines.push(line(shortItem, ordered, shipped));
+      lines.push(
+        line(
+          shortItem,
+          ordered,
+          shipped,
+          agreedPrice(seed, customer, shortItem),
+        ),
+      );
       shortfall = {
         itemNo: shortItem.no,
         ordered,
@@ -271,7 +285,14 @@ export function makeOrders(inputs: OrderInputs): SampleOrder[] {
       used.add(at);
       const usual = random.pick(usualQuantities(at));
       const quantity = Math.max(1, Math.min(usual, room));
-      lines.push(line(item, String(quantity), shipped));
+      lines.push(
+        line(
+          item,
+          String(quantity),
+          shipped,
+          agreedPrice(seed, customer, item),
+        ),
+      );
       if (!shipped)
         reserved.set(item.no, (reserved.get(item.no) ?? 0) + quantity);
     }

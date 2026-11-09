@@ -58,6 +58,7 @@ export function createSyntheticDataset(
   const numberer = new RecordNumberer();
   const orders = makeOrders({
     random,
+    seed,
     reference,
     customers,
     items,
