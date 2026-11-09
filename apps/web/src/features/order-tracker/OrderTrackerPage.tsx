@@ -96,7 +96,10 @@ export default function OrderTrackerPage() {
         status={tableStatusOf(tracker)}
         error={tracker.error}
         onRetry={() => void tracker.refetch()}
-        toggleFilters={[{ id: "overdue", label: t("list.overdueOnly") }]}
+        toggleFilters={[
+          { id: "overdue", label: t("list.overdueOnly") },
+          { id: "exceptionsOnly", label: t("list.exceptionsOnly") },
+        ]}
         empty={{
           title: t("list.emptyTitle"),
           description: t("list.emptyDescription"),

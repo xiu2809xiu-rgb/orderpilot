@@ -14,6 +14,7 @@ export const TRACKER_URL_FILTERS = [
   "open",
   "overdue",
   "documentToConfirm",
+  "exceptionsOnly",
 ] as const;
 
 /**
@@ -67,7 +68,9 @@ export function stageTabOf(status: string | undefined): LifecycleStageTab {
   const codes = status.split(",");
   if (codes.length === 0) return "all";
   const stage = LIFECYCLE_STAGES.find((candidate) =>
-    codes.every((code) => candidate.statuses.includes(code)),
+    codes.every((code) =>
+      (candidate.statuses as readonly string[]).includes(code),
+    ),
   );
   return stage?.id ?? "all";
 }
@@ -88,9 +91,12 @@ export function singleStatusWithin(
 ): string | undefined {
   if (!status) return undefined;
   const codes = status.split(",");
-  if (codes.length !== 1) return undefined;
+  const [onlyCode] = codes;
+  if (codes.length !== 1 || onlyCode === undefined) return undefined;
   const group = LIFECYCLE_STAGES.find((candidate) => candidate.id === stage);
-  return group?.statuses.includes(codes[0]) ? codes[0] : undefined;
+  return (group?.statuses as readonly string[] | undefined)?.includes(onlyCode)
+    ? onlyCode
+    : undefined;
 }
 
 /** A status filter holds several comma-separated codes: the API takes up to 400 characters. */
@@ -135,6 +141,12 @@ export function trackerChips(
   if (filters.overdue === true) {
     chips.push({ id: "overdue", label: t("list.chips.overdue") });
   }
+  if (filters.exceptionsOnly === true) {
+    chips.push({
+      id: "exceptionsOnly",
+      label: t("list.chips.exceptions"),
+    });
+  }
   return chips;
 }
 
@@ -149,6 +161,9 @@ export function toParams(query: TableQuery): TrackerListParams {
   if (query.filters.open === true) params.open = "true";
   if (query.filters.documentToConfirm === true) {
     params.documentToConfirm = "true";
+  }
+  if (query.filters.exceptionsOnly === true) {
+    params.exceptionsOnly = "true";
   }
   if (typeof query.filters.status === "string") {
     params.status = query.filters.status;

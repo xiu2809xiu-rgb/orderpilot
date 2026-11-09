@@ -102,6 +102,34 @@ describe("the order tracker", () => {
     expect(seen.at(-1)).toContain("page=1");
   });
 
+  it("asks the server for the exceptions-only filter, resets to page 1, and combines with overdue", async () => {
+    await i18n.loadNamespaces(["order-tracker", "common"]);
+    const seen: string[] = [];
+    server.use(
+      http.get("*/api/v1/tracker/orders", ({ request }) => {
+        const url = new URL(request.url);
+        if (url.searchParams.get("pageSize") !== "1") seen.push(url.search);
+        return HttpResponse.json(page([row(1)], 30));
+      }),
+    );
+    renderPage();
+    await screen.findByText("Status 1");
+    await userEvent.click(screen.getByRole("button", { name: "Next page" }));
+    await userEvent.click(
+      screen.getByRole("switch", { name: "Exceptions only" }),
+    );
+    await screen.findByText("Status 1");
+    // Ticking the switch dropped the page back to 1, and the request asks
+    // for exceptions only.
+    expect(seen.at(-1)).toContain("exceptionsOnly=true");
+    expect(seen.at(-1)).toContain("page=1");
+    // It combines with the overdue toggle rather than replacing it.
+    await userEvent.click(screen.getByRole("switch", { name: "Overdue only" }));
+    await screen.findByText("Status 1");
+    expect(seen.at(-1)).toContain("exceptionsOnly=true");
+    expect(seen.at(-1)).toContain("overdue=true");
+  });
+
   it("opens from a link with its search and its overdue filter, and shows the filter as a chip", async () => {
     await i18n.loadNamespaces(["order-tracker", "common"]);
     // Same as above: ignore the stage tabs' own `pageSize=1` count requests.

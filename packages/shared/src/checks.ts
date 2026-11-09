@@ -173,6 +173,8 @@ export const trackerQuerySchema = z.object({
   open: z.enum(["true", "false"]).optional(),
   /** "true" keeps the orders with a document waiting for a person to confirm it. */
   documentToConfirm: z.enum(["true", "false"]).optional(),
+  /** "true" keeps only the orders with at least one open exception. */
+  exceptionsOnly: z.enum(["true", "false"]).optional(),
   /**
    * The status codes to keep, separated by commas: one for a tile, several for
    * a flow step that holds more than one.
