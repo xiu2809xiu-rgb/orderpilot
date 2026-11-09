@@ -28,7 +28,7 @@ export const HEADERS = {
 export const DEMO_PERSONAS: Record<Role, string> = {
   SYSTEM_ADMIN: "Daniel Koh",
   PRODUCT_MANAGER: "Priya Nair",
-  APPROVER: "Janet Lim",
+  APPROVER: "Rachel Goh",
   SUPPORT: "Mei Tan",
   WAREHOUSE: "Hafiz Rahman",
   FINANCE: "Grace Ong",

@@ -18,7 +18,7 @@ export type Role = z.infer<typeof roleSchema>;
 export const ROLE_LABELS: Record<Role, string> = {
   SYSTEM_ADMIN: "System admin",
   PRODUCT_MANAGER: "Product manager",
-  APPROVER: "Approver",
+  APPROVER: "Management approver",
   SUPPORT: "Support",
   WAREHOUSE: "Warehouse",
   FINANCE: "Finance",
