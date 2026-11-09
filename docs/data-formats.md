@@ -1,30 +1,31 @@
 # Data formats
 
-The formats we assume for every document OrderPilot reads or drafts, and for every Navision record it reads. **All of them are assumptions to confirm** at the briefing call (T-2), with Spectra's samples ([what we ask for first](client/questions-for-client.md#ask-for-these-first)).
+The formats we assume for every document OrderPilot reads or drafts, and for every Microsoft Dynamics 365 Business Central record it reads. **All of them are assumptions to confirm** at the briefing call (T-2), with Spectra's samples ([what we ask for first](client/questions-for-client.md#ask-for-these-first)).
 
-- **Navision's names.** Fields are named as standard Navision names them, so that Spectra's staff recognise them. They come from [the domain notes](research/domain-notes.md), and Spectra's Navision may be older or customised (A-10, A-11 in [the assumptions](assumptions.md)).
-- **The mock speaks camelCase.** The mock Navision (planned: P-19) answers in OData-style JSON with the same names in camelCase. The connector (planned: P-20) maps the real names to these.
+- **Business Central's names.** Fields are named as standard Business Central names them, so that Spectra's staff recognise them. They come from [the domain notes](research/domain-notes.md), and Spectra's Business Central may be older or customised (A-10, A-11 in [the assumptions](assumptions.md)).
+- **API v2.0 renames these fields.** Business Central kept the field names below from its earlier releases, and its API v2.0 names many of them differently. The connector (planned: P-20) maps each API name to the name used here, so a rename never reaches a document or a screen.
+- **The mock speaks camelCase.** The mock Business Central (planned: P-19) answers in OData-style JSON with the same names in camelCase. The connector (planned: P-20) maps the real names to these.
 - **Synthetic data only.** Every example here is invented. Bank details are obviously fake, and prices are in USD.
 
 ## Status of each format
 
-| Format                      | Source of our assumption               | Confirmed |
-| --------------------------- | -------------------------------------- | --------- |
-| Every document in this file | The brief and the domain notes         | Not yet   |
-| Every Navision record       | Standard Navision, in the domain notes | Not yet   |
+| Format                        | Source of our assumption                       | Confirmed |
+| ----------------------------- | ---------------------------------------------- | --------- |
+| Every document in this file   | The brief and the domain notes                 | Not yet   |
+| Every Business Central record | Standard Business Central, in the domain notes | Not yet   |
 
 When a sample confirms or changes a format, update its section, mark it here with the date, and update the matching assumption.
 
 ## Documents
 
-Each document lists the fields OrderPilot reads, and the Navision field each one maps to. Every field extracted by AI keeps a confidence score and a link to where it was found in the document (planned: P-18 and area 1's extraction stories).
+Each document lists the fields OrderPilot reads, and the Business Central field each one maps to. Every field extracted by AI keeps a confidence score and a link to where it was found in the document (planned: P-18 and area 1's extraction stories).
 
 ### Customer PO
 
 - **From:** the customer, by email. **Format:** PDF, a scan of one, or Excel. One layout per customer (A-04).
-- **Becomes:** a sales order. Navision stays the place where it is posted.
+- **Becomes:** a sales order. Business Central stays the place where it is posted.
 
-| Field on the PO         | Navision field                 | Notes                                                                                      |
+| Field on the PO         | Business Central field         | Notes                                                                                      |
 | ----------------------- | ------------------------------ | ------------------------------------------------------------------------------------------ |
 | Customer name, address  | Sell-to Customer No. (matched) | Matched on the customer No., never on the name. A look-alike name is a possible match only |
 | PO number               | External Document No.          | With Sell-to Customer No., the key of the duplicate-PO check                               |
@@ -44,7 +45,7 @@ Each document lists the fields OrderPilot reads, and the Navision field each one
 - **From:** a Product Manager. **Format today:** unknown; we have asked for the form (request 1). In OrderPilot it is a record of its own, numbered like `SPR-20261102-0001`.
 - **Becomes:** an approval task, then a vendor PO draft (planned: phase 2).
 
-| Field                             | Navision field it relates to              |
+| Field                             | Business Central field it relates to      |
 | --------------------------------- | ----------------------------------------- |
 | SPR number                        | None: OrderPilot's own number             |
 | Raised by, date                   | None: OrderPilot's own record             |
@@ -56,7 +57,7 @@ Each document lists the fields OrderPilot reads, and the Navision field each one
 
 ### Proforma invoice (PI) to the customer
 
-- **From:** Support, assumed to be printed from the Navision sales order (Q-13). **Format:** PDF.
+- **From:** Support, assumed to be printed from the Business Central sales order (Q-13). **Format:** PDF.
 - **OrderPilot's part:** a PI draft for Support to review (planned: Should 2), carrying Spectra's bank details, masked by role.
 
 Fields: the sales order's header and lines, Prepayment %, Payment Terms Code, the amount due, and Spectra's bank details (bank name, account number, SWIFT code).
@@ -70,7 +71,7 @@ Fields: the payer, the amount and currency, the value date, the bank reference, 
 
 ### Commercial invoice
 
-- **From:** Support, assumed to be a Posted Sales Invoice in Navision. **Format:** PDF.
+- **From:** Support, assumed to be a Posted Sales Invoice in Business Central. **Format:** PDF.
 - **OrderPilot's part:** reads it and checks it against the PO and the packing list. It never posts one.
 
 Fields: the invoice No., the sales order No., External Document No., the lines (No., Description, Quantity, Unit Price, Line Amount) and the totals.
@@ -80,7 +81,7 @@ Fields: the invoice No., the sales order No., External Document No., the lines (
 - **From:** the warehouse for sales, or the vendor for purchases. **Format:** PDF or Excel.
 - **OrderPilot's part:** the Must mismatch: a packing list whose quantity differs from the PO (planned: D-1, then area 3).
 
-| Field                        | Navision field it relates to            |
+| Field                        | Business Central field it relates to    |
 | ---------------------------- | --------------------------------------- |
 | Packing list number, date    | Posted Sales Shipment No.               |
 | The order it belongs to      | Sales Header No., External Document No. |
@@ -106,7 +107,7 @@ Fields: the permit number, the country, the issue and expiry dates, the importer
 - **From:** the vendor, by email, quoting our PO number. **Format:** PDF.
 - **OrderPilot's part:** checked against the vendor PO, and its bank details against the Vendor Bank Account on record. Any difference holds the payment until Finance and a second approver release it (planned: phase 2, area 4, E2E #4).
 
-| Field on the vendor PI   | Navision field                                          |
+| Field on the vendor PI   | Business Central field                                  |
 | ------------------------ | ------------------------------------------------------- |
 | Vendor                   | Buy-from Vendor No. (matched on the No.)                |
 | Our PO number            | Purchase Header No.                                     |
@@ -122,11 +123,11 @@ Fields: the permit number, the country, the issue and expiry dates, the importer
 
 Fields: Vendor Invoice No., the Purchase Header No., the lines, the totals, the due date, and the bank details (checked as on the vendor PI).
 
-## Navision records
+## Business Central records
 
-What OrderPilot reads from Navision. The mock (planned: P-19) serves the same records, behind an API key, with paging and `$filter`. The camelCase name drops dots, brackets and slashes, joins the words, writes `%` as `Percent` and `(LCY)` as `Lcy`.
+What OrderPilot reads from Business Central. The mock (planned: P-19) serves the same records, behind an API key, with paging and `$filter`. The camelCase name drops dots, brackets and slashes, joins the words, writes `%` as `Percent` and `(LCY)` as `Lcy`.
 
-| Record              | Navision fields                                                                                                                                                                   | In the mock, camelCase                                                                                                                                                                     |
+| Record              | Business Central fields                                                                                                                                                           | In the mock, camelCase                                                                                                                                                                     |
 | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Customer            | No., Name, Country/Region Code, Currency Code, Payment Terms Code, Customer Price Group, Credit Limit (LCY), Balance (LCY)                                                        | `no`, `name`, `countryRegionCode`, `currencyCode`, `paymentTermsCode`, `customerPriceGroup`, `creditLimitLcy`, `balanceLcy`                                                                |
 | Vendor              | No., Name, Currency Code, Payment Terms Code                                                                                                                                      | `no`, `name`, `currencyCode`, `paymentTermsCode`                                                                                                                                           |
@@ -140,9 +141,9 @@ What OrderPilot reads from Navision. The mock (planned: P-19) serves the same re
 | Approval User Setup | User ID, Approver ID, Sales Amount Approval Limit, Purchase Amount Approval Limit, Unlimited Sales Approval, Unlimited Purchase Approval, Substitute                              | `userId`, `approverId`, `salesAmountApprovalLimit`, `purchaseAmountApprovalLimit`, `unlimitedSalesApproval`, `unlimitedPurchaseApproval`, `substitute`                                     |
 | No. Series          | Code, Description, the last number used                                                                                                                                           | `code`, `description`, `lastNoUsed`                                                                                                                                                        |
 
-**Status values.** Sales Header Status is Open, Released, Pending Approval or Pending Prepayment in standard Navision. This is Navision's document status, not the order's status in OrderPilot, which lives only in area 2's state machine.
+**Status values.** Sales Header Status is Open, Released, Pending Approval or Pending Prepayment in standard Business Central. This is Business Central's document status, not the order's status in OrderPilot, which lives only in area 2's state machine.
 
-**Numbers.** Navision's numbers are the official ones. OrderPilot shows them beside its own numbers, which take a type prefix, the date and a running number, such as `SPR-20261102-0001` (planned: P-7 and C-1).
+**Numbers.** Business Central's numbers are the official ones. OrderPilot shows them beside its own numbers, which take a type prefix, the date and a running number, such as `SPR-20261102-0001` (planned: P-7 and C-1).
 
 **Stock.** Available stock is Inventory minus Qty. on Sales Order plus Qty. on Purch. Order (A-17). A shortfall suggests an SPR, which a person raises. In the mock, Qty. on Sales Order is exactly the open order lines, and Qty. on Purch. Order the open purchase lines. A short line stays out of Qty. on Sales Order while its SPR waits, as the demand under review, and joins it once the SPR is approved. An SPR's purchase order has arrived by the time its sales order reaches picking.
 

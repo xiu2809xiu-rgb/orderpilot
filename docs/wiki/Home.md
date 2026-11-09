@@ -2,7 +2,7 @@
 
 **AI reads, rules decide, people approve.**
 
-OrderPilot is an AI-assisted order-automation layer beside Microsoft Dynamics Navision, never instead of it. It is our product for Problem Statement #11, Spectra Innovations, in the IT2134 IT Innovation Project (SCCCI x NYP AI Innovation Challenge, AY2026 Semester 2). All its data is synthetic.
+OrderPilot is an AI-assisted order-automation layer beside Microsoft Dynamics 365 Business Central, never instead of it. It is our product for Problem Statement #11, Spectra Innovations, in the IT2134 IT Innovation Project (SCCCI x NYP AI Innovation Challenge, AY2026 Semester 2). All its data is synthetic.
 
 **The base is being built. There is no app to run yet.** The [build report](https://github.com/xiu2809xiu-rgb/orderpilot/blob/main/docs/BUILD_REPORT.md) tracks each story as it lands.
 

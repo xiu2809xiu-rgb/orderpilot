@@ -4,14 +4,14 @@
 
 ## Goal
 
-Read each document once, and pass its data on to every team and system that uses it. Area 1 owns the whole AI pipeline (intake, classification, extraction, confidence and its thresholds, and the review screen), layout mapping, the order's data and its documents with their provenance, master data, the Navision connector, and the platform the other areas build on, including the 3D scene.
+Read each document once, and pass its data on to every team and system that uses it. Area 1 owns the whole AI pipeline (intake, classification, extraction, confidence and its thresholds, and the review screen), layout mapping, the order's data and its documents with their provenance, master data, the Microsoft Dynamics 365 Business Central connector, and the platform the other areas build on, including the 3D scene.
 
 ### User stories
 
 - As **Support**, I upload a PO or forward it by email, and OrderPilot tells me what type it is and reads its fields.
 - As **Support**, I confirm only the fields the AI is unsure of, each marked "Requires approval" and linked to where it was found in the document.
 - As **Support**, a PO in a new layout is mapped by the AI and approved by me, and the next one in that layout needs no help.
-- As **Support**, I see each line's stock from Navision, matched on the item No.
+- As **Support**, I see each line's stock from Business Central, matched on the item No.
 - As **Support**, the same PO sent twice is caught as a duplicate.
 - As a **teammate**, I build my area on a platform that already signs people in, checks permissions, queues jobs, publishes events and renders documents.
 
@@ -27,8 +27,8 @@ How area 1 meets the others ([How the areas connect](../../CLAUDE.md#how-the-are
 
 - **The AI pipeline stays whole in area 1:** classification, extraction, the thresholds that decide when a person must check a field (and the fields a person always checks), and the review screen.
 - **Area 1 owns the order's data, never its status,** which lives only in area 2's state machine.
-- **Match on Navision numbers,** never on names. A look-alike name is shown as a possible match only.
-- **Navision stays the system of record.** OrderPilot reads it, and any write-back needs a preview and an approval, against the mock only until Spectra agrees.
+- **Match on Business Central numbers,** never on names. A look-alike name is shown as a possible match only.
+- **Business Central stays the system of record.** OrderPilot reads it, and any write-back needs a preview and an approval, against the mock only until Spectra agrees.
 - **Shared code changes in small pull requests,** with the affected owners reviewing ([module ownership](module-ownership.md#shared-files-and-who-reviews-them)).
 
 ## Recommended design
@@ -47,7 +47,7 @@ sequenceDiagram
   participant I as Intake
   participant Q as Queue
   participant G as LlmGateway
-  participant N as Navision connector
+  participant N as Business Central connector
   S->>I: Upload the PO
   I->>I: Check type and size, hash, store
   I->>Q: Job: read the document
@@ -65,7 +65,7 @@ All planned. Area 1's core is part of the base itself, so these stories are Rich
 
 - **The way of working:** the ground rules (P-1, merged), GitHub as code (P-2), these docs (P-3, P-4), the tooling (P-5) and CI with the security scans (P-6).
 - **The app:** shared contracts (P-7), the API shell (P-8), the database, queues, storage and audit writer (P-9), sign-in and sessions (P-10), the web shell (P-11), common components (P-12), Docker images (P-13), the end-to-end smoke test (P-14), events and live updates (P-15) and diagrams as code (P-16).
-- **Area 1's core:** the AI gateway with usage tracking and the destination check (P-17), document intake and storage (P-18), mock Navision and synthetic master data (P-19), the connector framework and the Navision adapter (P-20), and synthetic documents with planted mistakes and ground truth (P-21).
+- **Area 1's core:** the AI gateway with usage tracking and the destination check (P-17), document intake and storage (P-18), mock Business Central and synthetic master data (P-19), the connector framework and the Business Central adapter (P-20), and synthetic documents with planted mistakes and ground truth (P-21).
 - **Planned work in area 1's stories:** the Vercel AI SDK under `LlmGateway` in P-17, with the gateway keeping cost tracking and the data-to-AI policy; promptfoo for the accuracy set (E-2) and the prompt-injection tests (E-3) in CI; React-PDF and ExcelJS for the template engine (B-3). Each comes with an ADR, a pinned version and a traceability row.
 - **Generated hooks and mocks (planned: P-26):** orval generates typed TanStack Query hooks and MSW mocks from the API's OpenAPI spec, through the web app's `ApiClient`, and every area base uses them. CI fails when the generated code is out of date.
 - **Later:** the design system with the Pro kits (P-22), the 3D order constellation (P-23), cloud deployment (P-24) and the slides (P-25).
@@ -75,7 +75,7 @@ All planned. Area 1's core is part of the base itself, so these stories are Rich
 Area 1's own stories, after the base (001, section 10), under epics A, B and E:
 
 - **The AI pipeline:** classification; extraction with confidence and provenance; the review screen with source highlighting; the accuracy harness, with a 95% target and a comparison of models; learning from corrections, one layout at a time; layout mapping proposed by AI and approved by a person (E2E #2); prompt-injection tests; and email intake through a mock mailbox with signed webhooks.
-- **Orders and Navision:** duplicate-PO protection (Sell-to Customer No. plus External Document No., and the content hash); a Navision-ready import file; and the template engine for PIs, invoices, packing lists and Excel, used by areas 2 and 3.
+- **Orders and Business Central:** duplicate-PO protection (Sell-to Customer No. plus External Document No., and the content hash); a Business Central-ready import file; and the template engine for PIs, invoices, packing lists and Excel, used by areas 2 and 3.
 - **Could:** QR codes on generated documents and carton labels for the warehouse to scan; passkeys to confirm risky approvals, with area 4's policy deciding when; a first-run tour for each role; and an "Ask OrderPilot" help panel that answers from our docs, labelled as AI ([domain notes](../research/domain-notes.md)).
 
 ## At the Week 7 interview
@@ -86,19 +86,19 @@ Be ready to explain, in your own code:
 - how confidence is scored, how the thresholds are set, and which fields always need a person;
 - how the gateway keeps a model's output from ever triggering an action;
 - how prompt injection is defended against, and how the tests prove it;
-- how the connector framework lets the mock be swapped for the real Navision;
+- how the connector framework lets the mock be swapped for the real Business Central;
 - how accuracy is measured against the ground truth;
 - how the platform pieces the other areas use are kept stable.
 
 ## Risks
 
-| Risk                                         | What to do                                                                                                        |
-| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Extraction accuracy falls short of 95%       | Measure per field and layout; tune mappings and thresholds; compare models                                        |
-| Spectra's Navision differs from the standard | Keep Navision behind the connector; update [the data formats](../data-formats.md) from samples                    |
-| A client document reaches a third-party AI   | The mock is the default; area 4's destination check; samples only on the throwaway stack                          |
-| The base is late and teammates wait          | Phase A of [prompt 002](../ai/prompts/002-finish-the-base-by-sunday.md): everything a teammate needs merges first |
-| The platform changes under the other areas   | Small shared pull requests, reviewed by the owners they affect                                                    |
+| Risk                                                 | What to do                                                                                                        |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Extraction accuracy falls short of 95%               | Measure per field and layout; tune mappings and thresholds; compare models                                        |
+| Spectra's Business Central differs from the standard | Keep Business Central behind the connector; update [the data formats](../data-formats.md) from samples            |
+| A client document reaches a third-party AI           | The mock is the default; area 4's destination check; samples only on the throwaway stack                          |
+| The base is late and teammates wait                  | Phase A of [prompt 002](../ai/prompts/002-finish-the-base-by-sunday.md): everything a teammate needs merges first |
+| The platform changes under the other areas           | Small shared pull requests, reviewed by the owners they affect                                                    |
 
 ## Module requirements
 

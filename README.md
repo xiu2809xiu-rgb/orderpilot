@@ -2,23 +2,23 @@
 
 **AI reads, rules decide, people approve.**
 
-OrderPilot is an AI-assisted order-automation layer beside Microsoft Dynamics Navision, never instead of it.
+OrderPilot is an AI-assisted order-automation layer beside Microsoft Dynamics 365 Business Central, never instead of it.
 
-Spectra Innovations is a Singapore distributor of IT products and computer peripherals. Six groups handle every order by hand, re-typing data from POs, proforma invoices, invoices, packing lists and AWB/BL into Navision, then chasing approvals, payments and shipping papers. OrderPilot will read those documents, route the work to each role and track every order. A person will approve anything that matters, and that will be audited. The AI will never approve, buy, post, release goods or pay.
+Spectra Innovations is a Singapore distributor of IT products and computer peripherals. Six groups handle every order by hand, re-typing data from POs, proforma invoices, invoices, packing lists and AWB/BL into Business Central, then chasing approvals, payments and shipping papers. OrderPilot will read those documents, route the work to each role and track every order. A person will approve anything that matters, and that will be audited. The AI will never approve, buy, post, release goods or pay.
 
 OrderPilot is our product for Problem Statement #11 in the IT2134 IT Innovation Project (SCCCI x NYP AI Innovation Challenge, AY2026 Semester 2). All its data is synthetic.
 
 ## Project layout
 
-| Folder              | What it holds                                                                                                                |
-| ------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `apps/web`          | The front end: the React web app                                                                                             |
-| `apps/api`          | The back end: the NestJS API and its worker, with the Prisma schema and migrations                                           |
-| `apps/e2e`          | The end-to-end tests: Playwright against the running stack                                                                   |
-| `packages`          | Shared code: the contracts both sides use, the synthetic data and documents, and the TypeScript and ESLint settings          |
-| `services`          | The mock services that stand in for outside systems: today the template each one starts from (mock Navision comes with P-19) |
-| `docker`, `scripts` | Tooling: the Dockerfiles that are not an app's own, the repository checks and the GitHub scripts                             |
-| `docs`              | The documentation: decisions, architecture, the agile docs, the team guides and the build report                             |
+| Folder              | What it holds                                                                                                                        |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `apps/web`          | The front end: the React web app                                                                                                     |
+| `apps/api`          | The back end: the NestJS API and its worker, with the Prisma schema and migrations                                                   |
+| `apps/e2e`          | The end-to-end tests: Playwright against the running stack                                                                           |
+| `packages`          | Shared code: the contracts both sides use, the synthetic data and documents, and the TypeScript and ESLint settings                  |
+| `services`          | The mock services that stand in for outside systems: today the template each one starts from (mock Business Central comes with P-19) |
+| `docker`, `scripts` | Tooling: the Dockerfiles that are not an app's own, the repository checks and the GitHub scripts                                     |
+| `docs`              | The documentation: decisions, architecture, the agile docs, the team guides and the build report                                     |
 
 Which folders belong to each of the four areas:
 
@@ -48,14 +48,14 @@ Which folders belong to each of the four areas:
 
 ### What later stories bring
 
-| Stories                 | What they bring                                                                                     |
-| ----------------------- | --------------------------------------------------------------------------------------------------- |
-| P-2                     | Issue forms, the pull request template, labels, the backlog and board as code, and the wiki pages   |
-| P-3, P-4                | The problem statement, research, client questions, and a guide for each area                        |
-| P-7 to P-16             | The app: shared contracts, API, database, sign-in, web shell, Docker images, events and diagrams    |
-| P-17 to P-21            | The core of area 1: the AI gateway, document intake, mock Navision, connectors, synthetic documents |
-| C-1, D-1, F-1, F-2, G-1 | A head start for areas 2, 3 and 4                                                                   |
-| P-22 to P-25            | The design system once the repository is private, the 3D scene, deployment and the slides           |
+| Stories                 | What they bring                                                                                             |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------- |
+| P-2                     | Issue forms, the pull request template, labels, the backlog and board as code, and the wiki pages           |
+| P-3, P-4                | The problem statement, research, client questions, and a guide for each area                                |
+| P-7 to P-16             | The app: shared contracts, API, database, sign-in, web shell, Docker images, events and diagrams            |
+| P-17 to P-21            | The core of area 1: the AI gateway, document intake, mock Business Central, connectors, synthetic documents |
+| C-1, D-1, F-1, F-2, G-1 | A head start for areas 2, 3 and 4                                                                           |
+| P-22 to P-25            | The design system once the repository is private, the 3D scene, deployment and the slides                   |
 
 [The build report](docs/BUILD_REPORT.md) tracks each story as it lands.
 

@@ -15,19 +15,19 @@ Problem Statement #11, Spectra Innovations. Written on 31 Oct 2026, before the b
 
 ## 1. The brief in our words
 
-**Who Spectra is.** Spectra, based in Singapore, distributes computer peripherals and IT products, and holds master distribution rights for certain brands. Its buyers are mainly in India, Sri Lanka, Bangladesh, Pakistan and the Middle East, and most of them pay up front, before anything ships. Orders and stock live in Microsoft Dynamics Navision.
+**Who Spectra is.** Spectra, based in Singapore, distributes computer peripherals and IT products, and holds master distribution rights for certain brands. Its buyers are mainly in India, Sri Lanka, Bangladesh, Pakistan and the Middle East, and most of them pay up front, before anything ships. Orders and stock live in Microsoft Dynamics 365 Business Central.
 
 **What goes wrong today.** An order passes through six groups: Product Managers, the approver (Janet), Support, Warehouse, Finance and Logistics. Each group keys in data that already exists in a document someone else received: the customer's PO, the proforma invoice (PI), the invoice, the packing list and the AWB/BL. Then they chase each other for approvals, payments and shipping papers.
 
 **The sales flow.** The customer's PO arrives. Stock is checked, and an SPR (Sales Purchase Requisition) is raised when stock is needed. Support sends a PI carrying Spectra's bank details. The customer pays. The warehouse packs. The invoice and packing list are made. The goods go to the forwarder, and the customer receives the shipping details. Last, Logistics chases the AWB/BL and the import permit.
 
-**The purchase flow.** A Product Manager raises an SPR and the approver approves it. Support creates the vendor PO in Navision. The vendor's PI comes back with the vendor's bank details. A forwarder is arranged. The warehouse compares what arrives with its paperwork (invoice, packing list, AWB/BL), and the goods are received into Navision. The customer is told, and Finance pays the vendor on the due date.
+**The purchase flow.** A Product Manager raises an SPR and the approver approves it. Support creates the vendor PO in Business Central. The vendor's PI comes back with the vendor's bank details. A forwarder is arranged. The warehouse compares what arrives with its paperwork (invoice, packing list, AWB/BL), and the goods are received into Business Central. The customer is told, and Finance pays the vendor on the due date.
 
-**What the brief asks for.** A tool that pulls part numbers, quantities, prices and shipment details out of these documents; compares the documents with each other and raises disagreements for a person; sends each approval and task to the right group, with reminders; and shows every order's status, owner, open actions and exceptions in one place. It suggests starting with one flow, probably sales, while staff keep posting in Navision. Human approvals and the financial controls stay.
+**What the brief asks for.** A tool that pulls part numbers, quantities, prices and shipment details out of these documents; compares the documents with each other and raises disagreements for a person; sends each approval and task to the right group, with reminders; and shows every order's status, owner, open actions and exceptions in one place. It suggests starting with one flow, probably sales, while staff keep posting in Business Central. Human approvals and the financial controls stay.
 
 **Spectra's own idea.** AI handles the reading and the variety of documents; a workflow engine applies the business rules, the limits and the order of the steps. Spectra would judge success by five measures: order-processing time, manual touches per order, data-entry errors, approval turnaround and overdue orders.
 
-**Our answer: OrderPilot.** An order-automation layer that sits beside Navision and never replaces it, under one tagline: **AI reads, rules decide, people approve.** A document is read once, a person confirms what the AI is unsure of, and the confirmed data feeds every group's tasks and one tracker. Fixed rules do the comparing and routing. People approve, release, post and pay, and every one of those actions is audited.
+**Our answer: OrderPilot.** An order-automation layer that sits beside Business Central and never replaces it, under one tagline: **AI reads, rules decide, people approve.** A document is read once, a person confirms what the AI is unsure of, and the confirmed data feeds every group's tasks and one tracker. Fixed rules do the comparing and routing. People approve, release, post and pay, and every one of those actions is audited.
 
 | Task                                                     | Approach                                              |
 | -------------------------------------------------------- | ----------------------------------------------------- |
@@ -53,7 +53,7 @@ OrderPilot's users are Spectra's staff only. Customers, vendors and forwarders n
 | Logistics                                  | `LOGISTICS`       | Forwarders, shipment dates, AWB/BL and import permits          | Overdue paperwork flagged, and shipping details sent without re-typing                     |
 | Management                                 | `MANAGEMENT`      | Throughput, delays and errors                                  | One tracker, and the five measures actually measured                                       |
 | Auditors                                   | `AUDITOR`         | Proof that approvals and payments followed the controls        | A tamper-evident trail, read-only                                                          |
-| IT and whoever supports Navision           | `SYSTEM_ADMIN`    | Keep Navision stable and the system of record                  | Supported interfaces only, least privilege, health and logs                                |
+| IT and whoever supports Business Central   | `SYSTEM_ADMIN`    | Keep Business Central stable and the system of record          | Supported interfaces only, least privilege, health and logs                                |
 | Customers (South Asia and the Middle East) | None              | Pay first, then wait for goods and papers                      | Correct PIs and invoices, and timely shipping updates                                      |
 | Vendors and brands                         | None              | Send PIs, invoices and packing lists, and expect payment       | POs that match, and payment on time to the right account                                   |
 | Forwarders                                 | None              | Collect goods and issue the AWB/BL                             | Complete papers and a clear release                                                        |
@@ -86,9 +86,9 @@ Asking why, five times:
 2. **Why are mismatches found late?** Each group checks only the documents in front of it, by eye.
 3. **Why does everyone chase?** The order of the steps and who owns each one is known by people, not held by a system that could route work and remind.
 4. **Why is there no shared status?** Every group sees only its own step, and no system ties the steps together into one order.
-5. **Why has Navision not fixed it?** Our hypothesis, to test at the briefing call: Navision records orders well, but it was not built to read incoming documents, to cross-check one party's papers against another's, or to hand work from one group to the next.
+5. **Why has Business Central not fixed it?** Our hypothesis, to test at the briefing call: Business Central records orders well, but it was not built to read incoming documents, to cross-check one party's papers against another's, or to hand work from one group to the next.
 
-**The root cause.** An order's facts arrive in documents that nothing reads, and the rules that connect them are known by people and kept in inboxes, not in a system. Each hand-off therefore means re-typing, re-checking and chasing. The missing piece is a layer that reads each document once with a person confirming the doubtful parts, cross-checks the documents with one another and with Navision, routes the work under explicit rules, and shows each order's full trail. Navision stays the system of record: OrderPilot prepares and checks, and staff post.
+**The root cause.** An order's facts arrive in documents that nothing reads, and the rules that connect them are known by people and kept in inboxes, not in a system. Each hand-off therefore means re-typing, re-checking and chasing. The missing piece is a layer that reads each document once with a person confirming the doubtful parts, cross-checks the documents with one another and with Business Central, routes the work under explicit rules, and shows each order's full trail. Business Central stays the system of record: OrderPilot prepares and checks, and staff post.
 
 ## 5. Constraints
 
@@ -99,27 +99,27 @@ Not legal advice: Spectra and its advisers decide what applies. The prototype ru
 | Area                                      | What it means for the design                                                                                                                                                                                                                                   |
 | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Singapore's PDPA                          | Customer and vendor contacts are mostly business contact information, but staff accounts, the audit trail and analytics are personal data. Collect only what a step needs, protect it, keep it no longer than needed, and take care when data leaves Singapore |
-| Record keeping                            | Transaction records are kept for years (five is the usual Singapore rule). Navision stays the book of record; OrderPilot keeps its own trail and sets retention per record type                                                                                |
+| Record keeping                            | Transaction records are kept for years (five is the usual Singapore rule). Business Central stays the book of record; OrderPilot keeps its own trail and sets retention per record type                                                                        |
 | Export and import rules                   | Shipments need permits, and some IT goods may be controlled. OrderPilot tracks permits as Spectra defines them, and Spectra decides what is controlled                                                                                                         |
 | Financial controls                        | Segregation of duties, approval limits and checked changes to bank details. Good practice to confirm with Spectra's auditors                                                                                                                                   |
 | Singapore's Model AI Governance Framework | Human oversight in proportion to impact. The AI reads and drafts; people decide                                                                                                                                                                                |
 
 ### Technical
 
-- **Navision is unknown.** Its version, hosting, customisation and interfaces are all open. OrderPilot reaches it only through a connector (planned: P-20), against an OData-style mock until we know more (planned: P-19). [The domain notes](research/domain-notes.md) list what standard Navision keeps.
+- **Business Central is unknown.** Its version, hosting, customisation and interfaces are all open. OrderPilot reaches it only through a connector (planned: P-20), against an OData-style mock until we know more (planned: P-19). [The domain notes](research/domain-notes.md) list what standard Business Central keeps.
 - **Every customer and vendor has its own layout.** Mappings are proposed by AI and approved by a person, so a new layout needs no code.
 - **Extraction is never certain.** Each field gets a confidence score and points back to where it was read, and doubtful fields wait for a person.
-- **Documents must agree.** Customers, vendors and items are identified by their Navision numbers, not their names, and each check states its tolerance.
+- **Documents must agree.** Customers, vendors and items are identified by their Business Central numbers, not their names, and each check states its tolerance.
 - **Money.** Prices are in USD. Totals, freight and rounding differ between documents, so checks state their tolerance.
 - **Email is messy.** The same PO can arrive twice or forwarded, so duplicates are found by content hash.
-- **The books must stay clean.** A write to Navision would need a preview and an approval, and stays against the mock until Spectra agrees.
+- **The books must stay clean.** A write to Business Central would need a preview and an approval, and stays against the mock until Spectra agrees.
 - **Rules not yet confirmed** (the SPR trigger, the PI sequence, approvers and limits, delegation) are configuration, never code.
 - **Volumes are unknown,** so work runs on queues, and every list is paged and indexed.
 
 ### Organisational
 
 - Six groups own one order, so gains are measured across the hand-offs.
-- Staff keep posting in Navision, and money stays under their control.
+- Staff keep posting in Business Central, and money stays under their control.
 - Approvals and payments may be audited long afterwards, so every action keeps its evidence.
 
 ### Project
@@ -138,7 +138,7 @@ Not legal advice: Spectra and its advisers decide what applies. The prototype ru
 | --------------------------------------------------------------- | ---------- | ---------------------------------------------- |
 | PO upload, with AI classification and extraction                | A, E       | 1                                              |
 | A person confirms the uncertain fields                          | A, E       | 1                                              |
-| A stock lookup in mock Navision                                 | B          | 1                                              |
+| A stock lookup in mock Business Central                         | B          | 1                                              |
 | An SPR raised by a button and approved                          | C          | 2                                              |
 | The tracker                                                     | D          | 3                                              |
 | One mismatch: a packing list whose quantity differs from the PO | D          | 3                                              |
@@ -155,20 +155,20 @@ Not legal advice: Spectra and its advisers decide what applies. The prototype ru
 
 **Phase 2, built in Weeks 8 to 12, shown at the Week 18 final:** the purchase flow. An SPR becomes a vendor PO draft, the vendor's PI is checked against the vendor's bank details on record, a changed account holds the payment, the received goods are compared with their documents, and a reminder fires when payment falls due.
 
-**Throughout:** layout mappings, master data from mock Navision, the template engine, governance (roles, segregation of duties, limits, masking, audit, retention and the rules for data sent to AI), monitoring (logs, traces, metrics, clickstream and AI cost), and an English UI in light and dark themes that meets WCAG 2.2 AA.
+**Throughout:** layout mappings, master data from mock Business Central, the template engine, governance (roles, segregation of duties, limits, masking, audit, retention and the rules for data sent to AI), monitoring (logs, traces, metrics, clickstream and AI cost), and an English UI in light and dark themes that meets WCAG 2.2 AA.
 
-**Later, only if Spectra asks:** a real Navision link, write-back with controls, and forwarder tracking.
+**Later, only if Spectra asks:** a real Business Central link, write-back with controls, and forwarder tracking.
 
 **Out of scope:**
 
 | Out of scope                                    | Why                                                        |
 | ----------------------------------------------- | ---------------------------------------------------------- |
-| Replacing Navision                              | It is the system of record                                 |
+| Replacing Business Central                      | It is the system of record                                 |
 | Posting transactions automatically              | People post, and keep control of the books                 |
 | Real payments                                   | Finance pays through its own bank                          |
 | Real emails to customers or vendors             | Drafts only; a person sends them                           |
 | Booking forwarders or filing permits            | Forwarders and every country run their own systems         |
-| Accounting, stocktakes and financial statements | Navision does these                                        |
+| Accounting, stocktakes and financial statements | Business Central does these                                |
 | Real customer, vendor, price or bank data       | Only synthetic data, in Spectra's formats                  |
 | Customer or vendor log-ins                      | OrderPilot is for Spectra's staff                          |
 | Single sign-on                                  | Demo accounts for now; the auth module can take it later   |
@@ -205,7 +205,7 @@ Our own targets, each with a test:
 
 These change the design most. They are written out in full, in priority order, in [the questions for the client](client/questions-for-client.md).
 
-- Navision: version, cloud or on-premise, interfaces, customisation, and a test company.
+- Business Central: version, cloud or on-premise, interfaces, customisation, and a test company.
 - How documents reach Spectra, their formats, and the monthly volume.
 - Which flow is the pilot, and which step wastes the most time.
 - The PI sequence: does the customer or the warehouse get the PI first?
