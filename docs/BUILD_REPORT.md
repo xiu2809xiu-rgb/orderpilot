@@ -306,6 +306,8 @@ P-82 ([#219](https://github.com/xiu2809xiu-rgb/orderpilot/issues/219)) cuts them
 
 **P-22.** The keys arrived on 6 Nov. It is now a Must, because P-106 depends on it. Its working registries at `registry.collectui.pro` stay, as prompt 006 allows ("keep what works"), and item br keeps the question of where the licences come from open. Direction C uses our own teal and navy in the spirit of the client's deck, with no colour sampled from the pack and no logo.
 
+**The briefing's records (P-85).** The Answers table, the assumptions (A-31 rewritten, A-38 to A-46 new) and the new questions from Q-33 are in our own words, with no names, figures, product names or site names. `CLAUDE.md` and the docs bring the purchase flow forward (A-20) and name the six measures in place of the five, each old one mapped to a new one (item cz). The dashboard and its tests still show the five until area 3 acts on issue #253, and the owners' own guides under `docs/team/` are theirs to update. The three owner issues were filed on 9 Nov: #251 (Azri), #252 (Angelyn) and #253 (Iok Teck).
+
 **The old persona's real first name.** P-84 takes it out of every text file but prompt 001. Committed pictures keep it until their pages are re-shot, which P-107's roll-out does for every page, and Git history keeps it regardless.
 
 **Estimates and priorities that moved:** P-20 from 5 to 8 points for its write path, P-21 from 8 to 13 for the briefing's documents, P-22 from Should to Must, and P-23 from Could to Should (item dd).
@@ -319,7 +321,7 @@ The board sync keeps an open card's Sprint, so the cards of P-21 (#36) and P-61 
 | P-82  | Plan prompts 005 and 006                                         | P    | must     | 2      | 3       | `chore/plan-prompts-005-006`          | This pull request |
 | P-83  | Rename Navision to Business Central                              | P    | must     | 5      | 3       | `chore/business-central-rename`       | Pull request #254 |
 | P-84  | SPR, the approver group and zero tolerance in the facts          | P    | must     | 3      | 3       | `chore/spr-approver-group`            | Pull request #255 |
-| P-85  | Record the 5 Nov briefing                                        | P    | must     | 2      | 3       | `docs/briefing-5-nov`                 | Not started       |
+| P-85  | Record the 5 Nov briefing                                        | P    | must     | 2      | 3       | `docs/briefing-5-nov`                 | This pull request |
 | P-86  | Synthetic data from the briefing                                 | P    | must     | 13     | 3, 4    | `feat/area1-briefing-data`            | Not started       |
 | P-87  | Drafts that a person sends                                       | E    | must     | 5      | 5       | `feat/area1-drafts`                   | Not started       |
 | P-88  | Customer check on intake and the new-customer card               | B    | must     | 8      | 6       | `feat/area1-customer-check`           | Not started       |
