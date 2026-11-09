@@ -31,29 +31,30 @@ Each document lists the fields OrderPilot reads, and the Business Central field 
 | PO number               | External Document No.          | With Sell-to Customer No., the key of the duplicate-PO check                               |
 | PO date                 | Order Date                     |                                                                                            |
 | Requested shipment date | Shipment Date                  | Often missing                                                                              |
-| Currency                | Currency Code                  | Assumed USD                                                                                |
+| Currency                | Currency Code                  | Assumed USD. Must match the other documents exactly, with no tolerance                     |
 | Shipping terms          | Shipment Method Code           | For example FOB or CIF                                                                     |
 | Line: part number       | Sales Line No. (the Item No.)  | Matched on the item No.; the customer's own code may differ                                |
 | Line: description       | Sales Line Description         | For review only, never for matching                                                        |
-| Line: quantity          | Sales Line Quantity            |                                                                                            |
-| Line: unit price        | Sales Line Unit Price          | Checked against the customer's price group                                                 |
+| Line: quantity          | Sales Line Quantity            | Must match the other documents exactly, with no tolerance                                  |
+| Line: unit price        | Sales Line Unit Price          | The agreed price. Must match the other documents exactly, with no tolerance                |
 | Line: amount            | Sales Line Line Amount         | Checked as quantity times unit price, within a tolerance                                   |
 | Total                   | None (derived)                 | Checked against the sum of the lines                                                       |
 
-### SPR (Sales Purchase Requisition)
+### SPR (Stock Purchase Requisition)
 
-- **From:** a Product Manager. **Format today:** unknown; we have asked for the form (request 1). In OrderPilot it is a record of its own, numbered like `SPR-20261102-0001`.
-- **Becomes:** an approval task, then a vendor PO draft (planned: phase 2).
+- **From:** a Product Manager, who is also the purchase manager at Spectra. It is raised from stock on hand and the last three months' run rate, not from one order's shortfall (the planned story P-61 moves the pre-fill; today it still comes from an order). **Format today:** unknown; we have asked for the form (request 1). In OrderPilot it is a record of its own, numbered like `SPR-20261102-0001`.
+- **Routed by:** a coordinator, a Support user, to the group of three management approvers. Any one of them decides, and there is no substitute. A reminder goes to the whole group after 24 hours.
+- **Becomes:** an approval task, then a vendor PO draft, which the Product Manager places (planned: phase 2). Where the vendor makes Spectra use its own portal, the portal's reference is recorded instead.
 
-| Field                             | Business Central field it relates to      |
-| --------------------------------- | ----------------------------------------- |
-| SPR number                        | None: OrderPilot's own number             |
-| Raised by, date                   | None: OrderPilot's own record             |
-| The sales order it serves, if any | Sales Header No.                          |
-| Item, quantity, unit cost (USD)   | Item No., Unit Cost                       |
-| Suggested vendor                  | Item: Vendor No., Vendor Item No.         |
-| Reason                            | None                                      |
-| Approver and decision             | Approval User Setup (Approver ID, limits) |
+| Field                                 | Business Central field it relates to                      |
+| ------------------------------------- | --------------------------------------------------------- |
+| SPR number                            | None: OrderPilot's own number                             |
+| Raised by, date                       | None: OrderPilot's own record                             |
+| The sales order it relates to, if any | Sales Header No.                                          |
+| Item, quantity, unit cost (USD)       | Item No., Unit Cost                                       |
+| Suggested vendor                      | Item: Vendor No., Vendor Item No.                         |
+| Reason                                | None                                                      |
+| Approver and decision                 | Approval User Setup (Approver ID, limits, if switched on) |
 
 ### Proforma invoice (PI) to the customer
 
@@ -145,7 +146,7 @@ What OrderPilot reads from Business Central. The mock (planned: P-19) serves the
 
 **Numbers.** Business Central's numbers are the official ones. OrderPilot shows them beside its own numbers, which take a type prefix, the date and a running number, such as `SPR-20261102-0001` (planned: P-7 and C-1).
 
-**Stock.** Available stock is Inventory minus Qty. on Sales Order plus Qty. on Purch. Order (A-17). A shortfall suggests an SPR, which a person raises. In the mock, Qty. on Sales Order is exactly the open order lines, and Qty. on Purch. Order the open purchase lines. A short line stays out of Qty. on Sales Order while its SPR waits, as the demand under review, and joins it once the SPR is approved. An SPR's purchase order has arrived by the time its sales order reaches picking.
+**Stock.** Available stock is Inventory minus Qty. on Sales Order plus Qty. on Purch. Order (A-17). Today a shortfall suggests an SPR, which a person raises; P-61 moves the suggestion to stock on hand and run rate. In the mock, Qty. on Sales Order is exactly the open order lines, and Qty. on Purch. Order the open purchase lines. A short line stays out of Qty. on Sales Order while its SPR waits, as the demand under review, and joins it once the SPR is approved. An SPR's purchase order has arrived by the time its sales order reaches picking.
 
 **Example.** One synthetic customer, as the mock is planned to return it:
 

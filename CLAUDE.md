@@ -19,19 +19,19 @@ The brief every story serves.
 
 ### The client
 
-Spectra Innovations is a Singapore distributor, and master distributor for appointed brands, of IT products and computer peripherals. Its customers are in South Asia (India, Sri Lanka, Bangladesh, Pakistan) and the Middle East, and most of them pay before their goods ship. Its ERP is Microsoft Dynamics 365 Business Central.
+Spectra Innovations is a Singapore distributor, and master distributor for appointed brands, of IT products and computer peripherals. Its customers are in South Asia (India, Sri Lanka, Bangladesh, Pakistan, Nepal, the Maldives), the Middle East (the UAE), and South-East Asia (Vietnam, Indonesia, Malaysia, Singapore). Prices are agreed one customer at a time, before the PO, and payment terms vary: some customers pay before their goods ship and some pay on credit terms. Its ERP is Microsoft Dynamics 365 Business Central.
 
 ### The problem
 
-Six groups handle every order by hand: Product Managers, the approver (Janet), Support, Warehouse, Finance and Logistics. Staff re-type data from POs, proforma invoices (PIs), invoices, packing lists and AWB/BL into Business Central, and spend their time chasing approvals, payments and shipping papers.
+Six groups handle every order by hand: Product Managers, the management approvers, Support, Warehouse, Finance and Logistics. Staff re-type data from POs, proforma invoices (PIs), invoices, packing lists and AWB/BL into Business Central, and spend their time chasing approvals, payments and shipping papers.
 
 ### The two flows
 
-The two flows are linked by the SPR (Sales Purchase Requisition):
+The two flows are linked by stock. Spectra sells only what it has, and the Product Manager buys to keep stock covered. The link is the SPR (Stock Purchase Requisition), raised from stock on hand and the last three months' run rate, never from one order's shortfall. Today the code still raises an SPR from an order, and P-61 changes that.
 
 - **Sales:**
   1. The customer's PO arrives.
-  2. Stock is checked, and an SPR is raised when needed.
+  2. Stock is checked. When the PO asks for more than is available, the order is held and the customer is asked to revise the PO to the available quantity. No SPR is raised for it.
   3. Support generates a PI with the bank details.
   4. The customer pays.
   5. The warehouse packs.
@@ -40,15 +40,17 @@ The two flows are linked by the SPR (Sales Purchase Requisition):
   8. The customer gets the shipping details.
   9. The AWB/BL and import permit are followed up.
 - **Purchase:**
-  1. A Product Manager raises an SPR.
-  2. The approver approves it.
-  3. Support creates the vendor PO in Business Central.
+  1. A Product Manager raises an SPR from stock on hand and the last three months' run rate. At Spectra the Product Manager and the purchase manager are the same person.
+  2. A coordinator, a Support user, routes it to the group of three management approvers. Any one of them decides, so there is no substitute. If no one has decided after 24 hours, the whole group gets a reminder.
+  3. After approval the coordinator hands the SPR back, and the Product Manager places the vendor PO. Some vendors make Spectra enter POs in the vendor's own portal, and then OrderPilot records that portal's reference.
   4. The vendor's PI arrives with its bank details.
   5. A forwarder is arranged.
   6. The warehouse checks the goods against the invoice, packing list and AWB/BL.
   7. The goods are received into Business Central.
   8. The customer is told.
   9. Finance pays the vendor on the due date.
+
+Steps 1 to 3 describe the process Spectra told us. Today the workflow has one approver and a substitute, and its SPR is raised from an order. Areas 2 and 4 change that, and [ADR 0049](docs/adr/0049-the-spr-process-the-client-described.md) records the facts and the open conflicts.
 
 ### What we build
 
@@ -60,24 +62,24 @@ OrderPilot is an AI-assisted order-automation layer **beside** Business Central,
 
 ### Roles
 
-| Role              | Access                                                                                                          |
-| ----------------- | --------------------------------------------------------------------------------------------------------------- |
-| `SYSTEM_ADMIN`    | Configures the platform; never approves, posts or pays                                                          |
-| `PRODUCT_MANAGER` | Raises SPRs and follows their brands' orders and stock                                                          |
-| `APPROVER`        | Approves or rejects SPRs and requests within their limit                                                        |
-| `SUPPORT`         | Confirms documents, keeps orders current, generates PIs, invoices and packing lists, and sends customer updates |
-| `WAREHOUSE`       | Checks goods against documents, then packs and releases them                                                    |
-| `FINANCE`         | Confirms payments, pays vendors, and clears payment holds with a second approver                                |
-| `LOGISTICS`       | Arranges forwarders, and follows shipment dates, AWB/BL and import permits                                      |
-| `MANAGEMENT`      | Reads the tracker, dashboards and reports, and decides approvals above an approver's limit                      |
-| `AUDITOR`         | Reads the audit trail                                                                                           |
+| Role              | Access                                                                                                                                                           |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SYSTEM_ADMIN`    | Configures the platform; never approves, posts or pays                                                                                                           |
+| `PRODUCT_MANAGER` | Raises SPRs from stock and run rate, places vendor POs, and follows their brands' orders and stock                                                               |
+| `APPROVER`        | One of three management approvers (shown as "Management approver"): any one decides an SPR, within a limit if limits are on                                      |
+| `SUPPORT`         | Confirms documents, keeps orders current, generates PIs, invoices and packing lists, sends customer updates, and as coordinator routes each SPR to the approvers |
+| `WAREHOUSE`       | Checks goods against documents, then packs and releases them                                                                                                     |
+| `FINANCE`         | Confirms payments, pays vendors, and clears payment holds with a second approver                                                                                 |
+| `LOGISTICS`       | Arranges forwarders, and follows shipment dates, AWB/BL and import permits                                                                                       |
+| `MANAGEMENT`      | Reads the tracker, dashboards and reports, and decides above an approver's limit only if limits are switched on                                                  |
+| `AUDITOR`         | Reads the audit trail                                                                                                                                            |
 
 ### Capabilities
 
 - **A. Document intake and AI extraction:** email or upload; classification; extraction with a confidence score and a source link per field; layout mappings that AI proposes and a person approves.
 - **B. Master data and Business Central:** items, customers, vendors, prices and stock behind a connector; any write-back needs a preview and an approval.
-- **C. Order workflows and approvals:** a state machine; tasks for each role; SPR approval within limits; the payment gate; reminders and escalations; generated PIs, invoices and packing lists.
-- **D. Checks, the tracker and insights:** documents checked against each other with tolerances; an exceptions queue; one tracker with every order's trail; Spectra's five measures as KPIs.
+- **C. Order workflows and approvals:** a state machine; tasks for each role; SPR approval by the approver group, with limits switchable and none set; the payment gate; reminders and escalations; generated PIs, invoices and packing lists.
+- **D. Checks, the tracker and insights:** part number, quantity, unit price and currency must match exactly across the PO, PI, invoice and packing list, with no tolerance setting for those four, and other differences are warnings; an exceptions queue; one tracker with every order's trail; Spectra's five measures as KPIs.
 - **E. AI with a person in the loop:** extraction, mismatch explanations, and drafts that a person sends.
 - **F. Financial controls and governance:** no self-approval; approval limits; bank-detail change control; masking of bank details and prices by role; a tamper-evident audit trail.
 - **G. Monitoring:** tracing, metrics, clickstream analytics, and the AI cost per document.
@@ -88,7 +90,7 @@ OrderPilot is an AI-assisted order-automation layer **beside** Business Central,
   - PO upload, with AI classification and extraction.
   - A person confirms the uncertain fields.
   - A stock lookup in mock Business Central.
-  - An SPR raised by a button and approved.
+  - An SPR raised by a button and approved (for v0.1-proposal).
   - The tracker.
   - One mismatch: a packing list whose quantity differs from the PO.
   - The permission check, enforced on the server.
@@ -120,7 +122,7 @@ OrderPilot is an AI-assisted order-automation layer **beside** Business Central,
 - Mask bank details and prices by role, with a reason.
 - Every extracted field keeps its confidence and source. AI output is a draft until a person confirms it.
 - Match customers, vendors and items on their Business Central numbers, never on names. A look-alike name is shown as a possible match.
-- Open business rules are configuration until Spectra confirms them: the SPR trigger, the PI sequence, approvers and limits, and delegation.
+- Open business rules are configuration until Spectra confirms them: the PI sequence and the approver group's limits, which are switchable and have none set. There is no delegation or substitute: any one of the three approvers decides. The SPR trigger is settled: a person raises it from stock and run rate.
 - No Spectra document goes to a third-party AI without their written OK, in an approved region. The one exception is the briefing material Spectra gave the team: it stays outside the repository, and coding tools may read it on Richie's PC (A-31).
 
 ### Targets
@@ -136,7 +138,7 @@ Spectra's own five measures sit alongside these: order-processing time, manual t
 
 ### End-to-end tests
 
-- **#1, the sales pilot:** upload, two fields confirmed, stock, SPR, a reminder, the mismatch, and the tracker.
+- **#1, the sales pilot:** upload, two fields confirmed, stock, SPR (for v0.1-proposal), a reminder, the mismatch, and the tracker.
 - **#2, AI layout mapping:** a new layout is mapped by AI and approved by a person.
 - **#3, refusals:** an unauthorised direct API call is refused, segregation of duties and masking hold, and every refusal is audited.
 - **#4, the purchase flow:** a vendor PI with changed bank details holds the payment.

@@ -633,7 +633,7 @@ describe("SPR approval within limits (C-3), on the real state machine and area 4
           expect(await handedFor("MANAGEMENT", spr.recordNo)).toMatchObject({
             kind: "APPROVE_SPR",
             orderNo: spr.orderNo,
-            handedOver: { reason: "substitute", fromName: "Janet Lim" },
+            handedOver: { reason: "substitute", fromName: "Rachel Goh" },
           });
         },
       );
@@ -648,7 +648,7 @@ describe("SPR approval within limits (C-3), on the real state machine and area 4
       await withApprover({ substituteUserId: null, ...away }, async () => {
         expect(await approverInbox()).not.toContain(spr.recordNo);
         expect(await handedFor("MANAGEMENT", spr.recordNo)).toMatchObject({
-          handedOver: { reason: "escalated", fromName: "Janet Lim" },
+          handedOver: { reason: "escalated", fromName: "Rachel Goh" },
         });
       });
     });
@@ -660,7 +660,7 @@ describe("SPR approval within limits (C-3), on the real state machine and area 4
 
       expect(await approverInbox()).not.toContain(spr.recordNo);
       expect(await handedFor("MANAGEMENT", spr.recordNo)).toMatchObject({
-        handedOver: { reason: "passed-on", fromName: "Janet Lim" },
+        handedOver: { reason: "passed-on", fromName: "Rachel Goh" },
       });
     });
 
@@ -794,7 +794,7 @@ describe("SPR approval within limits (C-3), on the real state machine and area 4
 
       expect(await approverInbox()).not.toContain(spr.recordNo);
       expect(await handedFor("MANAGEMENT", spr.recordNo)).toMatchObject({
-        handedOver: { reason: "named", fromName: "Janet Lim" },
+        handedOver: { reason: "named", fromName: "Rachel Goh" },
       });
     });
 
@@ -825,7 +825,7 @@ describe("SPR approval within limits (C-3), on the real state machine and area 4
       const spr = await pendingSpr("100.00", {
         decision: {
           outcome: "approved",
-          by: "Janet Lim",
+          by: "Rachel Goh",
           comment: "Recorded",
           at: new Date().toISOString(),
         },

@@ -28,6 +28,8 @@ The Must list, for the Week 4 prototype and the Week 5 proposal. It grows as eac
 | 8    | Management      | Opens the tracker: the order's status, owner, history and the exception, with overdue flags   | One view of every order                                            | 3    | D-1, D-4                     |
 | 9    | Auditor         | Opens the audit trail for the order: every action, who did it and when, with the chain intact | Every decision is audited and tamper-evident                       | 4    | P-9, F-2                     |
 
+The briefing of 5 Nov changes step 4: Spectra raises an SPR (a Stock Purchase Requisition) from stock on hand and the last three months' run rate, not from an order's shortfall, and a short order is held while the customer revises the PO. The steps above stay as they are for `v0.1-proposal`. With P-61 the SPR's pre-fill moves from the shortfall to stock on hand and the run rate, and P-90 records the switch in this table after the tag.
+
 As the Should items land, the journey adds: the payment gate (packing waits for Finance), the PI draft, full matching, the AWB/BL and permit follow-ups, and email intake with an update drafted by AI and sent by a person.
 
 ## E2E #2: AI layout mapping

@@ -10,7 +10,7 @@ What we assume until Spectra tells us otherwise. Each one is checked at the brie
 
 | #    | Assumption                                                                                                                                  | If wrong                                                     | Q   | Status |
 | ---- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ | --- | ------ |
-| A-01 | Prices are quoted in USD, and most customers pay before shipment                                                                            | The payment gate and the price checks need other currencies  | Q-9 | Partly |
+| A-01 | Prices are quoted in USD, and many customers pay before shipment, others on credit terms                                                    | The payment gate and the price checks need other currencies  | Q-9 | Partly |
 | A-02 | The customer, vendor and item numbers in Microsoft Dynamics 365 Business Central are stable and unique, so we match on them, never on names | Matching needs another key, and look-alike names get riskier | Q-1 | Open   |
 | A-03 | Documents arrive mostly by email, as PDF, scans or Excel, and staff can also upload them                                                    | Intake needs another channel (portal, EDI or paper)          | Q-2 | Partly |
 | A-04 | Each customer and vendor keeps one layout for each document type, which changes rarely                                                      | Layout mapping needs more versions, or per-document review   | Q-2 | Open   |
@@ -36,18 +36,18 @@ Every detail below comes from the standard product, as written up in [the domain
 
 ## The process
 
-| #    | Assumption                                                                                                     | If wrong                                                    | Q    | Status     |
-| ---- | -------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- | ---- | ---------- |
-| A-20 | The pilot is the sales flow, from the customer's PO to the tracker                                             | The Must list moves to the purchase flow                    | Q-3  | Challenged |
-| A-21 | **Open rule, configurable:** an SPR is raised when stock is short. In the MVP a person raises it with a button | Only the configuration changes                              | Q-5  | Challenged |
-| A-22 | **Open rule, configurable:** the PI goes to the customer first, and to the warehouse after payment             | Only the configuration changes                              | Q-4  | Open       |
-| A-23 | **Open rule, configurable:** one approver (Janet) approves SPRs up to a limit, and amounts above it escalate   | Only the configuration changes                              | Q-6  | Changed    |
-| A-24 | **Open rule, configurable:** while the approver is away, a named substitute approves                           | Only the configuration changes                              | Q-6  | Open       |
-| A-25 | Packing starts only after Finance confirms the payment                                                         | The payment gate becomes a warning, not a block             | Q-9  | Open       |
-| A-26 | A quantity difference between the packing list and the PO is a mismatch, with no tolerance                     | The rule gets a tolerance, or partial shipments are allowed | Q-8  | Partly     |
-| A-27 | Customers send import permits or ask for them, and Logistics follows them up                                   | The permit follow-up changes owner or disappears            | Q-10 | Open       |
-| A-28 | Each Product Manager owns certain brands, and sees only those orders                                           | The data scope in area 4's policy changes                   | Q-17 | Open       |
-| A-29 | Returns and credit notes are rare, and stay in Business Central                                                | They become their own documents in OrderPilot               | Q-18 | Partly     |
+| #    | Assumption                                                                                                              | If wrong                                                    | Q    | Status     |
+| ---- | ----------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- | ---- | ---------- |
+| A-20 | The pilot is the sales flow, from the customer's PO to the tracker                                                      | The Must list moves to the purchase flow                    | Q-3  | Challenged |
+| A-21 | **Open rule, configurable:** an SPR is raised when stock is short. In the MVP a person raises it with a button          | Only the configuration changes                              | Q-5  | Challenged |
+| A-22 | **Open rule, configurable:** the PI goes to the customer first, and to the warehouse after payment                      | Only the configuration changes                              | Q-4  | Open       |
+| A-23 | **Open rule, configurable:** a group of three approvers (Rachel, Marcus, Farah) decides each SPR; limits are switchable | Only the configuration changes                              | Q-6  | Changed    |
+| A-24 | **Superseded by the briefing:** there is no substitute; any one of the three approvers decides                          | Only the configuration changes                              | Q-6  | Superseded |
+| A-25 | Packing starts only after Finance confirms the payment                                                                  | The payment gate becomes a warning, not a block             | Q-9  | Open       |
+| A-26 | A quantity difference between the packing list and the PO is a mismatch, with no tolerance                              | The rule gets a tolerance, or partial shipments are allowed | Q-8  | Partly     |
+| A-27 | Customers send import permits or ask for them, and Logistics follows them up                                            | The permit follow-up changes owner or disappears            | Q-10 | Open       |
+| A-28 | Each Product Manager owns certain brands, and sees only those orders                                                    | The data scope in area 4's policy changes                   | Q-17 | Open       |
+| A-29 | Returns and credit notes are rare, and stay in Business Central                                                         | They become their own documents in OrderPilot               | Q-18 | Partly     |
 
 ## Technology and data
 

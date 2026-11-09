@@ -360,7 +360,7 @@ export const TEAM: readonly PersonSpec[] = [
   { name: "Priya Nair", role: "PRODUCT_MANAGER", category: "IT" },
   { name: "Kavin Ramesh", role: "PRODUCT_MANAGER", category: "SURVEILLANCE" },
   { name: "Nadia Salleh", role: "PRODUCT_MANAGER", category: "ACCESSORIES" },
-  { name: "Janet Lim", role: "APPROVER" },
+  { name: "Rachel Goh", role: "APPROVER" },
   { name: "Mei Tan", role: "SUPPORT" },
   { name: "Daryl Foo", role: "SUPPORT" },
   { name: "Hafiz Rahman", role: "WAREHOUSE" },

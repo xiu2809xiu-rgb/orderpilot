@@ -20,17 +20,17 @@ The sales flow, today and with OrderPilot. Today's map is our reading of the bri
 
 ## With OrderPilot: the sales flow
 
-| Step                        | Who                       | What changes                                                                                                                    | Rule or person in charge                  | Area    |
-| --------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- | ------- |
-| 1. The PO arrives           | Support                   | Upload or email. The AI classifies and extracts it; Support confirms only the doubtful fields                                   | A person confirms; AI only reads          | 1       |
-| 2. Stock check and SPR      | Product Manager, approver | Stock comes from Business Central through the connector. A shortfall suggests an SPR; the approver gets it with its checks done | The approval limit; a person approves     | 1, 2, 4 |
-| 3. The PI                   | Support                   | A PI draft from the confirmed order, with the bank details masked by role                                                       | Support reviews and sends it              | 2       |
-| 4. The customer pays        | Finance                   | Finance confirms the payment in OrderPilot, and the payment gate opens                                                          | The gate rule plus Finance's confirmation | 2, 4    |
-| 5. The warehouse packs      | Warehouse                 | The packing task appears only once the order is paid                                                                            | The state machine                         | 2       |
-| 6. Invoice and packing list | Support, Warehouse        | The packing list is checked against the PO and invoice. A difference goes to the exceptions queue                               | Fixed check rules; a person resolves      | 3       |
-| 7. To the forwarder         | Logistics                 | Shipping details come from the confirmed order, not re-typed                                                                    | A person releases the goods               | 2       |
-| 8. Shipping details         | Logistics, Support        | The AI drafts the customer's update; a person sends it                                                                          | A person sends                            | 1, 2    |
-| 9. AWB/BL and permit        | Logistics                 | Follow-ups with deadlines, reminders and escalations; overdue ones show on the tracker                                          | Deadlines as configuration                | 2, 3    |
+| Step                        | Who                       | What changes                                                                                                                                                                  | Rule or person in charge                  | Area    |
+| --------------------------- | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- | ------- |
+| 1. The PO arrives           | Support                   | Upload or email. The AI classifies and extracts it; Support confirms only the doubtful fields                                                                                 | A person confirms; AI only reads          | 1       |
+| 2. Stock check and SPR      | Product Manager, approver | Stock comes from Business Central through the connector. Stock on hand and run rate suggest an SPR (today a shortfall, until P-61); the approvers get it with its checks done | The approval limit; a person approves     | 1, 2, 4 |
+| 3. The PI                   | Support                   | A PI draft from the confirmed order, with the bank details masked by role                                                                                                     | Support reviews and sends it              | 2       |
+| 4. The customer pays        | Finance                   | Finance confirms the payment in OrderPilot, and the payment gate opens                                                                                                        | The gate rule plus Finance's confirmation | 2, 4    |
+| 5. The warehouse packs      | Warehouse                 | The packing task appears only once the order is paid                                                                                                                          | The state machine                         | 2       |
+| 6. Invoice and packing list | Support, Warehouse        | The packing list is checked against the PO and invoice. A difference goes to the exceptions queue                                                                             | Fixed check rules; a person resolves      | 3       |
+| 7. To the forwarder         | Logistics                 | Shipping details come from the confirmed order, not re-typed                                                                                                                  | A person releases the goods               | 2       |
+| 8. Shipping details         | Logistics, Support        | The AI drafts the customer's update; a person sends it                                                                                                                        | A person sends                            | 1, 2    |
+| 9. AWB/BL and permit        | Logistics                 | Follow-ups with deadlines, reminders and escalations; overdue ones show on the tracker                                                                                        | Deadlines as configuration                | 2, 3    |
 
 **Across the whole journey:** the tracker shows every order's status, owner, history and exceptions, and the audit trail records each decision. Staff still post in Business Central.
 
@@ -39,6 +39,6 @@ The sales flow, today and with OrderPilot. Today's map is our reading of the bri
 The steps where OrderPilot must earn trust, so the prototype gets them right first:
 
 1. **Step 1, the confirm screen.** If confirming takes longer than typing, Support will not use it.
-2. **Step 2, the approver's view.** Janet must trust the checks enough to approve from one screen.
+2. **Step 2, the approver's view.** Rachel must trust the checks enough to approve from one screen.
 3. **Step 4, the payment gate.** A false "paid" ships unpaid goods; a missed "paid" delays a customer who has paid.
 4. **Step 6, the mismatch.** One mismatch caught before shipping is the demo's proof.

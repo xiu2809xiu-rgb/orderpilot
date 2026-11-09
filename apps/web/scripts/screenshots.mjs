@@ -31,7 +31,7 @@ const { chromium } = createRequire(path.join(playwrightDir, "x.js"))(
 const PERSONAS = {
   SYSTEM_ADMIN: "Daniel Koh",
   PRODUCT_MANAGER: "Priya Nair",
-  APPROVER: "Janet Lim",
+  APPROVER: "Rachel Goh",
   SUPPORT: "Mei Tan",
   WAREHOUSE: "Hafiz Rahman",
   FINANCE: "Grace Ong",
