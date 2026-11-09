@@ -511,7 +511,7 @@
         "Prompt 003 brings forward reading master data through a port labelled as the mock (P-35, whose label P-83 renames); this story still brings the service, its paging and `$filter`, and the compose service.",
         "The stock figure a lookup needs is `inventory` on `items`, as in API v2.0, and the quantities on sales and purchase orders are summed from the open lines, because `items` has neither.",
         "Vendor bank details have no API v2.0 resource (`bankAccounts` is the company's own), so the mock adds `vendorBankAccounts`, and `docs/api/mock-systems.md` marks it as ours and says a real connection needs a custom API page or an export.",
-        "A write path where API v2.0 has one: POST and PATCH on customers, vendors, purchaseOrders and purchaseOrderLines, kept in the mock's own store. `purchaseReceipts` stays read-only, as in API v2.0, so the mock makes a receipt when a purchase order is received.",
+        "A write path where API v2.0 has one: POST and PATCH on customers, vendors, purchaseOrders and purchaseOrderLines, kept in the mock's own store. `purchaseReceipts` stays read-only, as in API v2.0, so the mock makes a receipt when P-103 calls `receiveAndInvoice`, the one receiving action API v2.0 lists on `purchaseOrders`.",
         "Webhooks (subscriptions) come later, and `docs/api/mock-systems.md` says so."
       ]
     },
@@ -2668,12 +2668,12 @@
         "`docs/team/area-2-*.md`, `area-3-*.md` and `area-4-*.md` stay out of this sweep: their lines are listed in each owner's issue, and the owners change them.",
         "`docs/grs/grs-by-design.md` rewords risk R-06 for the ERP Spectra now runs instead of swapping the word, and `docs/data-formats.md` and `docs/research/domain-notes.md` say that API v2.0 renames these fields and the connector maps them.",
         "Area 1's code names change where the rename stays inside area 1: `MockNavisionMasterData` and its file, the `mockNavision` badge kind, and the Swagger summaries and messages in area 1's API.",
-        "The comments and titles that only describe the mock follow: `packages/shared` (23 comment lines in 9 files, with all four owners asked to review), `packages/synthetic-data` (7 lines), `apps/api/requests/master-data.http` and `orders.http`, the API test titles in `master-data.parity.test.ts`, `test/http/master-data.test.ts` and `test/database/sales-order.test.ts`, area 1's API comments, and 11 comments in the web code.",
-        "Database columns, wire properties, the stored `navision` value, i18n keys, other areas' identifiers and the shared exports (`navisionNoSchema`, `NavisionStatus`, `NAVISION_STATUSES` and `navisionStatusSchema`, of which area 2 imports `NavisionStatus`) keep their names, and an ADR says why.",
+        "The comments and titles that only describe the mock follow: `packages/shared` (22 comment lines and one test title, in 9 files, with all four owners asked to review), `packages/synthetic-data` (7 lines), `apps/api/requests/master-data.http` and `orders.http`, the API test titles in `master-data.parity.test.ts`, `test/http/master-data.test.ts` and `test/database/sales-order.test.ts`, area 1's API comments, and 11 comments in the web code.",
+        "Database columns, wire properties, the stored `navision` value, i18n keys, other areas' identifiers and the shared exports (`navisionNoSchema`, `NavisionStatus`, `NAVISION_STATUSES` and `navisionStatusSchema`, of which area 2 imports `NavisionStatus`) keep their names, an ADR says why, and a comment on `SalesOrder.navisionNo` says it holds the Business Central number.",
         "The words this story changes in the owners' files (`workflows.json`, `order-tracker.json`, `OrderDetailPage.test.tsx` and `checks/domain/mock-status.ts`) change with those owners' review, and each owner's issue lists the mentions left in their own code.",
         "`pnpm api:generate` changes only the summaries in `apps/api/openapi.json` and the generated client's `endpoints/master-data/master-data.ts`, because the other 12 generated files carry only the wire names, and `pnpm api:check` passes.",
         "The fixture in `scripts/ci/changed-inputs.test.mjs` and the comment in `docker-compose.yml` use the planned `mock-business-central`.",
-        "`git grep -i navision` lists only what the ADR keeps on purpose, the `RENAMED` map in `backlog.test.mjs` and this story's own text, and the pull request shows the list.",
+        "`git grep -i navision` lists only what the ADR keeps on purpose, the lines each owner's issue leaves to that owner, the `RENAMED` map and its test in `backlog.test.mjs`, and this story's own text, and the pull request shows the list.",
         "Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844."
       ]
     },
@@ -2690,7 +2690,7 @@
       "dependsOn": ["P-83"],
       "summary": "The facts, names and personas follow the briefing: Stock Purchase Requisition, three management approvers, a coordinator and exact matching on four fields.",
       "acceptance": [
-        "SPR reads Stock Purchase Requisition in `CLAUDE.md` and the docs, raised by the product manager from stock on hand and the last three months' run rate.",
+        "SPR reads Stock Purchase Requisition in `CLAUDE.md`, the docs and area 1's comments, raised by the product manager from stock on hand and the last three months' run rate.",
         "`CLAUDE.md` and the docs say a coordinator, a Support user, routes each SPR to three management approvers, any one of whom decides, with no substitute and a reminder to the whole group after 24 hours.",
         "`CLAUDE.md` follows the briefing where else it differs, at lines 22, 30, 34 and 72 today: the countries and payment terms in its client paragraph, what links the two flows, an SPR no longer raised from an order's shortfall, and Management deciding above a limit only if limits are switched on.",
         "`docs/agile/hero-journey.md` says at line 24 today the SPR's pre-fill moves from the shortfall to stock on hand and the run rate with P-61, and E2E #1's steps stay as they are for `v0.1-proposal` (P-90 records the switch after the tag).",
@@ -2722,7 +2722,7 @@
         "A-31 says samples may go to a cloud AI service that does not train on inputs, in a named region, only once Spectra's written line arrives, and `CLAUDE.md`, `AGENTS.md` and `docs/data-formats.md` agree.",
         "`CLAUDE.md` and the docs bring the purchase flow forward (A-20), and the six KPIs replace the five, each old measure mapped to a new one (item cz in the build report).",
         "One issue each for Azri, Angelyn and Iok Teck, filed right after P-82's seed and assigned to them, lists what their logic now needs and which area 1 stories wait on it.",
-        "Nothing from the client pack is in Git or an issue: no staff names, figures, customer or vendor names, quotes or screenshots."
+        "Nothing from the client pack is in Git or an issue: no staff names, figures, customer or vendor names, quotes or screenshots, and no site names until Richie decides (item dh)."
       ]
     },
     {
@@ -2941,7 +2941,7 @@
         "A deterministic mock provider with scripted answers to the demo questions keeps tests and offline demos working.",
         "Every question and answer is audited, with its tokens and cost tracked like any AI call.",
         "Prompt-injection tests show that a hostile document cannot make Spark call a tool or change anything.",
-        "`CLAUDE.md` section 5, and the GRS doc and area 1's guide where they repeat it, say that no model output writes, approves, posts, pays or sends, and that tools are read-only and run as the person asking.",
+        "`CLAUDE.md` section 5, and the GRS doc, the test plan, the traceability matrix and area 1's guide where they repeat it, say that no model output writes, approves, posts, pays or sends, and that tools are read-only and run as the person asking.",
         "ADR: Spark and its read-only tools."
       ]
     },
