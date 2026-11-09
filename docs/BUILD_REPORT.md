@@ -316,39 +316,39 @@ P-82 ([#219](https://github.com/xiu2809xiu-rgb/orderpilot/issues/219)) cuts them
 
 The board sync keeps an open card's Sprint, so the cards of P-21 (#36) and P-61 (#156) stay at Sprint 02 until someone moves them by hand to Sprint 04 and Sprint 08. A closed card's Sprint follows its milestone, so the same run moves P-49's card (#144) from Sprint 02 to Sprint 03, the week it merged.
 
-| Story | Title                                                            | Epic | Priority | Points | Sprints | Branch                                | State             |
-| ----- | ---------------------------------------------------------------- | ---- | -------- | ------ | ------- | ------------------------------------- | ----------------- |
-| P-82  | Plan prompts 005 and 006                                         | P    | must     | 2      | 3       | `chore/plan-prompts-005-006`          | This pull request |
-| P-83  | Rename Navision to Business Central                              | P    | must     | 5      | 3       | `chore/business-central-rename`       | Pull request #254 |
-| P-84  | SPR, the approver group and zero tolerance in the facts          | P    | must     | 3      | 3       | `chore/spr-approver-group`            | Pull request #255 |
-| P-85  | Record the 5 Nov briefing                                        | P    | must     | 2      | 3       | `docs/briefing-5-nov`                 | This pull request |
-| P-86  | Synthetic data from the briefing                                 | P    | must     | 13     | 3, 4    | `feat/area1-briefing-data`            | Not started       |
-| P-87  | Drafts that a person sends                                       | E    | must     | 5      | 5       | `feat/area1-drafts`                   | Not started       |
-| P-88  | Customer check on intake and the new-customer card               | B    | must     | 8      | 6       | `feat/area1-customer-check`           | Not started       |
-| P-89  | PO versions                                                      | C    | must     | 5      | 6       | `feat/area1-po-versions`              | Not started       |
-| P-90  | The short-stock revision request                                 | C    | must     | 3      | 6, 7    | `feat/area1-short-stock-request`      | Not started       |
-| P-91  | The compare screen                                               | D    | must     | 8      | 6, 7    | `feat/area1-compare-documents`        | Not started       |
-| P-92  | Document cabinet: filing and search                              | A    | must     | 8      | 7       | `feat/area1-document-cabinet`         | Not started       |
-| P-93  | Cabinet viewer: stamps, notes and the related chain              | A    | must     | 8      | 7, 8    | `feat/area1-cabinet-viewer`           | Not started       |
-| P-94  | Audit packs                                                      | A    | must     | 8      | 8       | `feat/area1-audit-packs`              | Not started       |
-| P-95  | Spark's foundation                                               | E    | must     | 8      | 8       | `feat/area1-spark-foundation`         | Not started       |
-| P-96  | Spark's panel and page                                           | E    | must     | 8      | 8, 9    | `feat/area1-spark-panel`              | Not started       |
-| P-97  | Spark finds documents                                            | E    | must     | 5      | 9       | `feat/area1-spark-find`               | Not started       |
-| P-98  | Spark matches a set and collects an audit pack                   | E    | must     | 5      | 9       | `feat/area1-spark-match-and-pack`     | Not started       |
-| P-99  | Spark answers order questions                                    | E    | must     | 5      | 9       | `feat/area1-spark-order-questions`    | Not started       |
-| P-100 | SPR screens: routing, the 24-hour reminder and where it is stuck | C    | must     | 8      | 9, 10   | `feat/area1-spr-routing-screens`      | Not started       |
-| P-101 | Vendor POs                                                       | B    | must     | 5      | 10      | `feat/area1-vendor-pos`               | Not started       |
-| P-102 | Inbound shipments and chase drafts                               | C    | should   | 5      | 10      | `feat/area1-inbound-shipments`        | Not started       |
-| P-103 | Goods receipt and inwarding                                      | B    | should   | 8      | 10, 11  | `feat/area1-goods-receipt`            | Not started       |
-| P-104 | Vendor payments by due date                                      | F    | should   | 5      | 11      | `feat/area1-vendor-payments`          | Not started       |
-| P-105 | Spark's charts, forecast and customer replies                    | E    | should   | 8      | 11      | `feat/area1-spark-charts-and-replies` | Not started       |
-| P-106 | Three visual directions                                          | P    | must     | 8      | 3, 4    | `feat/platform-design-directions`     | Not started       |
-| P-107 | Roll the picked direction onto the shell and templates           | P    | must     | 8      | 5       | `feat/platform-direction-rollout`     | Not started       |
-| P-108 | The landing page                                                 | P    | should   | 8      | 11      | `feat/platform-landing`               | Not started       |
-| P-109 | The sign-in page with the scene                                  | P    | should   | 3      | 6       | `feat/platform-sign-in-scene`         | Not started       |
-| P-110 | The speed bar                                                    | P    | should   | 5      | 7       | `feat/platform-speed-bar`             | Not started       |
-| P-111 | Grid polish                                                      | P    | could    | 5      | 13      | `feat/platform-grid-polish`           | Not started       |
-| P-112 | Small delights                                                   | P    | could    | 3      | 13      | `feat/platform-small-delights`        | Not started       |
+| Story | Title                                                            | Epic | Priority | Points | Sprints | Branch                                | State                                                         |
+| ----- | ---------------------------------------------------------------- | ---- | -------- | ------ | ------- | ------------------------------------- | ------------------------------------------------------------- |
+| P-82  | Plan prompts 005 and 006                                         | P    | must     | 2      | 3       | `chore/plan-prompts-005-006`          | This pull request                                             |
+| P-83  | Rename Navision to Business Central                              | P    | must     | 5      | 3       | `chore/business-central-rename`       | Pull request #254                                             |
+| P-84  | SPR, the approver group and zero tolerance in the facts          | P    | must     | 3      | 3       | `chore/spr-approver-group`            | Pull request #255                                             |
+| P-85  | Record the 5 Nov briefing                                        | P    | must     | 2      | 3       | `docs/briefing-5-nov`                 | [#256](https://github.com/xiu2809xiu-rgb/orderpilot/pull/256) |
+| P-86  | Synthetic data from the briefing                                 | P    | must     | 13     | 3, 4    | `feat/area1-briefing-data`            | Not started                                                   |
+| P-87  | Drafts that a person sends                                       | E    | must     | 5      | 5       | `feat/area1-drafts`                   | Not started                                                   |
+| P-88  | Customer check on intake and the new-customer card               | B    | must     | 8      | 6       | `feat/area1-customer-check`           | Not started                                                   |
+| P-89  | PO versions                                                      | C    | must     | 5      | 6       | `feat/area1-po-versions`              | Not started                                                   |
+| P-90  | The short-stock revision request                                 | C    | must     | 3      | 6, 7    | `feat/area1-short-stock-request`      | Not started                                                   |
+| P-91  | The compare screen                                               | D    | must     | 8      | 6, 7    | `feat/area1-compare-documents`        | Not started                                                   |
+| P-92  | Document cabinet: filing and search                              | A    | must     | 8      | 7       | `feat/area1-document-cabinet`         | Not started                                                   |
+| P-93  | Cabinet viewer: stamps, notes and the related chain              | A    | must     | 8      | 7, 8    | `feat/area1-cabinet-viewer`           | Not started                                                   |
+| P-94  | Audit packs                                                      | A    | must     | 8      | 8       | `feat/area1-audit-packs`              | Not started                                                   |
+| P-95  | Spark's foundation                                               | E    | must     | 8      | 8       | `feat/area1-spark-foundation`         | Not started                                                   |
+| P-96  | Spark's panel and page                                           | E    | must     | 8      | 8, 9    | `feat/area1-spark-panel`              | Not started                                                   |
+| P-97  | Spark finds documents                                            | E    | must     | 5      | 9       | `feat/area1-spark-find`               | Not started                                                   |
+| P-98  | Spark matches a set and collects an audit pack                   | E    | must     | 5      | 9       | `feat/area1-spark-match-and-pack`     | Not started                                                   |
+| P-99  | Spark answers order questions                                    | E    | must     | 5      | 9       | `feat/area1-spark-order-questions`    | Not started                                                   |
+| P-100 | SPR screens: routing, the 24-hour reminder and where it is stuck | C    | must     | 8      | 9, 10   | `feat/area1-spr-routing-screens`      | Not started                                                   |
+| P-101 | Vendor POs                                                       | B    | must     | 5      | 10      | `feat/area1-vendor-pos`               | Not started                                                   |
+| P-102 | Inbound shipments and chase drafts                               | C    | should   | 5      | 10      | `feat/area1-inbound-shipments`        | Not started                                                   |
+| P-103 | Goods receipt and inwarding                                      | B    | should   | 8      | 10, 11  | `feat/area1-goods-receipt`            | Not started                                                   |
+| P-104 | Vendor payments by due date                                      | F    | should   | 5      | 11      | `feat/area1-vendor-payments`          | Not started                                                   |
+| P-105 | Spark's charts, forecast and customer replies                    | E    | should   | 8      | 11      | `feat/area1-spark-charts-and-replies` | Not started                                                   |
+| P-106 | Three visual directions                                          | P    | must     | 8      | 3, 4    | `feat/platform-design-directions`     | Not started                                                   |
+| P-107 | Roll the picked direction onto the shell and templates           | P    | must     | 8      | 5       | `feat/platform-direction-rollout`     | Not started                                                   |
+| P-108 | The landing page                                                 | P    | should   | 8      | 11      | `feat/platform-landing`               | Not started                                                   |
+| P-109 | The sign-in page with the scene                                  | P    | should   | 3      | 6       | `feat/platform-sign-in-scene`         | Not started                                                   |
+| P-110 | The speed bar                                                    | P    | should   | 5      | 7       | `feat/platform-speed-bar`             | Not started                                                   |
+| P-111 | Grid polish                                                      | P    | could    | 5      | 13      | `feat/platform-grid-polish`           | Not started                                                   |
+| P-112 | Small delights                                                   | P    | could    | 3      | 13      | `feat/platform-small-delights`        | Not started                                                   |
 
 ## Prompt 004: an ERP-grade workspace
 
