@@ -27,6 +27,17 @@ const POINTS = [1, 2, 3, 5, 8, 13];
 const PRIORITIES = ["must", "should", "could"];
 const REQS = ["M1", "M2", "M3", "M4", "M5", "M6"];
 
+// Prompt 005 renames Navision to Business Central, and a prompt is never rewritten.
+// These are the words prompt 001 still uses, so the brief's checks keep reading it.
+const RENAMED = {
+  "Epic B": { title: "Master data and Navision" },
+  "P-19": {
+    title: "Mock Navision and synthetic master data",
+    branch: "feat/area1-mock-navision",
+  },
+  "P-20": { title: "The connector framework and the Navision adapter" },
+};
+
 function briefHeadings() {
   const pattern = /^\*\*([A-Z]-\d+) (.+?)\*\*(?: \(`([^`]+)`\))?/gm;
   return [...brief.matchAll(pattern)].map(([, key, title, branch]) => ({
@@ -45,8 +56,9 @@ test("the epics are P, A to G and T", () => {
 
 test("the epics use the capability names in the brief", () => {
   for (const epic of backlog.epics.filter((item) => /[A-G]/.test(item.key))) {
+    const title = RENAMED[`Epic ${epic.key}`]?.title ?? epic.title;
     assert.ok(
-      brief.includes(`- **${epic.key}. ${epic.title}:**`),
+      brief.includes(`- **${epic.key}. ${title}:**`),
       `Epic ${epic.key}`,
     );
   }
@@ -54,6 +66,22 @@ test("the epics use the capability names in the brief", () => {
 
 test("story keys are unique", () => {
   assert.equal(byKey.size, backlog.stories.length);
+});
+
+// GitHub allows at most 100 sub-issues per parent, and the seed links every story
+// under its epic's issue. A dry run cannot see that limit, so a backlog over it would
+// stop a real seed partway. Prompt 005's stories sit in the epics of their
+// capabilities for this reason, and the next platform stories need a new epic.
+const MOST_STORIES_IN_AN_EPIC = 95;
+
+test("no epic comes near GitHub's limit on sub-issues", () => {
+  for (const epic of backlog.epics) {
+    const stories = backlog.stories.filter((story) => story.epic === epic.key);
+    assert.ok(
+      stories.length <= MOST_STORIES_IN_AN_EPIC,
+      `Epic ${epic.key} has ${stories.length} stories`,
+    );
+  }
 });
 
 test("every story the brief names is here, in the expected groups", () => {
@@ -72,7 +100,7 @@ test("every story the brief names is here, in the expected groups", () => {
     "E-6",
   ];
   for (const key of expected) assert.ok(keys.includes(key), key);
-  assert.equal(keys.length, expected.length + 74);
+  assert.equal(keys.length, expected.length + 105);
 });
 
 test("titles and branches match the brief's headings", () => {
@@ -81,9 +109,33 @@ test("titles and branches match the brief's headings", () => {
   for (const { key, title, branch } of headings) {
     const story = byKey.get(key);
     assert.ok(story, key);
-    assert.equal(story.title, title, key);
-    assert.equal(story.branch, branch, key);
+    const was = RENAMED[key] ?? {};
+    assert.equal(was.title ?? story.title, title, key);
+    assert.equal(was.branch ?? story.branch, branch, key);
   }
+});
+
+test("the renamed stories say Business Central, and only the map keeps the old words", () => {
+  assert.equal(
+    backlog.epics.find((epic) => epic.key === "B").title,
+    "Master data and Business Central",
+  );
+  assert.equal(
+    byKey.get("P-19").title,
+    "Mock Business Central and synthetic master data",
+  );
+  assert.equal(byKey.get("P-19").branch, "feat/area1-mock-business-central");
+  assert.equal(
+    byKey.get("P-20").title,
+    "The connector framework and the Business Central adapter",
+  );
+  // P-83's own story names what it renames, so it is the one place in the data
+  // that may still say Navision. A wire name such as navisionNo is not the product.
+  const others = backlog.stories.filter((story) => story.key !== "P-83");
+  assert.doesNotMatch(
+    JSON.stringify({ epics: backlog.epics, stories: others }),
+    /Navision/,
+  );
 });
 
 test("T-1 and T-9 use the titles in the brief", () => {
@@ -152,8 +204,10 @@ test("area 1's own stories sit under epics A, B and E", () => {
   const own = backlog.stories.filter((story) =>
     ["A", "B", "E"].includes(story.epic),
   );
-  // 13 from prompt 001, section 10, and E-5 and E-6 from prompt 002.
-  assert.equal(own.length, 15);
+  // 13 from prompt 001, section 10, E-5 and E-6 from prompt 002, and 13 from prompt
+  // 005: drafts and Spark, the cabinet and audit packs, the customer check, vendor
+  // POs and goods receipt.
+  assert.equal(own.length, 28);
   for (const story of own) {
     assert.equal(story.area, "area: 1 document AI and integration", story.key);
   }
@@ -168,7 +222,7 @@ test("area 1's own stories sit under epics A, B and E", () => {
     "Prompt-injection tests",
     "Email intake through a mock mailbox with signed webhooks",
     "Duplicate-PO protection",
-    "A Navision-ready import file",
+    "A Business Central import file",
     "The template engine for PIs, invoices, packing lists and Excel",
     "QR codes on generated documents and carton labels",
     "Passkeys to confirm risky approvals",
@@ -272,16 +326,19 @@ test("the stories prompt 002 touches carry its additions", () => {
   has("P-19", /business partners, each with a type and a price level/);
   has("P-19", /Opening stock and opening balances/);
   has("P-22", /landing, sign-in, the app shell and the 3D view/);
-  has("T-9", /Prompt 005/);
+  has("T-9", /Prompt 007/);
 });
 
 test("the sprints follow prompt 002's order", () => {
   const phaseA = ["P-2", "P-3", "P-4", "P-5", "P-6", "P-7", "P-8", "P-9"];
   phaseA.push("P-10", "P-11", "P-12", "C-1", "D-1", "F-1", "F-2", "G-1");
   for (const key of phaseA) assert.deepEqual(byKey.get(key).sprints, [1], key);
-  for (const key of ["P-13", "P-17", "P-21", "P-22", "P-23", "P-24"]) {
+  for (const key of ["P-13", "P-17", "P-22", "P-23", "P-24"]) {
     assert.deepEqual(byKey.get(key).sprints, [2], key);
   }
+  // Prompt 005 section 12 puts the documents after the briefing's data, so P-21
+  // left prompt 002's Sprint 2 to follow P-86.
+  assert.deepEqual(byKey.get("P-21").sprints, [4, 5]);
   const goal = (sprint) => loadSprintGoals()[sprint - 1].goal;
   assert.match(goal(1), /Sunday 1 Nov, 23:59 Singapore time/);
   assert.match(goal(2), /Monday 2 Nov/);
@@ -356,6 +413,22 @@ test("planned sprints are inside the calendar", () => {
   for (const story of backlog.stories) {
     for (const sprint of story.sprints ?? []) {
       assert.ok(sprint >= 1 && sprint <= 18, story.key);
+    }
+  }
+});
+
+// A story may overlap what it depends on, but a plan that finishes it before that
+// work starts cannot be followed. Prompt 005 made P-21 and P-61 wait for P-86.
+test("no story is planned to finish before what it depends on starts", () => {
+  for (const story of backlog.stories.filter((item) => item.sprints)) {
+    for (const key of story.dependsOn) {
+      const [starts] = byKey.get(key).sprints ?? [];
+      if (starts) {
+        assert.ok(
+          story.sprints.at(-1) >= starts,
+          `${story.key} finishes before ${key} starts`,
+        );
+      }
     }
   }
 });
