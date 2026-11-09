@@ -10,7 +10,7 @@ import type { OrderForm } from "./orderFormValues";
 import { searchCustomers } from "./orderSearches";
 
 /**
- * The order's header: the customer by search (its Navision number is what is
+ * The order's header: the customer by search (its Business Central number is what is
  * saved), the customer's PO number, the dates and the prepayment. The currency
  * is the server's, USD, and only shown. A read-only order locks every field.
  */

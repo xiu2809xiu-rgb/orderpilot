@@ -27,7 +27,7 @@ The same work done two ways, by hand and with OrderPilot, timed and counted the 
 ### The material
 
 - A set of 10 synthetic sales orders, each with its PO, packing list and invoice, from the synthetic documents (planned: P-21). At least two POs in a layout the tester has not seen, and the seeded mistakes left in.
-- **The manual run** uses a spreadsheet laid out like Navision's sales order (Sell-to Customer No., External Document No., the lines) and the documents as PDFs, as Spectra's staff work today.
+- **The manual run** uses a spreadsheet laid out like Microsoft Dynamics 365 Business Central's sales order (Sell-to Customer No., External Document No., the lines) and the documents as PDFs, as Spectra's staff work today.
 - **The OrderPilot run** uses the same documents, uploaded into the demo stack with the mock AI provider, or a provider allowed for synthetic data.
 
 ### The steps

@@ -270,7 +270,9 @@ describe("a draft order's page", () => {
       ).toHaveAttribute("readonly");
       // Nothing can be typed, so nothing is asked for and nothing is hinted.
       expect(document.body.textContent).not.toContain("*");
-      expect(screen.queryByText(/Search by Navision number/)).toBeNull();
+      expect(
+        screen.queryByText(/Search by Business Central number/),
+      ).toBeNull();
       expect(screen.queryByText(/One customer and PO number/)).toBeNull();
       expect(screen.queryByText(/comes from the customer's PO/)).toBeNull();
       expect(screen.getByText(/Availability is mock/)).toBeVisible();

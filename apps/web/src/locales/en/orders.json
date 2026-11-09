@@ -53,14 +53,14 @@
   "form": {
     "title": "Sales order {{number}}",
     "newTitle": "New order",
-    "newDescription": "Enter a customer's PO as a draft. Nothing is posted to Navision from here.",
-    "draftDescription": "A draft: entry is not finished and nothing is reserved. Stock figures are from the mock Navision.",
+    "newDescription": "Enter a customer's PO as a draft. Nothing is posted to Business Central from here.",
+    "draftDescription": "A draft: entry is not finished and nothing is reserved. Stock figures are from the mock Business Central.",
     "formLabel": "Sales order",
     "statusNew": "Not saved yet",
     "tabsEmpty": "Nothing here yet.",
     "fields": {
       "customer": "Customer",
-      "customerHint": "Search by Navision number or name. The number is what is saved.",
+      "customerHint": "Search by Business Central number or name. The number is what is saved.",
       "externalDocumentNo": "Customer PO number",
       "externalDocumentNoHint": "One customer and PO number is one order.",
       "orderDate": "Order date",
@@ -86,7 +86,7 @@
     "lines": {
       "tableLabel": "Order lines",
       "visibleTo": "Roles that handle prices",
-      "hint": "Availability is mock Navision's figure, refreshed every 30 seconds. A draft reserves nothing.",
+      "hint": "Availability is mock Business Central's figure, refreshed every 30 seconds. A draft reserves nothing.",
       "priceHint": "The price comes from the customer's PO. The list price under a price is for reference only.",
       "columns": {
         "lineNo": "Line",

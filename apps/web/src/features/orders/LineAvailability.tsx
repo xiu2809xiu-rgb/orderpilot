@@ -7,7 +7,7 @@ import {
   type OrderForm,
 } from "./orderFormValues";
 
-/** Mock Navision's figures move slowly, so a half minute is live enough. */
+/** Mock Business Central's figures move slowly, so a half minute is live enough. */
 const REFRESH_MS = 30_000;
 
 /**

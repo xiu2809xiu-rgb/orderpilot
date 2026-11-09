@@ -7,7 +7,7 @@ import {
 } from "@/components/form";
 import { ApiError } from "@/lib/api/errors";
 
-// Synthetic demo data, in the shape of the mock Navision's customers and items.
+// Synthetic demo data, in the shape of the mock Business Central's customers and items.
 export const GALLERY_CUSTOMERS: readonly LookupOption[] = [
   { number: "C-0001", name: "Quillon Harbour Traders", detail: "IN" },
   { number: "C-0002", name: "Brindle Coast Imports", detail: "LK" },

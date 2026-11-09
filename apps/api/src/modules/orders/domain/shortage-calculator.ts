@@ -27,7 +27,7 @@ export class ShortageCalculator {
     const short: SalesOrderShortage[] = [];
     for (const [itemNo, quantities] of wanted) {
       const availableStock = this.stock.get(itemNo);
-      // An item Navision does not know has no figure to fall short of.
+      // An item Business Central does not know has no figure to fall short of.
       if (availableStock === undefined) continue;
       const ordered = sumDecimal(quantities);
       const shortBy = shortfallOf(ordered, availableStock);

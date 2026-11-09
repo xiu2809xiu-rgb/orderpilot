@@ -28,7 +28,7 @@ export const sprFieldSchema = z.object({
 export type SprField = z.infer<typeof sprFieldSchema>;
 
 /**
- * The stock figures a pre-fill is worked out from. Available stock is Navision's
+ * The stock figures a pre-fill is worked out from. Available stock is Business Central's
  * Inventory, minus Qty. on Sales Order, plus Qty. on Purch. Order.
  */
 export const sprBasisSchema = z.object({
@@ -57,7 +57,7 @@ export const sprDetailSchema = z.object({
   currencyCode: z.string().length(3),
   basis: sprBasisSchema,
   fields: z.array(sprFieldSchema),
-  /** The approver in Navision's Approval User Setup shape, from area 4's policy. */
+  /** The approver in Business Central's Approval User Setup shape, from area 4's policy. */
   approver: z.object({
     displayName: z.string().min(1),
     setup: approvalUserSetupSchema,

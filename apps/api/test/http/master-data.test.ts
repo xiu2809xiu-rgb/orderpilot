@@ -21,7 +21,7 @@ import { createTestApp, type TestApp } from "../support/test-app.js";
 
 const M = `${API}/master-data`;
 
-describe("master data routes (mock Navision)", () => {
+describe("master data routes (mock Business Central)", () => {
   let t: TestApp;
   const sessions = new Map<Role, Browser>();
   const dataset = syntheticDataset();

@@ -19,11 +19,11 @@ The brief every story serves.
 
 ### The client
 
-Spectra Innovations is a Singapore distributor, and master distributor for appointed brands, of IT products and computer peripherals. Its customers are in South Asia (India, Sri Lanka, Bangladesh, Pakistan) and the Middle East, and most of them pay before their goods ship. Its ERP is Microsoft Dynamics Navision.
+Spectra Innovations is a Singapore distributor, and master distributor for appointed brands, of IT products and computer peripherals. Its customers are in South Asia (India, Sri Lanka, Bangladesh, Pakistan) and the Middle East, and most of them pay before their goods ship. Its ERP is Microsoft Dynamics 365 Business Central.
 
 ### The problem
 
-Six groups handle every order by hand: Product Managers, the approver (Janet), Support, Warehouse, Finance and Logistics. Staff re-type data from POs, proforma invoices (PIs), invoices, packing lists and AWB/BL into Navision, and spend their time chasing approvals, payments and shipping papers.
+Six groups handle every order by hand: Product Managers, the approver (Janet), Support, Warehouse, Finance and Logistics. Staff re-type data from POs, proforma invoices (PIs), invoices, packing lists and AWB/BL into Business Central, and spend their time chasing approvals, payments and shipping papers.
 
 ### The two flows
 
@@ -42,17 +42,17 @@ The two flows are linked by the SPR (Sales Purchase Requisition):
 - **Purchase:**
   1. A Product Manager raises an SPR.
   2. The approver approves it.
-  3. Support creates the vendor PO in Navision.
+  3. Support creates the vendor PO in Business Central.
   4. The vendor's PI arrives with its bank details.
   5. A forwarder is arranged.
   6. The warehouse checks the goods against the invoice, packing list and AWB/BL.
-  7. The goods are received into Navision.
+  7. The goods are received into Business Central.
   8. The customer is told.
   9. Finance pays the vendor on the due date.
 
 ### What we build
 
-OrderPilot is an AI-assisted order-automation layer **beside** Navision, never instead of it. Its tagline is **"AI reads, rules decide, people approve."**
+OrderPilot is an AI-assisted order-automation layer **beside** Business Central, never instead of it. Its tagline is **"AI reads, rules decide, people approve."**
 
 - **Users:** Spectra's staff only, in one web app behind a login. Each role sees its own tasks.
 - **Devices:** desktop first and responsive. The warehouse screens also work on a tablet, with touch targets of 44 px or more.
@@ -75,7 +75,7 @@ OrderPilot is an AI-assisted order-automation layer **beside** Navision, never i
 ### Capabilities
 
 - **A. Document intake and AI extraction:** email or upload; classification; extraction with a confidence score and a source link per field; layout mappings that AI proposes and a person approves.
-- **B. Master data and Navision:** items, customers, vendors, prices and stock behind a connector; any write-back needs a preview and an approval.
+- **B. Master data and Business Central:** items, customers, vendors, prices and stock behind a connector; any write-back needs a preview and an approval.
 - **C. Order workflows and approvals:** a state machine; tasks for each role; SPR approval within limits; the payment gate; reminders and escalations; generated PIs, invoices and packing lists.
 - **D. Checks, the tracker and insights:** documents checked against each other with tolerances; an exceptions queue; one tracker with every order's trail; Spectra's five measures as KPIs.
 - **E. AI with a person in the loop:** extraction, mismatch explanations, and drafts that a person sends.
@@ -87,20 +87,20 @@ OrderPilot is an AI-assisted order-automation layer **beside** Navision, never i
 - **Must, for the Week 4 prototype and Week 5 proposal: the sales pilot.**
   - PO upload, with AI classification and extraction.
   - A person confirms the uncertain fields.
-  - A stock lookup in mock Navision.
+  - A stock lookup in mock Business Central.
   - An SPR raised by a button and approved.
   - The tracker.
   - One mismatch: a packing list whose quantity differs from the PO.
   - The permission check, enforced on the server.
 - **Should, by Week 13, in order:** the payment gate; a PI draft; full matching; AWB/BL and permit follow-ups; email intake with AI-drafted updates; more rules.
 - **Phase 2, Weeks 8 to 12, in the Week 18 final:** the purchase flow, with the bank-detail check.
-- **Out of scope:** replacing Navision, automatic postings, real payments, and real customer emails.
+- **Out of scope:** replacing Business Central, automatic postings, real payments, and real customer emails.
 
 ### The AI rules
 
 - The AI reads, classifies, extracts, explains and drafts. It never approves, buys, posts, releases goods or pays: a person does, and that is audited.
 - It never makes a purchase. It pre-fills an SPR or a vendor PO draft, and a person approves before anything happens.
-- **Enter once, flows everywhere.** Data a person confirms feeds every team's task and the tracker. Writes to Navision and messages to customers wait for a person's OK.
+- **Enter once, flows everywhere.** Data a person confirms feeds every team's task and the tracker. Writes to Business Central and messages to customers wait for a person's OK.
 
 ### Where we use AI
 
@@ -119,7 +119,7 @@ OrderPilot is an AI-assisted order-automation layer **beside** Navision, never i
 - Synthetic data only, labelled "Synthetic demo data". Obviously fake bank details, no national ID numbers, and prices in USD.
 - Mask bank details and prices by role, with a reason.
 - Every extracted field keeps its confidence and source. AI output is a draft until a person confirms it.
-- Match customers, vendors and items on their Navision numbers, never on names. A look-alike name is shown as a possible match.
+- Match customers, vendors and items on their Business Central numbers, never on names. A look-alike name is shown as a possible match.
 - Open business rules are configuration until Spectra confirms them: the SPR trigger, the PI sequence, approvers and limits, and delegation.
 - No Spectra document goes to a third-party AI without their written OK, in an approved region. The one exception is the briefing material Spectra gave the team: it stays outside the repository, and coding tools may read it on Richie's PC (A-31).
 
@@ -204,8 +204,8 @@ Each row says whether it exists today or which story brings it. Everything marke
 | AI                      | `LlmGateway` with three providers: mock (the default), OpenAI-compatible, and optional Bedrock                                                                           | Planned: P-17                        |
 | Document processing     | pdfjs-dist for PDF text, plus page images for the vision models                                                                                                          | Planned: P-18                        |
 | Demo documents          | `pdf-lib` and `@pdf-lib/fontkit` write PDFs in pure JavaScript, with the position of every field ([ADR 0033](docs/adr/0033-pdf-lib-for-the-demo-documents.md))           | Today (P-52)                         |
-| Mock ERP                | `services/mock-navision`: an OData-style API, labelled "Mock" wherever it's used                                                                                         | Planned: P-19                        |
-| Integration             | A `SystemConnector` framework and the Navision adapter                                                                                                                   | Planned: P-20                        |
+| Mock ERP                | `services/mock-business-central`: an OData-style API, labelled "Mock" wherever it's used                                                                                 | Planned: P-19                        |
+| Integration             | A `SystemConnector` framework and the Business Central adapter                                                                                                           | Planned: P-20                        |
 | 3D                      | Blender scripts, glTF Transform, and React Three Fiber with drei and postprocessing                                                                                      | Planned: P-23                        |
 | Deployment              | Amazon Lightsail in Singapore, Caddy for HTTPS, images on GHCR, and OWASP ZAP against the live URL                                                                       | Planned: P-24                        |
 | Slides                  | Marp                                                                                                                                                                     | Planned: P-25                        |
@@ -226,7 +226,7 @@ Each row says whether it exists today or which story brings it. Everything marke
 | `apps/web`                       | The web app                                                                                                                                                            | Built: P-11                                       |
 | `apps/e2e`                       | The Playwright tests of a running stack: the smoke test of every role, and the helpers each CRUD spec uses                                                             | Today (P-14)                                      |
 | `services/mock-template`         | The template every mock service starts from, built by `docker/mock/Dockerfile`                                                                                         | Today (P-13)                                      |
-| `services/mock-navision`         | The mock of Navision                                                                                                                                                   | Planned: P-19                                     |
+| `services/mock-business-central` | The mock of Business Central                                                                                                                                           | Planned: P-19                                     |
 | `packages/tsconfig`              | The strict TypeScript config                                                                                                                                           | Today                                             |
 | `packages/eslint-config`         | The flat, type-aware ESLint config                                                                                                                                     | Today                                             |
 | `packages/shared`                | Shared zod schemas and types: envelopes, error codes, roles, permissions, and the order and event contract                                                             | Built: P-7 (draft order contract)                 |

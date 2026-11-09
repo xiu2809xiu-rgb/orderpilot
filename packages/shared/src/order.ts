@@ -1,9 +1,9 @@
 // DRAFT for the team to agree in Week 3. Names may change until then; nothing
 // outside the platform stories should depend on them yet.
 //
-// Names follow Navision's, in camelCase (Sales Header, Sales Line). Order status
+// Names follow Business Central's, in camelCase (Sales Header, Sales Line). Order status
 // belongs to area 2's state machine and is not defined here: `navisionStatus` is
-// only a read-only mirror of what Navision shows.
+// only a read-only mirror of what Business Central shows.
 
 import { z } from "zod";
 import { decimalStringSchema } from "./money.js";
@@ -69,9 +69,9 @@ export type TextField = z.infer<typeof textFieldSchema>;
 export const decimalFieldSchema = fieldValue(decimalStringSchema);
 export type DecimalField = z.infer<typeof decimalFieldSchema>;
 
-// ---- Sales header and lines (Navision names, camelCase) --------------------
+// ---- Sales header and lines (Business Central names, camelCase) --------------------
 
-/** Navision's own status, shown as it is. OrderPilot's order status is area 2's. */
+/** Business Central's own status, shown as it is. OrderPilot's order status is area 2's. */
 export const NAVISION_STATUSES = [
   "Open",
   "Released",
@@ -95,7 +95,7 @@ export const salesHeaderSchema = z.object({
   shippingAgentCode: z.string().nullable(),
   // The AWB or BL number, filled after approval.
   packageTrackingNo: z.string().nullable(),
-  // Read-only mirror of Navision. Never set by OrderPilot.
+  // Read-only mirror of Business Central. Never set by OrderPilot.
   navisionStatus: navisionStatusSchema.nullable(),
 });
 export type SalesHeader = z.infer<typeof salesHeaderSchema>;
@@ -117,7 +117,7 @@ export type SalesLine = z.infer<typeof salesLineSchema>;
 /** An order as OrderPilot holds it: the header, its lines and the documents behind it. */
 export const orderSchema = z.object({
   id: z.uuid(),
-  // OrderPilot's number beside Navision's.
+  // OrderPilot's number beside Business Central's.
   ref: recordRefSchema.nullable(),
   header: salesHeaderSchema,
   lines: z.array(salesLineSchema),

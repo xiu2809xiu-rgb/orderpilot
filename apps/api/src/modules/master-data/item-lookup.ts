@@ -11,8 +11,8 @@ export interface ItemFacts {
 }
 
 /**
- * Items by Navision number, for whoever writes an order line. Like the other
- * lookups it asks the reader, so P-20's connector answers with Navision's own
+ * Items by Business Central number, for whoever writes an order line. Like the other
+ * lookups it asks the reader, so P-20's connector answers with Business Central's own
  * cards. An item that is not there is simply absent from the answer.
  */
 @Injectable()

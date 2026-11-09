@@ -2,7 +2,7 @@ import type { OrderCaptureState, OrderSource } from "@orderpilot/shared";
 
 export interface OrderFactsLine {
   readonly lineNo: number;
-  /** The item's Navision number. */
+  /** The item's Business Central number. */
   readonly itemNo: string;
   readonly description: string;
   readonly quantity: string;

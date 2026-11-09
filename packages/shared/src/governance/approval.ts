@@ -2,10 +2,10 @@ import { z } from "zod";
 import { decimalStringSchema } from "../money.js";
 
 /**
- * Approval limits and a substitute, in the shape of Navision's Approval User
+ * Approval limits and a substitute, in the shape of Business Central's Approval User
  * Setup (User ID, Approver ID, Sales and Purchase Amount Approval Limits,
- * Unlimited flags, Substitute), so a later Navision link maps one to one.
- * Area 4 keeps it in ApprovalUserSetup, with the absence Navision does not
+ * Unlimited flags, Substitute), so a later Business Central link maps one to one.
+ * Area 4 keeps it in ApprovalUserSetup, with the absence Business Central does not
  * record, and its approval-route and approval-limit rules read it (F-3, ADR
  * 0041). Area 2 routes each SPR by it (C-3).
  */

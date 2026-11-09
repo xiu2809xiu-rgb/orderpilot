@@ -57,7 +57,7 @@ const unitPrice = () =>
   screen.getByRole("textbox", { name: /Unit price, line 1/ });
 
 describe("the New order page", () => {
-  it("picks the customer by search and sends its Navision number", async () => {
+  it("picks the customer by search and sends its Business Central number", async () => {
     const user = userEvent.setup();
     const server = fakeServer();
     const { router } = renderOrders("/orders/new");

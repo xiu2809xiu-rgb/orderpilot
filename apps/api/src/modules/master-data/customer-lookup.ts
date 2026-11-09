@@ -5,9 +5,9 @@ import {
 } from "./domain/master-data-reader.js";
 
 /**
- * Customer names by Navision number, for whoever shows a name beside a
+ * Customer names by Business Central number, for whoever shows a name beside a
  * number. Matching never goes through here: it stays on the number. It asks
- * the reader, so P-20's connector answers it with Navision's own names.
+ * the reader, so P-20's connector answers it with Business Central's own names.
  */
 @Injectable()
 export class CustomerLookup {

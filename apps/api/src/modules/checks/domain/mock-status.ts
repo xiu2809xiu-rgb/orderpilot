@@ -105,7 +105,7 @@ export const SAMPLE_STEPS: readonly SampleStep[] = [
     "LOGISTICS",
     "Warehouse",
     "Goods shipped",
-    "The shipment is posted in Navision. The AWB is not here yet",
+    "The shipment is posted in Business Central. The AWB is not here yet",
   ),
   step(
     "sample-shipped",
@@ -119,9 +119,9 @@ export const SAMPLE_STEPS: readonly SampleStep[] = [
     "sample-invoiced",
     "Invoiced",
     "FINANCE",
-    "Navision",
-    "Sales invoice posted in Navision",
-    "Receivables are raised in Navision. OrderPilot only shows the result",
+    "Business Central",
+    "Sales invoice posted in Business Central",
+    "Receivables are raised in Business Central. OrderPilot only shows the result",
   ),
   step(
     "sample-closed",

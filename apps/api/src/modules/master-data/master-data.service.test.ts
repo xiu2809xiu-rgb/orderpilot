@@ -13,11 +13,11 @@ import {
   isOpenOrder,
 } from "./domain/stock-position.js";
 import { MasterDataService } from "./master-data.service.js";
-import { MockNavisionMasterData } from "./mock-navision-master-data.js";
+import { MockBusinessCentralMasterData } from "./mock-business-central-master-data.js";
 
 const dataset = createSyntheticDataset();
 const service = new MasterDataService(
-  new MockNavisionMasterData(() => dataset),
+  new MockBusinessCentralMasterData(() => dataset),
   new SampleOrderSource(() => dataset),
 );
 const tracker = new TrackerService(
@@ -161,7 +161,7 @@ describe("items over the mock", () => {
   });
 
   it("lists as short exactly the items an open order waits on an SPR for", async () => {
-    const reader = new MockNavisionMasterData(() => dataset);
+    const reader = new MockBusinessCentralMasterData(() => dataset);
     // An approved SPR covers its order: its purchase order brings the rest.
     const orders = (await reader.salesOrders()).filter(
       (o) =>
