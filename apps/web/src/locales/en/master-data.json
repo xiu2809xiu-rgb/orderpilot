@@ -152,7 +152,6 @@
       "country": "Country",
       "currency": "Currency",
       "paymentTerms": "Payment terms",
-      "priceGroup": "Price group",
       "openOrders": "To ship",
       "overdue": "Overdue"
     },
@@ -160,9 +159,7 @@
       "country": "Country",
       "allCountries": "All countries",
       "paymentTerms": "Payment terms",
-      "allPaymentTerms": "All payment terms",
-      "priceGroup": "Price group",
-      "allPriceGroups": "All price groups"
+      "allPaymentTerms": "All payment terms"
     },
     "overdueCount": "{{count}} overdue"
   },
@@ -172,9 +169,10 @@
     "country": "Country",
     "currency": "Currency",
     "paymentTerms": "Payment terms",
-    "priceGroup": "Price group",
     "creditLimit": "Credit limit",
     "balance": "Balance",
+    "address": "Address",
+    "taxRegistration": "Tax registration no.",
     "notFoundTitle": "No such customer",
     "notFoundDescription": "Business Central has no customer numbered {{no}}.",
     "open": {

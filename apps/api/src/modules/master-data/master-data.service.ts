@@ -357,9 +357,7 @@ export class MasterDataService {
           matches(query.search, [customer.no, customer.name]) &&
           (!query.country || customer.countryRegionCode === query.country) &&
           (!query.paymentTerms ||
-            customer.paymentTermsCode === query.paymentTerms) &&
-          (!query.priceGroup ||
-            customer.customerPriceGroup === query.priceGroup),
+            customer.paymentTermsCode === query.paymentTerms),
       )
       .map((customer): CustomerRow => {
         const own = orders.filter((o) => o.customerNo === customer.no);
@@ -369,7 +367,6 @@ export class MasterDataService {
           countryRegionCode: customer.countryRegionCode,
           currencyCode: customer.currencyCode,
           paymentTermsCode: customer.paymentTermsCode,
-          customerPriceGroup: customer.customerPriceGroup,
           openOrders: own.filter(isOpenOrder).length,
           overdueOrders: own.filter((o) => o.overdue).length,
         };
@@ -391,7 +388,12 @@ export class MasterDataService {
       countryRegionCode: customer.countryRegionCode,
       currencyCode: customer.currencyCode,
       paymentTermsCode: customer.paymentTermsCode,
-      customerPriceGroup: customer.customerPriceGroup,
+      addressLine1: customer.addressLine1,
+      addressLine2: customer.addressLine2,
+      city: customer.city,
+      state: customer.state,
+      postalCode: customer.postalCode,
+      taxRegistrationNumber: customer.taxRegistrationNumber,
       creditLimitLcy: this.field(
         role,
         "customer.creditLimitLcy",
@@ -517,7 +519,6 @@ export class MasterDataService {
       vendors: vendors.map((vendor) => ({ no: vendor.no, name: vendor.name })),
       countries: distinct(customers.map((c) => c.countryRegionCode)),
       paymentTerms: distinct(customers.map((c) => c.paymentTermsCode)),
-      priceGroups: distinct(customers.map((c) => c.customerPriceGroup)),
     };
   }
 }

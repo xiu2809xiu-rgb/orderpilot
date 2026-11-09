@@ -333,14 +333,13 @@ describe("one item's numbers agree", () => {
 });
 
 describe("customers over the mock", () => {
-  it("filters by country, payment terms and price group", async () => {
+  it("filters by country and payment terms", async () => {
     const some = dataset.customers[0];
     if (!some) throw new Error("no customer");
     const found = await service.listCustomers({
       ...everything,
       country: some.countryRegionCode,
       paymentTerms: some.paymentTermsCode,
-      priceGroup: some.customerPriceGroup,
     });
     expect(found.items.map((r) => r.no)).toContain(some.no);
     for (const row of found.items) {

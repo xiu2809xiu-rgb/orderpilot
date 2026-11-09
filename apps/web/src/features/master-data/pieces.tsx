@@ -114,18 +114,27 @@ export function AvailableFigure({
   );
 }
 
+export interface KeyFact {
+  id: string;
+  label: string;
+  value: ReactNode;
+  /** Long text, such as an address: it spans two columns and wraps instead of being cut. */
+  wrap?: boolean;
+}
+
 /** The facts under a record's header, one quiet panel rather than a row of boxes. */
-export function KeyFacts({
-  facts,
-}: {
-  facts: readonly { id: string; label: string; value: ReactNode }[];
-}) {
+export function KeyFacts({ facts }: { facts: readonly KeyFact[] }) {
   return (
     <dl className="grid grid-cols-2 gap-x-s3 gap-y-s2 rounded-xl border bg-card p-s2 md:grid-cols-3 xl:grid-cols-4">
       {facts.map((fact) => (
-        <div key={fact.id} className="min-w-0 space-y-0.5">
+        <div
+          key={fact.id}
+          className={cn("min-w-0 space-y-0.5", fact.wrap && "col-span-2")}
+        >
           <dt className="text-xs text-muted-foreground">{fact.label}</dt>
-          <dd className="truncate text-sm">{fact.value}</dd>
+          <dd className={cn("text-sm", fact.wrap ? "break-words" : "truncate")}>
+            {fact.value}
+          </dd>
         </div>
       ))}
     </dl>

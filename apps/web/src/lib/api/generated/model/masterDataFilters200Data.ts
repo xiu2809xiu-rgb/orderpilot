@@ -14,5 +14,4 @@ export type MasterDataFilters200Data = {
   vendors: MasterDataFilters200DataVendorsItem[];
   countries: string[];
   paymentTerms: string[];
-  priceGroups: string[];
 };

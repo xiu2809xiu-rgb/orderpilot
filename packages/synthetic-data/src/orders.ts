@@ -6,11 +6,11 @@ import {
   type SalesLine,
 } from "@orderpilot/shared";
 import { isLowStockIndex, supportsInRotation } from "./catalogue.js";
+import { FIRST_CUSTOMER_COUNT, PREPAYMENT_PERCENT } from "./names.js";
 import { addDays, daysBetween } from "./dates.js";
 import { makeDocuments, type DocumentFactory } from "./documents.js";
 import type { Journey } from "./journey.js";
 import { planCatalogue } from "./catalogue-plan.js";
-import { PREPAYMENT_PERCENT } from "./names.js";
 import { priorityOf } from "./priority.js";
 import type { SeededRandom } from "./random.js";
 import { availableStock } from "./stock.js";
@@ -182,9 +182,18 @@ export function makeOrders(inputs: OrderInputs): SampleOrder[] {
   const allIndexes = items.map((_, i) => i);
   const shortPool = shuffled(random, allIndexes.filter(isLowStockIndex));
   const normalPool = allIndexes.filter((i) => !isLowStockIndex(i));
-  const prepayCustomers = customers.filter(
-    (c) => PREPAYMENT_PERCENT[c.paymentTermsCode] !== undefined,
-  );
+  const prepays = (c: Customer): boolean =>
+    PREPAYMENT_PERCENT[c.paymentTermsCode] !== undefined;
+  // The pick draws over the first forty customers only, as it always did, so
+  // the draws after it do not move. The customers after them reach an order
+  // through the newcomer slot below.
+  const firstCustomers = customers.slice(0, FIRST_CUSTOMER_COUNT);
+  const prepayCustomers = firstCustomers.filter(prepays);
+  const newcomers = customers.slice(FIRST_CUSTOMER_COUNT);
+  const newcomerCountries = [
+    ...new Set(newcomers.map((c) => c.countryRegionCode)),
+  ];
+  let nextNewcomer = 0;
   const pickCustomer = (pool: readonly Customer[]): Customer => {
     // Squaring the draw favours the first customers, so a few accounts have many orders.
     const customer = pool[Math.floor(random.next() ** 1.5 * pool.length)];
@@ -200,9 +209,27 @@ export function makeOrders(inputs: OrderInputs): SampleOrder[] {
   const orders = journeys.map((j, i): SampleOrder => {
     const rank = SAMPLE_SCREEN_STATES.indexOf(j.state);
     const shipped = rank >= 8;
-    const customer = pickCustomer(
-      j.state === "sample-awaiting-payment" ? prepayCustomers : customers,
+    const picked = pickCustomer(
+      j.state === "sample-awaiting-payment" ? prepayCustomers : firstCustomers,
     );
+    // Every tenth order, from the eighth, goes to a customer in one of the six
+    // newer countries, in turn, so each has live orders. One waiting for a
+    // payment goes to a customer who prepays.
+    let customer = picked;
+    if (i % 10 === 7 && newcomerCountries.length > 0) {
+      const turn = nextNewcomer++;
+      const country = newcomerCountries[turn % newcomerCountries.length];
+      const inCountry = newcomers.filter(
+        (c) =>
+          c.countryRegionCode === country &&
+          (j.state !== "sample-awaiting-payment" || prepays(c)),
+      );
+      const chosen =
+        inCountry[
+          Math.floor(turn / newcomerCountries.length) % inCountry.length
+        ];
+      if (chosen) customer = chosen;
+    }
     const lines: SalesLine[] = [];
     let shortfall: SampleOrder["stockShortfall"] = null;
     let shortItem: Item | undefined;
@@ -312,6 +339,14 @@ export function makeOrders(inputs: OrderInputs): SampleOrder[] {
     );
     return {
       header,
+      shipTo: {
+        name: customer.name,
+        addressLine1: customer.addressLine1,
+        addressLine2: customer.addressLine2,
+        city: customer.city,
+        postalCode: customer.postalCode,
+        countryRegionCode: customer.countryRegionCode,
+      },
       lines,
       sampleScreenState: j.state,
       scenario,

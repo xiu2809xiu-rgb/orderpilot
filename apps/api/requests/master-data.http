@@ -32,10 +32,10 @@ GET {{baseUrl}}/api/v1/master-data/items/I-0004
 ### An unknown number answers the 404 envelope.
 GET {{baseUrl}}/api/v1/master-data/items/I-9999
 
-### Customers: search, country, payment terms and price group.
+### Customers: search, country and payment terms.
 GET {{baseUrl}}/api/v1/master-data/customers?country=IN&sort=overdueOrders&direction=desc
 ###
-GET {{baseUrl}}/api/v1/master-data/customers?paymentTerms=30%20DAYS&priceGroup=DIST-A
+GET {{baseUrl}}/api/v1/master-data/customers?paymentTerms=30%20DAYS&country=MV
 
 ### One customer: key facts, open orders and overdue orders.
 GET {{baseUrl}}/api/v1/master-data/customers/C-0001

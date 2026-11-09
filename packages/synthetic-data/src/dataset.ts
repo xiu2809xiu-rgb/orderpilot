@@ -51,7 +51,7 @@ export function createSyntheticDataset(
   const random = new SeededRandom(seed);
   const people = makePeople();
   const brands = makeBrands();
-  const customers = makeCustomers(random);
+  const customers = makeCustomers(random, seed);
   const vendors = makeVendors(random);
   const items = makeItems(random, vendors, seed);
   const journeys = planJourneys(random, reference);

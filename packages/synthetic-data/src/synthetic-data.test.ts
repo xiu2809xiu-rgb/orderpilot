@@ -89,9 +89,9 @@ describe("the synthetic dataset", () => {
     expect(data.label).toBe("Synthetic demo data");
     const first = createSyntheticDataset();
     first.customers.length = 0;
-    expect(createSyntheticDataset().customers).toHaveLength(40);
+    expect(createSyntheticDataset().customers).toHaveLength(64);
     expect(describeDataset(data)).toContain(
-      "Synthetic demo data: 40 customers, 12 vendors, 300 items, 120 orders",
+      "Synthetic demo data: 64 customers, 12 vendors, 300 items, 120 orders",
     );
   });
 
@@ -101,8 +101,8 @@ describe("the synthetic dataset", () => {
     expect(performance.now() - started).toBeLessThan(1_000);
   });
 
-  it("has 40 customers in the brief's countries, 12 vendors and 300 items", () => {
-    expect(data.customers).toHaveLength(40);
+  it("has 64 customers in eleven countries, 12 vendors and 300 items", () => {
+    expect(data.customers).toHaveLength(64);
     expect(data.vendors).toHaveLength(12);
     expect(data.items).toHaveLength(300);
     expect(data.orders).toHaveLength(120);
@@ -111,7 +111,12 @@ describe("the synthetic dataset", () => {
         data.customers.filter((c) => c.countryRegionCode === country),
       ).toHaveLength(8);
     }
-    expect(new Set(data.customers.map((c) => c.name)).size).toBe(40);
+    for (const country of ["MV", "NP", "VN", "SG", "ID", "MY"]) {
+      expect(
+        data.customers.filter((c) => c.countryRegionCode === country),
+      ).toHaveLength(4);
+    }
+    expect(new Set(data.customers.map((c) => c.name)).size).toBe(64);
   });
 
   it("spreads the items over six categories, each with a part number", () => {
@@ -128,14 +133,19 @@ describe("the synthetic dataset", () => {
 
   it("uses Business Central's names and USD decimal strings", () => {
     expect(Object.keys(data.customers[0] ?? {}).sort()).toEqual([
+      "addressLine1",
+      "addressLine2",
       "balanceLcy",
+      "city",
       "countryRegionCode",
       "creditLimitLcy",
       "currencyCode",
-      "customerPriceGroup",
       "name",
       "no",
       "paymentTermsCode",
+      "postalCode",
+      "state",
+      "taxRegistrationNumber",
     ]);
     for (const item of data.items) {
       for (const value of [

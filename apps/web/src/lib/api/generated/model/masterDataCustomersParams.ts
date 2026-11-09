@@ -33,11 +33,6 @@ country?: string;
  * @maxLength 60
  */
 paymentTerms?: string;
-/**
- * @minLength 1
- * @maxLength 60
- */
-priceGroup?: string;
 sort?: MasterDataCustomersSort;
 direction?: MasterDataCustomersDirection;
 };

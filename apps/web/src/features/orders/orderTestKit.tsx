@@ -140,7 +140,6 @@ export function fakeServer(over: Partial<FakeApi> = {}) {
             countryRegionCode: "IN",
             currencyCode: "USD",
             paymentTermsCode: "PREPAID",
-            customerPriceGroup: "STD",
             openOrders: 0,
             overdueOrders: 0,
           },

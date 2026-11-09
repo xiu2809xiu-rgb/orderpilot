@@ -18,13 +18,36 @@ export const SYNTHETIC_LABEL = "Synthetic demo data" as const;
 // Field names follow Business Central's, in camelCase (docs/research/domain-notes.md).
 // Every amount is a USD decimal string, never a float.
 
+/** The eleven countries Spectra's customers are in. */
+export const COUNTRY_CODES = [
+  "AE",
+  "PK",
+  "LK",
+  "MV",
+  "IN",
+  "NP",
+  "BD",
+  "VN",
+  "SG",
+  "ID",
+  "MY",
+] as const;
+export type CountryCode = (typeof COUNTRY_CODES)[number];
+
 export interface Customer {
   no: string;
   name: string;
-  countryRegionCode: "IN" | "LK" | "BD" | "PK" | "AE";
+  countryRegionCode: CountryCode;
   currencyCode: "USD";
   paymentTermsCode: string;
-  customerPriceGroup: string;
+  /** Made up, in a real city (Business Central's address fields). */
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  /** Obviously fake: the country code, ZZ and a run of zeros. */
+  taxRegistrationNumber: string;
   creditLimitLcy: DecimalString;
   balanceLcy: DecimalString;
 }
@@ -206,8 +229,19 @@ export interface OrderStep {
   dueOn: string | null;
 }
 
+/** Where the goods go: the customer's own name and address. */
+export interface ShipTo {
+  name: string;
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  postalCode: string;
+  countryRegionCode: CountryCode;
+}
+
 export interface SampleOrder {
   header: SalesHeader;
+  shipTo: ShipTo;
   lines: SalesLine[];
   sampleScreenState: SampleScreenState;
   scenario: SampleScenario;

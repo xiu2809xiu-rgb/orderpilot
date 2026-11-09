@@ -1,13 +1,17 @@
 import type { Role } from "@orderpilot/shared";
+import type { CountryCode } from "./types.js";
 
 // The customers, vendors and people below are invented. Nothing is taken from
 // a real company or person; the trading names only sound like the places they
 // trade in. The brands, which are real names, live in catalogue-plan.ts.
 
-type Country = "IN" | "LK" | "BD" | "PK" | "AE";
-
-/** Eight customers a country. The first of each is listed first, so C-0001 to C-0005 keep their country. */
-export const CUSTOMER_NAMES: readonly (readonly [string, Country])[] = [
+/**
+ * Forty customers in five countries, eight each, then twenty-four in six more,
+ * four each. The first of the forty are listed first, so C-0001 to C-0005 keep
+ * their country. Two pairs of names are one letter apart on purpose, each with
+ * its own tax number, so a name look-alike is a possible match and not a merge.
+ */
+export const CUSTOMER_NAMES: readonly (readonly [string, CountryCode])[] = [
   ["Quillon Harbour Traders", "IN"],
   ["Brindle Coast Imports", "LK"],
   ["Tamarell Palm Wholesale", "BD"],
@@ -48,7 +52,34 @@ export const CUSTOMER_NAMES: readonly (readonly [string, Country])[] = [
   ["Surmaran Security Ltd", "BD"],
   ["Gwadren Security Trading (Pvt) Ltd", "PK"],
   ["Jebelor Distribution LLC", "AE"],
+  ["Veyrulhu Trading Pvt Ltd", "MV"],
+  ["Maldura Electronics Pvt Ltd", "MV"],
+  ["Hithadhu Digital Pvt Ltd", "MV"],
+  ["Kuredhu Systems Pvt Ltd", "MV"],
+  ["Himvanta Electronics Pvt Ltd", "NP"],
+  ["Sagarun Trading Pvt Ltd", "NP"],
+  ["Sagaran Trading Pvt Ltd", "NP"],
+  ["Pashukal Systems Pvt Ltd", "NP"],
+  ["Mekonvi Electronics Co Ltd", "VN"],
+  ["Hoanvi Technology JSC", "VN"],
+  ["Thanhlor Trading Co Ltd", "VN"],
+  ["Dalvien Systems Co Ltd", "VN"],
+  ["Tanjora Technology Pte Ltd", "SG"],
+  ["Orchardel Trading Pte Ltd", "SG"],
+  ["Selarang Distribution Pte Ltd", "SG"],
+  ["Bedokan Systems Pte Ltd", "SG"],
+  ["PT Cendrawan Electronics", "ID"],
+  ["PT Cendrawen Electronics", "ID"],
+  ["PT Nusavara Distribusi", "ID"],
+  ["PT Jakaran Teknologi", "ID"],
+  ["Selvora Technology Sdn Bhd", "MY"],
+  ["Petalon Electronics Sdn Bhd", "MY"],
+  ["Kenanga Mur Trading Sdn Bhd", "MY"],
+  ["Johorin Systems Sdn Bhd", "MY"],
 ];
+
+/** C-0001 to C-0040: the customers every live order is drawn from. */
+export const FIRST_CUSTOMER_COUNT = 40;
 
 /** Payment terms in turn. The first five are the terms the earlier, smaller set used. */
 export const PAYMENT_TERMS = [
@@ -67,8 +98,6 @@ export const PREPAYMENT_PERCENT: Readonly<Record<string, string>> = {
   "50% ADVANCE": "50",
   "30% DEPOSIT": "30",
 };
-
-export const PRICE_GROUPS = ["DIST-A", "DIST-B", "RETAIL"] as const;
 
 export const VENDOR_NAMES: readonly string[] = [
   "Halvorn Components Ltd",

@@ -9,11 +9,12 @@ import {
 import {
   CUSTOMER_NAMES,
   PAYMENT_TERMS,
-  PRICE_GROUPS,
+  FIRST_CUSTOMER_COUNT,
   TEAM,
   VENDOR_NAMES,
 } from "./names.js";
-import { hashUnit, type SeededRandom } from "./random.js";
+import { addressOf, taxIdOf } from "./places.js";
+import { SeededRandom, hashUnit } from "./random.js";
 import type {
   Brand,
   Customer,
@@ -60,18 +61,27 @@ export function makeBrands(): Brand[] {
   });
 }
 
-export function makeCustomers(random: SeededRandom): Customer[] {
+/**
+ * C-0001 to C-0040 draw from the main stream exactly as before the briefing
+ * data, so every live order keeps its state and age. The customers after them
+ * draw from a stream of their own, and the addresses and tax numbers are pure
+ * functions of the customer number.
+ */
+export function makeCustomers(random: SeededRandom, seed: number): Customer[] {
+  const later = SeededRandom.child(seed, "customers-2");
   return CUSTOMER_NAMES.map(([name, country], i) => {
-    const limit = random.int(50, 300) * 1_000;
+    const stream = i < FIRST_CUSTOMER_COUNT ? random : later;
+    const limit = stream.int(50, 300) * 1_000;
     return {
       no: `C-${pad(i + 1)}`,
       name,
       countryRegionCode: country,
       currencyCode: "USD",
       paymentTermsCode: PAYMENT_TERMS[i % PAYMENT_TERMS.length] ?? "30 DAYS",
-      customerPriceGroup: PRICE_GROUPS[i % PRICE_GROUPS.length] ?? "DIST-A",
+      ...addressOf(i + 1, country),
+      taxRegistrationNumber: taxIdOf(i + 1, country),
       creditLimitLcy: `${String(limit)}.00`,
-      balanceLcy: random.money(0, Math.floor(limit / 2)),
+      balanceLcy: stream.money(0, Math.floor(limit / 2)),
     };
   });
 }

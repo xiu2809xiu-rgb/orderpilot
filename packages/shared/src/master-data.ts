@@ -182,7 +182,6 @@ export const customerQuerySchema = z.object({
   search,
   country: filterText,
   paymentTerms: filterText,
-  priceGroup: filterText,
   sort: z.enum(CUSTOMER_SORT_COLUMNS).optional(),
   direction,
 });
@@ -194,7 +193,6 @@ export const customerRowSchema = z.object({
   countryRegionCode: z.string().min(1),
   currencyCode: z.string().min(1),
   paymentTermsCode: z.string().min(1),
-  customerPriceGroup: z.string().min(1),
   openOrders: z.int().min(0),
   overdueOrders: z.int().min(0),
 });
@@ -222,6 +220,13 @@ export const customerOverdueSchema = z.object({
 export const customerDetailSchema = customerRowSchema
   .omit({ openOrders: true, overdueOrders: true })
   .extend({
+    /** Business Central's address and tax fields. Made up, and obviously fake. */
+    addressLine1: z.string().min(1),
+    addressLine2: z.string(),
+    city: z.string().min(1),
+    state: z.string(),
+    postalCode: z.string().min(1),
+    taxRegistrationNumber: z.string().min(1),
     /** Masked, with the balance, for roles that never price anything. */
     creditLimitLcy: maskedFieldSchema,
     balanceLcy: maskedFieldSchema,
@@ -306,7 +311,6 @@ export const masterDataFiltersSchema = z.object({
   vendors: z.array(z.object({ no: z.string(), name: z.string() })),
   countries: z.array(z.string()),
   paymentTerms: z.array(z.string()),
-  priceGroups: z.array(z.string()),
 });
 export type MasterDataFilters = z.infer<typeof masterDataFiltersSchema>;
 

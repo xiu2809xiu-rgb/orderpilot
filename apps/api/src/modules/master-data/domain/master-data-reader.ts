@@ -26,7 +26,12 @@ export interface MasterDataCustomer {
   readonly countryRegionCode: string;
   readonly currencyCode: string;
   readonly paymentTermsCode: string;
-  readonly customerPriceGroup: string;
+  readonly addressLine1: string;
+  readonly addressLine2: string;
+  readonly city: string;
+  readonly state: string;
+  readonly postalCode: string;
+  readonly taxRegistrationNumber: string;
   readonly creditLimitLcy: string;
   readonly balanceLcy: string;
 }

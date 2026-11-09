@@ -20,7 +20,7 @@ import type { MasterDataCustomersParams } from "@/lib/api/generated/model";
 import { readOnlyActions } from "./listActions";
 import { MasterDataTabs, countryName } from "./pieces";
 
-const URL_FILTERS = { country: null, paymentTerms: null, priceGroup: null };
+const URL_FILTERS = { country: null, paymentTerms: null };
 const SORTABLE = ["no", "name", "openOrders", "overdueOrders"];
 
 function customerColumns(t: TFunction): DataTableColumn<CustomerRow>[] {
@@ -64,12 +64,6 @@ function customerColumns(t: TFunction): DataTableColumn<CustomerRow>[] {
       header: t("customers.columns.paymentTerms"),
       cell: (row) => row.paymentTermsCode,
       exportValue: (row) => row.paymentTermsCode,
-    },
-    {
-      id: "priceGroup",
-      header: t("customers.columns.priceGroup"),
-      cell: (row) => row.customerPriceGroup,
-      exportValue: (row) => row.customerPriceGroup,
     },
     {
       id: "openOrders",
@@ -127,13 +121,6 @@ export default function CustomersPage() {
         label: t("customers.filters.paymentTerms"),
         allLabel: t("customers.filters.allPaymentTerms"),
         options: plain(options?.paymentTerms),
-      },
-      {
-        id: "priceGroup",
-        label: t("customers.filters.priceGroup"),
-        allLabel: t("customers.filters.allPriceGroups"),
-        more: true,
-        options: plain(options?.priceGroups),
       },
     ];
   }, [t, options]);

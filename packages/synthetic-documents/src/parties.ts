@@ -1,4 +1,9 @@
-import type { Customer } from "@orderpilot/synthetic-data";
+import {
+  COUNTRY_NAMES,
+  type CountryCode,
+  type Customer,
+  type SampleOrder,
+} from "@orderpilot/synthetic-data";
 
 export interface Party {
   name: string;
@@ -34,123 +39,52 @@ export const SELLER_BANK: BankDetails = {
   swiftCode: "DEMOZZ00",
 };
 
-interface Place {
-  city: string;
-  /** Where the goods are shipped to, for the incoterm. */
-  port: string;
-  country: string;
-  postcode: string;
-}
-
-const PLACES: Readonly<
-  Record<Customer["countryRegionCode"], readonly Place[]>
-> = {
-  IN: [
-    { city: "Chennai", port: "Chennai", country: "India", postcode: "600 000" },
-    {
-      city: "Mumbai",
-      port: "Nhava Sheva",
-      country: "India",
-      postcode: "400 000",
-    },
-    { city: "Kochi", port: "Kochi", country: "India", postcode: "682 000" },
-  ],
-  LK: [
-    {
-      city: "Colombo",
-      port: "Colombo",
-      country: "Sri Lanka",
-      postcode: "00100",
-    },
-    { city: "Kandy", port: "Colombo", country: "Sri Lanka", postcode: "20000" },
-  ],
-  BD: [
-    {
-      city: "Dhaka",
-      port: "Chattogram",
-      country: "Bangladesh",
-      postcode: "1200",
-    },
-    {
-      city: "Chattogram",
-      port: "Chattogram",
-      country: "Bangladesh",
-      postcode: "4000",
-    },
-  ],
-  PK: [
-    {
-      city: "Karachi",
-      port: "Karachi",
-      country: "Pakistan",
-      postcode: "74000",
-    },
-    { city: "Lahore", port: "Karachi", country: "Pakistan", postcode: "54000" },
-  ],
-  AE: [
-    {
-      city: "Dubai",
-      port: "Jebel Ali",
-      country: "United Arab Emirates",
-      postcode: "PO Box 00000",
-    },
-    {
-      city: "Sharjah",
-      port: "Jebel Ali",
-      country: "United Arab Emirates",
-      postcode: "PO Box 00000",
-    },
-  ],
+/** Where goods for a country are shipped to, for the incoterm. */
+const PORTS: Readonly<Record<CountryCode, string>> = {
+  AE: "Jebel Ali",
+  PK: "Karachi",
+  LK: "Colombo",
+  MV: "Male",
+  IN: "Nhava Sheva",
+  NP: "Kolkata",
+  BD: "Chattogram",
+  VN: "Ho Chi Minh City",
+  SG: "Singapore",
+  ID: "Jakarta",
+  MY: "Port Klang",
 };
 
-const STREETS = [
-  "Harbour Link Road",
-  "Spice Quay Street",
-  "Mill Lane",
-  "Lantern Court",
-  "Tidewater Avenue",
-  "Old Customs Road",
-  "Palm Terrace",
-  "Anchor Street",
-] as const;
-
-function customerIndex(customer: Customer): number {
-  return Number(customer.no.slice(2)) - 1;
+export function portOf(customer: Customer): string {
+  return PORTS[customer.countryRegionCode];
 }
 
-export function placeOf(customer: Customer): Place {
-  const places = PLACES[customer.countryRegionCode];
-  const place = places[customerIndex(customer) % places.length];
-  if (!place) throw new Error(`No place for ${customer.no}`);
-  return place;
+function party(
+  name: string,
+  place: Pick<
+    Customer,
+    | "addressLine1"
+    | "addressLine2"
+    | "city"
+    | "postalCode"
+    | "countryRegionCode"
+  >,
+): Party {
+  return {
+    name,
+    address: [
+      `${place.addressLine1}, ${place.addressLine2}`,
+      `${place.city} ${place.postalCode}`,
+      COUNTRY_NAMES[place.countryRegionCode],
+    ],
+  };
 }
 
 /** The customer's office: where the invoice goes. */
 export function billTo(customer: Customer): Party {
-  const place = placeOf(customer);
-  const n = customerIndex(customer);
-  const street = STREETS[n % STREETS.length] ?? STREETS[0];
-  return {
-    name: customer.name,
-    address: [
-      `${String(12 + ((n * 7) % 80))} ${street}`,
-      `${place.city} ${place.postcode}`,
-      place.country,
-    ],
-  };
+  return party(customer.name, customer);
 }
 
-/** Their warehouse, which is a different address from the office. */
-export function shipTo(customer: Customer): Party {
-  const place = placeOf(customer);
-  const n = customerIndex(customer);
-  const street = STREETS[(n + 3) % STREETS.length] ?? STREETS[0];
-  return {
-    name: `${customer.name} (Warehouse)`,
-    address: [
-      `Godown ${String(1 + (n % 9))}, ${street}`,
-      `${place.city} ${place.postcode}`,
-      place.country,
-    ],
-  };
+/** Where the order's goods go, as the dataset says. */
+export function shipTo(order: SampleOrder): Party {
+  return party(order.shipTo.name, order.shipTo);
 }

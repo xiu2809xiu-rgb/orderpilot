@@ -17,8 +17,6 @@ export type MasterDataCustomers200DataItem = {
   currencyCode: string;
   /** @minLength 1 */
   paymentTermsCode: string;
-  /** @minLength 1 */
-  customerPriceGroup: string;
   /**
      * @minimum 0
      * @maximum 9007199254740991

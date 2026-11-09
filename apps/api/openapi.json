@@ -3756,12 +3756,6 @@
                           "items": {
                             "type": "string"
                           }
-                        },
-                        "priceGroups": {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
                         }
                       },
                       "required": [
@@ -3769,8 +3763,7 @@
                         "categories",
                         "vendors",
                         "countries",
-                        "paymentTerms",
-                        "priceGroups"
+                        "paymentTerms"
                       ],
                       "additionalProperties": false
                     },
@@ -4654,16 +4647,6 @@
             }
           },
           {
-            "name": "priceGroup",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 60
-            }
-          },
-          {
             "name": "sort",
             "required": false,
             "in": "query",
@@ -4715,10 +4698,6 @@
                             "type": "string",
                             "minLength": 1
                           },
-                          "customerPriceGroup": {
-                            "type": "string",
-                            "minLength": 1
-                          },
                           "openOrders": {
                             "type": "integer",
                             "minimum": 0,
@@ -4736,7 +4715,6 @@
                           "countryRegionCode",
                           "currencyCode",
                           "paymentTermsCode",
-                          "customerPriceGroup",
                           "openOrders",
                           "overdueOrders"
                         ],
@@ -4825,7 +4803,25 @@
                           "type": "string",
                           "minLength": 1
                         },
-                        "customerPriceGroup": {
+                        "addressLine1": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "addressLine2": {
+                          "type": "string"
+                        },
+                        "city": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "state": {
+                          "type": "string"
+                        },
+                        "postalCode": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "taxRegistrationNumber": {
                           "type": "string",
                           "minLength": 1
                         },
@@ -5029,7 +5025,12 @@
                         "countryRegionCode",
                         "currencyCode",
                         "paymentTermsCode",
-                        "customerPriceGroup",
+                        "addressLine1",
+                        "addressLine2",
+                        "city",
+                        "state",
+                        "postalCode",
+                        "taxRegistrationNumber",
                         "creditLimitLcy",
                         "balanceLcy",
                         "openOrders",

@@ -22,7 +22,15 @@ export type MasterDataCustomer200Data = {
   /** @minLength 1 */
   paymentTermsCode: string;
   /** @minLength 1 */
-  customerPriceGroup: string;
+  addressLine1: string;
+  addressLine2: string;
+  /** @minLength 1 */
+  city: string;
+  state: string;
+  /** @minLength 1 */
+  postalCode: string;
+  /** @minLength 1 */
+  taxRegistrationNumber: string;
   creditLimitLcy: MasterDataCustomer200DataCreditLimitLcy;
   balanceLcy: MasterDataCustomer200DataBalanceLcy;
   openOrders: MasterDataCustomer200DataOpenOrdersItem[];
