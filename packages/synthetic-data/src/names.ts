@@ -353,6 +353,8 @@ export interface PersonSpec {
   readonly role: Role;
   /** The category a product manager owns. */
   readonly category?: ItemCategory;
+  /** Routes each SPR to the approvers. Never owns or is assigned an order. */
+  readonly sprCoordinator?: true;
 }
 
 /** The first person of each role is the demo sign-in persona. */
@@ -361,8 +363,11 @@ export const TEAM: readonly PersonSpec[] = [
   { name: "Kavin Ramesh", role: "PRODUCT_MANAGER", category: "SURVEILLANCE" },
   { name: "Nadia Salleh", role: "PRODUCT_MANAGER", category: "ACCESSORIES" },
   { name: "Rachel Goh", role: "APPROVER" },
+  { name: "Marcus Teo", role: "APPROVER" },
+  { name: "Farah Ismail", role: "APPROVER" },
   { name: "Mei Tan", role: "SUPPORT" },
   { name: "Daryl Foo", role: "SUPPORT" },
+  { name: "Michelle Lau", role: "SUPPORT", sprCoordinator: true },
   { name: "Hafiz Rahman", role: "WAREHOUSE" },
   { name: "Vikram Soh", role: "WAREHOUSE" },
   { name: "Grace Ong", role: "FINANCE" },

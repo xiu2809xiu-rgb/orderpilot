@@ -40,7 +40,18 @@ export function makePeople(): Person[] {
     brands: member.category
       ? BRANDS.filter((b) => b.category === member.category).map((b) => b.name)
       : [],
+    ...(member.sprCoordinator ? { sprCoordinator: true as const } : {}),
   }));
+}
+
+/**
+ * The Support people who take turns owning orders. The coordinator is left out
+ * on purpose: the order rotation keeps its two people, so no order changes hands.
+ */
+export function supportsInRotation(people: readonly Person[]): string[] {
+  return people
+    .filter((p) => p.role === "SUPPORT" && !p.sprCoordinator)
+    .map((p) => p.name);
 }
 
 export function makeBrands(): Brand[] {

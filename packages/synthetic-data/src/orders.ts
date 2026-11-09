@@ -5,7 +5,7 @@ import {
   type NavisionStatus,
   type SalesLine,
 } from "@orderpilot/shared";
-import { isLowStockIndex } from "./catalogue.js";
+import { isLowStockIndex, supportsInRotation } from "./catalogue.js";
 import { addDays, daysBetween } from "./dates.js";
 import { makeDocuments, type DocumentFactory } from "./documents.js";
 import type { Journey } from "./journey.js";
@@ -173,7 +173,7 @@ export function makeOrders(inputs: OrderInputs): SampleOrder[] {
   const { random, reference, customers, items, journeys } = inputs;
   const names = (role: Person["role"]) =>
     inputs.people.filter((p) => p.role === role).map((p) => p.name);
-  const supports = names("SUPPORT");
+  const supports = supportsInRotation(inputs.people);
   const warehouses = names("WAREHOUSE");
   const finances = names("FINANCE");
   const logistics = names("LOGISTICS");

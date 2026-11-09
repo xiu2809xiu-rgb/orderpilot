@@ -73,6 +73,8 @@ export interface Person {
   name: string;
   role: Role;
   brands: string[];
+  /** The Support person who routes each SPR; not one of those who own orders. */
+  sprCoordinator?: true;
 }
 
 export interface Brand {
