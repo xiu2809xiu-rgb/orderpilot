@@ -7,8 +7,16 @@ export {
 } from "./dataset.js";
 export type { Milestone } from "./journey.js";
 export type { DatasetOptions } from "./dataset.js";
-export { addDays, daysBetween, todayInSingapore } from "./dates.js";
-export { SeededRandom } from "./random.js";
+export {
+  addDays,
+  addMonths,
+  dateInMonth,
+  daysBetween,
+  historyMonths,
+  monthOf,
+  todayInSingapore,
+} from "./dates.js";
+export { SeededRandom, hashUnit } from "./random.js";
 export { availableStock } from "./stock.js";
 export {
   DOCUMENT_STATUSES,
