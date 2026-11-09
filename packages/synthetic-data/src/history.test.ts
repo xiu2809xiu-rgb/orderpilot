@@ -341,5 +341,20 @@ describe("the last agreed price", () => {
         );
       }
     }
+    // A month end must not move what a live order was priced at.
+    for (const set of [earlier, later]) {
+      for (const order of set.orders) {
+        const buyer = set.customers.find(
+          (c) => c.no === order.header.sellToCustomerNo,
+        );
+        for (const line of order.lines) {
+          const item = set.items.find((i) => i.no === line.no);
+          if (!buyer || !item) throw new Error(order.header.no);
+          expect(line.unitPrice, `${set.asOf} ${order.header.no}`).toBe(
+            agreedPrice(DEFAULT_SEED, buyer, item),
+          );
+        }
+      }
+    }
   });
 });
