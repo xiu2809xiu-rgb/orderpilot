@@ -16,7 +16,9 @@ model SalesOrder {
   id                 String            @id @default(uuid(7)) @db.Uuid
   /// OrderPilot's own number, `SO-20261108-0001`, from the record number service.
   orderNo            String            @unique
-  /// Stays null until the order exists in Navision (ADR 0046).
+  /// Holds the record's Business Central number. The column keeps its first name,
+  /// so no migration renames it (ADR 0048). Stays null until the order exists
+  /// in Business Central (ADR 0046).
   navisionNo         String?
   captureState       OrderCaptureState @default(DRAFT)
   customerNo         String
