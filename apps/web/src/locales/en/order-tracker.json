@@ -29,6 +29,18 @@
       "overdue": "Overdue",
       "documentToConfirm": "Has a document to confirm"
     },
+    "stages": {
+      "label": "Lifecycle stage",
+      "all": "All",
+      "draft": "Draft",
+      "pendingApproval": "Pending approval",
+      "processing": "Processing",
+      "shipped": "Shipped",
+      "completed": "Completed",
+      "statusMenu": "Narrow {{stage}} by status",
+      "statusMenuLabel": "Status: {{status}}",
+      "anyStatus": "Any status in this stage"
+    },
     "statuses": {
       "sample-po-received": "PO received",
       "sample-extracted-awaiting-review": "Fields awaiting review",

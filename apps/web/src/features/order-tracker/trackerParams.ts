@@ -16,6 +16,83 @@ export const TRACKER_URL_FILTERS = [
   "documentToConfirm",
 ] as const;
 
+/**
+ * The sample status codes grouped into the five lifecycle stages the tracker's
+ * top tabs show. This is a UI-only grouping for the prototype, built the same
+ * way `MOCK_SALES_FLOW` groups them into the nine sales steps: it goes once
+ * area 2's state machine reports a real stage on each order, and the tabs
+ * read that instead.
+ */
+export const LIFECYCLE_STAGES = [
+  {
+    id: "draft",
+    statuses: ["sample-po-received", "sample-extracted-awaiting-review"],
+  },
+  {
+    id: "pendingApproval",
+    statuses: ["sample-short-stock", "sample-pending-approval"],
+  },
+  {
+    id: "processing",
+    statuses: [
+      "sample-pi-to-send",
+      "sample-awaiting-payment",
+      "sample-ready-to-pick",
+      "sample-packing-list-mismatch",
+    ],
+  },
+  {
+    id: "shipped",
+    statuses: ["sample-shipped", "sample-awb-overdue"],
+  },
+  {
+    id: "completed",
+    statuses: ["sample-invoiced", "sample-closed"],
+  },
+] as const satisfies readonly { id: string; statuses: readonly string[] }[];
+
+export type LifecycleStageId = (typeof LIFECYCLE_STAGES)[number]["id"];
+/** The top tabs' value: one of the five stages, or "all" for no status filter. */
+export type LifecycleStageTab = LifecycleStageId | "all";
+
+/**
+ * Which stage tab the current status filter sits in: every code the filter
+ * holds must belong to that one stage, whether the filter is the stage's
+ * whole group (the tab itself was clicked) or one status within it (the
+ * tab's dropdown narrowed it). "all" when it names none of the five groups,
+ * or when there is none.
+ */
+export function stageTabOf(status: string | undefined): LifecycleStageTab {
+  if (!status) return "all";
+  const codes = status.split(",");
+  if (codes.length === 0) return "all";
+  const stage = LIFECYCLE_STAGES.find((candidate) =>
+    codes.every((code) => candidate.statuses.includes(code)),
+  );
+  return stage?.id ?? "all";
+}
+
+/** The stage's codes, joined: what its tab itself sets as the status filter. */
+export function groupStatusOf(stage: LifecycleStageId): string {
+  const found = LIFECYCLE_STAGES.find((candidate) => candidate.id === stage);
+  return (found?.statuses ?? []).join(",");
+}
+
+/**
+ * The one status a stage's dropdown has narrowed the filter to, or `undefined`
+ * when the filter names the stage's whole group (or something else).
+ */
+export function singleStatusWithin(
+  stage: LifecycleStageId,
+  status: string | undefined,
+): string | undefined {
+  if (!status) return undefined;
+  const codes = status.split(",");
+  if (codes.length !== 1) return undefined;
+  const group = LIFECYCLE_STAGES.find((candidate) => candidate.id === stage);
+  return group?.statuses.includes(codes[0]) ? codes[0] : undefined;
+}
+
 /** A status filter holds several comma-separated codes: the API takes up to 400 characters. */
 export const TRACKER_URL_OPTIONS = { filterMax: { status: 400 } } as const;
 

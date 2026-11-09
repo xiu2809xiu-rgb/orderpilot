@@ -81,10 +81,13 @@ describe("the order tracker", () => {
 
   it("asks the server for the next page, the search and the overdue filter", async () => {
     await i18n.loadNamespaces(["order-tracker", "common"]);
+    // The lifecycle stage tabs ask for their own counts (`pageSize=1`) on the
+    // same endpoint: this test only tracks the table's own requests.
     const seen: string[] = [];
     server.use(
       http.get("*/api/v1/tracker/orders", ({ request }) => {
-        seen.push(new URL(request.url).search);
+        const url = new URL(request.url);
+        if (url.searchParams.get("pageSize") !== "1") seen.push(url.search);
         return HttpResponse.json(page([row(1)], 30));
       }),
     );
@@ -101,10 +104,12 @@ describe("the order tracker", () => {
 
   it("opens from a link with its search and its overdue filter, and shows the filter as a chip", async () => {
     await i18n.loadNamespaces(["order-tracker", "common"]);
+    // Same as above: ignore the stage tabs' own `pageSize=1` count requests.
     const seen: string[] = [];
     server.use(
       http.get("*/api/v1/tracker/orders", ({ request }) => {
-        seen.push(new URL(request.url).search);
+        const url = new URL(request.url);
+        if (url.searchParams.get("pageSize") !== "1") seen.push(url.search);
         return HttpResponse.json(page([row(1)]));
       }),
     );
@@ -116,6 +121,49 @@ describe("the order tracker", () => {
       "C-0001",
     );
     expect(screen.getByRole("switch", { name: "Overdue only" })).toBeChecked();
+  });
+
+  it("shows the lifecycle stage tabs with their counts, and filters by stage on click", async () => {
+    await i18n.loadNamespaces(["order-tracker", "common"]);
+    server.use(getTrackerListMockHandler(page([row(1)], 7)));
+    renderPage();
+    await screen.findByText("Status 1");
+    const tabs = screen.getByRole("tablist", { name: "Lifecycle stage" });
+    const allTab = within(tabs).getByRole("tab", { name: /All \(7\)/ });
+    expect(allTab).toHaveAttribute("aria-selected", "true");
+    const shippedTab = within(tabs).getByRole("tab", { name: /^Shipped/ });
+    await userEvent.click(shippedTab);
+    // The active tab is driven by the URL filter, not by the response the
+    // mock happens to send back, so it switches as soon as the click lands.
+    await waitFor(() => {
+      expect(shippedTab).toHaveAttribute("aria-selected", "true");
+    });
+    expect(allTab).toHaveAttribute("aria-selected", "false");
+  });
+
+  it("narrows a stage to one status from its dropdown, and keeps the stage's tab active", async () => {
+    await i18n.loadNamespaces(["order-tracker", "common"]);
+    server.use(getTrackerListMockHandler(page([row(1)], 2)));
+    renderPage();
+    await screen.findByText("Status 1");
+    const tabs = screen.getByRole("tablist", { name: "Lifecycle stage" });
+    const shippedTab = within(tabs).getByRole("tab", { name: /^Shipped/ });
+    // The dropdown only shows once its own tab is the one open.
+    await userEvent.click(shippedTab);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Narrow Shipped by status" }),
+    );
+    await userEvent.click(
+      await screen.findByRole("menuitemradio", {
+        name: "Shipped, AWB overdue",
+      }),
+    );
+    await waitFor(() => {
+      expect(shippedTab).toHaveAttribute("aria-selected", "true");
+    });
+    // The single status picked from the dropdown, not the whole stage,
+    // shows as the active filter chip.
+    expect(screen.getByText("Shipped, AWB overdue")).toBeInTheDocument();
   });
 
   it("shows an empty state that names what is missing", async () => {

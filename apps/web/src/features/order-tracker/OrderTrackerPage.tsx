@@ -9,7 +9,9 @@ import {
 } from "@/components/common";
 import { useTrackerList } from "@/lib/api/generated/endpoints/tracker/tracker";
 import { tableStatusOf } from "@/lib/query-status";
+import { LifecycleStageTabs, StageStatusFilter } from "./LifecycleStageTabs";
 import {
+  stageTabOf,
   toParams,
   trackerChips,
   TRACKER_URL_FILTERS,
@@ -32,6 +34,18 @@ export default function OrderTrackerPage() {
     () => trackerColumns(t, (role) => tc(`roles.${role}`)),
     [t, tc],
   );
+  const status =
+    typeof query.filters.status === "string" ? query.filters.status : undefined;
+  const stageTab = stageTabOf(status);
+  const onSelectStatus = (next: string | undefined) => {
+    const filters = { ...query.filters };
+    if (next) {
+      filters.status = next;
+    } else {
+      delete filters.status;
+    }
+    setQuery({ ...query, page: 1, filters });
+  };
 
   return (
     <div className="space-y-s4">
@@ -40,6 +54,12 @@ export default function OrderTrackerPage() {
         description={t("description")}
         meta={<DemoBadge kind="mock" />}
         total={tracker.data?.meta.total}
+      />
+      <LifecycleStageTabs value={stageTab} onSelectStatus={onSelectStatus} />
+      <StageStatusFilter
+        value={stageTab}
+        status={status}
+        onSelectStatus={onSelectStatus}
       />
       <FilterChips
         chips={trackerChips(query.filters, t)}
