@@ -129,14 +129,20 @@ describe("the payment actions (F-4)", () => {
     expect(policyActionOf("customer-payment.confirm")).toEqual({
       permission: "payments.confirm",
     });
-    expect(policyActionOf("payment-hold.clear")).toEqual({
-      permission: "payments.confirm",
-    });
     expect(policyActionOf("vendor-payment.approve")).toEqual({
       permission: "payments.post",
     });
     expect(policyActionOf("vendor-payment.release")).toEqual({
       permission: "payments.post",
+    });
+  });
+
+  it("gives a hold's two steps to two different permissions (F-5)", () => {
+    expect(policyActionOf("payment-hold.verify")).toEqual({
+      permission: "payments.confirm",
+    });
+    expect(policyActionOf("payment-hold.clear")).toEqual({
+      permission: "approvals.decide",
     });
   });
 
@@ -225,8 +231,78 @@ describe("the order of the rules (F-4)", () => {
         action: "vendor-payment.release",
         permission: "payments.post",
         roleHoldsPermission: true,
+        vendorHold: { vendorNo: "V-0007", openHoldIds: [] },
         earlierDuties: { "vendor-bank.change": ME },
       }).rule,
     ).toBe("segregation-of-duties");
+  });
+});
+
+describe("where the bank-detail hold's rules sit (F-5)", () => {
+  const ME = ACTOR.userId;
+  const HOLD = "00000000-0000-7000-8000-00000000aaaa";
+  const heldRelease: PolicyContext = {
+    actor: { userId: ME, role: "FINANCE" },
+    action: "vendor-payment.release",
+    permission: "payments.post",
+    roleHoldsPermission: true,
+    vendorHold: { vendorNo: "V-0007", openHoldIds: [HOLD] },
+    requesterUserId: ME,
+    earlierDuties: { "vendor-bank.change": ME },
+  };
+
+  it("tells the system admin first that they never pay", () => {
+    expect(
+      ACTION_POLICY.decide({
+        ...heldRelease,
+        actor: { userId: ME, role: "SYSTEM_ADMIN" },
+      }).rule,
+    ).toBe("system-admin");
+  });
+
+  it("tells a role without the right only that, and never about the hold", () => {
+    const decision = ACTION_POLICY.decide({
+      ...heldRelease,
+      roleHoldsPermission: false,
+    });
+    expect(decision.rule).toBe("permission");
+    expect(decision.reason).not.toContain(HOLD);
+  });
+
+  it("names the hold before any rule about one person, since it binds them all", () => {
+    const decision = ACTION_POLICY.decide(heldRelease);
+    expect(decision).toMatchObject({
+      outcome: "refused",
+      rule: "bank-detail-hold",
+    });
+    expect(decision.reason).toContain(HOLD);
+  });
+
+  const clearing = (earlierDuties: PolicyContext["earlierDuties"]) =>
+    ACTION_POLICY.decide({
+      actor: { userId: ME, role: "APPROVER" },
+      action: "payment-hold.clear",
+      permission: "approvals.decide",
+      roleHoldsPermission: true,
+      earlierDuties,
+      holdClearance: {
+        hold: {
+          status: "open",
+          openedAt: new Date("2026-11-09T09:00:00.000Z"),
+          latestOutcome: null,
+        },
+        resolution: "accept-new-details",
+        now: new Date("2026-11-10T09:00:00.000Z"),
+      },
+    });
+
+  it("refuses the person before looking at the state of the hold", () => {
+    expect(clearing({ "payment-hold.verify": ME }).rule).toBe(
+      "segregation-of-duties",
+    );
+  });
+
+  it("then looks at the state of the hold", () => {
+    expect(clearing({}).rule).toBe("hold-verification");
   });
 });

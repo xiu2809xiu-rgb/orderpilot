@@ -5,7 +5,8 @@ import type { PolicyContext, PolicyRule } from "./authorisation-policy.js";
  * them: who raised it is the request's own requester, so it cannot be named
  * twice and disagree.
  */
-export type EarlierDuty = "vendor-payment.approve" | "vendor-bank.change";
+export type EarlierDuty =
+  "vendor-payment.approve" | "vendor-bank.change" | "payment-hold.verify";
 
 /** Who did each earlier duty on the record, by user id. */
 export type EarlierDuties = Readonly<Partial<Record<EarlierDuty, string>>>;
@@ -19,7 +20,9 @@ interface DutyPair {
  * The duties kept apart: whoever did the earlier one never does a later one on
  * the same record. Configuration until Spectra confirms them. F-4 started with
  * raising and approving an SPR, approving a vendor payment and clearing its
- * hold, and changing a vendor's bank details against paying that vendor.
+ * hold, and changing a vendor's bank details against paying that vendor. F-5
+ * adds the two people a hold needs: whoever changed the details does neither
+ * step, and whoever verified a hold does not also clear it.
  */
 export const SEGREGATED_DUTIES: readonly DutyPair[] = [
   { earlier: "spr.raise", later: ["spr.approve"] },
@@ -27,11 +30,13 @@ export const SEGREGATED_DUTIES: readonly DutyPair[] = [
   {
     earlier: "vendor-bank.change",
     later: [
+      "payment-hold.verify",
       "payment-hold.clear",
       "vendor-payment.approve",
       "vendor-payment.release",
     ],
   },
+  { earlier: "payment-hold.verify", later: ["payment-hold.clear"] },
 ];
 
 /** The actor did none of the earlier duties kept apart from this action. */
