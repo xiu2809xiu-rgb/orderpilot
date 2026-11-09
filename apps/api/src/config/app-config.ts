@@ -48,6 +48,11 @@ export class AppConfig {
     readonly sentryDsn: string | null;
   };
 
+  readonly governance: {
+    /** Null means a bank-detail comparison fails closed. */
+    readonly bankFingerprintKey: string | null;
+  };
+
   readonly database: { readonly url: string };
   readonly redis: { readonly url: string };
   readonly workflows: { readonly sweepSeconds: number };
@@ -93,6 +98,9 @@ export class AppConfig {
         env.OTEL_EXPORTER_OTLP_ENDPOINT?.replace(/\/+$/, "") ?? null,
       metricsToken: env.METRICS_TOKEN ?? null,
       sentryDsn: env.SENTRY_DSN ?? null,
+    };
+    this.governance = {
+      bankFingerprintKey: env.BANK_FINGERPRINT_KEY ?? null,
     };
     this.database = { url: env.DATABASE_URL };
     this.redis = { url: env.REDIS_URL };
