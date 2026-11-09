@@ -21,6 +21,17 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  BankHoldClear200,
+  BankHoldClear403,
+  BankHoldClearBody,
+  BankHoldGet200,
+  BankHoldGet403,
+  BankHoldList200,
+  BankHoldList403,
+  BankHoldListParams,
+  BankHoldRecordVerification200,
+  BankHoldRecordVerification403,
+  BankHoldRecordVerificationBody,
   MatrixCopy200,
   MatrixCopy403,
   MatrixCopyBody,
@@ -721,6 +732,393 @@ export function usePolicyCheckAiDestination<TData = Awaited<ReturnType<typeof po
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getPolicyCheckAiDestinationQueryOptions(policyCheckAiDestinationBody,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary List bank-detail holds, a page at a time, masked by role
+ */
+export const bankHoldList = (
+    params?: BankHoldListParams,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<BankHoldList200>(
+      {url: `/api/v1/governance/bank-holds`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getBankHoldListQueryKey = (params?: BankHoldListParams,) => {
+    return [
+    `/api/v1/governance/bank-holds`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getBankHoldListQueryOptions = <TData = Awaited<ReturnType<typeof bankHoldList>>, TError = ErrorType<BankHoldList403>>(params?: BankHoldListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof bankHoldList>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getBankHoldListQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof bankHoldList>>> = ({ signal }) => bankHoldList(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof bankHoldList>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type BankHoldListQueryResult = NonNullable<Awaited<ReturnType<typeof bankHoldList>>>
+export type BankHoldListQueryError = ErrorType<BankHoldList403>
+
+
+export function useBankHoldList<TData = Awaited<ReturnType<typeof bankHoldList>>, TError = ErrorType<BankHoldList403>>(
+ params: undefined |  BankHoldListParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof bankHoldList>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof bankHoldList>>,
+          TError,
+          Awaited<ReturnType<typeof bankHoldList>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useBankHoldList<TData = Awaited<ReturnType<typeof bankHoldList>>, TError = ErrorType<BankHoldList403>>(
+ params?: BankHoldListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof bankHoldList>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof bankHoldList>>,
+          TError,
+          Awaited<ReturnType<typeof bankHoldList>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useBankHoldList<TData = Awaited<ReturnType<typeof bankHoldList>>, TError = ErrorType<BankHoldList403>>(
+ params?: BankHoldListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof bankHoldList>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List bank-detail holds, a page at a time, masked by role
+ */
+
+export function useBankHoldList<TData = Awaited<ReturnType<typeof bankHoldList>>, TError = ErrorType<BankHoldList403>>(
+ params?: BankHoldListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof bankHoldList>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getBankHoldListQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary One bank-detail hold: which fields differ, masked by role
+ */
+export const bankHoldGet = (
+    id: string,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<BankHoldGet200>(
+      {url: `/api/v1/governance/bank-holds/${id}`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getBankHoldGetQueryKey = (id: string,) => {
+    return [
+    `/api/v1/governance/bank-holds/${id}`
+    ] as const;
+    }
+
+
+export const getBankHoldGetQueryOptions = <TData = Awaited<ReturnType<typeof bankHoldGet>>, TError = ErrorType<BankHoldGet403>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof bankHoldGet>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getBankHoldGetQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof bankHoldGet>>> = ({ signal }) => bankHoldGet(id, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof bankHoldGet>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type BankHoldGetQueryResult = NonNullable<Awaited<ReturnType<typeof bankHoldGet>>>
+export type BankHoldGetQueryError = ErrorType<BankHoldGet403>
+
+
+export function useBankHoldGet<TData = Awaited<ReturnType<typeof bankHoldGet>>, TError = ErrorType<BankHoldGet403>>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof bankHoldGet>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof bankHoldGet>>,
+          TError,
+          Awaited<ReturnType<typeof bankHoldGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useBankHoldGet<TData = Awaited<ReturnType<typeof bankHoldGet>>, TError = ErrorType<BankHoldGet403>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof bankHoldGet>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof bankHoldGet>>,
+          TError,
+          Awaited<ReturnType<typeof bankHoldGet>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useBankHoldGet<TData = Awaited<ReturnType<typeof bankHoldGet>>, TError = ErrorType<BankHoldGet403>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof bankHoldGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary One bank-detail hold: which fields differ, masked by role
+ */
+
+export function useBankHoldGet<TData = Awaited<ReturnType<typeof bankHoldGet>>, TError = ErrorType<BankHoldGet403>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof bankHoldGet>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getBankHoldGetQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary Record an out-of-band verification. A rejection keeps the hold. Audited
+ */
+export const bankHoldRecordVerification = (
+    id: string,
+    bankHoldRecordVerificationBody: BankHoldRecordVerificationBody,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<BankHoldRecordVerification200>(
+      {url: `/api/v1/governance/bank-holds/${id}/verifications`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: bankHoldRecordVerificationBody, signal
+    },
+      );
+    }
+
+
+
+
+export const getBankHoldRecordVerificationQueryKey = (id: string,
+    bankHoldRecordVerificationBody?: BankHoldRecordVerificationBody,) => {
+    return [
+    'POST', `/api/v1/governance/bank-holds/${id}/verifications`, bankHoldRecordVerificationBody
+    ] as const;
+    }
+
+
+export const getBankHoldRecordVerificationQueryOptions = <TData = Awaited<ReturnType<typeof bankHoldRecordVerification>>, TError = ErrorType<BankHoldRecordVerification403>>(id: string,
+    bankHoldRecordVerificationBody: BankHoldRecordVerificationBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof bankHoldRecordVerification>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getBankHoldRecordVerificationQueryKey(id,bankHoldRecordVerificationBody);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof bankHoldRecordVerification>>> = ({ signal }) => bankHoldRecordVerification(id,bankHoldRecordVerificationBody, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof bankHoldRecordVerification>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type BankHoldRecordVerificationQueryResult = NonNullable<Awaited<ReturnType<typeof bankHoldRecordVerification>>>
+export type BankHoldRecordVerificationQueryError = ErrorType<BankHoldRecordVerification403>
+
+
+export function useBankHoldRecordVerification<TData = Awaited<ReturnType<typeof bankHoldRecordVerification>>, TError = ErrorType<BankHoldRecordVerification403>>(
+ id: string,
+    bankHoldRecordVerificationBody: BankHoldRecordVerificationBody, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof bankHoldRecordVerification>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof bankHoldRecordVerification>>,
+          TError,
+          Awaited<ReturnType<typeof bankHoldRecordVerification>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useBankHoldRecordVerification<TData = Awaited<ReturnType<typeof bankHoldRecordVerification>>, TError = ErrorType<BankHoldRecordVerification403>>(
+ id: string,
+    bankHoldRecordVerificationBody: BankHoldRecordVerificationBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof bankHoldRecordVerification>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof bankHoldRecordVerification>>,
+          TError,
+          Awaited<ReturnType<typeof bankHoldRecordVerification>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useBankHoldRecordVerification<TData = Awaited<ReturnType<typeof bankHoldRecordVerification>>, TError = ErrorType<BankHoldRecordVerification403>>(
+ id: string,
+    bankHoldRecordVerificationBody: BankHoldRecordVerificationBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof bankHoldRecordVerification>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Record an out-of-band verification. A rejection keeps the hold. Audited
+ */
+
+export function useBankHoldRecordVerification<TData = Awaited<ReturnType<typeof bankHoldRecordVerification>>, TError = ErrorType<BankHoldRecordVerification403>>(
+ id: string,
+    bankHoldRecordVerificationBody: BankHoldRecordVerificationBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof bankHoldRecordVerification>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getBankHoldRecordVerificationQueryOptions(id,bankHoldRecordVerificationBody,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary Close a hold as the second approver, accepting the new details or keeping the stored ones. Audited
+ */
+export const bankHoldClear = (
+    id: string,
+    bankHoldClearBody: BankHoldClearBody,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<BankHoldClear200>(
+      {url: `/api/v1/governance/bank-holds/${id}/clear`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: bankHoldClearBody, signal
+    },
+      );
+    }
+
+
+
+
+export const getBankHoldClearQueryKey = (id: string,
+    bankHoldClearBody?: BankHoldClearBody,) => {
+    return [
+    'POST', `/api/v1/governance/bank-holds/${id}/clear`, bankHoldClearBody
+    ] as const;
+    }
+
+
+export const getBankHoldClearQueryOptions = <TData = Awaited<ReturnType<typeof bankHoldClear>>, TError = ErrorType<BankHoldClear403>>(id: string,
+    bankHoldClearBody: BankHoldClearBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof bankHoldClear>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getBankHoldClearQueryKey(id,bankHoldClearBody);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof bankHoldClear>>> = ({ signal }) => bankHoldClear(id,bankHoldClearBody, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof bankHoldClear>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type BankHoldClearQueryResult = NonNullable<Awaited<ReturnType<typeof bankHoldClear>>>
+export type BankHoldClearQueryError = ErrorType<BankHoldClear403>
+
+
+export function useBankHoldClear<TData = Awaited<ReturnType<typeof bankHoldClear>>, TError = ErrorType<BankHoldClear403>>(
+ id: string,
+    bankHoldClearBody: BankHoldClearBody, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof bankHoldClear>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof bankHoldClear>>,
+          TError,
+          Awaited<ReturnType<typeof bankHoldClear>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useBankHoldClear<TData = Awaited<ReturnType<typeof bankHoldClear>>, TError = ErrorType<BankHoldClear403>>(
+ id: string,
+    bankHoldClearBody: BankHoldClearBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof bankHoldClear>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof bankHoldClear>>,
+          TError,
+          Awaited<ReturnType<typeof bankHoldClear>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useBankHoldClear<TData = Awaited<ReturnType<typeof bankHoldClear>>, TError = ErrorType<BankHoldClear403>>(
+ id: string,
+    bankHoldClearBody: BankHoldClearBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof bankHoldClear>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Close a hold as the second approver, accepting the new details or keeping the stored ones. Audited
+ */
+
+export function useBankHoldClear<TData = Awaited<ReturnType<typeof bankHoldClear>>, TError = ErrorType<BankHoldClear403>>(
+ id: string,
+    bankHoldClearBody: BankHoldClearBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof bankHoldClear>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getBankHoldClearQueryOptions(id,bankHoldClearBody,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

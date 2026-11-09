@@ -9529,6 +9529,1806 @@
         "tags": ["Governance"]
       }
     },
+    "/api/v1/governance/bank-holds": {
+      "get": {
+        "operationId": "BankHold_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 25,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["open", "cleared"]
+            }
+          },
+          {
+            "name": "vendorNo",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          "vendorNo": {
+                            "type": "string"
+                          },
+                          "accountCode": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": ["open", "cleared"]
+                          },
+                          "source": {
+                            "type": "string",
+                            "enum": [
+                              "vendor-record",
+                              "vendor-pi",
+                              "vendor-invoice"
+                            ]
+                          },
+                          "sourceRef": {
+                            "type": "string"
+                          },
+                          "changedByUserId": {
+                            "nullable": true,
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          "differingFields": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "enum": ["bankAccountNo", "swiftCode", "iban"]
+                            }
+                          },
+                          "fields": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "field": {
+                                  "type": "string",
+                                  "enum": ["bankAccountNo", "swiftCode", "iban"]
+                                },
+                                "differs": {
+                                  "type": "boolean"
+                                },
+                                "before": {
+                                  "type": "object",
+                                  "properties": {
+                                    "field": {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    "classification": {
+                                      "type": "string",
+                                      "enum": [
+                                        "public",
+                                        "internal",
+                                        "confidential",
+                                        "restricted"
+                                      ]
+                                    },
+                                    "masked": {
+                                      "type": "boolean"
+                                    },
+                                    "value": {
+                                      "nullable": true,
+                                      "type": "string"
+                                    },
+                                    "reason": {
+                                      "nullable": true,
+                                      "type": "string",
+                                      "enum": [
+                                        "role",
+                                        "bankDetails",
+                                        "price",
+                                        "policy"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "field",
+                                    "classification",
+                                    "masked",
+                                    "value",
+                                    "reason"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                "after": {
+                                  "type": "object",
+                                  "properties": {
+                                    "field": {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    "classification": {
+                                      "type": "string",
+                                      "enum": [
+                                        "public",
+                                        "internal",
+                                        "confidential",
+                                        "restricted"
+                                      ]
+                                    },
+                                    "masked": {
+                                      "type": "boolean"
+                                    },
+                                    "value": {
+                                      "nullable": true,
+                                      "type": "string"
+                                    },
+                                    "reason": {
+                                      "nullable": true,
+                                      "type": "string",
+                                      "enum": [
+                                        "role",
+                                        "bankDetails",
+                                        "price",
+                                        "policy"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "field",
+                                    "classification",
+                                    "masked",
+                                    "value",
+                                    "reason"
+                                  ],
+                                  "additionalProperties": false
+                                }
+                              },
+                              "required": [
+                                "field",
+                                "differs",
+                                "before",
+                                "after"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "verifications": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "format": "uuid",
+                                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                                },
+                                "verifiedByUserId": {
+                                  "type": "string",
+                                  "format": "uuid",
+                                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                                },
+                                "outcome": {
+                                  "type": "string",
+                                  "enum": ["confirmed", "rejected"]
+                                },
+                                "contactedAt": {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                },
+                                "contactFromStoredRecord": {
+                                  "type": "boolean"
+                                },
+                                "recordedAt": {
+                                  "type": "string",
+                                  "format": "date-time",
+                                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                },
+                                "note": {
+                                  "type": "object",
+                                  "properties": {
+                                    "field": {
+                                      "type": "string",
+                                      "minLength": 1
+                                    },
+                                    "classification": {
+                                      "type": "string",
+                                      "enum": [
+                                        "public",
+                                        "internal",
+                                        "confidential",
+                                        "restricted"
+                                      ]
+                                    },
+                                    "masked": {
+                                      "type": "boolean"
+                                    },
+                                    "value": {
+                                      "nullable": true,
+                                      "type": "string"
+                                    },
+                                    "reason": {
+                                      "nullable": true,
+                                      "type": "string",
+                                      "enum": [
+                                        "role",
+                                        "bankDetails",
+                                        "price",
+                                        "policy"
+                                      ]
+                                    }
+                                  },
+                                  "required": [
+                                    "field",
+                                    "classification",
+                                    "masked",
+                                    "value",
+                                    "reason"
+                                  ],
+                                  "additionalProperties": false
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "verifiedByUserId",
+                                "outcome",
+                                "contactedAt",
+                                "contactFromStoredRecord",
+                                "recordedAt",
+                                "note"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "blockedReason": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "openedAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "resolution": {
+                            "nullable": true,
+                            "type": "string",
+                            "enum": [
+                              "accept-new-details",
+                              "keep-stored-details"
+                            ]
+                          },
+                          "clearedAt": {
+                            "nullable": true,
+                            "type": "string",
+                            "format": "date-time",
+                            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                          },
+                          "clearedByUserId": {
+                            "nullable": true,
+                            "type": "string",
+                            "format": "uuid",
+                            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                          },
+                          "clearReason": {
+                            "nullable": true,
+                            "type": "object",
+                            "properties": {
+                              "field": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "classification": {
+                                "type": "string",
+                                "enum": [
+                                  "public",
+                                  "internal",
+                                  "confidential",
+                                  "restricted"
+                                ]
+                              },
+                              "masked": {
+                                "type": "boolean"
+                              },
+                              "value": {
+                                "nullable": true,
+                                "type": "string"
+                              },
+                              "reason": {
+                                "nullable": true,
+                                "type": "string",
+                                "enum": [
+                                  "role",
+                                  "bankDetails",
+                                  "price",
+                                  "policy"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "field",
+                              "classification",
+                              "masked",
+                              "value",
+                              "reason"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "vendorNo",
+                          "accountCode",
+                          "status",
+                          "source",
+                          "sourceRef",
+                          "changedByUserId",
+                          "differingFields",
+                          "fields",
+                          "verifications",
+                          "blockedReason",
+                          "openedAt",
+                          "resolution",
+                          "clearedAt",
+                          "clearedByUserId",
+                          "clearReason"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 9007199254740991
+                        },
+                        "pageSize": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 200
+                        },
+                        "total": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": ["page", "pageSize", "total"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The policy refused. Audited.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "VALIDATION_FAILED",
+                            "UNAUTHENTICATED",
+                            "INVALID_CREDENTIALS",
+                            "SESSION_EXPIRED",
+                            "REFRESH_REUSED",
+                            "FORBIDDEN",
+                            "CSRF_INVALID",
+                            "DEMO_MODE_DISABLED",
+                            "NOT_FOUND",
+                            "CONFLICT",
+                            "RATE_LIMITED",
+                            "UPSTREAM_UNAVAILABLE",
+                            "INTERNAL_ERROR"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "nullable": true,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "path": {
+                                "type": "string"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "required": ["path", "message"],
+                            "additionalProperties": false
+                          }
+                        },
+                        "traceId": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": ["code", "message", "details", "traceId"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "List bank-detail holds, a page at a time, masked by role",
+        "tags": ["Governance"]
+      }
+    },
+    "/api/v1/governance/bank-holds/{id}": {
+      "get": {
+        "operationId": "BankHold_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "vendorNo": {
+                          "type": "string"
+                        },
+                        "accountCode": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": ["open", "cleared"]
+                        },
+                        "source": {
+                          "type": "string",
+                          "enum": [
+                            "vendor-record",
+                            "vendor-pi",
+                            "vendor-invoice"
+                          ]
+                        },
+                        "sourceRef": {
+                          "type": "string"
+                        },
+                        "changedByUserId": {
+                          "nullable": true,
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "differingFields": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": ["bankAccountNo", "swiftCode", "iban"]
+                          }
+                        },
+                        "fields": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "field": {
+                                "type": "string",
+                                "enum": ["bankAccountNo", "swiftCode", "iban"]
+                              },
+                              "differs": {
+                                "type": "boolean"
+                              },
+                              "before": {
+                                "type": "object",
+                                "properties": {
+                                  "field": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "classification": {
+                                    "type": "string",
+                                    "enum": [
+                                      "public",
+                                      "internal",
+                                      "confidential",
+                                      "restricted"
+                                    ]
+                                  },
+                                  "masked": {
+                                    "type": "boolean"
+                                  },
+                                  "value": {
+                                    "nullable": true,
+                                    "type": "string"
+                                  },
+                                  "reason": {
+                                    "nullable": true,
+                                    "type": "string",
+                                    "enum": [
+                                      "role",
+                                      "bankDetails",
+                                      "price",
+                                      "policy"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "field",
+                                  "classification",
+                                  "masked",
+                                  "value",
+                                  "reason"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "after": {
+                                "type": "object",
+                                "properties": {
+                                  "field": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "classification": {
+                                    "type": "string",
+                                    "enum": [
+                                      "public",
+                                      "internal",
+                                      "confidential",
+                                      "restricted"
+                                    ]
+                                  },
+                                  "masked": {
+                                    "type": "boolean"
+                                  },
+                                  "value": {
+                                    "nullable": true,
+                                    "type": "string"
+                                  },
+                                  "reason": {
+                                    "nullable": true,
+                                    "type": "string",
+                                    "enum": [
+                                      "role",
+                                      "bankDetails",
+                                      "price",
+                                      "policy"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "field",
+                                  "classification",
+                                  "masked",
+                                  "value",
+                                  "reason"
+                                ],
+                                "additionalProperties": false
+                              }
+                            },
+                            "required": ["field", "differs", "before", "after"],
+                            "additionalProperties": false
+                          }
+                        },
+                        "verifications": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "format": "uuid",
+                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                              },
+                              "verifiedByUserId": {
+                                "type": "string",
+                                "format": "uuid",
+                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                              },
+                              "outcome": {
+                                "type": "string",
+                                "enum": ["confirmed", "rejected"]
+                              },
+                              "contactedAt": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              "contactFromStoredRecord": {
+                                "type": "boolean"
+                              },
+                              "recordedAt": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              "note": {
+                                "type": "object",
+                                "properties": {
+                                  "field": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "classification": {
+                                    "type": "string",
+                                    "enum": [
+                                      "public",
+                                      "internal",
+                                      "confidential",
+                                      "restricted"
+                                    ]
+                                  },
+                                  "masked": {
+                                    "type": "boolean"
+                                  },
+                                  "value": {
+                                    "nullable": true,
+                                    "type": "string"
+                                  },
+                                  "reason": {
+                                    "nullable": true,
+                                    "type": "string",
+                                    "enum": [
+                                      "role",
+                                      "bankDetails",
+                                      "price",
+                                      "policy"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "field",
+                                  "classification",
+                                  "masked",
+                                  "value",
+                                  "reason"
+                                ],
+                                "additionalProperties": false
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "verifiedByUserId",
+                              "outcome",
+                              "contactedAt",
+                              "contactFromStoredRecord",
+                              "recordedAt",
+                              "note"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "blockedReason": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "openedAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "resolution": {
+                          "nullable": true,
+                          "type": "string",
+                          "enum": ["accept-new-details", "keep-stored-details"]
+                        },
+                        "clearedAt": {
+                          "nullable": true,
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "clearedByUserId": {
+                          "nullable": true,
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "clearReason": {
+                          "nullable": true,
+                          "type": "object",
+                          "properties": {
+                            "field": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "classification": {
+                              "type": "string",
+                              "enum": [
+                                "public",
+                                "internal",
+                                "confidential",
+                                "restricted"
+                              ]
+                            },
+                            "masked": {
+                              "type": "boolean"
+                            },
+                            "value": {
+                              "nullable": true,
+                              "type": "string"
+                            },
+                            "reason": {
+                              "nullable": true,
+                              "type": "string",
+                              "enum": ["role", "bankDetails", "price", "policy"]
+                            }
+                          },
+                          "required": [
+                            "field",
+                            "classification",
+                            "masked",
+                            "value",
+                            "reason"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "vendorNo",
+                        "accountCode",
+                        "status",
+                        "source",
+                        "sourceRef",
+                        "changedByUserId",
+                        "differingFields",
+                        "fields",
+                        "verifications",
+                        "blockedReason",
+                        "openedAt",
+                        "resolution",
+                        "clearedAt",
+                        "clearedByUserId",
+                        "clearReason"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The policy refused. Audited.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "VALIDATION_FAILED",
+                            "UNAUTHENTICATED",
+                            "INVALID_CREDENTIALS",
+                            "SESSION_EXPIRED",
+                            "REFRESH_REUSED",
+                            "FORBIDDEN",
+                            "CSRF_INVALID",
+                            "DEMO_MODE_DISABLED",
+                            "NOT_FOUND",
+                            "CONFLICT",
+                            "RATE_LIMITED",
+                            "UPSTREAM_UNAVAILABLE",
+                            "INTERNAL_ERROR"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "nullable": true,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "path": {
+                                "type": "string"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "required": ["path", "message"],
+                            "additionalProperties": false
+                          }
+                        },
+                        "traceId": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": ["code", "message", "details", "traceId"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "One bank-detail hold: which fields differ, masked by role",
+        "tags": ["Governance"]
+      }
+    },
+    "/api/v1/governance/bank-holds/{id}/verifications": {
+      "post": {
+        "operationId": "BankHold_recordVerification",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "outcome": {
+                    "type": "string",
+                    "enum": ["confirmed", "rejected"]
+                  },
+                  "contactedAt": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                  },
+                  "contactFromStoredRecord": {
+                    "type": "boolean"
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 500
+                  }
+                },
+                "required": [
+                  "outcome",
+                  "contactedAt",
+                  "contactFromStoredRecord",
+                  "reason"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "vendorNo": {
+                          "type": "string"
+                        },
+                        "accountCode": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": ["open", "cleared"]
+                        },
+                        "source": {
+                          "type": "string",
+                          "enum": [
+                            "vendor-record",
+                            "vendor-pi",
+                            "vendor-invoice"
+                          ]
+                        },
+                        "sourceRef": {
+                          "type": "string"
+                        },
+                        "changedByUserId": {
+                          "nullable": true,
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "differingFields": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": ["bankAccountNo", "swiftCode", "iban"]
+                          }
+                        },
+                        "fields": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "field": {
+                                "type": "string",
+                                "enum": ["bankAccountNo", "swiftCode", "iban"]
+                              },
+                              "differs": {
+                                "type": "boolean"
+                              },
+                              "before": {
+                                "type": "object",
+                                "properties": {
+                                  "field": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "classification": {
+                                    "type": "string",
+                                    "enum": [
+                                      "public",
+                                      "internal",
+                                      "confidential",
+                                      "restricted"
+                                    ]
+                                  },
+                                  "masked": {
+                                    "type": "boolean"
+                                  },
+                                  "value": {
+                                    "nullable": true,
+                                    "type": "string"
+                                  },
+                                  "reason": {
+                                    "nullable": true,
+                                    "type": "string",
+                                    "enum": [
+                                      "role",
+                                      "bankDetails",
+                                      "price",
+                                      "policy"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "field",
+                                  "classification",
+                                  "masked",
+                                  "value",
+                                  "reason"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "after": {
+                                "type": "object",
+                                "properties": {
+                                  "field": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "classification": {
+                                    "type": "string",
+                                    "enum": [
+                                      "public",
+                                      "internal",
+                                      "confidential",
+                                      "restricted"
+                                    ]
+                                  },
+                                  "masked": {
+                                    "type": "boolean"
+                                  },
+                                  "value": {
+                                    "nullable": true,
+                                    "type": "string"
+                                  },
+                                  "reason": {
+                                    "nullable": true,
+                                    "type": "string",
+                                    "enum": [
+                                      "role",
+                                      "bankDetails",
+                                      "price",
+                                      "policy"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "field",
+                                  "classification",
+                                  "masked",
+                                  "value",
+                                  "reason"
+                                ],
+                                "additionalProperties": false
+                              }
+                            },
+                            "required": ["field", "differs", "before", "after"],
+                            "additionalProperties": false
+                          }
+                        },
+                        "verifications": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "format": "uuid",
+                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                              },
+                              "verifiedByUserId": {
+                                "type": "string",
+                                "format": "uuid",
+                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                              },
+                              "outcome": {
+                                "type": "string",
+                                "enum": ["confirmed", "rejected"]
+                              },
+                              "contactedAt": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              "contactFromStoredRecord": {
+                                "type": "boolean"
+                              },
+                              "recordedAt": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              "note": {
+                                "type": "object",
+                                "properties": {
+                                  "field": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "classification": {
+                                    "type": "string",
+                                    "enum": [
+                                      "public",
+                                      "internal",
+                                      "confidential",
+                                      "restricted"
+                                    ]
+                                  },
+                                  "masked": {
+                                    "type": "boolean"
+                                  },
+                                  "value": {
+                                    "nullable": true,
+                                    "type": "string"
+                                  },
+                                  "reason": {
+                                    "nullable": true,
+                                    "type": "string",
+                                    "enum": [
+                                      "role",
+                                      "bankDetails",
+                                      "price",
+                                      "policy"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "field",
+                                  "classification",
+                                  "masked",
+                                  "value",
+                                  "reason"
+                                ],
+                                "additionalProperties": false
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "verifiedByUserId",
+                              "outcome",
+                              "contactedAt",
+                              "contactFromStoredRecord",
+                              "recordedAt",
+                              "note"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "blockedReason": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "openedAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "resolution": {
+                          "nullable": true,
+                          "type": "string",
+                          "enum": ["accept-new-details", "keep-stored-details"]
+                        },
+                        "clearedAt": {
+                          "nullable": true,
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "clearedByUserId": {
+                          "nullable": true,
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "clearReason": {
+                          "nullable": true,
+                          "type": "object",
+                          "properties": {
+                            "field": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "classification": {
+                              "type": "string",
+                              "enum": [
+                                "public",
+                                "internal",
+                                "confidential",
+                                "restricted"
+                              ]
+                            },
+                            "masked": {
+                              "type": "boolean"
+                            },
+                            "value": {
+                              "nullable": true,
+                              "type": "string"
+                            },
+                            "reason": {
+                              "nullable": true,
+                              "type": "string",
+                              "enum": ["role", "bankDetails", "price", "policy"]
+                            }
+                          },
+                          "required": [
+                            "field",
+                            "classification",
+                            "masked",
+                            "value",
+                            "reason"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "vendorNo",
+                        "accountCode",
+                        "status",
+                        "source",
+                        "sourceRef",
+                        "changedByUserId",
+                        "differingFields",
+                        "fields",
+                        "verifications",
+                        "blockedReason",
+                        "openedAt",
+                        "resolution",
+                        "clearedAt",
+                        "clearedByUserId",
+                        "clearReason"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The policy refused. Audited.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "VALIDATION_FAILED",
+                            "UNAUTHENTICATED",
+                            "INVALID_CREDENTIALS",
+                            "SESSION_EXPIRED",
+                            "REFRESH_REUSED",
+                            "FORBIDDEN",
+                            "CSRF_INVALID",
+                            "DEMO_MODE_DISABLED",
+                            "NOT_FOUND",
+                            "CONFLICT",
+                            "RATE_LIMITED",
+                            "UPSTREAM_UNAVAILABLE",
+                            "INTERNAL_ERROR"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "nullable": true,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "path": {
+                                "type": "string"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "required": ["path", "message"],
+                            "additionalProperties": false
+                          }
+                        },
+                        "traceId": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": ["code", "message", "details", "traceId"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Record an out-of-band verification. A rejection keeps the hold. Audited",
+        "tags": ["Governance"]
+      }
+    },
+    "/api/v1/governance/bank-holds/{id}/clear": {
+      "post": {
+        "operationId": "BankHold_clear",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "resolution": {
+                    "type": "string",
+                    "enum": ["accept-new-details", "keep-stored-details"]
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 500
+                  }
+                },
+                "required": ["resolution", "reason"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "vendorNo": {
+                          "type": "string"
+                        },
+                        "accountCode": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": ["open", "cleared"]
+                        },
+                        "source": {
+                          "type": "string",
+                          "enum": [
+                            "vendor-record",
+                            "vendor-pi",
+                            "vendor-invoice"
+                          ]
+                        },
+                        "sourceRef": {
+                          "type": "string"
+                        },
+                        "changedByUserId": {
+                          "nullable": true,
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "differingFields": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": ["bankAccountNo", "swiftCode", "iban"]
+                          }
+                        },
+                        "fields": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "field": {
+                                "type": "string",
+                                "enum": ["bankAccountNo", "swiftCode", "iban"]
+                              },
+                              "differs": {
+                                "type": "boolean"
+                              },
+                              "before": {
+                                "type": "object",
+                                "properties": {
+                                  "field": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "classification": {
+                                    "type": "string",
+                                    "enum": [
+                                      "public",
+                                      "internal",
+                                      "confidential",
+                                      "restricted"
+                                    ]
+                                  },
+                                  "masked": {
+                                    "type": "boolean"
+                                  },
+                                  "value": {
+                                    "nullable": true,
+                                    "type": "string"
+                                  },
+                                  "reason": {
+                                    "nullable": true,
+                                    "type": "string",
+                                    "enum": [
+                                      "role",
+                                      "bankDetails",
+                                      "price",
+                                      "policy"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "field",
+                                  "classification",
+                                  "masked",
+                                  "value",
+                                  "reason"
+                                ],
+                                "additionalProperties": false
+                              },
+                              "after": {
+                                "type": "object",
+                                "properties": {
+                                  "field": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "classification": {
+                                    "type": "string",
+                                    "enum": [
+                                      "public",
+                                      "internal",
+                                      "confidential",
+                                      "restricted"
+                                    ]
+                                  },
+                                  "masked": {
+                                    "type": "boolean"
+                                  },
+                                  "value": {
+                                    "nullable": true,
+                                    "type": "string"
+                                  },
+                                  "reason": {
+                                    "nullable": true,
+                                    "type": "string",
+                                    "enum": [
+                                      "role",
+                                      "bankDetails",
+                                      "price",
+                                      "policy"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "field",
+                                  "classification",
+                                  "masked",
+                                  "value",
+                                  "reason"
+                                ],
+                                "additionalProperties": false
+                              }
+                            },
+                            "required": ["field", "differs", "before", "after"],
+                            "additionalProperties": false
+                          }
+                        },
+                        "verifications": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "format": "uuid",
+                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                              },
+                              "verifiedByUserId": {
+                                "type": "string",
+                                "format": "uuid",
+                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                              },
+                              "outcome": {
+                                "type": "string",
+                                "enum": ["confirmed", "rejected"]
+                              },
+                              "contactedAt": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              "contactFromStoredRecord": {
+                                "type": "boolean"
+                              },
+                              "recordedAt": {
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              "note": {
+                                "type": "object",
+                                "properties": {
+                                  "field": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "classification": {
+                                    "type": "string",
+                                    "enum": [
+                                      "public",
+                                      "internal",
+                                      "confidential",
+                                      "restricted"
+                                    ]
+                                  },
+                                  "masked": {
+                                    "type": "boolean"
+                                  },
+                                  "value": {
+                                    "nullable": true,
+                                    "type": "string"
+                                  },
+                                  "reason": {
+                                    "nullable": true,
+                                    "type": "string",
+                                    "enum": [
+                                      "role",
+                                      "bankDetails",
+                                      "price",
+                                      "policy"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "field",
+                                  "classification",
+                                  "masked",
+                                  "value",
+                                  "reason"
+                                ],
+                                "additionalProperties": false
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "verifiedByUserId",
+                              "outcome",
+                              "contactedAt",
+                              "contactFromStoredRecord",
+                              "recordedAt",
+                              "note"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "blockedReason": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "openedAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "resolution": {
+                          "nullable": true,
+                          "type": "string",
+                          "enum": ["accept-new-details", "keep-stored-details"]
+                        },
+                        "clearedAt": {
+                          "nullable": true,
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "clearedByUserId": {
+                          "nullable": true,
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "clearReason": {
+                          "nullable": true,
+                          "type": "object",
+                          "properties": {
+                            "field": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "classification": {
+                              "type": "string",
+                              "enum": [
+                                "public",
+                                "internal",
+                                "confidential",
+                                "restricted"
+                              ]
+                            },
+                            "masked": {
+                              "type": "boolean"
+                            },
+                            "value": {
+                              "nullable": true,
+                              "type": "string"
+                            },
+                            "reason": {
+                              "nullable": true,
+                              "type": "string",
+                              "enum": ["role", "bankDetails", "price", "policy"]
+                            }
+                          },
+                          "required": [
+                            "field",
+                            "classification",
+                            "masked",
+                            "value",
+                            "reason"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "vendorNo",
+                        "accountCode",
+                        "status",
+                        "source",
+                        "sourceRef",
+                        "changedByUserId",
+                        "differingFields",
+                        "fields",
+                        "verifications",
+                        "blockedReason",
+                        "openedAt",
+                        "resolution",
+                        "clearedAt",
+                        "clearedByUserId",
+                        "clearReason"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The policy refused. Audited.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "VALIDATION_FAILED",
+                            "UNAUTHENTICATED",
+                            "INVALID_CREDENTIALS",
+                            "SESSION_EXPIRED",
+                            "REFRESH_REUSED",
+                            "FORBIDDEN",
+                            "CSRF_INVALID",
+                            "DEMO_MODE_DISABLED",
+                            "NOT_FOUND",
+                            "CONFLICT",
+                            "RATE_LIMITED",
+                            "UPSTREAM_UNAVAILABLE",
+                            "INTERNAL_ERROR"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "nullable": true,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "path": {
+                                "type": "string"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "required": ["path", "message"],
+                            "additionalProperties": false
+                          }
+                        },
+                        "traceId": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": ["code", "message", "details", "traceId"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Close a hold as the second approver, accepting the new details or keeping the stored ones. Audited",
+        "tags": ["Governance"]
+      }
+    },
     "/api/v1/monitoring/ai-usage": {
       "get": {
         "operationId": "AiUsage_report",
