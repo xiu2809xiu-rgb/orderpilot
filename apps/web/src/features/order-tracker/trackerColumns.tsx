@@ -6,6 +6,7 @@ import {
   RecordLink,
 } from "@/components/common";
 import { formatDay } from "@/lib/format";
+import { docBadgesOf, DocsBadges } from "./DocsBadges";
 
 /**
  * The tracker's columns. Only the four the API can sort are sortable. The
@@ -62,6 +63,17 @@ export function trackerColumns(
       header: t("list.columns.status"),
       cell: (row) => <StatusBadge>{row.status.label}</StatusBadge>,
       exportValue: (row) => row.status.label,
+    },
+    {
+      // A concept column: see DocsBadges.tsx for what it does and does not
+      // represent.
+      id: "docs",
+      header: t("list.columns.docs"),
+      cell: (row) => <DocsBadges row={row} />,
+      exportValue: (row) =>
+        docBadgesOf(row)
+          .map(({ code, state }) => `${code}:${state}`)
+          .join(" "),
     },
     {
       id: "owner",

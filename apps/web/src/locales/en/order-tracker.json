@@ -13,6 +13,7 @@
       "orderNo": "Order No.",
       "customer": "Customer",
       "status": "Status",
+      "docs": "Docs",
       "owner": "Owner",
       "overdue": "Overdue",
       "exceptions": "Open exceptions",
@@ -28,6 +29,18 @@
       "open": "Open orders",
       "overdue": "Overdue",
       "documentToConfirm": "Has a document to confirm"
+    },
+    "docs": {
+      "labels": {
+        "P": "Purchase order",
+        "I": "Proforma invoice / invoice",
+        "L": "Packing list",
+        "A": "Air waybill / shipping doc"
+      },
+      "passed": "{{label}}: passed",
+      "pending": "{{label}}: not reached yet",
+      "failed_one": "{{label}}: mismatch flagged, {{count}} open exception",
+      "failed_other": "{{label}}: mismatch flagged, {{count}} open exceptions"
     },
     "stages": {
       "label": "Lifecycle stage",
