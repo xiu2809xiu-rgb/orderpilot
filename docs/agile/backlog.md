@@ -20,7 +20,7 @@ There are 9 epics and 156 stories. Estimates are story points: a first guess, fo
 
 ## Ready to pull
 
-The starter stories for areas 2, 3 and 4. Their owners start on them on Monday 2 Nov and refine them, and at the handover prompt 005 writes the rest from the owners' notes. They sit at Ready on the board.
+The starter stories for areas 2, 3 and 4. Their owners start on them on Monday 2 Nov and refine them, and at the handover prompt 007 writes the rest from the owners' notes. They sit at Ready on the board.
 
 | Story | Title                                                              | Area                                    | Points |
 | ----- | ------------------------------------------------------------------ | --------------------------------------- | ------ |
@@ -3448,6 +3448,6 @@ Each owner takes over their area, and the team moves to planning by tasks.
 Acceptance criteria:
 
 - Each owner takes over their area.
-- Prompt 005 writes the rest of epics A to G's stories from the owners' planning notes.
+- Prompt 007 writes the rest of epics A to G's stories from the owners' planning notes.
 - One approving review plus code-owner review is switched on, only on Richie's yes.
 - The first sprint is planned by tasks.

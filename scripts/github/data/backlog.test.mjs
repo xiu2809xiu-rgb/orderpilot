@@ -326,7 +326,7 @@ test("the stories prompt 002 touches carry its additions", () => {
   has("P-19", /business partners, each with a type and a price level/);
   has("P-19", /Opening stock and opening balances/);
   has("P-22", /landing, sign-in, the app shell and the 3D view/);
-  has("T-9", /Prompt 005/);
+  has("T-9", /Prompt 007/);
 });
 
 test("the sprints follow prompt 002's order", () => {

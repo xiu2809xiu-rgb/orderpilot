@@ -2230,7 +2230,7 @@
       "summary": "Each owner takes over their area, and the team moves to planning by tasks.",
       "acceptance": [
         "Each owner takes over their area.",
-        "Prompt 005 writes the rest of epics A to G's stories from the owners' planning notes.",
+        "Prompt 007 writes the rest of epics A to G's stories from the owners' planning notes.",
         "One approving review plus code-owner review is switched on, only on Richie's yes.",
         "The first sprint is planned by tasks."
       ]
