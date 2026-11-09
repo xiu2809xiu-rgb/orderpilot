@@ -40,6 +40,12 @@ GET {{baseUrl}}/api/v1/master-data/customers?paymentTerms=30%20DAYS&country=MV
 ### One customer: key facts, open orders and overdue orders.
 GET {{baseUrl}}/api/v1/master-data/customers/C-0001
 
+### What a customer last paid for each item asked for (at most 200, comma-separated).
+### An item they never bought is left out, a bad format is a 400 and an unknown
+### customer a 404. The price is masked like an item's Unit Price: sign in as
+### WAREHOUSE and it answers masked: true, value: null and the reason.
+GET {{baseUrl}}/api/v1/master-data/customers/C-0001/last-prices?itemNos=I-0001,I-0002
+
 ### Vendors.
 GET {{baseUrl}}/api/v1/master-data/vendors?sort=balanceLcy&direction=desc
 

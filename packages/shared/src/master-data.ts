@@ -352,3 +352,26 @@ export const availableStockResponseSchema = mockEnvelope(
 export type AvailableStockResponse = z.infer<
   typeof availableStockResponseSchema
 >;
+
+// ---- A customer's last agreed prices ------------------------------------------
+
+export const lastPricesQuerySchema = availableStockQuerySchema;
+export type LastPricesQuery = z.infer<typeof lastPricesQuerySchema>;
+
+/**
+ * The price one customer last paid for one item, as context for whoever fills
+ * in an order line. It is never a price list: an item the customer never
+ * bought has no row. The price is masked like an item's Unit Price.
+ */
+export const lastPriceRowSchema = z.object({
+  itemNo: z.string().min(1),
+  price: maskedFieldSchema,
+  agreedOn: z.string().min(1),
+  documentNo: z.string().min(1),
+});
+export type LastPriceRow = z.infer<typeof lastPriceRowSchema>;
+
+export const lastPricesResponseSchema = mockEnvelope(
+  z.array(lastPriceRowSchema),
+);
+export type LastPricesResponse = z.infer<typeof lastPricesResponseSchema>;

@@ -4759,6 +4759,129 @@
         "tags": ["MasterData"]
       }
     },
+    "/api/v1/master-data/customers/{no}/last-prices": {
+      "get": {
+        "operationId": "MasterData_lastPrices",
+        "parameters": [
+          {
+            "name": "itemNos",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9-]{1,20}(,[A-Za-z0-9-]{1,20})*$"
+            }
+          },
+          {
+            "name": "no",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "itemNo": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "price": {
+                            "type": "object",
+                            "properties": {
+                              "field": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "classification": {
+                                "type": "string",
+                                "enum": [
+                                  "public",
+                                  "internal",
+                                  "confidential",
+                                  "restricted"
+                                ]
+                              },
+                              "masked": {
+                                "type": "boolean"
+                              },
+                              "value": {
+                                "nullable": true,
+                                "type": "string"
+                              },
+                              "reason": {
+                                "nullable": true,
+                                "type": "string",
+                                "enum": [
+                                  "role",
+                                  "bankDetails",
+                                  "price",
+                                  "policy"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "field",
+                              "classification",
+                              "masked",
+                              "value",
+                              "reason"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "agreedOn": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "documentNo": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "required": [
+                          "itemNo",
+                          "price",
+                          "agreedOn",
+                          "documentNo"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "mock": {
+                          "type": "boolean",
+                          "enum": [true]
+                        }
+                      },
+                      "required": ["mock"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "What a customer last paid for each item asked for, as context for an order line. Masked like a unit price. Mock Business Central data",
+        "tags": ["MasterData"]
+      }
+    },
     "/api/v1/master-data/customers/{no}": {
       "get": {
         "operationId": "MasterData_customer",

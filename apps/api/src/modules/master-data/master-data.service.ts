@@ -5,6 +5,7 @@ import {
   compareDecimal,
   type CustomerDetail,
   type AvailableStockResponse,
+  type LastPricesResponse,
   type CustomerQuery,
   type CustomerRow,
   type ItemDetail,
@@ -282,6 +283,28 @@ export class MasterDataService {
         availableStock: new StockPosition(item, []).availableStock,
         unit: item.baseUnitOfMeasure,
       }));
+  }
+
+  /**
+   * What the customer last paid for each item asked for. An item they never
+   * bought is left out, so the answer is never a price list. The price is the
+   * item's Unit Price field for masking, so no new rule exists.
+   */
+  async lastPrices(
+    customerNo: string,
+    itemNos: readonly string[],
+    role: Role,
+  ): Promise<LastPricesResponse["data"]> {
+    const customers = await this.reader.customers();
+    if (!customers.some((customer) => customer.no === customerNo))
+      throw new NotFoundError("Customer");
+    const prices = await this.reader.lastAgreedPrices(customerNo, itemNos);
+    return prices.map((row) => ({
+      itemNo: row.itemNo,
+      price: this.field(role, "item.unitPrice", row.price),
+      agreedOn: row.agreedOn,
+      documentNo: row.documentNo,
+    }));
   }
 
   async item(no: string, role: Role): Promise<ItemDetail> {

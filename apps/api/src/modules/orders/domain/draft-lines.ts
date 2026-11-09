@@ -88,7 +88,7 @@ export function isTotalHoldable(
 
 /**
  * The price of a line. The customer's PO sets it (ADR 0047), so master data's
- * list price is never a fallback: a role that sees no prices keeps only the
+ * Unit Price is never a fallback: a role that sees no prices keeps only the
  * price already stored on the same position and item, and a line it adds or
  * changes needs a role that sees prices to type it.
  */

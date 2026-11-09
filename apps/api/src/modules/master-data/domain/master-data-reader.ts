@@ -115,6 +115,14 @@ export interface MasterDataSalesOrder {
   } | null;
 }
 
+/** The price a customer last paid for an item, and the document it was on. */
+export interface MasterDataLastPrice {
+  readonly itemNo: string;
+  readonly price: string;
+  readonly agreedOn: string;
+  readonly documentNo: string;
+}
+
 /**
  * Where master data comes from. The service and the controller depend on this
  * alone, so P-20's connector replaces the one class behind it.
@@ -129,6 +137,11 @@ export interface MasterDataReader {
   salesOrders(): Promise<readonly MasterDataSalesOrder[]>;
   purchaseOrders(): Promise<readonly MasterDataPurchaseOrder[]>;
   sprs(): Promise<readonly MasterDataSpr[]>;
+  /** Items the customer never bought are left out. */
+  lastAgreedPrices(
+    customerNo: string,
+    itemNos: readonly string[],
+  ): Promise<readonly MasterDataLastPrice[]>;
 }
 
 /** The injection token for the reader. */
