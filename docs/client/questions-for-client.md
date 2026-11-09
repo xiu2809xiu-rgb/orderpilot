@@ -83,6 +83,7 @@ Questions that came out of [the domain notes](../research/domain-notes.md), abou
 | Q-13 | Is the PI a pro forma printed from the Business Central sales order, or a posted prepayment invoice? Is the customer's payment recorded in Business Central? | A-13        |
 | Q-14 | Are approval limits and approvers already set up in Business Central, or kept outside it?                                                                    | A-14        |
 | Q-15 | Where are vendors' bank details kept, and who may change them?                                                                                               | A-15        |
+| Q-49 | If only one Finance user can verify a bank-detail change, and they made it, who verifies it? The hold needs a different Finance user.                        | A-15        |
 | Q-16 | Do you record forwarders and AWB/BL numbers in Business Central (Shipping Agent, Package Tracking No.)?                                                      | A-16        |
 | Q-17 | Does each Product Manager own certain brands, and should they see only those orders?                                                                         | A-28        |
 | Q-18 | How are returns and credit notes handled, for customers and for vendors?                                                                                     | A-29        |
