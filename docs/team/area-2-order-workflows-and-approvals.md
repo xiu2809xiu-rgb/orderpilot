@@ -106,12 +106,19 @@ A wrong actor is refused with 403 and an illegal move with 409, in the one error
 
 **What happens when the worker restarts.** Nothing is lost and nothing is sent twice: the sweep works out what is due from each task's start time and the settings, and the next run finds whatever was missed. A long outage can send a reminder and an escalation together.
 
+**Retries with an idempotency key (follows C-2).** `POST /workflows/sprs/:recordNo/approve`, `reject` and `undo` take an optional `Idempotency-Key` header. `CommandReplayService` runs a command once per person and key. It claims the key in `WorkflowCommand` before the command runs, and the command writes its answer there inside its own transaction. A repeat with the same key gets that answer and runs nothing, even after an undo. A copy sent while the first is still running finds the claim and waits for the answer, up to five seconds, and is then told to try again with 409. While the first succeeds, the copy never runs the command, so it writes no refusal. A command that fails gives its claim back, so a waiting copy or a later retry runs it again, and is refused and audited again. A claim left by a command that stopped is taken over after a minute. The same key with a different command, SPR or comment is refused with 409. Without a key, a command behaves as before. Keys are per person, so two people never collide.
+
 **How other areas use it:** `WorkflowOrderStatusReader` implements area 3's `OrderStatusReader`, and `WorkflowCheckReporter` implements its `CheckReporter`: a failed check holds the order and that rule passing clears it. Both are exported from `WorkflowsModule` for area 3 to bind in place of its mock. `OrderWorkflowService` underneath has `statusOf`, `statusOfMany`, `start`, `apply`, and `decideSpr`, which asks area 4's policy first.
 
 **Not done yet:**
 
 - The routes and screens still answer from the mock until a story binds them (C-3 is the first). A seeded sample order is not the machine's to run, so the tracker needs its mock until the demo's orders run on the machine.
-- Events are saved as rows and not published until P-15. Retries with an idempotency key are still to do.
+- Events are saved as rows and not published until P-15.
+- **The browser does not send an Idempotency-Key yet.** Area 1's generated client and `ApiClient` drop extra headers. Passing it on is the next pull request, with Richie's review.
+- **Only the SPR commands take a key.** The task and payment commands still run on the mock overlay, and take one when C-5 moves them to the database.
+- **Keys never expire.** `WorkflowCommand` keeps every one. Clearing out old ones can use its `createdAt` index later.
+- **The kept answer includes the comment,** as the SPR's record and the audit trail do, and it is kept for good. How long to keep it is a question for area 4's retention rules.
+- **A key is tied to the SPR's number.** A retry across midnight on a sample SPR, whose number moves with the date, is refused as a different request.
 - Area 4's policy knows only approval actions, so other moves are checked by role alone.
 - **"Waiting for you" is only on the task inbox page.** The home page's queue and the My tasks count read the role's inbox, so they do not show it. The home page is area 1's.
 - **An oversight role picking the Approver's inbox does not see a handed SPR.** The holder does, and the order tracker shows the order.
