@@ -1,18 +1,32 @@
 # Success metrics
 
-How we will know OrderPilot helps, and how we measure it. Spectra's five measures come first. The brief gives no baselines, so **each one is a lab estimate on synthetic data** until Spectra gives real numbers (Q-7). Our own targets, each with a test, are in [the problem statement](../problem-statement.md#7-success-metrics).
+How we will know OrderPilot helps, and how we measure it. The six measures we derived from Spectra's priorities come first. The brief gives no baselines, so **each one is a lab estimate on synthetic data** until Spectra gives real numbers (Q-7). Our own targets, each with a test, are in [the problem statement](../problem-statement.md#7-success-metrics).
 
-## Spectra's five measures
+## The six measures
 
-| Measure                  | Definition                                                         | Source in OrderPilot                                           | Lab estimate                                 | Spectra's baseline |
-| ------------------------ | ------------------------------------------------------------------ | -------------------------------------------------------------- | -------------------------------------------- | ------------------ |
-| Order-processing time    | Minutes of staff work per step, from PO received to goods released | The order's workflow events and the protocol's stopwatch times | From the protocol, manual against OrderPilot | To ask (Q-7)       |
-| Manual touches per order | Hand-typed or hand-corrected fields, plus hand-offs between groups | Field edits on the review screen, and task hand-offs           | From the protocol                            | To ask             |
-| Data-entry errors        | Confirmed values that differ from the truth, per 100 fields        | The ground truth of the synthetic documents (planned: P-21)    | From the protocol                            | To ask             |
-| Approval turnaround      | Hours between an SPR being raised and decided                      | The SPR's workflow events                                      | Only meaningful with real users              | To ask             |
-| Overdue orders           | Orders late on any step, counted by step and owner                 | The tracker's overdue flags                                    | Counted on the synthetic orders              | Not visible today  |
+Spectra did not name six measures. It ranked its priorities (time first, then seeing where an order is held up, then fewer errors) and gave two targets: about an hour a day saved, and an audit pack in minutes, not days. The six are our derivation from those, and they replace the five of the brief. Each old measure maps to a new one:
 
-Approval turnaround and overdue orders depend on how people behave over days, so the lab can only show that OrderPilot measures them. Their real values need Spectra's staff.
+| The five of the brief    | Becomes                                                       |
+| ------------------------ | ------------------------------------------------------------- |
+| Order-processing time    | PO received to PI sent, and PO received to shipped            |
+| Manual touches per order | Time stuck at each step                                       |
+| Overdue orders           | Time stuck at each step (the tracker keeps its overdue flags) |
+| Data-entry errors        | Mismatches caught before anything is issued                   |
+| Approval turnaround      | Time to decide an SPR                                         |
+| (new)                    | Time to produce an audit pack                                 |
+
+| Measure                       | Definition                                                                 | Source in OrderPilot                                                 | Lab estimate                     | Spectra's baseline |
+| ----------------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------------- | -------------------------------- | ------------------ |
+| PO received to PI sent        | Elapsed time from the PO arriving to the PI going out                      | The order's workflow events                                          | From the protocol                | To ask (Q-7)       |
+| PO received to shipped        | Elapsed time from the PO arriving to the goods leaving                     | The order's workflow events                                          | From the protocol                | To ask             |
+| Time stuck at each step       | Time an order spends at each step, and who holds it                        | The workflow events, and the tracker's overdue flags                 | Counted on the synthetic orders  | Not visible today  |
+| Mismatches caught early       | Mismatches found before anything is issued, against those found afterwards | The checks' results, and the ground truth of the synthetic documents | From the protocol                | To ask             |
+| Time to decide an SPR         | Hours between an SPR being raised and decided                              | The SPR's workflow events                                            | Only meaningful with real users  | To ask             |
+| Time to produce an audit pack | Minutes to produce a pack of every document for a customer or month        | The cabinet and the pack download (planned)                          | Timed on the synthetic documents | Days, by hand      |
+
+The six are the plan. Today the dashboard still shows the five, as mock lab estimates, until area 3 changes them (issue #253).
+
+Time to decide an SPR and time stuck at each step depend on how people behave over days, so the lab can only show that OrderPilot measures them. Their real values need Spectra's staff. The protocol below still counts touches and data-entry errors, as our own working measures: they show where the time goes.
 
 ## The measurement protocol
 
@@ -27,7 +41,7 @@ The same work done two ways, by hand and with OrderPilot, timed and counted the 
 ### The material
 
 - A set of 10 synthetic sales orders, each with its PO, packing list and invoice, from the synthetic documents (planned: P-21). At least two POs in a layout the tester has not seen, and the seeded mistakes left in.
-- **The manual run** uses a spreadsheet laid out like Navision's sales order (Sell-to Customer No., External Document No., the lines) and the documents as PDFs, as Spectra's staff work today.
+- **The manual run** uses a spreadsheet laid out like Microsoft Dynamics 365 Business Central's sales order (Sell-to Customer No., External Document No., the lines) and the documents as PDFs, as Spectra's staff work today.
 - **The OrderPilot run** uses the same documents, uploaded into the demo stack with the mock AI provider, or a provider allowed for synthetic data.
 
 ### The steps

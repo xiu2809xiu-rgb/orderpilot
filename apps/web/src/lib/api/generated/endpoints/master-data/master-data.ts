@@ -21,6 +21,8 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  MasterDataAvailableStock200,
+  MasterDataAvailableStockParams,
   MasterDataCustomer200,
   MasterDataCustomers200,
   MasterDataCustomersParams,
@@ -55,7 +57,7 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
 };
 
 /**
- * @summary What the master data filters can offer. Mock Navision data
+ * @summary What the master data filters can offer. Mock Business Central data
  */
 export const masterDataFilters = (
 
@@ -126,7 +128,7 @@ export function useMasterDataFilters<TData = Awaited<ReturnType<typeof masterDat
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary What the master data filters can offer. Mock Navision data
+ * @summary What the master data filters can offer. Mock Business Central data
  */
 
 export function useMasterDataFilters<TData = Awaited<ReturnType<typeof masterDataFilters>>, TError = ErrorType<unknown>>(
@@ -147,7 +149,7 @@ export function useMasterDataFilters<TData = Awaited<ReturnType<typeof masterDat
 
 
 /**
- * @summary Items with their stock, a page at a time. Prices are masked by role. Mock Navision data
+ * @summary Items with their stock, a page at a time. Prices are masked by role. Mock Business Central data
  */
 export const masterDataItems = (
     params?: MasterDataItemsParams,
@@ -219,7 +221,7 @@ export function useMasterDataItems<TData = Awaited<ReturnType<typeof masterDataI
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary Items with their stock, a page at a time. Prices are masked by role. Mock Navision data
+ * @summary Items with their stock, a page at a time. Prices are masked by role. Mock Business Central data
  */
 
 export function useMasterDataItems<TData = Awaited<ReturnType<typeof masterDataItems>>, TError = ErrorType<unknown>>(
@@ -240,7 +242,100 @@ export function useMasterDataItems<TData = Awaited<ReturnType<typeof masterDataI
 
 
 /**
- * @summary One item: its stock, open orders, open purchase orders and SPRs. Mock Navision data
+ * @summary The available stock of many items at once, for the lines of an order. Mock Business Central data
+ */
+export const masterDataAvailableStock = (
+    params: MasterDataAvailableStockParams,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<MasterDataAvailableStock200>(
+      {url: `/api/v1/master-data/available-stock`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getMasterDataAvailableStockQueryKey = (params?: MasterDataAvailableStockParams,) => {
+    return [
+    `/api/v1/master-data/available-stock`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getMasterDataAvailableStockQueryOptions = <TData = Awaited<ReturnType<typeof masterDataAvailableStock>>, TError = ErrorType<unknown>>(params: MasterDataAvailableStockParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataAvailableStock>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getMasterDataAvailableStockQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof masterDataAvailableStock>>> = ({ signal }) => masterDataAvailableStock(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof masterDataAvailableStock>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type MasterDataAvailableStockQueryResult = NonNullable<Awaited<ReturnType<typeof masterDataAvailableStock>>>
+export type MasterDataAvailableStockQueryError = ErrorType<unknown>
+
+
+export function useMasterDataAvailableStock<TData = Awaited<ReturnType<typeof masterDataAvailableStock>>, TError = ErrorType<unknown>>(
+ params: MasterDataAvailableStockParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataAvailableStock>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof masterDataAvailableStock>>,
+          TError,
+          Awaited<ReturnType<typeof masterDataAvailableStock>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useMasterDataAvailableStock<TData = Awaited<ReturnType<typeof masterDataAvailableStock>>, TError = ErrorType<unknown>>(
+ params: MasterDataAvailableStockParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataAvailableStock>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof masterDataAvailableStock>>,
+          TError,
+          Awaited<ReturnType<typeof masterDataAvailableStock>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useMasterDataAvailableStock<TData = Awaited<ReturnType<typeof masterDataAvailableStock>>, TError = ErrorType<unknown>>(
+ params: MasterDataAvailableStockParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataAvailableStock>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary The available stock of many items at once, for the lines of an order. Mock Business Central data
+ */
+
+export function useMasterDataAvailableStock<TData = Awaited<ReturnType<typeof masterDataAvailableStock>>, TError = ErrorType<unknown>>(
+ params: MasterDataAvailableStockParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataAvailableStock>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getMasterDataAvailableStockQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary One item: its stock, open orders, open purchase orders and SPRs. Mock Business Central data
  */
 export const masterDataItem = (
     no: string,
@@ -311,7 +406,7 @@ export function useMasterDataItem<TData = Awaited<ReturnType<typeof masterDataIt
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary One item: its stock, open orders, open purchase orders and SPRs. Mock Navision data
+ * @summary One item: its stock, open orders, open purchase orders and SPRs. Mock Business Central data
  */
 
 export function useMasterDataItem<TData = Awaited<ReturnType<typeof masterDataItem>>, TError = ErrorType<unknown>>(
@@ -332,7 +427,7 @@ export function useMasterDataItem<TData = Awaited<ReturnType<typeof masterDataIt
 
 
 /**
- * @summary Customers with their open and overdue orders, a page at a time. Mock Navision data
+ * @summary Customers with their open and overdue orders, a page at a time. Mock Business Central data
  */
 export const masterDataCustomers = (
     params?: MasterDataCustomersParams,
@@ -404,7 +499,7 @@ export function useMasterDataCustomers<TData = Awaited<ReturnType<typeof masterD
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary Customers with their open and overdue orders, a page at a time. Mock Navision data
+ * @summary Customers with their open and overdue orders, a page at a time. Mock Business Central data
  */
 
 export function useMasterDataCustomers<TData = Awaited<ReturnType<typeof masterDataCustomers>>, TError = ErrorType<unknown>>(
@@ -425,7 +520,7 @@ export function useMasterDataCustomers<TData = Awaited<ReturnType<typeof masterD
 
 
 /**
- * @summary One customer: key facts, open orders and overdue orders. Mock Navision data
+ * @summary One customer: key facts, open orders and overdue orders. Mock Business Central data
  */
 export const masterDataCustomer = (
     no: string,
@@ -496,7 +591,7 @@ export function useMasterDataCustomer<TData = Awaited<ReturnType<typeof masterDa
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary One customer: key facts, open orders and overdue orders. Mock Navision data
+ * @summary One customer: key facts, open orders and overdue orders. Mock Business Central data
  */
 
 export function useMasterDataCustomer<TData = Awaited<ReturnType<typeof masterDataCustomer>>, TError = ErrorType<unknown>>(
@@ -517,7 +612,7 @@ export function useMasterDataCustomer<TData = Awaited<ReturnType<typeof masterDa
 
 
 /**
- * @summary Vendors, a page at a time. Balances are masked by role. Mock Navision data
+ * @summary Vendors, a page at a time. Balances are masked by role. Mock Business Central data
  */
 export const masterDataVendors = (
     params?: MasterDataVendorsParams,
@@ -589,7 +684,7 @@ export function useMasterDataVendors<TData = Awaited<ReturnType<typeof masterDat
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary Vendors, a page at a time. Balances are masked by role. Mock Navision data
+ * @summary Vendors, a page at a time. Balances are masked by role. Mock Business Central data
  */
 
 export function useMasterDataVendors<TData = Awaited<ReturnType<typeof masterDataVendors>>, TError = ErrorType<unknown>>(
@@ -610,7 +705,7 @@ export function useMasterDataVendors<TData = Awaited<ReturnType<typeof masterDat
 
 
 /**
- * @summary One vendor: key facts, bank accounts masked by role, open purchase orders and items. Mock Navision data
+ * @summary One vendor: key facts, bank accounts masked by role, open purchase orders and items. Mock Business Central data
  */
 export const masterDataVendor = (
     no: string,
@@ -681,7 +776,7 @@ export function useMasterDataVendor<TData = Awaited<ReturnType<typeof masterData
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary One vendor: key facts, bank accounts masked by role, open purchase orders and items. Mock Navision data
+ * @summary One vendor: key facts, bank accounts masked by role, open purchase orders and items. Mock Business Central data
  */
 
 export function useMasterDataVendor<TData = Awaited<ReturnType<typeof masterDataVendor>>, TError = ErrorType<unknown>>(

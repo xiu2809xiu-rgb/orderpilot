@@ -141,3 +141,39 @@ describe("the lines grid, from the keyboard", () => {
     expect(box("Quantity", 2)).toHaveFocus();
   });
 });
+
+describe("what picking an item does to the price", () => {
+  it("leaves the price empty and shows the list price as context when asked", async () => {
+    const user = userEvent.setup();
+    renderGrid({ itemPrice: "reference" });
+    await user.type(await item(1), "NV-WM-100{Enter}");
+    await waitFor(() => {
+      expect(box("Quantity", 1)).toHaveFocus();
+    });
+    expect(box("Unit price", 1)).toHaveValue("");
+    expect(screen.getByText("List price 18.40")).toBeVisible();
+    expect(screen.getByText(", for reference")).toBeInTheDocument();
+  });
+
+  it("drops the list price when the item is cleared", async () => {
+    const user = userEvent.setup();
+    renderGrid({ itemPrice: "reference" });
+    await user.type(await item(1), "NV-WM-100{Enter}");
+    expect(await screen.findByText("List price 18.40")).toBeVisible();
+    await user.clear(await item(1));
+    expect(screen.queryByText("List price 18.40")).not.toBeInTheDocument();
+  });
+
+  it("keeps a typed price when the item changes in reference mode", async () => {
+    const user = userEvent.setup();
+    renderGrid({ itemPrice: "reference", lines: [SAVED[0] ?? line()] });
+    await screen.findByRole("table");
+    const field = await item(1);
+    await user.clear(field);
+    await user.type(field, "I-0002{Enter}");
+    await waitFor(() => {
+      expect(box("Quantity", 1)).toHaveFocus();
+    });
+    expect(box("Unit price", 1)).toHaveValue("19.99");
+  });
+});

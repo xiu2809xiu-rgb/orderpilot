@@ -80,7 +80,9 @@
       "upload": "Upload documents"
     },
     "orders": {
-      "read": "Read orders"
+      "read": "Read orders",
+      "create": "Create orders",
+      "edit": "Edit draft orders"
     },
     "approvals": {
       "decide": "Approve or reject"

@@ -1,6 +1,6 @@
 // The contract of the master data pages: items, customers and vendors as
-// Navision holds them. Read-only: Navision stays the system of record. Field
-// names follow Navision's, and every record is matched on its number, never on
+// Business Central holds them. Read-only: Business Central stays the system of record. Field
+// names follow Business Central's, and every record is matched on its number, never on
 // its name.
 
 import { z } from "zod";
@@ -315,3 +315,32 @@ export const vendorResponseSchema = mockEnvelope(vendorDetailSchema);
 export const masterDataFiltersResponseSchema = mockEnvelope(
   masterDataFiltersSchema,
 );
+
+// ---- Available stock for many items at once -------------------------------------
+
+/** One request for every line of an order, from the same formula as an item. */
+export const AVAILABLE_STOCK_MAX_ITEMS = 200;
+
+export const availableStockQuerySchema = z.object({
+  /** Business Central numbers, separated by commas, at most one order's worth. */
+  itemNos: z
+    .string()
+    .regex(/^[A-Za-z0-9-]{1,20}(,[A-Za-z0-9-]{1,20})*$/)
+    .refine((value) => value.split(",").length <= AVAILABLE_STOCK_MAX_ITEMS, {
+      message: `Ask for at most ${String(AVAILABLE_STOCK_MAX_ITEMS)} items at once`,
+    }),
+});
+export type AvailableStockQuery = z.infer<typeof availableStockQuerySchema>;
+
+export const availableStockResponseSchema = mockEnvelope(
+  z.array(
+    z.object({
+      itemNo: z.string().min(1),
+      availableStock: decimalStringSchema,
+      unit: z.string().min(1),
+    }),
+  ),
+);
+export type AvailableStockResponse = z.infer<
+  typeof availableStockResponseSchema
+>;

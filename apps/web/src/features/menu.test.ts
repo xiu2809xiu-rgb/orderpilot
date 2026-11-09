@@ -25,10 +25,11 @@ beforeAll(async () => {
 const MASTER_DATA = ["Customers", "Vendors", "Items"];
 const INBOX = ["Home", "My tasks"];
 
-// What the default matrix gives each role. Sales, Purchasing, Warehouse,
-// Finance and Documents are empty on purpose: no screen exists in them yet, and
-// an empty module is not shown. Warehouse and Approver have short menus for
-// that reason, not by mistake.
+// What the default matrix gives each role. Purchasing, Warehouse, Finance and
+// Documents are empty on purpose: no screen exists in them yet, and an empty
+// module is not shown. Warehouse and Approver have short menus for that reason,
+// not by mistake. Orders is the one Sales screen, and every role that may read
+// orders gets it.
 const EXPECTED: Record<Role, Record<string, readonly string[]>> = {
   SYSTEM_ADMIN: {
     home: ["Home"],
@@ -36,42 +37,50 @@ const EXPECTED: Record<Role, Record<string, readonly string[]>> = {
   },
   PRODUCT_MANAGER: {
     home: INBOX,
+    sales: ["Orders"],
     masterData: MASTER_DATA,
     reports: ["Order tracker", "KPIs"],
   },
   APPROVER: {
     home: INBOX,
+    sales: ["Orders"],
     masterData: MASTER_DATA,
     reports: ["Order tracker"],
   },
   SUPPORT: {
     home: INBOX,
+    sales: ["Orders"],
     masterData: MASTER_DATA,
     reports: ["Order tracker", "Exceptions"],
   },
   WAREHOUSE: {
     home: INBOX,
+    sales: ["Orders"],
     masterData: MASTER_DATA,
     reports: ["Order tracker", "Exceptions"],
   },
   FINANCE: {
     home: INBOX,
+    sales: ["Orders"],
     masterData: MASTER_DATA,
     reports: ["Order tracker", "Exceptions"],
   },
   LOGISTICS: {
     home: INBOX,
+    sales: ["Orders"],
     masterData: MASTER_DATA,
     reports: ["Order tracker", "Exceptions"],
   },
   MANAGEMENT: {
     home: ["Home"],
+    sales: ["Orders"],
     masterData: MASTER_DATA,
     reports: ["Order tracker", "Exceptions", "KPIs"],
     system: ["Monitoring"],
   },
   AUDITOR: {
     home: ["Home"],
+    sales: ["Orders"],
     masterData: MASTER_DATA,
     reports: ["Order tracker", "Exceptions", "KPIs"],
     system: ["Roles", "Audit log", "Monitoring"],

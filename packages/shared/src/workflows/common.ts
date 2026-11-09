@@ -16,7 +16,7 @@ export const INBOX_ROLES = [
 export const inboxRoleSchema = z.enum(INBOX_ROLES);
 export type InboxRole = z.infer<typeof inboxRoleSchema>;
 
-/** Navision's sales order number, as the sample data writes it: `SO-0003`. */
+/** Business Central's sales order number, as the sample data writes it: `SO-0003`. */
 export const orderNoSchema = z.string().regex(/^[A-Za-z0-9-]{1,30}$/);
 
 /**

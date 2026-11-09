@@ -80,9 +80,11 @@ export function LinesGrid(props: LinesGridProps) {
       return parsed.success && lookupText(parsed.data) === input.value;
     },
   });
+  const itemPrice = props.itemPrice ?? "fill";
   const pick = useItemPick({
     name,
     priceMask,
+    itemPrice,
     advance,
     advanceTo: afterItem(editable),
     root: rootRef,
@@ -95,6 +97,7 @@ export function LinesGrid(props: LinesGridProps) {
       debounceMs: props.debounceMs ?? 250,
       readOnly,
       priceMask,
+      itemPrice,
       shortfallAction: props.shortfallAction,
       pick,
       remove,
@@ -105,6 +108,7 @@ export function LinesGrid(props: LinesGridProps) {
       props.debounceMs,
       readOnly,
       priceMask,
+      itemPrice,
       props.shortfallAction,
       pick,
       remove,

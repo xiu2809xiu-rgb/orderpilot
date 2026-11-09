@@ -45,7 +45,7 @@ export function cellClass(column: Shape, first: Sticky | boolean): string {
 export function headClass(column: Shape, first: Sticky | boolean): string {
   const sticky = stickyOf(first);
   return cn(
-    "sticky top-0 z-10 h-9 bg-card px-3 shadow-[inset_0_-1px_0_var(--border)]",
+    "sticky top-0 z-10 h-9 pointer-coarse:h-11 bg-card px-3 shadow-[inset_0_-1px_0_var(--border)]",
     alignsEnd(column) && "text-right",
     sticky !== "none" && cn("z-20 max-md:border-r", STICKY_LEFT[sticky]),
   );

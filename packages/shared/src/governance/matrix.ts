@@ -34,6 +34,8 @@ export const NEVER_FOR_SYSTEM_ADMIN = [
   "payments.confirm",
   "payments.post",
   "tasks.complete",
+  "orders.create",
+  "orders.edit",
 ] as const satisfies readonly Permission[];
 
 /** Kept on the system admin role, so the matrix can always be edited. */

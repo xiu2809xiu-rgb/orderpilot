@@ -96,6 +96,12 @@ describe("a screen's column declaration", () => {
     );
   });
 
+  it("gives the amount one fixed width, so no row's columns drift from the others", () => {
+    const amount = [{ kind: "amount", header: "Amount" }] as const;
+    expect(trackTemplate(amount)).toBe("9rem");
+    expect(trackTemplate(amount, true)).toBe("8rem");
+  });
+
   it("tightens only the default widths for a tablet in landscape", () => {
     expect(trackTemplate(order, true)).toBe(
       "2.25rem minmax(0, 2fr) minmax(0, 1fr) 5rem 8rem 2.75rem",

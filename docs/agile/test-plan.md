@@ -6,17 +6,17 @@ How OrderPilot is tested: the levels, the environments, the data, and the failur
 
 ## 1. Test levels
 
-| Level           | What it covers                                                          | Tool                        | Where the tests live                        | Status                              |
-| --------------- | ----------------------------------------------------------------------- | --------------------------- | ------------------------------------------- | ----------------------------------- |
-| Repository      | The guards, the Git hooks and the shared ESLint config                  | `node --test`               | `scripts/**/*.test.mjs`, `packages/*/test/` | Today (P-5)                         |
-| Unit            | Domain classes and rules, at 80% or more coverage of domain logic       | Vitest                      | Next to the code, as `*.test.ts`            | Today (P-8)                         |
-| API integration | Every endpoint, with 401, 403 and validation cases, and the audit entry | Vitest                      | `apps/api/test/`                            | Today (P-9 harness), P-10 adds more |
-| Component       | Each component in each of its states                                    | Vitest with Testing Library | Next to the component                       | Planned: P-11                       |
-| Contract        | Each connector against the mock Navision                                | Vitest                      | Next to the connector                       | Planned: P-20                       |
-| End-to-end      | The smoke test, then E2E #1 to #4, with WCAG 2.2 AA checked by axe      | Playwright with axe         | `apps/e2e/tests/`, on a running stack       | Today (P-14): the smoke test        |
-| Load            | The extraction queue and the order endpoints, as a smoke load           | k6                          | To be decided by its story                  | Planned, not yet in a story         |
-| Manual requests | Each endpoint by hand, for reviews and demos                            | `.http` files               | `apps/api/requests/`                        | Today (P-8)                         |
-| Security        | Code, secrets, dependencies, then images and the live URL               | See security testing        | `.github/workflows/`                        | Today (P-6, Trivy P-13); ZAP P-24   |
+| Level           | What it covers                                                             | Tool                        | Where the tests live                        | Status                              |
+| --------------- | -------------------------------------------------------------------------- | --------------------------- | ------------------------------------------- | ----------------------------------- |
+| Repository      | The guards, the Git hooks and the shared ESLint config                     | `node --test`               | `scripts/**/*.test.mjs`, `packages/*/test/` | Today (P-5)                         |
+| Unit            | Domain classes and rules, at 80% or more coverage of domain logic          | Vitest                      | Next to the code, as `*.test.ts`            | Today (P-8)                         |
+| API integration | Every endpoint, with 401, 403 and validation cases, and the audit entry    | Vitest                      | `apps/api/test/`                            | Today (P-9 harness), P-10 adds more |
+| Component       | Each component in each of its states                                       | Vitest with Testing Library | Next to the component                       | Planned: P-11                       |
+| Contract        | Each connector against the mock of Microsoft Dynamics 365 Business Central | Vitest                      | Next to the connector                       | Planned: P-20                       |
+| End-to-end      | The smoke test, then E2E #1 to #4, with WCAG 2.2 AA checked by axe         | Playwright with axe         | `apps/e2e/tests/`, on a running stack       | Today (P-14): the smoke test        |
+| Load            | The extraction queue and the order endpoints, as a smoke load              | k6                          | To be decided by its story                  | Planned, not yet in a story         |
+| Manual requests | Each endpoint by hand, for reviews and demos                               | `.http` files               | `apps/api/requests/`                        | Today (P-8)                         |
+| Security        | Code, secrets, dependencies, then images and the live URL                  | See security testing        | `.github/workflows/`                        | Today (P-6, Trivy P-13); ZAP P-24   |
 
 `pnpm test` at the root runs every level that exists, and the verify job in CI runs it on every pull request. [Security testing](../security/security-testing.md) covers the security scans.
 
@@ -31,7 +31,7 @@ How OrderPilot is tested: the levels, the environments, the data, and the failur
 
 - `APP_ENV` is separate from `NODE_ENV`. Safety rules key off `APP_ENV=production`, so the demo can run `NODE_ENV=production` with demo data (P-8).
 - Tests never call a paid AI provider. They use the mock provider, which is the default (P-17).
-- Tests never reach a real Navision, mailbox or bank. The mock Navision is labelled "Mock" wherever it is used (P-19).
+- Tests never reach a real Business Central, mailbox or bank. The mock Business Central is labelled "Mock" wherever it is used (P-19).
 
 ## 3. Test data
 
@@ -57,20 +57,20 @@ Each row is a case some test must cover. The story is the one that brings the te
 
 ### Document intake and AI (area 1)
 
-| #   | Case                                                                                | Expected                                                                  | Level             | Status              |
-| --- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ----------------- | ------------------- |
-| A1  | An upload is too large, executable, or a type that its extension does not match     | Refused before storage, with a clear error                                | API integration   | Planned: P-18       |
-| A2  | A compressed file expands far beyond its size (a zip bomb)                          | Refused, and nothing is extracted                                         | Unit, integration | Planned: P-18       |
-| A3  | A document is of no known type                                                      | Classified as unknown and sent to a person, never guessed                 | Unit              | Planned: P-17, P-18 |
-| A4  | A field is extracted below the confidence threshold                                 | Marked "Requires approval" and blocks the next step until confirmed       | Unit, component   | Planned: P-18, P-12 |
-| A5  | A document's text tells the model to approve, pay or change data (prompt injection) | Treated as data: the model only returns fields, and no output acts        | Unit              | Planned: P-17       |
-| A6  | The AI provider times out or returns invalid JSON                                   | The zod schema rejects it, the document waits for retry or a person       | Unit              | Planned: P-17       |
-| A7  | A non-synthetic document would go to a third-party provider                         | Area 4's policy refuses it; the default is synthetic data only            | Unit, integration | Planned: P-17, F-1  |
-| A8  | Extraction accuracy over the synthetic test set                                     | 95% or more, reported per field                                           | Unit              | Planned: P-21       |
-| A9  | A new layout arrives (E2E #2)                                                       | The AI proposes a mapping, and it is used only after a person approves it | End-to-end        | Planned: P-14       |
-| A10 | A customer or item name looks like an existing one but the Navision number differs  | Shown as a possible match, never merged by name                           | Unit              | Planned: P-19, P-20 |
-| A11 | Navision (the mock) is down, slow or returns an error                               | Retried with backoff, then reported; no partial write                     | Contract          | Planned: P-20       |
-| A12 | A write-back to Navision is requested                                               | Shown as a preview, and sent only after a person approves                 | Integration       | Planned: P-20       |
+| #   | Case                                                                                       | Expected                                                                  | Level             | Status              |
+| --- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- | ----------------- | ------------------- |
+| A1  | An upload is too large, executable, or a type that its extension does not match            | Refused before storage, with a clear error                                | API integration   | Planned: P-18       |
+| A2  | A compressed file expands far beyond its size (a zip bomb)                                 | Refused, and nothing is extracted                                         | Unit, integration | Planned: P-18       |
+| A3  | A document is of no known type                                                             | Classified as unknown and sent to a person, never guessed                 | Unit              | Planned: P-17, P-18 |
+| A4  | A field is extracted below the confidence threshold                                        | Marked "Requires approval" and blocks the next step until confirmed       | Unit, component   | Planned: P-18, P-12 |
+| A5  | A document's text tells the model to approve, pay or change data (prompt injection)        | Treated as data: the model only returns fields, and no output acts        | Unit              | Planned: P-17       |
+| A6  | The AI provider times out or returns invalid JSON                                          | The zod schema rejects it, the document waits for retry or a person       | Unit              | Planned: P-17       |
+| A7  | A non-synthetic document would go to a third-party provider                                | Area 4's policy refuses it; the default is synthetic data only            | Unit, integration | Planned: P-17, F-1  |
+| A8  | Extraction accuracy over the synthetic test set                                            | 95% or more, reported per field                                           | Unit              | Planned: P-21       |
+| A9  | A new layout arrives (E2E #2)                                                              | The AI proposes a mapping, and it is used only after a person approves it | End-to-end        | Planned: P-14       |
+| A10 | A customer or item name looks like an existing one but the Business Central number differs | Shown as a possible match, never merged by name                           | Unit              | Planned: P-19, P-20 |
+| A11 | Business Central (the mock) is down, slow or returns an error                              | Retried with backoff, then reported; no partial write                     | Contract          | Planned: P-20       |
+| A12 | A write-back to Business Central is requested                                              | Shown as a preview, and sent only after a person approves                 | Integration       | Planned: P-20       |
 
 ### Order workflows and approvals (area 2)
 

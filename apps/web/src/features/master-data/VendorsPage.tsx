@@ -114,7 +114,7 @@ export default function VendorsPage() {
       tableId="master-data-vendors"
       title={t("vendors.title")}
       description={t("vendors.description")}
-      demo="mockNavision"
+      demo="mockBusinessCentral"
       tabs={<MasterDataTabs />}
       caption={t("vendors.caption")}
       columns={columns}

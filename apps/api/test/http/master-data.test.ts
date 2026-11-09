@@ -1,5 +1,7 @@
 import {
   ROLES,
+  AVAILABLE_STOCK_MAX_ITEMS,
+  availableStockResponseSchema,
   customerListSchema,
   customerResponseSchema,
   itemListSchema,
@@ -11,13 +13,15 @@ import {
 } from "@orderpilot/shared";
 import { syntheticDataset } from "@orderpilot/synthetic-data";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { SalesOrder } from "../../src/modules/orders/domain/sales-order.js";
+import { SalesOrderRepository } from "../../src/modules/orders/sales-order.repository.js";
 import { API, call, demoSignIn, type Browser } from "../support/auth.js";
 import { resetTestData } from "../support/reset.js";
 import { createTestApp, type TestApp } from "../support/test-app.js";
 
 const M = `${API}/master-data`;
 
-describe("master data routes (mock Navision)", () => {
+describe("master data routes (mock Business Central)", () => {
   let t: TestApp;
   const sessions = new Map<Role, Browser>();
   const dataset = syntheticDataset();
@@ -142,6 +146,68 @@ describe("master data routes (mock Navision)", () => {
     expect(filters.data.vendors.map((v) => v.no)).toContain(vendor.no);
   });
 
+  describe("available stock for many items", () => {
+    const route = `${M}/available-stock`;
+    const [first, second] = dataset.items;
+    if (!first || !second) throw new Error("the set is empty");
+
+    it("answers 401 with no session and 403 without orders.read", async () => {
+      const path = `${route}?itemNos=${item.no}`;
+      expect((await call(t, null, "get", path)).status).toBe(401);
+      expect((await get("SYSTEM_ADMIN", path)).status).toBe(403);
+    });
+
+    it("refuses a bad format and more items than an order may hold", async () => {
+      const tooMany = Array.from(
+        { length: AVAILABLE_STOCK_MAX_ITEMS + 1 },
+        (_, i) => `I-${String(i)}`,
+      ).join(",");
+      for (const query of [
+        "",
+        "itemNos=",
+        "itemNos=I-1,,I-2",
+        `itemNos=${encodeURIComponent("I 1;")}`,
+        `itemNos=${tooMany}`,
+      ]) {
+        const res = await get("SUPPORT", `${route}?${query}`);
+        expect(res.status, query).toBe(400);
+        expect(res.body).toMatchObject({
+          error: { code: "VALIDATION_FAILED" },
+        });
+      }
+    });
+
+    it("accepts as many items as an order may hold", async () => {
+      const many = Array.from(
+        { length: AVAILABLE_STOCK_MAX_ITEMS },
+        (_, i) => `I-${String(i)}`,
+      ).join(",");
+      expect((await get("SUPPORT", `${route}?itemNos=${many}`)).status).toBe(
+        200,
+      );
+    });
+
+    it("gives each item the figure its own page gives, and leaves an unknown one out", async () => {
+      const res = await get(
+        "WAREHOUSE",
+        `${route}?itemNos=${first.no},${second.no},I-NOPE`,
+      );
+      expect(res.status).toBe(200);
+      const body = availableStockResponseSchema.parse(res.body);
+      expect(body.meta.mock).toBe(true);
+      expect(body.data.map((row) => row.itemNo).sort()).toEqual(
+        [first.no, second.no].sort(),
+      );
+      for (const row of body.data) {
+        const page = itemResponseSchema.parse(
+          (await get("SUPPORT", `${M}/items/${row.itemNo}`)).body,
+        );
+        expect(row.availableStock).toBe(page.data.availableStock);
+        expect(row.unit).toBe(page.data.baseUnitOfMeasure);
+      }
+    });
+  });
+
   describe("masking in the response body", () => {
     const account = dataset.vendorBankAccounts.find(
       (a) => a.vendorNo === vendor.no,
@@ -228,6 +294,57 @@ describe("master data routes (mock Navision)", () => {
         const support = JSON.stringify((await get("SUPPORT", path)).body);
         expect(support).toContain(`"${value}"`);
       }
+    });
+  });
+  describe("a stored order", () => {
+    const orderNo = "SO-20261108-0001";
+
+    it("shows up on the customer and the item once it is submitted, and not before", async () => {
+      const customer = dataset.customers[0];
+      if (!customer) throw new Error("no customer");
+      const repository = t.app.get(SalesOrderRepository, { strict: false });
+      const make = (no: string, captureState: "draft" | "submitted") =>
+        new SalesOrder({
+          orderNo: no,
+          navisionNo: null,
+          captureState,
+          customerNo: customer.no,
+          externalDocumentNo: `PO-${no.slice(-4)}`,
+          orderDate: "2026-11-08",
+          shipmentDate: null,
+          currencyCode: "USD",
+          prepaymentPercent: "0.00",
+          createdBy: "00000000-0000-4000-8000-000000000001",
+          lines: [
+            {
+              lineNo: 1,
+              itemNo: item.no,
+              description: item.description,
+              quantity: "2",
+              unitPrice: "12.50",
+              qtyToShip: "2",
+            },
+          ],
+        });
+      const figures = async () =>
+        itemResponseSchema.parse(
+          (await get("SUPPORT", `${M}/items/${item.no}`)).body,
+        ).data;
+      const before = await figures();
+      await repository.insert(make("SO-20261108-0002", "draft"));
+      await repository.insert(make(orderNo, "submitted"));
+
+      const shown = customerResponseSchema.parse(
+        (await get("SUPPORT", `${M}/customers/${customer.no}`)).body,
+      );
+      const numbers = shown.data.openOrders.map((o) => o.orderNo);
+      expect(numbers).toContain(orderNo);
+      expect(numbers).not.toContain("SO-20261108-0002");
+      const after = await figures();
+      expect(after.orderLines.map((l) => l.orderNo)).toContain(orderNo);
+      expect(after.orderLines).toHaveLength(before.orderLines.length + 1);
+      expect(after.qtyOnSalesOrder).toBe(before.qtyOnSalesOrder);
+      expect(after.availableStock).toBe(before.availableStock);
     });
   });
 });

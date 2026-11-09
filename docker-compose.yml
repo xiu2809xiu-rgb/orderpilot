@@ -224,7 +224,7 @@ services:
         condition: service_healthy
 
   # The template the mock services start from (docker/mock). P-19 adds
-  # mock-navision beside it. Off unless asked for, and only reached over the
+  # mock-business-central beside it. Off unless asked for, and only reached over the
   # compose network:
   #   docker compose --profile mocks up -d --build mock-template
   mock-template:

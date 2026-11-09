@@ -74,7 +74,6 @@ for (const role of ROLES) {
 // A page that is not built has no address: it is the same not-found page as
 // any unknown one, never a placeholder.
 for (const path of [
-  "/orders",
   "/documents",
   "/mapping",
   "/connectors",

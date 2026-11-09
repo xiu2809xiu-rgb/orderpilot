@@ -162,7 +162,7 @@ function VendorRecord({ vendor }: { vendor: VendorDetail }) {
       <PageHeader
         title={vendor.no}
         description={vendor.name}
-        meta={<DemoBadge kind="mockNavision" />}
+        meta={<DemoBadge kind="mockBusinessCentral" />}
         actions={
           <Button asChild>
             <Link to={`/master-data/items?vendor=${vendor.no}`}>

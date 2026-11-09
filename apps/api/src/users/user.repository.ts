@@ -94,6 +94,13 @@ export class UserRepository extends BaseRepository<UserRecord, string> {
     });
   }
 
+  async setDisplayName(id: string, displayName: string): Promise<void> {
+    await this.database.client.user.update({
+      where: { id },
+      data: { displayName },
+    });
+  }
+
   async setDisabledAt(
     id: string,
     disabledAt: Date | null,

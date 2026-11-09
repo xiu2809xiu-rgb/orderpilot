@@ -27,7 +27,7 @@ export interface DocumentInput {
   scenario: SampleScenario;
   /** AWB for air freight, bill of lading for sea. */
   transport: "AWB" | "BILL_OF_LADING";
-  /** The sales invoice number, once Navision has posted one. */
+  /** The sales invoice number, once Business Central has posted one. */
   invoiceNo: string | null;
 }
 

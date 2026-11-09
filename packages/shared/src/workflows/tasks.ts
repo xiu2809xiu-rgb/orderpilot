@@ -39,9 +39,9 @@ export const workflowTaskSchema = z.object({
   kind: taskKindSchema,
   title: z.string().min(1),
   assigneeRole: roleSchema,
-  /** Navision's sales order number, when the task belongs to an order. */
+  /** Business Central's sales order number, when the task belongs to an order. */
   orderNo: orderNoSchema.nullable(),
-  /** OrderPilot's own number beside Navision's, when the task is about a record such as an SPR. */
+  /** OrderPilot's own number beside Business Central's, when the task is about a record such as an SPR. */
   ref: recordRefSchema.nullable(),
   status: taskStatusSchema,
   createdAt: z.iso.datetime(),

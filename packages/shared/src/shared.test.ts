@@ -129,6 +129,27 @@ describe("record numbers", () => {
     expect(parseRecordNumber("XYZ-20261102-0001")).toBeNull();
     expect(() => formatRecordNumber("EXC", new Date(), 0)).toThrow(RangeError);
   });
+  it("numbers a stored sales order as SO and keeps the other types", () => {
+    const at = new Date("2026-11-08T02:00:00Z");
+    const n = formatRecordNumber("SO", at, 1);
+    expect(n).toBe("SO-20261108-0001");
+    expect(recordNumberSchema.safeParse(n).success).toBe(true);
+    expect(parseRecordNumber(n)).toEqual({
+      type: "SO",
+      date: "20261108",
+      sequence: 1,
+    });
+    for (const type of ["SPR", "PI", "EXC"] as const) {
+      const other = formatRecordNumber(type, at, 7);
+      expect(other).toBe(`${type}-20261108-0007`);
+      expect(parseRecordNumber(other)?.type).toBe(type);
+    }
+  });
+  it("does not take a sample order number for a record number", () => {
+    expect(recordNumberSchema.safeParse("SO-0001").success).toBe(false);
+    expect(parseRecordNumber("SO-0001")).toBeNull();
+    expect(parseRecordNumber("XSO-20261108-0001")).toBeNull();
+  });
 });
 
 describe("order contract", () => {

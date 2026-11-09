@@ -3,7 +3,7 @@ import type { LookupState } from "./useLookupSearch";
 
 /**
  * The record that typed text stands for, once the search for that very text has
- * answered: the one whose number is the text, or the only one found. A Navision
+ * answered: the one whose number is the text, or the only one found. A Business Central
  * user types a number and presses Enter or Tab, and expects that record. Anything
  * less certain is left for the person to pick from the list.
  */

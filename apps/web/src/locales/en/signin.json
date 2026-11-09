@@ -14,10 +14,10 @@
       },
       "approve": {
         "title": "People approve",
-        "body": "The right person reviews what needs a decision. Navision stays the system of record."
+        "body": "The right person reviews what needs a decision. Business Central stays the system of record."
       }
     },
-    "demoNote": "In this demo the AI and Navision are stand-ins, and every record is made up."
+    "demoNote": "In this demo the AI and Business Central are stand-ins, and every record is made up."
   },
   "flow": {
     "read": "Read",

@@ -17,6 +17,7 @@ import { ChecksModule } from "./modules/checks/checks.module.js";
 import { InsightsModule } from "./modules/insights/insights.module.js";
 import { GovernanceModule } from "./modules/governance/governance.module.js";
 import { MasterDataModule } from "./modules/master-data/master-data.module.js";
+import { OrdersModule } from "./modules/orders/orders.module.js";
 import { MonitoringModule } from "./modules/monitoring/monitoring.module.js";
 import { OperationLogModule } from "./modules/operation-log/operation-log.module.js";
 import { QueueModule } from "./queue/queue.module.js";
@@ -63,6 +64,7 @@ export class AppModule {
         AuthModule.register(config),
         WorkflowsModule,
         MasterDataModule,
+        OrdersModule,
         ChecksModule,
         InsightsModule,
         GovernanceModule,

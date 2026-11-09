@@ -115,8 +115,9 @@ test("an epic's block counts its stories and points", () => {
   const backlog = loadBacklog();
   const epic = backlog.epics.find((item) => item.key === "F");
   const text = renderEpicBlock(epic, backlog, loadLabels());
-  // F-1 and F-2, the starter stories F-3 to F-5, then the follow-ups F-6 and F-7 (P-10) and F-8 (F-1) and F-9 (F-2).
-  assert.ok(text.includes("- **Stories:** 9, worth 38 points"));
+  // F-1 and F-2, the starter stories F-3 to F-5, the follow-ups F-6 and F-7 (P-10) and F-8 (F-1) and F-9 (F-2),
+  // and prompt 005's P-104, whose capability this is.
+  assert.ok(text.includes("- **Stories:** 10, worth 43 points"));
 });
 
 test("a story's labels are its type, area, priority and requirements", () => {

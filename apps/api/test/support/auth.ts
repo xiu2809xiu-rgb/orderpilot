@@ -90,7 +90,7 @@ export async function emailForRole(role: Role): Promise<string> {
 export function call(
   t: TestApp,
   browser: Browser | null,
-  method: "get" | "post" | "put",
+  method: "get" | "post" | "put" | "patch",
   path: string,
   options: { csrf?: boolean | string; body?: object } = {},
 ): request.Test {

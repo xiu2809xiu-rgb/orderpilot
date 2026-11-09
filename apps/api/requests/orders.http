@@ -1,0 +1,192 @@
+### Orders: the 120 sample orders and the orders OrderPilot stores itself.
+### Each row says its source (sample or stored). A stored order has no workflow
+### status, only a capture state (draft, submitted or void), which is not the
+### order's status. Support and the Product Manager start and change drafts;
+### nothing submits an order yet. A sample can be read but never written.
+### Sign in first (see auth.http): REST Client keeps the cookies. The writes also
+### need the CSRF header: paste the op_csrf cookie's value into @csrf, as auth.http says.
+@baseUrl = http://localhost:3000
+@csrf = paste the op_csrf cookie value here after signing in
+
+### Sign in as Support, who sees amounts.
+POST {{baseUrl}}/api/v1/auth/demo-login
+Content-Type: application/json
+
+{ "role": "SUPPORT" }
+
+### Orders, a page at a time, newest first. Amounts are masked by role.
+GET {{baseUrl}}/api/v1/orders?page=1&pageSize=25
+
+### Sort by orderNo, customerNo, orderDate, shipmentDate, amount or captureState.
+GET {{baseUrl}}/api/v1/orders?sort=amount&direction=desc
+###
+GET {{baseUrl}}/api/v1/orders?sort=shipmentDate&direction=asc
+
+### Search covers the order number, the customer number and the customer's PO number.
+GET {{baseUrl}}/api/v1/orders?search=SO-00
+
+### One customer, by Business Central number.
+GET {{baseUrl}}/api/v1/orders?customerNo=C-0001
+
+### Capture state applies to stored orders only: a sample has none.
+GET {{baseUrl}}/api/v1/orders?captureState=draft
+###
+GET {{baseUrl}}/api/v1/orders?source=stored
+
+### Order date and amount ranges.
+GET {{baseUrl}}/api/v1/orders?orderDateFrom=2026-10-01&orderDateTo=2026-10-31
+###
+GET {{baseUrl}}/api/v1/orders?amountFrom=1000&amountTo=5000
+
+### Orders waiting on stock. Each says by how much it is short: the list only
+### shows the gap, and nothing is ordered for it. The value is `waiting`, never `true`.
+GET {{baseUrl}}/api/v1/orders?stock=waiting
+
+### One order, with its lines and what falls short of stock.
+GET {{baseUrl}}/api/v1/orders/SO-0001
+
+### An unknown number answers the 404 envelope.
+GET {{baseUrl}}/api/v1/orders/SO-20990101-0001
+
+### A bad query answers the 400 envelope with the fields that failed.
+GET {{baseUrl}}/api/v1/orders?pageSize=500&stock=true
+
+### Sign in as WAREHOUSE and the same requests answer amount, unitPrice and
+### lineAmount as masked: true, value: null, reason "price". Sorting by amount
+### then gives the default order, and an amount range is ignored.
+POST {{baseUrl}}/api/v1/auth/demo-login
+Content-Type: application/json
+
+{ "role": "WAREHOUSE" }
+
+###
+GET {{baseUrl}}/api/v1/orders/SO-0001
+
+### SYSTEM_ADMIN holds no orders.read: 403, and the refusal is audited.
+POST {{baseUrl}}/api/v1/auth/demo-login
+Content-Type: application/json
+
+{ "role": "SYSTEM_ADMIN" }
+
+###
+GET {{baseUrl}}/api/v1/orders
+
+### ---- Writing a draft (P-49, ADR 0047) ----------------------------------------
+### Sign back in as Support (and paste the new op_csrf cookie into @csrf).
+POST {{baseUrl}}/api/v1/auth/demo-login
+Content-Type: application/json
+
+{ "role": "SUPPORT" }
+
+### Start a draft: 201, with the number, version 1 and the lines. The price comes
+### from the customer's PO, so a role that sees prices must send one on every line.
+### A role that cannot see prices cannot start an order, because no line can carry one.
+# @name created
+POST {{baseUrl}}/api/v1/orders
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{
+  "customerNo": "C-0001",
+  "externalDocumentNo": "PO-HTTP-1",
+  "orderDate": "2026-11-10",
+  "shipmentDate": null,
+  "prepaymentPercent": "30",
+  "lines": [{ "itemNo": "I-0001", "quantity": "5", "unitPrice": "12.50" }]
+}
+
+### The same customer and PO number again, in any case: 409. The issue on the path
+### `existingOrderNo` carries the number of the order that already holds it.
+POST {{baseUrl}}/api/v1/orders
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{
+  "customerNo": "C-0001",
+  "externalDocumentNo": "po-http-1",
+  "orderDate": "2026-11-10",
+  "shipmentDate": null,
+  "prepaymentPercent": "30",
+  "lines": [{ "itemNo": "I-0001", "quantity": "5", "unitPrice": "12.50" }]
+}
+
+### Change a draft. Send the version you read and only the fields that change.
+### A stale version, a submitted order and a void order each answer 409.
+@orderNo = {{created.response.body.$.data.orderNo}}
+PATCH {{baseUrl}}/api/v1/orders/{{orderNo}}
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "version": 1, "prepaymentPercent": "50" }
+
+### Void a draft, with a reason. The version is now 2. This frees the PO number.
+POST {{baseUrl}}/api/v1/orders/{{orderNo}}/void
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "version": 2, "reason": "Entered twice." }
+
+### A missing price, an empty PO number or no lines: 400, with the issue paths.
+POST {{baseUrl}}/api/v1/orders
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{
+  "customerNo": "C-0001",
+  "externalDocumentNo": "  ",
+  "orderDate": "2026-11-10",
+  "shipmentDate": null,
+  "prepaymentPercent": "0",
+  "lines": []
+}
+
+### A void without a reason: 400.
+POST {{baseUrl}}/api/v1/orders/{{orderNo}}/void
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "version": 2, "reason": "   " }
+
+### A number that does not exist: 404.
+PATCH {{baseUrl}}/api/v1/orders/SO-20990101-0001
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "version": 1, "prepaymentPercent": "50" }
+
+### A sample is not stored: 404.
+PATCH {{baseUrl}}/api/v1/orders/SO-0001
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "version": 1, "prepaymentPercent": "50" }
+
+### Warehouse holds neither orders.create nor orders.edit: 403, audited.
+POST {{baseUrl}}/api/v1/auth/demo-login
+Content-Type: application/json
+
+{ "role": "WAREHOUSE" }
+
+###
+POST {{baseUrl}}/api/v1/orders
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{
+  "customerNo": "C-0001",
+  "externalDocumentNo": "PO-HTTP-2",
+  "orderDate": "2026-11-10",
+  "shipmentDate": null,
+  "prepaymentPercent": "0",
+  "lines": [{ "itemNo": "I-0001", "quantity": "1" }]
+}
+
+### No session: 401. Sign out first (see auth.http), then send the write.
+POST {{baseUrl}}/api/v1/auth/logout
+X-CSRF-Token: {{csrf}}
+
+###
+POST {{baseUrl}}/api/v1/orders
+Content-Type: application/json
+
+{ "customerNo": "C-0001" }

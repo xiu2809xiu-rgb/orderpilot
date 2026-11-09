@@ -39,6 +39,7 @@ export function lineDraftOptions(
     rowKey: "lineId",
     exclude: [
       `${name}.*.availableStock`,
+      `${name}.*.listPrice`,
       ...(priceMasked ? [`${name}.*.unitPrice`] : []),
     ],
   };
@@ -50,7 +51,9 @@ const DEFAULT_WIDTH: Record<ColumnKind, string> = {
   description: "minmax(0, 2fr)",
   quantity: "5.5rem",
   unitPrice: "6.5rem",
-  amount: "6.5rem",
+  // One width for every row: a track that grew to each row's own amount would
+  // push that row's other columns out of line with the rest. 9rem holds 17 characters.
+  amount: "9rem",
   availability: "minmax(7rem, 1.2fr)",
   remove: "2.75rem",
 };
@@ -64,7 +67,7 @@ const COMPACT_WIDTH: Partial<Record<ColumnKind, string>> = {
   description: "minmax(0, 1fr)",
   quantity: "5rem",
   unitPrice: "5.5rem",
-  amount: "5.5rem",
+  amount: "8rem",
   availability: "minmax(6.5rem, 1fr)",
 };
 

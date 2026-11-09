@@ -2,17 +2,18 @@ import { FlaskConical } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 
-export type DemoBadgeKind = "mock" | "mockAi" | "mockNavision" | "synthetic";
+export type DemoBadgeKind =
+  "mock" | "mockAi" | "mockBusinessCentral" | "synthetic";
 
 const KEYS = {
   mock: ["badges.mock", "badges.mockHint"],
   mockAi: ["badges.mockAi", "badges.mockAiHint"],
-  mockNavision: ["badges.mockNavision", "badges.mockNavisionHint"],
+  mockBusinessCentral: ["badges.mockNavision", "badges.mockNavisionHint"],
   synthetic: ["badges.synthetic", "badges.syntheticHint"],
 } as const;
 
 /**
- * "Mock", "Mock AI", "Mock Navision" or "Synthetic demo data": the labels that stop a demo
+ * "Mock", "Mock AI", "Mock Business Central" or "Synthetic demo data": the labels that stop a demo
  * being mistaken for the real thing. The hint is a tooltip.
  */
 export function DemoBadge({ kind }: { kind: DemoBadgeKind }) {

@@ -92,6 +92,7 @@ describe("command palette", () => {
     expect(goTo.map((o) => o.textContent)).toEqual([
       "Home",
       "My tasks",
+      "Orders",
       "Customers",
       "Vendors",
       "Items",

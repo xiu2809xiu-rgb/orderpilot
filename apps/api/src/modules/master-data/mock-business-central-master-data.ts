@@ -18,7 +18,7 @@ import type {
 } from "./domain/master-data-reader.js";
 
 /** What is late: the transport document for an overdue AWB or bill of lading, else the step. */
-function lateStep(order: SampleOrder): string {
+export function lateStep(order: SampleOrder): string {
   const { scenario } = order;
   if (scenario.kind === "awb-overdue")
     return scenario.documentType === "AWB" ? "AWB" : "Bill of lading";
@@ -63,14 +63,14 @@ function toSalesOrder(
 }
 
 /**
- * The mock of Navision's master data, over the synthetic set, mapped to the
+ * The mock of Business Central's master data, over the synthetic set, mapped to the
  * reader's own records. Status and overdue come from the same mock builders
  * as the tracker, so a customer's overdue count equals the tracker's list.
  * P-20's connector replaces this class. It looks the set up on each call,
  * because the set turns over daily.
  */
 @Injectable()
-export class MockNavisionMasterData implements MasterDataReader {
+export class MockBusinessCentralMasterData implements MasterDataReader {
   constructor(
     @Inject(SYNTHETIC_SOURCE) private readonly source: DatasetSource,
   ) {}

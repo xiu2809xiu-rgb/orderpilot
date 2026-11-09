@@ -11,7 +11,7 @@ import {
 import { ApiError } from "@/lib/api/errors";
 import { lineAmount, sumDecimal } from "@orderpilot/shared";
 
-// Synthetic demo data, in the shape of the mock Navision's items: its number,
+// Synthetic demo data, in the shape of the mock Business Central's items: its number,
 // its part number, its stock as the API would report it, and its selling price.
 export const GALLERY_STOCK: readonly ItemOption[] = [
   stock("I-0001", "Norvale Wireless Mouse", "NV-WM-100", "40", "18.40"),

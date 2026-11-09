@@ -48,7 +48,7 @@ export function DataTableHead<Row>({
         {rowActions ? (
           <TableHead
             scope="col"
-            className={`${ACTIONS_CELL} top-0 z-20 h-9 shadow-[inset_0_-1px_0_var(--border)]`}
+            className={`${ACTIONS_CELL} top-0 z-20 h-9 pointer-coarse:h-11 shadow-[inset_0_-1px_0_var(--border)]`}
           >
             <span className="sr-only">{rowActions.header}</span>
           </TableHead>
