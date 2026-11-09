@@ -112,6 +112,9 @@ export function makeVendorBankAccounts(
   }));
 }
 
+/** What the planted short-stock item has on hand: 1,000 ordered leaves it 360 short. */
+export const PLANTED_STOCK = 640;
+
 /**
  * The items, by the catalogue plan. Each item still takes the same four draws
  * in the same order as before the briefing data, so every number drawn after
@@ -138,13 +141,19 @@ export function makeItems(
       random.int(productClass.price[0] * 100, productClass.price[1] * 100) / 100
     ).toFixed(2);
     const low = isLowStockIndex(index);
-    const inventory = low ? random.int(10, 60) : random.int(150, 900);
+    let inventory = low ? random.int(10, 60) : random.int(150, 900);
     // Qty. on Sales Order starts at nothing: the sample's open orders are
     // all there is, so their lines add up to it. The draw that once gave it
     // a base figure stays, so every number drawn after it stays put.
     random.int(0, low ? (inventory / 2) | 0 : 60);
     const [fastest, slowest] = productClass.leadTimeDays;
     const no = `I-${pad(index + 1)}`;
+    // The planted short-stock item keeps its draws like every other item and
+    // then takes its fixed figures, so no number drawn after it moves.
+    const planted = plan.plantedShort === true;
+    if (planted) inventory = PLANTED_STOCK;
+    const drawnOnOrder = random.int(0, low ? 20 : 400);
+    const onOrder = planted ? 0 : drawnOnOrder;
     const sold = threeMonthSales(seed, no, plan, low, inventory);
     items.push({
       no,
@@ -157,7 +166,7 @@ export function makeItems(
       unitCost: (Number(price) * productClass.cost).toFixed(2),
       inventory: String(inventory),
       qtyOnSalesOrder: "0",
-      qtyOnPurchOrder: String(random.int(0, low ? 20 : 400)),
+      qtyOnPurchOrder: String(onOrder),
       vendorNo: vendor.no,
       vendorItemNo: `${brand.name.slice(0, 3).toUpperCase()}-${pad(index + 100)}`,
       leadTimeDays:

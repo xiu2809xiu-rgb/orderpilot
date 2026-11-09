@@ -175,11 +175,12 @@ export type SampleScenario =
       packed: DecimalString;
     }
   | {
-      kind: "price-mismatch";
+      kind: "pi-price-mismatch";
       itemNo: string;
-      /** The unit price on the PO, against Business Central's. */
-      printed: DecimalString;
-      listed: DecimalString;
+      /** The unit price on the customer's PO, which is the agreed one. */
+      poPrice: DecimalString;
+      /** The higher price the draft PI prints on its first line. */
+      piPrice: DecimalString;
     }
   | {
       kind: "awb-overdue";
@@ -228,6 +229,10 @@ export interface OrderDocument {
   dueDate: string | null;
   /** Who confirmed it, once confirmed. */
   confirmedBy: string | null;
+  /** On a shipping document: the consignee it names, when that is not the buyer. */
+  consignee?: string;
+  /** On a shipping document: who the carrier notifies on arrival. */
+  notifyParty?: string;
 }
 
 /** Where an order stands in the day-by-day story the data tells. */

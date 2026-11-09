@@ -19,8 +19,7 @@ function plain(value: string): string {
 /**
  * Exceptions follow from each order's scenario, with the expected and found
  * values the screen shows: a packing list that disagrees with the PO, a
- * shipping document that is late, a PO price that differs from the price
- * list. Some closed orders carry one that was resolved on the way. These are
+ * shipping document that is late, a PI price that differs from its PO. Some closed orders carry one that was resolved on the way. These are
  * stand-ins for area 3's engine, which decides what a check is.
  */
 export function makeExceptions(
@@ -73,14 +72,14 @@ export function makeExceptions(
         toleranceValue: "0",
         fixBy: "LOGISTICS",
       });
-    } else if (scenario.kind === "price-mismatch") {
+    } else if (scenario.kind === "pi-price-mismatch") {
       open(journey.enteredOn, {
         ruleId: "mock.sample-price",
-        ruleLabel: "Unit price against the price list (sample result)",
-        summary: `Item ${scenario.itemNo}: the PO prints ${scenario.printed}, the price list says ${scenario.listed}`,
-        expected: scenario.listed,
-        found: scenario.printed,
-        difference: `${addDecimal(scenario.printed, `-${scenario.listed}`)} USD a unit`,
+        ruleLabel: "Unit price on the PI against the PO (sample result)",
+        summary: `Item ${scenario.itemNo}: the PI prints ${scenario.piPrice}, the PO says ${scenario.poPrice}`,
+        expected: scenario.poPrice,
+        found: scenario.piPrice,
+        difference: `${addDecimal(scenario.piPrice, `-${scenario.poPrice}`)} USD a unit`,
         toleranceLabel: "Price difference in USD (sample value)",
         toleranceValue: "0.00",
         fixBy: "SUPPORT",

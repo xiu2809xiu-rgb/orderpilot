@@ -29,6 +29,8 @@ export interface DocumentInput {
   transport: "AWB" | "BILL_OF_LADING";
   /** The sales invoice number, once Business Central has posted one. */
   invoiceNo: string | null;
+  /** Set for the one order whose draft air waybill names the wrong consignee. */
+  wrongConsignee?: { consignee: string; notifyParty: string } | undefined;
 }
 
 /**
@@ -127,6 +129,25 @@ export function makeDocuments(
         by: owners.warehouse,
       },
     );
+  }
+
+  if (input.wrongConsignee) {
+    // Its own id space: adding this document must not move the ids of the rest.
+    const number = `AWB-DRAFT-${orderNo.slice(3)}`;
+    docs.push({
+      id: syntheticId(8, Number(orderNo.slice(3))),
+      orderNo,
+      type: "AWB",
+      number,
+      fileName: `${number}.pdf`,
+      status: "to-confirm",
+      source: "email",
+      receivedAt: atHour(journey.enteredOn, 5),
+      dueDate: null,
+      confirmedBy: null,
+      consignee: input.wrongConsignee.consignee,
+      notifyParty: input.wrongConsignee.notifyParty,
+    });
   }
 
   if (scenario.kind === "awb-overdue") {

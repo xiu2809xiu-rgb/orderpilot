@@ -178,16 +178,16 @@ export function mockChecks(order: SampleOrder): CheckResult[] {
       checkedAt,
     });
   }
-  if (order.scenario.kind === "price-mismatch") {
-    const { itemNo, printed, listed } = order.scenario;
+  if (order.scenario.kind === "pi-price-mismatch") {
+    const { itemNo, poPrice, piPrice } = order.scenario;
     results.push({
       id: `mock-${no}-3`,
       ruleId: "mock.sample-price",
-      ruleLabel: "Unit price against the price list (sample result)",
+      ruleLabel: "Unit price on the PI against the PO (sample result)",
       orderNo: no,
       outcome: "fail",
-      expected: listed,
-      actual: printed,
+      expected: poPrice,
+      actual: piPrice,
       tolerance: {
         label: "Price difference in USD (sample value)",
         value: "0.00",
@@ -197,7 +197,13 @@ export function mockChecks(order: SampleOrder): CheckResult[] {
           documentId: `${no}-customer-po`,
           documentType: "CUSTOMER_PO",
           location: `item ${itemNo}: unit price`,
-          value: printed,
+          value: poPrice,
+        },
+        {
+          documentId: `${no}-proforma-invoice`,
+          documentType: "PROFORMA_INVOICE",
+          location: `item ${itemNo}: unit price`,
+          value: piPrice,
         },
       ],
       checkedAt,

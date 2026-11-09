@@ -31,10 +31,7 @@ function planFor(order: SampleOrder): TaskPlan | null {
       return {
         kind: "REVIEW_FIELDS",
         role: "SUPPORT",
-        title:
-          scenario.kind === "price-mismatch"
-            ? "Confirm the differing unit price"
-            : `Confirm the ${String(2 + (Number(order.header.no.slice(3)) % 3))} uncertain fields`,
+        title: `Confirm the ${String(2 + (Number(order.header.no.slice(3)) % 3))} uncertain fields`,
       };
     case "sample-short-stock":
       return {

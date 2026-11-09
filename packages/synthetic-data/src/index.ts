@@ -34,6 +34,8 @@ export type {
   SalesHistory,
 } from "./history.js";
 export { agreedPrice } from "./last-price.js";
+export { plantedCases, respelling } from "./planted.js";
+export type { PlantedCases } from "./planted.js";
 export { SEASONALITY } from "./seasonality.js";
 export {
   COUNTRY_CODES,

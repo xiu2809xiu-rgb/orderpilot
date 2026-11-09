@@ -26,8 +26,6 @@ const COUNT_IN_TITLE = /^Confirm the (\d+) uncertain fields$/;
 /**
  * The ids of the fields Mock AI is unsure of on this order's PO. The order's
  * own task says how many, so the documents can never disagree with the inbox.
- * A price-mismatch order is known by its scenario, not by its task's wording,
- * so rewording that title cannot quietly drop the price it asks about.
  * Only a PO is read by Mock AI here. The other documents are made or checked
  * inside Spectra, so they carry no uncertain fields even where the set still
  * lists one as to confirm.
@@ -50,9 +48,6 @@ export function uncertainIds(
     }
     return new Set(DOUBTFUL.slice(0, Number(count)));
   }
-  const order = dataset.orders.find((o) => o.header.no === orderNo);
-  if (task && order?.scenario.kind === "price-mismatch")
-    return new Set(["lines.unitPrice[0]"]);
   return new Set();
 }
 
