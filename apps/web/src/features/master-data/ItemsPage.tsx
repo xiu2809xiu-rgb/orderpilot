@@ -38,7 +38,7 @@ function withoutPriceSort(query: TableQuery, priceHidden: boolean): TableQuery {
 
 const ACTIONS = readOnlyActions<ItemRow>();
 
-/** Every item with its stock. Read-only, because Navision stays the system of record. */
+/** Every item with its stock. Read-only, because Business Central stays the system of record. */
 export default function ItemsPage() {
   const { t } = useTranslation("master-data");
   const [asked, setQuery] = useUrlQuery(URL_FILTERS, { pageSize: 25 });
@@ -106,7 +106,7 @@ export default function ItemsPage() {
       tableId="master-data-items"
       title={t("items.title")}
       description={t("items.description")}
-      demo="mockNavision"
+      demo="mockBusinessCentral"
       tabs={<MasterDataTabs />}
       caption={t("items.caption")}
       columns={columns}

@@ -12,14 +12,14 @@
       "title": "Document intake and AI extraction",
       "area": "area: 1 document AI and integration",
       "priority": "must",
-      "summary": "Email or upload; classification; extraction with a confidence score and a source link per field; layout mappings that AI proposes and a person approves."
+      "summary": "Email or upload; classification; extraction with a confidence score and a source link per field; layout mappings that AI proposes and a person approves; the document cabinet and audit packs."
     },
     {
       "key": "B",
-      "title": "Master data and Navision",
+      "title": "Master data and Business Central",
       "area": "area: 1 document AI and integration",
       "priority": "must",
-      "summary": "Items, customers, vendors, prices and stock behind a connector; any write-back needs a preview and an approval."
+      "summary": "Items, customers, vendors and stock behind a connector, with each customer's last agreed price as context and no price tables; any write-back needs a preview and an approval."
     },
     {
       "key": "C",
@@ -33,14 +33,14 @@
       "title": "Checks, the tracker and insights",
       "area": "area: 3 checks tracker and insights",
       "priority": "must",
-      "summary": "Documents checked against each other with tolerances; an exceptions queue; one tracker with every order's trail; Spectra's five measures as KPIs."
+      "summary": "Documents checked against each other, exactly on part number, quantity, unit price and currency and as warnings elsewhere; an exceptions queue; one tracker with every order's trail; Spectra's measures as KPIs."
     },
     {
       "key": "E",
       "title": "AI with a person in the loop",
       "area": "area: 1 document AI and integration",
       "priority": "must",
-      "summary": "Extraction, mismatch explanations, and drafts that a person sends."
+      "summary": "Extraction, mismatch explanations, drafts that a person sends, and Spark, the read-only assistant."
     },
     {
       "key": "F",
@@ -137,10 +137,10 @@
       "acceptance": [
         "`docs/problem-statement.md`: the brief in our words, stakeholders, pain points, root cause, constraints, scope, success metrics and open questions.",
         "`docs/assumptions.md`.",
-        "`docs/client/questions-for-client.md`: the three items to ask for first (anonymised samples of every document type including the SPR form; a Navision export; and the timeline of one real order), then the questions in priority order, and a note to send the priority questions before the briefing call.",
+        "`docs/client/questions-for-client.md`: the three items to ask for first (anonymised samples of every document type including the SPR form; a Business Central export; and the timeline of one real order), then the questions in priority order, and a note to send the priority questions before the briefing call.",
         "`docs/client/questions-for-client.md`: the six new questions in section 5.3 of prompt 002, after the existing priority questions.",
-        "`docs/research/domain-notes.md`: section 5 of prompt 002, the domain notes, with every Navision detail marked as an assumption to confirm at the briefing call.",
-        "`docs/data-formats.md`: the assumed formats of every document and Navision export, each to confirm, and how to try a client sample safely.",
+        "`docs/research/domain-notes.md`: section 5 of prompt 002, the domain notes, with every Business Central detail marked as an assumption to confirm at the briefing call.",
+        "`docs/data-formats.md`: the assumed formats of every document and Business Central export, each to confirm, and how to try a client sample safely.",
         "`docs/agile/hero-journey.md`: the sales-pilot demo story, E2E #1 to #4, and a presenter slot for each area.",
         "`docs/requirements-traceability.md`: M1 to M6, planned features, where, and evidence.",
         "`docs/research/README.md`: where Richie's ERP notes go, in his own words only.",
@@ -234,10 +234,10 @@
         "`packages/shared`, with zod schemas and types: the response envelope and the error envelope `{ error: { code, message, details, traceId } }`, and the error codes.",
         "`packages/shared`: the nine roles; the permissions the platform checks so far; the session and user reference; and the audit and AI-usage types.",
         "The first draft of the order and event contract: order headers and lines; documents and their types; field values with confidence and provenance; domain event names.",
-        "OrderPilot's own record numbers: a type prefix, the date and a running number, like `SPR-20261102-0001`, shown beside Navision's numbers, which stay the official ones.",
+        "OrderPilot's own record numbers: a type prefix, the date and a running number, like `SPR-20261102-0001`, shown beside Business Central's numbers, which stay the official ones.",
         "The contract is marked \"draft for the team to agree in Week 3\", and status stays in area 2.",
         "ADR: shared contracts.",
-        "Contract polish: publish the schemas as JSON Schema for the Swagger page and the mock Navision, add a contract test that fails on a breaking change, and prove the `exports` map through a Vite build once P-11 lands."
+        "Contract polish: publish the schemas as JSON Schema for the Swagger page and the mock Business Central, add a contract test that fails on a breaking change, and prove the `exports` map through a Vite build once P-11 lands."
       ]
     },
     {
@@ -456,11 +456,12 @@
         "`LlmGateway` with three providers: mock (the default, deterministic, and works offline); OpenAI-compatible (a base URL, a key and a model, so Groq, Gemini's OpenAI-compatible endpoint, OpenRouter, NVIDIA NIM and Ollama all work by configuration alone); and optional Bedrock.",
         "Calls: structured output validated with zod, with retries; page images for vision models (Groq's `qwen/qwen3.8-27b` takes up to 3 images a request).",
         "Usage tracking: `AiUsageTracker` and `AiUsageRecord` log tokens, model, latency, estimated cost, feature, user, document and outcome, plus the data the web app needs to show its \"Mock AI\" badge.",
-        "Prompt-injection defence: documents are treated as data; the model only returns fields; no model output triggers an action.",
+        "Prompt-injection defence: documents are treated as data; the model only returns fields, or asks for a read-only tool that runs as the person asking; no model output writes, approves, posts, pays or sends.",
         "A destination check: area 4's policy decides what data may go to which provider. The default is synthetic data only.",
         "Keys: Richie adds `GROQ_API_KEY` and `GEMINI_API_KEY` to the root `.env` himself.",
         "ADR: the AI gateway and the person in the loop.",
-        "The Vercel AI SDK sits under `LlmGateway`, and the gateway keeps cost tracking and the data-to-AI policy with an ADR, a pinned version and a traceability row."
+        "The Vercel AI SDK sits under `LlmGateway`, and the gateway keeps cost tracking and the data-to-AI policy with an ADR, a pinned version and a traceability row.",
+        "Tool calling, with each tool's arguments parsed by zod, and streamed answers, with a mock provider that scripts both, so Spark (P-95) needs no second gateway."
       ]
     },
     {
@@ -488,45 +489,51 @@
     },
     {
       "key": "P-19",
-      "title": "Mock Navision and synthetic master data",
+      "title": "Mock Business Central and synthetic master data",
       "epic": "P",
       "area": "area: 1 document AI and integration",
       "priority": "must",
       "estimate": 8,
       "reqs": ["M2", "M4"],
-      "branch": "feat/area1-mock-navision",
+      "branch": "feat/area1-mock-business-central",
       "sprints": [2],
       "dependsOn": ["P-5"],
-      "summary": "An OData-style mock of Navision and the synthetic master data behind it.",
+      "summary": "A mock of Business Central's standard API v2.0, and the synthetic master data behind it.",
       "acceptance": [
-        "`services/mock-navision`: an OData-style API with paging and `$filter`, behind an API key, for Items, Customers, Vendors, PriceLists and StockLevels, and for SalesOrders, PurchaseOrders and Receipts.",
-        "`packages/synthetic-data`: a seeded random generator; a Spectra-like catalogue of fictional brands' IT, surveillance and accessory products, with part numbers; customers in India, Sri Lanka, Bangladesh, Pakistan and the UAE; vendors, stock, and USD prices.",
-        "Customers and vendors in one list of business partners, each with a type and a price level, for the master-data screens and the price checks.",
+        "`services/mock-business-central`: the resources of Business Central's API v2.0, named as Microsoft's reference names them (companies, customers, vendors, items, salesQuotes, salesOrders, salesInvoices, salesCreditMemos, purchaseOrders, purchaseInvoices and purchaseReceipts, with their lines), with paging and `$filter`, behind a stub of OAuth client credentials, and no price tables.",
+        "`packages/synthetic-data` stays the source of the mock's records, and P-86 brings the briefing's brands, categories and countries.",
+        "Customers and vendors in one list of business partners, each with a type and a price level, for the master-data screens; the price check is that the documents agree (prompt 005 section 1).",
         "Opening stock and opening balances (receivables and payables), growing the set P-9 starts.",
-        "The mock speaks OData-style JSON with Navision's names in camelCase, as `docs/research/domain-notes.md` lists them.",
+        "The mock follows the JSON shapes in Microsoft's API v2.0 reference, such as `number`, `displayName`, `addressLine1` and `taxRegistrationNumber` on a customer, and `docs/research/domain-notes.md` maps them to the field names in `docs/data-formats.md`.",
         "Realism: document numbering and statuses from Richie's notes when present.",
         "Tests, a compose service, `docs/api/mock-systems.md`, and a \"Mock\" label wherever it's used.",
         "ADR: mock external systems.",
-        "Prompt 003 brings forward reading master data through a port labelled Mock Navision (P-35); this story still brings the OData service, its paging and `$filter`, and the compose service."
+        "Prompt 003 brings forward reading master data through a port labelled as the mock (P-35, whose label P-83 renames); this story still brings the service, its paging and `$filter`, and the compose service.",
+        "The stock figure a lookup needs is `inventory` on `items`, as in API v2.0, and the quantities on sales and purchase orders are summed from the open lines, because `items` has neither.",
+        "Vendor bank details have no API v2.0 resource (`bankAccounts` is the company's own), so the mock adds `vendorBankAccounts`, and `docs/api/mock-systems.md` marks it as ours and says a real connection needs a custom API page or an export.",
+        "A write path where API v2.0 has one: POST and PATCH on customers, vendors, purchaseOrders and purchaseOrderLines, kept in the mock's own store. `purchaseReceipts` stays read-only, as in API v2.0, so the mock makes a receipt when P-103 calls `receiveAndInvoice`, the one receiving action API v2.0 lists on `purchaseOrders`.",
+        "Webhooks (subscriptions) come later, and `docs/api/mock-systems.md` says so."
       ]
     },
     {
       "key": "P-20",
-      "title": "The connector framework and the Navision adapter",
+      "title": "The connector framework and the Business Central adapter",
       "epic": "P",
       "area": "area: 1 document AI and integration",
       "priority": "must",
-      "estimate": 5,
+      "estimate": 8,
       "reqs": ["M4"],
       "branch": "feat/area1-connectors",
       "sprints": [2],
       "dependsOn": ["P-19"],
       "summary": "A connector framework, and the adapter that makes a stock lookup work end to end.",
       "acceptance": [
-        "The framework: a `SystemConnector` interface over named record kinds (items, customers, vendors, price lists, stock levels and mail messages).",
+        "The framework: a `SystemConnector` interface over named record kinds (items, customers, vendors, stock levels and mail messages).",
         "The framework: a factory (credentials only from the environment); a health probe and a retry policy with backoff; an HTTP JSON client with timeouts; data minimisation and an offline connector; the `Connector` model and a connectors page.",
-        "The Navision adapter, so a stock lookup works end to end, with contract tests against the mock.",
-        "ADR: hub-and-spoke integration."
+        "The Business Central adapter, so a stock lookup works end to end, with contract tests against the mock.",
+        "ADR: hub-and-spoke integration.",
+        "Moving to the real Business Central is configuration only (base URL, tenant, environment, company and OAuth client), and a test shows the adapter reads nothing else.",
+        "A write path: the adapter writes a record only with the preview a person saw and the id of their approval, refuses otherwise, and audits both, with contract tests against the mock. P-88, P-101 and P-103 write through it."
       ]
     },
     {
@@ -535,18 +542,19 @@
       "epic": "P",
       "area": "area: 1 document AI and integration",
       "priority": "must",
-      "estimate": 8,
+      "estimate": 13,
       "reqs": ["M2", "M4"],
       "branch": "feat/area1-synthetic-documents",
-      "sprints": [2],
-      "dependsOn": ["P-19", "P-52"],
+      "sprints": [4, 5],
+      "dependsOn": ["P-52", "P-86"],
       "summary": "The rest of the generated set, with planted mistakes and ground truth for the accuracy harness. P-52 brought the package, four layouts, the CLI and twelve files forward.",
       "acceptance": [
-        "More document kinds in the same renderer, with positions and ground truth: the vendor PI, AWB and bill of lading, import permit and payment advice. P-52 has the PO, PI, packing list and commercial invoice.",
+        "More document kinds in the same renderer, with positions and ground truth: the vendor PI, vendor invoice, vendor packing list, delivery order, AWB, bill of lading as draft and final, import permit, proof of payment and the SPR form. P-52 has the PO, PI, packing list and commercial invoice.",
         "Scanned-looking variants of more than one document, and long orders that flow onto further pages (a layout today refuses an order that does not fit one page).",
-        "Planted mistakes: price, PO reference, part number and changed bank details. The quantity mismatch is P-52's packing list.",
+        "Planted mistakes: price, PO reference, part number and changed bank details, plus P-86's PI whose price differs from its PO and AWB draft with the wrong consignee. The quantity mismatch is P-52's packing list.",
         "Ground truth: a JSON file for every generated document, for the accuracy harness. P-52 writes them for its twelve.",
-        "Delivery: P-52's `pnpm docs:generate` grows to the full set. The twelve demo files stay in `apps/web/public/demo-documents/`, not a folder called `samples`."
+        "Delivery: P-52's `pnpm docs:generate` grows to the full set. The twelve demo files stay in `apps/web/public/demo-documents/`, not a folder called `samples`.",
+        "`DOCUMENT_TYPES` in `packages/shared/src/order.ts` widens with the kinds it lacks (vendor invoice, delivery order, SPR form and credit note) and a draft or final marker on the AWB and bill of lading, with all four owners asked to review."
       ]
     },
     {
@@ -562,7 +570,7 @@
       "summary": "Azri's head start: the models, contracts, screens and test skeletons, never the area's core logic.",
       "acceptance": [
         "Models: workflow definitions, instances, tasks, events and notifications.",
-        "OrderPilot's own numbers for its records, like `SPR-20261102-0001`, beside Navision's.",
+        "OrderPilot's own numbers for its records, like `SPR-20261102-0001`, beside Business Central's.",
         "Payment confirmation records the payment type, and prepayment drives the payment gate.",
         "Configurable fields and default values for each document type, as configuration, not code.",
         "The SPR pre-fill is a suggestion from stock levels that a person approves.",
@@ -589,7 +597,7 @@
       "acceptance": [
         "Azri writes the state machine himself, as his first story, so that it stays his work (C-1 leaves it to him).",
         "Its states and transitions follow the sales flow: the PO arrives; stock is checked and an SPR raised when needed; Support generates the PI; the customer pays; the warehouse packs; the invoice and packing list are made; the goods go to the forwarder; the customer gets the shipping details; the AWB/BL and import permit are followed up.",
-        "Where they meet, its states map to Navision's Sales Header Status (Open, Released, Pending Approval, Pending Prepayment), as an assumption to confirm at the briefing call.",
+        "Where they meet, its states map to Business Central's Sales Header Status (Open, Released, Pending Approval, Pending Prepayment), as an assumption to confirm at the briefing call.",
         "Order status lives only in this state machine. Other areas read it or send events, and never set status themselves.",
         "Each transition names the role that may make it, and area 4's policy is called on the server before it happens.",
         "The payment gate guards packing: with the prepayment type, packing waits for Finance's confirmation.",
@@ -611,9 +619,9 @@
       "sprints": [2],
       "ready": true,
       "dependsOn": ["C-1"],
-      "summary": "An SPR goes to an approver who may decide it within their limit, set up in the shape of Navision's Approval User Setup.",
+      "summary": "An SPR goes to an approver who may decide it within their limit, set up in the shape of Business Central's Approval User Setup.",
       "acceptance": [
-        "The approval setup has the shape of Navision's Approval User Setup: user, approver, Sales Amount Approval Limit, Purchase Amount Approval Limit, Unlimited Sales Approval, Unlimited Purchase Approval, and a substitute.",
+        "The approval setup has the shape of Business Central's Approval User Setup: user, approver, Sales Amount Approval Limit, Purchase Amount Approval Limit, Unlimited Sales Approval, Unlimited Purchase Approval, and a substitute.",
         "Approvers, limits and delegation are configuration, not code, until Spectra confirms them.",
         "An approver approves or rejects an SPR within their limit, with a comment, on C-1's SPR approval page.",
         "An SPR above the approver's limit goes on to an approver whose limit covers it, or one with an unlimited approval, and is never approved below it.",
@@ -678,7 +686,7 @@
         "The checks module: a check-rule Strategy interface; check-result and exception contracts; an empty exceptions model.",
         "Contracts, with routes returning typed mock data in Swagger.",
         "Screens wired to those routes, covering every state: the order tracker (status, owner, overdue flags); an order's detail timeline; the exceptions queue; a KPI dashboard of Spectra's five measures.",
-        "An order's page in the tracker shows each step and its effect, such as \"payment confirmed: packing released\". Money postings stay in Navision.",
+        "An order's page in the tracker shows each step and its effect, such as \"payment confirmed: packing released\". Money postings stay in Business Central.",
         "To-do tests, as `it.todo` with the key cases named: the MVP mismatch (the packing list's quantity against the PO), tolerances, and the KPI formulas.",
         "The \"What the base gives you\" and \"What's yours to build\" sections of the guide are filled in.",
         "Left to Iok Teck: every check and its tolerance, the exceptions flow, the tracker's logic and the KPIs.",
@@ -699,7 +707,7 @@
       "summary": "The MVP mismatch: a packing list whose quantity differs from the PO is flagged, and the result goes to area 2.",
       "acceptance": [
         "A check rule on D-1's Strategy interface compares each packing-list line's quantity with the matching PO line.",
-        "Lines match on the item's Navision number, never on its name. A look-alike name is shown as a possible match.",
+        "Lines match on the item's Business Central number, never on its name. A look-alike name is shown as a possible match.",
         "A difference outside the tolerance fails the check. The tolerance is configuration, and zero until Spectra says otherwise.",
         "The result, pass or fail with each differing line, is reported to area 2, which decides what happens to the order.",
         "A failure raises an exception in the exceptions queue (D-3), linked to both documents.",
@@ -748,7 +756,7 @@
         "The tracker takes each order's status from area 2's workflow events. It never stores or sets a status of its own.",
         "Each order shows its current step, the role and the person who hold it, and how long it has waited.",
         "An order or a follow-up past its due time is flagged overdue, and every overdue follow-up is visible.",
-        "An order's page shows each step and its effect, such as \"payment confirmed: packing released\". Money postings stay in Navision.",
+        "An order's page shows each step and its effect, such as \"payment confirmed: packing released\". Money postings stay in Business Central.",
         "Until P-15's event bus exists, it works from the typed events in the order and event contract (P-7).",
         "It filters by status, owner, area and overdue, with the common data table (P-12).",
         "The overdue count feeds the KPI dashboard's overdue-orders measure.",
@@ -814,7 +822,7 @@
       "acceptance": [
         "One policy, called on the server by every endpoint that acts. Hiding a button is never the control.",
         "Role permissions plus a data scope, on F-1's matrix: for example, a Product Manager sees only their brands' orders.",
-        "Approval limits in the shape of Navision's Approval User Setup (approver, Sales Amount Approval Limit, Purchase Amount Approval Limit, Unlimited Sales Approval, Unlimited Purchase Approval, substitute), the same shape area 2's SPR approval uses (C-3).",
+        "Approval limits in the shape of Business Central's Approval User Setup (approver, Sales Amount Approval Limit, Purchase Amount Approval Limit, Unlimited Sales Approval, Unlimited Purchase Approval, substitute), the same shape area 2's SPR approval uses (C-3).",
         "Limits and approvers are configuration until Spectra confirms them.",
         "An action above the actor's limit is refused, the way F-1 shows a refusal.",
         "Every refusal is audited: who, what, when and why.",
@@ -858,7 +866,7 @@
       "summary": "A vendor PI whose bank details differ from the vendor's bank account record holds the payment until Finance and a second approver clear it.",
       "acceptance": [
         "The bank details on a vendor PI are compared with the vendor's Vendor Bank Account record: Bank Account No., SWIFT Code and IBAN.",
-        "Vendors match on their Navision number, never on their name.",
+        "Vendors match on their Business Central number, never on their name.",
         "Any difference holds the payment, and nobody can pay the vendor while the hold is on.",
         "Only Finance and a second approver clear the hold: two different people, each with a reason, and neither of them the person who changed the details.",
         "Bank details are masked by role, with a reason, and the hold shows which field differs without showing the full number to a role that may not see it.",
@@ -893,24 +901,24 @@
       "title": "The design system with the Pro kits",
       "epic": "P",
       "area": "area: 1 document AI and integration",
-      "priority": "should",
+      "priority": "must",
       "estimate": 8,
       "reqs": ["M4"],
       "branch": "feat/platform-design-system",
       "sprints": [2],
-      "condition": "Only once Richie says the repository is private and official keys are in `apps/web/.env.local` (rule 8 of prompt 001, confirmed in prompt 002, section 7). Until he says, free kits only.",
+      "condition": "Only once Richie says the repository is private and official keys are in `apps/web/.env.local` (rule 8 of prompt 001, confirmed in prompt 002, section 7). Until he says, free kits only. Met on 6 Nov: the repository is private (P-81) and the keys are in.",
       "dependsOn": ["P-11", "P-12"],
-      "summary": "The licensed kits, set up once Richie says the repository is private and the official keys are in `apps/web/.env.local`, and Richie's own pages upgraded with them.",
+      "summary": "The licensed kits, set up once Richie says the repository is private and the official keys are in `apps/web/.env.local`, ready for Richie's own pages, which P-107 to P-109 upgrade.",
       "acceptance": [
-        "Registries in `apps/web/components.json`: `@reactbits-starter`, `@reactbits-pro`, `@reui` and `@magicui`, with the licence keys sent as bearer headers from the environment.",
+        "Registries in `apps/web/components.json`: `@reactbits-starter`, `@reactbits-pro`, `@reui` and `@magicui`, with the licence keys sent as bearer headers from the environment. The working registries at `registry.collectui.pro` stay, as prompt 006 section 2 allows (keep what works).",
         "The keys stay in `apps/web/.env.local` as `REUI_LICENSE_KEY` and `REACTBITS_LICENSE_KEY`, and `components.json` refers to them only as `${...}`. No key is ever written into a file, commit or message.",
-        "Pro parts stay in Richie's own pages: landing, sign-in, the app shell and the 3D view. The four areas' screens use the free kits unless Richie confirms a team licence.",
+        "Pro parts stay in Richie's own pages: landing, sign-in, the app shell and the 3D view, plus Spark (prompt 006 section 2). The four areas' screens use the free kits unless Richie confirms a team licence.",
         "Each source verified with a test install, and exact errors reported.",
         "Tools: the React Bits skill read in full before any item is used; the shadcn MCP; ReUI's MCP server, with its token kept out of Git.",
         "`docs/design/reactbits-usage.md`: a plan for every page, saying which React Bits, ReUI and Magic UI items it uses, and why; 20 or more distinct items across the app; at least one item on every page; Pro blocks on landing and login; Application UI wherever it matches; only subtle items on dense work screens.",
-        "`docs/design/design-system.md`.",
+        "`docs/design/design-system.md`, which names prompt 006's work mode and show mode and what belongs to each.",
         "`CONTRIBUTING.md`: teammates never need the keys to run or build, because added components are code in the repository. Adding a new Pro component goes through Richie.",
-        "Login and landing are upgraded with Pro blocks, then the app shell and the 3D view. Every item is adapted to the tokens, one component per file, with a header comment stating its origin.",
+        "The Pro blocks on sign-in, landing and the app shell move to P-107 to P-109, after Richie picks a direction in P-106. Every item is adapted to the tokens, one component per file, with a header comment naming its vendor, the item and its licence.",
         "ADR: component registries, and why licensed code needs a private repository."
       ]
     },
@@ -919,20 +927,21 @@
       "title": "The 3D order constellation",
       "epic": "P",
       "area": "area: 1 document AI and integration",
-      "priority": "could",
+      "priority": "should",
       "estimate": 13,
       "reqs": ["M4"],
       "branch": "feat/area1-order-constellation",
       "sprints": [2],
       "dependsOn": ["P-11", "P-15"],
-      "summary": "A live 3D view of orders moving between the six teams, on landing, login and as an operations view.",
+      "summary": "A live 3D view of orders moving between the teams around Spark, on landing, login and as an operations view.",
       "acceptance": [
-        "The concept: the OrderPilot core, in faceted glass with an emissive inner light; around it, six team stations (Product Managers, Approver, Support, Warehouse, Finance and Logistics), plus Navision and the mailbox; documents travel as glowing packets along arcs while an order moves; status colours (on time, waiting, exception) come from real workflow events over SSE.",
-        "It appears on landing and login, and as a live operations view.",
+        "The concept: Spark at the core, in faceted glass with an emissive inner light that pulses when Spark answers; around it the stations (Sales and Support, Product Managers, the management approvers, the SPR coordinator, the warehouse, Finance, and Logistics and forwarders) plus Business Central and the inbox; PO, PI, invoice, packing list and AWB/BL travel as glowing packets along arcs, coloured on time, waiting or mismatch caught, from real workflow events over SSE.",
+        "It is the landing page's hero, sits behind the sign-in page, and is a live operations view for Management, where clicking a station opens the tracker filtered to it.",
         "Assets: parametric Blender Python scripts in `assets-src/3d/`, with PBR materials, bevels and clean topology; run headless with `blender -b -P`; exported to GLB and quantised with glTF Transform, with no WebAssembly decoders; 1.5 MB or less in total.",
         "Rendering: React Three Fiber, drei and postprocessing; ACES filmic tone mapping, a studio environment and soft shadows; bloom, a subtle depth of field and a vignette; spring motion and a slow cinematic camera that the user can take over; hover tooltips, and clicking a node to navigate; React Bits overlays for labels.",
         "Performance and access: a lazy chunk, DPR clamped to [1, 2], and adaptive quality; pauses when off-screen or when the tab is hidden; a still frame for reduced motion, and a fallback image without WebGL; a keyboard-usable list beside the canvas; 60 fps on a mid-range laptop, reported honestly.",
-        "ADRs: 3D assets without WebAssembly decoders; the constellation scene."
+        "ADRs: 3D assets without WebAssembly decoders; the constellation scene.",
+        "Proof for Richie: a 20-second capture of the camera move and stills in light and dark in `docs/design/constellation/`, judged before the scene goes on landing."
       ]
     },
     {
@@ -1177,7 +1186,7 @@
       "dependsOn": ["P-31"],
       "summary": "Lists and detail pages for customers, vendors and items, brought forward from P-19. Prompt 003; finished before the handover on Monday evening, 2 Nov.",
       "acceptance": [
-        "Lists and detail pages for customers, vendors and items, read from the mock Navision data and labelled \"Mock Navision\".",
+        "Lists and detail pages for customers, vendors and items, read from the mock Business Central data and labelled \"Mock Business Central\".",
         "An item shows stock, quantity on sales order, quantity on purchase order, available stock, price, brand and vendor.",
         "A customer shows country, currency, payment terms, price group, open orders and overdue items.",
         "A vendor shows its bank accounts (masked by role) and its open purchase orders.",
@@ -1226,7 +1235,8 @@
         "A document can be voided with a reason, with its own permission, and every step is audited.",
         "`.http` requests and API tests for every kind of refused upload.",
         "A Playwright test: an allowed role uploads and voids a document, and a role without the permission sees no button and gets a 403 from the server.",
-        "Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844."
+        "Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.",
+        "Files saved out of WhatsApp upload like any other, product managers may upload vendor invoices with the permission Angelyn's issue asks for, and the inbox shows where each document came from."
       ]
     },
     {
@@ -1477,7 +1487,7 @@
       "dependsOn": ["P-36", "P-47", "P-48", "P-14"],
       "summary": "Support enters an order on the document form. Prompt 004 section 4.",
       "acceptance": [
-        "`/orders/new` and the draft's own page use the document form and the lines grid, with the customer chosen by search and matched on its Navision number.",
+        "`/orders/new` and the draft's own page use the document form and the lines grid, with the customer chosen by search and matched on its Business Central number.",
         "`POST /orders` and `PATCH /orders/:orderNo`, for drafts only, with new permissions held by Support and the Product Manager and never by System admin.",
         "No duplicate orders: one customer plus one PO number is one order, with a unique index and a 409 that names the existing order, and the form links to it.",
         "Availability shows live on each line, from the same formula as master data.",
@@ -1565,7 +1575,7 @@
         "Mock AI classifies a known document and fills its fields from the ground truth, labelled \"Mock AI\". An unknown file ends honestly, and it never invents a field.",
         "`/documents/:id` shows the fields, grouped into header and lines, each with its confidence and source, and \"Requires approval\" on the uncertain ones.",
         "Confirm and Correct are inline and keyboard first. A review stores who, when, the old value and the new one in OrderPilot's own tables, and each is audited, with Undo.",
-        "When every uncertain field is done the document is confirmed and its task leaves the inbox. No order status changes and nothing goes to Navision.",
+        "When every uncertain field is done the document is confirmed and its task leaves the inbox. No order status changes and nothing goes to Business Central.",
         "To review is a list on the template, and the home page's tile opens it with the same count.",
         "Bank details never reach a role that may not see them, tested on the bytes of the response.",
         "Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844."
@@ -1606,7 +1616,7 @@
       "summary": "Enter once, flows everywhere. Prompt 004 section 4.",
       "acceptance": [
         "A confirmed PO offers Create order, which opens a draft pre-filled from what a person confirmed.",
-        "Customers and items match on their Navision numbers, and a look-alike name is only shown as a possible match.",
+        "Customers and items match on their Business Central numbers, a look-alike name is only shown as a possible match, and a new customer goes through P-88's check.",
         "The draft keeps a link to its source document, and the two pages link to each other.",
         "The order form's footer lists its attachments, and Attach uploads through P-37's route.",
         "The Playwright test covers the path from upload to a saved draft.",
@@ -1688,7 +1698,7 @@
         "A reminder fires on a date, or when a condition from a closed list holds, such as still unpaid on a date.",
         "Postgres holds each reminder. A delayed BullMQ job fires it, and a repeating sweep requeues what is due, so losing Redis loses nothing and nothing fires twice.",
         "When it fires, the bell and the home page show it for any role, and an email goes to Mailpit if the person chose one.",
-        "A mail service that can only reach Mailpit, with an ADR, a pinned version and `.env.example` entries.",
+        "A mail sender that can only reach Mailpit, with an ADR, a pinned version and `.env.example` entries, unless P-87 merged first and brought it.",
         "The worker runs in the compose stack and in the end-to-end job, and a Playwright test sees a reminder fire."
       ]
     },
@@ -1707,7 +1717,7 @@
       "acceptance": [
         "An area 1 table holds drafts, numbered by the record number service, with no limit, trigger or status logic. The port that hands a submitted draft to area 2 is agreed with Azri.",
         "SPRs is a list on the template, in the Purchasing module, reading sample and stored SPRs through one reader, with the approver's waiting count on its menu entry.",
-        "Support may raise an SPR from a shortfall, as the brief says, with the permission recorded.",
+        "The product manager raises an SPR, because the product manager is also the purchase manager (prompt 005 section 1), with the permission recorded.",
         "`.http` requests and API tests for 401, 403, 404 and validation.",
         "Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844."
       ]
@@ -1721,18 +1731,19 @@
       "estimate": 8,
       "reqs": ["M2", "M4"],
       "branch": "feat/spr-form",
-      "sprints": [2],
-      "dependsOn": ["P-60", "P-47", "P-48"],
-      "summary": "Raise an SPR from a shortage line, pre-filled. Prompt 004 section 4.",
+      "sprints": [8, 9],
+      "dependsOn": ["P-60", "P-47", "P-48", "P-86"],
+      "summary": "Raise an SPR from stock on hand and the three-month run rate, pre-filled. Prompt 005 section 1.",
       "acceptance": [
-        "An SPR is created from a shortage line, pre-filled through `SprSuggestion`, on the document form.",
+        "An SPR is raised from an item on the document form, pre-filled through `SprSuggestion` with the stock on hand, the last three months' run rate and the months of cover, from P-86's figures and the basis Azri's issue asks for.",
         "It can be edited while it is a draft, submitted, and withdrawn with a reason.",
-        "A submitted SPR reaches the approver's inbox through the agreed port, and the AI never raises or approves one.",
-        "Raise SPR appears on the order's line, on the item page, and in the home page and Ctrl+K for the roles allowed.",
+        "A submitted SPR reaches the coordinator through the agreed port, the coordinator routes it to the approver group (P-100), and the AI never raises or approves one.",
+        "Raise SPR appears on the item page, and in the home page and Ctrl+K for the product manager.",
         "Azri is asked to review.",
         "A Playwright test: an allowed role creates, edits and voids a record, and a role without the permission sees no button and gets a 403 from the server.",
         "Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.",
-        "The pre-filled SPR stays a draft until a person reviews it and submits it, it shows which fields were suggested and from what, and it warns, with a link, when an open SPR already covers the line."
+        "The pre-filled SPR stays a draft until a person reviews it and submits it, it shows which fields were suggested and from what, and it warns, with a link, when an open SPR already covers the item.",
+        "After approval the coordinator hands the SPR back, and the product manager records the vendor PO or the vendor portal's reference (P-101)."
       ]
     },
     {
@@ -1769,7 +1780,7 @@
       "branch": "feat/shipments",
       "sprints": [2],
       "dependsOn": ["P-47"],
-      "summary": "Logistics records forwarders and AWB/BL numbers. Prompt 004 section 4.",
+      "summary": "Logistics records forwarders and AWB/BL numbers for outbound shipments; inbound ones are P-102. Prompt 004 section 4.",
       "acceptance": [
         "A new area 1 module holds a shipment: the order, the forwarder, the AWB or BL number and the dates, with no status logic.",
         "Shipments is a list on the template in the Sales module, with a document form, reading sample shipments from the synthetic set and stored ones through one reader.",
@@ -1835,12 +1846,13 @@
       "branch": "feat/settings-approval-limits",
       "sprints": [2],
       "dependsOn": ["F-3", "P-46"],
-      "summary": "A form only, in the shape of Navision's Approval User Setup. Prompt 004 section 4.",
+      "summary": "A form only, in the shape of Business Central's Approval User Setup. Prompt 004 section 4.",
       "acceptance": [
         "A list and a form for each approver's limits, parsed by `approvalUserSetupSchema`, on the route F-3 brings.",
         "`ApprovalPolicy` and the verdict stay with their owners, and the form changes no logic.",
         "Angelyn is asked to review.",
-        "Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844."
+        "Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.",
+        "It shows the approver group of three, any one of whom decides, with limits switchable and none set and no substitute column, in the shape Angelyn settles in her issue."
       ]
     },
     {
@@ -1860,7 +1872,8 @@
         "A form for area 3's check tolerances and one for area 2's reminder rules, in the System module under Rules.",
         "Nothing reads them until D-2 and C-4 do, and each form says so in plain words.",
         "Iok Teck and Azri are asked to accept the shape before this merges.",
-        "Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844."
+        "Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.",
+        "The check tolerance form has no field for part number, quantity, unit price or currency."
       ]
     },
     {
@@ -1874,9 +1887,9 @@
       "branch": "feat/master-change-requests",
       "sprints": [2],
       "dependsOn": ["P-44", "P-46"],
-      "summary": "Managed in Navision, with Request a change. Prompt 004 section 1.",
+      "summary": "Managed in Business Central, with Request a change. Prompt 004 section 1.",
       "acceptance": [
-        "Customers, vendors and items say Managed in Navision, and offer Request a change.",
+        "Customers, vendors and items say Managed in Business Central, and offer Request a change.",
         "A request is a record, and a second person approves it before it is applied, to mock data only.",
         "A change to a vendor's bank details stops at a port for area 4's control and is never applied here.",
         "Every step is audited, and a person cannot approve their own request.",
@@ -1886,18 +1899,18 @@
     },
     {
       "key": "P-69",
-      "title": "Mock Navision Demo data page",
+      "title": "Mock Business Central Demo data page",
       "epic": "P",
       "area": "area: 1 document AI and integration",
       "priority": "must",
       "estimate": 5,
       "reqs": ["M4"],
-      "branch": "feat/mock-navision-demo-data",
+      "branch": "feat/mock-business-central-demo-data",
       "sprints": [2],
       "dependsOn": ["P-68"],
       "summary": "Test records for demos, for System admin only. Prompt 004 section 1.",
       "acceptance": [
-        "A page for System admin only, with its own permission, labelled as demo only, to add and edit test records in mock Navision.",
+        "A page for System admin only, with its own permission, labelled as demo only, to add and edit test records in mock Business Central.",
         "It works only with demo mode on, and the server refuses it otherwise.",
         "P-20's real connector retires it.",
         "A Playwright test: an allowed role creates, edits and voids a record, and a role without the permission sees no button and gets a 403 from the server.",
@@ -1919,7 +1932,8 @@
       "acceptance": [
         "Pick and pack in the Warehouse module and Proforma invoices in the Sales module are lists on the template, of the work waiting for that role.",
         "Each row opens the order and offers the action Needs you offers. Nothing is generated: B-3 brings documents.",
-        "Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844."
+        "Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.",
+        "The pick list works on a tablet, with touch targets of 44 px or more."
       ]
     },
     {
@@ -1958,7 +1972,8 @@
         "SPR approval uses the document form, showing the request, the stock picture, the order and the limit as a fact. It computes and enforces nothing.",
         "The core logic stays `it.todo`, and Azri reviews the pull request.",
         "Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.",
-        "It also shows the cost against the selling price where the role may see both, the vendor and the lead time, because the approver decides with them."
+        "It also shows the cost against the selling price where the role may see both, the vendor and the lead time, because the approver decides with them.",
+        "It shows the approver group, any one of whom decides, with Approve or Reply with remarks and the reminder countdown, at 390 by 844 as well."
       ]
     },
     {
@@ -1977,7 +1992,8 @@
         "Exceptions is a list on the template, every column fits at 1440, and an exception shows expected and found side by side.",
         "Assign and resolve stay hidden until D-3 brings them, and the checks engine stays Iok Teck's.",
         "Iok Teck reviews the pull request.",
-        "Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844."
+        "Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.",
+        "Each difference says whether it blocks or warns, beside expected and found."
       ]
     },
     {
@@ -1996,7 +2012,8 @@
         "The order tracker is a list on the template, and each row opens the one order page.",
         "KPIs show each measure's value, target and trend, reusing the lazy chart component. A miss is said in words as well as colour, and no formula is computed.",
         "Iok Teck reviews the pull request.",
-        "Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844."
+        "Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.",
+        "Every chart has a data-table view for screen readers (prompt 006 section 4)."
       ]
     },
     {
@@ -2213,7 +2230,7 @@
       "summary": "Each owner takes over their area, and the team moves to planning by tasks.",
       "acceptance": [
         "Each owner takes over their area.",
-        "Prompt 005 writes the rest of epics A to G's stories from the owners' planning notes.",
+        "Prompt 007 writes the rest of epics A to G's stories from the owners' planning notes.",
         "One approving review plus code-owner review is switched on, only on Richie's yes.",
         "The first sprint is planned by tasks."
       ]
@@ -2286,11 +2303,13 @@
       "priority": "should",
       "estimate": 5,
       "reqs": ["M2", "M4"],
+      "sprints": [8],
       "dependsOn": ["P-18"],
       "summary": "Documents arrive by email as well as by upload, through a mock mailbox.",
       "acceptance": [
         "Email intake runs through a mock mailbox with signed webhooks.",
-        "No real customer email is read or sent."
+        "No real customer email is read or sent.",
+        "It is the proof of concept's email inbox (prompt 005 section 1), and a file saved out of WhatsApp can be forwarded to it."
       ]
     },
     {
@@ -2303,20 +2322,23 @@
       "reqs": ["M4"],
       "dependsOn": ["P-18"],
       "summary": "The same PO never creates a second order.",
-      "acceptance": ["No duplicate orders: a repeated PO is caught."]
+      "acceptance": [
+        "No duplicate orders: a repeated PO is caught.",
+        "A PO a person confirms as a revision of an existing order is that order's next version (P-89), never a duplicate, and a re-sent PO is still caught."
+      ]
     },
     {
       "key": "B-2",
-      "title": "A Navision-ready import file",
+      "title": "A Business Central import file",
       "epic": "B",
       "area": "area: 1 document AI and integration",
       "priority": "should",
       "estimate": 3,
       "reqs": ["M4"],
       "dependsOn": ["P-20"],
-      "summary": "Confirmed data leaves as a file Navision can import, beside Navision and never instead of it.",
+      "summary": "Confirmed data leaves as a file Business Central can import, beside Business Central and never instead of it.",
       "acceptance": [
-        "A Navision-ready import file is produced from data a person has confirmed.",
+        "A Business Central import file is produced from data a person has confirmed.",
         "Any write-back needs a preview and an approval, and nothing posts automatically."
       ]
     },
@@ -2333,7 +2355,8 @@
       "acceptance": [
         "The template engine produces PIs, invoices, packing lists and Excel.",
         "Areas 2 and 3 use it.",
-        "React-PDF and ExcelJS render the template engine's PDF and Excel output with an ADR, a pinned version and a traceability row."
+        "React-PDF and ExcelJS render the template engine's PDF and Excel output with an ADR, a pinned version and a traceability row.",
+        "It also renders the credit note and the reissued invoice that area 2's reverse and reissue needs, and the PI carries bank details that are synthetic and obviously fake."
       ]
     },
     {
@@ -2393,7 +2416,7 @@
       "dependsOn": ["P-17"],
       "summary": "Tests that prove a hostile document cannot steer the AI.",
       "acceptance": [
-        "Tests show that documents are treated as data, the model only returns fields, and no model output triggers an action.",
+        "Tests show that documents are treated as data, the model only returns fields or asks for a read-only tool that runs as the person asking, and no model output writes, approves, posts, pays or sends.",
         "promptfoo runs the prompt-injection tests in CI with an ADR, a pinned version and a traceability row."
       ]
     },
@@ -2439,7 +2462,7 @@
       "priority": "could",
       "estimate": 5,
       "reqs": ["M2", "M3"],
-      "dependsOn": ["P-11", "P-17"],
+      "dependsOn": ["P-11", "P-17", "P-96"],
       "summary": "A help panel that answers questions from OrderPilot's own docs, labelled as AI-generated and for reference only.",
       "acceptance": [
         "The panel answers from OrderPilot's own docs only, and links the pages it used.",
@@ -2447,7 +2470,8 @@
         "It goes through the AI gateway (P-17), with the mock provider by default, and each answer is tracked like any other AI call.",
         "It never acts: it cannot approve, change data or call another endpoint.",
         "Questions and docs are treated as data, and the prompt-injection tests cover it (E-3).",
-        "Area 4's policy decides which provider may receive a question, and no business data goes with it."
+        "Area 4's policy decides which provider may receive a question, and no business data goes with it.",
+        "It opens as one more read-only tool inside Spark's panel (P-96), never as a second assistant."
       ]
     },
     {
@@ -2578,7 +2602,7 @@
       "dependsOn": ["P-48"],
       "summary": "Left out of P-48 because no teammate needs it this week.",
       "acceptance": [
-        "Pasting rows from a spreadsheet (a part number and a quantity on each) fills one line per row, each part number resolved on its Navision number, and the rows that match nothing are listed for the person to fix.",
+        "Pasting rows from a spreadsheet (a part number and a quantity on each) fills one line per row, each part number resolved on its Business Central number, and the rows that match nothing are listed for the person to fix.",
         "The shortfall counts every line that asks for the same item together, not each line alone, and says which lines add up to it.",
         "A click on a line's number selects the line, so the mouse can reach Delete too.",
         "Column widths can be dragged and are kept for each person.",
@@ -2604,6 +2628,663 @@
         "The first verify run on the private runners is read, and any check that fails there for want of time, memory or disk is fixed, with the reason beside the fix.",
         "What says the repository is public is corrected: `CLAUDE.md`, `CONTRIBUTING.md`, the pull request template and the GRS risks. An ADR records what going private changed.",
         "A-31 records Richie's decision of 5 Nov: Spectra's briefing material stays outside the repository and our coding tools may read it on his PC, while real business samples still wait for Spectra's written OK (Q-12)."
+      ]
+    },
+    {
+      "key": "P-82",
+      "title": "Plan prompts 005 and 006",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 2,
+      "reqs": ["M4", "M5"],
+      "branch": "chore/plan-prompts-005-006",
+      "sprints": [3],
+      "dependsOn": [],
+      "summary": "Files prompts 005 and 006 and turns them into stories, in the order of 005 section 12 and 006 section 7.",
+      "acceptance": [
+        "Prompts 005 and 006 are in `docs/ai/prompts/` as Richie approved them, and T-9, `render.mjs`, the rendered backlog and the wiki name prompt 007 as the handover prompt.",
+        "The backlog holds P-82 to P-112, each under the epic of its capability, and the stories the briefing changes are updated so that nothing is built twice.",
+        "`docs/team/module-ownership.md` records the exception prompt 005 sections 5 to 7 make: Richie builds the platform side of the briefing's changes, never the owners' rules.",
+        "`backlog.test.mjs` and `seed-backlog.test.mjs` carry the new counts, a renamed-stories map keeps the prompt 001 checks, a test holds every epic at 95 stories or fewer against GitHub's limit of 100 sub-issues, and `node --test` over `scripts/github` and `render-docs.mjs --check` pass.",
+        "`docs/BUILD_REPORT.md` has a section for prompts 005 and 006 with the story table, the Waiting for Richie list holds the decisions taken while cutting, and area 1's table in `docs/ai/ai-usage-log.md` has one row."
+      ]
+    },
+    {
+      "key": "P-83",
+      "title": "Rename Navision to Business Central",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 5,
+      "reqs": ["M4"],
+      "branch": "chore/business-central-rename",
+      "sprints": [3],
+      "dependsOn": ["P-82"],
+      "summary": "Spectra moved to Business Central, so pages, docs and area 1's code names say so, while stored names stay.",
+      "acceptance": [
+        "Every page says Business Central, Managed in Business Central or Mock Business Central where it said Navision: locale values change and their keys stay, and the tests that assert those words follow, including the negative assertion in `DraftOrderPage.test.tsx`.",
+        "`CLAUDE.md`, `README.md`, `CONTRIBUTING.md` and the `docs/` pages say Business Central, naming Microsoft Dynamics 365 Business Central once on each page. Prompts 001 to 006, the AI usage log, merged ADRs and the build report outside its Waiting list stay as written.",
+        "`docs/team/area-2-*.md`, `area-3-*.md` and `area-4-*.md` stay out of this sweep: their lines are listed in each owner's issue, and the owners change them.",
+        "`docs/grs/grs-by-design.md` rewords risk R-06 for the ERP Spectra now runs instead of swapping the word, and `docs/data-formats.md` and `docs/research/domain-notes.md` say that API v2.0 renames these fields and the connector maps them.",
+        "Area 1's code names change where the rename stays inside area 1: `MockNavisionMasterData` and its file, the `mockNavision` badge kind, and the Swagger summaries and messages in area 1's API.",
+        "The comments and titles that only describe the mock follow: `packages/shared` (22 comment lines and one test title, in 9 files, with all four owners asked to review), `packages/synthetic-data` (7 lines), `apps/api/requests/master-data.http` and `orders.http`, the API test titles in `master-data.parity.test.ts`, `test/http/master-data.test.ts` and `test/database/sales-order.test.ts`, area 1's API comments, and 11 comments in the web code.",
+        "Database columns, wire properties, the stored `navision` value, i18n keys, other areas' identifiers and the shared exports (`navisionNoSchema`, `NavisionStatus`, `NAVISION_STATUSES` and `navisionStatusSchema`, of which area 2 imports `NavisionStatus`) keep their names, an ADR says why, and a comment on `SalesOrder.navisionNo` says it holds the Business Central number.",
+        "The words this story changes in the owners' files (`workflows.json`, `order-tracker.json`, `OrderDetailPage.test.tsx` and `checks/domain/mock-status.ts`) change with those owners' review, and each owner's issue lists the mentions left in their own code.",
+        "`pnpm api:generate` changes only the summaries in `apps/api/openapi.json` and the generated client's `endpoints/master-data/master-data.ts`, because the other 12 generated files carry only the wire names, and `pnpm api:check` passes.",
+        "The fixture in `scripts/ci/changed-inputs.test.mjs` and the comment in `docker-compose.yml` use the planned `mock-business-central`.",
+        "`git grep -i navision` lists only what the ADR keeps on purpose, the lines each owner's issue leaves to that owner, the `RENAMED` map and its test in `backlog.test.mjs`, and this story's own text, and the pull request shows the list.",
+        "Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844."
+      ]
+    },
+    {
+      "key": "P-84",
+      "title": "SPR, the approver group and zero tolerance in the facts",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 3,
+      "reqs": ["M1", "M2"],
+      "branch": "chore/spr-approver-group",
+      "sprints": [3],
+      "dependsOn": ["P-83"],
+      "summary": "The facts, names and personas follow the briefing: Stock Purchase Requisition, three management approvers, a coordinator and exact matching on four fields.",
+      "acceptance": [
+        "SPR reads Stock Purchase Requisition in `CLAUDE.md`, the docs and area 1's comments, raised by the product manager from stock on hand and the last three months' run rate.",
+        "`CLAUDE.md` and the docs say a coordinator, a Support user, routes each SPR to three management approvers, any one of whom decides, with no substitute and a reminder to the whole group after 24 hours.",
+        "`CLAUDE.md` follows the briefing where else it differs, at lines 22, 30, 34 and 72 today: the countries and payment terms in its client paragraph, what links the two flows, an SPR no longer raised from an order's shortfall, and Management deciding above a limit only if limits are switched on.",
+        "`docs/agile/hero-journey.md` says at line 24 today the SPR's pre-fill moves from the shortfall to stock on hand and the run rate with P-61, and E2E #1's steps stay as they are for `v0.1-proposal` (P-90 records the switch after the tag).",
+        "Rachel Goh, made up, replaces the approver persona, and the personas name the other two made-up approvers, Marcus Teo and Farah Ismail, and the made-up coordinator, Michelle Lau, whom P-86 seeds.",
+        "The old persona's real first name leaves every text file but prompt 001. Committed pictures keep it until their pages are re-shot, which P-107's roll-out does for every page, and Git history keeps it regardless.",
+        "The role's label reads Management approver (item cy in the build report), and the stored `APPROVER` value stays.",
+        "`CLAUDE.md` states that part number, quantity, unit price and currency match exactly across the PO, PI, invoice and packing list, with no tolerance setting for those four.",
+        "An ADR records the briefing's facts, names the conflicts with ADR 0041's decisions 6, 8 and 10 for Angelyn to decide, and changes no logic of areas 2, 3 or 4.",
+        "Azri's two test files that carry the persona's name, `workflow-spr-approval.test.ts` and `WorkflowsPage.test.tsx`, change only where they name it, with his review.",
+        "`pnpm check:dashes`, `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm build` pass.",
+        "Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844."
+      ]
+    },
+    {
+      "key": "P-85",
+      "title": "Record the 5 Nov briefing",
+      "epic": "P",
+      "area": "area: team",
+      "priority": "must",
+      "estimate": 2,
+      "reqs": ["M1"],
+      "branch": "docs/briefing-5-nov",
+      "sprints": [3],
+      "dependsOn": ["P-84"],
+      "summary": "The answers from 5 Nov in our own words, the assumptions settled, and each owner told what their logic now needs.",
+      "acceptance": [
+        "`docs/client/questions-for-client.md` records the 5 Nov answers in our own words in its Answers table, and adds the new questions from Q-33.",
+        "`docs/assumptions.md` replaces its older briefing section, marks each assumption Confirmed, Partly, Changed, Dropped or Open, and adds A-38 onwards.",
+        "A-31 says samples may go to a cloud AI service that does not train on inputs, in a named region, only once Spectra's written line arrives, and `CLAUDE.md`, `AGENTS.md` and `docs/data-formats.md` agree.",
+        "`CLAUDE.md` and the docs bring the purchase flow forward (A-20), and the six KPIs replace the five, each old measure mapped to a new one (item cz in the build report).",
+        "One issue each for Azri, Angelyn and Iok Teck, filed right after P-82's seed and assigned to them, lists what their logic now needs and which area 1 stories wait on it.",
+        "Nothing from the client pack is in Git or an issue: no staff names, figures, customer or vendor names, quotes or screenshots, and no site names until Richie decides (item dh)."
+      ]
+    },
+    {
+      "key": "P-86",
+      "title": "Synthetic data from the briefing",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 13,
+      "reqs": ["M2", "M4"],
+      "branch": "feat/area1-briefing-data",
+      "sprints": [3, 4],
+      "dependsOn": ["P-31", "P-84"],
+      "summary": "The seeded set uses the brands, categories, countries, history and planted cases of the briefing, so Spark and the reports work on realistic data.",
+      "acceptance": [
+        "Real brand names from prompt 005 section 2, with made-up part numbers in each brand's style and no logos, across components, peripherals, PCs, enterprise, security and networking, and an ADR records Richie's decision of 9 Nov to use them.",
+        "Made-up customers in the eleven countries of prompt 005 section 10, each with an address and an obviously fake tax ID, prices in USD, and each customer's last agreed price for each item, with no price tables.",
+        "24 months of orders and sales with seasonality, each item's three-month run rate and months of cover, and vendor lead times as in prompt 005 section 9.",
+        "The 120 live samples stay apart from the 24 months of history, so the lists and the tracker still read the 120, and each owner is asked to review any of their tests that pin them, such as `apps/api/src/modules/checks/checks.test.ts`.",
+        "The planted cases exist: a PO for more than is in stock, a PI whose price differs from its PO, and an AWB draft with the wrong consignee.",
+        "The people include three management approvers and the SPR coordinator, and the first approver stays the demo persona.",
+        "The order form's reference price becomes the customer's last agreed price for the item, as context only, in place of the list price.",
+        "The price-list leftovers go: `docs/data-formats.md`, the sample exception in `packages/synthetic-data/src/exceptions.ts`, and the demo PO's purpose and a comment in `packages/synthetic-documents`, with `pnpm docs:generate` run again.",
+        "The docs that pin the old data set follow: `CLAUDE.md`'s row for `packages/synthetic-data`, `docs/agile/test-plan.md` and `docs/requirements-traceability.md`.",
+        "The seed stays deterministic and date-relative and runs in 30 seconds or less, the list endpoints are timed before and after and are no slower, and every test that pins a figure changes in the same pull request.",
+        "Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844."
+      ]
+    },
+    {
+      "key": "P-87",
+      "title": "Drafts that a person sends",
+      "epic": "E",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 5,
+      "reqs": ["M2", "M4"],
+      "branch": "feat/area1-drafts",
+      "sprints": [5],
+      "dependsOn": ["P-17"],
+      "summary": "One draft record and card for every message OrderPilot proposes, which a person edits and sends, never the system.",
+      "acceptance": [
+        "A `Draft` record holds its kind, the order or SPR it belongs to, the recipient, subject and body, who drafted it and who sent it, with `.http` requests and API tests for 401, 403, 404 and validation.",
+        "A draft card that a person edits and then sends, where sending reaches only Mailpit in development and demos and keeps the sent text.",
+        "A mail sender that can only reach Mailpit, with an ADR and a pinned version: the Mailpit container and the `SMTP_*` settings exist today and no sender does, so the first of this story and P-59 to merge brings it, and the other reuses it.",
+        "A draft from the AI says AI draft and Requires approval, and nothing leaves until a person presses Send.",
+        "Every draft, edit and send is audited with who and when.",
+        "A Playwright test: an allowed role edits and sends a draft, and a role without the permission gets a 403 from the server.",
+        "Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark."
+      ]
+    },
+    {
+      "key": "P-88",
+      "title": "Customer check on intake and the new-customer card",
+      "epic": "B",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 8,
+      "reqs": ["M2", "M4"],
+      "branch": "feat/area1-customer-check",
+      "sprints": [6],
+      "dependsOn": ["P-20", "P-53", "P-55", "P-68", "P-86", "P-107"],
+      "summary": "A PO's customer is found in Business Central by name, address and tax ID, and a new customer gets a pre-filled card for approval.",
+      "acceptance": [
+        "Name, address and tax ID find ranked candidate customers, a person confirms one, and the order stores its Business Central number, never a name.",
+        "A new customer opens a pre-filled customer card that a person edits and sends for approval.",
+        "A second person approves the card after a preview of exactly what goes to mock Business Central, and nobody approves their own card.",
+        "Every step is audited, and nothing is written without the preview and the approval, through P-20's write path.",
+        "A Playwright test takes a PO from a new customer through the card to a draft order.",
+        "Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark."
+      ]
+    },
+    {
+      "key": "P-89",
+      "title": "PO versions",
+      "epic": "C",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 5,
+      "reqs": ["M4"],
+      "branch": "feat/area1-po-versions",
+      "sprints": [6],
+      "dependsOn": ["P-49", "P-51", "P-55", "P-107"],
+      "summary": "A revised PO is the next version of the same order, shown with its differences.",
+      "acceptance": [
+        "A PO with the same customer and PO number becomes the next version of that order only when a person confirms it revises the existing order. Otherwise the 409 stays the answer to a re-sent PO, and an ADR amends ADR 0047's duplicate rule.",
+        "The order page lists every version and shows the differences between two, field by field and line by line.",
+        "An earlier version stays readable and marked superseded, and nothing is deleted.",
+        "The version number has its own name, because `version` in `packages/shared/src/orders.ts` is already the edit token.",
+        "Each check result shows which version it ran on.",
+        "`.http` requests and API tests for 401, 403, 404, validation and a third version.",
+        "Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark."
+      ]
+    },
+    {
+      "key": "P-90",
+      "title": "The short-stock revision request",
+      "epic": "C",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 3,
+      "reqs": ["M2", "M4"],
+      "branch": "feat/area1-short-stock-request",
+      "sprints": [6, 7],
+      "dependsOn": ["P-87", "P-89", "P-107"],
+      "summary": "When a PO asks for more than is available, a person sends a drafted request to revise it, and the revised PO joins the order.",
+      "acceptance": [
+        "An order whose lines ask for more than is available shows each line's shortage and offers Ask for a revised PO.",
+        "The draft asks the customer to revise the PO to the available quantity at the PO's price, and a person edits and sends it.",
+        "The revised PO joins the same order as its next version, and no partial shipment or back order is offered.",
+        "The hold is area 2's state, read through its route, and Azri reviews the pull request.",
+        "After the `v0.1-proposal` tag, E2E #1 takes this request in place of an SPR raised from a short line, and `CLAUDE.md` and `docs/agile/hero-journey.md` follow. An SPR raised from the item's cover and decided by one of the three joins it with P-100.",
+        "Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark."
+      ]
+    },
+    {
+      "key": "P-91",
+      "title": "The compare screen",
+      "epic": "D",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 8,
+      "reqs": ["M2", "M4"],
+      "branch": "feat/area1-compare-documents",
+      "sprints": [6, 7],
+      "dependsOn": ["P-54", "D-2", "P-107"],
+      "summary": "Two documents side by side, with both values highlighted on their pages, for every difference a check found.",
+      "acceptance": [
+        "Two documents show side by side, with each differing value highlighted on both pages, scaled with the zoom, in both themes.",
+        "A list of the differences sits beside them, each marked as blocking or a warning, and choosing one scrolls both pages to it.",
+        "Page thumbnails, zoom and full keyboard use, and at 390 px the pages stack with a way to switch. Stamps join both pages with P-93.",
+        "The screen reads area 3's check results and computes nothing, it takes over D-4's side-by-side criterion, and Iok Teck reviews the pull request.",
+        "Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark."
+      ]
+    },
+    {
+      "key": "P-92",
+      "title": "Document cabinet: filing and search",
+      "epic": "A",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 8,
+      "reqs": ["M2", "M4"],
+      "branch": "feat/area1-document-cabinet",
+      "sprints": [7],
+      "dependsOn": ["P-37", "P-53", "P-107"],
+      "summary": "Every document is filed on arrival with the fields the AI read and a link to its order, and found from one search box.",
+      "acceptance": [
+        "Each document is filed on arrival with its type, company, PO number, document number, date, amount, status, who stored it and a link to its order, or for a vendor's document to its vendor PO once P-101 brings them.",
+        "One search box and filters for company, PO number, type, date, status and who stored it, on a results grid on the list template.",
+        "Full-text search, and fuzzy part-number search with `pg_trgm`, indexed and paged on the server.",
+        "Results respect masking and the permission to read, tested on the bytes of the response.",
+        "API tests for 401, 403, 404 and validation, and a Playwright test that finds a document by its PO number.",
+        "Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark."
+      ]
+    },
+    {
+      "key": "P-93",
+      "title": "Cabinet viewer: stamps, notes and the related chain",
+      "epic": "A",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 8,
+      "reqs": ["M2", "M4"],
+      "branch": "feat/area1-cabinet-viewer",
+      "sprints": [7, 8],
+      "dependsOn": ["P-91", "P-92", "P-107"],
+      "summary": "Around each document: its related chain, stamps with who and when, notes, and a match badge on every pair.",
+      "acceptance": [
+        "Each PO shows its chain of PI, invoice, packing list and AWB/BL, with a match badge on each pair that opens the compare screen.",
+        "A viewer with zoom, page thumbnails, stamps such as Checked and Verified with who and when, and notes, and the stamps also show on the compare screen.",
+        "Stamps and notes are a person's records, audited, and removing one asks for a reason and deletes nothing.",
+        "Stamping needs its own permission, checked on the server.",
+        "API tests for 401, 403, 404 and validation, and a Playwright test that stamps and notes a document.",
+        "Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark."
+      ]
+    },
+    {
+      "key": "P-94",
+      "title": "Audit packs",
+      "epic": "A",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 8,
+      "reqs": ["M2", "M4"],
+      "branch": "feat/area1-audit-packs",
+      "sprints": [8],
+      "dependsOn": ["P-92", "P-107"],
+      "summary": "Pick a customer, a vendor, a month or an order, and download every document with an index, in seconds.",
+      "acceptance": [
+        "A pack's scope is a customer, a vendor, a month or an order, and it downloads as a zip of every document plus an index PDF, made with pdf-lib (ADR 0033), saying what each is, when it came in and who checked it.",
+        "A pack for one month of the synthetic set is ready in seconds, and its build time is recorded for the KPI.",
+        "Every download is an audit event with who, the scope and when, in the shape Angelyn agrees in her issue.",
+        "Only roles with the permission may build a pack, the server enforces it, and masked fields stay masked in the index.",
+        "API tests for 401, 403, 404 and validation, and a Playwright test that downloads a pack.",
+        "Documents stay in OrderPilot's own storage: MinIO today, and storage hosted in Singapore once P-24 deploys (ADR 0031). A copy to a SharePoint folder is an option for later and is not built here.",
+        "Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark."
+      ]
+    },
+    {
+      "key": "P-95",
+      "title": "Spark's foundation",
+      "epic": "E",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 8,
+      "reqs": ["M2", "M3", "M4"],
+      "branch": "feat/area1-spark-foundation",
+      "sprints": [8],
+      "dependsOn": ["P-17", "F-1"],
+      "summary": "Spark runs through the AI gateway with read-only tools, keeps each person's conversations, and audits every question and answer.",
+      "acceptance": [
+        "Conversations and messages are kept for each person and nobody else can read them, with API tests for 401, 403, 404 and validation.",
+        "Tool calling runs through `LlmGateway`, the tools call our own services, and the model never writes SQL.",
+        "Every tool is read-only and runs with the asking person's permissions through area 4's policy, so Spark sees only what that person may see.",
+        "Every answer cites its sources, as links to documents and orders or the query behind a chart, and outside its tools Spark says what it cannot do.",
+        "A deterministic mock provider with scripted answers to the demo questions keeps tests and offline demos working.",
+        "Every question and answer is audited, with its tokens and cost tracked like any AI call.",
+        "Prompt-injection tests show that a hostile document cannot make Spark call a tool or change anything.",
+        "`CLAUDE.md` section 5, and the GRS doc, the test plan, the traceability matrix and area 1's guide where they repeat it, say that no model output writes, approves, posts, pays or sends, and that tools are read-only and run as the person asking.",
+        "ADR: Spark and its read-only tools."
+      ]
+    },
+    {
+      "key": "P-96",
+      "title": "Spark's panel and page",
+      "epic": "E",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 8,
+      "reqs": ["M4"],
+      "branch": "feat/area1-spark-panel",
+      "sprints": [8, 9],
+      "dependsOn": ["P-15", "P-95", "P-107"],
+      "summary": "A side panel that opens from anywhere and a full page, with Spectra's own prompts when empty, built for a phone too.",
+      "acceptance": [
+        "A side panel opens from a top-bar button or a shortcut that does not clash with Ctrl+K, and a full page lists the person's conversations.",
+        "The empty state suggests prompts in Spectra's words: matching a customer's invoice, packing list and AWB, collecting a month's documents, and a brand's six months of sales as a graph.",
+        "Sources are chips that open the document beside the chat, drafts are cards a person edits and sends, and an audit pack is a card with its download.",
+        "A short glow as the panel opens and a quiet shimmer while an answer streams over P-15's live updates, with a still version for reduced motion.",
+        "Spark has an icon of our own and no vendor logo.",
+        "The panel and page work by keyboard, keep focus, and work at 390 by 844.",
+        "Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark, with a short capture of the motion."
+      ]
+    },
+    {
+      "key": "P-97",
+      "title": "Spark finds documents",
+      "epic": "E",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 5,
+      "reqs": ["M2", "M4"],
+      "branch": "feat/area1-spark-find",
+      "sprints": [9],
+      "dependsOn": ["P-92", "P-95"],
+      "summary": "Spark finds documents by customer, vendor, PO number, type, date range or status, with full text and fuzzy part numbers.",
+      "acceptance": [
+        "A tool takes the filters and a text query, searches the cabinet through its service, and answers with links.",
+        "A part number with a typo is still found through `pg_trgm`, with a test.",
+        "Results hold only what the asker may see.",
+        "Scripted mock answers cover the demo questions.",
+        "Tests cover each filter, an empty result and a refusal."
+      ]
+    },
+    {
+      "key": "P-98",
+      "title": "Spark matches a set and collects an audit pack",
+      "epic": "E",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 5,
+      "reqs": ["M2", "M4"],
+      "branch": "feat/area1-spark-match-and-pack",
+      "sprints": [9],
+      "dependsOn": ["D-2", "P-94", "P-95"],
+      "summary": "Spark runs area 3's checks over a set of documents and explains each difference, and collects an audit pack, changing nothing.",
+      "acceptance": [
+        "A tool runs area 3's on-demand, read-only check of a named document set (PO, PI, invoice, packing list and AWB/BL), which Iok Teck's issue asks for, and explains each difference in a sentence that links both pages.",
+        "A second tool builds an audit pack through P-94 for the scope the person names, and answers with the download card.",
+        "Spark never approves, waives or fixes a difference.",
+        "Scripted mock answers cover matching a customer's invoice, packing list and AWB, and collecting a month's documents.",
+        "Tests cover a clean set, a set with differences and a refused pack."
+      ]
+    },
+    {
+      "key": "P-99",
+      "title": "Spark answers order questions",
+      "epic": "E",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 5,
+      "reqs": ["M2", "M4"],
+      "branch": "feat/area1-spark-order-questions",
+      "sprints": [9],
+      "dependsOn": ["D-4", "P-95"],
+      "summary": "Where is order X, what is waiting for me, and what has been stuck for more than N hours.",
+      "acceptance": [
+        "Three tools read the tracker, the person's own work and the time at each step, through their services.",
+        "An answer names the step, the role and the person holding the order, and how long it has waited, with a link.",
+        "What is waiting for me matches the home page's Needs you for the same person.",
+        "Tests cover each question, an order the person may not see, and an unknown order."
+      ]
+    },
+    {
+      "key": "P-100",
+      "title": "SPR screens: routing, the 24-hour reminder and where it is stuck",
+      "epic": "C",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 8,
+      "reqs": ["M2", "M4"],
+      "branch": "feat/area1-spr-routing-screens",
+      "sprints": [9, 10],
+      "dependsOn": ["C-4", "P-61", "P-71", "P-87"],
+      "summary": "The platform side of the SPR flow: the coordinator's screen, the 24-hour reminder email, and where each SPR is stuck.",
+      "acceptance": [
+        "The coordinator routes an SPR to the approver group and hands an approved one back to the product manager, through area 2's routes.",
+        "Each SPR shows its step, who holds it, how long it has waited and a countdown to the 24-hour reminder with P-71's timer, and the approvers' own screen stays P-72.",
+        "When area 2's sweep calls the reminder port at 24 hours, the hook Azri's issue names, one email per group member goes once through the mail sender to Mailpit only, and a Playwright test sees it.",
+        "A where-is-it-stuck list shows every open SPR by step and age, for the product manager and the coordinator.",
+        "The screens live in area 1's folders, the state machine's rules stay Azri's, and he reviews the pull request.",
+        "Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark."
+      ]
+    },
+    {
+      "key": "P-101",
+      "title": "Vendor POs",
+      "epic": "B",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 5,
+      "reqs": ["M2", "M4"],
+      "branch": "feat/area1-vendor-pos",
+      "sprints": [10],
+      "dependsOn": ["P-20", "P-100"],
+      "summary": "The product manager places the vendor PO from an approved SPR, or records the vendor portal's reference.",
+      "acceptance": [
+        "A vendor PO is made from an approved SPR, with the vendor matched on its Business Central number, and goes to mock Business Central only after a preview and an approval.",
+        "For a vendor whose portal takes the PO, the portal's reference is recorded instead and no PO is written.",
+        "Only the product manager places it, the AI never does, and no PO comes from an unapproved SPR.",
+        "Every step is audited, with `.http` requests and API tests for 401, 403, 404 and validation.",
+        "Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark."
+      ]
+    },
+    {
+      "key": "P-102",
+      "title": "Inbound shipments and chase drafts",
+      "epic": "C",
+      "area": "area: 1 document AI and integration",
+      "priority": "should",
+      "estimate": 5,
+      "reqs": ["M4"],
+      "branch": "feat/area1-inbound-shipments",
+      "sprints": [10],
+      "dependsOn": ["P-63", "P-87", "P-101"],
+      "summary": "An inbound shipment keeps its promised and expected dates, and drafts a chase email when it slips.",
+      "acceptance": [
+        "An inbound shipment holds the vendor PO, the forwarder, the AWB or BL, and the promised and expected dates.",
+        "When the expected date passes the promised one, a chase draft is made for a person to edit and send.",
+        "The vendor's usual lead time shows beside the dates.",
+        "`.http` requests and API tests for 401, 403, 404 and validation.",
+        "Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark."
+      ]
+    },
+    {
+      "key": "P-103",
+      "title": "Goods receipt and inwarding",
+      "epic": "B",
+      "area": "area: 1 document AI and integration",
+      "priority": "should",
+      "estimate": 8,
+      "reqs": ["M2", "M4"],
+      "branch": "feat/area1-goods-receipt",
+      "sprints": [10, 11],
+      "dependsOn": ["P-20", "P-101"],
+      "summary": "The warehouse counts goods against what was expected, and a person confirms the inwarding into mock Business Central.",
+      "acceptance": [
+        "A receipt shows the expected quantities beside what was counted, and a difference is flagged for a person.",
+        "Inwarding writes to mock Business Central only after a preview and a person's confirmation, never on its own.",
+        "The receipt screen works on a tablet, with touch targets of 44 px or more.",
+        "Every step is audited, with API tests for 401, 403, 404 and validation.",
+        "Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark."
+      ]
+    },
+    {
+      "key": "P-104",
+      "title": "Vendor payments by due date",
+      "epic": "F",
+      "area": "area: 1 document AI and integration",
+      "priority": "should",
+      "estimate": 5,
+      "reqs": ["M2", "M4"],
+      "branch": "feat/area1-vendor-payments",
+      "sprints": [11],
+      "dependsOn": ["F-5", "P-62", "P-101"],
+      "summary": "Finance sees vendor payments by due date, and records only what no hold blocks.",
+      "acceptance": [
+        "Vendor payments are a list on the template by due date, with due-soon and overdue timers.",
+        "A payment under F-5's hold cannot be recorded until Finance and a second approver clear it.",
+        "No real payment is made: Finance records that it paid, and a change needs a reason.",
+        "Bank details are masked by role with a reason, and every step is audited.",
+        "Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark."
+      ]
+    },
+    {
+      "key": "P-105",
+      "title": "Spark's charts, forecast and customer replies",
+      "epic": "E",
+      "area": "area: 1 document AI and integration",
+      "priority": "should",
+      "estimate": 8,
+      "reqs": ["M2", "M4"],
+      "branch": "feat/area1-spark-charts-and-replies",
+      "sprints": [11],
+      "dependsOn": ["P-87", "P-96"],
+      "summary": "Spark draws area 3's figures as charts and forecasts, and drafts a reply to a customer's stock inquiry.",
+      "acceptance": [
+        "Charts of sales by brand, item, customer or country by month, and of PO-to-delivery time by vendor, are drawn by our chart components from area 3's services, each with the query behind it and Open in dashboard.",
+        "A six-month forecast shows its range and its method in one sentence.",
+        "A stock check answers an inquiry and drafts a reply that a person edits and sends.",
+        "Every chart has a data-table view for screen readers, and Spark never sends anything.",
+        "Scripted mock answers cover a brand's six months of sales as a graph.",
+        "Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark."
+      ]
+    },
+    {
+      "key": "P-106",
+      "title": "Three visual directions",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 8,
+      "reqs": ["M4"],
+      "branch": "feat/platform-design-directions",
+      "sprints": [3, 4],
+      "dependsOn": ["P-22"],
+      "summary": "Ink, Paper and Spectra, each shown on the home page and one order page, so Richie picks one before anything rolls out.",
+      "acceptance": [
+        "Each direction names its palette, type and radius, with tokens for colour in light and dark, one UI typeface with tabular figures, at most 7 type sizes, spacing, elevation and motion.",
+        "The home page and one order page, at 1440 by 900 in light and dark, for each direction, are in `docs/design/directions/`.",
+        "The Spectra direction uses our own teal and navy in the spirit of Spectra's deck, with no colour sampled from the client pack and no logo (Q-23).",
+        "`docs/design/review-board.md` holds the three directions, and Richie's pick is recorded in `docs/design/design-system.md` before anything rolls out.",
+        "Icons are Lucide only."
+      ]
+    },
+    {
+      "key": "P-107",
+      "title": "Roll the picked direction onto the shell and templates",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 8,
+      "reqs": ["M4"],
+      "branch": "feat/platform-direction-rollout",
+      "sprints": [5],
+      "dependsOn": ["P-106"],
+      "summary": "The chosen direction goes onto the app shell, the list page, the document form and the cards, and every later screen starts in it.",
+      "acceptance": [
+        "The tokens, shell, list template, document form and cards use the chosen direction, with dark mode as good as light.",
+        "Each kit item is adapted to the tokens, one component to a file, with a header comment naming its vendor, the item and its licence.",
+        "Pro parts appear only on Richie's pages and the shell, and area screens use free kits unless Richie confirms a team licence.",
+        "Every page it touches has a before and after in `docs/design/review-board.md`.",
+        "`pnpm budget` passes and Lighthouse stays at 90 or more.",
+        "Every page is re-shot in the new direction, which also replaces the older pictures that still show the old persona's real first name (P-84).",
+        "Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark."
+      ]
+    },
+    {
+      "key": "P-108",
+      "title": "The landing page",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "should",
+      "estimate": 8,
+      "reqs": ["M4"],
+      "branch": "feat/platform-landing",
+      "sprints": [11],
+      "dependsOn": ["P-23", "P-107"],
+      "summary": "The constellation as hero, the tagline, three steps, a short Spark exchange and Spectra's own measures.",
+      "acceptance": [
+        "The constellation is the hero once Richie approves its capture, with the tagline and the three steps.",
+        "A short scripted Spark exchange plays out, and Spectra's own measures from prompt 006 section 3 appear.",
+        "Sign in and Try the demo, with one primary button.",
+        "A still image for reduced motion or no WebGL, and the 3D stays a lazy chunk.",
+        "Lighthouse 90 or more and LCP under 2.5 s.",
+        "Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark, with a short capture of the motion."
+      ]
+    },
+    {
+      "key": "P-109",
+      "title": "The sign-in page with the scene",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "should",
+      "estimate": 3,
+      "reqs": ["M4"],
+      "branch": "feat/platform-sign-in-scene",
+      "sprints": [6],
+      "dependsOn": ["P-107"],
+      "summary": "The split sign-in layout with a React Bits background now, and the scene once it is approved.",
+      "acceptance": [
+        "A React Bits background sits behind the sign-in form, replaced by the scene once P-23's capture is approved, with a still version for reduced motion.",
+        "The demo role buttons stay one click each.",
+        "Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark, with a short capture of the motion."
+      ]
+    },
+    {
+      "key": "P-110",
+      "title": "The speed bar",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "should",
+      "estimate": 5,
+      "reqs": ["M4"],
+      "branch": "feat/platform-speed-bar",
+      "sprints": [7],
+      "dependsOn": ["P-41", "P-107"],
+      "summary": "The keyboard and speed rules of prompt 006 section 4 that the product pass left out.",
+      "acceptance": [
+        "The question-mark key opens a list of every shortcut, and P-41's setting turns the single-key shortcuts off.",
+        "Optimistic updates on actions that can be undone, and prefetching on hover for record links.",
+        "Component tests cover the keyboard path, and a Playwright test opens the list.",
+        "Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark."
+      ]
+    },
+    {
+      "key": "P-111",
+      "title": "Grid polish",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "could",
+      "estimate": 5,
+      "reqs": ["M4"],
+      "branch": "feat/platform-grid-polish",
+      "sprints": [13],
+      "dependsOn": ["P-45", "P-107"],
+      "summary": "Resizable columns, sticky headers on every grid, arrow keys between cells, and inline editing where a screen declares it.",
+      "acceptance": [
+        "Columns resize by mouse and keyboard, and saved views keep the widths.",
+        "Every grid has a sticky header, and arrow keys move between cells.",
+        "Grids that declare it edit inline, with validation and Undo.",
+        "Rows stay 36 to 40 px high, and numbers stay right-aligned in tabular figures with their currency.",
+        "Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark."
+      ]
+    },
+    {
+      "key": "P-112",
+      "title": "Small delights",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "could",
+      "estimate": 3,
+      "reqs": ["M4"],
+      "branch": "feat/platform-small-delights",
+      "sprints": [13],
+      "dependsOn": ["P-107"],
+      "summary": "KPI numbers count up, sparklines draw in and empty states get an illustration of our own, on first view only.",
+      "acceptance": [
+        "A shared count-up and draw-in in `components/common` runs on first view only, never on tables or forms in use, and area 3 may adopt it on its KPI page.",
+        "Each empty state has a simple illustration of our own and its next action.",
+        "Reduced motion shows the final value at once.",
+        "Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark, with a short capture of the motion."
       ]
     }
   ]

@@ -60,8 +60,8 @@ export function parseRecordNumber(value: string): ParsedRecordNumber | null {
 }
 
 /**
- * OrderPilot's number shown beside Navision's, which stays the official one.
- * `navisionNo` is null until the record exists in Navision.
+ * OrderPilot's number shown beside Business Central's, which stays the official one.
+ * `navisionNo` is null until the record exists in Business Central.
  */
 export const recordRefSchema = z.object({
   recordNo: recordNumberSchema,

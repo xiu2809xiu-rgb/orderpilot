@@ -58,7 +58,7 @@ test("a change to the code or the build needs both jobs", () => {
     "apps/web/nginx/default.conf.template",
     "apps/web/public/demo-documents/po-letter-so-0041.pdf",
     "packages/shared/src/index.ts",
-    "services/mock-navision/src/main.ts",
+    "services/mock-business-central/src/main.ts",
     "docker/minio/Dockerfile",
     "docker/mock/Dockerfile",
     "docker-compose.yml",
@@ -139,7 +139,7 @@ test("every path a Dockerfile copies is an input of the images job", () => {
       for (const source of parts.slice(0, -1)) {
         seen += 1;
         const file = source
-          .replace(/\$\{SERVICE\}/, "mock-navision")
+          .replace(/\$\{SERVICE\}/, "mock-business-central")
           .replace(/\/$/, "");
         assert.equal(
           decide("pull_request", [`${file}/x`]).images,

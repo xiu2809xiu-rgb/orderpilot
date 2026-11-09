@@ -66,7 +66,7 @@ describe("the governance contracts", () => {
     expect(parsed.success).toBe(true);
   });
 
-  it("follows the shape of Navision's Approval User Setup", () => {
+  it("follows the shape of Business Central's Approval User Setup", () => {
     const parsed = approvalUserSetupSchema.safeParse({
       userId: "0190a000-0000-7000-8000-000000000001",
       approverId: "0190a000-0000-7000-8000-000000000002",

@@ -6,11 +6,11 @@ Nothing here runs yet. Each step names the story that brings it, and the end-to-
 
 ## The story
 
-A synthetic customer in Colombo emails a PO for three lines of IT peripherals. Today, Support would re-type it into Navision, check stock by hand, chase the approver for an SPR, compare the packing list by eye and answer "where is my order?" by asking around.
+A synthetic customer in Colombo emails a PO for three lines of IT peripherals. Today, Support would re-type it into Microsoft Dynamics 365 Business Central, check stock by hand, chase the approver for an SPR, compare the packing list by eye and answer "where is my order?" by asking around.
 
-With OrderPilot, the PO is read once. A person confirms the two fields the AI is unsure of. Stock is checked in mock Navision, one line is short, and an SPR is raised with a button and approved within the approver's limit. A task left waiting gets a reminder. When the packing list arrives with the wrong quantity on one line, OrderPilot flags it before anything ships. The tracker shows the order's status, who holds it, its history and the exception, and every action is in the audit trail.
+With OrderPilot, the PO is read once. A person confirms the two fields the AI is unsure of. Stock is checked in mock Business Central, one line is short, and an SPR is raised with a button and approved within the approver's limit. A task left waiting gets a reminder. When the packing list arrives with the wrong quantity on one line, OrderPilot flags it before anything ships. The tracker shows the order's status, who holds it, its history and the exception, and every action is in the audit trail.
 
-All data in the demo is synthetic and labelled "Synthetic demo data". Mock Navision and the mock AI provider are labelled "Mock" and "Mock AI".
+All data in the demo is synthetic and labelled "Synthetic demo data". Mock Business Central and the mock AI provider are labelled "Mock" and "Mock AI".
 
 ## E2E #1: the sales pilot
 
@@ -20,13 +20,15 @@ The Must list, for the Week 4 prototype and the Week 5 proposal. It grows as eac
 | ---- | --------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ | ---- | ---------------------------- |
 | 1    | Support         | Uploads the customer's PO. OrderPilot classifies it as a PO and extracts its fields           | AI reads, with a confidence score and a source link for each field | 1    | P-17, P-18, area 1's stories |
 | 2    | Support         | Confirms two low-confidence fields, marked "Requires approval"                                | A person confirms what the AI is unsure of                         | 1    | Area 1's review screen       |
-| 3    | Support         | Sees stock for each line from mock Navision. One line is short                                | Data matched on Navision numbers, never names                      | 1    | P-19, P-20                   |
+| 3    | Support         | Sees stock for each line from mock Business Central. One line is short                        | Data matched on Business Central numbers, never names              | 1    | P-19, P-20                   |
 | 4    | Product Manager | Raises an SPR with a button, pre-filled from the shortfall                                    | The system suggests; a person raises                               | 2    | C-1, C-2                     |
 | 5    | Approver        | Approves the SPR within their limit, with a comment. The approval is logged                   | Rules decide who may approve; people approve                       | 2, 4 | C-3, F-3                     |
 | 6    | Support         | A task left waiting past its deadline gets a reminder                                         | Nobody has to chase                                                | 2    | C-4                          |
 | 7    | Warehouse       | The packing list arrives with a different quantity on one line. It is flagged as an exception | Documents checked against each other by fixed rules                | 3    | D-1, D-2, D-3                |
 | 8    | Management      | Opens the tracker: the order's status, owner, history and the exception, with overdue flags   | One view of every order                                            | 3    | D-1, D-4                     |
 | 9    | Auditor         | Opens the audit trail for the order: every action, who did it and when, with the chain intact | Every decision is audited and tamper-evident                       | 4    | P-9, F-2                     |
+
+The briefing of 5 Nov changes step 4: Spectra raises an SPR (a Stock Purchase Requisition) from stock on hand and the last three months' run rate, not from an order's shortfall, and a short order is held while the customer revises the PO. The steps above stay as they are for `v0.1-proposal`. With P-61 the SPR's pre-fill moves from the shortfall to stock on hand and the run rate, and P-90 records the switch in this table after the tag.
 
 As the Should items land, the journey adds: the payment gate (packing waits for Finance), the PI draft, full matching, the AWB/BL and permit follow-ups, and email intake with an update drafted by AI and sent by a person.
 
@@ -55,7 +57,7 @@ Area 4, on area 1's permissions guard. Built in P-10, F-1, F-3 and F-4.
 3. The goods arrive, and the receipt is compared with the invoice, packing list and AWB/BL.
 4. The payment-due reminder fires.
 
-Areas 2, 3 and 4, on area 1's documents. Built in Weeks 8 to 12: F-5 brings the bank-detail hold, and the rest comes from the owners' phase 2 stories.
+Areas 2, 3 and 4, on area 1's documents. The purchase flow starts thin beside the sales flow (A-20) and is deepened in Weeks 8 to 12: F-5 brings the bank-detail hold, and the rest comes from the owners' purchase-flow stories.
 
 ## Presenter slots
 

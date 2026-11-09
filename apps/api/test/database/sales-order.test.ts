@@ -40,7 +40,7 @@ describe("the sales order tables", () => {
     await resetTestData();
   });
 
-  it("stores an order with two lines, as a draft with no Navision number", async () => {
+  it("stores an order with two lines, as a draft with no Business Central number", async () => {
     const order = await db.client.salesOrder.create({
       data: {
         ...header("SO-20261108-0001"),

@@ -3786,7 +3786,7 @@
             }
           }
         },
-        "summary": "What the master data filters can offer. Mock Navision data",
+        "summary": "What the master data filters can offer. Mock Business Central data",
         "tags": ["MasterData"]
       }
     },
@@ -4052,7 +4052,7 @@
             }
           }
         },
-        "summary": "Items with their stock, a page at a time. Prices are masked by role. Mock Navision data",
+        "summary": "Items with their stock, a page at a time. Prices are masked by role. Mock Business Central data",
         "tags": ["MasterData"]
       }
     },
@@ -4119,7 +4119,7 @@
             }
           }
         },
-        "summary": "The available stock of many items at once, for the lines of an order. Mock Navision data",
+        "summary": "The available stock of many items at once, for the lines of an order. Mock Business Central data",
         "tags": ["MasterData"]
       }
     },
@@ -4566,7 +4566,7 @@
             }
           }
         },
-        "summary": "One item: its stock, open orders, open purchase orders and SPRs. Mock Navision data",
+        "summary": "One item: its stock, open orders, open purchase orders and SPRs. Mock Business Central data",
         "tags": ["MasterData"]
       }
     },
@@ -4749,7 +4749,7 @@
             }
           }
         },
-        "summary": "Customers with their open and overdue orders, a page at a time. Mock Navision data",
+        "summary": "Customers with their open and overdue orders, a page at a time. Mock Business Central data",
         "tags": ["MasterData"]
       }
     },
@@ -5028,7 +5028,7 @@
             }
           }
         },
-        "summary": "One customer: key facts, open orders and overdue orders. Mock Navision data",
+        "summary": "One customer: key facts, open orders and overdue orders. Mock Business Central data",
         "tags": ["MasterData"]
       }
     },
@@ -5221,7 +5221,7 @@
             }
           }
         },
-        "summary": "Vendors, a page at a time. Balances are masked by role. Mock Navision data",
+        "summary": "Vendors, a page at a time. Balances are masked by role. Mock Business Central data",
         "tags": ["MasterData"]
       }
     },
@@ -5649,7 +5649,7 @@
             }
           }
         },
-        "summary": "One vendor: key facts, bank accounts masked by role, open purchase orders and items. Mock Navision data",
+        "summary": "One vendor: key facts, bank accounts masked by role, open purchase orders and items. Mock Business Central data",
         "tags": ["MasterData"]
       }
     },

@@ -46,7 +46,7 @@
     "onTime": "On time",
     "order": "Order",
     "request": "Request",
-    "navision": "Navision",
+    "navision": "Business Central",
     "navisionNone": "none yet",
     "openOrder": "Open order",
     "openRequest": "Open request",
@@ -109,7 +109,7 @@
   "order": {
     "heading": "Order {{orderNo}}",
     "description": "{{customer}}, customer PO {{po}}, ordered {{date}}.",
-    "navisionNote": "{{orderNo}} is Navision's sales order number.",
+    "navisionNote": "{{orderNo}} is Business Central's sales order number.",
     "stepsHeading": "Steps",
     "stepsDescription": "Where the order is on its way. The steps come from sample data for the demo.",
     "timelineHeading": "Timeline",
@@ -161,7 +161,7 @@
   "spr": {
     "heading": "Stock purchase request {{recordNo}}",
     "description": "Requested by {{name}} on {{date}} for {{orderNo}}.",
-    "navision": "Navision number",
+    "navision": "Business Central number",
     "navisionNone": "none yet",
     "ourNumber": "OrderPilot number",
     "summaryHeading": "The request",

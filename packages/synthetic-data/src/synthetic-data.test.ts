@@ -124,7 +124,7 @@ describe("the synthetic dataset", () => {
     expect(new Set(data.items.map((i) => i.brand)).size).toBe(12);
   });
 
-  it("uses Navision's names and USD decimal strings", () => {
+  it("uses Business Central's names and USD decimal strings", () => {
     expect(Object.keys(data.customers[0] ?? {}).sort()).toEqual([
       "balanceLcy",
       "countryRegionCode",

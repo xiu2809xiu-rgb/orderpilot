@@ -1,6 +1,6 @@
-// The records master data reads, in Navision's field names. They belong to
+// The records master data reads, in Business Central's field names. They belong to
 // this port, not to any one source: the mock maps the synthetic set to them,
-// and P-20's connector maps Navision's OData responses the same way.
+// and P-20's connector maps Business Central's OData responses the same way.
 
 /** An item card, with its stock figures. */
 export interface MasterDataItem {

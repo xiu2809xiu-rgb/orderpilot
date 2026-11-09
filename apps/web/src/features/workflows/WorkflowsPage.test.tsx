@@ -61,7 +61,7 @@ function handed(data: unknown[]) {
 
 const HANDED_TASK = {
   ...SPR_TASK,
-  handedOver: { reason: "passed-on", fromName: "Janet Lim", canAct: true },
+  handedOver: { reason: "passed-on", fromName: "Rachel Goh", canAct: true },
 } as const;
 
 function open(role: "APPROVER" | "WAREHOUSE" | "MANAGEMENT", route = "/") {
@@ -106,7 +106,7 @@ describe("the task inbox", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        "Janet Lim passed this on to you, because it is above their limit.",
+        "Rachel Goh passed this on to you, because it is above their limit.",
       ),
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Open request/ })).toHaveAttribute(
@@ -125,7 +125,7 @@ describe("the task inbox", () => {
             ...HANDED_TASK,
             handedOver: {
               reason: "substitute",
-              fromName: "Janet Lim",
+              fromName: "Rachel Goh",
               canAct: false,
             },
           },
@@ -140,7 +140,7 @@ describe("the task inbox", () => {
     );
     open("MANAGEMENT");
     expect(
-      await screen.findByText(/You are standing in for Janet Lim\./),
+      await screen.findByText(/You are standing in for Rachel Goh\./),
     ).toBeInTheDocument();
     expect(
       screen.getByText(/Your role cannot decide this yet/),
@@ -155,7 +155,7 @@ describe("the task inbox", () => {
             ...HANDED_TASK,
             handedOver: {
               reason: "substitute",
-              fromName: "Janet Lim",
+              fromName: "Rachel Goh",
               canAct: false,
             },
           },

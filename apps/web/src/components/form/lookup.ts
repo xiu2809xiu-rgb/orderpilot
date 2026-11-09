@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-/** A record a lookup can pick: its Navision number, its name, and one detail. */
+/** A record a lookup can pick: its Business Central number, its name, and one detail. */
 export interface LookupOption {
   number: string;
   name: string;

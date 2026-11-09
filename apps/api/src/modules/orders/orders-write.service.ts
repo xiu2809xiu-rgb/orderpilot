@@ -39,7 +39,7 @@ const STALE = "This order was changed by someone else. Reload it to see it.";
 
 /**
  * Creates, changes and voids draft orders (ADR 0047). A person's click is the
- * only trigger: nothing here submits an order or posts to Navision. The route's
+ * only trigger: nothing here submits an order or posts to Business Central. The route's
  * permission guard has already decided who may call; the guard audits its own
  * refusals, so nothing here asks the policy again.
  *
@@ -237,7 +237,10 @@ export class OrdersWriteService {
   private async requireCustomer(customerNo: string): Promise<void> {
     if ((await this.customers.namesOf([customerNo])).has(customerNo)) return;
     throw new ValidationFailedError([
-      { path: "customerNo", message: "No customer has this Navision number." },
+      {
+        path: "customerNo",
+        message: "No customer has this Business Central number.",
+      },
     ]);
   }
 

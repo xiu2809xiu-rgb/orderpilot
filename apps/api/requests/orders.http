@@ -25,7 +25,7 @@ GET {{baseUrl}}/api/v1/orders?sort=shipmentDate&direction=asc
 ### Search covers the order number, the customer number and the customer's PO number.
 GET {{baseUrl}}/api/v1/orders?search=SO-00
 
-### One customer, by Navision number.
+### One customer, by Business Central number.
 GET {{baseUrl}}/api/v1/orders?customerNo=C-0001
 
 ### Capture state applies to stored orders only: a sample has none.

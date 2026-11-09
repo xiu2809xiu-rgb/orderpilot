@@ -9,10 +9,10 @@ import {
   toMasterDataSalesOrder,
 } from "./domain/order-mapping.js";
 import { MasterDataService } from "./master-data.service.js";
-import { MockNavisionMasterData } from "./mock-navision-master-data.js";
+import { MockBusinessCentralMasterData } from "./mock-business-central-master-data.js";
 
 const dataset = createSyntheticDataset();
-const reader = new MockNavisionMasterData(() => dataset);
+const reader = new MockBusinessCentralMasterData(() => dataset);
 const samples = new SampleOrderSource(() => dataset);
 
 const customer = dataset.customers[0];
@@ -20,7 +20,7 @@ const item = dataset.items[0];
 if (!customer || !item) throw new Error("the set is empty");
 
 describe("master data asks the directory", () => {
-  it("maps all 120 samples to exactly what the mock of Navision reports", async () => {
+  it("maps all 120 samples to exactly what the mock of Business Central reports", async () => {
     const asked = (await samples.list()).map(toMasterDataSalesOrder);
     const reported = await reader.salesOrders();
     expect(asked).toHaveLength(120);
@@ -84,7 +84,7 @@ describe("master data asks the directory", () => {
       expect(shown.openOrders).toHaveLength(before.openOrders.length + 1);
     });
 
-    it("shows a submitted order on the item's lines, and leaves Navision's figures alone", async () => {
+    it("shows a submitted order on the item's lines, and leaves Business Central's figures alone", async () => {
       const shown = await withStored.item(item.no, "SUPPORT");
       const before = await without.item(item.no, "SUPPORT");
       expect(shown.orderLines.map((line) => line.orderNo)).toContain(

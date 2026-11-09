@@ -101,7 +101,7 @@ describe("the item lookup in a line", () => {
     expect(onSave).not.toHaveBeenCalled();
   });
 
-  it("sends the Navision number of the item, never its name", async () => {
+  it("sends the Business Central number of the item, never its name", async () => {
     const user = userEvent.setup();
     const onSave = vi.fn((values: unknown) => Promise.resolve(values));
     renderGrid({ onSave });

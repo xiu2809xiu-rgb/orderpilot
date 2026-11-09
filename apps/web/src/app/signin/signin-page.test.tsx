@@ -76,7 +76,7 @@ describe("the sign-in page with demo mode on", () => {
     expect(screen.getAllByRole("alert")).toHaveLength(1);
   });
 
-  it("says the AI and Navision are stand-ins", async () => {
+  it("says the AI and Business Central are stand-ins", async () => {
     renderApp("/login", { demoMode: true });
     expect(await screen.findByText(/stand-ins/)).toBeInTheDocument();
   });
@@ -114,7 +114,9 @@ describe("the promise", () => {
       .getAllByRole("heading")
       .map((h) => h.textContent);
     expect(titles).toEqual(["AI reads", "Rules decide", "People approve"]);
-    expect(steps).toHaveTextContent("Navision stays the system of record");
+    expect(steps).toHaveTextContent(
+      "Business Central stays the system of record",
+    );
   });
 
   it("shows the animated order flow, hidden from screen readers", async () => {

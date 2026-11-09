@@ -157,7 +157,7 @@ function settleStock(
 
 /**
  * The purchase orders, derived rather than invented: each approved SPR's
- * Navision number is one, and whatever is on order that no SPR explains goes
+ * Business Central number is one, and whatever is on order that no SPR explains goes
  * into further orders in the same number series.
  *
  * It also moves the items' stock figures on from when the SPRs were raised

@@ -109,7 +109,7 @@ function CustomerRecord({ customer }: { customer: CustomerDetail }) {
       <PageHeader
         title={customer.no}
         description={customer.name}
-        meta={<DemoBadge kind="mockNavision" />}
+        meta={<DemoBadge kind="mockBusinessCentral" />}
         actions={
           <Button asChild>
             <Link to={tracker}>

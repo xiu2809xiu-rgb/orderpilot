@@ -102,7 +102,7 @@ F-1 and G-1 have landed. F-2 fills in its item when it does.
 
 Area 2 and area 3 wire their own detail pages; F-2 does not edit them. Two steps:
 
-1. **Write events with a record type and id** when the record changes: `AuditService.record({ entityType: "Order", entityId: order.id, summary: "...", ... })`. The summary is the sentence the log shows as "what changed", so write it as one ("Janet Lim approved SO-20261102-0001"), and keep any value a masking rule would hide in `changes`, not in the summary.
+1. **Write events with a record type and id** when the record changes: `AuditService.record({ entityType: "Order", entityId: order.id, summary: "...", ... })`. The summary is the sentence the log shows as "what changed", so write it as one ("Rachel Goh approved SO-20261102-0001"), and keep any value a masking rule would hide in `changes`, not in the summary.
 2. **Drop the component at the foot of the page:** `<EntityOperationLog entityType="Order" entityId={order.id} subject="order SO-20261102-0001" />` from `@/features/audit/EntityOperationLog`. It reads `GET /audit/events?entityType=...&entityId=...` through the generated hook, maps each event to a row of P-12's `OperationLog` (`toOperationRows`), adds the `AuditLink` and the Synthetic demo data label, and renders nothing for a role without `audit.read`.
 
 If you need a different layout, call `useAuditViewerList({ entityType, entityId, pageSize })` yourself and pass `toOperationRows(data.data)` to `OperationLog`.

@@ -27,7 +27,7 @@ export class SalesOrderLine {
     if (!Number.isInteger(input.lineNo) || input.lineNo < 1)
       add("lineNo", "A line number starts at 1.");
     if (input.itemNo.trim() === "")
-      add("itemNo", "Name the item by its Navision number.");
+      add("itemNo", "Name the item by its Business Central number.");
     if (
       !isDecimalString(input.quantity) ||
       compareDecimal(input.quantity, "0") <= 0
@@ -118,7 +118,7 @@ export class SalesOrder {
     if (parseRecordNumber(input.orderNo)?.type !== "SO")
       add("orderNo", "Use a number like SO-20261108-0001.");
     if (input.customerNo.trim() === "")
-      add("customerNo", "Name the customer by their Navision number.");
+      add("customerNo", "Name the customer by their Business Central number.");
     if (input.externalDocumentNo.trim() === "")
       add("externalDocumentNo", "Give the PO number the customer used.");
     if (
