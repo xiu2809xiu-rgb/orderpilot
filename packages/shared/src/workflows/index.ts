@@ -2,6 +2,7 @@
 // these as the real workflow lands.
 export * from "./common.js";
 export * from "./document-config.js";
+export * from "./idempotency.js";
 export * from "./order-flow.js";
 export * from "./order-status.js";
 export * from "./payment.js";

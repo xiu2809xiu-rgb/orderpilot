@@ -1,7 +1,10 @@
 import {
+  IDEMPOTENCY_KEY_HEADER,
+  IDEMPOTENCY_KEY_REUSED_MESSAGE,
   ROLES,
   SPR_DECISION_RECORDED_MESSAGE,
   SPR_PASSED_ON_MESSAGE,
+  errorEnvelopeSchema,
   type Role,
 } from "@orderpilot/shared";
 import { syntheticDataset } from "@orderpilot/synthetic-data";
@@ -11,6 +14,7 @@ import { Database } from "../../src/database/database.js";
 import { ApprovalSetupRepository } from "../../src/modules/governance/approval-setup.repository.js";
 import { OrderWorkflowService } from "../../src/modules/workflows/order-workflow.service.js";
 import { SprRecordRepository } from "../../src/modules/workflows/spr-record.repository.js";
+import { WorkflowCommandRepository } from "../../src/modules/workflows/workflow-command.repository.js";
 import {
   handedTaskListResponseSchema,
   sprDecisionResponseSchema,
@@ -933,6 +937,385 @@ describe("SPR approval within limits (C-3), on the real state machine and area 4
       expect(
         (await call(t, null, "get", `${W}/tasks/handed-to-me`)).status,
       ).toBe(401);
+    });
+  });
+
+  describe("retries with an idempotency key", () => {
+    let keys = 0;
+    const freshKey = () => `retry-test-${String(Date.now())}-${String(++keys)}`;
+    const sendWith = (
+      key: string,
+      role: Role,
+      recordNo: string,
+      action: "approve" | "reject" | "undo",
+      comment = "Checked against the quote.",
+    ) =>
+      call(t, as(role), "post", `${W}/sprs/${recordNo}/${action}`, {
+        csrf: true,
+        ...(action === "undo" ? {} : { body: { comment } }),
+      }).set(IDEMPOTENCY_KEY_HEADER, key);
+    const audited = async (action: string, recordNo: string) =>
+      (await auditEvents(t)).filter(
+        (e) => e.action === action && e.entityId === recordNo,
+      ).length;
+    const movesTo = (orderNo: string, toStatus: string) =>
+      database.client.workflowEvent.count({
+        where: { instance: { orderRef: orderNo }, toStatus },
+      });
+    /** Every refusal anyone wrote: a copy that ran and lost would leave one. */
+    const refusals = async () =>
+      (await auditEvents(t)).filter((e) => e.action.endsWith(".refused"))
+        .length;
+
+    it("applies a command once when it is sent twice with the same idempotency key", async () => {
+      const spr = await pendingSpr("100.00");
+      const key = freshKey();
+      const moves = await movesTo(spr.orderNo, "SprApproved");
+      const audits = await audited("workflows.spr.approved", spr.recordNo);
+
+      const first = await sendWith(key, "APPROVER", spr.recordNo, "approve");
+      const second = await sendWith(key, "APPROVER", spr.recordNo, "approve");
+
+      expect(first.status).toBe(200);
+      expect(second.status).toBe(200);
+      expect(await statusOf(spr.orderNo)).toBe("SprApproved");
+      expect((await movesTo(spr.orderNo, "SprApproved")) - moves).toBe(1);
+      expect(
+        (await audited("workflows.spr.approved", spr.recordNo)) - audits,
+      ).toBe(1);
+    });
+
+    it("returns the first result for a repeated key, without running it again", async () => {
+      const spr = await pendingSpr("100.00");
+      const key = freshKey();
+      const first = await sendWith(key, "APPROVER", spr.recordNo, "approve");
+      expect(first.status).toBe(200);
+      const undo = await sendWith(freshKey(), "APPROVER", spr.recordNo, "undo");
+      expect(undo.status).toBe(200);
+
+      const repeat = await sendWith(key, "APPROVER", spr.recordNo, "approve");
+
+      expect(repeat.status).toBe(200);
+      expect(repeat.body).toEqual(first.body);
+      // The repeat answered from memory: the undone order still waits.
+      expect(await statusOf(spr.orderNo)).toBe("AwaitingSpr");
+    });
+
+    it("answers a repeat from what it kept, running none of the command again", async () => {
+      const spr = await pendingSpr("100.00");
+      const key = freshKey();
+      const first = await sendWith(key, "APPROVER", spr.recordNo, "approve");
+      expect(first.status).toBe(200);
+      await sendWith(freshKey(), "APPROVER", spr.recordNo, "undo");
+      // Running it again would now be refused, and a refusal is audited.
+      const row = await database.client.workflowRecord.findUniqueOrThrow({
+        where: { recordNo: spr.recordNo },
+      });
+      await database.client.workflowRecord.update({
+        where: { recordNo: spr.recordNo },
+        data: {
+          data: {
+            ...(row.data as object),
+            requesterUserId: await idOf("APPROVER"),
+          },
+        },
+      });
+      const refusals = await audited("workflows.spr.refused", spr.recordNo);
+
+      const repeat = await sendWith(key, "APPROVER", spr.recordNo, "approve");
+
+      expect(repeat.status).toBe(200);
+      expect(repeat.body).toEqual(first.body);
+      expect(await audited("workflows.spr.refused", spr.recordNo)).toBe(
+        refusals,
+      );
+    });
+
+    it("runs once when the same key arrives twice at the same moment", async () => {
+      const spr = await pendingSpr("100.00");
+      const key = freshKey();
+      const moves = await movesTo(spr.orderNo, "SprApproved");
+      const refused = await refusals();
+
+      const [a, b] = await Promise.all([
+        sendWith(key, "APPROVER", spr.recordNo, "approve"),
+        sendWith(key, "APPROVER", spr.recordNo, "approve"),
+      ]);
+
+      expect([a.status, b.status]).toEqual([200, 200]);
+      expect(b.body).toEqual(a.body);
+      expect((await movesTo(spr.orderNo, "SprApproved")) - moves).toBe(1);
+      expect(await refusals()).toBe(refused);
+    });
+
+    it("passes an SPR on once when the same key arrives twice at the same moment", async () => {
+      const spr = await pendingSpr("9000.00");
+      const key = freshKey();
+      const audits = await audited("workflows.spr.passed-on", spr.recordNo);
+      const refused = await refusals();
+
+      const [a, b] = await Promise.all([
+        sendWith(key, "APPROVER", spr.recordNo, "approve"),
+        sendWith(key, "APPROVER", spr.recordNo, "approve"),
+      ]);
+
+      expect([a.status, b.status]).toEqual([200, 200]);
+      expect(b.body).toEqual(a.body);
+      expect(
+        (await audited("workflows.spr.passed-on", spr.recordNo)) - audits,
+      ).toBe(1);
+      expect(await refusals()).toBe(refused);
+    });
+
+    it("undoes once when the same key arrives twice at the same moment", async () => {
+      const spr = await pendingSpr("100.00");
+      await decide("APPROVER", spr.recordNo, "approve");
+      const key = freshKey();
+      const moves = await movesTo(spr.orderNo, "AwaitingSpr");
+      const refused = await refusals();
+
+      const [a, b] = await Promise.all([
+        sendWith(key, "APPROVER", spr.recordNo, "undo"),
+        sendWith(key, "APPROVER", spr.recordNo, "undo"),
+      ]);
+
+      expect([a.status, b.status]).toEqual([200, 200]);
+      expect(b.body).toEqual(a.body);
+      expect(await statusOf(spr.orderNo)).toBe("AwaitingSpr");
+      expect((await movesTo(spr.orderNo, "AwaitingSpr")) - moves).toBe(1);
+      expect(await refusals()).toBe(refused);
+    });
+
+    it("refuses the same key for a different request, and changes nothing", async () => {
+      const spr = await pendingSpr("100.00");
+      const other = await pendingSpr("100.00");
+      const key = freshKey();
+      await sendWith(key, "APPROVER", spr.recordNo, "approve");
+
+      const otherOutcome = await sendWith(
+        key,
+        "APPROVER",
+        spr.recordNo,
+        "reject",
+      );
+      const otherComment = await sendWith(
+        key,
+        "APPROVER",
+        spr.recordNo,
+        "approve",
+        "A different comment",
+      );
+      const otherSpr = await sendWith(
+        key,
+        "APPROVER",
+        other.recordNo,
+        "approve",
+      );
+
+      for (const res of [otherOutcome, otherComment, otherSpr]) {
+        expect(res.status).toBe(409);
+        expect(errorEnvelopeSchema.parse(res.body).error.message).toBe(
+          IDEMPOTENCY_KEY_REUSED_MESSAGE,
+        );
+      }
+      expect(await statusOf(spr.orderNo)).toBe("SprApproved");
+      expect(await statusOf(other.orderNo)).toBe("AwaitingSpr");
+    });
+
+    it("keeps each person's keys apart, even for the same request", async () => {
+      const spr = await pendingSpr("9000.00");
+      const key = freshKey();
+      const passed = await sendWith(key, "APPROVER", spr.recordNo, "approve");
+      expect(sprDecisionResponseSchema.parse(passed.body).data.message).toBe(
+        SPR_PASSED_ON_MESSAGE,
+      );
+
+      const res = await sendWith(key, "MANAGEMENT", spr.recordNo, "approve");
+
+      expect(res.status).toBe(200);
+      expect(sprDecisionResponseSchema.parse(res.body).data.message).toBe(
+        SPR_DECISION_RECORDED_MESSAGE,
+      );
+      expect(await statusOf(spr.orderNo)).toBe("SprApproved");
+    });
+
+    it("replays a rejection as well", async () => {
+      const spr = await pendingSpr("100.00");
+      const key = freshKey();
+
+      const first = await sendWith(key, "APPROVER", spr.recordNo, "reject");
+      const second = await sendWith(key, "APPROVER", spr.recordNo, "reject");
+
+      expect(first.status).toBe(200);
+      expect(second.status).toBe(200);
+      expect(second.body).toEqual(first.body);
+      expect(await statusOf(spr.orderNo)).toBe("StockChecked");
+    });
+
+    it("passes an SPR on once above the limit, however often it is sent", async () => {
+      const spr = await pendingSpr("9000.00");
+      const key = freshKey();
+      const audits = await audited("workflows.spr.passed-on", spr.recordNo);
+
+      const first = await sendWith(key, "APPROVER", spr.recordNo, "approve");
+      const second = await sendWith(key, "APPROVER", spr.recordNo, "approve");
+
+      expect(first.status).toBe(200);
+      expect(second.status).toBe(200);
+      expect(sprDecisionResponseSchema.parse(second.body).data.message).toBe(
+        SPR_PASSED_ON_MESSAGE,
+      );
+      expect(second.body).toEqual(first.body);
+      expect(
+        (await audited("workflows.spr.passed-on", spr.recordNo)) - audits,
+      ).toBe(1);
+    });
+
+    it("undoes once, however often the undo is sent", async () => {
+      const spr = await pendingSpr("100.00");
+      await decide("APPROVER", spr.recordNo, "approve");
+      const key = freshKey();
+      const audits = await audited(
+        "workflows.spr.decision-undone",
+        spr.recordNo,
+      );
+
+      const first = await sendWith(key, "APPROVER", spr.recordNo, "undo");
+      const second = await sendWith(key, "APPROVER", spr.recordNo, "undo");
+
+      expect(first.status).toBe(200);
+      expect(second.status).toBe(200);
+      expect(second.body).toEqual(first.body);
+      expect(await statusOf(spr.orderNo)).toBe("AwaitingSpr");
+      expect(
+        (await audited("workflows.spr.decision-undone", spr.recordNo)) - audits,
+      ).toBe(1);
+    });
+
+    it("still refuses and audits a request that was refused, every time", async () => {
+      const spr = await pendingSpr("10.00", {
+        requesterUserId: await idOf("APPROVER"),
+      });
+      const key = freshKey();
+      const audits = await audited("workflows.spr.refused", spr.recordNo);
+
+      const first = await sendWith(key, "APPROVER", spr.recordNo, "approve");
+      const second = await sendWith(key, "APPROVER", spr.recordNo, "approve");
+
+      expect(first.status).toBe(403);
+      expect(second.status).toBe(403);
+      expect(
+        (await audited("workflows.spr.refused", spr.recordNo)) - audits,
+      ).toBe(2);
+      expect(
+        await database.client.workflowCommand.count({ where: { key } }),
+      ).toBe(0);
+    });
+
+    it("refuses both copies of a refused request sent at the same moment, auditing each", async () => {
+      const spr = await pendingSpr("10.00", {
+        requesterUserId: await idOf("APPROVER"),
+      });
+      const key = freshKey();
+      const audits = await audited("workflows.spr.refused", spr.recordNo);
+
+      const [a, b] = await Promise.all([
+        sendWith(key, "APPROVER", spr.recordNo, "approve"),
+        sendWith(key, "APPROVER", spr.recordNo, "approve"),
+      ]);
+
+      expect([a.status, b.status]).toEqual([403, 403]);
+      expect(
+        (await audited("workflows.spr.refused", spr.recordNo)) - audits,
+      ).toBe(2);
+      expect(
+        await database.client.workflowCommand.count({ where: { key } }),
+      ).toBe(0);
+    });
+
+    it("rolls a command back when its claim was taken over before it kept its answer", async () => {
+      const commands = t.app.get(WorkflowCommandRepository);
+      const spr = await pendingSpr("100.00");
+      const claimId = await commands.claim(
+        {
+          actorUserId: await idOf("APPROVER"),
+          key: freshKey(),
+          command: "spr.approve",
+          requestHash: "a request",
+        },
+        new Date(),
+      );
+      if (!claimId) throw new Error("The key was not claimed");
+      // As a later copy does when it takes over an abandoned claim.
+      await commands.release(claimId);
+
+      await expect(
+        database.transaction(async () => {
+          await database.client.workflowRecord.update({
+            where: { recordNo: spr.recordNo },
+            data: { navisionNo: "TAKEN-OVER" },
+          });
+          await commands.complete(claimId, { said: "late" }, new Date());
+        }),
+      ).rejects.toThrow("a retry took it over");
+      const row = await database.client.workflowRecord.findUniqueOrThrow({
+        where: { recordNo: spr.recordNo },
+      });
+      expect(row.navisionNo).not.toBe("TAKEN-OVER");
+    });
+
+    it("answers a repeat without a key as before: it is refused, and nothing is kept", async () => {
+      const spr = await pendingSpr("100.00");
+      const kept = await database.client.workflowCommand.count();
+      await decide("APPROVER", spr.recordNo, "approve");
+
+      const again = await decide("APPROVER", spr.recordNo, "approve");
+
+      expect(again.status).toBe(409);
+      expect(await database.client.workflowCommand.count()).toBe(kept);
+    });
+
+    it("refuses a key that is not a key, before doing anything", async () => {
+      const spr = await pendingSpr("100.00");
+
+      for (const key of ["short12", "has spaces in it", "x".repeat(101)]) {
+        const res = await sendWith(key, "APPROVER", spr.recordNo, "approve");
+        expect(res.status).toBe(400);
+        expect(errorEnvelopeSchema.parse(res.body).error.code).toBe(
+          "VALIDATION_FAILED",
+        );
+      }
+      // A header sent twice reaches the API as both values joined by a comma.
+      const twice = await sendWith(
+        `${freshKey()}, ${freshKey()}`,
+        "APPROVER",
+        spr.recordNo,
+        "approve",
+      );
+      expect(twice.status).toBe(400);
+      expect(await statusOf(spr.orderNo)).toBe("AwaitingSpr");
+    });
+
+    it("accepts the shortest and the longest key", async () => {
+      const short = await pendingSpr("100.00");
+      const long = await pendingSpr("100.00");
+      const stamp = String(Date.now());
+
+      const eight = await sendWith(
+        stamp.slice(-8),
+        "APPROVER",
+        short.recordNo,
+        "approve",
+      );
+      const hundred = await sendWith(
+        stamp.padStart(100, "k"),
+        "APPROVER",
+        long.recordNo,
+        "approve",
+      );
+
+      expect(eight.status).toBe(200);
+      expect(hundred.status).toBe(200);
     });
   });
 

@@ -1,6 +1,7 @@
 // Area 2 models: workflow definitions, instances, tasks, events, notifications,
-// payment confirmations, OrderPilot's own record numbers and the configuration
-// of each document type. Owner: Azri (the base is C-1).
+// payment confirmations, OrderPilot's own record numbers, the configuration
+// of each document type, and the commands sent with an idempotency key.
+// Owner: Azri (the base is C-1).
 //
 // Two rules for this file:
 // - A workflow instance's `status` is plain text on purpose. Only the state
@@ -128,8 +129,9 @@ model WorkflowEvent {
   actorName      String
   summary        String
   data           Json?
-  /// The caller's key, so a retried command finds its first result instead of
-  /// running twice. Null for events nobody asked for.
+  /// Makes an event safe to write twice: the same key is the same event, as for
+  /// the sweep's (C-4). A person's key for a command is kept in WorkflowCommand,
+  /// with the answer it got. Null for events with no key.
   idempotencyKey String?
   occurredAt     DateTime @default(now()) @db.Timestamptz(3)
 
@@ -138,6 +140,33 @@ model WorkflowEvent {
   @@unique([instanceId, idempotencyKey])
   @@index([instanceId, occurredAt])
   @@index([type, occurredAt])
+}
+
+/// A command someone sent with an Idempotency-Key. The key is claimed before
+/// the command runs, so a copy sent at the same moment waits instead of running.
+/// The answer is written in the command's own transaction, and a command that
+/// fails gives its claim back. A repeat gets the answer and runs nothing.
+model WorkflowCommand {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  /// Keys are per person, so two people can never collide. No relation, see the top.
+  actorUserId String    @db.Uuid
+  key         String
+  /// What was asked, such as `spr.approve`.
+  command     String
+  /// A hash of the command, its target and its body, compared on a repeat. The
+  /// same key with a different request is refused.
+  requestHash String
+  /// The answer as it was sent, which can include the comment, as the SPR's
+  /// record and the audit trail do. Null while the command runs.
+  response    Json?
+  /// When the answer was written. Null means the command is still running, or
+  /// stopped without giving its claim back, which a later copy can take over.
+  completedAt DateTime? @db.Timestamptz(3)
+  createdAt   DateTime  @default(now()) @db.Timestamptz(3)
+
+  @@unique([actorUserId, key])
+  /// For clearing out old keys, which nothing does yet.
+  @@index([createdAt])
 }
 
 /// When a kind of task is due, and who is told if nobody acts. Configuration:
