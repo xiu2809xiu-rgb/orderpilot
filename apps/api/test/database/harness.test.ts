@@ -3,6 +3,8 @@ import { Redis } from "ioredis";
 import pg from "pg";
 import { AuditEventRepository } from "../../src/audit/audit-event.repository.js";
 import { AuditService } from "../../src/audit/audit.service.js";
+import { demoEmail } from "../../src/auth/demo-accounts.js";
+import { UserRepository } from "../../src/users/user.repository.js";
 import { runSeed } from "../../src/database/seed/run-seed.js";
 import { ObjectStorage } from "../../src/storage/object-storage.js";
 import { assertSafeToReset } from "../support/infrastructure.js";
@@ -103,6 +105,31 @@ describe("the test harness", () => {
       "Synthetic demo data: 40 customers, 12 vendors, 300 items, 120 orders",
     );
     expect(lines[1]).toContain("started already");
+  });
+
+  it("renames a demo persona whose stored name is out of date, with an audit event, and only that one", async () => {
+    await resetTestData();
+    const users = t.app.get(UserRepository);
+    const events = t.app.get(AuditEventRepository);
+    const approver = await users.findByEmail(demoEmail("APPROVER"));
+    const other = await users.findByEmail(demoEmail("SUPPORT"));
+    if (!approver || !other) throw new Error("the demo users are not seeded");
+    await users.setDisplayName(approver.id, "Earlier Name");
+    const before = (await events.list({ page: 1, pageSize: 50 })).meta.total;
+
+    const lines: string[] = [];
+    await runSeed(testConfig(), (line) => lines.push(line));
+
+    expect((await users.findByEmail(demoEmail("APPROVER")))?.displayName).toBe(
+      approver.displayName,
+    );
+    expect((await users.findByEmail(demoEmail("SUPPORT")))?.displayName).toBe(
+      other.displayName,
+    );
+    expect(lines.join("\n")).toContain("1 renamed");
+    expect((await events.list({ page: 1, pageSize: 50 })).meta.total).toBe(
+      before + 1,
+    );
   });
 });
 

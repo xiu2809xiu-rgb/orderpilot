@@ -89,9 +89,31 @@ const demoUsers: Seeder = {
     const password = config.auth.demoPassword;
     let created = 0;
     let passwords = 0;
+    let renamed = 0;
     for (const account of DEMO_ACCOUNTS) {
       const existing = await users.findByEmail(account.email);
       if (existing) {
+        // A demo persona renamed in the code (the approver was, in P-84) must
+        // reach databases that were seeded earlier. Only the demo accounts
+        // matched by email are touched, never a user an admin created.
+        if (existing.displayName !== account.displayName) {
+          await database.transaction(async () => {
+            await users.setDisplayName(existing.id, account.displayName);
+            await audit.record({
+              actor: { kind: "system", name: "seed" },
+              action: "user.renamed",
+              entityType: "User",
+              entityId: existing.id,
+              summary: `${existing.displayName} is now shown as ${account.displayName}`,
+              changes: {
+                from: existing.displayName,
+                to: account.displayName,
+              },
+              traceId: "seed",
+            });
+          });
+          renamed += 1;
+        }
         if (
           password !== null &&
           !(await hasher.check(existing.passwordHash, password))
@@ -138,7 +160,7 @@ const demoUsers: Seeder = {
       password === null
         ? " (no DEMO_PASSWORD, so none can sign in by password)"
         : "";
-    return `${String(created)} created, ${String(passwords)} passwords reset, ${String(DEMO_ACCOUNTS.length)} accounts in all${note}`;
+    return `${String(created)} created, ${String(passwords)} passwords reset, ${String(renamed)} renamed, ${String(DEMO_ACCOUNTS.length)} accounts in all${note}`;
   },
 };
 
