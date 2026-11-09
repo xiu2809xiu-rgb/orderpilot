@@ -1,12 +1,12 @@
 {
   "label": "Synthetic demo data",
-  "file": "invoice-so-0005.pdf",
+  "file": "invoice-so-0001.pdf",
   "documentType": "SALES_INVOICE",
-  "documentNumber": "SI-100004",
+  "documentNumber": "SI-100000",
   "layout": "house",
   "readable": "text",
-  "orderNo": "SO-0005",
-  "customerNo": "C-0015",
+  "orderNo": "SO-0001",
+  "customerNo": "C-0022",
   "purpose": "A commercial invoice on 30-day terms, with its due date.",
   "pageCount": 1,
   "page": {
@@ -22,17 +22,17 @@
       "label": "Invoice number",
       "group": "header",
       "lineIndex": null,
-      "value": "SI-100004",
-      "text": "SI-100004",
+      "value": "SI-100000",
+      "text": "SI-100000",
       "page": 1,
       "box": [
-        0.8585,
+        0.8582,
         0.0763,
-        0.083,
+        0.0834,
         0.0108
       ],
       "id": "invoiceNumber",
-      "confidence": 0.96,
+      "confidence": 0.94,
       "uncertain": false
     },
     {
@@ -40,17 +40,17 @@
       "label": "Invoice date",
       "group": "header",
       "lineIndex": null,
-      "value": "2026-09-30",
-      "text": "30 Sep 2026",
+      "value": "2026-09-22",
+      "text": "22 Sep 2026",
       "page": 1,
       "box": [
-        0.8422,
+        0.8428,
         0.0906,
-        0.0994,
+        0.0987,
         0.0122
       ],
       "id": "invoiceDate",
-      "confidence": 0.95,
+      "confidence": 0.97,
       "uncertain": false
     },
     {
@@ -58,17 +58,17 @@
       "label": "Due date",
       "group": "header",
       "lineIndex": null,
-      "value": "2026-10-30",
-      "text": "30 Oct 2026",
+      "value": "2026-10-22",
+      "text": "22 Oct 2026",
       "page": 1,
       "box": [
-        0.8438,
+        0.8445,
         0.1048,
-        0.0977,
+        0.0971,
         0.0108
       ],
       "id": "dueDate",
-      "confidence": 0.97,
+      "confidence": 0.94,
       "uncertain": false
     },
     {
@@ -76,13 +76,13 @@
       "label": "PO number",
       "group": "header",
       "lineIndex": null,
-      "value": "PO-AE-4128",
-      "text": "PO-AE-4128",
+      "value": "PO-LK-4100",
+      "text": "PO-LK-4100",
       "page": 1,
       "box": [
-        0.847,
+        0.8466,
         0.1191,
-        0.0945,
+        0.0949,
         0.0108
       ],
       "id": "poNumber",
@@ -94,17 +94,17 @@
       "label": "Customer",
       "group": "header",
       "lineIndex": null,
-      "value": "Marjana Technology FZE",
-      "text": "Marjana Technology FZE",
+      "value": "Galvera Office Systems (Pvt) Ltd",
+      "text": "Galvera Office Systems (Pvt) Ltd",
       "page": 1,
       "box": [
         0.0585,
-        0.186,
-        0.2054,
-        0.0133
+        0.1857,
+        0.2724,
+        0.0135
       ],
       "id": "customerName",
-      "confidence": 0.95,
+      "confidence": 0.96,
       "uncertain": false
     },
     {
@@ -112,13 +112,13 @@
       "label": "Bill to",
       "group": "header",
       "lineIndex": null,
-      "value": "30 Palm Terrace, Dubai PO Box 00000, United Arab Emirates",
-      "text": "30 Palm Terrace\nDubai PO Box 00000\nUnited Arab Emirates",
+      "value": "91 Sirimal Place, Unit 11B, Galle 80814, Sri Lanka",
+      "text": "91 Sirimal Place, Unit 11B\nGalle 80814\nSri Lanka",
       "page": 1,
       "box": [
         0.0585,
         0.2022,
-        0.1558,
+        0.177,
         0.0393
       ],
       "id": "billTo",
@@ -130,13 +130,13 @@
       "label": "Ship to",
       "group": "header",
       "lineIndex": null,
-      "value": "Marjana Technology FZE (Warehouse), Godown 6, Spice Quay Street, Dubai PO Box 00000, United Arab Emirates",
-      "text": "Marjana Technology FZE (Warehouse)\nGodown 6, Spice Quay Street\nDubai PO Box 00000\nUnited Arab Emirates",
+      "value": "Galvera Office Systems (Pvt) Ltd, 91 Sirimal Place, Unit 11B, Galle 80814, Sri Lanka",
+      "text": "Galvera Office Systems (Pvt) Ltd\n91 Sirimal Place, Unit 11B\nGalle 80814\nSri Lanka",
       "page": 1,
       "box": [
         0.498,
         0.1854,
-        0.2697,
+        0.2343,
         0.0527
       ],
       "id": "shipTo",
@@ -158,7 +158,7 @@
         0.0123
       ],
       "id": "incoterms",
-      "confidence": 0.96,
+      "confidence": 0.98,
       "uncertain": false
     },
     {
@@ -176,7 +176,7 @@
         0.0122
       ],
       "id": "paymentTerms",
-      "confidence": 0.98,
+      "confidence": 0.99,
       "uncertain": false
     },
     {
@@ -194,7 +194,7 @@
         0.0108
       ],
       "id": "currency",
-      "confidence": 0.97,
+      "confidence": 0.98,
       "uncertain": false
     },
     {
@@ -202,14 +202,14 @@
       "label": "Part number",
       "group": "lines",
       "lineIndex": 0,
-      "value": "QUO-PS-B-2540",
-      "text": "QUO-PS-B-2540",
+      "value": "4XZZ0035",
+      "text": "4XZZ0035",
       "page": 1,
       "box": [
         0.1072,
         0.358,
-        0.122,
-        0.0112
+        0.0769,
+        0.0106
       ],
       "id": "lines.partNumber[0]",
       "confidence": 0.98,
@@ -220,17 +220,17 @@
       "label": "Description",
       "group": "lines",
       "lineIndex": 0,
-      "value": "Quorrin PoE Switch 8-Port Pro",
-      "text": "Quorrin PoE Switch 8-Port Pro",
+      "value": "Lenovo Notebook 14-inch",
+      "text": "Lenovo Notebook 14-inch",
       "page": 1,
       "box": [
         0.2819,
-        0.358,
-        0.214,
-        0.0112
+        0.3582,
+        0.1807,
+        0.0104
       ],
       "id": "lines.description[0]",
-      "confidence": 0.99,
+      "confidence": 0.98,
       "uncertain": false
     },
     {
@@ -256,17 +256,17 @@
       "label": "Unit price",
       "group": "lines",
       "lineIndex": 0,
-      "value": "127.26",
-      "text": "127.26",
+      "value": "377.43",
+      "text": "377.43",
       "page": 1,
       "box": [
-        0.7477,
+        0.7447,
         0.358,
-        0.0489,
+        0.0519,
         0.0106
       ],
       "id": "lines.unitPrice[0]",
-      "confidence": 0.96,
+      "confidence": 0.97,
       "uncertain": false
     },
     {
@@ -274,17 +274,17 @@
       "label": "Amount",
       "group": "lines",
       "lineIndex": 0,
-      "value": "1272.60",
-      "text": "1,272.60",
+      "value": "3774.30",
+      "text": "3,774.30",
       "page": 1,
       "box": [
-        0.8712,
+        0.8683,
         0.358,
-        0.0619,
+        0.0648,
         0.0121
       ],
       "id": "lines.amount[0]",
-      "confidence": 0.94,
+      "confidence": 0.98,
       "uncertain": false
     },
     {
@@ -292,13 +292,13 @@
       "label": "Part number",
       "group": "lines",
       "lineIndex": 1,
-      "value": "DRA-CH-A-2482",
-      "text": "DRA-CH-A-2482",
+      "value": "210-ZZ0006",
+      "text": "210-ZZ0006",
       "page": 1,
       "box": [
         0.1072,
         0.383,
-        0.1207,
+        0.0901,
         0.0106
       ],
       "id": "lines.partNumber[1]",
@@ -310,14 +310,14 @@
       "label": "Description",
       "group": "lines",
       "lineIndex": 1,
-      "value": "Dravik Laptop Charger 65 W",
-      "text": "Dravik Laptop Charger 65 W",
+      "value": "Dell Monitor 24-inch Pro",
+      "text": "Dell Monitor 24-inch Pro",
       "page": 1,
       "box": [
         0.2819,
         0.383,
-        0.2006,
-        0.0121
+        0.1736,
+        0.0106
       ],
       "id": "lines.description[1]",
       "confidence": 0.94,
@@ -328,17 +328,17 @@
       "label": "Quantity",
       "group": "lines",
       "lineIndex": 1,
-      "value": "200",
-      "text": "200",
+      "value": "12",
+      "text": "12",
       "page": 1,
       "box": [
-        0.6359,
+        0.6501,
         0.383,
-        0.033,
-        0.0106
+        0.0189,
+        0.0104
       ],
       "id": "lines.quantity[1]",
-      "confidence": 0.98,
+      "confidence": 0.96,
       "uncertain": false
     },
     {
@@ -346,17 +346,17 @@
       "label": "Unit price",
       "group": "lines",
       "lineIndex": 1,
-      "value": "24.87",
-      "text": "24.87",
+      "value": "138.94",
+      "text": "138.94",
       "page": 1,
       "box": [
-        0.7534,
+        0.7472,
         0.383,
-        0.0432,
+        0.0494,
         0.0106
       ],
       "id": "lines.unitPrice[1]",
-      "confidence": 0.97,
+      "confidence": 0.96,
       "uncertain": false
     },
     {
@@ -364,16 +364,106 @@
       "label": "Amount",
       "group": "lines",
       "lineIndex": 1,
-      "value": "4974.00",
-      "text": "4,974.00",
+      "value": "1667.28",
+      "text": "1,667.28",
       "page": 1,
       "box": [
-        0.8665,
+        0.8722,
         0.383,
-        0.0666,
+        0.061,
         0.0121
       ],
       "id": "lines.amount[1]",
+      "confidence": 0.96,
+      "uncertain": false
+    },
+    {
+      "key": "lines.partNumber",
+      "label": "Part number",
+      "group": "lines",
+      "lineIndex": 2,
+      "value": "VB-ZZ0146",
+      "text": "VB-ZZ0146",
+      "page": 1,
+      "box": [
+        0.1072,
+        0.4079,
+        0.0805,
+        0.0106
+      ],
+      "id": "lines.partNumber[2]",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "lines.description",
+      "label": "Description",
+      "group": "lines",
+      "lineIndex": 2,
+      "value": "Verbatim USB Flash Drive 64 GB",
+      "text": "Verbatim USB Flash Drive 64 GB",
+      "page": 1,
+      "box": [
+        0.2819,
+        0.4079,
+        0.2287,
+        0.0106
+      ],
+      "id": "lines.description[2]",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "lines.quantity",
+      "label": "Quantity",
+      "group": "lines",
+      "lineIndex": 2,
+      "value": "40",
+      "text": "40",
+      "page": 1,
+      "box": [
+        0.6456,
+        0.4079,
+        0.0233,
+        0.0106
+      ],
+      "id": "lines.quantity[2]",
+      "confidence": 0.96,
+      "uncertain": false
+    },
+    {
+      "key": "lines.unitPrice",
+      "label": "Unit price",
+      "group": "lines",
+      "lineIndex": 2,
+      "value": "8.98",
+      "text": "8.98",
+      "page": 1,
+      "box": [
+        0.7624,
+        0.4079,
+        0.0342,
+        0.0106
+      ],
+      "id": "lines.unitPrice[2]",
+      "confidence": 0.96,
+      "uncertain": false
+    },
+    {
+      "key": "lines.amount",
+      "label": "Amount",
+      "group": "lines",
+      "lineIndex": 2,
+      "value": "359.20",
+      "text": "359.20",
+      "page": 1,
+      "box": [
+        0.8794,
+        0.4079,
+        0.0537,
+        0.0106
+      ],
+      "id": "lines.amount[2]",
       "confidence": 0.96,
       "uncertain": false
     },
@@ -382,17 +472,17 @@
       "label": "Total (USD)",
       "group": "totals",
       "lineIndex": null,
-      "value": "6246.60",
-      "text": "6,246.60",
+      "value": "5800.78",
+      "text": "5,800.78",
       "page": 1,
       "box": [
-        0.8495,
-        0.4176,
-        0.0853,
+        0.85,
+        0.4426,
+        0.0849,
         0.0144
       ],
       "id": "total",
-      "confidence": 0.99,
+      "confidence": 0.97,
       "uncertain": false
     }
   ]

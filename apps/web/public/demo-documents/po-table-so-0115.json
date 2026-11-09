@@ -1,0 +1,309 @@
+{
+  "label": "Synthetic demo data",
+  "file": "po-table-so-0115.pdf",
+  "documentType": "CUSTOMER_PO",
+  "documentNumber": "PO-BD-4898",
+  "layout": "table",
+  "readable": "text",
+  "orderNo": "SO-0115",
+  "customerNo": "C-0028",
+  "purpose": "A dense table printout. Its task says to confirm 3 uncertain fields.",
+  "pageCount": 1,
+  "page": {
+    "width": 595.28,
+    "height": 841.89
+  },
+  "confidenceThreshold": 0.9,
+  "uncertainFieldCount": 3,
+  "mismatch": null,
+  "fields": [
+    {
+      "key": "customerName",
+      "label": "Customer",
+      "group": "header",
+      "lineIndex": null,
+      "value": "Meghora Distribution Ltd",
+      "text": "Meghora Distribution Ltd",
+      "page": 1,
+      "box": [
+        0.0585,
+        0.045,
+        0.23,
+        0.0144
+      ],
+      "id": "customerName",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "poNumber",
+      "label": "PO number",
+      "group": "header",
+      "lineIndex": null,
+      "value": "PO-BD-4898",
+      "text": "PO-BD-4898",
+      "page": 1,
+      "box": [
+        0.045,
+        0.1094,
+        0.0827,
+        0.0097
+      ],
+      "id": "poNumber",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "poDate",
+      "label": "PO date",
+      "group": "header",
+      "lineIndex": null,
+      "value": "2026-11-02",
+      "text": "02 Nov 2026",
+      "page": 1,
+      "box": [
+        0.3642,
+        0.1094,
+        0.0905,
+        0.0097
+      ],
+      "id": "poDate",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "requiredDate",
+      "label": "Required by",
+      "group": "header",
+      "lineIndex": null,
+      "value": "2026-11-16",
+      "text": "16 Nov 2026",
+      "page": 1,
+      "box": [
+        0.6834,
+        0.1094,
+        0.0905,
+        0.0097
+      ],
+      "id": "requiredDate",
+      "confidence": 0.97,
+      "uncertain": false
+    },
+    {
+      "key": "buyerContact",
+      "label": "Buyer",
+      "group": "header",
+      "lineIndex": null,
+      "value": "Leilani Marchetti",
+      "text": "Leilani Marchetti",
+      "page": 1,
+      "box": [
+        0.045,
+        0.1405,
+        0.1377,
+        0.0095
+      ],
+      "id": "buyerContact",
+      "confidence": 0.97,
+      "uncertain": false
+    },
+    {
+      "key": "currency",
+      "label": "Currency",
+      "group": "header",
+      "lineIndex": null,
+      "value": "USD",
+      "text": "USD",
+      "page": 1,
+      "box": [
+        0.3642,
+        0.1403,
+        0.0276,
+        0.0097
+      ],
+      "id": "currency",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "incoterms",
+      "label": "Incoterms",
+      "group": "header",
+      "lineIndex": null,
+      "value": "FOB Singapore",
+      "text": "FOB Singapore",
+      "page": 1,
+      "box": [
+        0.6834,
+        0.1403,
+        0.1062,
+        0.0111
+      ],
+      "id": "incoterms",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "paymentTerms",
+      "label": "Payment terms",
+      "group": "header",
+      "lineIndex": null,
+      "value": "Net 60 days from invoice date",
+      "text": "Net 60 days from invoice date",
+      "page": 1,
+      "box": [
+        0.045,
+        0.1712,
+        0.232,
+        0.011
+      ],
+      "id": "paymentTerms",
+      "confidence": 0.82,
+      "uncertain": true
+    },
+    {
+      "key": "billTo",
+      "label": "Bill to",
+      "group": "header",
+      "lineIndex": null,
+      "value": "71 Tamarell Road, Unit 5B, Chattogram 4136, Bangladesh",
+      "text": "71 Tamarell Road, Unit 5B\nChattogram 4136\nBangladesh",
+      "page": 1,
+      "box": [
+        0.045,
+        0.2212,
+        0.2006,
+        0.035
+      ],
+      "id": "billTo",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "shipTo",
+      "label": "Ship to",
+      "group": "header",
+      "lineIndex": null,
+      "value": "Meghora Distribution Ltd, 71 Tamarell Road, Unit 5B, Chattogram 4136, Bangladesh",
+      "text": "Meghora Distribution Ltd\n71 Tamarell Road, Unit 5B\nChattogram 4136\nBangladesh",
+      "page": 1,
+      "box": [
+        0.3642,
+        0.2212,
+        0.2006,
+        0.0471
+      ],
+      "id": "shipTo",
+      "confidence": 0.6,
+      "uncertain": true
+    },
+    {
+      "key": "lines.partNumber",
+      "label": "Part number",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "LXZZ0140-BNNNG",
+      "text": "LXZZ0140-BNNNG",
+      "page": 1,
+      "box": [
+        0.0837,
+        0.3156,
+        0.1056,
+        0.0092
+      ],
+      "id": "lines.partNumber[0]",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "lines.description",
+      "label": "Description",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "Lexar Portable SSD 1 TB Pro",
+      "text": "Lexar Portable SSD 1 TB Pro",
+      "page": 1,
+      "box": [
+        0.2348,
+        0.3156,
+        0.2,
+        0.0092
+      ],
+      "id": "lines.description[0]",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "lines.quantity",
+      "label": "Quantity",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "50",
+      "text": "50",
+      "page": 1,
+      "box": [
+        0.5765,
+        0.3156,
+        0.0185,
+        0.0092
+      ],
+      "id": "lines.quantity[0]",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "lines.unitPrice",
+      "label": "Unit price",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "113.03",
+      "text": "113.03",
+      "page": 1,
+      "box": [
+        0.6382,
+        0.3156,
+        0.0476,
+        0.0092
+      ],
+      "id": "lines.unitPrice[0]",
+      "confidence": 0.76,
+      "uncertain": true
+    },
+    {
+      "key": "lines.amount",
+      "label": "Amount",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "5651.50",
+      "text": "5,651.50",
+      "page": 1,
+      "box": [
+        0.7815,
+        0.3156,
+        0.0621,
+        0.0104
+      ],
+      "id": "lines.amount[0]",
+      "confidence": 0.96,
+      "uncertain": false
+    },
+    {
+      "key": "total",
+      "label": "Total (USD)",
+      "group": "totals",
+      "lineIndex": null,
+      "value": "5651.50",
+      "text": "5,651.50",
+      "page": 1,
+      "box": [
+        0.8717,
+        0.3403,
+        0.0766,
+        0.0123
+      ],
+      "id": "total",
+      "confidence": 0.98,
+      "uncertain": false
+    }
+  ]
+}

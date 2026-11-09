@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-import type { GroundTruth } from "../demo.js";
+import { DEMO_FILES, type GroundTruth } from "../demo.js";
 import { generateDemoFiles, type GeneratedFile } from "../files.js";
 
 export interface Generated {
@@ -29,6 +29,22 @@ export function generated(): Promise<Generated> {
     return { files, pdf, truth };
   });
   return cached;
+}
+
+/** The stem of the one scanned demo file, whichever order the data picks for it. */
+export function scanStem(): string {
+  const scan = DEMO_FILES.find((f) => f.scanned);
+  if (!scan) throw new Error("No scanned demo file");
+  return scan.stem;
+}
+
+/** The first demo PO, the boxed two-page form, and its order. */
+export function boxedPo() {
+  const file = DEMO_FILES.find(
+    (f) => f.kind === "CUSTOMER_PO" && f.stem.startsWith("po-boxed-"),
+  );
+  if (!file) throw new Error("No boxed demo PO");
+  return file;
 }
 
 /** The folder the web app serves the committed files from. */

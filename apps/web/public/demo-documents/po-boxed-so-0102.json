@@ -1,20 +1,20 @@
 {
   "label": "Synthetic demo data",
-  "file": "po-boxed-so-0115.pdf",
+  "file": "po-boxed-so-0102.pdf",
   "documentType": "CUSTOMER_PO",
-  "documentNumber": "PO-IN-4898",
+  "documentNumber": "PO-IN-4807",
   "layout": "boxed",
   "readable": "text",
-  "orderNo": "SO-0115",
-  "customerNo": "C-0001",
-  "purpose": "A boxed form, two pages, with the payment terms overleaf. Its task says to confirm 3 uncertain fields.",
+  "orderNo": "SO-0102",
+  "customerNo": "C-0036",
+  "purpose": "A boxed form, two pages, with the payment terms overleaf. Its task says to confirm 2 uncertain fields, the one to try in the sales pilot.",
   "pageCount": 2,
   "page": {
     "width": 595.28,
     "height": 841.89
   },
   "confidenceThreshold": 0.9,
-  "uncertainFieldCount": 3,
+  "uncertainFieldCount": 2,
   "mismatch": null,
   "fields": [
     {
@@ -22,17 +22,17 @@
       "label": "Customer",
       "group": "header",
       "lineIndex": null,
-      "value": "Quillon Harbour Traders",
-      "text": "Quillon Harbour Traders",
+      "value": "Vellamar Network Stores",
+      "text": "Vellamar Network Stores",
       "page": 1,
       "box": [
         0.0753,
         0.0625,
-        0.2793,
-        0.016
+        0.2966,
+        0.0152
       ],
       "id": "customerName",
-      "confidence": 0.99,
+      "confidence": 0.94,
       "uncertain": false
     },
     {
@@ -40,17 +40,17 @@
       "label": "PO number",
       "group": "header",
       "lineIndex": null,
-      "value": "PO-IN-4898",
-      "text": "PO-IN-4898",
+      "value": "PO-IN-4807",
+      "text": "PO-IN-4807",
       "page": 1,
       "box": [
         0.0702,
         0.1159,
-        0.1034,
+        0.1032,
         0.0117
       ],
       "id": "poNumber",
-      "confidence": 0.94,
+      "confidence": 0.98,
       "uncertain": false
     },
     {
@@ -58,17 +58,17 @@
       "label": "PO date",
       "group": "header",
       "lineIndex": null,
-      "value": "2026-11-02",
-      "text": "02 Nov 2026",
+      "value": "2026-10-30",
+      "text": "30 Oct 2026",
       "page": 1,
       "box": [
         0.29,
         0.1159,
-        0.1109,
+        0.1081,
         0.0117
       ],
       "id": "poDate",
-      "confidence": 0.99,
+      "confidence": 0.95,
       "uncertain": false
     },
     {
@@ -76,8 +76,8 @@
       "label": "Required by",
       "group": "header",
       "lineIndex": null,
-      "value": "2026-11-18",
-      "text": "18 Nov 2026",
+      "value": "2026-11-16",
+      "text": "16 Nov 2026",
       "page": 1,
       "box": [
         0.5097,
@@ -86,7 +86,7 @@
         0.0117
       ],
       "id": "requiredDate",
-      "confidence": 0.97,
+      "confidence": 0.96,
       "uncertain": false
     },
     {
@@ -104,7 +104,7 @@
         0.0117
       ],
       "id": "currency",
-      "confidence": 0.94,
+      "confidence": 0.96,
       "uncertain": false
     },
     {
@@ -112,13 +112,13 @@
       "label": "Bill to",
       "group": "header",
       "lineIndex": null,
-      "value": "12 Harbour Link Road, Chennai 600 000, India",
-      "text": "12 Harbour Link Road\nChennai 600 000\nIndia",
+      "value": "77 Quillon Harbour Road, Unit 1A, Mumbai 400332, India",
+      "text": "77 Quillon Harbour Road, Unit 1A\nMumbai 400332\nIndia",
       "page": 1,
       "box": [
         0.3339,
         0.1623,
-        0.1463,
+        0.2195,
         0.0366
       ],
       "id": "billTo",
@@ -130,17 +130,17 @@
       "label": "Ship to",
       "group": "header",
       "lineIndex": null,
-      "value": "Quillon Harbour Traders (Warehouse), Godown 1, Lantern Court, Chennai 600 000, India",
-      "text": "Quillon Harbour Traders (Warehouse)\nGodown 1, Lantern Court\nChennai 600 000\nIndia",
+      "value": "Vellamar Network Stores, 77 Quillon Harbour Road, Unit 1A, Mumbai 400332, India",
+      "text": "Vellamar Network Stores\n77 Quillon Harbour Road, Unit 1A\nMumbai 400332\nIndia",
       "page": 1,
       "box": [
         0.6328,
-        0.162,
-        0.2508,
-        0.0499
+        0.1623,
+        0.2195,
+        0.0497
       ],
       "id": "shipTo",
-      "confidence": 0.6,
+      "confidence": 0.8,
       "uncertain": true
     },
     {
@@ -148,17 +148,17 @@
       "label": "Buyer",
       "group": "header",
       "lineIndex": null,
-      "value": "Tomas Quillane",
-      "text": "Tomas Quillane",
+      "value": "Leilani Marchetti",
+      "text": "Leilani Marchetti",
       "page": 1,
       "box": [
         0.0702,
-        0.2655,
-        0.1307,
-        0.0122
+        0.2656,
+        0.1418,
+        0.0115
       ],
       "id": "buyerContact",
-      "confidence": 0.97,
+      "confidence": 0.94,
       "uncertain": false
     },
     {
@@ -166,106 +166,16 @@
       "label": "Incoterms",
       "group": "header",
       "lineIndex": null,
-      "value": "FOB Singapore",
-      "text": "FOB Singapore",
+      "value": "CIF Nhava Sheva",
+      "text": "CIF Nhava Sheva",
       "page": 1,
       "box": [
         0.3632,
         0.2655,
-        0.1265,
-        0.0134
-      ],
-      "id": "incoterms",
-      "confidence": 0.99,
-      "uncertain": false
-    },
-    {
-      "key": "lines.partNumber",
-      "label": "Part number",
-      "group": "lines",
-      "lineIndex": 0,
-      "value": "EMB-MP-B-2641",
-      "text": "EMB-MP-B-2641",
-      "page": 1,
-      "box": [
-        0.1072,
-        0.3375,
-        0.1169,
-        0.0103
-      ],
-      "id": "lines.partNumber[0]",
-      "confidence": 0.98,
-      "uncertain": false
-    },
-    {
-      "key": "lines.description",
-      "label": "Description",
-      "group": "lines",
-      "lineIndex": 0,
-      "value": "Emberlyn Mouse Pad Large Pro",
-      "text": "Emberlyn Mouse Pad Large Pro",
-      "page": 1,
-      "box": [
-        0.2752,
-        0.3376,
-        0.2137,
+        0.1429,
         0.0117
       ],
-      "id": "lines.description[0]",
-      "confidence": 0.99,
-      "uncertain": false
-    },
-    {
-      "key": "lines.quantity",
-      "label": "Quantity",
-      "group": "lines",
-      "lineIndex": 0,
-      "value": "40",
-      "text": "40",
-      "page": 1,
-      "box": [
-        0.6227,
-        0.3375,
-        0.0227,
-        0.0103
-      ],
-      "id": "lines.quantity[0]",
-      "confidence": 0.94,
-      "uncertain": false
-    },
-    {
-      "key": "lines.unitPrice",
-      "label": "Unit price",
-      "group": "lines",
-      "lineIndex": 0,
-      "value": "7.42",
-      "text": "7.42",
-      "page": 1,
-      "box": [
-        0.7466,
-        0.3375,
-        0.0332,
-        0.0102
-      ],
-      "id": "lines.unitPrice[0]",
-      "confidence": 0.76,
-      "uncertain": true
-    },
-    {
-      "key": "lines.amount",
-      "label": "Amount",
-      "group": "lines",
-      "lineIndex": 0,
-      "value": "296.80",
-      "text": "296.80",
-      "page": 1,
-      "box": [
-        0.8813,
-        0.3375,
-        0.0519,
-        0.0103
-      ],
-      "id": "lines.amount[0]",
+      "id": "incoterms",
       "confidence": 0.96,
       "uncertain": false
     },
@@ -273,18 +183,108 @@
       "key": "lines.partNumber",
       "label": "Part number",
       "group": "lines",
+      "lineIndex": 0,
+      "value": "LXZZ0137-BNNNG",
+      "text": "LXZZ0137-BNNNG",
+      "page": 1,
+      "box": [
+        0.1072,
+        0.3375,
+        0.1267,
+        0.0103
+      ],
+      "id": "lines.partNumber[0]",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "lines.description",
+      "label": "Description",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "Lexar microSD Card 128 GB Pro",
+      "text": "Lexar microSD Card 128 GB Pro",
+      "page": 1,
+      "box": [
+        0.2752,
+        0.3375,
+        0.2151,
+        0.0103
+      ],
+      "id": "lines.description[0]",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "lines.quantity",
+      "label": "Quantity",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "50",
+      "text": "50",
+      "page": 1,
+      "box": [
+        0.6229,
+        0.3375,
+        0.0226,
+        0.0103
+      ],
+      "id": "lines.quantity[0]",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "lines.unitPrice",
+      "label": "Unit price",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "14.25",
+      "text": "14.25",
+      "page": 1,
+      "box": [
+        0.7405,
+        0.3375,
+        0.0393,
+        0.0103
+      ],
+      "id": "lines.unitPrice[0]",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "lines.amount",
+      "label": "Amount",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "712.50",
+      "text": "712.50",
+      "page": 1,
+      "box": [
+        0.885,
+        0.3375,
+        0.0482,
+        0.0103
+      ],
+      "id": "lines.amount[0]",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "lines.partNumber",
+      "label": "Part number",
+      "group": "lines",
       "lineIndex": 1,
-      "value": "ZEP-MP-A-2656",
-      "text": "ZEP-MP-A-2656",
+      "value": "90ZZ0065-M01",
+      "text": "90ZZ0065-M01",
       "page": 1,
       "box": [
         0.1072,
         0.3596,
-        0.1148,
+        0.1087,
         0.0103
       ],
       "id": "lines.partNumber[1]",
-      "confidence": 0.98,
+      "confidence": 0.95,
       "uncertain": false
     },
     {
@@ -292,17 +292,17 @@
       "label": "Description",
       "group": "lines",
       "lineIndex": 1,
-      "value": "Zephrine Mouse Pad Large",
-      "text": "Zephrine Mouse Pad Large",
+      "value": "Asus Monitor 27-inch",
+      "text": "Asus Monitor 27-inch",
       "page": 1,
       "box": [
         0.2752,
-        0.3597,
-        0.1819,
-        0.0117
+        0.3596,
+        0.1472,
+        0.0103
       ],
       "id": "lines.description[1]",
-      "confidence": 0.97,
+      "confidence": 0.95,
       "uncertain": false
     },
     {
@@ -310,13 +310,13 @@
       "label": "Quantity",
       "group": "lines",
       "lineIndex": 1,
-      "value": "200",
-      "text": "200",
+      "value": "30",
+      "text": "30",
       "page": 1,
       "box": [
-        0.6134,
+        0.623,
         0.3596,
-        0.032,
+        0.0224,
         0.0103
       ],
       "id": "lines.quantity[1]",
@@ -328,17 +328,17 @@
       "label": "Unit price",
       "group": "lines",
       "lineIndex": 1,
-      "value": "5.37",
-      "text": "5.37",
+      "value": "238.32",
+      "text": "238.32",
       "page": 1,
       "box": [
-        0.7468,
+        0.729,
         0.3596,
-        0.033,
+        0.0508,
         0.0103
       ],
       "id": "lines.unitPrice[1]",
-      "confidence": 0.99,
+      "confidence": 0.94,
       "uncertain": false
     },
     {
@@ -346,107 +346,17 @@
       "label": "Amount",
       "group": "lines",
       "lineIndex": 1,
-      "value": "1074.00",
-      "text": "1,074.00",
+      "value": "7149.60",
+      "text": "7,149.60",
       "page": 1,
       "box": [
-        0.8716,
+        0.8729,
         0.3596,
-        0.0616,
+        0.0602,
         0.0118
       ],
       "id": "lines.amount[1]",
-      "confidence": 0.95,
-      "uncertain": false
-    },
-    {
-      "key": "lines.partNumber",
-      "label": "Part number",
-      "group": "lines",
-      "lineIndex": 2,
-      "value": "BRI-PB-B-2612",
-      "text": "BRI-PB-B-2612",
-      "page": 1,
-      "box": [
-        0.1072,
-        0.3817,
-        0.1062,
-        0.0103
-      ],
-      "id": "lines.partNumber[2]",
       "confidence": 0.94,
-      "uncertain": false
-    },
-    {
-      "key": "lines.description",
-      "label": "Description",
-      "group": "lines",
-      "lineIndex": 2,
-      "value": "Brindlewick Power Bank 10000 mAh Pro",
-      "text": "Brindlewick Power Bank 10000 mAh Pro",
-      "page": 1,
-      "box": [
-        0.2752,
-        0.3817,
-        0.2755,
-        0.0103
-      ],
-      "id": "lines.description[2]",
-      "confidence": 0.97,
-      "uncertain": false
-    },
-    {
-      "key": "lines.quantity",
-      "label": "Quantity",
-      "group": "lines",
-      "lineIndex": 2,
-      "value": "20",
-      "text": "20",
-      "page": 1,
-      "box": [
-        0.623,
-        0.3817,
-        0.0225,
-        0.0103
-      ],
-      "id": "lines.quantity[2]",
-      "confidence": 0.95,
-      "uncertain": false
-    },
-    {
-      "key": "lines.unitPrice",
-      "label": "Unit price",
-      "group": "lines",
-      "lineIndex": 2,
-      "value": "33.22",
-      "text": "33.22",
-      "page": 1,
-      "box": [
-        0.7376,
-        0.3817,
-        0.0422,
-        0.0103
-      ],
-      "id": "lines.unitPrice[2]",
-      "confidence": 0.99,
-      "uncertain": false
-    },
-    {
-      "key": "lines.amount",
-      "label": "Amount",
-      "group": "lines",
-      "lineIndex": 2,
-      "value": "664.40",
-      "text": "664.40",
-      "page": 1,
-      "box": [
-        0.8806,
-        0.3817,
-        0.0525,
-        0.0103
-      ],
-      "id": "lines.amount[2]",
-      "confidence": 0.97,
       "uncertain": false
     },
     {
@@ -454,17 +364,17 @@
       "label": "Total (USD)",
       "group": "totals",
       "lineIndex": null,
-      "value": "2035.20",
-      "text": "2,035.20",
+      "value": "7862.10",
+      "text": "7,862.10",
       "page": 1,
       "box": [
-        0.8351,
-        0.4293,
-        0.093,
+        0.8414,
+        0.4072,
+        0.0867,
         0.0155
       ],
       "id": "total",
-      "confidence": 0.98,
+      "confidence": 0.97,
       "uncertain": false
     },
     {
@@ -482,7 +392,7 @@
         0.0127
       ],
       "id": "paymentTerms",
-      "confidence": 0.82,
+      "confidence": 0.6,
       "uncertain": true
     }
   ]

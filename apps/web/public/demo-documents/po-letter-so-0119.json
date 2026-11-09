@@ -1,20 +1,20 @@
 {
   "label": "Synthetic demo data",
-  "file": "po-table-so-0114.pdf",
+  "file": "po-letter-so-0119.pdf",
   "documentType": "CUSTOMER_PO",
-  "documentNumber": "PO-BD-4891",
-  "layout": "table",
+  "documentNumber": "PO-LK-4926",
+  "layout": "letter",
   "readable": "text",
-  "orderNo": "SO-0114",
-  "customerNo": "C-0013",
-  "purpose": "A dense table printout. Its task says to confirm 2 uncertain fields, the one to try in the sales pilot.",
+  "orderNo": "SO-0119",
+  "customerNo": "C-0007",
+  "purpose": "A plain letter. Mock AI has not read it yet, so its task says to check the fields.",
   "pageCount": 1,
   "page": {
     "width": 595.28,
     "height": 841.89
   },
   "confidenceThreshold": 0.9,
-  "uncertainFieldCount": 2,
+  "uncertainFieldCount": 0,
   "mismatch": null,
   "fields": [
     {
@@ -22,35 +22,35 @@
       "label": "Customer",
       "group": "header",
       "lineIndex": null,
-      "value": "Jamunia Trading Ltd",
-      "text": "Jamunia Trading Ltd",
+      "value": "Selvaran Trading (Pvt) Ltd",
+      "text": "Selvaran Trading (Pvt) Ltd",
       "page": 1,
       "box": [
-        0.0585,
-        0.045,
-        0.1891,
-        0.0144
+        0.0954,
+        0.0737,
+        0.3658,
+        0.0223
       ],
       "id": "customerName",
-      "confidence": 0.98,
+      "confidence": 0.96,
       "uncertain": false
     },
     {
-      "key": "poNumber",
-      "label": "PO number",
+      "key": "billTo",
+      "label": "Bill to",
       "group": "header",
       "lineIndex": null,
-      "value": "PO-BD-4891",
-      "text": "PO-BD-4891",
+      "value": "92 Kandaleya Road, Unit 8B, Negombo 11259, Sri Lanka",
+      "text": "92 Kandaleya Road, Unit 8B\nNegombo 11259\nSri Lanka",
       "page": 1,
       "box": [
-        0.045,
-        0.1094,
-        0.0827,
-        0.0097
+        0.0954,
+        0.1017,
+        0.1999,
+        0.0412
       ],
-      "id": "poNumber",
-      "confidence": 0.96,
+      "id": "billTo",
+      "confidence": 0.97,
       "uncertain": false
     },
     {
@@ -62,13 +62,31 @@
       "text": "02 Nov 2026",
       "page": 1,
       "box": [
-        0.3642,
-        0.1094,
-        0.0905,
-        0.0097
+        0.804,
+        0.0799,
+        0.1006,
+        0.012
       ],
       "id": "poDate",
-      "confidence": 0.96,
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "poNumber",
+      "label": "PO number",
+      "group": "header",
+      "lineIndex": null,
+      "value": "PO-LK-4926",
+      "text": "PO-LK-4926",
+      "page": 1,
+      "box": [
+        0.2985,
+        0.2631,
+        0.1301,
+        0.0141
+      ],
+      "id": "poNumber",
+      "confidence": 0.94,
       "uncertain": false
     },
     {
@@ -76,34 +94,52 @@
       "label": "Required by",
       "group": "header",
       "lineIndex": null,
-      "value": "2026-11-19",
-      "text": "19 Nov 2026",
+      "value": "2026-11-16",
+      "text": "16 Nov 2026",
       "page": 1,
       "box": [
-        0.6834,
-        0.1094,
-        0.0905,
-        0.0097
+        0.2567,
+        0.3816,
+        0.1006,
+        0.012
       ],
       "id": "requiredDate",
-      "confidence": 0.95,
+      "confidence": 0.98,
       "uncertain": false
     },
     {
-      "key": "buyerContact",
-      "label": "Buyer",
+      "key": "incoterms",
+      "label": "Incoterms",
       "group": "header",
       "lineIndex": null,
-      "value": "Dariusz Penhallow",
-      "text": "Dariusz Penhallow",
+      "value": "FOB Singapore",
+      "text": "FOB Singapore",
       "page": 1,
       "box": [
-        0.045,
-        0.1405,
-        0.1377,
-        0.0095
+        0.2567,
+        0.4005,
+        0.1206,
+        0.0146
       ],
-      "id": "buyerContact",
+      "id": "incoterms",
+      "confidence": 0.97,
+      "uncertain": false
+    },
+    {
+      "key": "paymentTerms",
+      "label": "Payment terms",
+      "group": "header",
+      "lineIndex": null,
+      "value": "Net 60 days from invoice date",
+      "text": "Net 60 days from invoice date",
+      "page": 1,
+      "box": [
+        0.2567,
+        0.4192,
+        0.2366,
+        0.0149
+      ],
+      "id": "paymentTerms",
       "confidence": 0.94,
       "uncertain": false
     },
@@ -116,67 +152,13 @@
       "text": "USD",
       "page": 1,
       "box": [
-        0.3642,
-        0.1403,
-        0.0276,
-        0.0097
+        0.2567,
+        0.4387,
+        0.0378,
+        0.0119
       ],
       "id": "currency",
-      "confidence": 0.94,
-      "uncertain": false
-    },
-    {
-      "key": "incoterms",
-      "label": "Incoterms",
-      "group": "header",
-      "lineIndex": null,
-      "value": "CIF Chattogram",
-      "text": "CIF Chattogram",
-      "page": 1,
-      "box": [
-        0.6834,
-        0.1403,
-        0.1141,
-        0.0111
-      ],
-      "id": "incoterms",
       "confidence": 0.98,
-      "uncertain": false
-    },
-    {
-      "key": "paymentTerms",
-      "label": "Payment terms",
-      "group": "header",
-      "lineIndex": null,
-      "value": "30% deposit with order, balance before shipment",
-      "text": "30% deposit with order, balance before shipment",
-      "page": 1,
-      "box": [
-        0.045,
-        0.1712,
-        0.3735,
-        0.011
-      ],
-      "id": "paymentTerms",
-      "confidence": 0.58,
-      "uncertain": true
-    },
-    {
-      "key": "billTo",
-      "label": "Bill to",
-      "group": "header",
-      "lineIndex": null,
-      "value": "16 Tidewater Avenue, Dhaka 1200, Bangladesh",
-      "text": "16 Tidewater Avenue\nDhaka 1200\nBangladesh",
-      "page": 1,
-      "box": [
-        0.045,
-        0.2211,
-        0.1534,
-        0.0352
-      ],
-      "id": "billTo",
-      "confidence": 0.99,
       "uncertain": false
     },
     {
@@ -184,32 +166,32 @@
       "label": "Ship to",
       "group": "header",
       "lineIndex": null,
-      "value": "Jamunia Trading Ltd (Warehouse), Godown 4, Anchor Street, Dhaka 1200, Bangladesh",
-      "text": "Jamunia Trading Ltd (Warehouse)\nGodown 4, Anchor Street\nDhaka 1200\nBangladesh",
+      "value": "Selvaran Trading (Pvt) Ltd, 92 Kandaleya Road, Unit 8B, Negombo 11259, Sri Lanka",
+      "text": "Selvaran Trading (Pvt) Ltd\n92 Kandaleya Road, Unit 8B\nNegombo 11259\nSri Lanka",
       "page": 1,
       "box": [
-        0.3642,
-        0.2209,
-        0.2477,
-        0.0474
+        0.2567,
+        0.4572,
+        0.2206,
+        0.0605
       ],
       "id": "shipTo",
-      "confidence": 0.83,
-      "uncertain": true
+      "confidence": 0.98,
+      "uncertain": false
     },
     {
       "key": "lines.partNumber",
       "label": "Part number",
       "group": "lines",
       "lineIndex": 0,
-      "value": "DRA-MN-A-2478",
-      "text": "DRA-MN-A-2478",
+      "value": "SYS-ZZ0279-TR",
+      "text": "SYS-ZZ0279-TR",
       "page": 1,
       "box": [
-        0.0837,
-        0.3156,
-        0.0984,
-        0.0092
+        0.1525,
+        0.5854,
+        0.1185,
+        0.011
       ],
       "id": "lines.partNumber[0]",
       "confidence": 0.95,
@@ -220,17 +202,17 @@
       "label": "Description",
       "group": "lines",
       "lineIndex": 0,
-      "value": "Dravik 24-inch Monitor",
-      "text": "Dravik 24-inch Monitor",
+      "value": "Supermicro Server SSD 1.92 TB",
+      "text": "Supermicro Server SSD 1.92 TB",
       "page": 1,
       "box": [
-        0.2348,
-        0.3156,
-        0.1637,
-        0.0092
+        0.3138,
+        0.5852,
+        0.2244,
+        0.0133
       ],
       "id": "lines.description[0]",
-      "confidence": 0.94,
+      "confidence": 0.98,
       "uncertain": false
     },
     {
@@ -242,13 +224,13 @@
       "text": "12",
       "page": 1,
       "box": [
-        0.5765,
-        0.3156,
-        0.0185,
-        0.0091
+        0.6361,
+        0.5854,
+        0.021,
+        0.0109
       ],
       "id": "lines.quantity[0]",
-      "confidence": 0.99,
+      "confidence": 0.97,
       "uncertain": false
     },
     {
@@ -256,17 +238,17 @@
       "label": "Unit price",
       "group": "lines",
       "lineIndex": 0,
-      "value": "121.63",
-      "text": "121.63",
+      "value": "282.59",
+      "text": "282.59",
       "page": 1,
       "box": [
-        0.6382,
-        0.3156,
-        0.0476,
-        0.0092
+        0.7237,
+        0.5849,
+        0.051,
+        0.0115
       ],
       "id": "lines.unitPrice[0]",
-      "confidence": 0.98,
+      "confidence": 0.97,
       "uncertain": false
     },
     {
@@ -274,17 +256,17 @@
       "label": "Amount",
       "group": "lines",
       "lineIndex": 0,
-      "value": "1459.56",
-      "text": "1,459.56",
+      "value": "3391.08",
+      "text": "3,391.08",
       "page": 1,
       "box": [
-        0.7815,
-        0.3156,
-        0.0621,
-        0.0104
+        0.8338,
+        0.5854,
+        0.064,
+        0.0129
       ],
       "id": "lines.amount[0]",
-      "confidence": 0.96,
+      "confidence": 0.99,
       "uncertain": false
     },
     {
@@ -292,17 +274,17 @@
       "label": "Part number",
       "group": "lines",
       "lineIndex": 1,
-      "value": "EMB-EB-A-2633",
-      "text": "EMB-EB-A-2633",
+      "value": "PZZ0266-B21",
+      "text": "PZZ0266-B21",
       "page": 1,
       "box": [
-        0.0837,
-        0.3334,
-        0.0984,
-        0.0092
+        0.1525,
+        0.6101,
+        0.1006,
+        0.0111
       ],
       "id": "lines.partNumber[1]",
-      "confidence": 0.96,
+      "confidence": 0.95,
       "uncertain": false
     },
     {
@@ -310,17 +292,17 @@
       "label": "Description",
       "group": "lines",
       "lineIndex": 1,
-      "value": "Emberlyn Wired Earbuds",
-      "text": "Emberlyn Wired Earbuds",
+      "value": "HPE Network Adapter 10GbE",
+      "text": "HPE Network Adapter 10GbE",
       "page": 1,
       "box": [
-        0.2348,
-        0.3335,
-        0.1637,
-        0.0102
+        0.3138,
+        0.6097,
+        0.2094,
+        0.0136
       ],
       "id": "lines.description[1]",
-      "confidence": 0.94,
+      "confidence": 0.99,
       "uncertain": false
     },
     {
@@ -328,14 +310,14 @@
       "label": "Quantity",
       "group": "lines",
       "lineIndex": 1,
-      "value": "50",
-      "text": "50",
+      "value": "30",
+      "text": "30",
       "page": 1,
       "box": [
-        0.5765,
-        0.3334,
-        0.0185,
-        0.0092
+        0.6361,
+        0.6102,
+        0.021,
+        0.011
       ],
       "id": "lines.quantity[1]",
       "confidence": 0.98,
@@ -346,17 +328,17 @@
       "label": "Unit price",
       "group": "lines",
       "lineIndex": 1,
-      "value": "7.08",
-      "text": "7.08",
+      "value": "91.39",
+      "text": "91.39",
       "page": 1,
       "box": [
-        0.6527,
-        0.3334,
-        0.0331,
-        0.0092
+        0.7323,
+        0.6102,
+        0.0425,
+        0.011
       ],
       "id": "lines.unitPrice[1]",
-      "confidence": 0.96,
+      "confidence": 0.97,
       "uncertain": false
     },
     {
@@ -364,17 +346,17 @@
       "label": "Amount",
       "group": "lines",
       "lineIndex": 1,
-      "value": "354.00",
-      "text": "354.00",
+      "value": "2741.70",
+      "text": "2,741.70",
       "page": 1,
       "box": [
-        0.7961,
-        0.3334,
-        0.0476,
-        0.0092
+        0.8338,
+        0.6102,
+        0.064,
+        0.0129
       ],
       "id": "lines.amount[1]",
-      "confidence": 0.95,
+      "confidence": 0.99,
       "uncertain": false
     },
     {
@@ -382,17 +364,35 @@
       "label": "Total (USD)",
       "group": "totals",
       "lineIndex": null,
-      "value": "1813.56",
-      "text": "1,813.56",
+      "value": "6132.78",
+      "text": "6,132.78",
       "page": 1,
       "box": [
-        0.8717,
-        0.3581,
-        0.0766,
-        0.0123
+        0.8201,
+        0.6428,
+        0.0778,
+        0.0145
       ],
       "id": "total",
-      "confidence": 0.98,
+      "confidence": 0.96,
+      "uncertain": false
+    },
+    {
+      "key": "buyerContact",
+      "label": "Buyer",
+      "group": "header",
+      "lineIndex": null,
+      "value": "Rostam Fairweather",
+      "text": "Rostam Fairweather",
+      "page": 1,
+      "box": [
+        0.0954,
+        0.7734,
+        0.1747,
+        0.0124
+      ],
+      "id": "buyerContact",
+      "confidence": 0.95,
       "uncertain": false
     }
   ]

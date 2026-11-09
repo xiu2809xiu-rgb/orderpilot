@@ -2,6 +2,7 @@ export {
   DEMO_FILES,
   DEMO_REFERENCE_DATE,
   groundTruth,
+  pickDemoFiles,
   renderDemoFile,
 } from "./demo.js";
 export type { DemoFile, GroundTruth } from "./demo.js";
