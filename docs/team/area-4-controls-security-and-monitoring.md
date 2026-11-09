@@ -177,7 +177,7 @@ An open rule, configuration until Spectra answers [Q-6](../client/questions-for-
 
 ## No self-approval and segregation of duties (F-4)
 
-F-4 adds three rules to the same chain ([ADR 0044](../adr/0044-no-self-approval-and-segregation-of-duties.md)). The full order is:
+F-4 adds three rules to the same chain ([ADR 0044](../adr/0044-no-self-approval-and-segregation-of-duties.md)). F-5 adds two more, [below](#the-bank-detail-hold-f-5). F-4's order is:
 
 1. `system-admin`
 2. `permission`
@@ -201,11 +201,90 @@ Confirming a customer's payment (`customer-payment.confirm`) and paying a vendor
 
 ### Still to come
 
-- **F-5 and area 2's payment steps** call `enforce` with `earlierDuties`. Until they do, nothing feeds the payment pairs: OrderPilot cannot change a vendor's bank details (A-15), and the payment steps don't ask the policy yet.
+- **Area 2's payment steps** call `enforce`. Until they do, the payment pairs have no real caller. F-5 records who changed a vendor's bank details, and fills that part in itself.
 - **`payments.post`** is held by no role by default, so the vendor payment actions are refused for everyone until the matrix grants it.
 - **Azri** points `POST /workflows/sprs/:no/approve` at `decideSpr`, which already calls `enforce`. Today the route still uses the mock overlay, so E2E #3 through it stays `it.todo`.
 - **The routes** to read and change a setup (`roles.read`, `roles.manage`), in a follow-up pull request that P-66's form needs.
 - **The data scope,** as a second slice once Q-17 is answered.
+
+## The bank-detail hold (F-5)
+
+When a vendor's bank details differ from what is stored, nobody pays that vendor until two people have dealt with it ([ADR 0050](../adr/0050-the-bank-detail-hold.md)). The open rules wait for Spectra's answers to [Q-15 and Q-49](../client/questions-for-client.md#from-our-business-central-notes).
+
+**No full number is stored or logged.** `BankDetails` (`governance/domain/bank-details.ts`) holds it in memory only, and cannot be printed. What is kept is a keyed fingerprint and a last-four mask per field. A reason with an account number in it is refused.
+
+The chain is now:
+
+1. `system-admin`
+2. `permission`
+3. `bank-detail-hold`: while a hold is open, nobody approves or releases a payment to that vendor. The refusal names the hold.
+4. `no-self-approval`
+5. `own-setup`
+6. `segregation-of-duties`: F-4's rule, with two more rows, so whoever changed the details can neither verify nor clear, and whoever verified cannot clear.
+7. `hold-verification`: the state of the hold.
+8. `approval-route`
+9. `approval-limit`
+
+### How areas 1 and 2 use it
+
+Import `GovernanceModule` and inject `BankDetailHoldService`. Nothing else is needed.
+
+```ts
+// Area 1: when a person confirms a vendor PI or invoice, or a record edit arrives.
+const report = await bankHolds.reportDetails(
+  {
+    vendorNo,
+    details: { bankAccountNo, swiftCode, iban },
+    source: "vendor-pi",
+    sourceRef: documentNo,
+    changedByUserId: confirmedByUserId,
+  },
+  { actor, ip, traceId },
+);
+// "match", "no-details", or "held" with holdId and differingFields.
+
+// Area 1: the first read of a vendor's record. Never from a PI.
+await bankHolds.recordBaseline({ vendorNo, accountCode, details }, by);
+
+// Area 2: to show a hold. Includes blockedReason.
+const holds = await bankHolds.openHoldsFor(vendorNo);
+
+// Area 2: before paying. A vendor payment without vendorNo is refused.
+await authorisation.enforce(
+  {
+    actor: { userId: auth.user.id, role: auth.user.role },
+    action: "vendor-payment.release",
+    resource: { type: "Payment", id: paymentNo },
+    vendorNo,
+  },
+  { ip: req.ip ?? null, traceId: requestIdOf(req) },
+);
+```
+
+- **Take `vendorNo` and `changedByUserId` from your stored records,** never from a request body. Match vendors on their Business Central number, never their name.
+- **`changedByUserId`** is whoever edited the record or confirmed the document's fields. It is null only when no person did.
+- **Call `recordBaseline` once per account.** It never overwrites what is stored.
+- **A refusal** is F-1's generic 403. The reason and the hold ID are in `decide()` and the audit trail, and a screen uses `openHoldsFor`.
+
+### Clearing a hold
+
+| Step   | Who                                                                          | Route                                           | Needs                                                                                                                                      |
+| ------ | ---------------------------------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Verify | Finance (`payments.confirm`), not the person who changed the details         | `POST /governance/bank-holds/:id/verifications` | Who, from the session; when; the outcome; a reason; for a confirmation, that the contact came from the stored record, not the new document |
+| Clear  | A second approver (`approvals.decide`), not the changer and not the verifier | `POST /governance/bank-holds/:id/clear`         | A reason, and a resolution that matches the latest verification                                                                            |
+
+- **`accept-new-details`** follows a confirmed verification, and the new details become the stored ones.
+- **`keep-stored-details`** follows a rejected one. The stored details stand, and the audit trail records "suspected fraud: details rejected".
+- **A rejected verification** keeps the hold and records why. A later verification can supersede it.
+- **"needs a different Finance user"** shows on a hold when nobody except the person who changed the details could verify it. Adding or enabling a Finance user clears it.
+
+### Still to come for the hold
+
+- **Area 1:** call `reportDetails` from vendor PI confirmation and P-68's port, `recordBaseline` from P-20, and run `seedVendorBankBaselines` from `seeders.ts`.
+- **Area 2 and P-104:** call `enforce` with the stored `vendorNo`, and show `openHoldsFor`.
+- **`GovernanceModule`** reads `BANK_FINGERPRINT_KEY` once its own pull request merges. Until then, comparing fails closed.
+- **`payments.post`** is held by no role, so vendor payments are refused for everyone until P-104's permission is decided.
+- **Events** wait for the bus (P-15).
 
 ## What's yours to build
 
