@@ -27,6 +27,17 @@ const POINTS = [1, 2, 3, 5, 8, 13];
 const PRIORITIES = ["must", "should", "could"];
 const REQS = ["M1", "M2", "M3", "M4", "M5", "M6"];
 
+// Prompt 005 renames Navision to Business Central, and a prompt is never rewritten.
+// These are the words prompt 001 still uses, so the brief's checks keep reading it.
+const RENAMED = {
+  "Epic B": { title: "Master data and Navision" },
+  "P-19": {
+    title: "Mock Navision and synthetic master data",
+    branch: "feat/area1-mock-navision",
+  },
+  "P-20": { title: "The connector framework and the Navision adapter" },
+};
+
 function briefHeadings() {
   const pattern = /^\*\*([A-Z]-\d+) (.+?)\*\*(?: \(`([^`]+)`\))?/gm;
   return [...brief.matchAll(pattern)].map(([, key, title, branch]) => ({
@@ -45,8 +56,9 @@ test("the epics are P, A to G and T", () => {
 
 test("the epics use the capability names in the brief", () => {
   for (const epic of backlog.epics.filter((item) => /[A-G]/.test(item.key))) {
+    const title = RENAMED[`Epic ${epic.key}`]?.title ?? epic.title;
     assert.ok(
-      brief.includes(`- **${epic.key}. ${epic.title}:**`),
+      brief.includes(`- **${epic.key}. ${title}:**`),
       `Epic ${epic.key}`,
     );
   }
@@ -81,9 +93,33 @@ test("titles and branches match the brief's headings", () => {
   for (const { key, title, branch } of headings) {
     const story = byKey.get(key);
     assert.ok(story, key);
-    assert.equal(story.title, title, key);
-    assert.equal(story.branch, branch, key);
+    const was = RENAMED[key] ?? {};
+    assert.equal(was.title ?? story.title, title, key);
+    assert.equal(was.branch ?? story.branch, branch, key);
   }
+});
+
+test("the renamed stories say Business Central, and only the map keeps the old words", () => {
+  assert.equal(
+    backlog.epics.find((epic) => epic.key === "B").title,
+    "Master data and Business Central",
+  );
+  assert.equal(
+    byKey.get("P-19").title,
+    "Mock Business Central and synthetic master data",
+  );
+  assert.equal(byKey.get("P-19").branch, "feat/area1-mock-business-central");
+  assert.equal(
+    byKey.get("P-20").title,
+    "The connector framework and the Business Central adapter",
+  );
+  // P-83's own story names what it renames, so it is the one place in the data
+  // that may still say Navision.
+  const others = backlog.stories.filter((story) => story.key !== "P-83");
+  assert.doesNotMatch(
+    JSON.stringify({ epics: backlog.epics, stories: others }),
+    /navision/i,
+  );
 });
 
 test("T-1 and T-9 use the titles in the brief", () => {
@@ -168,7 +204,7 @@ test("area 1's own stories sit under epics A, B and E", () => {
     "Prompt-injection tests",
     "Email intake through a mock mailbox with signed webhooks",
     "Duplicate-PO protection",
-    "A Navision-ready import file",
+    "A Business Central import file",
     "The template engine for PIs, invoices, packing lists and Excel",
     "QR codes on generated documents and carton labels",
     "Passkeys to confirm risky approvals",

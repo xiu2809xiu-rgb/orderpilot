@@ -10,7 +10,7 @@ There are 9 epics and 125 stories. Estimates are story points: a first guess, fo
 | ------ | --------------------------------- | --------------------------------------- | ------- | ------ |
 | Epic P | The platform base                 | `area: 1 document AI and integration`   | 81      | 458    |
 | Epic A | Document intake and AI extraction | `area: 1 document AI and integration`   | 5       | 31     |
-| Epic B | Master data and Navision          | `area: 1 document AI and integration`   | 4       | 14     |
+| Epic B | Master data and Business Central  | `area: 1 document AI and integration`   | 4       | 14     |
 | Epic C | Order workflows and approvals     | `area: 2 order workflows and approvals` | 5       | 29     |
 | Epic D | Checks, the tracker and insights  | `area: 3 checks tracker and insights`   | 4       | 23     |
 | Epic E | AI with a person in the loop      | `area: 1 document AI and integration`   | 6       | 29     |
@@ -58,8 +58,8 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | P-16  | Diagrams as code                                                   | must     | 3      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | P-17  | The AI gateway                                                     | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | P-18  | Document intake and storage                                        | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
-| P-19  | Mock Navision and synthetic master data                            | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
-| P-20  | The connector framework and the Navision adapter                   | must     | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-19  | Mock Business Central and synthetic master data                    | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-20  | The connector framework and the Business Central adapter           | must     | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-21  | Synthetic documents                                                | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | C-1   | Area 2 base, the workflow module                                   | must     | 8      | `area: 2 order workflows and approvals` | M4 best practices                                              |
 | C-2   | The order state machine for the sales flow                         | must     | 8      | `area: 2 order workflows and approvals` | M4 best practices                                              |
@@ -116,7 +116,7 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | P-66  | Approval limits form                                               | must     | 5      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
 | P-67  | Check tolerance and reminder rule forms                            | must     | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | P-68  | Change requests for master data                                    | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
-| P-69  | Mock Navision Demo data page                                       | must     | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-69  | Mock Business Central Demo data page                               | must     | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-70  | Pick and pack, and Proforma invoices                               | must     | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-71  | One status system everywhere                                       | must     | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-72  | SPR approval on the templates                                      | must     | 3      | `area: 2 order workflows and approvals` | M4 best practices, M5 team Git workflow                        |
@@ -148,7 +148,7 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | A-4   | Learning from corrections, one layout at a time                    | should   | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | A-5   | Email intake through a mock mailbox with signed webhooks           | should   | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | B-1   | Duplicate-PO protection                                            | should   | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
-| B-2   | A Navision-ready import file                                       | should   | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| B-2   | A Business Central import file                                     | should   | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | B-3   | The template engine for PIs, invoices, packing lists and Excel     | should   | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | E-3   | Prompt-injection tests                                             | should   | 3      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | F-6   | A non-owner runtime database role                                  | should   | 3      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
@@ -242,10 +242,10 @@ Acceptance criteria:
 
 - `docs/problem-statement.md`: the brief in our words, stakeholders, pain points, root cause, constraints, scope, success metrics and open questions.
 - `docs/assumptions.md`.
-- `docs/client/questions-for-client.md`: the three items to ask for first (anonymised samples of every document type including the SPR form; a Navision export; and the timeline of one real order), then the questions in priority order, and a note to send the priority questions before the briefing call.
+- `docs/client/questions-for-client.md`: the three items to ask for first (anonymised samples of every document type including the SPR form; a Business Central export; and the timeline of one real order), then the questions in priority order, and a note to send the priority questions before the briefing call.
 - `docs/client/questions-for-client.md`: the six new questions in section 5.3 of prompt 002, after the existing priority questions.
-- `docs/research/domain-notes.md`: section 5 of prompt 002, the domain notes, with every Navision detail marked as an assumption to confirm at the briefing call.
-- `docs/data-formats.md`: the assumed formats of every document and Navision export, each to confirm, and how to try a client sample safely.
+- `docs/research/domain-notes.md`: section 5 of prompt 002, the domain notes, with every Business Central detail marked as an assumption to confirm at the briefing call.
+- `docs/data-formats.md`: the assumed formats of every document and Business Central export, each to confirm, and how to try a client sample safely.
 - `docs/agile/hero-journey.md`: the sales-pilot demo story, E2E #1 to #4, and a presenter slot for each area.
 - `docs/requirements-traceability.md`: M1 to M6, planned features, where, and evidence.
 - `docs/research/README.md`: where Richie's ERP notes go, in his own words only.
@@ -339,10 +339,10 @@ Acceptance criteria:
 - `packages/shared`, with zod schemas and types: the response envelope and the error envelope `{ error: { code, message, details, traceId } }`, and the error codes.
 - `packages/shared`: the nine roles; the permissions the platform checks so far; the session and user reference; and the audit and AI-usage types.
 - The first draft of the order and event contract: order headers and lines; documents and their types; field values with confidence and provenance; domain event names.
-- OrderPilot's own record numbers: a type prefix, the date and a running number, like `SPR-20261102-0001`, shown beside Navision's numbers, which stay the official ones.
+- OrderPilot's own record numbers: a type prefix, the date and a running number, like `SPR-20261102-0001`, shown beside Business Central's numbers, which stay the official ones.
 - The contract is marked "draft for the team to agree in Week 3", and status stays in area 2.
 - ADR: shared contracts.
-- Contract polish: publish the schemas as JSON Schema for the Swagger page and the mock Navision, add a contract test that fails on a breaking change, and prove the `exports` map through a Vite build once P-11 lands.
+- Contract polish: publish the schemas as JSON Schema for the Swagger page and the mock Business Central, add a contract test that fails on a breaking change, and prove the `exports` map through a Vite build once P-11 lands.
 
 ### P-8: The API shell
 
@@ -590,31 +590,31 @@ Acceptance criteria:
 - The synthetic set includes a rejected SPR and a partly shipped order, with the screens that show them (follow-up to P-31).
 - Prompt 004 keeps the sample set behind `OrderDirectory` and `DocumentDirectory`, because its dates move with today, so the seed does not copy it into the order tables (ADR in P-36).
 
-### P-19: Mock Navision and synthetic master data
+### P-19: Mock Business Central and synthetic master data
 
-An OData-style mock of Navision and the synthetic master data behind it.
+An OData-style mock of Business Central and the synthetic master data behind it.
 
 - **Area:** `area: 1 document AI and integration`
 - **Priority:** must
 - **Estimate:** 8 points
 - **Requirements:** M2 GRS by design, M4 best practices
-- **Branch:** `feat/area1-mock-navision`
+- **Branch:** `feat/area1-mock-business-central`
 - **Planned for:** Sprint 02 (W3)
 - **Depends on:** P-5
 
 Acceptance criteria:
 
-- `services/mock-navision`: an OData-style API with paging and `$filter`, behind an API key, for Items, Customers, Vendors, PriceLists and StockLevels, and for SalesOrders, PurchaseOrders and Receipts.
+- `services/mock-business-central`: an OData-style API with paging and `$filter`, behind an API key, for Items, Customers, Vendors, PriceLists and StockLevels, and for SalesOrders, PurchaseOrders and Receipts.
 - `packages/synthetic-data`: a seeded random generator; a Spectra-like catalogue of fictional brands' IT, surveillance and accessory products, with part numbers; customers in India, Sri Lanka, Bangladesh, Pakistan and the UAE; vendors, stock, and USD prices.
 - Customers and vendors in one list of business partners, each with a type and a price level, for the master-data screens and the price checks.
 - Opening stock and opening balances (receivables and payables), growing the set P-9 starts.
-- The mock speaks OData-style JSON with Navision's names in camelCase, as `docs/research/domain-notes.md` lists them.
+- The mock speaks OData-style JSON with Business Central's names in camelCase, as `docs/research/domain-notes.md` lists them.
 - Realism: document numbering and statuses from Richie's notes when present.
 - Tests, a compose service, `docs/api/mock-systems.md`, and a "Mock" label wherever it's used.
 - ADR: mock external systems.
-- Prompt 003 brings forward reading master data through a port labelled Mock Navision (P-35); this story still brings the OData service, its paging and `$filter`, and the compose service.
+- Prompt 003 brings forward reading master data through a port labelled Mock Business Central (P-35); this story still brings the OData service, its paging and `$filter`, and the compose service.
 
-### P-20: The connector framework and the Navision adapter
+### P-20: The connector framework and the Business Central adapter
 
 A connector framework, and the adapter that makes a stock lookup work end to end.
 
@@ -630,7 +630,7 @@ Acceptance criteria:
 
 - The framework: a `SystemConnector` interface over named record kinds (items, customers, vendors, price lists, stock levels and mail messages).
 - The framework: a factory (credentials only from the environment); a health probe and a retry policy with backoff; an HTTP JSON client with timeouts; data minimisation and an offline connector; the `Connector` model and a connectors page.
-- The Navision adapter, so a stock lookup works end to end, with contract tests against the mock.
+- The Business Central adapter, so a stock lookup works end to end, with contract tests against the mock.
 - ADR: hub-and-spoke integration.
 
 ### P-21: Synthetic documents
@@ -693,7 +693,7 @@ A live 3D view of orders moving between the six teams, on landing, login and as 
 
 Acceptance criteria:
 
-- The concept: the OrderPilot core, in faceted glass with an emissive inner light; around it, six team stations (Product Managers, Approver, Support, Warehouse, Finance and Logistics), plus Navision and the mailbox; documents travel as glowing packets along arcs while an order moves; status colours (on time, waiting, exception) come from real workflow events over SSE.
+- The concept: the OrderPilot core, in faceted glass with an emissive inner light; around it, six team stations (Product Managers, Approver, Support, Warehouse, Finance and Logistics), plus Business Central and the mailbox; documents travel as glowing packets along arcs while an order moves; status colours (on time, waiting, exception) come from real workflow events over SSE.
 - It appears on landing and login, and as a live operations view.
 - Assets: parametric Blender Python scripts in `assets-src/3d/`, with PBR materials, bevels and clean topology; run headless with `blender -b -P`; exported to GLB and quantised with glTF Transform, with no WebAssembly decoders; 1.5 MB or less in total.
 - Rendering: React Three Fiber, drei and postprocessing; ACES filmic tone mapping, a studio environment and soft shadows; bloom, a subtle depth of field and a vignette; spring motion and a slow cinematic camera that the user can take over; hover tooltips, and clicking a node to navigate; React Bits overlays for labels.
@@ -943,7 +943,7 @@ Lists and detail pages for customers, vendors and items, brought forward from P-
 
 Acceptance criteria:
 
-- Lists and detail pages for customers, vendors and items, read from the mock Navision data and labelled "Mock Navision".
+- Lists and detail pages for customers, vendors and items, read from the mock Business Central data and labelled "Mock Business Central".
 - An item shows stock, quantity on sales order, quantity on purchase order, available stock, price, brand and vendor.
 - A customer shows country, currency, payment terms, price group, open orders and overdue items.
 - A vendor shows its bank accounts (masked by role) and its open purchase orders.
@@ -1242,7 +1242,7 @@ Support enters an order on the document form. Prompt 004 section 4.
 
 Acceptance criteria:
 
-- `/orders/new` and the draft's own page use the document form and the lines grid, with the customer chosen by search and matched on its Navision number.
+- `/orders/new` and the draft's own page use the document form and the lines grid, with the customer chosen by search and matched on its Business Central number.
 - `POST /orders` and `PATCH /orders/:orderNo`, for drafts only, with new permissions held by Support and the Product Manager and never by System admin.
 - No duplicate orders: one customer plus one PO number is one order, with a unique index and a 409 that names the existing order, and the form links to it.
 - Availability shows live on each line, from the same formula as master data.
@@ -1330,7 +1330,7 @@ Acceptance criteria:
 - Mock AI classifies a known document and fills its fields from the ground truth, labelled "Mock AI". An unknown file ends honestly, and it never invents a field.
 - `/documents/:id` shows the fields, grouped into header and lines, each with its confidence and source, and "Requires approval" on the uncertain ones.
 - Confirm and Correct are inline and keyboard first. A review stores who, when, the old value and the new one in OrderPilot's own tables, and each is audited, with Undo.
-- When every uncertain field is done the document is confirmed and its task leaves the inbox. No order status changes and nothing goes to Navision.
+- When every uncertain field is done the document is confirmed and its task leaves the inbox. No order status changes and nothing goes to Business Central.
 - To review is a list on the template, and the home page's tile opens it with the same count.
 - Bank details never reach a role that may not see them, tested on the bytes of the response.
 - Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
@@ -1371,7 +1371,7 @@ Enter once, flows everywhere. Prompt 004 section 4.
 Acceptance criteria:
 
 - A confirmed PO offers Create order, which opens a draft pre-filled from what a person confirmed.
-- Customers and items match on their Navision numbers, and a look-alike name is only shown as a possible match.
+- Customers and items match on their Business Central numbers, and a look-alike name is only shown as a possible match.
 - The draft keeps a link to its source document, and the two pages link to each other.
 - The order form's footer lists its attachments, and Attach uploads through P-37's route.
 - The Playwright test covers the path from upload to a saved draft.
@@ -1590,7 +1590,7 @@ Acceptance criteria:
 
 ### P-66: Approval limits form
 
-A form only, in the shape of Navision's Approval User Setup. Prompt 004 section 4.
+A form only, in the shape of Business Central's Approval User Setup. Prompt 004 section 4.
 
 - **Area:** `area: 4 controls and monitoring`
 - **Priority:** must
@@ -1629,7 +1629,7 @@ Acceptance criteria:
 
 ### P-68: Change requests for master data
 
-Managed in Navision, with Request a change. Prompt 004 section 1.
+Managed in Business Central, with Request a change. Prompt 004 section 1.
 
 - **Area:** `area: 1 document AI and integration`
 - **Priority:** must
@@ -1641,14 +1641,14 @@ Managed in Navision, with Request a change. Prompt 004 section 1.
 
 Acceptance criteria:
 
-- Customers, vendors and items say Managed in Navision, and offer Request a change.
+- Customers, vendors and items say Managed in Business Central, and offer Request a change.
 - A request is a record, and a second person approves it before it is applied, to mock data only.
 - A change to a vendor's bank details stops at a port for area 4's control and is never applied here.
 - Every step is audited, and a person cannot approve their own request.
 - A Playwright test: an allowed role creates, edits and voids a record, and a role without the permission sees no button and gets a 403 from the server.
 - Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
 
-### P-69: Mock Navision Demo data page
+### P-69: Mock Business Central Demo data page
 
 Test records for demos, for System admin only. Prompt 004 section 1.
 
@@ -1656,13 +1656,13 @@ Test records for demos, for System admin only. Prompt 004 section 1.
 - **Priority:** must
 - **Estimate:** 5 points
 - **Requirements:** M4 best practices
-- **Branch:** `feat/mock-navision-demo-data`
+- **Branch:** `feat/mock-business-central-demo-data`
 - **Planned for:** Sprint 02 (W3)
 - **Depends on:** P-68
 
 Acceptance criteria:
 
-- A page for System admin only, with its own permission, labelled as demo only, to add and edit test records in mock Navision.
+- A page for System admin only, with its own permission, labelled as demo only, to add and edit test records in mock Business Central.
 - It works only with demo mode on, and the server refuses it otherwise.
 - P-20's real connector retires it.
 - A Playwright test: an allowed role creates, edits and voids a record, and a role without the permission sees no button and gets a 403 from the server.
@@ -1874,7 +1874,7 @@ Left out of P-48 because no teammate needs it this week.
 
 Acceptance criteria:
 
-- Pasting rows from a spreadsheet (a part number and a quantity on each) fills one line per row, each part number resolved on its Navision number, and the rows that match nothing are listed for the person to fix.
+- Pasting rows from a spreadsheet (a part number and a quantity on each) fills one line per row, each part number resolved on its Business Central number, and the rows that match nothing are listed for the person to fix.
 - The shortfall counts every line that asks for the same item together, not each line alone, and says which lines add up to it.
 - A click on a line's number selects the line, so the mouse can reach Delete too.
 - Column widths can be dragged and are kept for each person.
@@ -1980,7 +1980,7 @@ Acceptance criteria:
 - Email intake runs through a mock mailbox with signed webhooks.
 - No real customer email is read or sent.
 
-## Epic B: Master data and Navision
+## Epic B: Master data and Business Central
 
 Items, customers, vendors, prices and stock behind a connector; any write-back needs a preview and an approval.
 
@@ -1998,9 +1998,9 @@ Acceptance criteria:
 
 - No duplicate orders: a repeated PO is caught.
 
-### B-2: A Navision-ready import file
+### B-2: A Business Central import file
 
-Confirmed data leaves as a file Navision can import, beside Navision and never instead of it.
+Confirmed data leaves as a file Business Central can import, beside Business Central and never instead of it.
 
 - **Area:** `area: 1 document AI and integration`
 - **Priority:** should
@@ -2010,7 +2010,7 @@ Confirmed data leaves as a file Navision can import, beside Navision and never i
 
 Acceptance criteria:
 
-- A Navision-ready import file is produced from data a person has confirmed.
+- A Business Central import file is produced from data a person has confirmed.
 - Any write-back needs a preview and an approval, and nothing posts automatically.
 
 ### B-3: The template engine for PIs, invoices, packing lists and Excel
@@ -2061,7 +2061,7 @@ Azri's head start: the models, contracts, screens and test skeletons, never the 
 Acceptance criteria:
 
 - Models: workflow definitions, instances, tasks, events and notifications.
-- OrderPilot's own numbers for its records, like `SPR-20261102-0001`, beside Navision's.
+- OrderPilot's own numbers for its records, like `SPR-20261102-0001`, beside Business Central's.
 - Payment confirmation records the payment type, and prepayment drives the payment gate.
 - Configurable fields and default values for each document type, as configuration, not code.
 - The SPR pre-fill is a suggestion from stock levels that a person approves.
@@ -2088,7 +2088,7 @@ Acceptance criteria:
 
 - Azri writes the state machine himself, as his first story, so that it stays his work (C-1 leaves it to him).
 - Its states and transitions follow the sales flow: the PO arrives; stock is checked and an SPR raised when needed; Support generates the PI; the customer pays; the warehouse packs; the invoice and packing list are made; the goods go to the forwarder; the customer gets the shipping details; the AWB/BL and import permit are followed up.
-- Where they meet, its states map to Navision's Sales Header Status (Open, Released, Pending Approval, Pending Prepayment), as an assumption to confirm at the briefing call.
+- Where they meet, its states map to Business Central's Sales Header Status (Open, Released, Pending Approval, Pending Prepayment), as an assumption to confirm at the briefing call.
 - Order status lives only in this state machine. Other areas read it or send events, and never set status themselves.
 - Each transition names the role that may make it, and area 4's policy is called on the server before it happens.
 - The payment gate guards packing: with the prepayment type, packing waits for Finance's confirmation.
@@ -2100,7 +2100,7 @@ Acceptance criteria:
 
 ### C-3: SPR approval within limits
 
-An SPR goes to an approver who may decide it within their limit, set up in the shape of Navision's Approval User Setup.
+An SPR goes to an approver who may decide it within their limit, set up in the shape of Business Central's Approval User Setup.
 
 - **Area:** `area: 2 order workflows and approvals`
 - **Priority:** must
@@ -2112,7 +2112,7 @@ An SPR goes to an approver who may decide it within their limit, set up in the s
 
 Acceptance criteria:
 
-- The approval setup has the shape of Navision's Approval User Setup: user, approver, Sales Amount Approval Limit, Purchase Amount Approval Limit, Unlimited Sales Approval, Unlimited Purchase Approval, and a substitute.
+- The approval setup has the shape of Business Central's Approval User Setup: user, approver, Sales Amount Approval Limit, Purchase Amount Approval Limit, Unlimited Sales Approval, Unlimited Purchase Approval, and a substitute.
 - Approvers, limits and delegation are configuration, not code, until Spectra confirms them.
 - An approver approves or rejects an SPR within their limit, with a comment, on C-1's SPR approval page.
 - An SPR above the approver's limit goes on to an approver whose limit covers it, or one with an unlimited approval, and is never approved below it.
@@ -2181,7 +2181,7 @@ Acceptance criteria:
 - The checks module: a check-rule Strategy interface; check-result and exception contracts; an empty exceptions model.
 - Contracts, with routes returning typed mock data in Swagger.
 - Screens wired to those routes, covering every state: the order tracker (status, owner, overdue flags); an order's detail timeline; the exceptions queue; a KPI dashboard of Spectra's five measures.
-- An order's page in the tracker shows each step and its effect, such as "payment confirmed: packing released". Money postings stay in Navision.
+- An order's page in the tracker shows each step and its effect, such as "payment confirmed: packing released". Money postings stay in Business Central.
 - To-do tests, as `it.todo` with the key cases named: the MVP mismatch (the packing list's quantity against the PO), tolerances, and the KPI formulas.
 - The "What the base gives you" and "What's yours to build" sections of the guide are filled in.
 - Left to Iok Teck: every check and its tolerance, the exceptions flow, the tracker's logic and the KPIs.
@@ -2202,7 +2202,7 @@ The MVP mismatch: a packing list whose quantity differs from the PO is flagged, 
 Acceptance criteria:
 
 - A check rule on D-1's Strategy interface compares each packing-list line's quantity with the matching PO line.
-- Lines match on the item's Navision number, never on its name. A look-alike name is shown as a possible match.
+- Lines match on the item's Business Central number, never on its name. A look-alike name is shown as a possible match.
 - A difference outside the tolerance fails the check. The tolerance is configuration, and zero until Spectra says otherwise.
 - The result, pass or fail with each differing line, is reported to area 2, which decides what happens to the order.
 - A failure raises an exception in the exceptions queue (D-3), linked to both documents.
@@ -2251,7 +2251,7 @@ Acceptance criteria:
 - The tracker takes each order's status from area 2's workflow events. It never stores or sets a status of its own.
 - Each order shows its current step, the role and the person who hold it, and how long it has waited.
 - An order or a follow-up past its due time is flagged overdue, and every overdue follow-up is visible.
-- An order's page shows each step and its effect, such as "payment confirmed: packing released". Money postings stay in Navision.
+- An order's page shows each step and its effect, such as "payment confirmed: packing released". Money postings stay in Business Central.
 - Until P-15's event bus exists, it works from the typed events in the order and event contract (P-7).
 - It filters by status, owner, area and overdue, with the common data table (P-12).
 - The overdue count feeds the KPI dashboard's overdue-orders measure.
@@ -2425,7 +2425,7 @@ Acceptance criteria:
 
 - One policy, called on the server by every endpoint that acts. Hiding a button is never the control.
 - Role permissions plus a data scope, on F-1's matrix: for example, a Product Manager sees only their brands' orders.
-- Approval limits in the shape of Navision's Approval User Setup (approver, Sales Amount Approval Limit, Purchase Amount Approval Limit, Unlimited Sales Approval, Unlimited Purchase Approval, substitute), the same shape area 2's SPR approval uses (C-3).
+- Approval limits in the shape of Business Central's Approval User Setup (approver, Sales Amount Approval Limit, Purchase Amount Approval Limit, Unlimited Sales Approval, Unlimited Purchase Approval, substitute), the same shape area 2's SPR approval uses (C-3).
 - Limits and approvers are configuration until Spectra confirms them.
 - An action above the actor's limit is refused, the way F-1 shows a refusal.
 - Every refusal is audited: who, what, when and why.
@@ -2469,7 +2469,7 @@ A vendor PI whose bank details differ from the vendor's bank account record hold
 Acceptance criteria:
 
 - The bank details on a vendor PI are compared with the vendor's Vendor Bank Account record: Bank Account No., SWIFT Code and IBAN.
-- Vendors match on their Navision number, never on their name.
+- Vendors match on their Business Central number, never on their name.
 - Any difference holds the payment, and nobody can pay the vendor while the hold is on.
 - Only Finance and a second approver clear the hold: two different people, each with a reason, and neither of them the person who changed the details.
 - Bank details are masked by role, with a reason, and the hold shows which field differs without showing the full number to a role that may not see it.
