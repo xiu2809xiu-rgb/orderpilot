@@ -29,7 +29,7 @@ interface FilterLookupProps {
 
 /**
  * A select with a search box, for a list too long to scan: customers, vendors,
- * items. The value is the Navision number, never the name.
+ * items. The value is the Business Central number, never the name.
  */
 export function FilterLookup({
   label,

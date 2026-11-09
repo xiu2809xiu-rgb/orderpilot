@@ -108,7 +108,7 @@ describe("an order's detail page", () => {
     server.use(getTrackerTimelineMockHandler(timeline));
     renderPage();
     const matches = await screen.findByRole("region", {
-      name: /matched on Navision numbers/i,
+      name: /matched on Business Central numbers/i,
     });
     const row = within(matches).getAllByRole("row")[1];
     if (!row) throw new Error("No match row");
@@ -123,7 +123,9 @@ describe("an order's detail page", () => {
     server.use(getTrackerTimelineMockHandler(timeline));
     renderPage();
     expect(
-      await screen.findByText(/Postings to the ledger are made in Navision/),
+      await screen.findByText(
+        /Postings to the ledger are made in Business Central/,
+      ),
     ).toBeVisible();
   });
 

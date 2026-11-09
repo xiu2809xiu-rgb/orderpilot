@@ -22,7 +22,7 @@ function ItemRecord({ item }: { item: ItemDetail }) {
         meta={
           <>
             <AvailabilityBadge availability={item.availability} />
-            <DemoBadge kind="mockNavision" />
+            <DemoBadge kind="mockBusinessCentral" />
           </>
         }
         actions={

@@ -12,7 +12,7 @@ import {
 
 /**
  * The customer and items as printed on the documents, beside the master-data
- * record found by the same Navision number. Names are shown, never matched.
+ * record found by the same Business Central number. Names are shown, never matched.
  * A look-alike name with another number is a possible match for a person.
  */
 export function MasterMatches({

@@ -119,7 +119,7 @@
       "creditLimit": "Credit limit",
       "creditLimitHint": "Never kept in a draft, as a masked field would not be.",
       "currency": "Currency",
-      "currencyHint": "From the customer card in Navision.",
+      "currencyHint": "From the customer card in Business Central.",
       "postingDate": "Posting date",
       "postingDateHint": "Set when the order is posted.",
       "partial": "Partial shipment allowed",

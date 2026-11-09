@@ -154,7 +154,7 @@ const load = () =>
   i18n.loadNamespaces(["master-data", "common", "components", "list-page"]);
 
 describe("the items list", () => {
-  it("lists items with the Mock Navision badge, marks the short one and links each record", async () => {
+  it("lists items with the Mock Business Central badge, marks the short one and links each record", async () => {
     await load();
     server.use(
       getMasterDataFiltersMockHandler(filters),
@@ -164,7 +164,7 @@ describe("the items list", () => {
     );
     const view = renderAt("/master-data/items");
     expect(await screen.findByText("Synthetic switch I-0004")).toBeVisible();
-    expect(screen.getByText("Mock Navision")).toBeInTheDocument();
+    expect(screen.getByText("Mock Business Central")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "I-0004" })).toHaveAttribute(
       "href",
       "/master-data/items/I-0004",
@@ -355,7 +355,7 @@ describe("an item", () => {
     ).toBeGreaterThan(0);
   });
 
-  it("says plainly when Navision has no such item", async () => {
+  it("says plainly when Business Central has no such item", async () => {
     await load();
     server.use(
       http.get("*/api/v1/master-data/items/:no", () =>
@@ -367,7 +367,7 @@ describe("an item", () => {
     renderAt("/master-data/items/I-9999");
     expect(await screen.findByText("No such item")).toBeVisible();
     expect(
-      screen.getByText("Navision has no item numbered I-9999."),
+      screen.getByText("Business Central has no item numbered I-9999."),
     ).toBeVisible();
   });
 });

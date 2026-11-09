@@ -9,7 +9,7 @@ import {
 const RESULTS = 10;
 
 /**
- * Customers by number or name. The value picked is the Navision number: the
+ * Customers by number or name. The value picked is the Business Central number: the
  * name is shown beside it and never matched on.
  */
 export const searchCustomers: LookupSearch = async (query, signal) => {

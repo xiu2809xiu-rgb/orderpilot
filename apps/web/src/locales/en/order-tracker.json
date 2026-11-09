@@ -55,7 +55,7 @@
     "overdue": "Overdue",
     "steps": {
       "title": "What happened, step by step",
-      "description": "Each step with its effect on the order. Postings to the ledger are made in Navision; this page only shows the result.",
+      "description": "Each step with its effect on the order. Postings to the ledger are made in Business Central; this page only shows the result.",
       "current": "Current step",
       "effect": "Effect",
       "empty": "No steps recorded yet."
@@ -64,7 +64,7 @@
       "title": "Checks",
       "description": "Sample results. Each says what was expected, what was found and the tolerance it used.",
       "empty": "No checks have run on this order yet.",
-      "emptyHint": "Checks run when the order is read from Navision. They appear here once they have.",
+      "emptyHint": "Checks run when the order is read from Business Central. They appear here once they have.",
       "expected": "Expected",
       "found": "Found",
       "tolerance": "Tolerance",
@@ -73,9 +73,9 @@
       "evidence": "Evidence"
     },
     "matches": {
-      "title": "Customer and items, matched on Navision numbers",
+      "title": "Customer and items, matched on Business Central numbers",
       "description": "A match is made on the number only. A similar name with another number is shown as a possible match for a person to look at.",
-      "region": "Matches on Navision numbers",
+      "region": "Matches on Business Central numbers",
       "kind": "Kind",
       "printed": "On the document",
       "matched": "In master data",

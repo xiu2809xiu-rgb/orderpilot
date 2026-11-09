@@ -143,7 +143,7 @@ export default function CustomersPage() {
       tableId="master-data-customers"
       title={t("customers.title")}
       description={t("customers.description")}
-      demo="mockNavision"
+      demo="mockBusinessCentral"
       tabs={<MasterDataTabs />}
       caption={t("customers.caption")}
       columns={columns}

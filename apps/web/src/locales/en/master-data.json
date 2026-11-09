@@ -1,6 +1,6 @@
 {
   "title": "Master data",
-  "description": "Items, customers and vendors, read from Navision.",
+  "description": "Items, customers and vendors, read from Business Central.",
   "menu": {
     "customers": "Customers",
     "vendors": "Vendors",
@@ -21,7 +21,7 @@
     "scroll": "{{name}}, scrollable",
     "hidden": "Hidden"
   },
-  "emptyDescription": "Records appear here once they are read from Navision. Open Connectors to check the link.",
+  "emptyDescription": "Records appear here once they are read from Business Central. Open Connectors to check the link.",
   "availability": {
     "short": "Short",
     "low": "Low",
@@ -34,7 +34,7 @@
   },
   "items": {
     "title": "Items",
-    "description": "Stock, prices and vendors. Navision stays the system of record, so nothing is changed here.",
+    "description": "Stock, prices and vendors. Business Central stays the system of record, so nothing is changed here.",
     "caption": "Items",
     "emptyTitle": "No items yet",
     "columns": {
@@ -73,7 +73,7 @@
     "vendor": "Vendor",
     "vendorItemNo": "Vendor item No.",
     "notFoundTitle": "No such item",
-    "notFoundDescription": "Navision has no item numbered {{no}}.",
+    "notFoundDescription": "Business Central has no item numbered {{no}}.",
     "stock": {
       "title": "Stock",
       "inventory": "Inventory",
@@ -173,7 +173,7 @@
     "creditLimit": "Credit limit",
     "balance": "Balance",
     "notFoundTitle": "No such customer",
-    "notFoundDescription": "Navision has no customer numbered {{no}}.",
+    "notFoundDescription": "Business Central has no customer numbered {{no}}.",
     "open": {
       "title_one": "{{count}} order to ship",
       "title_other": "{{count}} orders to ship",
@@ -224,7 +224,7 @@
     "paymentTerms": "Payment terms",
     "balance": "Balance",
     "notFoundTitle": "No such vendor",
-    "notFoundDescription": "Navision has no vendor numbered {{no}}.",
+    "notFoundDescription": "Business Central has no vendor numbered {{no}}.",
     "bank": {
       "title": "Bank accounts",
       "code": "Code",

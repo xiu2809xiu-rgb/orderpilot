@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 /**
  * Every step of the order as a chain, with what each one changed, in our own
  * words ("Payment confirmed: packing released"). The text comes from the API.
- * Money postings are made in Navision, and the heading says so.
+ * Money postings are made in Business Central, and the heading says so.
  */
 export function StepChain({ steps }: { steps: readonly TimelineStep[] }) {
   const { t } = useTranslation("order-tracker");

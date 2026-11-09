@@ -4,8 +4,8 @@
     "mockHint": "A stand-in for a real system. Nothing here reaches the real one.",
     "mockAi": "Mock AI",
     "mockAiHint": "A stand-in for the AI model. Its answers are canned, not generated.",
-    "mockNavision": "Mock Navision",
-    "mockNavisionHint": "A stand-in for Navision. Nothing here reaches the real one.",
+    "mockNavision": "Mock Business Central",
+    "mockNavisionHint": "A stand-in for Business Central. Nothing here reaches the real one.",
     "synthetic": "Synthetic demo data",
     "syntheticHint": "Made-up records for the demo. None of it is real.",
     "classification": {
