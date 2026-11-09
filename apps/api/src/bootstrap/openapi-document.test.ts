@@ -47,6 +47,7 @@ describe("the OpenAPI document (what orval reads)", () => {
       "/api/v1/master-data/available-stock",
       "/api/v1/master-data/customers",
       "/api/v1/master-data/customers/{no}",
+      "/api/v1/master-data/customers/{no}/last-prices",
       "/api/v1/master-data/filters",
       "/api/v1/master-data/items",
       "/api/v1/master-data/items/{no}",
