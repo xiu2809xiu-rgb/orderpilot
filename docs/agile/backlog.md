@@ -2,19 +2,19 @@
 
 Rendered from [`scripts/github/data/backlog.json`](../../scripts/github/data/backlog.json) by `node scripts/github/render-docs.mjs`. Change the data, not this file. The same data seeds the issues. The board shows where each story stands.
 
-There are 9 epics and 125 stories. Estimates are story points: a first guess, for the team to change at planning.
+There are 9 epics and 156 stories. Estimates are story points: a first guess, for the team to change at planning.
 
 ## Epics
 
 | Epic   | Title                             | Area                                    | Stories | Points |
 | ------ | --------------------------------- | --------------------------------------- | ------- | ------ |
-| Epic P | The platform base                 | `area: 1 document AI and integration`   | 81      | 458    |
-| Epic A | Document intake and AI extraction | `area: 1 document AI and integration`   | 5       | 31     |
-| Epic B | Master data and Business Central  | `area: 1 document AI and integration`   | 4       | 14     |
-| Epic C | Order workflows and approvals     | `area: 2 order workflows and approvals` | 5       | 29     |
-| Epic D | Checks, the tracker and insights  | `area: 3 checks tracker and insights`   | 4       | 23     |
-| Epic E | AI with a person in the loop      | `area: 1 document AI and integration`   | 6       | 29     |
-| Epic F | Financial controls and governance | `area: 4 controls and monitoring`       | 9       | 38     |
+| Epic P | The platform base                 | `area: 1 document AI and integration`   | 93      | 523    |
+| Epic A | Document intake and AI extraction | `area: 1 document AI and integration`   | 8       | 55     |
+| Epic B | Master data and Business Central  | `area: 1 document AI and integration`   | 7       | 35     |
+| Epic C | Order workflows and approvals     | `area: 2 order workflows and approvals` | 9       | 50     |
+| Epic D | Checks, the tracker and insights  | `area: 3 checks tracker and insights`   | 5       | 31     |
+| Epic E | AI with a person in the loop      | `area: 1 document AI and integration`   | 13      | 73     |
+| Epic F | Financial controls and governance | `area: 4 controls and monitoring`       | 10      | 43     |
 | Epic G | Monitoring                        | `area: 4 controls and monitoring`       | 2       | 11     |
 | Epic T | Team stories                      | `area: team`                            | 9       | 36     |
 
@@ -139,6 +139,28 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | E-2   | The accuracy harness, with a 95% target and a comparison of models | must     | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-78  | Room in the entry bundle                                           | must     | 3      | `area: 1 document AI and integration`   | M4 best practices, M6 deploy and monitor                       |
 | P-81  | Settle into the private repository                                 | must     | 2      | `area: 1 document AI and integration`   | M4 best practices, M5 team Git workflow                        |
+| P-82  | Plan prompts 005 and 006                                           | must     | 2      | `area: 1 document AI and integration`   | M4 best practices, M5 team Git workflow                        |
+| P-83  | Rename Navision to Business Central                                | must     | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-84  | SPR, the approver group and zero tolerance in the facts            | must     | 3      | `area: 1 document AI and integration`   | M1 design thinking, M2 GRS by design                           |
+| P-85  | Record the 5 Nov briefing                                          | must     | 2      | `area: team`                            | M1 design thinking                                             |
+| P-86  | Synthetic data from the briefing                                   | must     | 13     | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-87  | Drafts that a person sends                                         | must     | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-88  | Customer check on intake and the new-customer card                 | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-89  | PO versions                                                        | must     | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-90  | The short-stock revision request                                   | must     | 3      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-91  | The compare screen                                                 | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-92  | Document cabinet: filing and search                                | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-93  | Cabinet viewer: stamps, notes and the related chain                | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-94  | Audit packs                                                        | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-95  | Spark's foundation                                                 | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M3 AI-assisted coding, M4 best practices     |
+| P-96  | Spark's panel and page                                             | must     | 8      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-97  | Spark finds documents                                              | must     | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-98  | Spark matches a set and collects an audit pack                     | must     | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-99  | Spark answers order questions                                      | must     | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-100 | SPR screens: routing, the 24-hour reminder and where it is stuck   | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-101 | Vendor POs                                                         | must     | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-106 | Three visual directions                                            | must     | 8      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-107 | Roll the picked direction onto the shell and templates             | must     | 8      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | C-5   | Area 2 polish left out of the base                                 | should   | 3      | `area: 2 order workflows and approvals` | M4 best practices                                              |
 | P-22  | The design system with the Pro kits                                | should   | 8      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-29  | A unit coverage threshold on domain logic                          | should   | 2      | `area: 1 document AI and integration`   | M4 best practices                                              |
@@ -152,6 +174,13 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | B-3   | The template engine for PIs, invoices, packing lists and Excel     | should   | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | E-3   | Prompt-injection tests                                             | should   | 3      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | F-6   | A non-owner runtime database role                                  | should   | 3      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
+| P-102 | Inbound shipments and chase drafts                                 | should   | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-103 | Goods receipt and inwarding                                        | should   | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-104 | Vendor payments by due date                                        | should   | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-105 | Spark's charts, forecast and customer replies                      | should   | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-108 | The landing page                                                   | should   | 8      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-109 | The sign-in page with the scene                                    | should   | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-110 | The speed bar                                                      | should   | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-23  | The 3D order constellation                                         | could    | 13     | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-27  | Web shell polish                                                   | could    | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-77  | Tab strip polish                                                   | could    | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
@@ -165,6 +194,8 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | G-2   | Monitoring base polish                                             | could    | 3      | `area: 4 controls and monitoring`       | M2 GRS by design, M6 deploy and monitor                        |
 | F-9   | Audit viewer polish                                                | could    | 3      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
 | P-80  | Lines grid polish                                                  | could    | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-111 | Grid polish                                                        | could    | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-112 | Small delights                                                     | could    | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
 
 ## Epic P: The platform base
 
@@ -1901,6 +1932,265 @@ Acceptance criteria:
 - What says the repository is public is corrected: `CLAUDE.md`, `CONTRIBUTING.md`, the pull request template and the GRS risks. An ADR records what going private changed.
 - A-31 records Richie's decision of 5 Nov: Spectra's briefing material stays outside the repository and our coding tools may read it on his PC, while real business samples still wait for Spectra's written OK (Q-12).
 
+### P-82: Plan prompts 005 and 006
+
+Files prompts 005 and 006 and turns them into stories, in the order of 005 section 12 and 006 section 7.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 2 points
+- **Requirements:** M4 best practices, M5 team Git workflow
+- **Branch:** `chore/plan-prompts-005-006`
+- **Planned for:** Sprint 03 (W4)
+
+Acceptance criteria:
+
+- Prompts 005 and 006 are in `docs/ai/prompts/` as Richie approved them, and T-9, `render.mjs`, the rendered backlog and the wiki name prompt 007 as the handover prompt.
+- The backlog holds P-82 to P-112, each under the epic of its capability, and the stories the briefing changes are updated so that nothing is built twice.
+- `docs/team/module-ownership.md` records the exception prompt 005 sections 5 to 7 make: Richie builds the platform side of the briefing's changes, never the owners' rules.
+- `backlog.test.mjs` and `seed-backlog.test.mjs` carry the new counts, a renamed-stories map keeps the prompt 001 checks, a test holds every epic at 95 stories or fewer against GitHub's limit of 100 sub-issues, and `node --test` over `scripts/github` and `render-docs.mjs --check` pass.
+- `docs/BUILD_REPORT.md` has a section for prompts 005 and 006 with the story table, the Waiting for Richie list holds the decisions taken while cutting, and area 1's table in `docs/ai/ai-usage-log.md` has one row.
+
+### P-83: Rename Navision to Business Central
+
+Spectra moved to Business Central, so pages, docs and area 1's code names say so, while stored names stay.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 5 points
+- **Requirements:** M4 best practices
+- **Branch:** `chore/business-central-rename`
+- **Planned for:** Sprint 03 (W4)
+- **Depends on:** P-82
+
+Acceptance criteria:
+
+- Every page says Business Central, Managed in Business Central or Mock Business Central where it said Navision: locale values change and their keys stay, and the tests that assert those words follow, including the negative assertion in `DraftOrderPage.test.tsx`.
+- `CLAUDE.md`, `README.md`, `CONTRIBUTING.md` and the `docs/` pages say Business Central, naming Microsoft Dynamics 365 Business Central once on each page. Prompts 001 to 006, the AI usage log, merged ADRs and the build report outside its Waiting list stay as written.
+- `docs/team/area-2-*.md`, `area-3-*.md` and `area-4-*.md` stay out of this sweep: their lines are listed in each owner's issue, and the owners change them.
+- `docs/grs/grs-by-design.md` rewords risk R-06 for the ERP Spectra now runs instead of swapping the word, and `docs/data-formats.md` and `docs/research/domain-notes.md` say that API v2.0 renames these fields and the connector maps them.
+- Area 1's code names change where the rename stays inside area 1: `MockNavisionMasterData` and its file, the `mockNavision` badge kind, and the Swagger summaries and messages in area 1's API.
+- The comments and titles that only describe the mock follow: `packages/shared` (23 comment lines in 9 files, with all four owners asked to review), `packages/synthetic-data` (7 lines), `apps/api/requests/master-data.http` and `orders.http`, the API test titles in `master-data.parity.test.ts`, `test/http/master-data.test.ts` and `test/database/sales-order.test.ts`, area 1's API comments, and 11 comments in the web code.
+- Database columns, wire properties, the stored `navision` value, i18n keys, other areas' identifiers and the shared exports (`navisionNoSchema`, `NavisionStatus`, `NAVISION_STATUSES` and `navisionStatusSchema`, of which area 2 imports `NavisionStatus`) keep their names, and an ADR says why.
+- The words this story changes in the owners' files (`workflows.json`, `order-tracker.json`, `OrderDetailPage.test.tsx` and `checks/domain/mock-status.ts`) change with those owners' review, and each owner's issue lists the mentions left in their own code.
+- `pnpm api:generate` changes only the summaries in `apps/api/openapi.json` and the generated client's `endpoints/master-data/master-data.ts`, because the other 12 generated files carry only the wire names, and `pnpm api:check` passes.
+- The fixture in `scripts/ci/changed-inputs.test.mjs` and the comment in `docker-compose.yml` use the planned `mock-business-central`.
+- `git grep -i navision` lists only what the ADR keeps on purpose, the `RENAMED` map in `backlog.test.mjs` and this story's own text, and the pull request shows the list.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+
+### P-84: SPR, the approver group and zero tolerance in the facts
+
+The facts, names and personas follow the briefing: Stock Purchase Requisition, three management approvers, a coordinator and exact matching on four fields.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 3 points
+- **Requirements:** M1 design thinking, M2 GRS by design
+- **Branch:** `chore/spr-approver-group`
+- **Planned for:** Sprint 03 (W4)
+- **Depends on:** P-83
+
+Acceptance criteria:
+
+- SPR reads Stock Purchase Requisition in `CLAUDE.md` and the docs, raised by the product manager from stock on hand and the last three months' run rate.
+- `CLAUDE.md` and the docs say a coordinator, a Support user, routes each SPR to three management approvers, any one of whom decides, with no substitute and a reminder to the whole group after 24 hours.
+- `CLAUDE.md` follows the briefing where else it differs: the countries and payment terms in its client paragraph, what links the two flows, an SPR no longer raised from an order's shortfall, and Management deciding above a limit only if limits are switched on.
+- `docs/agile/hero-journey.md` says the SPR's pre-fill moves from the shortfall to stock on hand and the run rate with P-61, and E2E #1's steps stay as they are for `v0.1-proposal` (P-90 records the switch after the tag).
+- Rachel Goh, made up, replaces the approver persona, and the personas name the other two made-up approvers, Marcus Teo and Farah Ismail, and the made-up coordinator, Michelle Lau, whom P-86 seeds.
+- The old persona's real first name leaves every text file but prompt 001. Committed pictures keep it until their pages are re-shot, which P-107's roll-out does for every page, and Git history keeps it regardless.
+- The role's label reads Management approver (item cy in the build report), and the stored `APPROVER` value stays.
+- `CLAUDE.md` states that part number, quantity, unit price and currency match exactly across the PO, PI, invoice and packing list, with no tolerance setting for those four.
+- An ADR records the briefing's facts, names the conflicts with ADR 0041's decisions 6, 8 and 10 for Angelyn to decide, and changes no logic of areas 2, 3 or 4.
+- Azri's two test files that carry the persona's name, `workflow-spr-approval.test.ts` and `WorkflowsPage.test.tsx`, change only where they name it, with his review.
+- `pnpm check:dashes`, `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm build` pass.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+
+### P-85: Record the 5 Nov briefing
+
+The answers from 5 Nov in our own words, the assumptions settled, and each owner told what their logic now needs.
+
+- **Area:** `area: team`
+- **Priority:** must
+- **Estimate:** 2 points
+- **Requirements:** M1 design thinking
+- **Branch:** `docs/briefing-5-nov`
+- **Planned for:** Sprint 03 (W4)
+- **Depends on:** P-84
+
+Acceptance criteria:
+
+- `docs/client/questions-for-client.md` records the 5 Nov answers in our own words in its Answers table, and adds the new questions from Q-33.
+- `docs/assumptions.md` replaces its older briefing section, marks each assumption Confirmed, Partly, Changed, Dropped or Open, and adds A-38 onwards.
+- A-31 says samples may go to a cloud AI service that does not train on inputs, in a named region, only once Spectra's written line arrives, and `CLAUDE.md`, `AGENTS.md` and `docs/data-formats.md` agree.
+- `CLAUDE.md` and the docs bring the purchase flow forward (A-20), and the six KPIs replace the five, each old measure mapped to a new one (item cz in the build report).
+- One issue each for Azri, Angelyn and Iok Teck, filed right after P-82's seed and assigned to them, lists what their logic now needs and which area 1 stories wait on it.
+- Nothing from the client pack is in Git or an issue: no staff names, figures, customer or vendor names, quotes or screenshots.
+
+### P-86: Synthetic data from the briefing
+
+The seeded set uses the brands, categories, countries, history and planted cases of the briefing, so Spark and the reports work on realistic data.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 13 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/area1-briefing-data`
+- **Planned for:** Sprint 03 (W4) and Sprint 04 (W5)
+- **Depends on:** P-31, P-84
+
+Acceptance criteria:
+
+- Real brand names from prompt 005 section 2, with made-up part numbers in each brand's style and no logos, across components, peripherals, PCs, enterprise, security and networking, and an ADR records Richie's decision of 9 Nov to use them.
+- Made-up customers in the eleven countries of prompt 005 section 10, each with an address and an obviously fake tax ID, prices in USD, and each customer's last agreed price for each item, with no price tables.
+- 24 months of orders and sales with seasonality, each item's three-month run rate and months of cover, and vendor lead times as in prompt 005 section 9.
+- The 120 live samples stay apart from the 24 months of history, so the lists and the tracker still read the 120, and each owner is asked to review any of their tests that pin them, such as `apps/api/src/modules/checks/checks.test.ts`.
+- The planted cases exist: a PO for more than is in stock, a PI whose price differs from its PO, and an AWB draft with the wrong consignee.
+- The people include three management approvers and the SPR coordinator, and the first approver stays the demo persona.
+- The order form's reference price becomes the customer's last agreed price for the item, as context only, in place of the list price.
+- The price-list leftovers go: `docs/data-formats.md`, the sample exception in `packages/synthetic-data/src/exceptions.ts`, and the demo PO's purpose and a comment in `packages/synthetic-documents`, with `pnpm docs:generate` run again.
+- The docs that pin the old data set follow: `CLAUDE.md`'s row for `packages/synthetic-data`, `docs/agile/test-plan.md` and `docs/requirements-traceability.md`.
+- The seed stays deterministic and date-relative and runs in 30 seconds or less, the list endpoints are timed before and after and are no slower, and every test that pins a figure changes in the same pull request.
+- Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+
+### P-106: Three visual directions
+
+Ink, Paper and Spectra, each shown on the home page and one order page, so Richie picks one before anything rolls out.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 8 points
+- **Requirements:** M4 best practices
+- **Branch:** `feat/platform-design-directions`
+- **Planned for:** Sprint 03 (W4) and Sprint 04 (W5)
+- **Depends on:** P-22
+
+Acceptance criteria:
+
+- Each direction names its palette, type and radius, with tokens for colour in light and dark, one UI typeface with tabular figures, at most 7 type sizes, spacing, elevation and motion.
+- The home page and one order page, at 1440 by 900 in light and dark, for each direction, are in `docs/design/directions/`.
+- The Spectra direction uses our own teal and navy in the spirit of Spectra's deck, with no colour sampled from the client pack and no logo (Q-23).
+- `docs/design/review-board.md` holds the three directions, and Richie's pick is recorded in `docs/design/design-system.md` before anything rolls out.
+- Icons are Lucide only.
+
+### P-107: Roll the picked direction onto the shell and templates
+
+The chosen direction goes onto the app shell, the list page, the document form and the cards, and every later screen starts in it.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 8 points
+- **Requirements:** M4 best practices
+- **Branch:** `feat/platform-direction-rollout`
+- **Planned for:** Sprint 05 (W6)
+- **Depends on:** P-106
+
+Acceptance criteria:
+
+- The tokens, shell, list template, document form and cards use the chosen direction, with dark mode as good as light.
+- Each kit item is adapted to the tokens, one component to a file, with a header comment naming its vendor, the item and its licence.
+- Pro parts appear only on Richie's pages and the shell, and area screens use free kits unless Richie confirms a team licence.
+- Every page it touches has a before and after in `docs/design/review-board.md`.
+- `pnpm budget` passes and Lighthouse stays at 90 or more.
+- Every page is re-shot in the new direction, which also replaces the older pictures that still show the old persona's real first name (P-84).
+- Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark.
+
+### P-108: The landing page
+
+The constellation as hero, the tagline, three steps, a short Spark exchange and Spectra's own measures.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** should
+- **Estimate:** 8 points
+- **Requirements:** M4 best practices
+- **Branch:** `feat/platform-landing`
+- **Planned for:** Sprint 11 (W12)
+- **Depends on:** P-23, P-107
+
+Acceptance criteria:
+
+- The constellation is the hero once Richie approves its capture, with the tagline and the three steps.
+- A short scripted Spark exchange plays out, and Spectra's own measures from prompt 006 section 3 appear.
+- Sign in and Try the demo, with one primary button.
+- A still image for reduced motion or no WebGL, and the 3D stays a lazy chunk.
+- Lighthouse 90 or more and LCP under 2.5 s.
+- Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark, with a short capture of the motion.
+
+### P-109: The sign-in page with the scene
+
+The split sign-in layout with a React Bits background now, and the scene once it is approved.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** should
+- **Estimate:** 3 points
+- **Requirements:** M4 best practices
+- **Branch:** `feat/platform-sign-in-scene`
+- **Planned for:** Sprint 06 (W7)
+- **Depends on:** P-107
+
+Acceptance criteria:
+
+- A React Bits background sits behind the sign-in form, replaced by the scene once P-23's capture is approved, with a still version for reduced motion.
+- The demo role buttons stay one click each.
+- Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark, with a short capture of the motion.
+
+### P-110: The speed bar
+
+The keyboard and speed rules of prompt 006 section 4 that the product pass left out.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** should
+- **Estimate:** 5 points
+- **Requirements:** M4 best practices
+- **Branch:** `feat/platform-speed-bar`
+- **Planned for:** Sprint 07 (W8)
+- **Depends on:** P-41, P-107
+
+Acceptance criteria:
+
+- The question-mark key opens a list of every shortcut, and P-41's setting turns the single-key shortcuts off.
+- Optimistic updates on actions that can be undone, and prefetching on hover for record links.
+- Component tests cover the keyboard path, and a Playwright test opens the list.
+- Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark.
+
+### P-111: Grid polish
+
+Resizable columns, sticky headers on every grid, arrow keys between cells, and inline editing where a screen declares it.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** could
+- **Estimate:** 5 points
+- **Requirements:** M4 best practices
+- **Branch:** `feat/platform-grid-polish`
+- **Planned for:** Sprint 13 (W14)
+- **Depends on:** P-45, P-107
+
+Acceptance criteria:
+
+- Columns resize by mouse and keyboard, and saved views keep the widths.
+- Every grid has a sticky header, and arrow keys move between cells.
+- Grids that declare it edit inline, with validation and Undo.
+- Rows stay 36 to 40 px high, and numbers stay right-aligned in tabular figures with their currency.
+- Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark.
+
+### P-112: Small delights
+
+KPI numbers count up, sparklines draw in and empty states get an illustration of our own, on first view only.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** could
+- **Estimate:** 3 points
+- **Requirements:** M4 best practices
+- **Branch:** `feat/platform-small-delights`
+- **Planned for:** Sprint 13 (W14)
+- **Depends on:** P-107
+
+Acceptance criteria:
+
+- A shared count-up and draw-in in `components/common` runs on first view only, never on tables or forms in use, and area 3 may adopt it on its KPI page.
+- Each empty state has a simple illustration of our own and its next action.
+- Reduced motion shows the final value at once.
+- Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark, with a short capture of the motion.
+
 ## Epic A: Document intake and AI extraction
 
 Email or upload; classification; extraction with a confidence score and a source link per field; layout mappings that AI proposes and a person approves.
@@ -1980,6 +2270,70 @@ Acceptance criteria:
 - Email intake runs through a mock mailbox with signed webhooks.
 - No real customer email is read or sent.
 
+### P-92: Document cabinet: filing and search
+
+Every document is filed on arrival with the fields the AI read and a link to its order, and found from one search box.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 8 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/area1-document-cabinet`
+- **Planned for:** Sprint 07 (W8)
+- **Depends on:** P-37, P-53, P-107
+
+Acceptance criteria:
+
+- Each document is filed on arrival with its type, company, PO number, document number, date, amount, status, who stored it and a link to its order, or for a vendor's document to its vendor PO once P-101 brings them.
+- One search box and filters for company, PO number, type, date, status and who stored it, on a results grid on the list template.
+- Full-text search, and fuzzy part-number search with `pg_trgm`, indexed and paged on the server.
+- Results respect masking and the permission to read, tested on the bytes of the response.
+- API tests for 401, 403, 404 and validation, and a Playwright test that finds a document by its PO number.
+- Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark.
+
+### P-93: Cabinet viewer: stamps, notes and the related chain
+
+Around each document: its related chain, stamps with who and when, notes, and a match badge on every pair.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 8 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/area1-cabinet-viewer`
+- **Planned for:** Sprint 07 (W8) and Sprint 08 (W9)
+- **Depends on:** P-91, P-92, P-107
+
+Acceptance criteria:
+
+- Each PO shows its chain of PI, invoice, packing list and AWB/BL, with a match badge on each pair that opens the compare screen.
+- A viewer with zoom, page thumbnails, stamps such as Checked and Verified with who and when, and notes, and the stamps also show on the compare screen.
+- Stamps and notes are a person's records, audited, and removing one asks for a reason and deletes nothing.
+- Stamping needs its own permission, checked on the server.
+- API tests for 401, 403, 404 and validation, and a Playwright test that stamps and notes a document.
+- Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark.
+
+### P-94: Audit packs
+
+Pick a customer, a vendor, a month or an order, and download every document with an index, in seconds.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 8 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/area1-audit-packs`
+- **Planned for:** Sprint 08 (W9)
+- **Depends on:** P-92, P-107
+
+Acceptance criteria:
+
+- A pack's scope is a customer, a vendor, a month or an order, and it downloads as a zip of every document plus an index PDF, made with pdf-lib (ADR 0033), saying what each is, when it came in and who checked it.
+- A pack for one month of the synthetic set is ready in seconds, and its build time is recorded for the KPI.
+- Every download is an audit event with who, the scope and when, in the shape Angelyn agrees in her issue.
+- Only roles with the permission may build a pack, the server enforces it, and masked fields stay masked in the index.
+- API tests for 401, 403, 404 and validation, and a Playwright test that downloads a pack.
+- Documents stay in OrderPilot's own storage: MinIO today, and storage hosted in Singapore once P-24 deploys (ADR 0031). A copy to a SharePoint folder is an option for later and is not built here.
+- Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark.
+
 ## Epic B: Master data and Business Central
 
 Items, customers, vendors, prices and stock behind a connector; any write-back needs a preview and an approval.
@@ -2042,6 +2396,67 @@ QR codes for the warehouse to scan.
 Acceptance criteria:
 
 - Generated documents and carton labels carry QR codes for the warehouse to scan.
+
+### P-88: Customer check on intake and the new-customer card
+
+A PO's customer is found in Business Central by name, address and tax ID, and a new customer gets a pre-filled card for approval.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 8 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/area1-customer-check`
+- **Planned for:** Sprint 06 (W7)
+- **Depends on:** P-20, P-53, P-55, P-68, P-86, P-107
+
+Acceptance criteria:
+
+- Name, address and tax ID find ranked candidate customers, a person confirms one, and the order stores its Business Central number, never a name.
+- A new customer opens a pre-filled customer card that a person edits and sends for approval.
+- A second person approves the card after a preview of exactly what goes to mock Business Central, and nobody approves their own card.
+- Every step is audited, and nothing is written without the preview and the approval, through P-20's write path.
+- A Playwright test takes a PO from a new customer through the card to a draft order.
+- Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark.
+
+### P-101: Vendor POs
+
+The product manager places the vendor PO from an approved SPR, or records the vendor portal's reference.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 5 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/area1-vendor-pos`
+- **Planned for:** Sprint 10 (W11)
+- **Depends on:** P-20, P-100
+
+Acceptance criteria:
+
+- A vendor PO is made from an approved SPR, with the vendor matched on its Business Central number, and goes to mock Business Central only after a preview and an approval.
+- For a vendor whose portal takes the PO, the portal's reference is recorded instead and no PO is written.
+- Only the product manager places it, the AI never does, and no PO comes from an unapproved SPR.
+- Every step is audited, with `.http` requests and API tests for 401, 403, 404 and validation.
+- Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark.
+
+### P-103: Goods receipt and inwarding
+
+The warehouse counts goods against what was expected, and a person confirms the inwarding into mock Business Central.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** should
+- **Estimate:** 8 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/area1-goods-receipt`
+- **Planned for:** Sprint 10 (W11) and Sprint 11 (W12)
+- **Depends on:** P-20, P-101
+
+Acceptance criteria:
+
+- A receipt shows the expected quantities beside what was counted, and a difference is flagged for a person.
+- Inwarding writes to mock Business Central only after a preview and a person's confirmation, never on its own.
+- The receipt screen works on a tablet, with touch targets of 44 px or more.
+- Every step is audited, with API tests for 401, 403, 404 and validation.
+- Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark.
 
 ## Epic C: Order workflows and approvals
 
@@ -2161,6 +2576,90 @@ Acceptance criteria:
 - A document settings screen edits the field settings and defaults held in DocumentTypeConfig, with an audit event for each change.
 - The mock read model is replaced by one that reads WorkflowInstance, WorkflowTask and WorkflowNotification, and the routes drop meta.mock.
 
+### P-89: PO versions
+
+A revised PO is the next version of the same order, shown with its differences.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 5 points
+- **Requirements:** M4 best practices
+- **Branch:** `feat/area1-po-versions`
+- **Planned for:** Sprint 06 (W7)
+- **Depends on:** P-49, P-51, P-55, P-107
+
+Acceptance criteria:
+
+- A PO with the same customer and PO number becomes the next version of that order only when a person confirms it revises the existing order. Otherwise the 409 stays the answer to a re-sent PO, and an ADR amends ADR 0047's duplicate rule.
+- The order page lists every version and shows the differences between two, field by field and line by line.
+- An earlier version stays readable and marked superseded, and nothing is deleted.
+- The version number has its own name, because `version` in `packages/shared/src/orders.ts` is already the edit token.
+- Each check result shows which version it ran on.
+- `.http` requests and API tests for 401, 403, 404, validation and a third version.
+- Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark.
+
+### P-90: The short-stock revision request
+
+When a PO asks for more than is available, a person sends a drafted request to revise it, and the revised PO joins the order.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 3 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/area1-short-stock-request`
+- **Planned for:** Sprint 06 (W7) and Sprint 07 (W8)
+- **Depends on:** P-87, P-89, P-107
+
+Acceptance criteria:
+
+- An order whose lines ask for more than is available shows each line's shortage and offers Ask for a revised PO.
+- The draft asks the customer to revise the PO to the available quantity at the PO's price, and a person edits and sends it.
+- The revised PO joins the same order as its next version, and no partial shipment or back order is offered.
+- The hold is area 2's state, read through its route, and Azri reviews the pull request.
+- After the `v0.1-proposal` tag, E2E #1 takes this request in place of an SPR raised from a short line, and `CLAUDE.md` and `docs/agile/hero-journey.md` follow. An SPR raised from the item's cover and decided by one of the three joins it with P-100.
+- Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark.
+
+### P-100: SPR screens: routing, the 24-hour reminder and where it is stuck
+
+The platform side of the SPR flow: the coordinator's and approvers' screens, the 24-hour reminder email, and where each SPR is stuck.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 8 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/area1-spr-routing-screens`
+- **Planned for:** Sprint 09 (W10) and Sprint 10 (W11)
+- **Depends on:** C-4, P-61, P-71, P-87
+
+Acceptance criteria:
+
+- The coordinator routes an SPR to the approver group and hands an approved one back to the product manager, through area 2's routes.
+- Each SPR shows its step, who holds it, how long it has waited and a countdown to the 24-hour reminder with P-71's timer, and the approvers' own screen stays P-72.
+- When area 2's sweep calls the reminder port at 24 hours, the hook Azri's issue names, one email per group member goes once through the mail sender to Mailpit only, and a Playwright test sees it.
+- A where-is-it-stuck list shows every open SPR by step and age, for the product manager and the coordinator.
+- The screens live in area 1's folders, the state machine's rules stay Azri's, and he reviews the pull request.
+- Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark.
+
+### P-102: Inbound shipments and chase drafts
+
+An inbound shipment keeps its promised and expected dates, and drafts a chase email when it slips.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** should
+- **Estimate:** 5 points
+- **Requirements:** M4 best practices
+- **Branch:** `feat/area1-inbound-shipments`
+- **Planned for:** Sprint 10 (W11)
+- **Depends on:** P-63, P-87, P-101
+
+Acceptance criteria:
+
+- An inbound shipment holds the vendor PO, the forwarder, the AWB or BL, and the promised and expected dates.
+- When the expected date passes the promised one, a chase draft is made for a person to edit and send.
+- The vendor's usual lead time shows beside the dates.
+- `.http` requests and API tests for 401, 403, 404 and validation.
+- Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark.
+
 ## Epic D: Checks, the tracker and insights
 
 Documents checked against each other with tolerances; an exceptions queue; one tracker with every order's trail; Spectra's five measures as KPIs.
@@ -2259,6 +2758,26 @@ Acceptance criteria:
 - An order's page lists the documents behind each check side by side, with the differing line marked (D-1 leaves this out).
 - The operation log at the foot of an order's page is fed from the audit trail once F-2 lands (D-1 shows mock rows).
 - Role home tiles show real counts, such as orders waiting on me, and an end-to-end spec covers the tracker (D-1 leaves both out).
+
+### P-91: The compare screen
+
+Two documents side by side, with both values highlighted on their pages, for every difference a check found.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 8 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/area1-compare-documents`
+- **Planned for:** Sprint 06 (W7) and Sprint 07 (W8)
+- **Depends on:** P-54, D-2, P-107
+
+Acceptance criteria:
+
+- Two documents show side by side, with each differing value highlighted on both pages, scaled with the zoom, in both themes.
+- A list of the differences sits beside them, each marked as blocking or a warning, and choosing one scrolls both pages to it.
+- Page thumbnails, zoom and full keyboard use, and at 390 px the pages stack with a way to switch. Stamps join both pages with P-93.
+- The screen reads area 3's check results and computes nothing, it takes over D-4's side-by-side criterion, and Iok Teck reviews the pull request.
+- Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark.
 
 ## Epic E: AI with a person in the loop
 
@@ -2363,6 +2882,154 @@ Acceptance criteria:
 - It never acts: it cannot approve, change data or call another endpoint.
 - Questions and docs are treated as data, and the prompt-injection tests cover it (E-3).
 - Area 4's policy decides which provider may receive a question, and no business data goes with it.
+
+### P-87: Drafts that a person sends
+
+One draft record and card for every message OrderPilot proposes, which a person edits and sends, never the system.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 5 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/area1-drafts`
+- **Planned for:** Sprint 05 (W6)
+- **Depends on:** P-17
+
+Acceptance criteria:
+
+- A `Draft` record holds its kind, the order or SPR it belongs to, the recipient, subject and body, who drafted it and who sent it, with `.http` requests and API tests for 401, 403, 404 and validation.
+- A draft card that a person edits and then sends, where sending reaches only Mailpit in development and demos and keeps the sent text.
+- A mail sender that can only reach Mailpit, with an ADR and a pinned version: the Mailpit container and the `SMTP_*` settings exist today and no sender does, so the first of this story and P-59 to merge brings it, and the other reuses it.
+- A draft from the AI says AI draft and Requires approval, and nothing leaves until a person presses Send.
+- Every draft, edit and send is audited with who and when.
+- A Playwright test: an allowed role edits and sends a draft, and a role without the permission gets a 403 from the server.
+- Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark.
+
+### P-95: Spark's foundation
+
+Spark runs through the AI gateway with read-only tools, keeps each person's conversations, and audits every question and answer.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 8 points
+- **Requirements:** M2 GRS by design, M3 AI-assisted coding, M4 best practices
+- **Branch:** `feat/area1-spark-foundation`
+- **Planned for:** Sprint 08 (W9)
+- **Depends on:** P-17, F-1
+
+Acceptance criteria:
+
+- Conversations and messages are kept for each person and nobody else can read them, with API tests for 401, 403, 404 and validation.
+- Tool calling runs through `LlmGateway`, the tools call our own services, and the model never writes SQL.
+- Every tool is read-only and runs with the asking person's permissions through area 4's policy, so Spark sees only what that person may see.
+- Every answer cites its sources, as links to documents and orders or the query behind a chart, and outside its tools Spark says what it cannot do.
+- A deterministic mock provider with scripted answers to the demo questions keeps tests and offline demos working.
+- Every question and answer is audited, with its tokens and cost tracked like any AI call.
+- Prompt-injection tests show that a hostile document cannot make Spark call a tool or change anything.
+- `CLAUDE.md` section 5, and the GRS doc and area 1's guide where they repeat it, say that no model output writes, approves, posts, pays or sends, and that tools are read-only and run as the person asking.
+- ADR: Spark and its read-only tools.
+
+### P-96: Spark's panel and page
+
+A side panel that opens from anywhere and a full page, with Spectra's own prompts when empty, built for a phone too.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 8 points
+- **Requirements:** M4 best practices
+- **Branch:** `feat/area1-spark-panel`
+- **Planned for:** Sprint 08 (W9) and Sprint 09 (W10)
+- **Depends on:** P-15, P-95, P-107
+
+Acceptance criteria:
+
+- A side panel opens from a top-bar button or a shortcut that does not clash with Ctrl+K, and a full page lists the person's conversations.
+- The empty state suggests prompts in Spectra's words: matching a customer's invoice, packing list and AWB, collecting a month's documents, and a brand's six months of sales as a graph.
+- Sources are chips that open the document beside the chat, drafts are cards a person edits and sends, and an audit pack is a card with its download.
+- A short glow as the panel opens and a quiet shimmer while an answer streams over P-15's live updates, with a still version for reduced motion.
+- Spark has an icon of our own and no vendor logo.
+- The panel and page work by keyboard, keep focus, and work at 390 by 844.
+- Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark, with a short capture of the motion.
+
+### P-97: Spark finds documents
+
+Spark finds documents by customer, vendor, PO number, type, date range or status, with full text and fuzzy part numbers.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 5 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/area1-spark-find`
+- **Planned for:** Sprint 09 (W10)
+- **Depends on:** P-92, P-95
+
+Acceptance criteria:
+
+- A tool takes the filters and a text query, searches the cabinet through its service, and answers with links.
+- A part number with a typo is still found through `pg_trgm`, with a test.
+- Results hold only what the asker may see.
+- Scripted mock answers cover the demo questions.
+- Tests cover each filter, an empty result and a refusal.
+
+### P-98: Spark matches a set and collects an audit pack
+
+Spark runs area 3's checks over a set of documents and explains each difference, and collects an audit pack, changing nothing.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 5 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/area1-spark-match-and-pack`
+- **Planned for:** Sprint 09 (W10)
+- **Depends on:** D-2, P-94, P-95
+
+Acceptance criteria:
+
+- A tool runs area 3's on-demand, read-only check of a named document set (PO, PI, invoice, packing list and AWB/BL), which Iok Teck's issue asks for, and explains each difference in a sentence that links both pages.
+- A second tool builds an audit pack through P-94 for the scope the person names, and answers with the download card.
+- Spark never approves, waives or fixes a difference.
+- Scripted mock answers cover matching a customer's invoice, packing list and AWB, and collecting a month's documents.
+- Tests cover a clean set, a set with differences and a refused pack.
+
+### P-99: Spark answers order questions
+
+Where is order X, what is waiting for me, and what has been stuck for more than N hours.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 5 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/area1-spark-order-questions`
+- **Planned for:** Sprint 09 (W10)
+- **Depends on:** D-4, P-95
+
+Acceptance criteria:
+
+- Three tools read the tracker, the person's own work and the time at each step, through their services.
+- An answer names the step, the role and the person holding the order, and how long it has waited, with a link.
+- What is waiting for me matches the home page's Needs you for the same person.
+- Tests cover each question, an order the person may not see, and an unknown order.
+
+### P-105: Spark's charts, forecast and customer replies
+
+Spark draws area 3's figures as charts and forecasts, and drafts a reply to a customer's stock inquiry.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** should
+- **Estimate:** 8 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/area1-spark-charts-and-replies`
+- **Planned for:** Sprint 11 (W12)
+- **Depends on:** P-87, P-96
+
+Acceptance criteria:
+
+- Charts of sales by brand, item, customer or country by month, and of PO-to-delivery time by vendor, are drawn by our chart components from area 3's services, each with the query behind it and Open in dashboard.
+- A six-month forecast shows its range and its method in one sentence.
+- A stock check answers an inquiry and drafts a reply that a person edits and sends.
+- Every chart has a data-table view for screen readers, and Spark never sends anything.
+- Scripted mock answers cover a brand's six months of sales as a graph.
+- Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark.
 
 ## Epic F: Financial controls and governance
 
@@ -2551,6 +3218,26 @@ Acceptance criteria:
 - The chain check runs in the background for a long trail and shows progress, instead of one request that reads everything.
 - A broken chain shows the event it breaks at, with a link to open it and the events around it.
 - A browser test: an auditor filters to refusals, opens one, and sees a masked value with its reason.
+
+### P-104: Vendor payments by due date
+
+Finance sees vendor payments by due date, and records only what no hold blocks.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** should
+- **Estimate:** 5 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/area1-vendor-payments`
+- **Planned for:** Sprint 11 (W12)
+- **Depends on:** F-5, P-62, P-101
+
+Acceptance criteria:
+
+- Vendor payments are a list on the template by due date, with due-soon and overdue timers.
+- A payment under F-5's hold cannot be recorded until Finance and a second approver clear it.
+- No real payment is made: Finance records that it paid, and a change needs a reason.
+- Bank details are masked by role with a reason, and every step is audited.
+- Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark.
 
 ## Epic G: Monitoring
 

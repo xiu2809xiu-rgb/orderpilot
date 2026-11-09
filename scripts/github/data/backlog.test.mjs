@@ -68,6 +68,22 @@ test("story keys are unique", () => {
   assert.equal(byKey.size, backlog.stories.length);
 });
 
+// GitHub allows at most 100 sub-issues per parent, and the seed links every story
+// under its epic's issue. A dry run cannot see that limit, so a backlog over it would
+// stop a real seed partway. Prompt 005's stories sit in the epics of their
+// capabilities for this reason, and the next platform stories need a new epic.
+const MOST_STORIES_IN_AN_EPIC = 95;
+
+test("no epic comes near GitHub's limit on sub-issues", () => {
+  for (const epic of backlog.epics) {
+    const stories = backlog.stories.filter((story) => story.epic === epic.key);
+    assert.ok(
+      stories.length <= MOST_STORIES_IN_AN_EPIC,
+      `Epic ${epic.key} has ${stories.length} stories`,
+    );
+  }
+});
+
 test("every story the brief names is here, in the expected groups", () => {
   const keys = backlog.stories.map((story) => story.key);
   const expected = [
@@ -84,7 +100,7 @@ test("every story the brief names is here, in the expected groups", () => {
     "E-6",
   ];
   for (const key of expected) assert.ok(keys.includes(key), key);
-  assert.equal(keys.length, expected.length + 74);
+  assert.equal(keys.length, expected.length + 105);
 });
 
 test("titles and branches match the brief's headings", () => {
@@ -188,8 +204,10 @@ test("area 1's own stories sit under epics A, B and E", () => {
   const own = backlog.stories.filter((story) =>
     ["A", "B", "E"].includes(story.epic),
   );
-  // 13 from prompt 001, section 10, and E-5 and E-6 from prompt 002.
-  assert.equal(own.length, 15);
+  // 13 from prompt 001, section 10, E-5 and E-6 from prompt 002, and 13 from prompt
+  // 005: drafts and Spark, the cabinet and audit packs, the customer check, vendor
+  // POs and goods receipt.
+  assert.equal(own.length, 28);
   for (const story of own) {
     assert.equal(story.area, "area: 1 document AI and integration", story.key);
   }
