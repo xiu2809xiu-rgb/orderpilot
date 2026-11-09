@@ -174,6 +174,8 @@ A service that changes something on behalf of a user takes the `AuthContext` and
 | Policy behind a port | `GovernancePermissionPolicy`, `PermissionPolicy`   | The guard asks area 4's rules and no controller changes; the area calls `enforce` for the rest  | F-3   |
 | Rule in the table    | `ApprovalUserSetup` CHECKs in its migration        | A row from any other route cannot break the rules `ApprovalSetupService.save` checks            | F-3   |
 | Duties as data       | `SEGREGATED_DUTIES` in `segregation-of-duties.ts`  | The pairs kept apart are one table, so Spectra's answer changes a row, not the rule             | F-4   |
+| Unprintable value    | `domain/bank-details.ts`                           | Full numbers sit in private fields and every way of printing them is redacted                   | F-5   |
+| Narrow interface     | `BankDetailHoldService`                            | Areas 1 and 2 get three calls; verifying and clearing stay area 4's own routes                  | F-5   |
 
 ## Monitoring: telemetry, errors and the clickstream
 
