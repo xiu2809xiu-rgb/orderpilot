@@ -130,11 +130,11 @@ test("the renamed stories say Business Central, and only the map keeps the old w
     "The connector framework and the Business Central adapter",
   );
   // P-83's own story names what it renames, so it is the one place in the data
-  // that may still say Navision.
+  // that may still say Navision. A wire name such as navisionNo is not the product.
   const others = backlog.stories.filter((story) => story.key !== "P-83");
   assert.doesNotMatch(
     JSON.stringify({ epics: backlog.epics, stories: others }),
-    /navision/i,
+    /Navision/,
   );
 });
 

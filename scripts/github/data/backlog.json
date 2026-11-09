@@ -2692,8 +2692,8 @@
       "acceptance": [
         "SPR reads Stock Purchase Requisition in `CLAUDE.md` and the docs, raised by the product manager from stock on hand and the last three months' run rate.",
         "`CLAUDE.md` and the docs say a coordinator, a Support user, routes each SPR to three management approvers, any one of whom decides, with no substitute and a reminder to the whole group after 24 hours.",
-        "`CLAUDE.md` follows the briefing where else it differs: the countries and payment terms in its client paragraph, what links the two flows, an SPR no longer raised from an order's shortfall, and Management deciding above a limit only if limits are switched on.",
-        "`docs/agile/hero-journey.md` says the SPR's pre-fill moves from the shortfall to stock on hand and the run rate with P-61, and E2E #1's steps stay as they are for `v0.1-proposal` (P-90 records the switch after the tag).",
+        "`CLAUDE.md` follows the briefing where else it differs, at lines 22, 30, 34 and 72 today: the countries and payment terms in its client paragraph, what links the two flows, an SPR no longer raised from an order's shortfall, and Management deciding above a limit only if limits are switched on.",
+        "`docs/agile/hero-journey.md` says at line 24 today the SPR's pre-fill moves from the shortfall to stock on hand and the run rate with P-61, and E2E #1's steps stay as they are for `v0.1-proposal` (P-90 records the switch after the tag).",
         "Rachel Goh, made up, replaces the approver persona, and the personas name the other two made-up approvers, Marcus Teo and Farah Ismail, and the made-up coordinator, Michelle Lau, whom P-86 seeds.",
         "The old persona's real first name leaves every text file but prompt 001. Committed pictures keep it until their pages are re-shot, which P-107's roll-out does for every page, and Git history keeps it regardless.",
         "The role's label reads Management approver (item cy in the build report), and the stored `APPROVER` value stays.",
@@ -3037,7 +3037,7 @@
       "branch": "feat/area1-spr-routing-screens",
       "sprints": [9, 10],
       "dependsOn": ["C-4", "P-61", "P-71", "P-87"],
-      "summary": "The platform side of the SPR flow: the coordinator's and approvers' screens, the 24-hour reminder email, and where each SPR is stuck.",
+      "summary": "The platform side of the SPR flow: the coordinator's screen, the 24-hour reminder email, and where each SPR is stuck.",
       "acceptance": [
         "The coordinator routes an SPR to the approver group and hands an approved one back to the product manager, through area 2's routes.",
         "Each SPR shows its step, who holds it, how long it has waited and a countdown to the 24-hour reminder with P-71's timer, and the approvers' own screen stays P-72.",
