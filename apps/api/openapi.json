@@ -3719,7 +3719,14 @@
                           "type": "array",
                           "items": {
                             "type": "string",
-                            "enum": ["IT", "SURVEILLANCE", "ACCESSORIES"]
+                            "enum": [
+                              "COMPONENTS",
+                              "PERIPHERALS",
+                              "PCS",
+                              "ENTERPRISE",
+                              "SECURITY",
+                              "NETWORKING"
+                            ]
                           }
                         },
                         "vendors": {
@@ -3841,7 +3848,14 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "enum": ["IT", "SURVEILLANCE", "ACCESSORIES"]
+              "enum": [
+                "COMPONENTS",
+                "PERIPHERALS",
+                "PCS",
+                "ENTERPRISE",
+                "SECURITY",
+                "NETWORKING"
+              ]
             }
           },
           {
@@ -3921,7 +3935,14 @@
                           },
                           "category": {
                             "type": "string",
-                            "enum": ["IT", "SURVEILLANCE", "ACCESSORIES"]
+                            "enum": [
+                              "COMPONENTS",
+                              "PERIPHERALS",
+                              "PCS",
+                              "ENTERPRISE",
+                              "SECURITY",
+                              "NETWORKING"
+                            ]
                           },
                           "baseUnitOfMeasure": {
                             "type": "string",
@@ -4165,7 +4186,14 @@
                         },
                         "category": {
                           "type": "string",
-                          "enum": ["IT", "SURVEILLANCE", "ACCESSORIES"]
+                          "enum": [
+                            "COMPONENTS",
+                            "PERIPHERALS",
+                            "PCS",
+                            "ENTERPRISE",
+                            "SECURITY",
+                            "NETWORKING"
+                          ]
                         },
                         "baseUnitOfMeasure": {
                           "type": "string",

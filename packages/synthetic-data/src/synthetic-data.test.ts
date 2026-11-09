@@ -15,6 +15,7 @@ import { describe, expect, it } from "vitest";
 import {
   AS_OF,
   DEFAULT_SEED,
+  ITEM_CATEGORIES,
   SAMPLE_SCREEN_STATES,
   SYNTHETIC_LABEL,
   SeededRandom,
@@ -113,15 +114,16 @@ describe("the synthetic dataset", () => {
     expect(new Set(data.customers.map((c) => c.name)).size).toBe(40);
   });
 
-  it("spreads the items over IT, surveillance and accessories, each with a part number", () => {
-    for (const category of ["IT", "SURVEILLANCE", "ACCESSORIES"]) {
-      expect(data.items.filter((i) => i.category === category)).toHaveLength(
-        100,
-      );
+  it("spreads the items over six categories, each with a part number", () => {
+    for (const category of ITEM_CATEGORIES) {
+      expect(
+        data.items.filter((i) => i.category === category).length,
+        category,
+      ).toBeGreaterThanOrEqual(30);
     }
     expect(new Set(data.items.map((i) => i.partNumber)).size).toBe(300);
     expect(new Set(data.items.map((i) => i.no)).size).toBe(300);
-    expect(new Set(data.items.map((i) => i.brand)).size).toBe(12);
+    expect(new Set(data.items.map((i) => i.brand)).size).toBe(22);
   });
 
   it("uses Business Central's names and USD decimal strings", () => {

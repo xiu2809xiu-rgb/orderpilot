@@ -49,7 +49,7 @@ const row = (no: string, availability: "short" | "low" | "ok") => ({
   description: `Synthetic switch ${no}`,
   partNumber: `PN-${no}`,
   brand: "Synthetic Brand",
-  category: "IT" as const,
+  category: "NETWORKING" as const,
   baseUnitOfMeasure: "PCS",
   inventory: "120",
   qtyOnSalesOrder: "80",
@@ -70,7 +70,14 @@ const itemList = (rows: ReturnType<typeof row>[]) =>
 const filters: MasterDataFilters200 = {
   data: {
     brands: ["Synthetic Brand"],
-    categories: ["IT", "SURVEILLANCE", "ACCESSORIES"],
+    categories: [
+      "COMPONENTS",
+      "PERIPHERALS",
+      "PCS",
+      "ENTERPRISE",
+      "SECURITY",
+      "NETWORKING",
+    ],
     vendors: [{ no: "V-0001", name: "Synthetic Vendor One" }],
     countries: ["IN"],
     paymentTerms: ["PREPAID"],

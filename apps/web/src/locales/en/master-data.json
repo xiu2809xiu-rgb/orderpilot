@@ -28,9 +28,12 @@
     "ok": "OK"
   },
   "categories": {
-    "IT": "IT",
-    "SURVEILLANCE": "Surveillance",
-    "ACCESSORIES": "Accessories"
+    "COMPONENTS": "Components",
+    "PERIPHERALS": "Peripherals",
+    "PCS": "PCs",
+    "ENTERPRISE": "Enterprise",
+    "SECURITY": "Security",
+    "NETWORKING": "Networking"
   },
   "items": {
     "title": "Items",

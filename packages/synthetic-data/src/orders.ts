@@ -9,7 +9,8 @@ import { isLowStockIndex, supportsInRotation } from "./catalogue.js";
 import { addDays, daysBetween } from "./dates.js";
 import { makeDocuments, type DocumentFactory } from "./documents.js";
 import type { Journey } from "./journey.js";
-import { PREPAYMENT_PERCENT, PRODUCTS } from "./names.js";
+import { planCatalogue } from "./catalogue-plan.js";
+import { PREPAYMENT_PERCENT } from "./names.js";
 import { priorityOf } from "./priority.js";
 import type { SeededRandom } from "./random.js";
 import { availableStock } from "./stock.js";
@@ -82,9 +83,8 @@ function shuffled(random: SeededRandom, values: number[]): number[] {
   return values;
 }
 
-function usualQuantities(item: Item, index: number): readonly number[] {
-  const products = PRODUCTS[item.category];
-  return products[(index % 25) % products.length]?.quantities ?? [10];
+function usualQuantities(index: number): readonly number[] {
+  return planCatalogue()[index]?.productClass.quantities ?? [10];
 }
 
 function scenarioFor(
@@ -242,7 +242,7 @@ export function makeOrders(inputs: OrderInputs): SampleOrder[] {
       );
       if (room < 1) continue;
       used.add(at);
-      const usual = random.pick(usualQuantities(item, at));
+      const usual = random.pick(usualQuantities(at));
       const quantity = Math.max(1, Math.min(usual, room));
       lines.push(line(item, String(quantity), shipped));
       if (!shipped)

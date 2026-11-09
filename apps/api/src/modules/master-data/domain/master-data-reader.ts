@@ -1,6 +1,7 @@
 // The records master data reads, in Business Central's field names. They belong to
 // this port, not to any one source: the mock maps the synthetic set to them,
 // and P-20's connector maps Business Central's OData responses the same way.
+import type { ItemCategoryCode } from "@orderpilot/shared";
 
 /** An item card, with its stock figures. */
 export interface MasterDataItem {
@@ -8,7 +9,7 @@ export interface MasterDataItem {
   readonly description: string;
   readonly partNumber: string;
   readonly brand: string;
-  readonly category: "IT" | "SURVEILLANCE" | "ACCESSORIES";
+  readonly category: ItemCategoryCode;
   readonly baseUnitOfMeasure: string;
   readonly unitPrice: string;
   readonly unitCost: string;

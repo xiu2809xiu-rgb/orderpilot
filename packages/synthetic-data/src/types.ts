@@ -47,16 +47,23 @@ export interface VendorBankAccount {
   iban: string;
 }
 
-export const ITEM_CATEGORIES = ["IT", "SURVEILLANCE", "ACCESSORIES"] as const;
+export const ITEM_CATEGORIES = [
+  "COMPONENTS",
+  "PERIPHERALS",
+  "PCS",
+  "ENTERPRISE",
+  "SECURITY",
+  "NETWORKING",
+] as const;
 export type ItemCategory = (typeof ITEM_CATEGORIES)[number];
 
 export interface Item {
   no: string;
   description: string;
-  /** A fictional brand. */
+  /** A real brand name Spectra carries, as plain text (ADR 0050). */
   brand: string;
   category: ItemCategory;
-  /** The manufacturer's part number, such as `NOR-MS-A-2401`. */
+  /** A made-up part number in the brand's style, such as `210-ZZ0001`. */
   partNumber: string;
   baseUnitOfMeasure: "PCS";
   unitPrice: DecimalString;
@@ -66,6 +73,8 @@ export interface Item {
   qtyOnPurchOrder: DecimalString;
   vendorNo: string;
   vendorItemNo: string;
+  /** Days from the vendor's order to the goods arriving. */
+  leadTimeDays: number;
 }
 
 /** A person on the team, by the role they hold. A product manager lists the brands they own. */

@@ -53,7 +53,7 @@ export function createSyntheticDataset(
   const brands = makeBrands();
   const customers = makeCustomers(random);
   const vendors = makeVendors(random);
-  const items = makeItems(random, vendors);
+  const items = makeItems(random, vendors, seed);
   const journeys = planJourneys(random, reference);
   const numberer = new RecordNumberer();
   const orders = makeOrders({
@@ -86,7 +86,7 @@ export function createSyntheticDataset(
     tasks,
     reminders: makeReminders(tasks, orders, reference),
     exceptions: makeExceptions(orders, journeys, numberer),
-    kpis: makeKpis(random, reference, orders, sprs),
+    kpis: makeKpis(SeededRandom.child(seed, "kpis"), reference, orders, sprs),
     openingBalances: openingBalances(customers, vendors, items),
   };
 }

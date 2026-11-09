@@ -19,11 +19,12 @@ GET {{baseUrl}}/api/v1/master-data/items?page=1&pageSize=25&sort=availableStock&
 ### Search covers the number, the description and the part number.
 GET {{baseUrl}}/api/v1/master-data/items?search=monitor
 
-### Filters: brand, category (IT, SURVEILLANCE, ACCESSORIES), vendor and
+### Filters: brand, category (COMPONENTS, PERIPHERALS, PCS,
+### ENTERPRISE, SECURITY, NETWORKING), vendor and
 ### availability (short, low, ok).
 GET {{baseUrl}}/api/v1/master-data/items?availability=short
 ###
-GET {{baseUrl}}/api/v1/master-data/items?category=SURVEILLANCE&vendor=V-0002
+GET {{baseUrl}}/api/v1/master-data/items?category=SECURITY&vendor=V-0002
 
 ### One item: stock, open orders, open purchase orders and SPRs.
 GET {{baseUrl}}/api/v1/master-data/items/I-0004

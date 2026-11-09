@@ -1,15 +1,19 @@
 import { addDecimal, multiplyDecimal } from "@orderpilot/shared";
 import {
   BRANDS,
+  BRAND_OWNERS,
+  PART_NUMBER_STYLES,
+  isLowStockIndex,
+  planCatalogue,
+} from "./catalogue-plan.js";
+import {
   CUSTOMER_NAMES,
   PAYMENT_TERMS,
   PRICE_GROUPS,
-  PRODUCTS,
   TEAM,
-  VARIANTS,
   VENDOR_NAMES,
 } from "./names.js";
-import type { SeededRandom } from "./random.js";
+import { hashUnit, type SeededRandom } from "./random.js";
 import type {
   Brand,
   Customer,
@@ -22,24 +26,18 @@ import type {
 
 const pad = (n: number, width = 4): string => String(n).padStart(width, "0");
 
-const ITEMS_PER_BRAND = 25;
-
-/**
- * Every sixth item is kept low on purpose: an order for a lot of one of them
- * is short, so the stock purchase requests have something to follow from.
- * Ordinary order lines never use them.
- */
-export function isLowStockIndex(itemIndex: number): boolean {
-  return itemIndex % 6 === 3;
-}
+export { isLowStockIndex };
 
 export function makePeople(): Person[] {
   return TEAM.map((member) => ({
     name: member.name,
     role: member.role,
-    brands: member.category
-      ? BRANDS.filter((b) => b.category === member.category).map((b) => b.name)
-      : [],
+    brands:
+      member.role === "PRODUCT_MANAGER"
+        ? BRANDS.filter((b) => BRAND_OWNERS[b.name] === member.name).map(
+            (b) => b.name,
+          )
+        : [],
     ...(member.sprCoordinator ? { sprCoordinator: true as const } : {}),
   }));
 }
@@ -56,12 +54,9 @@ export function supportsInRotation(people: readonly Person[]): string[] {
 
 export function makeBrands(): Brand[] {
   return BRANDS.map((brand) => {
-    const owner = TEAM.find(
-      (member) =>
-        member.role === "PRODUCT_MANAGER" && member.category === brand.category,
-    );
-    if (!owner) throw new Error(`No product manager for ${brand.category}`);
-    return { ...brand, owner: owner.name };
+    const owner = BRAND_OWNERS[brand.name];
+    if (!owner) throw new Error(`No product manager for ${brand.name}`);
+    return { ...brand, owner };
   });
 }
 
@@ -105,45 +100,57 @@ export function makeVendorBankAccounts(
   }));
 }
 
+/**
+ * The items, by the catalogue plan. Each item still takes the same four draws
+ * in the same order as before the briefing data, so every number drawn after
+ * them, and with it every live order's state and age, stays where it was.
+ */
 export function makeItems(
   random: SeededRandom,
   vendors: readonly Vendor[],
+  seed: number,
 ): Item[] {
   const items: Item[] = [];
-  for (const [b, brand] of BRANDS.entries()) {
-    const products = PRODUCTS[brand.category];
-    for (let j = 0; j < ITEMS_PER_BRAND; j++) {
-      const index = items.length;
-      const product = products[j % products.length];
-      const variant = VARIANTS[Math.floor(j / products.length)];
-      const vendor = vendors[(b + (j % 2)) % vendors.length];
-      if (!product || !variant || !vendor)
-        throw new Error("Items need a product");
-      const base = random.int(product.price[0] * 100, product.price[1] * 100);
-      const price = ((base * variant.price) / 100).toFixed(2);
-      const low = isLowStockIndex(index);
-      const inventory = low ? random.int(10, 60) : random.int(150, 900);
-      const prefix = brand.name.slice(0, 3).toUpperCase();
-      // Qty. on Sales Order starts at nothing: the sample's open orders are
-      // all there is, so their lines add up to it. The draw that once gave it
-      // a base figure stays, so every number drawn after it stays put.
-      random.int(0, low ? (inventory / 2) | 0 : 60);
-      items.push({
-        no: `I-${pad(index + 1)}`,
-        description: `${brand.name} ${product.name}${variant.label}`,
-        brand: brand.name,
-        category: brand.category,
-        partNumber: `${prefix}-${product.code}-${variant.code}-${String(2400 + index)}`,
-        baseUnitOfMeasure: "PCS",
-        unitPrice: price,
-        unitCost: (Number(price) * product.cost).toFixed(2),
-        inventory: String(inventory),
-        qtyOnSalesOrder: "0",
-        qtyOnPurchOrder: String(random.int(0, low ? 20 : 400)),
-        vendorNo: vendor.no,
-        vendorItemNo: `${prefix}-${pad(index + 100)}`,
-      });
-    }
+  const brandIndex = new Map(BRANDS.map((brand, b) => [brand.name, b]));
+  const insideBrand = new Map<string, number>();
+  for (const plan of planCatalogue()) {
+    const { brand, productClass } = plan;
+    const index = items.length;
+    const j = insideBrand.get(brand.name) ?? 0;
+    insideBrand.set(brand.name, j + 1);
+    const vendor =
+      vendors[((brandIndex.get(brand.name) ?? 0) + (j % 2)) % vendors.length];
+    const style = PART_NUMBER_STYLES[brand.name];
+    if (!vendor || !style) throw new Error("Items need a vendor and a style");
+    const price = (
+      random.int(productClass.price[0] * 100, productClass.price[1] * 100) / 100
+    ).toFixed(2);
+    const low = isLowStockIndex(index);
+    const inventory = low ? random.int(10, 60) : random.int(150, 900);
+    // Qty. on Sales Order starts at nothing: the sample's open orders are
+    // all there is, so their lines add up to it. The draw that once gave it
+    // a base figure stays, so every number drawn after it stays put.
+    random.int(0, low ? (inventory / 2) | 0 : 60);
+    const [fastest, slowest] = productClass.leadTimeDays;
+    const no = `I-${pad(index + 1)}`;
+    items.push({
+      no,
+      description: `${brand.name} ${plan.label}`,
+      brand: brand.name,
+      category: productClass.category,
+      partNumber: style(pad(index + 1)),
+      baseUnitOfMeasure: "PCS",
+      unitPrice: price,
+      unitCost: (Number(price) * productClass.cost).toFixed(2),
+      inventory: String(inventory),
+      qtyOnSalesOrder: "0",
+      qtyOnPurchOrder: String(random.int(0, low ? 20 : 400)),
+      vendorNo: vendor.no,
+      vendorItemNo: `${brand.name.slice(0, 3).toUpperCase()}-${pad(index + 100)}`,
+      leadTimeDays:
+        fastest +
+        Math.floor(hashUnit(seed, "lead", no) * (slowest - fastest + 1)),
+    });
   }
   return items;
 }

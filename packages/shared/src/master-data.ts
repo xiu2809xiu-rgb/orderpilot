@@ -15,10 +15,14 @@ export const navisionNoSchema = z
   .regex(/^[A-Za-z0-9-]{1,20}$/);
 
 export const ITEM_CATEGORY_CODES = [
-  "IT",
-  "SURVEILLANCE",
-  "ACCESSORIES",
+  "COMPONENTS",
+  "PERIPHERALS",
+  "PCS",
+  "ENTERPRISE",
+  "SECURITY",
+  "NETWORKING",
 ] as const;
+export type ItemCategoryCode = (typeof ITEM_CATEGORY_CODES)[number];
 
 /**
  * Where an item stands. `short`: an open order needs more than the available
