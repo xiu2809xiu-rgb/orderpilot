@@ -318,7 +318,7 @@ The board sync keeps an open card's Sprint, so the cards of P-21 (#36) and P-61 
 | ----- | ---------------------------------------------------------------- | ---- | -------- | ------ | ------- | ------------------------------------- | ----------------- |
 | P-82  | Plan prompts 005 and 006                                         | P    | must     | 2      | 3       | `chore/plan-prompts-005-006`          | This pull request |
 | P-83  | Rename Navision to Business Central                              | P    | must     | 5      | 3       | `chore/business-central-rename`       | Pull request #254 |
-| P-84  | SPR, the approver group and zero tolerance in the facts          | P    | must     | 3      | 3       | `chore/spr-approver-group`            | In review         |
+| P-84  | SPR, the approver group and zero tolerance in the facts          | P    | must     | 3      | 3       | `chore/spr-approver-group`            | Pull request #255 |
 | P-85  | Record the 5 Nov briefing                                        | P    | must     | 2      | 3       | `docs/briefing-5-nov`                 | Not started       |
 | P-86  | Synthetic data from the briefing                                 | P    | must     | 13     | 3, 4    | `feat/area1-briefing-data`            | Not started       |
 | P-87  | Drafts that a person sends                                       | E    | must     | 5      | 5       | `feat/area1-drafts`                   | Not started       |
