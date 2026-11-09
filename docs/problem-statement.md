@@ -43,21 +43,21 @@ Problem Statement #11, Spectra Innovations. Written on 31 Oct 2026, before the b
 
 OrderPilot's users are Spectra's staff only. Customers, vendors and forwarders never log in. Until the briefing call, everything in this table is our reading of the brief.
 
-| Group                                      | OrderPilot role   | Their stake                                                                           | What they would need from OrderPilot                                                       |
-| ------------------------------------------ | ----------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| Support                                    | `SUPPORT`         | Handles most documents, keeps every order current, and as coordinator routes each SPR | Fields read for them, only the doubtful ones to confirm, and PIs and updates drafted       |
-| Product Managers                           | `PRODUCT_MANAGER` | Own brands, stock levels and SPRs                                                     | An SPR pre-filled from stock and run rate, and its approval visible without chasing        |
-| The management approvers (three)           | `APPROVER`        | Any one of them decides an SPR, within a limit if limits are on                       | Each request with its checks already done, and reminders that do not flood                 |
-| Warehouse                                  | `WAREHOUSE`       | Packs only paid orders, and checks incoming goods                                     | A packing task that appears only after payment, and documents side by side with mismatches |
-| Finance                                    | `FINANCE`         | Confirms customer payments and pays vendors                                           | Payment status per order, and a hold whenever a vendor's bank details change               |
-| Logistics                                  | `LOGISTICS`       | Forwarders, shipment dates, AWB/BL and import permits                                 | Overdue paperwork flagged, and shipping details sent without re-typing                     |
-| Management                                 | `MANAGEMENT`      | Throughput, delays and errors                                                         | One tracker, and the five measures actually measured                                       |
-| Auditors                                   | `AUDITOR`         | Proof that approvals and payments followed the controls                               | A tamper-evident trail, read-only                                                          |
-| IT and whoever supports Business Central   | `SYSTEM_ADMIN`    | Keep Business Central stable and the system of record                                 | Supported interfaces only, least privilege, health and logs                                |
-| Customers (South Asia and the Middle East) | None              | Pay first, then wait for goods and papers                                             | Correct PIs and invoices, and timely shipping updates                                      |
-| Vendors and brands                         | None              | Send PIs, invoices and packing lists, and expect payment                              | POs that match, and payment on time to the right account                                   |
-| Forwarders                                 | None              | Collect goods and issue the AWB/BL                                                    | Complete papers and a clear release                                                        |
-| The module team and lecturers              | None              | Assess design thinking, GRS, AI use, practice, Git and running                        | Evidence for M1 to M6, traced in [the matrix](requirements-traceability.md)                |
+| Group                                                       | OrderPilot role   | Their stake                                                                           | What they would need from OrderPilot                                                       |
+| ----------------------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Support                                                     | `SUPPORT`         | Handles most documents, keeps every order current, and as coordinator routes each SPR | Fields read for them, only the doubtful ones to confirm, and PIs and updates drafted       |
+| Product Managers                                            | `PRODUCT_MANAGER` | Own brands, stock levels and SPRs                                                     | An SPR pre-filled from stock and run rate, and its approval visible without chasing        |
+| The management approvers (three)                            | `APPROVER`        | Any one of them decides an SPR, within a limit if limits are on                       | Each request with its checks already done, and reminders that do not flood                 |
+| Warehouse                                                   | `WAREHOUSE`       | Packs only paid orders, and checks incoming goods                                     | A packing task that appears only after payment, and documents side by side with mismatches |
+| Finance                                                     | `FINANCE`         | Confirms customer payments and pays vendors                                           | Payment status per order, and a hold whenever a vendor's bank details change               |
+| Logistics                                                   | `LOGISTICS`       | Forwarders, shipment dates, AWB/BL and import permits                                 | Overdue paperwork flagged, and shipping details sent without re-typing                     |
+| Management                                                  | `MANAGEMENT`      | Throughput, delays and errors                                                         | One tracker, and the five measures actually measured                                       |
+| Auditors                                                    | `AUDITOR`         | Proof that approvals and payments followed the controls                               | A tamper-evident trail, read-only                                                          |
+| IT and whoever supports Business Central                    | `SYSTEM_ADMIN`    | Keep Business Central stable and the system of record                                 | Supported interfaces only, least privilege, health and logs                                |
+| Customers (South Asia, the Middle East and South-East Asia) | None              | Pay first or on credit terms, then wait for goods and papers                          | Correct PIs and invoices, and timely shipping updates                                      |
+| Vendors and brands                                          | None              | Send PIs, invoices and packing lists, and expect payment                              | POs that match, and payment on time to the right account                                   |
+| Forwarders                                                  | None              | Collect goods and issue the AWB/BL                                                    | Complete papers and a clear release                                                        |
+| The module team and lecturers                               | None              | Assess design thinking, GRS, AI use, practice, Git and running                        | Evidence for M1 to M6, traced in [the matrix](requirements-traceability.md)                |
 
 The approver, Finance and Management hold the most influence over whether OrderPilot is trusted, so their reviews come first. Support and the Product Managers feel the pain most, so they are the first people we would ask to try the prototype.
 
@@ -69,14 +69,14 @@ Each pain point is from the brief. What it costs is our hypothesis until Spectra
 | --- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | --------------------------- | ---------- |
 | 1   | The same data is typed again for each step                     | Hours of keying, and every copy is a chance to mistype a part number, quantity or price     | Support, Warehouse, Finance | A, B       |
 | 2   | Documents are compared by eye                                  | A short shipment or a wrong price is found late, sometimes only when the customer complains | Support, Warehouse, Finance | D          |
-| 3   | Approvals are chased                                           | An SPR sits unanswered while the sales order waits for its stock                            | Product Managers, approver  | C          |
+| 3   | Approvals are chased                                           | An SPR sits unanswered while stock runs short                                               | Product Managers, approver  | C          |
 | 4   | Payments are chased                                            | Packing waits for news of the payment, and a vendor's due date can slip                     | Finance, Support, Warehouse | C          |
 | 5   | Shipping papers are chased                                     | A missing AWB/BL or import permit holds goods at the border after the customer has paid     | Logistics                   | C, D       |
 | 6   | Six hand-offs and no shared view                               | Nobody can say where an order is or who holds it without asking around                      | Everyone, Management        | D          |
 | 7   | A vendor's bank details arrive on each PI                      | A changed account, by mistake or by fraud, is easy to miss by eye. Our inference            | Finance                     | F          |
 | 8   | Who approves what, and up to which limit, is in people's heads | The rules are applied unevenly and are hard to show an auditor                              | Approver, auditors          | C, F       |
 
-Because customers pay in advance, every delay between payment and shipment lands on someone who has already paid.
+Where customers pay in advance, every delay between payment and shipment lands on someone who has already paid.
 
 ## 4. Root cause
 

@@ -90,7 +90,7 @@ OrderPilot is an AI-assisted order-automation layer **beside** Business Central,
   - PO upload, with AI classification and extraction.
   - A person confirms the uncertain fields.
   - A stock lookup in mock Business Central.
-  - An SPR raised by a button and approved.
+  - An SPR raised by a button and approved (for v0.1-proposal).
   - The tracker.
   - One mismatch: a packing list whose quantity differs from the PO.
   - The permission check, enforced on the server.
@@ -138,7 +138,7 @@ Spectra's own five measures sit alongside these: order-processing time, manual t
 
 ### End-to-end tests
 
-- **#1, the sales pilot:** upload, two fields confirmed, stock, SPR, a reminder, the mismatch, and the tracker.
+- **#1, the sales pilot:** upload, two fields confirmed, stock, SPR (for v0.1-proposal), a reminder, the mismatch, and the tracker.
 - **#2, AI layout mapping:** a new layout is mapped by AI and approved by a person.
 - **#3, refusals:** an unauthorised direct API call is refused, segregation of duties and masking hold, and every refusal is audited.
 - **#4, the purchase flow:** a vendor PI with changed bank details holds the payment.

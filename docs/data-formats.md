@@ -146,7 +146,7 @@ What OrderPilot reads from Business Central. The mock (planned: P-19) serves the
 
 **Numbers.** Business Central's numbers are the official ones. OrderPilot shows them beside its own numbers, which take a type prefix, the date and a running number, such as `SPR-20261102-0001` (planned: P-7 and C-1).
 
-**Stock.** Available stock is Inventory minus Qty. on Sales Order plus Qty. on Purch. Order (A-17). A shortfall suggests an SPR, which a person raises. In the mock, Qty. on Sales Order is exactly the open order lines, and Qty. on Purch. Order the open purchase lines. A short line stays out of Qty. on Sales Order while its SPR waits, as the demand under review, and joins it once the SPR is approved. An SPR's purchase order has arrived by the time its sales order reaches picking.
+**Stock.** Available stock is Inventory minus Qty. on Sales Order plus Qty. on Purch. Order (A-17). Today a shortfall suggests an SPR, which a person raises; P-61 moves the suggestion to stock on hand and run rate. In the mock, Qty. on Sales Order is exactly the open order lines, and Qty. on Purch. Order the open purchase lines. A short line stays out of Qty. on Sales Order while its SPR waits, as the demand under review, and joins it once the SPR is approved. An SPR's purchase order has arrived by the time its sales order reaches picking.
 
 **Example.** One synthetic customer, as the mock is planned to return it:
 
