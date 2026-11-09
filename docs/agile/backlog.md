@@ -680,7 +680,7 @@ The rest of the generated set, with planted mistakes and ground truth for the ac
 - **Estimate:** 13 points
 - **Requirements:** M2 GRS by design, M4 best practices
 - **Branch:** `feat/area1-synthetic-documents`
-- **Planned for:** Sprint 02 (W3)
+- **Planned for:** Sprint 04 (W5) and Sprint 05 (W6)
 - **Depends on:** P-52, P-86
 
 Acceptance criteria:
@@ -1526,7 +1526,7 @@ Raise an SPR from stock on hand and the three-month run rate, pre-filled. Prompt
 - **Estimate:** 8 points
 - **Requirements:** M2 GRS by design, M4 best practices
 - **Branch:** `feat/spr-form`
-- **Planned for:** Sprint 02 (W3)
+- **Planned for:** Sprint 08 (W9) and Sprint 09 (W10)
 - **Depends on:** P-60, P-47, P-48, P-86
 
 Acceptance criteria:

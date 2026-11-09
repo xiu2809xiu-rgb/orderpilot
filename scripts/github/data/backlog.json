@@ -545,7 +545,7 @@
       "estimate": 13,
       "reqs": ["M2", "M4"],
       "branch": "feat/area1-synthetic-documents",
-      "sprints": [2],
+      "sprints": [4, 5],
       "dependsOn": ["P-52", "P-86"],
       "summary": "The rest of the generated set, with planted mistakes and ground truth for the accuracy harness. P-52 brought the package, four layouts, the CLI and twelve files forward.",
       "acceptance": [
@@ -1731,7 +1731,7 @@
       "estimate": 8,
       "reqs": ["M2", "M4"],
       "branch": "feat/spr-form",
-      "sprints": [2],
+      "sprints": [8, 9],
       "dependsOn": ["P-60", "P-47", "P-48", "P-86"],
       "summary": "Raise an SPR from stock on hand and the three-month run rate, pre-filled. Prompt 005 section 1.",
       "acceptance": [

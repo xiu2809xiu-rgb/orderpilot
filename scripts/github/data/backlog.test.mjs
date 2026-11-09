@@ -333,9 +333,12 @@ test("the sprints follow prompt 002's order", () => {
   const phaseA = ["P-2", "P-3", "P-4", "P-5", "P-6", "P-7", "P-8", "P-9"];
   phaseA.push("P-10", "P-11", "P-12", "C-1", "D-1", "F-1", "F-2", "G-1");
   for (const key of phaseA) assert.deepEqual(byKey.get(key).sprints, [1], key);
-  for (const key of ["P-13", "P-17", "P-21", "P-22", "P-23", "P-24"]) {
+  for (const key of ["P-13", "P-17", "P-22", "P-23", "P-24"]) {
     assert.deepEqual(byKey.get(key).sprints, [2], key);
   }
+  // Prompt 005 section 12 puts the documents after the briefing's data, so P-21
+  // left prompt 002's Sprint 2 to follow P-86.
+  assert.deepEqual(byKey.get("P-21").sprints, [4, 5]);
   const goal = (sprint) => loadSprintGoals()[sprint - 1].goal;
   assert.match(goal(1), /Sunday 1 Nov, 23:59 Singapore time/);
   assert.match(goal(2), /Monday 2 Nov/);
@@ -410,6 +413,22 @@ test("planned sprints are inside the calendar", () => {
   for (const story of backlog.stories) {
     for (const sprint of story.sprints ?? []) {
       assert.ok(sprint >= 1 && sprint <= 18, story.key);
+    }
+  }
+});
+
+// A story may overlap what it depends on, but a plan that finishes it before that
+// work starts cannot be followed. Prompt 005 made P-21 and P-61 wait for P-86.
+test("no story is planned to finish before what it depends on starts", () => {
+  for (const story of backlog.stories.filter((item) => item.sprints)) {
+    for (const key of story.dependsOn) {
+      const [starts] = byKey.get(key).sprints ?? [];
+      if (starts) {
+        assert.ok(
+          story.sprints.at(-1) >= starts,
+          `${story.key} finishes before ${key} starts`,
+        );
+      }
     }
   }
 });
