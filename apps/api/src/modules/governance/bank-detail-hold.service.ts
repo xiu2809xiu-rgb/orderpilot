@@ -1,4 +1,9 @@
-import { Inject, Injectable } from "@nestjs/common";
+import {
+  Inject,
+  Injectable,
+  Logger,
+  type OnApplicationBootstrap,
+} from "@nestjs/common";
 import { AuditService } from "../../audit/audit.service.js";
 import { Database } from "../../database/database.js";
 import type { ChangeInfo } from "./approval-setup.service.js";
@@ -82,7 +87,9 @@ export interface OpenBankHold {
  * Verifying and clearing a hold are area 4's own routes.
  */
 @Injectable()
-export class BankDetailHoldService {
+export class BankDetailHoldService implements OnApplicationBootstrap {
+  private readonly logger = new Logger(BankDetailHoldService.name);
+
   constructor(
     @Inject(Database) private readonly database: Database,
     @Inject(BankHoldRepository) private readonly holds: BankHoldRepository,
@@ -91,6 +98,13 @@ export class BankDetailHoldService {
     private readonly fingerprinter: BankFingerprinter,
     @Inject(AuditService) private readonly audit: AuditService,
   ) {}
+
+  onApplicationBootstrap(): void {
+    if (this.fingerprinter.configured) return;
+    this.logger.warn(
+      "BANK_FINGERPRINT_KEY is not set: bank-detail comparisons will fail closed and every vendor change will be held.",
+    );
+  }
 
   /**
    * Stores the first sight of a Vendor Bank Account, from the record only.

@@ -43,6 +43,7 @@ import { BankHoldRepository } from "../../src/modules/governance/bank-hold.repos
 import type { ApprovalSetup } from "../../src/modules/governance/domain/approval-setup.js";
 import { digestOf } from "../../src/modules/governance/domain/bank-comparison.js";
 import {
+  BankDetails,
   BankFingerprinter,
   type RawBankDetails,
 } from "../../src/modules/governance/domain/bank-details.js";
@@ -165,6 +166,14 @@ class StandInActionController {
 const SECOND_APPROVER = "approver.second@example.test";
 const TEST_BANK_FINGERPRINT_KEY =
   "test-only-bank-fingerprint-key-0000000000000000";
+const keyWarnings = (t: TestApp) =>
+  t
+    .logLines()
+    .filter(
+      (line) =>
+        typeof line.msg === "string" &&
+        line.msg.includes("BANK_FINGERPRINT_KEY"),
+    );
 const BY_THE_TEST = {
   actor: { kind: "system", name: "governance-controls test" },
   ip: null,
@@ -1187,6 +1196,10 @@ describe("the bank-detail hold (F-5)", () => {
     await t.close();
   });
 
+  it("logs no warning about the key when it has one", () => {
+    expect(keyWarnings(t)).toEqual([]);
+  });
+
   describe("what opens a hold", () => {
     it("opens nothing when the details match, however they are written", async () => {
       const vendorNo = nextVendor();
@@ -1966,6 +1979,15 @@ describe("the bank-detail hold with no fingerprint key (F-5)", () => {
     await t.close();
   });
 
+  it("logs one clear warning at startup", () => {
+    expect(keyWarnings(t)).toMatchObject([
+      {
+        level: 40,
+        msg: "BANK_FINGERPRINT_KEY is not set: bank-detail comparisons will fail closed and every vendor change will be held.",
+      },
+    ]);
+  });
+
   it("holds every report, since nothing can be compared", async () => {
     const vendorNo = "V-NO-KEY-1";
     expect(await report(vendorNo)).toMatchObject({ outcome: "held" });
@@ -1984,6 +2006,19 @@ describe("the bank-detail hold with no fingerprint key (F-5)", () => {
     expect(await t.app.get(BankHoldRepository).baselinesFor(vendorNo)).toEqual(
       [],
     );
+    expect(await report(vendorNo)).toMatchObject({ outcome: "held" });
+  });
+
+  it("never matches details stored while there was no key", async () => {
+    const vendorNo = "V-NO-KEY-4";
+    await t.app
+      .get(BankHoldRepository)
+      .saveBaseline(
+        vendorNo,
+        "MAIN",
+        BankDetails.from(DETAILS).seal(new BankFingerprinter(null)),
+        "a-hold-cleared-with-no-key",
+      );
     expect(await report(vendorNo)).toMatchObject({ outcome: "held" });
   });
 
