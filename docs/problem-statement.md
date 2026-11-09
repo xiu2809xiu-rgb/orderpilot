@@ -15,13 +15,13 @@ Problem Statement #11, Spectra Innovations. Written on 31 Oct 2026, before the b
 
 ## 1. The brief in our words
 
-**Who Spectra is.** Spectra, based in Singapore, distributes computer peripherals and IT products, and holds master distribution rights for certain brands. Its buyers are mainly in India, Sri Lanka, Bangladesh, Pakistan and the Middle East, and most of them pay up front, before anything ships. Orders and stock live in Microsoft Dynamics 365 Business Central.
+**Who Spectra is.** Spectra, based in Singapore, distributes computer peripherals and IT products, and holds master distribution rights for certain brands. Its buyers are in South Asia (India, Sri Lanka, Bangladesh, Pakistan, Nepal, the Maldives), the Middle East (the UAE) and South-East Asia (Vietnam, Indonesia, Malaysia, Singapore). Prices are agreed with each customer before the PO, and payment terms vary: some pay up front, before anything ships, and some pay on credit terms. Orders and stock live in Microsoft Dynamics 365 Business Central.
 
-**What goes wrong today.** An order passes through six groups: Product Managers, the approver (Janet), Support, Warehouse, Finance and Logistics. Each group keys in data that already exists in a document someone else received: the customer's PO, the proforma invoice (PI), the invoice, the packing list and the AWB/BL. Then they chase each other for approvals, payments and shipping papers.
+**What goes wrong today.** An order passes through six groups: Product Managers, the management approvers, Support, Warehouse, Finance and Logistics. Each group keys in data that already exists in a document someone else received: the customer's PO, the proforma invoice (PI), the invoice, the packing list and the AWB/BL. Then they chase each other for approvals, payments and shipping papers.
 
-**The sales flow.** The customer's PO arrives. Stock is checked, and an SPR (Sales Purchase Requisition) is raised when stock is needed. Support sends a PI carrying Spectra's bank details. The customer pays. The warehouse packs. The invoice and packing list are made. The goods go to the forwarder, and the customer receives the shipping details. Last, Logistics chases the AWB/BL and the import permit.
+**The sales flow.** The customer's PO arrives. Stock is checked, and Spectra sells only what it has: when a PO asks for more, the order is held and the customer is asked to revise it. Support sends a PI carrying Spectra's bank details. The customer pays. The warehouse packs. The invoice and packing list are made. The goods go to the forwarder, and the customer receives the shipping details. Last, Logistics chases the AWB/BL and the import permit.
 
-**The purchase flow.** A Product Manager raises an SPR and the approver approves it. Support creates the vendor PO in Business Central. The vendor's PI comes back with the vendor's bank details. A forwarder is arranged. The warehouse compares what arrives with its paperwork (invoice, packing list, AWB/BL), and the goods are received into Business Central. The customer is told, and Finance pays the vendor on the due date.
+**The purchase flow.** A Product Manager raises an SPR (a Stock Purchase Requisition) from stock on hand and the last three months' run rate. A coordinator, a Support user, routes it to three management approvers, any one of whom decides, with no substitute and a reminder to the whole group after 24 hours. The Product Manager then places the vendor PO, or records the vendor's portal reference where the vendor requires its own portal. The vendor's PI comes back with the vendor's bank details. A forwarder is arranged. The warehouse compares what arrives with its paperwork (invoice, packing list, AWB/BL), and the goods are received into Business Central. The customer is told, and Finance pays the vendor on the due date.
 
 **What the brief asks for.** A tool that pulls part numbers, quantities, prices and shipment details out of these documents; compares the documents with each other and raises disagreements for a person; sends each approval and task to the right group, with reminders; and shows every order's status, owner, open actions and exceptions in one place. It suggests starting with one flow, probably sales, while staff keep posting in Business Central. Human approvals and the financial controls stay.
 
@@ -43,21 +43,21 @@ Problem Statement #11, Spectra Innovations. Written on 31 Oct 2026, before the b
 
 OrderPilot's users are Spectra's staff only. Customers, vendors and forwarders never log in. Until the briefing call, everything in this table is our reading of the brief.
 
-| Group                                      | OrderPilot role   | Their stake                                                    | What they would need from OrderPilot                                                       |
-| ------------------------------------------ | ----------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| Support                                    | `SUPPORT`         | Handles most documents and keeps every order current           | Fields read for them, only the doubtful ones to confirm, and PIs and updates drafted       |
-| Product Managers                           | `PRODUCT_MANAGER` | Own brands, stock levels and SPRs                              | An SPR pre-filled from a shortfall, and its approval visible without chasing               |
-| The approver (Janet)                       | `APPROVER`        | Approves SPRs and requests within a limit                      | Each request with its checks already done, and reminders that do not flood                 |
-| Warehouse                                  | `WAREHOUSE`       | Packs only paid orders, and checks incoming goods              | A packing task that appears only after payment, and documents side by side with mismatches |
-| Finance                                    | `FINANCE`         | Confirms customer payments and pays vendors                    | Payment status per order, and a hold whenever a vendor's bank details change               |
-| Logistics                                  | `LOGISTICS`       | Forwarders, shipment dates, AWB/BL and import permits          | Overdue paperwork flagged, and shipping details sent without re-typing                     |
-| Management                                 | `MANAGEMENT`      | Throughput, delays and errors                                  | One tracker, and the five measures actually measured                                       |
-| Auditors                                   | `AUDITOR`         | Proof that approvals and payments followed the controls        | A tamper-evident trail, read-only                                                          |
-| IT and whoever supports Business Central   | `SYSTEM_ADMIN`    | Keep Business Central stable and the system of record          | Supported interfaces only, least privilege, health and logs                                |
-| Customers (South Asia and the Middle East) | None              | Pay first, then wait for goods and papers                      | Correct PIs and invoices, and timely shipping updates                                      |
-| Vendors and brands                         | None              | Send PIs, invoices and packing lists, and expect payment       | POs that match, and payment on time to the right account                                   |
-| Forwarders                                 | None              | Collect goods and issue the AWB/BL                             | Complete papers and a clear release                                                        |
-| The module team and lecturers              | None              | Assess design thinking, GRS, AI use, practice, Git and running | Evidence for M1 to M6, traced in [the matrix](requirements-traceability.md)                |
+| Group                                      | OrderPilot role   | Their stake                                                                           | What they would need from OrderPilot                                                       |
+| ------------------------------------------ | ----------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Support                                    | `SUPPORT`         | Handles most documents, keeps every order current, and as coordinator routes each SPR | Fields read for them, only the doubtful ones to confirm, and PIs and updates drafted       |
+| Product Managers                           | `PRODUCT_MANAGER` | Own brands, stock levels and SPRs                                                     | An SPR pre-filled from stock and run rate, and its approval visible without chasing        |
+| The management approvers (three)           | `APPROVER`        | Any one of them decides an SPR, within a limit if limits are on                       | Each request with its checks already done, and reminders that do not flood                 |
+| Warehouse                                  | `WAREHOUSE`       | Packs only paid orders, and checks incoming goods                                     | A packing task that appears only after payment, and documents side by side with mismatches |
+| Finance                                    | `FINANCE`         | Confirms customer payments and pays vendors                                           | Payment status per order, and a hold whenever a vendor's bank details change               |
+| Logistics                                  | `LOGISTICS`       | Forwarders, shipment dates, AWB/BL and import permits                                 | Overdue paperwork flagged, and shipping details sent without re-typing                     |
+| Management                                 | `MANAGEMENT`      | Throughput, delays and errors                                                         | One tracker, and the five measures actually measured                                       |
+| Auditors                                   | `AUDITOR`         | Proof that approvals and payments followed the controls                               | A tamper-evident trail, read-only                                                          |
+| IT and whoever supports Business Central   | `SYSTEM_ADMIN`    | Keep Business Central stable and the system of record                                 | Supported interfaces only, least privilege, health and logs                                |
+| Customers (South Asia and the Middle East) | None              | Pay first, then wait for goods and papers                                             | Correct PIs and invoices, and timely shipping updates                                      |
+| Vendors and brands                         | None              | Send PIs, invoices and packing lists, and expect payment                              | POs that match, and payment on time to the right account                                   |
+| Forwarders                                 | None              | Collect goods and issue the AWB/BL                                                    | Complete papers and a clear release                                                        |
+| The module team and lecturers              | None              | Assess design thinking, GRS, AI use, practice, Git and running                        | Evidence for M1 to M6, traced in [the matrix](requirements-traceability.md)                |
 
 The approver, Finance and Management hold the most influence over whether OrderPilot is trusted, so their reviews come first. Support and the Product Managers feel the pain most, so they are the first people we would ask to try the prototype.
 
@@ -109,11 +109,11 @@ Not legal advice: Spectra and its advisers decide what applies. The prototype ru
 - **Business Central is unknown.** Its version, hosting, customisation and interfaces are all open. OrderPilot reaches it only through a connector (planned: P-20), against an OData-style mock until we know more (planned: P-19). [The domain notes](research/domain-notes.md) list what standard Business Central keeps.
 - **Every customer and vendor has its own layout.** Mappings are proposed by AI and approved by a person, so a new layout needs no code.
 - **Extraction is never certain.** Each field gets a confidence score and points back to where it was read, and doubtful fields wait for a person.
-- **Documents must agree.** Customers, vendors and items are identified by their Business Central numbers, not their names, and each check states its tolerance.
-- **Money.** Prices are in USD. Totals, freight and rounding differ between documents, so checks state their tolerance.
+- **Documents must agree.** Customers, vendors and items are identified by their Business Central numbers, not their names, and part number, quantity, unit price and currency must match exactly across the PO, PI, invoice and packing list, with no tolerance setting for those four.
+- **Money.** Prices are in USD. Totals, freight and rounding differ between documents, so checks on other fields state their tolerance. Unit price and currency are not among them: they match exactly.
 - **Email is messy.** The same PO can arrive twice or forwarded, so duplicates are found by content hash.
 - **The books must stay clean.** A write to Business Central would need a preview and an approval, and stays against the mock until Spectra agrees.
-- **Rules not yet confirmed** (the SPR trigger, the PI sequence, approvers and limits, delegation) are configuration, never code.
+- **Rules not yet confirmed** (the PI sequence and the approver group's limits, which are switchable with none set) are configuration, never code. The SPR is raised by a person from stock and run rate, and there is no delegation.
 - **Volumes are unknown,** so work runs on queues, and every list is paged and indexed.
 
 ### Organisational
@@ -209,8 +209,8 @@ These change the design most. They are written out in full, in priority order, i
 - How documents reach Spectra, their formats, and the monthly volume.
 - Which flow is the pilot, and which step wastes the most time.
 - The PI sequence: does the customer or the warehouse get the PI first?
-- When an SPR is raised in a sale.
-- Approvers, limits and delegation.
+- Whether a sale ever raises an SPR. The briefing says it does not: a short order is held and the customer revises the PO.
+- The approver group's limits, which are switchable with none set. There is no delegation: any one of three approvers decides.
 - What counts as a mismatch, and what happens next.
 - How payments are confirmed, and how vendor bank details are checked.
 - Forwarders, AWB/BL formats and each country's import permits.
@@ -219,4 +219,4 @@ These change the design most. They are written out in full, in priority order, i
 - Whether an AI service may be used, in which region, and what it must never see.
 - Who signs off the results.
 
-Until Spectra answers, four rules stay as configuration: when an SPR is raised, the PI sequence, who approves up to what limit, and delegation.
+Until Spectra answers, two rules stay as configuration: the PI sequence, and the approver group's limits.
