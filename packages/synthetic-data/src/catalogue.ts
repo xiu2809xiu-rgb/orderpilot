@@ -5,6 +5,7 @@ import {
   PART_NUMBER_STYLES,
   isLowStockIndex,
   planCatalogue,
+  type ItemPlan,
 } from "./catalogue-plan.js";
 import {
   CUSTOMER_NAMES,
@@ -93,6 +94,7 @@ export function makeVendors(random: SeededRandom): Vendor[] {
     currencyCode: "USD",
     paymentTermsCode: ["30 DAYS", "60 DAYS", "PREPAID"][i % 3] ?? "30 DAYS",
     balanceLcy: random.money(0, 40_000),
+    leadTimeDays: 0,
   }));
 }
 
@@ -143,6 +145,7 @@ export function makeItems(
     random.int(0, low ? (inventory / 2) | 0 : 60);
     const [fastest, slowest] = productClass.leadTimeDays;
     const no = `I-${pad(index + 1)}`;
+    const sold = threeMonthSales(seed, no, plan, low, inventory);
     items.push({
       no,
       description: `${brand.name} ${plan.label}`,
@@ -160,9 +163,68 @@ export function makeItems(
       leadTimeDays:
         fastest +
         Math.floor(hashUnit(seed, "lead", no) * (slowest - fastest + 1)),
+      runRate3m: (sold / 3).toFixed(1),
+      monthsOfCover: null,
     });
   }
   return items;
+}
+
+/**
+ * Units sold in the last three months, the figure the history adds up to. It is
+ * the stock divided by a target cover, a hash of the item: low-stock items run
+ * out within weeks, some components are held for less than the vendor's lead
+ * time, and the rest cover one and a half to six months.
+ */
+function threeMonthSales(
+  seed: number,
+  no: string,
+  plan: ItemPlan,
+  low: boolean,
+  inventory: number,
+): number {
+  const u = hashUnit(seed, "cover", no);
+  let target = 1.5 + 4.5 * u;
+  if (low) target = 0.3 + 0.9 * u;
+  else if (
+    plan.productClass.category === "COMPONENTS" &&
+    hashUnit(seed, "thin", no) < 0.35
+  )
+    target = 1 + 1.5 * u;
+  if (plan.plantedShort) target = 1.5;
+  return Math.max(1, Math.round((3 * inventory) / target));
+}
+
+/** Each vendor's lead time is the median of its items', which are known once the items are. */
+export function setVendorLeadTimes(
+  vendors: Vendor[],
+  items: readonly Item[],
+): void {
+  for (const vendor of vendors) {
+    const days = items
+      .filter((item) => item.vendorNo === vendor.no)
+      .map((item) => item.leadTimeDays)
+      .sort((a, b) => a - b);
+    if (days.length === 0) continue;
+    const mid = Math.floor(days.length / 2);
+    vendor.leadTimeDays =
+      days.length % 2 === 1
+        ? (days[mid] ?? 0)
+        : Math.round(((days[mid - 1] ?? 0) + (days[mid] ?? 0)) / 2);
+  }
+}
+
+/**
+ * Months of cover is stock over the monthly run rate. It is set after the
+ * purchase orders, because received stock from approved SPRs is in Inventory
+ * by then.
+ */
+export function setMonthsOfCover(items: Item[]): void {
+  for (const item of items) {
+    const rate = Number(item.runRate3m);
+    item.monthsOfCover =
+      rate > 0 ? (Number(item.inventory) / rate).toFixed(1) : null;
+  }
 }
 
 export function openingBalances(

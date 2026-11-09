@@ -20,6 +20,22 @@ export { SeededRandom, hashUnit } from "./random.js";
 export { COUNTRY_NAMES, addressOf, taxIdOf, taxIdLength } from "./places.js";
 export { availableStock } from "./stock.js";
 export {
+  lastAgreedPrice,
+  lastAgreedPricesFor,
+  monthlySales,
+  salesHistory,
+  stockCover,
+} from "./history.js";
+export type {
+  HistoryGrouping,
+  HistoryLine,
+  HistoryReceipt,
+  LastAgreedPrice,
+  SalesHistory,
+} from "./history.js";
+export { agreedPrice } from "./last-price.js";
+export { SEASONALITY } from "./seasonality.js";
+export {
   COUNTRY_CODES,
   DOCUMENT_STATUSES,
   ITEM_CATEGORIES,

@@ -58,6 +58,8 @@ export interface Vendor {
   currencyCode: "USD";
   paymentTermsCode: string;
   balanceLcy: DecimalString;
+  /** The median lead time of the items it supplies, in days. */
+  leadTimeDays: number;
 }
 
 /** Obviously fake: an unassigned country code in the IBAN and a bank that says so. */
@@ -98,6 +100,13 @@ export interface Item {
   vendorItemNo: string;
   /** Days from the vendor's order to the goods arriving. */
   leadTimeDays: number;
+  /**
+   * Units sold a month over the last three whole months. OrderPilot's own
+   * figure, not a Business Central field; the history adds up to it.
+   */
+  runRate3m: DecimalString;
+  /** Inventory over `runRate3m`, in months; null when nothing sold. */
+  monthsOfCover: DecimalString | null;
 }
 
 /** A person on the team, by the role they hold. A product manager lists the brands they own. */
