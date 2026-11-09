@@ -1933,6 +1933,76 @@ describe("the bank-detail hold (F-5)", () => {
   it.todo("emits payment.held and payment.hold-cleared, both audited");
 });
 
+describe("the bank-detail hold with no fingerprint key (F-5)", () => {
+  let t: TestApp;
+  // Obviously fake: ZZ is not a country, and the bank names itself a demo.
+  const DETAILS = {
+    bankAccountNo: "000000008801",
+    swiftCode: "DEMOZZ88",
+    iban: "ZZ00DEMO0000000008801",
+  };
+  const control = () => t.app.get(BankDetailHoldService);
+  const report = (vendorNo: string) =>
+    control().reportDetails(
+      {
+        vendorNo,
+        details: DETAILS,
+        source: "vendor-pi",
+        sourceRef: "PI-NO-KEY-1",
+        changedByUserId: null,
+      },
+      BY_THE_TEST,
+    );
+
+  beforeAll(async () => {
+    await resetTestData();
+    t = await createTestApp({}, [], (builder) =>
+      builder
+        .overrideProvider(BankFingerprinter)
+        .useValue(new BankFingerprinter(null)),
+    );
+  });
+  afterAll(async () => {
+    await t.close();
+  });
+
+  it("holds every report, since nothing can be compared", async () => {
+    const vendorNo = "V-NO-KEY-1";
+    expect(await report(vendorNo)).toMatchObject({ outcome: "held" });
+    expect(await report(vendorNo)).toMatchObject({ outcome: "held" });
+    expect((await control().openHoldsFor(vendorNo)).length).toBeGreaterThan(0);
+  });
+
+  it("stores nothing it could never compare with again", async () => {
+    const vendorNo = "V-NO-KEY-2";
+    expect(
+      await control().recordBaseline(
+        { vendorNo, accountCode: "MAIN", details: DETAILS },
+        BY_THE_TEST,
+      ),
+    ).toBe(false);
+    expect(await t.app.get(BankHoldRepository).baselinesFor(vendorNo)).toEqual(
+      [],
+    );
+    expect(await report(vendorNo)).toMatchObject({ outcome: "held" });
+  });
+
+  it("skips storing the vendors' details from the seed", async () => {
+    expect(await seedVendorBankBaselines(t.app)).toContain(
+      "BANK_FINGERPRINT_KEY",
+    );
+  });
+
+  it("keeps the numbers out of the audit trail all the same", async () => {
+    await report("V-NO-KEY-3");
+    const trail = JSON.stringify(await auditEvents(t));
+    expect(trail).toContain("****8801");
+    for (const secret of Object.values(DETAILS)) {
+      expect(trail.includes(secret), secret).toBe(false);
+    }
+  });
+});
+
 describe("masking for each role (F-1 onwards)", () => {
   it.todo(
     "hides bank details from every role outside Finance, with the reason",

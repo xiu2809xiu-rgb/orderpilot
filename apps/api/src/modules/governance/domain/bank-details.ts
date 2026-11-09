@@ -1,4 +1,4 @@
-import { createHmac } from "node:crypto";
+import { createHmac, randomBytes } from "node:crypto";
 import { inspect } from "node:util";
 
 /** The fields of Business Central's Vendor Bank Account that decide where money goes. */
@@ -42,8 +42,9 @@ function maskLast4(field: BankField, normalised: string): string {
 /**
  * Turns a value into a fingerprint with a server-side key. A plain hash would
  * not do: an account number is short enough to guess from its hash. The key is
- * a private field, so printing this object cannot show it. Without a key
- * comparing fails closed, rather than comparing with a weak one.
+ * a private field, so printing this object cannot show it. Without a key every
+ * fingerprint is random, so it matches nothing and every report is held, rather
+ * than being compared under a weak key.
  */
 export class BankFingerprinter {
   readonly #key: string | null;
@@ -57,11 +58,7 @@ export class BankFingerprinter {
   }
 
   digest(field: BankField, normalised: string): string {
-    if (this.#key === null) {
-      throw new Error(
-        "BANK_FINGERPRINT_KEY is not set, so bank details cannot be compared.",
-      );
-    }
+    if (this.#key === null) return randomBytes(32).toString("hex");
     return createHmac("sha256", this.#key)
       .update(`${field}\0${normalised}`)
       .digest("hex");

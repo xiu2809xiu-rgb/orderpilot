@@ -282,7 +282,7 @@ await authorisation.enforce(
 
 - **Area 1:** call `reportDetails` from vendor PI confirmation and P-68's port, `recordBaseline` from P-20, and run `seedVendorBankBaselines` from `seeders.ts`.
 - **Area 2 and P-104:** call `enforce` with the stored `vendorNo`, and show `openHoldsFor`.
-- **`GovernanceModule`** reads `BANK_FINGERPRINT_KEY` once its own pull request merges. Until then, comparing fails closed.
+- **`GovernanceModule`** reads `BANK_FINGERPRINT_KEY` once its own pull request merges. Until then nothing can be compared, so every report opens a hold.
 - **`payments.post`** is held by no role, so vendor payments are refused for everyone until P-104's permission is decided.
 - **Events** wait for the bus (P-15).
 

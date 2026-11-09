@@ -107,17 +107,16 @@ describe("the fingerprint", () => {
     ).not.toBe(fingerprintOf("bankAccountNo", ACCOUNT));
   });
 
-  it("fails closed without a key, naming the setting and no number", () => {
+  it("matches nothing without a key, so that every report is held", () => {
     const keyless = new BankFingerprinter(null);
     expect(keyless.configured).toBe(false);
     expect(fingerprinter.configured).toBe(true);
     const details = BankDetails.from({ bankAccountNo: ACCOUNT });
-    expect(() => details.seal(keyless)).toThrow(/BANK_FINGERPRINT_KEY/);
-    try {
-      details.seal(keyless);
-    } catch (error) {
-      expect(String(error)).not.toContain(ACCOUNT);
-    }
+    const first = details.seal(keyless).bankAccountNo;
+    const second = details.seal(keyless).bankAccountNo;
+    expect(first?.fingerprint).toMatch(/^[0-9a-f]{64}$/);
+    expect(first?.fingerprint).not.toBe(second?.fingerprint);
+    expect(first?.masked).toBe("****9901");
   });
 });
 

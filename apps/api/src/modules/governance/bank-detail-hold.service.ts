@@ -101,6 +101,9 @@ export class BankDetailHoldService {
     input: StoredBankAccount,
     by: ChangeInfo,
   ): Promise<boolean> {
+    // Without a key a fingerprint is random, so storing one would make this
+    // vendor differ for ever, even once a key is set.
+    if (!this.fingerprinter.configured) return false;
     const { vendorNo, accountCode } = input;
     const sealed = BankDetails.from(input.details).seal(this.fingerprinter);
     return this.database.transaction(async () => {
