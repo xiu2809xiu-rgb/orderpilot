@@ -8,7 +8,7 @@ There are 9 epics and 156 stories. Estimates are story points: a first guess, fo
 
 | Epic   | Title                             | Area                                    | Stories | Points |
 | ------ | --------------------------------- | --------------------------------------- | ------- | ------ |
-| Epic P | The platform base                 | `area: 1 document AI and integration`   | 93      | 523    |
+| Epic P | The platform base                 | `area: 1 document AI and integration`   | 93      | 531    |
 | Epic A | Document intake and AI extraction | `area: 1 document AI and integration`   | 8       | 55     |
 | Epic B | Master data and Business Central  | `area: 1 document AI and integration`   | 7       | 35     |
 | Epic C | Order workflows and approvals     | `area: 2 order workflows and approvals` | 9       | 50     |
@@ -59,8 +59,8 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | P-17  | The AI gateway                                                     | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | P-18  | Document intake and storage                                        | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | P-19  | Mock Business Central and synthetic master data                    | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
-| P-20  | The connector framework and the Business Central adapter           | must     | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
-| P-21  | Synthetic documents                                                | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-20  | The connector framework and the Business Central adapter           | must     | 8      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-21  | Synthetic documents                                                | must     | 13     | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | C-1   | Area 2 base, the workflow module                                   | must     | 8      | `area: 2 order workflows and approvals` | M4 best practices                                              |
 | C-2   | The order state machine for the sales flow                         | must     | 8      | `area: 2 order workflows and approvals` | M4 best practices                                              |
 | C-3   | SPR approval within limits                                         | must     | 5      | `area: 2 order workflows and approvals` | M2 GRS by design, M4 best practices                            |
@@ -75,6 +75,7 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | F-4   | No self-approval and segregation of duties                         | must     | 3      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
 | F-5   | The bank-detail hold                                               | must     | 5      | `area: 4 controls and monitoring`       | M2 GRS by design, M4 best practices                            |
 | G-1   | Area 4 base, monitoring                                            | must     | 8      | `area: 4 controls and monitoring`       | M2 GRS by design, M6 deploy and monitor                        |
+| P-22  | The design system with the Pro kits                                | must     | 8      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-24  | Cloud deployment                                                   | must     | 8      | `area: 1 document AI and integration`   | M4 best practices, M6 deploy and monitor                       |
 | P-25  | Slides as code                                                     | must     | 3      | `area: team`                            | M4 best practices                                              |
 | P-26  | Generated API hooks and mocks                                      | must     | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
@@ -162,7 +163,7 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | P-106 | Three visual directions                                            | must     | 8      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-107 | Roll the picked direction onto the shell and templates             | must     | 8      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | C-5   | Area 2 polish left out of the base                                 | should   | 3      | `area: 2 order workflows and approvals` | M4 best practices                                              |
-| P-22  | The design system with the Pro kits                                | should   | 8      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-23  | The 3D order constellation                                         | should   | 13     | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-29  | A unit coverage threshold on domain logic                          | should   | 2      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-30  | A k6 smoke load test                                               | should   | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-41  | Finish the bar on every list and detail page                       | should   | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
@@ -181,7 +182,6 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | P-108 | The landing page                                                   | should   | 8      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-109 | The sign-in page with the scene                                    | should   | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-110 | The speed bar                                                      | should   | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
-| P-23  | The 3D order constellation                                         | could    | 13     | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-27  | Web shell polish                                                   | could    | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-77  | Tab strip polish                                                   | could    | 3      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-79  | End-to-end follow-ups                                              | could    | 3      | `area: 1 document AI and integration`   | M4 best practices, M6 deploy and monitor                       |
@@ -592,11 +592,12 @@ Acceptance criteria:
 - `LlmGateway` with three providers: mock (the default, deterministic, and works offline); OpenAI-compatible (a base URL, a key and a model, so Groq, Gemini's OpenAI-compatible endpoint, OpenRouter, NVIDIA NIM and Ollama all work by configuration alone); and optional Bedrock.
 - Calls: structured output validated with zod, with retries; page images for vision models (Groq's `qwen/qwen3.8-27b` takes up to 3 images a request).
 - Usage tracking: `AiUsageTracker` and `AiUsageRecord` log tokens, model, latency, estimated cost, feature, user, document and outcome, plus the data the web app needs to show its "Mock AI" badge.
-- Prompt-injection defence: documents are treated as data; the model only returns fields; no model output triggers an action.
+- Prompt-injection defence: documents are treated as data; the model only returns fields, or asks for a read-only tool that runs as the person asking; no model output writes, approves, posts, pays or sends.
 - A destination check: area 4's policy decides what data may go to which provider. The default is synthetic data only.
 - Keys: Richie adds `GROQ_API_KEY` and `GEMINI_API_KEY` to the root `.env` himself.
 - ADR: the AI gateway and the person in the loop.
 - The Vercel AI SDK sits under `LlmGateway`, and the gateway keeps cost tracking and the data-to-AI policy with an ADR, a pinned version and a traceability row.
+- Tool calling, with each tool's arguments parsed by zod, and streamed answers, with a mock provider that scripts both, so Spark (P-95) needs no second gateway.
 
 ### P-18: Document intake and storage
 
@@ -623,7 +624,7 @@ Acceptance criteria:
 
 ### P-19: Mock Business Central and synthetic master data
 
-An OData-style mock of Business Central and the synthetic master data behind it.
+A mock of Business Central's standard API v2.0, and the synthetic master data behind it.
 
 - **Area:** `area: 1 document AI and integration`
 - **Priority:** must
@@ -635,15 +636,19 @@ An OData-style mock of Business Central and the synthetic master data behind it.
 
 Acceptance criteria:
 
-- `services/mock-business-central`: an OData-style API with paging and `$filter`, behind an API key, for Items, Customers, Vendors, PriceLists and StockLevels, and for SalesOrders, PurchaseOrders and Receipts.
-- `packages/synthetic-data`: a seeded random generator; a Spectra-like catalogue of fictional brands' IT, surveillance and accessory products, with part numbers; customers in India, Sri Lanka, Bangladesh, Pakistan and the UAE; vendors, stock, and USD prices.
-- Customers and vendors in one list of business partners, each with a type and a price level, for the master-data screens and the price checks.
+- `services/mock-business-central`: the resources of Business Central's API v2.0, named as Microsoft's reference names them (companies, customers, vendors, items, salesQuotes, salesOrders, salesInvoices, salesCreditMemos, purchaseOrders, purchaseInvoices and purchaseReceipts, with their lines), with paging and `$filter`, behind a stub of OAuth client credentials, and no price tables.
+- `packages/synthetic-data` stays the source of the mock's records, and P-86 brings the briefing's brands, categories and countries.
+- Customers and vendors in one list of business partners, each with a type and a price level, for the master-data screens; the price check is that the documents agree (prompt 005 section 1).
 - Opening stock and opening balances (receivables and payables), growing the set P-9 starts.
-- The mock speaks OData-style JSON with Business Central's names in camelCase, as `docs/research/domain-notes.md` lists them.
+- The mock follows the JSON shapes in Microsoft's API v2.0 reference, such as `number`, `displayName`, `addressLine1` and `taxRegistrationNumber` on a customer, and `docs/research/domain-notes.md` maps them to the field names in `docs/data-formats.md`.
 - Realism: document numbering and statuses from Richie's notes when present.
 - Tests, a compose service, `docs/api/mock-systems.md`, and a "Mock" label wherever it's used.
 - ADR: mock external systems.
-- Prompt 003 brings forward reading master data through a port labelled Mock Business Central (P-35); this story still brings the OData service, its paging and `$filter`, and the compose service.
+- Prompt 003 brings forward reading master data through a port labelled as the mock (P-35, whose label P-83 renames); this story still brings the service, its paging and `$filter`, and the compose service.
+- The stock figure a lookup needs is `inventory` on `items`, as in API v2.0, and the quantities on sales and purchase orders are summed from the open lines, because `items` has neither.
+- Vendor bank details have no API v2.0 resource (`bankAccounts` is the company's own), so the mock adds `vendorBankAccounts`, and `docs/api/mock-systems.md` marks it as ours and says a real connection needs a custom API page or an export.
+- A write path where API v2.0 has one: POST and PATCH on customers, vendors, purchaseOrders and purchaseOrderLines, kept in the mock's own store. `purchaseReceipts` stays read-only, as in API v2.0, so the mock makes a receipt when a purchase order is received.
+- Webhooks (subscriptions) come later, and `docs/api/mock-systems.md` says so.
 
 ### P-20: The connector framework and the Business Central adapter
 
@@ -651,7 +656,7 @@ A connector framework, and the adapter that makes a stock lookup work end to end
 
 - **Area:** `area: 1 document AI and integration`
 - **Priority:** must
-- **Estimate:** 5 points
+- **Estimate:** 8 points
 - **Requirements:** M4 best practices
 - **Branch:** `feat/area1-connectors`
 - **Planned for:** Sprint 02 (W3)
@@ -659,10 +664,12 @@ A connector framework, and the adapter that makes a stock lookup work end to end
 
 Acceptance criteria:
 
-- The framework: a `SystemConnector` interface over named record kinds (items, customers, vendors, price lists, stock levels and mail messages).
+- The framework: a `SystemConnector` interface over named record kinds (items, customers, vendors, stock levels and mail messages).
 - The framework: a factory (credentials only from the environment); a health probe and a retry policy with backoff; an HTTP JSON client with timeouts; data minimisation and an offline connector; the `Connector` model and a connectors page.
 - The Business Central adapter, so a stock lookup works end to end, with contract tests against the mock.
 - ADR: hub-and-spoke integration.
+- Moving to the real Business Central is configuration only (base URL, tenant, environment, company and OAuth client), and a test shows the adapter reads nothing else.
+- A write path: the adapter writes a record only with the preview a person saw and the id of their approval, refuses otherwise, and audits both, with contract tests against the mock. P-88, P-101 and P-103 write through it.
 
 ### P-21: Synthetic documents
 
@@ -670,52 +677,53 @@ The rest of the generated set, with planted mistakes and ground truth for the ac
 
 - **Area:** `area: 1 document AI and integration`
 - **Priority:** must
-- **Estimate:** 8 points
+- **Estimate:** 13 points
 - **Requirements:** M2 GRS by design, M4 best practices
 - **Branch:** `feat/area1-synthetic-documents`
 - **Planned for:** Sprint 02 (W3)
-- **Depends on:** P-19, P-52
+- **Depends on:** P-52, P-86
 
 Acceptance criteria:
 
-- More document kinds in the same renderer, with positions and ground truth: the vendor PI, AWB and bill of lading, import permit and payment advice. P-52 has the PO, PI, packing list and commercial invoice.
+- More document kinds in the same renderer, with positions and ground truth: the vendor PI, vendor invoice, vendor packing list, delivery order, AWB, bill of lading as draft and final, import permit, proof of payment and the SPR form. P-52 has the PO, PI, packing list and commercial invoice.
 - Scanned-looking variants of more than one document, and long orders that flow onto further pages (a layout today refuses an order that does not fit one page).
-- Planted mistakes: price, PO reference, part number and changed bank details. The quantity mismatch is P-52's packing list.
+- Planted mistakes: price, PO reference, part number and changed bank details, plus P-86's PI whose price differs from its PO and AWB draft with the wrong consignee. The quantity mismatch is P-52's packing list.
 - Ground truth: a JSON file for every generated document, for the accuracy harness. P-52 writes them for its twelve.
 - Delivery: P-52's `pnpm docs:generate` grows to the full set. The twelve demo files stay in `apps/web/public/demo-documents/`, not a folder called `samples`.
+- `DOCUMENT_TYPES` in `packages/shared/src/order.ts` widens with the kinds it lacks (vendor invoice, delivery order, SPR form and credit note) and a draft or final marker on the AWB and bill of lading, with all four owners asked to review.
 
 ### P-22: The design system with the Pro kits
 
-The licensed kits, set up once Richie says the repository is private and the official keys are in `apps/web/.env.local`, and Richie's own pages upgraded with them.
+The licensed kits, set up once Richie says the repository is private and the official keys are in `apps/web/.env.local`, ready for Richie's own pages, which P-107 to P-109 upgrade.
 
 - **Area:** `area: 1 document AI and integration`
-- **Priority:** should
+- **Priority:** must
 - **Estimate:** 8 points
 - **Requirements:** M4 best practices
 - **Branch:** `feat/platform-design-system`
 - **Planned for:** Sprint 02 (W3)
 - **Depends on:** P-11, P-12
-- **Condition:** Only once Richie says the repository is private and official keys are in `apps/web/.env.local` (rule 8 of prompt 001, confirmed in prompt 002, section 7). Until he says, free kits only.
+- **Condition:** Only once Richie says the repository is private and official keys are in `apps/web/.env.local` (rule 8 of prompt 001, confirmed in prompt 002, section 7). Until he says, free kits only. Met on 6 Nov: the repository is private (P-81) and the keys are in.
 
 Acceptance criteria:
 
-- Registries in `apps/web/components.json`: `@reactbits-starter`, `@reactbits-pro`, `@reui` and `@magicui`, with the licence keys sent as bearer headers from the environment.
+- Registries in `apps/web/components.json`: `@reactbits-starter`, `@reactbits-pro`, `@reui` and `@magicui`, with the licence keys sent as bearer headers from the environment. The working registries at `registry.collectui.pro` stay, as prompt 006 section 2 allows (keep what works).
 - The keys stay in `apps/web/.env.local` as `REUI_LICENSE_KEY` and `REACTBITS_LICENSE_KEY`, and `components.json` refers to them only as `${...}`. No key is ever written into a file, commit or message.
-- Pro parts stay in Richie's own pages: landing, sign-in, the app shell and the 3D view. The four areas' screens use the free kits unless Richie confirms a team licence.
+- Pro parts stay in Richie's own pages: landing, sign-in, the app shell and the 3D view, plus Spark (prompt 006 section 2). The four areas' screens use the free kits unless Richie confirms a team licence.
 - Each source verified with a test install, and exact errors reported.
 - Tools: the React Bits skill read in full before any item is used; the shadcn MCP; ReUI's MCP server, with its token kept out of Git.
 - `docs/design/reactbits-usage.md`: a plan for every page, saying which React Bits, ReUI and Magic UI items it uses, and why; 20 or more distinct items across the app; at least one item on every page; Pro blocks on landing and login; Application UI wherever it matches; only subtle items on dense work screens.
-- `docs/design/design-system.md`.
+- `docs/design/design-system.md`, which names prompt 006's work mode and show mode and what belongs to each.
 - `CONTRIBUTING.md`: teammates never need the keys to run or build, because added components are code in the repository. Adding a new Pro component goes through Richie.
-- Login and landing are upgraded with Pro blocks, then the app shell and the 3D view. Every item is adapted to the tokens, one component per file, with a header comment stating its origin.
+- The Pro blocks on sign-in, landing and the app shell move to P-107 to P-109, after Richie picks a direction in P-106. Every item is adapted to the tokens, one component per file, with a header comment naming its vendor, the item and its licence.
 - ADR: component registries, and why licensed code needs a private repository.
 
 ### P-23: The 3D order constellation
 
-A live 3D view of orders moving between the six teams, on landing, login and as an operations view.
+A live 3D view of orders moving between the teams around Spark, on landing, login and as an operations view.
 
 - **Area:** `area: 1 document AI and integration`
-- **Priority:** could
+- **Priority:** should
 - **Estimate:** 13 points
 - **Requirements:** M4 best practices
 - **Branch:** `feat/area1-order-constellation`
@@ -724,12 +732,13 @@ A live 3D view of orders moving between the six teams, on landing, login and as 
 
 Acceptance criteria:
 
-- The concept: the OrderPilot core, in faceted glass with an emissive inner light; around it, six team stations (Product Managers, Approver, Support, Warehouse, Finance and Logistics), plus Business Central and the mailbox; documents travel as glowing packets along arcs while an order moves; status colours (on time, waiting, exception) come from real workflow events over SSE.
-- It appears on landing and login, and as a live operations view.
+- The concept: Spark at the core, in faceted glass with an emissive inner light that pulses when Spark answers; around it the stations (Sales and Support, Product Managers, the management approvers, the SPR coordinator, the warehouse, Finance, and Logistics and forwarders) plus Business Central and the inbox; PO, PI, invoice, packing list and AWB/BL travel as glowing packets along arcs, coloured on time, waiting or mismatch caught, from real workflow events over SSE.
+- It is the landing page's hero, sits behind the sign-in page, and is a live operations view for Management, where clicking a station opens the tracker filtered to it.
 - Assets: parametric Blender Python scripts in `assets-src/3d/`, with PBR materials, bevels and clean topology; run headless with `blender -b -P`; exported to GLB and quantised with glTF Transform, with no WebAssembly decoders; 1.5 MB or less in total.
 - Rendering: React Three Fiber, drei and postprocessing; ACES filmic tone mapping, a studio environment and soft shadows; bloom, a subtle depth of field and a vignette; spring motion and a slow cinematic camera that the user can take over; hover tooltips, and clicking a node to navigate; React Bits overlays for labels.
 - Performance and access: a lazy chunk, DPR clamped to [1, 2], and adaptive quality; pauses when off-screen or when the tab is hidden; a still frame for reduced motion, and a fallback image without WebGL; a keyboard-usable list beside the canvas; 60 fps on a mid-range laptop, reported honestly.
 - ADRs: 3D assets without WebAssembly decoders; the constellation scene.
+- Proof for Richie: a 20-second capture of the camera move and stills in light and dark in `docs/design/constellation/`, judged before the scene goes on landing.
 
 ### P-24: Cloud deployment
 
@@ -1024,6 +1033,7 @@ Acceptance criteria:
 - `.http` requests and API tests for every kind of refused upload.
 - A Playwright test: an allowed role uploads and voids a document, and a role without the permission sees no button and gets a 403 from the server.
 - Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+- Files saved out of WhatsApp upload like any other, product managers may upload vendor invoices with the permission Angelyn's issue asks for, and the inbox shows where each document came from.
 
 ### P-38: The task inbox on the templates
 
@@ -1402,7 +1412,7 @@ Enter once, flows everywhere. Prompt 004 section 4.
 Acceptance criteria:
 
 - A confirmed PO offers Create order, which opens a draft pre-filled from what a person confirmed.
-- Customers and items match on their Business Central numbers, and a look-alike name is only shown as a possible match.
+- Customers and items match on their Business Central numbers, a look-alike name is only shown as a possible match, and a new customer goes through P-88's check.
 - The draft keeps a link to its source document, and the two pages link to each other.
 - The order form's footer lists its attachments, and Attach uploads through P-37's route.
 - The Playwright test covers the path from upload to a saved draft.
@@ -1484,7 +1494,7 @@ Acceptance criteria:
 - A reminder fires on a date, or when a condition from a closed list holds, such as still unpaid on a date.
 - Postgres holds each reminder. A delayed BullMQ job fires it, and a repeating sweep requeues what is due, so losing Redis loses nothing and nothing fires twice.
 - When it fires, the bell and the home page show it for any role, and an email goes to Mailpit if the person chose one.
-- A mail service that can only reach Mailpit, with an ADR, a pinned version and `.env.example` entries.
+- A mail sender that can only reach Mailpit, with an ADR, a pinned version and `.env.example` entries, unless P-87 merged first and brought it.
 - The worker runs in the compose stack and in the end-to-end job, and a Playwright test sees a reminder fire.
 
 ### P-60: SPR drafts and the SPR list
@@ -1503,13 +1513,13 @@ Acceptance criteria:
 
 - An area 1 table holds drafts, numbered by the record number service, with no limit, trigger or status logic. The port that hands a submitted draft to area 2 is agreed with Azri.
 - SPRs is a list on the template, in the Purchasing module, reading sample and stored SPRs through one reader, with the approver's waiting count on its menu entry.
-- Support may raise an SPR from a shortfall, as the brief says, with the permission recorded.
+- The product manager raises an SPR, because the product manager is also the purchase manager (prompt 005 section 1), with the permission recorded.
 - `.http` requests and API tests for 401, 403, 404 and validation.
 - Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
 
 ### P-61: The SPR form
 
-Raise an SPR from a shortage line, pre-filled. Prompt 004 section 4.
+Raise an SPR from stock on hand and the three-month run rate, pre-filled. Prompt 005 section 1.
 
 - **Area:** `area: 1 document AI and integration`
 - **Priority:** must
@@ -1517,18 +1527,19 @@ Raise an SPR from a shortage line, pre-filled. Prompt 004 section 4.
 - **Requirements:** M2 GRS by design, M4 best practices
 - **Branch:** `feat/spr-form`
 - **Planned for:** Sprint 02 (W3)
-- **Depends on:** P-60, P-47, P-48
+- **Depends on:** P-60, P-47, P-48, P-86
 
 Acceptance criteria:
 
-- An SPR is created from a shortage line, pre-filled through `SprSuggestion`, on the document form.
+- An SPR is raised from an item on the document form, pre-filled through `SprSuggestion` with the stock on hand, the last three months' run rate and the months of cover, from P-86's figures and the basis Azri's issue asks for.
 - It can be edited while it is a draft, submitted, and withdrawn with a reason.
-- A submitted SPR reaches the approver's inbox through the agreed port, and the AI never raises or approves one.
-- Raise SPR appears on the order's line, on the item page, and in the home page and Ctrl+K for the roles allowed.
+- A submitted SPR reaches the coordinator through the agreed port, the coordinator routes it to the approver group (P-100), and the AI never raises or approves one.
+- Raise SPR appears on the item page, and in the home page and Ctrl+K for the product manager.
 - Azri is asked to review.
 - A Playwright test: an allowed role creates, edits and voids a record, and a role without the permission sees no button and gets a 403 from the server.
 - Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
-- The pre-filled SPR stays a draft until a person reviews it and submits it, it shows which fields were suggested and from what, and it warns, with a link, when an open SPR already covers the line.
+- The pre-filled SPR stays a draft until a person reviews it and submits it, it shows which fields were suggested and from what, and it warns, with a link, when an open SPR already covers the item.
+- After approval the coordinator hands the SPR back, and the product manager records the vendor PO or the vendor portal's reference (P-101).
 
 ### P-62: Payment confirmations
 
@@ -1555,7 +1566,7 @@ Acceptance criteria:
 
 ### P-63: Shipments
 
-Logistics records forwarders and AWB/BL numbers. Prompt 004 section 4.
+Logistics records forwarders and AWB/BL numbers for outbound shipments; inbound ones are P-102. Prompt 004 section 4.
 
 - **Area:** `area: 1 document AI and integration`
 - **Priority:** must
@@ -1637,6 +1648,7 @@ Acceptance criteria:
 - `ApprovalPolicy` and the verdict stay with their owners, and the form changes no logic.
 - Angelyn is asked to review.
 - Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+- It shows the approver group of three, any one of whom decides, with limits switchable and none set and no substitute column, in the shape Angelyn settles in her issue.
 
 ### P-67: Check tolerance and reminder rule forms
 
@@ -1657,6 +1669,7 @@ Acceptance criteria:
 - Nothing reads them until D-2 and C-4 do, and each form says so in plain words.
 - Iok Teck and Azri are asked to accept the shape before this merges.
 - Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+- The check tolerance form has no field for part number, quantity, unit price or currency.
 
 ### P-68: Change requests for master data
 
@@ -1716,6 +1729,7 @@ Acceptance criteria:
 - Pick and pack in the Warehouse module and Proforma invoices in the Sales module are lists on the template, of the work waiting for that role.
 - Each row opens the order and offers the action Needs you offers. Nothing is generated: B-3 brings documents.
 - Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+- The pick list works on a tablet, with touch targets of 44 px or more.
 
 ### P-71: One status system everywhere
 
@@ -1755,6 +1769,7 @@ Acceptance criteria:
 - The core logic stays `it.todo`, and Azri reviews the pull request.
 - Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
 - It also shows the cost against the selling price where the role may see both, the vendor and the lead time, because the approver decides with them.
+- It shows the approver group, any one of whom decides, with Approve or Reply with remarks and the reminder countdown, at 390 by 844 as well.
 
 ### P-73: Exceptions on the templates
 
@@ -1774,6 +1789,7 @@ Acceptance criteria:
 - Assign and resolve stay hidden until D-3 brings them, and the checks engine stays Iok Teck's.
 - Iok Teck reviews the pull request.
 - Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+- Each difference says whether it blocks or warns, beside expected and found.
 
 ### P-74: Tracker and KPIs on the templates
 
@@ -1793,6 +1809,7 @@ Acceptance criteria:
 - KPIs show each measure's value, target and trend, reusing the lazy chart component. A miss is said in words as well as colour, and no formula is computed.
 - Iok Teck reviews the pull request.
 - Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
+- Every chart has a data-table view for screen readers (prompt 006 section 4).
 
 ### P-75: Audit log on the template
 
@@ -2193,7 +2210,7 @@ Acceptance criteria:
 
 ## Epic A: Document intake and AI extraction
 
-Email or upload; classification; extraction with a confidence score and a source link per field; layout mappings that AI proposes and a person approves.
+Email or upload; classification; extraction with a confidence score and a source link per field; layout mappings that AI proposes and a person approves; the document cabinet and audit packs.
 
 ### A-1: Classification
 
@@ -2263,12 +2280,14 @@ Documents arrive by email as well as by upload, through a mock mailbox.
 - **Priority:** should
 - **Estimate:** 5 points
 - **Requirements:** M2 GRS by design, M4 best practices
+- **Planned for:** Sprint 08 (W9)
 - **Depends on:** P-18
 
 Acceptance criteria:
 
 - Email intake runs through a mock mailbox with signed webhooks.
 - No real customer email is read or sent.
+- It is the proof of concept's email inbox (prompt 005 section 1), and a file saved out of WhatsApp can be forwarded to it.
 
 ### P-92: Document cabinet: filing and search
 
@@ -2336,7 +2355,7 @@ Acceptance criteria:
 
 ## Epic B: Master data and Business Central
 
-Items, customers, vendors, prices and stock behind a connector; any write-back needs a preview and an approval.
+Items, customers, vendors and stock behind a connector, with each customer's last agreed price as context and no price tables; any write-back needs a preview and an approval.
 
 ### B-1: Duplicate-PO protection
 
@@ -2351,6 +2370,7 @@ The same PO never creates a second order.
 Acceptance criteria:
 
 - No duplicate orders: a repeated PO is caught.
+- A PO a person confirms as a revision of an existing order is that order's next version (P-89), never a duplicate, and a re-sent PO is still caught.
 
 ### B-2: A Business Central import file
 
@@ -2382,6 +2402,7 @@ Acceptance criteria:
 - The template engine produces PIs, invoices, packing lists and Excel.
 - Areas 2 and 3 use it.
 - React-PDF and ExcelJS render the template engine's PDF and Excel output with an ADR, a pinned version and a traceability row.
+- It also renders the credit note and the reissued invoice that area 2's reverse and reissue needs, and the PI carries bank details that are synthetic and obviously fake.
 
 ### B-4: QR codes on generated documents and carton labels
 
@@ -2662,7 +2683,7 @@ Acceptance criteria:
 
 ## Epic D: Checks, the tracker and insights
 
-Documents checked against each other with tolerances; an exceptions queue; one tracker with every order's trail; Spectra's five measures as KPIs.
+Documents checked against each other, exactly on part number, quantity, unit price and currency and as warnings elsewhere; an exceptions queue; one tracker with every order's trail; Spectra's measures as KPIs.
 
 ### D-1: Area 3 base, checks and the tracker
 
@@ -2781,7 +2802,7 @@ Acceptance criteria:
 
 ## Epic E: AI with a person in the loop
 
-Extraction, mismatch explanations, and drafts that a person sends.
+Extraction, mismatch explanations, drafts that a person sends, and Spark, the read-only assistant.
 
 ### E-1: The review screen, with source highlighting
 
@@ -2827,7 +2848,7 @@ Tests that prove a hostile document cannot steer the AI.
 
 Acceptance criteria:
 
-- Tests show that documents are treated as data, the model only returns fields, and no model output triggers an action.
+- Tests show that documents are treated as data, the model only returns fields or asks for a read-only tool that runs as the person asking, and no model output writes, approves, posts, pays or sends.
 - promptfoo runs the prompt-injection tests in CI with an ADR, a pinned version and a traceability row.
 
 ### E-4: Passkeys to confirm risky approvals
@@ -2872,7 +2893,7 @@ A help panel that answers questions from OrderPilot's own docs, labelled as AI-g
 - **Priority:** could
 - **Estimate:** 5 points
 - **Requirements:** M2 GRS by design, M3 AI-assisted coding
-- **Depends on:** P-11, P-17
+- **Depends on:** P-11, P-17, P-96
 
 Acceptance criteria:
 
@@ -2882,6 +2903,7 @@ Acceptance criteria:
 - It never acts: it cannot approve, change data or call another endpoint.
 - Questions and docs are treated as data, and the prompt-injection tests cover it (E-3).
 - Area 4's policy decides which provider may receive a question, and no business data goes with it.
+- It opens as one more read-only tool inside Spark's panel (P-96), never as a second assistant.
 
 ### P-87: Drafts that a person sends
 
