@@ -7,6 +7,15 @@ import {
 } from "@/components/common";
 import { formatDay } from "@/lib/format";
 import { docBadgesOf, DocsBadges } from "./DocsBadges";
+import { StatusColumnFilter } from "./StatusColumnFilter";
+import type { LifecycleStageTab } from "./trackerParams";
+
+/** What the Status column's own header needs to show and run its filter menu. */
+export interface StatusFilterState {
+  value: LifecycleStageTab;
+  status: string | undefined;
+  onSelectStatus: (status: string | undefined) => void;
+}
 
 /**
  * The tracker's columns. Only the four the API can sort are sortable. The
@@ -16,6 +25,7 @@ import { docBadgesOf, DocsBadges } from "./DocsBadges";
 export function trackerColumns(
   t: TFunction,
   roleLabel: (role: TrackerOrder["ownerRole"]) => string,
+  statusFilter: StatusFilterState,
 ): DataTableColumn<TrackerOrder>[] {
   const day = (value: string | null) =>
     value ? formatDay(value) : t("list.noShipmentDate");
@@ -61,6 +71,7 @@ export function trackerColumns(
     {
       id: "status",
       header: t("list.columns.status"),
+      headerContent: <StatusColumnFilter {...statusFilter} />,
       cell: (row) => <StatusBadge>{row.status.label}</StatusBadge>,
       exportValue: (row) => row.status.label,
     },

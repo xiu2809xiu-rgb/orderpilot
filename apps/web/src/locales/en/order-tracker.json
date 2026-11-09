@@ -13,6 +13,7 @@
       "orderNo": "Order No.",
       "customer": "Customer",
       "status": "Status",
+      "statusFilterLabel": "Filter by sub-status",
       "docs": "Docs",
       "owner": "Owner",
       "overdue": "Overdue",
@@ -50,8 +51,6 @@
       "processing": "Processing",
       "shipped": "Shipped",
       "completed": "Completed",
-      "statusMenu": "Narrow {{stage}} by status",
-      "statusMenuLabel": "Status: {{status}}",
       "anyStatus": "Any status in this stage"
     },
     "statuses": {

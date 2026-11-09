@@ -141,18 +141,30 @@ describe("the order tracker", () => {
     expect(allTab).toHaveAttribute("aria-selected", "false");
   });
 
-  it("narrows a stage to one status from its dropdown, and keeps the stage's tab active", async () => {
+  it("disables the Status column's filter until a stage tab (not All) is open", async () => {
+    await i18n.loadNamespaces(["order-tracker", "common"]);
+    server.use(getTrackerListMockHandler(page([row(1)], 2)));
+    renderPage();
+    await screen.findByText("Status 1");
+    expect(
+      screen.getByRole("button", { name: "Filter by sub-status" }),
+    ).toBeDisabled();
+  });
+
+  it("narrows a stage to one status from the Status column's own filter, and keeps the stage's tab active", async () => {
     await i18n.loadNamespaces(["order-tracker", "common"]);
     server.use(getTrackerListMockHandler(page([row(1)], 2)));
     renderPage();
     await screen.findByText("Status 1");
     const tabs = screen.getByRole("tablist", { name: "Lifecycle stage" });
     const shippedTab = within(tabs).getByRole("tab", { name: /^Shipped/ });
-    // The dropdown only shows once its own tab is the one open.
+    // The Status column's filter only opens once its own tab is the one open.
     await userEvent.click(shippedTab);
-    await userEvent.click(
-      await screen.findByRole("button", { name: "Narrow Shipped by status" }),
-    );
+    const statusFilter = screen.getByRole("button", {
+      name: "Filter by sub-status",
+    });
+    expect(statusFilter).toBeEnabled();
+    await userEvent.click(statusFilter);
     await userEvent.click(
       await screen.findByRole("menuitemradio", {
         name: "Shipped, AWB overdue",
@@ -161,8 +173,8 @@ describe("the order tracker", () => {
     await waitFor(() => {
       expect(shippedTab).toHaveAttribute("aria-selected", "true");
     });
-    // The single status picked from the dropdown, not the whole stage,
-    // shows as the active filter chip.
+    // The single status picked from the menu, not the whole stage, shows as
+    // the active filter chip.
     expect(screen.getByText("Shipped, AWB overdue")).toBeInTheDocument();
   });
 
