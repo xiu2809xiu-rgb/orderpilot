@@ -3,7 +3,7 @@
 The formats we assume for every document OrderPilot reads or drafts, and for every Microsoft Dynamics 365 Business Central record it reads. **All of them are assumptions to confirm** at the briefing call (T-2), with Spectra's samples ([what we ask for first](client/questions-for-client.md#ask-for-these-first)).
 
 - **Business Central's names.** Fields are named as standard Business Central names them, so that Spectra's staff recognise them. They come from [the domain notes](research/domain-notes.md), and Spectra's Business Central may be older or customised (A-10, A-11 in [the assumptions](assumptions.md)).
-- **API v2.0 renames these fields.** Business Central kept the field names below from its earlier releases, and its API v2.0 names many of them differently. The connector (planned: P-20) maps each API name to the name used here, so a rename never reaches a document or a screen.
+- **API v2.0 renames these fields.** Business Central's API v2.0 names many of the fields below differently. The connector (planned: P-20) maps each API name to the name used here, so a rename never reaches a document or a screen.
 - **The mock speaks camelCase.** The mock Business Central (planned: P-19) answers in OData-style JSON with the same names in camelCase. The connector (planned: P-20) maps the real names to these.
 - **Synthetic data only.** Every example here is invented. Bank details are obviously fake, and prices are in USD.
 

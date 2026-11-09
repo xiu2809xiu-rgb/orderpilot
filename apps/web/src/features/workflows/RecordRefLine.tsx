@@ -1,7 +1,7 @@
 import type { RecordRef } from "@orderpilot/shared";
 import { useTranslation } from "react-i18next";
 
-/** OrderPilot's own number with Business Central's beside it. Business Central's stays the official one. */
+/** OrderPilot's own number with Navision's beside it. Navision's stays the official one. */
 export function RecordRefLine({ value }: { value: RecordRef }) {
   const { t } = useTranslation("workflows");
   return (
