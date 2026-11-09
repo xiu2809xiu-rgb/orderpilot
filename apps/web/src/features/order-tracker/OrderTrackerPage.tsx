@@ -11,6 +11,7 @@ import { useTrackerList } from "@/lib/api/generated/endpoints/tracker/tracker";
 import { tableStatusOf } from "@/lib/query-status";
 import { LifecycleStageTabs } from "./LifecycleStageTabs";
 import {
+  groupStatusOf,
   stageTabOf,
   toParams,
   trackerChips,
@@ -68,7 +69,18 @@ export default function OrderTrackerPage() {
         chips={trackerChips(query.filters, t)}
         filters={query.filters}
         onChange={(filters) => {
-          setQuery({ ...query, page: 1, filters });
+          // The status chip only ever shows a narrowed sub-status (never the
+          // whole stage): clearing it resets to the stage's whole group, not
+          // to no status at all, since the stage tab itself stays open.
+          const next = { ...filters };
+          if (
+            typeof query.filters.status === "string" &&
+            typeof next.status !== "string" &&
+            stageTab !== "all"
+          ) {
+            next.status = groupStatusOf(stageTab);
+          }
+          setQuery({ ...query, page: 1, filters: next });
         }}
       />
       <DataTable

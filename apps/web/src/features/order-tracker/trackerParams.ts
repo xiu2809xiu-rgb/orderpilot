@@ -96,18 +96,32 @@ export function singleStatusWithin(
 /** A status filter holds several comma-separated codes: the API takes up to 400 characters. */
 export const TRACKER_URL_OPTIONS = { filterMax: { status: 400 } } as const;
 
-/** The active filters in words, with their status codes as Spectra's staff say them. */
+/**
+ * The active filters in words, with their status codes as Spectra's staff
+ * say them. No chip for "All sub-statuses in this stage": the stage tab
+ * already says that, and a chip saying it again would just repeat it. A
+ * chip appears only once the Status column's own dropdown has narrowed the
+ * stage to one status (or, in future, a few), named by Spectra's words for
+ * it, or as a count once there is more than one.
+ */
 export function trackerChips(
   filters: TableQuery["filters"],
   t: (key: string, options?: Record<string, unknown>) => string,
 ): FilterChip[] {
   const chips: FilterChip[] = [];
   if (typeof filters.status === "string") {
-    const statuses = filters.status
-      .split(",")
-      .map((code) => t(`list.statuses.${code}`, { defaultValue: code }))
-      .join(", ");
-    chips.push({ id: "status", label: statuses });
+    const stage = stageTabOf(filters.status);
+    const isWholeStage =
+      stage !== "all" && filters.status === groupStatusOf(stage);
+    if (!isWholeStage) {
+      const codes = filters.status.split(",");
+      const [onlyCode] = codes;
+      const value =
+        codes.length === 1 && onlyCode !== undefined
+          ? t(`list.statuses.${onlyCode}`, { defaultValue: onlyCode })
+          : t("list.chips.statusSelectedCount", { count: codes.length });
+      chips.push({ id: "status", label: t("list.chips.status", { value }) });
+    }
   }
   if (filters.open === true) {
     chips.push({ id: "open", label: t("list.chips.open") });

@@ -175,7 +175,54 @@ describe("the order tracker", () => {
     });
     // The single status picked from the menu, not the whole stage, shows as
     // the active filter chip.
-    expect(screen.getByText("Shipped, AWB overdue")).toBeInTheDocument();
+    expect(
+      screen.getByText("Status: Shipped, AWB overdue"),
+    ).toBeInTheDocument();
+  });
+
+  it("shows no status chip when a stage tab's whole group is selected", async () => {
+    await i18n.loadNamespaces(["order-tracker", "common", "components"]);
+    server.use(getTrackerListMockHandler(page([row(1)], 2)));
+    renderPage();
+    await screen.findByText("Status 1");
+    const tabs = screen.getByRole("tablist", { name: "Lifecycle stage" });
+    await userEvent.click(within(tabs).getByRole("tab", { name: /^Shipped/ }));
+    await waitFor(() => {
+      expect(
+        within(tabs).getByRole("tab", { name: /^Shipped/ }),
+      ).toHaveAttribute("aria-selected", "true");
+    });
+    expect(screen.queryByText(/^Status:/)).not.toBeInTheDocument();
+  });
+
+  it("shows a Status chip once narrowed, and clearing it resets to the whole stage rather than away from it", async () => {
+    await i18n.loadNamespaces(["order-tracker", "common", "components"]);
+    server.use(getTrackerListMockHandler(page([row(1)], 2)));
+    renderPage();
+    await screen.findByText("Status 1");
+    const tabs = screen.getByRole("tablist", { name: "Lifecycle stage" });
+    const shippedTab = within(tabs).getByRole("tab", { name: /^Shipped/ });
+    await userEvent.click(shippedTab);
+    await userEvent.click(
+      screen.getByRole("button", { name: "Filter by sub-status" }),
+    );
+    await userEvent.click(
+      await screen.findByRole("menuitemradio", {
+        name: "Shipped, AWB overdue",
+      }),
+    );
+    expect(
+      screen.getByText("Status: Shipped, AWB overdue"),
+    ).toBeInTheDocument();
+    await userEvent.click(
+      screen.getByRole("button", { name: /Clear filter: Status/ }),
+    );
+    // Clearing the chip drops back to the stage's whole group: the tab
+    // stays open, it just no longer says one status in particular.
+    expect(
+      screen.queryByText("Status: Shipped, AWB overdue"),
+    ).not.toBeInTheDocument();
+    expect(shippedTab).toHaveAttribute("aria-selected", "true");
   });
 
   it("shows a red exceptions badge beside the order number only when there are open exceptions", async () => {

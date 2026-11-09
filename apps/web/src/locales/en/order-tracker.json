@@ -30,7 +30,9 @@
     "chips": {
       "open": "Open orders",
       "overdue": "Overdue",
-      "documentToConfirm": "Has a document to confirm"
+      "documentToConfirm": "Has a document to confirm",
+      "status": "Status: {{value}}",
+      "statusSelectedCount": "{{count}} selected"
     },
     "docs": {
       "labels": {
