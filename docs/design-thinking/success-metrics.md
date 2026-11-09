@@ -1,10 +1,10 @@
 # Success metrics
 
-How we will know OrderPilot helps, and how we measure it. Spectra's six measures come first. The brief gives no baselines, so **each one is a lab estimate on synthetic data** until Spectra gives real numbers (Q-7). Our own targets, each with a test, are in [the problem statement](../problem-statement.md#7-success-metrics).
+How we will know OrderPilot helps, and how we measure it. The six measures we derived from Spectra's priorities come first. The brief gives no baselines, so **each one is a lab estimate on synthetic data** until Spectra gives real numbers (Q-7). Our own targets, each with a test, are in [the problem statement](../problem-statement.md#7-success-metrics).
 
-## Spectra's six measures
+## The six measures
 
-They replace the five of the brief. Spectra ranked them: time first, then seeing where an order is held up, then fewer errors. Each old measure maps to a new one:
+Spectra did not name six measures. It ranked its priorities (time first, then seeing where an order is held up, then fewer errors) and gave two targets: about an hour a day saved, and an audit pack in minutes, not days. The six are our derivation from those, and they replace the five of the brief. Each old measure maps to a new one:
 
 | The five of the brief    | Becomes                                                       |
 | ------------------------ | ------------------------------------------------------------- |

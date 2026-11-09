@@ -79,7 +79,7 @@ OrderPilot is an AI-assisted order-automation layer **beside** Business Central,
 - **A. Document intake and AI extraction:** email or upload; classification; extraction with a confidence score and a source link per field; layout mappings that AI proposes and a person approves.
 - **B. Master data and Business Central:** items, customers, vendors, prices and stock behind a connector; any write-back needs a preview and an approval.
 - **C. Order workflows and approvals:** a state machine; tasks for each role; SPR approval by the approver group, with limits switchable and none set; the payment gate; reminders and escalations; generated PIs, invoices and packing lists.
-- **D. Checks, the tracker and insights:** part number, quantity, unit price and currency must match exactly across the PO, PI, invoice and packing list, with no tolerance setting for those four, and other differences are warnings; an exceptions queue; one tracker with every order's trail; Spectra's six measures as KPIs (planned, replacing the five).
+- **D. Checks, the tracker and insights:** part number, quantity, unit price and currency must match exactly across the PO, PI, invoice and packing list, with no tolerance setting for those four, and other differences are warnings; an exceptions queue; one tracker with every order's trail; six measures we derived from Spectra's priorities as KPIs (planned, replacing the five).
 - **E. AI with a person in the loop:** extraction, mismatch explanations, and drafts that a person sends.
 - **F. Financial controls and governance:** no self-approval; approval limits; bank-detail change control; masking of bank details and prices by role; a tamper-evident audit trail.
 - **G. Monitoring:** tracing, metrics, clickstream analytics, and the AI cost per document.
@@ -134,7 +134,7 @@ OrderPilot is an AI-assisted order-automation layer **beside** Business Central,
 - time and touches per order measured;
 - every overdue follow-up visible.
 
-Spectra's own measures sit alongside these. Spectra ranked them: time first, then seeing where an order is held up, then fewer errors. They are six, and they replace the five of the brief, each old measure mapped to a new one:
+Six measures sit alongside these. They are our own derivation from what Spectra told us: its first three priorities were time, then seeing where an order is held up, then fewer errors, and it hoped to save about an hour a day and to produce an audit pack in minutes, not days. The six replace the five of the brief, each old measure mapped to a new one:
 
 | The five of the brief    | Becomes                                                                       |
 | ------------------------ | ----------------------------------------------------------------------------- |
