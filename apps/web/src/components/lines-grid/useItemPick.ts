@@ -18,7 +18,7 @@ interface PickOptions {
 /**
  * What picking an item fills in on its line: the description, the unit, the
  * stock the API reported and, if the role may see prices, the default price (or,
- * for a screen where a document sets the price, the list price as context only).
+ * for a screen where a document sets the price, only a cleared last agreed price).
  * A masked price is never written, so it cannot reach a draft.
  */
 export function useItemPick({
@@ -59,11 +59,18 @@ export function useItemPick({
         "availableStock" in item ? (item.availableStock ?? null) : null,
       );
       if (priceMask === null) {
-        const price = "unitPrice" in item ? item.unitPrice : undefined;
-        const usable = price && !price.masked && price.value !== null;
-        const text = usable ? normaliseDecimal(price.value ?? "", 2) : "";
-        if (itemPrice === "fill") set("unitPrice", text);
-        else set("listPrice", text === "" ? null : text);
+        if (itemPrice === "fill") {
+          const price = "unitPrice" in item ? item.unitPrice : undefined;
+          const usable = price && !price.masked && price.value !== null;
+          set(
+            "unitPrice",
+            usable ? normaliseDecimal(price.value ?? "", 2) : "",
+          );
+        } else {
+          // The last agreed price belongs to the old item, and the screen
+          // writes the new one when its answer arrives.
+          set("lastPrice", null);
+        }
       }
       if (advance.current === index) {
         advance.current = null;

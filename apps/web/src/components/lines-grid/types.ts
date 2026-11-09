@@ -23,11 +23,20 @@ export interface LineValue {
   /** As the API reports it, or null while it is not known. */
   availableStock: string | null;
   /**
-   * The item's list price, kept only when the grid shows it as context
-   * (`itemPrice: "reference"`). It is never a price of the line.
+   * What this order's customer last paid for the item, shown as context when
+   * the grid is in `itemPrice: "reference"` mode. "none" means the customer
+   * never bought it. It is never a price of the line.
    */
-  listPrice?: string | null | undefined;
+  lastPrice?: LastPrice | "none" | null | undefined;
 }
+
+/** The price a customer last paid for an item, and the document it was on. */
+export const lastPriceSchema = z.object({
+  price: z.string(),
+  agreedOn: z.string(),
+  documentNo: z.string(),
+});
+export type LastPrice = z.infer<typeof lastPriceSchema>;
 
 /** A record the item lookup found, with what picking it fills in. */
 export const itemOptionSchema = z.object({
@@ -122,9 +131,10 @@ export interface LinesGridProps {
   priceMask?: PriceMask | null;
   /**
    * What picking an item does to the price. "fill" (the default) starts the
-   * line at the item's list price. "reference" leaves the price empty for the
-   * person to type, and shows the list price beside it as context, for a
-   * screen where a document sets the price (an order's PO).
+   * line at the item's Unit Price. "reference" leaves the price empty for the
+   * person to type, and shows the customer's last agreed price beside it as
+   * context (written by the screen), for a screen where a document sets the
+   * price (an order's PO).
    */
   itemPrice?: "fill" | "reference";
   /** Draws the footer from the totals. The default shows lines, quantity and total. */

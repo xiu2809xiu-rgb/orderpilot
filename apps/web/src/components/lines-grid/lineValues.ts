@@ -39,7 +39,7 @@ export function lineDraftOptions(
     rowKey: "lineId",
     exclude: [
       `${name}.*.availableStock`,
-      `${name}.*.listPrice`,
+      `${name}.*.lastPrice`,
       ...(priceMasked ? [`${name}.*.unitPrice`] : []),
     ],
   };

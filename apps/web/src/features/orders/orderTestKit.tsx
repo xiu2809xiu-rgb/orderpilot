@@ -88,6 +88,7 @@ export interface Requests {
   voids: unknown[];
   itemReads: number;
   stockReads: number;
+  lastPriceReads: number;
 }
 
 export interface FakeApi {
@@ -95,6 +96,8 @@ export interface FakeApi {
   detail: () => SalesOrderDetail;
   /** What the available-stock read answers. */
   stock: () => string;
+  /** The last agreed price the customer paid for I-0001, or null for never. */
+  lastPrice: () => string | null;
   masked: boolean;
 }
 
@@ -106,6 +109,7 @@ export function fakeServer(over: Partial<FakeApi> = {}) {
   const api: FakeApi = {
     detail: () => draftDetail(),
     stock: () => "40.000",
+    lastPrice: () => "17.90",
     masked: false,
     ...over,
   };
@@ -115,6 +119,7 @@ export function fakeServer(over: Partial<FakeApi> = {}) {
     voids: [],
     itemReads: 0,
     stockReads: 0,
+    lastPriceReads: 0,
   };
   server.use(
     http.get("*/api/v1/master-data/items", () => {
@@ -151,6 +156,29 @@ export function fakeServer(over: Partial<FakeApi> = {}) {
       requests.stockReads += 1;
       return HttpResponse.json({
         data: [{ itemNo: "I-0001", availableStock: api.stock(), unit: "PCS" }],
+        meta: { mock: true },
+      });
+    }),
+    http.get("*/api/v1/master-data/customers/:no/last-prices", () => {
+      requests.lastPriceReads += 1;
+      const price = api.lastPrice();
+      return HttpResponse.json({
+        data:
+          price === null
+            ? []
+            : [
+                {
+                  itemNo: "I-0001",
+                  price: {
+                    ...maskedPrice,
+                    masked: false,
+                    value: price,
+                    reason: null,
+                  },
+                  agreedOn: "2026-10-14",
+                  documentNo: "SO-0007",
+                },
+              ],
         meta: { mock: true },
       });
     }),

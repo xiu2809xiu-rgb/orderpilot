@@ -10,12 +10,12 @@ import {
   LinesFooter,
   LinesGrid,
   lineDraftOptions,
-  type LineColumn,
   type LineTotals,
   type PriceMask,
 } from "@/components/lines-grid";
+import { todayInSingapore } from "@/lib/format";
 import { CAPTURE_FAMILY } from "./captureFamily";
-import { LineAvailability } from "./LineAvailability";
+import { LineContext } from "./LineContext";
 import { OrderHeaderFields } from "./OrderHeaderFields";
 import { OrderNotices, type ReadOnlyReason } from "./OrderNotices";
 import {
@@ -25,23 +25,9 @@ import {
 } from "./orderFormSchema";
 import { blankOrder, fromDetail } from "./orderFormValues";
 import { searchItems } from "./orderSearches";
+import { useLineColumns } from "./useLineColumns";
 import { useOrderActions } from "./useOrderActions";
 import { useOrderSave } from "./useOrderSave";
-
-const COLUMN_KINDS = [
-  "lineNo",
-  "item",
-  "description",
-  "quantity",
-  "unitPrice",
-  "amount",
-  "availability",
-  "remove",
-] as const;
-
-function today(): string {
-  return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Singapore" });
-}
 
 interface OrderDocumentProps {
   /** Null while the order is new. */
@@ -76,7 +62,7 @@ export function OrderDocument({
   );
   const form = useZodForm<OrderFormInput, OrderFormOutput>({
     schema,
-    defaultValues: record ? fromDetail(record) : blankOrder(today()),
+    defaultValues: record ? fromDetail(record) : blankOrder(todayInSingapore()),
   });
   const save = useOrderSave({ form, orderNo, priceMasked });
   const actions = useOrderActions({
@@ -84,14 +70,7 @@ export function OrderDocument({
     orderNo,
     editable: readOnly === null,
   });
-  const columns = useMemo<LineColumn[]>(
-    () =>
-      COLUMN_KINDS.map((kind) => ({
-        kind,
-        header: t(`form.lines.columns.${kind}`),
-      })),
-    [t],
-  );
+  const columns = useLineColumns();
   const priceMask = useMemo<PriceMask | null>(
     () =>
       priceMasked
@@ -168,7 +147,11 @@ export function OrderDocument({
               </div>
             )}
           />
-          <LineAvailability form={form} paused={captureState === "void"} />
+          <LineContext
+            form={form}
+            priceMasked={priceMasked}
+            paused={captureState === "void"}
+          />
         </>
       }
       status={{
@@ -183,7 +166,7 @@ export function OrderDocument({
       onSave={save.onSave}
       onSaved={save.onSaved}
       serverPaths={save.serverPaths}
-      nextValues={() => blankOrder(today())}
+      nextValues={() => blankOrder(todayInSingapore())}
       {...(readOnly
         ? { saveBlocked: t(`form.notices.readOnly.${readOnly}`) }
         : {})}

@@ -6,8 +6,10 @@ import {
   TextField,
   type LookupOption,
 } from "@/components/form";
+import { formatDay } from "@/lib/format";
 import { useGrid } from "./gridContext";
 import { MaskedPrice, ReadItem, ReadText } from "./LineReadCells";
+import { lastPriceSchema, type LastPrice } from "./types";
 
 interface CellProps {
   index: number;
@@ -82,25 +84,43 @@ export function PriceCell({ index, row, readOnly }: CellProps) {
         hideLabel
         scale={2}
       />
-      {itemPrice === "reference" ? <ListPrice row={row} /> : null}
+      {itemPrice === "reference" ? <LastPriceNote row={row} /> : null}
     </>
   );
 }
 
-/** What master data lists the item at: context for the typed price, never its value. */
-function ListPrice({ row }: { row: string }) {
+/**
+ * What this order's customer last paid for the item: context for the typed
+ * price, never its value. "No earlier price" says the customer never bought it.
+ */
+function LastPriceNote({ row }: { row: string }) {
   const { t } = useTranslation("linesGrid");
   const { control } = useFormContext();
-  const value: unknown = useWatch({ control, name: `${row}.listPrice` });
+  const value: unknown = useWatch({ control, name: `${row}.lastPrice` });
   const item: unknown = useWatch({ control, name: `${row}.item` });
-  // Only the pick writes the list price, so a cleared item would keep the old
-  // one: it is shown for an item that is there.
-  if (typeof value !== "string" || value === "") return null;
+  // The screen writes the last price for the item on the line, so a cleared
+  // item would keep the old one: it is shown for an item that is there.
   if (item === undefined || item === null || item === "") return null;
+  const found = lastPriceOf(value);
+  if (value !== "none" && found === null) return null;
   return (
     <span className="mt-0.5 block text-xs break-words text-muted-foreground tabular-nums @lines:text-right">
-      {t("listPrice", { price: value })}
-      <span className="sr-only">{t("listPriceNote")}</span>
+      {found === null
+        ? t("noLastPrice")
+        : t("lastPrice", {
+            price: found.price,
+            date: formatDay(found.agreedOn),
+          })}
+      {found === null ? null : (
+        <span className="sr-only">
+          {t("lastPriceNote", { document: found.documentNo })}
+        </span>
+      )}
     </span>
   );
+}
+
+function lastPriceOf(value: unknown): LastPrice | null {
+  const parsed = lastPriceSchema.safeParse(value);
+  return parsed.success ? parsed.data : null;
 }
