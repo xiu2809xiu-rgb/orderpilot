@@ -276,7 +276,9 @@ P-82 ([#219](https://github.com/xiu2809xiu-rgb/orderpilot/issues/219)) cuts them
 
 **Step 1 of both prompts** is to finish P-45 and P-47. Both merged in part ([#206](https://github.com/xiu2809xiu-rgb/orderpilot/pull/206) and [#216](https://github.com/xiu2809xiu-rgb/orderpilot/pull/216)), and #141 and #142 stay open for Richie's call. The section on prompt 004 says what is left.
 
-**Before the `v0.1-proposal` tag,** in Sprint 04 at the latest: P-82 to P-86, P-22's registries and P-106, where Richie picks a direction (item db). P-107 rolls the pick out after the tag and before the sales-flow screens multiply, so P-88 to P-94 depend on it. End-to-end test #1 stays as it is for the tag, and P-90 records the switch (item da). P-21 and P-23 stay planned in Sprint 02, where a test holds them to prompt 002's order: P-21's documents follow P-86, and P-23 runs alongside with its own builder.
+**Before the `v0.1-proposal` tag,** in Sprint 04 at the latest: P-82 to P-86, P-22's registries and P-106, where Richie picks a direction (item db). P-107 rolls the pick out after the tag and before the sales-flow screens multiply, so P-88 to P-94 depend on it. End-to-end test #1 stays as it is for the tag, and P-90 records the switch (item da). P-22 and P-23 stay planned in Sprint 02, where a test holds them to prompt 002's order, and P-23 runs alongside with its own builder.
+
+**Two older stories moved, because each now depends on P-86** and could not be planned before it. P-21's documents go to Sprints 04 and 05, right after P-86, because prompt 005 section 12 takes the data and the documents together. P-61's form goes to Sprints 08 and 09, just before P-100, because section 12 puts the SPR screens after the cabinet and Spark, and the form waits on the basis Azri's issue asks for. End-to-end test #1 does not wait for P-61, because the hero journey builds its SPR step in C-1 and C-2. A new test holds every story to this. The other unfinished stories planned for Sprint 02 depend on nothing later, so they keep their plan.
 
 **Epic P is near GitHub's limit, so later platform stories need a new epic.** [GitHub allows at most 100 sub-issues per parent](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/adding-sub-issues), and the seed links every story under its epic's issue. A seed over the limit would stop partway, and a dry run cannot see it coming. So each new story keeps its P key and area label and sits in the epic of its capability, and a test now holds every epic at 95 or fewer. Today's totals were read from GitHub on 9 Nov:
 
@@ -298,7 +300,7 @@ P-82 ([#219](https://github.com/xiu2809xiu-rgb/orderpilot/issues/219)) cuts them
 - **Iok Teck:** P-91 on the severity, P-98 on an on-demand check of a named document set, and P-105 on the insights.
 - **Angelyn:** P-104 on the bank-detail hold, and every story whose permission she names: P-37, P-60, P-87, P-88, P-93, P-94, P-101, P-103 and P-104.
 
-**Mock Business Central,** checked on 9 Nov against [Microsoft's API v2.0 reference](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/api-reference/v2.0/). P-19 uses its names. `salesCreditMemos` and `purchaseReceipts` exist, and `purchaseReceipts` is read-only. `items` holds `inventory` but no quantities on order. No resource holds a vendor's bank details, because `bankAccounts` is the company's own, so the mock adds one and marks it as ours. P-19 and P-20 gain a write path behind a preview and an approval, which P-88, P-101 and P-103 need.
+**Mock Business Central,** checked on 9 Nov against [Microsoft's API v2.0 reference](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/api-reference/v2.0/). P-19's text uses its names. `salesCreditMemos` and `purchaseReceipts` exist, and `purchaseReceipts` is read-only, so a receipt comes from `receiveAndInvoice`, the one receiving action on `purchaseOrders`. `items` holds `inventory` but no quantities on order. No resource holds a vendor's bank details, because `bankAccounts` is the company's own, so the mock adds one and marks it as ours. P-19 and P-20 gain a write path behind a preview and an approval, which P-88, P-101 and P-103 need.
 
 **Mail.** The Mailpit container and the `SMTP_*` settings exist today, and no mail sender does. The first of P-59 and P-87 to merge brings it, so P-87 and P-100 no longer wait on the whole reminders chain.
 
@@ -309,6 +311,8 @@ P-82 ([#219](https://github.com/xiu2809xiu-rgb/orderpilot/issues/219)) cuts them
 **Estimates and priorities that moved:** P-20 from 5 to 8 points for its write path, P-21 from 8 to 13 for the briefing's documents, P-22 from Should to Must, and P-23 from Could to Should (item dd).
 
 **After the merge,** `node scripts/github/setup.mjs --dry-run`, then the same without the flag. It creates 30 issues and links all 31 under their epics, retitles #14, #34, #35, #164 and #70, refreshes the open issues whose text changed, and leaves closed bodies alone. The three owner issues follow.
+
+The board sync keeps an open card's Sprint, so the cards of P-21 (#36) and P-61 (#156) stay at Sprint 02 until someone moves them by hand to Sprint 04 and Sprint 08. A closed card's Sprint follows its milestone, so the same run moves P-49's card (#144) from Sprint 02 to Sprint 03, the week it merged.
 
 | Story | Title                                                            | Epic | Priority | Points | Sprints | Branch                                | State             |
 | ----- | ---------------------------------------------------------------- | ---- | -------- | ------ | ------- | ------------------------------------- | ----------------- |
