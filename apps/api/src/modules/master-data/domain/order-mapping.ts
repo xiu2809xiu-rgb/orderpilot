@@ -3,7 +3,7 @@ import type { MasterDataSalesOrder } from "./master-data-reader.js";
 
 /**
  * Master data's view of an order. A sample maps to exactly what the mock of
- * Navision reports for it; a stored order has no workflow status, so its
+ * Business Central reports for it; a stored order has no workflow status, so its
  * capture state is the nearest honest word.
  */
 export function toMasterDataSalesOrder(
@@ -32,7 +32,7 @@ export function toMasterDataSalesOrder(
 }
 
 /**
- * Whether master data lists the order as one of Navision's. Samples always
+ * Whether master data lists the order as one of Business Central's. Samples always
  * are. A stored order is only once it is submitted: a draft is not demand and
  * a void order is gone (ADR 0046), so neither counts as open anywhere.
  */

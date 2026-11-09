@@ -43,7 +43,7 @@ export function draftLines(
     if (!item)
       issues.push({
         path: `${at}.itemNo`,
-        message: "No item has this Navision number.",
+        message: "No item has this Business Central number.",
       });
     const unitPrice = priceOf(
       line.unitPrice,

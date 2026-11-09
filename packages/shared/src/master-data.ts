@@ -1,6 +1,6 @@
 // The contract of the master data pages: items, customers and vendors as
-// Navision holds them. Read-only: Navision stays the system of record. Field
-// names follow Navision's, and every record is matched on its number, never on
+// Business Central holds them. Read-only: Business Central stays the system of record. Field
+// names follow Business Central's, and every record is matched on its number, never on
 // its name.
 
 import { z } from "zod";
@@ -322,7 +322,7 @@ export const masterDataFiltersResponseSchema = mockEnvelope(
 export const AVAILABLE_STOCK_MAX_ITEMS = 200;
 
 export const availableStockQuerySchema = z.object({
-  /** Navision numbers, separated by commas, at most one order's worth. */
+  /** Business Central numbers, separated by commas, at most one order's worth. */
   itemNos: z
     .string()
     .regex(/^[A-Za-z0-9-]{1,20}(,[A-Za-z0-9-]{1,20})*$/)

@@ -7,7 +7,7 @@ import { StockPosition } from "./domain/stock-position.js";
 
 /**
  * Available stock by item number, for whoever must judge an order against
- * it. It asks the reader, so P-20's connector answers it with Navision's own
+ * it. It asks the reader, so P-20's connector answers it with Business Central's own
  * figures.
  */
 @Injectable()

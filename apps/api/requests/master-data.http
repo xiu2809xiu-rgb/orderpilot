@@ -1,5 +1,5 @@
-### Master data: items, customers and vendors from the mock of Navision. Every
-### answer says so in meta.mock. Read-only: Navision stays the system of record.
+### Master data: items, customers and vendors from the mock of Business Central. Every
+### answer says so in meta.mock. Read-only: Business Central stays the system of record.
 ### Sign in first (see auth.http): REST Client keeps the cookies.
 @baseUrl = http://localhost:3000
 

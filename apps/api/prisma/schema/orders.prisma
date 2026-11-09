@@ -1,6 +1,6 @@
 // Area 1 models: the sales orders OrderPilot stores itself (ADR 0046). The 120
 // sample orders are never stored: their dates move with today, so they are
-// generated each day. Nothing here is written to Navision.
+// generated each day. Nothing here is written to Business Central.
 
 /// How far the entry of an order has got. It is not the order's status: that
 /// stays in area 2's state machine.
@@ -11,7 +11,7 @@ enum OrderCaptureState {
 }
 
 /// A sales order made in OrderPilot. Customers and items are matched on their
-/// Navision numbers, kept here as plain text, never on names.
+/// Business Central numbers, kept here as plain text, never on names.
 model SalesOrder {
   id                 String            @id @default(uuid(7)) @db.Uuid
   /// OrderPilot's own number, `SO-20261108-0001`, from the record number service.

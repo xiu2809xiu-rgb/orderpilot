@@ -56,7 +56,7 @@ export type EvidenceRef = z.infer<typeof evidenceRefSchema>;
 
 /**
  * What one rule says about one order: pass or fail, what was expected, what
- * was found, the tolerance and the evidence. Navision numbers identify the
+ * was found, the tolerance and the evidence. Business Central numbers identify the
  * parties and items, never names.
  */
 export const checkResultSchema = z.object({
@@ -230,14 +230,14 @@ export const timelineStepSchema = z.object({
 });
 export type TimelineStep = z.infer<typeof timelineStepSchema>;
 
-/** A candidate with a similar name but another Navision number. */
+/** A candidate with a similar name but another Business Central number. */
 export const possibleMatchSchema = z.object({
   no: z.string().min(1),
   name: z.string().min(1),
 });
 
 /**
- * A party or item on the documents, matched to master data by its Navision
+ * A party or item on the documents, matched to master data by its Business Central
  * number. Names are shown, never used to match. A look-alike name is listed
  * as a possible match for a person to look at.
  */

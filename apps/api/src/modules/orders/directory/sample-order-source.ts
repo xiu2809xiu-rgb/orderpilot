@@ -6,7 +6,7 @@ import {
 } from "../../../common/synthetic-source.js";
 import { mockOverdue } from "../../checks/domain/mock-samples.js";
 import { sampleStepFor } from "../../checks/domain/mock-status.js";
-import { lateStep } from "../../master-data/mock-navision-master-data.js";
+import { lateStep } from "../../master-data/mock-business-central-master-data.js";
 import type { OrderFactsSource } from "../domain/order-directory.js";
 import type { OrderFacts } from "../domain/order-facts.js";
 
@@ -28,7 +28,7 @@ function toFacts(order: SampleOrder, dataset: SyntheticDataset): OrderFacts {
     shipmentDate: order.header.shipmentDate,
     currencyCode: order.header.currencyCode,
     prepaymentPercent: order.header.prepaymentPercent,
-    // A sample's number is the one Navision gives it.
+    // A sample's number is the one Business Central gives it.
     navisionNo: order.header.no,
     version: null,
     workflowStatus: sampleStepFor(order.sampleScreenState).status.label,

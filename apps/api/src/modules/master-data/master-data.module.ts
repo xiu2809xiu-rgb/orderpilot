@@ -7,11 +7,11 @@ import { MasterDataService } from "./master-data.service.js";
 import { CustomerLookup } from "./customer-lookup.js";
 import { ItemLookup } from "./item-lookup.js";
 import { StockLookup } from "./stock-lookup.js";
-import { MockNavisionMasterData } from "./mock-navision-master-data.js";
+import { MockBusinessCentralMasterData } from "./mock-business-central-master-data.js";
 
 /**
  * Area 1: items, customers and vendors, read-only. Today they come from the
- * mock of Navision. P-20 binds its connector to `MASTER_DATA_READER` here, and
+ * mock of Business Central. P-20 binds its connector to `MASTER_DATA_READER` here, and
  * nothing else changes.
  */
 @Module({
@@ -19,7 +19,7 @@ import { MockNavisionMasterData } from "./mock-navision-master-data.js";
   controllers: [MasterDataController],
   providers: [
     syntheticSourceProvider,
-    { provide: MASTER_DATA_READER, useClass: MockNavisionMasterData },
+    { provide: MASTER_DATA_READER, useClass: MockBusinessCentralMasterData },
     MasterDataService,
     StockLookup,
     CustomerLookup,

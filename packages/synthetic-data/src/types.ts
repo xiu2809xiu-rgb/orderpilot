@@ -15,7 +15,7 @@ import type { Milestone } from "./journey.js";
 /** Stamped on every dataset, and shown wherever the data is shown. */
 export const SYNTHETIC_LABEL = "Synthetic demo data" as const;
 
-// Field names follow Navision's, in camelCase (docs/research/domain-notes.md).
+// Field names follow Business Central's, in camelCase (docs/research/domain-notes.md).
 // Every amount is a USD decimal string, never a float.
 
 export interface Customer {
@@ -134,7 +134,7 @@ export type SampleScenario =
   | {
       kind: "price-mismatch";
       itemNo: string;
-      /** The unit price on the PO, against Navision's. */
+      /** The unit price on the PO, against Business Central's. */
       printed: DecimalString;
       listed: DecimalString;
     }
@@ -251,7 +251,7 @@ export interface PurchaseLine {
   lineAmount: DecimalString;
 }
 
-/** A vendor purchase order in Navision, from an approved SPR or already on order. */
+/** A vendor purchase order in Business Central, from an approved SPR or already on order. */
 export interface PurchaseOrder {
   no: string;
   buyFromVendorNo: string;
@@ -275,7 +275,7 @@ export const SPR_STATUSES = ["suggested", "submitted", "approved"] as const;
  */
 export interface SampleSpr {
   recordNo: string;
-  /** Navision's purchase order number, once the SPR is approved and posted. */
+  /** Business Central's purchase order number, once the SPR is approved and posted. */
   navisionNo: string | null;
   orderNo: string;
   status: (typeof SPR_STATUSES)[number];

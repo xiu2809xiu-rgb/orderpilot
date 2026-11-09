@@ -47,7 +47,7 @@ function pageOf<Row>(page: MasterDataPage<Row>) {
   };
 }
 
-/** Read-only: Navision stays the system of record, so nothing here writes. */
+/** Read-only: Business Central stays the system of record, so nothing here writes. */
 @ApiTags("MasterData")
 @Controller("master-data")
 @RequirePermission("orders.read")
@@ -58,7 +58,8 @@ export class MasterDataController {
 
   @Get("filters")
   @ApiOperation({
-    summary: "What the master data filters can offer. Mock Navision data",
+    summary:
+      "What the master data filters can offer. Mock Business Central data",
   })
   @ApiOkResponse({ schema: openApiSchema(masterDataFiltersResponseSchema) })
   async filters() {
@@ -71,7 +72,7 @@ export class MasterDataController {
   @Get("items")
   @ApiOperation({
     summary:
-      "Items with their stock, a page at a time. Prices are masked by role. Mock Navision data",
+      "Items with their stock, a page at a time. Prices are masked by role. Mock Business Central data",
   })
   @openApiQuery(itemQuerySchema)
   @ApiOkResponse({ schema: openApiSchema(itemListSchema) })
@@ -85,7 +86,7 @@ export class MasterDataController {
   @Get("available-stock")
   @ApiOperation({
     summary:
-      "The available stock of many items at once, for the lines of an order. Mock Navision data",
+      "The available stock of many items at once, for the lines of an order. Mock Business Central data",
   })
   @openApiQuery(availableStockQuerySchema)
   @ApiOkResponse({ schema: openApiSchema(availableStockResponseSchema) })
@@ -103,7 +104,7 @@ export class MasterDataController {
   @ApiParam({ name: "no", schema: { type: "string" } })
   @ApiOperation({
     summary:
-      "One item: its stock, open orders, open purchase orders and SPRs. Mock Navision data",
+      "One item: its stock, open orders, open purchase orders and SPRs. Mock Business Central data",
   })
   @ApiOkResponse({ schema: openApiSchema(itemResponseSchema) })
   async item(@Param("no", recordNo) no: string, @Auth() auth: AuthContext) {
@@ -116,7 +117,7 @@ export class MasterDataController {
   @Get("customers")
   @ApiOperation({
     summary:
-      "Customers with their open and overdue orders, a page at a time. Mock Navision data",
+      "Customers with their open and overdue orders, a page at a time. Mock Business Central data",
   })
   @openApiQuery(customerQuerySchema)
   @ApiOkResponse({ schema: openApiSchema(customerListSchema) })
@@ -130,7 +131,7 @@ export class MasterDataController {
   @ApiParam({ name: "no", schema: { type: "string" } })
   @ApiOperation({
     summary:
-      "One customer: key facts, open orders and overdue orders. Mock Navision data",
+      "One customer: key facts, open orders and overdue orders. Mock Business Central data",
   })
   @ApiOkResponse({ schema: openApiSchema(customerResponseSchema) })
   async customer(@Param("no", recordNo) no: string, @Auth() auth: AuthContext) {
@@ -143,7 +144,7 @@ export class MasterDataController {
   @Get("vendors")
   @ApiOperation({
     summary:
-      "Vendors, a page at a time. Balances are masked by role. Mock Navision data",
+      "Vendors, a page at a time. Balances are masked by role. Mock Business Central data",
   })
   @openApiQuery(vendorQuerySchema)
   @ApiOkResponse({ schema: openApiSchema(vendorListSchema) })
@@ -158,7 +159,7 @@ export class MasterDataController {
   @ApiParam({ name: "no", schema: { type: "string" } })
   @ApiOperation({
     summary:
-      "One vendor: key facts, bank accounts masked by role, open purchase orders and items. Mock Navision data",
+      "One vendor: key facts, bank accounts masked by role, open purchase orders and items. Mock Business Central data",
   })
   @ApiOkResponse({ schema: openApiSchema(vendorResponseSchema) })
   async vendor(@Param("no", recordNo) no: string, @Auth() auth: AuthContext) {
