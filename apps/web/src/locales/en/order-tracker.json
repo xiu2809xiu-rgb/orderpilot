@@ -17,10 +17,11 @@
       "docs": "Docs",
       "owner": "Owner",
       "overdue": "Overdue",
-      "exceptions": "Open exceptions",
       "orderDate": "Order date",
       "shipmentDate": "Shipment date",
-      "externalDocumentNo": "PO number"
+      "externalDocumentNo": "PO number",
+      "exceptionsBadge_one": "{{count}} open exception",
+      "exceptionsBadge_other": "{{count}} open exceptions"
     },
     "overdueDays_one": "{{count}} day overdue",
     "overdueDays_other": "{{count}} days overdue",

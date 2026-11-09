@@ -34,12 +34,24 @@ export function trackerColumns(
       id: "orderNo",
       header: t("list.columns.orderNo"),
       cell: (row) => (
-        <RecordLink
-          to={`/order-tracker/${row.orderNo}`}
-          className="-my-0.5 inline-block py-0.5 font-mono font-medium text-primary underline-offset-4 hover:underline"
-        >
-          {row.orderNo}
-        </RecordLink>
+        <span className="inline-flex items-center gap-1.5">
+          <RecordLink
+            to={`/order-tracker/${row.orderNo}`}
+            className="-my-0.5 inline-block py-0.5 font-mono font-medium text-primary underline-offset-4 hover:underline"
+          >
+            {row.orderNo}
+          </RecordLink>
+          {row.openExceptions > 0 ? (
+            <span
+              aria-label={t("list.columns.exceptionsBadge", {
+                count: row.openExceptions,
+              })}
+              className="inline-flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full bg-destructive/10 px-1 text-[10px] font-bold leading-none text-destructive"
+            >
+              {row.openExceptions}
+            </span>
+          ) : null}
+        </span>
       ),
       exportValue: (row) => row.orderNo,
       sortable: true,
@@ -105,13 +117,6 @@ export function trackerColumns(
         ),
       exportValue: (row) =>
         row.overdue.overdue ? (row.overdue.reason ?? "") : "",
-    },
-    {
-      id: "openExceptions",
-      header: t("list.columns.exceptions"),
-      cell: (row) => row.openExceptions,
-      exportValue: (row) => row.openExceptions,
-      kind: "number",
     },
     {
       id: "orderDate",

@@ -12,7 +12,7 @@ import { errorBody } from "@/test/fixtures";
 import { server } from "@/test/server";
 import OrderTrackerPage from "./OrderTrackerPage";
 
-const row = (n: number, overdue = false) => ({
+const row = (n: number, overdue = false, exceptions = 0) => ({
   orderNo: `SO-000${String(n)}`,
   externalDocumentNo: `PO-${String(n)}`,
   customerNo: `C0${String(n)}`,
@@ -22,7 +22,7 @@ const row = (n: number, overdue = false) => ({
   overdue: overdue
     ? { overdue: true, daysOverdue: 3, reason: "AWB was due" }
     : { overdue: false, daysOverdue: 0, reason: null },
-  openExceptions: 0,
+  openExceptions: exceptions,
   shipmentDate: null,
   orderDate: "2026-10-01",
 });
@@ -176,6 +176,30 @@ describe("the order tracker", () => {
     // The single status picked from the menu, not the whole stage, shows as
     // the active filter chip.
     expect(screen.getByText("Shipped, AWB overdue")).toBeInTheDocument();
+  });
+
+  it("shows a red exceptions badge beside the order number only when there are open exceptions", async () => {
+    await i18n.loadNamespaces(["order-tracker", "common"]);
+    server.use(
+      getTrackerListMockHandler(page([row(1, false, 0), row(2, false, 3)])),
+    );
+    renderPage();
+    await screen.findByText("Status 1");
+    expect(
+      screen.queryByText("No orders to track yet"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("columnheader", { name: "Open exceptions" }),
+    ).not.toBeInTheDocument();
+    const clean = screen.getByRole("link", { name: "SO-0001" });
+    expect(
+      within(clean.closest("td") ?? clean).queryByLabelText(/open exception/),
+    ).toBeNull();
+    const flagged = screen.getByRole("link", { name: "SO-0002" });
+    const badge = within(flagged.closest("td") ?? flagged).getByLabelText(
+      "3 open exceptions",
+    );
+    expect(badge).toHaveTextContent("3");
   });
 
   it("shows an empty state that names what is missing", async () => {
