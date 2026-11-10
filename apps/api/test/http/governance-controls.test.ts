@@ -20,7 +20,15 @@ import {
 import { syntheticDataset } from "@orderpilot/synthetic-data";
 import type { Request } from "express";
 import request from "supertest";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 import { z } from "zod";
 import type { AuthContext } from "../../src/auth/auth-context.js";
 import {
@@ -52,6 +60,11 @@ import {
   bankHoldListResponseSchema,
   bankHoldResponseSchema,
 } from "../../src/modules/governance/governance.schemas.js";
+import {
+  MASTER_DATA_READER,
+  type MasterDataReader,
+  type MasterDataVendor,
+} from "../../src/modules/master-data/domain/master-data-reader.js";
 import { UserRepository } from "../../src/users/user.repository.js";
 import {
   API,
@@ -1318,6 +1331,53 @@ describe("the bank-detail hold (F-5)", () => {
       await withFinancePaying(async () => {
         expect((await pay("finance2", other)).status).toBe(200);
         expect((await pay("finance2", vendorNo)).status).toBe(403);
+      });
+    });
+
+    it("compares a PI only with its own vendor's record when two vendors share a name", async () => {
+      const first = nextVendor();
+      const second = nextVendor();
+      const vendor = (no: string): MasterDataVendor => ({
+        no,
+        name: "Same Name Trading Pte Ltd (synthetic)",
+        currencyCode: "USD",
+        paymentTermsCode: "30 DAYS",
+        balanceLcy: "0.00",
+      });
+      const reader = t.app.get<MasterDataReader>(MASTER_DATA_READER, {
+        strict: false,
+      });
+      const vendors = vi
+        .spyOn(reader, "vendors")
+        .mockResolvedValue([vendor(first), vendor(second)]);
+      const accounts = vi
+        .spyOn(reader, "vendorBankAccounts")
+        .mockImplementation((no) =>
+          Promise.resolve([
+            {
+              code: "MAIN",
+              name: "Demo Bank (not a real bank)",
+              ...(no === first ? RECORD : CHANGED),
+            },
+          ]),
+        );
+      try {
+        await seedVendorBankBaselines(t.app);
+      } finally {
+        vendors.mockRestore();
+        accounts.mockRestore();
+      }
+
+      expect(await reportPi(first, RECORD)).toEqual({ outcome: "match" });
+      expect(await reportPi(second, CHANGED)).toEqual({ outcome: "match" });
+      // The other vendor's details are a difference, whatever the name says.
+      expect(await reportPi(first, CHANGED)).toMatchObject({
+        outcome: "held",
+        differingFields: ["bankAccountNo", "swiftCode", "iban"],
+      });
+      await withFinancePaying(async () => {
+        expect((await pay("finance2", second)).status).toBe(200);
+        expect((await pay("finance2", first)).status).toBe(403);
       });
     });
 
