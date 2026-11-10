@@ -7,6 +7,7 @@ import {
   type BaselineAccount,
 } from "./bank-comparison.js";
 import {
+  BANK_FIELDS,
   BankDetails,
   BankFingerprinter,
   type RawBankDetails,
@@ -31,6 +32,10 @@ const account = (
 const MAIN = [account("MAIN")];
 
 describe("which fields a source compares", () => {
+  it("compares exactly Bank Account No., SWIFT Code and IBAN", () => {
+    expect(BANK_FIELDS).toEqual(["bankAccountNo", "swiftCode", "iban"]);
+  });
+
   it("compares every field of a record edit, and what a document carries", () => {
     expect(scopeOf("vendor-record")).toBe("all-fields");
     expect(scopeOf("vendor-pi")).toBe("carried-fields");
@@ -45,19 +50,21 @@ describe("comparing with the stored details", () => {
     expect(result.accountCode).toBe("MAIN");
   });
 
-  it("names each field that differs on its own", () => {
-    for (const [field, value] of [
-      ["bankAccountNo", "000000007702"],
-      ["swiftCode", "DEMOZZ77"],
-      ["iban", "ZZ00DEMO0000000007702"],
-    ] as const) {
-      const result = compareWithBaselines(
-        seal({ ...RECORD, [field]: value }),
-        MAIN,
-        "carried-fields",
-      );
-      expect(result.differingFields, field).toEqual([field]);
-    }
+  it.each([
+    {
+      label: "Bank Account No.",
+      field: "bankAccountNo",
+      value: "000000007702",
+    },
+    { label: "SWIFT Code", field: "swiftCode", value: "DEMOZZ77" },
+    { label: "IBAN", field: "iban", value: "ZZ00DEMO0000000007702" },
+  ] as const)("names only $label when it alone differs", ({ field, value }) => {
+    const result = compareWithBaselines(
+      seal({ ...RECORD, [field]: value }),
+      MAIN,
+      "carried-fields",
+    );
+    expect(result.differingFields).toEqual([field]);
   });
 
   it("does not count a field a document simply does not carry", () => {

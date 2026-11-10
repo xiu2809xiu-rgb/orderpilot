@@ -1236,20 +1236,25 @@ describe("the bank-detail hold (F-5)", () => {
       expect(await control().openHoldsFor(vendorNo)).toEqual([]);
     });
 
-    it("opens a hold naming each field that differs on its own", async () => {
-      for (const field of ["bankAccountNo", "swiftCode", "iban"] as const) {
+    it.each([
+      { label: "Bank Account No.", field: "bankAccountNo" },
+      { label: "SWIFT Code", field: "swiftCode" },
+      { label: "IBAN", field: "iban" },
+    ] as const)(
+      "opens a hold naming only $label when it alone differs",
+      async ({ field }) => {
         const vendorNo = nextVendor();
         await setBaseline(vendorNo);
         const report = await reportPi(vendorNo, {
           ...RECORD,
           [field]: CHANGED[field],
         });
-        expect(report, field).toMatchObject({
+        expect(report).toMatchObject({
           outcome: "held",
           differingFields: [field],
         });
-      }
-    });
+      },
+    );
 
     it("holds a payment whose bank details differ from the vendor record", async () => {
       const { vendorNo, holdId } = await heldVendor();
