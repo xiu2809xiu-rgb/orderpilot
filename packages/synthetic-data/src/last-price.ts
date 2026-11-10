@@ -18,6 +18,9 @@ const MINIMUM_MARGIN = 1.05;
  * - every customer earns a volume discount of 0 to 3 percent, set by the
  *   customer number modulo 4;
  * - each customer and item pair has its own jitter of about 1.5 percent.
+ *
+ * Net, a customer lands from about 8 percent under the catalogue price to about
+ * 6 percent over it: credit terms can outweigh the volume discount.
  */
 export function agreedPrice(
   seed: number,

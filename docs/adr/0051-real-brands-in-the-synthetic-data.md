@@ -37,9 +37,10 @@ Pinned, and kept by `stable-live.test.ts`: every live order's number, state, age
 
 - History prices rise from month to month, as the client said (question 5 and assumption A-21), so earlier rows are cheaper than later ones and a pair's last row stays at its agreed price. A history line has no cost, so an old price under today's floor is not a loss.
 - The invented customer and vendor names were not checked against real business registers, and which vendor supplies which brand is invented. Neither is a claim about a real company.
-- The seed stays far under its 30 second budget. Measured on one machine, three runs each, the seed alone (`node dist/database/seed/seed.js` on a fresh database) has a median of 2.85 s, against 2.42 s before, about 18% slower. The full `pnpm db:seed` includes the compile step, and its two single runs (37 s before, 25.6 s after) say nothing about the data.
+- The seed stays far under its 30 second budget, with no slowdown we can measure. Measured on one machine, five runs each, alternating, on a fresh database, the seed alone (`node dist/database/seed/seed.js`) has a median of 2.46 s on main and 2.49 s with the new data, and the full `pnpm db:seed`, compile step included, takes 7.1 to 7.7 s. The first run of each side was a cold-cache outlier, which is why an earlier three-run reading of 2.42 s against 2.85 s overstated the gap. The list routes are no slower in any way we can separate from noise.
 - Real SKU collisions cannot be ruled out offline. Richie reads the list once.
 - The customers on each live order, their lines, totals, the KPI values and the numbers of the exceptions change once. The demo PDFs are regenerated once and a test then keeps their choice loud.
 - Old development databases keep stale rows. A review stack starts from a fresh database.
 - Area 3's sample of a price mismatch changes to the PI and PO case. Area 3 is asked to review that one file.
 - Review at `v0.2-technical-review`.
+- The last-prices route answers a role that may not see prices with the price masked and the reason `price`, but it still returns the date and the document number. We read those as a pointer to a document, not as price information. Say so if they should be masked too (waiting item dr).

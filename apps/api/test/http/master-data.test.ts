@@ -252,6 +252,14 @@ describe("master data routes (mock Business Central)", () => {
       ).toBe(400);
     });
 
+    it("counts the item numbers as sent, so 201 repeats of one are refused", async () => {
+      // The cap guards the request's size, before any repeat is dropped.
+      const repeats = Array.from({ length: 201 }, () => "I-1").join(",");
+      expect((await get("SUPPORT", `${route}?itemNos=${repeats}`)).status).toBe(
+        400,
+      );
+    });
+
     it("answers 404 for a customer that is not there", async () => {
       const res = await get(
         "SUPPORT",
