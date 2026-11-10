@@ -111,7 +111,7 @@ describe("a screen's column declaration", () => {
   it("gives the price a wider track where the last agreed price sits under it", () => {
     const plain = [{ kind: "unitPrice", header: "Unit price" }] as const;
     expect(trackTemplate(plain, false, true)).toBe("8rem");
-    expect(trackTemplate(plain, true, true)).toBe("6.5rem");
+    expect(trackTemplate(plain, true, true)).toBe("7rem");
     expect(trackTemplate(plain)).toBe("6.5rem");
     expect(trackTemplate(plain, true)).toBe("5.5rem");
     expect(trackTemplate(order, false, true)).toBe(trackTemplate(order));

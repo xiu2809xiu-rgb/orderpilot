@@ -87,7 +87,7 @@ export function trackTemplate(
       // The last-price note sits under the price input and needs the room to
       // keep its amount and its date each on one line.
       if (reference && c.kind === "unitPrice") {
-        return compact ? "6.5rem" : "8rem";
+        return compact ? "7rem" : "8rem";
       }
       return (
         (compact ? COMPACT_WIDTH[c.kind] : undefined) ?? DEFAULT_WIDTH[c.kind]
