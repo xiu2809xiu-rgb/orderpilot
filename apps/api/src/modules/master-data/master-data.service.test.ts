@@ -402,6 +402,21 @@ describe("vendors over the mock", () => {
   });
 });
 
+describe("a customer's last prices", () => {
+  it("gives one row for an item asked for twice", async () => {
+    const order = dataset.orders[0];
+    const buyer = order?.header.sellToCustomerNo;
+    const bought = order?.lines[0]?.no;
+    if (!buyer || !bought) throw new Error("the set has no order line");
+    const rows = await service.lastPrices(
+      buyer,
+      [bought, bought, bought],
+      "SUPPORT",
+    );
+    expect(rows.map((row) => row.itemNo)).toEqual([bought]);
+  });
+});
+
 describe("masking", () => {
   const vendorNo = dataset.vendors[0]?.no ?? "";
   const account = dataset.vendorBankAccounts.find(

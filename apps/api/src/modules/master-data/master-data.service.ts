@@ -298,7 +298,10 @@ export class MasterDataService {
     const customers = await this.reader.customers();
     if (!customers.some((customer) => customer.no === customerNo))
       throw new NotFoundError("Customer");
-    const prices = await this.reader.lastAgreedPrices(customerNo, itemNos);
+    // A repeated number would repeat its row: one row an item is the answer.
+    const prices = await this.reader.lastAgreedPrices(customerNo, [
+      ...new Set(itemNos),
+    ]);
     return prices.map((row) => ({
       itemNo: row.itemNo,
       price: this.field(role, "item.unitPrice", row.price),

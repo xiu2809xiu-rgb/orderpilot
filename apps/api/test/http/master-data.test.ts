@@ -241,6 +241,17 @@ describe("master data routes (mock Business Central)", () => {
       }
     });
 
+    it("holds the cap at 200 item numbers, written out as numbers", async () => {
+      const ask = (count: number): string =>
+        Array.from({ length: count }, (_, i) => `I-${String(i + 1)}`).join(",");
+      expect(
+        (await get("SUPPORT", `${route}?itemNos=${ask(200)}`)).status,
+      ).toBe(200);
+      expect(
+        (await get("SUPPORT", `${route}?itemNos=${ask(201)}`)).status,
+      ).toBe(400);
+    });
+
     it("answers 404 for a customer that is not there", async () => {
       const res = await get(
         "SUPPORT",
