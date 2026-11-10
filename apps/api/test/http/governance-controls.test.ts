@@ -1653,21 +1653,25 @@ describe("the bank-detail hold (F-5)", () => {
       const { holdId } = await heldVendor();
       const refusals = async () =>
         (await events("auth.permission.refused")).length;
-      for (const [step, who] of [
-        [verify, "warehouse"],
-        [verify, "approver"],
-        [verify, "admin"],
-        [clear, "finance"],
-        [clear, "warehouse"],
-        [clear, "admin"],
+      for (const [step, permission, holders] of [
+        [verify, "payments.confirm", ["FINANCE"]],
+        // Management is meant to be able to be the second approver.
+        [clear, "approvals.decide", ["APPROVER", "MANAGEMENT"]],
       ] as const) {
-        const before = await refusals();
-        const res = await step(who, holdId);
-        expect(res.status, who).toBe(403);
-        expect(errorEnvelopeSchema.parse(res.body).error.code, who).toBe(
-          "FORBIDDEN",
-        );
-        expect(await refusals(), who).toBe(before + 1);
+        const holds = (role: Role) =>
+          DEFAULT_ROLE_PERMISSIONS[role].includes(permission);
+        // Pinned, or a role wrongly granted the right would leave the loop below.
+        expect(ROLES.filter(holds), permission).toEqual(holders);
+        for (const role of ROLES.filter((other) => !holds(other))) {
+          sessions.set(role, await demoSignIn(t, role));
+          const before = await refusals();
+          const res = await step(role, holdId);
+          expect(res.status, role).toBe(403);
+          expect(errorEnvelopeSchema.parse(res.body).error.code, role).toBe(
+            "FORBIDDEN",
+          );
+          expect(await refusals(), role).toBe(before + 1);
+        }
       }
     });
 
