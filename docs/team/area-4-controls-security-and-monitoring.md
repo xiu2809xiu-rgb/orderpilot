@@ -211,7 +211,7 @@ Confirming a customer's payment (`customer-payment.confirm`) and paying a vendor
 
 When a vendor's bank details differ from what is stored, nobody pays that vendor until two people have dealt with it ([ADR 0050](../adr/0050-the-bank-detail-hold.md)). The open rules wait for Spectra's answers to [Q-15 and Q-49](../client/questions-for-client.md#from-our-business-central-notes).
 
-**No full number is stored or logged.** `BankDetails` (`governance/domain/bank-details.ts`) holds it in memory only, and cannot be printed. What is kept is a keyed fingerprint and a last-four mask per field. A reason with an account number in it is refused.
+**No full number is stored or logged.** `BankDetails` (`governance/domain/bank-details.ts`) holds it in memory only, and cannot be printed. What is kept is a keyed fingerprint and a last-four mask per field. A reason with an account number in it is refused. `GovernanceModule` reads the key from `BANK_FINGERPRINT_KEY`. Without one nothing can be compared, so every report opens a hold, and the API logs one warning at startup.
 
 The chain is now:
 
@@ -283,7 +283,6 @@ await authorisation.enforce(
 
 - **Area 1:** call `reportDetails` from vendor PI confirmation and P-68's port, `recordBaseline` from P-20, and run `seedVendorBankBaselines` from `seeders.ts`.
 - **Area 2 and P-104:** call `enforce` with the stored `vendorNo`, and show `openHoldsFor`.
-- **`GovernanceModule`** reads `BANK_FINGERPRINT_KEY` once its own pull request merges. Until then nothing can be compared, so every report opens a hold, and the API logs one warning at startup.
 - **`payments.post`** is held by no role, so vendor payments are refused for everyone until P-104's permission is decided.
 - **Events** wait for the bus (P-15).
 
