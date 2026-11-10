@@ -15,8 +15,8 @@ const MINIMUM_MARGIN = 1.05;
  * customer pays near it, not exactly it:
  * - customers who pay before shipping get a little under, those on credit a
  *   little over;
- * - bigger accounts (every fourth customer number) earn a volume discount of
- *   0 to 3 percent;
+ * - every customer earns a volume discount of 0 to 3 percent, set by the
+ *   customer number modulo 4;
  * - each customer and item pair has its own jitter of about 1.5 percent.
  */
 export function agreedPrice(

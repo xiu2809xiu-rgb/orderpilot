@@ -155,14 +155,14 @@ describe("the 24 months of history", () => {
     }
   });
 
-  it("prices a pair's last row at the agreed price and earlier rows above it", () => {
+  it("prices a pair's last row at the agreed price and earlier rows at or below it", () => {
     const lastOf = new Map<string, (typeof history.lines)[number]>();
     for (const line of history.lines)
       lastOf.set(`${line.customerNo}|${line.itemNo}`, line);
     for (const line of history.lines) {
       const last = lastOf.get(`${line.customerNo}|${line.itemNo}`);
       if (!last) throw new Error("no last row");
-      expect(Number(line.unitPrice)).toBeGreaterThanOrEqual(
+      expect(Number(line.unitPrice)).toBeLessThanOrEqual(
         Number(last.unitPrice),
       );
     }

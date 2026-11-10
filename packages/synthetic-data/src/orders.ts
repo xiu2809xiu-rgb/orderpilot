@@ -223,9 +223,11 @@ export function makeOrders(inputs: OrderInputs): SampleOrder[] {
   );
   const prepays = (c: Customer): boolean =>
     PREPAYMENT_PERCENT[c.paymentTermsCode] !== undefined;
-  // The pick draws over the first forty customers only, as it always did, so
-  // the draws after it do not move. The customers after them reach an order
-  // through the newcomer slot below.
+  // What is pinned across the data sets is only each order's number, state,
+  // age, SPR and PI numbers and the first forty customers; the buyer, owner and
+  // documents of most orders did change once. The pick draws over the first
+  // forty only, and the customers after them reach an order through the
+  // newcomer slot below.
   const firstCustomers = customers.slice(0, FIRST_CUSTOMER_COUNT);
   const prepayCustomers = firstCustomers.filter(prepays);
   const newcomers = customers.slice(FIRST_CUSTOMER_COUNT);

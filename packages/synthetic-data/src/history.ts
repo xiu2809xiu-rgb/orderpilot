@@ -222,15 +222,16 @@ function build(dataset: SyntheticDataset): SalesHistory {
   const receipts: HistoryReceipt[] = [];
   for (const item of dataset.items) {
     const rows = itemRows(dataset.seed, item, months, dataset.customers);
-    // A price paid long ago was higher: each month before the pair's last
-    // order adds the category's drift, so the last order is at the agreed price.
+    // Prices rise from month to month, so an older row was cheaper: each month
+    // before the pair's last order takes the category's drift off, and the last
+    // order stays at the agreed price.
     const lastAt = new Map<string, number>();
     for (const row of rows) lastAt.set(row.customer.no, row.at);
     for (const row of rows) {
       const month = months[row.at] ?? "";
       const behind = (lastAt.get(row.customer.no) ?? row.at) - row.at;
       const price = (
-        Number(agreedPrice(dataset.seed, row.customer, item)) *
+        Number(agreedPrice(dataset.seed, row.customer, item)) /
         (1 + PRICE_DRIFT[item.category]) ** behind
       ).toFixed(2);
       const day =
@@ -261,6 +262,7 @@ interface Memo {
   latest?: Map<string, LastAgreedPrice>;
 }
 
+// The memo assumes the dataset object is never changed after it is made.
 const memos = new WeakMap<SyntheticDataset, Memo>();
 
 function memoOf(dataset: SyntheticDataset): Memo {

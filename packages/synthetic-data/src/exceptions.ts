@@ -19,8 +19,9 @@ function plain(value: string): string {
 /**
  * Exceptions follow from each order's scenario, with the expected and found
  * values the screen shows: a packing list that disagrees with the PO, a
- * shipping document that is late, a PI price that differs from its PO. Some closed orders carry one that was resolved on the way. These are
- * stand-ins for area 3's engine, which decides what a check is.
+ * shipping document that is late, a PI price that differs from its PO. Some
+ * closed orders carry one that was resolved on the way. These are stand-ins
+ * for area 3's engine, which decides what a check is.
  */
 export function makeExceptions(
   orders: readonly SampleOrder[],

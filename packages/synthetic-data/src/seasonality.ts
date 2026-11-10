@@ -48,8 +48,9 @@ export const DIWALI_COUNTRIES: readonly CountryCode[] = ["IN", "NP"];
 export const FESTIVAL_WEIGHT = 3;
 
 /**
- * How much a price falls in a month, by category: a price paid long ago was
- * higher, so each month before a pair's last order adds this share.
+ * How much a price rises in a month, by category. Spectra's answer to Q-5
+ * (assumption A-21) is that prices move up from month to month, so a price paid
+ * long ago was lower: each month before a pair's last order takes this share off.
  */
 export const PRICE_DRIFT: Readonly<Record<ItemCategory, number>> = {
   PCS: 0.003,
