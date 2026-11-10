@@ -73,6 +73,24 @@ describe("the tracker over mock data", () => {
     expect(overdue.items.every((o) => o.overdue.overdue)).toBe(true);
   });
 
+  it("filters to orders with at least one open exception", async () => {
+    const flagged = await tracker.list({
+      page: 1,
+      pageSize: 200,
+      exceptionsOnly: "true",
+    });
+    expect(flagged.total).toBeGreaterThan(0);
+    expect(flagged.items.every((o) => o.openExceptions > 0)).toBe(true);
+    const clean = await tracker.list({
+      page: 1,
+      pageSize: 200,
+      exceptionsOnly: "false",
+    });
+    expect(clean.items.every((o) => o.openExceptions === 0)).toBe(true);
+    const all = await tracker.list({ page: 1, pageSize: 200 });
+    expect(flagged.total + clean.total).toBe(all.total);
+  });
+
   it("builds a timeline that parses against the contract", async () => {
     for (const order of dataset.orders) {
       const timeline = await tracker.timeline(order.header.no);

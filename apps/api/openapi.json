@@ -7645,6 +7645,15 @@
             }
           },
           {
+            "name": "exceptionsOnly",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["true", "false"]
+            }
+          },
+          {
             "name": "status",
             "required": false,
             "in": "query",

@@ -6,6 +6,16 @@ import {
   RecordLink,
 } from "@/components/common";
 import { formatDay } from "@/lib/format";
+import { docBadgesOf, DocsBadges } from "./DocsBadges";
+import { StatusColumnFilter } from "./StatusColumnFilter";
+import type { LifecycleStageTab } from "./trackerParams";
+
+/** What the Status column's own header needs to show and run its filter menu. */
+export interface StatusFilterState {
+  value: LifecycleStageTab;
+  status: string | undefined;
+  onSelectStatus: (status: string | undefined) => void;
+}
 
 /**
  * The tracker's columns. Only the four the API can sort are sortable. The
@@ -15,6 +25,7 @@ import { formatDay } from "@/lib/format";
 export function trackerColumns(
   t: TFunction,
   roleLabel: (role: TrackerOrder["ownerRole"]) => string,
+  statusFilter: StatusFilterState,
 ): DataTableColumn<TrackerOrder>[] {
   const day = (value: string | null) =>
     value ? formatDay(value) : t("list.noShipmentDate");
@@ -23,12 +34,24 @@ export function trackerColumns(
       id: "orderNo",
       header: t("list.columns.orderNo"),
       cell: (row) => (
-        <RecordLink
-          to={`/order-tracker/${row.orderNo}`}
-          className="-my-0.5 inline-block py-0.5 font-mono font-medium text-primary underline-offset-4 hover:underline"
-        >
-          {row.orderNo}
-        </RecordLink>
+        <span className="inline-flex items-center gap-1.5">
+          <RecordLink
+            to={`/order-tracker/${row.orderNo}`}
+            className="-my-0.5 inline-block py-0.5 font-mono font-medium text-primary underline-offset-4 hover:underline"
+          >
+            {row.orderNo}
+          </RecordLink>
+          {row.openExceptions > 0 ? (
+            <span
+              aria-label={t("list.columns.exceptionsBadge", {
+                count: row.openExceptions,
+              })}
+              className="inline-flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full bg-destructive/10 px-1 text-[10px] font-bold leading-none text-destructive"
+            >
+              {row.openExceptions}
+            </span>
+          ) : null}
+        </span>
       ),
       exportValue: (row) => row.orderNo,
       sortable: true,
@@ -60,8 +83,20 @@ export function trackerColumns(
     {
       id: "status",
       header: t("list.columns.status"),
+      headerContent: <StatusColumnFilter {...statusFilter} />,
       cell: (row) => <StatusBadge>{row.status.label}</StatusBadge>,
       exportValue: (row) => row.status.label,
+    },
+    {
+      // A concept column: see DocsBadges.tsx for what it does and does not
+      // represent.
+      id: "docs",
+      header: t("list.columns.docs"),
+      cell: (row) => <DocsBadges row={row} />,
+      exportValue: (row) =>
+        docBadgesOf(row)
+          .map(({ code, state }) => `${code}:${state}`)
+          .join(" "),
     },
     {
       id: "owner",
@@ -82,13 +117,6 @@ export function trackerColumns(
         ),
       exportValue: (row) =>
         row.overdue.overdue ? (row.overdue.reason ?? "") : "",
-    },
-    {
-      id: "openExceptions",
-      header: t("list.columns.exceptions"),
-      cell: (row) => row.openExceptions,
-      exportValue: (row) => row.openExceptions,
-      kind: "number",
     },
     {
       id: "orderDate",

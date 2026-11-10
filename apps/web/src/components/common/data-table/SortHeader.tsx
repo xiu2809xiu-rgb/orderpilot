@@ -44,27 +44,28 @@ export function SortHeader<Row>({
       aria-sort={ariaSort}
       className={cn(headClass(column, first), className)}
     >
-      {column.sortable ? (
-        <button
-          type="button"
-          onClick={() => {
-            onSort(column.id);
-          }}
-          title={t("table.sortBy", { column: column.header })}
-          className={cn(
-            "relative -mx-1 inline-flex items-center gap-1 rounded-sm px-1 py-0.5 font-medium hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none pointer-coarse:after:absolute pointer-coarse:after:-inset-y-2.5 pointer-coarse:after:inset-x-0 pointer-coarse:after:content-['']",
-            alignsEnd(column) && "flex-row-reverse",
-          )}
-        >
-          {column.header}
-          <Icon
-            className={cn("size-3.5", !active && "text-muted-foreground")}
-            aria-hidden="true"
-          />
-        </button>
-      ) : (
-        column.header
-      )}
+      {column.headerContent ??
+        (column.sortable ? (
+          <button
+            type="button"
+            onClick={() => {
+              onSort(column.id);
+            }}
+            title={t("table.sortBy", { column: column.header })}
+            className={cn(
+              "relative -mx-1 inline-flex items-center gap-1 rounded-sm px-1 py-0.5 font-medium hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none pointer-coarse:after:absolute pointer-coarse:after:-inset-y-2.5 pointer-coarse:after:inset-x-0 pointer-coarse:after:content-['']",
+              alignsEnd(column) && "flex-row-reverse",
+            )}
+          >
+            {column.header}
+            <Icon
+              className={cn("size-3.5", !active && "text-muted-foreground")}
+              aria-hidden="true"
+            />
+          </button>
+        ) : (
+          column.header
+        ))}
     </TableHead>
   );
 }

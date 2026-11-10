@@ -27,6 +27,9 @@ GET {{baseUrl}}/api/v1/tracker/orders?open=true
 ###
 GET {{baseUrl}}/api/v1/tracker/orders?documentToConfirm=true
 
+### Only the orders with at least one open exception.
+GET {{baseUrl}}/api/v1/tracker/orders?exceptionsOnly=true
+
 ### Open orders at each of the nine sales steps. They add up to openOrders.
 GET {{baseUrl}}/api/v1/tracker/flow
 
