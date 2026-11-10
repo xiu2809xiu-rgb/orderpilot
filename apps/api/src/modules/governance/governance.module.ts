@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { AuditModule } from "../../audit/audit.module.js";
 import { RolePermissionRepository } from "../../auth/role-permission.repository.js";
+import { AppConfig } from "../../config/app-config.js";
 import { UsersModule } from "../../users/users.module.js";
 import { ApprovalSetupRepository } from "./approval-setup.repository.js";
 import { ApprovalSetupService } from "./approval-setup.service.js";
@@ -36,9 +37,12 @@ import { PolicyService } from "./policy.service.js";
     ApprovalSetupRepository,
     ApprovalSetupService,
     AuthorisationService,
-    // BANK_FINGERPRINT_KEY reaches AppConfig in its own pull request. Until
-    // this reads it, comparing bank details fails closed, and tests inject a key.
-    { provide: BankFingerprinter, useValue: new BankFingerprinter(null) },
+    {
+      provide: BankFingerprinter,
+      useFactory: (config: AppConfig) =>
+        new BankFingerprinter(config.governance.bankFingerprintKey),
+      inject: [AppConfig],
+    },
     BankHoldRepository,
     BankHoldVerifiers,
     BankDetailHoldService,

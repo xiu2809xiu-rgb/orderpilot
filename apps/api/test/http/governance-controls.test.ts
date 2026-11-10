@@ -1175,10 +1175,9 @@ describe("the bank-detail hold (F-5)", () => {
 
   beforeAll(async () => {
     await resetTestData();
-    t = await createTestApp({}, [StandInActionController], (builder) =>
-      builder
-        .overrideProvider(BankFingerprinter)
-        .useValue(new BankFingerprinter(TEST_BANK_FINGERPRINT_KEY)),
+    t = await createTestApp(
+      { BANK_FINGERPRINT_KEY: TEST_BANK_FINGERPRINT_KEY },
+      [StandInActionController],
     );
     const users = t.app.get(UserRepository);
     const hasher = t.app.get(PasswordHasher);
@@ -1215,6 +1214,14 @@ describe("the bank-detail hold (F-5)", () => {
 
   it("logs no warning about the key when it has one", () => {
     expect(keyWarnings(t)).toEqual([]);
+  });
+
+  it("fingerprints with the key in the configuration", () => {
+    const digestBy = (fingerprinter: BankFingerprinter) =>
+      fingerprinter.digest("iban", RECORD.iban);
+    expect(digestBy(t.app.get(BankFingerprinter))).toBe(
+      digestBy(new BankFingerprinter(TEST_BANK_FINGERPRINT_KEY)),
+    );
   });
 
   describe("what opens a hold", () => {
@@ -2144,14 +2151,14 @@ describe("the bank-detail hold with no fingerprint key (F-5)", () => {
 
   beforeAll(async () => {
     await resetTestData();
-    t = await createTestApp({}, [], (builder) =>
-      builder
-        .overrideProvider(BankFingerprinter)
-        .useValue(new BankFingerprinter(null)),
-    );
+    t = await createTestApp();
   });
   afterAll(async () => {
     await t.close();
+  });
+
+  it("has no key when the configuration has none", () => {
+    expect(t.app.get(BankFingerprinter).configured).toBe(false);
   });
 
   it("logs one clear warning at startup", () => {
