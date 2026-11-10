@@ -2084,8 +2084,18 @@ describe("the bank-detail hold (F-5)", () => {
 
   describe("the stored details", () => {
     it("records each vendor's stored details once, from the record, and never overwrites them", async () => {
+      const handedOver = vi.spyOn(control(), "recordBaseline");
       await seedVendorBankBaselines(t.app);
-      const [first] = syntheticDataset().vendorBankAccounts;
+      const numbers = handedOver.mock.calls.map(
+        ([{ details }]) => details.bankAccountNo,
+      );
+      handedOver.mockRestore();
+      const synthetic = syntheticDataset().vendorBankAccounts;
+      expect(numbers).toHaveLength(synthetic.length);
+      // Obviously fake: ten zeros, then the vendor's own two digits.
+      for (const number of numbers) expect(number).toMatch(/^0{10}\d{2}$/);
+
+      const [first] = synthetic;
       if (!first) throw new Error("no synthetic bank account");
       expect(await reportPi(first.vendorNo, first)).toEqual({
         outcome: "match",
