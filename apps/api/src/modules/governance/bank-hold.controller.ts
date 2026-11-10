@@ -106,17 +106,22 @@ export class BankHoldController {
   @ApiOkResponse({ schema: openApiSchema(bankHoldResponseSchema) })
   async recordVerification(
     @Param(new ZodValidationPipe(bankHoldParamsSchema)) params: BankHoldParams,
-    @Body(new ZodValidationPipe(recordVerificationBodySchema))
-    body: RecordVerificationBody,
+    @Body() raw: unknown,
     @Auth() auth: AuthContext,
     @Req() req: Request,
   ) {
+    const info = infoOf(req);
+    const body: RecordVerificationBody = await this.holds.parseStepBody(
+      recordVerificationBodySchema,
+      raw,
+      { action: "payment-hold.verify", id: params.id, user: auth.user, info },
+    );
     return {
       data: await this.holds.recordVerification(
         params.id,
         body,
         auth.user,
-        infoOf(req),
+        info,
       ),
     };
   }
@@ -133,13 +138,18 @@ export class BankHoldController {
   @ApiOkResponse({ schema: openApiSchema(bankHoldResponseSchema) })
   async clear(
     @Param(new ZodValidationPipe(bankHoldParamsSchema)) params: BankHoldParams,
-    @Body(new ZodValidationPipe(clearBankHoldBodySchema))
-    body: ClearBankHoldBody,
+    @Body() raw: unknown,
     @Auth() auth: AuthContext,
     @Req() req: Request,
   ) {
+    const info = infoOf(req);
+    const body: ClearBankHoldBody = await this.holds.parseStepBody(
+      clearBankHoldBodySchema,
+      raw,
+      { action: "payment-hold.clear", id: params.id, user: auth.user, info },
+    );
     return {
-      data: await this.holds.clear(params.id, body, auth.user, infoOf(req)),
+      data: await this.holds.clear(params.id, body, auth.user, info),
     };
   }
 }

@@ -218,6 +218,27 @@ export class AuthorisationService {
     throw new DomainError("FORBIDDEN", "You do not have access to this.");
   }
 
+  /**
+   * Audits a refusal the rules never saw, because the request could not be put
+   * to them. The row is the same as a rule's, and the caller does the refusing.
+   */
+  async recordRefusal(
+    request: GovernanceRequest,
+    refusal: { readonly rule: string; readonly reason: string },
+    info: RequestInfo,
+    holdIds: readonly string[] = [],
+  ): Promise<void> {
+    await this.auditRefusal(
+      request,
+      {
+        decision: { outcome: "refused", ...refusal },
+        holdIds,
+        earlierDuties: request.earlierDuties ?? {},
+      },
+      info,
+    );
+  }
+
   /** Who should receive a request raised by `requesterUserId`, for area 2 to route it. */
   async deciderFor(
     requesterUserId: string,

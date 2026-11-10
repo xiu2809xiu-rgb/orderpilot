@@ -1,9 +1,14 @@
 import { Inject, Injectable } from "@nestjs/common";
 import type { Role } from "@orderpilot/shared";
+import type { z } from "zod";
 import { AuditService } from "../../audit/audit.service.js";
 import type { AuthUser } from "../../auth/auth-context.js";
-import { ConflictError } from "../../common/domain-error.js";
+import {
+  ConflictError,
+  ValidationFailedError,
+} from "../../common/domain-error.js";
 import type { Page } from "../../common/repository.js";
+import { toFieldIssues } from "../../common/zod-validation.pipe.js";
 import { Database } from "../../database/database.js";
 import {
   AuthorisationService,
@@ -34,8 +39,21 @@ const SUSPECTED_FRAUD = "suspected fraud: details rejected";
 const MOVED_ON =
   "This hold changed while you were working on it. Reload it and try again.";
 
+const REFUSED_REASON = {
+  rule: "hold-reason",
+  reason: "a hold step needs a reason, with no account number in it",
+} as const;
+
 const actorOf = (user: AuthUser) => ({ userId: user.id, role: user.role });
 const latestOf = (hold: BankHoldRecord) => hold.verifications.at(-1) ?? null;
+
+/** One person taking one step on one hold, for the audit trail. */
+interface HoldStep {
+  readonly action: string;
+  readonly id: string;
+  readonly user: AuthUser;
+  readonly info: RequestInfo;
+}
 
 /**
  * The two people a hold needs. Finance records an out-of-band verification, and
@@ -71,6 +89,36 @@ export class BankHoldClearanceService {
       this.verifiers.all(),
     ]);
     return toBankHoldView(hold, role, verifiers);
+  }
+
+  /**
+   * Parses a step's body. A refused reason is a refusal like any other, so it
+   * is audited, but never with its text, which may be the very number it was
+   * refused for. The caller still gets the standard validation error.
+   */
+  async parseStepBody<S extends z.ZodType>(
+    schema: S,
+    raw: unknown,
+    { action, id, user, info }: HoldStep,
+  ): Promise<z.output<S>> {
+    const parsed = schema.safeParse(raw);
+    if (parsed.success) return parsed.data;
+    const issues = toFieldIssues(parsed.error);
+    if (issues.some((issue) => issue.path === "reason")) {
+      const { vendorNo } = await this.holds.getById(id);
+      await this.policy.recordRefusal(
+        {
+          actor: actorOf(user),
+          action,
+          resource: { type: BANK_HOLD_ENTITY, id },
+          vendorNo,
+        },
+        REFUSED_REASON,
+        info,
+        [id],
+      );
+    }
+    throw new ValidationFailedError(issues);
   }
 
   /** A rejected verification keeps the hold open, and records why. */
