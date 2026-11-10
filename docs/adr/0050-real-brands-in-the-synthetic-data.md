@@ -28,7 +28,7 @@ Pinned, and kept by `stable-live.test.ts`: every live order's number, state, age
 ## Alternatives considered
 
 - **Invented brands.** Rejected: Richie decided on 9 Nov that real names add realism for the audience, and the briefing named them.
-- **Renaming the existing 40 customers into 64.** Rejected: it would move every order. We keep C-0001 to C-0040 and add 24.
+- **Renaming the existing 40 customers into 64.** Rejected: it would change the 40 customer records that `stable-live.test.ts` pins. We keep C-0001 to C-0040 and add 24.
 - **Customer price groups or a price list.** Rejected: the briefing says prices are agreed one by one, and we build no price tables.
 - **Building the history eagerly.** Rejected: it would make every seed and every dataset build slower, for data most screens never read.
 - **A separate stream per build stage.** Rejected: it would re-roll all 120 orders for no gain.
