@@ -1944,6 +1944,40 @@ describe("the bank-detail hold (F-5)", () => {
       });
     });
 
+    it.each([
+      {
+        resolution: "accept-new-details",
+        outcome: "confirmed",
+        event: "governance.bank-hold.cleared",
+      },
+      {
+        resolution: "keep-stored-details",
+        outcome: "rejected",
+        event: "governance.bank-hold.details-rejected",
+      },
+    ])(
+      "saves, masks and audits the second person's reason when closing with $resolution",
+      async ({ resolution, outcome, event }) => {
+        const { vendorNo, holdId } = await heldVendor();
+        expect((await verify("finance", holdId, { outcome })).status).toBe(200);
+        const why = "Checked against the verification on this hold.";
+        expect(
+          (await clear("approver", holdId, { resolution, reason: why })).status,
+        ).toBe(200);
+
+        expect((await holdSeenBy("finance", holdId)).clearReason).toMatchObject(
+          { masked: false, value: why },
+        );
+        expect(
+          (await holdSeenBy("warehouse", holdId)).clearReason,
+        ).toMatchObject({ masked: true, value: null, reason: "bankDetails" });
+        expect((await events(event, holdId))[0]).toMatchObject({
+          actor: { kind: "user", userId: id("approver"), role: "APPROVER" },
+          changes: { vendorNo, resolution, reason: why },
+        });
+      },
+    );
+
     it("shows the last four in the audit viewer to the auditor only", async () => {
       const { holdId } = await heldVendor();
       const changesSeenBy = async (who: string) => {
