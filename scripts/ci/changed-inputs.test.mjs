@@ -56,7 +56,7 @@ test("a change to the code or the build needs both jobs", () => {
     "apps/api/Dockerfile",
     "apps/web/src/App.tsx",
     "apps/web/nginx/default.conf.template",
-    "apps/web/public/demo-documents/po-letter-so-0041.pdf",
+    "apps/web/public/demo-documents/po-table-so-0041.pdf",
     "packages/shared/src/index.ts",
     "services/mock-business-central/src/main.ts",
     "docker/minio/Dockerfile",
