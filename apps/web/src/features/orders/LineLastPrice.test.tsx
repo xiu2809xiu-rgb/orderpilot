@@ -35,6 +35,12 @@ async function pickCustomerAndItem(user: ReturnType<typeof userEvent.setup>) {
   );
 }
 
+async function pickOtherCustomer(user: ReturnType<typeof userEvent.setup>) {
+  const box = await screen.findByRole("combobox", { name: /^Customer$/ });
+  await user.type(box, "{Control>}a{/Control}C-0002");
+  await user.click(await screen.findByRole("option", { name: /Marlowe/ }));
+}
+
 describe("the customer's last agreed price beside a line", () => {
   it("shows the price and its date, and never writes it into the line's price", async () => {
     const user = userEvent.setup();
@@ -42,8 +48,12 @@ describe("the customer's last agreed price beside a line", () => {
     renderOrders("/orders/new");
     await pickCustomerAndItem(user);
     expect(
-      await screen.findByText("Last agreed price 17.90 on 14 Oct 2026"),
-    ).toBeVisible();
+      await screen.findByText(
+        "Last agreed price USD 17.90 on 14 Oct 2026, on SO-0007, for reference",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Last USD 17.90")).toBeVisible();
+    expect(screen.getByText("14 Oct 2026")).toBeVisible();
     expect(unitPrice()).toHaveValue("");
     expect(server.requests.lastPriceReads).toBeGreaterThan(0);
   });
@@ -83,4 +93,36 @@ describe("the customer's last agreed price beside a line", () => {
     expect(screen.queryByText(/Last agreed price/)).not.toBeInTheDocument();
     expect(screen.queryByText(/No earlier price/)).not.toBeInTheDocument();
   });
+
+  it("drops the old customer's price at once when another customer is picked", async () => {
+    const user = userEvent.setup();
+    let release: (price: string) => void = () => undefined;
+    const held = new Promise<string>((resolve) => {
+      release = resolve;
+    });
+    fakeServer({
+      lastPrice: (no) => (no === "C-0001" ? "17.90" : held),
+    });
+    renderOrders("/orders/new");
+    await pickCustomerAndItem(user);
+    expect(await screen.findByText("Last USD 17.90")).toBeVisible();
+    await pickOtherCustomer(user);
+    await waitFor(() => {
+      expect(screen.queryByText("Last USD 17.90")).not.toBeInTheDocument();
+    });
+    release("21.50");
+    expect(await screen.findByText("Last USD 21.50")).toBeVisible();
+  });
+
+  it("says Last price not known when the lookup fails", async () => {
+    const user = userEvent.setup();
+    fakeServer({ lastPriceStatus: () => 500 });
+    renderOrders("/orders/new");
+    await pickCustomerAndItem(user);
+    expect(
+      await screen.findByText("Last price not known", {}, { timeout: 8000 }),
+    ).toBeVisible();
+    expect(screen.queryByText("No earlier price")).not.toBeInTheDocument();
+    expect(unitPrice()).toHaveValue("");
+  }, 15_000);
 });

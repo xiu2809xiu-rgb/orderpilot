@@ -32,7 +32,7 @@ export function makeOrderFormSchema(
     availableStock: z.string().nullable(),
     // What the customer last paid, shown beside the price as context. Never sent.
     lastPrice: z
-      .union([lastPriceSchema, z.literal("none")])
+      .union([lastPriceSchema, z.literal("none"), z.literal("unknown")])
       .nullable()
       .optional(),
   });

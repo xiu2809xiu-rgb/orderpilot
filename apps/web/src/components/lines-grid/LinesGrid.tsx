@@ -136,8 +136,16 @@ export function LinesGrid(props: LinesGridProps) {
             aria-describedby={readOnly ? undefined : hintId}
             style={
               {
-                "--line-tracks": trackTemplate(columns),
-                "--line-tracks-compact": trackTemplate(columns, true),
+                "--line-tracks": trackTemplate(
+                  columns,
+                  false,
+                  itemPrice === "reference",
+                ),
+                "--line-tracks-compact": trackTemplate(
+                  columns,
+                  true,
+                  itemPrice === "reference",
+                ),
               } as CSSProperties
             }
           >

@@ -170,12 +170,12 @@ export function setLineFigures(
   }
 }
 
-/** What the customer last paid for one line's item, or "none" if never bought. */
+/** What the customer last paid for one line's item, "none" if never bought, or "unknown" if the lookup failed. */
 export interface LinePrice {
   index: number;
   /** Guards the write: a line moved or replaced since is left alone. */
   itemNo: string;
-  lastPrice: LastPrice | "none" | null;
+  lastPrice: LastPrice | "none" | "unknown" | null;
 }
 
 /**

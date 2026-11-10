@@ -97,7 +97,9 @@ export interface FakeApi {
   /** What the available-stock read answers. */
   stock: () => string;
   /** The last agreed price the customer paid for I-0001, or null for never. */
-  lastPrice: () => string | null;
+  lastPrice: (customerNo: string) => string | null | Promise<string | null>;
+  /** The status the last-prices read answers with. */
+  lastPriceStatus: () => number;
   masked: boolean;
 }
 
@@ -110,6 +112,7 @@ export function fakeServer(over: Partial<FakeApi> = {}) {
     detail: () => draftDetail(),
     stock: () => "40.000",
     lastPrice: () => "17.90",
+    lastPriceStatus: () => 200,
     masked: false,
     ...over,
   };
@@ -148,8 +151,17 @@ export function fakeServer(over: Partial<FakeApi> = {}) {
             openOrders: 0,
             overdueOrders: 0,
           },
+          {
+            no: "C-0002",
+            name: "Marlowe Bay Supplies",
+            countryRegionCode: "LK",
+            currencyCode: "USD",
+            paymentTermsCode: "PREPAID",
+            openOrders: 0,
+            overdueOrders: 0,
+          },
         ],
-        meta: { page: 1, pageSize: 10, total: 1, mock: true },
+        meta: { page: 1, pageSize: 10, total: 2, mock: true },
       }),
     ),
     http.get("*/api/v1/master-data/available-stock", () => {
@@ -159,9 +171,13 @@ export function fakeServer(over: Partial<FakeApi> = {}) {
         meta: { mock: true },
       });
     }),
-    http.get("*/api/v1/master-data/customers/:no/last-prices", () => {
+    http.get("*/api/v1/master-data/customers/:no/last-prices", async (info) => {
       requests.lastPriceReads += 1;
-      const price = api.lastPrice();
+      const status = api.lastPriceStatus();
+      if (status !== 200) {
+        return HttpResponse.json(errorBody("INTERNAL_ERROR"), { status });
+      }
+      const price = await api.lastPrice(String(info.params.no));
       return HttpResponse.json({
         data:
           price === null

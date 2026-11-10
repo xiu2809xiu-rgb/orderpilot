@@ -53,6 +53,7 @@ export function customerFacts(
       value: (
         <span className="font-mono">{customer.taxRegistrationNumber}</span>
       ),
+      wrap: true,
     },
   ];
 }

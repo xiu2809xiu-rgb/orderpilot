@@ -170,10 +170,13 @@ describe("what picking an item does to the price", () => {
         }),
       ],
     });
+    expect(screen.getByText("Last USD 17.90")).toBeVisible();
+    expect(screen.getByText("14 Oct 2026")).toBeVisible();
     expect(
-      screen.getByText("Last agreed price 17.90 on 14 Oct 2026"),
-    ).toBeVisible();
-    expect(screen.getByText(", on SO-0007, for reference")).toBeInTheDocument();
+      screen.getByText(
+        "Last agreed price USD 17.90 on 14 Oct 2026, on SO-0007, for reference",
+      ),
+    ).toBeInTheDocument();
   });
 
   it("says No earlier price for an item the customer never bought", () => {
@@ -187,6 +190,19 @@ describe("what picking an item does to the price", () => {
       ],
     });
     expect(screen.getByText("No earlier price")).toBeVisible();
+  });
+
+  it("says Last price not known when the lookup failed", () => {
+    renderGrid({
+      itemPrice: "reference",
+      lines: [
+        line({
+          item: { number: "I-0001", name: "Norvale Wireless Mouse" },
+          lastPrice: "unknown",
+        }),
+      ],
+    });
+    expect(screen.getByText("Last price not known")).toBeVisible();
   });
 
   it("drops the last agreed price when the item is picked again or cleared", async () => {
@@ -204,9 +220,9 @@ describe("what picking an item does to the price", () => {
         }),
       ],
     });
-    expect(screen.getByText(/Last agreed price 17.90/)).toBeVisible();
+    expect(screen.getByText("Last USD 17.90")).toBeVisible();
     await user.clear(await item(1));
-    expect(screen.queryByText(/Last agreed price/)).not.toBeInTheDocument();
+    expect(screen.queryByText("Last USD 17.90")).not.toBeInTheDocument();
   });
 
   it("keeps a typed price when the item changes in reference mode", async () => {

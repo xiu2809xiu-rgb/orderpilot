@@ -25,9 +25,10 @@ export interface LineValue {
   /**
    * What this order's customer last paid for the item, shown as context when
    * the grid is in `itemPrice: "reference"` mode. "none" means the customer
-   * never bought it. It is never a price of the line.
+   * never bought it, and "unknown" that the lookup failed. It is never a
+   * price of the line.
    */
-  lastPrice?: LastPrice | "none" | null | undefined;
+  lastPrice?: LastPrice | "none" | "unknown" | null | undefined;
 }
 
 /** The price a customer last paid for an item, and the document it was on. */

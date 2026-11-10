@@ -67,7 +67,7 @@ describe("the New order page", () => {
     // leaves the price empty: the PO sets it.
     expect(unitPrice()).toHaveValue("");
     expect(
-      await screen.findByText(/Last agreed price 17.90 on 14 Oct 2026/),
+      await screen.findByText(/Last agreed price USD 17.90 on 14 Oct 2026/),
     ).toBeVisible();
     await user.type(unitPrice(), "17.25");
     expect(unitPrice()).toHaveValue("17.25");

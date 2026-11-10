@@ -6,7 +6,7 @@ import {
   TextField,
   type LookupOption,
 } from "@/components/form";
-import { formatDay } from "@/lib/format";
+import { formatDay, formatMoney } from "@/lib/format";
 import { useGrid } from "./gridContext";
 import { MaskedPrice, ReadItem, ReadText } from "./LineReadCells";
 import { lastPriceSchema, type LastPrice } from "./types";
@@ -91,7 +91,8 @@ export function PriceCell({ index, row, readOnly }: CellProps) {
 
 /**
  * What this order's customer last paid for the item: context for the typed
- * price, never its value. "No earlier price" says the customer never bought it.
+ * price, never its value. "No earlier price" says the customer never bought
+ * it, and "Last price not known" that the lookup failed.
  */
 function LastPriceNote({ row }: { row: string }) {
   const { t } = useTranslation("linesGrid");
@@ -102,20 +103,38 @@ function LastPriceNote({ row }: { row: string }) {
   // item would keep the old one: it is shown for an item that is there.
   if (item === undefined || item === null || item === "") return null;
   const found = lastPriceOf(value);
-  if (value !== "none" && found === null) return null;
+  const className =
+    "mt-0.5 block text-xs break-words text-muted-foreground tabular-nums @lines:text-right";
+  if (found === null) {
+    if (value === "none") {
+      return <span className={className}>{t("noLastPrice")}</span>;
+    }
+    if (value === "unknown") {
+      return <span className={className}>{t("unknownLastPrice")}</span>;
+    }
+    return null;
+  }
+  const amount = formatMoney(found.price);
+  const date = formatDay(found.agreedOn);
+  const full = t("lastPriceFull", {
+    amount,
+    date,
+    document: found.documentNo,
+  });
+  // Two short lines that never break inside the amount or the date. A screen
+  // reader hears the full sentence once, not the visible fragments.
   return (
-    <span className="mt-0.5 block text-xs break-words text-muted-foreground tabular-nums @lines:text-right">
-      {found === null
-        ? t("noLastPrice")
-        : t("lastPrice", {
-            price: found.price,
-            date: formatDay(found.agreedOn),
-          })}
-      {found === null ? null : (
-        <span className="sr-only">
-          {t("lastPriceNote", { document: found.documentNo })}
-        </span>
-      )}
+    <span
+      title={full}
+      className={`${className} flex flex-col @lines:items-end`}
+    >
+      <span className="sr-only">{full}</span>
+      <span aria-hidden="true" className="whitespace-nowrap">
+        {t("lastPriceAmount", { amount })}
+      </span>
+      <span aria-hidden="true" className="whitespace-nowrap">
+        {t("lastPriceDate", { date })}
+      </span>
     </span>
   );
 }
