@@ -276,6 +276,7 @@ await authorisation.enforce(
 - **`accept-new-details`** follows a confirmed verification, and the new details become the stored ones.
 - **`keep-stored-details`** follows a rejected one. The stored details stand, and the audit trail records "suspected fraud: details rejected".
 - **A rejected verification** keeps the hold and records why. A later verification can supersede it.
+- **A refused reason** (blank, missing, or holding an account number) is a 400 that names the field. It is audited as `governance.policy.refused` under the rule `hold-reason`, without its text.
 - **"needs a different Finance user"** shows on a hold when nobody except the person who changed the details could verify it. Adding or enabling a Finance user clears it.
 
 ### Still to come for the hold
