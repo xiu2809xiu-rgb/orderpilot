@@ -4,11 +4,8 @@ import { useForm, useWatch } from "react-hook-form";
 import { beforeAll, describe, expect, it } from "vitest";
 import i18n from "@/i18n";
 import { LineLastPrice } from "./LineLastPrice";
-import {
-  blankOrder,
-  type OrderForm,
-  type OrderFormInput,
-} from "./orderFormValues";
+import type { OrderFormInput } from "./orderFormSchema";
+import { blankOrder, type OrderForm } from "./orderFormValues";
 import { fakeServer } from "./orderTestKit";
 
 beforeAll(async () => {
