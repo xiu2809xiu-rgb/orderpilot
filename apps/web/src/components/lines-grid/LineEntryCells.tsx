@@ -104,13 +104,15 @@ function LastPriceNote({ row }: { row: string }) {
   if (item === undefined || item === null || item === "") return null;
   const found = lastPriceOf(value);
   const className =
-    "mt-0.5 block text-xs break-words text-muted-foreground tabular-nums @lines:text-right";
+    "mt-0.5 text-xs break-words text-muted-foreground tabular-nums @lines:text-right";
   if (found === null) {
     if (value === "none") {
-      return <span className={className}>{t("noLastPrice")}</span>;
+      return <span className={`${className} block`}>{t("noLastPrice")}</span>;
     }
     if (value === "unknown") {
-      return <span className={className}>{t("unknownLastPrice")}</span>;
+      return (
+        <span className={`${className} block`}>{t("unknownLastPrice")}</span>
+      );
     }
     return null;
   }

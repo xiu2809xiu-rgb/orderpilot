@@ -278,6 +278,8 @@ describe("a draft order's page", () => {
       expect(screen.getByText(/Availability is mock/)).toBeVisible();
       const row = await screen.findByRole("row", { name: "Line 1" });
       expect(within(row).queryByRole("textbox")).toBeNull();
+      // No note is shown on a read-only page, so no last price is asked for.
+      expect(requests.lastPriceReads).toBe(0);
       await user.click(screen.getByRole("textbox", { name: /PO number/ }));
       await user.keyboard("{Control>}s{/Control}");
       expect(requests.patches).toEqual([]);

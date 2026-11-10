@@ -64,7 +64,12 @@ export function LineLastPrice({
   const failed = prices.isError;
 
   useEffect(() => {
-    if (priceMasked || isSubmitting) return;
+    if (priceMasked) {
+      // No prices are on the lines for a masked role, so nothing is stale.
+      shownFor.current = customerNo;
+      return;
+    }
+    if (isSubmitting) return;
     // Waiting for an answer for these items: leave what is there.
     if (asking && !answer && !failed) {
       if (shownFor.current !== customerNo) {

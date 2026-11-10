@@ -1,6 +1,14 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 import i18n from "@/i18n";
 import { fakeServer, renderOrders } from "./orderTestKit";
 
@@ -125,4 +133,30 @@ describe("the customer's last agreed price beside a line", () => {
     expect(screen.queryByText("No earlier price")).not.toBeInTheDocument();
     expect(unitPrice()).toHaveValue("");
   }, 15_000);
+
+  describe("asking again by itself after a failure", () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("recovers when the lookup starts answering, with no button pressed", async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+      let status = 500;
+      const server = fakeServer({ lastPriceStatus: () => status });
+      renderOrders("/orders/new");
+      await pickCustomerAndItem(user);
+      await vi.advanceTimersByTimeAsync(10_000);
+      expect(await screen.findByText("Last price not known")).toBeVisible();
+      status = 200;
+      const before = server.requests.lastPriceReads;
+      await vi.advanceTimersByTimeAsync(31_000);
+      expect(await screen.findByText("Last USD 17.90")).toBeVisible();
+      expect(server.requests.lastPriceReads).toBeGreaterThan(before);
+      // A success stops the asking: no request follows a quiet minute.
+      const after = server.requests.lastPriceReads;
+      await vi.advanceTimersByTimeAsync(60_000);
+      expect(server.requests.lastPriceReads).toBe(after);
+    }, 30_000);
+  });
 });

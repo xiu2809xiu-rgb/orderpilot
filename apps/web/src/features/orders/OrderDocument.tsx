@@ -151,6 +151,7 @@ export function OrderDocument({
             form={form}
             priceMasked={priceMasked}
             paused={captureState === "void"}
+            editable={readOnly === null}
           />
         </>
       }
