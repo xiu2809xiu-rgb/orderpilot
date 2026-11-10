@@ -1,6 +1,6 @@
 import type { ItemCategory } from "./types.js";
 
-// The brand names below are real names Spectra carries (ADR 0050). Everything
+// The brand names below are real names Spectra carries (ADR 0051). Everything
 // else is invented: the part numbers, the products and every price. No logo
 // and no claim that a brand supplied or endorses any of it.
 

@@ -85,7 +85,7 @@ export type ItemCategory = (typeof ITEM_CATEGORIES)[number];
 export interface Item {
   no: string;
   description: string;
-  /** A real brand name Spectra carries, as plain text (ADR 0050). */
+  /** A real brand name Spectra carries, as plain text (ADR 0051). */
   brand: string;
   category: ItemCategory;
   /** A made-up part number in the brand's style, such as `210-ZZ0001`. */

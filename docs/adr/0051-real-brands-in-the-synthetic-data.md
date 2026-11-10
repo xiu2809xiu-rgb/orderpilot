@@ -1,4 +1,4 @@
-# ADR 0050: Real brands in the synthetic data
+# ADR 0051: Real brands in the synthetic data
 
 - **Status:** Accepted. Richie reads the brand list once for real part numbers.
 - **Date:** 2026-11-10
