@@ -11,14 +11,24 @@ import { ModuleRef } from "@nestjs/core";
 import {
   DEFAULT_ROLE_PERMISSIONS,
   ROLES,
+  auditEventViewSchema,
   decimalStringSchema,
   errorEnvelopeSchema,
   sessionResponseSchema,
   type Role,
 } from "@orderpilot/shared";
+import { syntheticDataset } from "@orderpilot/synthetic-data";
 import type { Request } from "express";
 import request from "supertest";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 import { z } from "zod";
 import type { AuthContext } from "../../src/auth/auth-context.js";
 import {
@@ -35,8 +45,26 @@ import { seedApprovalSetups } from "../../src/modules/governance/approval-setup-
 import { ApprovalSetupRepository } from "../../src/modules/governance/approval-setup.repository.js";
 import { ApprovalSetupService } from "../../src/modules/governance/approval-setup.service.js";
 import { AuthorisationService } from "../../src/modules/governance/authorisation.service.js";
+import { seedVendorBankBaselines } from "../../src/modules/governance/bank-baseline-seed.js";
+import { BankDetailHoldService } from "../../src/modules/governance/bank-detail-hold.service.js";
+import { BankHoldRepository } from "../../src/modules/governance/bank-hold.repository.js";
 import type { ApprovalSetup } from "../../src/modules/governance/domain/approval-setup.js";
+import { digestOf } from "../../src/modules/governance/domain/bank-comparison.js";
+import {
+  BankDetails,
+  BankFingerprinter,
+  type RawBankDetails,
+} from "../../src/modules/governance/domain/bank-details.js";
 import { GovernancePermissionPolicy } from "../../src/modules/governance/governance-permission-policy.js";
+import {
+  bankHoldListResponseSchema,
+  bankHoldResponseSchema,
+} from "../../src/modules/governance/governance.schemas.js";
+import {
+  MASTER_DATA_READER,
+  type MasterDataReader,
+  type MasterDataVendor,
+} from "../../src/modules/master-data/domain/master-data-reader.js";
 import { UserRepository } from "../../src/users/user.repository.js";
 import {
   API,
@@ -101,6 +129,7 @@ class StandInApprovalController {
 const standInActionSchema = z.object({
   action: z.string().min(1),
   requesterUserId: z.uuid().optional(),
+  vendorNo: z.string().min(1).optional(),
   earlierDuties: z
     .object({
       "vendor-payment.approve": z.uuid().optional(),
@@ -138,6 +167,7 @@ class StandInActionController {
         action: body.action,
         resource: { type: "Payment", id: recordNo },
         requesterUserId: body.requesterUserId,
+        vendorNo: body.vendorNo,
         earlierDuties: body.earlierDuties,
       },
       { ip: req.ip ?? null, traceId: requestIdOf(req) },
@@ -147,6 +177,16 @@ class StandInActionController {
 }
 
 const SECOND_APPROVER = "approver.second@example.test";
+const TEST_BANK_FINGERPRINT_KEY =
+  "test-only-bank-fingerprint-key-0000000000000000";
+const keyWarnings = (t: TestApp) =>
+  t
+    .logLines()
+    .filter(
+      (line) =>
+        typeof line.msg === "string" &&
+        line.msg.includes("BANK_FINGERPRINT_KEY"),
+    );
 const BY_THE_TEST = {
   actor: { kind: "system", name: "governance-controls test" },
   ip: null,
@@ -670,10 +710,11 @@ describe("no self-approval and segregation of duties (F-4)", () => {
     action: string,
     earlierDuties: Record<string, string> = {},
     recordNo = "PAY-F4-1",
+    vendorNo?: string,
   ) =>
     call(t, as(who), "post", `${API}/test-only/actions/${recordNo}`, {
       csrf: true,
-      body: { action, earlierDuties },
+      body: { action, earlierDuties, vendorNo },
     });
   const lastRefusal = async () =>
     (await auditEvents(t))
@@ -896,27 +937,37 @@ describe("no self-approval and segregation of duties (F-4)", () => {
 
   describe("segregation of duties", () => {
     it("refuses the same person approving a vendor payment and clearing its hold", async () => {
-      const approvedBy = { "vendor-payment.approve": id("finance") };
+      const approvedBy = { "vendor-payment.approve": id("approver") };
       expect(
-        (await act("FINANCE", "payment-hold.clear", approvedBy)).status,
+        (await act("APPROVER", "payment-hold.clear", approvedBy)).status,
       ).toBe(403);
       expect((await lastRefusal())?.changes).toMatchObject({
         rule: "segregation-of-duties",
         earlierDuties: approvedBy,
       });
+      // Someone else passes this rule and stops at the next: no real hold here.
       expect(
-        (await act("finance2", "payment-hold.clear", approvedBy)).status,
-      ).toBe(200);
+        (await act("substitute", "payment-hold.clear", approvedBy)).status,
+      ).toBe(403);
+      expect((await lastRefusal())?.changes).toMatchObject({
+        rule: "hold-verification",
+      });
     });
 
     it("refuses the same person clearing a bank-detail hold after changing the details", async () => {
-      const changedBy = { "vendor-bank.change": id("finance") };
+      const changedBy = { "vendor-bank.change": id("approver") };
       expect(
-        (await act("FINANCE", "payment-hold.clear", changedBy)).status,
+        (await act("APPROVER", "payment-hold.clear", changedBy)).status,
       ).toBe(403);
+      expect((await lastRefusal())?.changes).toMatchObject({
+        rule: "segregation-of-duties",
+      });
       expect(
-        (await act("finance2", "payment-hold.clear", changedBy)).status,
-      ).toBe(200);
+        (await act("substitute", "payment-hold.clear", changedBy)).status,
+      ).toBe(403);
+      expect((await lastRefusal())?.changes).toMatchObject({
+        rule: "hold-verification",
+      });
     });
 
     it("refuses whoever changed a vendor's bank details approving or releasing a payment to that vendor", async () => {
@@ -926,14 +977,17 @@ describe("no self-approval and segregation of duties (F-4)", () => {
           "vendor-payment.approve",
           "vendor-payment.release",
         ]) {
-          expect((await act("FINANCE", action, changedBy)).status, action).toBe(
-            403,
-          );
+          expect(
+            (await act("FINANCE", action, changedBy, "PAY-F4-1", "V-F4-1"))
+              .status,
+            action,
+          ).toBe(403);
           expect((await lastRefusal())?.changes, action).toMatchObject({
             rule: "segregation-of-duties",
           });
           expect(
-            (await act("finance2", action, changedBy)).status,
+            (await act("finance2", action, changedBy, "PAY-F4-1", "V-F4-1"))
+              .status,
             action,
           ).toBe(200);
         }
@@ -956,10 +1010,10 @@ describe("no self-approval and segregation of duties (F-4)", () => {
       () => approveSpr("APPROVER", "approver", "SPR-F4-AUDIT"),
       () =>
         act(
-          "FINANCE",
+          "APPROVER",
           "payment-hold.clear",
           {
-            "vendor-payment.approve": id("finance"),
+            "vendor-payment.approve": id("approver"),
           },
           "PAY-F4-AUDIT",
         ),
@@ -984,11 +1038,1186 @@ describe("no self-approval and segregation of duties (F-4)", () => {
 });
 
 describe("the bank-detail hold (F-5)", () => {
-  it.todo("holds a payment whose bank details differ from the vendor record");
-  it.todo("never trusts the bank details on the PI, only the record");
-  it.todo("clears the hold only with Finance and a second approver");
-  it.todo("refuses the second approver being the requester or the first one");
+  let t: TestApp;
+  const ids = new Map<string, string>();
+  const sessions = new Map<string, Browser>();
+  const id = (who: string): string => {
+    const found = ids.get(who);
+    if (!found) throw new Error(`no user for ${who}`);
+    return found;
+  };
+  const as = (who: string): Browser => {
+    const found = sessions.get(who);
+    if (!found) throw new Error(`no session for ${who}`);
+    return found;
+  };
+
+  // Obviously fake: ZZ is not a country, and the bank names itself a demo.
+  const RECORD = {
+    bankAccountNo: "000000009901",
+    swiftCode: "DEMOZZ00",
+    iban: "ZZ00DEMO0000000009901",
+  };
+  const CHANGED = {
+    bankAccountNo: "000000007702",
+    swiftCode: "DEMOZZ77",
+    iban: "ZZ00DEMO0000000007702",
+  };
+  const HOLDS = `${API}/governance/bank-holds`;
+  const STORED_CONTACT = "Called the number on the stored vendor record.";
+
+  let vendors = 0;
+  const nextVendor = () => {
+    vendors += 1;
+    return `V-F5-${String(vendors).padStart(3, "0")}`;
+  };
+  const control = () => t.app.get(BankDetailHoldService);
+  const setBaseline = (vendorNo: string, details: RawBankDetails = RECORD) =>
+    control().recordBaseline(
+      { vendorNo, accountCode: "MAIN", details },
+      BY_THE_TEST,
+    );
+  const reportPi = (
+    vendorNo: string,
+    details: RawBankDetails,
+    changedBy = "support",
+  ) =>
+    control().reportDetails(
+      {
+        vendorNo,
+        details,
+        source: "vendor-pi",
+        sourceRef: "PI-F5-1",
+        changedByUserId: id(changedBy),
+      },
+      BY_THE_TEST,
+    );
+  interface HeldVendor {
+    readonly vendorNo: string;
+    readonly holdId: string;
+  }
+  /** A vendor with stored details, and a PI that differs from them. */
+  const heldVendor = async (changedBy = "support"): Promise<HeldVendor> => {
+    const vendorNo = nextVendor();
+    await setBaseline(vendorNo);
+    const report = await reportPi(vendorNo, CHANGED, changedBy);
+    if (report.outcome !== "held") throw new Error("expected a hold");
+    return { vendorNo, holdId: report.holdId };
+  };
+
+  const verify = (who: string, holdId: string, body: object = {}) =>
+    call(t, as(who), "post", `${HOLDS}/${holdId}/verifications`, {
+      csrf: true,
+      body: {
+        outcome: "confirmed",
+        contactedAt: new Date().toISOString(),
+        contactFromStoredRecord: true,
+        reason: STORED_CONTACT,
+        ...body,
+      },
+    });
+  const clear = (who: string, holdId: string, body: object = {}) =>
+    call(t, as(who), "post", `${HOLDS}/${holdId}/clear`, {
+      csrf: true,
+      body: {
+        resolution: "accept-new-details",
+        reason: "The verification is sound and the change is genuine.",
+        ...body,
+      },
+    });
+  const view = (who: string, holdId: string) =>
+    call(t, as(who), "get", `${HOLDS}/${holdId}`);
+  const holdSeenBy = async (who: string, holdId: string) => {
+    const res = await view(who, holdId);
+    expect(res.status).toBe(200);
+    return bankHoldResponseSchema.parse(res.body).data;
+  };
+  const pay = (
+    who: string,
+    vendorNo?: string,
+    action = "vendor-payment.release",
+    earlierDuties: Record<string, string> = {},
+  ) =>
+    call(t, as(who), "post", `${API}/test-only/actions/PAY-F5-1`, {
+      csrf: true,
+      body: { action, vendorNo, earlierDuties },
+    });
+
+  const events = async (action: string, entityId?: string) =>
+    (await auditEvents(t)).filter(
+      (event) =>
+        event.action === action &&
+        (entityId === undefined || event.entityId === entityId),
+    );
+  const lastRefusal = async () =>
+    (await events("governance.policy.refused")).at(-1);
+  const expectRule = async (rule: string) => {
+    expect((await lastRefusal())?.changes).toMatchObject({ rule });
+  };
+  /** Grants a permission for one piece of work, through the matrix route. */
+  const withGrant = async (
+    role: Role,
+    permission: string,
+    work: () => Promise<void>,
+  ) => {
+    const cell = `${API}/governance/matrix/${role}/permissions/${permission}`;
+    const grant = (granted: boolean) =>
+      call(t, as("admin"), "put", cell, { csrf: true, body: { granted } });
+    expect((await grant(true)).status).toBe(200);
+    try {
+      await work();
+    } finally {
+      await grant(false);
+    }
+  };
+  const withFinancePaying = (work: () => Promise<void>) =>
+    withGrant("FINANCE", "payments.post", work);
+
+  beforeAll(async () => {
+    await resetTestData();
+    t = await createTestApp(
+      { BANK_FINGERPRINT_KEY: TEST_BANK_FINGERPRINT_KEY },
+      [StandInActionController],
+    );
+    const users = t.app.get(UserRepository);
+    const hasher = t.app.get(PasswordHasher);
+    for (const [who, role] of [
+      ["finance", "FINANCE"],
+      ["approver", "APPROVER"],
+      ["support", "SUPPORT"],
+      ["warehouse", "WAREHOUSE"],
+      ["auditor", "AUDITOR"],
+      ["admin", "SYSTEM_ADMIN"],
+    ] as const) {
+      const user = await users.findByEmail(await emailForRole(role));
+      if (!user) throw new Error(`no demo user for ${role}`);
+      ids.set(who, user.id);
+      sessions.set(who, await demoSignIn(t, role));
+    }
+    for (const [who, email, role, name] of [
+      ["finance2", "finance.second@example.test", "FINANCE", "Second Finance"],
+      ["approver2", SECOND_APPROVER, "APPROVER", "Second Approver"],
+    ] as const) {
+      const user = await users.create({
+        email,
+        displayName: name,
+        role,
+        passwordHash: await hasher.hash(TEST_DEMO_PASSWORD),
+      });
+      ids.set(who, user.id);
+      sessions.set(who, await passwordSignIn(t, email));
+    }
+  });
+  afterAll(async () => {
+    await t.close();
+  });
+
+  it("logs no warning about the key when it has one", () => {
+    expect(keyWarnings(t)).toEqual([]);
+  });
+
+  it("fingerprints with the key in the configuration", () => {
+    const digestBy = (fingerprinter: BankFingerprinter) =>
+      fingerprinter.digest("iban", RECORD.iban);
+    expect(digestBy(t.app.get(BankFingerprinter))).toBe(
+      digestBy(new BankFingerprinter(TEST_BANK_FINGERPRINT_KEY)),
+    );
+  });
+
+  describe("what opens a hold", () => {
+    it("opens nothing when the details match, however they are written", async () => {
+      const vendorNo = nextVendor();
+      await setBaseline(vendorNo);
+      for (const details of [
+        RECORD,
+        {
+          bankAccountNo: "0000 0000 9901",
+          swiftCode: "demozz00xxx",
+          iban: "zz00 demo 0000 0000 0990 1",
+        },
+        // A document that does not print one field has not changed it.
+        { bankAccountNo: RECORD.bankAccountNo },
+      ]) {
+        expect(await reportPi(vendorNo, details)).toEqual({ outcome: "match" });
+      }
+      expect(await control().openHoldsFor(vendorNo)).toEqual([]);
+    });
+
+    it.each([
+      { label: "Bank Account No.", field: "bankAccountNo" },
+      { label: "SWIFT Code", field: "swiftCode" },
+      { label: "IBAN", field: "iban" },
+    ] as const)(
+      "opens a hold naming only $label when it alone differs",
+      async ({ field }) => {
+        const vendorNo = nextVendor();
+        await setBaseline(vendorNo);
+        const report = await reportPi(vendorNo, {
+          ...RECORD,
+          [field]: CHANGED[field],
+        });
+        expect(report).toMatchObject({
+          outcome: "held",
+          differingFields: [field],
+        });
+      },
+    );
+
+    it("holds a payment whose bank details differ from the vendor record", async () => {
+      const { vendorNo, holdId } = await heldVendor();
+      await withFinancePaying(async () => {
+        for (const action of [
+          "vendor-payment.release",
+          "vendor-payment.approve",
+        ]) {
+          const res = await pay("finance", vendorNo, action);
+          expect(res.status, action).toBe(403);
+          // F-1's generic envelope: the rule, the reason and the hold stay out of it.
+          const { error } = errorEnvelopeSchema.parse(res.body);
+          expect({ ...error, traceId: "" }, action).toEqual({
+            code: "FORBIDDEN",
+            message: "You do not have access to this.",
+            details: null,
+            traceId: "",
+          });
+          expect(res.text, action).not.toContain(holdId);
+          const refusal = await lastRefusal();
+          expect(refusal?.changes, action).toMatchObject({
+            action,
+            rule: "bank-detail-hold",
+            vendorNo,
+            holdIds: [holdId],
+          });
+          expect(refusal?.changes?.reason, action).toContain(holdId);
+        }
+        const decision = await t.app.get(AuthorisationService).decide({
+          actor: { userId: id("finance"), role: "FINANCE" },
+          action: "vendor-payment.release",
+          resource: { type: "Payment", id: "PAY-F5-1" },
+          vendorNo,
+        });
+        expect(decision).toMatchObject({
+          outcome: "refused",
+          rule: "bank-detail-hold",
+        });
+        expect(decision.reason).toContain(holdId);
+      });
+    });
+
+    it("opens the same hold for an edit to the vendor record", async () => {
+      const vendorNo = nextVendor();
+      await setBaseline(vendorNo);
+      const report = await control().reportDetails(
+        {
+          vendorNo,
+          accountCode: "MAIN",
+          details: { ...RECORD, iban: null },
+          source: "vendor-record",
+          sourceRef: "CR-F5-1",
+          changedByUserId: id("finance"),
+        },
+        BY_THE_TEST,
+      );
+      expect(report).toMatchObject({
+        outcome: "held",
+        differingFields: ["iban"],
+      });
+      await withFinancePaying(async () => {
+        expect((await pay("finance2", vendorNo)).status).toBe(403);
+        await expectRule("bank-detail-hold");
+      });
+    });
+
+    it("never trusts the bank details on the PI, only the record", async () => {
+      const vendorNo = nextVendor();
+      // Nothing on record yet: the PI is held, and never becomes the record.
+      const first = await reportPi(vendorNo, CHANGED);
+      const second = await reportPi(vendorNo, CHANGED);
+      expect(first).toMatchObject({ outcome: "held" });
+      expect(second).toEqual(first);
+      await setBaseline(vendorNo, RECORD);
+      expect(await reportPi(vendorNo, RECORD)).toEqual({ outcome: "match" });
+    });
+
+    it("matches vendors on their Business Central number, never their details", async () => {
+      const { vendorNo } = await heldVendor();
+      const other = nextVendor();
+      await setBaseline(other, CHANGED);
+      expect(await reportPi(other, CHANGED)).toEqual({ outcome: "match" });
+      await withFinancePaying(async () => {
+        expect((await pay("finance2", other)).status).toBe(200);
+        expect((await pay("finance2", vendorNo)).status).toBe(403);
+      });
+    });
+
+    it("compares a PI only with its own vendor's record when two vendors share a name", async () => {
+      const first = nextVendor();
+      const second = nextVendor();
+      const vendor = (no: string): MasterDataVendor => ({
+        no,
+        name: "Same Name Trading Pte Ltd (synthetic)",
+        currencyCode: "USD",
+        paymentTermsCode: "30 DAYS",
+        balanceLcy: "0.00",
+      });
+      const reader = t.app.get<MasterDataReader>(MASTER_DATA_READER, {
+        strict: false,
+      });
+      const vendors = vi
+        .spyOn(reader, "vendors")
+        .mockResolvedValue([vendor(first), vendor(second)]);
+      const accounts = vi
+        .spyOn(reader, "vendorBankAccounts")
+        .mockImplementation((no) =>
+          Promise.resolve([
+            {
+              code: "MAIN",
+              name: "Demo Bank (not a real bank)",
+              ...(no === first ? RECORD : CHANGED),
+            },
+          ]),
+        );
+      try {
+        await seedVendorBankBaselines(t.app);
+      } finally {
+        vendors.mockRestore();
+        accounts.mockRestore();
+      }
+
+      expect(await reportPi(first, RECORD)).toEqual({ outcome: "match" });
+      expect(await reportPi(second, CHANGED)).toEqual({ outcome: "match" });
+      // The other vendor's details are a difference, whatever the name says.
+      expect(await reportPi(first, CHANGED)).toMatchObject({
+        outcome: "held",
+        differingFields: ["bankAccountNo", "swiftCode", "iban"],
+      });
+      await withFinancePaying(async () => {
+        expect((await pay("finance2", second)).status).toBe(200);
+        expect((await pay("finance2", first)).status).toBe(403);
+      });
+    });
+
+    it("keeps one hold for one set of new details, and opens another for different ones", async () => {
+      const { vendorNo, holdId } = await heldVendor();
+      expect(await reportPi(vendorNo, CHANGED)).toMatchObject({ holdId });
+      const other = await reportPi(vendorNo, {
+        ...CHANGED,
+        bankAccountNo: "000000003303",
+      });
+      expect(other).toMatchObject({ outcome: "held" });
+      expect(other).not.toMatchObject({ holdId });
+      expect(await control().openHoldsFor(vendorNo)).toHaveLength(2);
+      expect(
+        (await events("governance.bank-hold.opened")).filter(
+          (event) => event.changes?.vendorNo === vendorNo,
+        ),
+      ).toHaveLength(2);
+    });
+
+    it("opens one hold when two reports race", async () => {
+      const vendorNo = nextVendor();
+      await setBaseline(vendorNo);
+      const [first, second] = await Promise.all([
+        reportPi(vendorNo, CHANGED),
+        reportPi(vendorNo, CHANGED),
+      ]);
+      expect(second).toEqual(first);
+      expect(await control().openHoldsFor(vendorNo)).toHaveLength(1);
+    });
+
+    it("is held to one open hold per set of new details by the table itself", async () => {
+      const { vendorNo } = await heldVendor();
+      const repository = t.app.get(BankHoldRepository);
+      const [open] = await repository.openHoldsFor(vendorNo);
+      if (!open) throw new Error("expected a hold");
+      const copy = {
+        vendorNo,
+        accountCode: open.accountCode,
+        source: open.source,
+        sourceRef: open.sourceRef,
+        changedByUserId: open.changedByUserId,
+        differingFields: open.differingFields,
+        beforeMasks: open.beforeMasks,
+        proposed: open.proposed,
+        openedAt: open.openedAt,
+      };
+      await expect(
+        repository.insert({
+          ...copy,
+          proposedDigest: digestOf(open.proposed),
+        }),
+      ).rejects.toThrow();
+      // The same row with other details goes in, so the index is what refused.
+      await expect(
+        repository.insert({
+          ...copy,
+          proposedDigest: "another-set-of-details",
+        }),
+      ).resolves.toMatchObject({ vendorNo });
+    });
+
+    it("ignores a document with no bank details on it", async () => {
+      const vendorNo = nextVendor();
+      await setBaseline(vendorNo);
+      expect(await reportPi(vendorNo, {})).toEqual({ outcome: "no-details" });
+      expect(await control().openHoldsFor(vendorNo)).toEqual([]);
+    });
+
+    it("refuses a vendor payment that does not name its vendor", async () => {
+      await withFinancePaying(async () => {
+        expect((await pay("finance2")).status).toBe(403);
+        await expectRule("bank-detail-hold");
+      });
+    });
+
+    it("tells area 2 what is held, and reports nothing for a clear vendor", async () => {
+      const { vendorNo, holdId } = await heldVendor();
+      expect(await control().openHoldsFor(vendorNo)).toEqual([
+        {
+          holdId,
+          differingFields: ["bankAccountNo", "swiftCode", "iban"],
+          openedAt: expect.any(Date) as Date,
+          blockedReason: null,
+        },
+      ]);
+      expect(await control().openHoldsFor(nextVendor())).toEqual([]);
+    });
+  });
+
+  describe("clearing a hold", () => {
+    it("clears the hold only with Finance and a second approver", async () => {
+      const { vendorNo, holdId } = await heldVendor();
+      await withFinancePaying(async () => {
+        expect((await verify("finance", holdId)).status).toBe(200);
+        // One person's verification is not enough to pay.
+        expect((await pay("finance2", vendorNo)).status).toBe(403);
+        await expectRule("bank-detail-hold");
+
+        expect((await clear("approver", holdId)).status).toBe(200);
+        expect((await pay("finance2", vendorNo)).status).toBe(200);
+      });
+      expect(await holdSeenBy("finance", holdId)).toMatchObject({
+        status: "cleared",
+        resolution: "accept-new-details",
+        clearedByUserId: id("approver"),
+      });
+      expect(await control().openHoldsFor(vendorNo)).toEqual([]);
+
+      // The accepted details are now the stored ones, and the old ones differ.
+      expect(await reportPi(vendorNo, CHANGED)).toEqual({ outcome: "match" });
+      expect(await reportPi(vendorNo, RECORD)).toMatchObject({
+        outcome: "held",
+      });
+    });
+
+    it("refuses the second approver being the person who changed the details or the first one", async () => {
+      // Whoever changed the details cannot verify them.
+      const changedByFinance = await heldVendor("finance");
+      expect((await verify("finance", changedByFinance.holdId)).status).toBe(
+        403,
+      );
+      await expectRule("segregation-of-duties");
+      expect(
+        (await holdSeenBy("finance2", changedByFinance.holdId)).verifications,
+      ).toEqual([]);
+
+      // Whoever changed the details cannot clear them.
+      const changedByApprover = await heldVendor("approver");
+      expect((await verify("finance", changedByApprover.holdId)).status).toBe(
+        200,
+      );
+      expect((await clear("approver", changedByApprover.holdId)).status).toBe(
+        403,
+      );
+      await expectRule("segregation-of-duties");
+
+      // One person cannot do both, even holding both permissions.
+      const oneAlone = await heldVendor();
+      await withGrant("FINANCE", "approvals.decide", async () => {
+        expect((await verify("finance", oneAlone.holdId)).status).toBe(200);
+        expect((await clear("finance", oneAlone.holdId)).status).toBe(403);
+        await expectRule("segregation-of-duties");
+        expect((await clear("finance2", oneAlone.holdId)).status).toBe(200);
+      });
+    });
+
+    it("refuses a clearance before any verification", async () => {
+      const { holdId } = await heldVendor();
+      expect((await clear("approver", holdId)).status).toBe(403);
+      await expectRule("hold-verification");
+    });
+
+    it("refuses a confirmation whose contact came from the new document, and records nothing", async () => {
+      const { holdId } = await heldVendor();
+      const res = await verify("finance", holdId, {
+        contactFromStoredRecord: false,
+      });
+      expect(res.status).toBe(403);
+      await expectRule("hold-verification");
+      expect((await lastRefusal())?.changes?.reason).toContain("stored record");
+      expect((await holdSeenBy("finance", holdId)).verifications).toEqual([]);
+    });
+
+    it("refuses a contact in the future", async () => {
+      const { holdId } = await heldVendor();
+      const res = await verify("finance", holdId, {
+        contactedAt: new Date(Date.now() + 3_600_000).toISOString(),
+      });
+      expect(res.status).toBe(403);
+      await expectRule("hold-verification");
+    });
+
+    it("keeps the hold after a rejected verification, and records why", async () => {
+      const { vendorNo, holdId } = await heldVendor();
+      const why = "The vendor says it did not change its account.";
+      expect(
+        (await verify("finance", holdId, { outcome: "rejected", reason: why }))
+          .status,
+      ).toBe(200);
+
+      const hold = await holdSeenBy("finance", holdId);
+      expect(hold.status).toBe("open");
+      expect(hold.verifications).toMatchObject([
+        {
+          outcome: "rejected",
+          verifiedByUserId: id("finance"),
+          note: { value: why },
+        },
+      ]);
+      await withFinancePaying(async () => {
+        expect((await pay("finance2", vendorNo)).status).toBe(403);
+      });
+      expect((await clear("approver", holdId)).status).toBe(403);
+      await expectRule("hold-verification");
+
+      // A later confirmation, from someone else, can still move it on.
+      expect((await verify("finance2", holdId)).status).toBe(200);
+      expect((await clear("approver", holdId)).status).toBe(200);
+    });
+
+    it("closes a hold as suspected fraud with two people, and keeps the stored details", async () => {
+      const { vendorNo, holdId } = await heldVendor();
+      expect(
+        (await verify("finance", holdId, { outcome: "rejected" })).status,
+      ).toBe(200);
+      const res = await clear("approver", holdId, {
+        resolution: "keep-stored-details",
+        reason: "The vendor denies the change, so the PI is not genuine.",
+      });
+      expect(res.status).toBe(200);
+      expect(await holdSeenBy("finance", holdId)).toMatchObject({
+        status: "cleared",
+        resolution: "keep-stored-details",
+      });
+
+      const [event] = await events(
+        "governance.bank-hold.details-rejected",
+        holdId,
+      );
+      expect(event?.summary).toContain("suspected fraud: details rejected");
+      expect(event?.changes).toMatchObject({
+        finding: "suspected fraud: details rejected",
+        resolution: "keep-stored-details",
+      });
+      expect(await events("governance.bank-hold.cleared", holdId)).toEqual([]);
+
+      await withFinancePaying(async () => {
+        expect((await pay("finance2", vendorNo)).status).toBe(200);
+      });
+      // The stored details stand, so the forged ones are still a difference.
+      expect(await reportPi(vendorNo, RECORD)).toEqual({ outcome: "match" });
+      expect(await reportPi(vendorNo, CHANGED)).toMatchObject({
+        outcome: "held",
+      });
+    });
+
+    it("keeps the two people apart when closing as suspected fraud too", async () => {
+      const { holdId } = await heldVendor();
+      const keep = { resolution: "keep-stored-details" };
+      await withGrant("FINANCE", "approvals.decide", async () => {
+        expect(
+          (await verify("finance", holdId, { outcome: "rejected" })).status,
+        ).toBe(200);
+        expect((await clear("finance", holdId, keep)).status).toBe(403);
+        await expectRule("segregation-of-duties");
+      });
+    });
+
+    it("refuses a resolution the latest verification does not support", async () => {
+      const confirmed = await heldVendor();
+      expect((await verify("finance", confirmed.holdId)).status).toBe(200);
+      expect(
+        (
+          await clear("approver", confirmed.holdId, {
+            resolution: "keep-stored-details",
+          })
+        ).status,
+      ).toBe(403);
+      await expectRule("hold-verification");
+    });
+
+    it("refuses every role without the right by a direct call, and audits it", async () => {
+      const { holdId } = await heldVendor();
+      const refusals = async () =>
+        (await events("auth.permission.refused")).length;
+      for (const [step, permission, holders] of [
+        [verify, "payments.confirm", ["FINANCE"]],
+        // Management is meant to be able to be the second approver.
+        [clear, "approvals.decide", ["APPROVER", "MANAGEMENT"]],
+      ] as const) {
+        const holds = (role: Role) =>
+          DEFAULT_ROLE_PERMISSIONS[role].includes(permission);
+        // Pinned, or a role wrongly granted the right would leave the loop below.
+        expect(ROLES.filter(holds), permission).toEqual(holders);
+        for (const role of ROLES.filter((other) => !holds(other))) {
+          sessions.set(role, await demoSignIn(t, role));
+          const before = await refusals();
+          const res = await step(role, holdId);
+          expect(res.status, role).toBe(403);
+          expect(errorEnvelopeSchema.parse(res.body).error.code, role).toBe(
+            "FORBIDDEN",
+          );
+          expect(await refusals(), role).toBe(before + 1);
+        }
+      }
+    });
+
+    it("lets only one of two racing clearances through", async () => {
+      const { holdId } = await heldVendor();
+      expect((await verify("finance", holdId)).status).toBe(200);
+      const results = await Promise.all([
+        clear("approver", holdId),
+        clear("approver2", holdId),
+      ]);
+      expect(results.filter((res) => res.status === 200)).toHaveLength(1);
+      expect(await events("governance.bank-hold.cleared", holdId)).toHaveLength(
+        1,
+      );
+    });
+
+    it("refuses clearing a hold that is already closed", async () => {
+      const { holdId } = await heldVendor();
+      expect((await verify("finance", holdId)).status).toBe(200);
+      expect((await clear("approver", holdId)).status).toBe(200);
+      expect((await clear("approver2", holdId)).status).toBe(403);
+      await expectRule("hold-verification");
+      expect((await verify("finance2", holdId)).status).toBe(403);
+      await expectRule("hold-verification");
+    });
+
+    it("keeps whoever changed the details barred from paying that vendor, from its own record", async () => {
+      const { vendorNo, holdId } = await heldVendor("finance");
+      expect((await verify("finance2", holdId)).status).toBe(200);
+      expect((await clear("approver", holdId)).status).toBe(200);
+      // A caller naming someone else as the changer changes nothing.
+      const claim = { "vendor-bank.change": id("finance2") };
+      await withFinancePaying(async () => {
+        const res = await pay(
+          "finance",
+          vendorNo,
+          "vendor-payment.release",
+          claim,
+        );
+        expect(res.status).toBe(403);
+        await expectRule("segregation-of-duties");
+        expect(
+          (await pay("finance2", vendorNo, "vendor-payment.release", claim))
+            .status,
+        ).toBe(200);
+      });
+    });
+
+    it("shows why a hold cannot move when only the person who changed it could verify it", async () => {
+      const { vendorNo, holdId } = await heldVendor("finance");
+      expect((await holdSeenBy("finance", holdId)).blockedReason).toBeNull();
+      const users = t.app.get(UserRepository);
+      await users.setDisabledAt(id("finance2"), new Date());
+      try {
+        expect((await holdSeenBy("finance", holdId)).blockedReason).toBe(
+          "needs a different Finance user",
+        );
+        expect(await control().openHoldsFor(vendorNo)).toMatchObject([
+          { blockedReason: "needs a different Finance user" },
+        ]);
+        const list = await call(
+          t,
+          as("finance"),
+          "get",
+          `${HOLDS}?status=open&vendorNo=${vendorNo}`,
+        );
+        expect(
+          bankHoldListResponseSchema.parse(list.body).data[0]?.blockedReason,
+        ).toBe("needs a different Finance user");
+      } finally {
+        await users.setDisabledAt(id("finance2"), null);
+      }
+      expect((await holdSeenBy("finance", holdId)).blockedReason).toBeNull();
+    });
+
+    it("refuses a reason with an account number in it, without repeating it", async () => {
+      const { holdId } = await heldVendor();
+      for (const step of [
+        () => verify("finance", holdId, { reason: `Called: ${CHANGED.iban}` }),
+        () =>
+          clear("approver", holdId, {
+            reason: `Accepted ${CHANGED.bankAccountNo} today`,
+          }),
+      ]) {
+        const res = await step();
+        expect(res.status).toBe(400);
+        expect(errorEnvelopeSchema.parse(res.body).error.details).toMatchObject(
+          [{ path: "reason" }],
+        );
+        expect(res.text).not.toContain(CHANGED.iban);
+        expect(res.text).not.toContain(CHANGED.bankAccountNo);
+        // Audited like any refusal, and the row does not repeat it either.
+        await expectRule("hold-reason");
+        const refusal = JSON.stringify(await lastRefusal());
+        expect(refusal).toContain(holdId);
+        expect(refusal).not.toContain(CHANGED.iban);
+        expect(refusal).not.toContain(CHANGED.bankAccountNo);
+      }
+    });
+
+    describe.each([
+      { label: "empty", body: { reason: "" } },
+      { label: "only spaces", body: { reason: "   " } },
+      { label: "missing", body: { reason: undefined } },
+    ])("a reason that is $label", ({ body }) => {
+      const expectRefusedAndAudited = async (
+        res: request.Response,
+        refused: { action: string; who: string; hold: HeldVendor },
+      ) => {
+        expect(res.status).toBe(400);
+        expect(errorEnvelopeSchema.parse(res.body).error).toMatchObject({
+          code: "VALIDATION_FAILED",
+          details: [{ path: "reason" }],
+        });
+        expect(await lastRefusal()).toMatchObject({
+          actor: { kind: "user", userId: id(refused.who) },
+          entityType: "VendorBankHold",
+          entityId: refused.hold.holdId,
+          changes: {
+            action: refused.action,
+            rule: "hold-reason",
+            vendorNo: refused.hold.vendorNo,
+            holdIds: [refused.hold.holdId],
+          },
+        });
+      };
+
+      it("is refused on the verification route, saves nothing and is audited", async () => {
+        const hold = await heldVendor();
+        await expectRefusedAndAudited(
+          await verify("finance", hold.holdId, body),
+          { action: "payment-hold.verify", who: "finance", hold },
+        );
+        expect(
+          (await holdSeenBy("finance", hold.holdId)).verifications,
+        ).toEqual([]);
+      });
+
+      it("is refused on the clearance route, keeps the hold open and is audited", async () => {
+        const hold = await heldVendor();
+        expect((await verify("finance", hold.holdId)).status).toBe(200);
+        await expectRefusedAndAudited(
+          await clear("approver", hold.holdId, body),
+          { action: "payment-hold.clear", who: "approver", hold },
+        );
+        expect(await holdSeenBy("finance", hold.holdId)).toMatchObject({
+          status: "open",
+          clearReason: null,
+        });
+      });
+    });
+
+    it("takes who verified from the session, and refuses a body that names them", async () => {
+      const { holdId } = await heldVendor();
+      const res = await verify("finance", holdId, {
+        verifiedByUserId: id("finance2"),
+      });
+      expect(res.status).toBe(400);
+      expect((await holdSeenBy("finance", holdId)).verifications).toEqual([]);
+      expect((await verify("finance", holdId)).status).toBe(200);
+      expect((await holdSeenBy("finance", holdId)).verifications).toMatchObject(
+        [{ verifiedByUserId: id("finance") }],
+      );
+    });
+
+    it("answers 404 for a hold that does not exist, and 400 for a bad id", async () => {
+      const unknown = "00000000-0000-7000-8000-00000000dead";
+      expect((await view("finance", unknown)).status).toBe(404);
+      expect((await verify("finance", unknown)).status).toBe(404);
+      expect((await clear("approver", unknown)).status).toBe(404);
+      expect((await view("finance", "not-a-uuid")).status).toBe(400);
+    });
+
+    it("lists holds a page at a time, by status and vendor", async () => {
+      const { vendorNo, holdId } = await heldVendor();
+      const res = await call(
+        t,
+        as("finance"),
+        "get",
+        `${HOLDS}?status=open&vendorNo=${vendorNo}&page=1&pageSize=10`,
+      );
+      expect(res.status).toBe(200);
+      const page = bankHoldListResponseSchema.parse(res.body);
+      expect(page.data.map((hold) => hold.id)).toEqual([holdId]);
+      expect(page.meta).toEqual({ page: 1, pageSize: 10, total: 1 });
+      const none = await call(
+        t,
+        as("finance"),
+        "get",
+        `${HOLDS}?status=cleared&vendorNo=${vendorNo}`,
+      );
+      expect(bankHoldListResponseSchema.parse(none.body).data).toEqual([]);
+    });
+  });
+
+  describe("what the trail and the screens show", () => {
+    it("audits the hold, the verification and the clearance, masked to the last four", async () => {
+      const { vendorNo, holdId } = await heldVendor();
+      expect((await verify("finance", holdId)).status).toBe(200);
+      expect((await clear("approver", holdId)).status).toBe(200);
+
+      const beforeAndAfter = {
+        bankAccountNo: { from: "****9901", to: "****7702" },
+        swiftCode: { from: "****ZZ00", to: "****ZZ77" },
+        iban: { from: "****9901", to: "****7702" },
+      };
+      expect(
+        (await events("governance.bank-hold.opened", holdId))[0],
+      ).toMatchObject({
+        actor: BY_THE_TEST.actor,
+        entityType: "VendorBankHold",
+        changes: {
+          vendorNo,
+          source: "vendor-pi",
+          sourceRef: "PI-F5-1",
+          changedByUserId: id("support"),
+          differingFields: ["bankAccountNo", "swiftCode", "iban"],
+          ...beforeAndAfter,
+        },
+      });
+      expect(
+        (await events("governance.bank-hold.verification-recorded", holdId))[0],
+      ).toMatchObject({
+        actor: { kind: "user", userId: id("finance"), role: "FINANCE" },
+        changes: {
+          vendorNo,
+          outcome: "confirmed",
+          contactFromStoredRecord: true,
+          reason: STORED_CONTACT,
+        },
+      });
+      expect(
+        (await events("governance.bank-hold.cleared", holdId))[0],
+      ).toMatchObject({
+        actor: { kind: "user", userId: id("approver"), role: "APPROVER" },
+        changes: {
+          vendorNo,
+          resolution: "accept-new-details",
+          verifiedByUserId: id("finance"),
+          ...beforeAndAfter,
+        },
+      });
+    });
+
+    it("masks bank details by role with a reason, and still shows which field differs", async () => {
+      const { holdId } = await heldVendor();
+      expect((await verify("finance", holdId)).status).toBe(200);
+      for (const who of ["finance", "approver", "auditor"]) {
+        const hold = await holdSeenBy(who, holdId);
+        expect(hold.fields[0], who).toMatchObject({
+          field: "bankAccountNo",
+          differs: true,
+          before: { masked: false, value: "****9901" },
+          after: { masked: false, value: "****7702" },
+        });
+      }
+      const hold = await holdSeenBy("warehouse", holdId);
+      expect(hold.differingFields).toEqual([
+        "bankAccountNo",
+        "swiftCode",
+        "iban",
+      ]);
+      for (const field of hold.fields) {
+        expect(field.before, field.field).toMatchObject({
+          masked: true,
+          value: null,
+          reason: "bankDetails",
+        });
+        expect(field.after, field.field).toMatchObject({
+          masked: true,
+          value: null,
+          reason: "bankDetails",
+        });
+      }
+      expect(hold.verifications[0]?.note).toMatchObject({
+        masked: true,
+        value: null,
+        reason: "bankDetails",
+      });
+    });
+
+    it.each([
+      {
+        resolution: "accept-new-details",
+        outcome: "confirmed",
+        event: "governance.bank-hold.cleared",
+      },
+      {
+        resolution: "keep-stored-details",
+        outcome: "rejected",
+        event: "governance.bank-hold.details-rejected",
+      },
+    ])(
+      "saves, masks and audits the second person's reason when closing with $resolution",
+      async ({ resolution, outcome, event }) => {
+        const { vendorNo, holdId } = await heldVendor();
+        expect((await verify("finance", holdId, { outcome })).status).toBe(200);
+        const why = "Checked against the verification on this hold.";
+        expect(
+          (await clear("approver", holdId, { resolution, reason: why })).status,
+        ).toBe(200);
+
+        expect((await holdSeenBy("finance", holdId)).clearReason).toMatchObject(
+          { masked: false, value: why },
+        );
+        expect(
+          (await holdSeenBy("warehouse", holdId)).clearReason,
+        ).toMatchObject({ masked: true, value: null, reason: "bankDetails" });
+        expect((await events(event, holdId))[0]).toMatchObject({
+          actor: { kind: "user", userId: id("approver"), role: "APPROVER" },
+          changes: { vendorNo, resolution, reason: why },
+        });
+      },
+    );
+
+    it("shows the last four in the audit viewer to the auditor only", async () => {
+      const { holdId } = await heldVendor();
+      const changesSeenBy = async (who: string) => {
+        const res = await call(
+          t,
+          as(who),
+          "get",
+          `${API}/audit/events?entityType=VendorBankHold&entityId=${holdId}`,
+        );
+        expect(res.status, who).toBe(200);
+        const body = z
+          .object({ data: z.array(auditEventViewSchema) })
+          .parse(res.body);
+        return body.data[0]?.changes.find(
+          (change) => change.field === "bankAccountNo",
+        );
+      };
+      expect(await changesSeenBy("auditor")).toMatchObject({
+        masked: false,
+        change: true,
+        before: "****9901",
+        after: "****7702",
+      });
+      expect(await changesSeenBy("admin")).toMatchObject({
+        masked: true,
+        reason: "bankDetails",
+        before: null,
+        after: null,
+      });
+    });
+
+    it("never lets a full number reach a response, an audit row, a table or a log", async () => {
+      const before = {
+        bankAccountNo: "000000004411",
+        swiftCode: "DEMOZZ44",
+        iban: "ZZ00DEMO0000000004411",
+      };
+      const after = {
+        bankAccountNo: "000000006622",
+        swiftCode: "DEMOZZ66",
+        iban: "ZZ00DEMO0000000006622",
+      };
+      const vendorNo = nextVendor();
+      await setBaseline(vendorNo, before);
+      const report = await reportPi(vendorNo, after, "finance");
+      if (report.outcome !== "held") throw new Error("expected a hold");
+      const { holdId } = report;
+
+      const responses = [
+        await verify("finance", holdId),
+        await verify("warehouse", holdId),
+        await verify("finance2", holdId, { contactFromStoredRecord: false }),
+        await verify("finance2", holdId),
+        await clear("finance2", holdId),
+        await view("finance", holdId),
+        await view("warehouse", holdId),
+        await call(t, as("finance"), "get", `${HOLDS}?vendorNo=${vendorNo}`),
+      ];
+      await withFinancePaying(async () => {
+        responses.push(await pay("finance2", vendorNo));
+      });
+      responses.push(await clear("approver", holdId));
+      await withFinancePaying(async () => {
+        responses.push(await pay("finance2", vendorNo));
+      });
+      responses.push(
+        await call(
+          t,
+          as("auditor"),
+          "get",
+          `${API}/audit/events?entityType=VendorBankHold&entityId=${holdId}`,
+        ),
+      );
+
+      const database = t.app.get(Database).client;
+      const tables = await Promise.all([
+        database.$queryRaw`SELECT row_to_json(r) AS row FROM "VendorBankBaseline" r`,
+        database.$queryRaw`SELECT row_to_json(r) AS row FROM "VendorBankHold" r`,
+        database.$queryRaw`SELECT row_to_json(r) AS row FROM "VendorBankHoldVerification" r`,
+      ]);
+      expect(t.logLines().length).toBeGreaterThan(0);
+      const everywhere = [
+        ...responses.map((res) => res.text),
+        JSON.stringify(await auditEvents(t)),
+        JSON.stringify(tables),
+        JSON.stringify(t.logLines()),
+      ];
+      expect(everywhere.join()).toContain(holdId);
+      for (const secret of [
+        ...Object.values(before),
+        ...Object.values(after),
+      ]) {
+        for (const text of everywhere) {
+          expect(text.includes(secret), secret).toBe(false);
+        }
+      }
+    });
+  });
+
+  describe("the stored details", () => {
+    it("records each vendor's stored details once, from the record, and never overwrites them", async () => {
+      const handedOver = vi.spyOn(control(), "recordBaseline");
+      await seedVendorBankBaselines(t.app);
+      const numbers = handedOver.mock.calls.map(
+        ([{ details }]) => details.bankAccountNo,
+      );
+      handedOver.mockRestore();
+      const synthetic = syntheticDataset().vendorBankAccounts;
+      expect(numbers).toHaveLength(synthetic.length);
+      // Obviously fake: ten zeros, then the vendor's own two digits.
+      for (const number of numbers) expect(number).toMatch(/^0{10}\d{2}$/);
+
+      const [first] = synthetic;
+      if (!first) throw new Error("no synthetic bank account");
+      expect(await reportPi(first.vendorNo, first)).toEqual({
+        outcome: "match",
+      });
+      const count = (await auditEvents(t)).length;
+      await seedVendorBankBaselines(t.app);
+      expect((await auditEvents(t)).length).toBe(count);
+    });
+
+    it("keeps the first stored details when asked to record them again", async () => {
+      const vendorNo = nextVendor();
+      expect(await setBaseline(vendorNo, RECORD)).toBe(true);
+      expect(await setBaseline(vendorNo, CHANGED)).toBe(false);
+      expect(await reportPi(vendorNo, RECORD)).toEqual({ outcome: "match" });
+    });
+  });
+
+  // No domain event bus exists yet (P-15). The audited half is tested above.
   it.todo("emits payment.held and payment.hold-cleared, both audited");
+});
+
+describe("the bank-detail hold with no fingerprint key (F-5)", () => {
+  let t: TestApp;
+  // Obviously fake: ZZ is not a country, and the bank names itself a demo.
+  const DETAILS = {
+    bankAccountNo: "000000008801",
+    swiftCode: "DEMOZZ88",
+    iban: "ZZ00DEMO0000000008801",
+  };
+  const control = () => t.app.get(BankDetailHoldService);
+  const report = (vendorNo: string) =>
+    control().reportDetails(
+      {
+        vendorNo,
+        details: DETAILS,
+        source: "vendor-pi",
+        sourceRef: "PI-NO-KEY-1",
+        changedByUserId: null,
+      },
+      BY_THE_TEST,
+    );
+
+  beforeAll(async () => {
+    await resetTestData();
+    t = await createTestApp();
+  });
+  afterAll(async () => {
+    await t.close();
+  });
+
+  it("has no key when the configuration has none", () => {
+    expect(t.app.get(BankFingerprinter).configured).toBe(false);
+  });
+
+  it("logs one clear warning at startup", () => {
+    expect(keyWarnings(t)).toMatchObject([
+      {
+        level: 40,
+        msg: "BANK_FINGERPRINT_KEY is not set: bank-detail comparisons will fail closed and every vendor change will be held.",
+      },
+    ]);
+  });
+
+  it("holds every report, since nothing can be compared", async () => {
+    const vendorNo = "V-NO-KEY-1";
+    expect(await report(vendorNo)).toMatchObject({ outcome: "held" });
+    expect(await report(vendorNo)).toMatchObject({ outcome: "held" });
+    expect((await control().openHoldsFor(vendorNo)).length).toBeGreaterThan(0);
+  });
+
+  it("stores nothing it could never compare with again", async () => {
+    const vendorNo = "V-NO-KEY-2";
+    expect(
+      await control().recordBaseline(
+        { vendorNo, accountCode: "MAIN", details: DETAILS },
+        BY_THE_TEST,
+      ),
+    ).toBe(false);
+    expect(await t.app.get(BankHoldRepository).baselinesFor(vendorNo)).toEqual(
+      [],
+    );
+    expect(await report(vendorNo)).toMatchObject({ outcome: "held" });
+  });
+
+  it("never matches details stored while there was no key", async () => {
+    const vendorNo = "V-NO-KEY-4";
+    await t.app
+      .get(BankHoldRepository)
+      .saveBaseline(
+        vendorNo,
+        "MAIN",
+        BankDetails.from(DETAILS).seal(new BankFingerprinter(null)),
+        "a-hold-cleared-with-no-key",
+      );
+    expect(await report(vendorNo)).toMatchObject({ outcome: "held" });
+  });
+
+  it("skips storing the vendors' details from the seed", async () => {
+    expect(await seedVendorBankBaselines(t.app)).toContain(
+      "BANK_FINGERPRINT_KEY",
+    );
+  });
+
+  it("keeps the numbers out of the audit trail all the same", async () => {
+    await report("V-NO-KEY-3");
+    const trail = JSON.stringify(await auditEvents(t));
+    expect(trail).toContain("****8801");
+    for (const secret of Object.values(DETAILS)) {
+      expect(trail.includes(secret), secret).toBe(false);
+    }
+  });
 });
 
 describe("masking for each role (F-1 onwards)", () => {

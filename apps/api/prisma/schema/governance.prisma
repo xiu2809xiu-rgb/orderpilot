@@ -2,7 +2,7 @@
 //
 // The role-permission matrix itself is RolePermission in platform.prisma (P-10
 // created it, area 4 owns its contents). What area 4 adds here is the data
-// scope of a role, and each user's approval setup (F-3).
+// scope of a role, each user's approval setup (F-3) and the bank-detail hold (F-5).
 
 /// Which records a role may see: "all", "brands" or "own" (the names are in
 /// @orderpilot/shared). A role with no row reads as its default. The base
@@ -33,4 +33,72 @@ model ApprovalUserSetup {
   awayFrom                    DateTime? @db.Timestamptz(3)
   awayUntil                   DateTime? @db.Timestamptz(3)
   updatedAt                   DateTime  @updatedAt @db.Timestamptz(3)
+}
+
+/// What area 4 accepts as one Vendor Bank Account (F-5): a fingerprint and a
+/// last-four mask per field, never the numbers. It starts from the vendor's
+/// record and moves only when two people accept a change, so a PI can never
+/// become the record. `sealed` holds bankAccountNo, swiftCode and iban, each
+/// { fingerprint, masked } or null.
+model VendorBankBaseline {
+  vendorNo    String
+  accountCode String
+  sealed      Json
+  /// "vendor-record", or the id of the hold whose clearance set it.
+  setBy       String
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+
+  @@id([vendorNo, accountCode])
+}
+
+/// One difference between a vendor's bank details and what is stored (F-5).
+/// While one is open nobody pays that vendor. The migration adds a partial
+/// unique index Prisma cannot express: one open hold per set of new details.
+model VendorBankHold {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  vendorNo        String
+  /// Null when nothing was stored to compare with.
+  accountCode     String?
+  /// "open" or "cleared".
+  status          String
+  /// "vendor-record", "vendor-pi" or "vendor-invoice".
+  source          String
+  sourceRef       String
+  /// Who edited the record or confirmed the document. Null when no person did.
+  changedByUserId String?   @db.Uuid
+  differingFields String[]
+  /// The last-four masks of what was stored, per field.
+  beforeMasks     Json
+  /// The new details, in the shape of VendorBankBaseline.sealed.
+  proposed        Json
+  proposedDigest  String
+  openedAt        DateTime  @db.Timestamptz(3)
+  /// "accept-new-details" or "keep-stored-details", once closed.
+  resolution      String?
+  clearedAt       DateTime? @db.Timestamptz(3)
+  clearedByUserId String?   @db.Uuid
+  clearReason     String?
+
+  verifications VendorBankHoldVerification[]
+
+  @@index([vendorNo, status, openedAt])
+  @@index([status, openedAt])
+}
+
+/// One out-of-band verification of a hold (F-5). Never updated or deleted: a
+/// later one supersedes it, and the latest decides what may happen next.
+model VendorBankHoldVerification {
+  id                      String   @id @default(uuid(7)) @db.Uuid
+  holdId                  String   @db.Uuid
+  verifiedByUserId        String   @db.Uuid
+  /// "confirmed" or "rejected".
+  outcome                 String
+  contactedAt             DateTime @db.Timestamptz(3)
+  contactFromStoredRecord Boolean
+  reason                  String
+  recordedAt              DateTime @db.Timestamptz(3)
+
+  hold VendorBankHold @relation(fields: [holdId], references: [id])
+
+  @@index([holdId, recordedAt])
 }

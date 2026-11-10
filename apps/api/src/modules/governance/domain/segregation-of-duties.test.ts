@@ -23,18 +23,20 @@ const context = (
 });
 
 describe("the duties kept apart", () => {
-  it("starts with the pairs F-4 names, plus the bank-detail change against payments", () => {
+  it("holds the pairs F-4 names, the bank-detail change against payments, and F-5's two people", () => {
     expect(SEGREGATED_DUTIES).toEqual([
       { earlier: "spr.raise", later: ["spr.approve"] },
       { earlier: "vendor-payment.approve", later: ["payment-hold.clear"] },
       {
         earlier: "vendor-bank.change",
         later: [
+          "payment-hold.verify",
           "payment-hold.clear",
           "vendor-payment.approve",
           "vendor-payment.release",
         ],
       },
+      { earlier: "payment-hold.verify", later: ["payment-hold.clear"] },
     ]);
   });
 });
@@ -59,8 +61,24 @@ describe("the segregation-of-duties rule", () => {
     ).toBeNull();
   });
 
-  it("refuses whoever changed a vendor's bank details approving, releasing or clearing a payment to them", () => {
+  it("refuses the person who verified a hold clearing it", () => {
+    expect(
+      rule.refusal(
+        context("payment-hold.clear", { "payment-hold.verify": ME }),
+      ),
+    ).toBe(
+      "payment-hold.verify and payment-hold.clear are done by different people",
+    );
+    expect(
+      rule.refusal(
+        context("payment-hold.clear", { "payment-hold.verify": SOMEONE_ELSE }),
+      ),
+    ).toBeNull();
+  });
+
+  it("refuses whoever changed a vendor's bank details verifying, approving, releasing or clearing a payment to them", () => {
     for (const action of [
+      "payment-hold.verify",
       "vendor-payment.approve",
       "vendor-payment.release",
       "payment-hold.clear",

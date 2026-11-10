@@ -26,7 +26,10 @@ const POLICY_ACTIONS: Readonly<Record<string, PolicyAction>> = {
   // A customer's payment arriving and a payment going out to a vendor are
   // different duties, so they are different actions.
   "customer-payment.confirm": { permission: "payments.confirm" },
-  "payment-hold.clear": { permission: "payments.confirm" },
+  // Two permissions, so a hold's two people come from two different roles: Finance
+  // verifies, and a management approver clears (F-5).
+  "payment-hold.verify": { permission: "payments.confirm" },
+  "payment-hold.clear": { permission: "approvals.decide" },
   "vendor-payment.approve": { permission: "payments.post" },
   "vendor-payment.release": { permission: "payments.post" },
 };

@@ -4,6 +4,7 @@ import type {
   PolicyRequest,
 } from "@orderpilot/shared";
 import type { Approver } from "./approval-setup.js";
+import type { HoldClearanceFacts, VendorHoldFacts } from "./bank-hold-rules.js";
 import type { LimitKind } from "./policy-actions.js";
 import type { EarlierDuties } from "./segregation-of-duties.js";
 
@@ -27,6 +28,10 @@ export interface PolicyContext {
   readonly earlierDuties?: EarlierDuties | undefined;
   /** Present only when the action is an approval with a limit. */
   readonly approval?: ApprovalFacts;
+  /** Present only for a payment to a vendor. */
+  readonly vendorHold?: VendorHoldFacts;
+  /** Present only for a step on a bank-detail hold. */
+  readonly holdClearance?: HoldClearanceFacts;
 }
 
 export interface ApprovalFacts {
