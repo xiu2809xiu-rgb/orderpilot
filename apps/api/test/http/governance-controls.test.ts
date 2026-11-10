@@ -1092,8 +1092,12 @@ describe("the bank-detail hold (F-5)", () => {
       },
       BY_THE_TEST,
     );
+  interface HeldVendor {
+    readonly vendorNo: string;
+    readonly holdId: string;
+  }
   /** A vendor with stored details, and a PI that differs from them. */
-  const heldVendor = async (changedBy = "support") => {
+  const heldVendor = async (changedBy = "support"): Promise<HeldVendor> => {
     const vendorNo = nextVendor();
     await setBaseline(vendorNo);
     const report = await reportPi(vendorNo, CHANGED, changedBy);
@@ -1750,7 +1754,65 @@ describe("the bank-detail hold (F-5)", () => {
         );
         expect(res.text).not.toContain(CHANGED.iban);
         expect(res.text).not.toContain(CHANGED.bankAccountNo);
+        // Audited like any refusal, and the row does not repeat it either.
+        await expectRule("hold-reason");
+        const refusal = JSON.stringify(await lastRefusal());
+        expect(refusal).toContain(holdId);
+        expect(refusal).not.toContain(CHANGED.iban);
+        expect(refusal).not.toContain(CHANGED.bankAccountNo);
       }
+    });
+
+    describe.each([
+      { label: "empty", body: { reason: "" } },
+      { label: "only spaces", body: { reason: "   " } },
+      { label: "missing", body: { reason: undefined } },
+    ])("a reason that is $label", ({ body }) => {
+      const expectRefusedAndAudited = async (
+        res: request.Response,
+        refused: { action: string; who: string; hold: HeldVendor },
+      ) => {
+        expect(res.status).toBe(400);
+        expect(errorEnvelopeSchema.parse(res.body).error).toMatchObject({
+          code: "VALIDATION_FAILED",
+          details: [{ path: "reason" }],
+        });
+        expect(await lastRefusal()).toMatchObject({
+          actor: { kind: "user", userId: id(refused.who) },
+          entityType: "VendorBankHold",
+          entityId: refused.hold.holdId,
+          changes: {
+            action: refused.action,
+            rule: "hold-reason",
+            vendorNo: refused.hold.vendorNo,
+            holdIds: [refused.hold.holdId],
+          },
+        });
+      };
+
+      it("is refused on the verification route, saves nothing and is audited", async () => {
+        const hold = await heldVendor();
+        await expectRefusedAndAudited(
+          await verify("finance", hold.holdId, body),
+          { action: "payment-hold.verify", who: "finance", hold },
+        );
+        expect(
+          (await holdSeenBy("finance", hold.holdId)).verifications,
+        ).toEqual([]);
+      });
+
+      it("is refused on the clearance route, keeps the hold open and is audited", async () => {
+        const hold = await heldVendor();
+        expect((await verify("finance", hold.holdId)).status).toBe(200);
+        await expectRefusedAndAudited(
+          await clear("approver", hold.holdId, body),
+          { action: "payment-hold.clear", who: "approver", hold },
+        );
+        expect(await holdSeenBy("finance", hold.holdId)).toMatchObject({
+          status: "open",
+          clearReason: null,
+        });
+      });
     });
 
     it("takes who verified from the session, and refuses a body that names them", async () => {
