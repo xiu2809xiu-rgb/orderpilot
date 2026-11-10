@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
   DataTable,
@@ -9,7 +9,10 @@ import {
 } from "@/components/common";
 import { useTrackerList } from "@/lib/api/generated/endpoints/tracker/tracker";
 import { tableStatusOf } from "@/lib/query-status";
+import { LifecycleStageTabs } from "./LifecycleStageTabs";
 import {
+  groupStatusOf,
+  stageTabOf,
   toParams,
   trackerChips,
   TRACKER_URL_FILTERS,
@@ -28,9 +31,29 @@ export default function OrderTrackerPage() {
   const tracker = useTrackerList(toParams(query), {
     query: { placeholderData: (previous) => previous },
   });
+  const status =
+    typeof query.filters.status === "string" ? query.filters.status : undefined;
+  const stageTab = stageTabOf(status);
+  const onSelectStatus = useCallback(
+    (next: string | undefined) => {
+      const filters = { ...query.filters };
+      if (next) {
+        filters.status = next;
+      } else {
+        delete filters.status;
+      }
+      setQuery({ ...query, page: 1, filters });
+    },
+    [query, setQuery],
+  );
   const columns = useMemo(
-    () => trackerColumns(t, (role) => tc(`roles.${role}`)),
-    [t, tc],
+    () =>
+      trackerColumns(t, (role) => tc(`roles.${role}`), {
+        value: stageTab,
+        status,
+        onSelectStatus,
+      }),
+    [t, tc, stageTab, status, onSelectStatus],
   );
 
   return (
@@ -41,11 +64,23 @@ export default function OrderTrackerPage() {
         meta={<DemoBadge kind="mock" />}
         total={tracker.data?.meta.total}
       />
+      <LifecycleStageTabs value={stageTab} onSelectStatus={onSelectStatus} />
       <FilterChips
         chips={trackerChips(query.filters, t)}
         filters={query.filters}
         onChange={(filters) => {
-          setQuery({ ...query, page: 1, filters });
+          // The status chip only ever shows a narrowed sub-status (never the
+          // whole stage): clearing it resets to the stage's whole group, not
+          // to no status at all, since the stage tab itself stays open.
+          const next = { ...filters };
+          if (
+            typeof query.filters.status === "string" &&
+            typeof next.status !== "string" &&
+            stageTab !== "all"
+          ) {
+            next.status = groupStatusOf(stageTab);
+          }
+          setQuery({ ...query, page: 1, filters: next });
         }}
       />
       <DataTable
@@ -61,7 +96,10 @@ export default function OrderTrackerPage() {
         status={tableStatusOf(tracker)}
         error={tracker.error}
         onRetry={() => void tracker.refetch()}
-        toggleFilters={[{ id: "overdue", label: t("list.overdueOnly") }]}
+        toggleFilters={[
+          { id: "overdue", label: t("list.overdueOnly") },
+          { id: "exceptionsOnly", label: t("list.exceptionsOnly") },
+        ]}
         empty={{
           title: t("list.emptyTitle"),
           description: t("list.emptyDescription"),

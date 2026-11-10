@@ -47,6 +47,12 @@ export interface DataTableColumn<Row> {
   cell: (row: Row) => ReactNode;
   /** The value in an export. Without it the column is left out of exports. */
   exportValue?: (row: Row) => ExportValue;
+  /**
+   * Replaces the plain header text with a custom control, such as a column's
+   * own filter menu. `header` is still used for exports and the sort
+   * button's title, so it stays set even when this is.
+   */
+  headerContent?: ReactNode;
   sortable?: boolean;
   /** False keeps the column on screen, such as the record number. */
   hideable?: boolean;

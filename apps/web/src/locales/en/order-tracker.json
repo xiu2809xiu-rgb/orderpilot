@@ -7,18 +7,22 @@
   "list": {
     "caption": "Orders in the tracker",
     "overdueOnly": "Overdue only",
+    "exceptionsOnly": "Exceptions only",
     "emptyTitle": "No orders to track yet",
     "emptyDescription": "Orders appear here once a customer PO has been received.",
     "columns": {
       "orderNo": "Order No.",
       "customer": "Customer",
       "status": "Status",
+      "statusFilterLabel": "Filter by sub-status",
+      "docs": "Docs",
       "owner": "Owner",
       "overdue": "Overdue",
-      "exceptions": "Open exceptions",
       "orderDate": "Order date",
       "shipmentDate": "Shipment date",
-      "externalDocumentNo": "PO number"
+      "externalDocumentNo": "PO number",
+      "exceptionsBadge_one": "{{count}} open exception",
+      "exceptionsBadge_other": "{{count}} open exceptions"
     },
     "overdueDays_one": "{{count}} day overdue",
     "overdueDays_other": "{{count}} days overdue",
@@ -27,7 +31,32 @@
     "chips": {
       "open": "Open orders",
       "overdue": "Overdue",
-      "documentToConfirm": "Has a document to confirm"
+      "documentToConfirm": "Has a document to confirm",
+      "exceptions": "Open exceptions",
+      "status": "Status: {{value}}",
+      "statusSelectedCount": "{{count}} selected"
+    },
+    "docs": {
+      "labels": {
+        "P": "Purchase order",
+        "I": "Proforma invoice / invoice",
+        "L": "Packing list",
+        "A": "Air waybill / shipping doc"
+      },
+      "passed": "{{label}}: passed",
+      "pending": "{{label}}: not reached yet",
+      "failed_one": "{{label}}: mismatch flagged, {{count}} open exception",
+      "failed_other": "{{label}}: mismatch flagged, {{count}} open exceptions"
+    },
+    "stages": {
+      "label": "Lifecycle stage",
+      "all": "All",
+      "draft": "Draft",
+      "pendingApproval": "Pending approval",
+      "processing": "Processing",
+      "shipped": "Shipped",
+      "completed": "Completed",
+      "anyStatus": "Any status in this stage"
     },
     "statuses": {
       "sample-po-received": "PO received",

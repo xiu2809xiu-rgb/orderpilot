@@ -7,6 +7,7 @@
  */
 import type { TrackerListDirection } from './trackerListDirection.ts';
 import type { TrackerListDocumentToConfirm } from './trackerListDocumentToConfirm.ts';
+import type { TrackerListExceptionsOnly } from './trackerListExceptionsOnly.ts';
 import type { TrackerListOpen } from './trackerListOpen.ts';
 import type { TrackerListOverdue } from './trackerListOverdue.ts';
 import type { TrackerListOwnerRole } from './trackerListOwnerRole.ts';
@@ -32,6 +33,7 @@ direction?: TrackerListDirection;
 overdue?: TrackerListOverdue;
 open?: TrackerListOpen;
 documentToConfirm?: TrackerListDocumentToConfirm;
+exceptionsOnly?: TrackerListExceptionsOnly;
 /**
  * @minLength 1
  * @maxLength 400
