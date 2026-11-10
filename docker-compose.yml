@@ -46,6 +46,7 @@ x-app-env: &app-env
   # Off unless the .env sets them.
   METRICS_TOKEN:
   SENTRY_DSN:
+  BANK_FINGERPRINT_KEY:
 
 x-api-build: &api-build
   context: .

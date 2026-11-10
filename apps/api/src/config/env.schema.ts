@@ -43,6 +43,10 @@ function isOrigin(value: string): boolean {
 export const DEFAULT_JWT_SECRET =
   "local-development-secret-not-for-production-use";
 
+/** The bank fingerprint key `.env.example` ships. It is public, so only a laptop may use it. */
+export const LOCAL_BANK_FINGERPRINT_KEY =
+  "local-development-bank-fingerprint-key-not-for-production-use";
+
 /**
  * Every environment variable the API reads, with its safe default. A variable
  * with no default is required: the API refuses to start without it.
@@ -157,6 +161,12 @@ export const envSchema = z
     METRICS_TOKEN: z.string().min(24).optional(),
     // Errors go to Sentry only when this is set.
     SENTRY_DSN: z.url().optional(),
+
+    // Keys the fingerprints of vendors' bank details (F-5), so a stolen table
+    // cannot be reversed by guessing account numbers. Separate from the JWT
+    // secret: rotating that must not make every vendor look changed. Without
+    // it a comparison fails closed.
+    BANK_FINGERPRINT_KEY: z.string().min(32).optional(),
   })
   .superRefine((env, ctx) => {
     if (env.APP_ENV !== "local" && !env.COOKIE_SECURE) {
@@ -174,6 +184,17 @@ export const envSchema = z
         path: ["JWT_SECRET"],
         message:
           "Set your own JWT secret unless APP_ENV is local: the default is public",
+      });
+    }
+    if (
+      env.APP_ENV !== "local" &&
+      env.BANK_FINGERPRINT_KEY === LOCAL_BANK_FINGERPRINT_KEY
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["BANK_FINGERPRINT_KEY"],
+        message:
+          "Set your own bank fingerprint key unless APP_ENV is local: this one is public",
       });
     }
     if (env.APP_ENV !== "production") return;
