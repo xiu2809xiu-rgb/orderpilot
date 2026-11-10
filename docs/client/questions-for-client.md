@@ -16,7 +16,7 @@ Held on Thursday 5 Nov 2026, with several of Spectra's people. The recording and
 
 - **Answered:** Q-3, Q-4, Q-5, Q-8 and Q-27 (Q-27 by our own decision, not Spectra's).
 - **Answered in part:** Q-1, Q-2, Q-6, Q-7, Q-9 to Q-11, Q-13, Q-14, Q-17, Q-18, Q-24, Q-25, Q-26 and Q-28 to Q-30. Q-12 and Q-32 were answered by word of mouth only, which our rules do not accept, so they stay open until the written line arrives.
-- **Not asked:** Q-15, Q-16, Q-19 to Q-23 and Q-31. Ask them again in writing.
+- **Not asked:** Q-15, Q-16, Q-19 to Q-23, Q-31 and Q-49. Ask them again in writing.
 
 **Follow-ups to send in writing.** Q-25 to Q-32 came before the call. Each is now answered in the Answers table, in whole or in part, and the part still open is what to ask again. Q-33 onwards came out of the call. All of them go with the data request, in order of how much they change what is built:
 
@@ -83,6 +83,7 @@ Questions that came out of [the domain notes](../research/domain-notes.md), abou
 | Q-13 | Is the PI a pro forma printed from the Business Central sales order, or a posted prepayment invoice? Is the customer's payment recorded in Business Central? | A-13        |
 | Q-14 | Are approval limits and approvers already set up in Business Central, or kept outside it?                                                                    | A-14        |
 | Q-15 | Where are vendors' bank details kept, and who may change them?                                                                                               | A-15        |
+| Q-49 | If only one Finance user can verify a bank-detail change, and they made it, who verifies it? The hold needs a different Finance user.                        | A-15        |
 | Q-16 | Do you record forwarders and AWB/BL numbers in Business Central (Shipping Agent, Package Tracking No.)?                                                      | A-16        |
 | Q-17 | Does each Product Manager own certain brands, and should they see only those orders?                                                                         | A-28        |
 | Q-18 | How are returns and credit notes handled, for customers and for vendors?                                                                                     | A-29        |
@@ -131,4 +132,4 @@ Recorded on 9 Nov 2026 from the briefing of 5 Nov. Several of Spectra's people s
 | Q-43 | 5 Nov 2026 | Spectra, at the briefing       | Changes to an order are rare: Spectra settles about 95% or more of an order's details before the PO, and sometimes a quantity changes or a part number is added. The customer sends a revised PO. **Still open:** whether the revised PO keeps the old number (asked as Q-43).                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | Q-47 | 5 Nov 2026 | Spectra, at the briefing       | Spectra asked for live reports in Power BI. Nothing was said about how much history it will send for the forecast, or what real time means. **Still open:** both (asked as Q-47).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 
-**Not asked at the briefing,** so still open: Q-15, Q-16, Q-19 to Q-23 and Q-31. One remark bears on Q-31: staff today print the invoice and compare it with the PO by eye, so a check before anything is issued is what they want, but nobody put the question in our terms.
+**Not asked at the briefing,** so still open: Q-15, Q-16, Q-19 to Q-23, Q-31 and Q-49. One remark bears on Q-31: staff today print the invoice and compare it with the PO by eye, so a check before anything is issued is what they want, but nobody put the question in our terms.

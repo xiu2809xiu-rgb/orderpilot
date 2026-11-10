@@ -121,3 +121,23 @@ export const SAMPLE_RULES: readonly MaskingRule[] = [
   accountRule("customer.balanceLcy", "Customer balance"),
   accountRule("vendor.balanceLcy", "Vendor balance"),
 ];
+
+const bankHoldRule = (field: string, label: string): MaskingRule => ({
+  field,
+  label,
+  classification: "restricted",
+  reason: "bankDetails",
+  visibleTo: ["FINANCE", "APPROVER", "MANAGEMENT", "AUDITOR"],
+  sample: false,
+});
+
+/**
+ * A hold shows the last four at most, and only to those who must act on it or
+ * audit it. Everyone else who can read a hold still sees which field differs.
+ */
+export const BANK_HOLD_MASKING_RULES: readonly MaskingRule[] = [
+  bankHoldRule("bankHold.bankAccountNo", "Bank account number on a hold"),
+  bankHoldRule("bankHold.swiftCode", "SWIFT code on a hold"),
+  bankHoldRule("bankHold.iban", "IBAN on a hold"),
+  bankHoldRule("bankHold.note", "What a person wrote about a hold"),
+];

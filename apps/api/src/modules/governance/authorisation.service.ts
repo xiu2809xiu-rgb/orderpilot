@@ -6,8 +6,20 @@ import { DomainError } from "../../common/domain-error.js";
 import { Database } from "../../database/database.js";
 import { UserRepository } from "../../users/user.repository.js";
 import { ApprovalSetupRepository } from "./approval-setup.repository.js";
+import {
+  BANK_HOLD_ENTITY,
+  BankHoldRepository,
+} from "./bank-hold.repository.js";
 import { deciderFor, type Decider } from "./domain/approval-route.js";
 import type { ApprovalSetup, Approver } from "./domain/approval-setup.js";
+import {
+  isHoldStep,
+  isVendorPayment,
+  type HoldClearanceFacts,
+  type HoldResolution,
+  type VendorHoldFacts,
+  type VerificationAttempt,
+} from "./domain/bank-hold-rules.js";
 import { ACTION_POLICY } from "./domain/policies.js";
 import { policyActionOf } from "./domain/policy-actions.js";
 import type { EarlierDuties } from "./domain/segregation-of-duties.js";
@@ -20,7 +32,24 @@ import type { EarlierDuties } from "./domain/segregation-of-duties.js";
  * they would let a caller name someone else and pass every rule they guard.
  */
 export interface GovernanceRequest extends PolicyRequest {
-  readonly earlierDuties?: EarlierDuties;
+  readonly earlierDuties?: EarlierDuties | undefined;
+  /**
+   * The vendor a payment goes to, by Business Central number, from your stored
+   * payment record, never a request body (F-5). A vendor payment without it is
+   * refused.
+   */
+  readonly vendorNo?: string | undefined;
+  /** What Finance reports, for `payment-hold.verify`. */
+  readonly verification?: VerificationAttempt | undefined;
+  /** How `payment-hold.clear` closes the hold. */
+  readonly resolution?: HoldResolution | undefined;
+}
+
+/** A decision, with the facts its audit row records. */
+interface Evaluation {
+  readonly decision: PolicyDecision;
+  readonly holdIds: readonly string[];
+  readonly earlierDuties: EarlierDuties;
 }
 
 /** Where a request came from, for the audit trail. Area 2's ActionInfo has this shape. */
@@ -46,6 +75,7 @@ export class AuthorisationService {
     private readonly setups: ApprovalSetupRepository,
     @Inject(UserRepository) private readonly users: UserRepository,
     @Inject(AuditService) private readonly audit: AuditService,
+    @Inject(BankHoldRepository) private readonly holds: BankHoldRepository,
   ) {}
 
   /** The decision on one action, without acting on it. */
@@ -53,33 +83,116 @@ export class AuthorisationService {
     request: GovernanceRequest,
     now: Date = new Date(),
   ): Promise<PolicyDecision> {
+    return (await this.evaluate(request, now)).decision;
+  }
+
+  private async evaluate(
+    request: GovernanceRequest,
+    now: Date,
+  ): Promise<Evaluation> {
     const action = policyActionOf(request.action);
     if (!action) {
       return {
-        outcome: "refused",
-        rule: "action",
-        reason: "the policy knows no such action",
+        decision: {
+          outcome: "refused",
+          rule: "action",
+          reason: "the policy knows no such action",
+        },
+        holdIds: [],
+        earlierDuties: request.earlierDuties ?? {},
       };
     }
     const { limit } = action;
-    const [roleHoldsPermission, approvers] = await Promise.all([
-      this.matrix.has(request.actor.role, action.permission),
-      limit
-        ? this.approversAround(request.requesterUserId, request.actor.userId)
-        : undefined,
-    ]);
-    return ACTION_POLICY.decide({
+    const [roleHoldsPermission, approvers, payment, holdStep] =
+      await Promise.all([
+        this.matrix.has(request.actor.role, action.permission),
+        limit
+          ? this.approversAround(request.requesterUserId, request.actor.userId)
+          : undefined,
+        isVendorPayment(request.action)
+          ? this.vendorPaymentFacts(request.vendorNo)
+          : undefined,
+        isHoldStep(request.action)
+          ? this.holdStepFacts(request, now)
+          : undefined,
+      ]);
+    // Area 4's own record of who did what wins over anything a caller says.
+    const earlierDuties: EarlierDuties = {
+      ...request.earlierDuties,
+      ...payment?.duties,
+      ...holdStep?.duties,
+    };
+    const decision = ACTION_POLICY.decide({
       actor: request.actor,
       action: request.action,
       permission: action.permission,
       roleHoldsPermission,
       resource: request.resource,
       requesterUserId: request.requesterUserId,
-      earlierDuties: request.earlierDuties,
+      earlierDuties,
       ...(limit && approvers
         ? { approval: { limit, amount: request.amount, approvers, now } }
         : {}),
+      ...(payment ? { vendorHold: payment.facts } : {}),
+      ...(holdStep ? { holdClearance: holdStep.facts } : {}),
     });
+    return {
+      decision,
+      holdIds: payment?.facts.openHoldIds ?? holdStep?.holdIds ?? [],
+      earlierDuties,
+    };
+  }
+
+  private async vendorPaymentFacts(
+    vendorNo: string | undefined,
+  ): Promise<{ facts: VendorHoldFacts; duties: EarlierDuties }> {
+    if (!vendorNo) {
+      return { facts: { vendorNo, openHoldIds: [] }, duties: {} };
+    }
+    const [openHoldIds, changer] = await Promise.all([
+      this.holds.openHoldIdsFor(vendorNo),
+      this.holds.latestChangerOf(vendorNo),
+    ]);
+    return {
+      facts: { vendorNo, openHoldIds },
+      duties: changer ? { "vendor-bank.change": changer } : {},
+    };
+  }
+
+  private async holdStepFacts(
+    request: GovernanceRequest,
+    now: Date,
+  ): Promise<{
+    facts: HoldClearanceFacts;
+    duties: EarlierDuties;
+    holdIds: readonly string[];
+  }> {
+    const hold =
+      request.resource.type === BANK_HOLD_ENTITY
+        ? await this.holds.findById(request.resource.id)
+        : null;
+    const latest = hold?.verifications.at(-1) ?? null;
+    return {
+      facts: {
+        hold: hold
+          ? {
+              status: hold.status,
+              openedAt: hold.openedAt,
+              latestOutcome: latest?.outcome ?? null,
+            }
+          : null,
+        attempt: request.verification,
+        resolution: request.resolution,
+        now,
+      },
+      duties: {
+        ...(hold?.changedByUserId
+          ? { "vendor-bank.change": hold.changedByUserId }
+          : {}),
+        ...(latest ? { "payment-hold.verify": latest.verifiedByUserId } : {}),
+      },
+      holdIds: hold ? [hold.id] : [],
+    };
   }
 
   /**
@@ -99,10 +212,31 @@ export class AuthorisationService {
         "Call AuthorisationService.enforce before opening the transaction, so a refusal's audit event is not rolled back with it.",
       );
     }
-    const decision = await this.decide(request, now);
-    if (decision.outcome === "allowed") return;
-    await this.auditRefusal(request, decision, info);
+    const evaluation = await this.evaluate(request, now);
+    if (evaluation.decision.outcome === "allowed") return;
+    await this.auditRefusal(request, evaluation, info);
     throw new DomainError("FORBIDDEN", "You do not have access to this.");
+  }
+
+  /**
+   * Audits a refusal the rules never saw, because the request could not be put
+   * to them. The row is the same as a rule's, and the caller does the refusing.
+   */
+  async recordRefusal(
+    request: GovernanceRequest,
+    refusal: { readonly rule: string; readonly reason: string },
+    info: RequestInfo,
+    holdIds: readonly string[] = [],
+  ): Promise<void> {
+    await this.auditRefusal(
+      request,
+      {
+        decision: { outcome: "refused", ...refusal },
+        holdIds,
+        earlierDuties: request.earlierDuties ?? {},
+      },
+      info,
+    );
   }
 
   /** Who should receive a request raised by `requesterUserId`, for area 2 to route it. */
@@ -164,7 +298,7 @@ export class AuthorisationService {
    */
   private async auditRefusal(
     request: GovernanceRequest,
-    decision: PolicyDecision,
+    { decision, holdIds, earlierDuties }: Evaluation,
     info: RequestInfo,
   ): Promise<void> {
     const { actor, resource } = request;
@@ -184,7 +318,10 @@ export class AuthorisationService {
           reason: decision.reason,
           amount: request.amount ?? null,
           requesterUserId: request.requesterUserId ?? null,
-          earlierDuties: request.earlierDuties ?? null,
+          earlierDuties:
+            Object.keys(earlierDuties).length > 0 ? earlierDuties : null,
+          ...(request.vendorNo ? { vendorNo: request.vendorNo } : {}),
+          ...(holdIds.length > 0 ? { holdIds: [...holdIds] } : {}),
         },
         ip: info.ip,
         traceId: info.traceId,

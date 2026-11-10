@@ -12,6 +12,15 @@ import { mask } from "../../governance/domain/masking.js";
  * The one rule below is a neutral sample that shows the mechanism with real
  * events. The real rules (which fields, which roles, why) are area 4's.
  */
+const bankDetailRule = (key: string, label: string): MaskingRule => ({
+  field: `*.${key}`,
+  label,
+  classification: "restricted",
+  reason: "bankDetails",
+  visibleTo: ["AUDITOR"],
+  sample: false,
+});
+
 export const AUDIT_MASKING_RULES: readonly MaskingRule[] = [
   {
     field: "*.reason",
@@ -21,6 +30,10 @@ export const AUDIT_MASKING_RULES: readonly MaskingRule[] = [
     visibleTo: ["AUDITOR"],
     sample: true,
   },
+  // F-5: even masked to the last four, a bank detail is the auditor's to read.
+  bankDetailRule("bankAccountNo", "Bank account number, last four"),
+  bankDetailRule("swiftCode", "SWIFT code, last four"),
+  bankDetailRule("iban", "IBAN, last four"),
 ];
 
 /** An entry shaped `{ from, to }` is a before and after pair. */
