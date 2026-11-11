@@ -286,6 +286,20 @@ await authorisation.enforce(
 - **`payments.post`** is held by no role, so vendor payments are refused for everyone until P-104's permission is decided.
 - **Events** wait for the bus (P-15).
 
+## Finding and undoing on the matrix (F-8)
+
+**Search and filters.** The matrix has a search box, a role filter and a permission group filter, in `MatrixFilterBar.tsx`, on the shared `SearchBox`, `FilterSelect` and `FilterChips`. The filtering is one pure function, `filterMatrix` in `matrixFilter.ts`, which searches a permission's label and key.
+
+- The filters live in the address bar (`q`, `role`, `group`), so a view can be shared.
+- A role filter leaves one column and a group filter leaves those rows. The data scope row goes while the rows are being narrowed.
+- The groups go by the word before the first dot of a permission's name. One nobody has grouped is listed under Other.
+
+**Undo.** A switch or a data scope change ends with a toast that offers Undo, for 10 seconds or with Ctrl+Z. Undo is the same save as the change, so a refusal shows its trace ID and the switches wait for it. On the server it is one more change with its own audit row, and the row of the change it reverses stays.
+
+**Copying a role has no Undo,** because nothing keeps the target's old rows. A second step says so before anything is sent, and the audit trail keeps the change.
+
+**E2E #3 in a browser** is in `apps/e2e/tests/governance.spec.ts`. A script calls the SPR approval route as Warehouse, with no page involved, and gets the 403 envelope with its trace ID. The auditor then opens the audit viewer, filtered to that route and role, and the newest row's details must show that trace ID. A refusal's record is the route pattern, not the SPR number, so the trace ID is what proves the row is this call's. This covers the direct call and its audit row. The self-approval and masking steps of E2E #3 are not in it.
+
 ## What's yours to build
 
 **Starter stories,** ready to pull on the board (planned: P-2 seeds them):
@@ -309,7 +323,6 @@ await authorisation.enforce(
 - the bank-detail control (F-5);
 - a policy class under the `PermissionPolicy` token that runs your rules in a chain (ADR 0012, point 7): F-3 wrote `GovernancePermissionPolicy`, and putting it behind the token is Richie's one line;
 - the seed adds missing pairs back, so a permission you revoke returns on the next seed: decide whether it should;
-- polish nobody needs this week: a search box and filters on the matrix, an undo for a change, and a browser test of E2E #3 (backlog F-8).
 
 **What G-1 deliberately leaves to you** (the monitoring wiring works; the work that needs judgement is yours):
 
