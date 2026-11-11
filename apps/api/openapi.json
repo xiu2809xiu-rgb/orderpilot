@@ -3308,6 +3308,17 @@
         "operationId": "Workflows_approve",
         "parameters": [
           {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Optional. Send the same key again to retry safely: once the first try has succeeded, a repeat gets its answer and nothing runs again, even after an undo. A copy sent while the first is running waits up to 5 seconds for its answer, then is refused with 409 to try again. A refused or failed command keeps nothing, so a copy or a retry runs it again. Keys are per person. The same key with a different request is refused with 409, and a malformed key with 400.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.:-]{8,100}$",
+              "example": "6f1c2a8e-0b7d-4c5e-9a31-2d4f8b6e7c10"
+            }
+          },
+          {
             "name": "recordNo",
             "required": true,
             "in": "path",
@@ -3396,6 +3407,17 @@
         "operationId": "Workflows_reject",
         "parameters": [
           {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Optional. Send the same key again to retry safely: once the first try has succeeded, a repeat gets its answer and nothing runs again, even after an undo. A copy sent while the first is running waits up to 5 seconds for its answer, then is refused with 409 to try again. A refused or failed command keeps nothing, so a copy or a retry runs it again. Keys are per person. The same key with a different request is refused with 409, and a malformed key with 400.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.:-]{8,100}$",
+              "example": "6f1c2a8e-0b7d-4c5e-9a31-2d4f8b6e7c10"
+            }
+          },
+          {
             "name": "recordNo",
             "required": true,
             "in": "path",
@@ -3483,6 +3505,17 @@
       "post": {
         "operationId": "Workflows_undoDecision",
         "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Optional. Send the same key again to retry safely: once the first try has succeeded, a repeat gets its answer and nothing runs again, even after an undo. A copy sent while the first is running waits up to 5 seconds for its answer, then is refused with 409 to try again. A refused or failed command keeps nothing, so a copy or a retry runs it again. Keys are per person. The same key with a different request is refused with 409, and a malformed key with 400.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.:-]{8,100}$",
+              "example": "6f1c2a8e-0b7d-4c5e-9a31-2d4f8b6e7c10"
+            }
+          },
           {
             "name": "recordNo",
             "required": true,

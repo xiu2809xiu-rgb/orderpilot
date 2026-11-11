@@ -8,10 +8,3 @@ import { describe, it } from "vitest";
 describe("reminders and escalations", () => {
   it.todo("reminds Logistics when the shipping documents are missing");
 });
-
-describe("retries and idempotency", () => {
-  it.todo(
-    "applies a command once when it is sent twice with the same idempotency key",
-  );
-  it.todo("returns the first result for a repeated key");
-});

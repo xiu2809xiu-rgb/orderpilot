@@ -1,6 +1,8 @@
 import {
   Body,
   Controller,
+  createParamDecorator,
+  type ExecutionContext,
   Get,
   HttpCode,
   Inject,
@@ -12,12 +14,16 @@ import {
 } from "@nestjs/common";
 import {
   ApiBody,
+  ApiHeader,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiTags,
 } from "@nestjs/swagger";
 import {
+  IDEMPOTENCY_KEY_HEADER,
+  IDEMPOTENCY_KEY_PATTERN,
+  idempotencyKeySchema,
   inboxParamsSchema,
   noticesQuerySchema,
   taskSlaChangeSchema,
@@ -94,6 +100,26 @@ const paymentParam = ApiParam({
   name: "paymentId",
   schema: { type: "string", format: "uuid" },
 });
+const idempotencyHeader = ApiHeader({
+  name: IDEMPOTENCY_KEY_HEADER,
+  required: false,
+  description:
+    "Optional. Send the same key again to retry safely: once the first try has succeeded, a repeat gets its answer and nothing runs again, even after an undo. A copy sent while the first is running waits up to 5 seconds for its answer, then is refused with 409 to try again. A refused or failed command keeps nothing, so a copy or a retry runs it again. Keys are per person. The same key with a different request is refused with 409, and a malformed key with 400.",
+  schema: {
+    type: "string",
+    pattern: IDEMPOTENCY_KEY_PATTERN.source,
+    example: "6f1c2a8e-0b7d-4c5e-9a31-2d4f8b6e7c10",
+  },
+});
+/** The command's Idempotency-Key, undefined when there is none. Node lower-cases header names. */
+const IdempotencyKey = createParamDecorator(
+  (_data: unknown, ctx: ExecutionContext): unknown =>
+    ctx.switchToHttp().getRequest<Request>().headers[
+      IDEMPOTENCY_KEY_HEADER.toLowerCase()
+    ],
+);
+/** A key that is not a key is refused with 400 before the command runs. */
+const keyPipe = new ZodValidationPipe(idempotencyKeySchema.optional());
 
 function infoOf(req: Request): ActionInfo {
   return { ip: req.ip ?? null, traceId: requestIdOf(req) };
@@ -362,6 +388,7 @@ export class WorkflowsController {
   @HttpCode(200)
   @RequirePermission("approvals.decide")
   @recordParam
+  @idempotencyHeader
   @ApiOperation({
     summary:
       "Approve a stock purchase request, with a comment. Above the approver's limit it goes on up the chain instead. Audited",
@@ -372,6 +399,7 @@ export class WorkflowsController {
     @Param(new ZodValidationPipe(sprParamsSchema)) params: { recordNo: string },
     @Body(new ZodValidationPipe(sprDecisionInputSchema))
     body: SprDecisionInput,
+    @IdempotencyKey(keyPipe) key: string | undefined,
     @Auth() auth: AuthContext,
     @Req() req: Request,
   ) {
@@ -382,6 +410,7 @@ export class WorkflowsController {
         body.comment,
         auth,
         infoOf(req),
+        { key },
       ),
     };
   }
@@ -390,6 +419,7 @@ export class WorkflowsController {
   @HttpCode(200)
   @RequirePermission("approvals.decide")
   @recordParam
+  @idempotencyHeader
   @ApiOperation({
     summary:
       "Reject a stock purchase request, with a comment. Above the approver's limit it goes on up the chain instead. Audited",
@@ -400,6 +430,7 @@ export class WorkflowsController {
     @Param(new ZodValidationPipe(sprParamsSchema)) params: { recordNo: string },
     @Body(new ZodValidationPipe(sprDecisionInputSchema))
     body: SprDecisionInput,
+    @IdempotencyKey(keyPipe) key: string | undefined,
     @Auth() auth: AuthContext,
     @Req() req: Request,
   ) {
@@ -410,6 +441,7 @@ export class WorkflowsController {
         body.comment,
         auth,
         infoOf(req),
+        { key },
       ),
     };
   }
@@ -418,15 +450,17 @@ export class WorkflowsController {
   @HttpCode(200)
   @RequirePermission("approvals.decide")
   @recordParam
+  @idempotencyHeader
   @ApiOperation({ summary: "Undo a decision on a request. Audited" })
   @ApiOkResponse({ schema: openApiSchema(sprDecisionUndoResponseSchema) })
   async undoDecision(
     @Param(new ZodValidationPipe(sprParamsSchema)) params: { recordNo: string },
+    @IdempotencyKey(keyPipe) key: string | undefined,
     @Auth() auth: AuthContext,
     @Req() req: Request,
   ) {
     return {
-      data: await this.sprs.undo(params.recordNo, auth, infoOf(req)),
+      data: await this.sprs.undo(params.recordNo, auth, infoOf(req), { key }),
     };
   }
 

@@ -3,6 +3,8 @@ import {
   SPR_DECISION_RECORDED_MESSAGE,
   SPR_DECISION_UNDONE_MESSAGE,
   SPR_PASSED_ON_MESSAGE,
+  sprDecisionResultSchema,
+  sprDecisionUndoResultSchema,
   type PolicyRequest,
   type SprDecisionResult,
   type SprDecisionUndoResult,
@@ -20,6 +22,10 @@ import {
   AuthorisationService,
   type RequestInfo,
 } from "../governance/authorisation.service.js";
+import {
+  CommandReplayService,
+  type KeepAnswer,
+} from "./command-replay.service.js";
 import type { OrderActor } from "./domain/order-state-machine.js";
 import { OrderWorkflowService } from "./order-workflow.service.js";
 import {
@@ -30,6 +36,12 @@ import { WorkflowReadModel } from "./workflow-read-model.js";
 import { WorkflowTaskRepository } from "./workflow-task.repository.js";
 
 type Outcome = SprDecisionResult["outcome"];
+
+/** How a command was sent: the caller's Idempotency-Key, and the time, which tests set. */
+export interface CommandOptions {
+  readonly key?: string;
+  readonly now?: Date;
+}
 
 function actorOf(auth: AuthContext): OrderActor {
   return {
@@ -60,15 +72,41 @@ export class SprApprovalService {
     @Inject(AuditService) private readonly audit: AuditService,
     @Inject(WorkflowTaskRepository)
     private readonly tasks: WorkflowTaskRepository,
+    @Inject(CommandReplayService)
+    private readonly replay: CommandReplayService,
   ) {}
 
+  /** Sent again with the same key, it answers as it did the first time and does nothing. */
   async decide(
     recordNo: string,
     outcome: Outcome,
     comment: string,
     auth: AuthContext,
     info: RequestInfo,
-    now: Date = new Date(),
+    { key, now = new Date() }: CommandOptions = {},
+  ): Promise<SprDecisionResult> {
+    return this.replay.once(
+      {
+        key,
+        actorUserId: auth.user.id,
+        command: outcome === "approved" ? "spr.approve" : "spr.reject",
+        target: recordNo,
+        body: { comment },
+      },
+      sprDecisionResultSchema,
+      (keep) =>
+        this.decideOnce(recordNo, outcome, comment, auth, info, now, keep),
+    );
+  }
+
+  private async decideOnce(
+    recordNo: string,
+    outcome: Outcome,
+    comment: string,
+    auth: AuthContext,
+    info: RequestInfo,
+    now: Date,
+    keep: KeepAnswer<SprDecisionResult>,
   ): Promise<SprDecisionResult> {
     const spr = await this.storedOf(recordNo);
     if (!spr) {
@@ -90,7 +128,7 @@ export class SprApprovalService {
     // A rejection passes on too: someone with no authority over this amount
     // should not be the one to end it, and the decision stays with whoever has.
     if (verdict.outcome === "refused" && verdict.rule === "approval-limit") {
-      const toName = await this.passOn(
+      return this.passOn(
         recordNo,
         spr,
         outcome,
@@ -98,15 +136,8 @@ export class SprApprovalService {
         auth,
         info,
         now,
+        keep,
       );
-      return {
-        applied: true,
-        message: SPR_PASSED_ON_MESSAGE,
-        recordNo,
-        outcome,
-        comment,
-        passedToName: toName,
-      };
     }
 
     const decision = {
@@ -114,6 +145,13 @@ export class SprApprovalService {
       by: auth.user.displayName,
       comment,
       at: now.toISOString(),
+    };
+    const answer: SprDecisionResult = {
+      applied: true,
+      message: SPR_DECISION_RECORDED_MESSAGE,
+      recordNo,
+      outcome,
+      comment,
     };
     await this.workflow.decideSpr(
       spr.orderRef,
@@ -137,26 +175,47 @@ export class SprApprovalService {
           ip: info.ip,
           traceId: info.traceId,
         });
+        await keep(answer);
       },
     );
-    return {
-      applied: true,
-      message: SPR_DECISION_RECORDED_MESSAGE,
-      recordNo,
-      outcome,
-      comment,
-    };
+    return answer;
   }
 
+  /** Sent again with the same key, it answers as it did the first time and does nothing. */
   async undo(
     recordNo: string,
     auth: AuthContext,
     info: RequestInfo,
-    now: Date = new Date(),
+    { key, now = new Date() }: CommandOptions = {},
+  ): Promise<SprDecisionUndoResult> {
+    return this.replay.once(
+      {
+        key,
+        actorUserId: auth.user.id,
+        command: "spr.undo",
+        target: recordNo,
+        body: {},
+      },
+      sprDecisionUndoResultSchema,
+      (keep) => this.undoOnce(recordNo, auth, info, now, keep),
+    );
+  }
+
+  private async undoOnce(
+    recordNo: string,
+    auth: AuthContext,
+    info: RequestInfo,
+    now: Date,
+    keep: KeepAnswer<SprDecisionUndoResult>,
   ): Promise<SprDecisionUndoResult> {
     const spr = await this.storedOf(recordNo);
     if (!spr?.decision) throw new NotFoundError(`A decision on ${recordNo}`);
     await this.refuseTheRequester(recordNo, spr, auth, info);
+    const answer: SprDecisionUndoResult = {
+      applied: true,
+      message: SPR_DECISION_UNDONE_MESSAGE,
+      recordNo,
+    };
     await this.workflow.decideSpr(
       spr.orderRef,
       { type: "SPR_DECISION_UNDONE" },
@@ -177,13 +236,10 @@ export class SprApprovalService {
           ip: info.ip,
           traceId: info.traceId,
         });
+        await keep(answer);
       },
     );
-    return {
-      applied: true,
-      message: SPR_DECISION_UNDONE_MESSAGE,
-      recordNo,
-    };
+    return answer;
   }
 
   private async storedOf(recordNo: string): Promise<StoredSpr | null> {
@@ -226,7 +282,8 @@ export class SprApprovalService {
     auth: AuthContext,
     info: RequestInfo,
     now: Date,
-  ): Promise<string> {
+    keep: KeepAnswer<SprDecisionResult>,
+  ): Promise<SprDecisionResult> {
     const status = await this.workflow.statusOf(spr.orderRef);
     if (status?.status !== "AwaitingSpr") {
       throw new ConflictError(
@@ -251,6 +308,14 @@ export class SprApprovalService {
     }
     const names = await this.users.namesByIds([next.userId]);
     const toName = names.get(next.userId) ?? next.userId;
+    const answer: SprDecisionResult = {
+      applied: true,
+      message: SPR_PASSED_ON_MESSAGE,
+      recordNo,
+      outcome,
+      comment,
+      passedToName: toName,
+    };
     await this.database.transaction(async () => {
       await this.records.save(spr, {
         passedOn: {
@@ -272,8 +337,9 @@ export class SprApprovalService {
         ip: info.ip,
         traceId: info.traceId,
       });
+      await keep(answer);
     });
-    return toName;
+    return answer;
   }
 
   /** The chain follows from the last hand-off: the passer, or the absent approver they stood in for. */
