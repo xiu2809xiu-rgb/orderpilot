@@ -5,6 +5,7 @@ import { HttpResponse, http } from "msw";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import type { Permission, Role, SalesOrderDetail } from "@orderpilot/shared";
 import { Toaster } from "@/components/common";
+import { useToastStore } from "@/components/common/toast";
 import { useSessionStore } from "@/stores/session";
 import { errorBody, sessionFor } from "@/test/fixtures";
 import { server } from "@/test/server";
@@ -259,6 +260,10 @@ export function renderOrders(
     status: "active",
     session: { ...session, permissions: [...session.permissions, ...extra] },
   });
+  // The toast store outlives a test. Left alone, the toasts of the test before
+  // come back in this render's Toaster with a fresh six seconds to live, and a
+  // test that waits for its own toast finds theirs beside it.
+  useToastStore.setState({ items: [] });
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });

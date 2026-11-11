@@ -132,8 +132,11 @@ describe("the New order page", () => {
     answerWrite("post", "*/api/v1/orders", [], saved(draftDetail()));
     await fillOrder(user, "PO-7732");
     await user.click(screen.getByRole("button", { name: /Save and new/ }));
+    // The whole sentence: "saved as a draft" is the toast of a plain Save.
     expect(
-      await screen.findByText(/Order SO-20261109-0001 saved/),
+      await screen.findByText(
+        `Order ${NEW_ORDER_NO} saved. Ready for the next one.`,
+      ),
     ).toBeVisible();
     expect(router.state.location.pathname).toBe("/orders/new");
     expect(screen.getByRole("textbox", { name: /PO number/ })).toHaveValue("");
