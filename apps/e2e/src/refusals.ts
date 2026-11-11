@@ -15,13 +15,15 @@ export type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
  * `route` is the API route, such as "/governance/matrix/copy". `body` is sent
  * as JSON. Send a body the route would accept, so the 403 cannot be a
  * validation failure in disguise.
+ *
+ * Returns the trace id, so a test can find this refusal in the audit viewer.
  */
 export async function expectRefused(
   role: Role,
   method: Method,
   route: string,
   body?: unknown,
-): Promise<void> {
+): Promise<string> {
   const session = await sessionFor(role);
   const api = await request.newContext({ storageState: session });
   const requestId = `e2e-${randomUUID()}`;
@@ -40,6 +42,7 @@ export async function expectRefused(
     const envelope = errorEnvelopeSchema.parse(await res.json());
     expect(envelope.error.code, `${call} refusal code`).toBe("FORBIDDEN");
     expect(envelope.error.traceId, `${call} trace id`).toBe(requestId);
+    return requestId;
   } finally {
     await api.dispose();
   }
