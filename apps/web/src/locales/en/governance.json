@@ -23,6 +23,29 @@
       "copied": "Permissions of {{from}} copied to {{to}}",
       "failed": "The change was not saved"
     },
+    "filter": {
+      "search": "Search permissions",
+      "role": "Filter by role",
+      "allRoles": "All roles",
+      "group": "Filter by permission group",
+      "allGroups": "All groups",
+      "searchChip": "Search: {{words}}",
+      "roleChip": "Role: {{role}}",
+      "groupChip": "Group: {{group}}",
+      "shown": "{{shown}} of {{total}} permissions",
+      "noMatchTitle": "No permissions match",
+      "noMatchDescription": "Try another word, or clear the filters.",
+      "clear": "Clear filters"
+    },
+    "groups": {
+      "platform": "Platform setup",
+      "oversight": "Audit and AI cost",
+      "orders": "Documents, orders",
+      "tracking": "Tracking and KPIs",
+      "approvals": "Approvals, payments",
+      "workflows": "Workflows and tasks",
+      "other": "Other"
+    },
     "readOnly": "You can read the matrix. Changing it needs the roles.manage permission.",
     "tableLabel": "Permissions by role",
     "scrollHint": "Scroll sideways to see every role.",
@@ -84,12 +107,33 @@
       "create": "Create orders",
       "edit": "Edit draft orders"
     },
+    "tracker": {
+      "read": "See the order tracker"
+    },
+    "exceptions": {
+      "read": "See the exceptions queue"
+    },
+    "insights": {
+      "read": "See the KPIs"
+    },
     "approvals": {
       "decide": "Approve or reject"
     },
     "payments": {
       "confirm": "Confirm a payment",
       "post": "Post a payment"
+    },
+    "workflows": {
+      "read": "See workflows and tasks",
+      "inboxes": {
+        "any": "See another role's inbox"
+      }
+    },
+    "spr": {
+      "read": "Read stock purchase requests"
+    },
+    "tasks": {
+      "complete": "Complete a task"
     }
   },
   "users": {

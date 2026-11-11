@@ -10,7 +10,7 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
 import { HttpResponse, http } from "msw";
-import { MemoryRouter } from "react-router";
+import { MemoryRouter, useLocation } from "react-router";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { Toaster } from "@/components/common";
 import { useToastStore } from "@/components/common/toast";
@@ -40,16 +40,32 @@ function signIn(role: (typeof ROLES)[number]) {
   useSessionStore.getState().setSession(sessionFor(role));
 }
 
-function renderPage() {
+function Address() {
+  return <output aria-label="Address">{useLocation().search}</output>;
+}
+
+function renderPage(address = "/governance") {
   return render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={[address]}>
       <QueryClientProvider client={createQueryClient()}>
         <GovernancePage />
         <Toaster />
+        <Address />
       </QueryClientProvider>
     </MemoryRouter>,
   );
 }
+
+/** Every permission's row, by the name it reads under. */
+const rowNames = () =>
+  screen.getAllByRole("rowheader").map((header) => header.textContent);
+const columnNames = () =>
+  screen.getAllByRole("columnheader").map((header) => header.textContent);
+const searchBox = () =>
+  screen.findByRole("searchbox", { name: "Search permissions" });
+const search = async (words: string) => {
+  await userEvent.type(await searchBox(), words);
+};
 
 describe("GovernancePage", () => {
   beforeEach(() => {
@@ -154,6 +170,159 @@ describe("GovernancePage", () => {
     await userEvent.click(screen.getByRole("button", { name: "Copy" }));
     await waitFor(() => {
       expect(body).toEqual({ fromRole: "FINANCE", toRole: "LOGISTICS" });
+    });
+  });
+
+  describe("finding a permission", () => {
+    it("gives every permission a label of its own", () => {
+      const missing = PERMISSIONS.filter(
+        (permission) => !i18n.exists(`governance:permissions.${permission}`),
+      ).map((permission) => `"permissions.${permission}"`);
+      // Whoever adds a permission meets this test, so it says what to do.
+      expect(
+        missing,
+        `Add ${missing.join(", ")} to apps/web/src/locales/en/governance.json, with the words the matrix shows for it`,
+      ).toEqual([]);
+    });
+
+    it("narrows the rows by name or by key, and says how many match", async () => {
+      signIn("SYSTEM_ADMIN");
+      renderPage();
+      await search("draft");
+      await waitFor(() => {
+        expect(rowNames()).toEqual(["Edit draft ordersorders.edit"]);
+      });
+      expect(
+        screen.getByText(`1 of ${String(PERMISSIONS.length)} permissions`),
+      ).toHaveAttribute("role", "status");
+
+      await userEvent.clear(await searchBox());
+      await search("tasks.complete");
+      await waitFor(() => {
+        expect(rowNames()).toEqual(["Complete a tasktasks.complete"]);
+      });
+    });
+
+    it("shows only the chosen role's column, and keeps its data scope", async () => {
+      signIn("SYSTEM_ADMIN");
+      renderPage();
+      await userEvent.selectOptions(
+        await screen.findByLabelText("Filter by role"),
+        "FINANCE",
+      );
+      expect(columnNames()).toEqual(["Permission", "Finance"]);
+      expect(rowNames().length).toBe(PERMISSIONS.length + 1);
+      expect(
+        screen.getByRole("combobox", { name: "Data scope: Finance" }),
+      ).toBeVisible();
+      expect(
+        screen.queryByRole("switch", {
+          name: "Read orders for Warehouse",
+        }),
+      ).toBeNull();
+    });
+
+    it("shows only the chosen group's rows, without the data scope", async () => {
+      signIn("SYSTEM_ADMIN");
+      renderPage();
+      await userEvent.selectOptions(
+        await screen.findByLabelText("Filter by permission group"),
+        "approvals",
+      );
+      expect(rowNames()).toEqual([
+        "Approve or rejectapprovals.decide",
+        "Confirm a paymentpayments.confirm",
+        "Post a paymentpayments.post",
+      ]);
+      expect(
+        screen.queryByRole("combobox", { name: "Data scope: Finance" }),
+      ).toBeNull();
+    });
+
+    it("keeps the filters in the address bar, beside the tab", async () => {
+      signIn("SYSTEM_ADMIN");
+      renderPage("/governance?tab=matrix");
+      await userEvent.selectOptions(
+        await screen.findByLabelText("Filter by role"),
+        "FINANCE",
+      );
+      const address = screen.getByRole("status", { name: "Address" });
+      expect(address).toHaveTextContent("tab=matrix");
+      expect(address).toHaveTextContent("role=FINANCE");
+    });
+
+    it("opens with the filters a link carries", async () => {
+      signIn("SYSTEM_ADMIN");
+      renderPage("/governance?tab=matrix&q=draft&role=FINANCE&group=orders");
+      await waitFor(() => {
+        expect(columnNames()).toEqual(["Permission", "Finance"]);
+      });
+      expect(rowNames()).toEqual(["Edit draft ordersorders.edit"]);
+      expect(await searchBox()).toHaveValue("draft");
+    });
+
+    it("ignores a role or group in a link that does not exist", async () => {
+      signIn("SYSTEM_ADMIN");
+      renderPage("/governance?tab=matrix&role=NOBODY&group=nothing");
+      await waitFor(() => {
+        expect(rowNames().length).toBe(PERMISSIONS.length + 1);
+      });
+      expect(columnNames().length).toBe(ROLES.length + 1);
+    });
+
+    it("says so when nothing matches, and Clear filters brings everything back", async () => {
+      signIn("SYSTEM_ADMIN");
+      renderPage();
+      await search("no such permission");
+      expect(await screen.findByText("No permissions match")).toBeVisible();
+      expect(screen.queryByRole("table")).toBeNull();
+      await userEvent.click(
+        screen.getByRole("button", { name: "Clear filters" }),
+      );
+      await waitFor(() => {
+        expect(rowNames().length).toBe(PERMISSIONS.length + 1);
+      });
+      expect(await searchBox()).toHaveValue("");
+    });
+
+    it("clears one filter from its chip and leaves the others", async () => {
+      signIn("SYSTEM_ADMIN");
+      renderPage("/governance?tab=matrix&role=FINANCE&group=orders");
+      await userEvent.click(
+        await screen.findByRole("button", {
+          name: "Clear filter: Role: Finance",
+        }),
+      );
+      await waitFor(() => {
+        expect(columnNames().length).toBe(ROLES.length + 1);
+      });
+      expect(rowNames()).toContain("Read ordersorders.read");
+      expect(rowNames()).not.toContain("See usersusers.read");
+      expect(screen.getByRole("status", { name: "Address" })).toHaveTextContent(
+        "group=orders",
+      );
+    });
+
+    it("lets a read-only role search as well", async () => {
+      signIn("AUDITOR");
+      renderPage();
+      await search("draft");
+      await waitFor(() => {
+        expect(rowNames()).toEqual(["Edit draft ordersorders.edit"]);
+      });
+      expect(
+        screen.getByRole("switch", { name: "Edit draft orders for Support" }),
+      ).toBeDisabled();
+    });
+
+    it("has no axe violations while filtered, or with no match", async () => {
+      signIn("SYSTEM_ADMIN");
+      const { container } = renderPage("/governance?tab=matrix&role=FINANCE");
+      await screen.findByRole("table", { name: "Permissions by role" });
+      expect(await axeViolations(container)).toEqual([]);
+      await search("no such permission");
+      await screen.findByText("No permissions match");
+      expect(await axeViolations(container)).toEqual([]);
     });
   });
 
