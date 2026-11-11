@@ -75,6 +75,10 @@
       "from": "Copy from",
       "to": "Copy to",
       "submit": "Copy",
+      "confirmTitle": "Replace what {{to}} holds?",
+      "confirmDescription": "{{to}} will hold exactly what {{from}} holds, with the same data scope. This can't be undone. The audit log keeps the change.",
+      "confirm": "Copy and replace",
+      "back": "Back",
       "cancel": "Cancel",
       "same": "Pick two different roles.",
       "done": "Copied."

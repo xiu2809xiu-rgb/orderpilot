@@ -171,8 +171,120 @@ describe("GovernancePage", () => {
       "LOGISTICS",
     );
     await userEvent.click(screen.getByRole("button", { name: "Copy" }));
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Copy and replace" }),
+    );
     await waitFor(() => {
       expect(body).toEqual({ fromRole: "FINANCE", toRole: "LOGISTICS" });
+    });
+  });
+
+  describe("confirming a copy", () => {
+    const answerCopy = () => {
+      const copies: unknown[] = [];
+      server.use(
+        http.post("*/api/v1/governance/matrix/copy", async ({ request }) => {
+          copies.push(await request.json());
+          return HttpResponse.json({ data: matrix.roles[0] });
+        }),
+      );
+      return copies;
+    };
+    const reachConfirm = async () => {
+      await userEvent.click(
+        await screen.findByRole("button", { name: "Copy a role" }),
+      );
+      await userEvent.selectOptions(
+        screen.getByLabelText("Copy from"),
+        "FINANCE",
+      );
+      await userEvent.selectOptions(
+        screen.getByLabelText("Copy to"),
+        "LOGISTICS",
+      );
+      await userEvent.click(screen.getByRole("button", { name: "Copy" }));
+    };
+
+    it("says it cannot be undone, and copies nothing until it is confirmed", async () => {
+      signIn("SYSTEM_ADMIN");
+      const copies = answerCopy();
+      renderPage();
+      await reachConfirm();
+      const dialog = await screen.findByRole("dialog", {
+        name: "Replace what Logistics holds?",
+      });
+      expect(dialog).toHaveTextContent("can't be undone");
+      expect(dialog).toHaveTextContent("Finance");
+      expect(copies).toEqual([]);
+      await userEvent.click(
+        within(dialog).getByRole("button", { name: "Copy and replace" }),
+      );
+      await waitFor(() => {
+        expect(copies).toEqual([{ fromRole: "FINANCE", toRole: "LOGISTICS" }]);
+      });
+    });
+
+    it("sends nothing when the person goes back or cancels", async () => {
+      signIn("SYSTEM_ADMIN");
+      const copies = answerCopy();
+      renderPage();
+      await reachConfirm();
+      await userEvent.click(
+        await screen.findByRole("button", { name: "Back" }),
+      );
+      expect(screen.getByLabelText("Copy from")).toHaveValue("FINANCE");
+      expect(screen.getByLabelText("Copy to")).toHaveValue("LOGISTICS");
+      await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+      await waitFor(() => {
+        expect(screen.queryByRole("dialog")).toBeNull();
+      });
+      expect(copies).toEqual([]);
+    });
+
+    it("opens at the first step again after it was left on the second", async () => {
+      signIn("SYSTEM_ADMIN");
+      answerCopy();
+      renderPage();
+      await reachConfirm();
+      await screen.findByRole("button", { name: "Back" });
+      await userEvent.keyboard("{Escape}");
+      await waitFor(() => {
+        expect(screen.queryByRole("dialog")).toBeNull();
+      });
+      await userEvent.click(
+        screen.getByRole("button", { name: "Copy a role" }),
+      );
+      expect(await screen.findByLabelText("Copy from")).toBeVisible();
+    });
+
+    it("puts focus on the safe choice, and back on Copy when the person returns", async () => {
+      signIn("SYSTEM_ADMIN");
+      answerCopy();
+      renderPage();
+      await reachConfirm();
+      const back = await screen.findByRole("button", { name: "Back" });
+      await waitFor(() => {
+        expect(back).toHaveFocus();
+      });
+      await userEvent.click(back);
+      const copy = await screen.findByRole("button", { name: "Copy" });
+      await waitFor(() => {
+        expect(copy).toHaveFocus();
+      });
+    });
+
+    it("offers no Undo once a role is copied", async () => {
+      signIn("SYSTEM_ADMIN");
+      answerCopy();
+      renderPage();
+      await reachConfirm();
+      await userEvent.click(
+        await screen.findByRole("button", { name: "Copy and replace" }),
+      );
+      expect(
+        await screen.findByText("Permissions of Finance copied to Logistics"),
+      ).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Undo" })).toBeNull();
     });
   });
 
