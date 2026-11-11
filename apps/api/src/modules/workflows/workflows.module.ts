@@ -5,6 +5,7 @@ import { syntheticSourceProvider } from "../../common/synthetic-source.js";
 import { QueueModule } from "../../queue/queue.module.js";
 import { UsersModule } from "../../users/users.module.js";
 import { GovernanceModule } from "../governance/governance.module.js";
+import { CommandReplayService } from "./command-replay.service.js";
 import { ApprovalPolicy } from "./domain/approval-policy.js";
 import {
   DEFAULT_ORDER_FLOW_RULES,
@@ -23,6 +24,7 @@ import { OrderWorkflowService } from "./order-workflow.service.js";
 import { TaskSlaService } from "./task-sla.service.js";
 import { TaskSweepService } from "./task-sweep.service.js";
 import { WorkflowCheckReporter } from "./workflow-check-reporter.js";
+import { WorkflowCommandRepository } from "./workflow-command.repository.js";
 import { WorkflowNoticeRepository } from "./workflow-notice.repository.js";
 import { WorkflowSweepJob } from "./workflow-sweep.job.js";
 import { WorkflowTaskRepository } from "./workflow-task.repository.js";
@@ -54,6 +56,8 @@ import { WorkflowsService } from "./workflows.service.js";
     OrderWorkflowRepository,
     SprRecordRepository,
     SprApprovalService,
+    CommandReplayService,
+    WorkflowCommandRepository,
     SprRoutingService,
     WorkflowTaskRepository,
     WorkflowNoticeRepository,
