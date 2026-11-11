@@ -56,6 +56,9 @@ function renderPage(address = "/governance") {
   );
 }
 
+const CELL_PUT = "*/api/v1/governance/matrix/:role/permissions/:permission";
+const SCOPE_PUT = "*/api/v1/governance/matrix/:role/data-scope";
+
 /** Every permission's row, by the name it reads under. */
 const rowNames = () =>
   screen.getAllByRole("rowheader").map((header) => header.textContent);
@@ -323,6 +326,159 @@ describe("GovernancePage", () => {
       await search("no such permission");
       await screen.findByText("No permissions match");
       expect(await axeViolations(container)).toEqual([]);
+    });
+  });
+
+  describe("undoing a change", () => {
+    const answerPuts = (path: string) => {
+      const sent: { url: string; body: unknown }[] = [];
+      server.use(
+        http.put(path, async ({ request }) => {
+          sent.push({
+            url: new URL(request.url).pathname,
+            body: await request.json(),
+          });
+          return HttpResponse.json({ data: matrix.roles[0] });
+        }),
+      );
+      return sent;
+    };
+    const countReads = () => {
+      const reads = { count: 0 };
+      server.use(
+        http.get("*/api/v1/governance/matrix", () => {
+          reads.count += 1;
+          return HttpResponse.json({ data: matrix });
+        }),
+      );
+      return reads;
+    };
+    const flipWarehouseOrders = async () => {
+      await userEvent.click(
+        await screen.findByRole("switch", {
+          name: "Read orders for Warehouse",
+        }),
+      );
+    };
+    const WAREHOUSE_ORDERS =
+      "/api/v1/governance/matrix/WAREHOUSE/permissions/orders.read";
+
+    it("reverses a switch through the same save, and reloads the matrix", async () => {
+      signIn("SYSTEM_ADMIN");
+      const sent = answerPuts(CELL_PUT);
+      const reads = countReads();
+      renderPage();
+      await flipWarehouseOrders();
+      await userEvent.click(
+        await screen.findByRole("button", { name: "Undo" }),
+      );
+      expect(await screen.findByText("Undone")).toBeInTheDocument();
+      expect(sent).toEqual([
+        { url: WAREHOUSE_ORDERS, body: { granted: false } },
+        { url: WAREHOUSE_ORDERS, body: { granted: true } },
+      ]);
+      // One read to open, one after the change, one after the Undo.
+      await waitFor(() => {
+        expect(reads.count).toBe(3);
+      });
+    });
+
+    it("reverses a data scope through the same save", async () => {
+      signIn("SYSTEM_ADMIN");
+      const sent = answerPuts(SCOPE_PUT);
+      renderPage();
+      await userEvent.selectOptions(
+        await screen.findByRole("combobox", { name: "Data scope: Finance" }),
+        "own",
+      );
+      await userEvent.click(
+        await screen.findByRole("button", { name: "Undo" }),
+      );
+      expect(await screen.findByText("Undone")).toBeInTheDocument();
+      expect(sent.map((call) => call.body)).toEqual([
+        { dataScope: "own" },
+        { dataScope: "all" },
+      ]);
+    });
+
+    it("shows a refused Undo with its trace id", async () => {
+      signIn("SYSTEM_ADMIN");
+      let puts = 0;
+      server.use(
+        http.put(CELL_PUT, () => {
+          puts += 1;
+          return puts === 1
+            ? HttpResponse.json({ data: matrix.roles[0] })
+            : HttpResponse.json(errorBody("FORBIDDEN", "trace-undo-1"), {
+                status: 403,
+              });
+        }),
+      );
+      renderPage();
+      await flipWarehouseOrders();
+      await userEvent.click(
+        await screen.findByRole("button", { name: "Undo" }),
+      );
+      const alert = await screen.findByRole("alert");
+      expect(alert).toHaveTextContent("You do not have access");
+      expect(alert).toHaveTextContent("trace-undo-1");
+    });
+
+    it("shows a refused Undo of a data scope with its trace id", async () => {
+      signIn("SYSTEM_ADMIN");
+      let puts = 0;
+      server.use(
+        http.put(SCOPE_PUT, () => {
+          puts += 1;
+          return puts === 1
+            ? HttpResponse.json({ data: matrix.roles[0] })
+            : HttpResponse.json(errorBody("FORBIDDEN", "trace-undo-2"), {
+                status: 403,
+              });
+        }),
+      );
+      renderPage();
+      await userEvent.selectOptions(
+        await screen.findByRole("combobox", { name: "Data scope: Finance" }),
+        "own",
+      );
+      await userEvent.click(
+        await screen.findByRole("button", { name: "Undo" }),
+      );
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "trace-undo-2",
+      );
+    });
+
+    it("holds the switches while an Undo is saving", async () => {
+      signIn("SYSTEM_ADMIN");
+      let release: () => void = () => undefined;
+      const held = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      let puts = 0;
+      server.use(
+        http.put(CELL_PUT, async () => {
+          puts += 1;
+          if (puts === 2) await held;
+          return HttpResponse.json({ data: matrix.roles[0] });
+        }),
+      );
+      renderPage();
+      await flipWarehouseOrders();
+      await userEvent.click(
+        await screen.findByRole("button", { name: "Undo" }),
+      );
+      const other = screen.getByRole("switch", {
+        name: "Read orders for Finance",
+      });
+      await waitFor(() => {
+        expect(other).toBeDisabled();
+      });
+      release();
+      await waitFor(() => {
+        expect(other).toBeEnabled();
+      });
     });
   });
 

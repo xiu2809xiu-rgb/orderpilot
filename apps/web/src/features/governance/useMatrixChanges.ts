@@ -57,11 +57,14 @@ export function useMatrixChanges() {
               role: tc(`roles.${role}`),
             }),
             {
+              // The same save as the change, so a refusal shows its trace id,
+              // the switches wait for it, and it is audited as its own change.
               undo: async () => {
-                await matrixSetPermission(role, permission, {
+                await toggle.mutateAsync({
+                  role,
+                  permission,
                   granted: !granted,
                 });
-                await refresh();
               },
             },
           ),
@@ -83,8 +86,7 @@ export function useMatrixChanges() {
             before
               ? {
                   undo: async () => {
-                    await matrixSetDataScope(role, { dataScope: before });
-                    await refresh();
+                    await scope.mutateAsync({ role, dataScope: before });
                   },
                 }
               : {},
