@@ -3,9 +3,12 @@ import {
   ROLES,
   errorEnvelopeSchema,
   matrixSchema,
+  type Permission,
   type Role,
 } from "@orderpilot/shared";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { RolePermissionRepository } from "../../src/auth/role-permission.repository.js";
+import { runSeed } from "../../src/database/seed/run-seed.js";
 import {
   API,
   auditEvents,
@@ -13,7 +16,7 @@ import {
   demoSignIn,
   type Browser,
 } from "../support/auth.js";
-import { resetTestData } from "../support/reset.js";
+import { resetTestData, testConfig } from "../support/reset.js";
 import { createTestApp, type TestApp } from "../support/test-app.js";
 
 const MATRIX = `${API}/governance/matrix`;
@@ -332,6 +335,109 @@ describe("governance: the role-permission matrix over HTTP", () => {
       expect(
         (refused.body as { data: { allowed: boolean; rule: string } }).data,
       ).toMatchObject({ allowed: false, rule: "synthetic-data-only" });
+    });
+  });
+
+  describe("the seed and a permission revoked on purpose (F-8)", () => {
+    /** Runs the real seed, as `pnpm db:seed` does, and returns its matrix line. */
+    const seed = async () => {
+      const lines: string[] = [];
+      await runSeed(testConfig(), (line) => lines.push(line));
+      return lines.find((line) => line.startsWith("seed role permissions:"));
+    };
+    const cell = (role: Role, permission: string) =>
+      `${MATRIX}/${role}/permissions/${permission}`;
+    /** Takes a pair out of the table without the matrix, as a story that adds a default finds it. */
+    const removeQuietly = (role: Role, permission: Permission) =>
+      t.app.get(RolePermissionRepository).revoke(role, permission);
+
+    it("keeps a permission revoked on the matrix revoked through the next seed", async () => {
+      const path = cell("WAREHOUSE", "exceptions.read");
+      expect((await put("SYSTEM_ADMIN", path, { granted: false })).status).toBe(
+        200,
+      );
+      try {
+        await seed();
+        expect((await access("WAREHOUSE")).permissions).not.toContain(
+          "exceptions.read",
+        );
+      } finally {
+        await put("SYSTEM_ADMIN", path, { granted: true });
+      }
+    });
+
+    it("keeps what a copy took away revoked through the next seed", async () => {
+      const taken = ["orders.create", "orders.edit", "documents.upload"];
+      const copy = await post("SYSTEM_ADMIN", `${MATRIX}/copy`, {
+        fromRole: "WAREHOUSE",
+        toRole: "SUPPORT",
+      });
+      expect(copy.status).toBe(200);
+      try {
+        await seed();
+        const held: readonly string[] = (await access("SUPPORT")).permissions;
+        for (const permission of taken) {
+          expect(held, permission).not.toContain(permission);
+        }
+      } finally {
+        for (const permission of taken) {
+          await put("SYSTEM_ADMIN", cell("SUPPORT", permission), {
+            granted: true,
+          });
+        }
+      }
+    });
+
+    it("says in its log how many default pairs stay revoked, and counts no other pair", async () => {
+      const path = cell("WAREHOUSE", "tracker.read");
+      // Not a default for Warehouse, so the log must not count it.
+      const other = cell("WAREHOUSE", "users.read");
+      for (const granted of [true, false]) {
+        expect((await put("SYSTEM_ADMIN", other, { granted })).status).toBe(
+          200,
+        );
+      }
+      expect((await put("SYSTEM_ADMIN", path, { granted: false })).status).toBe(
+        200,
+      );
+      try {
+        expect(await seed()).toMatch(/, and 1 revoked on purpose stays out$/);
+      } finally {
+        await put("SYSTEM_ADMIN", path, { granted: true });
+      }
+    });
+
+    it("still adds a default pair that is missing with no revocation, as a new default would be", async () => {
+      await removeQuietly("LOGISTICS", "tracker.read");
+      await seed();
+      expect((await access("LOGISTICS")).permissions).toContain("tracker.read");
+    });
+
+    it("forgets a revocation once the permission is granted again", async () => {
+      const path = cell("FINANCE", "tracker.read");
+      for (const granted of [false, true]) {
+        expect((await put("SYSTEM_ADMIN", path, { granted })).status).toBe(200);
+      }
+      await removeQuietly("FINANCE", "tracker.read");
+      await seed();
+      expect((await access("FINANCE")).permissions).toContain("tracker.read");
+    });
+
+    it("forgets a revocation when a copy gives the permission back", async () => {
+      const path = cell("WAREHOUSE", "exceptions.read");
+      expect((await put("SYSTEM_ADMIN", path, { granted: false })).status).toBe(
+        200,
+      );
+      const copy = await post("SYSTEM_ADMIN", `${MATRIX}/copy`, {
+        fromRole: "SUPPORT",
+        toRole: "WAREHOUSE",
+      });
+      expect(copy.status).toBe(200);
+      await removeQuietly("WAREHOUSE", "exceptions.read");
+      await seed();
+      expect((await access("WAREHOUSE")).permissions).toContain(
+        "exceptions.read",
+      );
     });
   });
 });
