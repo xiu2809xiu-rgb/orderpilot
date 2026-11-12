@@ -1,23 +1,30 @@
 import { describe, expect, it } from "vitest";
 import {
   API_BASE_PATH,
+  CONFIGURABLE_DOCUMENT_TYPES,
   COOKIES,
   DEMO_PERSONAS,
+  DOCUMENT_STAGES,
+  DOCUMENT_TYPES,
   ERROR_CODES,
   ERROR_HTTP_STATUS,
   HEADERS,
   PERMISSIONS,
   REFRESH_COOKIE_PATH,
   ROLES,
+  STAGED_DOCUMENT_TYPES,
   addDecimal,
   aiUsageSchema,
   apiPath,
   authRoutes,
   compareDecimal,
   decimalStringSchema,
+  documentRefSchema,
+  documentTypeSchema,
   domainEventSchema,
   errorEnvelopeSchema,
   formatRecordNumber,
+  isStagedDocumentType,
   multiplyDecimal,
   roundToCents,
   orderSchema,
@@ -227,6 +234,99 @@ describe("order contract", () => {
     expect(
       domainEventSchema.safeParse({ ...event, name: "order.exploded" }).success,
     ).toBe(false);
+  });
+});
+
+describe("document types and stages", () => {
+  const ref = {
+    id,
+    type: "AWB",
+    fileName: "awb.pdf",
+    receivedAt: "2026-11-02T01:00:00Z",
+    source: "upload",
+  };
+  const unstaged = DOCUMENT_TYPES.filter((type) => !isStagedDocumentType(type));
+
+  it("parses the four kinds added for the briefing", () => {
+    for (const type of [
+      "VENDOR_INVOICE",
+      "DELIVERY_ORDER",
+      "SPR_FORM",
+      "CREDIT_NOTE",
+    ]) {
+      expect(documentTypeSchema.safeParse(type).success).toBe(true);
+    }
+  });
+  it("keeps OTHER last and refuses an unknown type", () => {
+    expect(DOCUMENT_TYPES.at(-1)).toBe("OTHER");
+    expect(documentTypeSchema.safeParse("AWB_DRAFT").success).toBe(false);
+    expect(
+      documentRefSchema.safeParse({ ...ref, type: "RECEIPT" }).success,
+    ).toBe(false);
+  });
+  it("accepts a stage on an AWB and on a bill of lading", () => {
+    expect([...STAGED_DOCUMENT_TYPES]).toEqual(["AWB", "BILL_OF_LADING"]);
+    for (const type of STAGED_DOCUMENT_TYPES) {
+      for (const stage of DOCUMENT_STAGES) {
+        expect(
+          documentRefSchema.safeParse({ ...ref, type, stage }).success,
+        ).toBe(true);
+      }
+    }
+  });
+  it("accepts no stage on every type", () => {
+    for (const type of DOCUMENT_TYPES) {
+      expect(documentRefSchema.safeParse({ ...ref, type }).success).toBe(true);
+    }
+  });
+  it("refuses a stage on any other type, at the path stage", () => {
+    expect(unstaged.length).toBe(DOCUMENT_TYPES.length - 2);
+    for (const type of unstaged) {
+      const result = documentRefSchema.safeParse({
+        ...ref,
+        type,
+        stage: "draft",
+      });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.map((issue) => issue.path)).toEqual([
+        ["stage"],
+      ]);
+    }
+  });
+  it("refuses a stage outside the list", () => {
+    expect(
+      documentRefSchema.safeParse({ ...ref, stage: "signed" }).success,
+    ).toBe(false);
+  });
+  it("still holds a staged document in an order", () => {
+    const order = orderSchema.safeParse({
+      id,
+      ref: null,
+      header: {
+        no: "SO-1001",
+        sellToCustomerNo: "C-10010",
+        externalDocumentNo: "PO-7788",
+        orderDate: "2026-11-02",
+        shipmentDate: null,
+        currencyCode: "USD",
+        prepaymentPercent: "30",
+        shipmentMethodCode: null,
+        shippingAgentCode: null,
+        packageTrackingNo: null,
+        navisionStatus: null,
+      },
+      lines: [],
+      documents: [{ ...ref, stage: "draft" }],
+    });
+    expect(order.success).toBe(true);
+    expect(order.data?.documents[0]?.stage).toBe("draft");
+  });
+  it("lists every document type for configuration, and SPR beside them", () => {
+    expect(CONFIGURABLE_DOCUMENT_TYPES).toContain("SPR");
+    for (const type of DOCUMENT_TYPES) {
+      expect(CONFIGURABLE_DOCUMENT_TYPES).toContain(type);
+    }
+    expect(CONFIGURABLE_DOCUMENT_TYPES).toContain("SPR_FORM");
   });
 });
 

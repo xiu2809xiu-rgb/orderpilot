@@ -5,6 +5,10 @@ import { DOCUMENT_TYPES } from "../order.js";
  * Field settings and default values for each document type. They are held as
  * configuration (the DocumentTypeConfig table, seeded from the list below), so
  * changing a default is an edit to a row, never a code change.
+ *
+ * "SPR" is the request record's own settings. "SPR_FORM" (from DOCUMENT_TYPES)
+ * is the form as a document, a PDF someone uploads or prints. They are two
+ * entries on purpose. The newer document types have no default settings yet.
  */
 export const CONFIGURABLE_DOCUMENT_TYPES = ["SPR", ...DOCUMENT_TYPES] as const;
 export const configurableDocumentTypeSchema = z.enum(

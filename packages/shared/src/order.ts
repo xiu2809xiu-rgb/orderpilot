@@ -11,29 +11,62 @@ import { recordRefSchema } from "./record-number.js";
 
 // ---- Documents -------------------------------------------------------------
 
+/**
+ * What a document is, never who issued it: a vendor's packing list is a
+ * PACKING_LIST and a customer's proof of payment is PAYMENT_ADVICE.
+ * SPR_FORM is the form as a file someone uploads or prints. The request
+ * record's own settings are the "SPR" entry of CONFIGURABLE_DOCUMENT_TYPES.
+ */
 export const DOCUMENT_TYPES = [
   "CUSTOMER_PO",
   "PROFORMA_INVOICE",
   "VENDOR_PI",
+  "VENDOR_INVOICE",
   "SALES_INVOICE",
+  "CREDIT_NOTE",
   "PACKING_LIST",
+  "DELIVERY_ORDER",
   "AWB",
   "BILL_OF_LADING",
   "IMPORT_PERMIT",
   "PAYMENT_ADVICE",
+  "SPR_FORM",
   "OTHER",
 ] as const;
 export const documentTypeSchema = z.enum(DOCUMENT_TYPES);
 export type DocumentType = z.infer<typeof documentTypeSchema>;
 
-export const documentRefSchema = z.object({
-  id: z.uuid(),
-  type: documentTypeSchema,
-  fileName: z.string().min(1),
-  receivedAt: z.iso.datetime(),
-  // Where it came from: an email address or "upload".
-  source: z.string().min(1),
-});
+/**
+ * Whether a shipping paper is still a draft or is final. It is a marker on the
+ * document, not more types, so one rule on "an AWB" still reads both. A
+ * forwarder's draft is checked before the final is issued.
+ */
+export const DOCUMENT_STAGES = ["draft", "final"] as const;
+export const documentStageSchema = z.enum(DOCUMENT_STAGES);
+export type DocumentStage = z.infer<typeof documentStageSchema>;
+
+/** The only types that pass through a draft first. */
+export const STAGED_DOCUMENT_TYPES = ["AWB", "BILL_OF_LADING"] as const;
+
+export function isStagedDocumentType(type: DocumentType): boolean {
+  return (STAGED_DOCUMENT_TYPES as readonly string[]).includes(type);
+}
+
+export const documentRefSchema = z
+  .object({
+    id: z.uuid(),
+    type: documentTypeSchema,
+    fileName: z.string().min(1),
+    receivedAt: z.iso.datetime(),
+    // Where it came from: an email address or "upload".
+    source: z.string().min(1),
+    // Absent means not known or not applicable, and is valid for every type.
+    stage: documentStageSchema.optional(),
+  })
+  .refine((ref) => ref.stage === undefined || isStagedDocumentType(ref.type), {
+    path: ["stage"],
+    message: "Only an AWB or a bill of lading has a draft or final stage",
+  });
 export type DocumentRef = z.infer<typeof documentRefSchema>;
 
 // ---- Field values with confidence and provenance ---------------------------
