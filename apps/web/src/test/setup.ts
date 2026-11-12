@@ -1,6 +1,7 @@
 import "@testing-library/jest-dom/vitest";
 import { cleanup, configure } from "@testing-library/react";
 import { afterAll, afterEach, beforeAll, vi } from "vitest";
+import { useToastStore } from "@/components/common/toast";
 import i18n, { i18nReady } from "@/i18n";
 import { server } from "./server";
 
@@ -23,6 +24,10 @@ afterAll(() => {
 afterEach(() => {
   server.resetHandlers();
   cleanup();
+  // The toast store is module state, and a toast only leaves when its card's
+  // six-second timer fires. cleanup() unmounts the card and cancels that timer,
+  // so without this the toasts of one test show up in the next one's render.
+  useToastStore.setState({ items: [] });
   vi.unstubAllGlobals();
 });
 
