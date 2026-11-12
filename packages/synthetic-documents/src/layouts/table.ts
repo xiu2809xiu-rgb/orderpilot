@@ -1,10 +1,12 @@
 import { PAGE, type Color } from "../canvas.js";
 import { printDate } from "../format.js";
-import { drawTable, type Column, type TableLook } from "../table.js";
+import { drawFlow, planFlow, type FlowSpec } from "../flow.js";
+import type { Column, TableLook } from "../table.js";
+import { tableBand } from "./bands.js";
 import {
+  FLOOR,
   MUTED,
   WHITE,
-  assertFits,
   captioned,
   type CaptionStyle,
   type DrawLayout,
@@ -65,8 +67,24 @@ export const drawTableLayout: DrawLayout = (canvas, facts, f) => {
     color: WHITE,
     align: "right",
   });
+  const delivery = f.otherDate?.text ?? "";
+  const flow: FlowSpec = {
+    x: LEFT,
+    top: 248,
+    columns: COLUMNS,
+    lines: f.lines,
+    look: LOOK,
+    statics: { uom: "PCS", discount: "0.00", delivery },
+    floor: FLOOR,
+    // What every one-page listing has always been checked against.
+    closing: 60,
+    extent: 44,
+    next: tableBand(facts.number),
+    carry: "amount",
+  };
+  const { pages } = planFlow(flow);
   canvas.text(
-    `Printed ${printDate(facts.issueDate)} 09:14 by PURCH01   Report PO-LIST-01   Page 1 of 1`,
+    `Printed ${printDate(facts.issueDate)} 09:14 by PURCH01   Report PO-LIST-01   Page 1 of ${String(pages)}`,
     LEFT,
     70,
     { font: "mono", size: 6.6, color: MUTED },
@@ -106,13 +124,7 @@ export const drawTableLayout: DrawLayout = (canvas, facts, f) => {
   );
   canvas.line([LEFT, 238], [LEFT + WIDTH, 238], DARK, 0.5);
 
-  const delivery = f.otherDate?.text ?? "";
-  const bottom = drawTable(canvas, LEFT, 248, COLUMNS, f.lines, LOOK, {
-    uom: "PCS",
-    discount: "0.00",
-    delivery,
-  });
-  assertFits(bottom + 60, "The table PO");
+  const { bottom } = drawFlow(canvas, flow);
   canvas.text("TOTAL USD", LEFT + WIDTH - 90, bottom + 16, {
     font: "sansBold",
     size: 8,

@@ -1,15 +1,17 @@
+import { drawFlow } from "../flow.js";
 import type { LegacyKind } from "../model.js";
-import { drawTable, type Column, type TableLook } from "../table.js";
+import type { Column, TableLook } from "../table.js";
+import { houseBand } from "./bands.js";
 import { JADE, drawPaymentBox } from "./payment-box.js";
 import {
   CONTENT_WIDTH,
+  FLOOR,
   MARGIN,
   MUTED,
   PAPER_GREY,
   RIGHT,
   RULE,
   WHITE,
-  assertFits,
   captioned,
   sellerBlock,
   type CaptionStyle,
@@ -57,6 +59,12 @@ const LOOK: TableLook = {
   padX: 5,
   padY: 5,
 };
+
+// How far the block under the table reaches, to its lowest letter: the totals,
+// the payment box, or the packing signatures.
+const EXTENT_TOTALS = 28;
+const EXTENT_PAYMENT = 192;
+const EXTENT_PACKING = 138;
 
 const CAPTION: CaptionStyle = {
   labelFont: "sans",
@@ -120,15 +128,19 @@ export const drawHouse: DrawLayout = (canvas, facts, f) => {
       captioned(canvas, field, MARGIN + at * CONTENT_WIDTH, y, CAPTION);
   });
   if (!f.incoterms) y -= 30;
-  const bottom = drawTable(
-    canvas,
-    MARGIN,
-    y + 32,
-    packing ? PACKED : PRICED,
-    f.lines,
-    LOOK,
-  );
-  assertFits(bottom + 230, `The ${facts.kind} document`);
+  const { bottom } = drawFlow(canvas, {
+    x: MARGIN,
+    top: y + 32,
+    columns: packing ? PACKED : PRICED,
+    lines: f.lines,
+    look: LOOK,
+    floor: FLOOR,
+    // What every one-page order has always been checked against.
+    closing: 230,
+    extent: packing ? EXTENT_PACKING : f.bank ? EXTENT_PAYMENT : EXTENT_TOTALS,
+    next: houseBand(TITLES[facts.kind], facts.number),
+    carry: packing ? "grossWeight" : "amount",
+  });
 
   const sumRow = (
     label: string,

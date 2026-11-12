@@ -1,12 +1,14 @@
 import { BLACK } from "../canvas.js";
-import { drawTable, type Column, type TableLook } from "../table.js";
+import { drawFlow, planFlow, type FlowSpec } from "../flow.js";
+import type { Column, TableLook } from "../table.js";
+import { boxedBand } from "./bands.js";
 import {
   CONTENT_WIDTH,
+  FLOOR,
   MARGIN,
   MUTED,
   PAPER_GREY,
   RIGHT,
-  assertFits,
   captioned,
   type CaptionStyle,
   type DrawLayout,
@@ -43,6 +45,9 @@ const LOOK: TableLook = {
   padX: 5,
   padY: 4,
 };
+
+// How far the total, the signature box and the closing line reach under the table.
+const BLOCK = 172;
 
 const TERMS = [
   "Goods must match the part numbers and quantities above. We do not accept substitutions or part shipments unless we agree in writing.",
@@ -109,6 +114,24 @@ export const drawBoxed: DrawLayout = (canvas, facts, f) => {
     valueSize: 8.5,
   });
 
+  const flow: FlowSpec = {
+    x: MARGIN,
+    top: 262,
+    columns: COLUMNS,
+    lines: f.lines,
+    look: LOOK,
+    floor: FLOOR,
+    // The block under the table reaches 172 pt. Checking for 120, as this layout
+    // once did, let an order of about 19 lines draw its signature box below the
+    // floor, so both numbers are its real reach.
+    closing: BLOCK,
+    extent: BLOCK,
+    next: boxedBand(facts.number),
+    carry: "amount",
+  };
+  // The terms follow the last page of the table, so their page is not always 2.
+  const termsPage = planFlow(flow).pages + 1;
+
   const third = CONTENT_WIDTH / 3;
   [f.contact, f.incoterms].forEach((field, i) => {
     cell(MARGIN + i * third, 206, third, 38);
@@ -120,13 +143,14 @@ export const drawBoxed: DrawLayout = (canvas, facts, f) => {
     size: 6.5,
     color: MUTED,
   });
-  canvas.text("See terms of purchase, page 2", MARGIN + 2 * third + 7, 232, {
-    font: "sans",
-    size: 9,
-  });
+  canvas.text(
+    `See terms of purchase, page ${String(termsPage)}`,
+    MARGIN + 2 * third + 7,
+    232,
+    { font: "sans", size: 9 },
+  );
 
-  const bottom = drawTable(canvas, MARGIN, 262, COLUMNS, f.lines, LOOK);
-  assertFits(bottom + 120, "The boxed PO");
+  const { bottom } = drawFlow(canvas, flow);
   if (f.total) {
     cell(RIGHT - 190, bottom + 10, 190, 34);
     captioned(
