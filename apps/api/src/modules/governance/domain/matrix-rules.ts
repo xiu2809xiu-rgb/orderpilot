@@ -58,3 +58,20 @@ export function planCopy(
   });
   return { grant, revoke };
 }
+
+/**
+ * The default pairs the seed may add: every one except those revoked on
+ * purpose (ADR 0053). A default that is merely missing stays in, so a
+ * permission a later story adds still reaches an existing database.
+ */
+export function pairsToSeed(
+  defaults: Readonly<Partial<Record<Role, readonly Permission[]>>>,
+  revoked: readonly { readonly role: Role; readonly permission: string }[],
+): { role: Role; permission: Permission }[] {
+  const out = new Set(revoked.map((pair) => `${pair.role}:${pair.permission}`));
+  return (Object.keys(defaults) as Role[]).flatMap((role) =>
+    (defaults[role] ?? [])
+      .filter((permission) => !out.has(`${role}:${permission}`))
+      .map((permission) => ({ role, permission })),
+  );
+}

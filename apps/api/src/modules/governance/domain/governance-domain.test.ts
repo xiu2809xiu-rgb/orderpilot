@@ -3,7 +3,12 @@ import { describe, expect, it } from "vitest";
 import { DomainError } from "../../../common/domain-error.js";
 import { decideAiDestination } from "./ai-destination-policy.js";
 import { SAMPLE_RULES, mask } from "./masking.js";
-import { assertCanGrant, assertCanRevoke, planCopy } from "./matrix-rules.js";
+import {
+  assertCanGrant,
+  assertCanRevoke,
+  pairsToSeed,
+  planCopy,
+} from "./matrix-rules.js";
 
 describe("matrix rules", () => {
   it("refuses to grant the system admin a right to approve, post or pay", () => {
@@ -77,6 +82,36 @@ describe("masking", () => {
 
   it("shows a field that has no rule", () => {
     expect(mask(SAMPLE_RULES, "WAREHOUSE", "other", "x").masked).toBe(false);
+  });
+});
+
+describe("which default pairs the seed adds (F-8)", () => {
+  const defaults = {
+    SUPPORT: ["orders.read", "orders.create"],
+    WAREHOUSE: ["orders.read"],
+  } as const;
+
+  it("adds every default pair nobody revoked on purpose", () => {
+    expect(pairsToSeed(defaults, [])).toEqual([
+      { role: "SUPPORT", permission: "orders.read" },
+      { role: "SUPPORT", permission: "orders.create" },
+      { role: "WAREHOUSE", permission: "orders.read" },
+    ]);
+  });
+
+  it("leaves out a pair revoked on purpose, and only that pair", () => {
+    expect(
+      pairsToSeed(defaults, [{ role: "SUPPORT", permission: "orders.read" }]),
+    ).toEqual([
+      { role: "SUPPORT", permission: "orders.create" },
+      { role: "WAREHOUSE", permission: "orders.read" },
+    ]);
+  });
+
+  it("is not changed by a revoked pair that is not a default", () => {
+    expect(
+      pairsToSeed(defaults, [{ role: "WAREHOUSE", permission: "users.read" }]),
+    ).toHaveLength(3);
   });
 });
 
