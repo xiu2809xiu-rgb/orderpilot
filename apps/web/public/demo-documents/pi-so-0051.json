@@ -1,0 +1,417 @@
+{
+  "label": "Synthetic demo data",
+  "file": "pi-so-0051.pdf",
+  "documentType": "PROFORMA_INVOICE",
+  "documentNumber": "PI-20261023-0002",
+  "layout": "house",
+  "readable": "text",
+  "orderNo": "SO-0051",
+  "customerNo": "C-0032",
+  "purpose": "A PI for a 50% advance on a single line.",
+  "pageCount": 1,
+  "page": {
+    "width": 595.28,
+    "height": 841.89
+  },
+  "confidenceThreshold": 0.9,
+  "uncertainFieldCount": 0,
+  "mismatch": null,
+  "fields": [
+    {
+      "key": "piNumber",
+      "label": "PI number",
+      "group": "header",
+      "lineIndex": null,
+      "value": "PI-20261023-0002",
+      "text": "PI-20261023-0002",
+      "page": 1,
+      "box": [
+        0.7936,
+        0.0763,
+        0.148,
+        0.0108
+      ],
+      "id": "piNumber",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "piDate",
+      "label": "PI date",
+      "group": "header",
+      "lineIndex": null,
+      "value": "2026-10-23",
+      "text": "23 Oct 2026",
+      "page": 1,
+      "box": [
+        0.8445,
+        0.0906,
+        0.097,
+        0.0108
+      ],
+      "id": "piDate",
+      "confidence": 0.96,
+      "uncertain": false
+    },
+    {
+      "key": "validUntil",
+      "label": "Valid until",
+      "group": "header",
+      "lineIndex": null,
+      "value": "2026-11-06",
+      "text": "06 Nov 2026",
+      "page": 1,
+      "box": [
+        0.8412,
+        0.1048,
+        0.1003,
+        0.0108
+      ],
+      "id": "validUntil",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "poNumber",
+      "label": "PO number",
+      "group": "header",
+      "lineIndex": null,
+      "value": "PO-LK-4450",
+      "text": "PO-LK-4450",
+      "page": 1,
+      "box": [
+        0.8435,
+        0.1191,
+        0.0981,
+        0.0108
+      ],
+      "id": "poNumber",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "customerName",
+      "label": "Customer",
+      "group": "header",
+      "lineIndex": null,
+      "value": "Dambera Security Supplies (Pvt) Ltd",
+      "text": "Dambera Security Supplies (Pvt) Ltd",
+      "page": 1,
+      "box": [
+        0.0585,
+        0.1857,
+        0.3015,
+        0.0135
+      ],
+      "id": "customerName",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "billTo",
+      "label": "Bill to",
+      "group": "header",
+      "lineIndex": null,
+      "value": "25 Selvaran Mawatha, Unit 9C, Colombo 00184, Sri Lanka",
+      "text": "25 Selvaran Mawatha, Unit 9C\nColombo 00184\nSri Lanka",
+      "page": 1,
+      "box": [
+        0.0585,
+        0.2022,
+        0.2189,
+        0.0393
+      ],
+      "id": "billTo",
+      "confidence": 0.97,
+      "uncertain": false
+    },
+    {
+      "key": "shipTo",
+      "label": "Ship to",
+      "group": "header",
+      "lineIndex": null,
+      "value": "Dambera Security Supplies (Pvt) Ltd, 25 Selvaran Mawatha, Unit 9C, Colombo 00184, Sri Lanka",
+      "text": "Dambera Security Supplies (Pvt) Ltd\n25 Selvaran Mawatha, Unit 9C\nColombo 00184\nSri Lanka",
+      "page": 1,
+      "box": [
+        0.498,
+        0.1854,
+        0.2602,
+        0.0527
+      ],
+      "id": "shipTo",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "incoterms",
+      "label": "Incoterms",
+      "group": "header",
+      "lineIndex": null,
+      "value": "FOB Singapore",
+      "text": "FOB Singapore",
+      "page": 1,
+      "box": [
+        0.0585,
+        0.2949,
+        0.1104,
+        0.0123
+      ],
+      "id": "incoterms",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "paymentTerms",
+      "label": "Payment terms",
+      "group": "header",
+      "lineIndex": null,
+      "value": "50% advance with order, balance before shipment",
+      "text": "50% advance with order, balance before shipment",
+      "page": 1,
+      "box": [
+        0.2782,
+        0.2949,
+        0.3596,
+        0.0123
+      ],
+      "id": "paymentTerms",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "currency",
+      "label": "Currency",
+      "group": "header",
+      "lineIndex": null,
+      "value": "USD",
+      "text": "USD",
+      "page": 1,
+      "box": [
+        0.7617,
+        0.2949,
+        0.0349,
+        0.0108
+      ],
+      "id": "currency",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "lines.partNumber",
+      "label": "Part number",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "CUZZ0245",
+      "text": "CUZZ0245",
+      "page": 1,
+      "box": [
+        0.1072,
+        0.358,
+        0.0785,
+        0.0106
+      ],
+      "id": "lines.partNumber[0]",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "lines.description",
+      "label": "Description",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "Cudy Wi-Fi 6 Router AX1800 Lite",
+      "text": "Cudy Wi-Fi 6 Router AX1800 Lite",
+      "page": 1,
+      "box": [
+        0.2819,
+        0.358,
+        0.2301,
+        0.012
+      ],
+      "id": "lines.description[0]",
+      "confidence": 0.96,
+      "uncertain": false
+    },
+    {
+      "key": "lines.quantity",
+      "label": "Quantity",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "120",
+      "text": "120",
+      "page": 1,
+      "box": [
+        0.6402,
+        0.358,
+        0.0288,
+        0.0106
+      ],
+      "id": "lines.quantity[0]",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "lines.unitPrice",
+      "label": "Unit price",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "66.34",
+      "text": "66.34",
+      "page": 1,
+      "box": [
+        0.7526,
+        0.358,
+        0.044,
+        0.0106
+      ],
+      "id": "lines.unitPrice[0]",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "lines.amount",
+      "label": "Amount",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "7960.80",
+      "text": "7,960.80",
+      "page": 1,
+      "box": [
+        0.8671,
+        0.358,
+        0.066,
+        0.0121
+      ],
+      "id": "lines.amount[0]",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "total",
+      "label": "Total (USD)",
+      "group": "totals",
+      "lineIndex": null,
+      "value": "7960.80",
+      "text": "7,960.80",
+      "page": 1,
+      "box": [
+        0.85,
+        0.3927,
+        0.0848,
+        0.0144
+      ],
+      "id": "total",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "amountDue",
+      "label": "Due now (50%)",
+      "group": "totals",
+      "lineIndex": null,
+      "value": "3980.40",
+      "text": "3,980.40",
+      "page": 1,
+      "box": [
+        0.8633,
+        0.4154,
+        0.0716,
+        0.0128
+      ],
+      "id": "amountDue",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "balanceDue",
+      "label": "Balance before shipment",
+      "group": "totals",
+      "lineIndex": null,
+      "value": "3980.40",
+      "text": "3,980.40",
+      "page": 1,
+      "box": [
+        0.8633,
+        0.4344,
+        0.0716,
+        0.0128
+      ],
+      "id": "balanceDue",
+      "confidence": 0.96,
+      "uncertain": false
+    },
+    {
+      "key": "bankBeneficiary",
+      "label": "Beneficiary",
+      "group": "bank",
+      "lineIndex": null,
+      "value": "Spectra Demo Pte Ltd",
+      "text": "Spectra Demo Pte Ltd",
+      "page": 1,
+      "box": [
+        0.0753,
+        0.5227,
+        0.1608,
+        0.0122
+      ],
+      "id": "bankBeneficiary",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "bankName",
+      "label": "Bank",
+      "group": "bank",
+      "lineIndex": null,
+      "value": "Demo Bank (not a real bank)",
+      "text": "Demo Bank (not a real bank)",
+      "page": 1,
+      "box": [
+        0.5148,
+        0.5225,
+        0.2042,
+        0.012
+      ],
+      "id": "bankName",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "bankAccountNo",
+      "label": "Account number",
+      "group": "bank",
+      "lineIndex": null,
+      "value": "0000 0000 0000",
+      "text": "0000 0000 0000",
+      "page": 1,
+      "box": [
+        0.0753,
+        0.556,
+        0.131,
+        0.0108
+      ],
+      "id": "bankAccountNo",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "swiftCode",
+      "label": "SWIFT code",
+      "group": "bank",
+      "lineIndex": null,
+      "value": "DEMOZZ00",
+      "text": "DEMOZZ00",
+      "page": 1,
+      "box": [
+        0.5148,
+        0.556,
+        0.0766,
+        0.0108
+      ],
+      "id": "swiftCode",
+      "confidence": 0.95,
+      "uncertain": false
+    }
+  ]
+}

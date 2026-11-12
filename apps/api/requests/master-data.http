@@ -19,11 +19,12 @@ GET {{baseUrl}}/api/v1/master-data/items?page=1&pageSize=25&sort=availableStock&
 ### Search covers the number, the description and the part number.
 GET {{baseUrl}}/api/v1/master-data/items?search=monitor
 
-### Filters: brand, category (IT, SURVEILLANCE, ACCESSORIES), vendor and
+### Filters: brand, category (COMPONENTS, PERIPHERALS, PCS,
+### ENTERPRISE, SECURITY, NETWORKING), vendor and
 ### availability (short, low, ok).
 GET {{baseUrl}}/api/v1/master-data/items?availability=short
 ###
-GET {{baseUrl}}/api/v1/master-data/items?category=SURVEILLANCE&vendor=V-0002
+GET {{baseUrl}}/api/v1/master-data/items?category=SECURITY&vendor=V-0002
 
 ### One item: stock, open orders, open purchase orders and SPRs.
 GET {{baseUrl}}/api/v1/master-data/items/I-0004
@@ -31,13 +32,19 @@ GET {{baseUrl}}/api/v1/master-data/items/I-0004
 ### An unknown number answers the 404 envelope.
 GET {{baseUrl}}/api/v1/master-data/items/I-9999
 
-### Customers: search, country, payment terms and price group.
+### Customers: search, country and payment terms.
 GET {{baseUrl}}/api/v1/master-data/customers?country=IN&sort=overdueOrders&direction=desc
 ###
-GET {{baseUrl}}/api/v1/master-data/customers?paymentTerms=30%20DAYS&priceGroup=DIST-A
+GET {{baseUrl}}/api/v1/master-data/customers?paymentTerms=30%20DAYS&country=MV
 
 ### One customer: key facts, open orders and overdue orders.
 GET {{baseUrl}}/api/v1/master-data/customers/C-0001
+
+### What a customer last paid for each item asked for (at most 200, comma-separated).
+### An item they never bought is left out, a bad format is a 400 and an unknown
+### customer a 404. The price is masked like an item's Unit Price: sign in as
+### WAREHOUSE and it answers masked: true, value: null and the reason.
+GET {{baseUrl}}/api/v1/master-data/customers/C-0001/last-prices?itemNos=I-0001,I-0002
 
 ### Vendors.
 GET {{baseUrl}}/api/v1/master-data/vendors?sort=balanceLcy&direction=desc

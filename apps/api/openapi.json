@@ -3752,7 +3752,14 @@
                           "type": "array",
                           "items": {
                             "type": "string",
-                            "enum": ["IT", "SURVEILLANCE", "ACCESSORIES"]
+                            "enum": [
+                              "COMPONENTS",
+                              "PERIPHERALS",
+                              "PCS",
+                              "ENTERPRISE",
+                              "SECURITY",
+                              "NETWORKING"
+                            ]
                           }
                         },
                         "vendors": {
@@ -3782,12 +3789,6 @@
                           "items": {
                             "type": "string"
                           }
-                        },
-                        "priceGroups": {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
                         }
                       },
                       "required": [
@@ -3795,8 +3796,7 @@
                         "categories",
                         "vendors",
                         "countries",
-                        "paymentTerms",
-                        "priceGroups"
+                        "paymentTerms"
                       ],
                       "additionalProperties": false
                     },
@@ -3874,7 +3874,14 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "enum": ["IT", "SURVEILLANCE", "ACCESSORIES"]
+              "enum": [
+                "COMPONENTS",
+                "PERIPHERALS",
+                "PCS",
+                "ENTERPRISE",
+                "SECURITY",
+                "NETWORKING"
+              ]
             }
           },
           {
@@ -3954,7 +3961,14 @@
                           },
                           "category": {
                             "type": "string",
-                            "enum": ["IT", "SURVEILLANCE", "ACCESSORIES"]
+                            "enum": [
+                              "COMPONENTS",
+                              "PERIPHERALS",
+                              "PCS",
+                              "ENTERPRISE",
+                              "SECURITY",
+                              "NETWORKING"
+                            ]
                           },
                           "baseUnitOfMeasure": {
                             "type": "string",
@@ -4198,7 +4212,14 @@
                         },
                         "category": {
                           "type": "string",
-                          "enum": ["IT", "SURVEILLANCE", "ACCESSORIES"]
+                          "enum": [
+                            "COMPONENTS",
+                            "PERIPHERALS",
+                            "PCS",
+                            "ENTERPRISE",
+                            "SECURITY",
+                            "NETWORKING"
+                          ]
                         },
                         "baseUnitOfMeasure": {
                           "type": "string",
@@ -4659,16 +4680,6 @@
             }
           },
           {
-            "name": "priceGroup",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 60
-            }
-          },
-          {
             "name": "sort",
             "required": false,
             "in": "query",
@@ -4720,10 +4731,6 @@
                             "type": "string",
                             "minLength": 1
                           },
-                          "customerPriceGroup": {
-                            "type": "string",
-                            "minLength": 1
-                          },
                           "openOrders": {
                             "type": "integer",
                             "minimum": 0,
@@ -4741,7 +4748,6 @@
                           "countryRegionCode",
                           "currencyCode",
                           "paymentTermsCode",
-                          "customerPriceGroup",
                           "openOrders",
                           "overdueOrders"
                         ],
@@ -4783,6 +4789,129 @@
           }
         },
         "summary": "Customers with their open and overdue orders, a page at a time. Mock Business Central data",
+        "tags": ["MasterData"]
+      }
+    },
+    "/api/v1/master-data/customers/{no}/last-prices": {
+      "get": {
+        "operationId": "MasterData_lastPrices",
+        "parameters": [
+          {
+            "name": "itemNos",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9-]{1,20}(,[A-Za-z0-9-]{1,20})*$"
+            }
+          },
+          {
+            "name": "no",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "itemNo": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "price": {
+                            "type": "object",
+                            "properties": {
+                              "field": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "classification": {
+                                "type": "string",
+                                "enum": [
+                                  "public",
+                                  "internal",
+                                  "confidential",
+                                  "restricted"
+                                ]
+                              },
+                              "masked": {
+                                "type": "boolean"
+                              },
+                              "value": {
+                                "nullable": true,
+                                "type": "string"
+                              },
+                              "reason": {
+                                "nullable": true,
+                                "type": "string",
+                                "enum": [
+                                  "role",
+                                  "bankDetails",
+                                  "price",
+                                  "policy"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "field",
+                              "classification",
+                              "masked",
+                              "value",
+                              "reason"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "agreedOn": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "documentNo": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "required": [
+                          "itemNo",
+                          "price",
+                          "agreedOn",
+                          "documentNo"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "mock": {
+                          "type": "boolean",
+                          "enum": [true]
+                        }
+                      },
+                      "required": ["mock"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "What a customer last paid for each item asked for, as context for an order line. Masked like a unit price. Mock Business Central data",
         "tags": ["MasterData"]
       }
     },
@@ -4830,7 +4959,25 @@
                           "type": "string",
                           "minLength": 1
                         },
-                        "customerPriceGroup": {
+                        "addressLine1": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "addressLine2": {
+                          "type": "string"
+                        },
+                        "city": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "state": {
+                          "type": "string"
+                        },
+                        "postalCode": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "taxRegistrationNumber": {
                           "type": "string",
                           "minLength": 1
                         },
@@ -5034,7 +5181,12 @@
                         "countryRegionCode",
                         "currencyCode",
                         "paymentTermsCode",
-                        "customerPriceGroup",
+                        "addressLine1",
+                        "addressLine2",
+                        "city",
+                        "state",
+                        "postalCode",
+                        "taxRegistrationNumber",
                         "creditLimitLcy",
                         "balanceLcy",
                         "openOrders",

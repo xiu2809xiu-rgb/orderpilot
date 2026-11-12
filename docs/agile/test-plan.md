@@ -35,7 +35,7 @@ How OrderPilot is tested: the levels, the environments, the data, and the failur
 
 ## 3. Test data
 
-- **Synthetic only,** labelled "Synthetic demo data": fictional customers in the brief's countries, vendors, items from fictional brands, opening stock and orders in different states (`packages/synthetic-data`, Today (P-9), grown by P-19).
+- **Synthetic only,** labelled "Synthetic demo data": made-up customers in the eleven countries of the briefing, vendors, items from 22 real brands with made-up part numbers, opening stock, 120 live orders in different states, the planted cases, and 24 months of history kept apart from the live orders (`packages/synthetic-data`, Today (P-9, P-31, P-86), grown by P-19).
 - **Documents with planted mistakes** and their ground truth, for the extraction accuracy target and the mismatch checks (`packages/synthetic-documents`: the first twelve files are there today (P-52), the full set is planned: P-21).
 - **Obviously fake bank details,** no national ID numbers, and prices in USD.
 - **Fixed seeds,** so a failing test fails the same way twice.

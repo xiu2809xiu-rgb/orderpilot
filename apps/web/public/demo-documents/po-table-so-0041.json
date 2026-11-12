@@ -1,0 +1,489 @@
+{
+  "label": "Synthetic demo data",
+  "file": "po-table-so-0041.pdf",
+  "documentType": "CUSTOMER_PO",
+  "documentNumber": "PO-BD-4380",
+  "layout": "table",
+  "readable": "text",
+  "orderNo": "SO-0041",
+  "customerNo": "C-0018",
+  "purpose": "The PO that the packing list pl-so-0041-mismatch is checked against.",
+  "pageCount": 1,
+  "page": {
+    "width": 595.28,
+    "height": 841.89
+  },
+  "confidenceThreshold": 0.9,
+  "uncertainFieldCount": 0,
+  "mismatch": null,
+  "fields": [
+    {
+      "key": "customerName",
+      "label": "Customer",
+      "group": "header",
+      "lineIndex": null,
+      "value": "Shitalvi Technology Ltd",
+      "text": "Shitalvi Technology Ltd",
+      "page": 1,
+      "box": [
+        0.0585,
+        0.0449,
+        0.2175,
+        0.0145
+      ],
+      "id": "customerName",
+      "confidence": 0.96,
+      "uncertain": false
+    },
+    {
+      "key": "poNumber",
+      "label": "PO number",
+      "group": "header",
+      "lineIndex": null,
+      "value": "PO-BD-4380",
+      "text": "PO-BD-4380",
+      "page": 1,
+      "box": [
+        0.045,
+        0.1094,
+        0.0827,
+        0.0097
+      ],
+      "id": "poNumber",
+      "confidence": 0.96,
+      "uncertain": false
+    },
+    {
+      "key": "poDate",
+      "label": "PO date",
+      "group": "header",
+      "lineIndex": null,
+      "value": "2026-10-17",
+      "text": "17 Oct 2026",
+      "page": 1,
+      "box": [
+        0.3642,
+        0.1094,
+        0.0905,
+        0.0097
+      ],
+      "id": "poDate",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "requiredDate",
+      "label": "Required by",
+      "group": "header",
+      "lineIndex": null,
+      "value": "2026-11-09",
+      "text": "09 Nov 2026",
+      "page": 1,
+      "box": [
+        0.6834,
+        0.1094,
+        0.0905,
+        0.0097
+      ],
+      "id": "requiredDate",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "buyerContact",
+      "label": "Buyer",
+      "group": "header",
+      "lineIndex": null,
+      "value": "Marisol Dunreith",
+      "text": "Marisol Dunreith",
+      "page": 1,
+      "box": [
+        0.045,
+        0.1405,
+        0.1298,
+        0.0095
+      ],
+      "id": "buyerContact",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "currency",
+      "label": "Currency",
+      "group": "header",
+      "lineIndex": null,
+      "value": "USD",
+      "text": "USD",
+      "page": 1,
+      "box": [
+        0.3642,
+        0.1403,
+        0.0276,
+        0.0097
+      ],
+      "id": "currency",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "incoterms",
+      "label": "Incoterms",
+      "group": "header",
+      "lineIndex": null,
+      "value": "FOB Singapore",
+      "text": "FOB Singapore",
+      "page": 1,
+      "box": [
+        0.6834,
+        0.1403,
+        0.1062,
+        0.0111
+      ],
+      "id": "incoterms",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "paymentTerms",
+      "label": "Payment terms",
+      "group": "header",
+      "lineIndex": null,
+      "value": "50% advance with order, balance before shipment",
+      "text": "50% advance with order, balance before shipment",
+      "page": 1,
+      "box": [
+        0.045,
+        0.1712,
+        0.3735,
+        0.011
+      ],
+      "id": "paymentTerms",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "billTo",
+      "label": "Bill to",
+      "group": "header",
+      "lineIndex": null,
+      "value": "39 Meghora Street, Unit 7A, Dhaka 1266, Bangladesh",
+      "text": "39 Meghora Street, Unit 7A\nDhaka 1266\nBangladesh",
+      "page": 1,
+      "box": [
+        0.045,
+        0.2211,
+        0.2084,
+        0.0352
+      ],
+      "id": "billTo",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "shipTo",
+      "label": "Ship to",
+      "group": "header",
+      "lineIndex": null,
+      "value": "Shitalvi Technology Ltd, 39 Meghora Street, Unit 7A, Dhaka 1266, Bangladesh",
+      "text": "Shitalvi Technology Ltd\n39 Meghora Street, Unit 7A\nDhaka 1266\nBangladesh",
+      "page": 1,
+      "box": [
+        0.3642,
+        0.2211,
+        0.2084,
+        0.0472
+      ],
+      "id": "shipTo",
+      "confidence": 0.96,
+      "uncertain": false
+    },
+    {
+      "key": "lines.partNumber",
+      "label": "Part number",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "TL-ZZ0217",
+      "text": "TL-ZZ0217",
+      "page": 1,
+      "box": [
+        0.0837,
+        0.3156,
+        0.0693,
+        0.0092
+      ],
+      "id": "lines.partNumber[0]",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "lines.description",
+      "label": "Description",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "TP-Link Gigabit Switch 8-Port",
+      "text": "TP-Link Gigabit Switch 8-Port",
+      "page": 1,
+      "box": [
+        0.2348,
+        0.3156,
+        0.2145,
+        0.0104
+      ],
+      "id": "lines.description[0]",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "lines.quantity",
+      "label": "Quantity",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "120",
+      "text": "120",
+      "page": 1,
+      "box": [
+        0.5692,
+        0.3156,
+        0.0258,
+        0.0092
+      ],
+      "id": "lines.quantity[0]",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "lines.unitPrice",
+      "label": "Unit price",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "46.17",
+      "text": "46.17",
+      "page": 1,
+      "box": [
+        0.6454,
+        0.3156,
+        0.0403,
+        0.0092
+      ],
+      "id": "lines.unitPrice[0]",
+      "confidence": 0.96,
+      "uncertain": false
+    },
+    {
+      "key": "lines.amount",
+      "label": "Amount",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "5540.40",
+      "text": "5,540.40",
+      "page": 1,
+      "box": [
+        0.7815,
+        0.3156,
+        0.0621,
+        0.0104
+      ],
+      "id": "lines.amount[0]",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "lines.partNumber",
+      "label": "Part number",
+      "group": "lines",
+      "lineIndex": 1,
+      "value": "DS-2CDZZ0185-I",
+      "text": "DS-2CDZZ0185-I",
+      "page": 1,
+      "box": [
+        0.0837,
+        0.3334,
+        0.1056,
+        0.0092
+      ],
+      "id": "lines.partNumber[1]",
+      "confidence": 0.96,
+      "uncertain": false
+    },
+    {
+      "key": "lines.description",
+      "label": "Description",
+      "group": "lines",
+      "lineIndex": 1,
+      "value": "Hikvision NVR 32-Channel",
+      "text": "Hikvision NVR 32-Channel",
+      "page": 1,
+      "box": [
+        0.2348,
+        0.3334,
+        0.1782,
+        0.0092
+      ],
+      "id": "lines.description[1]",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "lines.quantity",
+      "label": "Quantity",
+      "group": "lines",
+      "lineIndex": 1,
+      "value": "4",
+      "text": "4",
+      "page": 1,
+      "box": [
+        0.5837,
+        0.3335,
+        0.0113,
+        0.0089
+      ],
+      "id": "lines.quantity[1]",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "lines.unitPrice",
+      "label": "Unit price",
+      "group": "lines",
+      "lineIndex": 1,
+      "value": "501.88",
+      "text": "501.88",
+      "page": 1,
+      "box": [
+        0.6382,
+        0.3334,
+        0.0476,
+        0.0092
+      ],
+      "id": "lines.unitPrice[1]",
+      "confidence": 0.96,
+      "uncertain": false
+    },
+    {
+      "key": "lines.amount",
+      "label": "Amount",
+      "group": "lines",
+      "lineIndex": 1,
+      "value": "2007.52",
+      "text": "2,007.52",
+      "page": 1,
+      "box": [
+        0.7815,
+        0.3334,
+        0.0621,
+        0.0104
+      ],
+      "id": "lines.amount[1]",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "lines.partNumber",
+      "label": "Part number",
+      "group": "lines",
+      "lineIndex": 2,
+      "value": "TL-ZZ0230",
+      "text": "TL-ZZ0230",
+      "page": 1,
+      "box": [
+        0.0837,
+        0.3512,
+        0.0693,
+        0.0092
+      ],
+      "id": "lines.partNumber[2]",
+      "confidence": 0.96,
+      "uncertain": false
+    },
+    {
+      "key": "lines.description",
+      "label": "Description",
+      "group": "lines",
+      "lineIndex": 2,
+      "value": "TP-Link Wireless Access Point Wi-Fi 6 Pro",
+      "text": "TP-Link Wireless Access Point\nWi-Fi 6 Pro",
+      "page": 1,
+      "box": [
+        0.2348,
+        0.3513,
+        0.2145,
+        0.0198
+      ],
+      "id": "lines.description[2]",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "lines.quantity",
+      "label": "Quantity",
+      "group": "lines",
+      "lineIndex": 2,
+      "value": "30",
+      "text": "30",
+      "page": 1,
+      "box": [
+        0.5765,
+        0.3512,
+        0.0185,
+        0.0092
+      ],
+      "id": "lines.quantity[2]",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "lines.unitPrice",
+      "label": "Unit price",
+      "group": "lines",
+      "lineIndex": 2,
+      "value": "255.70",
+      "text": "255.70",
+      "page": 1,
+      "box": [
+        0.6382,
+        0.3512,
+        0.0476,
+        0.0092
+      ],
+      "id": "lines.unitPrice[2]",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "lines.amount",
+      "label": "Amount",
+      "group": "lines",
+      "lineIndex": 2,
+      "value": "7671.00",
+      "text": "7,671.00",
+      "page": 1,
+      "box": [
+        0.7815,
+        0.3512,
+        0.0621,
+        0.0104
+      ],
+      "id": "lines.amount[2]",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "total",
+      "label": "Total (USD)",
+      "group": "totals",
+      "lineIndex": null,
+      "value": "15218.92",
+      "text": "15,218.92",
+      "page": 1,
+      "box": [
+        0.8626,
+        0.3866,
+        0.0857,
+        0.0123
+      ],
+      "id": "total",
+      "confidence": 0.96,
+      "uncertain": false
+    }
+  ]
+}

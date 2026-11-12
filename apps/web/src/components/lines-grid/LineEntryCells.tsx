@@ -6,8 +6,10 @@ import {
   TextField,
   type LookupOption,
 } from "@/components/form";
+import { formatDay, formatMoney } from "@/lib/format";
 import { useGrid } from "./gridContext";
 import { MaskedPrice, ReadItem, ReadText } from "./LineReadCells";
+import { lastPriceSchema, type LastPrice } from "./types";
 
 interface CellProps {
   index: number;
@@ -82,25 +84,64 @@ export function PriceCell({ index, row, readOnly }: CellProps) {
         hideLabel
         scale={2}
       />
-      {itemPrice === "reference" ? <ListPrice row={row} /> : null}
+      {itemPrice === "reference" ? <LastPriceNote row={row} /> : null}
     </>
   );
 }
 
-/** What master data lists the item at: context for the typed price, never its value. */
-function ListPrice({ row }: { row: string }) {
+/**
+ * What this order's customer last paid for the item: context for the typed
+ * price, never its value. "No earlier price" says the customer never bought
+ * it, and "Last price not known" that the lookup failed.
+ */
+function LastPriceNote({ row }: { row: string }) {
   const { t } = useTranslation("linesGrid");
   const { control } = useFormContext();
-  const value: unknown = useWatch({ control, name: `${row}.listPrice` });
+  const value: unknown = useWatch({ control, name: `${row}.lastPrice` });
   const item: unknown = useWatch({ control, name: `${row}.item` });
-  // Only the pick writes the list price, so a cleared item would keep the old
-  // one: it is shown for an item that is there.
-  if (typeof value !== "string" || value === "") return null;
+  // The screen writes the last price for the item on the line, so a cleared
+  // item would keep the old one: it is shown for an item that is there.
   if (item === undefined || item === null || item === "") return null;
+  const found = lastPriceOf(value);
+  const className =
+    "mt-0.5 text-xs break-words text-muted-foreground tabular-nums @lines:text-right";
+  if (found === null) {
+    if (value === "none") {
+      return <span className={`${className} block`}>{t("noLastPrice")}</span>;
+    }
+    if (value === "unknown") {
+      return (
+        <span className={`${className} block`}>{t("unknownLastPrice")}</span>
+      );
+    }
+    return null;
+  }
+  const amount = formatMoney(found.price);
+  const date = formatDay(found.agreedOn);
+  const full = t("lastPriceFull", {
+    amount,
+    date,
+    document: found.documentNo,
+  });
+  // Two short lines that never break inside the amount or the date. A screen
+  // reader hears the full sentence once, not the visible fragments.
   return (
-    <span className="mt-0.5 block text-xs break-words text-muted-foreground tabular-nums @lines:text-right">
-      {t("listPrice", { price: value })}
-      <span className="sr-only">{t("listPriceNote")}</span>
+    <span
+      title={full}
+      className={`${className} flex flex-col @lines:items-end`}
+    >
+      <span className="sr-only">{full}</span>
+      <span aria-hidden="true" className="whitespace-nowrap">
+        {t("lastPriceAmount", { amount })}
+      </span>
+      <span aria-hidden="true" className="whitespace-nowrap">
+        {t("lastPriceDate", { date })}
+      </span>
     </span>
   );
+}
+
+function lastPriceOf(value: unknown): LastPrice | null {
+  const parsed = lastPriceSchema.safeParse(value);
+  return parsed.success ? parsed.data : null;
 }

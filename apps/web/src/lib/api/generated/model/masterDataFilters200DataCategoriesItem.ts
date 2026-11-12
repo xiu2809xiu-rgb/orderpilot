@@ -10,7 +10,10 @@ export type MasterDataFilters200DataCategoriesItem = typeof MasterDataFilters200
 
 
 export const MasterDataFilters200DataCategoriesItem = {
-  IT: 'IT',
-  SURVEILLANCE: 'SURVEILLANCE',
-  ACCESSORIES: 'ACCESSORIES',
+  COMPONENTS: 'COMPONENTS',
+  PERIPHERALS: 'PERIPHERALS',
+  PCS: 'PCS',
+  ENTERPRISE: 'ENTERPRISE',
+  SECURITY: 'SECURITY',
+  NETWORKING: 'NETWORKING',
 } as const;

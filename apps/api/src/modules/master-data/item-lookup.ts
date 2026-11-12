@@ -4,7 +4,7 @@ import {
   type MasterDataReader,
 } from "./domain/master-data-reader.js";
 
-/** What an order line starts from: the item's own words and its list price. */
+/** What an order line starts from: the item's own words and its Unit Price. */
 export interface ItemFacts {
   readonly description: string;
   readonly unitPrice: string;

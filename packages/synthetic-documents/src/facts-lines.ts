@@ -14,14 +14,14 @@ export function linesOf(
   return order.lines.map((line, i) => {
     const item = find(items, (it) => it.no === line.no, `item ${line.no}`);
     let { quantity, unitPrice } = line;
-    // The customer's PO prints the price it believes in; the mismatch is for
-    // the checks to find against the price list.
+    // The PO prints the agreed price, the line's own. The one planted draft
+    // PI prints a higher price on its first line, for the checks to find.
     if (
-      kind === "CUSTOMER_PO" &&
-      scenario.kind === "price-mismatch" &&
+      kind === "PROFORMA_INVOICE" &&
+      scenario.kind === "pi-price-mismatch" &&
       i === 0
     ) {
-      unitPrice = scenario.printed;
+      unitPrice = scenario.piPrice;
     }
     // The packing list counts what was packed, which is short on the first line.
     if (

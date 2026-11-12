@@ -6,6 +6,8 @@ import {
   makeVendorBankAccounts,
   makeVendors,
   openingBalances,
+  setMonthsOfCover,
+  setVendorLeadTimes,
 } from "./catalogue.js";
 import { todayInSingapore } from "./dates.js";
 import { documentFactory } from "./documents.js";
@@ -51,13 +53,15 @@ export function createSyntheticDataset(
   const random = new SeededRandom(seed);
   const people = makePeople();
   const brands = makeBrands();
-  const customers = makeCustomers(random);
+  const customers = makeCustomers(random, seed);
   const vendors = makeVendors(random);
-  const items = makeItems(random, vendors);
+  const items = makeItems(random, vendors, seed);
+  setVendorLeadTimes(vendors, items);
   const journeys = planJourneys(random, reference);
   const numberer = new RecordNumberer();
   const orders = makeOrders({
     random,
+    seed,
     reference,
     customers,
     items,
@@ -68,6 +72,7 @@ export function createSyntheticDataset(
   });
   const sprs = makeSprs(orders, journeys, items, numberer);
   const purchaseOrders = makePurchaseOrders(sprs, items, orders, reference);
+  setMonthsOfCover(items);
   const tasks = makeTasks(orders, customers, sprs, reference);
   return {
     label: SYNTHETIC_LABEL,
@@ -86,7 +91,7 @@ export function createSyntheticDataset(
     tasks,
     reminders: makeReminders(tasks, orders, reference),
     exceptions: makeExceptions(orders, journeys, numberer),
-    kpis: makeKpis(random, reference, orders, sprs),
+    kpis: makeKpis(SeededRandom.child(seed, "kpis"), reference, orders, sprs),
     openingBalances: openingBalances(customers, vendors, items),
   };
 }

@@ -49,7 +49,7 @@ const row = (no: string, availability: "short" | "low" | "ok") => ({
   description: `Synthetic switch ${no}`,
   partNumber: `PN-${no}`,
   brand: "Synthetic Brand",
-  category: "IT" as const,
+  category: "NETWORKING" as const,
   baseUnitOfMeasure: "PCS",
   inventory: "120",
   qtyOnSalesOrder: "80",
@@ -70,11 +70,17 @@ const itemList = (rows: ReturnType<typeof row>[]) =>
 const filters: MasterDataFilters200 = {
   data: {
     brands: ["Synthetic Brand"],
-    categories: ["IT", "SURVEILLANCE", "ACCESSORIES"],
+    categories: [
+      "COMPONENTS",
+      "PERIPHERALS",
+      "PCS",
+      "ENTERPRISE",
+      "SECURITY",
+      "NETWORKING",
+    ],
     vendors: [{ no: "V-0001", name: "Synthetic Vendor One" }],
     countries: ["IN"],
     paymentTerms: ["PREPAID"],
-    priceGroups: ["DEALER"],
   },
   meta: { mock: true },
 };
@@ -439,7 +445,12 @@ describe("a customer", () => {
         countryRegionCode: "IN",
         currencyCode: "USD",
         paymentTermsCode: "PREPAID",
-        customerPriceGroup: "DEALER",
+        addressLine1: "12 Synthetic Road",
+        addressLine2: "Unit 3A",
+        city: "Mumbai",
+        state: "Maharashtra",
+        postalCode: "400001",
+        taxRegistrationNumber: "INZZ00000000001",
         creditLimitLcy: masked
           ? hidden("customer.creditLimitLcy", "role")
           : shown("customer.creditLimitLcy", "108000.00"),
@@ -468,6 +479,19 @@ describe("a customer", () => {
       await screen.findByText("Bill of lading, due 22 Oct 2026"),
     ).toBeVisible();
     expect(screen.queryByText(/2026-10-22/)).toBeNull();
+  });
+
+  it("shows the address and the tax registration number, and no price group", async () => {
+    await load();
+    server.use(getMasterDataCustomerMockHandler(customer(false)));
+    renderAt("/master-data/customers/C-0003");
+    expect(
+      await screen.findByText(
+        "12 Synthetic Road, Unit 3A, Mumbai, Maharashtra, 400001, India",
+      ),
+    ).toBeVisible();
+    expect(screen.getByText("INZZ00000000001")).toBeVisible();
+    expect(screen.queryByText(/price group/i)).toBeNull();
   });
 
   it("hides the credit limit and balance from a role that never prices", async () => {

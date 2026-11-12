@@ -6,7 +6,7 @@
   "layout": "house",
   "readable": "text",
   "orderNo": "SO-0063",
-  "customerNo": "C-0037",
+  "customerNo": "C-0002",
   "purpose": "A PI for payment in full before shipment.",
   "pageCount": 1,
   "page": {
@@ -94,14 +94,14 @@
       "label": "Customer",
       "group": "header",
       "lineIndex": null,
-      "value": "Lankor Digital Traders (Pvt) Ltd",
-      "text": "Lankor Digital Traders (Pvt) Ltd",
+      "value": "Brindle Coast Imports",
+      "text": "Brindle Coast Imports",
       "page": 1,
       "box": [
         0.0585,
-        0.1857,
-        0.262,
-        0.0137
+        0.1859,
+        0.184,
+        0.0133
       ],
       "id": "customerName",
       "confidence": 0.95,
@@ -112,13 +112,13 @@
       "label": "Bill to",
       "group": "header",
       "lineIndex": null,
-      "value": "24 Tidewater Avenue, Colombo 00100, Sri Lanka",
-      "text": "24 Tidewater Avenue\nColombo 00100\nSri Lanka",
+      "value": "27 Sirimal Place, Unit 3C, Galle 80074, Sri Lanka",
+      "text": "27 Sirimal Place, Unit 3C\nGalle 80074\nSri Lanka",
       "page": 1,
       "box": [
         0.0585,
         0.2022,
-        0.1547,
+        0.1781,
         0.0393
       ],
       "id": "billTo",
@@ -130,14 +130,14 @@
       "label": "Ship to",
       "group": "header",
       "lineIndex": null,
-      "value": "Lankor Digital Traders (Pvt) Ltd (Warehouse), Godown 1, Anchor Street, Colombo 00100, Sri Lanka",
-      "text": "Lankor Digital Traders (Pvt) Ltd (Warehouse)\nGodown 1, Anchor Street\nColombo 00100\nSri Lanka",
+      "value": "Brindle Coast Imports, 27 Sirimal Place, Unit 3C, Galle 80074, Sri Lanka",
+      "text": "Brindle Coast Imports\n27 Sirimal Place, Unit 3C\nGalle 80074\nSri Lanka",
       "page": 1,
       "box": [
         0.498,
-        0.1854,
-        0.3177,
-        0.0527
+        0.1856,
+        0.1781,
+        0.0525
       ],
       "id": "shipTo",
       "confidence": 0.94,
@@ -202,13 +202,13 @@
       "label": "Part number",
       "group": "lines",
       "lineIndex": 0,
-      "value": "BRI-SC-B-2619",
-      "text": "BRI-SC-B-2619",
+      "value": "TL-ZZ0220",
+      "text": "TL-ZZ0220",
       "page": 1,
       "box": [
         0.1072,
         0.358,
-        0.1103,
+        0.0816,
         0.0106
       ],
       "id": "lines.partNumber[0]",
@@ -220,14 +220,14 @@
       "label": "Description",
       "group": "lines",
       "lineIndex": 0,
-      "value": "Brindlewick Screen Cleaning Kit Pro",
-      "text": "Brindlewick Screen Cleaning Kit Pro",
+      "value": "TP-Link Wireless Access Point Wi-Fi 6",
+      "text": "TP-Link Wireless Access Point Wi-Fi 6",
       "page": 1,
       "box": [
         0.2819,
         0.358,
-        0.2535,
-        0.0121
+        0.2671,
+        0.0106
       ],
       "id": "lines.description[0]",
       "confidence": 0.94,
@@ -238,13 +238,13 @@
       "label": "Quantity",
       "group": "lines",
       "lineIndex": 0,
-      "value": "206",
-      "text": "206",
+      "value": "116",
+      "text": "116",
       "page": 1,
       "box": [
-        0.6366,
+        0.6443,
         0.358,
-        0.0323,
+        0.0246,
         0.0106
       ],
       "id": "lines.quantity[0]",
@@ -256,14 +256,14 @@
       "label": "Unit price",
       "group": "lines",
       "lineIndex": 0,
-      "value": "2.77",
-      "text": "2.77",
+      "value": "83.75",
+      "text": "83.75",
       "page": 1,
       "box": [
-        0.7631,
+        0.7536,
         0.358,
-        0.0335,
-        0.0104
+        0.043,
+        0.0106
       ],
       "id": "lines.unitPrice[0]",
       "confidence": 0.94,
@@ -274,14 +274,14 @@
       "label": "Amount",
       "group": "lines",
       "lineIndex": 0,
-      "value": "570.62",
-      "text": "570.62",
+      "value": "9715.00",
+      "text": "9,715.00",
       "page": 1,
       "box": [
-        0.8799,
+        0.8704,
         0.358,
-        0.0533,
-        0.0106
+        0.0628,
+        0.0121
       ],
       "id": "lines.amount[0]",
       "confidence": 0.95,
@@ -292,13 +292,13 @@
       "label": "Part number",
       "group": "lines",
       "lineIndex": 1,
-      "value": "SOL-DC-A-2575",
-      "text": "SOL-DC-A-2575",
+      "value": "HDWZZ0120EZSTA",
+      "text": "HDWZZ0120EZSTA",
       "page": 1,
       "box": [
         0.1072,
         0.383,
-        0.1192,
+        0.134,
         0.0106
       ],
       "id": "lines.partNumber[1]",
@@ -310,14 +310,14 @@
       "label": "Description",
       "group": "lines",
       "lineIndex": 1,
-      "value": "Soltera Dome Camera 2 MP",
-      "text": "Soltera Dome Camera 2 MP",
+      "value": "Toshiba Internal Hard Drive 4 TB Max",
+      "text": "Toshiba Internal Hard Drive 4 TB Max",
       "page": 1,
       "box": [
         0.2819,
-        0.383,
-        0.1958,
-        0.0106
+        0.3831,
+        0.2616,
+        0.0104
       ],
       "id": "lines.description[1]",
       "confidence": 0.94,
@@ -328,13 +328,13 @@
       "label": "Quantity",
       "group": "lines",
       "lineIndex": 1,
-      "value": "20",
-      "text": "20",
+      "value": "50",
+      "text": "50",
       "page": 1,
       "box": [
-        0.6458,
+        0.6457,
         0.383,
-        0.0231,
+        0.0232,
         0.0106
       ],
       "id": "lines.quantity[1]",
@@ -346,13 +346,13 @@
       "label": "Unit price",
       "group": "lines",
       "lineIndex": 1,
-      "value": "48.37",
-      "text": "48.37",
+      "value": "98.23",
+      "text": "98.23",
       "page": 1,
       "box": [
-        0.7535,
+        0.7531,
         0.383,
-        0.0431,
+        0.0435,
         0.0106
       ],
       "id": "lines.unitPrice[1]",
@@ -364,106 +364,16 @@
       "label": "Amount",
       "group": "lines",
       "lineIndex": 1,
-      "value": "967.40",
-      "text": "967.40",
+      "value": "4911.50",
+      "text": "4,911.50",
       "page": 1,
       "box": [
-        0.8797,
+        0.8739,
         0.383,
-        0.0535,
-        0.0106
+        0.0593,
+        0.0121
       ],
       "id": "lines.amount[1]",
-      "confidence": 0.96,
-      "uncertain": false
-    },
-    {
-      "key": "lines.partNumber",
-      "label": "Part number",
-      "group": "lines",
-      "lineIndex": 2,
-      "value": "ZEP-MP-A-2656",
-      "text": "ZEP-MP-A-2656",
-      "page": 1,
-      "box": [
-        0.1072,
-        0.4079,
-        0.1187,
-        0.0106
-      ],
-      "id": "lines.partNumber[2]",
-      "confidence": 0.97,
-      "uncertain": false
-    },
-    {
-      "key": "lines.description",
-      "label": "Description",
-      "group": "lines",
-      "lineIndex": 2,
-      "value": "Zephrine Mouse Pad Large",
-      "text": "Zephrine Mouse Pad Large",
-      "page": 1,
-      "box": [
-        0.2819,
-        0.4081,
-        0.1881,
-        0.012
-      ],
-      "id": "lines.description[2]",
-      "confidence": 0.96,
-      "uncertain": false
-    },
-    {
-      "key": "lines.quantity",
-      "label": "Quantity",
-      "group": "lines",
-      "lineIndex": 2,
-      "value": "20",
-      "text": "20",
-      "page": 1,
-      "box": [
-        0.6458,
-        0.4079,
-        0.0231,
-        0.0106
-      ],
-      "id": "lines.quantity[2]",
-      "confidence": 0.99,
-      "uncertain": false
-    },
-    {
-      "key": "lines.unitPrice",
-      "label": "Unit price",
-      "group": "lines",
-      "lineIndex": 2,
-      "value": "5.37",
-      "text": "5.37",
-      "page": 1,
-      "box": [
-        0.7626,
-        0.4079,
-        0.034,
-        0.0106
-      ],
-      "id": "lines.unitPrice[2]",
-      "confidence": 0.98,
-      "uncertain": false
-    },
-    {
-      "key": "lines.amount",
-      "label": "Amount",
-      "group": "lines",
-      "lineIndex": 2,
-      "value": "107.40",
-      "text": "107.40",
-      "page": 1,
-      "box": [
-        0.8825,
-        0.4079,
-        0.0506,
-        0.0106
-      ],
-      "id": "lines.amount[2]",
       "confidence": 0.96,
       "uncertain": false
     },
@@ -472,13 +382,13 @@
       "label": "Total (USD)",
       "group": "totals",
       "lineIndex": null,
-      "value": "1645.42",
-      "text": "1,645.42",
+      "value": "14626.50",
+      "text": "14,626.50",
       "page": 1,
       "box": [
-        0.8539,
-        0.4426,
-        0.0809,
+        0.8415,
+        0.4176,
+        0.0933,
         0.0144
       ],
       "id": "total",
@@ -490,13 +400,13 @@
       "label": "Due now (100%)",
       "group": "totals",
       "lineIndex": null,
-      "value": "1645.42",
-      "text": "1,645.42",
+      "value": "14626.50",
+      "text": "14,626.50",
       "page": 1,
       "box": [
-        0.868,
-        0.4653,
-        0.0669,
+        0.8574,
+        0.4403,
+        0.0774,
         0.0128
       ],
       "id": "amountDue",
@@ -513,7 +423,7 @@
       "page": 1,
       "box": [
         0.8954,
-        0.4843,
+        0.4593,
         0.0395,
         0.0112
       ],
@@ -531,7 +441,7 @@
       "page": 1,
       "box": [
         0.0753,
-        0.5726,
+        0.5477,
         0.1608,
         0.0122
       ],
@@ -549,7 +459,7 @@
       "page": 1,
       "box": [
         0.5148,
-        0.5723,
+        0.5474,
         0.2042,
         0.012
       ],
@@ -567,7 +477,7 @@
       "page": 1,
       "box": [
         0.0753,
-        0.6059,
+        0.5809,
         0.131,
         0.0108
       ],
@@ -585,7 +495,7 @@
       "page": 1,
       "box": [
         0.5148,
-        0.6059,
+        0.5809,
         0.0766,
         0.0108
       ],

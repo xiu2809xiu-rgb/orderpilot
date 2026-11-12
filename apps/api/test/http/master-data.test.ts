@@ -6,12 +6,13 @@ import {
   customerResponseSchema,
   itemListSchema,
   itemResponseSchema,
+  lastPricesResponseSchema,
   masterDataFiltersResponseSchema,
   vendorListSchema,
   vendorResponseSchema,
   type Role,
 } from "@orderpilot/shared";
-import { syntheticDataset } from "@orderpilot/synthetic-data";
+import { lastAgreedPrice, syntheticDataset } from "@orderpilot/synthetic-data";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { SalesOrder } from "../../src/modules/orders/domain/sales-order.js";
 import { SalesOrderRepository } from "../../src/modules/orders/sales-order.repository.js";
@@ -204,6 +205,105 @@ describe("master data routes (mock Business Central)", () => {
         );
         expect(row.availableStock).toBe(page.data.availableStock);
         expect(row.unit).toBe(page.data.baseUnitOfMeasure);
+      }
+    });
+  });
+
+  describe("a customer's last agreed prices", () => {
+    const order = dataset.orders[0];
+    const line = order?.lines[0];
+    if (!order || !line) throw new Error("the set has no order line");
+    const buyer = order.header.sellToCustomerNo;
+    const route = `${M}/customers/${buyer}/last-prices`;
+    const bought = line.no;
+    const expected = lastAgreedPrice(dataset, buyer, bought);
+    if (!expected) throw new Error("the order's own line has no price");
+    // An item this customer never bought, to see it left out.
+    const neverBought = dataset.items.find(
+      (candidate) => !lastAgreedPrice(dataset, buyer, candidate.no),
+    );
+    if (!neverBought) throw new Error("this customer bought every item");
+
+    it("answers 401 with no session and 403 without orders.read", async () => {
+      const path = `${route}?itemNos=${bought}`;
+      expect((await call(t, null, "get", path)).status).toBe(401);
+      expect((await get("SYSTEM_ADMIN", path)).status).toBe(403);
+    });
+
+    it("refuses a bad format and more items than an order may hold", async () => {
+      const tooMany = Array.from(
+        { length: AVAILABLE_STOCK_MAX_ITEMS + 1 },
+        (_, i) => `I-${String(i)}`,
+      ).join(",");
+      for (const query of ["", "itemNos=", `itemNos=${tooMany}`]) {
+        const res = await get("SUPPORT", `${route}?${query}`);
+        expect(res.status, query).toBe(400);
+      }
+    });
+
+    it("holds the cap at 200 item numbers, written out as numbers", async () => {
+      const ask = (count: number): string =>
+        Array.from({ length: count }, (_, i) => `I-${String(i + 1)}`).join(",");
+      expect(
+        (await get("SUPPORT", `${route}?itemNos=${ask(200)}`)).status,
+      ).toBe(200);
+      expect(
+        (await get("SUPPORT", `${route}?itemNos=${ask(201)}`)).status,
+      ).toBe(400);
+    });
+
+    it("counts the item numbers as sent, so 201 repeats of one are refused", async () => {
+      // The cap guards the request's size, before any repeat is dropped.
+      const repeats = Array.from({ length: 201 }, () => "I-1").join(",");
+      expect((await get("SUPPORT", `${route}?itemNos=${repeats}`)).status).toBe(
+        400,
+      );
+    });
+
+    it("answers 404 for a customer that is not there", async () => {
+      const res = await get(
+        "SUPPORT",
+        `${M}/customers/C-9999/last-prices?itemNos=${bought}`,
+      );
+      expect(res.status).toBe(404);
+    });
+
+    it("gives the price, its date and its document, and leaves a never-bought item out", async () => {
+      for (const role of [
+        "PRODUCT_MANAGER",
+        "APPROVER",
+        "SUPPORT",
+        "FINANCE",
+        "MANAGEMENT",
+        "AUDITOR",
+      ] as const) {
+        const res = await get(
+          role,
+          `${route}?itemNos=${bought},${neverBought.no}`,
+        );
+        expect(res.status, role).toBe(200);
+        const body = lastPricesResponseSchema.parse(res.body);
+        expect(body.meta.mock).toBe(true);
+        expect(body.data).toHaveLength(1);
+        expect(body.data[0]).toMatchObject({
+          itemNo: bought,
+          agreedOn: expected.agreedOn,
+          documentNo: expected.documentNo,
+          price: { masked: false, value: expected.price },
+        });
+      }
+    });
+
+    it("holds no price anywhere for a role that sees no prices", async () => {
+      for (const role of ["WAREHOUSE", "LOGISTICS"] as const) {
+        const res = await get(role, `${route}?itemNos=${bought}`);
+        expect(res.status, role).toBe(200);
+        const body = lastPricesResponseSchema.parse(res.body);
+        expect(body.data[0]?.price).toMatchObject({
+          masked: true,
+          value: null,
+        });
+        expect(JSON.stringify(res.body)).not.toContain(`"${expected.price}"`);
       }
     });
   });

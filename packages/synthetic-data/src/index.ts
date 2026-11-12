@@ -7,10 +7,38 @@ export {
 } from "./dataset.js";
 export type { Milestone } from "./journey.js";
 export type { DatasetOptions } from "./dataset.js";
-export { addDays, daysBetween, todayInSingapore } from "./dates.js";
-export { SeededRandom } from "./random.js";
+export {
+  addDays,
+  addMonths,
+  dateInMonth,
+  daysBetween,
+  historyMonths,
+  monthOf,
+  todayInSingapore,
+} from "./dates.js";
+export { SeededRandom, hashUnit } from "./random.js";
+export { COUNTRY_NAMES, addressOf, taxIdOf, taxIdLength } from "./places.js";
 export { availableStock } from "./stock.js";
 export {
+  lastAgreedPrice,
+  lastAgreedPricesFor,
+  monthlySales,
+  salesHistory,
+  stockCover,
+} from "./history.js";
+export type {
+  HistoryGrouping,
+  HistoryLine,
+  HistoryReceipt,
+  LastAgreedPrice,
+  SalesHistory,
+} from "./history.js";
+export { agreedPrice } from "./last-price.js";
+export { plantedCases, respelling } from "./planted.js";
+export type { PlantedCases } from "./planted.js";
+export { SEASONALITY } from "./seasonality.js";
+export {
+  COUNTRY_CODES,
   DOCUMENT_STATUSES,
   ITEM_CATEGORIES,
   PURCHASE_ORDER_STATUSES,
@@ -19,6 +47,7 @@ export {
 } from "./types.js";
 export type {
   Brand,
+  CountryCode,
   Customer,
   DocumentStatus,
   Item,
@@ -39,6 +68,7 @@ export type {
   SampleScreenState,
   SampleSpr,
   SampleTask,
+  ShipTo,
   SyntheticDataset,
   Vendor,
   VendorBankAccount,

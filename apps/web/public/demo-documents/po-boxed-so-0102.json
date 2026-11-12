@@ -1,0 +1,399 @@
+{
+  "label": "Synthetic demo data",
+  "file": "po-boxed-so-0102.pdf",
+  "documentType": "CUSTOMER_PO",
+  "documentNumber": "PO-IN-4807",
+  "layout": "boxed",
+  "readable": "text",
+  "orderNo": "SO-0102",
+  "customerNo": "C-0036",
+  "purpose": "A boxed form, two pages, with the payment terms overleaf. Its task says to confirm 2 uncertain fields, the one to try in the sales pilot.",
+  "pageCount": 2,
+  "page": {
+    "width": 595.28,
+    "height": 841.89
+  },
+  "confidenceThreshold": 0.9,
+  "uncertainFieldCount": 2,
+  "mismatch": null,
+  "fields": [
+    {
+      "key": "customerName",
+      "label": "Customer",
+      "group": "header",
+      "lineIndex": null,
+      "value": "Vellamar Network Stores",
+      "text": "Vellamar Network Stores",
+      "page": 1,
+      "box": [
+        0.0753,
+        0.0625,
+        0.2966,
+        0.0152
+      ],
+      "id": "customerName",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "poNumber",
+      "label": "PO number",
+      "group": "header",
+      "lineIndex": null,
+      "value": "PO-IN-4807",
+      "text": "PO-IN-4807",
+      "page": 1,
+      "box": [
+        0.0702,
+        0.1159,
+        0.1032,
+        0.0117
+      ],
+      "id": "poNumber",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "poDate",
+      "label": "PO date",
+      "group": "header",
+      "lineIndex": null,
+      "value": "2026-10-30",
+      "text": "30 Oct 2026",
+      "page": 1,
+      "box": [
+        0.29,
+        0.1159,
+        0.1081,
+        0.0117
+      ],
+      "id": "poDate",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "requiredDate",
+      "label": "Required by",
+      "group": "header",
+      "lineIndex": null,
+      "value": "2026-11-16",
+      "text": "16 Nov 2026",
+      "page": 1,
+      "box": [
+        0.5097,
+        0.1159,
+        0.1066,
+        0.0117
+      ],
+      "id": "requiredDate",
+      "confidence": 0.96,
+      "uncertain": false
+    },
+    {
+      "key": "currency",
+      "label": "Currency",
+      "group": "header",
+      "lineIndex": null,
+      "value": "USD",
+      "text": "USD",
+      "page": 1,
+      "box": [
+        0.7295,
+        0.1159,
+        0.039,
+        0.0117
+      ],
+      "id": "currency",
+      "confidence": 0.96,
+      "uncertain": false
+    },
+    {
+      "key": "billTo",
+      "label": "Bill to",
+      "group": "header",
+      "lineIndex": null,
+      "value": "77 Quillon Harbour Road, Unit 1A, Mumbai 400332, India",
+      "text": "77 Quillon Harbour Road, Unit 1A\nMumbai 400332\nIndia",
+      "page": 1,
+      "box": [
+        0.3339,
+        0.1623,
+        0.2195,
+        0.0366
+      ],
+      "id": "billTo",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "shipTo",
+      "label": "Ship to",
+      "group": "header",
+      "lineIndex": null,
+      "value": "Vellamar Network Stores, 77 Quillon Harbour Road, Unit 1A, Mumbai 400332, India",
+      "text": "Vellamar Network Stores\n77 Quillon Harbour Road, Unit 1A\nMumbai 400332\nIndia",
+      "page": 1,
+      "box": [
+        0.6328,
+        0.1623,
+        0.2195,
+        0.0497
+      ],
+      "id": "shipTo",
+      "confidence": 0.8,
+      "uncertain": true
+    },
+    {
+      "key": "buyerContact",
+      "label": "Buyer",
+      "group": "header",
+      "lineIndex": null,
+      "value": "Leilani Marchetti",
+      "text": "Leilani Marchetti",
+      "page": 1,
+      "box": [
+        0.0702,
+        0.2656,
+        0.1418,
+        0.0115
+      ],
+      "id": "buyerContact",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "incoterms",
+      "label": "Incoterms",
+      "group": "header",
+      "lineIndex": null,
+      "value": "CIF Nhava Sheva",
+      "text": "CIF Nhava Sheva",
+      "page": 1,
+      "box": [
+        0.3632,
+        0.2655,
+        0.1429,
+        0.0117
+      ],
+      "id": "incoterms",
+      "confidence": 0.96,
+      "uncertain": false
+    },
+    {
+      "key": "lines.partNumber",
+      "label": "Part number",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "LXZZ0137-BNNNG",
+      "text": "LXZZ0137-BNNNG",
+      "page": 1,
+      "box": [
+        0.1072,
+        0.3375,
+        0.1267,
+        0.0103
+      ],
+      "id": "lines.partNumber[0]",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "lines.description",
+      "label": "Description",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "Lexar microSD Card 128 GB Pro",
+      "text": "Lexar microSD Card 128 GB Pro",
+      "page": 1,
+      "box": [
+        0.2752,
+        0.3375,
+        0.2151,
+        0.0103
+      ],
+      "id": "lines.description[0]",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "lines.quantity",
+      "label": "Quantity",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "50",
+      "text": "50",
+      "page": 1,
+      "box": [
+        0.6229,
+        0.3375,
+        0.0226,
+        0.0103
+      ],
+      "id": "lines.quantity[0]",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "lines.unitPrice",
+      "label": "Unit price",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "14.25",
+      "text": "14.25",
+      "page": 1,
+      "box": [
+        0.7405,
+        0.3375,
+        0.0393,
+        0.0103
+      ],
+      "id": "lines.unitPrice[0]",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "lines.amount",
+      "label": "Amount",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "712.50",
+      "text": "712.50",
+      "page": 1,
+      "box": [
+        0.885,
+        0.3375,
+        0.0482,
+        0.0103
+      ],
+      "id": "lines.amount[0]",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "lines.partNumber",
+      "label": "Part number",
+      "group": "lines",
+      "lineIndex": 1,
+      "value": "90ZZ0065-M01",
+      "text": "90ZZ0065-M01",
+      "page": 1,
+      "box": [
+        0.1072,
+        0.3596,
+        0.1087,
+        0.0103
+      ],
+      "id": "lines.partNumber[1]",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "lines.description",
+      "label": "Description",
+      "group": "lines",
+      "lineIndex": 1,
+      "value": "Asus Monitor 27-inch",
+      "text": "Asus Monitor 27-inch",
+      "page": 1,
+      "box": [
+        0.2752,
+        0.3596,
+        0.1472,
+        0.0103
+      ],
+      "id": "lines.description[1]",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "lines.quantity",
+      "label": "Quantity",
+      "group": "lines",
+      "lineIndex": 1,
+      "value": "30",
+      "text": "30",
+      "page": 1,
+      "box": [
+        0.623,
+        0.3596,
+        0.0224,
+        0.0103
+      ],
+      "id": "lines.quantity[1]",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "lines.unitPrice",
+      "label": "Unit price",
+      "group": "lines",
+      "lineIndex": 1,
+      "value": "238.32",
+      "text": "238.32",
+      "page": 1,
+      "box": [
+        0.729,
+        0.3596,
+        0.0508,
+        0.0103
+      ],
+      "id": "lines.unitPrice[1]",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "lines.amount",
+      "label": "Amount",
+      "group": "lines",
+      "lineIndex": 1,
+      "value": "7149.60",
+      "text": "7,149.60",
+      "page": 1,
+      "box": [
+        0.8729,
+        0.3596,
+        0.0602,
+        0.0118
+      ],
+      "id": "lines.amount[1]",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "total",
+      "label": "Total (USD)",
+      "group": "totals",
+      "lineIndex": null,
+      "value": "7862.10",
+      "text": "7,862.10",
+      "page": 1,
+      "box": [
+        0.8414,
+        0.4072,
+        0.0867,
+        0.0155
+      ],
+      "id": "total",
+      "confidence": 0.97,
+      "uncertain": false
+    },
+    {
+      "key": "paymentTerms",
+      "label": "Payment terms",
+      "group": "header",
+      "lineIndex": null,
+      "value": "Net 30 days from invoice date",
+      "text": "Net 30 days from invoice date",
+      "page": 2,
+      "box": [
+        0.1156,
+        0.1305,
+        0.2297,
+        0.0127
+      ],
+      "id": "paymentTerms",
+      "confidence": 0.6,
+      "uncertain": true
+    }
+  ]
+}

@@ -7,6 +7,7 @@ import {
 import type { TFunction } from "i18next";
 import { z } from "zod";
 import { requiredLookup } from "@/components/form";
+import { lastPriceSchema } from "@/components/lines-grid";
 
 /**
  * The order form's schema, on the patterns the server checks with, so a value
@@ -29,8 +30,11 @@ export function makeOrderFormSchema(
       : z.string().regex(ORDER_PRICE_PATTERN, t("form.errors.unitPrice")),
     unit: z.string(),
     availableStock: z.string().nullable(),
-    // The item's list price, shown beside the price as context. Never sent.
-    listPrice: z.string().nullable().optional(),
+    // What the customer last paid, shown beside the price as context. Never sent.
+    lastPrice: z
+      .union([lastPriceSchema, z.literal("none"), z.literal("unknown")])
+      .nullable()
+      .optional(),
   });
   return z.object({
     // The number of saves this form was typed against. It is a form value, so

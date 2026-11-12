@@ -15,10 +15,14 @@ export const navisionNoSchema = z
   .regex(/^[A-Za-z0-9-]{1,20}$/);
 
 export const ITEM_CATEGORY_CODES = [
-  "IT",
-  "SURVEILLANCE",
-  "ACCESSORIES",
+  "COMPONENTS",
+  "PERIPHERALS",
+  "PCS",
+  "ENTERPRISE",
+  "SECURITY",
+  "NETWORKING",
 ] as const;
+export type ItemCategoryCode = (typeof ITEM_CATEGORY_CODES)[number];
 
 /**
  * Where an item stands. `short`: an open order needs more than the available
@@ -178,7 +182,6 @@ export const customerQuerySchema = z.object({
   search,
   country: filterText,
   paymentTerms: filterText,
-  priceGroup: filterText,
   sort: z.enum(CUSTOMER_SORT_COLUMNS).optional(),
   direction,
 });
@@ -190,7 +193,6 @@ export const customerRowSchema = z.object({
   countryRegionCode: z.string().min(1),
   currencyCode: z.string().min(1),
   paymentTermsCode: z.string().min(1),
-  customerPriceGroup: z.string().min(1),
   openOrders: z.int().min(0),
   overdueOrders: z.int().min(0),
 });
@@ -218,6 +220,13 @@ export const customerOverdueSchema = z.object({
 export const customerDetailSchema = customerRowSchema
   .omit({ openOrders: true, overdueOrders: true })
   .extend({
+    /** Business Central's address and tax fields. Made up, and obviously fake. */
+    addressLine1: z.string().min(1),
+    addressLine2: z.string(),
+    city: z.string().min(1),
+    state: z.string(),
+    postalCode: z.string().min(1),
+    taxRegistrationNumber: z.string().min(1),
     /** Masked, with the balance, for roles that never price anything. */
     creditLimitLcy: maskedFieldSchema,
     balanceLcy: maskedFieldSchema,
@@ -302,7 +311,6 @@ export const masterDataFiltersSchema = z.object({
   vendors: z.array(z.object({ no: z.string(), name: z.string() })),
   countries: z.array(z.string()),
   paymentTerms: z.array(z.string()),
-  priceGroups: z.array(z.string()),
 });
 export type MasterDataFilters = z.infer<typeof masterDataFiltersSchema>;
 
@@ -344,3 +352,26 @@ export const availableStockResponseSchema = mockEnvelope(
 export type AvailableStockResponse = z.infer<
   typeof availableStockResponseSchema
 >;
+
+// ---- A customer's last agreed prices ------------------------------------------
+
+export const lastPricesQuerySchema = availableStockQuerySchema;
+export type LastPricesQuery = z.infer<typeof lastPricesQuerySchema>;
+
+/**
+ * The price one customer last paid for one item, as context for whoever fills
+ * in an order line. It is never a price list: an item the customer never
+ * bought has no row. The price is masked like an item's Unit Price.
+ */
+export const lastPriceRowSchema = z.object({
+  itemNo: z.string().min(1),
+  price: maskedFieldSchema,
+  agreedOn: z.string().min(1),
+  documentNo: z.string().min(1),
+});
+export type LastPriceRow = z.infer<typeof lastPriceRowSchema>;
+
+export const lastPricesResponseSchema = mockEnvelope(
+  z.array(lastPriceRowSchema),
+);
+export type LastPricesResponse = z.infer<typeof lastPricesResponseSchema>;

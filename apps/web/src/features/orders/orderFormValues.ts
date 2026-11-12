@@ -4,7 +4,11 @@ import type {
   SalesOrderDetail,
 } from "@orderpilot/shared";
 import type { UseFormReturn } from "react-hook-form";
-import { emptyLine, type LineValue } from "@/components/lines-grid";
+import {
+  emptyLine,
+  type LastPrice,
+  type LineValue,
+} from "@/components/lines-grid";
 import type { OrderFormInput, OrderFormOutput } from "./orderFormSchema";
 
 export type OrderForm = UseFormReturn<OrderFormInput, unknown, OrderFormOutput>;
@@ -163,5 +167,39 @@ export function setLineFigures(
     if (figure.unit !== null) {
       form.setValue(`${at}.unit`, figure.unit, { shouldDirty: false });
     }
+  }
+}
+
+/** What the customer last paid for one line's item, "none" if never bought, or "unknown" if the lookup failed. */
+export interface LinePrice {
+  index: number;
+  /** Guards the write: a line moved or replaced since is left alone. */
+  itemNo: string;
+  lastPrice: LastPrice | "none" | "unknown" | null;
+}
+
+/**
+ * Writes the customers' last agreed prices beside the lines, the way
+ * `setLineFigures` writes stock: as defaults and as values, never marking
+ * the form changed, because a lookup is not the person's edit.
+ */
+export function setLinePrices(
+  form: OrderForm,
+  prices: readonly LinePrice[],
+): void {
+  if (prices.length === 0) return;
+  const defaults = form.control._defaultValues;
+  const lines = (defaults.lines ?? []).map((line, index) => {
+    const found = prices.find((entry) => entry.index === index);
+    if (!line || !found || line.item?.number !== found.itemNo) return line;
+    return { ...line, lastPrice: found.lastPrice };
+  });
+  form.reset(
+    { ...defaults, lines },
+    { keepValues: true, keepDirty: true, keepErrors: true, keepTouched: true },
+  );
+  for (const found of prices) {
+    const at = `lines.${String(found.index)}` as `lines.${number}`;
+    form.setValue(`${at}.lastPrice`, found.lastPrice, { shouldDirty: false });
   }
 }

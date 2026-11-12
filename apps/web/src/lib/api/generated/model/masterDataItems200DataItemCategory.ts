@@ -10,7 +10,10 @@ export type MasterDataItems200DataItemCategory = typeof MasterDataItems200DataIt
 
 
 export const MasterDataItems200DataItemCategory = {
-  IT: 'IT',
-  SURVEILLANCE: 'SURVEILLANCE',
-  ACCESSORIES: 'ACCESSORIES',
+  COMPONENTS: 'COMPONENTS',
+  PERIPHERALS: 'PERIPHERALS',
+  PCS: 'PCS',
+  ENTERPRISE: 'ENTERPRISE',
+  SECURITY: 'SECURITY',
+  NETWORKING: 'NETWORKING',
 } as const;

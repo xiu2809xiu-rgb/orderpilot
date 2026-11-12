@@ -2,7 +2,7 @@
   "name": "@orderpilot/synthetic-data",
   "version": "0.0.0",
   "private": true,
-  "description": "Synthetic demo data for every screen and test: fictional customers, vendors, items and orders.",
+  "description": "Synthetic demo data for every screen and test: made-up customers, vendors and orders, items from real brands with made-up part numbers, and 24 months of history.",
   "license": "UNLICENSED",
   "type": "module",
   "sideEffects": false,

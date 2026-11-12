@@ -5,6 +5,7 @@ import {
   compareDecimal,
   type CustomerDetail,
   type AvailableStockResponse,
+  type LastPricesResponse,
   type CustomerQuery,
   type CustomerRow,
   type ItemDetail,
@@ -284,6 +285,31 @@ export class MasterDataService {
       }));
   }
 
+  /**
+   * What the customer last paid for each item asked for. An item they never
+   * bought is left out, so the answer is never a price list. The price is the
+   * item's Unit Price field for masking, so no new rule exists.
+   */
+  async lastPrices(
+    customerNo: string,
+    itemNos: readonly string[],
+    role: Role,
+  ): Promise<LastPricesResponse["data"]> {
+    const customers = await this.reader.customers();
+    if (!customers.some((customer) => customer.no === customerNo))
+      throw new NotFoundError("Customer");
+    // A repeated number would repeat its row: one row an item is the answer.
+    const prices = await this.reader.lastAgreedPrices(customerNo, [
+      ...new Set(itemNos),
+    ]);
+    return prices.map((row) => ({
+      itemNo: row.itemNo,
+      price: this.field(role, "item.unitPrice", row.price),
+      agreedOn: row.agreedOn,
+      documentNo: row.documentNo,
+    }));
+  }
+
   async item(no: string, role: Role): Promise<ItemDetail> {
     const [items, orders, purchaseOrders, sprs, names, customers] =
       await Promise.all([
@@ -357,9 +383,7 @@ export class MasterDataService {
           matches(query.search, [customer.no, customer.name]) &&
           (!query.country || customer.countryRegionCode === query.country) &&
           (!query.paymentTerms ||
-            customer.paymentTermsCode === query.paymentTerms) &&
-          (!query.priceGroup ||
-            customer.customerPriceGroup === query.priceGroup),
+            customer.paymentTermsCode === query.paymentTerms),
       )
       .map((customer): CustomerRow => {
         const own = orders.filter((o) => o.customerNo === customer.no);
@@ -369,7 +393,6 @@ export class MasterDataService {
           countryRegionCode: customer.countryRegionCode,
           currencyCode: customer.currencyCode,
           paymentTermsCode: customer.paymentTermsCode,
-          customerPriceGroup: customer.customerPriceGroup,
           openOrders: own.filter(isOpenOrder).length,
           overdueOrders: own.filter((o) => o.overdue).length,
         };
@@ -391,7 +414,12 @@ export class MasterDataService {
       countryRegionCode: customer.countryRegionCode,
       currencyCode: customer.currencyCode,
       paymentTermsCode: customer.paymentTermsCode,
-      customerPriceGroup: customer.customerPriceGroup,
+      addressLine1: customer.addressLine1,
+      addressLine2: customer.addressLine2,
+      city: customer.city,
+      state: customer.state,
+      postalCode: customer.postalCode,
+      taxRegistrationNumber: customer.taxRegistrationNumber,
       creditLimitLcy: this.field(
         role,
         "customer.creditLimitLcy",
@@ -517,7 +545,6 @@ export class MasterDataService {
       vendors: vendors.map((vendor) => ({ no: vendor.no, name: vendor.name })),
       countries: distinct(customers.map((c) => c.countryRegionCode)),
       paymentTerms: distinct(customers.map((c) => c.paymentTermsCode)),
-      priceGroups: distinct(customers.map((c) => c.customerPriceGroup)),
     };
   }
 }

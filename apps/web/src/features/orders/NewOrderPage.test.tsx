@@ -63,9 +63,12 @@ describe("the New order page", () => {
     const { router } = renderOrders("/orders/new");
     await fillOrder(user, "PO-7731", null);
     expect(await item()).toHaveValue("I-0001  Norvale Wireless Mouse");
-    // Picking the item shows the list price as context and leaves the price empty.
+    // Picking the item shows what this customer last paid as context, and
+    // leaves the price empty: the PO sets it.
     expect(unitPrice()).toHaveValue("");
-    expect(await screen.findByText(/List price 18.40/)).toBeVisible();
+    expect(
+      await screen.findByText(/Last agreed price USD 17.90 on 14 Oct 2026/),
+    ).toBeVisible();
     await user.type(unitPrice(), "17.25");
     expect(unitPrice()).toHaveValue("17.25");
     expect(await screen.findByText(/40 PCS available/)).toBeVisible();
@@ -129,8 +132,11 @@ describe("the New order page", () => {
     answerWrite("post", "*/api/v1/orders", [], saved(draftDetail()));
     await fillOrder(user, "PO-7732");
     await user.click(screen.getByRole("button", { name: /Save and new/ }));
+    // The whole sentence: "saved as a draft" is the toast of a plain Save.
     expect(
-      await screen.findByText(/Order SO-20261109-0001 saved/),
+      await screen.findByText(
+        `Order ${NEW_ORDER_NO} saved. Ready for the next one.`,
+      ),
     ).toBeVisible();
     expect(router.state.location.pathname).toBe("/orders/new");
     expect(screen.getByRole("textbox", { name: /PO number/ })).toHaveValue("");

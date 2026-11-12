@@ -266,7 +266,7 @@ If a hook stops you, it says why and what to do. When it refuses a push to `main
 
 **The first `docker compose up` takes minutes.** It compiles MinIO from its source once. Later starts use the cached image.
 
-**Start again from nothing.** `docker compose down` stops and removes the containers and keeps your data. Removing the data too (`docker compose down -v`) deletes the volumes: ask first, and know that it cannot be undone.
+**Start again from nothing.** `docker compose down` stops and removes the containers and keeps your data. Removing the data too (`docker compose down -v`) deletes the volumes: ask first, and know that it cannot be undone. After a change to the synthetic data, an old database keeps the rows of the old set, because the seed never overwrites a row that exists: start from a fresh database to see the new data.
 
 ## Workflow
 

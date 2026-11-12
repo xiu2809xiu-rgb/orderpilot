@@ -9,8 +9,11 @@
     "quantity": "Quantity, line {{n}}",
     "unitPrice": "Unit price, line {{n}}"
   },
-  "listPrice": "List price {{price}}",
-  "listPriceNote": ", for reference",
+  "lastPriceAmount": "Last {{amount}}",
+  "lastPriceDate": "{{date}}",
+  "lastPriceFull": "Last agreed price {{amount}} on {{date}}, on {{document}}, for reference",
+  "noLastPrice": "No earlier price",
+  "unknownLastPrice": "Last price not known",
   "placeholders": {
     "item": "Part number or name"
   },

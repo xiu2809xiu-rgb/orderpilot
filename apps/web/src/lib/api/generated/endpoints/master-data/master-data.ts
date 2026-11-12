@@ -30,6 +30,8 @@ import type {
   MasterDataItem200,
   MasterDataItems200,
   MasterDataItemsParams,
+  MasterDataLastPrices200,
+  MasterDataLastPricesParams,
   MasterDataVendor200,
   MasterDataVendors200,
   MasterDataVendorsParams
@@ -508,6 +510,106 @@ export function useMasterDataCustomers<TData = Awaited<ReturnType<typeof masterD
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getMasterDataCustomersQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary What a customer last paid for each item asked for, as context for an order line. Masked like a unit price. Mock Business Central data
+ */
+export const masterDataLastPrices = (
+    no: string,
+    params: MasterDataLastPricesParams,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<MasterDataLastPrices200>(
+      {url: `/api/v1/master-data/customers/${no}/last-prices`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getMasterDataLastPricesQueryKey = (no: string,
+    params?: MasterDataLastPricesParams,) => {
+    return [
+    `/api/v1/master-data/customers/${no}/last-prices`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getMasterDataLastPricesQueryOptions = <TData = Awaited<ReturnType<typeof masterDataLastPrices>>, TError = ErrorType<unknown>>(no: string,
+    params: MasterDataLastPricesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataLastPrices>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getMasterDataLastPricesQueryKey(no,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof masterDataLastPrices>>> = ({ signal }) => masterDataLastPrices(no,params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: no !== null && no !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof masterDataLastPrices>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type MasterDataLastPricesQueryResult = NonNullable<Awaited<ReturnType<typeof masterDataLastPrices>>>
+export type MasterDataLastPricesQueryError = ErrorType<unknown>
+
+
+export function useMasterDataLastPrices<TData = Awaited<ReturnType<typeof masterDataLastPrices>>, TError = ErrorType<unknown>>(
+ no: string,
+    params: MasterDataLastPricesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataLastPrices>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof masterDataLastPrices>>,
+          TError,
+          Awaited<ReturnType<typeof masterDataLastPrices>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useMasterDataLastPrices<TData = Awaited<ReturnType<typeof masterDataLastPrices>>, TError = ErrorType<unknown>>(
+ no: string,
+    params: MasterDataLastPricesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataLastPrices>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof masterDataLastPrices>>,
+          TError,
+          Awaited<ReturnType<typeof masterDataLastPrices>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useMasterDataLastPrices<TData = Awaited<ReturnType<typeof masterDataLastPrices>>, TError = ErrorType<unknown>>(
+ no: string,
+    params: MasterDataLastPricesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataLastPrices>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary What a customer last paid for each item asked for, as context for an order line. Masked like a unit price. Mock Business Central data
+ */
+
+export function useMasterDataLastPrices<TData = Awaited<ReturnType<typeof masterDataLastPrices>>, TError = ErrorType<unknown>>(
+ no: string,
+    params: MasterDataLastPricesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof masterDataLastPrices>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getMasterDataLastPricesQueryOptions(no,params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

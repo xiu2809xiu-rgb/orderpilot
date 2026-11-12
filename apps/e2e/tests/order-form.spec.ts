@@ -10,6 +10,7 @@ import {
   expect,
   expectNoButton,
   expectRefused,
+  apiUrl,
   signInAs,
   test,
 } from "../src/index.js";
@@ -22,6 +23,13 @@ import {
 /** A PO number no earlier run used, so a persistent stack never clashes. */
 function freshPo(): string {
   return `E2E-${String(Date.now())}-${String(randomInt(1000, 9999))}`;
+}
+
+/** "USD 4,228.89" from "4228.89", as the page words an amount. */
+function formatUsd(value: string): string {
+  const [whole = "0", fraction = ""] = value.split(".");
+  const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return `USD ${grouped}.${fraction.padEnd(2, "0")}`;
 }
 
 /** Fills the new-order form the way a person does: by searching, not by typing a name. */
@@ -40,7 +48,9 @@ async function fillNewOrder(page: Page, po: string): Promise<void> {
   await expect(quantity).toBeFocused();
   await quantity.fill("2");
   // The PO sets the price: picking an item leaves it empty.
-  await page.getByRole("textbox", { name: "Unit price, line 1" }).fill("18.40");
+  await page
+    .getByRole("textbox", { name: "Unit price, line 1" })
+    .fill("857.00");
 }
 
 const saveButton = (page: Page) =>
@@ -160,6 +170,46 @@ test.describe("New order and draft editing", () => {
     });
   });
 
+  test("the note under a line's price shows what the customer last paid, as the server says", async ({
+    page,
+  }) => {
+    await signInAs(page, "SUPPORT");
+    // The data is date-relative, so no date is asserted: the server names an
+    // item this customer bought, and the page must show its price.
+    const itemNos = Array.from(
+      { length: 200 },
+      (_, i) => `I-${String(i + 1).padStart(4, "0")}`,
+    ).join(",");
+    const answer = await page.request.get(
+      apiUrl(`/master-data/customers/C-0001/last-prices?itemNos=${itemNos}`),
+    );
+    expect(answer.ok()).toBe(true);
+    const body = (await answer.json()) as {
+      data: { itemNo: string; price: { value: string | null } }[];
+    };
+    const bought = body.data.find((row) => row.price.value !== null);
+    expect(bought, "C-0001 has a last price for some item").toBeDefined();
+    const price = bought?.price.value ?? "";
+
+    await page.goto("/orders/new");
+    await expect(
+      page.getByRole("heading", { level: 1, name: "New order" }),
+    ).toBeVisible();
+    await page.getByRole("combobox", { name: /^Customer$/ }).fill("C-0001");
+    await page.getByRole("option").first().click();
+    await page
+      .getByRole("combobox", { name: "Item, line 1" })
+      .fill(bought?.itemNo ?? "");
+    await page.keyboard.press("Enter");
+    await expect(
+      page.getByText(`Last ${formatUsd(price)}`, { exact: true }),
+    ).toBeVisible();
+    // Context only: the price the PO sets is still the person's to type.
+    await expect(
+      page.getByRole("textbox", { name: "Unit price, line 1" }),
+    ).toHaveValue("");
+  });
+
   test("the draft page fits and passes the accessibility check", async ({
     page,
   }) => {
@@ -186,7 +236,7 @@ test.describe("New order and draft editing", () => {
       orderDate: "2026-11-09",
       shipmentDate: null,
       prepaymentPercent: "100",
-      lines: [{ itemNo: "I-0001", quantity: "1", unitPrice: "10.00" }],
+      lines: [{ itemNo: "I-0001", quantity: "1", unitPrice: "857.00" }],
     } satisfies CreateSalesOrderBody;
     const patch = {
       version: 1,

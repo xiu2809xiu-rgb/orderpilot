@@ -143,7 +143,7 @@ describe("the lines grid, from the keyboard", () => {
 });
 
 describe("what picking an item does to the price", () => {
-  it("leaves the price empty and shows the list price as context when asked", async () => {
+  it("leaves the price empty and holds no last price of its own when asked", async () => {
     const user = userEvent.setup();
     renderGrid({ itemPrice: "reference" });
     await user.type(await item(1), "NV-WM-100{Enter}");
@@ -151,17 +151,78 @@ describe("what picking an item does to the price", () => {
       expect(box("Quantity", 1)).toHaveFocus();
     });
     expect(box("Unit price", 1)).toHaveValue("");
-    expect(screen.getByText("List price 18.40")).toBeVisible();
-    expect(screen.getByText(", for reference")).toBeInTheDocument();
+    // The grid never reads a price from the item: the screen writes the last one.
+    expect(screen.queryByText(/Last agreed price/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/No earlier price/)).not.toBeInTheDocument();
   });
 
-  it("drops the list price when the item is cleared", async () => {
+  it("shows the last agreed price with its date, and the document for a screen reader", () => {
+    renderGrid({
+      itemPrice: "reference",
+      lines: [
+        line({
+          item: { number: "I-0001", name: "Norvale Wireless Mouse" },
+          lastPrice: {
+            price: "17.90",
+            agreedOn: "2026-10-14",
+            documentNo: "SO-0007",
+          },
+        }),
+      ],
+    });
+    expect(screen.getByText("Last USD 17.90")).toBeVisible();
+    expect(screen.getByText("14 Oct 2026")).toBeVisible();
+    expect(
+      screen.getByText(
+        "Last agreed price USD 17.90 on 14 Oct 2026, on SO-0007, for reference",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("says No earlier price for an item the customer never bought", () => {
+    renderGrid({
+      itemPrice: "reference",
+      lines: [
+        line({
+          item: { number: "I-0001", name: "Norvale Wireless Mouse" },
+          lastPrice: "none",
+        }),
+      ],
+    });
+    expect(screen.getByText("No earlier price")).toBeVisible();
+  });
+
+  it("says Last price not known when the lookup failed", () => {
+    renderGrid({
+      itemPrice: "reference",
+      lines: [
+        line({
+          item: { number: "I-0001", name: "Norvale Wireless Mouse" },
+          lastPrice: "unknown",
+        }),
+      ],
+    });
+    expect(screen.getByText("Last price not known")).toBeVisible();
+  });
+
+  it("drops the last agreed price when the item is picked again or cleared", async () => {
     const user = userEvent.setup();
-    renderGrid({ itemPrice: "reference" });
-    await user.type(await item(1), "NV-WM-100{Enter}");
-    expect(await screen.findByText("List price 18.40")).toBeVisible();
+    renderGrid({
+      itemPrice: "reference",
+      lines: [
+        line({
+          item: { number: "I-0001", name: "Norvale Wireless Mouse" },
+          lastPrice: {
+            price: "17.90",
+            agreedOn: "2026-10-14",
+            documentNo: "SO-0007",
+          },
+        }),
+      ],
+    });
+    expect(screen.getByText("Last USD 17.90")).toBeVisible();
     await user.clear(await item(1));
-    expect(screen.queryByText("List price 18.40")).not.toBeInTheDocument();
+    expect(screen.queryByText("Last USD 17.90")).not.toBeInTheDocument();
   });
 
   it("keeps a typed price when the item changes in reference mode", async () => {

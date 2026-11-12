@@ -12,6 +12,8 @@ import {
   customerQuerySchema,
   customerResponseSchema,
   itemListSchema,
+  lastPricesQuerySchema,
+  lastPricesResponseSchema,
   itemQuerySchema,
   itemResponseSchema,
   masterDataFiltersResponseSchema,
@@ -22,6 +24,7 @@ import {
   type AvailableStockQuery,
   type CustomerQuery,
   type ItemQuery,
+  type LastPricesQuery,
   type VendorQuery,
 } from "@orderpilot/shared";
 import type { AuthContext } from "../../auth/auth-context.js";
@@ -125,6 +128,30 @@ export class MasterDataController {
     @Query(new ZodValidationPipe(customerQuerySchema)) query: CustomerQuery,
   ) {
     return pageOf(await this.masterData.listCustomers(query));
+  }
+
+  @Get("customers/:no/last-prices")
+  @ApiParam({ name: "no", schema: { type: "string" } })
+  @ApiOperation({
+    summary:
+      "What a customer last paid for each item asked for, as context for an order line. Masked like a unit price. Mock Business Central data",
+  })
+  @openApiQuery(lastPricesQuerySchema)
+  @ApiOkResponse({ schema: openApiSchema(lastPricesResponseSchema) })
+  async lastPrices(
+    @Param("no", recordNo) no: string,
+    @Query(new ZodValidationPipe(lastPricesQuerySchema))
+    query: LastPricesQuery,
+    @Auth() auth: AuthContext,
+  ) {
+    return {
+      data: await this.masterData.lastPrices(
+        no,
+        query.itemNos.split(","),
+        auth.user.role,
+      ),
+      meta: { mock: true as const },
+    };
   }
 
   @Get("customers/:no")

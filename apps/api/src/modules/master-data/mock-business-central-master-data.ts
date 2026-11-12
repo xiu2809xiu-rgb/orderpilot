@@ -1,5 +1,9 @@
 import { Inject, Injectable } from "@nestjs/common";
-import type { SampleOrder, SyntheticDataset } from "@orderpilot/synthetic-data";
+import {
+  lastAgreedPricesFor,
+  type SampleOrder,
+  type SyntheticDataset,
+} from "@orderpilot/synthetic-data";
 import {
   SYNTHETIC_SOURCE,
   type DatasetSource,
@@ -10,6 +14,7 @@ import type {
   MasterDataBankAccount,
   MasterDataCustomer,
   MasterDataItem,
+  MasterDataLastPrice,
   MasterDataPurchaseOrder,
   MasterDataReader,
   MasterDataSalesOrder,
@@ -103,7 +108,12 @@ export class MockBusinessCentralMasterData implements MasterDataReader {
         countryRegionCode: customer.countryRegionCode,
         currencyCode: customer.currencyCode,
         paymentTermsCode: customer.paymentTermsCode,
-        customerPriceGroup: customer.customerPriceGroup,
+        addressLine1: customer.addressLine1,
+        addressLine2: customer.addressLine2,
+        city: customer.city,
+        state: customer.state,
+        postalCode: customer.postalCode,
+        taxRegistrationNumber: customer.taxRegistrationNumber,
         creditLimitLcy: customer.creditLimitLcy,
         balanceLcy: customer.balanceLcy,
       })),
@@ -176,6 +186,15 @@ export class MockBusinessCentralMasterData implements MasterDataReader {
         needBy: spr.needBy,
         requestedBy: spr.requestedBy,
       })),
+    );
+  }
+
+  lastAgreedPrices(
+    customerNo: string,
+    itemNos: readonly string[],
+  ): Promise<readonly MasterDataLastPrice[]> {
+    return Promise.resolve(
+      lastAgreedPricesFor(this.source(), customerNo, itemNos),
     );
   }
 }

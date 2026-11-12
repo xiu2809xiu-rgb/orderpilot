@@ -18,13 +18,36 @@ export const SYNTHETIC_LABEL = "Synthetic demo data" as const;
 // Field names follow Business Central's, in camelCase (docs/research/domain-notes.md).
 // Every amount is a USD decimal string, never a float.
 
+/** The eleven countries Spectra's customers are in. */
+export const COUNTRY_CODES = [
+  "AE",
+  "PK",
+  "LK",
+  "MV",
+  "IN",
+  "NP",
+  "BD",
+  "VN",
+  "SG",
+  "ID",
+  "MY",
+] as const;
+export type CountryCode = (typeof COUNTRY_CODES)[number];
+
 export interface Customer {
   no: string;
   name: string;
-  countryRegionCode: "IN" | "LK" | "BD" | "PK" | "AE";
+  countryRegionCode: CountryCode;
   currencyCode: "USD";
   paymentTermsCode: string;
-  customerPriceGroup: string;
+  /** Made up, in a real city (Business Central's address fields). */
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  /** Obviously fake: the country code, ZZ and a run of zeros. */
+  taxRegistrationNumber: string;
   creditLimitLcy: DecimalString;
   balanceLcy: DecimalString;
 }
@@ -35,6 +58,8 @@ export interface Vendor {
   currencyCode: "USD";
   paymentTermsCode: string;
   balanceLcy: DecimalString;
+  /** The median lead time of the items it supplies, in days. */
+  leadTimeDays: number;
 }
 
 /** Obviously fake: an unassigned country code in the IBAN and a bank that says so. */
@@ -47,16 +72,23 @@ export interface VendorBankAccount {
   iban: string;
 }
 
-export const ITEM_CATEGORIES = ["IT", "SURVEILLANCE", "ACCESSORIES"] as const;
+export const ITEM_CATEGORIES = [
+  "COMPONENTS",
+  "PERIPHERALS",
+  "PCS",
+  "ENTERPRISE",
+  "SECURITY",
+  "NETWORKING",
+] as const;
 export type ItemCategory = (typeof ITEM_CATEGORIES)[number];
 
 export interface Item {
   no: string;
   description: string;
-  /** A fictional brand. */
+  /** A real brand name Spectra carries, as plain text (ADR 0051). */
   brand: string;
   category: ItemCategory;
-  /** The manufacturer's part number, such as `NOR-MS-A-2401`. */
+  /** A made-up part number in the brand's style, such as `210-ZZ0001`. */
   partNumber: string;
   baseUnitOfMeasure: "PCS";
   unitPrice: DecimalString;
@@ -66,6 +98,15 @@ export interface Item {
   qtyOnPurchOrder: DecimalString;
   vendorNo: string;
   vendorItemNo: string;
+  /** Days from the vendor's order to the goods arriving. */
+  leadTimeDays: number;
+  /**
+   * Units sold a month over the last three whole months. OrderPilot's own
+   * figure, not a Business Central field; the history adds up to it.
+   */
+  runRate3m: DecimalString;
+  /** Inventory over `runRate3m`, in months; null when nothing sold. */
+  monthsOfCover: DecimalString | null;
 }
 
 /** A person on the team, by the role they hold. A product manager lists the brands they own. */
@@ -73,6 +114,8 @@ export interface Person {
   name: string;
   role: Role;
   brands: string[];
+  /** The Support person who routes each SPR; not one of those who own orders. */
+  sprCoordinator?: true;
 }
 
 export interface Brand {
@@ -132,11 +175,12 @@ export type SampleScenario =
       packed: DecimalString;
     }
   | {
-      kind: "price-mismatch";
+      kind: "pi-price-mismatch";
       itemNo: string;
-      /** The unit price on the PO, against Business Central's. */
-      printed: DecimalString;
-      listed: DecimalString;
+      /** The unit price on the customer's PO, which is the agreed one. */
+      poPrice: DecimalString;
+      /** The higher price the draft PI prints on its first line. */
+      piPrice: DecimalString;
     }
   | {
       kind: "awb-overdue";
@@ -185,6 +229,10 @@ export interface OrderDocument {
   dueDate: string | null;
   /** Who confirmed it, once confirmed. */
   confirmedBy: string | null;
+  /** On a shipping document: the consignee it names, when that is not the buyer. */
+  consignee?: string;
+  /** On a shipping document: who the carrier notifies on arrival. */
+  notifyParty?: string;
 }
 
 /** Where an order stands in the day-by-day story the data tells. */
@@ -195,8 +243,19 @@ export interface OrderStep {
   dueOn: string | null;
 }
 
+/** Where the goods go: the customer's own name and address. */
+export interface ShipTo {
+  name: string;
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  postalCode: string;
+  countryRegionCode: CountryCode;
+}
+
 export interface SampleOrder {
   header: SalesHeader;
+  shipTo: ShipTo;
   lines: SalesLine[];
   sampleScreenState: SampleScreenState;
   scenario: SampleScenario;

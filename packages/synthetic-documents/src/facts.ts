@@ -14,7 +14,7 @@ import {
   SELLER,
   SELLER_BANK,
   billTo,
-  placeOf,
+  portOf,
   shipTo,
   type BankDetails,
   type Party,
@@ -106,7 +106,6 @@ export function buildFacts(
   const amount = sum(lines.map((l) => l.amount));
   const percent = order.header.prepaymentPercent;
   const upfront = Number(percent) > 0;
-  const place = placeOf(customer);
   const dates = datesOf(
     anchor,
     kind,
@@ -123,11 +122,11 @@ export function buildFacts(
     poNumber: order.header.externalDocumentNo,
     seller: SELLER,
     buyer: billTo(customer),
-    shipTo: shipTo(customer),
+    shipTo: shipTo(order),
     contact: CONTACTS[n % CONTACTS.length] ?? CONTACTS[0],
     incoterms:
       order.header.shipmentMethodCode === "CIF"
-        ? `CIF ${place.port}`
+        ? `CIF ${portOf(customer)}`
         : "FOB Singapore",
     paymentTerms: TERMS[customer.paymentTermsCode] ?? customer.paymentTermsCode,
     currency: "USD",

@@ -1,7 +1,7 @@
 import { CONFIDENCE_HIGH } from "@orderpilot/shared";
 import { AS_OF, createSyntheticDataset } from "@orderpilot/synthetic-data";
 import { beforeAll, describe, expect, it } from "vitest";
-import { DEMO_FILES, type GroundTruth } from "./demo.js";
+import { DEMO_FILES, pickDemoFiles, type GroundTruth } from "./demo.js";
 import { layoutForCustomer } from "./facts-data.js";
 import { PO_LAYOUTS } from "./model.js";
 import { generated, type Generated } from "./testing/generated.js";
@@ -20,7 +20,38 @@ const truthOf = (stem: string): GroundTruth => {
 const value = (truth: GroundTruth, id: string): string =>
   truth.fields.find((f) => f.id === id)?.value ?? "";
 
+// `pickDemoFiles` fixes this order, and the test below keeps it equal to the list.
+const stemAt = (index: number): string => {
+  const file = DEMO_FILES[index];
+  if (!file) throw new Error(`No demo file ${String(index)}`);
+  return file.stem;
+};
+const PILOT = 0;
+const SCAN = 4;
+const MISMATCH_PO = 5;
+const MISMATCH_PL = 6;
+const MATCHING_PL = 7;
+const PIS = [8, 9, 10].map(stemAt);
+const INVOICE = 11;
+const orderOf = (stem: string) => {
+  const file = DEMO_FILES.find((f) => f.stem === stem);
+  const order = dataset.orders.find((o) => o.header.no === file?.orderNo);
+  if (!order) throw new Error(`No order for ${stem}`);
+  return order;
+};
+
 describe("the demo files", () => {
+  it("are what the data picks, so a change to the data fails here", () => {
+    expect(pickDemoFiles(dataset)).toEqual(DEMO_FILES);
+  });
+
+  it("name each PO by the layout it is drawn in", () => {
+    for (const file of DEMO_FILES.filter((f) => f.kind === "CUSTOMER_PO")) {
+      const layout = truthOf(file.stem).layout;
+      expect(file.stem.startsWith(`po-${layout}-so-`), file.stem).toBe(true);
+    }
+  });
+
   it("are twelve, each tied to a real order that has that document", () => {
     expect(DEMO_FILES).toHaveLength(12);
     expect(new Set(DEMO_FILES.map((f) => f.stem)).size).toBe(12);
@@ -45,7 +76,7 @@ describe("the demo files", () => {
     ).toHaveLength(3);
     expect(DEMO_FILES.filter((f) => f.kind === "PACKING_LIST")).toHaveLength(2);
     expect(DEMO_FILES.filter((f) => f.scanned)).toHaveLength(1);
-    expect(truthOf("po-table-so-0120-scanned").readable).toBe("image");
+    expect(truthOf(stemAt(SCAN)).readable).toBe("image");
   });
 
   it("give a customer the same layout every time, and every layout a customer", () => {
@@ -57,21 +88,21 @@ describe("the demo files", () => {
       seen.set(order.header.sellToCustomerNo, layout);
     }
     expect(new Set(seen.values())).toEqual(new Set(PO_LAYOUTS));
-    expect(truthOf("po-letter-so-0101").layout).toBe(
-      layoutForCustomer("C-0002"),
-    );
+    for (const file of DEMO_FILES.filter((f) => f.kind === "CUSTOMER_PO")) {
+      expect(truthOf(file.stem).layout, file.stem).toBe(
+        layoutForCustomer(orderOf(file.stem).header.sellToCustomerNo),
+      );
+    }
   });
 
   it("carry the totals of their order", () => {
-    const order = dataset.orders.find((o) => o.header.no === "SO-0115");
-    expect(value(truthOf("po-boxed-so-0115"), "total")).toBe(order?.total);
-    expect(value(truthOf("pi-so-0097"), "total")).toBe(
-      dataset.orders.find((o) => o.header.no === "SO-0097")?.total,
-    );
+    for (const stem of [stemAt(PILOT), ...PIS]) {
+      expect(value(truthOf(stem), "total"), stem).toBe(orderOf(stem).total);
+    }
   });
 
   it("show a PI's deposit and balance to the cent, and they add up", () => {
-    const pi = truthOf("pi-so-0097");
+    const pi = truthOf(stemAt(8));
     const [total, due, balance] = ["total", "amountDue", "balanceDue"].map(
       (id) => Math.round(Number(value(pi, id)) * 100),
     );
@@ -129,7 +160,7 @@ describe("the PI's bank details", () => {
     truthOf(stem).fields.filter((f) => f.group === "bank");
 
   it("are obviously fake and say so", () => {
-    for (const stem of ["pi-so-0097", "pi-so-0079", "pi-so-0063"]) {
+    for (const stem of PIS) {
       const fields = bank(stem);
       expect(fields.map((f) => f.key).sort()).toEqual([
         "bankAccountNo",
@@ -154,8 +185,8 @@ describe("the PI's bank details", () => {
 
 describe("the mismatch", () => {
   it("packs fewer pieces on line 1 than the PO orders, and no other line differs", () => {
-    const po = truthOf("po-letter-so-0041");
-    const pl = truthOf("pl-so-0041-mismatch");
+    const po = truthOf(stemAt(MISMATCH_PO));
+    const pl = truthOf(stemAt(MISMATCH_PL));
     const ordered = Number(value(po, "lines.quantity[0]"));
     const packed = Number(value(pl, "lines.quantity[0]"));
     expect(packed).toBeLessThan(ordered);
@@ -170,10 +201,10 @@ describe("the mismatch", () => {
   });
 
   it("is the only packing list that disagrees with its order", () => {
-    const order = dataset.orders.find((o) => o.header.no === "SO-0026");
-    const pl = truthOf("pl-so-0026");
+    const order = orderOf(stemAt(MATCHING_PL));
+    const pl = truthOf(stemAt(MATCHING_PL));
     expect(pl.mismatch).toBeNull();
-    order?.lines.forEach((line, i) => {
+    order.lines.forEach((line, i) => {
       expect(value(pl, `lines.quantity[${String(i)}]`)).toBe(line.quantity);
     });
   });
@@ -201,11 +232,8 @@ describe("the three-uncertain-fields rule", () => {
     }
   });
 
-  it("gives the order with a price to confirm just that price", () => {
-    const uncertain = truthOf("po-branded-so-0112").fields.filter(
-      (f) => f.uncertain,
-    );
-    expect(uncertain.map((f) => f.id)).toEqual(["lines.unitPrice[0]"]);
+  it("gives the PO to try in the sales pilot exactly two fields to confirm", () => {
+    expect(truthOf(stemAt(PILOT)).uncertainFieldCount).toBe(2);
   });
 
   it("uses the shared threshold and flags exactly what falls under it", () => {
@@ -221,14 +249,15 @@ describe("the three-uncertain-fields rule", () => {
 
   it("leaves a PO that is not read by Mock AI, and every other document, with nothing to confirm, and a scan with all of it", () => {
     for (const stem of [
-      "pi-so-0097",
-      "pl-so-0026",
-      "invoice-so-0005",
-      "po-letter-so-0041",
+      stemAt(8),
+      stemAt(MATCHING_PL),
+      stemAt(INVOICE),
+      stemAt(MISMATCH_PO),
+      stemAt(1),
     ]) {
       expect(truthOf(stem).uncertainFieldCount, stem).toBe(0);
     }
-    const scan = truthOf("po-table-so-0120-scanned");
+    const scan = truthOf(stemAt(SCAN));
     expect(scan.uncertainFieldCount).toBe(scan.fields.length);
   });
 });

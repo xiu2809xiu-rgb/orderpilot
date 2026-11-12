@@ -10,7 +10,10 @@ export type MasterDataItemsCategory = typeof MasterDataItemsCategory[keyof typeo
 
 
 export const MasterDataItemsCategory = {
-  IT: 'IT',
-  SURVEILLANCE: 'SURVEILLANCE',
-  ACCESSORIES: 'ACCESSORIES',
+  COMPONENTS: 'COMPONENTS',
+  PERIPHERALS: 'PERIPHERALS',
+  PCS: 'PCS',
+  ENTERPRISE: 'ENTERPRISE',
+  SECURITY: 'SECURITY',
+  NETWORKING: 'NETWORKING',
 } as const;

@@ -1,0 +1,309 @@
+{
+  "label": "Synthetic demo data",
+  "file": "po-branded-so-0101.pdf",
+  "documentType": "CUSTOMER_PO",
+  "documentNumber": "PO-PK-4800",
+  "layout": "branded",
+  "readable": "text",
+  "orderNo": "SO-0101",
+  "customerNo": "C-0024",
+  "purpose": "The customer's own look. Its task says to confirm 4 uncertain fields.",
+  "pageCount": 1,
+  "page": {
+    "width": 595.28,
+    "height": 841.89
+  },
+  "confidenceThreshold": 0.9,
+  "uncertainFieldCount": 4,
+  "mismatch": null,
+  "fields": [
+    {
+      "key": "customerName",
+      "label": "Customer",
+      "group": "header",
+      "lineIndex": null,
+      "value": "Karakel Systems (Pvt) Ltd",
+      "text": "Karakel Systems (Pvt) Ltd",
+      "page": 1,
+      "box": [
+        0.1559,
+        0.039,
+        0.3473,
+        0.02
+      ],
+      "id": "customerName",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "poNumber",
+      "label": "PO number",
+      "group": "header",
+      "lineIndex": null,
+      "value": "PO-PK-4800",
+      "text": "PO-PK-4800",
+      "page": 1,
+      "box": [
+        0.8156,
+        0.0671,
+        0.1259,
+        0.013
+      ],
+      "id": "poNumber",
+      "confidence": 0.94,
+      "uncertain": false
+    },
+    {
+      "key": "poDate",
+      "label": "PO date",
+      "group": "header",
+      "lineIndex": null,
+      "value": "2026-10-30",
+      "text": "30 Oct 2026",
+      "page": 1,
+      "box": [
+        0.0753,
+        0.1583,
+        0.0977,
+        0.0108
+      ],
+      "id": "poDate",
+      "confidence": 0.97,
+      "uncertain": false
+    },
+    {
+      "key": "requiredDate",
+      "label": "Required by",
+      "group": "header",
+      "lineIndex": null,
+      "value": "2026-11-14",
+      "text": "14 Nov 2026",
+      "page": 1,
+      "box": [
+        0.0753,
+        0.1892,
+        0.0966,
+        0.0108
+      ],
+      "id": "requiredDate",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "buyerContact",
+      "label": "Buyer",
+      "group": "header",
+      "lineIndex": null,
+      "value": "Anjelika Verrow",
+      "text": "Anjelika Verrow",
+      "page": 1,
+      "box": [
+        0.0753,
+        0.2201,
+        0.1227,
+        0.0121
+      ],
+      "id": "buyerContact",
+      "confidence": 0.95,
+      "uncertain": false
+    },
+    {
+      "key": "billTo",
+      "label": "Bill to",
+      "group": "header",
+      "lineIndex": null,
+      "value": "19 Chenavar Road, Unit 1A, Karachi 74888, Pakistan",
+      "text": "19 Chenavar Road, Unit 1A\nKarachi 74888\nPakistan",
+      "page": 1,
+      "box": [
+        0.3203,
+        0.1585,
+        0.1828,
+        0.0377
+      ],
+      "id": "billTo",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "shipTo",
+      "label": "Ship to",
+      "group": "header",
+      "lineIndex": null,
+      "value": "Karakel Systems (Pvt) Ltd, 19 Chenavar Road, Unit 1A, Karachi 74888, Pakistan",
+      "text": "Karakel Systems (Pvt) Ltd\n19 Chenavar Road, Unit 1A\nKarachi 74888\nPakistan",
+      "page": 1,
+      "box": [
+        0.5992,
+        0.1582,
+        0.1841,
+        0.0516
+      ],
+      "id": "shipTo",
+      "confidence": 0.79,
+      "uncertain": true
+    },
+    {
+      "key": "incoterms",
+      "label": "Incoterms",
+      "group": "header",
+      "lineIndex": null,
+      "value": "FOB Singapore",
+      "text": "FOB Singapore",
+      "page": 1,
+      "box": [
+        0.0753,
+        0.2842,
+        0.1143,
+        0.0123
+      ],
+      "id": "incoterms",
+      "confidence": 0.78,
+      "uncertain": true
+    },
+    {
+      "key": "paymentTerms",
+      "label": "Payment terms",
+      "group": "header",
+      "lineIndex": null,
+      "value": "Irrevocable letter of credit at sight",
+      "text": "Irrevocable letter of credit at sight",
+      "page": 1,
+      "box": [
+        0.3288,
+        0.2843,
+        0.2602,
+        0.0123
+      ],
+      "id": "paymentTerms",
+      "confidence": 0.82,
+      "uncertain": true
+    },
+    {
+      "key": "currency",
+      "label": "Currency",
+      "group": "header",
+      "lineIndex": null,
+      "value": "USD",
+      "text": "USD",
+      "page": 1,
+      "box": [
+        0.7683,
+        0.2842,
+        0.0355,
+        0.0108
+      ],
+      "id": "currency",
+      "confidence": 0.98,
+      "uncertain": false
+    },
+    {
+      "key": "lines.partNumber",
+      "label": "Part number",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "MCZZ-0176-KKN1",
+      "text": "MCZZ-0176-KKN1",
+      "page": 1,
+      "box": [
+        0.1089,
+        0.3648,
+        0.1282,
+        0.0108
+      ],
+      "id": "lines.partNumber[0]",
+      "confidence": 0.97,
+      "uncertain": false
+    },
+    {
+      "key": "lines.description",
+      "label": "Description",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "Cooler Master CPU Cooler Lite",
+      "text": "Cooler Master CPU Cooler Lite",
+      "page": 1,
+      "box": [
+        0.2768,
+        0.3648,
+        0.2211,
+        0.0108
+      ],
+      "id": "lines.description[0]",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "lines.quantity",
+      "label": "Quantity",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "80",
+      "text": "80",
+      "page": 1,
+      "box": [
+        0.6204,
+        0.3648,
+        0.0233,
+        0.0108
+      ],
+      "id": "lines.quantity[0]",
+      "confidence": 0.99,
+      "uncertain": false
+    },
+    {
+      "key": "lines.unitPrice",
+      "label": "Unit price",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "53.81",
+      "text": "53.81",
+      "page": 1,
+      "box": [
+        0.7373,
+        0.3648,
+        0.0408,
+        0.0108
+      ],
+      "id": "lines.unitPrice[0]",
+      "confidence": 0.73,
+      "uncertain": true
+    },
+    {
+      "key": "lines.amount",
+      "label": "Amount",
+      "group": "lines",
+      "lineIndex": 0,
+      "value": "4304.80",
+      "text": "4,304.80",
+      "page": 1,
+      "box": [
+        0.8633,
+        0.3648,
+        0.0682,
+        0.0123
+      ],
+      "id": "lines.amount[0]",
+      "confidence": 0.97,
+      "uncertain": false
+    },
+    {
+      "key": "total",
+      "label": "Total (USD)",
+      "group": "totals",
+      "lineIndex": null,
+      "value": "4304.80",
+      "text": "4,304.80",
+      "page": 1,
+      "box": [
+        0.8127,
+        0.4239,
+        0.1087,
+        0.0176
+      ],
+      "id": "total",
+      "confidence": 0.98,
+      "uncertain": false
+    }
+  ]
+}

@@ -6,7 +6,9 @@ export { emptyLine, lineDraftOptions, newLineId } from "./lineValues";
 export { useLineTotals } from "./useLineTotals";
 export {
   itemOptionSchema,
+  lastPriceSchema,
   type ColumnKind,
+  type LastPrice,
   type ItemOption,
   type ItemSearch,
   type LineColumn,

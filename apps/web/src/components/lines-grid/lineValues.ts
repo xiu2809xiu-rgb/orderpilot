@@ -39,7 +39,7 @@ export function lineDraftOptions(
     rowKey: "lineId",
     exclude: [
       `${name}.*.availableStock`,
-      `${name}.*.listPrice`,
+      `${name}.*.lastPrice`,
       ...(priceMasked ? [`${name}.*.unitPrice`] : []),
     ],
   };
@@ -73,19 +73,26 @@ const COMPACT_WIDTH: Partial<Record<ColumnKind, string>> = {
 
 /**
  * The `grid-template-columns` of the columns, for screens wide enough for a
- * grid. `compact` is the version for the narrower of the two grid widths.
+ * grid. `compact` is the version for the narrower of the two grid widths, and
+ * `reference` is for a grid that shows the last agreed price under the price.
  */
 export function trackTemplate(
   columns: readonly LineColumn[],
   compact = false,
+  reference = false,
 ): string {
   return columns
-    .map(
-      (c) =>
-        c.width ??
-        (compact ? COMPACT_WIDTH[c.kind] : undefined) ??
-        DEFAULT_WIDTH[c.kind],
-    )
+    .map((c) => {
+      if (c.width) return c.width;
+      // The last-price note sits under the price input and needs the room to
+      // keep its amount and its date each on one line.
+      if (reference && c.kind === "unitPrice") {
+        return compact ? "7rem" : "8rem";
+      }
+      return (
+        (compact ? COMPACT_WIDTH[c.kind] : undefined) ?? DEFAULT_WIDTH[c.kind]
+      );
+    })
     .join(" ");
 }
 

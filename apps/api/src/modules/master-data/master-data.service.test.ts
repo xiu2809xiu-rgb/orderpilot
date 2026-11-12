@@ -333,14 +333,13 @@ describe("one item's numbers agree", () => {
 });
 
 describe("customers over the mock", () => {
-  it("filters by country, payment terms and price group", async () => {
+  it("filters by country and payment terms", async () => {
     const some = dataset.customers[0];
     if (!some) throw new Error("no customer");
     const found = await service.listCustomers({
       ...everything,
       country: some.countryRegionCode,
       paymentTerms: some.paymentTermsCode,
-      priceGroup: some.customerPriceGroup,
     });
     expect(found.items.map((r) => r.no)).toContain(some.no);
     for (const row of found.items) {
@@ -400,6 +399,21 @@ describe("vendors over the mock", () => {
     const plain = await service.listVendors(everything, "WAREHOUSE");
     const hidden = await service.listVendors(query, "WAREHOUSE");
     expect(hidden.items.map((r) => r.no)).toEqual(plain.items.map((r) => r.no));
+  });
+});
+
+describe("a customer's last prices", () => {
+  it("gives one row for an item asked for twice", async () => {
+    const order = dataset.orders[0];
+    const buyer = order?.header.sellToCustomerNo;
+    const bought = order?.lines[0]?.no;
+    if (!buyer || !bought) throw new Error("the set has no order line");
+    const rows = await service.lastPrices(
+      buyer,
+      [bought, bought, bought],
+      "SUPPORT",
+    );
+    expect(rows.map((row) => row.itemNo)).toEqual([bought]);
   });
 });
 

@@ -12,7 +12,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { useMasterDataCustomer } from "@/lib/api/generated/endpoints/master-data/master-data";
 import { formatDay } from "@/lib/format";
-import { KeyFacts, MaskedMoney, countryName } from "./pieces";
+import { customerFacts } from "./customerFacts";
+import { KeyFacts, MaskedMoney } from "./pieces";
 import { BackToList, RecordState } from "./RecordState";
 import { RecordTable, type RecordColumn } from "./RecordTable";
 
@@ -119,40 +120,7 @@ function CustomerRecord({ customer }: { customer: CustomerDetail }) {
           </Button>
         }
       />
-      <KeyFacts
-        facts={[
-          {
-            id: "country",
-            label: t("customer.country"),
-            value: countryName(customer.countryRegionCode),
-          },
-          {
-            id: "currency",
-            label: t("customer.currency"),
-            value: customer.currencyCode,
-          },
-          {
-            id: "terms",
-            label: t("customer.paymentTerms"),
-            value: customer.paymentTermsCode,
-          },
-          {
-            id: "group",
-            label: t("customer.priceGroup"),
-            value: customer.customerPriceGroup,
-          },
-          {
-            id: "limit",
-            label: t("customer.creditLimit"),
-            value: <MaskedMoney field={customer.creditLimitLcy} />,
-          },
-          {
-            id: "balance",
-            label: t("customer.balance"),
-            value: <MaskedMoney field={customer.balanceLcy} />,
-          },
-        ]}
-      />
+      <KeyFacts facts={customerFacts(customer, t)} />
       <SectionCard
         title={t("customer.open.title", { count: customer.openOrders.length })}
         description={t("customer.open.description")}

@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import type { PlacedField } from "./model.js";
 import { pageImage, textOrigins } from "./testing/pdf-reader.js";
-import { generated, type Generated } from "./testing/generated.js";
+import { generated, scanStem, type Generated } from "./testing/generated.js";
 
 let run: Generated;
 beforeAll(async () => {
@@ -63,7 +63,7 @@ describe("field positions", () => {
   });
 
   it("puts a scan's boxes around real ink in its image", async () => {
-    const stem = "po-table-so-0120-scanned";
+    const stem = scanStem();
     const truth = run.truth.get(stem);
     const image = await pageImage(run.pdf.get(stem) ?? new Uint8Array());
     if (!truth || !image) throw new Error("The scan is missing");

@@ -3,18 +3,22 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { PAGE } from "./canvas.js";
 import { renderDocument, type RenderedDocument } from "./render.js";
 import { STAMP_BASELINE, STAMP_TEXT } from "./stamp.js";
+import { boxedPo } from "./testing/generated.js";
+import { DEMO_FILES } from "./demo.js";
 import { readMetadata, textOrigins } from "./testing/pdf-reader.js";
 
 const dataset = createSyntheticDataset();
+const BOXED = boxedPo().orderNo;
+const SCAN = DEMO_FILES.find((f) => f.scanned)?.orderNo ?? "";
 
 describe("renderDocument", () => {
   let first: RenderedDocument;
   let again: RenderedDocument;
   beforeAll(async () => {
-    first = await renderDocument(dataset, "SO-0115", "CUSTOMER_PO");
+    first = await renderDocument(dataset, BOXED, "CUSTOMER_PO");
     again = await renderDocument(
       createSyntheticDataset(),
-      "SO-0115",
+      BOXED,
       "CUSTOMER_PO",
     );
   });
@@ -54,13 +58,15 @@ describe("renderDocument", () => {
   it("names the document and its order in the file's own metadata", async () => {
     const { PDFDocument } = await import("pdf-lib");
     const doc = await PDFDocument.load(first.bytes, { updateMetadata: false });
-    expect(doc.getTitle()).toBe("Customer purchase order PO-IN-4898");
+    expect(doc.getTitle()).toBe(
+      `Customer purchase order ${first.facts.number}`,
+    );
     expect(doc.getAuthor()).toBe("Synthetic demo data");
   });
 
   it("has a text layer, and a scan does not", async () => {
     expect((await textOrigins(first.bytes)).length).toBeGreaterThan(40);
-    const scan = await renderDocument(dataset, "SO-0120", "CUSTOMER_PO", {
+    const scan = await renderDocument(dataset, SCAN, "CUSTOMER_PO", {
       scanned: true,
     });
     expect(await textOrigins(scan.bytes)).toEqual([]);
@@ -68,7 +74,7 @@ describe("renderDocument", () => {
   });
 
   it("keeps the number, the kind and the order out of a scan's metadata", async () => {
-    const scan = await renderDocument(dataset, "SO-0120", "CUSTOMER_PO", {
+    const scan = await renderDocument(dataset, SCAN, "CUSTOMER_PO", {
       scanned: true,
     });
     const { PDFDocument } = await import("pdf-lib");
@@ -77,7 +83,7 @@ describe("renderDocument", () => {
       .join(" ")
       .toLowerCase();
     expect(metadata).toContain("synthetic demo data");
-    for (const given of [scan.facts.number, "SO-0120", "CUSTOMER_PO", "po-"]) {
+    for (const given of [scan.facts.number, SCAN, "CUSTOMER_PO", "po-"]) {
       expect(metadata).not.toContain(given.toLowerCase());
     }
     expect(doc.getAuthor()).toBe("Synthetic demo data");
@@ -85,7 +91,7 @@ describe("renderDocument", () => {
 
   it("refuses a scan of more than one page", async () => {
     await expect(
-      renderDocument(dataset, "SO-0115", "CUSTOMER_PO", { scanned: true }),
+      renderDocument(dataset, BOXED, "CUSTOMER_PO", { scanned: true }),
     ).rejects.toThrow("A scan is one page");
   });
 
@@ -94,7 +100,7 @@ describe("renderDocument", () => {
       renderDocument(dataset, "SO-9999", "CUSTOMER_PO"),
     ).rejects.toThrow("No order SO-9999");
     await expect(
-      renderDocument(dataset, "SO-0115", "AWB" as never),
+      renderDocument(dataset, BOXED, "AWB" as never),
     ).rejects.toThrow(RangeError);
   });
 

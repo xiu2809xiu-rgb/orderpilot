@@ -5,6 +5,7 @@ import { HttpResponse, http } from "msw";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import type { Permission, Role, SalesOrderDetail } from "@orderpilot/shared";
 import { Toaster } from "@/components/common";
+import { useToastStore } from "@/components/common/toast";
 import { useSessionStore } from "@/stores/session";
 import { errorBody, sessionFor } from "@/test/fixtures";
 import { server } from "@/test/server";
@@ -88,6 +89,7 @@ export interface Requests {
   voids: unknown[];
   itemReads: number;
   stockReads: number;
+  lastPriceReads: number;
 }
 
 export interface FakeApi {
@@ -95,6 +97,10 @@ export interface FakeApi {
   detail: () => SalesOrderDetail;
   /** What the available-stock read answers. */
   stock: () => string;
+  /** The last agreed price the customer paid for I-0001, or null for never. */
+  lastPrice: (customerNo: string) => string | null | Promise<string | null>;
+  /** The status the last-prices read answers with. */
+  lastPriceStatus: () => number;
   masked: boolean;
 }
 
@@ -106,6 +112,8 @@ export function fakeServer(over: Partial<FakeApi> = {}) {
   const api: FakeApi = {
     detail: () => draftDetail(),
     stock: () => "40.000",
+    lastPrice: () => "17.90",
+    lastPriceStatus: () => 200,
     masked: false,
     ...over,
   };
@@ -115,6 +123,7 @@ export function fakeServer(over: Partial<FakeApi> = {}) {
     voids: [],
     itemReads: 0,
     stockReads: 0,
+    lastPriceReads: 0,
   };
   server.use(
     http.get("*/api/v1/master-data/items", () => {
@@ -140,18 +149,53 @@ export function fakeServer(over: Partial<FakeApi> = {}) {
             countryRegionCode: "IN",
             currencyCode: "USD",
             paymentTermsCode: "PREPAID",
-            customerPriceGroup: "STD",
+            openOrders: 0,
+            overdueOrders: 0,
+          },
+          {
+            no: "C-0002",
+            name: "Marlowe Bay Supplies",
+            countryRegionCode: "LK",
+            currencyCode: "USD",
+            paymentTermsCode: "PREPAID",
             openOrders: 0,
             overdueOrders: 0,
           },
         ],
-        meta: { page: 1, pageSize: 10, total: 1, mock: true },
+        meta: { page: 1, pageSize: 10, total: 2, mock: true },
       }),
     ),
     http.get("*/api/v1/master-data/available-stock", () => {
       requests.stockReads += 1;
       return HttpResponse.json({
         data: [{ itemNo: "I-0001", availableStock: api.stock(), unit: "PCS" }],
+        meta: { mock: true },
+      });
+    }),
+    http.get("*/api/v1/master-data/customers/:no/last-prices", async (info) => {
+      requests.lastPriceReads += 1;
+      const status = api.lastPriceStatus();
+      if (status !== 200) {
+        return HttpResponse.json(errorBody("INTERNAL_ERROR"), { status });
+      }
+      const price = await api.lastPrice(String(info.params.no));
+      return HttpResponse.json({
+        data:
+          price === null
+            ? []
+            : [
+                {
+                  itemNo: "I-0001",
+                  price: {
+                    ...maskedPrice,
+                    masked: false,
+                    value: price,
+                    reason: null,
+                  },
+                  agreedOn: "2026-10-14",
+                  documentNo: "SO-0007",
+                },
+              ],
         meta: { mock: true },
       });
     }),
@@ -216,6 +260,10 @@ export function renderOrders(
     status: "active",
     session: { ...session, permissions: [...session.permissions, ...extra] },
   });
+  // The toast store outlives a test. Left alone, the toasts of the test before
+  // come back in this render's Toaster with a fresh six seconds to live, and a
+  // test that waits for its own toast finds theirs beside it.
+  useToastStore.setState({ items: [] });
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });

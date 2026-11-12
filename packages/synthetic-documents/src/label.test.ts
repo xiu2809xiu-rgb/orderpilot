@@ -3,7 +3,7 @@ import { PAGE } from "./canvas.js";
 import { DEMO_FILES } from "./demo.js";
 import { scanPages } from "./scan.js";
 import { stampOps, STAMP_BASELINE } from "./stamp.js";
-import { generated, type Generated } from "./testing/generated.js";
+import { generated, scanStem, type Generated } from "./testing/generated.js";
 import { pageImage, textOrigins } from "./testing/pdf-reader.js";
 
 let run: Generated;
@@ -42,7 +42,7 @@ describe("the synthetic label on every demo file", () => {
     const [bare, stamped, real] = await Promise.all([
       pageImage(empty.bytes),
       pageImage(labelled.bytes),
-      pageImage(bytesOf("po-table-so-0120-scanned")),
+      pageImage(bytesOf(scanStem())),
     ]);
     if (!bare || !stamped || !real) throw new Error("A scan has no image");
 

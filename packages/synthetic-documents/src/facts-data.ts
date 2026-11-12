@@ -30,9 +30,12 @@ export const CREDIT_DAYS: Readonly<Record<string, number>> = {
 export const CARTON: Readonly<
   Record<Item["category"], { pieces: number; kg: number }>
 > = {
-  IT: { pieces: 10, kg: 12 },
-  SURVEILLANCE: { pieces: 5, kg: 9.5 },
-  ACCESSORIES: { pieces: 50, kg: 8 },
+  COMPONENTS: { pieces: 20, kg: 6 },
+  PERIPHERALS: { pieces: 10, kg: 12 },
+  PCS: { pieces: 5, kg: 18 },
+  ENTERPRISE: { pieces: 2, kg: 22 },
+  SECURITY: { pieces: 5, kg: 9.5 },
+  NETWORKING: { pieces: 20, kg: 8 },
 };
 
 /**
