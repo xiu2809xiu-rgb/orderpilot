@@ -124,6 +124,7 @@ describe("the planted cases", () => {
     expect(Number(order.header.no.slice(3)) % 2).toBe(1);
     expect(document.type).toBe("AWB");
     expect(document.status).toBe("to-confirm");
+    expect(document.stage).toBe("draft");
     expect(document.consignee).not.toBe(order.shipTo.name);
     expect(document.notifyParty).toBe(order.shipTo.name);
     const a = document.consignee ?? "";

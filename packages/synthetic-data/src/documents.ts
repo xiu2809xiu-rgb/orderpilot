@@ -56,6 +56,7 @@ export function makeDocuments(
       source?: OrderDocument["source"];
       dueDate?: string;
       by?: string;
+      stage?: OrderDocument["stage"];
     } = {},
   ): void => {
     const id = factory.nextId();
@@ -72,6 +73,7 @@ export function makeDocuments(
       receivedAt: when ? atHour(when, 2 + (docs.length % 6)) : null,
       dueDate: extra.dueDate ?? null,
       confirmedBy: status === "confirmed" ? (extra.by ?? owners.support) : null,
+      ...(extra.stage ? { stage: extra.stage } : {}),
     });
   };
 
@@ -147,6 +149,7 @@ export function makeDocuments(
       confirmedBy: null,
       consignee: input.wrongConsignee.consignee,
       notifyParty: input.wrongConsignee.notifyParty,
+      stage: "draft",
     });
   }
 
@@ -160,6 +163,7 @@ export function makeDocuments(
       journey.done.shipped ?? journey.enteredOn,
       {
         by: owners.logistics,
+        stage: "final",
       },
     );
   }

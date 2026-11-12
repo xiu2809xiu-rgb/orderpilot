@@ -288,9 +288,21 @@ describe("the orders and their states", () => {
             fileName: doc.fileName,
             receivedAt: doc.receivedAt ?? `${doc.dueDate ?? AS_OF}T00:00:00Z`,
             source: doc.source,
+            ...(doc.stage ? { stage: doc.stage } : {}),
           }).success,
           doc.id,
         ).toBe(true);
+        // A stage is only for a shipping document that exists, never an expected one.
+        if (doc.stage) {
+          expect(["AWB", "BILL_OF_LADING"]).toContain(doc.type);
+          expect(doc.status).not.toBe("expected");
+        }
+        if (
+          (doc.type === "AWB" || doc.type === "BILL_OF_LADING") &&
+          doc.status === "confirmed"
+        ) {
+          expect(doc.stage, doc.id).toBe("final");
+        }
         if (doc.type === "PROFORMA_INVOICE") {
           expect(parseRecordNumber(doc.number ?? "")?.type).toBe("PI");
         }

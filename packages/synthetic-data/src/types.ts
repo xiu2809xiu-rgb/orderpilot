@@ -1,5 +1,6 @@
 import type {
   DecimalString,
+  DocumentStage,
   DocumentType,
   PaymentType,
   Role,
@@ -233,6 +234,8 @@ export interface OrderDocument {
   consignee?: string;
   /** On a shipping document: who the carrier notifies on arrival. */
   notifyParty?: string;
+  /** On an AWB or a bill of lading that exists: a draft to check, or the final one. */
+  stage?: DocumentStage;
 }
 
 /** Where an order stands in the day-by-day story the data tells. */
