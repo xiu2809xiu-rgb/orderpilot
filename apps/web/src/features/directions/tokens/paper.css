@@ -1,0 +1,126 @@
+/* Paper, "the ledger": light, airy and precise. Cards are ruled cells of a
+   sheet, never floating boxes, so there are no shadows. Light is the hero
+   scheme. */
+
+:root[data-direction="paper"] {
+  --background: #ffffff;
+  --canvas: #f7f7f8;
+  --foreground: #0a0a0b;
+  --card: #ffffff;
+  --card-foreground: #0a0a0b;
+  --popover: #ffffff;
+  --popover-foreground: #0a0a0b;
+  --primary: #002fa7;
+  --primary-foreground: #ffffff;
+  --secondary: #f7f7f8;
+  --secondary-foreground: #0a0a0b;
+  --muted: #f7f7f8;
+  --muted-foreground: #55555e;
+  --faint-foreground: #6e6e78;
+  --accent: #e9eefb;
+  --accent-foreground: #002fa7;
+  --destructive: #b3261e;
+  --destructive-foreground: #ffffff;
+  --destructive-surface: #fbe6e4;
+  --success: #0b6b3a;
+  --success-surface: #e3f4ea;
+  --warning: #8a5300;
+  --warning-surface: #fbf0dc;
+  --info: #1f5fa8;
+  --info-surface: #e4eef9;
+  --border: #e3e3e6;
+  --border-strong: #c9c9cf;
+  --input: #c9c9cf;
+  --ring: #002fa7;
+  --sidebar: #f7f7f8;
+  --sidebar-foreground: #55555e;
+  --sidebar-border: #e3e3e6;
+  --sidebar-accent: #e9eefb;
+  --sidebar-accent-foreground: #002fa7;
+
+  --panel: #ffffff;
+  --panel-strong: #ffffff;
+  --panel-filter: none;
+  --panel-border: #e3e3e6;
+  --ground-image: none;
+  --glow: none;
+  --shadow-card: none;
+  --shadow-pop: 0 0 0 1px #c9c9cf;
+
+  --radius: 4px;
+  --radius-control: 2px;
+  --radius-card: 2px;
+  --radius-pill: 2px;
+
+  --motion-fast: 150ms;
+  --motion-base: 200ms;
+  --motion-slow: 250ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --spring-stiffness: 300;
+  --spring-damping: 32;
+
+  /* Large figures sit on the grid lines as part of the composition. */
+  --numeral-font: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  --numeral-weight: 500;
+}
+
+:root[data-direction="paper"].dark {
+  --background: #0d0d0f;
+  --canvas: #131316;
+  --foreground: #f6f6f7;
+  --card: #0d0d0f;
+  --card-foreground: #f6f6f7;
+  --popover: #131316;
+  --popover-foreground: #f6f6f7;
+  --primary: #2f4fd0;
+  --primary-foreground: #ffffff;
+  --secondary: #131316;
+  --secondary-foreground: #f6f6f7;
+  --muted: #131316;
+  --muted-foreground: #a6a6b0;
+  --faint-foreground: #8a8a95;
+  --accent: rgb(143 168 255 / 0.14);
+  --accent-foreground: #8fa8ff;
+  --destructive: #ff8f86;
+  --destructive-foreground: #1a0604;
+  --destructive-surface: #301614;
+  --success: #6fd3a0;
+  --success-surface: #102a1e;
+  --warning: #f0b86a;
+  --warning-surface: #2a2112;
+  --info: #8fb8f5;
+  --info-surface: #12223a;
+  --border: #26262b;
+  --border-strong: #3a3a42;
+  --input: #3a3a42;
+  --ring: #8fa8ff;
+  --sidebar: #131316;
+  --sidebar-foreground: #a6a6b0;
+  --sidebar-border: #26262b;
+  --sidebar-accent: rgb(143 168 255 / 0.14);
+  --sidebar-accent-foreground: #8fa8ff;
+
+  --panel: #0d0d0f;
+  --panel-strong: #0d0d0f;
+  --panel-border: #26262b;
+  --shadow-pop: 0 0 0 1px #3a3a42;
+}
+
+/* Page change: the content slides in 24 px from the right, like a turned page. */
+@keyframes dx-paper-in {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+}
+@keyframes dx-paper-out {
+  to {
+    opacity: 0;
+  }
+}
+:root[data-direction="paper"] ::view-transition-old(.dx-paper-page) {
+  animation: dx-paper-out 150ms var(--ease-out) both;
+}
+:root[data-direction="paper"] ::view-transition-new(.dx-paper-page) {
+  animation: dx-paper-in 200ms var(--ease-out) both;
+}

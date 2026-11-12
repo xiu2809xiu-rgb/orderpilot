@@ -1,0 +1,148 @@
+/* Spectra, "the aurora": our own teal and navy. The gradient ground is the
+   surface feature and work happens on glass over it. Panels that carry a
+   table or a form use --panel-strong, which is opaque enough for 4.5:1 text
+   over any part of the mesh (tokens.test.ts measures it). Dark is the hero
+   scheme. */
+
+:root[data-direction="spectra"] {
+  /* Light scheme */
+  --background: #f2f9fa;
+  --foreground: #0b2239;
+  --card: rgb(255 255 255 / 0.86);
+  --card-foreground: #0b2239;
+  --popover: #ffffff;
+  --popover-foreground: #0b2239;
+  --primary: #0e7c86;
+  --primary-foreground: #ffffff;
+  --secondary: #f5fbfc;
+  --secondary-foreground: #0b2239;
+  --muted: #f5fbfc;
+  --muted-foreground: #3f5a6c;
+  --faint-foreground: #5e7686;
+  --accent: rgb(14 124 134 / 0.1);
+  --accent-foreground: #0b7480;
+  --destructive: #b3261e;
+  --destructive-foreground: #ffffff;
+  --destructive-surface: #fbe3e1;
+  --success: #0b6b45;
+  --success-surface: #d9f2e8;
+  --warning: #8a5a00;
+  --warning-surface: #fbefd0;
+  --info: #2f4fd0;
+  --info-surface: #e3e8ff;
+  --border: rgb(9 34 57 / 0.1);
+  --border-strong: rgb(9 34 57 / 0.22);
+  --input: #6f8a99;
+  --ring: #0e7c86;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #3f5a6c;
+  --sidebar-border: rgb(9 34 57 / 0.1);
+  --sidebar-accent: rgb(14 124 134 / 0.14);
+  --sidebar-accent-foreground: #0b2239;
+
+  --panel: rgb(255 255 255 / 0.82);
+  --panel-strong: rgb(255 255 255 / 0.92);
+  --panel-filter: blur(18px) saturate(140%);
+  --panel-border: rgb(9 34 57 / 0.1);
+  --ground-image:
+    radial-gradient(60% 50% at 6% 0%, rgb(14 124 134 / 0.1), transparent 70%),
+    radial-gradient(50% 45% at 100% 8%, rgb(56 160 230 / 0.08), transparent 70%);
+  --glow: 0 8px 28px rgb(14 124 134 / 0.18);
+  --shadow-card: 0 1px 2px rgb(9 34 57 / 0.06), 0 8px 24px rgb(9 34 57 / 0.06);
+  --shadow-pop: 0 12px 40px rgb(9 34 57 / 0.18);
+
+  --radius: 14px;
+  --radius-control: 12px;
+  --radius-card: 16px;
+  --radius-pill: 999px;
+
+  --motion-fast: 160ms;
+  --motion-base: 220ms;
+  --motion-slow: 250ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --spring-stiffness: 260;
+  --spring-damping: 28;
+
+  --numeral-font: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  --numeral-weight: 600;
+}
+
+:root[data-direction="spectra"].dark {
+  --background: #06162b;
+  --foreground: #f1fbfb;
+  --card: rgb(10 24 40 / 0.88);
+  --card-foreground: #f1fbfb;
+  --popover: #0a1c30;
+  --popover-foreground: #f1fbfb;
+  --primary: #2ee6d6;
+  --primary-foreground: #04121c;
+  --secondary: #0f2a3f;
+  --secondary-foreground: #f1fbfb;
+  --muted: #0f2a3f;
+  --muted-foreground: #b3ccd1;
+  --faint-foreground: #8faab2;
+  --accent: rgb(46 230 214 / 0.14);
+  --accent-foreground: #2ee6d6;
+  --destructive: #ff8e86;
+  --destructive-foreground: #2a0805;
+  --destructive-surface: #3d1a1d;
+  --success: #5ee6a8;
+  --success-surface: #0d3329;
+  --warning: #ffc85a;
+  --warning-surface: #3a2c0f;
+  --info: #9db0ff;
+  --info-surface: #1a2455;
+  --border: rgb(255 255 255 / 0.1);
+  --border-strong: rgb(255 255 255 / 0.2);
+  --input: #5f8a95;
+  --ring: #2ee6d6;
+  --sidebar: #0a1c30;
+  --sidebar-foreground: #b3ccd1;
+  --sidebar-border: rgb(255 255 255 / 0.1);
+  --sidebar-accent: rgb(46 230 214 / 0.18);
+  --sidebar-accent-foreground: #f1fbfb;
+
+  --panel: rgb(10 24 40 / 0.72);
+  --panel-strong: rgb(10 24 40 / 0.88);
+  --panel-border: rgb(255 255 255 / 0.1);
+  /* The mesh: navy, teal and a little cyan, with indigo at 15% or less. */
+  --ground-image:
+    radial-gradient(60% 50% at 6% 0%, rgb(14 124 134 / 0.5), transparent 70%),
+    radial-gradient(
+      50% 45% at 100% 100%,
+      rgb(46 230 214 / 0.2),
+      transparent 70%
+    ),
+    radial-gradient(45% 40% at 88% 4%, rgb(91 108 255 / 0.15), transparent 70%),
+    radial-gradient(70% 60% at 30% 100%, #0a2a43, transparent 70%);
+  --glow: 0 0 24px rgb(46 230 214 / 0.35);
+  --shadow-card:
+    0 0 0 1px rgb(255 255 255 / 0.06), 0 8px 24px rgb(0 0 0 / 0.25);
+  --shadow-pop: 0 12px 40px rgb(0 0 0 / 0.55), 0 0 0 1px rgb(255 255 255 / 0.1);
+}
+
+/* Cards are glass: they blur the mesh behind them. */
+:root[data-direction="spectra"] [data-slot="card"] {
+  backdrop-filter: var(--panel-filter);
+}
+
+/* Page change: the content scales up from 0.985 with a blur fade. */
+@keyframes dx-spectra-in {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+    filter: blur(6px);
+  }
+}
+@keyframes dx-spectra-out {
+  to {
+    opacity: 0;
+    filter: blur(4px);
+  }
+}
+:root[data-direction="spectra"] ::view-transition-old(.dx-spectra-page) {
+  animation: dx-spectra-out 140ms var(--ease-out) both;
+}
+:root[data-direction="spectra"] ::view-transition-new(.dx-spectra-page) {
+  animation: dx-spectra-in 220ms var(--ease-out) both;
+}
