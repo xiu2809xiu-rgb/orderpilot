@@ -38,12 +38,9 @@ export function loadFont(id: FontId): LoadedFont {
   return loaded;
 }
 
-/**
- * The glyphs of a string and where each one starts, in ems. Advances only: the
- * PDF writer places glyphs the same way (no kerning), so what is measured here
- * is what lands on the page.
- */
-export function layoutText(id: FontId, text: string) {
+const laid = new Map<string, ReturnType<typeof shape>>();
+
+function shape(id: FontId, text: string) {
   const { face } = loadFont(id);
   const { glyphs } = face.layout(text);
   let advance = 0;
@@ -53,6 +50,22 @@ export function layoutText(id: FontId, text: string) {
     return { glyph, at };
   });
   return { placed, advance };
+}
+
+/**
+ * The glyphs of a string and where each one starts, in ems. Advances only: the
+ * PDF writer places glyphs the same way (no kerning), so what is measured here
+ * is what lands on the page. Remembered, because a table repeats the same
+ * words and a text is measured again for its width and its ink.
+ */
+export function layoutText(id: FontId, text: string) {
+  const key = `${id}\u0000${text}`;
+  let found = laid.get(key);
+  if (!found) {
+    found = shape(id, text);
+    laid.set(key, found);
+  }
+  return found;
 }
 
 /** The width of a string in points. */
