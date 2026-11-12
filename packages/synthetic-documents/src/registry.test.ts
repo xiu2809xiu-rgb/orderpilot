@@ -130,8 +130,11 @@ describe("a subject", () => {
   });
 
   it("says so when a long order or a purchase order is not there", () => {
-    expect(() => resolve(ctx, { kind: "long-order", no: "LS-0001" })).toThrow(
-      "No long order LS-0001",
+    expect(() => resolve(ctx, { kind: "long-order", no: "LS-9999" })).toThrow(
+      "No long order LS-9999",
+    );
+    expect(resolve(ctx, { kind: "long-order", no: "LS-0001" }).order).toBe(
+      ctx.longOrders[0],
     );
     expect(() =>
       resolve(ctx, { kind: "purchase-order", poNo: "PO-9999" }),

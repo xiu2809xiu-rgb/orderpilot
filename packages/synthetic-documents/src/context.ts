@@ -9,6 +9,7 @@ import {
   type Vendor,
   type VendorBankAccount,
 } from "@orderpilot/synthetic-data";
+import { longOrders, longPurchaseOrders } from "./long-orders.js";
 import { find } from "./pinned.js";
 
 /** What every kind of document looks things up in, built once for a dataset. */
@@ -17,7 +18,7 @@ export interface RenderContext {
   dataset: SyntheticDataset;
   /** The same set on the fixed reference date, which dates and dated numbers come from. */
   pinned: SyntheticDataset;
-  /** Orders and purchase orders that live beside the dataset, never in it. The long-order story fills them. */
+  /** Orders and purchase orders that live beside the dataset, never in it: the long ones. */
   longOrders: readonly SampleOrder[];
   longPurchaseOrders: readonly PurchaseOrder[];
   item: (no: string) => Item;
@@ -45,8 +46,13 @@ export function contextFor(dataset: SyntheticDataset): RenderContext {
   const context: RenderContext = {
     dataset,
     pinned: syntheticDataset({ referenceDate: AS_OF }),
-    longOrders: [],
-    longPurchaseOrders: [],
+    // Built on first use: most documents never touch a long order.
+    get longOrders() {
+      return longOrders(dataset);
+    },
+    get longPurchaseOrders() {
+      return longPurchaseOrders(dataset);
+    },
     item: (no) => look(items, no, "item"),
     customer: (no) => look(customers, no, "customer"),
     vendor: (no) => look(vendors, no, "vendor"),
