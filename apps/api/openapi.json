@@ -3588,12 +3588,16 @@
                               "CUSTOMER_PO",
                               "PROFORMA_INVOICE",
                               "VENDOR_PI",
+                              "VENDOR_INVOICE",
                               "SALES_INVOICE",
+                              "CREDIT_NOTE",
                               "PACKING_LIST",
+                              "DELIVERY_ORDER",
                               "AWB",
                               "BILL_OF_LADING",
                               "IMPORT_PERMIT",
                               "PAYMENT_ADVICE",
+                              "SPR_FORM",
                               "OTHER"
                             ]
                           },
@@ -8146,12 +8150,16 @@
                                         "CUSTOMER_PO",
                                         "PROFORMA_INVOICE",
                                         "VENDOR_PI",
+                                        "VENDOR_INVOICE",
                                         "SALES_INVOICE",
+                                        "CREDIT_NOTE",
                                         "PACKING_LIST",
+                                        "DELIVERY_ORDER",
                                         "AWB",
                                         "BILL_OF_LADING",
                                         "IMPORT_PERMIT",
                                         "PAYMENT_ADVICE",
+                                        "SPR_FORM",
                                         "OTHER"
                                       ]
                                     },
