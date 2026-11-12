@@ -6,7 +6,7 @@
 
 ## Context
 
-`DOCUMENT_TYPES` in `packages/shared/src/order.ts` had ten values. The backlog for P-21 (`docs/agile/backlog.md`, criterion 6 of issue #36) names more kinds of document than that: a vendor's invoice, a delivery order, the SPR form that people print and upload, and a credit note. It also showed that an AWB and a bill of lading arrive twice, first as a draft from the forwarder and then as the final. A draft with the wrong consignee is one of the planted cases in the synthetic data (ADR 0051), and a check has to tell a draft from a final.
+`DOCUMENT_TYPES` in `packages/shared/src/order.ts` had ten values. The backlog for P-21 (`docs/agile/backlog.md`, criterion 6 of issue #36) names more kinds of document than that: a vendor's invoice, a delivery order, the SPR form that people print and upload, and a credit note. It also asks for a draft or final marker on the AWB and the bill of lading: the draft is the one that gets checked, before the final is issued. A draft with the wrong consignee is one of the planted cases in the synthetic data (ADR 0051), and a check has to tell a draft from a final.
 
 P-21 will draw these documents as real PDFs. Its first part is this contract change, so that the renderer and the data are built on a list that is already agreed and reviewed. The contract is read by areas 2, 3 and 4.
 
