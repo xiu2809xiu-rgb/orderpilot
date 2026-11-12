@@ -5,7 +5,7 @@ import { renderDocument, type RenderedDocument } from "./render.js";
 import { STAMP_BASELINE, STAMP_TEXT } from "./stamp.js";
 import { boxedPo } from "./testing/generated.js";
 import { DEMO_FILES } from "./demo.js";
-import { readMetadata, textOrigins } from "./testing/pdf-reader.js";
+import { pageImage, readMetadata, textOrigins } from "./testing/pdf-reader.js";
 
 const dataset = createSyntheticDataset();
 const BOXED = boxedPo().orderNo;
@@ -89,10 +89,14 @@ describe("renderDocument", () => {
     expect(doc.getAuthor()).toBe("Synthetic demo data");
   });
 
-  it("refuses a scan of more than one page", async () => {
-    await expect(
-      renderDocument(dataset, BOXED, "CUSTOMER_PO", { scanned: true }),
-    ).rejects.toThrow("A scan is one page");
+  it("scans every page of a two-page document, with no text on any", async () => {
+    const scan = await renderDocument(dataset, BOXED, "CUSTOMER_PO", {
+      scanned: true,
+    });
+    expect(scan.pageCount).toBe(2);
+    expect(await textOrigins(scan.bytes)).toEqual([]);
+    expect(await pageImage(scan.bytes, 1)).not.toBeNull();
+    expect(await pageImage(scan.bytes, 2)).not.toBeNull();
   });
 
   it("refuses an order or a kind it does not know", async () => {
@@ -100,7 +104,7 @@ describe("renderDocument", () => {
       renderDocument(dataset, "SO-9999", "CUSTOMER_PO"),
     ).rejects.toThrow("No order SO-9999");
     await expect(
-      renderDocument(dataset, BOXED, "AWB" as never),
+      renderDocument(dataset, BOXED, "NOT_A_KIND" as never),
     ).rejects.toThrow(RangeError);
   });
 

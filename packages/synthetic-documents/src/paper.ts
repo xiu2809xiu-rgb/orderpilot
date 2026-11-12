@@ -12,9 +12,14 @@ function grain(x: number, y: number, salt: number): number {
 
 const SPECK_CELL = 26;
 
-/** Grey paper, uneven light, grain, a copier streak and dust. Returns 8-bit pixels. */
-export function developed(raster: Raster): Uint8Array {
+/**
+ * Grey paper, uneven light, grain, a copier streak and dust. Returns 8-bit
+ * pixels. `sheet` counts the sheets of one scan from 0: each has its own grain
+ * and dust, and sheet 0 is the paper every single-page scan has always had.
+ */
+export function developed(raster: Raster, sheet = 0): Uint8Array {
   const { width: WIDTH, height: HEIGHT } = raster;
+  const salt = (n: number): number => n + 8 * sheet;
   const out = new Uint8Array(WIDTH * HEIGHT);
   const { value } = raster;
   for (let y = 0; y < HEIGHT; y++) {
@@ -29,7 +34,7 @@ export function developed(raster: Raster): Uint8Array {
       const dx = x / WIDTH - 0.45;
       const dy = y / HEIGHT - 0.5;
       const light = 0.85 - 0.16 * (dx * dx + dy * dy) - 0.04 * (x / WIDTH);
-      const noise = (grain(x, y, 1) + grain(x, y, 2) - 1) * 0.018;
+      const noise = (grain(x, y, salt(1)) + grain(x, y, salt(2)) - 1) * 0.018;
       const streak =
         x === Math.round(WIDTH * 0.83) || x === Math.round(WIDTH * 0.83) + 1
           ? -0.035
@@ -41,11 +46,11 @@ export function developed(raster: Raster): Uint8Array {
   }
   for (let cy = 0; cy < Math.ceil(HEIGHT / SPECK_CELL); cy++) {
     for (let cx = 0; cx < Math.ceil(WIDTH / SPECK_CELL); cx++) {
-      if (grain(cx, cy, 3) > 0.07) continue;
-      const px = cx * SPECK_CELL + grain(cx, cy, 4) * SPECK_CELL;
-      const py = cy * SPECK_CELL + grain(cx, cy, 5) * SPECK_CELL;
-      const radius = 0.7 + grain(cx, cy, 6) * 1.1;
-      const darkness = 0.35 + grain(cx, cy, 7) * 0.45;
+      if (grain(cx, cy, salt(3)) > 0.07) continue;
+      const px = cx * SPECK_CELL + grain(cx, cy, salt(4)) * SPECK_CELL;
+      const py = cy * SPECK_CELL + grain(cx, cy, salt(5)) * SPECK_CELL;
+      const radius = 0.7 + grain(cx, cy, salt(6)) * 1.1;
+      const darkness = 0.35 + grain(cx, cy, salt(7)) * 0.45;
       for (let y = Math.floor(py - 3); y <= Math.ceil(py + 3); y++) {
         for (let x = Math.floor(px - 3); x <= Math.ceil(px + 3); x++) {
           if (x < 0 || y < 0 || x >= WIDTH || y >= HEIGHT) continue;

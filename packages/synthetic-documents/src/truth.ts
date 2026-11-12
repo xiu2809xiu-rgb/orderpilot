@@ -13,6 +13,7 @@ import type { ExpectedFrom, PlanEntry } from "./plan/entry.js";
 import { linesOf, plantedOf } from "./truth-parts.js";
 import { definitionOf } from "./registry.js";
 import type { RenderedDocument } from "./render.js";
+import { tiltOf } from "./scan.js";
 
 export type ExpectedValue = ExpectedFrom;
 
@@ -107,10 +108,6 @@ export interface GroundTruth {
   };
 }
 
-// How far each page of a scan lies off square, in degrees. The scanner holds
-// the same numbers as sines and cosines, so no maths library can move a pixel.
-const TILT_DEGREES = [0.9, -0.5, 0.6, -0.3] as const;
-
 /**
  * The ground truth of one document: what it says, where, how sure Mock AI is,
  * what it is tied to and what is wrong with it on purpose. `plan` is the set
@@ -189,7 +186,7 @@ export function groundTruth(
           pages: rendered.pageCount,
           tiltDegrees: Array.from(
             { length: rendered.pageCount },
-            (_, i) => TILT_DEGREES[i % TILT_DEGREES.length] ?? 0,
+            (_, i) => tiltOf(i + 1).degrees,
           ),
         }
       : null,

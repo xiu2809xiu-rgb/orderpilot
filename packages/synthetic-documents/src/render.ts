@@ -124,7 +124,9 @@ export async function renderResolved(
     return {
       ...shared,
       bytes: scan.bytes,
-      fields: placeFields(canvas.fields, plan, (f) => scan.moveBox(f.box)),
+      fields: placeFields(canvas.fields, plan, (f) =>
+        scan.moveBox(f.box, f.page),
+      ),
     };
   }
   return {
