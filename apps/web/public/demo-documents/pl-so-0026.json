@@ -33,7 +33,8 @@
       ],
       "id": "packingListNumber",
       "confidence": 0.97,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "packingListDate",
@@ -51,7 +52,8 @@
       ],
       "id": "packingListDate",
       "confidence": 0.98,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "poNumber",
@@ -69,7 +71,8 @@
       ],
       "id": "poNumber",
       "confidence": 0.95,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "customerName",
@@ -87,7 +90,8 @@
       ],
       "id": "customerName",
       "confidence": 0.96,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "shipTo",
@@ -105,7 +109,8 @@
       ],
       "id": "shipTo",
       "confidence": 0.98,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.partNumber",
@@ -123,7 +128,8 @@
       ],
       "id": "lines.partNumber[0]",
       "confidence": 0.99,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.description",
@@ -141,7 +147,8 @@
       ],
       "id": "lines.description[0]",
       "confidence": 0.94,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.quantity",
@@ -159,7 +166,8 @@
       ],
       "id": "lines.quantity[0]",
       "confidence": 0.95,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.cartons",
@@ -177,7 +185,8 @@
       ],
       "id": "lines.cartons[0]",
       "confidence": 0.97,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.grossWeight",
@@ -195,7 +204,8 @@
       ],
       "id": "lines.grossWeight[0]",
       "confidence": 0.97,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.partNumber",
@@ -213,7 +223,8 @@
       ],
       "id": "lines.partNumber[1]",
       "confidence": 0.97,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.description",
@@ -231,7 +242,8 @@
       ],
       "id": "lines.description[1]",
       "confidence": 0.96,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.quantity",
@@ -249,7 +261,8 @@
       ],
       "id": "lines.quantity[1]",
       "confidence": 0.94,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.cartons",
@@ -267,7 +280,8 @@
       ],
       "id": "lines.cartons[1]",
       "confidence": 0.97,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.grossWeight",
@@ -285,7 +299,8 @@
       ],
       "id": "lines.grossWeight[1]",
       "confidence": 0.95,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "totalQuantity",
@@ -303,7 +318,8 @@
       ],
       "id": "totalQuantity",
       "confidence": 0.94,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "totalCartons",
@@ -321,7 +337,8 @@
       ],
       "id": "totalCartons",
       "confidence": 0.95,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "totalGrossWeight",
@@ -339,7 +356,63 @@
       ],
       "id": "totalGrossWeight",
       "confidence": 0.99,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     }
-  ]
+  ],
+  "schemaVersion": 2,
+  "stem": "pl-so-0026",
+  "kind": "PACKING_LIST",
+  "stage": null,
+  "issuer": "spectra",
+  "issuerName": "Spectra Demo Pte Ltd",
+  "direction": "outbound",
+  "scan": null,
+  "pages": [
+    {
+      "page": 1,
+      "width": 595.28,
+      "height": 841.89
+    }
+  ],
+  "links": {
+    "vendorNo": null,
+    "purchaseOrderNo": null,
+    "sprRecordNo": null,
+    "paymentReference": null,
+    "poNumber": "PO-AE-4275",
+    "bundle": null,
+    "related": []
+  },
+  "lines": [
+    {
+      "lineIndex": 0,
+      "page": 1,
+      "values": {
+        "partNumber": "KBZZ0123G",
+        "description": "Kioxia USB Flash Drive 64 GB",
+        "quantity": "20",
+        "cartons": "1",
+        "grossWeight": "6.0"
+      }
+    },
+    {
+      "lineIndex": 1,
+      "page": 1,
+      "values": {
+        "partNumber": "LSZZ0077EAUXXE",
+        "description": "Samsung Monitor 27-inch Pro",
+        "quantity": "12",
+        "cartons": "2",
+        "grossWeight": "24.0"
+      }
+    }
+  ],
+  "planted": [],
+  "counts": {
+    "fieldCount": 18,
+    "uncertainFieldCount": 0,
+    "plantedCount": 0,
+    "lineCount": 2
+  }
 }

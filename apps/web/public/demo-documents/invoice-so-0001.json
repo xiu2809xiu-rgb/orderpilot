@@ -33,7 +33,8 @@
       ],
       "id": "invoiceNumber",
       "confidence": 0.94,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "invoiceDate",
@@ -51,7 +52,8 @@
       ],
       "id": "invoiceDate",
       "confidence": 0.97,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "dueDate",
@@ -69,7 +71,8 @@
       ],
       "id": "dueDate",
       "confidence": 0.94,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "poNumber",
@@ -87,7 +90,8 @@
       ],
       "id": "poNumber",
       "confidence": 0.99,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "customerName",
@@ -105,7 +109,8 @@
       ],
       "id": "customerName",
       "confidence": 0.96,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "billTo",
@@ -123,7 +128,8 @@
       ],
       "id": "billTo",
       "confidence": 0.97,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "shipTo",
@@ -141,7 +147,8 @@
       ],
       "id": "shipTo",
       "confidence": 0.96,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "incoterms",
@@ -159,7 +166,8 @@
       ],
       "id": "incoterms",
       "confidence": 0.98,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "paymentTerms",
@@ -177,7 +185,8 @@
       ],
       "id": "paymentTerms",
       "confidence": 0.99,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "currency",
@@ -195,7 +204,8 @@
       ],
       "id": "currency",
       "confidence": 0.98,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.partNumber",
@@ -213,7 +223,8 @@
       ],
       "id": "lines.partNumber[0]",
       "confidence": 0.98,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.description",
@@ -231,7 +242,8 @@
       ],
       "id": "lines.description[0]",
       "confidence": 0.98,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.quantity",
@@ -249,7 +261,8 @@
       ],
       "id": "lines.quantity[0]",
       "confidence": 0.98,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.unitPrice",
@@ -267,7 +280,8 @@
       ],
       "id": "lines.unitPrice[0]",
       "confidence": 0.97,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.amount",
@@ -285,7 +299,8 @@
       ],
       "id": "lines.amount[0]",
       "confidence": 0.98,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.partNumber",
@@ -303,7 +318,8 @@
       ],
       "id": "lines.partNumber[1]",
       "confidence": 0.98,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.description",
@@ -321,7 +337,8 @@
       ],
       "id": "lines.description[1]",
       "confidence": 0.94,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.quantity",
@@ -339,7 +356,8 @@
       ],
       "id": "lines.quantity[1]",
       "confidence": 0.96,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.unitPrice",
@@ -357,7 +375,8 @@
       ],
       "id": "lines.unitPrice[1]",
       "confidence": 0.96,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.amount",
@@ -375,7 +394,8 @@
       ],
       "id": "lines.amount[1]",
       "confidence": 0.96,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.partNumber",
@@ -393,7 +413,8 @@
       ],
       "id": "lines.partNumber[2]",
       "confidence": 0.94,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.description",
@@ -411,7 +432,8 @@
       ],
       "id": "lines.description[2]",
       "confidence": 0.94,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.quantity",
@@ -429,7 +451,8 @@
       ],
       "id": "lines.quantity[2]",
       "confidence": 0.96,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.unitPrice",
@@ -447,7 +470,8 @@
       ],
       "id": "lines.unitPrice[2]",
       "confidence": 0.96,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.amount",
@@ -465,7 +489,8 @@
       ],
       "id": "lines.amount[2]",
       "confidence": 0.96,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "total",
@@ -483,7 +508,74 @@
       ],
       "id": "total",
       "confidence": 0.97,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     }
-  ]
+  ],
+  "schemaVersion": 2,
+  "stem": "invoice-so-0001",
+  "kind": "SALES_INVOICE",
+  "stage": null,
+  "issuer": "spectra",
+  "issuerName": "Spectra Demo Pte Ltd",
+  "direction": "outbound",
+  "scan": null,
+  "pages": [
+    {
+      "page": 1,
+      "width": 595.28,
+      "height": 841.89
+    }
+  ],
+  "links": {
+    "vendorNo": null,
+    "purchaseOrderNo": null,
+    "sprRecordNo": null,
+    "paymentReference": null,
+    "poNumber": "PO-LK-4100",
+    "bundle": null,
+    "related": []
+  },
+  "lines": [
+    {
+      "lineIndex": 0,
+      "page": 1,
+      "values": {
+        "partNumber": "4XZZ0035",
+        "description": "Lenovo Notebook 14-inch",
+        "quantity": "10",
+        "unitPrice": "377.43",
+        "amount": "3774.30"
+      }
+    },
+    {
+      "lineIndex": 1,
+      "page": 1,
+      "values": {
+        "partNumber": "210-ZZ0006",
+        "description": "Dell Monitor 24-inch Pro",
+        "quantity": "12",
+        "unitPrice": "138.94",
+        "amount": "1667.28"
+      }
+    },
+    {
+      "lineIndex": 2,
+      "page": 1,
+      "values": {
+        "partNumber": "VB-ZZ0146",
+        "description": "Verbatim USB Flash Drive 64 GB",
+        "quantity": "40",
+        "unitPrice": "8.98",
+        "amount": "359.20"
+      }
+    }
+  ],
+  "planted": [],
+  "counts": {
+    "fieldCount": 26,
+    "uncertainFieldCount": 0,
+    "plantedCount": 0,
+    "lineCount": 3
+  }
 }

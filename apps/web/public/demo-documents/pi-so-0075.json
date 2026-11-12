@@ -33,7 +33,8 @@
       ],
       "id": "piNumber",
       "confidence": 0.94,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "piDate",
@@ -51,7 +52,8 @@
       ],
       "id": "piDate",
       "confidence": 0.97,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "validUntil",
@@ -69,7 +71,8 @@
       ],
       "id": "validUntil",
       "confidence": 0.97,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "poNumber",
@@ -87,7 +90,8 @@
       ],
       "id": "poNumber",
       "confidence": 0.97,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "customerName",
@@ -105,7 +109,8 @@
       ],
       "id": "customerName",
       "confidence": 0.97,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "billTo",
@@ -123,7 +128,8 @@
       ],
       "id": "billTo",
       "confidence": 0.99,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "shipTo",
@@ -141,7 +147,8 @@
       ],
       "id": "shipTo",
       "confidence": 0.98,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "incoterms",
@@ -159,7 +166,8 @@
       ],
       "id": "incoterms",
       "confidence": 0.99,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "paymentTerms",
@@ -177,7 +185,8 @@
       ],
       "id": "paymentTerms",
       "confidence": 0.97,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "currency",
@@ -195,7 +204,8 @@
       ],
       "id": "currency",
       "confidence": 0.98,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.partNumber",
@@ -213,7 +223,8 @@
       ],
       "id": "lines.partNumber[0]",
       "confidence": 0.95,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.description",
@@ -231,7 +242,8 @@
       ],
       "id": "lines.description[0]",
       "confidence": 0.98,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.quantity",
@@ -249,7 +261,8 @@
       ],
       "id": "lines.quantity[0]",
       "confidence": 0.96,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.unitPrice",
@@ -267,7 +280,8 @@
       ],
       "id": "lines.unitPrice[0]",
       "confidence": 0.95,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.amount",
@@ -285,7 +299,8 @@
       ],
       "id": "lines.amount[0]",
       "confidence": 0.94,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.partNumber",
@@ -303,7 +318,8 @@
       ],
       "id": "lines.partNumber[1]",
       "confidence": 0.94,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.description",
@@ -321,7 +337,8 @@
       ],
       "id": "lines.description[1]",
       "confidence": 0.96,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.quantity",
@@ -339,7 +356,8 @@
       ],
       "id": "lines.quantity[1]",
       "confidence": 0.96,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.unitPrice",
@@ -357,7 +375,8 @@
       ],
       "id": "lines.unitPrice[1]",
       "confidence": 0.95,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.amount",
@@ -375,7 +394,8 @@
       ],
       "id": "lines.amount[1]",
       "confidence": 0.99,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "total",
@@ -393,7 +413,8 @@
       ],
       "id": "total",
       "confidence": 0.98,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "amountDue",
@@ -411,7 +432,8 @@
       ],
       "id": "amountDue",
       "confidence": 0.98,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "balanceDue",
@@ -429,7 +451,8 @@
       ],
       "id": "balanceDue",
       "confidence": 0.97,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "bankBeneficiary",
@@ -447,7 +470,8 @@
       ],
       "id": "bankBeneficiary",
       "confidence": 0.96,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "bankName",
@@ -465,7 +489,8 @@
       ],
       "id": "bankName",
       "confidence": 0.99,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "bankAccountNo",
@@ -483,7 +508,8 @@
       ],
       "id": "bankAccountNo",
       "confidence": 0.94,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "swiftCode",
@@ -501,7 +527,63 @@
       ],
       "id": "swiftCode",
       "confidence": 0.98,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     }
-  ]
+  ],
+  "schemaVersion": 2,
+  "stem": "pi-so-0075",
+  "kind": "PROFORMA_INVOICE",
+  "stage": null,
+  "issuer": "spectra",
+  "issuerName": "Spectra Demo Pte Ltd",
+  "direction": "outbound",
+  "scan": null,
+  "pages": [
+    {
+      "page": 1,
+      "width": 595.28,
+      "height": 841.89
+    }
+  ],
+  "links": {
+    "vendorNo": null,
+    "purchaseOrderNo": null,
+    "sprRecordNo": null,
+    "paymentReference": null,
+    "poNumber": "PO-PK-4618",
+    "bundle": null,
+    "related": []
+  },
+  "lines": [
+    {
+      "lineIndex": 0,
+      "page": 1,
+      "values": {
+        "partNumber": "JLZZ0250A",
+        "description": "Aruba SFP+ Transceiver",
+        "quantity": "167",
+        "unitPrice": "41.32",
+        "amount": "6900.44"
+      }
+    },
+    {
+      "lineIndex": 1,
+      "page": 1,
+      "values": {
+        "partNumber": "HDWZZ0109EZSTA",
+        "description": "Toshiba Internal Hard Drive 4 TB",
+        "quantity": "50",
+        "unitPrice": "117.64",
+        "amount": "5882.00"
+      }
+    }
+  ],
+  "planted": [],
+  "counts": {
+    "fieldCount": 27,
+    "uncertainFieldCount": 0,
+    "plantedCount": 0,
+    "lineCount": 2
+  }
 }

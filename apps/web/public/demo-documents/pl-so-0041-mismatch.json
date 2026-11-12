@@ -38,7 +38,8 @@
       ],
       "id": "packingListNumber",
       "confidence": 0.97,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "packingListDate",
@@ -56,7 +57,8 @@
       ],
       "id": "packingListDate",
       "confidence": 0.98,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "poNumber",
@@ -74,7 +76,8 @@
       ],
       "id": "poNumber",
       "confidence": 0.96,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "customerName",
@@ -92,7 +95,8 @@
       ],
       "id": "customerName",
       "confidence": 0.97,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "shipTo",
@@ -110,7 +114,8 @@
       ],
       "id": "shipTo",
       "confidence": 0.94,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.partNumber",
@@ -128,7 +133,8 @@
       ],
       "id": "lines.partNumber[0]",
       "confidence": 0.97,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.description",
@@ -146,7 +152,8 @@
       ],
       "id": "lines.description[0]",
       "confidence": 0.99,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.quantity",
@@ -164,7 +171,8 @@
       ],
       "id": "lines.quantity[0]",
       "confidence": 0.96,
-      "uncertain": false
+      "uncertain": false,
+      "planted": true
     },
     {
       "key": "lines.cartons",
@@ -182,7 +190,8 @@
       ],
       "id": "lines.cartons[0]",
       "confidence": 0.95,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.grossWeight",
@@ -200,7 +209,8 @@
       ],
       "id": "lines.grossWeight[0]",
       "confidence": 0.94,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.partNumber",
@@ -218,7 +228,8 @@
       ],
       "id": "lines.partNumber[1]",
       "confidence": 0.99,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.description",
@@ -236,7 +247,8 @@
       ],
       "id": "lines.description[1]",
       "confidence": 0.99,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.quantity",
@@ -254,7 +266,8 @@
       ],
       "id": "lines.quantity[1]",
       "confidence": 0.97,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.cartons",
@@ -272,7 +285,8 @@
       ],
       "id": "lines.cartons[1]",
       "confidence": 0.95,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.grossWeight",
@@ -290,7 +304,8 @@
       ],
       "id": "lines.grossWeight[1]",
       "confidence": 0.94,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.partNumber",
@@ -308,7 +323,8 @@
       ],
       "id": "lines.partNumber[2]",
       "confidence": 0.99,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.description",
@@ -326,7 +342,8 @@
       ],
       "id": "lines.description[2]",
       "confidence": 0.99,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.quantity",
@@ -344,7 +361,8 @@
       ],
       "id": "lines.quantity[2]",
       "confidence": 0.98,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.cartons",
@@ -362,7 +380,8 @@
       ],
       "id": "lines.cartons[2]",
       "confidence": 0.96,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.grossWeight",
@@ -380,7 +399,8 @@
       ],
       "id": "lines.grossWeight[2]",
       "confidence": 0.99,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "totalQuantity",
@@ -398,7 +418,8 @@
       ],
       "id": "totalQuantity",
       "confidence": 0.98,
-      "uncertain": false
+      "uncertain": false,
+      "planted": true
     },
     {
       "key": "totalCartons",
@@ -416,7 +437,8 @@
       ],
       "id": "totalCartons",
       "confidence": 0.96,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "totalGrossWeight",
@@ -434,7 +456,112 @@
       ],
       "id": "totalGrossWeight",
       "confidence": 0.94,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     }
-  ]
+  ],
+  "schemaVersion": 2,
+  "stem": "pl-so-0041-mismatch",
+  "kind": "PACKING_LIST",
+  "stage": null,
+  "issuer": "spectra",
+  "issuerName": "Spectra Demo Pte Ltd",
+  "direction": "outbound",
+  "scan": null,
+  "pages": [
+    {
+      "page": 1,
+      "width": 595.28,
+      "height": 841.89
+    }
+  ],
+  "links": {
+    "vendorNo": null,
+    "purchaseOrderNo": null,
+    "sprRecordNo": null,
+    "paymentReference": null,
+    "poNumber": "PO-BD-4380",
+    "bundle": null,
+    "related": [
+      {
+        "stem": "pl-so-0026",
+        "relation": "twin-of"
+      },
+      {
+        "stem": "po-table-so-0041",
+        "relation": "expected-from"
+      }
+    ]
+  },
+  "lines": [
+    {
+      "lineIndex": 0,
+      "page": 1,
+      "values": {
+        "partNumber": "TL-ZZ0217",
+        "description": "TP-Link Gigabit Switch 8-Port",
+        "quantity": "108",
+        "cartons": "6",
+        "grossWeight": "48.0"
+      }
+    },
+    {
+      "lineIndex": 1,
+      "page": 1,
+      "values": {
+        "partNumber": "DS-2CDZZ0185-I",
+        "description": "Hikvision NVR 32-Channel",
+        "quantity": "4",
+        "cartons": "1",
+        "grossWeight": "9.5"
+      }
+    },
+    {
+      "lineIndex": 2,
+      "page": 1,
+      "values": {
+        "partNumber": "TL-ZZ0230",
+        "description": "TP-Link Wireless Access Point Wi-Fi 6 Pro",
+        "quantity": "30",
+        "cartons": "2",
+        "grossWeight": "16.0"
+      }
+    }
+  ],
+  "planted": [
+    {
+      "id": "pl-so-0041-mismatch#quantity",
+      "kind": "quantity",
+      "primaryFieldId": "lines.quantity[0]",
+      "lineIndex": 0,
+      "values": [
+        {
+          "fieldId": "lines.quantity[0]",
+          "printed": "108",
+          "expected": "120",
+          "expectedFrom": {
+            "source": "document",
+            "stem": "po-table-so-0041",
+            "fieldId": "lines.quantity[0]"
+          }
+        },
+        {
+          "fieldId": "totalQuantity",
+          "printed": "142",
+          "expected": "154",
+          "expectedFrom": {
+            "source": "derived",
+            "fieldId": "lines.quantity[0]"
+          }
+        }
+      ],
+      "twin": "pl-so-0026"
+    }
+  ],
+  "counts": {
+    "fieldCount": 23,
+    "uncertainFieldCount": 0,
+    "plantedCount": 1,
+    "lineCount": 3
+  }
 }

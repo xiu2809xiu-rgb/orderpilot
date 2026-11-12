@@ -33,7 +33,8 @@
       ],
       "id": "customerName",
       "confidence": 0.94,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "poNumber",
@@ -51,7 +52,8 @@
       ],
       "id": "poNumber",
       "confidence": 0.94,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "poDate",
@@ -69,7 +71,8 @@
       ],
       "id": "poDate",
       "confidence": 0.97,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "requiredDate",
@@ -87,7 +90,8 @@
       ],
       "id": "requiredDate",
       "confidence": 0.99,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "buyerContact",
@@ -105,7 +109,8 @@
       ],
       "id": "buyerContact",
       "confidence": 0.95,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "billTo",
@@ -123,7 +128,8 @@
       ],
       "id": "billTo",
       "confidence": 0.99,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "shipTo",
@@ -141,7 +147,8 @@
       ],
       "id": "shipTo",
       "confidence": 0.79,
-      "uncertain": true
+      "uncertain": true,
+      "planted": false
     },
     {
       "key": "incoterms",
@@ -159,7 +166,8 @@
       ],
       "id": "incoterms",
       "confidence": 0.78,
-      "uncertain": true
+      "uncertain": true,
+      "planted": false
     },
     {
       "key": "paymentTerms",
@@ -177,7 +185,8 @@
       ],
       "id": "paymentTerms",
       "confidence": 0.82,
-      "uncertain": true
+      "uncertain": true,
+      "planted": false
     },
     {
       "key": "currency",
@@ -195,7 +204,8 @@
       ],
       "id": "currency",
       "confidence": 0.98,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.partNumber",
@@ -213,7 +223,8 @@
       ],
       "id": "lines.partNumber[0]",
       "confidence": 0.97,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.description",
@@ -231,7 +242,8 @@
       ],
       "id": "lines.description[0]",
       "confidence": 0.99,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.quantity",
@@ -249,7 +261,8 @@
       ],
       "id": "lines.quantity[0]",
       "confidence": 0.99,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "lines.unitPrice",
@@ -267,7 +280,8 @@
       ],
       "id": "lines.unitPrice[0]",
       "confidence": 0.73,
-      "uncertain": true
+      "uncertain": true,
+      "planted": false
     },
     {
       "key": "lines.amount",
@@ -285,7 +299,8 @@
       ],
       "id": "lines.amount[0]",
       "confidence": 0.97,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     },
     {
       "key": "total",
@@ -303,7 +318,52 @@
       ],
       "id": "total",
       "confidence": 0.98,
-      "uncertain": false
+      "uncertain": false,
+      "planted": false
     }
-  ]
+  ],
+  "schemaVersion": 2,
+  "stem": "po-branded-so-0101",
+  "kind": "CUSTOMER_PO",
+  "stage": null,
+  "issuer": "customer",
+  "issuerName": "Karakel Systems (Pvt) Ltd",
+  "direction": "inbound",
+  "scan": null,
+  "pages": [
+    {
+      "page": 1,
+      "width": 595.28,
+      "height": 841.89
+    }
+  ],
+  "links": {
+    "vendorNo": null,
+    "purchaseOrderNo": null,
+    "sprRecordNo": null,
+    "paymentReference": null,
+    "poNumber": "PO-PK-4800",
+    "bundle": null,
+    "related": []
+  },
+  "lines": [
+    {
+      "lineIndex": 0,
+      "page": 1,
+      "values": {
+        "partNumber": "MCZZ-0176-KKN1",
+        "description": "Cooler Master CPU Cooler Lite",
+        "quantity": "80",
+        "unitPrice": "53.81",
+        "amount": "4304.80"
+      }
+    }
+  ],
+  "planted": [],
+  "counts": {
+    "fieldCount": 16,
+    "uncertainFieldCount": 4,
+    "plantedCount": 0,
+    "lineCount": 1
+  }
 }

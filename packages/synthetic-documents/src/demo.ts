@@ -1,21 +1,22 @@
-import { CONFIDENCE_HIGH } from "@orderpilot/shared";
 import {
   AS_OF,
   createSyntheticDataset,
   type SampleOrder,
   type SyntheticDataset,
 } from "@orderpilot/synthetic-data";
-import { PAGE } from "./canvas.js";
 import { layoutForCustomer } from "./facts-data.js";
-import { renderDocument, type RenderedDocument } from "./render.js";
 import {
-  DEMO_LABEL,
   PO_LAYOUTS,
   type DocumentKind,
   type LayoutId,
-  type PlacedField,
   type PoLayout,
 } from "./model.js";
+import type { PlanEntry } from "./plan/entry.js";
+import { twelvePlan } from "./plan/twelve.js";
+import { renderSubject } from "./render.js";
+import { groundTruth, type GroundTruth } from "./truth.js";
+
+export type { GroundTruth } from "./truth.js";
 
 /** One of the twelve files the demo offers, and the order it is tied to. */
 export interface DemoFile {
@@ -333,73 +334,23 @@ export function pickDemoFiles(dataset: SyntheticDataset): DemoFile[] {
   ];
 }
 
-export interface GroundTruth {
-  label: typeof DEMO_LABEL;
-  file: string;
-  documentType: DocumentKind;
-  documentNumber: string;
-  layout: string;
-  /** "image" when the file has no text in it, so a reader can only see it. */
-  readable: "text" | "image";
-  orderNo: string;
-  customerNo: string;
-  purpose: string;
-  pageCount: number;
-  /** Page size in points: boxes are fractions of it, from the top-left corner. */
-  page: { width: number; height: number };
-  /** A field below this is uncertain. It is the shared constant, not a copy. */
-  confidenceThreshold: number;
-  uncertainFieldCount: number;
-  /** Set on the packing list that disagrees with its PO. */
-  mismatch: {
-    lineIndex: number;
-    partNumber: string;
-    ordered: string;
-    packed: string;
-  } | null;
-  fields: PlacedField[];
-}
-
-export function groundTruth(
-  file: DemoFile,
-  dataset: SyntheticDataset,
-  rendered: RenderedDocument,
-): GroundTruth {
-  const scenario = dataset.orders.find(
-    (o) => o.header.no === file.orderNo,
-  )?.scenario;
-  const line = rendered.facts.lines[0];
-  return {
-    label: DEMO_LABEL,
-    file: `${file.stem}.pdf`,
-    documentType: file.kind,
-    documentNumber: rendered.facts.number,
-    layout: rendered.layout,
-    readable: file.scanned ? "image" : "text",
-    orderNo: file.orderNo,
-    customerNo: rendered.facts.customerNo,
-    purpose: file.purpose,
-    pageCount: rendered.pageCount,
-    page: { width: PAGE.width, height: PAGE.height },
-    confidenceThreshold: CONFIDENCE_HIGH,
-    uncertainFieldCount: rendered.fields.filter((f) => f.uncertain).length,
-    mismatch:
-      file.kind === "PACKING_LIST" &&
-      scenario?.kind === "packing-list-mismatch" &&
-      line
-        ? {
-            lineIndex: 0,
-            partNumber: line.partNumber,
-            ordered: scenario.ordered,
-            packed: scenario.packed,
-          }
-        : null,
-    fields: rendered.fields,
-  };
-}
-
 /** The reference date the demo files are made on, whatever day it is now. */
 export const DEMO_REFERENCE_DATE = AS_OF;
+
+/** Renders one planned document and builds its ground truth. */
+export async function renderEntry(
+  entry: PlanEntry,
+  dataset: SyntheticDataset,
+  plan: readonly PlanEntry[],
+): Promise<{ pdf: Uint8Array; truth: GroundTruth }> {
+  const rendered = await renderSubject(dataset, entry.subject, entry.kind, {
+    scanned: entry.scanned,
+    stage: entry.stage,
+    mistake: entry.mistake,
+    signed: entry.signed,
+  });
+  return { pdf: rendered.bytes, truth: groundTruth(entry, rendered, plan) };
+}
 
 export async function renderDemoFile(
   file: DemoFile,
@@ -407,8 +358,8 @@ export async function renderDemoFile(
     referenceDate: DEMO_REFERENCE_DATE,
   }),
 ): Promise<{ pdf: Uint8Array; truth: GroundTruth }> {
-  const rendered = await renderDocument(dataset, file.orderNo, file.kind, {
-    scanned: file.scanned,
-  });
-  return { pdf: rendered.bytes, truth: groundTruth(file, dataset, rendered) };
+  const plan = twelvePlan(dataset, DEMO_FILES);
+  const entry = plan.find((e) => e.stem === file.stem);
+  if (!entry) throw new Error(`${file.stem} is not one of the demo files`);
+  return renderEntry(entry, dataset, plan);
 }

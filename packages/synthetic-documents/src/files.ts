@@ -1,11 +1,9 @@
 import { createSyntheticDataset } from "@orderpilot/synthetic-data";
-import {
-  DEMO_FILES,
-  DEMO_REFERENCE_DATE,
-  renderDemoFile,
-  type GroundTruth,
-} from "./demo.js";
+import { DEMO_FILES, DEMO_REFERENCE_DATE, renderEntry } from "./demo.js";
 import { DEMO_LABEL } from "./model.js";
+import { twelvePlan } from "./plan/twelve.js";
+import { definitionOf } from "./registry.js";
+import type { GroundTruth } from "./truth.js";
 
 export interface GeneratedFile {
   /** The path inside the demo folder. */
@@ -13,20 +11,13 @@ export interface GeneratedFile {
   bytes: Uint8Array;
 }
 
-const KIND_NAMES = {
-  CUSTOMER_PO: "Customer PO",
-  PROFORMA_INVOICE: "Proforma invoice",
-  PACKING_LIST: "Packing list",
-  SALES_INVOICE: "Commercial invoice",
-} as const;
-
 const text = (value: string): Uint8Array => new TextEncoder().encode(value);
 
 function readme(truths: readonly GroundTruth[]): string {
   const rows = truths.map((t) => {
     const look = t.readable === "image" ? `${t.layout} (scan)` : t.layout;
     const stem = t.file.replace(/\.pdf$/, "");
-    return `| \`${t.file}\` | ${KIND_NAMES[t.documentType]} ${t.documentNumber} | ${t.orderNo} | ${look} | ${String(t.uncertainFieldCount)} | ${t.purpose} (\`${stem}.json\`) |`;
+    return `| \`${t.file}\` | ${definitionOf(t.kind).name} ${t.documentNumber} | ${t.orderNo ?? "none"} | ${look} | ${String(t.uncertainFieldCount)} | ${t.purpose} (\`${stem}.json\`) |`;
   });
   return `# Demo documents
 
@@ -59,13 +50,14 @@ export async function generateDemoFiles(): Promise<GeneratedFile[]> {
   });
   const files: GeneratedFile[] = [];
   const truths: GroundTruth[] = [];
-  for (const demo of DEMO_FILES) {
-    const { pdf, truth } = await renderDemoFile(demo, dataset);
+  const plan = twelvePlan(dataset, DEMO_FILES);
+  for (const entry of plan) {
+    const { pdf, truth } = await renderEntry(entry, dataset, plan);
     truths.push(truth);
     files.push(
-      { name: `${demo.stem}.pdf`, bytes: pdf },
+      { name: `${entry.stem}.pdf`, bytes: pdf },
       {
-        name: `${demo.stem}.json`,
+        name: `${entry.stem}.json`,
         bytes: text(`${JSON.stringify(truth, null, 2)}\n`),
       },
     );

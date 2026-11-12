@@ -1,7 +1,8 @@
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-import { DEMO_FILES, type GroundTruth } from "../demo.js";
+import { DEMO_FILES } from "../demo.js";
 import { generateDemoFiles, type GeneratedFile } from "../files.js";
+import type { GroundTruth } from "../truth.js";
 
 export interface Generated {
   files: GeneratedFile[];
