@@ -1,4 +1,4 @@
-import type { DocumentKind } from "../model.js";
+import type { LegacyKind } from "../model.js";
 import { drawTable, type Column, type TableLook } from "../table.js";
 import { JADE, drawPaymentBox } from "./payment-box.js";
 import {
@@ -16,7 +16,7 @@ import {
   type DrawLayout,
 } from "./kit.js";
 
-const TITLES: Record<DocumentKind, string> = {
+const TITLES: Record<LegacyKind, string> = {
   CUSTOMER_PO: "PURCHASE ORDER",
   PROFORMA_INVOICE: "PROFORMA INVOICE",
   PACKING_LIST: "PACKING LIST",

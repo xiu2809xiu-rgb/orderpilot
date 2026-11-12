@@ -59,6 +59,8 @@ function lineFields(
     grossWeight: packed
       ? at("grossWeight", "Gross weight (kg)", line.grossKg)
       : null,
+    vendorItemNo: null,
+    netWeight: null,
   };
 }
 

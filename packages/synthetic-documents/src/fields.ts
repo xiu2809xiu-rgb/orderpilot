@@ -8,6 +8,9 @@ export interface LineFields {
   amount: FieldSpec | null;
   cartons: FieldSpec | null;
   grossWeight: FieldSpec | null;
+  /** Vendor documents only: no legacy kind has them. */
+  vendorItemNo: FieldSpec | null;
+  netWeight: FieldSpec | null;
 }
 
 /** Every field a document of this kind carries, built once and placed by the layout. */
@@ -62,6 +65,8 @@ export function allSpecs(fields: Fields): FieldSpec[] {
       line.amount,
       line.cartons,
       line.grossWeight,
+      line.vendorItemNo,
+      line.netWeight,
     ]),
     fields.total,
     fields.totalQuantity,

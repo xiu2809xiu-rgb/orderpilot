@@ -1,5 +1,4 @@
 import { isUncertain } from "@orderpilot/shared";
-import type { SyntheticDataset } from "@orderpilot/synthetic-data";
 import { PAGE } from "./canvas.js";
 import {
   fieldId,
@@ -7,48 +6,39 @@ import {
   type DocumentKind,
   type DraftField,
   type PlacedField,
+  type Stage,
 } from "./model.js";
 
 /**
- * The fields a reader is least sure of, most doubtful first. A PO whose task
- * says "Confirm the 3 uncertain fields" has the first three of these, so the
- * same task always names the same fields.
+ * The fields a reader is least sure of on a customer's PO, most doubtful
+ * first. A PO whose task says "Confirm the 3 uncertain fields" has the first
+ * three of these, so the same task always names the same fields.
  */
-const DOUBTFUL = [
+export const DOUBTFUL: readonly string[] = [
   "shipTo",
   "paymentTerms",
   "lines.unitPrice[0]",
   "incoterms",
-] as const;
+];
 
 const COUNT_IN_TITLE = /^Confirm the (\d+) uncertain fields$/;
 
 /**
- * The ids of the fields Mock AI is unsure of on this order's PO. The order's
- * own task says how many, so the documents can never disagree with the inbox.
- * Only a PO is read by Mock AI here. The other documents are made or checked
- * inside Spectra, so they carry no uncertain fields even where the set still
- * lists one as to confirm.
+ * How many of `DOUBTFUL` the order's review task names, or none when it has no
+ * such task. The task says how many, so the documents can never disagree with
+ * the inbox. Only a PO is read by Mock AI here: the other documents are made
+ * or checked inside Spectra.
  */
-export function uncertainIds(
-  dataset: SyntheticDataset,
+export function reviewCount(
   orderNo: string,
-  kind: DocumentKind,
-): ReadonlySet<string> {
-  if (kind !== "CUSTOMER_PO") return new Set();
-  const task = dataset.tasks.find(
-    (t) => t.orderNo === orderNo && t.kind === "REVIEW_FIELDS",
-  );
-  const count = COUNT_IN_TITLE.exec(task?.title ?? "")?.[1];
-  if (count) {
-    if (Number(count) > DOUBTFUL.length) {
-      throw new RangeError(
-        `Task for ${orderNo} names ${count} uncertain fields`,
-      );
-    }
-    return new Set(DOUBTFUL.slice(0, Number(count)));
+  taskTitle: string | undefined,
+): number {
+  const count = COUNT_IN_TITLE.exec(taskTitle ?? "")?.[1];
+  if (count === undefined) return 0;
+  if (Number(count) > DOUBTFUL.length) {
+    throw new RangeError(`Task for ${orderNo} names ${count} uncertain fields`);
   }
-  return new Set();
+  return Number(count);
 }
 
 /** FNV-1a over the parts, as a fraction in [0, 1). A pure function of its input: no seed, no state. */
@@ -63,15 +53,19 @@ function hashFraction(...parts: string[]): number {
 const hundredths = (n: number): number => Math.round(n * 100) / 100;
 
 export interface ConfidencePlan {
-  orderNo: string;
+  /** The record the document hangs on: an order number for the original four kinds. */
+  ref: string;
   kind: DocumentKind;
+  stage: Stage | null;
   uncertain: ReadonlySet<string>;
   /** A scan is read from pixels, so nothing on it is better than a guess. */
   scanned: boolean;
 }
 
 function confidenceOf(plan: ConfidencePlan, id: string): number {
-  const f = hashFraction(plan.orderNo, plan.kind, id);
+  // A null stage keeps the kind alone, so the files made before stages existed do not move.
+  const kind = plan.stage ? `${plan.kind}:${plan.stage}` : plan.kind;
+  const f = hashFraction(plan.ref, kind, id);
   if (plan.scanned) return hundredths(0.62 + f * 0.27);
   if (plan.uncertain.has(id)) return hundredths(0.55 + f * 0.31);
   return hundredths(0.935 + f * 0.06);

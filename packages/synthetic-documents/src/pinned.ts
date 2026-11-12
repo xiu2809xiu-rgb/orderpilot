@@ -4,7 +4,7 @@ import {
   syntheticDataset,
   type SampleOrder,
 } from "@orderpilot/synthetic-data";
-import type { DocumentKind } from "./model.js";
+import type { LegacyKind } from "./model.js";
 
 export function find<T>(
   list: readonly T[],
@@ -30,9 +30,9 @@ export function pinned(orderNo: string): SampleOrder {
   );
 }
 
-export function numberOf(order: SampleOrder, kind: DocumentKind): string {
+export function numberOf(order: SampleOrder, kind: LegacyKind): string {
   const suffix = order.header.no.slice(3);
-  const fallback: Record<DocumentKind, string> = {
+  const fallback: Record<LegacyKind, string> = {
     CUSTOMER_PO: order.header.externalDocumentNo,
     PROFORMA_INVOICE: `PI-${suffix}`,
     PACKING_LIST: `PL-${suffix}`,
@@ -46,7 +46,7 @@ export function numberOf(order: SampleOrder, kind: DocumentKind): string {
  * number of a PI carries that day, so the date printed beside it must be the
  * same day. A guess from the order date is only for an order that has none.
  */
-function madeOn(order: SampleOrder, kind: DocumentKind): string | null {
+function madeOn(order: SampleOrder, kind: LegacyKind): string | null {
   return (
     order.documents.find((d) => d.type === kind)?.receivedAt?.slice(0, 10) ??
     null
@@ -55,7 +55,7 @@ function madeOn(order: SampleOrder, kind: DocumentKind): string | null {
 
 export function datesOf(
   order: SampleOrder,
-  kind: DocumentKind,
+  kind: LegacyKind,
   creditDays: number,
 ): { issueDate: string; otherDate: string | null } {
   const ordered = order.header.orderDate;
