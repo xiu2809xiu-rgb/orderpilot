@@ -259,6 +259,22 @@ describe("document types and stages", () => {
   });
   it("keeps OTHER last and refuses an unknown type", () => {
     expect(DOCUMENT_TYPES.at(-1)).toBe("OTHER");
+    expect([...DOCUMENT_TYPES]).toEqual([
+      "CUSTOMER_PO",
+      "PROFORMA_INVOICE",
+      "VENDOR_PI",
+      "VENDOR_INVOICE",
+      "SALES_INVOICE",
+      "CREDIT_NOTE",
+      "PACKING_LIST",
+      "DELIVERY_ORDER",
+      "AWB",
+      "BILL_OF_LADING",
+      "IMPORT_PERMIT",
+      "PAYMENT_ADVICE",
+      "SPR_FORM",
+      "OTHER",
+    ]);
     expect(documentTypeSchema.safeParse("AWB_DRAFT").success).toBe(false);
     expect(
       documentRefSchema.safeParse({ ...ref, type: "RECEIPT" }).success,
@@ -282,15 +298,13 @@ describe("document types and stages", () => {
   it("refuses a stage on any other type, at the path stage", () => {
     expect(unstaged.length).toBe(DOCUMENT_TYPES.length - 2);
     for (const type of unstaged) {
-      const result = documentRefSchema.safeParse({
-        ...ref,
-        type,
-        stage: "draft",
-      });
-      expect(result.success).toBe(false);
-      expect(result.error?.issues.map((issue) => issue.path)).toEqual([
-        ["stage"],
-      ]);
+      for (const stage of DOCUMENT_STAGES) {
+        const result = documentRefSchema.safeParse({ ...ref, type, stage });
+        expect(result.success).toBe(false);
+        expect(result.error?.issues.map((issue) => issue.path)).toEqual([
+          ["stage"],
+        ]);
+      }
     }
   });
   it("refuses a stage outside the list", () => {

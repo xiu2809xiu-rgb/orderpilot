@@ -52,6 +52,8 @@ export function isStagedDocumentType(type: DocumentType): boolean {
   return (STAGED_DOCUMENT_TYPES as readonly string[]).includes(type);
 }
 
+// Holds a refinement, so .pick(), .omit() and .partial() throw on it. Use
+// .extend(), which keeps the rule.
 export const documentRefSchema = z
   .object({
     id: z.uuid(),

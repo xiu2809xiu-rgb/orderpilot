@@ -8,7 +8,8 @@ import { DOCUMENT_TYPES } from "../order.js";
  *
  * "SPR" is the request record's own settings. "SPR_FORM" (from DOCUMENT_TYPES)
  * is the form as a document, a PDF someone uploads or prints. They are two
- * entries on purpose. The newer document types have no default settings yet.
+ * entries on purpose. The newer document types have no default settings yet, so
+ * no row is seeded for them and a settings screen shows none until one is.
  */
 export const CONFIGURABLE_DOCUMENT_TYPES = ["SPR", ...DOCUMENT_TYPES] as const;
 export const configurableDocumentTypeSchema = z.enum(
