@@ -100,9 +100,12 @@ export function sellerBlock(
   });
 }
 
+/** The lowest y a page's content may reach: the stamp line sits just under it. */
+export const FLOOR = PAGE.height - 50;
+
 /** Throws when something was drawn below the printable area. */
 export function assertFits(y: number, what: string): void {
-  if (y > PAGE.height - 50) {
+  if (y > FLOOR) {
     throw new Error(
       `${what} does not fit on the page (reaches y=${y.toFixed(0)})`,
     );
