@@ -5,6 +5,9 @@
     "log": "Audit log"
   },
   "filters": {
+    "more": "More filters",
+    "moreInUse_one": "More filters ({{count}} in use)",
+    "moreInUse_other": "More filters ({{count}} in use)",
     "region": "Filter the audit log",
     "kind": "Actor type",
     "kinds": {

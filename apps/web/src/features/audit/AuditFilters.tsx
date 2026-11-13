@@ -1,7 +1,9 @@
 import { ROLES } from "@orderpilot/shared";
+import { ChevronDown, SlidersHorizontal } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { TableFilters } from "@/components/common";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { FilterId } from "./auditQuery";
@@ -57,7 +59,22 @@ function CommitInput({
   );
 }
 
-/** The audit log's own filters, shown in the table's toolbar. */
+const FIELDS: readonly FilterId[] = [
+  "kind",
+  "role",
+  "actor",
+  "action",
+  "entity",
+  "id",
+  "from",
+  "to",
+];
+
+/**
+ * The audit log's own filters, folded away until asked for, so the trail itself
+ * is the first thing on the page. They open by themselves when one is in use,
+ * for example from a link.
+ */
 export function AuditFilters({
   filters,
   setFilter,
@@ -71,6 +88,9 @@ export function AuditFilters({
     const value = filters[id];
     return typeof value === "string" ? value : "";
   };
+  const inUse = FIELDS.filter((id) => text(id) !== "").length;
+  const [open, setOpen] = useState(inUse > 0);
+  const shown = open || inUse > 0;
   const text_input = (
     id: FilterId,
     label: string,
@@ -87,56 +107,85 @@ export function AuditFilters({
     />
   );
   return (
-    <fieldset className="grid w-full grid-cols-1 gap-s2 sm:grid-cols-2 lg:grid-cols-4">
-      <legend className="sr-only">{t("filters.region")}</legend>
-      <div className="space-y-1">
-        <Label htmlFor="audit-filter-kind">{t("filters.kind")}</Label>
-        <select
-          id="audit-filter-kind"
-          className={SELECT}
-          value={text("kind")}
-          onChange={(event) => {
-            setFilter("kind", event.target.value || undefined);
-          }}
+    <div className="w-full space-y-s2">
+      <Button
+        variant="ghost"
+        size="sm"
+        aria-expanded={shown}
+        aria-controls="audit-more-filters"
+        onClick={() => {
+          setOpen(!shown);
+        }}
+      >
+        <SlidersHorizontal aria-hidden="true" />
+        {inUse > 0
+          ? t("filters.moreInUse", { count: inUse })
+          : t("filters.more")}
+        <ChevronDown
+          aria-hidden="true"
+          className={
+            shown
+              ? "rotate-180 motion-safe:transition-transform"
+              : "motion-safe:transition-transform"
+          }
+        />
+      </Button>
+      {shown ? (
+        <fieldset
+          id="audit-more-filters"
+          className="grid w-full grid-cols-1 gap-s2 sm:grid-cols-2 lg:grid-cols-4"
         >
-          <option value="">{t("filters.kinds.any")}</option>
-          {(["user", "system", "ai"] as const).map((kind) => (
-            <option key={kind} value={kind}>
-              {t(`filters.kinds.${kind}`)}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="space-y-1">
-        <Label htmlFor="audit-filter-role">{t("filters.role")}</Label>
-        <select
-          id="audit-filter-role"
-          className={SELECT}
-          value={text("role")}
-          onChange={(event) => {
-            setFilter("role", event.target.value || undefined);
-          }}
-        >
-          <option value="">{t("filters.anyRole")}</option>
-          {ROLES.map((role) => (
-            <option key={role} value={role}>
-              {tc(`roles.${role}`)}
-            </option>
-          ))}
-        </select>
-      </div>
-      {text_input("actor", t("filters.actor"), {
-        placeholder: t("filters.actorHint"),
-      })}
-      {text_input("action", t("filters.action"), {
-        placeholder: t("filters.actionHint"),
-      })}
-      {text_input("entity", t("filters.entity"), {
-        placeholder: t("filters.entityHint"),
-      })}
-      {text_input("id", t("filters.entityId"))}
-      {text_input("from", t("filters.from"), { type: "date" })}
-      {text_input("to", t("filters.to"), { type: "date" })}
-    </fieldset>
+          <legend className="sr-only">{t("filters.region")}</legend>
+          <div className="space-y-1">
+            <Label htmlFor="audit-filter-kind">{t("filters.kind")}</Label>
+            <select
+              id="audit-filter-kind"
+              className={SELECT}
+              value={text("kind")}
+              onChange={(event) => {
+                setFilter("kind", event.target.value || undefined);
+              }}
+            >
+              <option value="">{t("filters.kinds.any")}</option>
+              {(["user", "system", "ai"] as const).map((kind) => (
+                <option key={kind} value={kind}>
+                  {t(`filters.kinds.${kind}`)}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="audit-filter-role">{t("filters.role")}</Label>
+            <select
+              id="audit-filter-role"
+              className={SELECT}
+              value={text("role")}
+              onChange={(event) => {
+                setFilter("role", event.target.value || undefined);
+              }}
+            >
+              <option value="">{t("filters.anyRole")}</option>
+              {ROLES.map((role) => (
+                <option key={role} value={role}>
+                  {tc(`roles.${role}`)}
+                </option>
+              ))}
+            </select>
+          </div>
+          {text_input("actor", t("filters.actor"), {
+            placeholder: t("filters.actorHint"),
+          })}
+          {text_input("action", t("filters.action"), {
+            placeholder: t("filters.actionHint"),
+          })}
+          {text_input("entity", t("filters.entity"), {
+            placeholder: t("filters.entityHint"),
+          })}
+          {text_input("id", t("filters.entityId"))}
+          {text_input("from", t("filters.from"), { type: "date" })}
+          {text_input("to", t("filters.to"), { type: "date" })}
+        </fieldset>
+      ) : null}
+    </div>
   );
 }

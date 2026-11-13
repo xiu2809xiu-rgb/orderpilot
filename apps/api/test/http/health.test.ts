@@ -1,6 +1,8 @@
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { ReadinessRegistry } from "../../src/health/readiness-registry.js";
+import { checkStatusResponseSchema } from "../../src/system/system.schemas.js";
+import { call, demoSignIn } from "../support/auth.js";
 import { createTestApp, type TestApp } from "../support/test-app.js";
 
 interface CheckBody {
@@ -175,5 +177,30 @@ describe("readiness when a service is unreachable", () => {
   it("keeps liveness up: a dead database never restarts the process", async () => {
     const res = await request(t.app.getHttpServer()).get("/health/live");
     expect(res.status).toBe(200);
+  });
+});
+
+describe("GET /api/v1/system/checks/status (the admin's health card)", () => {
+  let t: TestApp;
+  beforeAll(async () => {
+    t = await createTestApp();
+  });
+  afterAll(async () => {
+    await t.close();
+  });
+  const path = "/api/v1/system/checks/status";
+
+  it("runs every check for the system admin, each up, with its time", async () => {
+    const res = await call(t, await demoSignIn(t, "SYSTEM_ADMIN"), "get", path);
+    expect(res.status).toBe(200);
+    const checks = checkStatusResponseSchema.parse(res.body).data;
+    expect(checks.map((c) => c.name)).toEqual(["database", "redis", "storage"]);
+    expect(checks.every((c) => c.status === "up")).toBe(true);
+  });
+
+  it("is refused to a role that does not manage settings, and to nobody signed in", async () => {
+    const support = await call(t, await demoSignIn(t, "SUPPORT"), "get", path);
+    expect(support.status).toBe(403);
+    expect((await call(t, null, "get", path)).status).toBe(401);
   });
 });

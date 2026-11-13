@@ -216,8 +216,8 @@ export class WorkflowsService {
     return this.config.list();
   }
 
-  /** What stays open until Spectra confirms it, with today's draft values. */
-  async openRules(): Promise<OpenRule[]> {
-    return mockOpenRules(await this.approvals.approverFor("PRODUCT_MANAGER"));
+  /** What Spectra settled on 5 Nov, and the drafts that wait for its answer. */
+  openRules(): Promise<OpenRule[]> {
+    return Promise.resolve(mockOpenRules());
   }
 }

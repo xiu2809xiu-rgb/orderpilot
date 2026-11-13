@@ -33,7 +33,7 @@ export default defineFeature({
     {
       id: "aiUse",
       roles: ["SYSTEM_ADMIN"],
-      to: "/monitoring",
+      to: "/monitoring?tab=aiUsage",
       api: "/monitoring/ai-usage",
     },
   ],

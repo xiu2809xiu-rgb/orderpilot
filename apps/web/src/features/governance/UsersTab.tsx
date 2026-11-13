@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Users } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router";
 import {
@@ -12,6 +13,7 @@ import {
   toast,
   StatusBadge,
 } from "@/components/common";
+import { SearchBox } from "@/components/common/data-table/SearchBox";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -43,6 +45,7 @@ export function UsersTab() {
   const canRead = hasPermission(session, "users.read");
   const canManage = hasPermission(session, "users.manage");
   const [params, setParams] = useSearchParams();
+  const [search, setSearch] = useState("");
   const activeOnly = params.get("active") === "true";
   const users = useUsersList(
     { pageSize: 100, ...(activeOnly ? { active: "true" as const } : {}) },
@@ -67,11 +70,26 @@ export function UsersTab() {
       <RefusalPanel error={users.error} onRetry={() => void users.refetch()} />
     );
   }
-  const rows = users.data.data;
+  const needle = search.trim().toLowerCase();
+  // A short list of people, so it is searched here rather than on the server.
+  const rows = users.data.data.filter(
+    (user) =>
+      needle === "" ||
+      [user.displayName, user.email, tc(`roles.${user.role}`)].some((text) =>
+        text.toLowerCase().includes(needle),
+      ),
+  );
+  const me = session?.user.id;
 
   return (
     <SectionCard title={t("users.title")} description={t("users.description")}>
       <div className="space-y-s2">
+        <SearchBox
+          value={search}
+          onSearch={setSearch}
+          debounceMs={0}
+          label={t("users.search")}
+        />
         <FilterChips
           chips={chips}
           filters={activeOnly ? { active: true } : {}}
@@ -87,7 +105,13 @@ export function UsersTab() {
           }}
         />
         {change.error ? <RefusalPanel error={change.error} /> : null}
-        {rows.length === 0 ? (
+        {rows.length === 0 && needle !== "" ? (
+          <EmptyState
+            icon={Users}
+            title={t("users.noMatchTitle")}
+            description={t("users.noMatchDescription", { search })}
+          />
+        ) : rows.length === 0 ? (
           <EmptyState
             icon={Users}
             title={t("users.emptyTitle")}
@@ -130,7 +154,12 @@ export function UsersTab() {
                           userId={user.id}
                           name={user.displayName}
                         />
-                        {canManage ? (
+                        {user.id === me ? (
+                          // The server refuses to disable your own account, so no button offers it.
+                          <span className="px-2 text-xs text-muted-foreground">
+                            {t("users.you")}
+                          </span>
+                        ) : canManage ? (
                           <Button
                             variant="outline"
                             size="xs"

@@ -17,7 +17,7 @@ type Permission = MatrixRead200Data["permissions"][number];
 type Scope = MatrixRead200Data["roles"][number]["dataScope"];
 
 const ROW_HEAD =
-  "sticky left-0 z-10 w-56 min-w-56 bg-card font-normal whitespace-normal";
+  "sticky left-0 z-10 w-48 min-w-48 bg-card font-normal whitespace-normal";
 const SCOPES: readonly Scope[] = ["all", "brands", "own"];
 
 interface MatrixTableProps {
@@ -42,7 +42,10 @@ export function MatrixTable({
   const { t: tc } = useTranslation();
   return (
     <div className="space-y-s1">
-      <p className="text-xs text-muted-foreground">{t("matrix.scrollHint")}</p>
+      {/* All nine roles fit from about 1400 px; below that the table scrolls, and says so. */}
+      <p className="text-xs text-muted-foreground min-[1400px]:hidden">
+        {t("matrix.scrollHint")}
+      </p>
       <ScrollRegion label={t("matrix.tableLabel")}>
         <Table aria-label={t("matrix.tableLabel")}>
           <TableHeader>
@@ -51,7 +54,12 @@ export function MatrixTable({
                 {t("matrix.permission")}
               </TableHead>
               {matrix.roles.map(({ role }) => (
-                <TableHead key={role} scope="col" className="text-center">
+                <TableHead
+                  key={role}
+                  scope="col"
+                  // Narrow, wrapping headers, so all nine roles fit beside the permissions on a laptop.
+                  className="w-24 min-w-20 text-center text-xs leading-tight whitespace-normal"
+                >
                   {tc(`roles.${role}`)}
                 </TableHead>
               ))}
@@ -78,7 +86,7 @@ export function MatrixTable({
                     role: tc(`roles.${access.role}`),
                   });
                   return (
-                    <TableCell key={access.role} className="text-center">
+                    <TableCell key={access.role} className="px-1 text-center">
                       <span className="inline-flex items-center gap-1">
                         <Switch
                           checked={granted}
@@ -117,9 +125,9 @@ export function MatrixTable({
                   </span>
                 </TableHead>
                 {matrix.roles.map(({ role, dataScope }) => (
-                  <TableCell key={role} className="text-center">
+                  <TableCell key={role} className="px-1 text-center">
                     <select
-                      className="h-8 rounded-md border border-input bg-background px-2 text-sm disabled:opacity-50"
+                      className="h-8 w-full max-w-24 rounded-md border border-input bg-background px-1 text-xs disabled:opacity-50"
                       value={dataScope}
                       disabled={!canManage || busy}
                       aria-label={`${t("matrix.dataScope")}: ${tc(`roles.${role}`)}`}

@@ -11,6 +11,7 @@ import { HomeFlows } from "./home/HomeFlows";
 import { HomeTiles } from "./home/HomeTiles";
 import { NeedsYou } from "./home/NeedsYou";
 import { QuickActions } from "./home/QuickActions";
+import { SystemHealth } from "./home/SystemHealth";
 
 const KpiTrends = lazy(() => import("@/features/insights/KpiTrends"));
 
@@ -41,7 +42,13 @@ export function RoleHomePage() {
         <div className="min-w-0">
           <NeedsYou session={session} />
         </div>
-        <QuickActions session={session} />
+        {/* The admin's menu already holds its four places, so health earns the column. */}
+        {role === "SYSTEM_ADMIN" &&
+        hasPermission(session, "settings.manage") ? (
+          <SystemHealth />
+        ) : (
+          <QuickActions session={session} />
+        )}
       </div>
       {role === "MANAGEMENT" && hasPermission(session, "insights.read") ? (
         <Suspense fallback={<SectionCardSkeleton lines={4} />}>
