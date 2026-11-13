@@ -1,5 +1,4 @@
 import { useState, type ReactNode } from "react";
-import type { Direction } from "../directions";
 import type { ScreenId } from "../screens";
 import { CrumbProvider } from "./pageCrumb";
 import { MobileMenu } from "./MobileMenu";
@@ -15,11 +14,9 @@ import "./shell.css";
  * the bar fill the window and never scroll with the content.
  */
 export function Shell({
-  direction,
   screen,
   children,
 }: {
-  direction: Direction;
   screen: ScreenId;
   children: ReactNode;
 }) {
@@ -34,21 +31,15 @@ export function Shell({
             className="dx-side dx-side-box hidden shrink-0 md:block"
             data-collapsed={collapsed}
           >
-            <SidePanel
-              direction={direction}
-              screen={screen}
-              collapsed={collapsed}
-            />
+            <SidePanel screen={screen} collapsed={collapsed} />
           </aside>
           <MobileMenu
-            direction={direction}
             screen={screen}
             open={menuOpen}
             onOpenChange={setMenuOpen}
           />
           <div className="flex min-w-0 flex-1 flex-col">
             <TopBar
-              direction={direction}
               screen={screen}
               collapsed={collapsed}
               onToggleCollapsed={toggleCollapsed}

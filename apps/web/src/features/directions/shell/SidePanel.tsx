@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import { featureNamespaces } from "@/features/nav";
 import { cn } from "@/lib/utils";
 import { useSessionStore } from "@/stores/session";
-import type { Direction } from "../directions";
 import { PARENT_SCREEN, type ScreenId } from "../screens";
 import { Brand } from "./Brand";
 import { PanelEntryRow } from "./PanelEntryRow";
@@ -12,7 +11,6 @@ import { panelMenu } from "./menu";
 import { useScrollEdges } from "./useScrollEdges";
 
 interface SidePanelProps {
-  direction: Direction;
   screen: ScreenId;
   /** The 64 px rail: icons with tooltips. Never set inside the sheet. */
   collapsed: boolean;
@@ -24,12 +22,7 @@ interface SidePanelProps {
  * what people are doing, and Spark, settings, help and the signed-in person at
  * the bottom. Only the middle scrolls, and only when the groups do not fit.
  */
-export function SidePanel({
-  direction,
-  screen,
-  collapsed,
-  onNavigate,
-}: SidePanelProps) {
+export function SidePanel({ screen, collapsed, onNavigate }: SidePanelProps) {
   const { t } = useTranslation(["directions", "common", ...featureNamespaces]);
   const session = useSessionStore((state) => state.session);
   const groups = panelMenu(session);
@@ -74,7 +67,6 @@ export function SidePanel({
                     <li key={entry.id}>
                       <PanelEntryRow
                         entry={entry}
-                        direction={direction}
                         current={
                           entry.screen === screen ||
                           (entry.screen !== undefined &&

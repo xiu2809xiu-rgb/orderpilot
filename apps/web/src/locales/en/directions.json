@@ -1,18 +1,6 @@
 {
   "preview": {
-    "tag": "Design preview",
-    "bar": "Design preview controls",
-    "note": "Synthetic demo data",
-    "direction": "Direction",
-    "scheme": "Colour scheme",
-    "screen": "Screen",
-    "light": "Light",
-    "dark": "Dark"
-  },
-  "directions": {
-    "ink": "Ink",
-    "paper": "Paper",
-    "spectra": "Spectra"
+    "tag": "Design preview: not a real page yet"
   },
   "screens": {
     "signin": {

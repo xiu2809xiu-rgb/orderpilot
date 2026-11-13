@@ -34,7 +34,7 @@ export function AddStage({
         ) : null}
         <div className="flex flex-wrap items-center justify-end gap-3">
           {ready === 0 ? (
-            <p className="fs-13 text-muted-foreground" role="status">
+            <p className="fs-14 text-muted-foreground" role="status">
               {t("startNeeds")}
             </p>
           ) : null}

@@ -70,7 +70,7 @@ export function PanelFoot({ collapsed }: { collapsed: boolean }) {
             <TooltipTrigger asChild>
               <div>{person}</div>
             </TooltipTrigger>
-            <TooltipContent side="right" className="fs-13">
+            <TooltipContent side="right" className="fs-14">
               {t("panel.person", { name: user.displayName, role })}
             </TooltipContent>
           </Tooltip>

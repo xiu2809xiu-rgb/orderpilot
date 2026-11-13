@@ -15,7 +15,7 @@ const MOTION = [
 ] as const;
 const NAMES = [...RADII, ...MOTION].map(([, token]) => token);
 
-/** Radius, the 4 px spacing base and the motion durations of the direction. */
+/** Radius, the 4 px spacing base and the motion durations of the design. */
 export function ShapeSection() {
   const { t } = useTranslation("directions-kit");
   const tokens = useTokens(NAMES);
@@ -23,7 +23,7 @@ export function ShapeSection() {
     <Section title={t("sections.shape")}>
       <div className="grid gap-5 sm:grid-cols-3">
         <div>
-          <h3 className="fs-13 font-medium">{t("shape.radius")}</h3>
+          <h3 className="fs-14 font-medium">{t("shape.radius")}</h3>
           <ul className="mt-2 space-y-2">
             {RADII.map(([id, token]) => (
               <li key={id} className="flex items-center gap-3">
@@ -34,7 +34,7 @@ export function ShapeSection() {
                     borderRadius: `var(--${token})`,
                   }}
                 />
-                <span className="fs-13">
+                <span className="fs-14">
                   {t(`shape.${id}`)}{" "}
                   <span className="numeral text-muted-foreground">
                     {tokens[token]}
@@ -45,7 +45,7 @@ export function ShapeSection() {
           </ul>
         </div>
         <div>
-          <h3 className="fs-13 font-medium">{t("shape.spacing")}</h3>
+          <h3 className="fs-14 font-medium">{t("shape.spacing")}</h3>
           <ul className="mt-2 space-y-1.5">
             {STEPS.map((px) => (
               <li key={px} className="flex items-center gap-3">
@@ -62,10 +62,10 @@ export function ShapeSection() {
           </ul>
         </div>
         <div>
-          <h3 className="fs-13 font-medium">{t("shape.motion")}</h3>
+          <h3 className="fs-14 font-medium">{t("shape.motion")}</h3>
           <ul className="mt-2 space-y-2">
             {MOTION.map(([id, token]) => (
-              <li key={id} className="fs-13 flex justify-between gap-3">
+              <li key={id} className="fs-14 flex justify-between gap-3">
                 <span>{t(`shape.${id}`)}</span>
                 <span className="numeral text-muted-foreground">
                   {t("shape.ms", {

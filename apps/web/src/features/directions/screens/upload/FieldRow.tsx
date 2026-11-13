@@ -78,7 +78,7 @@ export function FieldRow({
             {value}
           </span>
         </span>
-        <span className="numeral fs-13 flex shrink-0 items-center gap-1 text-muted-foreground">
+        <span className="numeral fs-14 flex shrink-0 items-center gap-1 text-muted-foreground">
           <span className="sr-only">
             {t("review.confidence", { percent })}
             {", "}
@@ -119,7 +119,7 @@ export function FieldRow({
       ) : null}
       {editing ? (
         <div className="flex flex-col gap-1.5">
-          <label htmlFor={editId} className="fs-13 font-medium">
+          <label htmlFor={editId} className="fs-14 font-medium">
             {t("review.editLabel", { label: field.label })}
           </label>
           <Input

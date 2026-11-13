@@ -133,7 +133,7 @@ export function ReuiSection() {
                   size={24}
                   label={t(`demo.files.${key}`)}
                 />
-                <span className="fs-13 text-foreground">{name}</span>
+                <span className="fs-14 text-foreground">{name}</span>
               </li>
             ))}
           </ul>

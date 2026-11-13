@@ -4,7 +4,6 @@ import { AnimatedList } from "../AnimatedList";
 import { BlurFade } from "../BlurFade";
 import { BorderBeam } from "../BorderBeam";
 import { CircularProgress } from "../CircularProgress";
-import { GridPattern } from "../GridPattern";
 import { NumberTicker } from "../NumberTicker";
 import { ShineBorder } from "../ShineBorder";
 import { ShinyText } from "../ShinyText";
@@ -16,7 +15,7 @@ export function MagicUiSection() {
   const row = (key: string) => (
     <span
       key={key}
-      className="fs-13 block border border-border bg-card px-3 py-1.5 text-left text-foreground"
+      className="fs-14 block border border-border bg-card px-3 py-1.5 text-left text-foreground"
       style={{ borderRadius: "var(--radius-control)" }}
     >
       {t(`demo.rows.${key}`)}
@@ -30,8 +29,8 @@ export function MagicUiSection() {
     >
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <ItemCard item="numberTicker" vendor="magic">
-          <NumberTicker value={120} className="fs-44 text-foreground" />
-          <span className="fs-13 text-muted-foreground">
+          <NumberTicker value={120} className="fs-32 text-foreground" />
+          <span className="fs-14 text-muted-foreground">
             {t("demo.ordersInDataSet")}
           </span>
         </ItemCard>
@@ -81,16 +80,9 @@ export function MagicUiSection() {
           >
             <span className="fs-20">6/9</span>
           </CircularProgress>
-          <span className="fs-13 text-muted-foreground">
+          <span className="fs-14 text-muted-foreground">
             {t("demo.stepsOfNine")}
           </span>
-        </ItemCard>
-        <ItemCard
-          item="gridPattern"
-          vendor="magic"
-          className="sm:col-span-2 xl:col-span-2"
-        >
-          <GridPattern cell={24} />
         </ItemCard>
       </div>
     </Section>

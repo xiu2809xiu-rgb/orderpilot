@@ -1,10 +1,8 @@
 import { Minus, TrendingDown, TrendingUp, type LucideIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
-import { useDirection } from "../frame/useDirection";
 import { GradientText } from "../kit/GradientText";
 import { NumberTicker } from "../kit/NumberTicker";
-import { SplitFlap } from "../kit/SplitFlap";
 import { SpotlightCard } from "../kit/SpotlightCard";
 import "./parts.css";
 
@@ -41,8 +39,7 @@ const group = (value: number, decimals: number): string =>
 
 /**
  * One measure: a label, a figure that counts up once when first seen, and a
- * small trend in words. The figure takes the direction's numeral style: split
- * flaps in Ink, a large ruled numeral in Paper, gradient type in Spectra. The
+ * small trend in words. The figure is gradient type. The
  * tile is a card the pointer can light. With no figure it says so, and shows
  * no number.
  */
@@ -55,7 +52,6 @@ export function KpiTile({
   className,
 }: KpiTileProps) {
   const { t } = useTranslation("directions-parts");
-  const direction = useDirection();
   const TrendIcon = trend ? TREND_ICON[trend.direction] : null;
   const ticker =
     value === null ? null : (
@@ -70,23 +66,14 @@ export function KpiTile({
       intensity={0.1}
       className={cn("dx-card kpi flex flex-col gap-2 p-4", className)}
     >
-      <p className="fs-13 text-muted-foreground">{label}</p>
-      <p
-        className={cn(
-          "flex flex-wrap items-baseline gap-x-2",
-          direction === "paper" ? "fs-44" : "fs-28",
-        )}
-      >
+      <p className="fs-14 text-muted-foreground">{label}</p>
+      <p className="fs-28 flex flex-wrap items-baseline gap-x-2">
         {value === null ? (
           <span className="fs-14 text-muted-foreground">
             {t("kpi.noFigure")}
           </span>
-        ) : direction === "ink" ? (
-          <SplitFlap value={group(value, decimals)} />
-        ) : direction === "spectra" ? (
-          <GradientText>{ticker}</GradientText>
         ) : (
-          ticker
+          <GradientText>{ticker}</GradientText>
         )}
         {value !== null && unit ? (
           <span className="fs-14 font-normal text-muted-foreground">
@@ -97,7 +84,7 @@ export function KpiTile({
       {trend && TrendIcon ? (
         <p
           className={cn(
-            "fs-13 flex items-center gap-1.5",
+            "fs-14 flex items-center gap-1.5",
             trend.good === undefined && "text-muted-foreground",
             trend.good === true && "text-success",
             trend.good === false && "text-destructive",

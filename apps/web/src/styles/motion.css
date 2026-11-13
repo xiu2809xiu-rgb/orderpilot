@@ -1,0 +1,67 @@
+/* Page changes and the loading line. A page change scales the content up from
+   0.985 with a blur fade; under reduced motion it is instant. */
+
+@keyframes dx-page-in {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+    filter: blur(6px);
+  }
+}
+@keyframes dx-page-out {
+  to {
+    opacity: 0;
+    filter: blur(4px);
+  }
+}
+::view-transition-old(.dx-page) {
+  animation: dx-page-out 140ms var(--ease-out) both;
+}
+::view-transition-new(.dx-page) {
+  animation: dx-page-in 220ms var(--ease-out) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+/* The progress line for a slow load. It is invisible until it has run for
+   400 ms, so a fast load never shows it. */
+@keyframes dx-appear {
+  to {
+    opacity: 1;
+  }
+}
+@keyframes dx-run {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+.dx-progress {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 2px;
+  overflow: hidden;
+  opacity: 0;
+  animation: dx-appear 120ms linear 400ms forwards;
+}
+.dx-progress > i {
+  display: block;
+  height: 100%;
+  width: 40%;
+  background: var(--ring);
+  animation: dx-run 1.1s var(--ease-out) 400ms infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dx-progress > i {
+    animation: none;
+  }
+}

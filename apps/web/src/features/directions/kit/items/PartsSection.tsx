@@ -72,7 +72,7 @@ export function PartsSection() {
           scroll
           className="lg:col-span-3"
         >
-          <p className="fs-13 text-muted-foreground">
+          <p className="fs-14 text-muted-foreground">
             {t("parts.demo.journeyFull")}
           </p>
           <JourneyRail
@@ -96,7 +96,7 @@ export function PartsSection() {
           note={t("parts.follows")}
           align="start"
         >
-          <p className="fs-13 text-muted-foreground">
+          <p className="fs-14 text-muted-foreground">
             {t("parts.demo.journeyVertical")}
           </p>
           <JourneyRail
@@ -113,7 +113,7 @@ export function PartsSection() {
               note={t("parts.follows")}
               align="start"
             >
-              <p className="fs-13 text-muted-foreground">
+              <p className="fs-14 text-muted-foreground">
                 {t("parts.demo.journeyRow")}
               </p>
               <div className="flex flex-col gap-3">
@@ -141,12 +141,7 @@ export function PartsSection() {
           </div>
           <ItemCard
             name={t("parts.names.kpiTile")}
-            note={built(
-              "numberTicker",
-              "splitFlap",
-              "gradientText",
-              "spotlightCard",
-            )}
+            note={built("numberTicker", "gradientText", "spotlightCard")}
             align="start"
           >
             <div className="grid w-full gap-3 sm:grid-cols-3">

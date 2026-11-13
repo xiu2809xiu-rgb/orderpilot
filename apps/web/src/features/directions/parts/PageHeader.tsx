@@ -3,9 +3,7 @@ import { formatLongDay } from "@/lib/format";
 
 /**
  * The head of every screen: its title, today's date as the line of context, and
- * a short intro. Ink sets the title over a rule with the date in mono, Paper
- * puts the date in the margin and the title at 44 px, Spectra makes the title
- * gradient text. The markup is the same in all three.
+ * a short intro. The title is gradient text.
  */
 export function PageHeader({
   title,

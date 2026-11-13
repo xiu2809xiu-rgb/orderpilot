@@ -72,7 +72,7 @@ function link(gl: WebGL2RenderingContext) {
 /**
  * The WebGL2 orb: a glowing ring that swirls, with a light that orbits it.
  * Spark uses it where WebGPU is missing. It reads its colours from the caller
- * (the direction's tokens), clamps the pixel ratio to 2, stops while it is off
+ * (the design tokens), clamps the pixel ratio to 2, stops while it is off
  * screen or the tab is hidden, and under reduced motion draws one frame. The
  * pointer effects of the original (hover reach, click pulse) are left out: the
  * orb is a status light, not a toy. It never throws: with no WebGL2 it calls

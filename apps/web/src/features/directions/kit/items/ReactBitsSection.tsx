@@ -6,7 +6,6 @@ import { GlassSurface } from "../GlassSurface";
 import { GradientText } from "../GradientText";
 import { HoldButton } from "../HoldButton";
 import { LatticeLoader } from "../LatticeLoader";
-import { SplitFlap } from "../SplitFlap";
 import { SpotlightCard } from "../SpotlightCard";
 import { StatusMark } from "../StatusMark";
 import { ThoughtLine } from "../ThoughtLine";
@@ -26,11 +25,8 @@ export function ReactBitsSection() {
       intro={t("vendors.bits.intro")}
     >
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <ItemCard item="splitFlap" vendor="bits">
-          <SplitFlap value="120" className="fs-44 text-foreground" />
-        </ItemCard>
         <ItemCard item="gradientText" vendor="bits">
-          <GradientText className="fs-44 font-semibold" glow={0.4}>
+          <GradientText className="fs-32 font-semibold" glow={0.4}>
             {t("demo.insights")}
           </GradientText>
         </ItemCard>
@@ -98,7 +94,7 @@ export function ReactBitsSection() {
           >
             {t("demo.hold.label")}
           </HoldButton>
-          <span id={hint} className="fs-13 text-muted-foreground">
+          <span id={hint} className="fs-14 text-muted-foreground">
             {approved ? t("demo.hold.done") : t("demo.hold.hint")}
           </span>
         </ItemCard>

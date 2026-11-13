@@ -57,7 +57,7 @@ export default function UploadScreen() {
   return (
     <div className="dx-sheet py-6">
       <PageHeader title={t("title")} intro={t("intro")} />
-      <p className="fs-13 mb-6 flex items-start gap-2 text-muted-foreground">
+      <p className="fs-14 mb-6 flex items-start gap-2 text-muted-foreground">
         <Info aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
         {t("preview")}
       </p>

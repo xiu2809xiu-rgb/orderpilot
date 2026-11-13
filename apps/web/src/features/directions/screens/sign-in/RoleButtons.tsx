@@ -49,10 +49,10 @@ export function RoleButtons() {
         <h2 id="dx-roles-title" className="fs-14 font-semibold">
           {t("signin.roles.title")}
         </h2>
-        <p className="fs-13 text-muted-foreground">{t("signin.roles.hint")}</p>
+        <p className="fs-14 text-muted-foreground">{t("signin.roles.hint")}</p>
       </div>
       {options.isError ? (
-        <p role="alert" className="fs-13 text-destructive">
+        <p role="alert" className="fs-14 text-destructive">
           {t("signin.roles.failed")}
         </p>
       ) : roles.length === 0 ? (
@@ -90,7 +90,7 @@ export function RoleButtons() {
                 )}
                 style={{ borderRadius: "var(--radius-control)" }}
               >
-                <span className="fs-13 flex w-full items-start gap-1.5 font-medium">
+                <span className="fs-14 flex w-full items-start gap-1.5 font-medium">
                   {on ? (
                     <Check
                       className="mt-px size-4 shrink-0"

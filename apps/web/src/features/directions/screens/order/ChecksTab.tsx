@@ -27,7 +27,7 @@ function Result({ check }: { check: CheckResult }) {
         </StatusChip>
         <h3 className="fs-14 font-medium text-foreground">{check.ruleLabel}</h3>
       </div>
-      <dl className="od-check-facts fs-13">
+      <dl className="od-check-facts fs-14">
         <div>
           <dt className="text-muted-foreground">
             {t("detail.checks.expected")}
@@ -49,7 +49,7 @@ function Result({ check }: { check: CheckResult }) {
         </div>
       </dl>
       {check.evidence.length > 0 ? (
-        <p className="fs-13 text-muted-foreground">
+        <p className="fs-14 text-muted-foreground">
           {t("detail.checks.evidence")}:{" "}
           {check.evidence
             .map(
@@ -107,7 +107,7 @@ function Matches({ matches }: { matches: readonly MasterMatch[] }) {
                   </StatusChip>
                 )}
               </TableCell>
-              <TableCell className="fs-13 text-muted-foreground">
+              <TableCell className="fs-14 text-muted-foreground">
                 {match.possibleMatches.length === 0
                   ? t("detail.matches.none")
                   : match.possibleMatches

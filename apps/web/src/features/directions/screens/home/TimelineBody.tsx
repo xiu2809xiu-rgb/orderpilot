@@ -39,7 +39,7 @@ function OrderLine({ task }: { task: WorkflowTask }) {
 function Group({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div className="flex flex-col gap-3">
-      <h3 className="fs-13 font-semibold text-foreground">{title}</h3>
+      <h3 className="fs-14 font-semibold text-foreground">{title}</h3>
       {children}
     </div>
   );
@@ -50,7 +50,7 @@ export function DoneGroup({ done }: { done: readonly DoneItem[] }) {
   return (
     <Group title={t("timeline.done.title")}>
       {done.length === 0 ? (
-        <p className="fs-13 max-w-prose text-muted-foreground">
+        <p className="fs-14 max-w-prose text-muted-foreground">
           {t("timeline.done.empty")}
         </p>
       ) : (
@@ -168,7 +168,7 @@ export function NextGroup({ entries }: { entries: readonly TimelineEntry[] }) {
   return (
     <Group title={t("timeline.next.title")}>
       {entries.length === 0 ? (
-        <p className="fs-13 max-w-prose text-muted-foreground">
+        <p className="fs-14 max-w-prose text-muted-foreground">
           {t("timeline.next.empty")}
         </p>
       ) : (

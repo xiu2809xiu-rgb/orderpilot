@@ -60,7 +60,7 @@ export function FileRow({
           </div>
         ) : null}
         {row.status === "ready" ? (
-          <p className="fs-13 flex items-center gap-1.5 text-success">
+          <p className="fs-14 flex items-center gap-1.5 text-success">
             <CircleCheck aria-hidden="true" className="size-3.5" />
             {t("files.ready")}
             <span className="text-muted-foreground">
@@ -71,7 +71,7 @@ export function FileRow({
         {refused ? (
           <p
             role="alert"
-            className="fs-13 flex items-start gap-1.5 text-destructive"
+            className="fs-14 flex items-start gap-1.5 text-destructive"
           >
             <TriangleAlert
               aria-hidden="true"

@@ -1,4 +1,4 @@
-/** Colour maths for the direction tokens: the token test and the kit sheet share it. */
+/** Colour maths for the design tokens: the token test and the kit sheet share it. */
 
 export interface Rgba {
   r: number;

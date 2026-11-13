@@ -14,7 +14,7 @@ export function ControlsSection() {
   const noteId = useId();
   return (
     <Section title={t("sections.controls")} work>
-      <h3 className="fs-13 font-medium">{t("controls.buttons")}</h3>
+      <h3 className="fs-14 font-medium">{t("controls.buttons")}</h3>
       <div className="mt-2 flex flex-wrap items-center gap-2">
         <Button>
           <Plus aria-hidden="true" />
@@ -34,10 +34,10 @@ export function ControlsSection() {
         </Button>
         <Button disabled>{t("controls.disabled")}</Button>
       </div>
-      <h3 className="fs-13 mt-5 font-medium">{t("controls.fields")}</h3>
+      <h3 className="fs-14 mt-5 font-medium">{t("controls.fields")}</h3>
       <div className="mt-2 grid gap-4 sm:grid-cols-2">
         <div className="space-y-1.5">
-          <Label htmlFor={poId} className="fs-13">
+          <Label htmlFor={poId} className="fs-14">
             {t("controls.labelPo")}
           </Label>
           <Input
@@ -51,7 +51,7 @@ export function ControlsSection() {
           </p>
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor={shipId} className="fs-13">
+          <Label htmlFor={shipId} className="fs-14">
             {t("controls.labelShip")}
           </Label>
           <Input
@@ -71,7 +71,7 @@ export function ControlsSection() {
           </p>
         </div>
         <div className="space-y-1.5 sm:col-span-2">
-          <Label htmlFor={noteId} className="fs-13">
+          <Label htmlFor={noteId} className="fs-14">
             {t("controls.labelNote")}
             <span className="font-normal text-muted-foreground">
               {t("controls.optional")}

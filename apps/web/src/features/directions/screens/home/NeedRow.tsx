@@ -3,14 +3,12 @@ import { ArrowRight, Check } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
-import type { Direction } from "../../directions";
 import { DueTimer } from "../../parts/DueTimer";
 import { orderHref } from "./homeLinks";
 import { canComplete } from "./useCompleteTask";
 
 interface NeedRowProps {
   task: WorkflowTask;
-  direction: Direction;
   busy: boolean;
   onComplete: () => void;
 }
@@ -20,7 +18,7 @@ interface NeedRowProps {
  * long until it is due, and one action. A task that one click finishes has
  * that button; any other opens its order.
  */
-export function NeedRow({ task, direction, busy, onComplete }: NeedRowProps) {
+export function NeedRow({ task, busy, onComplete }: NeedRowProps) {
   const { t } = useTranslation("directions-home");
   const { t: tHome } = useTranslation("home");
   const order = task.orderNo;
@@ -32,10 +30,10 @@ export function NeedRow({ task, direction, busy, onComplete }: NeedRowProps) {
     <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 border-b border-border py-3 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_auto_7.5rem]">
       <div className="min-w-0">
         <p className="fs-14 font-medium text-foreground">{kind}</p>
-        <p className="fs-13 flex min-w-0 gap-1.5 text-muted-foreground">
+        <p className="fs-14 flex min-w-0 gap-1.5 text-muted-foreground">
           {order ? (
             <Link
-              to={orderHref(direction, order)}
+              to={orderHref(order)}
               className="numeral shrink-0 text-ring underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-ring"
             >
               {order}
@@ -63,7 +61,7 @@ export function NeedRow({ task, direction, busy, onComplete }: NeedRowProps) {
         ) : order ? (
           <Button asChild variant="outline" size="sm" className={target}>
             <Link
-              to={orderHref(direction, order)}
+              to={orderHref(order)}
               aria-label={t("needs.actionOn", { action: verb, order })}
             >
               {verb}

@@ -1,18 +1,26 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeAll, describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import { allFeatures } from "@/features/registry";
 import i18n from "@/i18n";
 import { axeViolations } from "@/test/axe";
 import { sessionFor } from "@/test/fixtures";
 import { renderApp } from "@/test/render";
 
+// This file tests the shell, not the kit sheet. The real sheet is a heavy lazy
+// screen (canvases, every kit item): waiting for it made these tests depend on
+// how busy the machine was. A stand-in with the same heading keeps the crumb
+// and the current entry honest without that cost.
+vi.mock("../kit/KitScreen", () => ({
+  default: () => <h1>Kit sheet</h1>,
+}));
+
 function found(element: HTMLElement | null): HTMLElement {
   if (!element) throw new Error("The element is not on the page");
   return element;
 }
 
-describe("the shell of the design directions preview", () => {
+describe("the shell of the prototype screens", () => {
   beforeAll(async () => {
     await i18n.loadNamespaces([
       "common",
@@ -25,8 +33,8 @@ describe("the shell of the design directions preview", () => {
     ]);
   });
 
-  async function open(direction = "ink") {
-    const view = renderApp(`/directions/${direction}/kit`, {
+  async function open() {
+    const view = renderApp("/preview/kit", {
       session: sessionFor("SUPPORT"),
     });
     await screen.findByRole("heading", { level: 1, name: "Kit sheet" });
@@ -117,7 +125,7 @@ describe("the shell of the design directions preview", () => {
     // Upload leads to the upload screen, and Spark opens its panel.
     expect(within(bar).getByRole("link", { name: "Upload" })).toHaveAttribute(
       "href",
-      "/directions/ink/upload",
+      "/preview/upload",
     );
     expect(
       within(bar).getByRole("button", { name: "Spark" }),
@@ -157,17 +165,14 @@ describe("the shell of the design directions preview", () => {
     await waitFor(() => {
       expect(screen.queryByRole("dialog")).toBeNull();
     });
-    expect(router.state.location.pathname).toBe("/directions/ink/kit");
+    expect(router.state.location.pathname).toBe("/preview/kit");
   });
 
-  it("keeps the same panel in every direction and passes the accessibility check", async () => {
-    for (const direction of ["ink", "paper", "spectra"]) {
-      const { container, unmount } = await open(direction);
-      expect(
-        screen.getByRole("navigation", { name: "Main navigation" }),
-      ).toBeVisible();
-      expect(await axeViolations(container)).toEqual([]);
-      unmount();
-    }
+  it("passes the accessibility check", async () => {
+    const { container } = await open();
+    expect(
+      screen.getByRole("navigation", { name: "Main navigation" }),
+    ).toBeVisible();
+    expect(await axeViolations(container)).toEqual([]);
   }, 60_000);
 });

@@ -7,8 +7,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { screenPath } from "../../directions";
-import { useDirection } from "../../frame/useDirection";
+import { screenPath } from "../../screens";
 import { isBuilt } from "../../screens";
 import { useHomeAccess } from "./homeAccess";
 
@@ -20,7 +19,6 @@ import { useHomeAccess } from "./homeAccess";
  */
 export function HomeActions() {
   const { t } = useTranslation("directions-home");
-  const direction = useDirection();
   const mayCreate = useHomeAccess().create;
   const upload = (
     <>
@@ -40,7 +38,7 @@ export function HomeActions() {
       ) : null}
       {isBuilt("upload") ? (
         <Button asChild variant="outline" className="pointer-coarse:h-11">
-          <Link to={screenPath(direction, "upload")}>{upload}</Link>
+          <Link to={screenPath("upload")}>{upload}</Link>
         </Button>
       ) : (
         <Tooltip>
@@ -53,7 +51,7 @@ export function HomeActions() {
               {upload}
             </Button>
           </TooltipTrigger>
-          <TooltipContent className="fs-13">
+          <TooltipContent className="fs-14">
             {t("actions.uploadUnavailable")}
           </TooltipContent>
         </Tooltip>

@@ -62,7 +62,7 @@ export function ThoughtLine({
         <span className="fs-14 text-foreground">{doneLabel}</span>
       )}
       {timer ? (
-        <span className="numeral fs-13 text-muted-foreground">{timer}</span>
+        <span className="numeral fs-14 text-muted-foreground">{timer}</span>
       ) : null}
     </>
   );
@@ -98,7 +98,7 @@ export function ThoughtLine({
         <ol
           id={listId}
           hidden={!open}
-          className="fs-13 ml-6 flex flex-col gap-1 border-l border-border pl-3 text-muted-foreground"
+          className="fs-14 ml-6 flex flex-col gap-1 border-l border-border pl-3 text-muted-foreground"
         >
           {steps.map((step, index) => (
             <li key={index}>{step}</li>

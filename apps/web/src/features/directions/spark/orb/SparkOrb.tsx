@@ -22,7 +22,7 @@ interface SparkOrbProps {
  * Spark's orb. Idle while it waits, thinking while it works. It tries the
  * WebGPU liquid orb (LerSent001/orb, MIT), falls back to React Bits' WebGL
  * orb, and under reduced motion, or when neither works, shows a still orb
- * drawn in CSS. Its colours are the direction's tokens, it is paused when it
+ * drawn in CSS. Its colours are the design tokens, it is paused when it
  * is off screen or the tab is hidden, and the pixel ratio is at most 2.
  */
 export function SparkOrb({ state, label, className, onEngine }: SparkOrbProps) {

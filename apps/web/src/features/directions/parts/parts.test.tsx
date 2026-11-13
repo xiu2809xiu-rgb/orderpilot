@@ -4,7 +4,6 @@ import { Inbox } from "lucide-react";
 import { MemoryRouter, Route, Routes } from "react-router";
 import { beforeAll, describe, expect, it } from "vitest";
 import i18n from "@/i18n";
-import type { Direction } from "../directions";
 import { DueTimer } from "./DueTimer";
 import { EmptyState } from "./EmptyState";
 import { JourneyRail } from "./JourneyRail";
@@ -20,11 +19,11 @@ beforeAll(async () => {
   await i18n.loadNamespaces(["directions-parts"]);
 });
 
-function inDirection(direction: Direction, ui: React.ReactNode) {
+function inPreview(ui: React.ReactNode) {
   return render(
-    <MemoryRouter initialEntries={[`/directions/${direction}/home`]}>
+    <MemoryRouter initialEntries={["/preview/home"]}>
       <Routes>
-        <Route path="/directions/:direction/:screen" element={ui} />
+        <Route path="/preview/:screen" element={ui} />
       </Routes>
     </MemoryRouter>,
   );
@@ -166,31 +165,21 @@ describe("StatusTag", () => {
 });
 
 describe("KpiTile", () => {
-  it.each(["ink", "paper", "spectra"] as const)(
-    "shows the figure and its label in %s",
-    (direction) => {
-      inDirection(
-        direction,
-        <KpiTile label="Open orders" value={1284} unit="orders" />,
-      );
-      expect(screen.getByText("Open orders")).toBeInTheDocument();
-      expect(screen.getByText("1,284")).toBeInTheDocument();
-      expect(screen.getByText("orders")).toBeInTheDocument();
-    },
-  );
+  it("shows the figure and its label", () => {
+    inPreview(<KpiTile label="Open orders" value={1284} unit="orders" />);
+    expect(screen.getByText("Open orders")).toBeInTheDocument();
+    expect(screen.getByText("1,284")).toBeInTheDocument();
+    expect(screen.getByText("orders")).toBeInTheDocument();
+  });
 
   it("shows no number when the data cannot support one", () => {
-    inDirection(
-      "paper",
-      <KpiTile label="Approval turnaround" value={null} unit="h" />,
-    );
+    inPreview(<KpiTile label="Approval turnaround" value={null} unit="h" />);
     expect(screen.getByText("No figure yet")).toBeInTheDocument();
     expect(screen.queryByText("h")).not.toBeInTheDocument();
   });
 
   it("says the trend in words, with the direction for a screen reader", () => {
-    inDirection(
-      "spectra",
+    inPreview(
       <KpiTile
         label="Overdue orders"
         value={7}

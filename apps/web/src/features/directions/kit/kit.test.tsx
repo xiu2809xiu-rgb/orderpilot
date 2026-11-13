@@ -8,19 +8,16 @@ import { BlurFade } from "./BlurFade";
 import { BlurText } from "./BlurText";
 import { BorderBeam } from "./BorderBeam";
 import { CircularProgress } from "./CircularProgress";
-import { Dither } from "./Dither";
 import { DotPattern } from "./DotPattern";
 import { extensionOf, FileType } from "./FileType";
 import { Frame, FramePanel, FrameTitle } from "./Frame";
 import { GlassSurface } from "./GlassSurface";
 import { GradientText } from "./GradientText";
-import { GridPattern } from "./GridPattern";
 import { HoldButton } from "./HoldButton";
 import { LatticeLoader } from "./LatticeLoader";
 import { NumberTicker } from "./NumberTicker";
 import { ShineBorder } from "./ShineBorder";
 import { ShinyText } from "./ShinyText";
-import { SplitFlap } from "./SplitFlap";
 import { SpotlightCard } from "./SpotlightCard";
 import { StatusMark } from "./StatusMark";
 import {
@@ -112,28 +109,15 @@ describe("Magic UI items", () => {
     expect(screen.getByRole("progressbar")).toHaveTextContent("100%");
   });
 
-  it("dot and grid patterns are hidden decoration", () => {
-    const { container } = render(
-      <>
-        <DotPattern />
-        <GridPattern />
-      </>,
-    );
-    const svgs = container.querySelectorAll("svg");
-    expect(svgs).toHaveLength(2);
-    svgs.forEach((svg) => {
-      expect(svg).toHaveAttribute("aria-hidden", "true");
-      expect(svg.querySelector("pattern")).not.toBeNull();
-    });
+  it("the dot pattern is hidden decoration", () => {
+    const { container } = render(<DotPattern />);
+    const svg = container.querySelector("svg");
+    expect(svg).toHaveAttribute("aria-hidden", "true");
+    expect(svg?.querySelector("pattern")).not.toBeNull();
   });
 });
 
 describe("React Bits items", () => {
-  it("split flap holds its value for a reader", () => {
-    render(<SplitFlap value="2,481" />);
-    expect(screen.getByText("2,481")).toHaveClass("sr-only");
-  });
-
   it("gradient text, glow included, keeps its words", () => {
     render(<GradientText glow={0.5}>Insights</GradientText>);
     expect(screen.getAllByText("Insights").length).toBeGreaterThan(0);
@@ -275,14 +259,9 @@ describe("React Bits items", () => {
     expect(onHold).not.toHaveBeenCalled();
   });
 
-  it("dither and aurora fall back to plain CSS where there is no WebGL", () => {
-    const { container } = render(
-      <>
-        <Dither />
-        <Aurora />
-      </>,
-    );
-    expect(container.querySelectorAll("[data-fallback]")).toHaveLength(2);
+  it("aurora falls back to plain CSS where there is no WebGL", () => {
+    const { container } = render(<Aurora />);
+    expect(container.querySelectorAll("[data-fallback]")).toHaveLength(1);
     expect(container.querySelector("canvas")).toBeNull();
   });
 });

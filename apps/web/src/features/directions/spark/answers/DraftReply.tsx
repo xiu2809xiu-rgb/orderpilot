@@ -58,7 +58,7 @@ export function DraftReply({ description, part, available }: DraftReplyProps) {
       </FrameHeader>
       <FramePanel className="flex flex-col gap-3">
         <div className="flex flex-col gap-1.5">
-          <label htmlFor={subjectId} className="fs-13 font-medium">
+          <label htmlFor={subjectId} className="fs-14 font-medium">
             {t("stock.draft.subjectLabel")}
           </label>
           <Input
@@ -71,7 +71,7 @@ export function DraftReply({ description, part, available }: DraftReplyProps) {
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <label htmlFor={bodyId} className="fs-13 font-medium">
+          <label htmlFor={bodyId} className="fs-14 font-medium">
             {t("stock.draft.bodyLabel")}
           </label>
           <Textarea
@@ -99,7 +99,7 @@ export function DraftReply({ description, part, available }: DraftReplyProps) {
             )}
             {t("stock.draft.copy")}
           </Button>
-          <span role="status" className="fs-13 text-muted-foreground">
+          <span role="status" className="fs-14 text-muted-foreground">
             {copied ? t("stock.draft.copied") : ""}
           </span>
         </div>

@@ -3,8 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Link, Navigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { useTrackerList } from "@/lib/api/generated/endpoints/tracker/tracker";
-import { screenPath } from "../../directions";
-import { useDirection } from "../../frame/useDirection";
+import { screenPath } from "../../screens";
 import { EmptyState } from "../../parts/EmptyState";
 import { OrderSkeleton } from "./OrderSkeleton";
 
@@ -16,13 +15,12 @@ import { OrderSkeleton } from "./OrderSkeleton";
  */
 export function OrderPicker() {
   const { t } = useTranslation("directions-orders");
-  const direction = useDirection();
   const first = useTrackerList({ open: "true", pageSize: 1 });
   const next = first.data?.data[0];
   if (next) {
     return (
       <Navigate
-        to={`${screenPath(direction, "order")}?order=${encodeURIComponent(next.orderNo)}`}
+        to={`${screenPath("order")}?order=${encodeURIComponent(next.orderNo)}`}
         replace
       />
     );
@@ -36,7 +34,7 @@ export function OrderPicker() {
         description={t("order.pickBody")}
         action={
           <Button asChild variant="outline">
-            <Link to={screenPath(direction, "orders")}>{t("order.back")}</Link>
+            <Link to={screenPath("orders")}>{t("order.back")}</Link>
           </Button>
         }
       />

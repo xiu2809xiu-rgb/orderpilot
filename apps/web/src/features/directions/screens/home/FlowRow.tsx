@@ -57,7 +57,7 @@ export function FlowRow({
                   {cell.count}
                 </span>
               ) : null}
-              <StepperTitle className="fs-13 leading-tight">
+              <StepperTitle className="fs-14 leading-tight">
                 {cell.title}
               </StepperTitle>
               <StepperDescription

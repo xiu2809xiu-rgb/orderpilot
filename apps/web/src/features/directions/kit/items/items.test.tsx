@@ -32,9 +32,6 @@ const ITEM_FILES: Record<string, RegExp> = {
   CircularProgress:
     /Magic UI \/ animated-circular-progress-bar\. Licence: MIT\./,
   DotPattern: /Magic UI \/ dot-pattern\. Licence: MIT\./,
-  GridPattern: /Magic UI \/ grid-pattern\. Licence: MIT\./,
-  SplitFlap:
-    /React Bits \/ SplitFlapText\. Licence: MIT with the Commons Clause\./,
   GradientText:
     /React Bits \/ GradientText\. Licence: MIT with the Commons Clause\./,
   BlurText: /React Bits \/ BlurText\. Licence: MIT with the Commons Clause\./,
@@ -50,7 +47,6 @@ const ITEM_FILES: Record<string, RegExp> = {
     /React Bits \/ ThoughtLine\. Licence: MIT with the Commons Clause\./,
   HoldButton:
     /React Bits \/ HoldButton\. Licence: MIT with the Commons Clause\./,
-  Dither: /React Bits \/ Dither\. Licence: MIT with the Commons Clause\./,
   Aurora: /React Bits \/ Aurora\. Licence: MIT with the Commons Clause\./,
   Stepper: /ReUI \/ stepper\. Licence: MIT\./,
   Timeline: /ReUI \/ timeline\. Licence: MIT\./,
@@ -107,16 +103,16 @@ describe("the kit items", () => {
       </>,
     );
     const figures = screen.getAllByRole("figure");
-    // Thirty items; the dot pattern is shown once, among the grounds.
-    expect(figures.length).toBe(30);
+    // Twenty-seven items; the dot pattern is shown once, among the grounds.
+    expect(figures.length).toBe(27);
     const names = figures.map(
       (figure) => figure.querySelector("figcaption span")?.textContent,
     );
-    expect(new Set(names).size).toBe(30);
-    expect(screen.getAllByText("Magic UI, MIT").length).toBe(9);
+    expect(new Set(names).size).toBe(27);
+    expect(screen.getAllByText("Magic UI, MIT").length).toBe(8);
     expect(
       screen.getAllByText("React Bits, MIT with the Commons Clause").length,
-    ).toBe(13);
+    ).toBe(11);
     expect(screen.getAllByText("ReUI, MIT").length).toBe(7);
     expect(screen.getAllByText("github.com/LerSent001/orb, MIT").length).toBe(
       1,
@@ -157,17 +153,14 @@ describe("the kit items", () => {
 
   it("summarises the kits with their counts and a button for each section", () => {
     render(
-      <MemoryRouter initialEntries={["/directions/ink/kit"]}>
+      <MemoryRouter initialEntries={["/preview/kit"]}>
         <Routes>
-          <Route
-            path="/directions/:direction/:screen"
-            element={<KitSummary />}
-          />
+          <Route path="/preview/:screen" element={<KitSummary />} />
         </Routes>
       </MemoryRouter>,
     );
     expect(
-      screen.getByText(/30 items from three kits and one orb/),
+      screen.getByText(/27 items from three kits and one orb/),
     ).toBeInTheDocument();
     expect(screen.getByText("Magic UI, MIT")).toBeInTheDocument();
     const nav = screen.getByRole("navigation", { name: "Jump to a section" });
@@ -176,12 +169,9 @@ describe("the kit items", () => {
 
   it("shows each product part with what it follows or is built on", () => {
     render(
-      <MemoryRouter initialEntries={["/directions/paper/kit"]}>
+      <MemoryRouter initialEntries={["/preview/kit"]}>
         <Routes>
-          <Route
-            path="/directions/:direction/:screen"
-            element={<PartsSection />}
-          />
+          <Route path="/preview/:screen" element={<PartsSection />} />
         </Routes>
       </MemoryRouter>,
     );

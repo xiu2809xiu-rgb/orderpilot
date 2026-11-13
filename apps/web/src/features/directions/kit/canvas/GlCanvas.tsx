@@ -55,7 +55,7 @@ function link(gl: WebGL2RenderingContext, fragment: string) {
 }
 
 /**
- * The one canvas behind the full-screen shaders (Dither, Aurora). It draws a
+ * The one canvas behind the full-screen shaders (Aurora). It draws a
  * single triangle that covers the canvas and lets the shader do the rest. It
  * only animates while it is on screen and the tab is showing, clamps the
  * device pixel ratio to 2, and draws one still frame under reduced motion.

@@ -1,15 +1,13 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router";
 import { useIsDark } from "../frame/useIsDark";
-import type { Tokens } from "../tokens/contrast";
+import type { Tokens } from "@/styles/contrast";
 
 /**
  * The live value of each named token, read from the page, so a swatch and its
  * contrast always describe what is on screen. It reads in a passive effect:
- * that runs after the frame has put the direction on the document element.
+ * that runs after the page has settled on its scheme.
  */
 export function useTokens(names: readonly string[]): Tokens {
-  const { direction } = useParams();
   const dark = useIsDark();
   const [tokens, setTokens] = useState<Tokens>({});
   const key = names.join(",");
@@ -20,6 +18,6 @@ export function useTokens(names: readonly string[]): Tokens {
       next[name] = style.getPropertyValue(`--${name}`).trim();
     }
     setTokens(next);
-  }, [direction, dark, key]);
+  }, [dark, key]);
   return tokens;
 }

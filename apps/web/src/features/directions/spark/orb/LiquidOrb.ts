@@ -1,6 +1,6 @@
 // Source: github.com/LerSent001/orb ("Liquid Orb", WebGPU). Licence: MIT, Copyright (c) 2026 LerSent001
 // (the licence text is in LICENSE beside this file). Adapted to OrderPilot: wrapped as a class, the colours
-// come from the direction's tokens instead of fixed palettes, the particle-ribbon pipelines are left out
+// come from the design tokens instead of fixed palettes, the particle-ribbon pipelines are left out
 // (Spark uses the aurora style only), the frame loop can be paused, and failures are reported to the caller.
 import shaderSource from "./liquidOrb.wgsl?raw";
 import seeds from "./orbSeeds.json";
@@ -39,7 +39,7 @@ const mixSrgb = (from: number, to: number, progress: number) =>
     srgbToLinear(from) + (srgbToLinear(to) - srgbToLinear(from)) * progress,
   );
 
-/** The seed of a state with the direction's colours written into it. */
+/** The seed of a state with the design's colours written into it. */
 function seedOf(state: OrbState, tokens: OrbTokens): Float32Array {
   const values = new Float32Array(SEEDS[state]);
   const colours = orbColours(tokens, state);
@@ -158,7 +158,7 @@ export class LiquidOrb {
     return orb;
   }
 
-  /** The colours changed (the direction or the scheme): repaint in them. */
+  /** The colours changed (the scheme): repaint in them. */
   setTokens(tokens: OrbTokens) {
     this.tokens = tokens;
     this.from = seedOf(this.state, tokens);

@@ -26,7 +26,7 @@ export function DropZone({ onFiles, onDemo }: DropZoneProps) {
       accept={ACCEPT}
       onFiles={onFiles}
     >
-      <span className="fs-13 text-muted-foreground">{t("drop.or")}</span>
+      <span className="fs-14 text-muted-foreground">{t("drop.or")}</span>
       <Button
         type="button"
         variant="ghost"

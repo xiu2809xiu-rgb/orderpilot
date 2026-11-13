@@ -3,12 +3,13 @@
    text colour (which is pale in a dark scheme). A box is a quiet outline; one
    Spark was unsure of is dashed and amber (the list names it too, so colour is
    never alone); one a person confirmed turns green; the selected box is
-   outlined in ink and washed in the direction's accent. */
+   outlined in ink and washed in the accent. */
 .dx-page-sheet {
   --paper-ink: #1f242b;
   --paper-amber: #a14a00;
   --paper-green: #176b3a;
 }
+
 .dx-box {
   box-sizing: content-box;
   margin: -2px 0 0 -3px;
@@ -20,27 +21,32 @@
     background-color var(--motion-fast, 150ms) var(--ease-out, ease-out),
     border-color var(--motion-fast, 150ms) var(--ease-out, ease-out);
 }
+
 .dx-box:hover {
   background: color-mix(in srgb, var(--primary) 18%, transparent);
 }
+
 .dx-box[data-uncertain="true"] {
   border: 1.5px dashed var(--paper-amber);
 }
+
 .dx-box[data-confirmed="true"] {
   border: 1.5px solid var(--paper-green);
 }
+
 .dx-box[data-selected="true"] {
   border: 2px solid var(--paper-ink);
   background: color-mix(in srgb, var(--primary) 38%, transparent);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 75%, white);
 }
+
 .dx-box:focus-visible {
   outline: 2px solid var(--paper-ink);
   outline-offset: 2px;
 }
 
 /* The drop zone on Spectra is glass over the aurora; the others keep a flat frame. */
-:root[data-direction="spectra"] .dx-drop {
+.dx-drop {
   background: color-mix(in srgb, var(--card) 60%, transparent);
   backdrop-filter: blur(10px);
 }

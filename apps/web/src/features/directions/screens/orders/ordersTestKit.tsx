@@ -382,7 +382,7 @@ export function renderAt(element: ReactElement, path: string) {
     <QueryClientProvider client={createQueryClient()}>
       <MemoryRouter initialEntries={[path]}>
         <Routes>
-          <Route path="/directions/:direction/:screen" element={element} />
+          <Route path="/preview/:screen" element={element} />
         </Routes>
       </MemoryRouter>
     </QueryClientProvider>,

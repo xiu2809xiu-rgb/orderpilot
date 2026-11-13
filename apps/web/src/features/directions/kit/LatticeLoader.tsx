@@ -87,7 +87,7 @@ export function LatticeLoader({
       </span>
       <span className="fs-14 text-foreground">{label}</span>
       {timer ? (
-        <span className="numeral fs-13 text-muted-foreground">{timer}</span>
+        <span className="numeral fs-14 text-muted-foreground">{timer}</span>
       ) : null}
     </span>
   );

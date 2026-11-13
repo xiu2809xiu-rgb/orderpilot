@@ -2,7 +2,6 @@ import { ArrowUpRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
-import { useDirection } from "../../frame/useDirection";
 import {
   Alert,
   AlertAction,
@@ -32,7 +31,6 @@ export function ReviewStage({
   onAgain: () => void;
 }) {
   const { t } = useTranslation("directions-intake");
-  const direction = useDirection();
   const review = useReview(doc);
 
   const select = (field: DemoField) => {
@@ -73,7 +71,7 @@ export function ReviewStage({
           {isBuilt("order") ? (
             <AlertAction>
               <Button asChild variant="outline" size="sm">
-                <Link to={orderHref(direction, doc.orderNo)}>
+                <Link to={orderHref(doc.orderNo)}>
                   {t("review.openOrder", { order: doc.orderNo })}
                   <ArrowUpRight aria-hidden="true" />
                 </Link>

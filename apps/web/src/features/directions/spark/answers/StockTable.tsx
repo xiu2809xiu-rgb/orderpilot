@@ -17,7 +17,7 @@ export function StockTable({ facts }: { facts: StockFacts }) {
       className="overflow-x-auto border border-border"
       style={{ borderRadius: "var(--radius-card)" }}
     >
-      <table className="fs-13 w-full border-collapse">
+      <table className="fs-14 w-full border-collapse">
         <caption className="sr-only">{t("stock.table")}</caption>
         <thead>
           <tr className="border-b border-border text-muted-foreground">

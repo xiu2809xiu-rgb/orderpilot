@@ -8,7 +8,7 @@ import {
   parseColor,
   surface,
   type Tokens,
-} from "../tokens/contrast";
+} from "@/styles/contrast";
 import { Section } from "../parts/Section";
 import { useTokens } from "./useTokens";
 
@@ -115,13 +115,13 @@ export function ColourSection() {
                 >
                   {t("colour.sample")}
                 </span>
-                <span className="fs-13 min-w-40 flex-1 break-words">
+                <span className="fs-14 min-w-40 flex-1 break-words">
                   {t("colour.on", {
                     text: `--${text}`,
                     surface: `--${chain[0] ?? ""}`,
                   })}
                 </span>
-                <span className="fs-13 numeral shrink-0">
+                <span className="fs-14 numeral shrink-0">
                   {t("colour.ratio", { ratio: ratio.toFixed(2) })}
                 </span>
                 <span

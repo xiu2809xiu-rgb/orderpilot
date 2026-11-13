@@ -44,7 +44,7 @@ export const PanelAction = forwardRef<HTMLButtonElement, PanelActionProps>(
     return (
       <Tooltip>
         <TooltipTrigger asChild>{row}</TooltipTrigger>
-        <TooltipContent side="right" className="fs-13">
+        <TooltipContent side="right" className="fs-14">
           {collapsed ? (
             <span className="block font-medium">{label}</span>
           ) : null}

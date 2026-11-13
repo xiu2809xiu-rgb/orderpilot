@@ -35,9 +35,8 @@ const ICON: Record<JourneyState, LucideIcon> = {
 /**
  * An order's nine steps as one rail: done, now and later, each with a word and
  * an icon so colour never says it alone. The same markup is small in a list
- * row, full in an order's header and vertical on a timeline; the direction's
- * own CSS (parts.css) decides what a step looks like: ticks and mono labels
- * in Ink, numbered ruled steps in Paper, a glowing current step in Spectra.
+ * row, full in an order's header and vertical on a timeline; parts.css
+ * gives the current step a glow.
  */
 export function JourneyRail({
   flow,
@@ -89,7 +88,7 @@ export function JourneyRail({
             </li>
           ))}
         </ol>
-        <span className="jr-now fs-13">
+        <span className="jr-now fs-14">
           {now ? (
             <>
               <now.Icon className="size-3.5 shrink-0" aria-hidden="true" />
@@ -126,7 +125,7 @@ export function JourneyRail({
             <Check className="jr-check" strokeWidth={2.5} />
           </span>
           <span className="jr-text">
-            <span className="jr-label fs-13">
+            <span className="jr-label fs-14">
               <step.Icon className="size-3.5 shrink-0" aria-hidden="true" />
               <span>{step.label}</span>
             </span>

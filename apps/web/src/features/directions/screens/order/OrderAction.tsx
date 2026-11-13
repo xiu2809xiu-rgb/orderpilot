@@ -32,7 +32,7 @@ export function OrderAction({
   if (pending) return null;
   if (!task) {
     return (
-      <p className="od-no-action fs-13 text-muted-foreground">
+      <p className="od-no-action fs-14 text-muted-foreground">
         {t("action.none")}
       </p>
     );
@@ -60,7 +60,7 @@ export function OrderAction({
           </Link>
         </Button>
       )}
-      <span className="od-action-due fs-13">
+      <span className="od-action-due fs-14">
         <span className="text-muted-foreground">{t("action.yourTask")}</span>
         {due}
       </span>

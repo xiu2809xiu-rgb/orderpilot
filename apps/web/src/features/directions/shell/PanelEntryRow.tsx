@@ -8,13 +8,12 @@ import {
 } from "@/components/ui/tooltip";
 import { useWaiting } from "@/app/shell/MenuCount";
 import { cn } from "@/lib/utils";
-import { screenPath, type Direction } from "../directions";
+import { screenPath } from "../screens";
 import { CountBadge } from "./CountBadge";
 import type { PanelEntry } from "./menu";
 
 interface PanelEntryRowProps {
   entry: PanelEntry;
-  direction: Direction;
   current: boolean;
   collapsed: boolean;
   onNavigate?: () => void;
@@ -27,7 +26,6 @@ interface PanelEntryRowProps {
  */
 export function PanelEntryRow({
   entry,
-  direction,
   current,
   collapsed,
   onNavigate,
@@ -76,7 +74,7 @@ export function PanelEntryRow({
   const row = entry.screen ? (
     <Link
       ref={linkRef}
-      to={screenPath(direction, entry.screen)}
+      to={screenPath(entry.screen)}
       aria-current={current ? "page" : undefined}
       onClick={onNavigate}
       className="dx-entry"
@@ -92,7 +90,7 @@ export function PanelEntryRow({
   return (
     <Tooltip>
       <TooltipTrigger asChild>{row}</TooltipTrigger>
-      <TooltipContent side="right" className="fs-13">
+      <TooltipContent side="right" className="fs-14">
         {collapsed ? <span className="block font-medium">{label}</span> : null}
         {waiting > 0 ? (
           <span className="numeral block">

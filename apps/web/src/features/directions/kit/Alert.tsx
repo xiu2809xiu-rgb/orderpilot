@@ -85,7 +85,7 @@ export function AlertDescription({
     <div
       data-slot="alert-description"
       className={cn(
-        "fs-13 col-start-2 grid justify-items-start gap-1 text-muted-foreground",
+        "fs-14 col-start-2 grid justify-items-start gap-1 text-muted-foreground",
         className,
       )}
       {...props}

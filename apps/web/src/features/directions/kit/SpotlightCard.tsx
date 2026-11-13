@@ -22,7 +22,7 @@ type SpotlightCardProps = HTMLAttributes<HTMLDivElement> & {
  * its edge. It is for a card people hover to explore (a KPI tile), never for
  * a table row. It only responds to a pointer: the light is not an animation,
  * so there is nothing to pause, and under reduced motion it is switched off.
- * It sets only a surface and an overlay; the direction's own card look
+ * It sets only a surface and an overlay; the design's card look
  * (`dx-card`) stays underneath.
  */
 export function SpotlightCard({

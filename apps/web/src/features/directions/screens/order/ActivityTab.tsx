@@ -54,13 +54,13 @@ export function ActivityTab({
   const newestFirst = [...steps].reverse();
   return (
     <div className="od-activity">
-      <p className="fs-13 max-w-prose text-muted-foreground">
+      <p className="fs-14 max-w-prose text-muted-foreground">
         {t("order.activity.note")}
       </p>
       <Timeline value={newestFirst.length}>
         {newestFirst.map((step, index) => (
           <TimelineItem key={step.id} step={index + 1}>
-            {/* Only the current step is lit: in Ink the accent means you are here. */}
+            {/* Only the current step is lit: the accent means you are here. */}
             <TimelineIndicator
               className={
                 step.current

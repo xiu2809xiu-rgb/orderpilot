@@ -107,7 +107,7 @@ export function StepperIndicator({ className }: { className?: string }) {
       data-slot="stepper-indicator"
       data-state={state}
       className={cn(
-        "numeral fs-13 relative z-10 flex size-7 shrink-0 items-center justify-center rounded-full border",
+        "numeral fs-14 relative z-10 flex size-7 shrink-0 items-center justify-center rounded-full border",
         state === "completed" &&
           "border-ring bg-primary text-primary-foreground",
         state === "active" && "border-ring bg-background text-ring",
@@ -147,7 +147,7 @@ export function StepperDescription({
   return (
     <span
       data-slot="stepper-description"
-      className={cn("fs-13 block text-muted-foreground", className)}
+      className={cn("fs-14 block text-muted-foreground", className)}
       {...props}
     />
   );

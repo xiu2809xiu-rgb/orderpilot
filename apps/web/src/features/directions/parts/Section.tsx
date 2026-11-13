@@ -3,11 +3,9 @@ import { useId } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * One section of a screen: a title and a body. It is the same component in all
- * three directions; the direction's own CSS decides what it looks like (a ruled
- * panel in Ink, a numbered row hung from a rule in Paper, a glass card in
- * Spectra). `work` marks a section that holds a table or a form: Spectra keeps
- * it as opaque as text needs, the others look the same.
+ * One section of a screen: a title and a body. It is a glass card. `work`
+ * marks a section that holds a table or a form: it is kept as opaque as text
+ * needs.
  */
 export function Section({
   title,

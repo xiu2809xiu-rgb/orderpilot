@@ -79,7 +79,6 @@ export function FileType({ name, size = 32, label, className }: FileTypeProps) {
         fontSize="7"
         fontWeight="700"
         fill="var(--card)"
-        style={{ fontFamily: "var(--numeral-font)" }}
       >
         {band}
       </text>

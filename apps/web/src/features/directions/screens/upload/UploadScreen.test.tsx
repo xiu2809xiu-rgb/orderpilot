@@ -16,7 +16,6 @@ import { createQueryClient } from "@/lib/query";
 import { useSessionStore } from "@/stores/session";
 import { axeViolations } from "@/test/axe";
 import { sessionFor } from "@/test/fixtures";
-import type { Direction } from "../../directions";
 import demo from "../../../../../public/demo-documents/po-boxed-so-0102.json";
 import UploadScreen from "./UploadScreen";
 
@@ -44,15 +43,12 @@ function reduceMotion() {
   }));
 }
 
-function upload(direction: Direction = "ink") {
+function upload() {
   return render(
     <QueryClientProvider client={createQueryClient()}>
-      <MemoryRouter initialEntries={[`/directions/${direction}/upload`]}>
+      <MemoryRouter initialEntries={["/preview/upload"]}>
         <Routes>
-          <Route
-            path="/directions/:direction/:screen"
-            element={<UploadScreen />}
-          />
+          <Route path="/preview/:screen" element={<UploadScreen />} />
         </Routes>
       </MemoryRouter>
     </QueryClientProvider>,

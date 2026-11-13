@@ -1,7 +1,6 @@
 import type { TFunction } from "i18next";
 import type { DataTableColumn } from "@/components/common";
 import { formatDay } from "@/lib/format";
-import type { Direction } from "../../directions";
 import { orderHref } from "../home/homeLinks";
 import { OrderCell } from "./OrderCell";
 import { AgeCell, DocsCell, StockCell, ValueCell } from "./OrderFigures";
@@ -12,7 +11,6 @@ interface ColumnContext {
   t: TFunction;
   /** Names a team: the tracker's owner role. */
   roleLabel: (role: NonNullable<OrderRow["ownerRole"]>) => string;
-  direction: Direction;
   /** `YYYY-MM-DD`, in Singapore. */
   today: string;
   /** The role may not see amounts, so the value column cannot sort by them. */
@@ -30,7 +28,6 @@ interface ColumnContext {
 export function orderColumns({
   t,
   roleLabel,
-  direction,
   today,
   valueHidden,
 }: ColumnContext): DataTableColumn<OrderRow>[] {
@@ -40,9 +37,7 @@ export function orderColumns({
     {
       id: "orderNo",
       header: t("columns.orderNo"),
-      cell: (row) => (
-        <OrderCell row={row} href={orderHref(direction, row.orderNo)} />
-      ),
+      cell: (row) => <OrderCell row={row} href={orderHref(row.orderNo)} />,
       exportValue: (row) => row.orderNo,
       sortable: true,
       hideable: false,

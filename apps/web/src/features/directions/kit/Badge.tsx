@@ -21,10 +21,10 @@ export const badgeVariants = cva(
       },
       size: {
         sm: "fs-12 h-5 min-w-5 px-1.5",
-        default: "fs-13 h-6 min-w-6 px-2",
+        default: "fs-14 h-6 min-w-6 px-2",
         lg: "fs-14 h-7 min-w-7 px-2.5",
       },
-      // The direction decides what "default" and "full" look like.
+      // "default" has a control corner, "full" a pill.
       radius: { default: "", full: "" },
     },
     defaultVariants: { variant: "default", size: "default", radius: "default" },
@@ -35,9 +35,8 @@ type BadgeProps = ComponentProps<"span"> & VariantProps<typeof badgeVariants>;
 
 /**
  * A small label for a stage, a status or a count. A status badge always
- * carries an icon and a word (pass both as children). Its radius is the
- * direction's: square in Ink and Paper, a pill in Spectra, unless `radius`
- * says "full".
+ * carries an icon and a word (pass both as children). Its corner is a
+ * control's, unless `radius` says "full" (a pill).
  */
 export function Badge({
   className,

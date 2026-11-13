@@ -103,7 +103,7 @@ function Column({
           </FrameTitle>
         </FrameHeader>
         {shown.length === 0 ? (
-          <p className="od-column-empty fs-13">{t("board.empty")}</p>
+          <p className="od-column-empty fs-14">{t("board.empty")}</p>
         ) : (
           <ul className="od-cards">
             {shown.map((row) => (
@@ -116,7 +116,7 @@ function Column({
         {more > 0 ? (
           <button
             type="button"
-            className="od-more fs-13"
+            className="od-more fs-14"
             onClick={onMore ?? undefined}
             disabled={onMore === null}
           >
@@ -176,10 +176,10 @@ function Card({
           ) : null}
         </span>
       </span>
-      <span className="od-card-customer fs-13">
+      <span className="od-card-customer fs-14">
         {row.customerName ?? row.customerNo}
       </span>
-      <span className="od-card-value fs-13">
+      <span className="od-card-value fs-14">
         <Amount field={row.amount} currency={row.currencyCode} />
       </span>
     </div>

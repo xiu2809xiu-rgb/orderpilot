@@ -1,6 +1,6 @@
 {
   "title": "Kit sheet",
-  "intro": "The tokens, type, controls and parts of the current direction, read live from the page. Switch direction or scheme above and every swatch, ratio and sample follows.",
+  "intro": "The tokens, type, controls and parts of the design, read live from the page. Switch the colour scheme with the theme button and every swatch, ratio and sample follows.",
   "sections": {
     "colour": "Colour",
     "type": "Type scale",
@@ -26,7 +26,7 @@
     "sample": "Aa"
   },
   "type": {
-    "intro": "Seven sizes and no more. Figures use the direction's numeral face.",
+    "intro": "Seven sizes and no more. Figures are tabular and semibold.",
     "sample": "Stock check for order SO-0102",
     "figure": "USD 12,340.00",
     "size": "{{size}} px"

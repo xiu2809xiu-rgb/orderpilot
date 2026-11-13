@@ -112,7 +112,7 @@ export function MoreFilters({
           }}
         />
         <fieldset className="space-y-2">
-          <legend className="fs-13 font-medium">
+          <legend className="fs-14 font-medium">
             {t("filters.orderDate")}
           </legend>
           <div className="grid grid-cols-2 gap-2">
@@ -152,7 +152,7 @@ export function MoreFilters({
             </div>
           </div>
           {span !== null ? (
-            <p className="od-span fs-13">
+            <p className="od-span fs-14">
               {t("filters.span", { count: span })}
             </p>
           ) : null}

@@ -21,8 +21,8 @@ import {
 } from "../orders/ordersTestKit";
 import OrderScreen from "./OrderScreen";
 
-const open = (query: string, direction = "ink") =>
-  renderAt(<OrderScreen />, `/directions/${direction}/order${query}`);
+const open = (query: string) =>
+  renderAt(<OrderScreen />, `/preview/order${query}`);
 
 beforeAll(loadNamespaces);
 
@@ -182,14 +182,10 @@ describe("the order page", () => {
     expect(screen.getByRole("link", { name: "Orders" })).toBeVisible();
   });
 
-  it("has no accessibility violations in any direction", async () => {
-    for (const direction of ["ink", "paper", "spectra"]) {
-      stubApi({ tasks: [taskOn("SO-0001", "SEND_PI")] });
-      const view = open(`${PAID}&tab=checks`, direction);
-      await screen.findByText("Rule quantity");
-      expect(await axeViolations(view.container)).toEqual([]);
-      view.unmount();
-      vi.unstubAllGlobals();
-    }
+  it("has no accessibility violations", async () => {
+    stubApi({ tasks: [taskOn("SO-0001", "SEND_PI")] });
+    const view = open(`${PAID}&tab=checks`);
+    await screen.findByText("Rule quantity");
+    expect(await axeViolations(view.container)).toEqual([]);
   });
 });

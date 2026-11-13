@@ -2,7 +2,6 @@ import type { WorkflowTask } from "@orderpilot/shared";
 import { Inbox } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useDirection } from "../../frame/useDirection";
 import { AnimatedList } from "../../kit/AnimatedList";
 import { EmptyState } from "../../parts/EmptyState";
 import { Section } from "../../parts/Section";
@@ -26,7 +25,6 @@ export function NeedsYou({
   completion: ReturnType<typeof useCompleteTask>;
 }) {
   const { t } = useTranslation("directions-home");
-  const direction = useDirection();
   const shown = home.tasks.slice(0, SHOWN);
   const hidden = Math.max(0, home.total - shown.length);
 
@@ -55,7 +53,6 @@ export function NeedsYou({
               <NeedRow
                 key={task.id}
                 task={task}
-                direction={direction}
                 busy={completion.isBusy(task)}
                 onComplete={() => {
                   completion.complete(task);
@@ -64,7 +61,7 @@ export function NeedsYou({
             ))}
           </AnimatedList>
           {hidden > 0 ? (
-            <p className="fs-13 pt-3 text-muted-foreground">
+            <p className="fs-14 pt-3 text-muted-foreground">
               {t("needs.more", { count: hidden })}
             </p>
           ) : null}

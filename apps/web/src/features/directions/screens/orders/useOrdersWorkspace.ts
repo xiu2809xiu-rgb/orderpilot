@@ -4,7 +4,6 @@ import { useRowSelection } from "@/components/list-page/useRowSelection";
 import { todayInSingapore } from "@/lib/format";
 import { tableStatusOf } from "@/lib/query-status";
 import { useSessionStore } from "@/stores/session";
-import { useDirection } from "../../frame/useDirection";
 import { customersOf } from "./CustomerFilter";
 import { orderColumns } from "./orderColumns";
 import type { OrderRow } from "./orderRow";
@@ -32,7 +31,6 @@ const rowLabel = (row: OrderRow) => row.orderNo;
 export function useOrdersWorkspace() {
   const { t } = useTranslation("directions-orders");
   const { t: tc } = useTranslation("common");
-  const direction = useDirection();
   const { query, change } = useOrdersQuery();
   const session = useSessionStore((state) => state.session);
   const who = useMemo(() => ({ role: session?.user.role }), [session]);
@@ -47,11 +45,10 @@ export function useOrdersWorkspace() {
       orderColumns({
         t,
         roleLabel: (role) => tc(`roles.${role}`),
-        direction,
         today,
         valueHidden,
       }),
-    [t, tc, direction, today, valueHidden],
+    [t, tc, today, valueHidden],
   );
   const table = useOrderColumns(columns);
   // A role that may not see values cannot sort by them, whatever the address says.

@@ -19,7 +19,7 @@ export function AppliedFilters({
         <li key={chip.id}>
           <button
             type="button"
-            className="od-chip fs-13"
+            className="od-chip fs-14"
             aria-label={t("applied.remove", { filter: chip.label })}
             onClick={() => {
               onChange(chip.clear);
@@ -33,7 +33,7 @@ export function AppliedFilters({
       <li>
         <button
           type="button"
-          className="od-clear fs-13"
+          className="od-clear fs-14"
           onClick={() => {
             onChange(NO_FILTERS);
           }}

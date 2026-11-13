@@ -8,8 +8,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
-import { screenPath } from "../../directions";
-import { useDirection } from "../../frame/useDirection";
+import { screenPath } from "../../screens";
 import {
   Alert,
   AlertAction,
@@ -57,7 +56,7 @@ function DocumentItem({
             </span>
           ) : null}
         </p>
-        <p className="fs-13 text-muted-foreground">
+        <p className="fs-14 text-muted-foreground">
           {document.rules.length === 0
             ? t("documents.noChecks")
             : t("documents.checked", {
@@ -66,7 +65,7 @@ function DocumentItem({
               })}
         </p>
         {document.rules.length > 0 ? (
-          <ul className="od-doc-rules fs-13">
+          <ul className="od-doc-rules fs-14">
             {document.rules.map((rule) => (
               <li key={rule.id} data-outcome={rule.outcome}>
                 {rule.label}
@@ -104,7 +103,6 @@ export function DocumentsTab({
   toConfirm: boolean;
 }) {
   const { t } = useTranslation("directions-orders");
-  const direction = useDirection();
   const documents = documentsOf(checks, { orderNo });
   return (
     <div className="od-docs-wrap">
@@ -120,9 +118,7 @@ export function DocumentsTab({
                 size="sm"
                 className="pointer-coarse:h-11"
               >
-                <Link to={screenPath(direction, "upload")}>
-                  {t("documents.review")}
-                </Link>
+                <Link to={screenPath("upload")}>{t("documents.review")}</Link>
               </Button>
             </AlertAction>
           ) : null}

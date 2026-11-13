@@ -38,7 +38,7 @@ export function StockAnswerParts({ facts }: { facts: StockFacts }) {
   return (
     <div className="flex flex-col gap-3">
       <StockTable facts={facts} />
-      <p className="fs-13 text-muted-foreground">{t("stock.formula")}</p>
+      <p className="fs-14 text-muted-foreground">{t("stock.formula")}</p>
       <div className="flex flex-col gap-1.5">
         <p className="fs-12 font-medium text-muted-foreground">
           {t("stock.sources")}

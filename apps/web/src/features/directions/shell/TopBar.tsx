@@ -3,8 +3,7 @@ import { useTranslation } from "react-i18next";
 import { ThemeSwitch } from "@/app/shell/ThemeSwitch";
 import { Notifications } from "@/app/shell/Notifications";
 import { Button } from "@/components/ui/button";
-import { screenPath, type Direction } from "../directions";
-import { isBuilt, type ScreenId } from "../screens";
+import { isBuilt, screenPath, type ScreenId } from "../screens";
 import { Crumbs } from "./Crumbs";
 import { RoleSwitch } from "./RoleSwitch";
 import { SearchField } from "./SearchField";
@@ -12,7 +11,6 @@ import { useSparkPanel } from "./sparkPanel";
 import { TopBarAction } from "./TopBarAction";
 
 interface TopBarProps {
-  direction: Direction;
   screen: ScreenId;
   collapsed: boolean;
   onToggleCollapsed: () => void;
@@ -24,7 +22,6 @@ interface TopBarProps {
  * bell, the demo role and the theme. It stands still when the screen changes.
  */
 export function TopBar({
-  direction,
   screen,
   collapsed,
   onToggleCollapsed,
@@ -56,11 +53,11 @@ export function TopBar({
       <div className="min-w-0 flex-1">
         <Crumbs screen={screen} />
       </div>
-      <SearchField direction={direction} />
+      <SearchField />
       <TopBarAction
         icon={Upload}
         label={t("bar.upload")}
-        to={isBuilt("upload") ? screenPath(direction, "upload") : undefined}
+        to={isBuilt("upload") ? screenPath("upload") : undefined}
         unavailable={isBuilt("upload") ? undefined : t("bar.uploadNote")}
       />
       <TopBarAction

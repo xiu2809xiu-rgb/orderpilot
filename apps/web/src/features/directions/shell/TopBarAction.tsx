@@ -75,7 +75,7 @@ export function TopBarAction({
           {inner}
         </Button>
       </TooltipTrigger>
-      <TooltipContent className="fs-13">{unavailable}</TooltipContent>
+      <TooltipContent className="fs-14">{unavailable}</TooltipContent>
     </Tooltip>
   );
 }

@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTrackerFlow } from "@/lib/api/generated/endpoints/tracker/tracker";
 import { PURCHASE_STEP_IDS } from "../../data/estimates";
-import { useDirection } from "../../frame/useDirection";
 import { Section } from "../../parts/Section";
 import { FlowRow, type FlowCell } from "./FlowRow";
 import { useHomeAccess } from "./homeAccess";
@@ -18,7 +17,6 @@ import { ordersHref } from "./homeLinks";
 export function Flows() {
   const { t } = useTranslation("directions-home");
   const { t: tParts } = useTranslation("directions-parts");
-  const direction = useDirection();
   const access = useHomeAccess();
   const flow = useTrackerFlow({ query: { enabled: access.tracker } });
   const steps = flow.data?.data.steps ?? [];
@@ -36,7 +34,7 @@ export function Flows() {
       id: step.id,
       title,
       count: step.count,
-      href: ordersHref(direction, step.id, step.statuses),
+      href: ordersHref(step.id, step.statuses),
       linkLabel: t("flows.opens", { step: title, count: step.count }),
       busiest: step.id === busiest?.id,
       note: t("flows.orders", { count: step.count }),
@@ -78,7 +76,7 @@ export function Flows() {
       ) : (
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-2">
-            <h3 className="fs-13 font-semibold">{t("flows.sales")}</h3>
+            <h3 className="fs-14 font-semibold">{t("flows.sales")}</h3>
             <FlowRow
               label={tParts("journey.flows.sales")}
               labels={labels}
@@ -86,13 +84,13 @@ export function Flows() {
             />
           </div>
           <div className="flex flex-col gap-2">
-            <h3 className="fs-13 font-semibold">{t("flows.purchase")}</h3>
+            <h3 className="fs-14 font-semibold">{t("flows.purchase")}</h3>
             <FlowRow
               label={tParts("journey.flows.purchase")}
               labels={labels}
               cells={purchase}
             />
-            <p className="fs-13 text-muted-foreground">
+            <p className="fs-14 text-muted-foreground">
               {t("flows.purchaseNote")}
             </p>
           </div>

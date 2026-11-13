@@ -31,7 +31,7 @@ export function SignInHero() {
       <div className="flex max-w-2xl flex-col gap-5">
         <h1
           id="dx-signin-promise"
-          className="dx-knock fs-44 font-semibold tracking-tight text-balance max-lg:text-(length:--type-28)"
+          className="dx-knock fs-32 font-semibold tracking-tight text-balance max-lg:text-(length:--type-28)"
         >
           <BlurText text={tCommon("app.tagline")} stagger={0.12} />
         </h1>
@@ -53,14 +53,14 @@ export function SignInHero() {
             >
               <span
                 aria-hidden="true"
-                className="numeral fs-28 block leading-none text-ring [[data-direction=paper]_&]:text-(length:--type-44)"
+                className="numeral fs-28 block leading-none text-ring"
               >
                 {index + 1}
               </span>
               <h2 className="fs-14 font-semibold">
                 {t(`signin.steps.${step}.title`)}
               </h2>
-              <p className="fs-13 text-foreground lg:text-muted-foreground">
+              <p className="fs-14 text-foreground lg:text-muted-foreground">
                 {t(`signin.steps.${step}.body`)}
               </p>
             </BlurFade>

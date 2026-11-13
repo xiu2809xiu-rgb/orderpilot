@@ -43,7 +43,7 @@ export function SparkKitSection() {
         aria-label={t("demo.orb.switch")}
         className="mb-4 flex flex-wrap items-center gap-2"
       >
-        <span className="fs-13 text-muted-foreground">
+        <span className="fs-14 text-muted-foreground">
           {t("demo.orb.switch")}
         </span>
         {STATES.map((value) => (
@@ -76,7 +76,7 @@ export function SparkKitSection() {
             }}
             className="w-full py-6"
           />
-          <span role="status" className="fs-13 text-muted-foreground">
+          <span role="status" className="fs-14 text-muted-foreground">
             {chosenLine}
           </span>
         </ItemCard>
@@ -91,7 +91,7 @@ export function SparkKitSection() {
               onSend={setSent}
             />
           </div>
-          <span role="status" className="fs-13 text-muted-foreground">
+          <span role="status" className="fs-14 text-muted-foreground">
             {sent === null
               ? t("demo.prompt.idle")
               : t("demo.prompt.sent", { text: sent })}
@@ -126,7 +126,7 @@ export function SparkKitSection() {
             className="size-40"
             onEngine={setEngine}
           />
-          <span role="status" className="fs-13 text-muted-foreground">
+          <span role="status" className="fs-14 text-muted-foreground">
             {engine === null
               ? t("demo.orb.pending")
               : t("demo.orb.engine", {

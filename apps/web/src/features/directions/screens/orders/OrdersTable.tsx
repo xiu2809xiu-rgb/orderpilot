@@ -10,7 +10,6 @@ import type { TableStatus } from "@/components/common/data-table/DataTableBody";
 import { DataTableHead } from "@/components/common/data-table/DataTableHead";
 import { Table } from "@/components/ui/table";
 import { orderHref } from "../home/homeLinks";
-import { useDirection } from "../../frame/useDirection";
 import { OrderRowMenu } from "./OrderRowMenu";
 import type { OrderRow } from "./orderRow";
 import type { Sort, SortId } from "./ordersQuery";
@@ -73,7 +72,6 @@ export function OrdersTable({
   onClearFilters: () => void;
 }) {
   const { t } = useTranslation("directions-orders");
-  const direction = useDirection();
   const tableSort: TableSort | null = sort
     ? { columnId: sort.id, direction: sort.direction }
     : null;
@@ -124,7 +122,7 @@ export function OrdersTable({
             cell: (row) => (
               <OrderRowMenu
                 orderNo={row.orderNo}
-                href={orderHref(direction, row.orderNo)}
+                href={orderHref(row.orderNo)}
                 onPeek={() => {
                   onPeek(row.orderNo);
                 }}

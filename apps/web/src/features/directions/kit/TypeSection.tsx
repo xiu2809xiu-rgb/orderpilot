@@ -3,12 +3,12 @@ import { Section } from "../parts/Section";
 
 const SIZES = [
   [12, "fs-12"],
-  [13, "fs-13"],
+  [13, "fs-14"],
   [14, "fs-14"],
   [16, "fs-16"],
   [20, "fs-20"],
   [28, "fs-28"],
-  [44, "fs-44"],
+  [44, "fs-32"],
 ] as const;
 
 export function TypeSection() {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { parseColor } from "../../tokens/contrast";
+import { parseColor } from "@/styles/contrast";
 
 type Rgb = readonly [number, number, number];
 
@@ -19,8 +19,8 @@ function read(names: readonly string[]): Rgb[] {
 
 /**
  * The colours of the named tokens as 0 to 1 triples for a shader, read from the
- * page and read again whenever the direction or the scheme changes (both are
- * attributes of the root element). Where a token is missing (a test) it is
+ * page and read again whenever the scheme changes (it is a class of the
+ * root element). Where a token is missing (a test) it is
  * mid grey, so a canvas never throws over a colour.
  */
 export function useTokenRgb(names: readonly string[]): Rgb[] {
@@ -37,7 +37,7 @@ export function useTokenRgb(names: readonly string[]): Rgb[] {
     const observer = new MutationObserver(update);
     observer.observe(document.documentElement, {
       attributes: true,
-      attributeFilter: ["class", "data-direction"],
+      attributeFilter: ["class"],
     });
     return () => {
       observer.disconnect();

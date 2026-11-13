@@ -1,14 +1,13 @@
 import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { Direction } from "../directions";
 import { PreviewPalette } from "./PreviewPalette";
 
 /**
  * The search and jump field of the top bar. It is a button that reads like a
  * field and opens the palette; Ctrl K or Command K opens it from anywhere.
  */
-export function SearchField({ direction }: { direction: Direction }) {
+export function SearchField() {
   const { t } = useTranslation("directions");
   const [open, setOpen] = useState(false);
 
@@ -46,11 +45,7 @@ export function SearchField({ direction }: { direction: Direction }) {
           {t("bar.keys")}
         </kbd>
       </button>
-      <PreviewPalette
-        direction={direction}
-        open={open}
-        onOpenChange={setOpen}
-      />
+      <PreviewPalette open={open} onOpenChange={setOpen} />
     </>
   );
 }

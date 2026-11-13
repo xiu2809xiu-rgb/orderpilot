@@ -4,7 +4,7 @@ import type { Journey } from "./journeyModel";
 import { journeyDetails } from "./journeyText";
 
 /**
- * The nine steps of an order as the direction's own rail, each with its state
+ * The nine steps of an order as the rail, each with its state
  * in words and the line the data supports: who and when for a done step, the
  * wait against the usual time for the current one, the expected day for a
  * later one. The same component is full in the order page and vertical in the

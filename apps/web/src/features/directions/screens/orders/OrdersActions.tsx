@@ -7,8 +7,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { screenPath } from "../../directions";
-import { useDirection } from "../../frame/useDirection";
+import { screenPath } from "../../screens";
 import { isBuilt } from "../../screens";
 import { useSessionStore } from "@/stores/session";
 
@@ -20,7 +19,6 @@ import { useSessionStore } from "@/stores/session";
  */
 export function OrdersActions() {
   const { t } = useTranslation("directions-orders");
-  const direction = useDirection();
   const permissions = useSessionStore((state) => state.session?.permissions);
   const mayCreate = permissions?.includes("orders.create") ?? false;
   const mayUpload = permissions?.includes("documents.upload") ?? false;
@@ -43,7 +41,7 @@ export function OrdersActions() {
       {mayUpload ? (
         isBuilt("upload") ? (
           <Button asChild variant="outline" className="pointer-coarse:h-11">
-            <Link to={screenPath(direction, "upload")}>{upload}</Link>
+            <Link to={screenPath("upload")}>{upload}</Link>
           </Button>
         ) : (
           <Tooltip>
@@ -56,7 +54,7 @@ export function OrdersActions() {
                 {upload}
               </Button>
             </TooltipTrigger>
-            <TooltipContent className="fs-13">
+            <TooltipContent className="fs-14">
               {t("actions.uploadUnavailable")}
             </TooltipContent>
           </Tooltip>

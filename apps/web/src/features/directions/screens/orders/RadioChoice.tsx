@@ -26,7 +26,7 @@ export function RadioChoice<T extends string>({
   const all = [{ value: null, label: anyLabel }, ...options] as const;
   return (
     <fieldset className="space-y-1">
-      <legend className="fs-13 font-medium">{legend}</legend>
+      <legend className="fs-14 font-medium">{legend}</legend>
       <div className="flex flex-wrap gap-x-4">
         {all.map((option) => (
           <label

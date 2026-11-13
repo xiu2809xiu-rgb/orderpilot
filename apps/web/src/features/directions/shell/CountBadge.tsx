@@ -14,7 +14,7 @@ const countBadge = cva(
       },
       size: {
         sm: "fs-12 h-5 min-w-5",
-        md: "fs-13 h-6 min-w-6",
+        md: "fs-14 h-6 min-w-6",
       },
     },
     defaultVariants: { tone: "accent", size: "sm" },
@@ -23,7 +23,7 @@ const countBadge = cva(
 
 type CountBadgeProps = ComponentProps<"span"> & VariantProps<typeof countBadge>;
 
-/** A number beside a name: tabular, from the direction's own figure face. */
+/** A number beside a name: tabular. */
 export function CountBadge({
   className,
   tone,

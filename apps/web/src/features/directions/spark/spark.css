@@ -1,6 +1,5 @@
 /* Spark: the panel, the head, the still orb and the glow while it opens.
-   Colours, radii and motion are the direction's tokens. */
-
+   Colours, radii and motion are the design tokens. */
 .spark-panel {
   position: fixed;
   z-index: 50;
@@ -12,6 +11,7 @@
   overflow: hidden;
   color: var(--foreground);
 }
+
 @media (min-width: 40rem) {
   .spark-panel {
     width: 420px;
@@ -23,13 +23,8 @@
     right: var(--dx-panel-edge, 0rem);
   }
 }
-:root[data-direction="spectra"] .spark-panel {
+.spark-panel {
   border-radius: var(--radius-card);
-}
-/* Ink and Paper: a hairline at the edge, no shadow. */
-:root[data-direction="ink"] .spark-panel,
-:root[data-direction="paper"] .spark-panel {
-  border-width: 0 0 0 1px;
 }
 
 .spark-orb-wrap {
@@ -40,10 +35,12 @@
     width var(--motion-slow, 200ms) var(--ease-out, ease-out),
     height var(--motion-slow, 200ms) var(--ease-out, ease-out);
 }
+
 .spark-head[data-compact="true"] .spark-orb-wrap {
   width: 56px;
   height: 56px;
 }
+
 .spark-head[data-compact="false"] .spark-orb-wrap {
   width: 168px;
   height: 168px;
@@ -55,12 +52,14 @@
       spark-in var(--motion-slow, 200ms) var(--ease-out, ease-out) both,
       spark-glow 700ms var(--ease-out, ease-out) backwards;
   }
+
   .spark-panel[data-state="closed"] {
     animation: spark-out var(--motion-base, 160ms) var(--ease-out, ease-out)
       both;
   }
+
   /* Spectra moves its panels on a spring (stiffness about 260, damping about 28). */
-  :root[data-direction="spectra"] .spark-panel[data-state="open"] {
+  .spark-panel[data-state="open"] {
     animation:
       spark-in 480ms
         linear(
@@ -77,11 +76,13 @@
         both,
       spark-glow 700ms var(--ease-out, ease-out) backwards;
   }
+
   @keyframes spark-in {
     from {
       opacity: 0;
       transform: translateX(28px);
     }
+
     to {
       opacity: 1;
       transform: none;
@@ -100,6 +101,7 @@
         0 0 0 2px color-mix(in srgb, var(--ring) 55%, transparent),
         0 0 48px color-mix(in srgb, var(--ring) 40%, transparent);
     }
+
     to {
       box-shadow:
         0 0 0 0 transparent,
@@ -107,9 +109,8 @@
     }
   }
 }
-
 /* The still orb: what shows under reduced motion, and where neither WebGPU
-   nor WebGL works. A lit sphere in the direction's accent, drawn in CSS. */
+   nor WebGL works. A lit sphere in the accent, drawn in CSS. */
 .spark-orb-still {
   position: absolute;
   inset: 6%;
@@ -130,6 +131,7 @@
     0 0 0 1px color-mix(in srgb, var(--ring) 30%, transparent),
     0 0 32px color-mix(in srgb, var(--ring) 32%, transparent);
 }
+
 .spark-orb-still[data-state="thinking"] {
   box-shadow:
     0 0 0 1px color-mix(in srgb, var(--ring) 55%, transparent),

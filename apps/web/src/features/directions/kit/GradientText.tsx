@@ -5,7 +5,7 @@ import "./kit.css";
 
 interface GradientTextProps {
   children: ReactNode;
-  /** CSS colours, two or more: direction tokens by default. */
+  /** CSS colours, two or more: the design tokens by default. */
   colors?: readonly string[];
   /** Seconds for one slow sweep. */
   duration?: number;

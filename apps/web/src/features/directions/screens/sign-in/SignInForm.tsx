@@ -71,11 +71,11 @@ export function SignInForm() {
             },
           })}
         />
-        <p id={`${id}-email-help`} className="fs-13 text-muted-foreground">
+        <p id={`${id}-email-help`} className="fs-14 text-muted-foreground">
           {t("signin.form.emailHelp")}
         </p>
         {errors.email ? (
-          <p id={`${id}-email-error`} className="fs-13 text-destructive">
+          <p id={`${id}-email-error`} className="fs-14 text-destructive">
             {errors.email.message}
           </p>
         ) : null}
@@ -113,11 +113,11 @@ export function SignInForm() {
             <Eye_ aria-hidden="true" />
           </Button>
         </div>
-        <p id={`${id}-password-help`} className="fs-13 text-muted-foreground">
+        <p id={`${id}-password-help`} className="fs-14 text-muted-foreground">
           {t("signin.form.passwordHelp")}
         </p>
         {errors.password ? (
-          <p id={`${id}-password-error`} className="fs-13 text-destructive">
+          <p id={`${id}-password-error`} className="fs-14 text-destructive">
             {errors.password.message}
           </p>
         ) : null}

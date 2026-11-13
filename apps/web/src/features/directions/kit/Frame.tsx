@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
  * panels inset by a few pixels, each with a smaller radius so the corners run
  * parallel. It is how Orders groups its table and its peek, and how a detail
  * page sets a group of related panels together. The panel radius is the
- * frame's less its padding, from the direction's card radius.
+ * frame's less its padding, from the card radius.
  */
 export function Frame({ className, style, ...props }: ComponentProps<"div">) {
   return (
@@ -75,7 +75,7 @@ export function FrameDescription({ className, ...props }: ComponentProps<"p">) {
   return (
     <p
       data-slot="frame-description"
-      className={cn("fs-13 text-muted-foreground", className)}
+      className={cn("fs-14 text-muted-foreground", className)}
       {...props}
     />
   );

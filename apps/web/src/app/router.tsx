@@ -71,31 +71,35 @@ export function buildRoutes(
         {
           element: <RequireAuth />,
           children: [
-            // The design directions preview draws its own panel and bar, so it
-            // sits beside AppShell, not inside it. Its code is one lazy chunk.
+            // A prototype screen draws its own panel and bar, so it sits
+            // beside AppShell, not inside it. It is open to a demo session and
+            // in no menu. Its code is one lazy chunk.
             {
-              path: "directions",
+              path: "preview",
               element: <RequireDemo />,
               children: [
                 {
                   index: true,
-                  element: <Navigate to="/directions/ink/kit" replace />,
+                  element: <Navigate to="/preview/kit" replace />,
                 },
                 {
-                  path: ":direction",
-                  children: [
-                    { index: true, element: <Navigate to="kit" replace /> },
-                    {
-                      path: ":screen",
-                      lazy: async () => ({
-                        Component: (
-                          await import("@/features/directions/DirectionsFrame")
-                        ).DirectionsFrame,
-                      }),
-                    },
-                  ],
+                  path: ":screen",
+                  lazy: async () => ({
+                    Component: (
+                      await import("@/features/directions/PreviewFrame")
+                    ).PreviewFrame,
+                  }),
                 },
               ],
+            },
+            // The old addresses of the three-design preview lead to it.
+            {
+              path: "directions/*",
+              lazy: async () => ({
+                Component: (
+                  await import("@/features/directions/OldPreviewAddress")
+                ).OldPreviewAddress,
+              }),
             },
             {
               element: <AppShell />,

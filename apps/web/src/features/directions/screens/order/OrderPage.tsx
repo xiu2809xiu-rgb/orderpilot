@@ -8,8 +8,7 @@ import { ApiError } from "@/lib/api/errors";
 import { useOrdersOne } from "@/lib/api/generated/endpoints/orders/orders";
 import { useTrackerList } from "@/lib/api/generated/endpoints/tracker/tracker";
 import { isForbidden } from "@/lib/query-status";
-import { screenPath } from "../../directions";
-import { useDirection } from "../../frame/useDirection";
+import { screenPath } from "../../screens";
 import { EmptyState } from "../../parts/EmptyState";
 import { PageHeader } from "../../parts/PageHeader";
 import { Section } from "../../parts/Section";
@@ -49,7 +48,6 @@ function untracked(detail: SalesOrderDetail): OrderTimeline {
 export function OrderPage({ orderNo }: { orderNo: string }) {
   const { t } = useTranslation("directions-orders");
   const { t: tc } = useTranslation("common");
-  const direction = useDirection();
   usePageCrumb(orderNo);
   const { timeline, order, journey } = useOrderJourney(orderNo);
   const detail = useOrdersOne(orderNo);
@@ -64,7 +62,7 @@ export function OrderPage({ orderNo }: { orderNo: string }) {
 
   const back = (
     <Button asChild variant="ghost" size="sm" className="od-back">
-      <Link to={screenPath(direction, "orders")}>
+      <Link to={screenPath("orders")}>
         <ArrowLeft aria-hidden="true" />
         {t("order.back")}
       </Link>

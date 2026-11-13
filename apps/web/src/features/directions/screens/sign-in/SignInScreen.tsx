@@ -1,21 +1,18 @@
 import { useTranslation } from "react-i18next";
-import { useDirection } from "../../frame/useDirection";
 import { BorderBeam } from "../../kit/BorderBeam";
 import { RoleButtons } from "./RoleButtons";
 import { SignInForm } from "./SignInForm";
 import { SignInGround } from "./SignInGround";
 import { SignInHero } from "./SignInHero";
-import "./signin.css";
 
 /**
- * The sign-in page, in show mode: the direction's own ground, the promise on
+ * The sign-in page, in show mode: the aurora ground, the promise on
  * the left and the form on the right, with the nine demo roles under it. It
  * fills the window, without the side panel or the top bar. It is a
  * prototype: nothing here signs anyone in.
  */
 export default function SignInScreen() {
   const { t } = useTranslation("directions-home");
-  const direction = useDirection();
   return (
     <div className="relative isolate grid min-h-full lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
       <SignInGround />
@@ -33,9 +30,7 @@ export default function SignInScreen() {
             <RoleButtons />
           </div>
           <p className="fs-12 text-muted-foreground">{t("signin.data")}</p>
-          {direction === "spectra" ? (
-            <BorderBeam size={90} duration={8} />
-          ) : null}
+          <BorderBeam size={90} duration={8} />
         </div>
       </section>
     </div>

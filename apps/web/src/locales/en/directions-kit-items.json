@@ -17,8 +17,8 @@
       "intro": "The structure of the product screens: the journey, the activity, labels, frames, messages and file icons."
     },
     "grounds": {
-      "title": "Sign-in grounds",
-      "intro": "One ground for each direction, drawn in its own accent. The canvas ones pause when off screen or when the tab is hidden, and hold a still frame under reduced motion."
+      "title": "Grounds",
+      "intro": "The aurora behind the sign-in page and the dots of an empty state. The canvas one pauses when off screen or when the tab is hidden, and holds a still frame under reduced motion."
     },
     "orb": {
       "title": "LerSent001 orb",
@@ -26,7 +26,7 @@
     },
     "spark": {
       "title": "Upload and Spark",
-      "intro": "The drop zone and prompt bar that the upload screen and Spark use, and the two orbs that head Spark. Each reads the direction's tokens."
+      "intro": "The drop zone and prompt bar that the upload screen and Spark use, and the two orbs that head Spark. Each reads the design tokens."
     }
   },
   "vendorLine": "{{vendor}}, {{licence}}",
@@ -39,8 +39,6 @@
     "shinyText": "Shiny text",
     "circularProgress": "Circular progress",
     "dotPattern": "Dot pattern",
-    "gridPattern": "Grid pattern",
-    "splitFlap": "Split-flap numerals",
     "gradientText": "Gradient text",
     "blurText": "Blur text",
     "spotlightCard": "Spotlight card",
@@ -49,7 +47,6 @@
     "latticeLoader": "Lattice loader",
     "thoughtLine": "Thought line",
     "holdButton": "Hold button",
-    "dither": "Dither",
     "aurora": "Aurora",
     "stepper": "Stepper",
     "timeline": "Timeline",
@@ -142,9 +139,8 @@
       "png": "PNG image"
     },
     "ground": {
-      "ink": "For Ink",
-      "paper": "For Paper",
-      "spectra": "For Spectra"
+      "dots": "Empty state",
+      "aurora": "Sign-in"
     },
     "drop": {
       "title": "Drop files here",
@@ -182,7 +178,7 @@
   },
   "summary": {
     "title": "Kits in use",
-    "intro": "{{count}} items from three kits and one orb, each shown live below in the current direction. Each one reads the direction's tokens, holds still under reduced motion and pauses when it is off screen.",
+    "intro": "{{count}} items from three kits and one orb, each shown live below. Each one reads the design tokens, holds still under reduced motion and pauses when it is off screen.",
     "items_one": "item",
     "items_other": "items",
     "jump": "Jump to a section",
@@ -190,9 +186,9 @@
   },
   "parts": {
     "title": "Product parts",
-    "intro": "The parts the screens are made from. Each one is built on kit items from the sections above and takes the direction's look from its tokens.",
+    "intro": "The parts the screens are made from. Each one is built on kit items from the sections above and takes its look from the design tokens.",
     "builtOn": "Built on {{items}}",
-    "alone": "Built on the direction's tokens",
+    "alone": "Built on the design tokens",
     "names": {
       "journeyRail": "Journey rail",
       "statusChip": "Status chip and due timer",

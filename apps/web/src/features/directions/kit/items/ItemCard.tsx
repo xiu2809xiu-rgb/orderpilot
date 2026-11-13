@@ -63,7 +63,7 @@ export function ItemCard({
         <span className="fs-14 font-medium text-foreground">
           {name ?? t(`items.${item ?? ""}`)}
         </span>
-        <span className="fs-13 text-muted-foreground">{line}</span>
+        <span className="fs-14 text-muted-foreground">{line}</span>
       </figcaption>
     </figure>
   );

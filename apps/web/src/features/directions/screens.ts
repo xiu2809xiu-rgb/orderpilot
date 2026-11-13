@@ -79,6 +79,11 @@ export const PARENT_SCREEN: Partial<Record<ScreenId, ScreenId>> = {
 
 export const DEFAULT_SCREEN: ScreenId = "kit";
 
+/** The address of a prototype screen. */
+export function screenPath(screen: string): string {
+  return `/preview/${screen}`;
+}
+
 export function findScreen(id: string | undefined): ScreenDef | undefined {
   return SCREENS.find((screen) => screen.id === id);
 }

@@ -62,7 +62,7 @@ export function ReviewHead({
             {t("review.classifiedAs", { type: t("review.documentType") })}
           </Badge>
         </div>
-        <p className="numeral fs-13 text-muted-foreground">
+        <p className="numeral fs-14 text-muted-foreground">
           {customer
             ? `${doc.documentNumber}, ${customer.text}`
             : doc.documentNumber}

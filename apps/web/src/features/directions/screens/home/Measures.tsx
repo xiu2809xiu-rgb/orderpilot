@@ -84,7 +84,7 @@ export function Measures({ home }: { home: ReturnType<typeof useHomeTasks> }) {
                 />
               ))}
             </div>
-            <p className="fs-13 mt-4 max-w-prose text-muted-foreground">
+            <p className="fs-14 mt-4 max-w-prose text-muted-foreground">
               {t("measures.lab", { note: kpis.data.data.note })}
             </p>
           </>

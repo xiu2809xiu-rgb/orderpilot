@@ -22,7 +22,7 @@ const STEPS: Record<SparkKind, readonly string[]> = {
 };
 
 const CHOICE =
-  "fs-13 min-h-9 border border-border bg-card px-3 text-left outline-none hover:border-ring focus-visible:ring-2 focus-visible:ring-ring pointer-coarse:min-h-11";
+  "fs-14 min-h-9 border border-border bg-card px-3 text-left outline-none hover:border-ring focus-visible:ring-2 focus-visible:ring-ring pointer-coarse:min-h-11";
 
 /**
  * One exchange: what the person asked, Spark's thought line (what it looked
@@ -91,7 +91,7 @@ export function SparkTurnView({
               )}
             </p>
             {turn.phase === "stopped" ? (
-              <p className="fs-13 text-muted-foreground">
+              <p className="fs-14 text-muted-foreground">
                 {t("thread.stopped")}
               </p>
             ) : null}

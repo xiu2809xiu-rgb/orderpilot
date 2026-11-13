@@ -12,7 +12,7 @@ export interface MaskableAmount {
 /**
  * An amount with its currency, or a mask with the reason in the role's terms
  * ("prices are for roles that work with pricing"). The currency is a small
- * muted prefix, so the figure itself can be set large (Paper) without the
+ * muted prefix, so the figure itself can be set large without the
  * code beside it taking the room; they still read as one money value. The
  * server decides what is hidden; the figure is never in the page while it is.
  */

@@ -113,7 +113,7 @@ export function TimelineDate({ className, ...props }: ComponentProps<"time">) {
   return (
     <time
       data-slot="timeline-date"
-      className={cn("numeral fs-13 block text-muted-foreground", className)}
+      className={cn("numeral fs-14 block text-muted-foreground", className)}
       {...props}
     />
   );
@@ -126,7 +126,7 @@ export function TimelineContent({
   return (
     <div
       data-slot="timeline-content"
-      className={cn("fs-13 text-muted-foreground", className)}
+      className={cn("fs-14 text-muted-foreground", className)}
       {...props}
     />
   );

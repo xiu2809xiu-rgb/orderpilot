@@ -9,16 +9,13 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { screenPath, type Direction } from "../directions";
-import { SCREENS } from "../screens";
+import { SCREENS, screenPath } from "../screens";
 
 /** Jump to a screen of the preview. It lists only screens that are built. */
 export function PreviewPalette({
-  direction,
   open,
   onOpenChange,
 }: {
-  direction: Direction;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
@@ -58,7 +55,7 @@ export function PreviewPalette({
               value={t(`screens.${id}.title`)}
               onSelect={() => {
                 onOpenChange(false);
-                void navigate(screenPath(direction, id));
+                void navigate(screenPath(id));
               }}
             >
               {t(`screens.${id}.title`)}

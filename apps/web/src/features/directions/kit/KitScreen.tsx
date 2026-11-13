@@ -16,7 +16,7 @@ import { TableSection } from "./TableSection";
 import { TypeSection } from "./TypeSection";
 
 /**
- * The kit sheet: the current direction's tokens, then every kit item in use
+ * The kit sheet: the design's tokens, then every kit item in use
  * (Magic UI, React Bits, ReUI) and the product parts built on them, all live.
  * It is the proof that the kits are used.
  */

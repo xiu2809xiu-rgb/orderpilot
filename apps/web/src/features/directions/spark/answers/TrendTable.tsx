@@ -9,7 +9,7 @@ export function TrendTable({ facts }: { facts: TrendFacts }) {
       className="max-h-56 overflow-auto border border-border"
       style={{ borderRadius: "var(--radius-card)" }}
     >
-      <table className="fs-13 w-full border-collapse">
+      <table className="fs-14 w-full border-collapse">
         <caption className="sr-only">{t("trend.table")}</caption>
         <thead className="sticky top-0 bg-card text-muted-foreground">
           <tr className="border-b border-border">

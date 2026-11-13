@@ -22,7 +22,7 @@ interface MaskedValueProps {
  * A figure the person's role may not see, shown as a mask. The reason appears
  * when the mask is focused or hovered, and a screen reader hears it as the
  * mask's description, so "hidden" is never unexplained. An unmasked value is
- * plain text in the direction's figure face. The server decides; this only
+ * plain text, tabular. The server decides; this only
  * shows it.
  */
 export function MaskedValue({

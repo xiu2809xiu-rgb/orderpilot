@@ -7,9 +7,9 @@ export type Rgb = readonly [number, number, number];
 export interface OrbTokens {
   /** The panel behind the orb. */
   ground: Rgb;
-  /** The direction's accent: lime, blue or teal. */
+  /** The accent: teal. */
   accent: Rgb;
-  /** The direction's information colour, a second hue to blend towards. */
+  /** The information colour, a second hue to blend towards. */
   info: Rgb;
   /** The text colour: the light that the highlights are tinted from. */
   ink: Rgb;
@@ -25,7 +25,7 @@ const mix = (a: Rgb, b: Rgb, amount: number): Rgb => [
 const BLACK: Rgb = [0.01, 0.015, 0.03];
 const WHITE: Rgb = [1, 1, 1];
 
-/** The orb's tokens, read again when the direction or the scheme changes. */
+/** The orb's tokens, read again when the scheme changes. */
 export function useOrbTokens(): OrbTokens {
   const [ground, accent, info, ink] = useTokenRgb([
     "--popover",
@@ -49,8 +49,7 @@ export function useOrbTokens(): OrbTokens {
 /**
  * The colours of the orb in one state. Idle is the accent held low over a deep
  * body; thinking brings the accent up, blends in the information hue and
- * lights the highlights. Both come from the direction's tokens, so lime, blue
- * and teal each get their own orb. The body is a deep tone of the accent in
+ * lights the highlights. Both come from the design tokens. The body is a deep tone of the accent in
  * every scheme: the orb is a lit glass, not a patch of the panel.
  */
 export function orbColours(tokens: OrbTokens, state: OrbState) {
@@ -85,7 +84,7 @@ const luminance = (c: Rgb) => 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
 /**
  * What the WebGL orb is drawn with. Its ring is light on a dark ground, so on
  * a light panel it would wash out to grey. There it sits on a deep disc of the
- * direction's text colour, which is also how the WebGPU orb looks on a light
+ * text colour, which is also how the WebGPU orb looks on a light
  * panel: a dark lit glass, not a ring on white.
  */
 export function webglLook(tokens: OrbTokens, state: OrbState) {

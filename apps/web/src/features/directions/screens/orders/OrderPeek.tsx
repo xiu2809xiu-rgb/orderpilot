@@ -14,7 +14,6 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { ApiError } from "@/lib/api/errors";
 import { formatDay, todayInSingapore } from "@/lib/format";
-import { useDirection } from "../../frame/useDirection";
 import { orderHref } from "../home/homeLinks";
 import { OrderJourney } from "../order/OrderJourney";
 import { ShipLine } from "../order/ShipLine";
@@ -44,7 +43,6 @@ export function OrderPeek({
   roleLabel: (role: NonNullable<OrderRow["ownerRole"]>) => string;
 }) {
   const { t } = useTranslation("directions-orders");
-  const direction = useDirection();
   const { timeline, journey } = useOrderJourney(row?.orderNo ?? null);
   const notInTracker =
     timeline.error instanceof ApiError && timeline.error.code === "NOT_FOUND";
@@ -64,7 +62,7 @@ export function OrderPeek({
                 {row.customerName ?? row.customerNo}
               </SheetDescription>
               <div className="od-peek-step">
-                <span className="numeral fs-13 text-muted-foreground">
+                <span className="numeral fs-14 text-muted-foreground">
                   {t("peek.position", { position, total })}
                 </span>
                 <Button
@@ -156,7 +154,7 @@ export function OrderPeek({
             </ScrollRegion>
             <SheetFooter className="od-peek-foot">
               <Button asChild className="pointer-coarse:h-11">
-                <Link to={orderHref(direction, row.orderNo)}>
+                <Link to={orderHref(row.orderNo)}>
                   {t("peek.open")}
                   <ArrowRight aria-hidden="true" />
                 </Link>

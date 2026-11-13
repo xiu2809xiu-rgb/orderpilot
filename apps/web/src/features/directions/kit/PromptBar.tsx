@@ -144,7 +144,7 @@ export function PromptBar({
 
   return (
     <div className={cn("flex flex-col gap-1.5", className)}>
-      <label htmlFor={id} className="fs-13 font-medium text-foreground">
+      <label htmlFor={id} className="fs-14 font-medium text-foreground">
         {label}
       </label>
       <div

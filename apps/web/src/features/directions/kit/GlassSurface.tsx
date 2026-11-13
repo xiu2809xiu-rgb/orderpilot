@@ -10,13 +10,11 @@ type GlassSurfaceProps = ComponentProps<"div"> & {
 };
 
 /**
- * A pane of frosted glass: the panel colour of the direction over a blur and a
- * saturation lift, with a hairline highlight along the top edge and the
- * direction's glow. It is Spectra's surface. Only the CSS-filter path of
- * React Bits' item is kept; its SVG refraction is dropped because it bends
- * the text behind it, and text on a surface must stay readable. In Ink and
- * Paper the panel variables are flat, so the same part reads as a plain
- * ruled panel.
+ * A pane of frosted glass: the panel colour over a blur and a saturation
+ * lift, with a hairline highlight along the top edge and the glow. It is the
+ * design's surface. Only the CSS-filter path of React Bits' item is kept; its
+ * SVG refraction is dropped because it bends the text behind it, and text on
+ * a surface must stay readable.
  */
 export function GlassSurface({
   work = false,

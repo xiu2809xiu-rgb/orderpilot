@@ -6,18 +6,15 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import type { Direction } from "../directions";
 import type { ScreenId } from "../screens";
 import { SidePanel } from "./SidePanel";
 
 /** The same panel in a sheet, below the md breakpoint. */
 export function MobileMenu({
-  direction,
   screen,
   open,
   onOpenChange,
 }: {
-  direction: Direction;
   screen: ScreenId;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -42,7 +39,6 @@ export function MobileMenu({
           <SheetDescription>{t("panel.menuDescription")}</SheetDescription>
         </SheetHeader>
         <SidePanel
-          direction={direction}
           screen={screen}
           collapsed={false}
           onNavigate={() => {

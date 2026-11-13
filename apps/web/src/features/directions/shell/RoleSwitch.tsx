@@ -50,7 +50,7 @@ export function RoleSwitch() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64">
-        <DropdownMenuLabel className="fs-13 font-normal text-muted-foreground">
+        <DropdownMenuLabel className="fs-14 font-normal text-muted-foreground">
           {t("common:demo.switcherHint")}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

@@ -27,8 +27,7 @@ const ICON: Record<Tone, LucideIcon> = {
 /**
  * A status as a chip: a word and an icon, whatever the colour. The word is the
  * tone's own unless the caller has a more exact one ("Packing list differs").
- * The chip's shape is the direction's: ruled and square in Ink and Paper, a
- * pill in Spectra.
+ * The chip is a pill.
  */
 export function StatusTag({ tone, label }: { tone: Tone; label?: string }) {
   const { t } = useTranslation("directions-parts");

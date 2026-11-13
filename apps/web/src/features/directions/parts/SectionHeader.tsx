@@ -4,9 +4,7 @@ import "./parts.css";
 
 /**
  * The heading of a block that is not itself a card: "Needs you", "My
- * timeline". Ink rules it, Spectra leaves it plain, and Paper hangs it in the
- * margin column under the same running number the cards use (01, 02, 03), so
- * the numbers stay in step down the page. A count sits beside the title in
+ * timeline". It is plain, on the ground. A count sits beside the title in
  * tabular figures, and the actions that belong to the block sit to the right.
  */
 export function SectionHeader({
@@ -27,7 +25,7 @@ export function SectionHeader({
         {count === undefined ? null : (
           <>
             {" "}
-            <span className="dx-sh-count numeral fs-13">{count}</span>
+            <span className="dx-sh-count numeral fs-14">{count}</span>
           </>
         )}
       </h2>

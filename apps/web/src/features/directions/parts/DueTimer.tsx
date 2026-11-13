@@ -35,7 +35,7 @@ export function DueTimer({ due, now, className }: DueTimerProps) {
       {parts.tone === "later" ? (
         <span
           className={cn(
-            "fs-13 numeral inline-flex items-center gap-1.5 text-muted-foreground",
+            "fs-14 numeral inline-flex items-center gap-1.5 text-muted-foreground",
           )}
         >
           <Clock className="size-3.5" aria-hidden="true" />

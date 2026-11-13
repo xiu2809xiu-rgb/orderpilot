@@ -46,7 +46,7 @@ export function DocumentPage({
                 onPage(number);
               }}
               className={cn(
-                "fs-13 min-h-9 border px-3 font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring pointer-coarse:min-h-11",
+                "fs-14 min-h-9 border px-3 font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring pointer-coarse:min-h-11",
                 number === page
                   ? "border-ring bg-accent text-accent-foreground"
                   : "border-border text-muted-foreground hover:text-foreground",

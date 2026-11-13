@@ -7,7 +7,6 @@ import i18n from "@/i18n";
 import { createQueryClient } from "@/lib/query";
 import { axeViolations } from "@/test/axe";
 import { optionsFixture } from "@/test/fixtures";
-import type { Direction } from "../../directions";
 import SignInScreen from "./SignInScreen";
 
 function stubOptions() {
@@ -24,15 +23,12 @@ function stubOptions() {
   );
 }
 
-function signIn(direction: Direction = "ink") {
+function signIn() {
   return render(
     <QueryClientProvider client={createQueryClient()}>
-      <MemoryRouter initialEntries={[`/directions/${direction}/signin`]}>
+      <MemoryRouter initialEntries={["/preview/signin"]}>
         <Routes>
-          <Route
-            path="/directions/:direction/:screen"
-            element={<SignInScreen />}
-          />
+          <Route path="/preview/:screen" element={<SignInScreen />} />
         </Routes>
       </MemoryRouter>
     </QueryClientProvider>,
@@ -142,14 +138,10 @@ describe("the sign-in screen", () => {
     ).toBeVisible();
   });
 
-  it.each<Direction>(["ink", "paper", "spectra"])(
-    "has no accessibility violation in %s",
-    async (direction) => {
-      stubOptions();
-      const { container } = signIn(direction);
-      await screen.findByRole("list", { name: "Demo roles" });
-      expect(await axeViolations(container)).toEqual([]);
-    },
-    60_000,
-  );
+  it("has no accessibility violation", async () => {
+    stubOptions();
+    const { container } = signIn();
+    await screen.findByRole("list", { name: "Demo roles" });
+    expect(await axeViolations(container)).toEqual([]);
+  }, 60_000);
 });

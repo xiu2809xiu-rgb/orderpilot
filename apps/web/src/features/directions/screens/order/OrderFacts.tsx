@@ -14,7 +14,7 @@ function Fact({
 }: {
   label: string;
   children: ReactNode;
-  /** The figure the eye should land on: set larger in Paper and Spectra. */
+  /** The figure the eye should land on: set larger. */
   main?: boolean;
 }) {
   return (

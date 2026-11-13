@@ -16,7 +16,6 @@ import { createQueryClient } from "@/lib/query";
 import { useSessionStore } from "@/stores/session";
 import { axeViolations } from "@/test/axe";
 import { sessionFor } from "@/test/fixtures";
-import type { Direction } from "../../directions";
 import HomeScreen from "./HomeScreen";
 
 // The tasks and the flow are what the real API would send: the same shapes,
@@ -136,15 +135,12 @@ function nth(items: readonly HTMLElement[], at: number): HTMLElement {
   return item;
 }
 
-function home(direction: Direction = "ink") {
+function home() {
   return render(
     <QueryClientProvider client={createQueryClient()}>
-      <MemoryRouter initialEntries={[`/directions/${direction}/home`]}>
+      <MemoryRouter initialEntries={["/preview/home"]}>
         <Routes>
-          <Route
-            path="/directions/:direction/:screen"
-            element={<HomeScreen />}
-          />
+          <Route path="/preview/:screen" element={<HomeScreen />} />
         </Routes>
       </MemoryRouter>
     </QueryClientProvider>,
@@ -221,7 +217,7 @@ describe("the home screen", () => {
     ).toHaveAttribute("href", "/orders/new");
     expect(
       screen.getByRole("link", { name: "Upload a document" }),
-    ).toHaveAttribute("href", "/directions/ink/upload");
+    ).toHaveAttribute("href", "/preview/upload");
   });
 
   it("builds My timeline from the tasks and says where the estimate comes from", async () => {
@@ -333,15 +329,11 @@ describe("the home screen", () => {
     ).toBeVisible();
   });
 
-  it.each<Direction>(["ink", "paper", "spectra"])(
-    "has no accessibility violation in %s",
-    async (direction) => {
-      stubApi();
-      const { container } = home(direction);
-      await screen.findByRole("heading", { name: "My timeline" });
-      await screen.findByText("106");
-      expect(await axeViolations(container)).toEqual([]);
-    },
-    60_000,
-  );
+  it("has no accessibility violation", async () => {
+    stubApi();
+    const { container } = home();
+    await screen.findByRole("heading", { name: "My timeline" });
+    await screen.findByText("106");
+    expect(await axeViolations(container)).toEqual([]);
+  }, 60_000);
 });

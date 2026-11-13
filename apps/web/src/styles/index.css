@@ -2,10 +2,10 @@
 @import "tw-animate-css";
 @import "./fonts.css";
 @import "./tokens.css";
-/* Spectra is the product's design (P-107). Its tokens sit over the ones above
-   while the document carries data-direction="spectra" (set in index.html). */
-@import "../features/directions/tokens/base.css";
-@import "../features/directions/tokens/spectra.css";
+@import "./type.css";
+@import "./surfaces.css";
+@import "./chrome.css";
+@import "./motion.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -17,22 +17,23 @@
   --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono Variable", ui-monospace, monospace;
 
-  /* Seven type sizes and no more (CLAUDE.md section 8). Tailwind's names are
-     kept so tailwind-merge understands them. */
+  /* Seven type sizes and no more (CLAUDE.md section 8), read from the
+     --type-* tokens. Tailwind's names are kept so tailwind-merge understands
+     them. */
   --text-*: initial;
-  --text-xs: 0.75rem;
+  --text-xs: var(--type-12);
   --text-xs--line-height: 1rem;
-  --text-sm: 0.875rem;
+  --text-sm: var(--type-14);
   --text-sm--line-height: 1.25rem;
-  --text-base: 1rem;
+  --text-base: var(--type-16);
   --text-base--line-height: 1.5rem;
-  --text-lg: 1.125rem;
+  --text-lg: var(--type-18);
   --text-lg--line-height: 1.75rem;
-  --text-xl: 1.25rem;
+  --text-xl: var(--type-20);
   --text-xl--line-height: 1.75rem;
-  --text-2xl: 1.5rem;
-  --text-2xl--line-height: 2rem;
-  --text-3xl: 2rem;
+  --text-2xl: var(--type-28);
+  --text-2xl--line-height: 2.125rem;
+  --text-3xl: var(--type-32);
   --text-3xl--line-height: 2.5rem;
 
   --color-background: var(--background);

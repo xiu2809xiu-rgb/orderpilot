@@ -39,7 +39,7 @@ export function ShipLine({
         {t("ship.expected", { day: formatWeekday(ship.date) })}
       </p>
       {past !== null ? (
-        <p className="fs-13 flex flex-wrap items-center gap-2 text-muted-foreground">
+        <p className="fs-14 flex flex-wrap items-center gap-2 text-muted-foreground">
           {past > 0 ? (
             <StatusChip kind="destructive" icon={TriangleAlert}>
               {t("ship.later", { count: past })}
@@ -53,7 +53,7 @@ export function ShipLine({
         </p>
       ) : null}
       {missing ? (
-        <p className="fs-13 text-muted-foreground">
+        <p className="fs-14 text-muted-foreground">
           {t("ship.missing", { steps: missing })}
         </p>
       ) : null}

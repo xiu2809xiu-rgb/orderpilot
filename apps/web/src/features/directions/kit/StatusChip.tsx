@@ -5,8 +5,7 @@ export type StatusKind = "success" | "warning" | "destructive" | "info";
 
 /**
  * A status: always a word and an icon, never a colour alone. It is the ReUI
- * badge in its status colours, with the direction's own shape: ruled and
- * square in Ink and Paper, a pill in Spectra.
+ * badge in its status colours, as a pill.
  */
 export function StatusChip({
   kind,

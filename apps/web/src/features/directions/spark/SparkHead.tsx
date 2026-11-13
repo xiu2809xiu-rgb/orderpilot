@@ -36,7 +36,7 @@ export function SparkHead({ compact, state, onNew, onClose }: SparkHeadProps) {
         <Dialog.Title className="fs-20 font-semibold text-foreground">
           {t("title")}
         </Dialog.Title>
-        <p className="fs-13 text-muted-foreground" role="status">
+        <p className="fs-14 text-muted-foreground" role="status">
           {t(`status.${state === "thinking" ? "thinking" : "idle"}`)}
         </p>
         <Dialog.Description className="sr-only">
