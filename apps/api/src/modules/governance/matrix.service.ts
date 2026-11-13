@@ -22,22 +22,36 @@ import {
   assertCanRevoke,
   planCopy,
 } from "./domain/matrix-rules.js";
+import { RevokedPermissionRepository } from "./revoked-permission.repository.js";
 
 /**
  * Reads and edits the role-permission matrix. Every change is made in one
  * transaction with its audit event, so a change without a trail cannot exist.
  * The permissions guard reads the same table on each request, so a change
- * takes effect at once.
+ * takes effect at once. A revocation is also recorded, so the seed leaves the
+ * pair out (ADR 0053), and granting the pair again forgets it.
  */
 @Injectable()
 export class MatrixService {
   constructor(
     @Inject(RolePermissionRepository)
     private readonly permissions: RolePermissionRepository,
+    @Inject(RevokedPermissionRepository)
+    private readonly revoked: RevokedPermissionRepository,
     @Inject(DataScopeRepository) private readonly scopes: DataScopeRepository,
     @Inject(AuditService) private readonly audit: AuditService,
     @Inject(Database) private readonly database: Database,
   ) {}
+
+  private async grant(role: Role, permission: Permission): Promise<void> {
+    await this.permissions.grant(role, permission);
+    await this.revoked.forget(role, permission);
+  }
+
+  private async revoke(role: Role, permission: Permission): Promise<void> {
+    await this.permissions.revoke(role, permission);
+    await this.revoked.record(role, permission);
+  }
 
   async matrix(): Promise<Matrix> {
     const [pairs, scopes] = await Promise.all([
@@ -74,8 +88,8 @@ export class MatrixService {
       else assertCanRevoke(role, permission);
       const already = await this.permissions.has(role, permission);
       if (already !== granted) {
-        if (granted) await this.permissions.grant(role, permission);
-        else await this.permissions.revoke(role, permission);
+        if (granted) await this.grant(role, permission);
+        else await this.revoke(role, permission);
         await this.audit.record({
           actor: { kind: "user", userId: actor.user.id, role: actor.user.role },
           action: granted
@@ -138,10 +152,10 @@ export class MatrixService {
       ]);
       const plan = planCopy(fromRole, toRole, source, target);
       for (const permission of plan.grant) {
-        await this.permissions.grant(toRole, permission);
+        await this.grant(toRole, permission);
       }
       for (const permission of plan.revoke) {
-        await this.permissions.revoke(toRole, permission);
+        await this.revoke(toRole, permission);
       }
       await this.scopes.set(toRole, scope);
       await this.audit.record({

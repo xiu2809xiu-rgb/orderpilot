@@ -436,7 +436,8 @@
                               "workflows.read",
                               "spr.read",
                               "workflows.inboxes.any",
-                              "tasks.complete"
+                              "tasks.complete",
+                              "masking.customerNote"
                             ]
                           }
                         },
@@ -540,7 +541,8 @@
                               "workflows.read",
                               "spr.read",
                               "workflows.inboxes.any",
-                              "tasks.complete"
+                              "tasks.complete",
+                              "masking.customerNote"
                             ]
                           }
                         },
@@ -679,7 +681,8 @@
                               "workflows.read",
                               "spr.read",
                               "workflows.inboxes.any",
-                              "tasks.complete"
+                              "tasks.complete",
+                              "masking.customerNote"
                             ]
                           }
                         },
@@ -811,7 +814,8 @@
                               "workflows.read",
                               "spr.read",
                               "workflows.inboxes.any",
-                              "tasks.complete"
+                              "tasks.complete",
+                              "masking.customerNote"
                             ]
                           }
                         },
@@ -8650,7 +8654,8 @@
                               "workflows.read",
                               "spr.read",
                               "workflows.inboxes.any",
-                              "tasks.complete"
+                              "tasks.complete",
+                              "masking.customerNote"
                             ]
                           }
                         },
@@ -8699,7 +8704,8 @@
                                     "workflows.read",
                                     "spr.read",
                                     "workflows.inboxes.any",
-                                    "tasks.complete"
+                                    "tasks.complete",
+                                    "masking.customerNote"
                                   ]
                                 }
                               },
@@ -8755,7 +8761,8 @@
                                   "workflows.read",
                                   "spr.read",
                                   "workflows.inboxes.any",
-                                  "tasks.complete"
+                                  "tasks.complete",
+                                  "masking.customerNote"
                                 ]
                               },
                               "kind": {
@@ -8899,7 +8906,8 @@
                 "workflows.read",
                 "spr.read",
                 "workflows.inboxes.any",
-                "tasks.complete"
+                "tasks.complete",
+                "masking.customerNote"
               ]
             }
           },
@@ -8991,7 +8999,8 @@
                               "workflows.read",
                               "spr.read",
                               "workflows.inboxes.any",
-                              "tasks.complete"
+                              "tasks.complete",
+                              "masking.customerNote"
                             ]
                           }
                         },
@@ -9171,7 +9180,8 @@
                               "workflows.read",
                               "spr.read",
                               "workflows.inboxes.any",
-                              "tasks.complete"
+                              "tasks.complete",
+                              "masking.customerNote"
                             ]
                           }
                         },
@@ -9355,7 +9365,8 @@
                               "workflows.read",
                               "spr.read",
                               "workflows.inboxes.any",
-                              "tasks.complete"
+                              "tasks.complete",
+                              "masking.customerNote"
                             ]
                           }
                         },

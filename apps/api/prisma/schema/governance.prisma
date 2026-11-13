@@ -2,7 +2,8 @@
 //
 // The role-permission matrix itself is RolePermission in platform.prisma (P-10
 // created it, area 4 owns its contents). What area 4 adds here is the data
-// scope of a role, each user's approval setup (F-3) and the bank-detail hold (F-5).
+// scope of a role, each user's approval setup (F-3), the bank-detail hold (F-5)
+// and the pairs revoked on purpose (F-8).
 
 /// Which records a role may see: "all", "brands" or "own" (the names are in
 /// @orderpilot/shared). A role with no row reads as its default. The base
@@ -11,6 +12,17 @@ model RoleDataScope {
   role      Role     @id
   scope     String
   updatedAt DateTime @updatedAt @db.Timestamptz(3)
+}
+
+/// A role-permission pair someone revoked on the matrix, so the seed never adds
+/// it back (F-8, ADR 0053). Granting the pair again removes its row. A default
+/// pair that is missing with no row here is still added, as a new one must be.
+model RevokedRolePermission {
+  role       Role
+  permission String
+  revokedAt  DateTime @default(now()) @db.Timestamptz(3)
+
+  @@id([role, permission])
 }
 
 /// One user's approval setup, in the shape of Navision's Approval User Setup

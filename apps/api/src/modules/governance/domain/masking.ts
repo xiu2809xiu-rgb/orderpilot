@@ -1,8 +1,9 @@
-import type {
-  Classification,
-  MaskedField,
-  MaskingRule,
-  Role,
+import {
+  ROLES,
+  type Classification,
+  type MaskedField,
+  type MaskingRule,
+  type Role,
 } from "@orderpilot/shared";
 
 /**
@@ -74,22 +75,36 @@ const accountRule = (field: string, label: string): MaskingRule => ({
   sample: true,
 });
 
-/** First an internal customer note floor roles do not need, then master data's rules. */
-export const SAMPLE_RULES: readonly MaskingRule[] = [
-  {
+/**
+ * The sample note's rule, for the roles the matrix says may see it: whoever
+ * holds `masking.customerNote` (F-8). The roles keep the matrix's order, so the
+ * screen lists them as the matrix does.
+ */
+export function sampleNoteRule(holders: readonly Role[]): MaskingRule {
+  const set = new Set(holders);
+  return {
     field: "sample.customerNote",
     label: "Customer note (sample rule)",
     classification: "internal",
     reason: "role",
-    visibleTo: [
-      "PRODUCT_MANAGER",
-      "APPROVER",
-      "SUPPORT",
-      "MANAGEMENT",
-      "AUDITOR",
-    ],
+    visibleTo: ROLES.filter((role) => set.has(role)),
     sample: true,
-  },
+  };
+}
+
+/**
+ * First an internal customer note floor roles do not need, then master data's
+ * rules. The note's roles here are the default matrix's; the masking sample
+ * reads the live matrix instead (PolicyService).
+ */
+export const SAMPLE_RULES: readonly MaskingRule[] = [
+  sampleNoteRule([
+    "PRODUCT_MANAGER",
+    "APPROVER",
+    "SUPPORT",
+    "MANAGEMENT",
+    "AUDITOR",
+  ]),
   bankRule("vendor.bankName", "Vendor bank name"),
   bankRule("vendor.bankAccountNo", "Vendor bank account number"),
   bankRule("vendor.swiftCode", "Vendor SWIFT code"),

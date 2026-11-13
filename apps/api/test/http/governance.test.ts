@@ -3,9 +3,12 @@ import {
   ROLES,
   errorEnvelopeSchema,
   matrixSchema,
+  type Permission,
   type Role,
 } from "@orderpilot/shared";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { RolePermissionRepository } from "../../src/auth/role-permission.repository.js";
+import { runSeed } from "../../src/database/seed/run-seed.js";
 import {
   API,
   auditEvents,
@@ -13,7 +16,7 @@ import {
   demoSignIn,
   type Browser,
 } from "../support/auth.js";
-import { resetTestData } from "../support/reset.js";
+import { resetTestData, testConfig } from "../support/reset.js";
 import { createTestApp, type TestApp } from "../support/test-app.js";
 
 const MATRIX = `${API}/governance/matrix`;
@@ -341,6 +344,69 @@ describe("governance: the role-permission matrix over HTTP", () => {
         reason: "role",
       });
     });
+
+    // F-8: the rule's roles are a row of the matrix, not code.
+    const NOTE = "masking.customerNote";
+    const noteCell = (role: Role) => `${MATRIX}/${role}/permissions/${NOTE}`;
+    interface Sample {
+      data: {
+        rules: { field: string; visibleTo: Role[] }[];
+        records: {
+          note: { masked: boolean; value: string | null; reason: string };
+        }[];
+      };
+    }
+    const sampleOf = async (role: Role) => (await sample(role)).body as Sample;
+    const noteRule = (body: Sample) =>
+      body.data.rules.find((rule) => rule.field === "sample.customerNote");
+
+    it("takes who sees the note from the matrix", async () => {
+      const res = await call(t, as("SYSTEM_ADMIN"), "get", MATRIX);
+      const matrix = matrixSchema.parse((res.body as { data: unknown }).data);
+      const holders = matrix.roles
+        .filter((access) =>
+          (access.permissions as readonly string[]).includes(NOTE),
+        )
+        .map((access) => access.role);
+      expect(holders.length).toBeGreaterThan(0);
+      expect(noteRule(await sampleOf("SUPPORT"))?.visibleTo).toEqual(holders);
+    });
+
+    it("hides the note from a role the matrix stops showing it to, with the reason", async () => {
+      const change = await put("SYSTEM_ADMIN", noteCell("SUPPORT"), {
+        granted: false,
+      });
+      expect(change.status).toBe(200);
+      try {
+        const body = await sampleOf("SUPPORT");
+        expect(noteRule(body)?.visibleTo).not.toContain("SUPPORT");
+        expect(body.data.records.length).toBeGreaterThan(0);
+        for (const record of body.data.records) {
+          expect(record.note).toMatchObject({
+            masked: true,
+            value: null,
+            reason: "role",
+          });
+        }
+      } finally {
+        await put("SYSTEM_ADMIN", noteCell("SUPPORT"), { granted: true });
+      }
+    });
+
+    it("shows the note to a role the matrix starts showing it to", async () => {
+      const change = await put("SYSTEM_ADMIN", noteCell("WAREHOUSE"), {
+        granted: true,
+      });
+      expect(change.status).toBe(200);
+      try {
+        const body = await sampleOf("WAREHOUSE");
+        expect(noteRule(body)?.visibleTo).toContain("WAREHOUSE");
+        expect(body.data.records[0]?.note.masked).toBe(false);
+        expect(body.data.records[0]?.note.value).toBeTruthy();
+      } finally {
+        await put("SYSTEM_ADMIN", noteCell("WAREHOUSE"), { granted: false });
+      }
+    });
   });
 
   describe("what data may go to which AI provider", () => {
@@ -377,6 +443,121 @@ describe("governance: the role-permission matrix over HTTP", () => {
       expect(
         (refused.body as { data: { allowed: boolean; rule: string } }).data,
       ).toMatchObject({ allowed: false, rule: "synthetic-data-only" });
+    });
+  });
+
+  describe("the seed and a permission revoked on purpose (F-8)", () => {
+    /** Runs the real seed, as `pnpm db:seed` does, and returns its matrix line. */
+    const seed = async () => {
+      const lines: string[] = [];
+      await runSeed(testConfig(), (line) => lines.push(line));
+      return lines.find((line) => line.startsWith("seed role permissions:"));
+    };
+    const cell = (role: Role, permission: string) =>
+      `${MATRIX}/${role}/permissions/${permission}`;
+    /** Takes a pair out of the table without the matrix, as a story that adds a default finds it. */
+    const removeQuietly = (role: Role, permission: Permission) =>
+      t.app.get(RolePermissionRepository).revoke(role, permission);
+
+    it("keeps a permission revoked on the matrix revoked through the next seed", async () => {
+      const path = cell("WAREHOUSE", "exceptions.read");
+      expect((await put("SYSTEM_ADMIN", path, { granted: false })).status).toBe(
+        200,
+      );
+      try {
+        await seed();
+        expect((await access("WAREHOUSE")).permissions).not.toContain(
+          "exceptions.read",
+        );
+      } finally {
+        await put("SYSTEM_ADMIN", path, { granted: true });
+      }
+    });
+
+    it("keeps what a copy took away revoked through the next seed", async () => {
+      // Whatever Support holds that Warehouse does not: the copy takes it all.
+      const source = new Set((await access("WAREHOUSE")).permissions);
+      const taken = (await access("SUPPORT")).permissions.filter(
+        (permission) => !source.has(permission),
+      );
+      expect(taken.length).toBeGreaterThan(0);
+      const copy = await post("SYSTEM_ADMIN", `${MATRIX}/copy`, {
+        fromRole: "WAREHOUSE",
+        toRole: "SUPPORT",
+      });
+      expect(copy.status).toBe(200);
+      try {
+        await seed();
+        const held: readonly string[] = (await access("SUPPORT")).permissions;
+        for (const permission of taken) {
+          expect(held, permission).not.toContain(permission);
+        }
+      } finally {
+        for (const permission of taken) {
+          await put("SYSTEM_ADMIN", cell("SUPPORT", permission), {
+            granted: true,
+          });
+        }
+      }
+    });
+
+    it("says in its log how many default pairs stay revoked, and counts no other pair", async () => {
+      /** How many the seed's line says stay out: none when it says nothing. */
+      const staysOut = (line: string | undefined) =>
+        Number(
+          /, and (\d+) revoked on purpose stays? out$/.exec(line ?? "")?.[1] ??
+            0,
+        );
+      const before = staysOut(await seed());
+      const path = cell("WAREHOUSE", "tracker.read");
+      // Not a default for Warehouse, so the log must not count it.
+      const other = cell("WAREHOUSE", "users.read");
+      for (const granted of [true, false]) {
+        expect((await put("SYSTEM_ADMIN", other, { granted })).status).toBe(
+          200,
+        );
+      }
+      expect((await put("SYSTEM_ADMIN", path, { granted: false })).status).toBe(
+        200,
+      );
+      try {
+        expect(staysOut(await seed())).toBe(before + 1);
+      } finally {
+        await put("SYSTEM_ADMIN", path, { granted: true });
+      }
+    });
+
+    it("still adds a default pair that is missing with no revocation, as a new default would be", async () => {
+      await removeQuietly("LOGISTICS", "tracker.read");
+      await seed();
+      expect((await access("LOGISTICS")).permissions).toContain("tracker.read");
+    });
+
+    it("forgets a revocation once the permission is granted again", async () => {
+      const path = cell("FINANCE", "tracker.read");
+      for (const granted of [false, true]) {
+        expect((await put("SYSTEM_ADMIN", path, { granted })).status).toBe(200);
+      }
+      await removeQuietly("FINANCE", "tracker.read");
+      await seed();
+      expect((await access("FINANCE")).permissions).toContain("tracker.read");
+    });
+
+    it("forgets a revocation when a copy gives the permission back", async () => {
+      const path = cell("WAREHOUSE", "exceptions.read");
+      expect((await put("SYSTEM_ADMIN", path, { granted: false })).status).toBe(
+        200,
+      );
+      const copy = await post("SYSTEM_ADMIN", `${MATRIX}/copy`, {
+        fromRole: "SUPPORT",
+        toRole: "WAREHOUSE",
+      });
+      expect(copy.status).toBe(200);
+      await removeQuietly("WAREHOUSE", "exceptions.read");
+      await seed();
+      expect((await access("WAREHOUSE")).permissions).toContain(
+        "exceptions.read",
+      );
     });
   });
 });
