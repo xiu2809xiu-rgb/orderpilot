@@ -24,7 +24,7 @@ import type {
   AuthOptions200,
   AuthRefresh200,
   DemoAuthDemoLogin200
-} from '../../model';
+} from '../../model/index';
 
 
 export const getAuthOptionsResponseMock = (overrideResponse: Partial<Extract<AuthOptions200, object>> = {}): AuthOptions200 => ({data: {demoMode: faker.datatype.boolean(), demoRoles: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({role: faker.helpers.arrayElement(['SYSTEM_ADMIN','PRODUCT_MANAGER','APPROVER','SUPPORT','WAREHOUSE','FINANCE','LOGISTICS','MANAGEMENT','AUDITOR'] as const), displayName: faker.string.alpha({length: {min: 1, max: 20}})}))}, ...overrideResponse})

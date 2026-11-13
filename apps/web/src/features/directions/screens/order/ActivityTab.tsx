@@ -1,7 +1,7 @@
 import type { TimelineStep } from "@orderpilot/shared";
 import { History } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Badge } from "../../kit/Badge";
+import { Badge } from "@/components/kit/Badge";
 import {
   Timeline,
   TimelineContent,
@@ -11,8 +11,8 @@ import {
   TimelineItem,
   TimelineSeparator,
   TimelineTitle,
-} from "../../kit/Timeline";
-import { EmptyState } from "../../parts/EmptyState";
+} from "@/components/kit/Timeline";
+import { EmptyState } from "@/components/parts/EmptyState";
 import { OrderOperationLog } from "../orders/OrderOperationLog";
 
 const STAMP = new Intl.DateTimeFormat("en-SG", {

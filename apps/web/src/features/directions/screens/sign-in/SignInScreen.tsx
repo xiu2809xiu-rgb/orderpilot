@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { BorderBeam } from "../../kit/BorderBeam";
+import { BorderBeam } from "@/components/kit/BorderBeam";
 import { RoleButtons } from "./RoleButtons";
 import { SignInForm } from "./SignInForm";
 import { SignInGround } from "./SignInGround";

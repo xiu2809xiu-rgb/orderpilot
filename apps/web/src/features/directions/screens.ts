@@ -65,7 +65,7 @@ export const SCREENS: readonly ScreenDef[] = [
   },
   {
     id: "kit",
-    Component: lazy(() => import("./kit/KitScreen")),
+    Component: lazy(() => import("./screens/kit/KitScreen")),
   },
 ];
 

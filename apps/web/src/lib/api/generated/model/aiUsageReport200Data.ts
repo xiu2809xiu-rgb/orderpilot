@@ -5,9 +5,9 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { AiUsageReport200DataByFeatureItem } from './aiUsageReport200DataByFeatureItem.ts';
-import type { AiUsageReport200DataRecordsItem } from './aiUsageReport200DataRecordsItem.ts';
-import type { AiUsageReport200DataSummary } from './aiUsageReport200DataSummary.ts';
+import type { AiUsageReport200DataByFeatureItem } from './aiUsageReport200DataByFeatureItem';
+import type { AiUsageReport200DataRecordsItem } from './aiUsageReport200DataRecordsItem';
+import type { AiUsageReport200DataSummary } from './aiUsageReport200DataSummary';
 
 export type AiUsageReport200Data = {
   summary: AiUsageReport200DataSummary;

@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { JourneyRail, type RailSize } from "../../parts/JourneyRail";
+import { JourneyRail, type RailSize } from "@/components/parts/JourneyRail";
 import type { Journey } from "./journeyModel";
 import { journeyDetails } from "./journeyText";
 

@@ -19,7 +19,7 @@ import type {
 
 import type {
   SystemChecks200
-} from '../../model';
+} from '../../model/index';
 
 
 export const getSystemChecksResponseMock = (overrideResponse: Partial<Extract<SystemChecks200, object>> = {}): SystemChecks200 => ({data: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({name: faker.string.alpha({length: {min: 10, max: 20}})})), meta: {page: faker.number.int({min: 1, max: 9007199254740991}), pageSize: faker.number.int({min: 1, max: 200}), total: faker.number.int({min: 0, max: 9007199254740991})}, ...overrideResponse})

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { median, quantile, rootMeanSquare, round } from "./stats.ts";
+import { median, quantile, rootMeanSquare, round } from "./stats";
 
 describe("stats", () => {
   it("finds quantiles by linear interpolation", () => {

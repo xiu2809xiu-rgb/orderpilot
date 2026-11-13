@@ -9,7 +9,7 @@ import {
   surface,
   type Tokens,
 } from "@/styles/contrast";
-import { Section } from "../parts/Section";
+import { Section } from "@/components/parts/Section";
 import { useTokens } from "./useTokens";
 
 const SWATCHES = [

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Toaster } from "@/components/common";
 import { useSessionStore } from "@/stores/session";
-import { PageHeader } from "../../parts/PageHeader";
+import { PageHeader } from "@/components/parts/PageHeader";
 import type { DoneItem } from "./doneToday";
 import { Flows } from "./Flows";
 import { HomeActions } from "./HomeActions";

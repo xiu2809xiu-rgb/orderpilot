@@ -19,7 +19,7 @@ import type {
 
 import type {
   OperationLogList200
-} from '../../model';
+} from '../../model/index';
 
 
 export const getOperationLogListResponseMock = (overrideResponse: Partial<Extract<OperationLogList200, object>> = {}): OperationLogList200 => ({data: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.string.uuid(), occurredAt: faker.date.past().toISOString().slice(0, 19) + 'Z', actorKind: faker.helpers.arrayElement(['user','system','ai'] as const), actorName: faker.string.alpha({length: {min: 10, max: 20}}), actorRole: faker.helpers.arrayElement([faker.helpers.arrayElement(['SYSTEM_ADMIN','PRODUCT_MANAGER','APPROVER','SUPPORT','WAREHOUSE','FINANCE','LOGISTICS','MANAGEMENT','AUDITOR'] as const), null]), summary: faker.string.alpha({length: {min: 10, max: 20}})})), meta: {page: faker.number.int({min: 1, max: 9007199254740991}), pageSize: faker.number.int({min: 1, max: 200}), total: faker.number.int({min: 0, max: 9007199254740991})}, ...overrideResponse})

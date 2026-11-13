@@ -1,14 +1,14 @@
 import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Section } from "../../parts/Section";
-import { BlurText } from "../BlurText";
-import { GlassSurface } from "../GlassSurface";
-import { GradientText } from "../GradientText";
-import { HoldButton } from "../HoldButton";
-import { LatticeLoader } from "../LatticeLoader";
-import { SpotlightCard } from "../SpotlightCard";
-import { StatusMark } from "../StatusMark";
-import { ThoughtLine } from "../ThoughtLine";
+import { Section } from "@/components/parts/Section";
+import { BlurText } from "@/components/kit/BlurText";
+import { GlassSurface } from "@/components/kit/GlassSurface";
+import { GradientText } from "@/components/kit/GradientText";
+import { HoldButton } from "@/components/kit/HoldButton";
+import { LatticeLoader } from "@/components/kit/LatticeLoader";
+import { SpotlightCard } from "@/components/kit/SpotlightCard";
+import { StatusMark } from "@/components/kit/StatusMark";
+import { ThoughtLine } from "@/components/kit/ThoughtLine";
 import { ItemCard } from "./ItemCard";
 
 const STATUSES = ["pending", "running", "done", "failed", "cancelled"] as const;

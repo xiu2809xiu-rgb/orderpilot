@@ -5,8 +5,8 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { OperationLogList200DataItem } from './operationLogList200DataItem.ts';
-import type { OperationLogList200Meta } from './operationLogList200Meta.ts';
+import type { OperationLogList200DataItem } from './operationLogList200DataItem';
+import type { OperationLogList200Meta } from './operationLogList200Meta';
 
 export type OperationLogList200 = {
   data: OperationLogList200DataItem[];

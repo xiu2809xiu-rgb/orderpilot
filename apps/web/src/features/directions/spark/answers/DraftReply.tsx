@@ -4,7 +4,12 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Frame, FrameHeader, FramePanel, FrameTitle } from "../../kit/Frame";
+import {
+  Frame,
+  FrameHeader,
+  FramePanel,
+  FrameTitle,
+} from "@/components/kit/Frame";
 
 /** Not every context has a clipboard: an insecure page does not. */
 function readClipboard(): Clipboard | undefined {

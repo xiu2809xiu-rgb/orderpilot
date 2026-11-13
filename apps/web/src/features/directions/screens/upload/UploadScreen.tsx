@@ -3,15 +3,15 @@ import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { useSessionStore } from "@/stores/session";
-import { LatticeLoader } from "../../kit/LatticeLoader";
+import { LatticeLoader } from "@/components/kit/LatticeLoader";
 import {
   Alert,
   AlertAction,
   AlertDescription,
   AlertTitle,
-} from "../../kit/Alert";
-import { EmptyState } from "../../parts/EmptyState";
-import { PageHeader } from "../../parts/PageHeader";
+} from "@/components/kit/Alert";
+import { EmptyState } from "@/components/parts/EmptyState";
+import { PageHeader } from "@/components/parts/PageHeader";
 import { AddStage } from "./AddStage";
 import { useDemoDocument } from "./demoDocument";
 import { ReadStage } from "./ReadStage";

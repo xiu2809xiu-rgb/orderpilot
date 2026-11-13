@@ -1,4 +1,4 @@
-import { SALES_HISTORY, STOCK_ANSWER } from "../data";
+import { SALES_HISTORY, STOCK_ANSWER } from "../data/index";
 import type { History, StockAnswer, StockItem } from "../data/types";
 
 /** The figures behind Spark's stock answer, read from the generated data file. */

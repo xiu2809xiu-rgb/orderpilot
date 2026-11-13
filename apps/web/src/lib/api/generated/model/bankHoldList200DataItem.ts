@@ -5,13 +5,13 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { BankHoldList200DataItemClearReason } from './bankHoldList200DataItemClearReason.ts';
-import type { BankHoldList200DataItemDifferingFieldsItem } from './bankHoldList200DataItemDifferingFieldsItem.ts';
-import type { BankHoldList200DataItemFieldsItem } from './bankHoldList200DataItemFieldsItem.ts';
-import type { BankHoldList200DataItemResolution } from './bankHoldList200DataItemResolution.ts';
-import type { BankHoldList200DataItemSource } from './bankHoldList200DataItemSource.ts';
-import type { BankHoldList200DataItemStatus } from './bankHoldList200DataItemStatus.ts';
-import type { BankHoldList200DataItemVerificationsItem } from './bankHoldList200DataItemVerificationsItem.ts';
+import type { BankHoldList200DataItemClearReason } from './bankHoldList200DataItemClearReason';
+import type { BankHoldList200DataItemDifferingFieldsItem } from './bankHoldList200DataItemDifferingFieldsItem';
+import type { BankHoldList200DataItemFieldsItem } from './bankHoldList200DataItemFieldsItem';
+import type { BankHoldList200DataItemResolution } from './bankHoldList200DataItemResolution';
+import type { BankHoldList200DataItemSource } from './bankHoldList200DataItemSource';
+import type { BankHoldList200DataItemStatus } from './bankHoldList200DataItemStatus';
+import type { BankHoldList200DataItemVerificationsItem } from './bankHoldList200DataItemVerificationsItem';
 
 export type BankHoldList200DataItem = {
   /** @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */

@@ -1,4 +1,4 @@
-import { extensionOf } from "../../kit/FileType";
+import { extensionOf } from "@/components/kit/FileType";
 
 /** What the preview accepts, written on the drop zone before anyone tries. */
 export const ACCEPTED_KINDS = ["pdf", "png", "jpeg", "xlsx", "csv"] as const;

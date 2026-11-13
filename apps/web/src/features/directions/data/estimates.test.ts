@@ -5,7 +5,7 @@ import {
   expectedShipDate,
   statOf,
   usualDuration,
-} from "./estimates.ts";
+} from "./estimates";
 import { STEP_TIMES } from "./index";
 import type { StepTime } from "./types";
 

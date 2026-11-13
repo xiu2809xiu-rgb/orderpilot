@@ -1,6 +1,6 @@
 import { ArrowUpRight, Package, TrendingUp } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { BlurFade } from "../kit/BlurFade";
+import { BlurFade } from "@/components/kit/BlurFade";
 import type { SparkKind } from "./useSparkChat";
 
 interface SparkEmptyProps {

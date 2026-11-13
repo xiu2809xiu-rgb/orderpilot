@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { prefersReducedMotion } from "../kit/env";
+import { prefersReducedMotion } from "@/components/kit/env";
 
 /** Milliseconds between steps of the stream, and how many words each step adds. */
 const STEP_MS = 38;

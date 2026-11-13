@@ -2,8 +2,8 @@ import { ArrowDown, ArrowLeft, FilePlus2, Sparkles } from "lucide-react";
 import { CONFIDENCE_HIGH } from "@orderpilot/shared";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { Badge } from "../../kit/Badge";
-import { CircularProgress } from "../../kit/CircularProgress";
+import { Badge } from "@/components/kit/Badge";
+import { CircularProgress } from "@/components/kit/CircularProgress";
 import type { DemoDocument } from "./demoDocument";
 
 interface ReviewHeadProps {

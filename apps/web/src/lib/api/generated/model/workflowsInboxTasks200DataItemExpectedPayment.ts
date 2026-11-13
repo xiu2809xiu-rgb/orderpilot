@@ -5,7 +5,7 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { WorkflowsInboxTasks200DataItemExpectedPaymentPaymentType } from './workflowsInboxTasks200DataItemExpectedPaymentPaymentType.ts';
+import type { WorkflowsInboxTasks200DataItemExpectedPaymentPaymentType } from './workflowsInboxTasks200DataItemExpectedPaymentPaymentType';
 
 export type WorkflowsInboxTasks200DataItemExpectedPayment = {
   paymentType: WorkflowsInboxTasks200DataItemExpectedPaymentPaymentType;

@@ -14,7 +14,7 @@ import i18n from "@/i18n";
 import { useSessionStore } from "@/stores/session";
 import { axeViolations } from "@/test/axe";
 import { sessionFor } from "@/test/fixtures";
-import { STOCK_ANSWER } from "../data";
+import { STOCK_ANSWER } from "../data/index";
 import SparkPanel from "./SparkPanel";
 
 // The test runner asks for reduced motion: the pause before an answer is short

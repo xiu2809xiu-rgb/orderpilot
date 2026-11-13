@@ -10,8 +10,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { StatusChip } from "../../kit/StatusChip";
-import { EmptyState } from "../../parts/EmptyState";
+import { StatusChip } from "@/components/kit/StatusChip";
+import { EmptyState } from "@/components/parts/EmptyState";
 
 function Result({ check }: { check: CheckResult }) {
   const { t } = useTranslation("order-tracker");

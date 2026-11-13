@@ -1,7 +1,7 @@
 import { Clock, FileQuestion, PackageMinus, TriangleAlert } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { formatQuantity } from "@/lib/format";
-import { StatusChip } from "../../kit/StatusChip";
+import { StatusChip } from "@/components/kit/StatusChip";
 import { Amount } from "./Amount";
 import { ageInDays, type OrderRow } from "./orderRow";
 

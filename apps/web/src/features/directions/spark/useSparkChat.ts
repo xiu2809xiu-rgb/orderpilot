@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { prefersReducedMotion } from "../kit/env";
+import { prefersReducedMotion } from "@/components/kit/env";
 
 export type SparkKind = "stock" | "trend" | "other";
 export type TurnPhase = "thinking" | "streaming" | "done" | "stopped";

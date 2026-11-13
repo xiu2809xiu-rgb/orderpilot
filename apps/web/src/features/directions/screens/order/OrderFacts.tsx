@@ -3,7 +3,7 @@ import { Clock } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { formatDay } from "@/lib/format";
-import { StatusChip } from "../../kit/StatusChip";
+import { StatusChip } from "@/components/kit/StatusChip";
 import { Amount } from "../orders/Amount";
 import { ALL_DONE } from "../orders/orderRow";
 

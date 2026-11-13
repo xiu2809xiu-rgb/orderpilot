@@ -1,7 +1,7 @@
 import { ExternalLink } from "lucide-react";
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
-import { badgeVariants } from "../../kit/Badge";
+import { badgeVariants } from "@/components/kit/Badge";
 import { cn } from "@/lib/utils";
 import { grouped, type StockFacts } from "../sparkFacts";
 import { DraftReply } from "./DraftReply";

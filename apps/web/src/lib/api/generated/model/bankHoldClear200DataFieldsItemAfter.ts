@@ -5,8 +5,8 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { BankHoldClear200DataFieldsItemAfterClassification } from './bankHoldClear200DataFieldsItemAfterClassification.ts';
-import type { BankHoldClear200DataFieldsItemAfterReason } from './bankHoldClear200DataFieldsItemAfterReason.ts';
+import type { BankHoldClear200DataFieldsItemAfterClassification } from './bankHoldClear200DataFieldsItemAfterClassification';
+import type { BankHoldClear200DataFieldsItemAfterReason } from './bankHoldClear200DataFieldsItemAfterReason';
 
 export type BankHoldClear200DataFieldsItemAfter = {
   /** @minLength 1 */

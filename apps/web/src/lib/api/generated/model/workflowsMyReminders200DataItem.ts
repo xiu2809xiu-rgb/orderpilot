@@ -5,10 +5,10 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { WorkflowsMyReminders200DataItemEscalatedTo } from './workflowsMyReminders200DataItemEscalatedTo.ts';
-import type { WorkflowsMyReminders200DataItemKind } from './workflowsMyReminders200DataItemKind.ts';
-import type { WorkflowsMyReminders200DataItemStage } from './workflowsMyReminders200DataItemStage.ts';
-import type { WorkflowsMyReminders200DataItemToRole } from './workflowsMyReminders200DataItemToRole.ts';
+import type { WorkflowsMyReminders200DataItemEscalatedTo } from './workflowsMyReminders200DataItemEscalatedTo';
+import type { WorkflowsMyReminders200DataItemKind } from './workflowsMyReminders200DataItemKind';
+import type { WorkflowsMyReminders200DataItemStage } from './workflowsMyReminders200DataItemStage';
+import type { WorkflowsMyReminders200DataItemToRole } from './workflowsMyReminders200DataItemToRole';
 
 export type WorkflowsMyReminders200DataItem = {
   /** @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */

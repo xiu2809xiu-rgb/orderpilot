@@ -1,6 +1,6 @@
 import type { WorkflowTask } from "@orderpilot/shared";
 import { describe, expect, it } from "vitest";
-import { STEP_TIMES } from "../../data";
+import { STEP_TIMES } from "../../data/index";
 import { buildTimeline } from "./timelineModel";
 
 const AT = new Date("2026-11-13T06:00:00.000Z");

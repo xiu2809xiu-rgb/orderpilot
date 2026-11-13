@@ -1,7 +1,7 @@
 import { FlaskConical } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { FileDropzone } from "../../kit/FileDropzone";
+import { FileDropzone } from "@/components/kit/FileDropzone";
 import { ACCEPT, MAX_FILES, MAX_MB } from "./uploadRules";
 
 interface DropZoneProps {

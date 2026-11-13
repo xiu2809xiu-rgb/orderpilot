@@ -1,6 +1,6 @@
 import { CircleCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { ShineBorder } from "../../kit/ShineBorder";
+import { ShineBorder } from "@/components/kit/ShineBorder";
 import type { Journey } from "./journeyModel";
 import { usualWords } from "./journeyText";
 import { ShipLine } from "./ShipLine";

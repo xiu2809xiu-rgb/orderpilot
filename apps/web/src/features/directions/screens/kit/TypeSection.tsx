@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Section } from "../parts/Section";
+import { Section } from "@/components/parts/Section";
 
 const SIZES = [
   [12, "fs-12"],

@@ -1,4 +1,4 @@
-import { Aurora } from "../../kit/Aurora";
+import { Aurora } from "@/components/kit/Aurora";
 
 /**
  * The picture behind the sign-in page: the aurora. It is decoration, holds no

@@ -11,7 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatQuantity } from "@/lib/format";
-import { StatusChip } from "../../kit/StatusChip";
+import { StatusChip } from "@/components/kit/StatusChip";
 import { Amount } from "../orders/Amount";
 
 /**

@@ -1,11 +1,21 @@
 import { CircleCheck, Clock, Info, TriangleAlert } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { Section } from "../../parts/Section";
-import { Alert, AlertAction, AlertDescription, AlertTitle } from "../Alert";
-import { Badge } from "../Badge";
-import { FileType } from "../FileType";
-import { Frame, FrameDescription, FramePanel, FrameTitle } from "../Frame";
+import { Section } from "@/components/parts/Section";
+import {
+  Alert,
+  AlertAction,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/kit/Alert";
+import { Badge } from "@/components/kit/Badge";
+import { FileType } from "@/components/kit/FileType";
+import {
+  Frame,
+  FrameDescription,
+  FramePanel,
+  FrameTitle,
+} from "@/components/kit/Frame";
 import {
   Stepper,
   StepperDescription,
@@ -13,7 +23,7 @@ import {
   StepperItem,
   StepperSeparator,
   StepperTitle,
-} from "../Stepper";
+} from "@/components/kit/Stepper";
 import {
   Timeline,
   TimelineContent,
@@ -22,7 +32,7 @@ import {
   TimelineItem,
   TimelineSeparator,
   TimelineTitle,
-} from "../Timeline";
+} from "@/components/kit/Timeline";
 import { ItemCard } from "./ItemCard";
 
 const STEPS = ["po", "stock", "pi", "sent"] as const;

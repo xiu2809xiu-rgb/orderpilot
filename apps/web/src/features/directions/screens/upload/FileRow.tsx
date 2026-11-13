@@ -1,7 +1,7 @@
 import { CircleCheck, TriangleAlert, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { extensionOf, FileType } from "../../kit/FileType";
+import { extensionOf, FileType } from "@/components/kit/FileType";
 import { MAX_FILES, MAX_MB } from "./uploadRules";
 import type { UploadRow } from "./useUploads";
 

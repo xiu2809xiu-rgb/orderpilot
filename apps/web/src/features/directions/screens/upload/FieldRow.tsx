@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { Badge } from "../../kit/Badge";
+import { Badge } from "@/components/kit/Badge";
 import type { DemoField } from "./demoDocument";
 import type { FieldState } from "./useReview";
 

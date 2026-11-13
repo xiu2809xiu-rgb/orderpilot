@@ -4,7 +4,7 @@ import {
   useTrackerFlow,
   useTrackerTimeline,
 } from "@/lib/api/generated/endpoints/tracker/tracker";
-import { STEP_TIMES } from "../../data";
+import { STEP_TIMES } from "../../data/index";
 import { stepOfStatus } from "../orders/orderRow";
 import { buildJourney } from "./journeyModel";
 

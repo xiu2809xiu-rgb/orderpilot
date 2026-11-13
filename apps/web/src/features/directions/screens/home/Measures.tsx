@@ -3,8 +3,8 @@ import { useTranslation } from "react-i18next";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useInsightsKpis } from "@/lib/api/generated/endpoints/insights/insights";
 import { useTrackerFlow } from "@/lib/api/generated/endpoints/tracker/tracker";
-import { KpiTile } from "../../parts/KpiTile";
-import { Section } from "../../parts/Section";
+import { KpiTile } from "@/components/parts/KpiTile";
+import { Section } from "@/components/parts/Section";
 import { useHomeAccess } from "./homeAccess";
 import type { useHomeTasks } from "./useHomeTasks";
 

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { prefersReducedMotion } from "../kit/env";
+import { prefersReducedMotion } from "@/components/kit/env";
 import { SparkTurnView } from "./SparkTurnView";
 import type { SparkKind, Turn } from "./useSparkChat";
 

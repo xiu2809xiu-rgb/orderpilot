@@ -1,6 +1,6 @@
 import type { TimelineStep } from "@orderpilot/shared";
 import { describe, expect, it } from "vitest";
-import { STEP_TIMES } from "../../data";
+import { STEP_TIMES } from "../../data/index";
 import { buildJourney, daysPastShipDate } from "./journeyModel";
 
 const event = (

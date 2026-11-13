@@ -3,7 +3,7 @@ import { ArrowRight, Check } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
-import { DueTimer } from "../../parts/DueTimer";
+import { DueTimer } from "@/components/parts/DueTimer";
 import { orderHref } from "./homeLinks";
 import { canComplete } from "./useCompleteTask";
 

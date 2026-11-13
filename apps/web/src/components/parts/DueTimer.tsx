@@ -1,7 +1,7 @@
 import { Clock, TriangleAlert } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
-import { timerParts } from "../data/timer";
+import { timerParts } from "../../features/directions/data/timer";
 import { StatusChip } from "../kit/StatusChip";
 import { useNow } from "./useNow";
 

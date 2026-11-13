@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { useLatest, useOnScreen, useStill, useTabVisible } from "../../kit/env";
-import { Orb as WebGlOrb } from "../../kit/Orb";
+import {
+  useLatest,
+  useOnScreen,
+  useStill,
+  useTabVisible,
+} from "@/components/kit/env";
+import { Orb as WebGlOrb } from "@/components/kit/Orb";
 import { LiquidOrb } from "./LiquidOrb";
 import { useOrbTokens, webglLook, type OrbState } from "./orbPalette";
 import "../spark.css";

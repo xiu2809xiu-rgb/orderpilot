@@ -2,19 +2,19 @@
 // follow this list. An area adds its feature here and nowhere else in the app
 // shell. Names follow docs/team/module-ownership.md.
 import type { Feature } from "./define";
-import workflows from "./workflows";
-import documents from "./documents";
-import orders from "./orders";
-import orderTracker from "./order-tracker";
-import exceptions from "./exceptions";
-import masterData from "./master-data";
-import insights from "./insights";
-import constellation from "./constellation";
-import governance from "./governance";
-import audit from "./audit";
-import monitoring from "./monitoring";
-import mapping from "./mapping";
-import connectors from "./connectors";
+import workflows from "./workflows/index";
+import documents from "./documents/index";
+import orders from "./orders/index";
+import orderTracker from "./order-tracker/index";
+import exceptions from "./exceptions/index";
+import masterData from "./master-data/index";
+import insights from "./insights/index";
+import constellation from "./constellation/index";
+import governance from "./governance/index";
+import audit from "./audit/index";
+import monitoring from "./monitoring/index";
+import mapping from "./mapping/index";
+import connectors from "./connectors/index";
 
 export const allFeatures: readonly Feature[] = [
   workflows,

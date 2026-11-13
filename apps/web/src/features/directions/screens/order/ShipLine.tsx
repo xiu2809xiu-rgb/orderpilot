@@ -1,7 +1,7 @@
 import { CircleCheck, TriangleAlert } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { formatDay } from "@/lib/format";
-import { StatusChip } from "../../kit/StatusChip";
+import { StatusChip } from "@/components/kit/StatusChip";
 import { daysPastShipDate, type Journey } from "./journeyModel";
 import { formatWeekday } from "./journeyText";
 

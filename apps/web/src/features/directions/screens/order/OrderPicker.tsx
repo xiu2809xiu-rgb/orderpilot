@@ -4,7 +4,7 @@ import { Link, Navigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { useTrackerList } from "@/lib/api/generated/endpoints/tracker/tracker";
 import { screenPath } from "../../screens";
-import { EmptyState } from "../../parts/EmptyState";
+import { EmptyState } from "@/components/parts/EmptyState";
 import { OrderSkeleton } from "./OrderSkeleton";
 
 /**

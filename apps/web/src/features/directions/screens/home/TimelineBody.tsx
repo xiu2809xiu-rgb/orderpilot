@@ -14,9 +14,9 @@ import {
   TimelineItem,
   TimelineSeparator,
   TimelineTitle,
-} from "../../kit/Timeline";
-import { JourneyRail } from "../../parts/JourneyRail";
-import { StatusTag } from "../../parts/StatusTag";
+} from "@/components/kit/Timeline";
+import { JourneyRail } from "@/components/parts/JourneyRail";
+import { StatusTag } from "@/components/parts/StatusTag";
 import type { DoneItem } from "./doneToday";
 import type { TimelineEntry } from "./timelineModel";
 

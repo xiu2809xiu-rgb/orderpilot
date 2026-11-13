@@ -1,12 +1,12 @@
 import { useTranslation } from "react-i18next";
-import { Section } from "../../parts/Section";
-import { AnimatedList } from "../AnimatedList";
-import { BlurFade } from "../BlurFade";
-import { BorderBeam } from "../BorderBeam";
-import { CircularProgress } from "../CircularProgress";
-import { NumberTicker } from "../NumberTicker";
-import { ShineBorder } from "../ShineBorder";
-import { ShinyText } from "../ShinyText";
+import { Section } from "@/components/parts/Section";
+import { AnimatedList } from "@/components/kit/AnimatedList";
+import { BlurFade } from "@/components/kit/BlurFade";
+import { BorderBeam } from "@/components/kit/BorderBeam";
+import { CircularProgress } from "@/components/kit/CircularProgress";
+import { NumberTicker } from "@/components/kit/NumberTicker";
+import { ShineBorder } from "@/components/kit/ShineBorder";
+import { ShinyText } from "@/components/kit/ShinyText";
 import { ItemCard } from "./ItemCard";
 
 /** Magic UI: motion and patterns, each shown live. */

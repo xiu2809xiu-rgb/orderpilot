@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useTokenRgb } from "../../kit/canvas/useTokenRgb";
+import { useTokenRgb } from "@/components/kit/canvas/useTokenRgb";
 
 export type Rgb = readonly [number, number, number];
 

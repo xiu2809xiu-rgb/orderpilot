@@ -5,8 +5,8 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { PolicyMaskingSample200DataRecordsItem } from './policyMaskingSample200DataRecordsItem.ts';
-import type { PolicyMaskingSample200DataRulesItem } from './policyMaskingSample200DataRulesItem.ts';
+import type { PolicyMaskingSample200DataRecordsItem } from './policyMaskingSample200DataRecordsItem';
+import type { PolicyMaskingSample200DataRulesItem } from './policyMaskingSample200DataRulesItem';
 
 export type PolicyMaskingSample200Data = {
   rules: PolicyMaskingSample200DataRulesItem[];

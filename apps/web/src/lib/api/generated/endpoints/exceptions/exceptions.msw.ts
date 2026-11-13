@@ -19,7 +19,7 @@ import type {
 
 import type {
   ExceptionsList200
-} from '../../model';
+} from '../../model/index';
 
 
 export const getExceptionsListResponseMock = (overrideResponse: Partial<Extract<ExceptionsList200, object>> = {}): ExceptionsList200 => ({data: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.string.alpha({length: {min: 1, max: 20}}), orderNo: faker.string.alpha({length: {min: 1, max: 20}}), customerNo: faker.string.alpha({length: {min: 1, max: 20}}), customerName: faker.string.alpha({length: {min: 1, max: 20}}), ruleId: faker.string.alpha({length: {min: 1, max: 20}}), ruleLabel: faker.string.alpha({length: {min: 1, max: 20}}), summary: faker.string.alpha({length: {min: 1, max: 20}}), expected: faker.string.alpha({length: {min: 10, max: 20}}), actual: faker.string.alpha({length: {min: 10, max: 20}}), difference: faker.string.alpha({length: {min: 10, max: 20}}), tolerance: {label: faker.string.alpha({length: {min: 1, max: 20}}), value: faker.string.alpha({length: {min: 1, max: 20}})}, fixBy: faker.helpers.arrayElement(['SYSTEM_ADMIN','PRODUCT_MANAGER','APPROVER','SUPPORT','WAREHOUSE','FINANCE','LOGISTICS','MANAGEMENT','AUDITOR'] as const), state: faker.helpers.arrayElement(['OPEN','RESOLVED'] as const), openedAt: faker.date.past().toISOString().slice(0, 19) + 'Z'})), meta: {page: faker.number.int({min: 1, max: 9007199254740991}), pageSize: faker.number.int({min: 1, max: 200}), total: faker.number.int({min: 0, max: 9007199254740991}), mock: faker.helpers.arrayElement([true] as const)}, ...overrideResponse})

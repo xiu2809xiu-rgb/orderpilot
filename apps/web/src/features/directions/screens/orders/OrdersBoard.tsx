@@ -3,8 +3,8 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { ScrollRegion } from "@/components/common";
 import { SALES_STEP_IDS } from "../../data/estimates";
-import { Badge } from "../../kit/Badge";
-import { Frame, FrameHeader, FrameTitle } from "../../kit/Frame";
+import { Badge } from "@/components/kit/Badge";
+import { Frame, FrameHeader, FrameTitle } from "@/components/kit/Frame";
 import { Amount } from "./Amount";
 import { ALL_DONE, type OrderRow } from "./orderRow";
 

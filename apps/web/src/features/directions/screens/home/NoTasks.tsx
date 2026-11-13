@@ -1,6 +1,6 @@
 import { Lock } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Section } from "../../parts/Section";
+import { Section } from "@/components/parts/Section";
 
 /**
  * What stands in for Needs you and My timeline when the role has no inbox of

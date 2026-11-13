@@ -2,18 +2,21 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Section } from "../../parts/Section";
+import { Section } from "@/components/parts/Section";
 import {
   useOrbTokens,
   webglLook,
   type OrbState,
-} from "../../spark/orb/orbPalette";
-import { SparkOrb, type Engine } from "../../spark/orb/SparkOrb";
-import { FileDropzone } from "../FileDropzone";
-import { Orb } from "../Orb";
-import { PromptBar } from "../PromptBar";
+} from "@/features/directions/spark/orb/orbPalette";
+import {
+  SparkOrb,
+  type Engine,
+} from "@/features/directions/spark/orb/SparkOrb";
+import { FileDropzone } from "@/components/kit/FileDropzone";
+import { Orb } from "@/components/kit/Orb";
+import { PromptBar } from "@/components/kit/PromptBar";
 import { ItemCard } from "./ItemCard";
-import "../../spark/spark.css";
+import "@/features/directions/spark/spark.css";
 
 const STATES = ["idle", "thinking"] as const;
 

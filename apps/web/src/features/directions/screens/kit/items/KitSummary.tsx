@@ -1,8 +1,8 @@
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { prefersReducedMotion } from "../env";
-import { KpiTile } from "../../parts/KpiTile";
-import { Section } from "../../parts/Section";
+import { prefersReducedMotion } from "@/components/kit/env";
+import { KpiTile } from "@/components/parts/KpiTile";
+import { Section } from "@/components/parts/Section";
 import { itemsOf, KIT_ITEMS } from "./registry";
 import type { Vendor } from "./ItemCard";
 

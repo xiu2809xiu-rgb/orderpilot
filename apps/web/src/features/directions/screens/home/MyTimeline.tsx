@@ -1,9 +1,9 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { formatDay } from "@/lib/format";
-import { STEP_TIMES } from "../../data";
-import { Section } from "../../parts/Section";
-import { useNow } from "../../parts/useNow";
+import { STEP_TIMES } from "../../data/index";
+import { Section } from "@/components/parts/Section";
+import { useNow } from "@/components/parts/useNow";
 import type { DoneItem } from "./doneToday";
 import { buildTimeline } from "./timelineModel";
 import { DoneGroup, NextGroup, NowGroup } from "./TimelineBody";

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useIsDark } from "../frame/useIsDark";
+import { useIsDark } from "./useIsDark";
 import type { Tokens } from "@/styles/contrast";
 
 /**

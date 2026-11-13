@@ -5,9 +5,9 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { MatrixRead200DataLockedItem } from './matrixRead200DataLockedItem.ts';
-import type { MatrixRead200DataPermissionsItem } from './matrixRead200DataPermissionsItem.ts';
-import type { MatrixRead200DataRolesItem } from './matrixRead200DataRolesItem.ts';
+import type { MatrixRead200DataLockedItem } from './matrixRead200DataLockedItem';
+import type { MatrixRead200DataPermissionsItem } from './matrixRead200DataPermissionsItem';
+import type { MatrixRead200DataRolesItem } from './matrixRead200DataRolesItem';
 
 export type MatrixRead200Data = {
   permissions: MatrixRead200DataPermissionsItem[];

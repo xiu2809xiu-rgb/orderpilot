@@ -5,7 +5,7 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { BankHoldClear200Data } from './bankHoldClear200Data.ts';
+import type { BankHoldClear200Data } from './bankHoldClear200Data';
 
 export type BankHoldClear200 = {
   data: BankHoldClear200Data;

@@ -14,9 +14,9 @@ import {
   AlertAction,
   AlertDescription,
   AlertTitle,
-} from "../../kit/Alert";
-import { FileType } from "../../kit/FileType";
-import { StatusChip, type StatusKind } from "../../kit/StatusChip";
+} from "@/components/kit/Alert";
+import { FileType } from "@/components/kit/FileType";
+import { StatusChip, type StatusKind } from "@/components/kit/StatusChip";
 import { isBuilt } from "../../screens";
 import {
   documentsOf,

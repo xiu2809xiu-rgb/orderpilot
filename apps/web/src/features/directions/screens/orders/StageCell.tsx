@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { JourneyRail } from "../../parts/JourneyRail";
+import { JourneyRail } from "@/components/parts/JourneyRail";
 import type { OrderRow } from "./orderRow";
 
 /**

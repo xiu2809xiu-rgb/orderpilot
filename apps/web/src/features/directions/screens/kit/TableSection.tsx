@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table";
 import { useTrackerList } from "@/lib/api/generated/endpoints/tracker/tracker";
 import { formatDay, formatMoney } from "@/lib/format";
-import { Section } from "../parts/Section";
+import { Section } from "@/components/parts/Section";
 
 /** Up to `count` rows, a new stage first and the rest in order. */
 function pickByStage<T extends { status: { label: string } }>(

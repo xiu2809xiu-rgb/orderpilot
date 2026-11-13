@@ -5,8 +5,8 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { UsersListActive } from './usersListActive.ts';
-import type { UsersListRole } from './usersListRole.ts';
+import type { UsersListActive } from './usersListActive';
+import type { UsersListRole } from './usersListRole';
 
 export type UsersListParams = {
 /**

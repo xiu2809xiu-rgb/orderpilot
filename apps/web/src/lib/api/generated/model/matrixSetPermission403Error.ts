@@ -5,8 +5,8 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { MatrixSetPermission403ErrorCode } from './matrixSetPermission403ErrorCode.ts';
-import type { MatrixSetPermission403ErrorDetailsItem } from './matrixSetPermission403ErrorDetailsItem.ts';
+import type { MatrixSetPermission403ErrorCode } from './matrixSetPermission403ErrorCode';
+import type { MatrixSetPermission403ErrorDetailsItem } from './matrixSetPermission403ErrorDetailsItem';
 
 export type MatrixSetPermission403Error = {
   code: MatrixSetPermission403ErrorCode;

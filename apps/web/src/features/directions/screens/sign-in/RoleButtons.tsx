@@ -17,7 +17,7 @@ import { useTranslation } from "react-i18next";
 import { useAuthOptions } from "@/app/signin/useAuthOptions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { AnimatedList } from "../../kit/AnimatedList";
+import { AnimatedList } from "@/components/kit/AnimatedList";
 
 const ICONS: Record<Role, LucideIcon> = {
   SYSTEM_ADMIN: Settings2,

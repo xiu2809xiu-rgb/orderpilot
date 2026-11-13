@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { ShinyText } from "../kit/ShinyText";
-import { ThoughtLine } from "../kit/ThoughtLine";
+import { ShinyText } from "@/components/kit/ShinyText";
+import { ThoughtLine } from "@/components/kit/ThoughtLine";
 import { StockAnswerParts, stockSentence } from "./answers/StockAnswer";
 import { TrendAnswerParts, trendSentence } from "./answers/TrendAnswerParts";
 import { stockFacts, trendFacts } from "./sparkFacts";

@@ -5,13 +5,13 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { BankHoldRecordVerification200DataClearReason } from './bankHoldRecordVerification200DataClearReason.ts';
-import type { BankHoldRecordVerification200DataDifferingFieldsItem } from './bankHoldRecordVerification200DataDifferingFieldsItem.ts';
-import type { BankHoldRecordVerification200DataFieldsItem } from './bankHoldRecordVerification200DataFieldsItem.ts';
-import type { BankHoldRecordVerification200DataResolution } from './bankHoldRecordVerification200DataResolution.ts';
-import type { BankHoldRecordVerification200DataSource } from './bankHoldRecordVerification200DataSource.ts';
-import type { BankHoldRecordVerification200DataStatus } from './bankHoldRecordVerification200DataStatus.ts';
-import type { BankHoldRecordVerification200DataVerificationsItem } from './bankHoldRecordVerification200DataVerificationsItem.ts';
+import type { BankHoldRecordVerification200DataClearReason } from './bankHoldRecordVerification200DataClearReason';
+import type { BankHoldRecordVerification200DataDifferingFieldsItem } from './bankHoldRecordVerification200DataDifferingFieldsItem';
+import type { BankHoldRecordVerification200DataFieldsItem } from './bankHoldRecordVerification200DataFieldsItem';
+import type { BankHoldRecordVerification200DataResolution } from './bankHoldRecordVerification200DataResolution';
+import type { BankHoldRecordVerification200DataSource } from './bankHoldRecordVerification200DataSource';
+import type { BankHoldRecordVerification200DataStatus } from './bankHoldRecordVerification200DataStatus';
+import type { BankHoldRecordVerification200DataVerificationsItem } from './bankHoldRecordVerification200DataVerificationsItem';
 
 export type BankHoldRecordVerification200Data = {
   /** @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */

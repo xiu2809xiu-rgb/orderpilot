@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SALES_HISTORY, STOCK_ANSWER } from "../data";
+import { SALES_HISTORY, STOCK_ANSWER } from "../data/index";
 import { classify } from "./useSparkChat";
 import {
   grouped,

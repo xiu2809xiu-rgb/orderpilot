@@ -4,7 +4,7 @@ import {
   SEASON,
   monthsAfter,
   seasonalNaive,
-} from "./forecast.ts";
+} from "./forecast";
 import { SALES_HISTORY } from "./index";
 
 /** Two years, the second 10 above the first in every month, so the error is exactly 10. */

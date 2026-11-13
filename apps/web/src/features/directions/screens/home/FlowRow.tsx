@@ -6,7 +6,7 @@ import {
   StepperItem,
   StepperTitle,
   type StepperLabels,
-} from "../../kit/Stepper";
+} from "@/components/kit/Stepper";
 
 export interface FlowCell {
   id: string;

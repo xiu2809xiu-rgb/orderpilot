@@ -5,7 +5,7 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { ClickstreamRecordBodyEventsItem } from './clickstreamRecordBodyEventsItem.ts';
+import type { ClickstreamRecordBodyEventsItem } from './clickstreamRecordBodyEventsItem';
 
 export type ClickstreamRecordBody = {
   /**

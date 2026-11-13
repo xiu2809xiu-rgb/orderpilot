@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { formatLongDay } from "@/lib/format";
-import { BlurFade } from "../../kit/BlurFade";
-import { BlurText } from "../../kit/BlurText";
+import { BlurFade } from "@/components/kit/BlurFade";
+import { BlurText } from "@/components/kit/BlurText";
 import { Brand } from "../../shell/Brand";
 
 const STEPS = ["read", "decide", "approve"] as const;

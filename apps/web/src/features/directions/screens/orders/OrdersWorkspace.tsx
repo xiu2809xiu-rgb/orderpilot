@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { Pagination } from "@/components/common/data-table/Pagination";
 import { SALES_STEP_IDS } from "../../data/estimates";
-import { Alert, AlertDescription, AlertTitle } from "../../kit/Alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/kit/Alert";
 import { AppliedFilters } from "./AppliedFilters";
 import { BoardState } from "./BoardState";
 import { OrderOperationLog } from "./OrderOperationLog";

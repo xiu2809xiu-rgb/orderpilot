@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Section } from "../parts/Section";
+import { Section } from "@/components/parts/Section";
 import { useTokens } from "./useTokens";
 
 const STEPS = [4, 8, 12, 16, 24, 32] as const;

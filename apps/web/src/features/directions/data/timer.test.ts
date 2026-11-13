@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { timerParts } from "./timer.ts";
+import { timerParts } from "./timer";
 
 const now = new Date("2026-11-13T09:00:00.000Z");
 const at = (ms: number) => new Date(now.getTime() + ms);

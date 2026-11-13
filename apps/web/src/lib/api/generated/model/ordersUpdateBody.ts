@@ -5,7 +5,7 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { OrdersUpdateBodyLinesItem } from './ordersUpdateBodyLinesItem.ts';
+import type { OrdersUpdateBodyLinesItem } from './ordersUpdateBodyLinesItem';
 
 export type OrdersUpdateBody = {
   /** @pattern ^[A-Za-z0-9-]{1,20}$ */

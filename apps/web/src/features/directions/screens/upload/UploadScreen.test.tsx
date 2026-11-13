@@ -16,7 +16,7 @@ import { createQueryClient } from "@/lib/query";
 import { useSessionStore } from "@/stores/session";
 import { axeViolations } from "@/test/axe";
 import { sessionFor } from "@/test/fixtures";
-import demo from "../../../../../public/demo-documents/po-boxed-so-0102.json";
+import demo from "@/../public/demo-documents/po-boxed-so-0102.json";
 import UploadScreen from "./UploadScreen";
 
 function stubDemo() {

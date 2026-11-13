@@ -1,4 +1,4 @@
-import { rootMeanSquare, round } from "./stats.ts";
+import { rootMeanSquare, round } from "./stats";
 
 // A seasonal naive forecast: each month ahead is expected to repeat the same
 // month a year earlier. It is the plainest method that respects the seasons,

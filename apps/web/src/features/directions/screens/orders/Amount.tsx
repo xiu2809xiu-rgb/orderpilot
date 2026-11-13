@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { formatMoney } from "@/lib/format";
-import { MaskedValue } from "../../parts/MaskedValue";
+import { MaskedValue } from "@/components/parts/MaskedValue";
 
 /** A value the server may have hidden: its mask code, or the amount when the role may see it. */
 export interface MaskableAmount {

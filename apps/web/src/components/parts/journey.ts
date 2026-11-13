@@ -1,4 +1,7 @@
-import { PURCHASE_STEP_IDS, SALES_STEP_IDS } from "../data/estimates";
+import {
+  PURCHASE_STEP_IDS,
+  SALES_STEP_IDS,
+} from "../../features/directions/data/estimates";
 
 export type Flow = "sales" | "purchase";
 export type JourneyState = "done" | "now" | "later";

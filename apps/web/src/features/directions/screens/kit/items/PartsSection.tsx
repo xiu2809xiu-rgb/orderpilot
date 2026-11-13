@@ -7,16 +7,16 @@ import {
   SALES_STEP_IDS,
   statOf,
   usualDuration,
-} from "../../data/estimates";
-import { STEP_TIMES, STOCK_ANSWER } from "../../data";
-import { DueTimer } from "../../parts/DueTimer";
-import { EmptyState } from "../../parts/EmptyState";
-import { JourneyRail } from "../../parts/JourneyRail";
-import { KpiTile } from "../../parts/KpiTile";
-import { MaskedValue } from "../../parts/MaskedValue";
-import { Section } from "../../parts/Section";
-import { SectionHeader } from "../../parts/SectionHeader";
-import { StatusTag, type Tone } from "../../parts/StatusTag";
+} from "@/features/directions/data/estimates";
+import { STEP_TIMES, STOCK_ANSWER } from "@/features/directions/data/index";
+import { DueTimer } from "@/components/parts/DueTimer";
+import { EmptyState } from "@/components/parts/EmptyState";
+import { JourneyRail } from "@/components/parts/JourneyRail";
+import { KpiTile } from "@/components/parts/KpiTile";
+import { MaskedValue } from "@/components/parts/MaskedValue";
+import { Section } from "@/components/parts/Section";
+import { SectionHeader } from "@/components/parts/SectionHeader";
+import { StatusTag, type Tone } from "@/components/parts/StatusTag";
 import { ItemCard } from "./ItemCard";
 
 const TONES: readonly Tone[] = ["ok", "waiting", "mismatch", "info"];

@@ -5,7 +5,7 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { WorkflowsChangeSla200Data } from './workflowsChangeSla200Data.ts';
+import type { WorkflowsChangeSla200Data } from './workflowsChangeSla200Data';
 
 export type WorkflowsChangeSla200 = {
   data: WorkflowsChangeSla200Data;

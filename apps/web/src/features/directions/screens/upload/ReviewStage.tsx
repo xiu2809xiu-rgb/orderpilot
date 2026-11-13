@@ -7,7 +7,7 @@ import {
   AlertAction,
   AlertDescription,
   AlertTitle,
-} from "../../kit/Alert";
+} from "@/components/kit/Alert";
 import { isBuilt } from "../../screens";
 import { orderHref } from "../home/homeLinks";
 import type { DemoDocument, DemoField } from "./demoDocument";

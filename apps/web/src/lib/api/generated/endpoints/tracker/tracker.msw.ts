@@ -21,7 +21,7 @@ import type {
   TrackerFlow200,
   TrackerList200,
   TrackerTimeline200
-} from '../../model';
+} from '../../model/index';
 
 
 export const getTrackerListResponseMock = (overrideResponse: Partial<Extract<TrackerList200, object>> = {}): TrackerList200 => ({data: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({orderNo: faker.string.alpha({length: {min: 1, max: 20}}), externalDocumentNo: faker.string.alpha({length: {min: 1, max: 20}}), customerNo: faker.string.alpha({length: {min: 1, max: 20}}), customerName: faker.string.alpha({length: {min: 1, max: 20}}), status: {code: faker.string.alpha({length: {min: 1, max: 20}}), label: faker.string.alpha({length: {min: 1, max: 20}})}, ownerRole: faker.helpers.arrayElement(['SYSTEM_ADMIN','PRODUCT_MANAGER','APPROVER','SUPPORT','WAREHOUSE','FINANCE','LOGISTICS','MANAGEMENT','AUDITOR'] as const), overdue: {overdue: faker.datatype.boolean(), daysOverdue: faker.number.int({min: 0, max: 9007199254740991}), reason: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), null])}, openExceptions: faker.number.int({min: 0, max: 9007199254740991}), shipmentDate: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 10), null]), orderDate: faker.date.past().toISOString().slice(0, 10), amount: faker.helpers.arrayElement([faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), undefined]), currencyCode: faker.helpers.arrayElement([faker.string.alpha({length: {min: 3, max: 3}}), undefined])})), meta: {page: faker.number.int({min: 1, max: 9007199254740991}), pageSize: faker.number.int({min: 1, max: 200}), total: faker.number.int({min: 0, max: 9007199254740991}), mock: faker.helpers.arrayElement([true] as const)}, ...overrideResponse})

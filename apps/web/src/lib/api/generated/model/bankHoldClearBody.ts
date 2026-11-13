@@ -5,7 +5,7 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { BankHoldClearBodyResolution } from './bankHoldClearBodyResolution.ts';
+import type { BankHoldClearBodyResolution } from './bankHoldClearBodyResolution';
 
 export type BankHoldClearBody = {
   resolution: BankHoldClearBodyResolution;

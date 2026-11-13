@@ -1,6 +1,6 @@
 import { Dialog } from "radix-ui";
 import { useTranslation } from "react-i18next";
-import { PromptBar } from "../kit/PromptBar";
+import { PromptBar } from "@/components/kit/PromptBar";
 import type { SparkPanelProps } from "../screens";
 import { useHomeAccess } from "../screens/home/homeAccess";
 import { SparkEmpty } from "./SparkEmpty";

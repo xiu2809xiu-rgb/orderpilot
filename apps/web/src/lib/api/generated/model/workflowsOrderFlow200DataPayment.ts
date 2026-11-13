@@ -5,7 +5,7 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { WorkflowsOrderFlow200DataPaymentConfirmationsItem } from './workflowsOrderFlow200DataPaymentConfirmationsItem.ts';
+import type { WorkflowsOrderFlow200DataPaymentConfirmationsItem } from './workflowsOrderFlow200DataPaymentConfirmationsItem';
 
 export type WorkflowsOrderFlow200DataPayment = {
   /** @pattern ^-?\d{1,15}(\.\d{1,4})?$ */

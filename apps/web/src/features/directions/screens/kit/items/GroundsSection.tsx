@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
-import { Section } from "../../parts/Section";
-import { Aurora } from "../Aurora";
-import { DotPattern } from "../DotPattern";
+import { Section } from "@/components/parts/Section";
+import { Aurora } from "@/components/kit/Aurora";
+import { DotPattern } from "@/components/kit/DotPattern";
 import { ItemCard } from "./ItemCard";
 
 /** The two grounds: the aurora behind sign-in, and the dots of an empty state. */

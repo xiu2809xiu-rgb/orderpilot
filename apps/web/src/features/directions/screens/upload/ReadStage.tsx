@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { prefersReducedMotion } from "../../kit/env";
-import { LatticeLoader } from "../../kit/LatticeLoader";
-import { ThoughtLine } from "../../kit/ThoughtLine";
+import { prefersReducedMotion } from "@/components/kit/env";
+import { LatticeLoader } from "@/components/kit/LatticeLoader";
+import { ThoughtLine } from "@/components/kit/ThoughtLine";
 import { SparkOrb } from "../../spark/orb/SparkOrb";
 import type { DemoDocument } from "./demoDocument";
 

@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTrackerFlow } from "@/lib/api/generated/endpoints/tracker/tracker";
 import { PURCHASE_STEP_IDS } from "../../data/estimates";
-import { Section } from "../../parts/Section";
+import { Section } from "@/components/parts/Section";
 import { FlowRow, type FlowCell } from "./FlowRow";
 import { useHomeAccess } from "./homeAccess";
 import { ordersHref } from "./homeLinks";

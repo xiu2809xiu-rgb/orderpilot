@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { PageHeader } from "../parts/PageHeader";
+import { PageHeader } from "@/components/parts/PageHeader";
 import { CardSection } from "./CardSection";
 import { ColourSection } from "./ColourSection";
 import { ControlsSection } from "./ControlsSection";

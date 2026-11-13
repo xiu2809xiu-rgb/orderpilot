@@ -1,7 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { Section } from "../parts/Section";
+import { Section } from "@/components/parts/Section";
 
 export function CardSection() {
   const { t } = useTranslation("directions-kit");

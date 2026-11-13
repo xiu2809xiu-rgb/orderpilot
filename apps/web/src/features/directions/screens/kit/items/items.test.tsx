@@ -11,13 +11,16 @@ import { ReactBitsSection } from "./ReactBitsSection";
 import { ReuiSection } from "./ReuiSection";
 import { SparkKitSection } from "./SparkKitSection";
 
-const SOURCES = import.meta.glob<string>("../*.tsx", {
-  query: "?raw",
-  import: "default",
-  eager: true,
-});
+const SOURCES = import.meta.glob<string>(
+  "../../../../../components/kit/*.tsx",
+  {
+    query: "?raw",
+    import: "default",
+    eager: true,
+  },
+);
 const ORB_SOURCES = import.meta.glob<string>(
-  ["../../spark/orb/LiquidOrb.ts", "../../spark/orb/LICENSE"],
+  ["../../../spark/orb/LiquidOrb.ts", "../../../spark/orb/LICENSE"],
   { query: "?raw", import: "default", eager: true },
 );
 
@@ -67,7 +70,7 @@ describe("the kit items", () => {
   it.each(Object.entries(ITEM_FILES))(
     "%s names its vendor, item and licence in its first line",
     (file, header) => {
-      const source = SOURCES[`../${file}.tsx`];
+      const source = SOURCES[`../../../../../components/kit/${file}.tsx`];
       expect(source, `${file}.tsx exists`).toBeDefined();
       const first = (source ?? "").split("\n")[0] ?? "";
       expect(first).toMatch(/^\/\/ Kit: /);
@@ -77,11 +80,11 @@ describe("the kit items", () => {
   );
 
   it("names the source and licence of the WebGPU orb and keeps its licence file beside it", () => {
-    const code = ORB_SOURCES["../../spark/orb/LiquidOrb.ts"] ?? "";
+    const code = ORB_SOURCES["../../../spark/orb/LiquidOrb.ts"] ?? "";
     const first = code.split(String.fromCharCode(10))[0] ?? "";
     expect(first).toContain("github.com/LerSent001/orb");
     expect(first).toContain("Licence: MIT, Copyright (c) 2026 LerSent001");
-    const licence = ORB_SOURCES["../../spark/orb/LICENSE"] ?? "";
+    const licence = ORB_SOURCES["../../../spark/orb/LICENSE"] ?? "";
     expect(licence).toContain("MIT License");
     expect(licence).toContain("Copyright (c) 2026 LerSent001");
   });

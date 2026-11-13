@@ -1,7 +1,7 @@
 import { ScanText } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { Section } from "../../parts/Section";
+import { Section } from "@/components/parts/Section";
 import { DropZone } from "./DropZone";
 import { FileRow } from "./FileRow";
 import type { useUploads } from "./useUploads";

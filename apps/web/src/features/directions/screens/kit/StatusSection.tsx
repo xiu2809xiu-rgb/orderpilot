@@ -1,7 +1,7 @@
 import { CircleCheck, Clock, Info, TriangleAlert } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Section } from "../parts/Section";
-import { StatusChip } from "./StatusChip";
+import { Section } from "@/components/parts/Section";
+import { StatusChip } from "@/components/kit/StatusChip";
 
 export function StatusSection() {
   const { t } = useTranslation("directions-kit");
