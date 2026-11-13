@@ -322,7 +322,11 @@ await authorisation.enforce(
 - no self-approval and segregation of duties (F-4): the contracts exist, the rules do not. F-3 brought the limits and substitutes, above;
 - the bank-detail control (F-5);
 - a policy class under the `PermissionPolicy` token that runs your rules in a chain (ADR 0012, point 7): F-3 wrote `GovernancePermissionPolicy`, and putting it behind the token is Richie's one line;
+  feat/area4-governance-seed-masking
+- the seed added missing pairs back, so a permission you revoked returned on the next seed: settled in F-8, a pair revoked on the matrix stays out ([ADR 0053](../adr/0053-revocations-survive-the-seed-and-the-masking-sample-reads-the-matrix.md));
+- polish nobody needs this week: a search box and filters on the matrix, an undo for a change, and a browser test of E2E #3 (backlog F-8).
 - the seed adds missing pairs back, so a permission you revoke returns on the next seed: decide whether it should;
+  main
 
 **What G-1 deliberately leaves to you** (the monitoring wiring works; the work that needs judgement is yours):
 
@@ -345,6 +349,17 @@ await authorisation.enforce(
 - E2E #3 and the area 4 half of E2E #4, end to end;
 - the real dashboards, budgets and alerts for traces, metrics, clickstream and AI cost, in Weeks 14 to 16 (Sprints 13 to 15);
 - the PDPA framing in [GRS by design](../grs/grs-by-design.md#risk-register) (R-04), kept current. Never claim that the prototype is PDPA compliant.
+
+## The seed and the masking sample (F-8)
+
+Two of F-1's loose ends, settled in [ADR 0053](../adr/0053-revocations-survive-the-seed-and-the-masking-sample-reads-the-matrix.md).
+
+**A revoked permission stays revoked.** Revoking on the matrix, by a switch or by copying a role, records the pair in `RevokedRolePermission` (`governance.prisma`) in the same transaction as the change and its audit event, and granting it again forgets it. `MatrixService` is the only writer. The seed's role permissions step calls `seedRolePermissions` (`modules/governance/role-permission-seed.ts`), which adds `pairsToSeed(DEFAULT_ROLE_PERMISSIONS, revoked)`: every default pair except those rows. A default pair that is missing with no row is still added, so a permission a later story brings reaches an existing database, and the seed's line says how many default pairs stay out.
+
+- **The limit:** a revocation made before F-8 has no row, so it comes back once on the next seed. Revoke it again on the matrix and it stays out.
+- **Tests:** `pairsToSeed` in `governance-domain.test.ts`, and `test/http/governance.test.ts` runs the real seed against the real database.
+
+**The masking sample reads the matrix.** Who sees the sample note is the row `masking.customerNote`, held by default by the five roles the hard-coded rule named. `PolicyService` reads the live matrix and builds the note's rule with `sampleNoteRule` (`domain/masking.ts`), so a system admin shows or hides the note for a role from the matrix, with no code change. The Masking tab says so and links to the row, and reads the sample again each time it opens. `SAMPLE_RULES` keeps the default roles for the callers in areas 1 and 3 that mask with it; only the sample reads the matrix.
 
 ## Options to consider, not built
 

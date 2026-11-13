@@ -1,9 +1,19 @@
-import { CLASSIFICATIONS, AI_PROVIDERS, ROLES } from "@orderpilot/shared";
+import {
+  CLASSIFICATIONS,
+  AI_PROVIDERS,
+  DEFAULT_ROLE_PERMISSIONS,
+  ROLES,
+} from "@orderpilot/shared";
 import { describe, expect, it } from "vitest";
 import { DomainError } from "../../../common/domain-error.js";
 import { decideAiDestination } from "./ai-destination-policy.js";
-import { SAMPLE_RULES, mask } from "./masking.js";
-import { assertCanGrant, assertCanRevoke, planCopy } from "./matrix-rules.js";
+import { SAMPLE_RULES, mask, sampleNoteRule } from "./masking.js";
+import {
+  assertCanGrant,
+  assertCanRevoke,
+  pairsToSeed,
+  planCopy,
+} from "./matrix-rules.js";
 
 describe("matrix rules", () => {
   it("refuses to grant the system admin a right to approve, post or pay", () => {
@@ -77,6 +87,85 @@ describe("masking", () => {
 
   it("shows a field that has no rule", () => {
     expect(mask(SAMPLE_RULES, "WAREHOUSE", "other", "x").masked).toBe(false);
+  });
+});
+
+describe("the sample note's rule, read from the matrix (F-8)", () => {
+  it("shows the note by default to the five roles the sample rule named", () => {
+    const holders = ROLES.filter((role) =>
+      (DEFAULT_ROLE_PERMISSIONS[role] as readonly string[]).includes(
+        "masking.customerNote",
+      ),
+    );
+    expect(holders).toEqual([
+      "PRODUCT_MANAGER",
+      "APPROVER",
+      "SUPPORT",
+      "MANAGEMENT",
+      "AUDITOR",
+    ]);
+  });
+
+  it("builds the rule from the roles the matrix gives it", () => {
+    const rule = sampleNoteRule(["WAREHOUSE"]);
+    expect(rule).toMatchObject({
+      field: "sample.customerNote",
+      classification: "internal",
+      reason: "role",
+      visibleTo: ["WAREHOUSE"],
+    });
+    expect(mask([rule], "WAREHOUSE", rule.field, "a note")).toMatchObject({
+      masked: false,
+      value: "a note",
+    });
+    expect(mask([rule], "SUPPORT", rule.field, "a note")).toMatchObject({
+      masked: true,
+      value: null,
+      reason: "role",
+    });
+  });
+
+  it("lists the roles in the matrix's order, however they arrive", () => {
+    expect(
+      sampleNoteRule(["AUDITOR", "SUPPORT", "APPROVER"]).visibleTo,
+    ).toEqual(["APPROVER", "SUPPORT", "AUDITOR"]);
+  });
+
+  it("hides the note from everyone when the matrix shows it to nobody", () => {
+    const rule = sampleNoteRule([]);
+    for (const role of ROLES) {
+      expect(mask([rule], role, rule.field, "a note").masked, role).toBe(true);
+    }
+  });
+});
+
+describe("which default pairs the seed adds (F-8)", () => {
+  const defaults = {
+    SUPPORT: ["orders.read", "orders.create"],
+    WAREHOUSE: ["orders.read"],
+  } as const;
+
+  it("adds every default pair nobody revoked on purpose", () => {
+    expect(pairsToSeed(defaults, [])).toEqual([
+      { role: "SUPPORT", permission: "orders.read" },
+      { role: "SUPPORT", permission: "orders.create" },
+      { role: "WAREHOUSE", permission: "orders.read" },
+    ]);
+  });
+
+  it("leaves out a pair revoked on purpose, and only that pair", () => {
+    expect(
+      pairsToSeed(defaults, [{ role: "SUPPORT", permission: "orders.read" }]),
+    ).toEqual([
+      { role: "SUPPORT", permission: "orders.create" },
+      { role: "WAREHOUSE", permission: "orders.read" },
+    ]);
+  });
+
+  it("is not changed by a revoked pair that is not a default", () => {
+    expect(
+      pairsToSeed(defaults, [{ role: "WAREHOUSE", permission: "users.read" }]),
+    ).toHaveLength(3);
   });
 });
 
