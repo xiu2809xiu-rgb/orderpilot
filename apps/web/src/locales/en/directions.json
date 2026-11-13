@@ -64,7 +64,6 @@
       "control": "Control"
     },
     "orders": "Orders",
-    "spark": "Spark",
     "settings": "Settings",
     "help": "Help",
     "person": "Signed in as {{name}}, {{role}}"

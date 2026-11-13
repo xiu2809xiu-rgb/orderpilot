@@ -1,4 +1,4 @@
-import { Settings, Sparkles } from "lucide-react";
+import { Settings } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useSessionStore } from "@/stores/session";
-import { SPARK_PANEL } from "../screens";
 import { PanelAction } from "./PanelAction";
 import { PanelHelp } from "./PanelHelp";
 
@@ -21,23 +20,18 @@ export function initials(name: string): string {
 }
 
 /**
- * The bottom of the panel: Spark, settings, help, and who is signed in. It
- * never scrolls and never moves; only the middle of the panel gives way.
+ * The bottom of the panel: settings, help, and who is signed in. Spark lives
+ * in the top bar only. It never scrolls and never moves; only the middle of
+ * the panel gives way.
  */
-export function PanelFoot({
-  collapsed,
-  onOpenSpark,
-}: {
-  collapsed: boolean;
-  onOpenSpark: () => void;
-}) {
+export function PanelFoot({ collapsed }: { collapsed: boolean }) {
   const { t } = useTranslation(["directions", "common"]);
   const user = useSessionStore((state) => state.session?.user);
   const role = user ? t(`common:roles.${user.role}`) : "";
   const person = user ? (
     <div
       className={cn(
-        "flex items-center gap-3 px-3 pt-2",
+        "dx-foot-person flex items-center gap-3 pt-2",
         collapsed && "justify-center px-0",
       )}
     >
@@ -56,17 +50,8 @@ export function PanelFoot({
   ) : null;
 
   return (
-    <div className="shrink-0 border-t border-sidebar-border px-2 pt-2 pb-3">
+    <div className="dx-foot shrink-0 border-t border-sidebar-border pt-2 pb-3">
       <ul className="flex flex-col gap-0.5">
-        <li>
-          <PanelAction
-            icon={Sparkles}
-            label={t("panel.spark")}
-            collapsed={collapsed}
-            unavailable={SPARK_PANEL ? undefined : t("spark.note")}
-            onClick={onOpenSpark}
-          />
-        </li>
         <li>
           <PanelAction
             icon={Settings}

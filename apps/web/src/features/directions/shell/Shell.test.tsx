@@ -64,16 +64,19 @@ describe("the shell of the design directions preview", () => {
     expect(await screen.findAllByText("Shown for layout")).not.toHaveLength(0);
   });
 
-  it("keeps Spark, settings, help and the signed-in person at the foot", async () => {
+  it("keeps settings, help and the signed-in person at the foot, and Spark only in the top bar", async () => {
     await open();
     const aside = found(
       screen.getByRole("navigation", { name: "Main navigation" }).parentElement,
     );
     expect(screen.getByText("Mei Tan")).toBeVisible();
     expect(screen.getAllByText("Support").length).toBeGreaterThan(0);
-    for (const name of ["Spark", "Settings", "Help"]) {
+    for (const name of ["Settings", "Help"]) {
       expect(within(aside).getByRole("button", { name })).toBeVisible();
     }
+    // One Spark on the screen, in the bar: the panel's foot has none.
+    expect(within(aside).queryByRole("button", { name: "Spark" })).toBeNull();
+    expect(screen.getAllByRole("button", { name: "Spark" })).toHaveLength(1);
   });
 
   it("collapses to a rail that keeps every name for a screen reader", async () => {

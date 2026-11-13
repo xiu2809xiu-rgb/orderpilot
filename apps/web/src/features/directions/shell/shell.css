@@ -18,6 +18,13 @@
 }
 .dx-group-title {
   margin-bottom: 0.125rem;
+  padding-inline: var(--dx-entry-pad);
+  font-family: var(--dx-group-font);
+  font-size: var(--dx-group-size);
+  line-height: 1.25rem;
+  font-weight: var(--dx-group-weight);
+  letter-spacing: var(--dx-group-tracking);
+  color: var(--dx-group-colour);
 }
 
 /* The middle of the panel: it scrolls alone, and a fade on an edge says
@@ -27,6 +34,7 @@
   flex-direction: column;
   --fade-top: 0px;
   --fade-bottom: 0px;
+  padding-inline: var(--dx-panel-edge);
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
@@ -58,8 +66,8 @@
   height: 2.5rem;
   align-items: center;
   gap: 0.75rem;
-  padding-inline: 0.75rem;
-  border-radius: var(--radius-control);
+  padding-inline: var(--dx-entry-pad);
+  border-radius: var(--dx-entry-radius);
   color: var(--sidebar-foreground);
   font-size: var(--panel-text);
   line-height: 1.25rem;
@@ -81,15 +89,23 @@
 }
 /* Only a link answers a hover: a row that goes nowhere stays still. */
 a.dx-entry:hover {
-  background: var(--muted);
+  background: var(--dx-hover-bg);
   color: var(--foreground);
 }
 button.dx-entry[aria-disabled="true"] {
   cursor: default;
 }
 .dx-entry[aria-current="page"] {
-  background: var(--sidebar-accent);
-  color: var(--sidebar-accent-foreground);
+  background-color: var(--dx-current-bg);
+  background-image: var(--dx-current-image);
+  color: var(--dx-current-fg);
+  box-shadow: var(--dx-current-shadow);
+}
+.dx-foot {
+  padding-inline: var(--dx-panel-edge);
+}
+.dx-foot-person {
+  padding-inline: var(--dx-entry-pad);
 }
 .dx-rail .dx-entry {
   justify-content: center;
@@ -145,4 +161,14 @@ button.dx-entry[aria-disabled="true"] {
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-pill);
   color: var(--muted-foreground);
+}
+
+/* The outlined buttons of the top bar take the direction's own button skin. */
+.dx-bar [data-slot="button"][data-variant="outline"] {
+  border-color: var(--dx-bar-btn-border);
+  background-color: var(--dx-bar-btn-bg);
+  border-radius: var(--dx-bar-btn-radius);
+}
+.dx-bar [data-slot="button"][data-variant="outline"]:hover {
+  background-color: var(--dx-bar-btn-hover);
 }

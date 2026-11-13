@@ -8,7 +8,7 @@
   /* Light scheme */
   --background: #f2f9fa;
   --foreground: #0b2239;
-  --card: rgb(255 255 255 / 0.92);
+  --card: rgb(255 255 255 / 0.86);
   --card-foreground: #0b2239;
   --popover: #ffffff;
   --popover-foreground: #0b2239;
@@ -18,8 +18,8 @@
   --secondary-foreground: #0b2239;
   --muted: #f5fbfc;
   --muted-foreground: #3f5a6c;
-  --faint-foreground: #5e7686;
-  --accent: rgb(14 124 134 / 0.1);
+  --faint-foreground: #526b7c;
+  --accent: rgb(14 124 134 / 0.06);
   --accent-foreground: #0b7480;
   --destructive: #b3261e;
   --destructive-foreground: #ffffff;
@@ -44,18 +44,25 @@
   --panel-strong: rgb(255 255 255 / 0.92);
   --panel-filter: blur(18px) saturate(140%);
   --panel-border: rgb(9 34 57 / 0.1);
+  /* A pale aqua sky with teal and sky blooms that can be seen. */
   --ground-image:
-    radial-gradient(60% 50% at 6% 0%, rgb(14 124 134 / 0.16), transparent 70%),
+    radial-gradient(65% 60% at 4% 2%, rgb(14 124 134 / 0.5), transparent 75%),
     radial-gradient(
-      50% 45% at 100% 8%,
-      rgb(56 160 230 / 0.14),
-      transparent 70%
+      55% 55% at 100% 6%,
+      rgb(56 160 230 / 0.42),
+      transparent 75%
     ),
     radial-gradient(
-      60% 50% at 20% 100%,
-      rgb(14 124 134 / 0.12),
-      transparent 70%
-    );
+      60% 55% at 14% 100%,
+      rgb(14 124 134 / 0.38),
+      transparent 75%
+    ),
+    radial-gradient(
+      45% 50% at 100% 92%,
+      rgb(56 160 230 / 0.3),
+      transparent 75%
+    ),
+    radial-gradient(50% 45% at 58% 42%, rgb(46 200 214 / 0.22), transparent 75%);
   --glow: 0 8px 28px rgb(14 124 134 / 0.18);
   --shadow-card: 0 1px 2px rgb(9 34 57 / 0.06), 0 8px 24px rgb(9 34 57 / 0.06);
   --shadow-pop: 0 12px 40px rgb(9 34 57 / 0.18);
@@ -74,12 +81,56 @@
 
   --numeral-font: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
   --numeral-weight: 600;
+
+  /* Structure. Spectra works on glass over the aurora: cards blur what is
+     behind them, 16 px corners, a highlight along the top edge and a faint
+     glowing border. The panel and the bar float as glass too. */
+  --dx-card-bg: var(--card);
+  --dx-card-work-bg: var(--panel-strong);
+  --dx-card-sheen: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 0.45),
+    transparent 38%
+  );
+  --dx-card-border: 1px solid rgb(14 124 134 / 0.28);
+  --dx-card-shadow: inset 0 1px 0 #ffffff, 0 8px 28px rgb(14 124 134 / 0.16);
+  --dx-card-filter: blur(18px) saturate(140%);
+  --dx-card-pad: 1.25rem;
+  --dx-head-rule: 0 solid transparent;
+  --dx-head-pb: 0rem;
+  --dx-title-size: var(--type-28);
+  --dx-title-weight: 600;
+  --dx-title-tracking: -0.02em;
+  --dx-title-from: #0a7480;
+  --dx-title-to: #0f68b4;
+  --dx-panel-edge: 0.5rem;
+  --dx-entry-pad: 0.75rem;
+  --dx-entry-radius: 999px;
+  --dx-group-font: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  --dx-group-size: var(--type-13);
+  --dx-group-weight: 600;
+  --dx-group-tracking: 0.01em;
+  --dx-group-colour: var(--muted-foreground);
+  --dx-hover-bg: rgb(14 124 134 / 0.1);
+  --dx-current-bg: rgb(14 124 134 / 0.16);
+  --dx-current-image: linear-gradient(
+    100deg,
+    rgb(14 124 134 / 0.22),
+    rgb(56 160 230 / 0.14)
+  );
+  --dx-current-fg: var(--foreground);
+  --dx-current-shadow:
+    inset 0 0 0 1px rgb(14 124 134 / 0.36), 0 4px 16px rgb(14 124 134 / 0.22);
+  --dx-bar-btn-border: rgb(9 34 57 / 0.2);
+  --dx-bar-btn-bg: rgb(255 255 255 / 0.55);
+  --dx-bar-btn-hover: rgb(14 124 134 / 0.14);
+  --dx-bar-btn-radius: 999px;
 }
 
 :root[data-direction="spectra"].dark {
   --background: #06162b;
   --foreground: #f1fbfb;
-  --card: rgb(10 24 40 / 0.88);
+  --card: rgb(10 24 40 / 0.7);
   --card-foreground: #f1fbfb;
   --popover: #0a1c30;
   --popover-foreground: #f1fbfb;
@@ -114,25 +165,51 @@
   --panel: rgb(10 24 40 / 0.72);
   --panel-strong: rgb(10 24 40 / 0.88);
   --panel-border: rgb(255 255 255 / 0.1);
-  /* The mesh: navy, teal and a little cyan, with indigo at 15% or less. */
+  /* The aurora: large blooms of teal and cyan, a touch of indigo (15% or
+     less), over deep navy. They show in the margins and through the glass. */
   --ground-image:
-    radial-gradient(60% 50% at 6% 0%, rgb(14 124 134 / 0.5), transparent 70%),
+    radial-gradient(70% 65% at 4% 4%, rgb(14 124 134 / 0.85), transparent 75%),
     radial-gradient(
-      50% 45% at 100% 100%,
-      rgb(46 230 214 / 0.3),
-      transparent 70%
+      55% 60% at 100% 100%,
+      rgb(46 230 214 / 0.6),
+      transparent 75%
     ),
-    radial-gradient(45% 40% at 88% 4%, rgb(91 108 255 / 0.15), transparent 70%),
-    radial-gradient(70% 60% at 30% 100%, #0a2a43, transparent 70%);
+    radial-gradient(50% 55% at 92% 2%, rgb(91 108 255 / 0.15), transparent 75%),
+    radial-gradient(45% 55% at 0% 62%, rgb(34 196 210 / 0.42), transparent 75%),
+    radial-gradient(
+      50% 45% at 62% 38%,
+      rgb(14 124 134 / 0.38),
+      transparent 75%
+    ),
+    radial-gradient(80% 60% at 40% 100%, #0a2a43, transparent 75%);
   --glow: 0 0 24px rgb(46 230 214 / 0.35);
   --shadow-card:
     0 0 0 1px rgb(255 255 255 / 0.06), 0 8px 24px rgb(0 0 0 / 0.25);
   --shadow-pop: 0 12px 40px rgb(0 0 0 / 0.55), 0 0 0 1px rgb(255 255 255 / 0.1);
-}
 
-/* Cards are glass: they blur the mesh behind them. */
-:root[data-direction="spectra"] [data-slot="card"] {
-  backdrop-filter: var(--panel-filter);
+  --dx-card-sheen: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 0.1),
+    transparent 38%
+  );
+  --dx-card-border: 1px solid rgb(46 230 214 / 0.22);
+  --dx-card-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.2), 0 0 28px rgb(46 230 214 / 0.1),
+    0 12px 32px rgb(0 0 0 / 0.25);
+  --dx-title-from: #2ee6d6;
+  --dx-title-to: #5eb4ff;
+  --dx-hover-bg: rgb(255 255 255 / 0.07);
+  --dx-current-bg: rgb(46 230 214 / 0.16);
+  --dx-current-image: linear-gradient(
+    100deg,
+    rgb(46 230 214 / 0.3),
+    rgb(91 108 255 / 0.2)
+  );
+  --dx-current-shadow:
+    inset 0 0 0 1px rgb(46 230 214 / 0.42), 0 0 20px rgb(46 230 214 / 0.28);
+  --dx-bar-btn-border: rgb(255 255 255 / 0.2);
+  --dx-bar-btn-bg: rgb(255 255 255 / 0.06);
+  --dx-bar-btn-hover: rgb(46 230 214 / 0.16);
 }
 
 /* Page change: the content scales up from 0.985 with a blur fade. */
@@ -156,25 +233,46 @@
   animation: dx-spectra-in 220ms var(--ease-out) both;
 }
 
-/* The aurora tints the current entry of the panel: a teal to indigo wash with
-   a soft ring and glow, in place of the hard bar the flat directions use. */
-:root[data-direction="spectra"] .dx-entry[aria-current="page"] {
-  background-image: linear-gradient(
-    100deg,
-    rgb(14 124 134 / 0.2),
-    rgb(56 160 230 / 0.12) 70%,
-    transparent
-  );
-  box-shadow: inset 0 0 0 1px rgb(14 124 134 / 0.3);
+/* The panel and the top bar float as glass over the aurora, with rounded
+   corners and a soft glowing edge. */
+:root[data-direction="spectra"] .dx-side {
+  margin: 0.75rem 0 0.75rem 0.75rem;
+  overflow: hidden;
+  border: var(--dx-card-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--dx-card-shadow);
 }
-:root[data-direction="spectra"].dark .dx-entry[aria-current="page"] {
+:root[data-direction="spectra"] .dx-bar {
+  margin: 0.75rem 0.75rem 0;
+  border: var(--dx-card-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--dx-card-shadow);
+}
+:root[data-direction="spectra"] .dx-search {
+  border-radius: 999px;
+  background: var(--dx-bar-btn-bg);
+}
+/* The page title is gradient text, teal to cyan. */
+:root[data-direction="spectra"] .dx-title {
   background-image: linear-gradient(
-    100deg,
-    rgb(46 230 214 / 0.3),
-    rgb(91 108 255 / 0.2) 70%,
-    transparent
+    90deg,
+    var(--dx-title-from),
+    var(--dx-title-to)
   );
-  box-shadow:
-    inset 0 0 0 1px rgb(46 230 214 / 0.4),
-    0 0 18px rgb(46 230 214 / 0.18);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  width: fit-content;
+  max-width: 100%;
+}
+:root[data-direction="spectra"] .dx-title-context {
+  margin-top: 0.25rem;
+}
+:root[data-direction="spectra"] .dx-page-intro {
+  margin-top: 0.5rem;
+}
+/* The brand mark glows. */
+:root[data-direction="spectra"] .dx-side svg rect {
+  filter: drop-shadow(0 0 8px rgb(46 230 214 / 0.5));
 }

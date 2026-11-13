@@ -17,7 +17,6 @@ interface SidePanelProps {
   /** The 64 px rail: icons with tooltips. Never set inside the sheet. */
   collapsed: boolean;
   onNavigate?: () => void;
-  onOpenSpark: () => void;
 }
 
 /**
@@ -30,7 +29,6 @@ export function SidePanel({
   screen,
   collapsed,
   onNavigate,
-  onOpenSpark,
 }: SidePanelProps) {
   const { t } = useTranslation(["directions", "common", ...featureNamespaces]);
   const session = useSessionStore((state) => state.session);
@@ -50,7 +48,7 @@ export function SidePanel({
       <nav
         ref={edges.ref}
         aria-label={t("panel.label")}
-        className="dx-scroll min-h-0 flex-1 px-2 py-1"
+        className="dx-scroll min-h-0 flex-1 py-1"
         data-more-above={edges.above}
         data-more-below={edges.below}
       >
@@ -67,10 +65,7 @@ export function SidePanel({
               >
                 <h2
                   id={`dx-group-${group.id}`}
-                  className={cn(
-                    "dx-group-title fs-13 px-3 font-semibold text-muted-foreground",
-                    collapsed && "sr-only",
-                  )}
+                  className={cn("dx-group-title", collapsed && "sr-only")}
                 >
                   {t(`panel.groups.${group.id}`)}
                 </h2>
@@ -92,7 +87,7 @@ export function SidePanel({
           ))}
         </div>
       </nav>
-      <PanelFoot collapsed={collapsed} onOpenSpark={onOpenSpark} />
+      <PanelFoot collapsed={collapsed} />
     </div>
   );
 }

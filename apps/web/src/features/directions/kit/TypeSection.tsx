@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { KitSection } from "./KitSection";
+import { Section } from "../parts/Section";
 
 const SIZES = [
   [12, "fs-12"],
@@ -14,7 +14,7 @@ const SIZES = [
 export function TypeSection() {
   const { t } = useTranslation("directions-kit");
   return (
-    <KitSection title={t("sections.type")} intro={t("type.intro")}>
+    <Section title={t("sections.type")} intro={t("type.intro")}>
       <ul>
         {SIZES.map(([size, cls]) => (
           <li
@@ -34,6 +34,6 @@ export function TypeSection() {
           </li>
         ))}
       </ul>
-    </KitSection>
+    </Section>
   );
 }

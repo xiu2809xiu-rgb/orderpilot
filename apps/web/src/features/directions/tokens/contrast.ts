@@ -67,23 +67,91 @@ export function contrast(a: Rgba, b: Rgba): number {
   return (hi + 0.05) / (lo + 0.05);
 }
 
+/** One radial layer of a ground: where it sits, how far it reaches and its colour. */
+interface Bloom {
+  cx: number;
+  cy: number;
+  rx: number;
+  ry: number;
+  stop: number;
+  colour: Rgba;
+}
+
 /**
- * The ground a surface can sit on, at its brightest: the base colour with
- * every mesh layer stacked at full strength. A real page is never brighter,
- * so a pair that passes here passes over any part of the mesh.
+ * Reads the layers of a `ground-image` written as
+ * `radial-gradient(RX% RY% at X% Y%, <colour>, transparent STOP%)`. A layer
+ * that is not in that form is a bug in the token file, so it throws.
  */
-export function worstGround(t: Tokens): Rgba {
-  let colour = parseColor(need(t, "background"));
-  const image = t["ground-image"] ?? "none";
-  const layers = [
+export function parseBlooms(image: string): Bloom[] {
+  if (image.trim() === "none") return [];
+  const found = [
     ...image.matchAll(
-      /radial-gradient\([^,]*,\s*(#[0-9a-f]{6}|rgb\([^)]*\))/gi,
+      /radial-gradient\(\s*([\d.]+)%\s+([\d.]+)%\s+at\s+([\d.]+)%\s+([\d.]+)%\s*,\s*(#[0-9a-f]{6}|rgb\([^)]*\))\s*,\s*transparent\s+([\d.]+)%\s*\)/gi,
     ),
   ];
-  for (const layer of layers.reverse()) {
-    colour = flatten(parseColor(layer[1] ?? ""), colour);
+  const count = image.split("radial-gradient(").length - 1;
+  if (found.length !== count) {
+    throw new Error(`A ground layer is not a plain radial gradient: ${image}`);
+  }
+  return found.map((m) => ({
+    rx: Number(m[1]) / 100,
+    ry: Number(m[2]) / 100,
+    cx: Number(m[3]) / 100,
+    cy: Number(m[4]) / 100,
+    colour: parseColor(m[5] ?? ""),
+    stop: Number(m[6]) / 100,
+  }));
+}
+
+/** The ground at one point of the window (x and y from 0 to 1), layers stacked in paint order. */
+export function groundAt(t: Tokens, blooms: Bloom[], x: number, y: number) {
+  let colour = parseColor(need(t, "background"));
+  // The first layer is painted on top, so lay down the last one first.
+  for (const b of [...blooms].reverse()) {
+    const d = Math.hypot((x - b.cx) / b.rx, (y - b.cy) / b.ry);
+    const fade = Math.max(0, 1 - d / b.stop);
+    colour = flatten({ ...b.colour, a: b.colour.a * fade }, colour);
   }
   return colour;
+}
+
+/** A part of the window, as fractions from the top left. */
+export interface Region {
+  x0: number;
+  x1: number;
+  y0: number;
+  y1: number;
+}
+
+const WHOLE_WINDOW: Region = { x0: 0, x1: 1, y0: 0, y1: 1 };
+
+/**
+ * The worst ground a surface can sit on: sampled across a 1440 by 900 window
+ * (or a part of it), the brightest point for a dark scheme (light text) and
+ * the darkest for a light one (dark text). The mesh is
+ * `background-attachment: fixed`, so this is exactly what is behind a panel
+ * wherever it is placed.
+ */
+export function worstGround(t: Tokens, region: Region = WHOLE_WINDOW): Rgba {
+  const base = parseColor(need(t, "background"));
+  const blooms = parseBlooms(t["ground-image"] ?? "none");
+  if (blooms.length === 0) return base;
+  const dark = luminance(base) < 0.4;
+  let worst = base;
+  const steps = 40;
+  for (let i = 0; i <= steps; i += 1) {
+    for (let j = 0; j <= steps; j += 1) {
+      const here = groundAt(
+        t,
+        blooms,
+        region.x0 + ((region.x1 - region.x0) * i) / steps,
+        region.y0 + ((region.y1 - region.y0) * j) / steps,
+      );
+      const lum = luminance(here);
+      if (dark ? lum > luminance(worst) : lum < luminance(worst)) worst = here;
+    }
+  }
+  return worst;
 }
 
 /** A chain such as ["accent", "card"] is accent drawn over card over the ground. */

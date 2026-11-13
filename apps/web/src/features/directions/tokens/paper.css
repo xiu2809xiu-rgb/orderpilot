@@ -62,6 +62,40 @@
   /* Large figures sit on the grid lines as part of the composition. */
   --numeral-font: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
   --numeral-weight: 500;
+
+  /* Structure. Paper is a ruled sheet: a card is a cell with no fill of its
+     own, a section hangs from a rule and has its numeral in the margin. */
+  --dx-card-bg: transparent;
+  --dx-card-work-bg: transparent;
+  --dx-card-sheen: none;
+  --dx-card-border: 1px solid var(--border);
+  --dx-card-shadow: none;
+  --dx-card-filter: none;
+  --dx-card-pad: 1.25rem;
+  --dx-head-rule: 0 solid transparent;
+  --dx-head-pb: 0rem;
+  --dx-title-size: var(--type-44);
+  --dx-title-weight: 500;
+  --dx-title-tracking: -0.035em;
+  --dx-title-from: var(--foreground);
+  --dx-title-to: var(--foreground);
+  --dx-panel-edge: 0rem;
+  --dx-entry-pad: 1.25rem;
+  --dx-entry-radius: 0px;
+  --dx-group-font: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  --dx-group-size: var(--type-13);
+  --dx-group-weight: 600;
+  --dx-group-tracking: 0em;
+  --dx-group-colour: var(--foreground);
+  --dx-hover-bg: transparent;
+  --dx-current-bg: transparent;
+  --dx-current-image: none;
+  --dx-current-fg: var(--accent-foreground);
+  --dx-current-shadow: inset 2px 0 0 var(--accent-foreground);
+  --dx-bar-btn-border: transparent;
+  --dx-bar-btn-bg: transparent;
+  --dx-bar-btn-hover: var(--accent);
+  --dx-bar-btn-radius: var(--radius-control);
 }
 
 :root[data-direction="paper"].dark {
@@ -125,44 +159,128 @@
   animation: dx-paper-in 200ms var(--ease-out) both;
 }
 
-/* The ledger is a ruled sheet: a canvas with twelve columns whose hairlines
-   show in the margins and between the cells, which sit on it as white cells. */
-:root[data-direction="paper"] main {
-  background-color: var(--canvas);
-}
-:root[data-direction="paper"] .dx-sheet::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  inset: 0 1.5rem;
-  border-right: 1px solid var(--border);
-  background-image: linear-gradient(90deg, var(--border) 1px, transparent 1px);
+/* The ledger is a ruled sheet: twelve columns whose hairlines run behind the
+   whole content area, with the cells drawn on them. The sheet has no fill of
+   its own, so the lines show through every section. */
+:root[data-direction="paper"] .dx-content {
+  background-color: var(--background);
+  background-image: linear-gradient(
+    90deg,
+    transparent calc(100% - 1px),
+    var(--border) 0
+  );
   background-size: calc(100% / 12) 100%;
-  pointer-events: none;
-}
-
-/* The ledger numbers its sections in the margin of each heading: 01, 02, 03. */
-:root[data-direction="paper"] main {
+  background-attachment: local;
   counter-reset: dx-section;
 }
-:root[data-direction="paper"] [data-dx-section] > h2::before {
-  counter-increment: dx-section;
-  content: counter(dx-section, decimal-leading-zero);
-  margin-inline-end: 0.75rem;
-  color: var(--accent-foreground);
-  font-variant-numeric: tabular-nums;
-  font-weight: 500;
+:root[data-direction="paper"] .dx-sheet {
+  max-width: none;
+  padding-inline: 0;
 }
 
-/* The ledger rules its panel: a hairline runs through the gap between two
-   groups, as a ruled sheet does between its blocks. */
+/* The page head: the date in the margin column, the title set large. */
+:root[data-direction="paper"] .dx-page-head {
+  display: grid;
+  grid-template-columns: calc(100% / 6) minmax(0, 1fr);
+  margin-bottom: 0;
+  padding-block: 0 2rem;
+  border-bottom: 1px solid var(--foreground);
+}
+:root[data-direction="paper"] .dx-title-context {
+  grid-column: 1;
+  grid-row: 1;
+  padding: 0.75rem 0 0 1.5rem;
+}
+:root[data-direction="paper"] .dx-title {
+  grid-column: 2;
+  grid-row: 1;
+  padding-left: 1.25rem;
+}
+:root[data-direction="paper"] .dx-page-intro {
+  grid-column: 2;
+  grid-row: 2;
+  margin-top: 0.75rem;
+  padding-left: 1.25rem;
+}
+
+/* A section hangs from a rule: its number and title in the margin column, its
+   content to the right. */
+:root[data-direction="paper"] .dx-section {
+  display: grid;
+  grid-template-columns: calc(100% / 6) minmax(0, 1fr);
+  border: 0;
+  border-bottom: 1px solid var(--border-strong);
+  border-radius: 0;
+}
+:root[data-direction="paper"] .dx-section-head {
+  padding: 1.5rem 1rem 1.5rem 1.5rem;
+}
+:root[data-direction="paper"] .dx-section-head::before {
+  counter-increment: dx-section;
+  content: counter(dx-section, decimal-leading-zero);
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--accent-foreground);
+  font-size: var(--type-28);
+  line-height: 2.125rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+:root[data-direction="paper"] .dx-section-body {
+  padding: 1.5rem 1.5rem 1.5rem 1.25rem;
+}
+@media (max-width: 47.99rem) {
+  :root[data-direction="paper"] .dx-content {
+    background-size: calc(100% / 4) 100%;
+  }
+  :root[data-direction="paper"] .dx-section,
+  :root[data-direction="paper"] .dx-page-head {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  :root[data-direction="paper"] .dx-title-context,
+  :root[data-direction="paper"] .dx-title,
+  :root[data-direction="paper"] .dx-page-intro {
+    grid-column: 1;
+    padding-left: 1rem;
+  }
+  :root[data-direction="paper"] .dx-title-context {
+    grid-row: 1;
+  }
+  :root[data-direction="paper"] .dx-title {
+    grid-row: 2;
+  }
+  :root[data-direction="paper"] .dx-page-intro {
+    grid-row: 3;
+  }
+  :root[data-direction="paper"] .dx-section-head {
+    padding: 1.25rem 1rem 0;
+  }
+  :root[data-direction="paper"] .dx-section-body {
+    padding: 0.75rem 1rem 1.25rem;
+  }
+}
+
+/* The panel is the sheet itself with one hairline at its edge, and a hairline
+   runs through the gap between groups from edge to edge. */
 :root[data-direction="paper"] .dx-gap {
   position: relative;
 }
 :root[data-direction="paper"] .dx-gap::after {
   content: "";
   position: absolute;
-  inset-inline: 0.75rem;
+  inset-inline: 0;
   top: 50%;
   border-top: 1px solid var(--panel-border);
+}
+/* Quiet text buttons, and a search that is a ruled line rather than a box. */
+:root[data-direction="paper"] .dx-search {
+  border-width: 0 0 1px;
+  border-radius: 0;
+  background: transparent;
+}
+
+/* A grid of sections is a stack of ruled rows in the ledger. */
+:root[data-direction="paper"] .dx-grid,
+:root[data-direction="paper"] .dx-grid-cell {
+  display: block;
 }

@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { KitSection } from "./KitSection";
+import { Section } from "../parts/Section";
 
 /** Buttons (one primary) and fields: a visible label, help that stays, an error under the field. */
 export function ControlsSection() {
@@ -13,7 +13,7 @@ export function ControlsSection() {
   const shipId = useId();
   const noteId = useId();
   return (
-    <KitSection title={t("sections.controls")}>
+    <Section title={t("sections.controls")} work>
       <h3 className="fs-13 font-medium">{t("controls.buttons")}</h3>
       <div className="mt-2 flex flex-wrap items-center gap-2">
         <Button>
@@ -80,6 +80,6 @@ export function ControlsSection() {
           <Input id={noteId} />
         </div>
       </div>
-    </KitSection>
+    </Section>
   );
 }

@@ -5,6 +5,8 @@ import { must } from "@/test/must";
 import {
   contrast,
   flatten,
+  groundAt,
+  parseBlooms,
   parseColor,
   surface,
   worstGround,
@@ -248,5 +250,146 @@ describe("the shared base", () => {
     expect(base).toMatch(
       /prefers-reduced-motion: reduce[\s\S]*view-transition-new/,
     );
+  });
+});
+
+describe("what makes each direction structurally its own", () => {
+  const STRUCTURE = [
+    "dx-card-bg",
+    "dx-card-work-bg",
+    "dx-card-sheen",
+    "dx-card-border",
+    "dx-card-shadow",
+    "dx-card-filter",
+    "dx-card-pad",
+    "dx-head-rule",
+    "dx-head-pb",
+    "dx-title-size",
+    "dx-title-weight",
+    "dx-title-tracking",
+    "dx-title-from",
+    "dx-title-to",
+    "dx-panel-edge",
+    "dx-entry-pad",
+    "dx-entry-radius",
+    "dx-group-font",
+    "dx-group-size",
+    "dx-group-weight",
+    "dx-group-tracking",
+    "dx-group-colour",
+    "dx-hover-bg",
+    "dx-current-bg",
+    "dx-current-image",
+    "dx-current-fg",
+    "dx-current-shadow",
+    "dx-bar-btn-border",
+    "dx-bar-btn-bg",
+    "dx-bar-btn-hover",
+    "dx-bar-btn-radius",
+  ];
+
+  it.each(DIRECTIONS)("%s defines every structure variable", (direction) => {
+    const light = tokensOf(direction, "light");
+    expect(STRUCTURE.filter((name) => light[name] === undefined)).toEqual([]);
+  });
+
+  it("makes Ink flat: no shadow, no blur, a 4 px corner, a rule under a title", () => {
+    const t = tokensOf("ink", "dark");
+    expect(t["dx-card-shadow"]).toBe("none");
+    expect(t["dx-card-filter"]).toBe("none");
+    expect(t["radius-card"]).toBe("4px");
+    expect(t["dx-head-rule"]).toContain("1px solid");
+    expect(t["dx-title-size"]).toBe("var(--type-28)");
+    expect(t["dx-group-font"]).toContain("Geist Mono");
+    expect(t["dx-group-size"]).toBe("var(--type-12)");
+    expect(t["dx-current-shadow"]).toContain("inset 2px 0 0");
+    expect(t["dx-current-image"]).toBe("none");
+  });
+
+  it("makes Paper a ruled sheet: no card fill, 2 px corners, a 44 px title", () => {
+    const t = tokensOf("paper", "light");
+    expect(t["dx-card-bg"]).toBe("transparent");
+    expect(t["dx-card-shadow"]).toBe("none");
+    expect(Number.parseFloat(must(t["radius-card"]))).toBeLessThanOrEqual(2);
+    expect(t["dx-title-size"]).toBe("var(--type-44)");
+    expect(t["dx-title-weight"]).toBe("500");
+    expect(t["dx-current-bg"]).toBe("transparent");
+    expect(t["dx-current-shadow"]).toContain("inset 2px 0 0");
+  });
+
+  it("makes Spectra glass: blur, a 16 px corner, a pill for the current entry", () => {
+    for (const scheme of SCHEMES) {
+      const t = tokensOf("spectra", scheme);
+      expect(t["dx-card-filter"]).toContain("blur(");
+      expect(t["radius-card"]).toBe("16px");
+      expect(t["dx-entry-radius"]).toBe("999px");
+      expect(t["dx-current-shadow"]).toContain("0 ");
+      expect(parseColor(must(t.card)).a).toBeLessThan(1);
+    }
+  });
+
+  it("keeps Spectra's gradient title at 3:1 against the ground along its whole length", () => {
+    for (const scheme of SCHEMES) {
+      const t = tokensOf("spectra", scheme);
+      const from = parseColor(must(t["dx-title-from"]));
+      const to = parseColor(must(t["dx-title-to"]));
+      // A title sits in the top band of the content, to the right of the panel.
+      const ground = worstGround(t, { x0: 0.18, x1: 0.9, y0: 0.08, y1: 0.3 });
+      for (let i = 0; i <= 10; i += 1) {
+        const k = i / 10;
+        const here = {
+          r: from.r + (to.r - from.r) * k,
+          g: from.g + (to.g - from.g) * k,
+          b: from.b + (to.b - from.b) * k,
+          a: 1,
+        };
+        expect(
+          contrast(here, ground),
+          `${scheme} at ${String(i * 10)}%`,
+        ).toBeGreaterThanOrEqual(3);
+      }
+    }
+  });
+
+  it("gives Spectra several blooms that actually change the ground", () => {
+    for (const scheme of SCHEMES) {
+      const t = tokensOf("spectra", scheme);
+      const blooms = parseBlooms(must(t["ground-image"]));
+      expect(blooms.length).toBeGreaterThanOrEqual(4);
+      // At the centre of the strongest bloom the ground has moved clearly away
+      // from the plain background colour.
+      const background = parseColor(must(t.background));
+      const centre = blooms.reduce((a, b) => (b.colour.a > a.colour.a ? b : a));
+      const there = groundAt(t, blooms, centre.cx, centre.cy);
+      expect(contrast(there, background)).toBeGreaterThan(1.15);
+    }
+  });
+
+  it("measures the worst ground by sampling, not by stacking every layer", () => {
+    const t = {
+      background: "#000000",
+      "ground-image":
+        "radial-gradient(40% 40% at 0% 0%, #ffffff, transparent 100%), radial-gradient(40% 40% at 100% 100%, #ffffff, transparent 100%)",
+    };
+    const worst = worstGround(t);
+    // Two white blooms in opposite corners never overlap, so the brightest
+    // point is one bloom at full strength, not two stacked.
+    expect(worst.r).toBeGreaterThan(250);
+    expect(worstGround({ ...t, "ground-image": "none" }).r).toBe(0);
+    // A bloom only in the top left corner is still found, whichever end of the
+    // window the sampler finishes at.
+    const corner = {
+      background: "#000000",
+      "ground-image":
+        "radial-gradient(30% 30% at 0% 0%, #ffffff, transparent 100%)",
+    };
+    expect(worstGround(corner).r).toBeGreaterThan(250);
+    // On a light ground the worst point is the darkest one.
+    const light = {
+      background: "#ffffff",
+      "ground-image":
+        "radial-gradient(30% 30% at 0% 0%, #000000, transparent 100%)",
+    };
+    expect(worstGround(light).r).toBeLessThan(5);
   });
 });

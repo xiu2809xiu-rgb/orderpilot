@@ -16,13 +16,11 @@ export function MobileMenu({
   screen,
   open,
   onOpenChange,
-  onOpenSpark,
 }: {
   direction: Direction;
   screen: ScreenId;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onOpenSpark: () => void;
 }) {
   const { t } = useTranslation("directions");
   return (
@@ -49,10 +47,6 @@ export function MobileMenu({
           collapsed={false}
           onNavigate={() => {
             onOpenChange(false);
-          }}
-          onOpenSpark={() => {
-            onOpenChange(false);
-            onOpenSpark();
           }}
         />
       </SheetContent>

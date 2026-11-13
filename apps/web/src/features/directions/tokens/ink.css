@@ -28,13 +28,15 @@
   --warning-surface: #fbefd2;
   --info: #1f4e99;
   --info-surface: #e1eaf7;
-  --border: #d9dcd2;
-  --border-strong: #b9beaf;
-  --input: #b9beaf;
+  /* Darker rules than the brief's table: in the light scheme Ink is graphite
+     lines on a warm ground, so it cannot pass for Paper's pale hairlines. */
+  --border: #c2c7b4;
+  --border-strong: #a3a995;
+  --input: #8a917b;
   --ring: #3d5f00;
   --sidebar: #ffffff;
   --sidebar-foreground: #4a5043;
-  --sidebar-border: #d9dcd2;
+  --sidebar-border: #c2c7b4;
   --sidebar-accent: #eaf7c8;
   --sidebar-accent-foreground: #3d5f00;
 
@@ -42,11 +44,11 @@
   --panel: #ffffff;
   --panel-strong: #ffffff;
   --panel-filter: none;
-  --panel-border: #d9dcd2;
+  --panel-border: #c2c7b4;
   --ground-image: none;
   --glow: none;
   --shadow-card: none;
-  --shadow-pop: 0 0 0 1px #b9beaf;
+  --shadow-pop: 0 0 0 1px #a3a995;
 
   --radius: 5px;
   --radius-control: 3px;
@@ -63,6 +65,40 @@
   /* Figures are Geist Mono in Ink; words stay Geist. */
   --numeral-font: "Geist Mono Variable", ui-monospace, monospace;
   --numeral-weight: 500;
+
+  /* Structure. Ink is an instrument: ruled panels with a line under their
+     title, no fill beyond one surface step, square corners, no shadow. */
+  --dx-card-bg: var(--card);
+  --dx-card-work-bg: var(--card);
+  --dx-card-sheen: none;
+  --dx-card-border: 1px solid var(--border);
+  --dx-card-shadow: none;
+  --dx-card-filter: none;
+  --dx-card-pad: 1rem;
+  --dx-head-rule: 1px solid var(--border);
+  --dx-head-pb: 0.625rem;
+  --dx-title-size: var(--type-28);
+  --dx-title-weight: 600;
+  --dx-title-tracking: -0.015em;
+  --dx-title-from: var(--foreground);
+  --dx-title-to: var(--foreground);
+  --dx-panel-edge: 0rem;
+  --dx-entry-pad: 1.25rem;
+  --dx-entry-radius: 0px;
+  --dx-group-font: "Geist Mono Variable", ui-monospace, monospace;
+  --dx-group-size: var(--type-12);
+  --dx-group-weight: 500;
+  --dx-group-tracking: 0.04em;
+  --dx-group-colour: var(--muted-foreground);
+  --dx-hover-bg: var(--muted);
+  --dx-current-bg: #e8eade;
+  --dx-current-image: none;
+  --dx-current-fg: var(--foreground);
+  --dx-current-shadow: inset 2px 0 0 var(--accent-foreground);
+  --dx-bar-btn-border: var(--border-strong);
+  --dx-bar-btn-bg: transparent;
+  --dx-bar-btn-hover: var(--muted);
+  --dx-bar-btn-radius: var(--radius-control);
 }
 
 :root[data-direction="ink"].dark {
@@ -104,6 +140,7 @@
   --panel-strong: #121411;
   --panel-border: #262a23;
   --shadow-pop: 0 0 0 1px #3a4035;
+  --dx-current-bg: var(--muted);
 }
 
 /* Page change: the content fades and rises 6 px while a one-pixel line
@@ -124,4 +161,25 @@
 }
 :root[data-direction="ink"] ::view-transition-new(.dx-ink-page) {
   animation: dx-ink-in 160ms var(--ease-out) both;
+}
+
+/* The instrument. A section is a ruled panel: a header line, a rule, the
+   body. The page title is set over a rule, with one mono line of context. */
+:root[data-direction="ink"] .dx-section-title {
+  font-size: var(--type-14);
+  line-height: 1.25rem;
+}
+:root[data-direction="ink"] .dx-page-head {
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+:root[data-direction="ink"] .dx-title-context {
+  margin-top: 0.5rem;
+}
+:root[data-direction="ink"] .dx-page-intro {
+  margin-top: 0.75rem;
+}
+/* The panel is a surface step above the ground, with one hairline. */
+:root[data-direction="ink"] .dx-side {
+  border-right-color: var(--panel-border);
 }

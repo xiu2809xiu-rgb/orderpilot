@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { PageHeader } from "../parts/PageHeader";
 import { CardSection } from "./CardSection";
 import { ColourSection } from "./ColourSection";
 import { ControlsSection } from "./ControlsSection";
@@ -15,16 +16,13 @@ export default function KitScreen() {
   const { t } = useTranslation("directions-kit");
   return (
     <div className="dx-sheet py-8">
-      <header className="mb-6 max-w-prose">
-        <h1 className="fs-28 font-semibold">{t("title")}</h1>
-        <p className="fs-14 mt-2 text-muted-foreground">{t("intro")}</p>
-      </header>
-      <div className="grid gap-5 lg:grid-cols-2">
+      <PageHeader title={t("title")} intro={t("intro")} />
+      <div className="dx-grid grid gap-5 lg:grid-cols-2">
         <ColourSection />
         <TypeSection />
         <ShapeSection />
         <ControlsSection />
-        <div className="flex flex-col gap-5">
+        <div className="dx-grid-cell flex flex-col gap-5">
           <StatusSection />
           <CardSection />
         </div>

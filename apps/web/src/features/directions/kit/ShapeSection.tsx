@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { KitSection } from "./KitSection";
+import { Section } from "../parts/Section";
 import { useTokens } from "./useTokens";
 
 const STEPS = [4, 8, 12, 16, 24, 32] as const;
@@ -20,7 +20,7 @@ export function ShapeSection() {
   const { t } = useTranslation("directions-kit");
   const tokens = useTokens(NAMES);
   return (
-    <KitSection title={t("sections.shape")}>
+    <Section title={t("sections.shape")}>
       <div className="grid gap-5 sm:grid-cols-3">
         <div>
           <h3 className="fs-13 font-medium">{t("shape.radius")}</h3>
@@ -77,6 +77,6 @@ export function ShapeSection() {
           </ul>
         </div>
       </div>
-    </KitSection>
+    </Section>
   );
 }

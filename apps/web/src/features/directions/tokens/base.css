@@ -195,11 +195,6 @@
   border-bottom: 1px solid var(--panel-border);
 }
 
-/* The current entry of the side panel: a block, and a mark on its edge. */
-.dx-entry[aria-current="page"] {
-  box-shadow: inset 2px 0 0 var(--accent-foreground);
-}
-
 /* Flat directions draw no shadow under a control: depth is a surface step. The
    ring that shows focus is a second shadow layer, so only the base shadow is
    set to nothing and the ring is left alone. */
@@ -213,14 +208,70 @@
   --tw-shadow: 0 0 #0000;
 }
 
-/* A card: a flat cell in Ink and Paper, a glass panel in Spectra. */
-.dx-card {
-  background: var(--card);
+/* A card. Each direction reads its own structure variables: a ruled panel in
+   Ink, a cell with no fill of its own in Paper, glass in Spectra. A shadcn
+   Card follows the same variables, so a screen never forks per direction. */
+.dx-card,
+[data-slot="card"] {
+  background-color: var(--dx-card-bg);
+  background-image: var(--dx-card-sheen);
   color: var(--card-foreground);
-  border: 1px solid var(--border);
+  border: var(--dx-card-border);
   border-radius: var(--radius-card);
-  box-shadow: var(--shadow-card);
-  backdrop-filter: var(--panel-filter);
+  box-shadow: var(--dx-card-shadow);
+  backdrop-filter: var(--dx-card-filter);
+}
+/* A card that holds a table or a form: as opaque as the direction allows. */
+.dx-card-work {
+  background-color: var(--dx-card-work-bg);
+  background-image: none;
+}
+
+/* A section of a screen: a title, then its body. Ink rules the title, Paper
+   hangs it in the margin with its number, Spectra leaves it on the glass. */
+.dx-section {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+.dx-section-head {
+  padding: var(--dx-card-pad) var(--dx-card-pad) var(--dx-head-pb);
+  border-bottom: var(--dx-head-rule);
+}
+.dx-section-body {
+  min-width: 0;
+  padding: 1rem var(--dx-card-pad) var(--dx-card-pad);
+}
+
+.dx-section-title {
+  font-size: var(--type-16);
+  line-height: 1.5rem;
+  font-weight: 600;
+}
+.dx-section-intro {
+  margin-bottom: 1rem;
+  max-width: 65ch;
+  font-size: var(--type-14);
+  line-height: 1.25rem;
+  color: var(--muted-foreground);
+}
+
+/* The title of a screen, and the line of context under it. */
+.dx-page-head {
+  margin-bottom: 1.5rem;
+}
+.dx-title {
+  font-size: var(--dx-title-size);
+  line-height: 1.15;
+  font-weight: var(--dx-title-weight);
+  letter-spacing: var(--dx-title-tracking);
+}
+.dx-title-context {
+  font-family: var(--numeral-font);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--type-13);
+  line-height: 1.125rem;
+  color: var(--muted-foreground);
 }
 
 @media (prefers-reduced-motion: reduce) {

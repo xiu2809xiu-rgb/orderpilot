@@ -40,7 +40,6 @@ export function Shell({
             direction={direction}
             screen={screen}
             collapsed={collapsed}
-            onOpenSpark={openSpark}
           />
         </aside>
         <MobileMenu
@@ -48,7 +47,6 @@ export function Shell({
           screen={screen}
           open={menuOpen}
           onOpenChange={setMenuOpen}
-          onOpenSpark={openSpark}
         />
         <div className="flex min-w-0 flex-1 flex-col">
           <TopBar

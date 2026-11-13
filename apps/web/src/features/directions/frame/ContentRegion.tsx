@@ -33,7 +33,7 @@ export function ContentRegion({
           className="dx-sweep pointer-events-none absolute inset-x-0 top-0 z-10 h-px"
         />
       ) : null}
-      <div className="h-full overflow-x-clip overflow-y-auto">
+      <div className="dx-content h-full overflow-x-clip overflow-y-auto">
         <ViewTransition key={screen.id} default={`dx-${direction}-page`}>
           <div>
             <Suspense

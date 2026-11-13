@@ -1,12 +1,12 @@
 import { ArrowRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { KitSection } from "./KitSection";
+import { Section } from "../parts/Section";
 
 export function CardSection() {
   const { t } = useTranslation("directions-kit");
   return (
-    <KitSection title={t("sections.card")}>
+    <Section title={t("sections.card")}>
       <div
         className="dx-panel-strong p-4"
         style={{ borderRadius: "var(--radius-card)" }}
@@ -18,6 +18,6 @@ export function CardSection() {
           <ArrowRight aria-hidden="true" />
         </Button>
       </div>
-    </KitSection>
+    </Section>
   );
 }

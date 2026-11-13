@@ -1,12 +1,12 @@
 import { CircleCheck, Clock, Info, TriangleAlert } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { KitSection } from "./KitSection";
+import { Section } from "../parts/Section";
 import { StatusChip } from "./StatusChip";
 
 export function StatusSection() {
   const { t } = useTranslation("directions-kit");
   return (
-    <KitSection title={t("sections.status")} intro={t("status.intro")}>
+    <Section title={t("sections.status")} intro={t("status.intro")}>
       <div className="flex flex-wrap gap-2">
         <StatusChip kind="success" icon={CircleCheck}>
           {t("status.onTime")}
@@ -21,6 +21,6 @@ export function StatusSection() {
           {t("status.information")}
         </StatusChip>
       </div>
-    </KitSection>
+    </Section>
   );
 }

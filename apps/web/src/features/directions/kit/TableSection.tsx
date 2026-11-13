@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table";
 import { useTrackerList } from "@/lib/api/generated/endpoints/tracker/tracker";
 import { formatDay, formatMoney } from "@/lib/format";
-import { KitSection } from "./KitSection";
+import { Section } from "../parts/Section";
 
 /** Up to `count` rows, a new stage first and the rest in order. */
 function pickByStage<T extends { status: { label: string } }>(
@@ -38,7 +38,7 @@ export function TableSection() {
   const list = useTrackerList({ pageSize: 40 });
   const rows = pickByStage(list.data?.data ?? [], 5);
   return (
-    <KitSection title={t("sections.table")} className="lg:col-span-2">
+    <Section title={t("sections.table")} className="lg:col-span-2" work>
       {list.isPending ? (
         <div
           className="space-y-2"
@@ -106,6 +106,6 @@ export function TableSection() {
           </Table>
         </div>
       )}
-    </KitSection>
+    </Section>
   );
 }
