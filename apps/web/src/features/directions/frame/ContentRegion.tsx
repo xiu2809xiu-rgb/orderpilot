@@ -35,7 +35,7 @@ export function ContentRegion({
       ) : null}
       <div className="dx-content h-full overflow-x-clip overflow-y-auto">
         <ViewTransition key={screen.id} default={`dx-${direction}-page`}>
-          <div>
+          <div className={screen.fill ? "h-full" : undefined}>
             <Suspense
               fallback={
                 <div role="status" aria-label={t("content.loading")}>

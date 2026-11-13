@@ -9,6 +9,8 @@ interface AnimatedListProps {
   className?: string;
   /** Seconds between one row arriving and the next. */
   stagger?: number;
+  /** The list's name for a screen reader. */
+  label?: string;
 }
 
 /**
@@ -21,6 +23,7 @@ export function AnimatedList({
   children,
   className,
   stagger = 0.09,
+  label,
 }: AnimatedListProps) {
   const ref = useRef<HTMLDivElement>(null);
   const still = useStill();
@@ -28,7 +31,12 @@ export function AnimatedList({
   const rows = Children.toArray(children);
 
   return (
-    <div ref={ref} role="list" className={cn("flex flex-col", className)}>
+    <div
+      ref={ref}
+      role="list"
+      aria-label={label}
+      className={cn("flex flex-col", className)}
+    >
       {rows.map((row, index) =>
         still ? (
           <div key={index} role="listitem">

@@ -1,0 +1,6 @@
+/* Paper's cards have no fill of their own, so the sign-in card is given the
+   sheet's colour: the dotted ground stops at its edge and never runs behind
+   a field or a line of words. */
+:root[data-direction="paper"] .dx-signin-card {
+  background: var(--background);
+}

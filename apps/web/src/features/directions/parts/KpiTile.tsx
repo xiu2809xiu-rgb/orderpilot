@@ -73,7 +73,7 @@ export function KpiTile({
       <p className="fs-13 text-muted-foreground">{label}</p>
       <p
         className={cn(
-          "flex items-baseline gap-2",
+          "flex flex-wrap items-baseline gap-x-2",
           direction === "paper" ? "fs-44" : "fs-28",
         )}
       >

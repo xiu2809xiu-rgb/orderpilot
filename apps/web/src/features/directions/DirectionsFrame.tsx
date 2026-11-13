@@ -49,9 +49,14 @@ function Frame({
   return (
     <div className="dx-ground flex h-dvh flex-col">
       <PreviewBar direction={direction} screen={screen.id} />
-      <Shell direction={direction} screen={screen.id}>
+      {screen.id === "signin" ? (
+        // Nobody is signed in on this page, so it has no side panel or top bar.
         <ContentRegion direction={direction} screen={screen} />
-      </Shell>
+      ) : (
+        <Shell direction={direction} screen={screen.id}>
+          <ContentRegion direction={direction} screen={screen} />
+        </Shell>
+      )}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { lazy } from "react";
 import type { ComponentType, LazyExoticComponent } from "react";
+import { HomeSkeleton } from "./screens/home/HomeSkeleton";
 
 /**
  * The eight screens of the preview. A screen is in `SCREENS` once it is built;
@@ -23,9 +24,21 @@ export interface ScreenDef {
   Component: LazyExoticComponent<ComponentType>;
   /** What shows while the screen loads, in the screen's own final layout. */
   Skeleton?: ComponentType;
+  /** The screen fills the window and draws its own ground (the sign-in page). */
+  fill?: boolean;
 }
 
 export const SCREENS: readonly ScreenDef[] = [
+  {
+    id: "signin",
+    Component: lazy(() => import("./screens/sign-in/SignInScreen")),
+    fill: true,
+  },
+  {
+    id: "home",
+    Component: lazy(() => import("./screens/home/HomeScreen")),
+    Skeleton: HomeSkeleton,
+  },
   {
     id: "kit",
     Component: lazy(() => import("./kit/KitScreen")),

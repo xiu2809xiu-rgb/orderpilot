@@ -1,0 +1,145 @@
+{
+  "greeting": {
+    "morning": "Good morning, {{name}}",
+    "afternoon": "Good afternoon, {{name}}",
+    "evening": "Good evening, {{name}}"
+  },
+  "introNone": "Nothing is waiting for you.",
+  "intro_one": "{{count}} task is waiting for you, and {{late}} is past its due time.",
+  "intro_other": "{{count}} tasks are waiting for you, and {{late}} are past their due time.",
+  "actions": {
+    "newOrder": "New order",
+    "upload": "Upload a document",
+    "uploadUnavailable": "The upload screen is not part of the preview yet."
+  },
+  "needs": {
+    "title": "Needs you",
+    "empty": {
+      "title": "Nothing needs you right now",
+      "description": "New tasks appear here as soon as an order reaches your step."
+    },
+    "kind": {
+      "REVIEW_FIELDS": "Confirm the fields read from the PO",
+      "RAISE_SPR": "Raise an SPR",
+      "APPROVE_SPR": "Approve the SPR",
+      "SEND_PI": "Send the PI to the customer",
+      "CONFIRM_PAYMENT": "Confirm the payment",
+      "PACK_ORDER": "Pack the order",
+      "RECOUNT_CARTONS": "Recount the cartons",
+      "ADD_SHIPPING_DOCUMENTS": "Add the shipping documents"
+    },
+    "action": {
+      "SEND_PI": "Mark PI sent",
+      "REVIEW_FIELDS": "Review fields",
+      "open": "Open order"
+    },
+    "actionOn": "{{action}} for {{order}}",
+    "more": "{{count}} more waiting",
+    "failed": "Could not load your tasks."
+  },
+  "timeline": {
+    "title": "My timeline",
+    "intro": "What you finished, what you are on, and what comes next.",
+    "summaryNone": "Nothing is waiting, so there is nothing to clear.",
+    "summary_one": "{{count}} task is waiting. It is due {{last}}.",
+    "summary_other": "{{count}} tasks are waiting, {{late}} past their due time. The last one is due {{last}}.",
+    "done": {
+      "title": "Done today",
+      "empty": "Nothing finished yet today. A task you complete here appears with the time.",
+      "at": "Finished at {{time}}"
+    },
+    "now": {
+      "title": "Now",
+      "waiting_hours": "Waiting {{count}} h",
+      "waiting_days_one": "Waiting {{count}} day",
+      "waiting_days_other": "Waiting {{count}} days",
+      "waiting_minutes": "Waiting {{count}} min",
+      "pastUsual": "Past the usual time for this step",
+      "withinUsual": "Within the usual time for this step"
+    },
+    "next": {
+      "title": "Next",
+      "empty": "No more tasks are queued behind this one.",
+      "expectedDay": "Expected done by {{day}}",
+      "pastUsual": "Past its usual time. {{usual}}.",
+      "noEstimate": "No usual time for this step in the data"
+    },
+    "basis": "Estimate from how long this step took on the last {{orders}} orders.",
+    "stepOf": "{{step}}, step {{position}} of 9"
+  },
+  "measures": {
+    "title": "Your numbers",
+    "open": "Open orders",
+    "waiting": "Waiting for you",
+    "late": "Past their due time",
+    "tasks": "tasks",
+    "orders": "orders",
+    "trend": {
+      "byHand": "Was {{value}} {{unit}} by hand"
+    },
+    "lab": "Lab estimate: {{note}}",
+    "five": "Spectra's five measures",
+    "noAccess": "Your role does not include Spectra's five measures. Management reads them.",
+    "failed": "Could not load the measures."
+  },
+  "flows": {
+    "title": "Orders in each step",
+    "sales": "Sales orders",
+    "purchase": "Purchase orders",
+    "summary": "{{count}} open sales orders. The busiest step is {{step}}.",
+    "step": {
+      "busiest": "Busiest step",
+      "other": "Step"
+    },
+    "stepNo": "Step {{n}}",
+    "orders_one": "{{count}} order",
+    "orders_other": "{{count}} orders",
+    "opens": "{{step}}: {{count}} in this step. Open them in Orders.",
+    "purchaseNote": "Purchase orders are not in the tracker, so these steps show no counts.",
+    "failed": "Could not load the order flow."
+  },
+  "signin": {
+    "heading": "Sign in to OrderPilot",
+    "date": "Today",
+    "lead": "One place for every order, from the customer's PO to the goods leaving.",
+    "stepsLabel": "How OrderPilot works",
+    "steps": {
+      "read": {
+        "title": "AI reads",
+        "body": "It reads each document and picks out the customer, items, quantities and prices."
+      },
+      "decide": {
+        "title": "Rules decide",
+        "body": "Fixed rules check the order against prices, stock and approval limits."
+      },
+      "approve": {
+        "title": "People approve",
+        "body": "The right person confirms anything uncertain. Business Central stays the system of record."
+      }
+    },
+    "form": {
+      "title": "Sign in",
+      "email": "Email",
+      "emailHelp": "Use the email of your Spectra account.",
+      "password": "Password",
+      "passwordHelp": "At least 8 characters.",
+      "show": "Show password",
+      "hide": "Hide password",
+      "submit": "Sign in",
+      "emailRequired": "Enter your email, for example name@example.com.",
+      "emailInvalid": "That does not look like an email. Check for an @ and a domain.",
+      "passwordRequired": "Enter your password.",
+      "passwordShort": "Use at least 8 characters.",
+      "sent": "Preview only: nothing was sent, and no one was signed in."
+    },
+    "roles": {
+      "title": "Or open a demo role",
+      "hint": "Each role sees its own tasks and numbers.",
+      "label": "Demo roles",
+      "note": "Prototype: these buttons only show a pressed state. Sign in for real from the login page.",
+      "loading": "Loading the demo roles",
+      "failed": "The demo roles could not be loaded."
+    },
+    "data": "Synthetic demo data. The AI and Business Central are stand-ins."
+  }
+}

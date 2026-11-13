@@ -266,6 +266,13 @@
   font-weight: var(--dx-title-weight);
   letter-spacing: var(--dx-title-tracking);
 }
+/* The buttons that belong to the whole screen, under its title. */
+.dx-page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
 .dx-title-context {
   font-family: var(--numeral-font);
   font-variant-numeric: tabular-nums;
