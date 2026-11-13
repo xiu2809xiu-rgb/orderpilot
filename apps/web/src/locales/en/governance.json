@@ -66,6 +66,9 @@
       "read": "See the role matrix",
       "manage": "Change the role matrix"
     },
+    "masking": {
+      "customerNote": "See the sample customer note"
+    },
     "settings": {
       "manage": "Change settings"
     },
@@ -133,6 +136,8 @@
     "visibleTo": "Shown in full to",
     "customer": "Customer",
     "note": "Note (sample rule)",
+    "matrixHint": "Who sees the note is a row of the role matrix, masking.customerNote. Change it there and this sample follows.",
+    "openMatrix": "Open the role matrix",
     "viewing": "You are seeing this as {{role}}.",
     "recordsLabel": "Synthetic customers with the sample rule applied",
     "emptyTitle": "No sample records",

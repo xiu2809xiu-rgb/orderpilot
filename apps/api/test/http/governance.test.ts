@@ -299,6 +299,69 @@ describe("governance: the role-permission matrix over HTTP", () => {
         reason: "role",
       });
     });
+
+    // F-8: the rule's roles are a row of the matrix, not code.
+    const NOTE = "masking.customerNote";
+    const noteCell = (role: Role) => `${MATRIX}/${role}/permissions/${NOTE}`;
+    interface Sample {
+      data: {
+        rules: { field: string; visibleTo: Role[] }[];
+        records: {
+          note: { masked: boolean; value: string | null; reason: string };
+        }[];
+      };
+    }
+    const sampleOf = async (role: Role) => (await sample(role)).body as Sample;
+    const noteRule = (body: Sample) =>
+      body.data.rules.find((rule) => rule.field === "sample.customerNote");
+
+    it("takes who sees the note from the matrix", async () => {
+      const res = await call(t, as("SYSTEM_ADMIN"), "get", MATRIX);
+      const matrix = matrixSchema.parse((res.body as { data: unknown }).data);
+      const holders = matrix.roles
+        .filter((access) =>
+          (access.permissions as readonly string[]).includes(NOTE),
+        )
+        .map((access) => access.role);
+      expect(holders.length).toBeGreaterThan(0);
+      expect(noteRule(await sampleOf("SUPPORT"))?.visibleTo).toEqual(holders);
+    });
+
+    it("hides the note from a role the matrix stops showing it to, with the reason", async () => {
+      const change = await put("SYSTEM_ADMIN", noteCell("SUPPORT"), {
+        granted: false,
+      });
+      expect(change.status).toBe(200);
+      try {
+        const body = await sampleOf("SUPPORT");
+        expect(noteRule(body)?.visibleTo).not.toContain("SUPPORT");
+        expect(body.data.records.length).toBeGreaterThan(0);
+        for (const record of body.data.records) {
+          expect(record.note).toMatchObject({
+            masked: true,
+            value: null,
+            reason: "role",
+          });
+        }
+      } finally {
+        await put("SYSTEM_ADMIN", noteCell("SUPPORT"), { granted: true });
+      }
+    });
+
+    it("shows the note to a role the matrix starts showing it to", async () => {
+      const change = await put("SYSTEM_ADMIN", noteCell("WAREHOUSE"), {
+        granted: true,
+      });
+      expect(change.status).toBe(200);
+      try {
+        const body = await sampleOf("WAREHOUSE");
+        expect(noteRule(body)?.visibleTo).toContain("WAREHOUSE");
+        expect(body.data.records[0]?.note.masked).toBe(false);
+        expect(body.data.records[0]?.note.value).toBeTruthy();
+      } finally {
+        await put("SYSTEM_ADMIN", noteCell("WAREHOUSE"), { granted: false });
+      }
+    });
   });
 
   describe("what data may go to which AI provider", () => {

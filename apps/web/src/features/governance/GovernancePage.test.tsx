@@ -275,6 +275,93 @@ describe("GovernancePage", () => {
     ).toBeInTheDocument();
   });
 
+  describe("the masking sample and the matrix (F-8)", () => {
+    const maskingSample = {
+      data: {
+        rules: [
+          {
+            field: "sample.customerNote",
+            label: "Customer note (sample rule)",
+            classification: "internal",
+            reason: "role",
+            visibleTo: ["SUPPORT"],
+            sample: true,
+          },
+        ],
+        records: [
+          {
+            customerNo: "C-1",
+            customerName: "Synthetic Customer",
+            note: {
+              field: "sample.customerNote",
+              classification: "internal",
+              masked: false,
+              value: "Prefers email over phone for confirmations.",
+              reason: null,
+            },
+          },
+        ],
+      },
+      meta: { mock: true },
+    };
+
+    it("says who sees the note is set on the matrix, and links to its row", async () => {
+      signIn("SYSTEM_ADMIN");
+      server.use(
+        http.get("*/api/v1/governance/masking/sample", () =>
+          HttpResponse.json(maskingSample),
+        ),
+      );
+      renderPage();
+      await userEvent.click(
+        await screen.findByRole("tab", { name: "Masking" }),
+      );
+      const link = await screen.findByRole("link", {
+        name: "Open the role matrix",
+      });
+      expect(link).toHaveAttribute(
+        "href",
+        "/governance?tab=matrix&q=masking.customerNote",
+      );
+      await userEvent.click(link);
+      expect(
+        await screen.findByRole("tab", { name: "Role matrix" }),
+      ).toHaveAttribute("aria-selected", "true");
+    });
+
+    it("reads the sample again after the matrix changes", async () => {
+      signIn("SYSTEM_ADMIN");
+      let reads = 0;
+      server.use(
+        http.get("*/api/v1/governance/masking/sample", () => {
+          reads += 1;
+          return HttpResponse.json(maskingSample);
+        }),
+        http.put(
+          "*/api/v1/governance/matrix/:role/permissions/:permission",
+          () => HttpResponse.json({ data: matrix.roles[0] }),
+        ),
+      );
+      renderPage();
+      await userEvent.click(
+        await screen.findByRole("tab", { name: "Masking" }),
+      );
+      await screen.findByText("Synthetic Customer");
+      expect(reads).toBe(1);
+      await userEvent.click(screen.getByRole("tab", { name: "Role matrix" }));
+      await userEvent.click(
+        await screen.findByRole("switch", {
+          name: "Read orders for Warehouse",
+        }),
+      );
+      await userEvent.click(screen.getByRole("tab", { name: "Masking" }));
+      await screen.findByText("Synthetic Customer");
+      await waitFor(() => {
+        expect(reads).toBe(2);
+      });
+    });
+  });
+
   it("disables a user rather than deleting them", async () => {
     signIn("SYSTEM_ADMIN");
     let called = "";
