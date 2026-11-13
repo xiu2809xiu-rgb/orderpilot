@@ -65,7 +65,7 @@ function field(
 export const DEFAULT_DOCUMENT_CONFIG: readonly DocumentTypeConfig[] = [
   {
     documentType: "SPR",
-    label: "Stock purchase request",
+    label: "Stock purchase requisition",
     fields: [
       field("vendorNo", "Vendor", "text", { required: true }),
       field("itemNo", "Item", "text", { required: true }),
