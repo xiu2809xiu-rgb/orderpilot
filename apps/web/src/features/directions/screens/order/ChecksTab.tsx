@@ -25,7 +25,7 @@ function Result({ check }: { check: CheckResult }) {
         >
           {t(`detail.checks.${check.outcome}`)}
         </StatusChip>
-        <h4 className="fs-14 font-medium text-foreground">{check.ruleLabel}</h4>
+        <h3 className="fs-14 font-medium text-foreground">{check.ruleLabel}</h3>
       </div>
       <dl className="od-check-facts fs-13">
         <div>

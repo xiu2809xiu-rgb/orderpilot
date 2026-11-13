@@ -1,7 +1,6 @@
 import { Inbox } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useSearchParams } from "react-router";
 import { Toaster } from "@/components/common";
 import { Pagination } from "@/components/common/data-table/Pagination";
 import { useRowSelection } from "@/components/list-page/useRowSelection";
@@ -13,7 +12,9 @@ import { Alert, AlertDescription, AlertTitle } from "../../kit/Alert";
 import { EmptyState } from "../../parts/EmptyState";
 import { PageHeader } from "../../parts/PageHeader";
 import { AppliedFilters } from "./AppliedFilters";
+import { BoardState } from "./BoardState";
 import { customersOf } from "./CustomerFilter";
+import { OrderOperationLog } from "./OrderOperationLog";
 import { OrderPeek } from "./OrderPeek";
 import { orderColumns } from "./orderColumns";
 import { OrdersActions } from "./OrdersActions";
@@ -28,16 +29,14 @@ import {
   countViews,
   filterOrders,
   PAGE_SIZES,
-  parseQuery,
   sortOrders,
-  toParams,
-  type OrdersQuery,
   type SortId,
 } from "./ordersQuery";
 import { useAppliedChips } from "./useAppliedChips";
 import { useDirection } from "../../frame/useDirection";
 import "./orders.css";
 import { useOrderColumns } from "./useOrderColumns";
+import { useOrdersQuery } from "./useOrdersQuery";
 import { useOrderRows, LOADED } from "./useOrderRows";
 
 const rowKey = (row: OrderRow) => row.orderNo;
@@ -53,8 +52,7 @@ export default function OrdersScreen() {
   const { t } = useTranslation("directions-orders");
   const { t: tc } = useTranslation("common");
   const direction = useDirection();
-  const [params, setParams] = useSearchParams();
-  const query = useMemo(() => parseQuery(params), [params]);
+  const { query, change } = useOrdersQuery();
   const session = useSessionStore((state) => state.session);
   const who = useMemo(() => ({ role: session?.user.role }), [session]);
   const mayHaveTasks = session?.permissions.includes("tasks.complete") ?? false;
@@ -62,14 +60,6 @@ export default function OrdersScreen() {
   const today = todayInSingapore();
   const [peekNo, setPeekNo] = useState<string | null>(null);
 
-  const change = useCallback(
-    (patch: Partial<OrdersQuery>) => {
-      setParams(toParams({ ...query, page: 1, ...patch }, params), {
-        replace: true,
-      });
-    },
-    [query, params, setParams],
-  );
   const rowLabel = useCallback((row: OrderRow) => row.orderNo, []);
 
   const valueHidden = data.rows[0]?.amount.masked ?? false;
@@ -106,6 +96,9 @@ export default function OrdersScreen() {
   const start = (query.page - 1) * query.pageSize;
   const pageRows = filtered.slice(start, start + query.pageSize);
   const selection = useRowSelection(pageRows, rowKey, rowLabel);
+  // The log of one order is shown when exactly one row is ticked.
+  const only =
+    selection.selected.length === 1 ? selection.selected[0] : undefined;
   const takeaway = selection.selected.length ? selection.selected : filtered;
   const late = data.rows.filter((row) => row.overdue?.overdue === true).length;
 
@@ -161,15 +154,13 @@ export default function OrdersScreen() {
               visibleIds={table.visibleIds}
               prefs={table.prefs}
               rows={takeaway}
+              ticked={selection.selected.length}
+              onClearTicks={selection.clear}
               appliedWords={[
                 ...(view === "all" ? [] : [t(`views.${view}`)]),
                 ...chips.map((chip) => chip.label),
               ]}
-              onApply={(next) => {
-                setParams(toParams({ ...next, page: 1 }, params), {
-                  replace: true,
-                });
-              }}
+              onApply={change}
             />
           </div>
           <OrdersFilters
@@ -197,7 +188,13 @@ export default function OrdersScreen() {
               ? t("table.showing", { count: filtered.length })
               : ""}
           </p>
-          {view === "stage" ? (
+          {view === "stage" && status !== "ready" ? (
+            <BoardState
+              status={status}
+              error={data.error}
+              onRetry={data.refetch}
+            />
+          ) : view === "stage" ? (
             <OrdersBoard
               rows={filtered}
               onPeek={setPeekNo}
@@ -242,6 +239,7 @@ export default function OrdersScreen() {
                   });
                 }}
               />
+              {only ? <OrderOperationLog orderNo={only.orderNo} /> : null}
               <Pagination
                 page={query.page}
                 pageSize={query.pageSize}

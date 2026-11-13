@@ -25,13 +25,15 @@ export function SearchField({ direction }: { direction: Direction }) {
     };
   }, []);
 
+  // No aria-label: the visible words are the name, so a screen reader and a
+  // person using speech control say the same thing (WCAG 2.5.3). The shortcut
+  // hint beside them is aria-hidden.
   return (
     <>
       <button
         type="button"
         className="dx-search w-64 max-xl:w-auto max-xl:px-2.5"
         aria-keyshortcuts="Control+K Meta+K"
-        aria-label={t("bar.paletteTitle")}
         onClick={() => {
           setOpen(true);
         }}

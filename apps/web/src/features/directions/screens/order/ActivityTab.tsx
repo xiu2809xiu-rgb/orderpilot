@@ -13,6 +13,7 @@ import {
   TimelineTitle,
 } from "../../kit/Timeline";
 import { EmptyState } from "../../parts/EmptyState";
+import { OrderOperationLog } from "../orders/OrderOperationLog";
 
 const STAMP = new Intl.DateTimeFormat("en-SG", {
   day: "numeric",
@@ -30,15 +31,24 @@ const STAMP = new Intl.DateTimeFormat("en-SG", {
  * words and times are the tracker's own; money is posted in Business Central,
  * and the page says so.
  */
-export function ActivityTab({ steps }: { steps: readonly TimelineStep[] }) {
+export function ActivityTab({
+  orderNo,
+  steps,
+}: {
+  orderNo: string;
+  steps: readonly TimelineStep[];
+}) {
   const { t } = useTranslation("directions-orders");
   if (steps.length === 0) {
     return (
-      <EmptyState
-        icon={History}
-        title={t("order.activity.emptyTitle")}
-        description={t("order.activity.emptyBody")}
-      />
+      <div className="od-activity">
+        <EmptyState
+          icon={History}
+          title={t("order.activity.emptyTitle")}
+          description={t("order.activity.emptyBody")}
+        />
+        <OrderOperationLog orderNo={orderNo} />
+      </div>
     );
   }
   const newestFirst = [...steps].reverse();
@@ -79,6 +89,7 @@ export function ActivityTab({ steps }: { steps: readonly TimelineStep[] }) {
           </TimelineItem>
         ))}
       </Timeline>
+      <OrderOperationLog orderNo={orderNo} />
     </div>
   );
 }

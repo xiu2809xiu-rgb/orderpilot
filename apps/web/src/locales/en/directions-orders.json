@@ -135,7 +135,8 @@
     "notStarted": "Not started",
     "empty": "No orders",
     "more_one": "Show {{count}} more in the list",
-    "more_other": "Show {{count}} more in the list"
+    "more_other": "Show {{count}} more in the list",
+    "loading": "Loading orders"
   },
   "peek": {
     "position": "{{position}} of {{total}}",
@@ -144,7 +145,8 @@
     "status": "Status",
     "journey": "Journey",
     "noJourney": "This order has no journey yet: the tracker does not know it.",
-    "open": "Open order"
+    "open": "Open order",
+    "region": "Order summary"
   },
   "journey": {
     "doneBy": "{{actor}}, {{when}}",

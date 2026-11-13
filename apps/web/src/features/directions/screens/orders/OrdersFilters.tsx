@@ -1,5 +1,5 @@
 import { Search } from "lucide-react";
-import { useId } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Input } from "@/components/ui/input";
 import {
@@ -46,6 +46,28 @@ export function OrdersFilters({
   const { t: tt } = useTranslation("order-tracker");
   const searchId = useId();
   const stageId = useId();
+  // What is typed shows at once; the list follows a moment after the last key,
+  // so typing is never behind the router. A change from elsewhere (Clear all, a
+  // saved view) replaces what is typed.
+  const [draft, setDraft] = useState(query.search);
+  const pushed = useRef(query.search);
+  useEffect(() => {
+    if (query.search !== pushed.current) {
+      pushed.current = query.search;
+      setDraft(query.search);
+    }
+  }, [query.search]);
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      if (draft !== pushed.current) {
+        pushed.current = draft;
+        onChange({ search: draft });
+      }
+    }, 250);
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [draft, onChange]);
   return (
     <div className="od-filters">
       <FilterField
@@ -58,11 +80,11 @@ export function OrdersFilters({
           <Input
             id={searchId}
             type="search"
-            value={query.search}
+            value={draft}
             placeholder={t("filters.searchHint")}
             className="od-control"
             onChange={(event) => {
-              onChange({ search: event.target.value });
+              setDraft(event.target.value);
             }}
           />
         </span>

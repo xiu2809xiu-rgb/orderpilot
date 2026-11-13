@@ -461,6 +461,9 @@
   margin-right: auto;
 }
 .od-peek-body {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   display: flex;
   min-height: 0;
   flex: 1;
@@ -952,4 +955,74 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+}
+
+/* The currency code is a small muted prefix to the figure. */
+.od-cur {
+  color: var(--muted-foreground);
+  font-size: var(--type-12);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+.od-fact[data-main] .od-cur {
+  font-size: var(--type-13);
+}
+
+/* ---- Phones: the filters share rows, and Paper's heads stack ---- */
+
+@media (max-width: 47.99rem) {
+  .od-filters {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .od-filters .od-field-search {
+    grid-column: 1 / -1;
+  }
+  .od-filters .od-search,
+  .od-filters .od-field > button,
+  .od-filters .od-field [data-slot="select-trigger"] {
+    width: 100%;
+  }
+  .od-filters .od-toggles {
+    grid-column: 1 / -1;
+  }
+  :root[data-direction="paper"] .od-page .dx-page-head,
+  :root[data-direction="paper"] .od-order .dx-page-head {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  :root[data-direction="paper"] .od-page .dx-page-actions,
+  :root[data-direction="paper"] .od-order .dx-page-actions {
+    grid-column: 1;
+    grid-row: auto;
+    margin: 0.75rem 0 0 1rem;
+  }
+  :root[data-direction="paper"] .od-order .od-back {
+    margin-left: 1rem;
+  }
+  :root[data-direction="paper"] .od-top {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  :root[data-direction="paper"] .od-views {
+    grid-template-columns: repeat(2, 50%);
+  }
+  :root[data-direction="paper"] .od-work > :not(.od-top) {
+    margin-inline: 1rem;
+  }
+}
+
+/* On a phone the page scrolls as a whole and the table takes the height of its rows. */
+@media (max-width: 47.99rem) {
+  .od-page {
+    height: auto;
+    min-height: 0;
+  }
+  .od-work,
+  .od-scroll,
+  .od-board-scroll {
+    flex: none;
+    min-height: 0;
+  }
+  .od-board-scroll {
+    max-height: 70dvh;
+  }
 }

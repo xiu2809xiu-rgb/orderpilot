@@ -4,6 +4,7 @@ import { ExportMenu } from "@/components/common/data-table/ExportMenu";
 import { SavedViews } from "@/components/common/data-table/SavedViews";
 import type { TablePrefs } from "@/components/common/data-table/useTablePrefs";
 import { PrintButton } from "@/components/list-page/PrintButton";
+import { SelectionCount } from "@/components/list-page/SelectionCount";
 import { useTranslation } from "react-i18next";
 import { fromSavedView, toSavedQuery } from "./savedViews";
 import type { OrderRow } from "./orderRow";
@@ -23,6 +24,8 @@ export function OrdersToolbar({
   prefs,
   rows,
   appliedWords,
+  ticked,
+  onClearTicks,
   onApply,
 }: {
   query: OrdersQuery;
@@ -33,11 +36,15 @@ export function OrdersToolbar({
   /** The rows to take away: the ticked ones, or every row in the view. */
   rows: readonly OrderRow[];
   appliedWords: readonly string[];
+  /** How many rows are ticked. */
+  ticked: number;
+  onClearTicks: () => void;
   onApply: (query: OrdersQuery) => void;
 }) {
   const { t } = useTranslation("directions-orders");
   return (
     <div className="od-toolbar">
+      <SelectionCount count={ticked} onClear={onClearTicks} />
       <SavedViews
         saved={prefs.saved}
         onApply={(view) => {

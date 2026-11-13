@@ -1,7 +1,7 @@
 import { ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
-import { ErrorPanel } from "@/components/common";
+import { ErrorPanel, ScrollRegion } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -93,7 +93,7 @@ export function OrderPeek({
                 </Button>
               </div>
             </SheetHeader>
-            <div className="od-peek-body">
+            <ScrollRegion label={t("peek.region")} className="od-peek-body">
               <dl className="od-facts fs-14">
                 <Fact label={t("peek.status")}>
                   {row.status?.label ??
@@ -147,7 +147,7 @@ export function OrderPeek({
                   />
                 </>
               )}
-            </div>
+            </ScrollRegion>
             <SheetFooter className="od-peek-foot">
               <Button asChild className="pointer-coarse:h-11">
                 <Link to={orderHref(direction, row.orderNo)}>

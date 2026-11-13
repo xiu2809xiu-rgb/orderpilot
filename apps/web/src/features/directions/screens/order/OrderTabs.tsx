@@ -82,7 +82,7 @@ export function OrderTabs({
         <ChecksTab checks={timeline.checks} matches={timeline.matches} />
       </TabsContent>
       <TabsContent value="activity">
-        <ActivityTab steps={timeline.steps} />
+        <ActivityTab orderNo={orderNo} steps={timeline.steps} />
       </TabsContent>
     </Tabs>
   );

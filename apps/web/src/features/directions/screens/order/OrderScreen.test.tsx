@@ -1,0 +1,195 @@
+import { screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
+import { useSessionStore } from "@/stores/session";
+import { axeViolations } from "@/test/axe";
+import { sessionFor } from "@/test/fixtures";
+import {
+  loadNamespaces,
+  nth,
+  renderAt,
+  stubApi,
+  taskOn,
+} from "../orders/ordersTestKit";
+import OrderScreen from "./OrderScreen";
+
+const open = (query: string, direction = "ink") =>
+  renderAt(<OrderScreen />, `/directions/${direction}/order${query}`);
+
+beforeAll(loadNamespaces);
+
+beforeEach(() => {
+  useSessionStore.setState({
+    status: "active",
+    session: sessionFor("SUPPORT"),
+  });
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
+
+/** SO-0001 waits for payment: the fourth step. */
+const PAID = "?order=SO-0001";
+
+describe("the order page", () => {
+  it("heads the page with the number, the customer and the facts", async () => {
+    stubApi();
+    open(PAID);
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "SO-0001" }),
+    ).toBeVisible();
+    expect(screen.getByText("Alpha Traders, C-0001")).toBeVisible();
+    const facts = screen.getByText("Stage").closest("dl");
+    if (!facts) throw new Error("no facts");
+    expect(within(facts).getByText("Waiting for payment")).toBeVisible();
+    expect(within(facts).getByText("Finance")).toBeVisible();
+    expect(within(facts).getByText("PO-SO-0001")).toBeVisible();
+    expect(within(facts).getByText("3 d late")).toBeVisible();
+  });
+
+  it("shows the journey with done, now and later, and who and when for done steps", async () => {
+    stubApi();
+    open(PAID);
+    const rail = await screen.findByRole("list", {
+      name: "Sales order journey",
+    });
+    const steps = within(rail).getAllByRole("listitem");
+    expect(steps).toHaveLength(9);
+    expect(steps[3]).toHaveAttribute("aria-current", "step");
+    // Done: the actor and the day, from the order's own events.
+    expect(within(nth(steps, 2)).getByText(/Support, /)).toBeVisible();
+    expect(within(nth(steps, 3)).getByText(/Since /)).toBeVisible();
+    // Later: a day the step is expected, worked from the usual times.
+    expect(within(nth(steps, 4)).getByText(/^By /)).toBeVisible();
+  });
+
+  it("sums the journey up in one line and sets it against the order's ship date", async () => {
+    stubApi();
+    open(PAID);
+    expect(
+      await screen.findByText(
+        /^Expected to ship on .+, from how long each step took on similar orders\.$/,
+      ),
+    ).toBeVisible();
+    expect(screen.getByText(/Ship date on the order:/)).toBeVisible();
+    // A step the data cannot time is named, and adds nothing.
+    expect(
+      screen.getByText(/No usual time for Invoice and packing list/),
+    ).toBeVisible();
+  });
+
+  it("fills the four tabs from the real data", async () => {
+    stubApi();
+    const user = userEvent.setup();
+    open(PAID);
+    await screen.findByRole("heading", { level: 1, name: "SO-0001" });
+    const tabs = await screen.findByRole("tablist", { name: "Order details" });
+    expect(
+      within(tabs).getByRole("tab", { name: /^Lines\s*2$/ }),
+    ).toHaveAttribute("aria-selected", "true");
+    const lines = await screen.findByRole("table", {
+      name: "Lines of the order",
+    });
+    expect(within(lines).getByText("Item 2")).toBeVisible();
+    expect(within(lines).getByText("Short 5")).toBeVisible();
+    expect(within(lines).getByText("Order total")).toBeVisible();
+
+    await user.click(within(tabs).getByRole("tab", { name: /^Documents/ }));
+    const customerPo = (await screen.findByText("Customer PO")).closest("li");
+    if (!customerPo) throw new Error("no document row");
+    expect(within(customerPo).getByText("Differs")).toBeVisible();
+    expect(screen.getByText("Packing list")).toBeVisible();
+
+    await user.click(within(tabs).getByRole("tab", { name: /^Checks/ }));
+    expect(await screen.findByText("Rule quantity")).toBeVisible();
+    expect(screen.getByText("Matched to Business Central")).toBeVisible();
+    expect(screen.getByText("C-0009 Look-alike Ltd")).toBeVisible();
+
+    await user.click(within(tabs).getByRole("tab", { name: /^Activity/ }));
+    const events = await screen.findByRole("tabpanel");
+    expect(await within(events).findByText("Payment received")).toBeVisible();
+    expect(within(events).getByText("Current step")).toBeVisible();
+  });
+
+  it("says a document waits for a person when the tracker says so, without naming which", async () => {
+    stubApi({ toConfirm: ["SO-0001"] });
+    open("?order=SO-0001&tab=documents");
+    expect(
+      await screen.findByText(
+        "A document of this order waits for you to confirm it",
+      ),
+    ).toBeVisible();
+    expect(screen.getByText(/It does not say which one/)).toBeVisible();
+  });
+
+  it("makes the person's own task the one primary button, finished here with one click", async () => {
+    stubApi({ tasks: [taskOn("SO-0001", "SEND_PI")] });
+    open(PAID);
+    expect(
+      await screen.findByRole("button", { name: "Mark sent" }),
+    ).toBeVisible();
+    expect(screen.getAllByRole("button", { name: /Mark sent/ })).toHaveLength(
+      1,
+    );
+  });
+
+  it("opens the order's own page of the app for a decision, and says when there is no task", async () => {
+    stubApi({ tasks: [taskOn("SO-0001", "CONFIRM_PAYMENT")] });
+    const view = open(PAID);
+    expect(
+      await screen.findByRole("link", { name: /Confirm/ }),
+    ).toHaveAttribute("href", "/workflows/orders/SO-0001");
+    view.unmount();
+    vi.unstubAllGlobals();
+    stubApi();
+    open(PAID);
+    expect(
+      await screen.findByText("You have no open task on this order."),
+    ).toBeVisible();
+  });
+
+  it("hides every price from a role that may not see them, with the reason", async () => {
+    useSessionStore.setState({
+      status: "active",
+      session: sessionFor("WAREHOUSE"),
+    });
+    stubApi({ masked: true });
+    open(PAID);
+    await screen.findByRole("heading", { level: 1, name: "SO-0001" });
+    await screen.findByRole("table", { name: "Lines of the order" });
+    const body = document.body.textContent;
+    for (const hidden of ["7,960.80", "7960.80", "169.19", "553.93"]) {
+      expect(body).not.toContain(hidden);
+    }
+    expect(
+      screen.getAllByText(/prices are for roles that work with pricing/).length,
+    ).toBeGreaterThan(2);
+  });
+
+  it("says plainly when the order is not found", async () => {
+    stubApi();
+    open("?order=SO-9999");
+    expect(await screen.findByText("That order was not found")).toBeVisible();
+    expect(screen.getByRole("link", { name: "Orders" })).toBeVisible();
+  });
+
+  it("has no accessibility violations in any direction", async () => {
+    for (const direction of ["ink", "paper", "spectra"]) {
+      stubApi({ tasks: [taskOn("SO-0001", "SEND_PI")] });
+      const view = open(`${PAID}&tab=checks`, direction);
+      await screen.findByText("Rule quantity");
+      expect(await axeViolations(view.container)).toEqual([]);
+      view.unmount();
+      vi.unstubAllGlobals();
+    }
+  });
+});
