@@ -41,3 +41,18 @@ export function findScreen(id: string | undefined): ScreenDef | undefined {
 export function isBuilt(id: ScreenId): boolean {
   return SCREENS.some((screen) => screen.id === id);
 }
+
+/** What the Spark panel is given by the shell, which owns whether it is open. */
+export interface SparkPanelProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+/**
+ * The Spark panel, once it is built: the Spark buttons of the top bar and the
+ * side panel open it, over any screen. Until then they say, in a tooltip, that
+ * it is not wired, and do nothing else.
+ */
+export const SPARK_PANEL: LazyExoticComponent<
+  ComponentType<SparkPanelProps>
+> | null = null;

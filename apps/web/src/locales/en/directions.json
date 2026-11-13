@@ -78,7 +78,9 @@
     "paletteDescription": "Jump to a screen of this preview.",
     "paletteEmpty": "No screen matches that.",
     "paletteScreens": "Screens",
-    "paletteMenu": "Menu"
+    "keys": "Ctrl K",
+    "palettePlaceholder": "Type a screen name",
+    "breadcrumb": "Breadcrumb"
   },
   "spark": {
     "title": "Spark",
@@ -88,7 +90,9 @@
   "help": {
     "title": "Keyboard shortcuts",
     "search": "Search or jump to",
-    "close": "Close a panel or a menu"
+    "close": "Close a panel or a menu",
+    "keysSearch": "Ctrl K",
+    "keysClose": "Esc"
   },
   "content": {
     "loading": "Loading the screen"

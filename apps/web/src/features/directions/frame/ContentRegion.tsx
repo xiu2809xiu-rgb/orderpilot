@@ -24,7 +24,7 @@ export function ContentRegion({
     <main
       id="main"
       tabIndex={-1}
-      className="relative min-h-0 flex-1 overflow-x-clip outline-none"
+      className="relative min-h-0 flex-1 outline-none"
     >
       {direction === "ink" ? (
         <span
@@ -33,22 +33,24 @@ export function ContentRegion({
           className="dx-sweep pointer-events-none absolute inset-x-0 top-0 z-10 h-px"
         />
       ) : null}
-      <ViewTransition key={screen.id} default={`dx-${direction}-page`}>
-        <div>
-          <Suspense
-            fallback={
-              <div role="status" aria-label={t("content.loading")}>
-                <span className="dx-progress" aria-hidden="true">
-                  <i />
-                </span>
-                <Skeleton />
-              </div>
-            }
-          >
-            <screen.Component />
-          </Suspense>
-        </div>
-      </ViewTransition>
+      <div className="h-full overflow-x-clip overflow-y-auto">
+        <ViewTransition key={screen.id} default={`dx-${direction}-page`}>
+          <div>
+            <Suspense
+              fallback={
+                <div role="status" aria-label={t("content.loading")}>
+                  <span className="dx-progress" aria-hidden="true">
+                    <i />
+                  </span>
+                  <Skeleton />
+                </div>
+              }
+            >
+              <screen.Component />
+            </Suspense>
+          </div>
+        </ViewTransition>
+      </div>
     </main>
   );
 }

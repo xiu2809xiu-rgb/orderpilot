@@ -7,6 +7,7 @@ import {
 } from "./directions";
 import { ContentRegion } from "./frame/ContentRegion";
 import { PreviewBar } from "./frame/PreviewBar";
+import { Shell } from "./shell/Shell";
 import { useDirectionOnRoot } from "./frame/useDirectionOnRoot";
 import { DEFAULT_SCREEN, findScreen, type ScreenDef } from "./screens";
 import "./tokens/base.css";
@@ -15,8 +16,9 @@ import "./tokens/paper.css";
 import "./tokens/spectra.css";
 
 /**
- * The route element of /directions/:direction/:screen: the preview's own bar
- * over the screen, on the direction's ground. The three token files are
+ * The route element of /directions/:direction/:screen: the preview's own bar,
+ * then the shell (side panel and top bar) around the screen, on the
+ * direction's ground. The three token files are
  * imported here, so only this lazy chunk carries them.
  */
 export function DirectionsFrame() {
@@ -45,9 +47,11 @@ function Frame({
 }) {
   useDirectionOnRoot(direction);
   return (
-    <div className="dx-ground flex min-h-dvh flex-col">
+    <div className="dx-ground flex h-dvh flex-col">
       <PreviewBar direction={direction} screen={screen.id} />
-      <ContentRegion direction={direction} screen={screen} />
+      <Shell direction={direction} screen={screen.id}>
+        <ContentRegion direction={direction} screen={screen} />
+      </Shell>
     </div>
   );
 }
