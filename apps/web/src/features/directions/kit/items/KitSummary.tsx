@@ -10,6 +10,7 @@ const JUMPS: readonly { id: string; vendor?: Vendor; key: string }[] = [
   { id: "kit-magic", vendor: "magic", key: "vendors.magic.title" },
   { id: "kit-bits", vendor: "bits", key: "vendors.bits.title" },
   { id: "kit-reui", vendor: "reui", key: "vendors.reui.title" },
+  { id: "kit-spark", key: "vendors.spark.title" },
   { id: "kit-grounds", key: "vendors.grounds.title" },
   { id: "kit-parts", key: "parts.title" },
 ];
@@ -18,6 +19,7 @@ const LICENCE: Record<Vendor, string> = {
   magic: "licence.mit",
   bits: "licence.commons",
   reui: "licence.mit",
+  orb: "licence.mit",
 };
 
 /**
@@ -38,13 +40,13 @@ export function KitSummary() {
       title={t("summary.title")}
       intro={t("summary.intro", { count: KIT_ITEMS.length })}
     >
-      <div className="grid gap-4 sm:grid-cols-3">
-        {(["magic", "bits", "reui"] as const).map((vendor) => (
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {(["magic", "bits", "reui", "orb"] as const).map((vendor) => (
           <KpiTile
             key={vendor}
             label={`${t(`vendors.${vendor}.title`)}, ${t(LICENCE[vendor])}`}
             value={itemsOf(vendor)}
-            unit={t("summary.items")}
+            unit={t("summary.items", { count: itemsOf(vendor) })}
           />
         ))}
       </div>

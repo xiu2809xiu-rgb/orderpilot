@@ -19,6 +19,14 @@
     "grounds": {
       "title": "Sign-in grounds",
       "intro": "One ground for each direction, drawn in its own accent. The canvas ones pause when off screen or when the tab is hidden, and hold a still frame under reduced motion."
+    },
+    "orb": {
+      "title": "LerSent001 orb",
+      "source": "github.com/LerSent001/orb"
+    },
+    "spark": {
+      "title": "Upload and Spark",
+      "intro": "The drop zone and prompt bar that the upload screen and Spark use, and the two orbs that head Spark. Each reads the direction's tokens."
     }
   },
   "vendorLine": "{{vendor}}, {{licence}}",
@@ -48,7 +56,11 @@
     "badge": "Badge",
     "frame": "Frame",
     "alert": "Alert",
-    "fileType": "File type"
+    "fileType": "File type",
+    "fileDropzone": "File drop zone",
+    "promptBar": "Prompt bar",
+    "orb": "Orb (WebGL)",
+    "liquidOrb": "Liquid orb (WebGPU)"
   },
   "demo": {
     "ordersInDataSet": "orders in the synthetic data set",
@@ -133,12 +145,46 @@
       "ink": "For Ink",
       "paper": "For Paper",
       "spectra": "For Spectra"
+    },
+    "drop": {
+      "title": "Drop files here",
+      "dragging": "Release to add the files",
+      "hint": "PDF, PNG, JPEG, XLSX or CSV, up to 10 MB each.",
+      "choose": "Choose files",
+      "input": "Choose files for the drop zone demo",
+      "none": "No files chosen yet.",
+      "chosen_one": "1 file chosen. Nothing is uploaded from this sheet.",
+      "chosen_other": "{{count}} files chosen. Nothing is uploaded from this sheet."
+    },
+    "prompt": {
+      "label": "Ask Spark",
+      "placeholder": "Ask about stock, orders or documents",
+      "send": "Send",
+      "stop": "Stop",
+      "help": "Enter sends, Shift and Enter adds a line.",
+      "sent": "Sent: {{text}}",
+      "idle": "Nothing sent yet."
+    },
+    "orb": {
+      "idle": "Idle",
+      "thinking": "Thinking",
+      "switch": "Orb state",
+      "labelIdle": "The orb, idle",
+      "labelThinking": "The orb, thinking",
+      "engine": "Drawing with {{engine}}",
+      "pending": "Asking the browser for a GPU",
+      "engines": {
+        "webgpu": "WebGPU",
+        "webgl": "WebGL",
+        "still": "a still image"
+      }
     }
   },
   "summary": {
     "title": "Kits in use",
-    "intro": "{{count}} items from three kits, each shown live below in the current direction. Each one reads the direction's tokens, holds still under reduced motion and pauses when it is off screen.",
-    "items": "items",
+    "intro": "{{count}} items from three kits and one orb, each shown live below in the current direction. Each one reads the direction's tokens, holds still under reduced motion and pauses when it is off screen.",
+    "items_one": "item",
+    "items_other": "items",
     "jump": "Jump to a section",
     "total": "Items in all"
   },

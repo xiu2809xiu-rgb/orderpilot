@@ -5,7 +5,12 @@ import type { Vendor } from "./ItemCard";
  * vendor. The kit sheet's summary counts from this list, and a test checks
  * that the sections show exactly these and no others.
  */
-export const KIT_ITEMS: readonly { key: string; vendor: Vendor }[] = [
+export const KIT_ITEMS: readonly {
+  key: string;
+  vendor: Vendor;
+  /** The item's code is not a file of kit/ (the WebGPU orb lives with Spark). */
+  outside?: true;
+}[] = [
   { key: "numberTicker", vendor: "magic" },
   { key: "blurFade", vendor: "magic" },
   { key: "borderBeam", vendor: "magic" },
@@ -32,6 +37,10 @@ export const KIT_ITEMS: readonly { key: string; vendor: Vendor }[] = [
   { key: "frame", vendor: "reui" },
   { key: "alert", vendor: "reui" },
   { key: "fileType", vendor: "reui" },
+  { key: "fileDropzone", vendor: "reui" },
+  { key: "promptBar", vendor: "bits" },
+  { key: "orb", vendor: "bits" },
+  { key: "liquidOrb", vendor: "orb", outside: true },
 ];
 
 export const itemsOf = (vendor: Vendor): number =>

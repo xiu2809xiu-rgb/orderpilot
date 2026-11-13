@@ -7,13 +7,15 @@ import { orbColours, useOrbTokens, type OrbState } from "./orbPalette";
 import "../spark.css";
 
 /** What draws the orb: WebGPU first, then WebGL, then a still picture in CSS. */
-type Engine = "webgpu" | "webgl" | "still";
+export type Engine = "webgpu" | "webgl" | "still";
 
 interface SparkOrbProps {
   state: OrbState;
   /** What a screen reader hears: for example "Spark is idle". */
   label: string;
   className?: string;
+  /** Told which engine is drawing, so a screen can say so instead of guessing. */
+  onEngine?: (engine: Engine) => void;
 }
 
 /**
@@ -23,7 +25,7 @@ interface SparkOrbProps {
  * drawn in CSS. Its colours are the direction's tokens, it is paused when it
  * is off screen or the tab is hidden, and the pixel ratio is at most 2.
  */
-export function SparkOrb({ state, label, className }: SparkOrbProps) {
+export function SparkOrb({ state, label, className, onEngine }: SparkOrbProps) {
   const still = useStill();
   const holder = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -34,6 +36,7 @@ export function SparkOrb({ state, label, className }: SparkOrbProps) {
   const visible = useTabVisible();
   const running = onScreen && visible;
   const latest = useLatest({ tokens, state, running });
+  const told = useLatest(onEngine);
 
   useEffect(() => {
     const node = canvas.current;
@@ -58,6 +61,7 @@ export function SparkOrb({ state, label, className }: SparkOrbProps) {
           }
           made = created;
           orb.current = created;
+          told.current?.("webgpu");
           // Catch up with what changed while the GPU was being asked for.
           created.setTokens(latest.current.tokens);
           created.setState(latest.current.state);
@@ -73,7 +77,7 @@ export function SparkOrb({ state, label, className }: SparkOrbProps) {
       orb.current = null;
       made?.destroy();
     };
-  }, [still, engine, latest]);
+  }, [still, engine, latest, told]);
 
   useEffect(() => {
     orb.current?.setTokens(tokens);
@@ -85,13 +89,19 @@ export function SparkOrb({ state, label, className }: SparkOrbProps) {
     orb.current?.setRunning(running);
   }, [running, engine]);
 
+  const shown: Engine = still ? "still" : engine;
+  // WebGPU is reported only once the GPU has answered, not while it is asked.
+  useEffect(() => {
+    if (shown !== "webgpu") told.current?.(shown);
+  }, [shown, told]);
+
   const colours = orbColours(tokens, state);
   return (
     <div
       ref={holder}
       role="img"
       aria-label={label}
-      data-engine={still ? "still" : engine}
+      data-engine={shown}
       data-state={state}
       className={cn("relative aspect-square", className)}
     >

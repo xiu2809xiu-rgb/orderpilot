@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
-export type Vendor = "magic" | "bits" | "reui";
+export type Vendor = "magic" | "bits" | "reui" | "orb";
 
 interface ItemCardProps {
   /** The key of a kit item's name under `items` in the locale file. */
@@ -40,7 +40,10 @@ export function ItemCard({
   const licence = vendor === "bits" ? "commons" : "mit";
   const line = vendor
     ? t("vendorLine", {
-        vendor: t(`vendors.${vendor}.title`),
+        vendor:
+          vendor === "orb"
+            ? t("vendors.orb.source")
+            : t(`vendors.${vendor}.title`),
         licence: t(`licence.${licence}`),
       })
     : note;

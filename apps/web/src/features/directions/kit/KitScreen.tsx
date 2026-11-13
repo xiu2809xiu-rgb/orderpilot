@@ -9,6 +9,7 @@ import { MagicUiSection } from "./items/MagicUiSection";
 import { PartsSection } from "./items/PartsSection";
 import { ReactBitsSection } from "./items/ReactBitsSection";
 import { ReuiSection } from "./items/ReuiSection";
+import { SparkKitSection } from "./items/SparkKitSection";
 import { ShapeSection } from "./ShapeSection";
 import { StatusSection } from "./StatusSection";
 import { TableSection } from "./TableSection";
@@ -40,6 +41,7 @@ export default function KitScreen() {
         <MagicUiSection />
         <ReactBitsSection />
         <ReuiSection />
+        <SparkKitSection />
         <GroundsSection />
         <PartsSection />
       </div>

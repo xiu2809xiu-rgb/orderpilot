@@ -59,6 +59,11 @@ export const SCREENS: readonly ScreenDef[] = [
     Skeleton: UploadSkeleton,
   },
   {
+    id: "spark",
+    Component: lazy(() => import("./screens/spark/SparkScreen")),
+    Skeleton: HomeSkeleton,
+  },
+  {
     id: "kit",
     Component: lazy(() => import("./kit/KitScreen")),
   },

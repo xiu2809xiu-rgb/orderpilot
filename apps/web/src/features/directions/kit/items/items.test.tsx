@@ -9,12 +9,17 @@ import { itemsOf, KIT_ITEMS } from "./registry";
 import { MagicUiSection } from "./MagicUiSection";
 import { ReactBitsSection } from "./ReactBitsSection";
 import { ReuiSection } from "./ReuiSection";
+import { SparkKitSection } from "./SparkKitSection";
 
 const SOURCES = import.meta.glob<string>("../*.tsx", {
   query: "?raw",
   import: "default",
   eager: true,
 });
+const ORB_SOURCES = import.meta.glob<string>(
+  ["../../spark/orb/LiquidOrb.ts", "../../spark/orb/LICENSE"],
+  { query: "?raw", import: "default", eager: true },
+);
 
 // The files in kit/ that are a vendor's item, with the vendor's licence.
 const ITEM_FILES: Record<string, RegExp> = {
@@ -53,6 +58,9 @@ const ITEM_FILES: Record<string, RegExp> = {
   Frame: /ReUI \/ frame\. Licence: MIT\./,
   Alert: /ReUI \/ alert\. Licence: MIT\./,
   FileType: /ReUI \/ file-type\. Licence: MIT\./,
+  FileDropzone: /ReUI \/ use-file-upload\. Licence: MIT\./,
+  PromptBar: /React Bits \/ PromptBar\. Licence: MIT with the Commons Clause\./,
+  Orb: /React Bits \/ Orb\. Licence: MIT with the Commons Clause\./,
 };
 
 describe("the kit items", () => {
@@ -72,6 +80,16 @@ describe("the kit items", () => {
     },
   );
 
+  it("names the source and licence of the WebGPU orb and keeps its licence file beside it", () => {
+    const code = ORB_SOURCES["../../spark/orb/LiquidOrb.ts"] ?? "";
+    const first = code.split(String.fromCharCode(10))[0] ?? "";
+    expect(first).toContain("github.com/LerSent001/orb");
+    expect(first).toContain("Licence: MIT, Copyright (c) 2026 LerSent001");
+    const licence = ORB_SOURCES["../../spark/orb/LICENSE"] ?? "";
+    expect(licence).toContain("MIT License");
+    expect(licence).toContain("Copyright (c) 2026 LerSent001");
+  });
+
   it("uses no icon package other than Lucide", () => {
     for (const [path, source] of Object.entries(SOURCES)) {
       expect(source, path).not.toMatch(/hugeicons/);
@@ -84,21 +102,25 @@ describe("the kit items", () => {
         <MagicUiSection />
         <ReactBitsSection />
         <ReuiSection />
+        <SparkKitSection />
         <GroundsSection />
       </>,
     );
     const figures = screen.getAllByRole("figure");
-    // Twenty-six items; the dot pattern is shown once, among the grounds.
-    expect(figures.length).toBe(26);
+    // Thirty items; the dot pattern is shown once, among the grounds.
+    expect(figures.length).toBe(30);
     const names = figures.map(
       (figure) => figure.querySelector("figcaption span")?.textContent,
     );
-    expect(new Set(names).size).toBe(26);
+    expect(new Set(names).size).toBe(30);
     expect(screen.getAllByText("Magic UI, MIT").length).toBe(9);
     expect(
       screen.getAllByText("React Bits, MIT with the Commons Clause").length,
-    ).toBe(11);
-    expect(screen.getAllByText("ReUI, MIT").length).toBe(6);
+    ).toBe(13);
+    expect(screen.getAllByText("ReUI, MIT").length).toBe(7);
+    expect(screen.getAllByText("github.com/LerSent001/orb, MIT").length).toBe(
+      1,
+    );
   });
 
   it("shows exactly the items in the registry, no more and no fewer", () => {
@@ -107,6 +129,7 @@ describe("the kit items", () => {
         <MagicUiSection />
         <ReactBitsSection />
         <ReuiSection />
+        <SparkKitSection />
         <GroundsSection />
       </>,
     );
@@ -117,18 +140,19 @@ describe("the kit items", () => {
       i18n.t(`items.${item.key}`, { ns: "directions-kit-items" }),
     );
     expect([...shown].sort()).toEqual([...expected].sort());
-    expect(itemsOf("magic") + itemsOf("bits") + itemsOf("reui")).toBe(
-      KIT_ITEMS.length,
-    );
+    expect(
+      itemsOf("magic") + itemsOf("bits") + itemsOf("reui") + itemsOf("orb"),
+    ).toBe(KIT_ITEMS.length);
   });
 
   it("has a file in kit/ for every item in the registry", () => {
     const files = new Set(Object.keys(ITEM_FILES));
-    for (const { key } of KIT_ITEMS) {
+    const inKit = KIT_ITEMS.filter((item) => !item.outside);
+    for (const { key } of inKit) {
       const file = `${key[0]?.toUpperCase() ?? ""}${key.slice(1)}`;
       expect(files.has(file), `${file}.tsx is a listed kit file`).toBe(true);
     }
-    expect(files.size).toBe(KIT_ITEMS.length);
+    expect(files.size).toBe(inKit.length);
   });
 
   it("summarises the kits with their counts and a button for each section", () => {
@@ -142,10 +166,12 @@ describe("the kit items", () => {
         </Routes>
       </MemoryRouter>,
     );
-    expect(screen.getByText(/26 items from three kits/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/30 items from three kits and one orb/),
+    ).toBeInTheDocument();
     expect(screen.getByText("Magic UI, MIT")).toBeInTheDocument();
     const nav = screen.getByRole("navigation", { name: "Jump to a section" });
-    expect(within(nav).getAllByRole("button")).toHaveLength(5);
+    expect(within(nav).getAllByRole("button")).toHaveLength(6);
   });
 
   it("shows each product part with what it follows or is built on", () => {
