@@ -114,10 +114,10 @@ describe("the shell of the design directions preview", () => {
         name: "Search or jump to",
       }),
     ).toHaveAttribute("aria-keyshortcuts", "Control+K Meta+K");
-    // The upload screen is not built: its button says so and is plain. Spark is wired.
-    expect(within(bar).getByRole("button", { name: "Upload" })).toHaveAttribute(
-      "aria-disabled",
-      "true",
+    // Upload leads to the upload screen, and Spark opens its panel.
+    expect(within(bar).getByRole("link", { name: "Upload" })).toHaveAttribute(
+      "href",
+      "/directions/ink/upload",
     );
     expect(
       within(bar).getByRole("button", { name: "Spark" }),

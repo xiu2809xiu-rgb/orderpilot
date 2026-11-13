@@ -3,6 +3,7 @@ import type { ComponentType, LazyExoticComponent } from "react";
 import { HomeSkeleton } from "./screens/home/HomeSkeleton";
 import { OrdersSkeleton } from "./screens/orders/OrdersSkeleton";
 import { OrderSkeleton } from "./screens/order/OrderSkeleton";
+import { UploadSkeleton } from "./screens/upload/UploadSkeleton";
 
 /**
  * The eight screens of the preview. A screen is in `SCREENS` once it is built;
@@ -51,6 +52,11 @@ export const SCREENS: readonly ScreenDef[] = [
     id: "order",
     Component: lazy(() => import("./screens/order/OrderScreen")),
     Skeleton: OrderSkeleton,
+  },
+  {
+    id: "upload",
+    Component: lazy(() => import("./screens/upload/UploadScreen")),
+    Skeleton: UploadSkeleton,
   },
   {
     id: "kit",
