@@ -28,13 +28,9 @@
       "RECOUNT_CARTONS": "Recount the cartons",
       "ADD_SHIPPING_DOCUMENTS": "Add the shipping documents"
     },
-    "action": {
-      "SEND_PI": "Mark PI sent",
-      "REVIEW_FIELDS": "Review fields",
-      "open": "Open order"
-    },
     "actionOn": "{{action}} for {{order}}",
     "more": "{{count}} more waiting",
+    "noAccess": "Your role has no tasks of its own, so there is nothing to list here. The orders and the measures show where the work stands.",
     "failed": "Could not load your tasks."
   },
   "timeline": {
@@ -54,8 +50,7 @@
       "waiting_days_one": "Waiting {{count}} day",
       "waiting_days_other": "Waiting {{count}} days",
       "waiting_minutes": "Waiting {{count}} min",
-      "pastUsual": "Past the usual time for this step",
-      "withinUsual": "Within the usual time for this step"
+      "pastUsual": "Past the usual time for this step"
     },
     "next": {
       "title": "Next",
@@ -64,8 +59,7 @@
       "pastUsual": "Past its usual time. {{usual}}.",
       "noEstimate": "No usual time for this step in the data"
     },
-    "basis": "Estimate from how long this step took on the last {{orders}} orders.",
-    "stepOf": "{{step}}, step {{position}} of 9"
+    "basis": "Estimate from how long this step took on the last {{orders}} orders."
   },
   "measures": {
     "title": "Your numbers",
@@ -96,11 +90,10 @@
     "orders_other": "{{count}} orders",
     "opens": "{{step}}: {{count}} in this step. Open them in Orders.",
     "purchaseNote": "Purchase orders are not in the tracker, so these steps show no counts.",
+    "noAccess": "Your role does not read the order tracker.",
     "failed": "Could not load the order flow."
   },
   "signin": {
-    "heading": "Sign in to OrderPilot",
-    "date": "Today",
     "lead": "One place for every order, from the customer's PO to the goods leaving.",
     "stepsLabel": "How OrderPilot works",
     "steps": {

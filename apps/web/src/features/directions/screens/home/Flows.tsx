@@ -1,3 +1,4 @@
+import { Lock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTrackerFlow } from "@/lib/api/generated/endpoints/tracker/tracker";
@@ -5,6 +6,7 @@ import { PURCHASE_STEP_IDS } from "../../data/estimates";
 import { useDirection } from "../../frame/useDirection";
 import { Section } from "../../parts/Section";
 import { FlowRow, type FlowCell } from "./FlowRow";
+import { useHomeAccess } from "./homeAccess";
 import { ordersHref } from "./homeLinks";
 
 /**
@@ -17,7 +19,8 @@ export function Flows() {
   const { t } = useTranslation("directions-home");
   const { t: tParts } = useTranslation("directions-parts");
   const direction = useDirection();
-  const flow = useTrackerFlow();
+  const access = useHomeAccess();
+  const flow = useTrackerFlow({ query: { enabled: access.tracker } });
   const steps = flow.data?.data.steps ?? [];
   const most = Math.max(0, ...steps.map((step) => step.count));
   const busiest = steps.find((step) => most > 0 && step.count === most);
@@ -61,7 +64,12 @@ export function Flows() {
       }
       work
     >
-      {flow.isError ? (
+      {!access.tracker ? (
+        <p className="fs-14 flex max-w-prose items-start gap-2 text-muted-foreground">
+          <Lock className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+          {t("flows.noAccess")}
+        </p>
+      ) : flow.isError ? (
         <p role="alert" className="fs-14 text-destructive">
           {t("flows.failed")}
         </p>

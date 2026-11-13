@@ -11,7 +11,9 @@ import { Measures } from "./Measures";
 import { MyTimeline } from "./MyTimeline";
 import { NeedsYou } from "./NeedsYou";
 import { useCompleteTask } from "./useCompleteTask";
+import { useHomeAccess } from "./homeAccess";
 import { useHomeTasks } from "./useHomeTasks";
+import { NoTasks } from "./NoTasks";
 
 /** The part of the day in Singapore, for the greeting. */
 function partOfDay(at: Date): "morning" | "afternoon" | "evening" {
@@ -35,7 +37,8 @@ function partOfDay(at: Date): "morning" | "afternoon" | "evening" {
 export default function HomeScreen() {
   const { t } = useTranslation("directions-home");
   const name = useSessionStore((state) => state.session?.user.displayName);
-  const home = useHomeTasks();
+  const access = useHomeAccess();
+  const home = useHomeTasks(access.tasks);
   const [done, setDone] = useState<DoneItem[]>([]);
   const completion = useCompleteTask({
     onDone: (task: WorkflowTask, at: Date) => {
@@ -46,11 +49,13 @@ export default function HomeScreen() {
     },
   });
   const first = (name ?? "").split(" ")[0] ?? "";
-  const intro = home.list.isPending
+  const intro = !access.tasks
     ? undefined
-    : home.total === 0
-      ? t("introNone")
-      : t("intro", { count: home.total, late: home.late });
+    : home.list.isPending
+      ? undefined
+      : home.total === 0
+        ? t("introNone")
+        : t("intro", { count: home.total, late: home.late });
 
   return (
     <div className="dx-sheet py-6">
@@ -59,14 +64,18 @@ export default function HomeScreen() {
         intro={intro}
         actions={<HomeActions />}
       />
-      <div className="dx-grid grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
-        <div className="dx-grid-cell flex min-w-0 flex-col gap-6">
-          <NeedsYou home={home} completion={completion} />
+      {access.tasks ? (
+        <div className="dx-grid grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
+          <div className="dx-grid-cell flex min-w-0 flex-col gap-6">
+            <NeedsYou home={home} completion={completion} />
+          </div>
+          <div className="dx-grid-cell flex min-w-0 flex-col gap-6">
+            <MyTimeline home={home} done={done} />
+          </div>
         </div>
-        <div className="dx-grid-cell flex min-w-0 flex-col gap-6">
-          <MyTimeline home={home} done={done} />
-        </div>
-      </div>
+      ) : (
+        <NoTasks />
+      )}
       <div className="dx-grid mt-6 flex flex-col gap-6">
         <Measures home={home} />
         <Flows />

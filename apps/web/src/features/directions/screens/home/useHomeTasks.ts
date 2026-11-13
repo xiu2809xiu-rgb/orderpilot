@@ -8,11 +8,19 @@ const LOADED = 50;
  * small calls to the real tasks endpoint: the list, and a count of the late
  * ones so the figure is right even when the list is cut short.
  */
-export function useHomeTasks() {
-  const list = useWorkflowsMyTasks({ pageSize: LOADED });
-  const late = useWorkflowsMyTasks({ overdue: "true", pageSize: 1 });
+export function useHomeTasks(enabled: boolean) {
+  const list = useWorkflowsMyTasks(
+    { pageSize: LOADED },
+    { query: { enabled } },
+  );
+  const late = useWorkflowsMyTasks(
+    { overdue: "true", pageSize: 1 },
+    { query: { enabled } },
+  );
   return {
     list,
+    /** False for a role with no inbox: nothing was asked, so nothing is pending. */
+    enabled,
     tasks: list.data?.data ?? [],
     total: list.data?.meta.total ?? 0,
     late: late.data?.meta.total ?? 0,

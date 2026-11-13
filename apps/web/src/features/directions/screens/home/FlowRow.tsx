@@ -60,7 +60,9 @@ export function FlowRow({
               <StepperTitle className="fs-13 leading-tight">
                 {cell.title}
               </StepperTitle>
-              <StepperDescription className="fs-12">
+              <StepperDescription
+                className={cn("fs-12", cell.count !== null && "sr-only")}
+              >
                 {cell.note}
               </StepperDescription>
               {cell.count !== null ? (

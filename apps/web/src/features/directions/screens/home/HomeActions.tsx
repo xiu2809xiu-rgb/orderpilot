@@ -7,10 +7,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useSessionStore } from "@/stores/session";
 import { screenPath } from "../../directions";
 import { useDirection } from "../../frame/useDirection";
 import { isBuilt } from "../../screens";
+import { useHomeAccess } from "./homeAccess";
 
 /**
  * The two buttons of the home screen: New order, the one primary button, and
@@ -21,9 +21,7 @@ import { isBuilt } from "../../screens";
 export function HomeActions() {
   const { t } = useTranslation("directions-home");
   const direction = useDirection();
-  const mayCreate = useSessionStore(
-    (state) => state.session?.permissions.includes("orders.create") ?? false,
-  );
+  const mayCreate = useHomeAccess().create;
   const upload = (
     <>
       <Upload aria-hidden="true" />

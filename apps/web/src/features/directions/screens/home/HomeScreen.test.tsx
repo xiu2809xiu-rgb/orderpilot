@@ -300,6 +300,27 @@ describe("the home screen", () => {
     expect(await screen.findByText(/^Finished at \d\d:\d\d$/)).toBeVisible();
   });
 
+  it("lists no tasks for a role with no inbox, and does not ask for any", async () => {
+    const calls = stubApi();
+    useSessionStore.setState({
+      status: "active",
+      session: sessionFor("MANAGEMENT"),
+    });
+    home();
+    expect(
+      await screen.findByText(
+        /Your role has no tasks of its own, so there is nothing to list here/,
+      ),
+    ).toBeVisible();
+    expect(
+      screen.queryByRole("heading", { name: "My timeline" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "New order" }),
+    ).not.toBeInTheDocument();
+    expect(calls.some((call) => call.endsWith("/workflows/tasks"))).toBe(false);
+  });
+
   it("is empty and says so when nothing waits", async () => {
     stubApi([]);
     home();

@@ -3,9 +3,9 @@ import { useTranslation } from "react-i18next";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useInsightsKpis } from "@/lib/api/generated/endpoints/insights/insights";
 import { useTrackerFlow } from "@/lib/api/generated/endpoints/tracker/tracker";
-import { useSessionStore } from "@/stores/session";
 import { KpiTile } from "../../parts/KpiTile";
 import { Section } from "../../parts/Section";
+import { useHomeAccess } from "./homeAccess";
 import type { useHomeTasks } from "./useHomeTasks";
 
 const decimalsOf = (value: number): number => (Number.isInteger(value) ? 0 : 1);
@@ -18,10 +18,9 @@ const decimalsOf = (value: number): number => (Number.isInteger(value) ? 0 : 1);
  */
 export function Measures({ home }: { home: ReturnType<typeof useHomeTasks> }) {
   const { t } = useTranslation("directions-home");
-  const flow = useTrackerFlow();
-  const mayRead = useSessionStore(
-    (state) => state.session?.permissions.includes("insights.read") ?? false,
-  );
+  const access = useHomeAccess();
+  const flow = useTrackerFlow({ query: { enabled: access.tracker } });
+  const mayRead = access.measures;
   const kpis = useInsightsKpis({ query: { enabled: mayRead } });
   const open = flow.data?.data.openOrders ?? null;
   const settled = !home.list.isPending;
@@ -35,16 +34,20 @@ export function Measures({ home }: { home: ReturnType<typeof useHomeTasks> }) {
             value={open}
             unit={t("measures.orders")}
           />
-          <KpiTile
-            label={t("measures.waiting")}
-            value={settled ? home.total : null}
-            unit={t("measures.tasks")}
-          />
-          <KpiTile
-            label={t("measures.late")}
-            value={settled ? home.late : null}
-            unit={t("measures.tasks")}
-          />
+          {access.tasks ? (
+            <>
+              <KpiTile
+                label={t("measures.waiting")}
+                value={settled ? home.total : null}
+                unit={t("measures.tasks")}
+              />
+              <KpiTile
+                label={t("measures.late")}
+                value={settled ? home.late : null}
+                unit={t("measures.tasks")}
+              />
+            </>
+          ) : null}
         </div>
       </Section>
       <Section title={t("measures.five")}>

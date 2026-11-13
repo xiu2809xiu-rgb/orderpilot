@@ -36,7 +36,7 @@ export function SignInHero() {
           <BlurText text={tCommon("app.tagline")} stagger={0.12} />
         </h1>
         <BlurFade delay={0.5}>
-          <p className="dx-knock fs-16 max-w-prose text-muted-foreground">
+          <p className="dx-knock fs-16 max-w-prose text-foreground lg:text-muted-foreground">
             {t("signin.lead")}
           </p>
         </BlurFade>
@@ -60,7 +60,7 @@ export function SignInHero() {
               <h2 className="fs-14 font-semibold">
                 {t(`signin.steps.${step}.title`)}
               </h2>
-              <p className="fs-13 text-muted-foreground">
+              <p className="fs-13 text-foreground lg:text-muted-foreground">
                 {t(`signin.steps.${step}.body`)}
               </p>
             </BlurFade>
