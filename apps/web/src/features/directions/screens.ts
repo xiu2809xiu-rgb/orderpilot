@@ -1,6 +1,8 @@
 import { lazy } from "react";
 import type { ComponentType, LazyExoticComponent } from "react";
 import { HomeSkeleton } from "./screens/home/HomeSkeleton";
+import { OrdersSkeleton } from "./screens/orders/OrdersSkeleton";
+import { OrderSkeleton } from "./screens/order/OrderSkeleton";
 
 /**
  * The eight screens of the preview. A screen is in `SCREENS` once it is built;
@@ -40,10 +42,29 @@ export const SCREENS: readonly ScreenDef[] = [
     Skeleton: HomeSkeleton,
   },
   {
+    id: "orders",
+    Component: lazy(() => import("./screens/orders/OrdersScreen")),
+    Skeleton: OrdersSkeleton,
+    fill: true,
+  },
+  {
+    id: "order",
+    Component: lazy(() => import("./screens/order/OrderScreen")),
+    Skeleton: OrderSkeleton,
+  },
+  {
     id: "kit",
     Component: lazy(() => import("./kit/KitScreen")),
   },
 ];
+
+/**
+ * A screen that sits under another in the side panel: the order page is part
+ * of Orders, so the Orders entry stays the current one while an order is open.
+ */
+export const PARENT_SCREEN: Partial<Record<ScreenId, ScreenId>> = {
+  order: "orders",
+};
 
 export const DEFAULT_SCREEN: ScreenId = "kit";
 

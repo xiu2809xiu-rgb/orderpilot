@@ -1,16 +1,18 @@
 import { ChevronRight } from "lucide-react";
 import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
-import type { ScreenId } from "../screens";
+import { PARENT_SCREEN, type ScreenId } from "../screens";
 import { useCrumbTail } from "./pageCrumb";
 
 /** Where you are: the screen's group, its name, and a record number a screen may add. */
 export function Crumbs({ screen }: { screen: ScreenId }) {
   const { t } = useTranslation("directions");
   const tail = useCrumbTail();
+  // An order is part of Orders: the trail reads Work, Orders, SO-0051.
+  const named = PARENT_SCREEN[screen] ?? screen;
   const trail = [
-    t(`screens.${screen}.group`),
-    t(`screens.${screen}.title`),
+    t(`screens.${named}.group`),
+    t(`screens.${named}.title`),
     ...(tail ? [tail] : []),
   ];
   return (

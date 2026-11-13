@@ -4,7 +4,7 @@ import { featureNamespaces } from "@/features/nav";
 import { cn } from "@/lib/utils";
 import { useSessionStore } from "@/stores/session";
 import type { Direction } from "../directions";
-import type { ScreenId } from "../screens";
+import { PARENT_SCREEN, type ScreenId } from "../screens";
 import { Brand } from "./Brand";
 import { PanelEntryRow } from "./PanelEntryRow";
 import { PanelFoot } from "./PanelFoot";
@@ -75,7 +75,11 @@ export function SidePanel({
                       <PanelEntryRow
                         entry={entry}
                         direction={direction}
-                        current={entry.screen === screen}
+                        current={
+                          entry.screen === screen ||
+                          (entry.screen !== undefined &&
+                            entry.screen === PARENT_SCREEN[screen])
+                        }
                         collapsed={collapsed}
                         onNavigate={onNavigate}
                       />

@@ -59,10 +59,12 @@ describe("the shell of the design directions preview", () => {
     const user = userEvent.setup();
     await open();
     const nav = screen.getByRole("navigation", { name: "Main navigation" });
-    expect(within(nav).queryByRole("link", { name: "Orders" })).toBeNull();
-    const orders = within(nav).getByRole("button", { name: "Orders" });
-    expect(orders).toHaveAttribute("aria-disabled", "true");
-    await user.hover(orders);
+    // Orders has its screen now, so it is a link; Customers has none yet.
+    expect(within(nav).getByRole("link", { name: "Orders" })).toBeVisible();
+    expect(within(nav).queryByRole("link", { name: "Customers" })).toBeNull();
+    const customers = within(nav).getByRole("button", { name: "Customers" });
+    expect(customers).toHaveAttribute("aria-disabled", "true");
+    await user.hover(customers);
     expect(await screen.findAllByText("Shown for layout")).not.toHaveLength(0);
   });
 

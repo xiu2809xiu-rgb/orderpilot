@@ -1,0 +1,955 @@
+/* The Orders workspace and the order page. Each rule reads the direction's own
+   variables, so the two screens are written once; the few places where a
+   direction does something of its own are the [data-direction] rules at the
+   end. Imported by both screens and their skeletons, only by the lazy preview. */
+
+/* ---- The workspace frame: the head and filters stay, the table scrolls ---- */
+
+.od-page {
+  display: flex;
+  height: 100%;
+  min-height: 34rem;
+  flex-direction: column;
+  max-width: 100rem;
+  margin-inline: auto;
+  padding-inline: 1.5rem;
+}
+/* The head is one row: title and what it says on the left, the two ways in on the right. */
+.od-page .dx-page-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 1rem;
+  align-items: end;
+  margin-bottom: 1rem;
+}
+.od-page .dx-title,
+.od-page .dx-title-context,
+.od-page .dx-page-intro {
+  grid-column: 1;
+}
+.od-page .dx-page-actions {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  margin-top: 0;
+  align-self: end;
+}
+@media (max-width: 47.99rem) {
+  .od-page .dx-page-head {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .od-page .dx-page-actions {
+    grid-column: 1;
+    grid-row: auto;
+    margin-top: 0.75rem;
+  }
+}
+.od-work {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.od-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.od-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.od-count-line {
+  color: var(--muted-foreground);
+}
+.od-count-line:empty {
+  display: none;
+}
+
+/* ---- Views and tabs: one strip, a count beside each name ---- */
+
+.od-views,
+.od-tabs {
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  flex-wrap: nowrap;
+  gap: 0.25rem;
+  overflow-x: auto;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  border-bottom: 1px solid var(--border);
+}
+.od-view,
+.od-tab {
+  position: relative;
+  display: inline-flex;
+  height: 2.5rem;
+  align-items: center;
+  gap: 0.5rem;
+  padding-inline: 0.75rem;
+  border-radius: var(--radius-control) var(--radius-control) 0 0;
+  background: transparent;
+  color: var(--muted-foreground);
+  font-weight: 500;
+  box-shadow: none;
+  transition: color var(--motion-fast) var(--ease-out);
+}
+.od-view-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.od-view-count {
+  font-size: var(--type-12);
+  color: var(--faint-foreground);
+}
+.od-view[data-state="active"],
+.od-tab[data-state="active"] {
+  background: transparent;
+  color: var(--foreground);
+  box-shadow: none;
+}
+.od-view[data-state="active"]::after,
+.od-tab[data-state="active"]::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--ring);
+}
+.od-view[data-state="active"] .od-view-count,
+.od-tab[data-state="active"] .od-view-count {
+  color: var(--foreground);
+}
+.od-view-count[data-alert] {
+  color: var(--destructive);
+}
+.od-view:hover,
+.od-tab:hover {
+  background: var(--dx-hover-bg);
+  color: var(--foreground);
+}
+@media (pointer: coarse) {
+  .od-view,
+  .od-tab {
+    height: 2.75rem;
+  }
+}
+
+/* ---- Filters: each with its label in view ---- */
+
+.od-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+.od-field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.od-field-label {
+  color: var(--muted-foreground);
+  font-weight: 500;
+}
+.od-control {
+  height: 2.25rem;
+  font-size: var(--type-14);
+}
+@media (pointer: coarse) {
+  .od-control {
+    height: 2.75rem;
+  }
+}
+.od-search {
+  position: relative;
+  display: block;
+  width: 17rem;
+  max-width: 100%;
+}
+.od-search > svg {
+  position: absolute;
+  top: 50%;
+  left: 0.625rem;
+  width: 1rem;
+  height: 1rem;
+  translate: 0 -50%;
+  color: var(--muted-foreground);
+  pointer-events: none;
+}
+.od-search input {
+  padding-left: 2.125rem;
+}
+.od-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.od-toggle[data-pressed="true"] {
+  border-color: var(--ring);
+  background: var(--accent);
+  color: var(--foreground);
+}
+.od-count {
+  margin-left: 0.125rem;
+  min-width: 1.25rem;
+  padding-inline: 0.25rem;
+  border-radius: var(--radius-control);
+  background: var(--accent);
+  color: var(--accent-foreground);
+  font-size: var(--type-12);
+  text-align: center;
+}
+.od-span {
+  color: var(--accent-foreground);
+  background: var(--accent);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-control);
+  width: fit-content;
+}
+
+.od-applied {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+  list-style: none;
+}
+.od-chip {
+  display: inline-flex;
+  min-height: 1.75rem;
+  align-items: center;
+  gap: 0.375rem;
+  padding-inline: 0.625rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  color: var(--foreground);
+}
+.od-chip:hover {
+  border-color: var(--ring);
+}
+.od-clear {
+  min-height: 1.75rem;
+  padding-inline: 0.5rem;
+  color: var(--muted-foreground);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.od-clear:hover {
+  color: var(--foreground);
+}
+@media (pointer: coarse) {
+  .od-chip,
+  .od-clear {
+    min-height: 2.75rem;
+  }
+}
+
+/* ---- The table: one surface, rows of 40 px, nothing that animates ---- */
+
+.od-scroll,
+.od-board-scroll,
+.od-lines-scroll {
+  min-height: 0;
+  background: var(--dx-card-work-bg);
+  border: var(--dx-card-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--dx-card-shadow);
+}
+.od-scroll,
+.od-board-scroll {
+  flex: 1 1 auto;
+  min-height: 16rem;
+}
+.od-table {
+  table-layout: fixed;
+  font-size: var(--type-13);
+}
+.od-table td:first-child,
+.od-table th:first-child {
+  padding-inline: 0.25rem;
+}
+.od-table td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.od-table th {
+  height: 2.25rem;
+  background: var(--dx-card-work-bg);
+  color: var(--muted-foreground);
+  font-size: var(--type-12);
+  font-weight: 600;
+}
+.od-table th button {
+  font-size: var(--type-12);
+  font-weight: 600;
+}
+.od-table td {
+  height: 2.5rem;
+  padding: 0 0.5rem;
+}
+.od-table th {
+  padding-inline: 0.5rem;
+}
+.od-table tbody tr {
+  border-bottom: 1px solid var(--border);
+}
+.od-table tbody tr:hover > td {
+  background: var(--dx-hover-bg);
+}
+.od-table tbody tr[data-selected] > td {
+  background: var(--accent);
+}
+.od-table td[data-numeric],
+.od-table th:has(> button.flex-row-reverse) {
+  text-align: right;
+}
+.od-stage {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+.od-stage .jr-now {
+  display: none;
+}
+.od-stage-label {
+  max-width: 9.75rem;
+  overflow: hidden;
+  font-size: var(--type-13);
+  color: var(--foreground);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.od-customer {
+  display: inline-flex;
+  max-width: 12.5rem;
+  min-width: 0;
+  flex-direction: column;
+  line-height: 1.2;
+}
+.od-customer-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.od-customer-no {
+  flex: none;
+  font-size: var(--type-12);
+  color: var(--faint-foreground);
+}
+
+/* ---- The board: static columns, one card per order ---- */
+
+.od-board {
+  display: flex;
+  min-width: min-content;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem;
+}
+.od-column {
+  flex: 0 0 15.5rem;
+}
+.od-column-head {
+  padding: 0.5rem 0.625rem;
+}
+.od-column-count {
+  font-size: var(--type-12);
+  color: var(--muted-foreground);
+}
+.od-column-empty {
+  padding: 0.5rem 0.625rem 0.75rem;
+  color: var(--faint-foreground);
+}
+.od-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  list-style: none;
+}
+.od-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--card);
+  color: var(--card-foreground);
+}
+.od-card:hover {
+  border-color: var(--border-strong);
+}
+.od-card:has(.od-card-open:focus-visible) {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.od-card-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem 0.5rem;
+}
+.od-card-open {
+  text-align: left;
+  white-space: nowrap;
+}
+.od-card-open::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+.od-card-open:focus-visible {
+  outline: none;
+}
+.od-card-flags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.25rem;
+}
+.od-card-customer {
+  overflow: hidden;
+  color: var(--muted-foreground);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.od-card-value {
+  position: relative;
+  z-index: 1;
+  width: fit-content;
+}
+.od-more {
+  margin: 0.5rem 0.625rem 0.5rem;
+  color: var(--accent-foreground);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.od-more:disabled {
+  color: var(--faint-foreground);
+  text-decoration: none;
+}
+
+/* ---- The side peek ---- */
+
+.od-peek-head {
+  gap: 0.25rem;
+  padding: 1.25rem 3rem 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.od-peek-step {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+.od-peek-step > span {
+  margin-right: auto;
+}
+.od-peek-body {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-y: auto;
+  padding: 1.25rem 1.5rem;
+}
+.od-peek-title {
+  margin-top: 0.5rem;
+  font-weight: 600;
+}
+.od-peek-foot {
+  border-top: 1px solid var(--border);
+  padding: 1rem 1.5rem;
+}
+.od-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.875rem 1.25rem;
+}
+.od-fact dd {
+  margin-top: 0.125rem;
+}
+
+/* ---- The order page ---- */
+
+.od-order .od-back {
+  margin: 0 0 0.5rem -0.5rem;
+  color: var(--muted-foreground);
+}
+/* The head is one row, as on the Orders screen: the number and customer, and the one action. */
+.od-order .dx-page-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 1rem;
+  align-items: end;
+  margin-bottom: 1rem;
+}
+.od-order .dx-title,
+.od-order .dx-title-context,
+.od-order .dx-page-intro {
+  grid-column: 1;
+}
+.od-order .dx-page-actions {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  align-items: center;
+  align-self: end;
+  margin-top: 0;
+}
+:root:is([data-direction="ink"], [data-direction="spectra"])
+  .od-order
+  .dx-title-context {
+  display: none;
+}
+@media (max-width: 47.99rem) {
+  .od-order .dx-page-head {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .od-order .dx-page-actions {
+    grid-column: 1;
+    grid-row: auto;
+    margin-top: 0.75rem;
+  }
+}
+.od-no-action {
+  align-self: center;
+}
+.od-action-due {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.od-facts-bar {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 0;
+}
+@media (min-width: 40rem) {
+  .od-facts-bar {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 64rem) {
+  .od-facts-bar {
+    grid-template-columns: 1.35fr 1fr 1.3fr 1fr 1fr 1fr;
+  }
+}
+.od-facts-bar .od-fact {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.375rem;
+  padding: 0.875rem 1rem;
+  border-left: 1px solid var(--border);
+}
+.od-facts-bar .od-fact:first-child {
+  border-left: 0;
+}
+.od-fact-label {
+  color: var(--muted-foreground);
+}
+.od-fact-value {
+  min-width: 0;
+  color: var(--foreground);
+}
+.od-fact[data-main] .od-fact-value {
+  font-size: var(--type-20);
+  line-height: 1.75rem;
+  font-weight: 600;
+}
+.od-facts-bar .od-fact-wide {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1rem;
+  border-left: 0;
+  border-top: 1px solid var(--border);
+}
+.od-journey {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.od-now {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem 2rem;
+  padding: 1.125rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--accent);
+}
+@media (min-width: 48rem) {
+  .od-now {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+  }
+}
+.od-now-label {
+  color: var(--accent-foreground);
+  font-weight: 600;
+}
+.od-now-stage {
+  margin-block: 0.125rem 0.25rem;
+  font-weight: 600;
+}
+.od-ship-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.od-ship {
+  color: var(--foreground);
+  font-weight: 500;
+}
+
+/* ---- Documents, checks and activity ---- */
+
+.od-docs {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+}
+.od-doc {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 1rem;
+  padding-block: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.od-doc:last-child {
+  border-bottom: 0;
+}
+.od-doc-state {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+.od-doc-rules {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  margin-top: 0.5rem;
+  list-style: none;
+  color: var(--muted-foreground);
+}
+.od-doc-rules li[data-outcome="fail"] {
+  color: var(--destructive);
+  font-weight: 500;
+}
+.od-checks {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.od-check-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  list-style: none;
+}
+.od-check {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+}
+.od-check-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+.od-check-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 0.5rem 1.5rem;
+}
+.od-matches {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.od-activity {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.od-lines-scroll {
+  box-shadow: none;
+}
+.od-lines td,
+.od-lines th {
+  padding-inline: 0.75rem;
+}
+.od-lines .od-customer {
+  max-width: 32rem;
+}
+
+/* ---- Ink: ruled, flat, a lime line under the view you are in ---- */
+
+:root[data-direction="ink"] .od-view-count {
+  font-family: var(--numeral-font);
+}
+:root[data-direction="ink"] .od-table th {
+  font-family: var(--numeral-font);
+  font-weight: 500;
+}
+
+/* ---- Paper: the ruled sheet; numerals set large on the grid ---- */
+
+:root[data-direction="paper"] .od-page {
+  max-width: none;
+  padding-inline: 0;
+}
+:root[data-direction="paper"] .od-work {
+  gap: 0;
+  padding: 0 0 1.5rem;
+  background: var(--background);
+}
+:root[data-direction="paper"] .od-work > :not(.od-top) {
+  margin-inline: 1.5rem;
+}
+:root[data-direction="paper"] .od-work > .od-filters {
+  margin-top: 1rem;
+}
+:root[data-direction="paper"] .od-work > .od-applied,
+:root[data-direction="paper"] .od-work > .od-scroll,
+:root[data-direction="paper"] .od-work > .od-board-scroll {
+  margin-top: 0.75rem;
+}
+:root[data-direction="paper"] .od-work > :last-child {
+  margin-top: 0.75rem;
+}
+:root[data-direction="paper"] .od-page .dx-page-head {
+  grid-template-columns: calc(100% / 6) minmax(0, 1fr) auto;
+  padding-bottom: 1.25rem;
+}
+:root[data-direction="paper"] .od-page .dx-page-actions {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  margin: 0 1.5rem 0 0;
+  align-self: end;
+  background: var(--background);
+}
+:root[data-direction="paper"] .od-top {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 2fr);
+  align-items: stretch;
+  gap: 0;
+}
+:root[data-direction="paper"] .od-toolbar {
+  align-content: center;
+  justify-content: flex-end;
+  padding-inline: 1.5rem;
+  border-top: 1px solid var(--foreground);
+  border-bottom: 1px solid var(--border-strong);
+}
+:root[data-direction="paper"] .od-views {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(4, 25%);
+  gap: 0;
+  overflow: visible;
+  border-top: 1px solid var(--foreground);
+  border-bottom: 1px solid var(--border-strong);
+}
+:root[data-direction="paper"] .od-view {
+  height: auto;
+  min-height: 5rem;
+  flex-direction: column-reverse;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0;
+  border-left: 1px solid var(--border-strong);
+}
+:root[data-direction="paper"] .od-view:first-child {
+  border-left: 0;
+}
+:root[data-direction="paper"] .od-view-count {
+  font-size: var(--type-28);
+  line-height: 2.125rem;
+  font-weight: 500;
+  color: var(--faint-foreground);
+}
+:root[data-direction="paper"] .od-view[data-state="active"] .od-view-count {
+  color: var(--accent-foreground);
+}
+:root[data-direction="paper"] .od-view[data-state="active"]::after {
+  top: -1px;
+  bottom: auto;
+  height: 3px;
+}
+:root[data-direction="paper"] .od-scroll,
+:root[data-direction="paper"] .od-board-scroll,
+:root[data-direction="paper"] .od-lines-scroll {
+  border-width: 1px 0;
+  border-color: var(--foreground) var(--border-strong);
+  border-radius: 0;
+}
+:root[data-direction="paper"] .od-table th {
+  border-bottom: 1px solid var(--foreground);
+  color: var(--foreground);
+}
+:root[data-direction="paper"] .od-facts-bar {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  border-top: 1px solid var(--foreground);
+  border-bottom: 1px solid var(--border-strong);
+  background: var(--background);
+}
+:root[data-direction="paper"] .od-fact[data-main] .od-fact-value {
+  font-size: var(--type-28);
+  line-height: 2.125rem;
+  font-weight: 500;
+}
+:root[data-direction="paper"] .od-now {
+  border-radius: 0;
+  background: var(--background);
+  border-color: var(--border-strong);
+  border-left: 3px solid var(--ring);
+}
+:root[data-direction="paper"] .od-now-stage {
+  font-size: var(--type-28);
+  line-height: 2.125rem;
+  font-weight: 500;
+}
+@media (max-width: 47.99rem) {
+  :root[data-direction="paper"] .od-views {
+    grid-template-columns: repeat(2, 50%);
+  }
+  :root[data-direction="paper"] .od-facts-bar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ---- Spectra: glass over the aurora; the current step glows ---- */
+
+:root[data-direction="spectra"] .od-views,
+:root[data-direction="spectra"] .od-tabs {
+  gap: 0.375rem;
+  padding: 0.25rem;
+  border: 1px solid var(--panel-border);
+  border-radius: 999px;
+  background: var(--panel-strong);
+}
+:root[data-direction="spectra"] .od-view,
+:root[data-direction="spectra"] .od-tab {
+  height: 2.25rem;
+  border-radius: 999px;
+}
+:root[data-direction="spectra"] .od-view[data-state="active"],
+:root[data-direction="spectra"] .od-tab[data-state="active"] {
+  background-color: var(--dx-current-bg);
+  background-image: var(--dx-current-image);
+  box-shadow: var(--dx-current-shadow);
+}
+:root[data-direction="spectra"] .od-view[data-state="active"]::after,
+:root[data-direction="spectra"] .od-tab[data-state="active"]::after {
+  display: none;
+}
+:root[data-direction="spectra"] .od-now {
+  border-color: rgb(46 230 214 / 0.35);
+  box-shadow: var(--glow);
+}
+:root[data-direction="spectra"] .od-card {
+  border-radius: 12px;
+}
+:root[data-direction="spectra"] .od-chip {
+  background: var(--accent);
+}
+
+/* Both chips of the documents cell stay in one 40 px row: they stack, small. */
+.od-docs-cell {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.od-docs-cell [data-slot="badge"]:not(:only-child) {
+  height: 1.125rem;
+  font-size: var(--type-12);
+  line-height: 1;
+}
+
+/* Age over the late flag, small, so both fit the narrow column. */
+.od-age {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  line-height: 1.1;
+}
+.od-age [data-slot="badge"] {
+  height: 1.125rem;
+  padding-inline: 0.25rem;
+  font-size: var(--type-12);
+  line-height: 1;
+}
+
+/* The app's table pins the first column beside a 44 px checkbox column. The
+   workspace's checkbox column is 32 px, so the pin moves with it. */
+.od-table [class~="left-11"] {
+  left: 2rem;
+}
+.od-table [class~="w-11"] {
+  width: 2rem;
+  min-width: 2rem;
+}
+
+/* The rail in a row is smaller than on its own, so the stage keeps room for its words. */
+:root[data-direction="paper"] .od-stage .jr[data-size="row"] {
+  --jr-w: 8px;
+  gap: 2px;
+}
+:root[data-direction="spectra"] .od-stage .jr[data-size="row"] {
+  --jr-w: 7px;
+  --jr-h: 7px;
+  gap: 3px;
+}
+
+:root[data-direction="paper"] .od-order .od-back {
+  margin-left: 1.5rem;
+}
+:root[data-direction="paper"] .od-order .dx-page-head {
+  grid-template-columns: calc(100% / 6) minmax(0, 1fr) auto;
+  padding-bottom: 1.25rem;
+}
+:root[data-direction="paper"] .od-order .dx-page-actions {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  margin: 0 1.5rem 0 0;
+  background: var(--background);
+}
+
+/* The lines and matches tables size to their words, unlike the workspace's fixed columns. */
+.od-table.od-lines {
+  table-layout: auto;
+}
+.od-docs-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}

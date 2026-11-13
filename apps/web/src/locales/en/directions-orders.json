@@ -1,0 +1,269 @@
+{
+  "title": "Orders",
+  "intro_one": "{{count}} order, {{late}} past due.",
+  "intro_other": "{{count}} orders, {{late}} past due.",
+  "actions": {
+    "newOrder": "New order",
+    "upload": "Upload a PO",
+    "uploadUnavailable": "The upload screen is not part of the preview yet."
+  },
+  "views": {
+    "label": "Views",
+    "all": "All",
+    "mine": "Needs me",
+    "held": "Held up",
+    "stage": "By stage"
+  },
+  "filters": {
+    "search": "Search",
+    "searchHint": "Order, PO or customer",
+    "stage": "Stage and status",
+    "allStages": "All stages",
+    "customer": "Customer",
+    "allCustomers": "All customers",
+    "customerSearch": "Find a customer",
+    "customerNone": "No customer matches.",
+    "overdue": "Past due",
+    "exceptions": "Has exceptions",
+    "more": "More filters",
+    "moreOn_one": "{{count}} more filter is on",
+    "moreOn_other": "{{count}} more filters are on",
+    "stock": "Waiting on stock",
+    "toConfirm": "Has a document to confirm",
+    "open": "Open orders only",
+    "entry": "Entry",
+    "source": "Source",
+    "any": "Any",
+    "orderDate": "Order date",
+    "from": "From",
+    "to": "To",
+    "span_one": "{{count}} day in range",
+    "span_other": "{{count}} days in range",
+    "wholeStage": "All of {{stage}}"
+  },
+  "applied": {
+    "label": "Filters in force",
+    "remove": "Remove filter: {{filter}}",
+    "clear": "Clear all",
+    "customer": "Customer: {{value}}",
+    "stage": "Stage: {{value}}",
+    "status": "Status: {{value}}",
+    "several_one": "{{count}} status",
+    "several_other": "{{count}} statuses",
+    "step": "Step: {{value}}",
+    "entry": "Entry: {{value}}",
+    "source": "Source: {{value}}",
+    "dates": "Ordered {{from}} to {{to}}",
+    "open": "any date"
+  },
+  "entry": {
+    "draft": "Draft",
+    "submitted": "Submitted",
+    "void": "Void"
+  },
+  "source": {
+    "sample": "Sample",
+    "stored": "Entered here"
+  },
+  "columns": {
+    "orderNo": "Order",
+    "customer": "Customer",
+    "stage": "Stage",
+    "heldAt": "Held at",
+    "age": "Order age",
+    "shipDate": "Ship date",
+    "value": "Value",
+    "documents": "Documents",
+    "stock": "Stock",
+    "po": "PO number",
+    "orderDate": "Order date",
+    "entry": "Entry",
+    "source": "Source"
+  },
+  "cells": {
+    "exceptions_one": "{{count}} open exception",
+    "exceptions_other": "{{count}} open exceptions",
+    "days": "{{count}} d",
+    "late": "{{count}} d late",
+    "done": "Done",
+    "notSet": "Not set",
+    "notStarted": "Not started",
+    "notEntered": "Not entered here",
+    "hidden": "Hidden",
+    "covered": "Covered",
+    "short": "Short {{quantity}}",
+    "shortLine": "Short by {{quantity}} of {{itemNo}}",
+    "shortLineMore_one": "Short by {{quantity}} of {{itemNo}} and {{count}} more item",
+    "shortLineMore_other": "Short by {{quantity}} of {{itemNo}} and {{count}} more items",
+    "toConfirm": "To confirm",
+    "docsNone": "No document needs attention",
+    "differs": "Differs",
+    "differsCount_one": "{{count}} difference found by the checks",
+    "differsCount_other": "{{count}} differences found by the checks"
+  },
+  "table": {
+    "caption": "Orders",
+    "region": "Orders table",
+    "actions": "Row actions",
+    "showing_one": "Showing {{count}} order.",
+    "showing_other": "Showing {{count}} orders.",
+    "peeking": "Side peek open for {{order}}."
+  },
+  "rowMenu": {
+    "open": "Actions for {{order}}",
+    "openOrder": "Open order",
+    "peek": "Quick look",
+    "copy": "Copy order number",
+    "copied": "Copied {{order}}",
+    "copyFailed": "Could not copy the order number."
+  },
+  "toolbar": {
+    "print": "Print"
+  },
+  "empty": {
+    "title": "No orders yet",
+    "description": "Orders appear here as soon as a customer PO is entered or read."
+  },
+  "notices": {
+    "trackerTitle": "Some columns are not available",
+    "trackerBody": "The order tracker did not answer, so stage, team and past-due flags are missing. Try again in a moment.",
+    "truncated": "Showing the first {{shown}} of {{total}} orders. Narrow the filters to reach the rest."
+  },
+  "board": {
+    "region": "Orders by stage",
+    "done": "Done",
+    "notStarted": "Not started",
+    "empty": "No orders",
+    "more_one": "Show {{count}} more in the list",
+    "more_other": "Show {{count}} more in the list"
+  },
+  "peek": {
+    "position": "{{position}} of {{total}}",
+    "previous": "Previous order",
+    "next": "Next order",
+    "status": "Status",
+    "journey": "Journey",
+    "noJourney": "This order has no journey yet: the tracker does not know it.",
+    "open": "Open order"
+  },
+  "journey": {
+    "doneBy": "{{actor}}, {{when}}",
+    "sinceToday": "Since today",
+    "since_one": "Since {{when}}, {{count}} day",
+    "since_other": "Since {{when}}, {{count}} days",
+    "sinceUsual": "{{since}}. Usually {{usual}}.",
+    "sinceLate": "{{since}}. Past the usual {{usual}}.",
+    "by": "By {{when}}",
+    "usually": "Usually {{usual}}",
+    "usual": {
+      "sameDay": "the same day",
+      "hours": "{{count}} h",
+      "days_one": "{{count}} day",
+      "days_other": "{{count}} days"
+    }
+  },
+  "ship": {
+    "expected": "Expected to ship on {{day}}, from how long each step took on similar orders.",
+    "later_one": "{{count}} day later than the order's ship date",
+    "later_other": "{{count}} days later than the order's ship date",
+    "within": "Within the order's ship date",
+    "orderDate": "Ship date on the order: {{date}}.",
+    "missing": "No usual time for {{steps}} in the data, so it is left out of this date.",
+    "left": "The goods have been released to the forwarder.",
+    "allDone": "Every step is done."
+  },
+  "action": {
+    "none": "You have no open task on this order.",
+    "yourTask": "Your task"
+  },
+  "order": {
+    "back": "Orders",
+    "intro": "{{customer}}, {{number}}",
+    "notFoundTitle": "That order was not found",
+    "notFoundBody": "There is no order {{order}} for your role. Go back to the list and pick one.",
+    "pickTitle": "Pick an order",
+    "pickBody": "Open an order from the list to see its journey, lines, documents and checks.",
+    "journey": {
+      "title": "Journey"
+    },
+    "details": {
+      "title": "Order details"
+    },
+    "facts": {
+      "stage": "Stage",
+      "pastDue": "Past due"
+    },
+    "now": {
+      "label": "Now",
+      "heldAt": "Held at {{team}}.",
+      "usual": "The step usually takes {{usual}}.",
+      "pastUsual": "It has run past the usual {{usual}}."
+    },
+    "tabs": {
+      "label": "Order details",
+      "lines": "Lines",
+      "documents": "Documents",
+      "checks": "Checks",
+      "activity": "Activity"
+    },
+    "lines": {
+      "region": "Order lines",
+      "caption": "Lines of the order",
+      "line": "Line",
+      "item": "Item",
+      "quantity": "Quantity",
+      "toShip": "To ship",
+      "unitPrice": "Unit price",
+      "amount": "Amount",
+      "stock": "Stock",
+      "total": "Order total",
+      "none": "The lines of this order are not available."
+    },
+    "checks": {
+      "emptyTitle": "No checks have run yet",
+      "emptyBody": "Checks run once the documents of this order have been read.",
+      "matches": "Matched to Business Central"
+    },
+    "activity": {
+      "emptyTitle": "Nothing has happened yet",
+      "emptyBody": "Events appear here as the order moves through its steps.",
+      "note": "What happened on the order, newest first. Postings to the ledger are made in Business Central; this page shows the result.",
+      "current": "Current step",
+      "by": "{{actor}}, {{when}}"
+    }
+  },
+  "documents": {
+    "type": {
+      "CUSTOMER_PO": "Customer PO",
+      "PROFORMA_INVOICE": "Proforma invoice",
+      "VENDOR_PI": "Vendor PI",
+      "VENDOR_INVOICE": "Vendor invoice",
+      "SALES_INVOICE": "Sales invoice",
+      "CREDIT_NOTE": "Credit note",
+      "PACKING_LIST": "Packing list",
+      "DELIVERY_ORDER": "Delivery order",
+      "AWB": "Air waybill",
+      "BILL_OF_LADING": "Bill of lading",
+      "IMPORT_PERMIT": "Import permit",
+      "PAYMENT_ADVICE": "Payment advice",
+      "SPR_FORM": "SPR form",
+      "OTHER": "Other document"
+    },
+    "state": {
+      "differs": "Differs",
+      "matches": "Matches",
+      "unchecked": "Not checked yet"
+    },
+    "noChecks": "No check has read this document yet.",
+    "review": "Review the fields",
+    "checked": "Checks: {{passed}} passed, {{failed}} found a difference.",
+    "confirmTitle": "A document of this order waits for you to confirm it",
+    "confirmBody": "The tracker says a person must confirm the fields read from one of the documents. It does not say which one."
+  },
+  "mask": {
+    "role": "your role does not include this figure",
+    "price": "prices are for roles that work with pricing",
+    "bankDetails": "bank details are for roles that handle payments",
+    "policy": "a data policy hides this figure"
+  }
+}
