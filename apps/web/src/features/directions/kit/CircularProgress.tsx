@@ -67,7 +67,7 @@ export function CircularProgress({
           r={RADIUS}
           strokeWidth="9"
           strokeLinecap="round"
-          className="stroke-primary motion-safe:transition-[stroke-dashoffset] motion-safe:duration-700 motion-safe:ease-out"
+          className="stroke-ring motion-safe:transition-[stroke-dashoffset] motion-safe:duration-700 motion-safe:ease-out"
           strokeDasharray={CIRCUMFERENCE}
           strokeDashoffset={CIRCUMFERENCE * (1 - ratio)}
         />

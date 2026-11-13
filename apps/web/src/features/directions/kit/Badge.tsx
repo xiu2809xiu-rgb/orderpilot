@@ -7,16 +7,17 @@ export const badgeVariants = cva(
   "inline-flex w-fit shrink-0 items-center justify-center gap-1 border border-transparent font-medium whitespace-nowrap select-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=size-])]:size-3.5",
   {
     variants: {
-      // The four status tones read the status tokens; the others are surfaces.
+      // The status surfaces and info are not in the app's Tailwind theme, so they
+      // are read as variables.
       variant: {
         default: "bg-primary text-primary-foreground",
         secondary: "bg-secondary text-secondary-foreground",
         outline: "border-border bg-transparent text-foreground",
-        success: "border-success/25 bg-success-surface text-success",
+        success: "border-success/25 bg-(--success-surface) text-success",
         warning: "border-warning/25 bg-warning-surface text-warning",
         destructive:
-          "border-destructive/25 bg-destructive-surface text-destructive",
-        info: "border-info/25 bg-info-surface text-info",
+          "border-destructive/25 bg-(--destructive-surface) text-destructive",
+        info: "border-(--info)/25 bg-(--info-surface) text-(--info)",
       },
       size: {
         sm: "fs-12 h-5 min-w-5 px-1.5",

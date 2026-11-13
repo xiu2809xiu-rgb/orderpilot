@@ -4,10 +4,10 @@ import { cn } from "@/lib/utils";
 export type StatusKind = "success" | "warning" | "destructive" | "info";
 
 const TONE: Record<StatusKind, string> = {
-  success: "bg-success-surface text-success",
+  success: "bg-(--success-surface) text-success",
   warning: "bg-warning-surface text-warning",
-  destructive: "bg-destructive-surface text-destructive",
-  info: "bg-info-surface text-info",
+  destructive: "bg-(--destructive-surface) text-destructive",
+  info: "bg-(--info-surface) text-(--info)",
 };
 
 /** A status: always a word and an icon, never a colour alone. */

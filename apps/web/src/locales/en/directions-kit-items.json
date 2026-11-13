@@ -1,0 +1,138 @@
+{
+  "licence": {
+    "mit": "MIT",
+    "commons": "MIT with the Commons Clause"
+  },
+  "vendors": {
+    "magic": {
+      "title": "Magic UI",
+      "intro": "Motion and patterns: numbers that count, content that fades in, borders that carry a light."
+    },
+    "bits": {
+      "title": "React Bits",
+      "intro": "Figures, type effects, glass, and the marks that show Spark working."
+    },
+    "reui": {
+      "title": "ReUI",
+      "intro": "The structure of the product screens: the journey, the activity, labels, frames, messages and file icons."
+    },
+    "grounds": {
+      "title": "Sign-in grounds",
+      "intro": "One ground for each direction, drawn in its own accent. The canvas ones pause when off screen or when the tab is hidden, and hold a still frame under reduced motion."
+    }
+  },
+  "vendorLine": "{{vendor}}, {{licence}}",
+  "items": {
+    "numberTicker": "Number ticker",
+    "blurFade": "Blur fade",
+    "borderBeam": "Border beam",
+    "shineBorder": "Shine border",
+    "animatedList": "Animated list",
+    "shinyText": "Shiny text",
+    "circularProgress": "Circular progress",
+    "dotPattern": "Dot pattern",
+    "gridPattern": "Grid pattern",
+    "splitFlap": "Split-flap numerals",
+    "gradientText": "Gradient text",
+    "blurText": "Blur text",
+    "spotlightCard": "Spotlight card",
+    "glassSurface": "Glass surface",
+    "statusMark": "Status mark",
+    "latticeLoader": "Lattice loader",
+    "thoughtLine": "Thought line",
+    "holdButton": "Hold button",
+    "dither": "Dither",
+    "aurora": "Aurora",
+    "stepper": "Stepper",
+    "timeline": "Timeline",
+    "badge": "Badge",
+    "frame": "Frame",
+    "alert": "Alert",
+    "fileType": "File type"
+  },
+  "demo": {
+    "ordersInDataSet": "orders in the synthetic data set",
+    "needsYou": "Needs you",
+    "rows": {
+      "read": "Customer PO read",
+      "stock": "Stock checked in Business Central",
+      "spr": "SPR raised and sent for approval"
+    },
+    "reading": "Reading the document",
+    "stepsOfNine": "6 of 9 steps done",
+    "journeyProgress": "Journey progress",
+    "pointer": "Move the pointer over this card.",
+    "insights": "Insights",
+    "tagline": "AI reads, rules decide, people approve.",
+    "glass": "A pane of glass over the ground.",
+    "status": {
+      "pending": "Queued",
+      "running": "Reading",
+      "done": "Read",
+      "failed": "Failed",
+      "cancelled": "Cancelled"
+    },
+    "lattice": {
+      "working": "Reading the PO",
+      "done": "Read in 4.2 s",
+      "error": "Could not read the file"
+    },
+    "thought": {
+      "working": "Reading the document",
+      "done": "Read the document",
+      "toggle": "Show what Spark did",
+      "timer": "3.1 s",
+      "steps": {
+        "classified": "Classified as a customer PO",
+        "read": "Read the header and the lines",
+        "review": "Marked 2 fields for review"
+      }
+    },
+    "hold": {
+      "label": "Hold to approve",
+      "done": "Approved",
+      "hint": "Press and hold for one second. A short press does nothing."
+    },
+    "stepper": {
+      "journey": "Order journey",
+      "completed": "Done",
+      "active": "Now",
+      "inactive": "Later",
+      "steps": {
+        "po": "PO received",
+        "stock": "Stock checked",
+        "pi": "PI generated in Business Central",
+        "sent": "PI sent to the customer"
+      },
+      "waiting": "Waiting on Support"
+    },
+    "badge": {
+      "paid": "Paid",
+      "hold": "On hold",
+      "late": "2 days late",
+      "draft": "Draft"
+    },
+    "frame": {
+      "title": "Orders",
+      "description": "Open orders by stage"
+    },
+    "alert": {
+      "title": "Quantity differs from the PO",
+      "description": "The packing list says 48 and the PO says 50.",
+      "action": "Open the checks",
+      "refused": "This file type is not accepted. Use PDF, PNG, JPEG, XLSX or CSV."
+    },
+    "files": {
+      "pdf": "PDF document",
+      "xlsx": "Spreadsheet",
+      "csv": "CSV file",
+      "jpg": "JPEG image",
+      "png": "PNG image"
+    },
+    "ground": {
+      "ink": "For Ink",
+      "paper": "For Paper",
+      "spectra": "For Spectra"
+    }
+  }
+}

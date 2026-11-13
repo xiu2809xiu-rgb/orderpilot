@@ -70,7 +70,7 @@ void main() {
     float wave = snoise(vec2(X * 0.75 + warp * 0.35 - pace * 0.03 + seed, pace * 0.07 - seed)) * 0.72
                + snoise(vec2(X * 1.6 + warp * 0.5 + pace * 0.04 - seed, pace * 0.1 + seed * 0.5)) * 0.28;
     float hem = uHeight + layer * 0.07 + wave * 0.18;
-    float soft = 0.1 * (1.0 + layer * 0.9);
+    float soft = 0.17 * (1.0 + layer * 0.9);
     float body = pow(smoother(-soft, 0.3 + soft * 0.6, hem - y), 1.6);
     float alpha = body * (layer < 0.5 ? 1.0 : 0.34 / layer);
     vec3 tint = ramp(u + 0.05 * sin(pace * 0.08 + layer * 2.3) + layer * 0.1);

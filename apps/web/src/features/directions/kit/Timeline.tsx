@@ -62,7 +62,7 @@ export function TimelineIndicator({
       data-slot="timeline-indicator"
       className={cn(
         "absolute top-1 left-0 size-4 rounded-full border-2",
-        done ? "border-ring bg-ring" : "border-border-strong bg-background",
+        done ? "border-ring bg-ring" : "border-(--border-strong) bg-background",
         className,
       )}
       {...props}

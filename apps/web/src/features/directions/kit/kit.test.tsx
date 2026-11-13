@@ -163,7 +163,7 @@ describe("React Bits items", () => {
   });
 
   it.each([
-    ["pending", "Waiting"],
+    ["pending", "Queued"],
     ["running", "Reading"],
     ["done", "Read"],
     ["failed", "Failed"],

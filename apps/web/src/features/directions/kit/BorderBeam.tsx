@@ -22,7 +22,7 @@ interface BorderBeamProps {
 export function BorderBeam({
   size = 64,
   duration = 6,
-  colorFrom = "var(--primary)",
+  colorFrom = "var(--ring)",
   colorTo = "var(--info)",
   borderWidth = 1,
 }: BorderBeamProps) {

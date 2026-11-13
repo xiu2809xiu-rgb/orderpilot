@@ -20,7 +20,7 @@ interface ShineBorderProps {
 export function ShineBorder({
   borderWidth = 1,
   duration = 14,
-  shineColor = "var(--primary)",
+  shineColor = "var(--ring)",
   className,
 }: ShineBorderProps) {
   const colours = typeof shineColor === "string" ? [shineColor] : shineColor;
@@ -34,6 +34,7 @@ export function ShineBorder({
       style={
         {
           "--kit-shine-width": `${String(borderWidth)}px`,
+          "--kit-shine-colour": colours[0] ?? "var(--ring)",
           "--kit-shine-duration": `${String(duration)}s`,
           backgroundImage: `radial-gradient(transparent, transparent, ${colours.join(",")}, transparent, transparent)`,
         } as CSSProperties

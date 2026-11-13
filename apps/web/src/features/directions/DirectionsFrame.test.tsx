@@ -8,7 +8,11 @@ import { renderApp } from "@/test/render";
 
 describe("the design directions frame", () => {
   beforeAll(async () => {
-    await i18n.loadNamespaces(["directions", "directions-kit"]);
+    await i18n.loadNamespaces([
+      "directions",
+      "directions-kit",
+      "directions-kit-items",
+    ]);
   });
 
   it("sends /directions to the kit sheet in Ink", async () => {

@@ -3,6 +3,10 @@ import { PageHeader } from "../parts/PageHeader";
 import { CardSection } from "./CardSection";
 import { ColourSection } from "./ColourSection";
 import { ControlsSection } from "./ControlsSection";
+import { GroundsSection } from "./items/GroundsSection";
+import { MagicUiSection } from "./items/MagicUiSection";
+import { ReactBitsSection } from "./items/ReactBitsSection";
+import { ReuiSection } from "./items/ReuiSection";
 import { ShapeSection } from "./ShapeSection";
 import { StatusSection } from "./StatusSection";
 import { TableSection } from "./TableSection";
@@ -27,6 +31,12 @@ export default function KitScreen() {
           <CardSection />
         </div>
         <TableSection />
+      </div>
+      <div className="dx-grid mt-5 grid gap-5">
+        <MagicUiSection />
+        <ReactBitsSection />
+        <ReuiSection />
+        <GroundsSection />
       </div>
     </div>
   );

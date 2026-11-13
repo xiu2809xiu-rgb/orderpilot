@@ -107,6 +107,17 @@
   }
 }
 
+/* A still page shows the whole border lit, not one frame of the sweep. */
+@media (prefers-reduced-motion: reduce) {
+  .kit-shine {
+    background-image: linear-gradient(
+      var(--kit-shine-colour),
+      var(--kit-shine-colour)
+    ) !important;
+    opacity: 0.6;
+  }
+}
+
 .kit-shine {
   mask:
     linear-gradient(#fff 0 0) content-box,

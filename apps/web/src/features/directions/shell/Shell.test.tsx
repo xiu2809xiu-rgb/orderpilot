@@ -18,6 +18,7 @@ describe("the shell of the design directions preview", () => {
       "common",
       "directions",
       "directions-kit",
+      "directions-kit-items",
       ...allFeatures.map((feature) => feature.namespace),
     ]);
   });

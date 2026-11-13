@@ -16,7 +16,7 @@ const FAMILY: Record<string, Family> = {
 
 const TONE: Record<Family, string> = {
   document: "text-destructive",
-  image: "text-info",
+  image: "text-(--info)",
   sheet: "text-success",
   other: "text-muted-foreground",
 };
