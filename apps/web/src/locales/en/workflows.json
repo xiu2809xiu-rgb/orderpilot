@@ -159,7 +159,7 @@
     }
   },
   "spr": {
-    "heading": "Stock purchase request {{recordNo}}",
+    "heading": "Stock purchase requisition {{recordNo}}",
     "description": "Requested by {{name}} on {{date}} for {{orderNo}}.",
     "navision": "Business Central number",
     "navisionNone": "none yet",
@@ -225,6 +225,6 @@
     "handedNoPermission": "Your role cannot decide this yet, so it stays waiting until an administrator gives it the permission.",
     "notFoundTitle": "This request is not in the sample data",
     "notFoundDescription": "Check the number, or go back to the task inbox.",
-    "crumb": "Stock purchase request"
+    "crumb": "Stock purchase requisition"
   }
 }

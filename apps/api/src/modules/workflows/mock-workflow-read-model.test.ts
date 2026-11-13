@@ -85,7 +85,7 @@ describe("the mock read model", () => {
     }
   });
 
-  it("numbers the SPRs the OrderPilot way, with Navision's number beside", async () => {
+  it("numbers the SPRs the OrderPilot way, with Business Central's number beside", async () => {
     const approved = dataset.sprs.find((s) => s.status === "approved");
     const suggested = dataset.sprs.find((s) => s.status === "suggested");
     const spr = await model.sprByRecordNo(approved?.recordNo ?? "");
@@ -164,7 +164,7 @@ describe("the service over the mock", () => {
   );
   const sprNo = dataset.sprs[0]?.recordNo ?? "";
 
-  it("adds the approver in the shape of Navision's Approval User Setup", async () => {
+  it("adds the approver in the shape of Business Central's Approval User Setup", async () => {
     const spr = await service.spr(sprNo);
     expect(sprDetailSchema.safeParse(spr).success).toBe(true);
     expect(spr.approver.setup).toMatchObject({

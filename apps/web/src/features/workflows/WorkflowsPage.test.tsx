@@ -33,7 +33,7 @@ const SPR_TASK = {
   ...TASK,
   id: "00000000-0000-4000-8000-000000000002",
   kind: "APPROVE_SPR",
-  title: "Approve or reject the stock purchase request",
+  title: "Approve or reject the stock purchase requisition",
   assigneeRole: "APPROVER",
   orderNo: "SO-0005",
   ref: { recordNo: "SPR-20261102-0002", navisionNo: null },
@@ -81,7 +81,9 @@ describe("the task inbox", () => {
     server.use(getWorkflowsMyTasksMockHandler(page([SPR_TASK, TASK])));
     const { container } = open("APPROVER");
     expect(
-      await screen.findByText("Approve or reject the stock purchase request"),
+      await screen.findByText(
+        "Approve or reject the stock purchase requisition",
+      ),
     ).toBeInTheDocument();
     expect(screen.getByText("SPR-20261102-0002")).toBeInTheDocument();
     expect(screen.getByText(/none yet/)).toBeInTheDocument();
