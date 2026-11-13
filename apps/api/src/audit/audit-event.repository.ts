@@ -30,6 +30,9 @@ export interface AuditSearch {
   readonly withoutRefusals?: boolean;
   /** Words in the summary, ignoring case. */
   readonly search?: string;
+  /** The first and last sequence to include, both inclusive (F-9's events around a break). */
+  readonly sequenceFrom?: number;
+  readonly sequenceTo?: number;
 }
 
 /** An event with its place in the chain, which the viewer shows. */
@@ -172,6 +175,27 @@ export class AuditEventRepository extends BaseRepository<AuditEvent, string> {
     return row ? Number(row.sequence) : null;
   }
 
+  /**
+   * Each person who appears in the trail as an actor, once. Grouped in the
+   * database on the actor's index, so the trail is not read row by row.
+   */
+  async actorUserIds(): Promise<string[]> {
+    const rows = await this.database.client.auditEvent.groupBy({
+      by: ["actorUserId"],
+      where: { actorUserId: { not: null } },
+    });
+    return rows.flatMap((row) => (row.actorUserId ? [row.actorUserId] : []));
+  }
+
+  /** Each action name in the trail, once, in order, from the action's index. */
+  async actionNames(): Promise<string[]> {
+    const rows = await this.database.client.auditEvent.groupBy({
+      by: ["action"],
+      orderBy: { action: "asc" },
+    });
+    return rows.map((row) => row.action);
+  }
+
   async existsByAction(action: string): Promise<boolean> {
     const count = await this.database.client.auditEvent.count({
       where: { action },
@@ -208,6 +232,19 @@ function toWhere(filters: AuditSearch): Prisma.AuditEventWhereInput {
           },
         }
       : {};
+  const sequence =
+    filters.sequenceFrom !== undefined || filters.sequenceTo !== undefined
+      ? {
+          sequence: {
+            ...(filters.sequenceFrom !== undefined
+              ? { gte: BigInt(filters.sequenceFrom) }
+              : {}),
+            ...(filters.sequenceTo !== undefined
+              ? { lte: BigInt(filters.sequenceTo) }
+              : {}),
+          },
+        }
+      : {};
   return {
     ...(filters.actorKind ? { actorKind: filters.actorKind } : {}),
     ...(filters.actorUserId ? { actorUserId: filters.actorUserId } : {}),
@@ -233,6 +270,7 @@ function toWhere(filters: AuditSearch): Prisma.AuditEventWhereInput {
         }
       : {}),
     ...range,
+    ...sequence,
   };
 }
 
