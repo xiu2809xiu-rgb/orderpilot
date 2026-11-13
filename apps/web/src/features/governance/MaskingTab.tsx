@@ -1,5 +1,6 @@
 import { EyeOff } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router";
 import {
   ClassificationBadge,
   DemoBadge,
@@ -20,16 +21,21 @@ import { usePolicyMaskingSample } from "@/lib/api/generated/endpoints/governance
 import { useSessionStore } from "@/stores/session";
 import { RefusalPanel } from "./RefusalPanel";
 
+/** Where the note's row sits on the matrix. The `q` finds it once the matrix can search. */
+const NOTE_ROW = "/governance?tab=matrix&q=masking.customerNote";
+
 /**
  * One neutral sample rule, applied on the server. The note arrives as null for
  * a role the rule does not list, so there is nothing to read in the browser.
+ * Who the rule lists is a row of the matrix, so the sample is read again each
+ * time this tab opens, in case the matrix changed meanwhile.
  */
 export function MaskingTab() {
   const { t } = useTranslation("governance");
   const { t: tc } = useTranslation();
   const { t: tm } = useTranslation("components");
   const role = useSessionStore((state) => state.session?.user.role);
-  const sample = usePolicyMaskingSample();
+  const sample = usePolicyMaskingSample({ query: { staleTime: 0 } });
 
   if (sample.isPending) return <LoadingState />;
   if (sample.isError) {
@@ -49,6 +55,16 @@ export function MaskingTab() {
         description={t("masking.description")}
         actions={<DemoBadge kind="synthetic" />}
       >
+        <p className="mb-s2 text-sm text-muted-foreground">
+          {t("masking.matrixHint")}{" "}
+          {/* Underlined, not only on hover: inside a sentence, colour alone would not mark it as a link (WCAG 1.4.1). */}
+          <Link
+            to={NOTE_ROW}
+            className="text-primary underline underline-offset-4"
+          >
+            {t("masking.openMatrix")}
+          </Link>
+        </p>
         <Table aria-label={t("masking.rulesLabel")}>
           <TableHeader>
             <TableRow>

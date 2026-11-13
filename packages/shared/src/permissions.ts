@@ -40,6 +40,9 @@ export const PERMISSIONS = [
   // Marking a task in the caller's own inbox as done. The system admin never
   // holds it (see governance/matrix.ts).
   "tasks.complete",
+  // Area 4 (F-8): who sees the masking sample's customer note. The sample rule
+  // reads its roles from the matrix, so this row shows or hides the note.
+  "masking.customerNote",
 ] as const;
 
 export const permissionSchema = z.enum(PERMISSIONS);
@@ -71,6 +74,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "workflows.read",
     "spr.read",
     "tasks.complete",
+    "masking.customerNote",
   ],
   APPROVER: [
     "orders.read",
@@ -80,6 +84,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "spr.read",
     "approvals.decide",
     "tasks.complete",
+    "masking.customerNote",
   ],
   SUPPORT: [
     "orders.read",
@@ -91,6 +96,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "exceptions.read",
     "workflows.read",
     "tasks.complete",
+    "masking.customerNote",
   ],
   WAREHOUSE: [
     "orders.read",
@@ -128,6 +134,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "spr.read",
     "approvals.decide",
     "workflows.inboxes.any",
+    "masking.customerNote",
   ],
   AUDITOR: [
     "orders.read",
@@ -140,5 +147,6 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "workflows.read",
     "spr.read",
     "workflows.inboxes.any",
+    "masking.customerNote",
   ],
 };

@@ -1,20 +1,14 @@
 import type { INestApplicationContext } from "@nestjs/common";
 import { describeDataset, syntheticDataset } from "@orderpilot/synthetic-data";
-import {
-  DEFAULT_ROLE_PERMISSIONS,
-  ROLES,
-  type Permission,
-  type Role,
-} from "@orderpilot/shared";
 import { AppConfig } from "../../config/app-config.js";
 import { DEMO_ACCOUNTS } from "../../auth/demo-accounts.js";
 import { PasswordHasher } from "../../auth/domain/password-hasher.js";
-import { RolePermissionRepository } from "../../auth/role-permission.repository.js";
 import { Database } from "../database.js";
 import { UserRepository } from "../../users/user.repository.js";
 import { AuditEventRepository } from "../../audit/audit-event.repository.js";
 import { AuditService } from "../../audit/audit.service.js";
 import { seedApprovalSetups } from "../../modules/governance/approval-setup-seed.js";
+import { seedRolePermissions } from "../../modules/governance/role-permission-seed.js";
 import { seedWorkflows } from "../../modules/workflows/workflows-seed.js";
 import { ObjectStorage } from "../../storage/object-storage.js";
 
@@ -55,20 +49,14 @@ const auditGenesis: Seeder = {
   },
 };
 
-/** What the platform checks today, as a fresh database starts. Area 4 edits the live table. */
+/**
+ * What the platform checks today, as a fresh database starts. Area 4 edits the
+ * live table, and its seed leaves out a pair revoked on purpose (ADR 0053).
+ */
 const rolePermissions: Seeder = {
   name: "role permissions",
-  async run(app) {
-    const pairs = ROLES.flatMap((role: Role) =>
-      DEFAULT_ROLE_PERMISSIONS[role].map((permission: Permission) => ({
-        role,
-        permission,
-      })),
-    );
-    const added = await app.get(RolePermissionRepository).addMissing(pairs);
-    return added === 0
-      ? `the matrix holds all ${String(pairs.length)} default pairs`
-      : `added ${String(added)} of ${String(pairs.length)} default pairs to the matrix`;
+  run(app) {
+    return seedRolePermissions(app);
   },
 };
 
