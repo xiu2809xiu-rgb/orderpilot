@@ -12,10 +12,10 @@ const LEFT = 26;
 const BOTTOM = 20;
 const TOP = 8;
 
-/** A nice top for the axis in USD millions: the next multiple of 5 above the data. */
+/** A top for the axis in USD millions: the next multiple of 10 above the data, so the middle line is a whole number. */
 function axisTop(points: readonly MonthPoint[]): number {
   const peak = Math.max(...points.map((p) => p.range?.high ?? p.amountUsd));
-  return Math.ceil(peak / 5_000_000) * 5_000_000;
+  return Math.ceil(peak / 10_000_000) * 10_000_000;
 }
 
 /**

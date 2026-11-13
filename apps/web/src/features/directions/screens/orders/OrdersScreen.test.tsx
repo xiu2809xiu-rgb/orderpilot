@@ -187,7 +187,7 @@ describe("the Orders workspace", () => {
     expect(within(tabs).getAllByRole("tab")).toHaveLength(3);
   });
 
-  it("offers New order as the one primary button and says why Upload a PO waits", async () => {
+  it("offers New order as the one primary button and Upload a PO beside it", async () => {
     stubApi();
     open();
     await bodyRows();
@@ -195,9 +195,9 @@ describe("the Orders workspace", () => {
       "href",
       "/orders/new",
     );
-    expect(screen.getByRole("button", { name: "Upload a PO" })).toHaveAttribute(
-      "aria-disabled",
-      "true",
+    expect(screen.getByRole("link", { name: "Upload a PO" })).toHaveAttribute(
+      "href",
+      "/directions/ink/upload",
     );
   });
 

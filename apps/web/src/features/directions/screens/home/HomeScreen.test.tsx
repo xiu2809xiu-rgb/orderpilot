@@ -213,15 +213,15 @@ describe("the home screen", () => {
     ).toBeVisible();
   });
 
-  it("has one primary button, New order, and an Upload that says why it waits", async () => {
+  it("has one primary button, New order, and an Upload that opens the upload screen", async () => {
     stubApi();
     home();
     expect(
       await screen.findByRole("link", { name: "New order" }),
     ).toHaveAttribute("href", "/orders/new");
     expect(
-      screen.getByRole("button", { name: "Upload a document" }),
-    ).toHaveAttribute("aria-disabled", "true");
+      screen.getByRole("link", { name: "Upload a document" }),
+    ).toHaveAttribute("href", "/directions/ink/upload");
   });
 
   it("builds My timeline from the tasks and says where the estimate comes from", async () => {
