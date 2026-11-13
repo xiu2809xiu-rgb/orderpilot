@@ -4,7 +4,7 @@
 
 /* The gap between groups adapts to the room the window leaves: each spacer
    between two groups takes an equal share of the free height, from a floor of
-   12 px to a ceiling of 28 px. The middle scrolls only when even the floor
+   8 px to a ceiling of 28 px. The middle scrolls only when even the floor
    does not fit. */
 .dx-groups {
   display: flex;
@@ -13,7 +13,7 @@
 }
 .dx-gap {
   flex: 1 1 0;
-  min-height: 0.75rem;
+  min-height: 0.5rem;
   max-height: 1.75rem;
 }
 .dx-group-title {
@@ -39,16 +39,17 @@
   );
 }
 .dx-scroll[data-more-above="true"] {
-  --fade-top: 20px;
+  --fade-top: 12px;
 }
 .dx-scroll[data-more-below="true"] {
-  --fade-bottom: 20px;
+  --fade-bottom: 12px;
 }
 
-/* One row of the panel: 40 px, 14 px text at weight 500, an 18 px icon. The
-   text size is one variable, so a larger step of the scale is a one-line change. */
+/* One row of the panel: 40 px, 16 px text at weight 500, an 18 px icon. Richie
+   asked for bigger text than the app's 14 px, and 16 is the next size of the
+   scale. The size is one variable, so going back to 14 is a one-line change. */
 :root {
-  --panel-text: var(--type-14);
+  --panel-text: var(--type-16);
 }
 .dx-entry {
   position: relative;

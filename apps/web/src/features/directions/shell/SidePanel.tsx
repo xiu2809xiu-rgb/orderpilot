@@ -68,7 +68,7 @@ export function SidePanel({
                 <h2
                   id={`dx-group-${group.id}`}
                   className={cn(
-                    "dx-group-title fs-12 px-3 font-semibold text-muted-foreground",
+                    "dx-group-title fs-13 px-3 font-semibold text-muted-foreground",
                     collapsed && "sr-only",
                   )}
                 >
