@@ -82,6 +82,8 @@ export function useReview(doc: DemoDocument) {
     },
     uncertainCount: uncertain.length,
     waitingCount: waiting.length,
+    /** The first uncertain field nobody has confirmed yet, for the Next button. */
+    nextWaiting: waiting[0] ?? null,
     groups: useMemo(() => groupFields(doc.fields), [doc]),
   };
 }

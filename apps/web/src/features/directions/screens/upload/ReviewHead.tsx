@@ -1,4 +1,4 @@
-import { ArrowLeft, FilePlus2, Sparkles } from "lucide-react";
+import { ArrowDown, ArrowLeft, FilePlus2, Sparkles } from "lucide-react";
 import { CONFIDENCE_HIGH } from "@orderpilot/shared";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,8 @@ interface ReviewHeadProps {
   created: boolean;
   onCreate: () => void;
   onAgain: () => void;
+  /** Selects the next uncertain field nobody has confirmed; undefined when none is left. */
+  onNext?: () => void;
 }
 
 /**
@@ -28,6 +30,7 @@ export function ReviewHead({
   created,
   onCreate,
   onAgain,
+  onNext,
 }: ReviewHeadProps) {
   const { t } = useTranslation("directions-intake");
   const total = doc.fields.length;
@@ -75,7 +78,7 @@ export function ReviewHead({
         <p className="fs-12 text-muted-foreground">{t("review.mock")}</p>
       </div>
       <div className="flex flex-col items-end gap-2">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2">
           <Button
             type="button"
             variant="ghost"
@@ -85,6 +88,17 @@ export function ReviewHead({
             <ArrowLeft aria-hidden="true" />
             {t("review.again")}
           </Button>
+          {onNext ? (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onNext}
+              className="pointer-coarse:h-11"
+            >
+              <ArrowDown aria-hidden="true" />
+              {t("review.next")}
+            </Button>
+          ) : null}
           <Button
             type="button"
             disabled={waitingCount > 0 || created}

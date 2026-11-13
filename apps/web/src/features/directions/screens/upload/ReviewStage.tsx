@@ -51,6 +51,13 @@ export function ReviewStage({
         document={doc}
         uncertainCount={review.uncertainCount}
         waitingCount={review.waitingCount}
+        onNext={
+          review.nextWaiting
+            ? () => {
+                if (review.nextWaiting) select(review.nextWaiting);
+              }
+            : undefined
+        }
         created={review.created}
         onCreate={review.create}
         onAgain={onAgain}

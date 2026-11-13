@@ -237,6 +237,28 @@ describe("the upload screen", () => {
     );
   });
 
+  it("takes a person to the next field to approve, and stops offering it when none is left", async () => {
+    const user = userEvent.setup();
+    await toReview(user);
+    const next = screen.getByRole("button", { name: "Next to approve" });
+    await user.click(next);
+    // The first waiting field is Ship to, on page 1.
+    expect(
+      screen.getByRole("button", { name: "Show Ship to on the page" }),
+    ).toHaveAttribute("aria-pressed", "true");
+    await user.click(screen.getByRole("button", { name: "Confirm Ship to" }));
+    await user.click(screen.getByRole("button", { name: "Next to approve" }));
+    expect(
+      screen.getByRole("img", { name: /Page 2 of purchase order/ }),
+    ).toBeVisible();
+    await user.click(
+      screen.getByRole("button", { name: "Confirm Payment terms" }),
+    );
+    expect(
+      screen.queryByRole("button", { name: "Next to approve" }),
+    ).not.toBeInTheDocument();
+  });
+
   it("opens Create draft order only when every uncertain field is confirmed or corrected", async () => {
     const user = userEvent.setup();
     await toReview(user);

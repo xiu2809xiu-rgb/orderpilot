@@ -57,6 +57,7 @@
     "confirmed": "{{done}} of {{total}} to approve",
     "ring": "Fields to approve that you have confirmed",
     "again": "Start again",
+    "next": "Next to approve",
     "pageLabel": "Page {{page}}",
     "pages": "Pages of the document",
     "pageImage": "Page {{page}} of purchase order {{number}}, with a box on each field Spark read",
