@@ -32,4 +32,5 @@ export const MatrixRead200DataRolesItemPermissionsItem = {
   sprread: 'spr.read',
   workflowsinboxesany: 'workflows.inboxes.any',
   taskscomplete: 'tasks.complete',
+  maskingcustomerNote: 'masking.customerNote',
 } as const;

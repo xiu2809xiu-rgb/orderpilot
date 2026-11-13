@@ -10,7 +10,7 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
 import { HttpResponse, http } from "msw";
-import { MemoryRouter } from "react-router";
+import { MemoryRouter, useLocation } from "react-router";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { Toaster } from "@/components/common";
 import { useToastStore } from "@/components/common/toast";
@@ -40,16 +40,35 @@ function signIn(role: (typeof ROLES)[number]) {
   useSessionStore.getState().setSession(sessionFor(role));
 }
 
-function renderPage() {
+function Address() {
+  return <output aria-label="Address">{useLocation().search}</output>;
+}
+
+function renderPage(address = "/governance") {
   return render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={[address]}>
       <QueryClientProvider client={createQueryClient()}>
         <GovernancePage />
         <Toaster />
+        <Address />
       </QueryClientProvider>
     </MemoryRouter>,
   );
 }
+
+const CELL_PUT = "*/api/v1/governance/matrix/:role/permissions/:permission";
+const SCOPE_PUT = "*/api/v1/governance/matrix/:role/data-scope";
+
+/** Every permission's row, by the name it reads under. */
+const rowNames = () =>
+  screen.getAllByRole("rowheader").map((header) => header.textContent);
+const columnNames = () =>
+  screen.getAllByRole("columnheader").map((header) => header.textContent);
+const searchBox = () =>
+  screen.findByRole("searchbox", { name: "Search permissions" });
+const search = async (words: string) => {
+  await userEvent.type(await searchBox(), words);
+};
 
 describe("GovernancePage", () => {
   beforeEach(() => {
@@ -152,8 +171,426 @@ describe("GovernancePage", () => {
       "LOGISTICS",
     );
     await userEvent.click(screen.getByRole("button", { name: "Copy" }));
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Copy and replace" }),
+    );
     await waitFor(() => {
       expect(body).toEqual({ fromRole: "FINANCE", toRole: "LOGISTICS" });
+    });
+  });
+
+  describe("confirming a copy", () => {
+    const answerCopy = () => {
+      const copies: unknown[] = [];
+      server.use(
+        http.post("*/api/v1/governance/matrix/copy", async ({ request }) => {
+          copies.push(await request.json());
+          return HttpResponse.json({ data: matrix.roles[0] });
+        }),
+      );
+      return copies;
+    };
+    const reachConfirm = async () => {
+      await userEvent.click(
+        await screen.findByRole("button", { name: "Copy a role" }),
+      );
+      await userEvent.selectOptions(
+        screen.getByLabelText("Copy from"),
+        "FINANCE",
+      );
+      await userEvent.selectOptions(
+        screen.getByLabelText("Copy to"),
+        "LOGISTICS",
+      );
+      await userEvent.click(screen.getByRole("button", { name: "Copy" }));
+    };
+
+    it("says it cannot be undone, and copies nothing until it is confirmed", async () => {
+      signIn("SYSTEM_ADMIN");
+      const copies = answerCopy();
+      renderPage();
+      await reachConfirm();
+      const dialog = await screen.findByRole("dialog", {
+        name: "Replace what Logistics holds?",
+      });
+      expect(dialog).toHaveTextContent("can't be undone");
+      expect(dialog).toHaveTextContent("Finance");
+      expect(copies).toEqual([]);
+      await userEvent.click(
+        within(dialog).getByRole("button", { name: "Copy and replace" }),
+      );
+      await waitFor(() => {
+        expect(copies).toEqual([{ fromRole: "FINANCE", toRole: "LOGISTICS" }]);
+      });
+    });
+
+    it("sends nothing when the person goes back or cancels", async () => {
+      signIn("SYSTEM_ADMIN");
+      const copies = answerCopy();
+      renderPage();
+      await reachConfirm();
+      await userEvent.click(
+        await screen.findByRole("button", { name: "Back" }),
+      );
+      expect(screen.getByLabelText("Copy from")).toHaveValue("FINANCE");
+      expect(screen.getByLabelText("Copy to")).toHaveValue("LOGISTICS");
+      await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+      await waitFor(() => {
+        expect(screen.queryByRole("dialog")).toBeNull();
+      });
+      expect(copies).toEqual([]);
+    });
+
+    it("opens at the first step again after it was left on the second", async () => {
+      signIn("SYSTEM_ADMIN");
+      answerCopy();
+      renderPage();
+      await reachConfirm();
+      await screen.findByRole("button", { name: "Back" });
+      await userEvent.keyboard("{Escape}");
+      await waitFor(() => {
+        expect(screen.queryByRole("dialog")).toBeNull();
+      });
+      await userEvent.click(
+        screen.getByRole("button", { name: "Copy a role" }),
+      );
+      expect(await screen.findByLabelText("Copy from")).toBeVisible();
+    });
+
+    it("puts focus on the safe choice, and back on Copy when the person returns", async () => {
+      signIn("SYSTEM_ADMIN");
+      answerCopy();
+      renderPage();
+      await reachConfirm();
+      const back = await screen.findByRole("button", { name: "Back" });
+      await waitFor(() => {
+        expect(back).toHaveFocus();
+      });
+      await userEvent.click(back);
+      const copy = await screen.findByRole("button", { name: "Copy" });
+      await waitFor(() => {
+        expect(copy).toHaveFocus();
+      });
+    });
+
+    it("offers no Undo once a role is copied", async () => {
+      signIn("SYSTEM_ADMIN");
+      answerCopy();
+      renderPage();
+      await reachConfirm();
+      await userEvent.click(
+        await screen.findByRole("button", { name: "Copy and replace" }),
+      );
+      expect(
+        await screen.findByText("Permissions of Finance copied to Logistics"),
+      ).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Undo" })).toBeNull();
+    });
+  });
+
+  describe("finding a permission", () => {
+    it("gives every permission a label of its own", () => {
+      const missing = PERMISSIONS.filter(
+        (permission) => !i18n.exists(`governance:permissions.${permission}`),
+      ).map((permission) => `"permissions.${permission}"`);
+      // Whoever adds a permission meets this test, so it says what to do.
+      expect(
+        missing,
+        `Add ${missing.join(", ")} to apps/web/src/locales/en/governance.json, with the words the matrix shows for it`,
+      ).toEqual([]);
+    });
+
+    it("narrows the rows by name or by key, and says how many match", async () => {
+      signIn("SYSTEM_ADMIN");
+      renderPage();
+      await search("draft");
+      await waitFor(() => {
+        expect(rowNames()).toEqual(["Edit draft ordersorders.edit"]);
+      });
+      expect(
+        screen.getByText(`1 of ${String(PERMISSIONS.length)} permissions`),
+      ).toHaveAttribute("role", "status");
+
+      await userEvent.clear(await searchBox());
+      await search("tasks.complete");
+      await waitFor(() => {
+        expect(rowNames()).toEqual(["Complete a tasktasks.complete"]);
+      });
+    });
+
+    it("shows only the chosen role's column, and keeps its data scope", async () => {
+      signIn("SYSTEM_ADMIN");
+      renderPage();
+      await userEvent.selectOptions(
+        await screen.findByLabelText("Filter by role"),
+        "FINANCE",
+      );
+      expect(columnNames()).toEqual(["Permission", "Finance"]);
+      expect(rowNames().length).toBe(PERMISSIONS.length + 1);
+      expect(
+        screen.getByRole("combobox", { name: "Data scope: Finance" }),
+      ).toBeVisible();
+      expect(
+        screen.queryByRole("switch", {
+          name: "Read orders for Warehouse",
+        }),
+      ).toBeNull();
+    });
+
+    it("shows only the chosen group's rows, without the data scope", async () => {
+      signIn("SYSTEM_ADMIN");
+      renderPage();
+      await userEvent.selectOptions(
+        await screen.findByLabelText("Filter by permission group"),
+        "approvals",
+      );
+      expect(rowNames()).toEqual([
+        "Approve or rejectapprovals.decide",
+        "Confirm a paymentpayments.confirm",
+        "Post a paymentpayments.post",
+      ]);
+      expect(
+        screen.queryByRole("combobox", { name: "Data scope: Finance" }),
+      ).toBeNull();
+    });
+
+    it("keeps the filters in the address bar, beside the tab", async () => {
+      signIn("SYSTEM_ADMIN");
+      renderPage("/governance?tab=matrix");
+      await userEvent.selectOptions(
+        await screen.findByLabelText("Filter by role"),
+        "FINANCE",
+      );
+      const address = screen.getByRole("status", { name: "Address" });
+      expect(address).toHaveTextContent("tab=matrix");
+      expect(address).toHaveTextContent("role=FINANCE");
+    });
+
+    it("opens with the filters a link carries", async () => {
+      signIn("SYSTEM_ADMIN");
+      renderPage("/governance?tab=matrix&q=draft&role=FINANCE&group=orders");
+      await waitFor(() => {
+        expect(columnNames()).toEqual(["Permission", "Finance"]);
+      });
+      expect(rowNames()).toEqual(["Edit draft ordersorders.edit"]);
+      expect(await searchBox()).toHaveValue("draft");
+    });
+
+    it("ignores a role or group in a link that does not exist", async () => {
+      signIn("SYSTEM_ADMIN");
+      renderPage("/governance?tab=matrix&role=NOBODY&group=nothing");
+      await waitFor(() => {
+        expect(rowNames().length).toBe(PERMISSIONS.length + 1);
+      });
+      expect(columnNames().length).toBe(ROLES.length + 1);
+    });
+
+    it("says so when nothing matches, and Clear filters brings everything back", async () => {
+      signIn("SYSTEM_ADMIN");
+      renderPage();
+      await search("no such permission");
+      expect(await screen.findByText("No permissions match")).toBeVisible();
+      expect(screen.queryByRole("table")).toBeNull();
+      await userEvent.click(
+        screen.getByRole("button", { name: "Clear filters" }),
+      );
+      await waitFor(() => {
+        expect(rowNames().length).toBe(PERMISSIONS.length + 1);
+      });
+      expect(await searchBox()).toHaveValue("");
+    });
+
+    it("clears one filter from its chip and leaves the others", async () => {
+      signIn("SYSTEM_ADMIN");
+      renderPage("/governance?tab=matrix&role=FINANCE&group=orders");
+      await userEvent.click(
+        await screen.findByRole("button", {
+          name: "Clear filter: Role: Finance",
+        }),
+      );
+      await waitFor(() => {
+        expect(columnNames().length).toBe(ROLES.length + 1);
+      });
+      expect(rowNames()).toContain("Read ordersorders.read");
+      expect(rowNames()).not.toContain("See usersusers.read");
+      expect(screen.getByRole("status", { name: "Address" })).toHaveTextContent(
+        "group=orders",
+      );
+    });
+
+    it("lets a read-only role search as well", async () => {
+      signIn("AUDITOR");
+      renderPage();
+      await search("draft");
+      await waitFor(() => {
+        expect(rowNames()).toEqual(["Edit draft ordersorders.edit"]);
+      });
+      expect(
+        screen.getByRole("switch", { name: "Edit draft orders for Support" }),
+      ).toBeDisabled();
+    });
+
+    it("has no axe violations while filtered, or with no match", async () => {
+      signIn("SYSTEM_ADMIN");
+      const { container } = renderPage("/governance?tab=matrix&role=FINANCE");
+      await screen.findByRole("table", { name: "Permissions by role" });
+      expect(await axeViolations(container)).toEqual([]);
+      await search("no such permission");
+      await screen.findByText("No permissions match");
+      expect(await axeViolations(container)).toEqual([]);
+    });
+  });
+
+  describe("undoing a change", () => {
+    const answerPuts = (path: string) => {
+      const sent: { url: string; body: unknown }[] = [];
+      server.use(
+        http.put(path, async ({ request }) => {
+          sent.push({
+            url: new URL(request.url).pathname,
+            body: await request.json(),
+          });
+          return HttpResponse.json({ data: matrix.roles[0] });
+        }),
+      );
+      return sent;
+    };
+    const countReads = () => {
+      const reads = { count: 0 };
+      server.use(
+        http.get("*/api/v1/governance/matrix", () => {
+          reads.count += 1;
+          return HttpResponse.json({ data: matrix });
+        }),
+      );
+      return reads;
+    };
+    const flipWarehouseOrders = async () => {
+      await userEvent.click(
+        await screen.findByRole("switch", {
+          name: "Read orders for Warehouse",
+        }),
+      );
+    };
+    const WAREHOUSE_ORDERS =
+      "/api/v1/governance/matrix/WAREHOUSE/permissions/orders.read";
+
+    it("reverses a switch through the same save, and reloads the matrix", async () => {
+      signIn("SYSTEM_ADMIN");
+      const sent = answerPuts(CELL_PUT);
+      const reads = countReads();
+      renderPage();
+      await flipWarehouseOrders();
+      await userEvent.click(
+        await screen.findByRole("button", { name: "Undo" }),
+      );
+      expect(await screen.findByText("Undone")).toBeInTheDocument();
+      expect(sent).toEqual([
+        { url: WAREHOUSE_ORDERS, body: { granted: false } },
+        { url: WAREHOUSE_ORDERS, body: { granted: true } },
+      ]);
+      // One read to open, one after the change, one after the Undo.
+      await waitFor(() => {
+        expect(reads.count).toBe(3);
+      });
+    });
+
+    it("reverses a data scope through the same save", async () => {
+      signIn("SYSTEM_ADMIN");
+      const sent = answerPuts(SCOPE_PUT);
+      renderPage();
+      await userEvent.selectOptions(
+        await screen.findByRole("combobox", { name: "Data scope: Finance" }),
+        "own",
+      );
+      await userEvent.click(
+        await screen.findByRole("button", { name: "Undo" }),
+      );
+      expect(await screen.findByText("Undone")).toBeInTheDocument();
+      expect(sent.map((call) => call.body)).toEqual([
+        { dataScope: "own" },
+        { dataScope: "all" },
+      ]);
+    });
+
+    it("shows a refused Undo with its trace id", async () => {
+      signIn("SYSTEM_ADMIN");
+      let puts = 0;
+      server.use(
+        http.put(CELL_PUT, () => {
+          puts += 1;
+          return puts === 1
+            ? HttpResponse.json({ data: matrix.roles[0] })
+            : HttpResponse.json(errorBody("FORBIDDEN", "trace-undo-1"), {
+                status: 403,
+              });
+        }),
+      );
+      renderPage();
+      await flipWarehouseOrders();
+      await userEvent.click(
+        await screen.findByRole("button", { name: "Undo" }),
+      );
+      const alert = await screen.findByRole("alert");
+      expect(alert).toHaveTextContent("You do not have access");
+      expect(alert).toHaveTextContent("trace-undo-1");
+    });
+
+    it("shows a refused Undo of a data scope with its trace id", async () => {
+      signIn("SYSTEM_ADMIN");
+      let puts = 0;
+      server.use(
+        http.put(SCOPE_PUT, () => {
+          puts += 1;
+          return puts === 1
+            ? HttpResponse.json({ data: matrix.roles[0] })
+            : HttpResponse.json(errorBody("FORBIDDEN", "trace-undo-2"), {
+                status: 403,
+              });
+        }),
+      );
+      renderPage();
+      await userEvent.selectOptions(
+        await screen.findByRole("combobox", { name: "Data scope: Finance" }),
+        "own",
+      );
+      await userEvent.click(
+        await screen.findByRole("button", { name: "Undo" }),
+      );
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "trace-undo-2",
+      );
+    });
+
+    it("holds the switches while an Undo is saving", async () => {
+      signIn("SYSTEM_ADMIN");
+      let release: () => void = () => undefined;
+      const held = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      let puts = 0;
+      server.use(
+        http.put(CELL_PUT, async () => {
+          puts += 1;
+          if (puts === 2) await held;
+          return HttpResponse.json({ data: matrix.roles[0] });
+        }),
+      );
+      renderPage();
+      await flipWarehouseOrders();
+      await userEvent.click(
+        await screen.findByRole("button", { name: "Undo" }),
+      );
+      const other = screen.getByRole("switch", {
+        name: "Read orders for Finance",
+      });
+      await waitFor(() => {
+        expect(other).toBeDisabled();
+      });
+      release();
+      await waitFor(() => {
+        expect(other).toBeEnabled();
+      });
     });
   });
 
@@ -273,6 +710,93 @@ describe("GovernancePage", () => {
     expect(
       screen.getByText("You are seeing this as Warehouse."),
     ).toBeInTheDocument();
+  });
+
+  describe("the masking sample and the matrix (F-8)", () => {
+    const maskingSample = {
+      data: {
+        rules: [
+          {
+            field: "sample.customerNote",
+            label: "Customer note (sample rule)",
+            classification: "internal",
+            reason: "role",
+            visibleTo: ["SUPPORT"],
+            sample: true,
+          },
+        ],
+        records: [
+          {
+            customerNo: "C-1",
+            customerName: "Synthetic Customer",
+            note: {
+              field: "sample.customerNote",
+              classification: "internal",
+              masked: false,
+              value: "Prefers email over phone for confirmations.",
+              reason: null,
+            },
+          },
+        ],
+      },
+      meta: { mock: true },
+    };
+
+    it("says who sees the note is set on the matrix, and links to its row", async () => {
+      signIn("SYSTEM_ADMIN");
+      server.use(
+        http.get("*/api/v1/governance/masking/sample", () =>
+          HttpResponse.json(maskingSample),
+        ),
+      );
+      renderPage();
+      await userEvent.click(
+        await screen.findByRole("tab", { name: "Masking" }),
+      );
+      const link = await screen.findByRole("link", {
+        name: "Open the role matrix",
+      });
+      expect(link).toHaveAttribute(
+        "href",
+        "/governance?tab=matrix&q=masking.customerNote",
+      );
+      await userEvent.click(link);
+      expect(
+        await screen.findByRole("tab", { name: "Role matrix" }),
+      ).toHaveAttribute("aria-selected", "true");
+    });
+
+    it("reads the sample again after the matrix changes", async () => {
+      signIn("SYSTEM_ADMIN");
+      let reads = 0;
+      server.use(
+        http.get("*/api/v1/governance/masking/sample", () => {
+          reads += 1;
+          return HttpResponse.json(maskingSample);
+        }),
+        http.put(
+          "*/api/v1/governance/matrix/:role/permissions/:permission",
+          () => HttpResponse.json({ data: matrix.roles[0] }),
+        ),
+      );
+      renderPage();
+      await userEvent.click(
+        await screen.findByRole("tab", { name: "Masking" }),
+      );
+      await screen.findByText("Synthetic Customer");
+      expect(reads).toBe(1);
+      await userEvent.click(screen.getByRole("tab", { name: "Role matrix" }));
+      await userEvent.click(
+        await screen.findByRole("switch", {
+          name: "Read orders for Warehouse",
+        }),
+      );
+      await userEvent.click(screen.getByRole("tab", { name: "Masking" }));
+      await screen.findByText("Synthetic Customer");
+      await waitFor(() => {
+        expect(reads).toBe(2);
+      });
+    });
   });
 
   it("disables a user rather than deleting them", async () => {

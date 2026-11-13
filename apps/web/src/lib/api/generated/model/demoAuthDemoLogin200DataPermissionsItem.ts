@@ -32,4 +32,5 @@ export const DemoAuthDemoLogin200DataPermissionsItem = {
   sprread: 'spr.read',
   workflowsinboxesany: 'workflows.inboxes.any',
   taskscomplete: 'tasks.complete',
+  maskingcustomerNote: 'masking.customerNote',
 } as const;

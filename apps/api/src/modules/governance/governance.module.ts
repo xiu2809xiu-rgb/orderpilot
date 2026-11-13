@@ -17,6 +17,7 @@ import { MatrixController } from "./matrix.controller.js";
 import { MatrixService } from "./matrix.service.js";
 import { PolicyController } from "./policy.controller.js";
 import { PolicyService } from "./policy.service.js";
+import { RevokedPermissionRepository } from "./revoked-permission.repository.js";
 
 /**
  * Area 4: the role-permission matrix, the authorisation policy with approval
@@ -47,6 +48,7 @@ import { PolicyService } from "./policy.service.js";
     BankHoldVerifiers,
     BankDetailHoldService,
     BankHoldClearanceService,
+    RevokedPermissionRepository,
     MatrixService,
     PolicyService,
   ],

@@ -1,5 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Users } from "lucide-react";
+import { SearchX, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
   EmptyState,
@@ -7,63 +6,27 @@ import {
   PartialNotice,
   PermissionDenied,
   SectionCard,
-  toast,
 } from "@/components/common";
 import { Button } from "@/components/ui/button";
-import {
-  getMatrixReadQueryKey,
-  matrixCopy,
-  matrixSetDataScope,
-  matrixSetPermission,
-  useMatrixRead,
-} from "@/lib/api/generated/endpoints/governance/governance";
-import type { MatrixCopyBody } from "@/lib/api/generated/model";
+import { useMatrixRead } from "@/lib/api/generated/endpoints/governance/governance";
 import { hasPermission, useSessionStore } from "@/stores/session";
 import { CopyRoleDialog } from "./CopyRoleDialog";
+import { MatrixFilterBar } from "./MatrixFilterBar";
 import { MatrixTable } from "./MatrixTable";
+import { NO_MATRIX_FILTERS, filterMatrix } from "./matrixFilter";
 import { RefusalPanel } from "./RefusalPanel";
-
-type Role = MatrixCopyBody["fromRole"];
-type Permission = Parameters<typeof matrixSetPermission>[1];
-type Scope = Parameters<typeof matrixSetDataScope>[1]["dataScope"];
+import { useMatrixChanges } from "./useMatrixChanges";
+import { useMatrixFilters } from "./useMatrixFilters";
 
 /** The live matrix: reads the RolePermission table and writes each change back. */
 export function MatrixTab() {
   const { t } = useTranslation("governance");
-  const { t: tc } = useTranslation();
-  const queryClient = useQueryClient();
   const session = useSessionStore((state) => state.session);
   const canManage = hasPermission(session, "roles.manage");
   const matrix = useMatrixRead();
-  const refresh = () =>
-    queryClient.invalidateQueries({ queryKey: getMatrixReadQueryKey() });
-
-  const toggle = useMutation({
-    mutationFn: (v: { role: Role; permission: Permission; granted: boolean }) =>
-      matrixSetPermission(v.role, v.permission, { granted: v.granted }),
-    onSettled: refresh,
-  });
-  const scope = useMutation({
-    mutationFn: (v: { role: Role; dataScope: Scope }) =>
-      matrixSetDataScope(v.role, { dataScope: v.dataScope }),
-    onSettled: refresh,
-  });
-  const copy = useMutation({
-    mutationFn: (body: MatrixCopyBody) => matrixCopy(body),
-    // No Undo: the API keeps no snapshot of the target role's old rows, so a
-    // faithful reversal is not possible. The audit trail holds the change.
-    onSuccess: (_data, body) =>
-      toast.done(
-        t("matrix.toast.copied", {
-          from: tc(`roles.${body.fromRole}`),
-          to: tc(`roles.${body.toRole}`),
-        }),
-      ),
-    onError: () => toast.failed(t("matrix.toast.failed")),
-    onSettled: refresh,
-  });
-  const busy = toggle.isPending || scope.isPending || copy.isPending;
-  const failure = toggle.error ?? scope.error ?? copy.error;
+  const { busy, failure, setPermission, setDataScope, copyRole } =
+    useMatrixChanges();
+  const { filters, setFilters } = useMatrixFilters();
 
   if (matrix.isPending) return <LoadingState />;
   if (matrix.isError && !matrix.data) {
@@ -75,6 +38,9 @@ export function MatrixTab() {
     );
   }
   const data = matrix.data.data;
+  const visible = filterMatrix(data, filters, (permission) =>
+    t(`permissions.${permission}`),
+  );
   if (data.roles.length === 0) {
     return (
       <EmptyState
@@ -99,7 +65,7 @@ export function MatrixTab() {
           <CopyRoleDialog
             roles={data.roles.map((access) => access.role)}
             busy={busy}
-            onCopy={(body) => copy.mutateAsync(body)}
+            onCopy={copyRole}
           />
         ) : null
       }
@@ -115,65 +81,44 @@ export function MatrixTab() {
         <p role="status" className="sr-only">
           {busy ? t("matrix.saving") : ""}
         </p>
-        <MatrixTable
+        <MatrixFilterBar
           matrix={data}
-          canManage={canManage}
-          busy={busy}
-          onToggle={(role, permission, granted) => {
-            toggle.mutate(
-              { role, permission, granted },
-              {
-                onSuccess: () =>
-                  toast.done(
-                    t(
-                      granted ? "matrix.toast.granted" : "matrix.toast.revoked",
-                      {
-                        permission: t(`permissions.${permission}`),
-                        role: tc(`roles.${role}`),
-                      },
-                    ),
-                    {
-                      undo: async () => {
-                        await matrixSetPermission(role, permission, {
-                          granted: !granted,
-                        });
-                        await refresh();
-                      },
-                    },
-                  ),
-                onError: () => toast.failed(t("matrix.toast.failed")),
-              },
-            );
-          }}
-          onScope={(role, dataScope) => {
-            const before = data.roles.find(
-              (access) => access.role === role,
-            )?.dataScope;
-            scope.mutate(
-              { role, dataScope },
-              {
-                onSuccess: () =>
-                  toast.done(
-                    t("matrix.toast.scope", {
-                      role: tc(`roles.${role}`),
-                      scope: t(`matrix.scopes.${dataScope}`),
-                    }),
-                    before
-                      ? {
-                          undo: async () => {
-                            await matrixSetDataScope(role, {
-                              dataScope: before,
-                            });
-                            await refresh();
-                          },
-                        }
-                      : {},
-                  ),
-                onError: () => toast.failed(t("matrix.toast.failed")),
-              },
-            );
-          }}
+          filters={filters}
+          shown={visible.matrix.permissions.length}
+          onChange={setFilters}
         />
+        {visible.matrix.permissions.length === 0 ? (
+          <EmptyState
+            icon={SearchX}
+            title={t("matrix.filter.noMatchTitle")}
+            description={t("matrix.filter.noMatchDescription")}
+            action={
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setFilters(NO_MATRIX_FILTERS);
+                }}
+              >
+                {t("matrix.filter.clear")}
+              </Button>
+            }
+          />
+        ) : (
+          <MatrixTable
+            matrix={visible.matrix}
+            showDataScope={visible.showDataScope}
+            canManage={canManage}
+            busy={busy}
+            onToggle={setPermission}
+            onScope={(role, dataScope) => {
+              setDataScope(
+                role,
+                dataScope,
+                data.roles.find((access) => access.role === role)?.dataScope,
+              );
+            }}
+          />
+        )}
       </div>
     </SectionCard>
   );
