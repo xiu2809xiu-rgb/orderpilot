@@ -5,7 +5,7 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { AuthOptions200DataDemoRolesItem } from './authOptions200DataDemoRolesItem';
+import type { AuthOptions200DataDemoRolesItem } from './authOptions200DataDemoRolesItem.ts';
 
 export type AuthOptions200Data = {
   demoMode: boolean;

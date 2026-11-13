@@ -21,7 +21,7 @@ import type {
   HealthLive200,
   HealthReady200,
   HealthSummary200
-} from '../../model/index';
+} from '../../model';
 
 
 export const getHealthSummaryResponseMock = (overrideResponse: Partial<Extract<HealthSummary200, object>> = {}): HealthSummary200 => ({data: {status: faker.helpers.arrayElement(['ok','unavailable'] as const), checks: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({name: faker.string.alpha({length: {min: 10, max: 20}}), status: faker.helpers.arrayElement(['up','down'] as const)}))}, ...overrideResponse})

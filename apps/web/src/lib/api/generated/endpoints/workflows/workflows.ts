@@ -50,10 +50,10 @@ import type {
   WorkflowsUndoDecision200,
   WorkflowsUndoPayment200,
   WorkflowsUndoTask200
-} from '../../model/index';
+} from '../../model';
 
-import { apiMutator } from '@/lib/api/mutator';
-import type { ErrorType } from '@/lib/api/mutator';
+import { apiMutator } from '../../../mutator.ts';
+import type { ErrorType } from '../../../mutator.ts';
 
 
 

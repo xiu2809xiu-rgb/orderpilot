@@ -5,15 +5,15 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { WorkflowsSpr200DataApprover } from './workflowsSpr200DataApprover';
-import type { WorkflowsSpr200DataBasis } from './workflowsSpr200DataBasis';
-import type { WorkflowsSpr200DataDecision } from './workflowsSpr200DataDecision';
-import type { WorkflowsSpr200DataFieldsItem } from './workflowsSpr200DataFieldsItem';
-import type { WorkflowsSpr200DataItem } from './workflowsSpr200DataItem';
-import type { WorkflowsSpr200DataPassedTo } from './workflowsSpr200DataPassedTo';
-import type { WorkflowsSpr200DataRef } from './workflowsSpr200DataRef';
-import type { WorkflowsSpr200DataRequestedBy } from './workflowsSpr200DataRequestedBy';
-import type { WorkflowsSpr200DataVendor } from './workflowsSpr200DataVendor';
+import type { WorkflowsSpr200DataApprover } from './workflowsSpr200DataApprover.ts';
+import type { WorkflowsSpr200DataBasis } from './workflowsSpr200DataBasis.ts';
+import type { WorkflowsSpr200DataDecision } from './workflowsSpr200DataDecision.ts';
+import type { WorkflowsSpr200DataFieldsItem } from './workflowsSpr200DataFieldsItem.ts';
+import type { WorkflowsSpr200DataItem } from './workflowsSpr200DataItem.ts';
+import type { WorkflowsSpr200DataPassedTo } from './workflowsSpr200DataPassedTo.ts';
+import type { WorkflowsSpr200DataRef } from './workflowsSpr200DataRef.ts';
+import type { WorkflowsSpr200DataRequestedBy } from './workflowsSpr200DataRequestedBy.ts';
+import type { WorkflowsSpr200DataVendor } from './workflowsSpr200DataVendor.ts';
 
 export type WorkflowsSpr200Data = {
   ref: WorkflowsSpr200DataRef;

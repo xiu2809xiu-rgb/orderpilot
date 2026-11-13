@@ -5,7 +5,7 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { OrdersVoidDraft200Data } from './ordersVoidDraft200Data';
+import type { OrdersVoidDraft200Data } from './ordersVoidDraft200Data.ts';
 
 export type OrdersVoidDraft200 = {
   data: OrdersVoidDraft200Data;

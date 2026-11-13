@@ -5,12 +5,12 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { WorkflowsInboxTasks200DataItemAssigneeRole } from './workflowsInboxTasks200DataItemAssigneeRole';
-import type { WorkflowsInboxTasks200DataItemExpectedPayment } from './workflowsInboxTasks200DataItemExpectedPayment';
-import type { WorkflowsInboxTasks200DataItemKind } from './workflowsInboxTasks200DataItemKind';
-import type { WorkflowsInboxTasks200DataItemPriority } from './workflowsInboxTasks200DataItemPriority';
-import type { WorkflowsInboxTasks200DataItemRef } from './workflowsInboxTasks200DataItemRef';
-import type { WorkflowsInboxTasks200DataItemStatus } from './workflowsInboxTasks200DataItemStatus';
+import type { WorkflowsInboxTasks200DataItemAssigneeRole } from './workflowsInboxTasks200DataItemAssigneeRole.ts';
+import type { WorkflowsInboxTasks200DataItemExpectedPayment } from './workflowsInboxTasks200DataItemExpectedPayment.ts';
+import type { WorkflowsInboxTasks200DataItemKind } from './workflowsInboxTasks200DataItemKind.ts';
+import type { WorkflowsInboxTasks200DataItemPriority } from './workflowsInboxTasks200DataItemPriority.ts';
+import type { WorkflowsInboxTasks200DataItemRef } from './workflowsInboxTasks200DataItemRef.ts';
+import type { WorkflowsInboxTasks200DataItemStatus } from './workflowsInboxTasks200DataItemStatus.ts';
 
 export type WorkflowsInboxTasks200DataItem = {
   /** @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */

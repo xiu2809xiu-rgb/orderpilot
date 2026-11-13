@@ -30,10 +30,10 @@ import type {
   OrdersUpdateBody,
   OrdersVoidDraft200,
   OrdersVoidDraftBody
-} from '../../model/index';
+} from '../../model';
 
-import { apiMutator } from '@/lib/api/mutator';
-import type { ErrorType } from '@/lib/api/mutator';
+import { apiMutator } from '../../../mutator.ts';
+import type { ErrorType } from '../../../mutator.ts';
 
 
 

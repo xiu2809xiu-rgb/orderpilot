@@ -5,8 +5,8 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { MatrixRead200Data } from './matrixRead200Data';
-import type { MatrixRead200Meta } from './matrixRead200Meta';
+import type { MatrixRead200Data } from './matrixRead200Data.ts';
+import type { MatrixRead200Meta } from './matrixRead200Meta.ts';
 
 export type MatrixRead200 = {
   data: MatrixRead200Data;

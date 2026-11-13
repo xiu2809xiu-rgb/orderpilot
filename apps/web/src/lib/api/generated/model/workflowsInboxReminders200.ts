@@ -5,8 +5,8 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { WorkflowsInboxReminders200DataItem } from './workflowsInboxReminders200DataItem';
-import type { WorkflowsInboxReminders200Meta } from './workflowsInboxReminders200Meta';
+import type { WorkflowsInboxReminders200DataItem } from './workflowsInboxReminders200DataItem.ts';
+import type { WorkflowsInboxReminders200Meta } from './workflowsInboxReminders200Meta.ts';
 
 export type WorkflowsInboxReminders200 = {
   data: WorkflowsInboxReminders200DataItem[];

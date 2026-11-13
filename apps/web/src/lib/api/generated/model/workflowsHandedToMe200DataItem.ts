@@ -5,13 +5,13 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { WorkflowsHandedToMe200DataItemAssigneeRole } from './workflowsHandedToMe200DataItemAssigneeRole';
-import type { WorkflowsHandedToMe200DataItemExpectedPayment } from './workflowsHandedToMe200DataItemExpectedPayment';
-import type { WorkflowsHandedToMe200DataItemHandedOver } from './workflowsHandedToMe200DataItemHandedOver';
-import type { WorkflowsHandedToMe200DataItemKind } from './workflowsHandedToMe200DataItemKind';
-import type { WorkflowsHandedToMe200DataItemPriority } from './workflowsHandedToMe200DataItemPriority';
-import type { WorkflowsHandedToMe200DataItemRef } from './workflowsHandedToMe200DataItemRef';
-import type { WorkflowsHandedToMe200DataItemStatus } from './workflowsHandedToMe200DataItemStatus';
+import type { WorkflowsHandedToMe200DataItemAssigneeRole } from './workflowsHandedToMe200DataItemAssigneeRole.ts';
+import type { WorkflowsHandedToMe200DataItemExpectedPayment } from './workflowsHandedToMe200DataItemExpectedPayment.ts';
+import type { WorkflowsHandedToMe200DataItemHandedOver } from './workflowsHandedToMe200DataItemHandedOver.ts';
+import type { WorkflowsHandedToMe200DataItemKind } from './workflowsHandedToMe200DataItemKind.ts';
+import type { WorkflowsHandedToMe200DataItemPriority } from './workflowsHandedToMe200DataItemPriority.ts';
+import type { WorkflowsHandedToMe200DataItemRef } from './workflowsHandedToMe200DataItemRef.ts';
+import type { WorkflowsHandedToMe200DataItemStatus } from './workflowsHandedToMe200DataItemStatus.ts';
 
 export type WorkflowsHandedToMe200DataItem = {
   /** @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */

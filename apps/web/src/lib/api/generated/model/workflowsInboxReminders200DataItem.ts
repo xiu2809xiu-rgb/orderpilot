@@ -5,10 +5,10 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { WorkflowsInboxReminders200DataItemEscalatedTo } from './workflowsInboxReminders200DataItemEscalatedTo';
-import type { WorkflowsInboxReminders200DataItemKind } from './workflowsInboxReminders200DataItemKind';
-import type { WorkflowsInboxReminders200DataItemStage } from './workflowsInboxReminders200DataItemStage';
-import type { WorkflowsInboxReminders200DataItemToRole } from './workflowsInboxReminders200DataItemToRole';
+import type { WorkflowsInboxReminders200DataItemEscalatedTo } from './workflowsInboxReminders200DataItemEscalatedTo.ts';
+import type { WorkflowsInboxReminders200DataItemKind } from './workflowsInboxReminders200DataItemKind.ts';
+import type { WorkflowsInboxReminders200DataItemStage } from './workflowsInboxReminders200DataItemStage.ts';
+import type { WorkflowsInboxReminders200DataItemToRole } from './workflowsInboxReminders200DataItemToRole.ts';
 
 export type WorkflowsInboxReminders200DataItem = {
   /** @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */

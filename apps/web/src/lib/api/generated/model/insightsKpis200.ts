@@ -5,8 +5,8 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { InsightsKpis200Data } from './insightsKpis200Data';
-import type { InsightsKpis200Meta } from './insightsKpis200Meta';
+import type { InsightsKpis200Data } from './insightsKpis200Data.ts';
+import type { InsightsKpis200Meta } from './insightsKpis200Meta.ts';
 
 export type InsightsKpis200 = {
   data: InsightsKpis200Data;

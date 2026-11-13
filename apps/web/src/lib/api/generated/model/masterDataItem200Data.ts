@@ -5,14 +5,14 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { MasterDataItem200DataAvailability } from './masterDataItem200DataAvailability';
-import type { MasterDataItem200DataCategory } from './masterDataItem200DataCategory';
-import type { MasterDataItem200DataOrderLinesItem } from './masterDataItem200DataOrderLinesItem';
-import type { MasterDataItem200DataPurchaseLinesItem } from './masterDataItem200DataPurchaseLinesItem';
-import type { MasterDataItem200DataSalesOrderBreakdown } from './masterDataItem200DataSalesOrderBreakdown';
-import type { MasterDataItem200DataSprsItem } from './masterDataItem200DataSprsItem';
-import type { MasterDataItem200DataUnitCost } from './masterDataItem200DataUnitCost';
-import type { MasterDataItem200DataUnitPrice } from './masterDataItem200DataUnitPrice';
+import type { MasterDataItem200DataAvailability } from './masterDataItem200DataAvailability.ts';
+import type { MasterDataItem200DataCategory } from './masterDataItem200DataCategory.ts';
+import type { MasterDataItem200DataOrderLinesItem } from './masterDataItem200DataOrderLinesItem.ts';
+import type { MasterDataItem200DataPurchaseLinesItem } from './masterDataItem200DataPurchaseLinesItem.ts';
+import type { MasterDataItem200DataSalesOrderBreakdown } from './masterDataItem200DataSalesOrderBreakdown.ts';
+import type { MasterDataItem200DataSprsItem } from './masterDataItem200DataSprsItem.ts';
+import type { MasterDataItem200DataUnitCost } from './masterDataItem200DataUnitCost.ts';
+import type { MasterDataItem200DataUnitPrice } from './masterDataItem200DataUnitPrice.ts';
 
 export type MasterDataItem200Data = {
   /** @minLength 1 */

@@ -5,9 +5,9 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { ExceptionsList200DataItemFixBy } from './exceptionsList200DataItemFixBy';
-import type { ExceptionsList200DataItemState } from './exceptionsList200DataItemState';
-import type { ExceptionsList200DataItemTolerance } from './exceptionsList200DataItemTolerance';
+import type { ExceptionsList200DataItemFixBy } from './exceptionsList200DataItemFixBy.ts';
+import type { ExceptionsList200DataItemState } from './exceptionsList200DataItemState.ts';
+import type { ExceptionsList200DataItemTolerance } from './exceptionsList200DataItemTolerance.ts';
 
 export type ExceptionsList200DataItem = {
   /** @minLength 1 */

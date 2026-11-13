@@ -5,12 +5,12 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { TrackerTimeline200DataChecksItem } from './trackerTimeline200DataChecksItem';
-import type { TrackerTimeline200DataMatchesItem } from './trackerTimeline200DataMatchesItem';
-import type { TrackerTimeline200DataOverdue } from './trackerTimeline200DataOverdue';
-import type { TrackerTimeline200DataOwnerRole } from './trackerTimeline200DataOwnerRole';
-import type { TrackerTimeline200DataStatus } from './trackerTimeline200DataStatus';
-import type { TrackerTimeline200DataStepsItem } from './trackerTimeline200DataStepsItem';
+import type { TrackerTimeline200DataChecksItem } from './trackerTimeline200DataChecksItem.ts';
+import type { TrackerTimeline200DataMatchesItem } from './trackerTimeline200DataMatchesItem.ts';
+import type { TrackerTimeline200DataOverdue } from './trackerTimeline200DataOverdue.ts';
+import type { TrackerTimeline200DataOwnerRole } from './trackerTimeline200DataOwnerRole.ts';
+import type { TrackerTimeline200DataStatus } from './trackerTimeline200DataStatus.ts';
+import type { TrackerTimeline200DataStepsItem } from './trackerTimeline200DataStepsItem.ts';
 
 export type TrackerTimeline200Data = {
   /** @minLength 1 */

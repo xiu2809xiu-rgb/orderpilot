@@ -1,12 +1,7 @@
 import { Plus } from "lucide-react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { sessionFor } from "@/test/fixtures";
-import {
-  actionsFor,
-  actionsForRole,
-  listActions,
-  registerAction,
-} from "./index";
+import { actionsFor, actionsForRole, listActions, registerAction } from ".";
 
 const added: (() => void)[] = [];
 afterEach(() => {

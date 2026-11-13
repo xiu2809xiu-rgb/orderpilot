@@ -5,8 +5,8 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { BankHoldList200DataItem } from './bankHoldList200DataItem';
-import type { BankHoldList200Meta } from './bankHoldList200Meta';
+import type { BankHoldList200DataItem } from './bankHoldList200DataItem.ts';
+import type { BankHoldList200Meta } from './bankHoldList200Meta.ts';
 
 export type BankHoldList200 = {
   data: BankHoldList200DataItem[];

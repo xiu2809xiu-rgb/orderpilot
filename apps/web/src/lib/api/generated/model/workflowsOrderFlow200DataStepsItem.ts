@@ -5,8 +5,8 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { WorkflowsOrderFlow200DataStepsItemOwnerRole } from './workflowsOrderFlow200DataStepsItemOwnerRole';
-import type { WorkflowsOrderFlow200DataStepsItemState } from './workflowsOrderFlow200DataStepsItemState';
+import type { WorkflowsOrderFlow200DataStepsItemOwnerRole } from './workflowsOrderFlow200DataStepsItemOwnerRole.ts';
+import type { WorkflowsOrderFlow200DataStepsItemState } from './workflowsOrderFlow200DataStepsItemState.ts';
 
 export type WorkflowsOrderFlow200DataStepsItem = {
   /** @pattern ^[a-z][a-z0-9-]*$ */

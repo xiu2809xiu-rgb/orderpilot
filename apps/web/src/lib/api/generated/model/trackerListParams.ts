@@ -5,13 +5,13 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { TrackerListDirection } from './trackerListDirection';
-import type { TrackerListDocumentToConfirm } from './trackerListDocumentToConfirm';
-import type { TrackerListExceptionsOnly } from './trackerListExceptionsOnly';
-import type { TrackerListOpen } from './trackerListOpen';
-import type { TrackerListOverdue } from './trackerListOverdue';
-import type { TrackerListOwnerRole } from './trackerListOwnerRole';
-import type { TrackerListSort } from './trackerListSort';
+import type { TrackerListDirection } from './trackerListDirection.ts';
+import type { TrackerListDocumentToConfirm } from './trackerListDocumentToConfirm.ts';
+import type { TrackerListExceptionsOnly } from './trackerListExceptionsOnly.ts';
+import type { TrackerListOpen } from './trackerListOpen.ts';
+import type { TrackerListOverdue } from './trackerListOverdue.ts';
+import type { TrackerListOwnerRole } from './trackerListOwnerRole.ts';
+import type { TrackerListSort } from './trackerListSort.ts';
 
 export type TrackerListParams = {
 /**

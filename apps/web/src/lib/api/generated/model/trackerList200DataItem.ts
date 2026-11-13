@@ -5,9 +5,9 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { TrackerList200DataItemOverdue } from './trackerList200DataItemOverdue';
-import type { TrackerList200DataItemOwnerRole } from './trackerList200DataItemOwnerRole';
-import type { TrackerList200DataItemStatus } from './trackerList200DataItemStatus';
+import type { TrackerList200DataItemOverdue } from './trackerList200DataItemOverdue.ts';
+import type { TrackerList200DataItemOwnerRole } from './trackerList200DataItemOwnerRole.ts';
+import type { TrackerList200DataItemStatus } from './trackerList200DataItemStatus.ts';
 
 export type TrackerList200DataItem = {
   /** @minLength 1 */

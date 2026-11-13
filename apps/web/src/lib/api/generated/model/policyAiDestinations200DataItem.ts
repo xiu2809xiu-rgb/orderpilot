@@ -5,9 +5,9 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { PolicyAiDestinations200DataItemClassificationsItem } from './policyAiDestinations200DataItemClassificationsItem';
-import type { PolicyAiDestinations200DataItemOriginsItem } from './policyAiDestinations200DataItemOriginsItem';
-import type { PolicyAiDestinations200DataItemProvider } from './policyAiDestinations200DataItemProvider';
+import type { PolicyAiDestinations200DataItemClassificationsItem } from './policyAiDestinations200DataItemClassificationsItem.ts';
+import type { PolicyAiDestinations200DataItemOriginsItem } from './policyAiDestinations200DataItemOriginsItem.ts';
+import type { PolicyAiDestinations200DataItemProvider } from './policyAiDestinations200DataItemProvider.ts';
 
 export type PolicyAiDestinations200DataItem = {
   provider: PolicyAiDestinations200DataItemProvider;

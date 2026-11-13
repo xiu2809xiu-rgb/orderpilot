@@ -5,12 +5,12 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { WorkflowsMyTasks200DataItemAssigneeRole } from './workflowsMyTasks200DataItemAssigneeRole';
-import type { WorkflowsMyTasks200DataItemExpectedPayment } from './workflowsMyTasks200DataItemExpectedPayment';
-import type { WorkflowsMyTasks200DataItemKind } from './workflowsMyTasks200DataItemKind';
-import type { WorkflowsMyTasks200DataItemPriority } from './workflowsMyTasks200DataItemPriority';
-import type { WorkflowsMyTasks200DataItemRef } from './workflowsMyTasks200DataItemRef';
-import type { WorkflowsMyTasks200DataItemStatus } from './workflowsMyTasks200DataItemStatus';
+import type { WorkflowsMyTasks200DataItemAssigneeRole } from './workflowsMyTasks200DataItemAssigneeRole.ts';
+import type { WorkflowsMyTasks200DataItemExpectedPayment } from './workflowsMyTasks200DataItemExpectedPayment.ts';
+import type { WorkflowsMyTasks200DataItemKind } from './workflowsMyTasks200DataItemKind.ts';
+import type { WorkflowsMyTasks200DataItemPriority } from './workflowsMyTasks200DataItemPriority.ts';
+import type { WorkflowsMyTasks200DataItemRef } from './workflowsMyTasks200DataItemRef.ts';
+import type { WorkflowsMyTasks200DataItemStatus } from './workflowsMyTasks200DataItemStatus.ts';
 
 export type WorkflowsMyTasks200DataItem = {
   /** @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$ */

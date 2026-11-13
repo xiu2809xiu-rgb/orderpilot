@@ -5,8 +5,8 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { BankHoldGet403ErrorCode } from './bankHoldGet403ErrorCode';
-import type { BankHoldGet403ErrorDetailsItem } from './bankHoldGet403ErrorDetailsItem';
+import type { BankHoldGet403ErrorCode } from './bankHoldGet403ErrorCode.ts';
+import type { BankHoldGet403ErrorDetailsItem } from './bankHoldGet403ErrorDetailsItem.ts';
 
 export type BankHoldGet403Error = {
   code: BankHoldGet403ErrorCode;

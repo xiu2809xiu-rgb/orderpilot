@@ -24,7 +24,7 @@ import {
   RelativeTime,
   SectionCard,
   StatusBadge,
-} from "./index";
+} from ".";
 
 afterEach(() => {
   useSessionStore.setState({ status: "booting", session: null });

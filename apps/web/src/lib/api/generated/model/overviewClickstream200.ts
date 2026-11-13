@@ -5,8 +5,8 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { OverviewClickstream200Data } from './overviewClickstream200Data';
-import type { OverviewClickstream200Meta } from './overviewClickstream200Meta';
+import type { OverviewClickstream200Data } from './overviewClickstream200Data.ts';
+import type { OverviewClickstream200Meta } from './overviewClickstream200Meta.ts';
 
 export type OverviewClickstream200 = {
   data: OverviewClickstream200Data;

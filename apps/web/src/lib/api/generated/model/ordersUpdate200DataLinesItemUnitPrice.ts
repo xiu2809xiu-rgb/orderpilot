@@ -5,8 +5,8 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { OrdersUpdate200DataLinesItemUnitPriceClassification } from './ordersUpdate200DataLinesItemUnitPriceClassification';
-import type { OrdersUpdate200DataLinesItemUnitPriceReason } from './ordersUpdate200DataLinesItemUnitPriceReason';
+import type { OrdersUpdate200DataLinesItemUnitPriceClassification } from './ordersUpdate200DataLinesItemUnitPriceClassification.ts';
+import type { OrdersUpdate200DataLinesItemUnitPriceReason } from './ordersUpdate200DataLinesItemUnitPriceReason.ts';
 
 export type OrdersUpdate200DataLinesItemUnitPrice = {
   /** @minLength 1 */

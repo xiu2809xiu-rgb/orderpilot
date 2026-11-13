@@ -5,8 +5,8 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { MatrixCopyBodyFromRole } from './matrixCopyBodyFromRole';
-import type { MatrixCopyBodyToRole } from './matrixCopyBodyToRole';
+import type { MatrixCopyBodyFromRole } from './matrixCopyBodyFromRole.ts';
+import type { MatrixCopyBodyToRole } from './matrixCopyBodyToRole.ts';
 
 export type MatrixCopyBody = {
   fromRole: MatrixCopyBodyFromRole;

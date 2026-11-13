@@ -5,8 +5,8 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { MasterDataVendors200DataItemBalanceLcyClassification } from './masterDataVendors200DataItemBalanceLcyClassification';
-import type { MasterDataVendors200DataItemBalanceLcyReason } from './masterDataVendors200DataItemBalanceLcyReason';
+import type { MasterDataVendors200DataItemBalanceLcyClassification } from './masterDataVendors200DataItemBalanceLcyClassification.ts';
+import type { MasterDataVendors200DataItemBalanceLcyReason } from './masterDataVendors200DataItemBalanceLcyReason.ts';
 
 export type MasterDataVendors200DataItemBalanceLcy = {
   /** @minLength 1 */

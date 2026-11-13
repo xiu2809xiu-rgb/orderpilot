@@ -25,10 +25,10 @@ import type {
   AiUsageReportParams,
   OverviewClickstream200,
   OverviewObservability200
-} from '../../model/index';
+} from '../../model';
 
-import { apiMutator } from '@/lib/api/mutator';
-import type { ErrorType } from '@/lib/api/mutator';
+import { apiMutator } from '../../../mutator.ts';
+import type { ErrorType } from '../../../mutator.ts';
 
 
 

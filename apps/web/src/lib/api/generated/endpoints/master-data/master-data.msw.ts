@@ -27,7 +27,7 @@ import type {
   MasterDataLastPrices200,
   MasterDataVendor200,
   MasterDataVendors200
-} from '../../model/index';
+} from '../../model';
 
 
 export const getMasterDataFiltersResponseMock = (overrideResponse: Partial<Extract<MasterDataFilters200, object>> = {}): MasterDataFilters200 => ({data: {brands: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => (faker.string.alpha({length: {min: 10, max: 20}}))), categories: faker.helpers.arrayElements(['COMPONENTS','PERIPHERALS','PCS','ENTERPRISE','SECURITY','NETWORKING'] as const), vendors: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({no: faker.string.alpha({length: {min: 10, max: 20}}), name: faker.string.alpha({length: {min: 10, max: 20}})})), countries: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => (faker.string.alpha({length: {min: 10, max: 20}}))), paymentTerms: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => (faker.string.alpha({length: {min: 10, max: 20}})))}, meta: {mock: faker.helpers.arrayElement([true] as const)}, ...overrideResponse})

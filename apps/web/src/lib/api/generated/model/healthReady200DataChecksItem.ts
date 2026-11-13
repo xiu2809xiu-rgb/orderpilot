@@ -5,7 +5,7 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { HealthReady200DataChecksItemStatus } from './healthReady200DataChecksItemStatus';
+import type { HealthReady200DataChecksItemStatus } from './healthReady200DataChecksItemStatus.ts';
 
 export type HealthReady200DataChecksItem = {
   name: string;

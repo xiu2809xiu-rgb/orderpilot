@@ -19,7 +19,7 @@ import type {
 
 import type {
   ClickstreamRecord200
-} from '../../model/index';
+} from '../../model';
 
 
 export const getClickstreamRecordResponseMock = (overrideResponse: Partial<Extract<ClickstreamRecord200, object>> = {}): ClickstreamRecord200 => ({data: {accepted: faker.number.int({min: 0, max: 9007199254740991})}, ...overrideResponse})

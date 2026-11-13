@@ -5,11 +5,11 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { OrdersListCaptureState } from './ordersListCaptureState';
-import type { OrdersListDirection } from './ordersListDirection';
-import type { OrdersListSort } from './ordersListSort';
-import type { OrdersListSource } from './ordersListSource';
-import type { OrdersListStock } from './ordersListStock';
+import type { OrdersListCaptureState } from './ordersListCaptureState.ts';
+import type { OrdersListDirection } from './ordersListDirection.ts';
+import type { OrdersListSort } from './ordersListSort.ts';
+import type { OrdersListSource } from './ordersListSource.ts';
+import type { OrdersListStock } from './ordersListStock.ts';
 
 export type OrdersListParams = {
 /**

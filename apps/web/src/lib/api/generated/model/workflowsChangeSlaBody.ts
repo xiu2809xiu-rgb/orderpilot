@@ -5,7 +5,7 @@
  * AI reads, rules decide, people approve. Errors share one envelope: { error: { code, message, details, traceId } }.
  * OpenAPI spec version: 0.0.0
  */
-import type { WorkflowsChangeSlaBodyEscalateToRole } from './workflowsChangeSlaBodyEscalateToRole';
+import type { WorkflowsChangeSlaBodyEscalateToRole } from './workflowsChangeSlaBodyEscalateToRole.ts';
 
 export type WorkflowsChangeSlaBody = {
   /**

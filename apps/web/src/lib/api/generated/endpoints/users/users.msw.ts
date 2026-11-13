@@ -22,7 +22,7 @@ import type {
   UsersEnable200,
   UsersGet200,
   UsersList200
-} from '../../model/index';
+} from '../../model';
 
 
 export const getUsersListResponseMock = (overrideResponse: Partial<Extract<UsersList200, object>> = {}): UsersList200 => ({data: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.string.uuid(), displayName: faker.string.alpha({length: {min: 1, max: 20}}), email: faker.internet.email(), role: faker.helpers.arrayElement(['SYSTEM_ADMIN','PRODUCT_MANAGER','APPROVER','SUPPORT','WAREHOUSE','FINANCE','LOGISTICS','MANAGEMENT','AUDITOR'] as const), disabled: faker.datatype.boolean(), disabledAt: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 19) + 'Z', null]), createdAt: faker.date.past().toISOString().slice(0, 19) + 'Z'})), meta: {page: faker.number.int({min: 1, max: 9007199254740991}), pageSize: faker.number.int({min: 1, max: 200}), total: faker.number.int({min: 0, max: 9007199254740991})}, ...overrideResponse})
