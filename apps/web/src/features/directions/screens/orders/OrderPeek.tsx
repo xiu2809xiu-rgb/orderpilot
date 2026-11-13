@@ -94,59 +94,65 @@ export function OrderPeek({
               </div>
             </SheetHeader>
             <ScrollRegion label={t("peek.region")} className="od-peek-body">
-              <dl className="od-facts fs-14">
-                <Fact label={t("peek.status")}>
-                  {row.status?.label ??
-                    row.workflowStatus ??
-                    t("cells.notStarted")}
-                </Fact>
-                <Fact label={t("columns.heldAt")}>
-                  {row.ownerRole && row.step !== ALL_DONE
-                    ? roleLabel(row.ownerRole)
-                    : t("cells.done")}
-                </Fact>
-                <Fact label={t("columns.age")}>
-                  {t("cells.days", {
-                    count: ageInDays(row.orderDate, todayInSingapore()),
-                  })}
-                </Fact>
-                <Fact label={t("columns.shipDate")}>
-                  {row.shipmentDate
-                    ? formatDay(row.shipmentDate)
-                    : t("cells.notSet")}
-                </Fact>
-                <Fact label={t("columns.value")}>
-                  <Amount field={row.amount} currency={row.currencyCode} />
-                </Fact>
-                <Fact label={t("columns.po")}>
-                  <span className="numeral">{row.externalDocumentNo}</span>
-                </Fact>
-              </dl>
-              <h3 className="od-peek-title fs-14">{t("peek.journey")}</h3>
-              {timeline.isPending ? (
-                <div className="space-y-3" aria-hidden="true">
-                  <Skeleton className="h-5 w-3/4" />
-                  <Skeleton className="h-40" />
-                </div>
-              ) : notInTracker || !journey ? (
-                <p className="fs-14 text-muted-foreground">
-                  {t("peek.noJourney")}
-                </p>
-              ) : timeline.isError ? (
-                <ErrorPanel
-                  error={timeline.error}
-                  onRetry={() => void timeline.refetch()}
-                />
-              ) : (
-                <>
-                  <ShipLine journey={journey} shipmentDate={row.shipmentDate} />
-                  <OrderJourney
-                    journey={journey}
-                    size="vertical"
-                    late={row.overdue?.overdue === true}
+              {/* One child, so the region's size observer sees the journey arrive. */}
+              <div className="od-peek-inner">
+                <dl className="od-facts fs-14">
+                  <Fact label={t("peek.status")}>
+                    {row.status?.label ??
+                      row.workflowStatus ??
+                      t("cells.notStarted")}
+                  </Fact>
+                  <Fact label={t("columns.heldAt")}>
+                    {row.ownerRole && row.step !== ALL_DONE
+                      ? roleLabel(row.ownerRole)
+                      : t("cells.done")}
+                  </Fact>
+                  <Fact label={t("columns.age")}>
+                    {t("cells.days", {
+                      count: ageInDays(row.orderDate, todayInSingapore()),
+                    })}
+                  </Fact>
+                  <Fact label={t("columns.shipDate")}>
+                    {row.shipmentDate
+                      ? formatDay(row.shipmentDate)
+                      : t("cells.notSet")}
+                  </Fact>
+                  <Fact label={t("columns.value")}>
+                    <Amount field={row.amount} currency={row.currencyCode} />
+                  </Fact>
+                  <Fact label={t("columns.po")}>
+                    <span className="numeral">{row.externalDocumentNo}</span>
+                  </Fact>
+                </dl>
+                <h3 className="od-peek-title fs-14">{t("peek.journey")}</h3>
+                {timeline.isPending ? (
+                  <div className="space-y-3" aria-hidden="true">
+                    <Skeleton className="h-5 w-3/4" />
+                    <Skeleton className="h-40" />
+                  </div>
+                ) : notInTracker || !journey ? (
+                  <p className="fs-14 text-muted-foreground">
+                    {t("peek.noJourney")}
+                  </p>
+                ) : timeline.isError ? (
+                  <ErrorPanel
+                    error={timeline.error}
+                    onRetry={() => void timeline.refetch()}
                   />
-                </>
-              )}
+                ) : (
+                  <>
+                    <ShipLine
+                      journey={journey}
+                      shipmentDate={row.shipmentDate}
+                    />
+                    <OrderJourney
+                      journey={journey}
+                      size="vertical"
+                      late={row.overdue?.overdue === true}
+                    />
+                  </>
+                )}
+              </div>
             </ScrollRegion>
             <SheetFooter className="od-peek-foot">
               <Button asChild className="pointer-coarse:h-11">
