@@ -6,6 +6,7 @@ import {
   type Role,
 } from "@orderpilot/shared";
 import { maskChanges } from "./domain/audit-masking.js";
+import { UNKNOWN_PERSON } from "./domain/filter-options.js";
 
 /** The name to show for whoever acted: the person, the system part or the model. */
 export function actorNameOf(
@@ -14,7 +15,7 @@ export function actorNameOf(
 ): string {
   switch (actor.kind) {
     case "user":
-      return names.get(actor.userId) ?? "Unknown user";
+      return names.get(actor.userId) ?? UNKNOWN_PERSON;
     case "ai":
       return actor.model;
     default:

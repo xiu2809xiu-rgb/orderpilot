@@ -19,6 +19,14 @@ GET {{baseUrl}}/api/v1/audit/events?entityType=User&entityId=paste-a-user-id-her
 ### A time range, and everything under one action prefix.
 GET {{baseUrl}}/api/v1/audit/events?action=governance.&from=2026-11-01T00:00:00.000Z&to=2026-11-30T23:59:59.999Z
 
+### The events around a sequence: five sequences either side, such as where the
+### chain check found a break (F-9). It combines with the other filters.
+GET {{baseUrl}}/api/v1/audit/events?around=paste-a-sequence-here
+
+### What the filters offer (F-9): each person in the trail by id and name, never
+### by email, and each action name that exists.
+GET {{baseUrl}}/api/v1/audit/filter-options
+
 ### One event, with its changes masked for your role.
 GET {{baseUrl}}/api/v1/audit/events/paste-an-event-id-here
 
