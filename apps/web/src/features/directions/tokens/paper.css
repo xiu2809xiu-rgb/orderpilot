@@ -137,3 +137,16 @@
   font-variant-numeric: tabular-nums;
   font-weight: 500;
 }
+
+/* The ledger rules its panel: a hairline runs through the gap between two
+   groups, as a ruled sheet does between its blocks. */
+:root[data-direction="paper"] .dx-gap {
+  position: relative;
+}
+:root[data-direction="paper"] .dx-gap::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0.75rem;
+  top: 50%;
+  border-top: 1px solid var(--panel-border);
+}
