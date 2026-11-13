@@ -89,4 +89,4 @@ export interface SparkPanelProps {
  */
 export const SPARK_PANEL: LazyExoticComponent<
   ComponentType<SparkPanelProps>
-> | null = null;
+> | null = lazy(() => import("./spark/SparkPanel"));

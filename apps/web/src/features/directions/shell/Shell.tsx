@@ -1,9 +1,10 @@
-import { Suspense, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import type { Direction } from "../directions";
-import { SPARK_PANEL, type ScreenId } from "../screens";
+import type { ScreenId } from "../screens";
 import { CrumbProvider } from "./pageCrumb";
 import { MobileMenu } from "./MobileMenu";
 import { SidePanel } from "./SidePanel";
+import { SparkPanelProvider } from "./sparkPanel";
 import { TopBar } from "./TopBar";
 import { usePanelCollapsed } from "./usePanelCollapsed";
 import "./shell.css";
@@ -24,49 +25,41 @@ export function Shell({
 }) {
   const [collapsed, toggleCollapsed] = usePanelCollapsed();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [sparkOpen, setSparkOpen] = useState(false);
-  const openSpark = () => {
-    setSparkOpen(true);
-  };
 
   return (
-    <CrumbProvider>
-      <div className="flex min-h-0 flex-1">
-        <aside
-          className="dx-side dx-side-box hidden shrink-0 md:block"
-          data-collapsed={collapsed}
-        >
-          <SidePanel
+    <SparkPanelProvider>
+      <CrumbProvider>
+        <div className="flex min-h-0 flex-1">
+          <aside
+            className="dx-side dx-side-box hidden shrink-0 md:block"
+            data-collapsed={collapsed}
+          >
+            <SidePanel
+              direction={direction}
+              screen={screen}
+              collapsed={collapsed}
+            />
+          </aside>
+          <MobileMenu
             direction={direction}
             screen={screen}
-            collapsed={collapsed}
+            open={menuOpen}
+            onOpenChange={setMenuOpen}
           />
-        </aside>
-        <MobileMenu
-          direction={direction}
-          screen={screen}
-          open={menuOpen}
-          onOpenChange={setMenuOpen}
-        />
-        <div className="flex min-w-0 flex-1 flex-col">
-          <TopBar
-            direction={direction}
-            screen={screen}
-            collapsed={collapsed}
-            onToggleCollapsed={toggleCollapsed}
-            onOpenMenu={() => {
-              setMenuOpen(true);
-            }}
-            onOpenSpark={openSpark}
-          />
-          {children}
+          <div className="flex min-w-0 flex-1 flex-col">
+            <TopBar
+              direction={direction}
+              screen={screen}
+              collapsed={collapsed}
+              onToggleCollapsed={toggleCollapsed}
+              onOpenMenu={() => {
+                setMenuOpen(true);
+              }}
+            />
+            {children}
+          </div>
         </div>
-      </div>
-      {SPARK_PANEL ? (
-        <Suspense fallback={null}>
-          <SPARK_PANEL open={sparkOpen} onOpenChange={setSparkOpen} />
-        </Suspense>
-      ) : null}
-    </CrumbProvider>
+      </CrumbProvider>
+    </SparkPanelProvider>
   );
 }

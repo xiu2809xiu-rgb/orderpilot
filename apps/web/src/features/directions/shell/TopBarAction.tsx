@@ -15,6 +15,8 @@ interface TopBarActionProps {
   onClick?: () => void;
   /** Why it does nothing yet. The button is then plain, and says so in a tooltip. */
   unavailable?: string;
+  /** The keys that do the same, for assistive tech: `Control+. Meta+.` */
+  shortcut?: string;
 }
 
 /**
@@ -28,6 +30,7 @@ export function TopBarAction({
   to,
   onClick,
   unavailable,
+  shortcut,
 }: TopBarActionProps) {
   const inner = (
     <>
@@ -54,6 +57,7 @@ export function TopBarAction({
         size="sm"
         className="fs-14 h-9 pointer-coarse:h-11"
         onClick={onClick}
+        aria-keyshortcuts={shortcut}
       >
         {inner}
       </Button>

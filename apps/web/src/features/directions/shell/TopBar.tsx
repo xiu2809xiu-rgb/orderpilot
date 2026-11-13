@@ -4,10 +4,11 @@ import { ThemeSwitch } from "@/app/shell/ThemeSwitch";
 import { Notifications } from "@/app/shell/Notifications";
 import { Button } from "@/components/ui/button";
 import { screenPath, type Direction } from "../directions";
-import { SPARK_PANEL, isBuilt, type ScreenId } from "../screens";
+import { isBuilt, type ScreenId } from "../screens";
 import { Crumbs } from "./Crumbs";
 import { RoleSwitch } from "./RoleSwitch";
 import { SearchField } from "./SearchField";
+import { useSparkPanel } from "./sparkPanel";
 import { TopBarAction } from "./TopBarAction";
 
 interface TopBarProps {
@@ -16,7 +17,6 @@ interface TopBarProps {
   collapsed: boolean;
   onToggleCollapsed: () => void;
   onOpenMenu: () => void;
-  onOpenSpark: () => void;
 }
 
 /**
@@ -29,9 +29,9 @@ export function TopBar({
   collapsed,
   onToggleCollapsed,
   onOpenMenu,
-  onOpenSpark,
 }: TopBarProps) {
   const { t } = useTranslation("directions");
+  const spark = useSparkPanel();
   return (
     <header className="dx-bar relative z-20 flex h-14 shrink-0 items-center gap-2 px-3 sm:px-4">
       <Button
@@ -66,8 +66,11 @@ export function TopBar({
       <TopBarAction
         icon={Sparkles}
         label={t("bar.spark")}
-        onClick={onOpenSpark}
-        unavailable={SPARK_PANEL ? undefined : t("spark.note")}
+        onClick={() => {
+          spark.setOpen(true);
+        }}
+        unavailable={spark.available ? undefined : t("spark.note")}
+        shortcut="Control+. Meta+."
       />
       <Notifications />
       <RoleSwitch />

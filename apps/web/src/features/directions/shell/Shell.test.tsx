@@ -20,6 +20,7 @@ describe("the shell of the design directions preview", () => {
       "directions-kit",
       "directions-kit-items",
       "directions-parts",
+      "directions-spark",
       ...allFeatures.map((feature) => feature.namespace),
     ]);
   });
@@ -113,16 +114,35 @@ describe("the shell of the design directions preview", () => {
         name: "Search or jump to",
       }),
     ).toHaveAttribute("aria-keyshortcuts", "Control+K Meta+K");
-    // The upload and Spark screens are not built: the buttons say so and are plain.
+    // The upload screen is not built: its button says so and is plain. Spark is wired.
     expect(within(bar).getByRole("button", { name: "Upload" })).toHaveAttribute(
       "aria-disabled",
       "true",
     );
-    expect(within(bar).getByRole("button", { name: "Spark" })).toHaveAttribute(
-      "aria-disabled",
-      "true",
-    );
+    expect(
+      within(bar).getByRole("button", { name: "Spark" }),
+    ).not.toHaveAttribute("aria-disabled");
     expect(within(bar).getByRole("button", { name: "Theme" })).toBeVisible();
+  });
+
+  it("opens Spark from its button and with Ctrl and a full stop, and closes it with Escape", async () => {
+    const user = userEvent.setup();
+    await open();
+    // Spark is not mounted until it has been asked for.
+    expect(screen.queryByRole("dialog", { name: "Spark" })).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Spark" }));
+    expect(await screen.findByRole("dialog", { name: "Spark" })).toBeVisible();
+    await user.keyboard("{Escape}");
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog", { name: "Spark" })).toBeNull();
+    });
+    // The shortcut opens it again, and the same key puts it away.
+    await user.keyboard("{Control>}.{/Control}");
+    expect(await screen.findByRole("dialog", { name: "Spark" })).toBeVisible();
+    await user.keyboard("{Control>}.{/Control}");
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog", { name: "Spark" })).toBeNull();
+    });
   });
 
   it("opens the palette with Ctrl K and jumps to a screen", async () => {

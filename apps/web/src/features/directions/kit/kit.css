@@ -201,3 +201,16 @@
   -webkit-background-clip: text;
   color: transparent;
 }
+
+/* React Bits / PromptBar: the border lights up while Spark works. The ring
+   is a still state, so it shows under reduced motion too; the light that runs
+   round it is the border beam, which is not drawn when still. */
+.kit-prompt-bar[data-busy="true"] {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 24%, transparent);
+}
+:root[data-direction="spectra"] .kit-prompt-bar[data-busy="true"] {
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--ring) 24%, transparent),
+    var(--glow);
+}

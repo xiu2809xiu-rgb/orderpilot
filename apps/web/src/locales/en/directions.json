@@ -91,7 +91,9 @@
     "search": "Search or jump to",
     "close": "Close a panel or a menu",
     "keysSearch": "Ctrl K",
-    "keysClose": "Esc"
+    "keysClose": "Esc",
+    "keysSpark": "Ctrl .",
+    "spark": "Open or close Spark"
   },
   "content": {
     "loading": "Loading the screen"

@@ -27,6 +27,10 @@ export function PanelHelp({ collapsed }: { collapsed: boolean }) {
           </dt>
           <dd>{t("help.search")}</dd>
           <dt>
+            <kbd className="dx-kbd">{t("help.keysSpark")}</kbd>
+          </dt>
+          <dd>{t("help.spark")}</dd>
+          <dt>
             <kbd className="dx-kbd">{t("help.keysClose")}</kbd>
           </dt>
           <dd>{t("help.close")}</dd>
