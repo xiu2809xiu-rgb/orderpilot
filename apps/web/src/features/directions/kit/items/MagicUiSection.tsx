@@ -85,7 +85,11 @@ export function MagicUiSection() {
             {t("demo.stepsOfNine")}
           </span>
         </ItemCard>
-        <ItemCard item="gridPattern" vendor="magic">
+        <ItemCard
+          item="gridPattern"
+          vendor="magic"
+          className="sm:col-span-2 xl:col-span-2"
+        >
           <GridPattern cell={24} />
         </ItemCard>
       </div>

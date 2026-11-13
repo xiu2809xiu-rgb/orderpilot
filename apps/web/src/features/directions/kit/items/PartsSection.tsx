@@ -106,7 +106,7 @@ export function PartsSection() {
             details={purchaseDetails}
           />
         </ItemCard>
-        <div className="flex min-w-0 flex-col gap-4 lg:col-span-2">
+        <div className="flex min-w-0 flex-col gap-4 lg:col-span-2 lg:self-start">
           <div className="grid gap-4 sm:grid-cols-2">
             <ItemCard
               name={t("parts.names.journeyRail")}
@@ -171,6 +171,7 @@ export function PartsSection() {
           name={t("parts.names.maskedValue")}
           note={t("parts.alone")}
           align="start"
+          className="h-auto lg:self-start"
         >
           <dl className="fs-14 grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-1">
             <dt className="text-muted-foreground">
@@ -202,7 +203,7 @@ export function PartsSection() {
                   {t("parts.demo.emptyAction")}
                 </Button>
               }
-              className="w-full"
+              className="w-full py-8"
             />
           </div>
         </ItemCard>

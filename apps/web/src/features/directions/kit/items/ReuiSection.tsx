@@ -124,22 +124,6 @@ export function ReuiSection() {
             </FramePanel>
           </Frame>
         </ItemCard>
-        <ItemCard
-          item="alert"
-          vendor="reui"
-          align="start"
-          className="sm:col-span-2 xl:col-span-2"
-        >
-          <Alert variant="warning" className="text-left">
-            <AlertTitle>{t("demo.alert.title")}</AlertTitle>
-            <AlertDescription>{t("demo.alert.description")}</AlertDescription>
-            <AlertAction>
-              <Button size="sm" variant="outline">
-                {t("demo.alert.action")}
-              </Button>
-            </AlertAction>
-          </Alert>
-        </ItemCard>
         <ItemCard item="fileType" vendor="reui" align="start">
           <ul className="flex flex-col gap-1.5">
             {FILES.map(([name, key]) => (
@@ -153,6 +137,22 @@ export function ReuiSection() {
               </li>
             ))}
           </ul>
+        </ItemCard>
+        <ItemCard
+          item="alert"
+          vendor="reui"
+          align="start"
+          className="sm:col-span-2 xl:col-span-3"
+        >
+          <Alert variant="warning" className="text-left">
+            <AlertTitle>{t("demo.alert.title")}</AlertTitle>
+            <AlertDescription>{t("demo.alert.description")}</AlertDescription>
+            <AlertAction>
+              <Button size="sm" variant="outline">
+                {t("demo.alert.action")}
+              </Button>
+            </AlertAction>
+          </Alert>
         </ItemCard>
       </div>
     </Section>

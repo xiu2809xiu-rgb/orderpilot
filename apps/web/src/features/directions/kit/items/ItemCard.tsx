@@ -45,10 +45,10 @@ export function ItemCard({
       })
     : note;
   return (
-    <figure className={cn("flex min-w-0 flex-col gap-2", className)}>
+    <figure className={cn("flex h-full min-w-0 flex-col gap-2", className)}>
       <div
         className={cn(
-          "relative flex min-h-28 min-w-0 flex-col justify-center gap-2 border border-border bg-background p-4",
+          "relative flex min-h-28 min-w-0 flex-1 flex-col justify-center gap-2 border border-border bg-background p-4",
           scroll ? "overflow-x-auto" : "overflow-hidden",
           align === "center" ? "items-center text-center" : "items-start",
         )}

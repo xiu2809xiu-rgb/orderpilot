@@ -73,7 +73,7 @@
 /* The full rail: nine columns on one line, the line running from mark to mark.
    It scrolls inside its own box on a phone. */
 .jr[data-size="full"] {
-  grid-template-columns: repeat(9, minmax(6.75rem, 1fr));
+  grid-template-columns: repeat(9, minmax(6rem, 1fr));
   overflow-x: auto;
   padding-block: 0.5rem 0.25rem;
 }

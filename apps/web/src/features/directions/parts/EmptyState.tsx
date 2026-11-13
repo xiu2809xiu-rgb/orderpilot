@@ -31,7 +31,12 @@ export function EmptyState({
       )}
       style={{ borderRadius: "var(--radius-card)" }}
     >
-      <DotPattern gap={14} />
+      {/* The dots frame the words and leave the middle clear, so none runs behind text. */}
+      <DotPattern
+        gap={14}
+        fade={false}
+        className="[mask-image:radial-gradient(ellipse_at_center,transparent_35%,#000_95%)]"
+      />
       <BlurFade className="flex flex-col items-center gap-3">
         <span
           className="flex size-12 items-center justify-center border border-border-strong bg-card text-ring"
