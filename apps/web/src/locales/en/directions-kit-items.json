@@ -134,5 +134,51 @@
       "paper": "For Paper",
       "spectra": "For Spectra"
     }
+  },
+  "summary": {
+    "title": "Kits in use",
+    "intro": "{{count}} items from three kits, each shown live below in the current direction. Each one reads the direction's tokens, holds still under reduced motion and pauses when it is off screen.",
+    "items": "items",
+    "jump": "Jump to a section",
+    "total": "Items in all"
+  },
+  "parts": {
+    "title": "Product parts",
+    "intro": "The parts the screens are made from. Each one is built on kit items from the sections above and takes the direction's look from its tokens.",
+    "builtOn": "Built on {{items}}",
+    "alone": "Built on the direction's tokens",
+    "names": {
+      "journeyRail": "Journey rail",
+      "statusChip": "Status chip and due timer",
+      "kpiTile": "KPI tile",
+      "maskedValue": "Masked value",
+      "sectionEmpty": "Section header and empty state"
+    },
+    "demo": {
+      "journeyFull": "The full rail, for an order's header",
+      "journeyVertical": "The vertical rail, for a timeline",
+      "journeyRow": "The small rail, for a list row",
+      "purchase": "A purchase order",
+      "shipLine_one": "Expected to ship in {{count}} day, from how long each step took on {{orders}} orders.",
+      "shipLine_other": "Expected to ship in {{count}} days, from how long each step took on {{orders}} orders.",
+      "usualNote": "{{usual}}, from {{n}} orders",
+      "tone": "Statuses",
+      "timers": "Due times",
+      "ordersInSet": "Orders in the data set",
+      "daysToPay": "Time customers take to pay",
+      "hpAvailable": "HP monitors available",
+      "days": "days",
+      "units": "units",
+      "orders": "orders",
+      "maskedLabel": "Order value",
+      "maskedReason": "Prices are hidden from Warehouse",
+      "maskedValue": "USD 12,340.00",
+      "shown": "Visible to Finance",
+      "sectionTitle": "Documents",
+      "emptyTitle": "No documents waiting",
+      "emptyText": "Upload a PO and Spark reads it here, ready for a person to confirm.",
+      "emptyAction": "Upload a document"
+    },
+    "follows": "Follows the Stepper and Timeline items"
   }
 }

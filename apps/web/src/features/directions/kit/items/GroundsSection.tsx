@@ -10,6 +10,7 @@ export function GroundsSection() {
   const { t } = useTranslation("directions-kit-items");
   return (
     <Section
+      id="kit-grounds"
       title={t("vendors.grounds.title")}
       intro={t("vendors.grounds.intro")}
     >

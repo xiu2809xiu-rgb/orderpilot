@@ -43,7 +43,11 @@ export function ReuiSection() {
     inactive: t("demo.stepper.inactive"),
   };
   return (
-    <Section title={t("vendors.reui.title")} intro={t("vendors.reui.intro")}>
+    <Section
+      id="kit-reui"
+      title={t("vendors.reui.title")}
+      intro={t("vendors.reui.intro")}
+    >
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <ItemCard
           item="stepper"

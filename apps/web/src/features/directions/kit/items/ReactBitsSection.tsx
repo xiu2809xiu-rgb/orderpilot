@@ -20,7 +20,11 @@ export function ReactBitsSection() {
   const hint = useId();
   const [approved, setApproved] = useState(false);
   return (
-    <Section title={t("vendors.bits.title")} intro={t("vendors.bits.intro")}>
+    <Section
+      id="kit-bits"
+      title={t("vendors.bits.title")}
+      intro={t("vendors.bits.intro")}
+    >
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <ItemCard item="splitFlap" vendor="bits">
           <SplitFlap value="120" className="fs-44 text-foreground" />

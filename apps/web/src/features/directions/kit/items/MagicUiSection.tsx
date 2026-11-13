@@ -23,7 +23,11 @@ export function MagicUiSection() {
     </span>
   );
   return (
-    <Section title={t("vendors.magic.title")} intro={t("vendors.magic.intro")}>
+    <Section
+      id="kit-magic"
+      title={t("vendors.magic.title")}
+      intro={t("vendors.magic.intro")}
+    >
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <ItemCard item="numberTicker" vendor="magic">
           <NumberTicker value={120} className="fs-44 text-foreground" />

@@ -4,7 +4,9 @@ import { CardSection } from "./CardSection";
 import { ColourSection } from "./ColourSection";
 import { ControlsSection } from "./ControlsSection";
 import { GroundsSection } from "./items/GroundsSection";
+import { KitSummary } from "./items/KitSummary";
 import { MagicUiSection } from "./items/MagicUiSection";
+import { PartsSection } from "./items/PartsSection";
 import { ReactBitsSection } from "./items/ReactBitsSection";
 import { ReuiSection } from "./items/ReuiSection";
 import { ShapeSection } from "./ShapeSection";
@@ -13,8 +15,9 @@ import { TableSection } from "./TableSection";
 import { TypeSection } from "./TypeSection";
 
 /**
- * The kit sheet: the current direction's tokens and parts, read live. Step F2
- * adds the kit items (React Bits, ReUI, Magic UI) to this page.
+ * The kit sheet: the current direction's tokens, then every kit item in use
+ * (Magic UI, React Bits, ReUI) and the product parts built on them, all live.
+ * It is the proof that the kits are used.
  */
 export default function KitScreen() {
   const { t } = useTranslation("directions-kit");
@@ -33,10 +36,12 @@ export default function KitScreen() {
         <TableSection />
       </div>
       <div className="dx-grid mt-5 grid gap-5">
+        <KitSummary />
         <MagicUiSection />
         <ReactBitsSection />
         <ReuiSection />
         <GroundsSection />
+        <PartsSection />
       </div>
     </div>
   );

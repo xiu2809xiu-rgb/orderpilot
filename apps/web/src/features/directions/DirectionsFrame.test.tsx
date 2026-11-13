@@ -12,6 +12,7 @@ describe("the design directions frame", () => {
       "directions",
       "directions-kit",
       "directions-kit-items",
+      "directions-parts",
     ]);
   });
 
@@ -82,7 +83,7 @@ describe("the design directions frame", () => {
     });
     await screen.findByRole("heading", { level: 1, name: "Kit sheet" });
     for (const word of ["On time", "Waiting", "Mismatch", "Information"]) {
-      expect(screen.getByText(word)).toBeVisible();
+      expect(screen.getAllByText(word)[0]).toBeVisible();
     }
     expect(
       screen.getByRole("textbox", { name: "Customer PO number" }),
