@@ -57,9 +57,10 @@ export function MaskingTab() {
       >
         <p className="mb-s2 text-sm text-muted-foreground">
           {t("masking.matrixHint")}{" "}
+          {/* Underlined, not only on hover: inside a sentence, colour alone would not mark it as a link (WCAG 1.4.1). */}
           <Link
             to={NOTE_ROW}
-            className="text-primary underline-offset-4 hover:underline"
+            className="text-primary underline underline-offset-4"
           >
             {t("masking.openMatrix")}
           </Link>
