@@ -367,7 +367,12 @@ describe("governance: the role-permission matrix over HTTP", () => {
     });
 
     it("keeps what a copy took away revoked through the next seed", async () => {
-      const taken = ["orders.create", "orders.edit", "documents.upload"];
+      // Whatever Support holds that Warehouse does not: the copy takes it all.
+      const source = new Set((await access("WAREHOUSE")).permissions);
+      const taken = (await access("SUPPORT")).permissions.filter(
+        (permission) => !source.has(permission),
+      );
+      expect(taken.length).toBeGreaterThan(0);
       const copy = await post("SYSTEM_ADMIN", `${MATRIX}/copy`, {
         fromRole: "WAREHOUSE",
         toRole: "SUPPORT",
@@ -389,6 +394,13 @@ describe("governance: the role-permission matrix over HTTP", () => {
     });
 
     it("says in its log how many default pairs stay revoked, and counts no other pair", async () => {
+      /** How many the seed's line says stay out: none when it says nothing. */
+      const staysOut = (line: string | undefined) =>
+        Number(
+          /, and (\d+) revoked on purpose stays? out$/.exec(line ?? "")?.[1] ??
+            0,
+        );
+      const before = staysOut(await seed());
       const path = cell("WAREHOUSE", "tracker.read");
       // Not a default for Warehouse, so the log must not count it.
       const other = cell("WAREHOUSE", "users.read");
@@ -401,7 +413,7 @@ describe("governance: the role-permission matrix over HTTP", () => {
         200,
       );
       try {
-        expect(await seed()).toMatch(/, and 1 revoked on purpose stays out$/);
+        expect(staysOut(await seed())).toBe(before + 1);
       } finally {
         await put("SYSTEM_ADMIN", path, { granted: true });
       }
