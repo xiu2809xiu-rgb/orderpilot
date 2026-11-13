@@ -22,7 +22,7 @@ export function Topbar({ onOpenPalette }: { onOpenPalette: () => void }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <header className="flex h-14 shrink-0 items-center gap-s1 border-b bg-background px-s2">
+    <header className="dx-panel flex h-14 shrink-0 items-center gap-s1 border-b bg-background px-s2">
       <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
         <SheetTrigger asChild>
           <Button

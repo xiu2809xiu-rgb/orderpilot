@@ -2,6 +2,10 @@
 @import "tw-animate-css";
 @import "./fonts.css";
 @import "./tokens.css";
+/* Spectra is the product's design (P-107). Its tokens sit over the ones above
+   while the document carries data-direction="spectra" (set in index.html). */
+@import "../features/directions/tokens/base.css";
+@import "../features/directions/tokens/spectra.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -87,6 +91,9 @@
 
   body {
     @apply bg-background font-sans text-sm text-foreground antialiased;
+    /* The aurora is the ground every page sits on. */
+    background-image: var(--ground-image, none);
+    background-attachment: fixed;
   }
 
   /* Figures line up in columns: tabular numbers wherever numbers are data. */

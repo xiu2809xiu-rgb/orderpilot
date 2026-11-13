@@ -9,9 +9,13 @@ import type { Direction } from "../directions";
 export function useDirectionOnRoot(direction: Direction): void {
   useLayoutEffect(() => {
     const root = document.documentElement;
+    // The app itself runs in Spectra, so leaving the preview puts back what
+    // was there before it opened.
+    const before = root.dataset.direction;
     root.dataset.direction = direction;
     return () => {
-      delete root.dataset.direction;
+      if (before === undefined) delete root.dataset.direction;
+      else root.dataset.direction = before;
     };
   }, [direction]);
 }

@@ -71,7 +71,7 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
 /** The fixed sidebar for wide screens. */
 export function Sidebar() {
   return (
-    <aside className="hidden w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar md:flex">
+    <aside className="dx-panel hidden w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar md:flex">
       <div className="flex h-14 items-center px-s2">
         <Logo />
       </div>

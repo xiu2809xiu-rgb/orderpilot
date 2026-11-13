@@ -40,7 +40,13 @@ export function PageHeader({
     <header className="flex flex-wrap items-start justify-between gap-s2">
       <div className="space-y-2">
         <div className="flex flex-wrap items-center gap-3">
-          <Heading className="text-2xl font-semibold tracking-tight">
+          <Heading
+            className={
+              headingLevel === 1
+                ? "dx-title text-2xl font-semibold tracking-tight"
+                : "text-2xl font-semibold tracking-tight"
+            }
+          >
             {title}
           </Heading>
           {total !== undefined ? (
