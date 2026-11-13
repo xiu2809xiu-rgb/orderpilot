@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Section } from "../../parts/Section";
 import {
-  orbColours,
   useOrbTokens,
+  webglLook,
   type OrbState,
 } from "../../spark/orb/orbPalette";
 import { SparkOrb, type Engine } from "../../spark/orb/SparkOrb";
@@ -12,6 +13,7 @@ import { FileDropzone } from "../FileDropzone";
 import { Orb } from "../Orb";
 import { PromptBar } from "../PromptBar";
 import { ItemCard } from "./ItemCard";
+import "../../spark/spark.css";
 
 const STATES = ["idle", "thinking"] as const;
 
@@ -23,7 +25,7 @@ export function SparkKitSection() {
   const [state, setState] = useState<OrbState>("idle");
   const [engine, setEngine] = useState<Engine | null>(null);
   const tokens = useOrbTokens();
-  const colours = orbColours(tokens, state);
+  const look = webglLook(tokens, state);
   const chosenLine =
     chosen === null
       ? t("demo.drop.none")
@@ -103,11 +105,18 @@ export function SparkKitSection() {
             )}
             className="relative size-40"
           >
-            <Orb
-              colours={[colours.b, colours.c, colours.d]}
-              ground={colours.canvas}
-              thinking={state === "thinking"}
-            />
+            <div
+              className={cn(
+                "absolute",
+                look.disc ? "spark-orb-disc" : "inset-0",
+              )}
+            >
+              <Orb
+                colours={look.colours}
+                ground={look.ground}
+                thinking={state === "thinking"}
+              />
+            </div>
           </div>
         </ItemCard>
         <ItemCard item="liquidOrb" vendor="orb">

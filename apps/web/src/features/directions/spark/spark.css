@@ -15,7 +15,11 @@
 @media (min-width: 40rem) {
   .spark-panel {
     width: 420px;
-    inset-block: var(--dx-panel-edge, 0rem);
+    /* Below the preview bar, so its switches stay reachable. */
+    inset-block-start: calc(
+      var(--dx-chrome-h, 2.5rem) + var(--dx-panel-edge, 0rem)
+    );
+    inset-block-end: var(--dx-panel-edge, 0rem);
     right: var(--dx-panel-edge, 0rem);
   }
 }
@@ -130,4 +134,16 @@
   box-shadow:
     0 0 0 1px color-mix(in srgb, var(--ring) 55%, transparent),
     0 0 44px color-mix(in srgb, var(--ring) 55%, transparent);
+}
+
+/* The WebGL orb on a light panel: a deep disc, so its ring keeps its light. */
+.spark-orb-disc {
+  inset: 6%;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle at 50% 56%,
+    color-mix(in srgb, var(--ring) 22%, var(--foreground)) 0,
+    var(--foreground) 100%
+  );
 }

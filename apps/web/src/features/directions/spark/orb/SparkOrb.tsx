@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { useLatest, useOnScreen, useStill, useTabVisible } from "../../kit/env";
 import { Orb as WebGlOrb } from "../../kit/Orb";
 import { LiquidOrb } from "./LiquidOrb";
-import { orbColours, useOrbTokens, type OrbState } from "./orbPalette";
+import { useOrbTokens, webglLook, type OrbState } from "./orbPalette";
 import "../spark.css";
 
 /** What draws the orb: WebGPU first, then WebGL, then a still picture in CSS. */
@@ -95,7 +95,7 @@ export function SparkOrb({ state, label, className, onEngine }: SparkOrbProps) {
     if (shown !== "webgpu") told.current?.(shown);
   }, [shown, told]);
 
-  const colours = orbColours(tokens, state);
+  const look = webglLook(tokens, state);
   return (
     <div
       ref={holder}
@@ -112,14 +112,18 @@ export function SparkOrb({ state, label, className, onEngine }: SparkOrbProps) {
           data-state={state}
         />
       ) : engine === "webgl" ? (
-        <WebGlOrb
-          colours={[colours.b, colours.c, colours.d]}
-          ground={colours.canvas}
-          thinking={state === "thinking"}
-          onUnavailable={() => {
-            setEngine("still");
-          }}
-        />
+        <div
+          className={cn("absolute", look.disc ? "spark-orb-disc" : "inset-0")}
+        >
+          <WebGlOrb
+            colours={look.colours}
+            ground={look.ground}
+            thinking={state === "thinking"}
+            onUnavailable={() => {
+              setEngine("still");
+            }}
+          />
+        </div>
       ) : (
         <canvas
           ref={canvas}

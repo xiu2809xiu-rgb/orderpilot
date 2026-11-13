@@ -3,11 +3,6 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { screenPath } from "../../directions";
 import { useDirection } from "../../frame/useDirection";
 import { isBuilt } from "../../screens";
@@ -32,21 +27,23 @@ export function trendSentence(
 /**
  * The chart under the trend sentence, with its table view, the method in one
  * line, and "Open in dashboard", which leads to the insights screen of the
- * preview. Until that screen is built the button says so and is plain.
+ * preview. Until that screen is built there is no button, only a plain note:
+ * a control that leads nowhere is not offered.
  */
 export function TrendAnswerParts({ facts }: { facts: TrendFacts }) {
   const { t } = useTranslation("directions-spark");
   const direction = useDirection();
   const [asTable, setAsTable] = useState(false);
-  const open = (
-    <>
-      <ArrowUpRight aria-hidden="true" />
-      {t("trend.open")}
-    </>
-  );
   return (
     <div className="flex flex-col gap-3">
-      {asTable ? <TrendTable facts={facts} /> : <TrendChart facts={facts} />}
+      {asTable ? (
+        <TrendTable facts={facts} />
+      ) : (
+        <div className="flex flex-col gap-1">
+          <p className="fs-12 text-muted-foreground">{t("trend.unit")}</p>
+          <TrendChart facts={facts} />
+        </div>
+      )}
       <p className="fs-13 text-muted-foreground">
         {t("trend.method", { method: facts.method })}
       </p>
@@ -54,23 +51,15 @@ export function TrendAnswerParts({ facts }: { facts: TrendFacts }) {
       <div className="flex flex-wrap items-center gap-2">
         {isBuilt("insights") ? (
           <Button asChild variant="outline" className="pointer-coarse:h-11">
-            <Link to={screenPath(direction, "insights")}>{open}</Link>
+            <Link to={screenPath(direction, "insights")}>
+              <ArrowUpRight aria-hidden="true" />
+              {t("trend.open")}
+            </Link>
           </Button>
         ) : (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                className="cursor-default pointer-coarse:h-11"
-                aria-disabled="true"
-              >
-                {open}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent className="fs-13">
-              {t("trend.openUnavailable")}
-            </TooltipContent>
-          </Tooltip>
+          <p className="fs-13 text-muted-foreground">
+            {t("trend.dashboardNote")}
+          </p>
         )}
         <Button
           type="button"

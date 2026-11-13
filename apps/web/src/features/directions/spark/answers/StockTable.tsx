@@ -5,6 +5,8 @@ import { grouped } from "../sparkFacts";
 /**
  * The stock figures behind the answer: one row per item, in the order a buyer
  * reads them (what we hold, what is promised, what is left, what is coming).
+ * The part number sits under the item's name: a 420 px panel has no room for
+ * six columns, and the number belongs to the item.
  * Numbers are right-aligned tabular figures. It scrolls sideways inside its
  * own box on a narrow panel, never the panel.
  */
@@ -23,10 +25,7 @@ export function StockTable({ facts }: { facts: StockFacts }) {
               scope="col"
               className="fs-12 px-2 py-2 pl-3 text-left font-medium"
             >
-              {t("stock.columns.item")}
-            </th>
-            <th scope="col" className="fs-12 px-2 py-2 text-left font-medium">
-              {t("stock.columns.part")}
+              {t("stock.columns.itemPart")}
             </th>
             {(["onHand", "sales", "available", "po"] as const).map((key) => (
               <th
@@ -50,10 +49,10 @@ export function StockTable({ facts }: { facts: StockFacts }) {
                 className="px-2 py-2 pl-3 text-left font-medium text-foreground"
               >
                 {item.description}
+                <span className="numeral fs-12 block font-normal text-muted-foreground">
+                  {item.partNumber}
+                </span>
               </th>
-              <td className="numeral px-2 py-2 text-muted-foreground">
-                {item.partNumber}
-              </td>
               <td className="numeral px-2 py-2 text-right">
                 {grouped(item.onHand)}
               </td>

@@ -79,3 +79,20 @@ export function orbColours(tokens: OrbTokens, state: OrbState) {
     glow: mix(accent, WHITE, 0.15),
   };
 }
+
+const luminance = (c: Rgb) => 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+
+/**
+ * What the WebGL orb is drawn with. Its ring is light on a dark ground, so on
+ * a light panel it would wash out to grey. There it sits on a deep disc of the
+ * direction's text colour, which is also how the WebGPU orb looks on a light
+ * panel: a dark lit glass, not a ring on white.
+ */
+export function webglLook(tokens: OrbTokens, state: OrbState) {
+  const { b, c, d, canvas } = orbColours(tokens, state);
+  return {
+    colours: [b, c, d] as const,
+    ground: canvas,
+    disc: luminance(tokens.ground) >= 0.5,
+  };
+}

@@ -68,8 +68,7 @@
     "otherBrands": "Other brands with monitors in the item list: {{brands}}.",
     "table": "HP monitors in stock",
     "columns": {
-      "item": "Item",
-      "part": "Part number",
+      "itemPart": "Item and part number",
       "onHand": "On hand",
       "sales": "On sales orders",
       "available": "Available",
@@ -95,6 +94,7 @@
     "higher": "higher",
     "lower": "lower",
     "chartLabel": "Sales by month in USD millions: {{first}} to {{lastSeen}} seen, then {{count}} months forecast, from {{low}} to {{high}} a month.",
+    "unit": "Sales a month, in USD millions",
     "legendSeen": "Seen",
     "legendForecast": "Forecast, with its range",
     "showTable": "Show as a table",
@@ -112,7 +112,7 @@
     },
     "method": "Method: {{method}}",
     "open": "Open in dashboard",
-    "openUnavailable": "The dashboard screen is not in this preview yet",
+    "dashboardNote": "The dashboard view of this chart comes with the insights page.",
     "source": "From the monthly sales history of the synthetic demo data.",
     "rangeValue": "{{low}} to {{high}}"
   },

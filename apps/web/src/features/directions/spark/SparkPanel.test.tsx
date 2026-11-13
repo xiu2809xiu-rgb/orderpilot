@@ -104,8 +104,7 @@ describe("the Spark panel", () => {
       .getAllByRole("columnheader")
       .map((cell) => cell.textContent);
     expect(header).toEqual([
-      "Item",
-      "Part number",
+      "Item and part number",
       "On hand",
       "On sales orders",
       "Available",
@@ -114,7 +113,11 @@ describe("the Spark panel", () => {
     const cells = within(table)
       .getAllByRole("cell")
       .map((cell) => cell.textContent);
-    expect(cells).toEqual([item?.partNumber, "880", "6", "1,020", "146"]);
+    expect(cells).toEqual(["880", "6", "1,020", "146"]);
+    // The part number sits in the item's own cell, under its name.
+    expect(within(table).getByRole("rowheader").textContent).toContain(
+      item?.partNumber ?? "",
+    );
     expect(
       within(dialog).getByRole("link", {
         name: "Open item I-0025 in master data",
@@ -196,7 +199,18 @@ describe("the Spark panel", () => {
         /came to USD 172\.4 million, 4\.1 percent higher/,
       ),
     ).toBeVisible();
-    expect(within(dialog).getByText("Open in dashboard")).toBeVisible();
+    // The insights page is not built yet: a plain note, and no control that leads nowhere.
+    expect(
+      within(dialog).getByText(
+        "The dashboard view of this chart comes with the insights page.",
+      ),
+    ).toBeVisible();
+    expect(
+      within(dialog).queryByRole("link", { name: "Open in dashboard" }),
+    ).not.toBeInTheDocument();
+    expect(
+      within(dialog).queryByRole("button", { name: "Open in dashboard" }),
+    ).not.toBeInTheDocument();
     await user.click(
       within(dialog).getByRole("button", { name: "Show as a table" }),
     );

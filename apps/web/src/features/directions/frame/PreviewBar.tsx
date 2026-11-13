@@ -1,4 +1,5 @@
 import { Moon, Sun } from "lucide-react";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { useThemeStore } from "@/lib/theme";
@@ -22,9 +23,29 @@ export function PreviewBar({
   const navigate = useNavigate();
   const setPreference = useThemeStore((state) => state.setPreference);
   const dark = useIsDark();
+  const bar = useRef<HTMLDivElement>(null);
+
+  // Spark's panel sits below this bar, so the direction and scheme switches stay reachable.
+  useEffect(() => {
+    const node = bar.current;
+    if (!node) return;
+    const root = document.documentElement;
+    const write = () => {
+      root.style.setProperty("--dx-chrome-h", `${String(node.offsetHeight)}px`);
+    };
+    write();
+    if (typeof ResizeObserver === "undefined") return;
+    const watch = new ResizeObserver(write);
+    watch.observe(node);
+    return () => {
+      watch.disconnect();
+      root.style.removeProperty("--dx-chrome-h");
+    };
+  }, []);
 
   return (
     <div
+      ref={bar}
       role="region"
       aria-label={t("preview.bar")}
       className="dx-chrome flex shrink-0 flex-wrap items-center gap-x-4 gap-y-1 px-3 py-1.5 sm:min-h-10"
