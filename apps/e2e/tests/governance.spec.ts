@@ -1,5 +1,6 @@
 import type { CopyRoleBody } from "@orderpilot/shared";
 import {
+  checkPage,
   expect,
   expectNoButton,
   expectRefused,
@@ -36,5 +37,40 @@ test.describe("Governance: the role and permission matrix", () => {
     ).toBeVisible();
     await expectNoButton(page, "Copy a role");
     await expectRefused("AUDITOR", "POST", "/governance/matrix/copy", copy);
+  });
+});
+
+test.describe("E2E #3: a direct call without the right", () => {
+  test("a script is refused with a trace id, and the refusal shows in the audit viewer", async ({
+    page,
+  }) => {
+    const traceId = await expectRefused(
+      "WAREHOUSE",
+      "POST",
+      "/workflows/sprs/SPR-20261101-0001/approve",
+      { comment: "Sent by a script, not through the app." },
+    );
+    expect(traceId).toMatch(/^e2e-/);
+
+    await signInAs(page, "AUDITOR");
+    // A refusal's record is its route pattern, so a filter finds the route,
+    // and the trace id proves the row is this call's.
+    const view = new URLSearchParams({
+      entity: "ApiRoute",
+      id: "POST /api/v1/workflows/sprs/:recordNo/approve",
+      role: "WAREHOUSE",
+      refusals: "1",
+    });
+    await page.goto(`/audit?${view.toString()}`);
+    await checkPage(page);
+
+    // Newest first, so the first row is the refusal just made.
+    await page
+      .getByRole("button", { name: /^Details of event/ })
+      .first()
+      .click();
+    const details = page.getByRole("dialog");
+    await expect(details).toContainText(traceId);
+    await expect(details).toContainText("auth.permission.refused");
   });
 });
