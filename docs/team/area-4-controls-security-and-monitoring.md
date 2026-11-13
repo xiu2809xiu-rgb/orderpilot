@@ -322,11 +322,7 @@ await authorisation.enforce(
 - no self-approval and segregation of duties (F-4): the contracts exist, the rules do not. F-3 brought the limits and substitutes, above;
 - the bank-detail control (F-5);
 - a policy class under the `PermissionPolicy` token that runs your rules in a chain (ADR 0012, point 7): F-3 wrote `GovernancePermissionPolicy`, and putting it behind the token is Richie's one line;
-  feat/area4-governance-seed-masking
-- the seed added missing pairs back, so a permission you revoked returned on the next seed: settled in F-8, a pair revoked on the matrix stays out ([ADR 0053](../adr/0053-revocations-survive-the-seed-and-the-masking-sample-reads-the-matrix.md));
-- polish nobody needs this week: a search box and filters on the matrix, an undo for a change, and a browser test of E2E #3 (backlog F-8).
-- the seed adds missing pairs back, so a permission you revoke returns on the next seed: decide whether it should;
-  main
+- the seed added missing pairs back, so a permission you revoked returned on the next seed: settled in F-8, a pair revoked on the matrix stays out ([ADR 0053](../adr/0053-revocations-survive-the-seed-and-the-masking-sample-reads-the-matrix.md)).
 
 **What G-1 deliberately leaves to you** (the monitoring wiring works; the work that needs judgement is yours):
 
