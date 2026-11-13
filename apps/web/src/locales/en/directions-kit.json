@@ -1,0 +1,91 @@
+{
+  "title": "Kit sheet",
+  "intro": "The tokens, type, controls and parts of the current direction, read live from the page. Switch direction or scheme above and every swatch, ratio and sample follows.",
+  "sections": {
+    "colour": "Colour",
+    "type": "Type scale",
+    "shape": "Radius, spacing and motion",
+    "controls": "Buttons and fields",
+    "status": "Status",
+    "table": "Table",
+    "card": "Card"
+  },
+  "colour": {
+    "intro": "Each swatch shows its token, its value and the contrast of the text that sits on it. Text needs 4.5 to 1.",
+    "surfaces": "Surfaces",
+    "text": "Text",
+    "accent": "Accent",
+    "status": "Status",
+    "lines": "Lines and focus",
+    "on": "{{text}} on {{surface}}",
+    "ratio": "{{ratio}} to 1",
+    "lineRatio": "{{ratio}} to 1 on the page",
+    "glass": "over the brightest mesh",
+    "pass": "Passes",
+    "fail": "Below 4.5 to 1",
+    "sample": "Aa"
+  },
+  "type": {
+    "intro": "Seven sizes and no more. Figures use the direction's numeral face.",
+    "sample": "Stock check for order SO-0102",
+    "figure": "USD 12,340.00",
+    "size": "{{size}} px"
+  },
+  "shape": {
+    "radius": "Radius",
+    "control": "Control",
+    "card": "Card",
+    "pill": "Pill",
+    "spacing": "Spacing, on a 4 px base",
+    "motion": "Motion",
+    "fast": "Fast",
+    "base": "Base",
+    "slow": "Slow",
+    "ms": "{{ms}} ms",
+    "px": "{{px}} px"
+  },
+  "controls": {
+    "buttons": "Buttons",
+    "primary": "New order",
+    "secondary": "Upload a PO",
+    "outline": "Save draft",
+    "ghost": "Cancel",
+    "danger": "Void draft",
+    "disabled": "Send to Business Central",
+    "fields": "Fields",
+    "labelPo": "Customer PO number",
+    "helpPo": "As printed on the customer's purchase order.",
+    "valuePo": "PO-AE-4261",
+    "labelShip": "Ship to",
+    "errorShip": "Enter the delivery address as it appears on the PO.",
+    "optional": "optional",
+    "labelNote": "Note for the warehouse"
+  },
+  "status": {
+    "intro": "A status always carries a word and an icon: colour never carries the meaning alone.",
+    "onTime": "On time",
+    "waiting": "Waiting",
+    "mismatch": "Mismatch",
+    "information": "Information",
+    "count": "Counts"
+  },
+  "table": {
+    "caption": "Five orders from the tracker",
+    "order": "Order",
+    "customer": "Customer",
+    "stage": "Stage",
+    "ship": "Ship date",
+    "value": "Value",
+    "empty": "No orders to show.",
+    "error": "The orders could not be loaded.",
+    "retry": "Try again",
+    "synthetic": "Synthetic demo data",
+    "hidden": "Hidden for this role",
+    "noDate": "Not set"
+  },
+  "card": {
+    "title": "Order SO-0102",
+    "body": "Two fields need a person before the order can move on: Ship to and Payment terms.",
+    "action": "Review fields"
+  }
+}
