@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import {
   createBrowserRouter,
   createMemoryRouter,
+  Navigate,
   type RouteObject,
 } from "react-router";
 import {
@@ -70,6 +71,32 @@ export function buildRoutes(
         {
           element: <RequireAuth />,
           children: [
+            // The design directions preview draws its own panel and bar, so it
+            // sits beside AppShell, not inside it. Its code is one lazy chunk.
+            {
+              path: "directions",
+              element: <RequireDemo />,
+              children: [
+                {
+                  index: true,
+                  element: <Navigate to="/directions/ink/kit" replace />,
+                },
+                {
+                  path: ":direction",
+                  children: [
+                    { index: true, element: <Navigate to="kit" replace /> },
+                    {
+                      path: ":screen",
+                      lazy: async () => ({
+                        Component: (
+                          await import("@/features/directions/DirectionsFrame")
+                        ).DirectionsFrame,
+                      }),
+                    },
+                  ],
+                },
+              ],
+            },
             {
               element: <AppShell />,
               handle: { crumb: "common:nav.home" },

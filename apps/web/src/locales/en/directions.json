@@ -1,0 +1,96 @@
+{
+  "preview": {
+    "tag": "Design preview",
+    "bar": "Design preview controls",
+    "note": "Synthetic demo data",
+    "direction": "Direction",
+    "scheme": "Colour scheme",
+    "screen": "Screen",
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "directions": {
+    "ink": "Ink",
+    "paper": "Paper",
+    "spectra": "Spectra"
+  },
+  "screens": {
+    "signin": {
+      "title": "Sign-in",
+      "group": "Access"
+    },
+    "home": {
+      "title": "Home",
+      "group": "Work"
+    },
+    "orders": {
+      "title": "Orders",
+      "group": "Work"
+    },
+    "order": {
+      "title": "An order",
+      "group": "Work"
+    },
+    "upload": {
+      "title": "Upload and review",
+      "group": "Work"
+    },
+    "spark": {
+      "title": "Spark",
+      "group": "Work"
+    },
+    "insights": {
+      "title": "Insights",
+      "group": "Insights"
+    },
+    "kit": {
+      "title": "Kit sheet",
+      "group": "Design"
+    }
+  },
+  "panel": {
+    "label": "Main navigation",
+    "brand": "OrderPilot",
+    "collapse": "Collapse the panel",
+    "expand": "Expand the panel",
+    "openMenu": "Open navigation",
+    "menuTitle": "Navigation",
+    "menuDescription": "Choose an area of OrderPilot.",
+    "layoutOnly": "Shown for layout",
+    "groups": {
+      "work": "Work",
+      "stock": "Stock and buying",
+      "insights": "Insights",
+      "control": "Control"
+    },
+    "orders": "Orders",
+    "spark": "Spark",
+    "settings": "Settings",
+    "help": "Help",
+    "person": "Signed in as {{name}}, {{role}}"
+  },
+  "bar": {
+    "upload": "Upload",
+    "uploadNote": "Upload and review is not wired in this preview yet",
+    "spark": "Spark",
+    "roleLabel": "Demo role",
+    "paletteTitle": "Search or jump to",
+    "paletteDescription": "Jump to a screen of this preview.",
+    "paletteEmpty": "No screen matches that.",
+    "paletteScreens": "Screens",
+    "paletteMenu": "Menu"
+  },
+  "spark": {
+    "title": "Spark",
+    "description": "The assistant panel.",
+    "note": "Not wired in this preview yet."
+  },
+  "help": {
+    "title": "Keyboard shortcuts",
+    "search": "Search or jump to",
+    "close": "Close a panel or a menu"
+  },
+  "content": {
+    "loading": "Loading the screen"
+  }
+}
