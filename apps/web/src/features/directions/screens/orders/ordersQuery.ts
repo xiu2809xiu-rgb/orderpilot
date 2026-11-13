@@ -82,6 +82,23 @@ export const DEFAULT_QUERY: OrdersQuery = {
   pageSize: 25,
 };
 
+/** Every filter off: what Clear all sets. The search, the view and the sort stay as they are unless a caller says. */
+export const NO_FILTERS: Partial<OrdersQuery> = {
+  customer: null,
+  stage: "all",
+  status: null,
+  step: null,
+  overdue: false,
+  exceptions: false,
+  stock: false,
+  toConfirm: false,
+  open: false,
+  entry: null,
+  source: null,
+  from: null,
+  to: null,
+};
+
 const isIn = <T extends string>(list: readonly T[], value: string | null) =>
   list.find((candidate) => candidate === value) ?? null;
 const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;

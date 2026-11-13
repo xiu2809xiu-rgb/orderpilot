@@ -282,7 +282,6 @@
 }
 .od-table td {
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 .od-table th {
   height: 2.25rem;
@@ -1025,4 +1024,35 @@
   .od-board-scroll {
     max-height: 70dvh;
   }
+}
+
+/* Focus stays visible. The strips and scroll boxes above set their own box
+   shadow, which would swallow the ring a component draws with one, so they
+   draw an outline instead. */
+.od-view:focus-visible,
+.od-tab:focus-visible,
+.od-scroll:focus-visible,
+.od-board-scroll:focus-visible,
+.od-lines-scroll:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+.od-chip:focus-visible,
+.od-clear:focus-visible,
+.od-more:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Orders keeps its head to the title and one line: the date is the shell's job here. */
+:root:is([data-direction="ink"], [data-direction="spectra"])
+  .od-page
+  .dx-title-context {
+  display: none;
+}
+
+/* The pinned cells of a scrolling table are solid, so what scrolls under them never shows through glass. */
+:root[data-direction="spectra"] .od-table [class~="sticky"] {
+  background-color: var(--background);
+  background-image: linear-gradient(var(--panel-strong), var(--panel-strong));
 }

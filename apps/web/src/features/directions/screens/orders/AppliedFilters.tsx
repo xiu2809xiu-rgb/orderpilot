@@ -1,7 +1,7 @@
 import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { AppliedChip } from "./useAppliedChips";
-import type { OrdersQuery } from "./ordersQuery";
+import { NO_FILTERS, type OrdersQuery } from "./ordersQuery";
 
 /** What is narrowing the list, each with a button that takes it off, and one that clears them all. */
 export function AppliedFilters({
@@ -35,21 +35,7 @@ export function AppliedFilters({
           type="button"
           className="od-clear fs-13"
           onClick={() => {
-            onChange({
-              customer: null,
-              stage: "all",
-              status: null,
-              step: null,
-              overdue: false,
-              exceptions: false,
-              stock: false,
-              toConfirm: false,
-              open: false,
-              entry: null,
-              source: null,
-              from: null,
-              to: null,
-            });
+            onChange(NO_FILTERS);
           }}
         >
           {t("applied.clear")}

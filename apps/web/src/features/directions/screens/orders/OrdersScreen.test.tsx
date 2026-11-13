@@ -227,6 +227,20 @@ describe("the Orders workspace", () => {
     expect(screen.getByRole("button", { name: "Try again" })).toBeVisible();
   });
 
+  it("shows only the refusal to a role that may not read orders, with nothing to filter", async () => {
+    stubApi({ ordersForbidden: true });
+    open();
+    expect(
+      await screen.findByText("You do not have access to this"),
+    ).toBeVisible();
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Orders" }),
+    ).toBeVisible();
+    expect(screen.queryByRole("tablist", { name: "Views" })).toBeNull();
+    expect(screen.queryByLabelText("Search")).toBeNull();
+    expect(screen.queryByRole("link", { name: "New order" })).toBeNull();
+  });
+
   it("has no accessibility violations in any direction", async () => {
     for (const direction of ["ink", "paper", "spectra"]) {
       stubApi();

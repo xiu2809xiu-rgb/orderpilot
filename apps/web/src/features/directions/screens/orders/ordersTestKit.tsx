@@ -249,6 +249,8 @@ function detailOf(spec: OrderSpec, masked: boolean) {
 export interface ApiOptions {
   masked?: boolean;
   ordersFail?: boolean;
+  /** The orders list answers 403, as for a role that may not read orders. */
+  ordersForbidden?: boolean;
   tasks?: unknown[];
   specs?: OrderSpec[];
   /** Orders with a document to confirm. */
@@ -296,6 +298,19 @@ export function stubApi(options: ApiOptions = {}): string[] {
           meta: { page: 1, pageSize: 200, total: rows.length, mock: true },
         });
       if (path.endsWith("/orders") && !path.includes("/tracker")) {
+        if (options.ordersForbidden) {
+          return reply(
+            {
+              error: {
+                code: "FORBIDDEN",
+                message: "x",
+                details: null,
+                traceId: "trace-403",
+              },
+            },
+            403,
+          );
+        }
         if (options.ordersFail) {
           return reply(
             {
