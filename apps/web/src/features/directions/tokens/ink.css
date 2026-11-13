@@ -99,6 +99,7 @@
   --dx-bar-btn-bg: transparent;
   --dx-bar-btn-hover: var(--muted);
   --dx-bar-btn-radius: var(--radius-control);
+  --dx-rule: var(--border);
 }
 
 :root[data-direction="ink"].dark {
