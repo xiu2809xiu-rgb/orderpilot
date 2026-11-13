@@ -2,6 +2,7 @@ import { CircleCheck, TriangleAlert } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
   contrast,
+  describeColour,
   flatten,
   need,
   parseColor,
@@ -88,7 +89,7 @@ export function ColourSection() {
             />
             <p className="fs-12 mt-1.5 truncate font-medium">--{name}</p>
             <p className="fs-12 numeral break-all text-muted-foreground">
-              {tokens[name]}
+              {ready ? describeColour(tokens[name] ?? "") : ""}
             </p>
           </li>
         ))}

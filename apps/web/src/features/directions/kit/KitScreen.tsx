@@ -14,7 +14,7 @@ import { TypeSection } from "./TypeSection";
 export default function KitScreen() {
   const { t } = useTranslation("directions-kit");
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8">
+    <div className="dx-sheet py-8">
       <header className="mb-6 max-w-prose">
         <h1 className="fs-28 font-semibold">{t("title")}</h1>
         <p className="fs-14 mt-2 text-muted-foreground">{t("intro")}</p>

@@ -125,6 +125,22 @@
   animation: dx-paper-in 200ms var(--ease-out) both;
 }
 
+/* The ledger is a ruled sheet: a canvas with twelve columns whose hairlines
+   show in the margins and between the cells, which sit on it as white cells. */
+:root[data-direction="paper"] main {
+  background-color: var(--canvas);
+}
+:root[data-direction="paper"] .dx-sheet::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0 1.5rem;
+  border-right: 1px solid var(--border);
+  background-image: linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: calc(100% / 12) 100%;
+  pointer-events: none;
+}
+
 /* The ledger numbers its sections in the margin of each heading: 01, 02, 03. */
 :root[data-direction="paper"] main {
   counter-reset: dx-section;
@@ -133,7 +149,7 @@
   counter-increment: dx-section;
   content: counter(dx-section, decimal-leading-zero);
   margin-inline-end: 0.75rem;
-  color: var(--faint-foreground);
+  color: var(--accent-foreground);
   font-variant-numeric: tabular-nums;
   font-weight: 500;
 }

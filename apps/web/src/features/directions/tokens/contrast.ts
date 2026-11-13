@@ -94,3 +94,10 @@ export function surface(t: Tokens, chain: string[]): Rgba {
   }
   return colour;
 }
+
+/** A colour as the kit sheet prints it: "#2ee6d6", or "#2ee6d6 at 14%" when it is translucent. */
+export function describeColour(value: string): string {
+  const { r, g, b, a } = parseColor(value);
+  const hex = `#${[r, g, b].map((v) => v.toString(16).padStart(2, "0")).join("")}`;
+  return a < 1 ? `${hex} at ${String(Math.round(a * 100))}%` : hex;
+}

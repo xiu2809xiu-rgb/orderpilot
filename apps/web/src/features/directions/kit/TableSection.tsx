@@ -14,11 +14,29 @@ import { useTrackerList } from "@/lib/api/generated/endpoints/tracker/tracker";
 import { formatDay, formatMoney } from "@/lib/format";
 import { KitSection } from "./KitSection";
 
-/** The five latest orders from the tracker, with its loading, empty and error states. */
+/** Up to `count` rows, a new stage first and the rest in order. */
+function pickByStage<T extends { status: { label: string } }>(
+  rows: readonly T[],
+  count: number,
+): T[] {
+  const seen = new Set<string>();
+  const first = rows.filter((row) => {
+    if (seen.has(row.status.label)) return false;
+    seen.add(row.status.label);
+    return true;
+  });
+  const rest = rows.filter((row) => !first.includes(row));
+  return [...first, ...rest].slice(0, count);
+}
+
+/**
+ * Five orders from the tracker, as far as possible one for each stage, with
+ * its loading, empty and error states. A page of 40 gives the choice.
+ */
 export function TableSection() {
   const { t } = useTranslation("directions-kit");
-  const list = useTrackerList({ pageSize: 5 });
-  const rows = list.data?.data ?? [];
+  const list = useTrackerList({ pageSize: 40 });
+  const rows = pickByStage(list.data?.data ?? [], 5);
   return (
     <KitSection title={t("sections.table")} className="lg:col-span-2">
       {list.isPending ? (
