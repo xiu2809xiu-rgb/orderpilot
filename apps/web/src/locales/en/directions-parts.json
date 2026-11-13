@@ -1,0 +1,73 @@
+{
+  "journey": {
+    "flows": {
+      "sales": "Sales order journey",
+      "purchase": "Purchase order journey"
+    },
+    "state": {
+      "done": "Done",
+      "now": "Now",
+      "later": "Later",
+      "late": "Now, late"
+    },
+    "step": "Step {{n}} of {{total}}",
+    "complete": "All steps done",
+    "sales": {
+      "poIn": "PO received",
+      "stock": "Stock checked",
+      "pi": "PI generated and sent",
+      "payment": "Payment received",
+      "pack": "Goods packed",
+      "documents": "Invoice and packing list",
+      "forwarder": "Released to forwarder",
+      "customerTold": "Customer told",
+      "awbAndPermit": "AWB/BL and permit"
+    },
+    "purchase": {
+      "spr": "SPR raised",
+      "approval": "SPR approved",
+      "vendorPo": "Vendor PO created",
+      "vendorPi": "Vendor PI received",
+      "forwarder": "Forwarder arranged",
+      "goodsCheck": "Goods checked",
+      "goodsReceived": "Goods received",
+      "customerTold": "Customer told",
+      "vendorPaid": "Vendor paid"
+    }
+  },
+  "timer": {
+    "now": "Due now",
+    "lateNow": "Due a moment ago",
+    "dueMinutes": "Due in {{count}} min",
+    "dueHours": "Due in {{count}} h",
+    "dueDays_one": "Due in {{count}} day",
+    "dueDays_other": "Due in {{count}} days",
+    "lateMinutes": "{{count}} min late",
+    "lateHours": "{{count}} h late",
+    "lateDays_one": "{{count}} day late",
+    "lateDays_other": "{{count}} days late"
+  },
+  "usual": {
+    "sameDay": "Usually the same day",
+    "hours": "Usually {{count}} h",
+    "days_one": "Usually {{count}} day",
+    "days_other": "Usually {{count}} days"
+  },
+  "tone": {
+    "ok": "On time",
+    "waiting": "Waiting",
+    "mismatch": "Mismatch",
+    "info": "For information"
+  },
+  "kpi": {
+    "noFigure": "No figure yet",
+    "up": "Up",
+    "down": "Down",
+    "flat": "No change"
+  },
+  "masked": {
+    "mask": "Hidden",
+    "defaultReason": "your role does not include this figure",
+    "reasonLine": "Hidden: {{reason}}"
+  }
+}

@@ -15,25 +15,29 @@ export function Section({
   children,
   className,
   work = false,
+  id,
 }: {
+  /** An anchor the contents of a long screen can jump to. */
+  id?: string;
   title: string;
   intro?: string;
   children: ReactNode;
   className?: string;
   work?: boolean;
 }) {
-  const id = useId();
+  const headingId = useId();
   return (
     <section
-      aria-labelledby={id}
+      id={id}
+      aria-labelledby={headingId}
       className={cn(
-        "dx-card dx-section min-w-0",
+        "dx-card dx-section min-w-0 scroll-mt-4",
         work && "dx-card-work",
         className,
       )}
     >
       <header className="dx-section-head">
-        <h2 id={id} className="dx-section-title">
+        <h2 id={headingId} className="dx-section-title">
           {title}
         </h2>
       </header>

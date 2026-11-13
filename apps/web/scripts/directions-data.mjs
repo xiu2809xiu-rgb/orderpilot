@@ -16,6 +16,10 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import {
+  PURCHASE_STEP_IDS,
+  SALES_STEP_IDS,
+} from "../src/features/directions/data/estimates.ts";
+import {
   RANGE_MULTIPLIER,
   SEASON,
   seasonalNaive,
@@ -49,30 +53,10 @@ const days = (from, to) =>
       DAY_MS,
   );
 
-// The nine steps of each flow, in the client's own order. Sales keys are the
-// tracker's (SalesFlowStepId); the purchase keys are this preview's.
-const SALES = [
-  "poIn",
-  "stock",
-  "pi",
-  "payment",
-  "pack",
-  "documents",
-  "forwarder",
-  "customerTold",
-  "awbAndPermit",
-];
-const PURCHASE = [
-  "spr",
-  "approval",
-  "vendorPo",
-  "vendorPi",
-  "forwarder",
-  "goodsCheck",
-  "goodsReceived",
-  "customerTold",
-  "vendorPaid",
-];
+// The nine steps of each flow are listed once, in estimates.ts, so the script
+// and the screens cannot disagree about them.
+const SALES = SALES_STEP_IDS;
+const PURCHASE = PURCHASE_STEP_IDS;
 
 const NO_DATE =
   "The data set has no date for this step, so there is nothing to measure.";

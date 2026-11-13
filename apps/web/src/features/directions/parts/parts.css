@@ -1,0 +1,427 @@
+/* The product primitives: the journey rail, the figure tile, the section
+   header. Structure is shared; each direction sets the look of a step through
+   the variables and rules below. Everything that moves is under
+   prefers-reduced-motion: no-preference. */
+
+/* ---- the journey rail --------------------------------------------------- */
+
+.jr {
+  --jr-w: 3px;
+  --jr-h: 16px;
+  --jr-gap: 6px;
+  --jr-line-w: 1px;
+  --jr-line: var(--border-strong);
+  --jr-line-done: var(--muted-foreground);
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.jr-step {
+  position: relative;
+  min-width: 0;
+}
+.jr-mark {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--jr-w);
+  height: var(--jr-h);
+}
+.jr-no,
+.jr-check {
+  display: none;
+}
+.jr-text {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+.jr-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.375rem;
+  font-weight: 500;
+  line-height: 1.125rem;
+}
+.jr-label > svg {
+  margin-top: 0.1875rem;
+}
+.jr-detail {
+  padding-left: calc(0.875rem + 0.375rem);
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-foreground);
+}
+.jr-step[data-state="done"] .jr-label {
+  color: var(--muted-foreground);
+}
+.jr-step[data-state="now"] .jr-label {
+  color: var(--foreground);
+  font-weight: 600;
+}
+.jr-step[data-state="later"] .jr-label,
+.jr-step[data-state="later"] .jr-detail {
+  color: var(--faint-foreground);
+}
+.jr-step[data-late] .jr-detail,
+.jr-step[data-late] .jr-label > svg {
+  color: var(--destructive);
+}
+
+/* The full rail: nine columns on one line, the line running from mark to mark.
+   It scrolls inside its own box on a phone. */
+.jr[data-size="full"] {
+  grid-template-columns: repeat(9, minmax(6.75rem, 1fr));
+  overflow-x: auto;
+  padding-block: 0.5rem 0.25rem;
+}
+.jr[data-size="full"] .jr-step {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-right: 0.75rem;
+}
+.jr[data-size="full"] .jr-step:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  top: calc(var(--jr-h) / 2);
+  left: calc(var(--jr-w) + var(--jr-gap));
+  right: var(--jr-gap);
+  border-top: var(--jr-line-w) solid var(--jr-line);
+}
+.jr[data-size="full"] .jr-step[data-state="done"]:not(:last-child)::before {
+  border-top-color: var(--jr-line-done);
+}
+
+/* The vertical rail, for a timeline. */
+.jr[data-size="vertical"] .jr-step {
+  display: flex;
+  gap: 0.875rem;
+  padding-bottom: 1.25rem;
+}
+.jr[data-size="vertical"] .jr-step:last-child {
+  padding-bottom: 0;
+}
+.jr[data-size="vertical"] .jr-mark {
+  margin-top: 0.0625rem;
+}
+.jr[data-size="vertical"] .jr-step:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  top: calc(var(--jr-h) + var(--jr-gap) + 1px);
+  bottom: var(--jr-gap);
+  left: calc(var(--jr-w) / 2);
+  border-left: var(--jr-line-w) solid var(--jr-line);
+}
+.jr[data-size="vertical"] .jr-step[data-state="done"]:not(:last-child)::before {
+  border-left-color: var(--jr-line-done);
+}
+
+/* The small rail in a list row: nine marks and the current step's name. */
+.jr-row {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.625rem;
+}
+.jr[data-size="row"] {
+  --jr-h: 14px;
+  display: inline-flex;
+  flex: none;
+  gap: 3px;
+}
+.jr-now {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.375rem;
+  white-space: nowrap;
+  color: var(--foreground);
+}
+.jr-row[data-late] .jr-now > svg {
+  color: var(--destructive);
+}
+
+/* Ink: ticks on a hairline, mono labels, the current tick pulsing lime. Lime
+   means you are here, act now. Done ticks are filled, later ones hollow. */
+:root[data-direction="ink"] .jr-mark {
+  border: 1px solid var(--border-strong);
+}
+:root[data-direction="ink"] .jr-step[data-state="done"] .jr-mark {
+  border-color: var(--muted-foreground);
+  background: var(--muted-foreground);
+}
+:root[data-direction="ink"] .jr-step[data-state="now"] .jr-mark {
+  border-color: var(--ring);
+  background: var(--ring);
+}
+:root[data-direction="ink"] .jr-label,
+:root[data-direction="ink"] .jr-detail {
+  font-family: var(--numeral-font);
+  font-size: var(--type-12);
+  line-height: 1rem;
+}
+:root[data-direction="ink"] .jr-now {
+  font-family: var(--numeral-font);
+  font-size: var(--type-12);
+}
+:root[data-direction="ink"] .jr[data-size="vertical"] {
+  --jr-w: 14px;
+  --jr-h: 3px;
+}
+:root[data-direction="ink"] .jr[data-size="vertical"] .jr-mark {
+  margin-top: 0.4375rem;
+}
+:root[data-direction="ink"] .jr[data-size="vertical"] .jr-step::before {
+  left: 7px;
+  top: calc(0.4375rem + var(--jr-h) + var(--jr-gap));
+}
+
+/* Paper: a ruled line with numbered steps. */
+:root[data-direction="paper"] .jr {
+  --jr-w: 24px;
+  --jr-h: 24px;
+  --jr-line: var(--border-strong);
+  --jr-line-done: var(--foreground);
+}
+:root[data-direction="paper"] .jr[data-size="row"] {
+  --jr-w: 12px;
+  --jr-h: 6px;
+}
+:root[data-direction="paper"] .jr[data-size="row"] .jr-step[data-state="now"] {
+  --jr-w: 12px;
+}
+:root[data-direction="paper"] .jr-mark {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  color: var(--faint-foreground);
+}
+:root[data-direction="paper"] .jr[data-size="full"] .jr-no,
+:root[data-direction="paper"] .jr[data-size="vertical"] .jr-no {
+  display: block;
+  font-size: var(--type-12);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+:root[data-direction="paper"] .jr-step[data-state="done"] .jr-mark {
+  border-color: var(--foreground);
+  background: var(--foreground);
+  color: var(--background);
+}
+:root[data-direction="paper"] .jr-step[data-state="now"] .jr-mark {
+  border-color: var(--ring);
+  background: var(--accent);
+  color: var(--accent-foreground);
+  box-shadow: inset 0 0 0 1px var(--ring);
+}
+:root[data-direction="paper"] .jr[data-size="vertical"] {
+  --jr-w: 24px;
+}
+:root[data-direction="paper"] .jr[data-size="vertical"] .jr-step::before {
+  left: 12px;
+  top: calc(24px + 5px);
+}
+
+/* Spectra: a glowing current step on a soft line. */
+:root[data-direction="spectra"] .jr {
+  --jr-w: 26px;
+  --jr-h: 26px;
+  --jr-line-w: 2px;
+  --jr-line: var(--border);
+  --jr-line-done: var(--ring);
+}
+:root[data-direction="spectra"] .jr[data-size="row"] {
+  --jr-w: 8px;
+  --jr-h: 8px;
+  gap: 4px;
+}
+:root[data-direction="spectra"] .jr-mark {
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  color: var(--faint-foreground);
+}
+:root[data-direction="spectra"] .jr[data-size="full"] .jr-no,
+:root[data-direction="spectra"] .jr[data-size="vertical"] .jr-no {
+  display: block;
+  font-size: var(--type-12);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+:root[data-direction="spectra"] .jr-step[data-state="done"] .jr-mark {
+  border-color: var(--ring);
+  background: var(--accent);
+  color: var(--ring);
+}
+:root[data-direction="spectra"]
+  .jr[data-size="full"]
+  .jr-step[data-state="done"]
+  .jr-no,
+:root[data-direction="spectra"]
+  .jr[data-size="vertical"]
+  .jr-step[data-state="done"]
+  .jr-no {
+  display: none;
+}
+:root[data-direction="spectra"]
+  .jr[data-size="full"]
+  .jr-step[data-state="done"]
+  .jr-check,
+:root[data-direction="spectra"]
+  .jr[data-size="vertical"]
+  .jr-step[data-state="done"]
+  .jr-check {
+  display: block;
+  width: 14px;
+  height: 14px;
+}
+:root[data-direction="spectra"] .jr-step[data-state="now"] .jr-mark {
+  border-color: var(--ring);
+  background: var(--ring);
+  color: var(--primary-foreground);
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--ring) 22%, transparent),
+    var(--glow);
+}
+:root[data-direction="spectra"] .jr[data-size="vertical"] .jr-step::before {
+  left: 13px;
+  top: calc(26px + 7px);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes jr-pulse {
+    0% {
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--ring) 55%, transparent);
+    }
+    70%,
+    100% {
+      box-shadow: 0 0 0 6px transparent;
+    }
+  }
+  :root[data-direction="ink"] .jr-step[data-state="now"] .jr-mark {
+    animation: jr-pulse 1.8s var(--ease-out) infinite;
+  }
+  @keyframes jr-glow {
+    0%,
+    100% {
+      box-shadow:
+        0 0 0 4px color-mix(in srgb, var(--ring) 22%, transparent),
+        var(--glow);
+    }
+    50% {
+      box-shadow:
+        0 0 0 6px color-mix(in srgb, var(--ring) 14%, transparent),
+        var(--glow);
+    }
+  }
+  :root[data-direction="spectra"] .jr-step[data-state="now"] .jr-mark {
+    animation: jr-glow 2.6s ease-in-out infinite;
+  }
+}
+
+/* ---- the section header ------------------------------------------------- */
+
+.dx-sh {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-width: 0;
+  padding-block: 0.25rem 0.75rem;
+}
+.dx-sh-title {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: var(--type-16);
+  line-height: 1.5rem;
+  font-weight: 600;
+}
+.dx-sh-count {
+  color: var(--muted-foreground);
+  font-weight: 500;
+}
+.dx-sh-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+:root[data-direction="ink"] .dx-sh {
+  border-bottom: 1px solid var(--border);
+}
+:root[data-direction="ink"] .dx-sh-title {
+  font-size: var(--type-14);
+}
+:root[data-direction="ink"] .dx-sh-count {
+  padding-inline: 0.375rem;
+  background: var(--accent);
+  color: var(--accent-foreground);
+  border-radius: var(--radius-control);
+}
+
+/* Paper hangs the heading in the margin column under the running number. Its
+   words sit on the sheet's colour, as wide as they are, so the ruling never
+   runs through them. */
+:root[data-direction="paper"] .dx-sh {
+  display: grid;
+  grid-template-columns: calc(100% / 6) minmax(0, 1fr);
+  align-items: start;
+  padding: 1.5rem 0 0.5rem;
+  border-top: 1px solid var(--border-strong);
+}
+:root[data-direction="paper"] .dx-sh::before,
+:root[data-direction="paper"] .dx-sh-title,
+:root[data-direction="paper"] .dx-sh-actions {
+  background: var(--background);
+}
+:root[data-direction="paper"] .dx-sh::before {
+  counter-increment: dx-section;
+  content: counter(dx-section, decimal-leading-zero);
+  grid-column: 1;
+  justify-self: start;
+  margin-left: 1.5rem;
+  padding-right: 0.5rem;
+  color: var(--accent-foreground);
+  font-size: var(--type-28);
+  line-height: 2.125rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+:root[data-direction="paper"] .dx-sh-title {
+  grid-column: 1;
+  grid-row: 2;
+  justify-self: start;
+  margin-left: 1.5rem;
+  padding-right: 0.5rem;
+}
+:root[data-direction="paper"] .dx-sh-actions {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  justify-self: end;
+  margin-right: 1.5rem;
+  padding-left: 0.5rem;
+}
+@media (max-width: 47.99rem) {
+  :root[data-direction="paper"] .dx-sh {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  :root[data-direction="paper"] .dx-sh::before,
+  :root[data-direction="paper"] .dx-sh-title {
+    margin-left: 1rem;
+  }
+  :root[data-direction="paper"] .dx-sh-actions {
+    grid-column: 1;
+    grid-row: auto;
+    justify-self: start;
+    margin: 0.5rem 0 0 1rem;
+  }
+}
+
+:root[data-direction="spectra"] .dx-sh-count {
+  padding-inline: 0.5rem;
+  background: var(--accent);
+  color: var(--accent-foreground);
+  border-radius: var(--radius-pill);
+}

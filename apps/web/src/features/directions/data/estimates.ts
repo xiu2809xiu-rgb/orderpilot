@@ -19,6 +19,20 @@ export const SALES_STEP_IDS = [
 ] as const;
 export type SalesStepId = (typeof SALES_STEP_IDS)[number];
 
+/** The nine steps of a purchase, in the client's order. The tracker has no purchase flow yet. */
+export const PURCHASE_STEP_IDS = [
+  "spr",
+  "approval",
+  "vendorPo",
+  "vendorPi",
+  "forwarder",
+  "goodsCheck",
+  "goodsReceived",
+  "customerTold",
+  "vendorPaid",
+] as const;
+export type PurchaseStepId = (typeof PURCHASE_STEP_IDS)[number];
+
 /** The step whose completion is the goods leaving. */
 export const SHIP_STEP: SalesStepId = "forwarder";
 
