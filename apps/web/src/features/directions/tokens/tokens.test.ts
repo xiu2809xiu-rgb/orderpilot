@@ -2,6 +2,15 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { must } from "@/test/must";
+import {
+  contrast,
+  flatten,
+  parseColor,
+  surface,
+  worstGround,
+  type Rgba,
+  type Tokens,
+} from "./contrast";
 
 const dir = import.meta.dirname;
 const read = (file: string) => readFileSync(path.join(dir, file), "utf8");
@@ -9,15 +18,6 @@ const read = (file: string) => readFileSync(path.join(dir, file), "utf8");
 const DIRECTIONS = ["ink", "paper", "spectra"] as const;
 type Direction = (typeof DIRECTIONS)[number];
 const SCHEMES = ["light", "dark"] as const;
-
-interface Rgba {
-  r: number;
-  g: number;
-  b: number;
-  a: number;
-}
-
-type Tokens = Record<string, string>;
 
 /** The custom properties declared in one selector's block. */
 function block(css: string, selector: string): Tokens {
@@ -39,82 +39,6 @@ function tokensOf(direction: Direction, scheme: (typeof SCHEMES)[number]) {
     ...light,
     ...block(css, `:root[data-direction="${direction}"].dark`),
   };
-}
-
-function parseColor(value: string): Rgba {
-  const hex = /^#([0-9a-f]{6})$/i.exec(value);
-  if (hex) {
-    const n = parseInt(must(hex[1]), 16);
-    return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255, a: 1 };
-  }
-  const fn =
-    /^rgba?\(\s*(\d+)[\s,]+(\d+)[\s,]+(\d+)(?:\s*[/,]\s*([\d.]+))?\s*\)$/.exec(
-      value,
-    );
-  if (fn) {
-    return {
-      r: Number(fn[1]),
-      g: Number(fn[2]),
-      b: Number(fn[3]),
-      a: fn[4] === undefined ? 1 : Number(fn[4]),
-    };
-  }
-  throw new Error(`Not a colour: ${value}`);
-}
-
-function flatten(top: Rgba, under: Rgba): Rgba {
-  const mix = (a: number, b: number) => a * top.a + b * (1 - top.a);
-  return {
-    r: mix(top.r, under.r),
-    g: mix(top.g, under.g),
-    b: mix(top.b, under.b),
-    a: 1,
-  };
-}
-
-function channel(v: number): number {
-  const c = v / 255;
-  return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-}
-
-function luminance(c: Rgba): number {
-  return 0.2126 * channel(c.r) + 0.7152 * channel(c.g) + 0.0722 * channel(c.b);
-}
-
-function contrast(a: Rgba, b: Rgba): number {
-  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x) as [
-    number,
-    number,
-  ];
-  return (hi + 0.05) / (lo + 0.05);
-}
-
-/**
- * The ground a surface can sit on, at its brightest: the base colour with
- * every mesh layer stacked at full strength. A real page is never brighter,
- * so a pair that passes here passes over any part of the mesh.
- */
-function worstGround(t: Tokens): Rgba {
-  let colour = parseColor(must(t.background));
-  const image = t["ground-image"] ?? "none";
-  const layers = [
-    ...image.matchAll(
-      /radial-gradient\([^,]*,\s*(#[0-9a-f]{6}|rgb\([^)]*\))/gi,
-    ),
-  ];
-  for (const layer of layers.reverse()) {
-    colour = flatten(parseColor(must(layer[1])), colour);
-  }
-  return colour;
-}
-
-/** A chain such as ["accent", "card"] is accent drawn over card over the ground. */
-function surface(t: Tokens, chain: string[]): Rgba {
-  let colour = worstGround(t);
-  for (const name of [...chain].reverse()) {
-    colour = flatten(parseColor(must(t[name])), colour);
-  }
-  return colour;
 }
 
 const SOLID = [

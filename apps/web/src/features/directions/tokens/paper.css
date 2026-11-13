@@ -124,3 +124,16 @@
 :root[data-direction="paper"] ::view-transition-new(.dx-paper-page) {
   animation: dx-paper-in 200ms var(--ease-out) both;
 }
+
+/* The ledger numbers its sections in the margin of each heading: 01, 02, 03. */
+:root[data-direction="paper"] main {
+  counter-reset: dx-section;
+}
+:root[data-direction="paper"] [data-dx-section] > h2::before {
+  counter-increment: dx-section;
+  content: counter(dx-section, decimal-leading-zero);
+  margin-inline-end: 0.75rem;
+  color: var(--faint-foreground);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}

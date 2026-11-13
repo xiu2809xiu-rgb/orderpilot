@@ -113,10 +113,112 @@
 }
 .dx-sweep {
   animation: dx-sweep 320ms var(--ease-out) both;
+  background: var(--ring);
 }
 .dx-progress {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 2px;
+  overflow: hidden;
   opacity: 0;
-  animation:
-    dx-appear 120ms linear 400ms forwards,
-    dx-sweep 1.1s var(--ease-out) 400ms infinite;
+  animation: dx-appear 120ms linear 400ms forwards;
+}
+.dx-progress > i {
+  display: block;
+  height: 100%;
+  width: 40%;
+  background: var(--ring);
+  animation: dx-run 1.1s var(--ease-out) 400ms infinite;
+}
+@keyframes dx-run {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+
+/* The preview's own bar. */
+.dx-chrome {
+  background: var(--pv-bg);
+  color: var(--pv-fg);
+  border-bottom: 1px solid var(--pv-border);
+}
+.dx-chrome-muted {
+  color: var(--pv-muted);
+}
+.dx-chrome-group {
+  background: var(--pv-bg);
+  color: var(--pv-fg);
+  border: 1px solid var(--pv-border);
+}
+.dx-chrome-item {
+  min-height: 1.75rem;
+  color: var(--pv-muted);
+}
+.dx-chrome-item[data-selected="true"] {
+  background: var(--pv-active);
+  color: var(--pv-fg);
+  box-shadow: 0 0 0 1px var(--pv-border);
+}
+.dx-chrome-item:hover {
+  color: var(--pv-fg);
+}
+@media (pointer: coarse) {
+  .dx-chrome-item,
+  .dx-chrome select {
+    min-height: 2.75rem;
+  }
+}
+
+/* The side panel, the top bar and the ground of the content. */
+.dx-side {
+  background: var(--panel);
+  backdrop-filter: var(--panel-filter);
+  border-right: 1px solid var(--panel-border);
+}
+.dx-bar {
+  background: var(--panel);
+  backdrop-filter: var(--panel-filter);
+  border-bottom: 1px solid var(--panel-border);
+}
+
+/* The current entry of the side panel: a block, and a mark on its edge. */
+.dx-entry[aria-current="page"] {
+  box-shadow: inset 2px 0 0 var(--accent-foreground);
+}
+
+/* Flat directions draw no shadow under a control: depth is a surface step. The
+   ring that shows focus is a second shadow layer, so only the base shadow is
+   set to nothing and the ring is left alone. */
+:root:is([data-direction="ink"], [data-direction="paper"])
+  :is(
+    [data-slot="input"],
+    [data-slot="button"],
+    [data-slot="textarea"],
+    [data-slot="select-trigger"]
+  ) {
+  --tw-shadow: 0 0 #0000;
+}
+
+/* A card: a flat cell in Ink and Paper, a glass panel in Spectra. */
+.dx-card {
+  background: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: var(--panel-filter);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dx-sweep,
+  .dx-progress > i {
+    animation: none;
+  }
+  .dx-sweep {
+    opacity: 0;
+  }
 }
