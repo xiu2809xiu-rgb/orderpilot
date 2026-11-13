@@ -49,9 +49,15 @@ export function ReuiSection() {
           item="stepper"
           vendor="reui"
           align="start"
+          scroll
           className="sm:col-span-2 xl:col-span-2"
         >
-          <Stepper value={3} label={t("demo.stepper.journey")} labels={labels}>
+          <Stepper
+            value={3}
+            label={t("demo.stepper.journey")}
+            labels={labels}
+            className="min-w-xl"
+          >
             {STEPS.map((step, index) => (
               <StepperItem key={step} step={index + 1}>
                 <StepperIndicator />

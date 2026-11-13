@@ -12,6 +12,8 @@ interface ItemCardProps {
   className?: string;
   /** Where the demo sits in its box. */
   align?: "center" | "start";
+  /** Let a wide demo scroll sideways inside its box instead of being clipped. */
+  scroll?: boolean;
 }
 
 /**
@@ -25,6 +27,7 @@ export function ItemCard({
   children,
   className,
   align = "center",
+  scroll = false,
 }: ItemCardProps) {
   const { t } = useTranslation("directions-kit-items");
   const licence = vendor === "magic" || vendor === "reui" ? "mit" : "commons";
@@ -32,7 +35,8 @@ export function ItemCard({
     <figure className={cn("flex min-w-0 flex-col gap-2", className)}>
       <div
         className={cn(
-          "relative flex min-h-28 min-w-0 flex-col justify-center gap-2 overflow-hidden border border-border bg-background p-4",
+          "relative flex min-h-28 min-w-0 flex-col justify-center gap-2 border border-border bg-background p-4",
+          scroll ? "overflow-x-auto" : "overflow-hidden",
           align === "center" ? "items-center text-center" : "items-start",
         )}
         style={{ borderRadius: "var(--radius-card)" }}
