@@ -22,6 +22,7 @@ const SCOPES: readonly Scope[] = ["all", "brands", "own"];
 
 interface MatrixTableProps {
   matrix: MatrixRead200Data;
+  showDataScope: boolean;
   canManage: boolean;
   busy: boolean;
   onToggle: (role: Role, permission: Permission, granted: boolean) => void;
@@ -31,6 +32,7 @@ interface MatrixTableProps {
 /** Permissions down the side, roles across the top, one switch per cell. */
 export function MatrixTable({
   matrix,
+  showDataScope,
   canManage,
   busy,
   onToggle,
@@ -106,33 +108,35 @@ export function MatrixTable({
                 })}
               </TableRow>
             ))}
-            <TableRow>
-              <TableHead scope="row" className={ROW_HEAD}>
-                {t("matrix.dataScope")}
-                <span className="block text-xs text-muted-foreground">
-                  {t("matrix.dataScopeHint")}
-                </span>
-              </TableHead>
-              {matrix.roles.map(({ role, dataScope }) => (
-                <TableCell key={role} className="text-center">
-                  <select
-                    className="h-8 rounded-md border border-input bg-background px-2 text-sm disabled:opacity-50"
-                    value={dataScope}
-                    disabled={!canManage || busy}
-                    aria-label={`${t("matrix.dataScope")}: ${tc(`roles.${role}`)}`}
-                    onChange={(event) => {
-                      onScope(role, event.target.value as Scope);
-                    }}
-                  >
-                    {SCOPES.map((scope) => (
-                      <option key={scope} value={scope}>
-                        {t(`matrix.scopes.${scope}`)}
-                      </option>
-                    ))}
-                  </select>
-                </TableCell>
-              ))}
-            </TableRow>
+            {showDataScope ? (
+              <TableRow>
+                <TableHead scope="row" className={ROW_HEAD}>
+                  {t("matrix.dataScope")}
+                  <span className="block text-xs text-muted-foreground">
+                    {t("matrix.dataScopeHint")}
+                  </span>
+                </TableHead>
+                {matrix.roles.map(({ role, dataScope }) => (
+                  <TableCell key={role} className="text-center">
+                    <select
+                      className="h-8 rounded-md border border-input bg-background px-2 text-sm disabled:opacity-50"
+                      value={dataScope}
+                      disabled={!canManage || busy}
+                      aria-label={`${t("matrix.dataScope")}: ${tc(`roles.${role}`)}`}
+                      onChange={(event) => {
+                        onScope(role, event.target.value as Scope);
+                      }}
+                    >
+                      {SCOPES.map((scope) => (
+                        <option key={scope} value={scope}>
+                          {t(`matrix.scopes.${scope}`)}
+                        </option>
+                      ))}
+                    </select>
+                  </TableCell>
+                ))}
+              </TableRow>
+            ) : null}
           </TableBody>
         </Table>
       </ScrollRegion>

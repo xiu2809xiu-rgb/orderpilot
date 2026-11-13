@@ -154,6 +154,29 @@ describe("governance: the role-permission matrix over HTTP", () => {
       ]);
     });
 
+    it("audits an undo as its own change, and leaves the change it reverses in place", async () => {
+      const path = `${MATRIX}/WAREHOUSE/permissions/orders.read`;
+      const rows = async () =>
+        (await auditEvents(t)).filter(
+          (e) => e.entityId === "WAREHOUSE:orders.read",
+        );
+      const before = (await rows()).length;
+      const change = await put("SYSTEM_ADMIN", path, { granted: false });
+      expect(change.status).toBe(200);
+      const [changed] = (await rows()).slice(before);
+
+      const undo = await put("SYSTEM_ADMIN", path, { granted: true });
+      expect(undo.status).toBe(200);
+      const both = (await rows()).slice(before);
+      expect(both.map((e) => [e.action, e.changes?.granted])).toEqual([
+        ["governance.permission.revoked", { from: true, to: false }],
+        ["governance.permission.granted", { from: false, to: true }],
+      ]);
+      expect(both[0]).toEqual(changed);
+      expect(both[1]?.id).not.toBe(both[0]?.id);
+      expect((await access("WAREHOUSE")).permissions).toContain("orders.read");
+    });
+
     it("writes no audit event when nothing changes", async () => {
       const count = () =>
         auditEvents(t).then(
@@ -223,6 +246,28 @@ describe("governance: the role-permission matrix over HTTP", () => {
         (e) => e.action === "governance.data-scope.changed",
       );
       expect(event?.entityId).toBe("APPROVER");
+    });
+
+    it("audits an undo as its own change, after the change it reverses", async () => {
+      const path = `${MATRIX}/LOGISTICS/data-scope`;
+      const rows = async () =>
+        (await auditEvents(t)).filter(
+          (e) =>
+            e.action === "governance.data-scope.changed" &&
+            e.entityId === "LOGISTICS",
+        );
+      const before = (await rows()).length;
+      for (const dataScope of ["own", "all"]) {
+        expect((await put("SYSTEM_ADMIN", path, { dataScope })).status).toBe(
+          200,
+        );
+      }
+      expect(
+        (await rows()).slice(before).map((e) => e.changes?.dataScope),
+      ).toEqual([
+        { from: "all", to: "own" },
+        { from: "own", to: "all" },
+      ]);
     });
   });
 
