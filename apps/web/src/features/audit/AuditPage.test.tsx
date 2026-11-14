@@ -338,3 +338,64 @@ describe("EntityOperationLog", () => {
     expect(container).toBeEmptyDOMElement();
   });
 });
+
+describe("the audit table, folded for the demo", () => {
+  beforeAll(async () => {
+    await i18n.loadNamespaces(["audit", "components"]);
+  });
+  beforeEach(() => {
+    signIn("AUDITOR");
+  });
+  const USER_ID = "0194f3a0-0000-7000-8000-0000000000aa";
+
+  it("folds the filters behind More filters, with the search and its trace ID hint in view", async () => {
+    server.use(getAuditViewerListMockHandler(page([event()])));
+    const user = userEvent.setup();
+    renderAt();
+    await screen.findByText("Farah Finance");
+    const more = screen.getByRole("button", { name: "More filters" });
+    expect(more).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByLabelText("Record type")).toBeNull();
+    expect(screen.getByRole("searchbox")).toBeVisible();
+    expect(
+      screen.getByText(/a whole trace ID quoted from a refusal/),
+    ).toBeVisible();
+    await user.click(more);
+    expect(more).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByLabelText("Record type")).toBeVisible();
+  });
+
+  it("opens the filters by itself when one is in use, and says how many", async () => {
+    server.use(getAuditViewerListMockHandler(page([event()])));
+    renderAt("/audit?role=FINANCE&entity=User");
+    const more = await screen.findByRole("button", {
+      name: "More filters (2 in use)",
+    });
+    expect(more).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByLabelText("Role")).toHaveValue("FINANCE");
+  });
+
+  it("shortens a record's ID, keeps the whole in its title, and offers to copy it", async () => {
+    server.use(
+      getAuditViewerListMockHandler(
+        page([event({ entityType: "User", entityId: USER_ID })]),
+      ),
+    );
+    renderAt();
+    const short = await screen.findByText("0194f3a0…");
+    expect(short.closest("[title]")).toHaveAttribute(
+      "title",
+      `User ${USER_ID}`,
+    );
+    expect(
+      screen.getByRole("button", { name: "Copy record ID of event 12" }),
+    ).toBeInTheDocument();
+  });
+
+  it("shows a record that is not an ID whole, and keeps the action code in view", async () => {
+    server.use(getAuditViewerListMockHandler(page([event()])));
+    renderAt();
+    expect(await screen.findByText("/api/v1/audit/events")).toBeVisible();
+    expect(screen.getByText("auth.permission.refused")).toBeVisible();
+  });
+});

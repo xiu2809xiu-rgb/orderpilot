@@ -27,6 +27,9 @@
     "refusals": "Refusals only",
     "searchLabel": "Search the summary",
     "searchHint": "Search finds words in what happened, or a whole trace ID quoted from a refusal.",
+    "more": "More filters",
+    "moreInUse_one": "More filters ({{count}} in use)",
+    "moreInUse_other": "More filters ({{count}} in use)",
     "problems": {
       "actor": "The person ID is not a valid ID, so nothing was searched.",
       "range": "The start date is after the end date, so nothing was searched.",
@@ -44,6 +47,7 @@
     "ip": "IP address",
     "open": "Details",
     "openFor": "Details of event {{sequence}}",
+    "recordIdOf": "record ID of event {{sequence}}",
     "refused": "Refused",
     "emptyTitle": "No audit events yet",
     "emptyDescription": "Every sign-in, decision and change is recorded here as it happens.",

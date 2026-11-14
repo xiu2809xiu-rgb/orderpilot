@@ -2,6 +2,7 @@ import type { AuditViewerList200DataItem } from "@/lib/api/generated/model";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
+  CopyButton,
   RelativeTime,
   StatusBadge,
   type DataTableColumn,
@@ -9,6 +10,17 @@ import {
 import { Button } from "@/components/ui/button";
 
 export type AuditRow = AuditViewerList200DataItem;
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * A UUID is unreadable in a list, so it shows its first characters; the whole
+ * is in the title, the copy button and the event's details. Anything else,
+ * such as a route, shows whole. (From Azri's #270.)
+ */
+export function shortId(id: string): string {
+  return UUID.test(id) ? `${id.slice(0, 8)}\u2026` : id;
+}
 
 /**
  * The columns of the audit table. No column sorts: the trail is always newest
@@ -64,8 +76,18 @@ export function useAuditColumns(onOpen: (id: string) => void) {
         id: "record",
         header: t("table.record"),
         cell: (row) => (
-          <span className="block max-w-56 font-mono text-xs whitespace-normal [overflow-wrap:anywhere]">
-            {row.entityType} {row.entityId}
+          <span
+            className="flex max-w-56 flex-wrap items-center gap-x-1 text-sm whitespace-normal"
+            title={`${row.entityType} ${row.entityId}`}
+          >
+            {row.entityType}{" "}
+            <span className="font-mono text-xs text-muted-foreground [overflow-wrap:anywhere]">
+              {shortId(row.entityId)}
+            </span>
+            <CopyButton
+              value={row.entityId}
+              what={t("table.recordIdOf", { sequence: row.sequence })}
+            />
           </span>
         ),
       },
