@@ -30,12 +30,12 @@ export function Topbar({
   const mayUpload = useUploadEntry();
   const spark = useSparkPanel();
   return (
-    <header className="dx-bar relative z-20 flex h-14 shrink-0 items-center gap-2 px-3 sm:px-4">
+    <header className="dx-bar relative z-20 flex h-14 shrink-0 items-center gap-1 px-2 sm:gap-2 sm:px-4">
       <MobileMenu />
       <Button
         variant="ghost"
         size="icon"
-        className="hidden md:inline-flex"
+        className="dx-bar-icon hidden md:inline-flex"
         aria-label={
           collapsed ? t("shell.expandPanel") : t("shell.collapsePanel")
         }
@@ -53,6 +53,8 @@ export function Topbar({
           icon={Upload}
           label={t("shell.upload")}
           to={UPLOAD_PATH}
+          // Home and Orders offer Upload too, so a phone keeps the room for the record number.
+          className="max-[30rem]:hidden"
         />
       ) : null}
       {spark.available ? (

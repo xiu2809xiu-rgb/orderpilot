@@ -57,7 +57,7 @@ export function Notifications() {
         <Button
           variant="ghost"
           size="icon"
-          className="relative"
+          className="relative dx-bar-icon"
           aria-label={
             total > 0
               ? t("notifications.titleCount", { count: total, shown })

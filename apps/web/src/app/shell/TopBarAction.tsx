@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface TopBarActionProps {
   icon: LucideIcon;
@@ -10,6 +11,8 @@ interface TopBarActionProps {
   onClick?: () => void;
   /** The keys that do the same, for assistive tech: `Control+. Meta+.` */
   shortcut?: string;
+  /** For a bar too narrow to hold it; the page it opens must be reachable elsewhere. */
+  className?: string;
 }
 
 /**
@@ -22,6 +25,7 @@ export function TopBarAction({
   to,
   onClick,
   shortcut,
+  className,
 }: TopBarActionProps) {
   const inner = (
     <>
@@ -35,7 +39,7 @@ export function TopBarAction({
         asChild
         variant="outline"
         size="sm"
-        className="fs-14 h-9 pointer-coarse:h-11"
+        className={cn("fs-14 dx-bar-action", className)}
       >
         <Link to={to}>{inner}</Link>
       </Button>
@@ -45,7 +49,7 @@ export function TopBarAction({
     <Button
       variant="outline"
       size="sm"
-      className="fs-14 h-9 pointer-coarse:h-11"
+      className={cn("fs-14 dx-bar-action", className)}
       onClick={onClick}
       aria-keyshortcuts={shortcut}
     >

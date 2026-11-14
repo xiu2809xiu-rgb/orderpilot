@@ -20,7 +20,12 @@ export function ThemeSwitch() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label={t("theme.label")}>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="dx-bar-icon"
+          aria-label={t("theme.label")}
+        >
           <Sun className="size-4 dark:hidden" aria-hidden="true" />
           <Moon className="hidden size-4 dark:block" aria-hidden="true" />
         </Button>

@@ -14,7 +14,7 @@ export function SearchField({ onOpen }: { onOpen: () => void }) {
   return (
     <button
       type="button"
-      className="dx-search w-64 max-xl:w-auto max-xl:px-2.5"
+      className="dx-search w-64"
       aria-keyshortcuts="Control+K Meta+K"
       onClick={onOpen}
     >

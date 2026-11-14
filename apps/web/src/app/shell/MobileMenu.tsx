@@ -22,7 +22,7 @@ export function MobileMenu() {
         <Button
           variant="ghost"
           size="icon"
-          className="md:hidden"
+          className="md:hidden dx-bar-icon"
           aria-label={t("shell.openMenu")}
         >
           <Menu aria-hidden="true" />

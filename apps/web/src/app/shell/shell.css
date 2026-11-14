@@ -149,10 +149,29 @@
   }
 }
 
+/* The controls of the top bar share one height, and the ones that shrink to an
+   icon share one square, so the round buttons on a phone are alike. A touch
+   screen gets 44 px for both. */
+.dx-bar {
+  --bar-ctl: 2.25rem;
+}
+@media (pointer: coarse) {
+  .dx-bar {
+    --bar-ctl: 2.75rem;
+  }
+}
+/* A trigger made with asChild takes its slot name from the trigger, so the
+   height is set by class on those. */
+.dx-bar [data-slot="button"],
+.dx-bar-icon,
+.dx-bar-role,
+.dx-search {
+  height: var(--bar-ctl);
+}
 /* The search field in the top bar: a button that reads like a field. */
 .dx-search {
   display: flex;
-  height: 2.25rem;
+  height: var(--bar-ctl);
   min-width: 0;
   align-items: center;
   gap: 0.5rem;
@@ -171,11 +190,6 @@
   outline: 2px solid var(--ring);
   outline-offset: 2px;
 }
-@media (pointer: coarse) {
-  .dx-search {
-    height: 2.75rem;
-  }
-}
 .dx-kbd {
   font-size: var(--type-12);
   line-height: 1rem;
@@ -183,6 +197,30 @@
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-pill);
   color: var(--muted-foreground);
+}
+
+.dx-bar-icon {
+  width: var(--bar-ctl);
+  padding-inline: 0;
+}
+@media (max-width: 79.99rem) {
+  .dx-search {
+    width: var(--bar-ctl);
+    justify-content: center;
+    padding-inline: 0;
+  }
+}
+@media (max-width: 63.99rem) {
+  .dx-bar-action {
+    width: var(--bar-ctl);
+    padding-inline: 0;
+  }
+}
+@media (max-width: 39.99rem) {
+  .dx-bar-role {
+    width: var(--bar-ctl);
+    padding-inline: 0;
+  }
 }
 
 /* The outlined buttons of the top bar take the pill button skin. */
