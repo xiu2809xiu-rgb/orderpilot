@@ -112,7 +112,7 @@ function CustomerRecord({ customer }: { customer: CustomerDetail }) {
         description={customer.name}
         meta={<DemoBadge kind="mockBusinessCentral" />}
         actions={
-          <Button asChild>
+          <Button asChild className="pointer-coarse:h-11">
             <Link to={tracker}>
               <Truck aria-hidden="true" />
               {t("customer.openTracker")}
@@ -139,7 +139,12 @@ function CustomerRecord({ customer }: { customer: CustomerDetail }) {
         })}
         actions={
           customer.overdueOrders.length > 0 ? (
-            <Button asChild variant="outline" size="sm">
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="pointer-coarse:h-11"
+            >
               <Link to={late}>{t("customer.overdue.inTracker")}</Link>
             </Button>
           ) : undefined

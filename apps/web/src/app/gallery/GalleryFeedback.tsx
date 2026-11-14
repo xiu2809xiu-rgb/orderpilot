@@ -25,6 +25,7 @@ export function GalleryFeedback() {
         <div className="flex flex-wrap gap-2">
           <Button
             variant="outline"
+            className="pointer-coarse:h-11"
             onClick={() => {
               toast.done(t("feedback.doneMessage"), {
                 description: t("feedback.doneDetail"),
@@ -36,6 +37,7 @@ export function GalleryFeedback() {
           </Button>
           <Button
             variant="outline"
+            className="pointer-coarse:h-11"
             onClick={() => {
               toast.failed(t("feedback.failedMessage"));
             }}

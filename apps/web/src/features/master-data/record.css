@@ -94,4 +94,11 @@
   .rec-table td {
     height: 2.75rem;
   }
+
+  /* A link in a table cell is a target of its own, so it fills the row's 44 px. */
+  .rec-table td a {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+  }
 }

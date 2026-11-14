@@ -27,7 +27,7 @@ function ItemRecord({ item }: { item: ItemDetail }) {
         }
         actions={
           item.orderLines.length > 0 ? (
-            <Button asChild variant="outline">
+            <Button asChild variant="outline" className="pointer-coarse:h-11">
               <a href="#item-orders">
                 <ListChecks aria-hidden="true" />
                 {t("item.seeOrders")}

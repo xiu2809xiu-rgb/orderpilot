@@ -164,7 +164,7 @@ function VendorRecord({ vendor }: { vendor: VendorDetail }) {
         description={vendor.name}
         meta={<DemoBadge kind="mockBusinessCentral" />}
         actions={
-          <Button asChild>
+          <Button asChild className="pointer-coarse:h-11">
             <Link to={`/master-data/items?vendor=${vendor.no}`}>
               <Boxes aria-hidden="true" />
               {t("vendor.seeItems")}

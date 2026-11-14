@@ -86,7 +86,11 @@ export function GalleryForm() {
             if (isAnswer(value)) setAnswer(value);
           }}
         >
-          <SelectTrigger id="gallery-form-answer" size="sm" className="w-64">
+          <SelectTrigger
+            id="gallery-form-answer"
+            size="sm"
+            className="w-64 pointer-coarse:h-11"
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

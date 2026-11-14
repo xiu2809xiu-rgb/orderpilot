@@ -98,7 +98,7 @@ export function GalleryDocument() {
           <SelectTrigger
             id="gallery-document-status"
             size="sm"
-            className="w-56"
+            className="w-56 pointer-coarse:h-11"
           >
             <SelectValue />
           </SelectTrigger>

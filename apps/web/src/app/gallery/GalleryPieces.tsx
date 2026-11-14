@@ -39,7 +39,7 @@ export function GalleryPieces() {
               title={t("states.emptyTitle")}
               description={t("states.emptyDescription")}
               action={
-                <Button>
+                <Button className="pointer-coarse:h-11">
                   <Upload aria-hidden="true" />
                   {t("states.emptyAction")}
                 </Button>
