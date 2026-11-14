@@ -9,7 +9,8 @@ export function SignInSteps() {
   return (
     <ol
       aria-label={t("hero.stepsLabel")}
-      className="grid max-w-2xl gap-5 sm:grid-cols-3"
+      // Under the form on a phone the steps meet the ground's brightest bloom (4.5:1 by a hair): a soft scrim of the page colour keeps them readable at any width.
+      className="grid max-w-2xl gap-5 max-lg:-mx-3 max-lg:rounded-(--radius-card) max-lg:bg-[color-mix(in_srgb,var(--background)_55%,transparent)] max-lg:p-3 sm:grid-cols-3"
     >
       {STEPS.map((step, index) => (
         <li

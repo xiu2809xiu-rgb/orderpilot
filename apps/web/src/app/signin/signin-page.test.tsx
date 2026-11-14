@@ -1,6 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
+import { axeViolations } from "@/test/axe";
 import { renderApp } from "@/test/render";
 
 describe("the sign-in page with demo mode on", () => {
@@ -168,4 +169,10 @@ describe("the form", () => {
       name: /^Good (morning|afternoon|evening), /,
     });
   });
+
+  it("has no accessibility violation", async () => {
+    const { container } = renderApp("/login", { demoMode: true });
+    await screen.findByRole("list", { name: "Demo roles" });
+    expect(await axeViolations(container)).toEqual([]);
+  }, 60_000);
 });
