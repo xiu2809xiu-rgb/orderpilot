@@ -17,7 +17,7 @@ export function OrderCell({ row, href }: { row: OrderRow; href: string }) {
     <span className="inline-flex items-center gap-2">
       <Link
         to={href}
-        className="numeral text-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+        className="numeral text-foreground underline-offset-4 hover:underline pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
       >
         {row.orderNo}
       </Link>

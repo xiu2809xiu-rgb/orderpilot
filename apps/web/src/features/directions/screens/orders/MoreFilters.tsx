@@ -52,8 +52,12 @@ export function MoreFilters({
   const count = moreCount(query);
   const span = spanDays(query.from, query.to);
   const toggle = (key: "stock" | "toConfirm" | "open", label: string) => (
-    <div className="flex min-h-9 items-center justify-between gap-4">
-      <Label htmlFor={`${id}-${key}`} className="fs-14 font-normal">
+    <div className="flex min-h-9 items-center justify-between gap-4 pointer-coarse:min-h-11">
+      {/* The label fills the row, so on a touch screen the whole row is the target. */}
+      <Label
+        htmlFor={`${id}-${key}`}
+        className="fs-14 flex flex-1 items-center self-stretch font-normal"
+      >
         {label}
       </Label>
       <Switch
@@ -126,6 +130,7 @@ export function MoreFilters({
               <Input
                 id={`${id}-from`}
                 type="date"
+                className="pointer-coarse:h-11"
                 value={query.from ?? ""}
                 max={query.to ?? undefined}
                 onChange={(event) => {
@@ -143,6 +148,7 @@ export function MoreFilters({
               <Input
                 id={`${id}-to`}
                 type="date"
+                className="pointer-coarse:h-11"
                 value={query.to ?? ""}
                 min={query.from ?? undefined}
                 onChange={(event) => {

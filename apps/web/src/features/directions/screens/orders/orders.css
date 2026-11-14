@@ -879,6 +879,14 @@
   border-radius: 999px;
 }
 
+/* After the pill height above, or the touch height set earlier would lose to it. */
+@media (pointer: coarse) {
+  .od-view,
+  .od-tab {
+    height: 2.75rem;
+  }
+}
+
 .od-view[data-state="active"],
 .od-tab[data-state="active"] {
   background-color: var(--dx-current-bg);

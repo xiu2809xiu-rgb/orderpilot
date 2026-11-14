@@ -62,7 +62,12 @@ export function OrderPage({ orderNo }: { orderNo: string }) {
     waiting.data?.data.some((row) => row.orderNo === orderNo) ?? false;
 
   const back = (
-    <Button asChild variant="ghost" size="sm" className="od-back">
+    <Button
+      asChild
+      variant="ghost"
+      size="sm"
+      className="od-back pointer-coarse:h-11"
+    >
       <Link to="/orders">
         <ArrowLeft aria-hidden="true" />
         {t("order.back")}
