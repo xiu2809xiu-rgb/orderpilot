@@ -4,8 +4,11 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import { DueTimer } from "@/components/parts/DueTimer";
+import { HomeRow } from "./HomeRow";
+import { RecordLinkText } from "./RecordLinkText";
+import { TaskAmount } from "./TaskAmount";
 import { useOrderLinks } from "./homeLinks";
-import { canComplete } from "./useCompleteTask";
+import { isOneClick } from "./useCompleteTask";
 
 interface NeedRowProps {
   task: WorkflowTask;
@@ -15,62 +18,85 @@ interface NeedRowProps {
 
 /**
  * One task waiting for the person: what to do, which order and customer, how
- * long until it is due, and one action. A task that one click finishes has
- * that button; any other opens its order.
+ * long until it is due, the money when there is some, and one action. A task
+ * that one click does has that button; any other opens its order, where it is
+ * reviewed or decided.
  */
 export function NeedRow({ task, busy, onComplete }: NeedRowProps) {
   const { t } = useTranslation("directions-home");
   const { t: tHome } = useTranslation("home");
   const links = useOrderLinks();
   const order = task.orderNo;
-  const kind = t(`needs.kind.${task.kind}`);
-  const doIt = canComplete(task);
-  const verb = tHome(`needs.actions.${task.kind}`);
+  const doIt = isOneClick(task);
+  const verb = tHome(`needs.actions.${doIt ? task.kind : "REVIEW_FIELDS"}`);
   const target = "pointer-coarse:min-h-11";
+  // A task with no order still has its SPR to open.
+  const href = order
+    ? links.order(order)
+    : task.ref
+      ? `/workflows/sprs/${encodeURIComponent(task.ref.recordNo)}`
+      : null;
+  const what = order ?? task.ref?.recordNo ?? "";
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 border-b border-border py-3 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_auto_7.5rem]">
-      <div className="min-w-0">
-        <p className="fs-14 font-medium text-foreground">{kind}</p>
-        <p className="fs-14 flex min-w-0 gap-1.5 text-muted-foreground">
+    <HomeRow
+      title={t(`needs.kind.${task.kind}`)}
+      meta={
+        <>
           {order ? (
-            <Link
-              to={links.order(order)}
-              className="numeral shrink-0 text-ring underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-ring"
+            <RecordLinkText to={links.order(order)}>{order}</RecordLinkText>
+          ) : null}
+          {task.ref ? (
+            <RecordLinkText
+              to={`/workflows/sprs/${encodeURIComponent(task.ref.recordNo)}`}
             >
-              {order}
-            </Link>
+              {task.ref.recordNo}
+            </RecordLinkText>
           ) : null}
           {task.customerName ? (
-            <span className="truncate">{task.customerName}</span>
+            <span className="min-w-0 truncate" title={task.customerName}>
+              {task.customerName}
+            </span>
           ) : null}
-        </p>
-      </div>
-      <DueTimer due={task.dueAt} className="justify-self-end" />
-      <div className="col-span-2 sm:col-span-1 sm:justify-self-end">
-        {doIt ? (
+        </>
+      }
+      trailing={
+        <>
+          <DueTimer due={task.dueAt} />
+          <TaskAmount task={task} />
+        </>
+      }
+      action={
+        doIt ? (
           <Button
             variant="outline"
             size="sm"
-            className={target}
+            data-task-action
+            className={`${target} w-full`}
             disabled={busy}
-            aria-label={t("needs.actionOn", { action: verb, order })}
+            aria-label={t("needs.actionOn", { action: verb, order: what })}
             onClick={onComplete}
           >
             <Check aria-hidden="true" />
             {verb}
           </Button>
-        ) : order ? (
-          <Button asChild variant="outline" size="sm" className={target}>
+        ) : href ? (
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className={`${target} w-full`}
+          >
             <Link
-              to={links.order(order)}
-              aria-label={t("needs.actionOn", { action: verb, order })}
+              to={href}
+              data-task-action
+              aria-label={t("needs.actionOn", { action: verb, order: what })}
             >
               {verb}
               <ArrowRight aria-hidden="true" />
             </Link>
           </Button>
-        ) : null}
-      </div>
-    </div>
+        ) : null
+      }
+    />
   );
 }

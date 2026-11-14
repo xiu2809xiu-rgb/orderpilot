@@ -18,7 +18,10 @@
     "refusedActions": "Refused actions",
     "roles": "Roles",
     "activeUsers": "Active users",
-    "aiUse": "AI use"
+    "aiUse": "AI use",
+    "retryShort": "Retry",
+    "unavailable": "Not available",
+    "retryFor": "Could not load {{label}}. Retry"
   },
   "needs": {
     "title": "Needs you",
@@ -109,7 +112,7 @@
     "title": "Quick actions"
   },
   "kpis": {
-    "title": "Spectra's five measures",
+    "title": "Twelve weeks of the five measures",
     "viewAll": "View all KPIs",
     "target": "Target {{value}}"
   },

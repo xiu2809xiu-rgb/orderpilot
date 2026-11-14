@@ -7,6 +7,15 @@
   "introNone": "Nothing is waiting for you.",
   "intro_one": "{{count}} task is waiting for you, and {{late}} is past its due time.",
   "intro_other": "{{count}} tasks are waiting for you, and {{late}} are past their due time.",
+  "introOverdueNone": "No order is overdue.",
+  "introOverdue_one": "{{count}} order is overdue. The one worth the most is first.",
+  "introOverdue_other": "{{count}} orders are overdue. The ones worth the most are first.",
+  "introRefusedNone": "Nothing has been refused.",
+  "introRefused_one": "{{count}} action was refused. The latest is first.",
+  "introRefused_other": "{{count}} actions were refused. The latest are first.",
+  "introRulesNone": "No business rule is waiting for Spectra.",
+  "introRules_one": "{{count}} business rule waits for Spectra to confirm it.",
+  "introRules_other": "{{count}} business rules wait for Spectra to confirm them.",
   "actions": {
     "newOrder": "New order",
     "upload": "Upload a document"
@@ -29,8 +38,7 @@
     },
     "actionOn": "{{action}} for {{order}}",
     "more": "{{count}} more waiting",
-    "noAccess": "Your role has no tasks of its own, so there is nothing to list here. The orders and the measures show where the work stands.",
-    "failed": "Could not load your tasks."
+    "viewAll": "View all {{total}} tasks"
   },
   "timeline": {
     "title": "My timeline",
@@ -62,18 +70,11 @@
   },
   "measures": {
     "title": "Your numbers",
-    "open": "Open orders",
-    "waiting": "Waiting for you",
-    "late": "Past their due time",
-    "tasks": "tasks",
-    "orders": "orders",
     "trend": {
       "byHand": "Was {{value}} {{unit}} by hand"
     },
     "lab": "Lab estimate: {{note}}",
-    "five": "Spectra's five measures",
-    "noAccess": "Your role does not include Spectra's five measures. Management reads them.",
-    "failed": "Could not load the measures."
+    "five": "Spectra's five measures"
   },
   "flows": {
     "title": "Orders in each step",
@@ -88,9 +89,25 @@
     "orders_one": "{{count}} order",
     "orders_other": "{{count}} orders",
     "opens": "{{step}}: {{count}} in this step. Open them in Orders.",
-    "purchaseNote": "Purchase orders are not in the tracker, so these steps show no counts.",
-    "noAccess": "Your role does not read the order tracker.",
-    "failed": "Could not load the order flow."
+    "purchaseNote": "Purchase orders are not in the tracker, so these steps show no counts."
+  },
+  "shortcuts": {
+    "title": "Shortcuts"
+  },
+  "block": {
+    "viewAll": "View all ({{total}})",
+    "actionOn": "{{action}}: {{record}}",
+    "refused": {
+      "event": "Event {{sequence}}"
+    },
+    "rules": {
+      "emptyTitle": "No rule is waiting",
+      "emptyDescription": "Every business rule has been confirmed by Spectra."
+    },
+    "overdue": {
+      "late_one": "{{count}} day late",
+      "late_other": "{{count}} days late"
+    }
   },
   "signin": {
     "lead": "One place for every order, from the customer's PO to the goods leaving.",

@@ -6,13 +6,18 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { FeatureCue } from "@/features/define";
 import { useListCount } from "@/lib/useListCount";
 
-const TILE = "dx-card flex h-full min-h-24 flex-col gap-2 p-4";
+/**
+ * The label takes up to two lines and the figure sits at the foot, so a row of
+ * tiles keeps its figures on one line whether or not a label wraps.
+ */
+const TILE = "dx-card flex h-full min-h-24 flex-col justify-between gap-2 p-4";
+const LABEL = "fs-14 min-w-0 text-muted-foreground";
 
 /**
  * One count of the role that opens the list it counts. The number is the
  * list's own total (`useListCount`, shared with the side panel), so it cannot
- * disagree with the page behind it. A count that fails says so and offers a
- * retry; the rest of the page stays up.
+ * disagree with the page behind it. A count that fails keeps its place, says
+ * so and offers a retry; the rest of the page stays up.
  */
 export function CountTile({ cue }: { cue: FeatureCue }) {
   const { t } = useTranslation("home");
@@ -22,7 +27,7 @@ export function CountTile({ cue }: { cue: FeatureCue }) {
   if (count.isPending) {
     return (
       <div className={TILE} aria-busy="true">
-        <span className="fs-14 text-muted-foreground">{label}</span>
+        <span className={LABEL}>{label}</span>
         <Skeleton
           className="h-9 w-16 animate-none"
           role="status"
@@ -34,29 +39,35 @@ export function CountTile({ cue }: { cue: FeatureCue }) {
   if (count.isError) {
     return (
       <div className={TILE}>
-        <span className="fs-14 text-muted-foreground">{label}</span>
-        <button
-          type="button"
-          onClick={() => {
-            void count.refetch();
-          }}
-          className="fs-14 inline-flex min-h-9 items-center gap-1.5 self-start rounded-md text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring pointer-coarse:min-h-11"
-        >
-          <RotateCw className="size-3.5" aria-hidden="true" />
-          {t("tiles.retry", { label })}
-        </button>
+        <span className={LABEL}>{label}</span>
+        <div className="flex flex-col items-start gap-1">
+          <span className="fs-14 text-foreground">
+            {t("tiles.unavailable")}
+          </span>
+          <button
+            type="button"
+            aria-label={t("tiles.retryFor", { label })}
+            onClick={() => {
+              void count.refetch();
+            }}
+            className="fs-14 -ml-1 inline-flex min-h-8 items-center gap-1.5 rounded-md px-1 text-ring underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-ring pointer-coarse:min-h-11"
+          >
+            <RotateCw className="size-3.5" aria-hidden="true" />
+            {t("tiles.retryShort")}
+          </button>
+        </div>
       </div>
     );
   }
   return (
     <Link
       to={cue.to}
-      className={`${TILE} group transition-colors hover:border-ring focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring`}
+      className={`${TILE} group transition-colors hover:bg-(--dx-hover-bg) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring`}
     >
-      <span className="fs-14 flex items-start justify-between gap-2 text-muted-foreground">
+      <span className={`${LABEL} flex items-start justify-between gap-2`}>
         {label}
         <ArrowUpRight
-          className="size-4 shrink-0 transition-colors group-hover:text-foreground"
+          className="mt-0.5 size-4 shrink-0 transition-colors group-hover:text-foreground"
           aria-hidden="true"
         />
       </span>

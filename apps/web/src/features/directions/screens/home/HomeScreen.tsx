@@ -9,10 +9,15 @@ import { HomeActions } from "./HomeActions";
 import { Measures } from "./Measures";
 import { MyTimeline } from "./MyTimeline";
 import { NeedsYou } from "./NeedsYou";
+import { RoleBlock } from "./RoleBlock";
+import { Shortcuts } from "./Shortcuts";
+import { YourNumbers } from "./YourNumbers";
+import { useBlockQueries } from "./useBlockQueries";
 import { useCompleteTask } from "./useCompleteTask";
 import { useHomeAccess } from "./homeAccess";
 import { useHomeTasks } from "./useHomeTasks";
-import { NoTasks } from "./NoTasks";
+import { useNeedFocus } from "./useNeedFocus";
+import { introOf } from "./homeIntro";
 
 /** The part of the day in Singapore, for the greeting. */
 function partOfDay(at: Date): "morning" | "afternoon" | "evening" {
@@ -27,17 +32,25 @@ function partOfDay(at: Date): "morning" | "afternoon" | "evening" {
   return hour < 18 ? "afternoon" : "evening";
 }
 
+const TOP = "dx-grid grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]";
+const CELL = "dx-grid-cell flex min-w-0 flex-col gap-6";
+
 /**
- * Home, for the signed-in role: a greeting, what needs the person with its
- * timers, their timeline, the numbers and the two flows. Done today is kept
- * here, because the real tasks API lists only open tasks: a task finished
- * from this screen is noted with its time, and an Undo takes it out again.
+ * Home, for the signed-in role, in the order of the person's day: a greeting,
+ * what needs them, their numbers, the measures and the flows. A role with an
+ * inbox has its tasks beside its timeline. A role without one has the one list
+ * that is its own where the tasks would be, and its shortcuts beside it. A
+ * section that has nothing for the role is not drawn. Done today is kept here,
+ * because the real tasks API lists only open tasks: a task finished from this
+ * screen is noted with its time, and an Undo takes it out again.
  */
 export default function HomeScreen() {
   const { t } = useTranslation("directions-home");
   const name = useSessionStore((state) => state.session?.user.displayName);
   const access = useHomeAccess();
   const home = useHomeTasks(access.tasks);
+  const queries = useBlockQueries(access.block);
+  const focus = useNeedFocus(home.tasks);
   const [done, setDone] = useState<DoneItem[]>([]);
   const completion = useCompleteTask({
     onDone: (task: WorkflowTask, at: Date) => {
@@ -45,16 +58,11 @@ export default function HomeScreen() {
     },
     onUndone: (task: WorkflowTask) => {
       setDone((items) => items.filter((item) => item.task.id !== task.id));
+      focus.followBack(task);
     },
   });
   const first = (name ?? "").split(" ")[0] ?? "";
-  const intro = !access.tasks
-    ? undefined
-    : home.list.isPending
-      ? undefined
-      : home.total === 0
-        ? t("introNone")
-        : t("intro", { count: home.total, late: home.late });
+  const intro = introOf(access.block, home, queries, t);
 
   return (
     <div className="dx-sheet">
@@ -63,19 +71,28 @@ export default function HomeScreen() {
         intro={intro}
         actions={<HomeActions />}
       />
-      {access.tasks ? (
-        <div className="dx-grid grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
-          <div className="dx-grid-cell flex min-w-0 flex-col gap-6">
-            <NeedsYou home={home} completion={completion} />
+      {access.block === "tasks" ? (
+        <div className={TOP}>
+          <div className={CELL}>
+            <NeedsYou home={home} completion={completion} focus={focus} />
           </div>
-          <div className="dx-grid-cell flex min-w-0 flex-col gap-6">
+          <div className={CELL}>
             <MyTimeline home={home} done={done} />
           </div>
         </div>
       ) : (
-        <NoTasks />
+        <div className={TOP}>
+          <div className={CELL}>
+            <RoleBlock block={access.block} queries={queries} />
+          </div>
+          <div className={CELL}>
+            <Shortcuts layout="rows" className="flex-1" />
+          </div>
+        </div>
       )}
       <div className="dx-grid mt-6 flex flex-col gap-6">
+        <YourNumbers />
+        {access.block === "tasks" ? <Shortcuts layout="pills" /> : null}
         <Measures />
         <Flows />
       </div>

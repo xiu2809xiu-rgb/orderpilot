@@ -5,6 +5,8 @@ import { STEP_TIMES } from "../../data/index";
 import { Section } from "@/components/parts/Section";
 import { useNow } from "@/components/parts/useNow";
 import type { DoneItem } from "./doneToday";
+import { HomeQuery } from "./HomeQuery";
+import { RowSkeletons } from "./RowSkeletons";
 import { buildTimeline } from "./timelineModel";
 import { DoneGroup, NextGroup, NowGroup } from "./TimelineBody";
 import type { useHomeTasks } from "./useHomeTasks";
@@ -40,15 +42,17 @@ export function MyTimeline({
 
   return (
     <Section title={t("timeline.title")} intro={t("timeline.intro")} work>
-      <p className="fs-14 mb-5 max-w-prose text-foreground">{summary}</p>
-      <div className="flex flex-col gap-6">
-        <DoneGroup done={done} />
-        <NowGroup entry={model.now} at={at} />
-        <NextGroup entries={model.next} />
-      </div>
-      <p className="fs-12 mt-6 text-muted-foreground">
-        {t("timeline.basis", { orders: STEP_TIMES.orders })}
-      </p>
+      <HomeQuery query={home.list} loading={<RowSkeletons rows={3} />}>
+        <p className="fs-14 mb-5 max-w-prose text-foreground">{summary}</p>
+        <div className="flex flex-col gap-6">
+          <DoneGroup done={done} />
+          <NowGroup entry={model.now} at={at} />
+          <NextGroup entries={model.next} />
+        </div>
+        <p className="fs-12 mt-6 text-muted-foreground">
+          {t("timeline.basis", { orders: STEP_TIMES.orders })}
+        </p>
+      </HomeQuery>
     </Section>
   );
 }

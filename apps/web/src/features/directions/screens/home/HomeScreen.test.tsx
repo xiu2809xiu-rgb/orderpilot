@@ -229,7 +229,9 @@ describe("the home screen", () => {
     expect(
       await screen.findByRole("heading", { name: "My timeline" }),
     ).toBeVisible();
-    expect(screen.getByRole("heading", { name: "Done today" })).toBeVisible();
+    expect(
+      await screen.findByRole("heading", { name: "Done today" }),
+    ).toBeVisible();
     expect(screen.getByRole("heading", { name: "Now" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Next" })).toBeVisible();
     expect(
@@ -317,11 +319,16 @@ describe("the home screen", () => {
       session: sessionFor("MANAGEMENT"),
     });
     home();
+    // Its own list stands where Needs you would be, and nothing says a part is missing.
     expect(
-      await screen.findByText(
-        /Your role has no tasks of its own, so there is nothing to list here/,
-      ),
+      await screen.findByRole("heading", { name: "Most overdue, by amount" }),
     ).toBeVisible();
+    expect(
+      screen.queryByRole("heading", { name: "Needs you" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/Your role has no tasks/),
+    ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("heading", { name: "My timeline" }),
     ).not.toBeInTheDocument();
