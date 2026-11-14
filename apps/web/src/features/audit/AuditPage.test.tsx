@@ -233,6 +233,21 @@ describe("AuditPage", () => {
     ).toHaveAttribute("href", expect.stringContaining("entity=ApiRoute"));
   });
 
+  it("offers to copy an event's trace ID, on a line of its own", async () => {
+    server.use(getAuditViewerGetMockHandler({ data: event() }));
+    const user = userEvent.setup();
+    renderAt();
+    await user.click(
+      await screen.findByRole("button", { name: "Details of event 12" }),
+    );
+    const sheet = await screen.findByRole("dialog");
+    const copy = await within(sheet).findByRole("button", {
+      name: "Copy Trace ID",
+    });
+    expect(copy.closest("dd")).toHaveTextContent("trace-abc");
+    expect(copy.closest("div")?.className).toContain("col-span-2");
+  });
+
   it("reports a verified chain up to a sequence", async () => {
     server.use(
       getAuditViewerChainMockHandler({
