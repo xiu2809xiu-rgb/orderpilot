@@ -34,8 +34,8 @@ The AI screenshotted every approver page and the detail pages behind them, and l
 yah im fine with those
 ```
 
-The AI gave My tasks one name and SPR rows that say what they buy, made Reminders compact and opening the SPR, and gave the SPR page its due date, a history and links. It showed item cost to the approver, gave the sample order page real dates and sensible look-alikes, named permissions in words on Settings, and dropped an empty column on the vendor page.
+The AI gave My tasks one name and SPR rows that say what they buy, made Reminders compact and opening the SPR, and gave the SPR page its due date, a history and links. It gave the sample order page real dates and sensible look-alikes, named permissions in words on Settings, and dropped an empty column on the vendor page.
 
 ## What the AI found that shaped it
 
-The approver's inbox and reminders come from the daily synthetic set, while "Sent to you" comes from database tasks seeded days earlier, so its dates lag until the database is reset. The SPR page showed the approver a cost that the item page hid from them. Every sample step sat on the order date from 4 pm, which made new orders' steps "in 2 hours". Real brand names in the data are not a fault: ADR 0051 decided them.
+The approver's inbox and reminders come from the daily synthetic set, while "Sent to you" comes from database tasks seeded days earlier, so its dates lag until the database is reset. The SPR page showed the approver a cost that the item page hid from them; Angelyn, whose rule it is, lets the approver see it in her pull request 272. Every sample step sat on the order date from 4 pm, which made new orders' steps "in 2 hours". Real brand names in the data are not a fault: ADR 0051 decided them.
