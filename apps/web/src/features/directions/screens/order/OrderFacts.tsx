@@ -60,6 +60,15 @@ export function OrderFacts({
         ) : (
           <span aria-hidden="true">-</span>
         )}
+        {/* Most customers pay before the goods ship, so the share asked up front
+            belongs beside the value. It is a percentage, not a price. */}
+        {detail ? (
+          <span className="od-fact-note fs-12 text-muted-foreground">
+            {t("order.facts.prepayment", {
+              percent: Number(detail.prepaymentPercent),
+            })}
+          </span>
+        ) : null}
       </Fact>
       <Fact label={t("columns.shipDate")}>
         {detail?.shipmentDate

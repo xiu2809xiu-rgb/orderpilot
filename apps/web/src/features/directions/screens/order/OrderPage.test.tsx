@@ -55,6 +55,8 @@ describe("the order page", () => {
     expect(within(facts).getByText("Finance")).toBeVisible();
     expect(within(facts).getByText("PO-SO-0001")).toBeVisible();
     expect(within(facts).getByText("3 d late")).toBeVisible();
+    // The read-only order form showed the prepayment, and customers pay before shipping.
+    expect(within(facts).getByText("30% prepayment")).toBeVisible();
   });
 
   it("shows the journey with done, now and later, and who and when for done steps", async () => {

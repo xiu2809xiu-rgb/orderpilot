@@ -675,6 +675,11 @@
   color: var(--foreground);
 }
 
+.od-fact-note {
+  display: block;
+  margin-top: 0.125rem;
+}
+
 .od-fact[data-main] .od-fact-value {
   font-size: var(--type-20);
   line-height: 1.75rem;

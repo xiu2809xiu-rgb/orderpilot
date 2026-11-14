@@ -205,7 +205,8 @@
     "trackerRefused": "The journey comes from the order tracker, which your role cannot read.",
     "facts": {
       "stage": "Stage",
-      "pastDue": "Past due"
+      "pastDue": "Past due",
+      "prepayment": "{{percent}}% prepayment"
     },
     "now": {
       "label": "Now",
