@@ -189,6 +189,27 @@ describe("MonitoringPage", () => {
     expect(screen.getByTestId("address")).toHaveTextContent("?tab=clickstream");
   });
 
+  it("names each role in the clickstream, and shows any other value as sent", async () => {
+    server.use(
+      getAiUsageReportMockHandler(usage(1)),
+      getOverviewClickstreamMockHandler({
+        data: {
+          consentRate: "62.5",
+          topRoutes: [{ route: "/orders/:id", views: 14 }],
+          byRole: [
+            { role: "APPROVER", events: 9 },
+            { role: "SALES", events: 2 },
+          ],
+        },
+        meta: { mock: true },
+      }),
+    );
+    renderPage("/monitoring?tab=clickstream");
+    expect(await screen.findByText("Management approver")).toBeVisible();
+    expect(screen.queryByText("APPROVER")).toBeNull();
+    expect(screen.getByText("SALES")).toBeVisible();
+  });
+
   it.todo("shows the permission-denied state when the role cannot read usage");
   it.todo(
     "reads the real ClickstreamEvent table once Angelyn builds the summary",
