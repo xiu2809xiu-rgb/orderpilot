@@ -50,12 +50,13 @@ function ConsentCard() {
     <section
       data-consent-card=""
       aria-label={t("consent.label")}
-      className="flex w-full flex-col gap-s2 border bg-card p-s2 text-card-foreground max-sm:border-x-0 max-sm:border-b-0 sm:w-80 sm:rounded-lg sm:shadow-md"
+      className="dx-panel-strong flex w-full flex-col gap-s2 rounded-(--radius-card) p-s2 text-card-foreground sm:w-80"
     >
       <p className="text-sm">{t("consent.description")}</p>
       <div className="flex gap-2">
         <Button
           size="sm"
+          className="pointer-coarse:h-11"
           onClick={() => {
             tracker.grant();
           }}
@@ -65,6 +66,7 @@ function ConsentCard() {
         <Button
           size="sm"
           variant="outline"
+          className="pointer-coarse:h-11"
           onClick={() => {
             tracker.deny();
           }}

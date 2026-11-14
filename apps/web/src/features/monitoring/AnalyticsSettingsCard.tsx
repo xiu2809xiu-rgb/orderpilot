@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Section } from "@/components/parts/Section";
 import { useSavedChoice } from "./consentCard";
 import { tracker, useConsent } from "./tracker";
 
@@ -20,15 +20,14 @@ export default function AnalyticsSettingsCard() {
         : t("analyticsSettings.overridden");
   }
 
+  // The same section as its neighbours on the settings page, so the card keeps
+  // its look wherever it is mounted and needs no rules from the shell.
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">
-          {t("analyticsSettings.title")}
-        </CardTitle>
-        <p className="text-muted-foreground">{t("analyticsSettings.hint")}</p>
-      </CardHeader>
-      <CardContent className="space-y-s2">
+    <Section
+      title={t("analyticsSettings.title")}
+      intro={t("analyticsSettings.hint")}
+    >
+      <div className="space-y-s2">
         <p>
           <span className="text-muted-foreground">
             {t("analyticsSettings.current")}:{" "}
@@ -38,6 +37,7 @@ export default function AnalyticsSettingsCard() {
         <div className="flex gap-2">
           <Button
             size="sm"
+            className="pointer-coarse:h-11"
             variant={consent === "granted" ? "default" : "outline"}
             aria-pressed={consent === "granted"}
             disabled={consent === "blocked"}
@@ -49,6 +49,7 @@ export default function AnalyticsSettingsCard() {
           </Button>
           <Button
             size="sm"
+            className="pointer-coarse:h-11"
             variant={consent === "denied" ? "default" : "outline"}
             aria-pressed={consent === "denied"}
             onClick={() => {
@@ -58,7 +59,7 @@ export default function AnalyticsSettingsCard() {
             {t("analyticsSettings.decline")}
           </Button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </Section>
   );
 }

@@ -114,7 +114,7 @@ export function MaskingTab() {
           />
         ) : (
           <ScrollRegion
-            label={t("masking.recordsLabel")}
+            label={t("masking.recordsTableLabel")}
             className="rounded-none border-0 bg-transparent"
           >
             <Table className="dt-table" aria-label={t("masking.recordsLabel")}>
