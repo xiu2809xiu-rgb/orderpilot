@@ -6,6 +6,7 @@ import { formatDay } from "@/lib/format";
 import { StatusChip } from "@/components/kit/StatusChip";
 import { Amount } from "../orders/Amount";
 import { ALL_DONE } from "../orders/orderRow";
+import { EntryFact } from "./EntryFact";
 
 function Fact({
   label,
@@ -71,6 +72,7 @@ export function OrderFacts({
       <Fact label={t("columns.po")}>
         <span className="numeral">{order.externalDocumentNo}</span>
       </Fact>
+      {detail ? <EntryFact detail={detail} /> : null}
       {overdue.overdue ? (
         <div className="od-fact od-fact-wide">
           <dt className="od-fact-label fs-12">{t("order.facts.pastDue")}</dt>

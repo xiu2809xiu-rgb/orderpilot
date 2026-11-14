@@ -11,7 +11,6 @@ import { isForbidden } from "@/lib/query-status";
 import { EmptyState } from "@/components/parts/EmptyState";
 import { PageHeader } from "@/components/parts/PageHeader";
 import { Section } from "@/components/parts/Section";
-import { usePageCrumb } from "@/app/shell/pageCrumb";
 import { NowCard } from "./NowCard";
 import { OrderAction } from "./OrderAction";
 import { OrderFacts } from "./OrderFacts";
@@ -47,9 +46,12 @@ function untracked(detail: SalesOrderDetail): OrderTimeline {
 export function OrderPage({ orderNo }: { orderNo: string }) {
   const { t } = useTranslation("directions-orders");
   const { t: tc } = useTranslation("common");
-  usePageCrumb(orderNo);
   const { timeline, order, journey } = useOrderJourney(orderNo);
-  const detail = useOrdersOne(orderNo);
+  // The route has already asked for this order. An order that is not there
+  // answered 404, and asking again on mount would put the query back to
+  // pending: the route would draw its skeleton, unmount this page, and
+  // mount it again for ever.
+  const detail = useOrdersOne(orderNo, { query: { retryOnMount: false } });
   const waiting = useTrackerList({
     documentToConfirm: "true",
     search: orderNo,
@@ -67,13 +69,18 @@ export function OrderPage({ orderNo }: { orderNo: string }) {
       </Link>
     </Button>
   );
+  // The tracker is where the journey, checks and events come from. An order it
+  // does not know (a draft entered here) or a role it refuses still has its
+  // facts and lines from the Orders API, so neither empties the page.
+  const trackerRefused = isForbidden(timeline.error);
   const notInTracker =
-    timeline.error instanceof ApiError && timeline.error.code === "NOT_FOUND";
+    trackerRefused ||
+    (timeline.error instanceof ApiError && timeline.error.code === "NOT_FOUND");
 
   if (timeline.isPending || detail.isPending) {
     return <OrderSkeleton />;
   }
-  if (isForbidden(timeline.error) || isForbidden(detail.error)) {
+  if (isForbidden(detail.error)) {
     return (
       <div className="dx-sheet">
         {back}
@@ -125,6 +132,7 @@ export function OrderPage({ orderNo }: { orderNo: string }) {
             task={action.task}
             orderNo={orderNo}
             pending={action.isPending}
+            hasInbox={action.hasInbox}
           />
         }
       />
@@ -150,7 +158,7 @@ export function OrderPage({ orderNo }: { orderNo: string }) {
             </div>
           ) : (
             <p className="fs-14 max-w-prose text-muted-foreground">
-              {t("peek.noJourney")}
+              {t(trackerRefused ? "order.trackerRefused" : "peek.noJourney")}
             </p>
           )}
         </Section>

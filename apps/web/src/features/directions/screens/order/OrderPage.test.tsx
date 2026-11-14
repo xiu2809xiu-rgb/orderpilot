@@ -176,6 +176,33 @@ describe("the order page", () => {
     ).toBeGreaterThan(2);
   });
 
+  it("keeps the facts and the lines for a role the tracker refuses, and says why there is no journey", async () => {
+    stubApi({ trackerForbidden: true });
+    open(PAID);
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "SO-0001" }),
+    ).toBeVisible();
+    expect(
+      screen.getByText(
+        "The journey comes from the order tracker, which your role cannot read.",
+      ),
+    ).toBeVisible();
+    expect(
+      await screen.findByRole("table", { name: "Lines of the order" }),
+    ).toBeVisible();
+  });
+
+  it("tells a role with no tasks nothing about one", async () => {
+    useSessionStore.setState({
+      status: "active",
+      session: sessionFor("MANAGEMENT"),
+    });
+    stubApi();
+    open(PAID);
+    await screen.findByRole("heading", { level: 1, name: "SO-0001" });
+    expect(screen.queryByText(/no open task/)).toBeNull();
+  });
+
   it("says plainly when the order is not found", async () => {
     stubApi();
     open("SO-9999");

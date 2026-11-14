@@ -191,6 +191,14 @@
     "details": {
       "title": "Order details"
     },
+    "entry": {
+      "label": "Entry",
+      "sample": "A sample order from Spectra. Samples are not edited here.",
+      "draft": "Entered here as a draft. Only a role that may edit orders can change it.",
+      "submitted": "Entered here and submitted. Only a draft can be changed.",
+      "void": "Entered here and voided. It cannot be changed."
+    },
+    "trackerRefused": "The journey comes from the order tracker, which your role cannot read.",
     "facts": {
       "stage": "Stage",
       "pastDue": "Past due"
