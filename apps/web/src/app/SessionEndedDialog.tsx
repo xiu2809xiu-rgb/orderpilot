@@ -16,7 +16,7 @@ import { SignInForm } from "./SignInForm";
  * page stays mounted, so a half-filled form is still there after the sign-in.
  */
 export function SessionEndedDialog() {
-  const { t } = useTranslation();
+  const { t } = useTranslation("signin");
   const queryClient = useQueryClient();
   const open = useSessionStore((state) => state.status === "expired");
   const email = useSessionStore((state) => state.session?.user.email);

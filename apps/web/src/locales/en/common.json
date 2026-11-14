@@ -107,23 +107,6 @@
     "switcherHint": "Switch to another role to see its home page.",
     "current": "Current role"
   },
-  "login": {
-    "title": "Sign in to OrderPilot",
-    "subtitle": "Sign in to see your tasks.",
-    "email": "Email",
-    "password": "Password",
-    "submit": "Sign in",
-    "submitting": "Signing in",
-    "demoTitle": "Demo sign-in",
-    "demoHint": "Pick a role to look around. One click, no password.",
-    "orEmail": "or sign in with your email",
-    "demoRolesLabel": "Demo roles",
-    "optionsFailed": "The demo sign-in could not be checked. You can still sign in with your email."
-  },
-  "sessionEnded": {
-    "title": "Your session ended",
-    "description": "Sign in again to carry on. This page stays as you left it, and anything you typed is kept."
-  },
   "validation": {
     "required": "This field is required.",
     "email": "Enter a valid email address."
