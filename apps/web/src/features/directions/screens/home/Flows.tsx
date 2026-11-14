@@ -6,7 +6,7 @@ import { PURCHASE_STEP_IDS } from "../../data/estimates";
 import { Section } from "@/components/parts/Section";
 import { FlowRow, type FlowCell } from "./FlowRow";
 import { useHomeAccess } from "./homeAccess";
-import { ordersHref } from "./homeLinks";
+import { useOrderLinks } from "./homeLinks";
 
 /**
  * The two flows with the orders at each step. The sales flow reads the
@@ -18,6 +18,7 @@ export function Flows() {
   const { t } = useTranslation("directions-home");
   const { t: tParts } = useTranslation("directions-parts");
   const access = useHomeAccess();
+  const links = useOrderLinks();
   const flow = useTrackerFlow({ query: { enabled: access.tracker } });
   const steps = flow.data?.data.steps ?? [];
   const most = Math.max(0, ...steps.map((step) => step.count));
@@ -34,7 +35,7 @@ export function Flows() {
       id: step.id,
       title,
       count: step.count,
-      href: ordersHref(step.id, step.statuses),
+      href: links.step(step.id, step.statuses),
       linkLabel: t("flows.opens", { step: title, count: step.count }),
       busiest: step.id === busiest?.id,
       note: t("flows.orders", { count: step.count }),

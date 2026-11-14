@@ -1,7 +1,6 @@
 import type { WorkflowTask } from "@orderpilot/shared";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Toaster } from "@/components/common";
 import { useSessionStore } from "@/stores/session";
 import { PageHeader } from "@/components/parts/PageHeader";
 import type { DoneItem } from "./doneToday";
@@ -58,7 +57,7 @@ export default function HomeScreen() {
         : t("intro", { count: home.total, late: home.late });
 
   return (
-    <div className="dx-sheet py-6">
+    <div className="dx-sheet">
       <PageHeader
         title={t(`greeting.${partOfDay(new Date())}`, { name: first })}
         intro={intro}
@@ -77,10 +76,9 @@ export default function HomeScreen() {
         <NoTasks />
       )}
       <div className="dx-grid mt-6 flex flex-col gap-6">
-        <Measures home={home} />
+        <Measures />
         <Flows />
       </div>
-      <Toaster />
     </div>
   );
 }

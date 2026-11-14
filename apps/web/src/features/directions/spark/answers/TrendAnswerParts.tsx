@@ -1,10 +1,7 @@
-import { ArrowUpRight, ChartColumn, Table2 } from "lucide-react";
+import { ChartColumn, Table2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
-import { screenPath } from "../../screens";
-import { isBuilt } from "../../screens";
 import { millions, type TrendFacts } from "../sparkFacts";
 import { TrendChart } from "./TrendChart";
 import { TrendTable } from "./TrendTable";
@@ -47,18 +44,6 @@ export function TrendAnswerParts({ facts }: { facts: TrendFacts }) {
       </p>
       <p className="fs-12 text-muted-foreground">{t("trend.source")}</p>
       <div className="flex flex-wrap items-center gap-2">
-        {isBuilt("insights") ? (
-          <Button asChild variant="outline" className="pointer-coarse:h-11">
-            <Link to={screenPath("insights")}>
-              <ArrowUpRight aria-hidden="true" />
-              {t("trend.open")}
-            </Link>
-          </Button>
-        ) : (
-          <p className="fs-14 text-muted-foreground">
-            {t("trend.dashboardNote")}
-          </p>
-        )}
         <Button
           type="button"
           variant="ghost"

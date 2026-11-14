@@ -15,8 +15,7 @@ import { sessionFor } from "@/test/fixtures";
 import OrdersScreen from "./OrdersScreen";
 import { loadNamespaces, nth, renderAt, SPECS, stubApi } from "./ordersTestKit";
 
-const open = (query = "") =>
-  renderAt(<OrdersScreen />, `/preview/orders${query}`);
+const open = (query = "") => renderAt(<OrdersScreen />, `/orders${query}`);
 
 /** The table's rows, once the orders have arrived. */
 async function bodyRows(): Promise<HTMLElement[]> {
@@ -66,7 +65,7 @@ describe("the Orders workspace", () => {
     expect(within(nth(rows, 0)).getByText("3 d late")).toBeVisible();
     expect(
       within(nth(rows, 0)).getByRole("link", { name: "SO-0001" }),
-    ).toHaveAttribute("href", "/preview/order?order=SO-0001");
+    ).toHaveAttribute("href", "/orders/SO-0001");
   });
 
   it("puts the journey rail in each row, at the step the status belongs to", async () => {
@@ -197,7 +196,7 @@ describe("the Orders workspace", () => {
     );
     expect(screen.getByRole("link", { name: "Upload a PO" })).toHaveAttribute(
       "href",
-      "/preview/upload",
+      "/upload",
     );
   });
 
@@ -215,7 +214,7 @@ describe("the Orders workspace", () => {
     ).toBeVisible();
     expect(
       within(peek).getByRole("link", { name: /Open order/ }),
-    ).toHaveAttribute("href", "/preview/order?order=SO-0001");
+    ).toHaveAttribute("href", "/orders/SO-0001");
     await user.click(within(peek).getByRole("button", { name: "Next order" }));
     expect(await within(peek).findByText("2 of 4")).toBeVisible();
   });

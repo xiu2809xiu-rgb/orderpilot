@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import { DueTimer } from "@/components/parts/DueTimer";
-import { orderHref } from "./homeLinks";
+import { useOrderLinks } from "./homeLinks";
 import { canComplete } from "./useCompleteTask";
 
 interface NeedRowProps {
@@ -21,6 +21,7 @@ interface NeedRowProps {
 export function NeedRow({ task, busy, onComplete }: NeedRowProps) {
   const { t } = useTranslation("directions-home");
   const { t: tHome } = useTranslation("home");
+  const links = useOrderLinks();
   const order = task.orderNo;
   const kind = t(`needs.kind.${task.kind}`);
   const doIt = canComplete(task);
@@ -33,7 +34,7 @@ export function NeedRow({ task, busy, onComplete }: NeedRowProps) {
         <p className="fs-14 flex min-w-0 gap-1.5 text-muted-foreground">
           {order ? (
             <Link
-              to={orderHref(order)}
+              to={links.order(order)}
               className="numeral shrink-0 text-ring underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-ring"
             >
               {order}
@@ -61,7 +62,7 @@ export function NeedRow({ task, busy, onComplete }: NeedRowProps) {
         ) : order ? (
           <Button asChild variant="outline" size="sm" className={target}>
             <Link
-              to={orderHref(order)}
+              to={links.order(order)}
               aria-label={t("needs.actionOn", { action: verb, order })}
             >
               {verb}

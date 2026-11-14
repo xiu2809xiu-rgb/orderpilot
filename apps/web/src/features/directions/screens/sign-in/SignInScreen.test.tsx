@@ -26,9 +26,9 @@ function stubOptions() {
 function signIn() {
   return render(
     <QueryClientProvider client={createQueryClient()}>
-      <MemoryRouter initialEntries={["/preview/signin"]}>
+      <MemoryRouter initialEntries={["/login"]}>
         <Routes>
-          <Route path="/preview/:screen" element={<SignInScreen />} />
+          <Route path="/login" element={<SignInScreen />} />
         </Routes>
       </MemoryRouter>
     </QueryClientProvider>,

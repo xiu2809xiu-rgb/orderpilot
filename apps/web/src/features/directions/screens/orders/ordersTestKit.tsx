@@ -3,6 +3,7 @@ import { render } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { MemoryRouter, Route, Routes } from "react-router";
 import { vi } from "vitest";
+import { Toaster } from "@/components/common/Toaster";
 import i18n from "@/i18n";
 import { createQueryClient } from "@/lib/query";
 
@@ -382,9 +383,11 @@ export function renderAt(element: ReactElement, path: string) {
     <QueryClientProvider client={createQueryClient()}>
       <MemoryRouter initialEntries={[path]}>
         <Routes>
-          <Route path="/preview/:screen" element={element} />
+          <Route path="*" element={element} />
         </Routes>
       </MemoryRouter>
+      {/* The shell draws the toaster on the real page. */}
+      <Toaster />
     </QueryClientProvider>,
   );
 }

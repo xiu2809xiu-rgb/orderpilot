@@ -9,8 +9,7 @@
   "intro_other": "{{count}} tasks are waiting for you, and {{late}} are past their due time.",
   "actions": {
     "newOrder": "New order",
-    "upload": "Upload a document",
-    "uploadUnavailable": "The upload screen is not part of the preview yet."
+    "upload": "Upload a document"
   },
   "needs": {
     "title": "Needs you",

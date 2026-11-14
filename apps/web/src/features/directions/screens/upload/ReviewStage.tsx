@@ -8,7 +8,6 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/components/kit/Alert";
-import { isBuilt } from "../../screens";
 import { orderHref } from "../home/homeLinks";
 import type { DemoDocument, DemoField } from "./demoDocument";
 import { DocumentPage } from "./DocumentPage";
@@ -68,16 +67,14 @@ export function ReviewStage({
           <AlertDescription>
             {t("review.createdBody", { order: doc.orderNo })}
           </AlertDescription>
-          {isBuilt("order") ? (
-            <AlertAction>
-              <Button asChild variant="outline" size="sm">
-                <Link to={orderHref(doc.orderNo)}>
-                  {t("review.openOrder", { order: doc.orderNo })}
-                  <ArrowUpRight aria-hidden="true" />
-                </Link>
-              </Button>
-            </AlertAction>
-          ) : null}
+          <AlertAction>
+            <Button asChild variant="outline" size="sm">
+              <Link to={orderHref(doc.orderNo)}>
+                {t("review.openOrder", { order: doc.orderNo })}
+                <ArrowUpRight aria-hidden="true" />
+              </Link>
+            </Button>
+          </AlertAction>
         </Alert>
       ) : null}
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,27rem)]">

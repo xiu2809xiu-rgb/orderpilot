@@ -8,7 +8,6 @@ import {
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
-import { screenPath } from "../../screens";
 import {
   Alert,
   AlertAction,
@@ -17,7 +16,7 @@ import {
 } from "@/components/kit/Alert";
 import { FileType } from "@/components/kit/FileType";
 import { StatusChip, type StatusKind } from "@/components/kit/StatusChip";
-import { isBuilt } from "../../screens";
+import { hasPermission, useSessionStore } from "@/stores/session";
 import {
   documentsOf,
   type MatchState,
@@ -104,13 +103,18 @@ export function DocumentsTab({
 }) {
   const { t } = useTranslation("directions-orders");
   const documents = documentsOf(checks, { orderNo });
+  // The task that confirms the fields is on the order's steps page.
+  const maySeeSteps = hasPermission(
+    useSessionStore((state) => state.session),
+    "workflows.read",
+  );
   return (
     <div className="od-docs-wrap">
       {toConfirm ? (
         <Alert variant="info">
           <AlertTitle>{t("documents.confirmTitle")}</AlertTitle>
           <AlertDescription>{t("documents.confirmBody")}</AlertDescription>
-          {isBuilt("upload") ? (
+          {maySeeSteps ? (
             <AlertAction>
               <Button
                 asChild
@@ -118,7 +122,9 @@ export function DocumentsTab({
                 size="sm"
                 className="pointer-coarse:h-11"
               >
-                <Link to={screenPath("upload")}>{t("documents.review")}</Link>
+                <Link to={`/workflows/orders/${encodeURIComponent(orderNo)}`}>
+                  {t("documents.review")}
+                </Link>
               </Button>
             </AlertAction>
           ) : null}

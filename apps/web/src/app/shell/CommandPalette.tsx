@@ -10,9 +10,10 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { featureNamespaces, menuFor } from "@/features/nav";
+import { featureNamespaces } from "@/features/nav";
 import { actionsFor, type AppAction } from "@/lib/actions";
 import { useSessionStore } from "@/stores/session";
+import { panelMenu } from "./panelMenu";
 
 interface CommandPaletteProps {
   open: boolean;
@@ -120,17 +121,20 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
           })}
         </CommandGroup>
         <CommandGroup heading={t("palette.goTo")}>
-          {menuFor(session).map((entry) => (
-            <CommandItem
-              key={entry.id}
-              onSelect={() => {
-                go(entry.to);
-              }}
-            >
-              <entry.icon aria-hidden="true" />
-              {t(entry.label)}
-            </CommandItem>
-          ))}
+          {/* The same places as the side panel, in its order. */}
+          {panelMenu(session)
+            .flatMap((group) => group.rows)
+            .map(({ entry }) => (
+              <CommandItem
+                key={entry.id}
+                onSelect={() => {
+                  go(entry.to);
+                }}
+              >
+                <entry.icon aria-hidden="true" />
+                {t(entry.label)}
+              </CommandItem>
+            ))}
           <CommandItem
             onSelect={() => {
               go("/settings");

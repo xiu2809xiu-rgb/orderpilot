@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 /** The OrderPilot mark and name, at the top of the panel. The mark stays when the panel is a rail. */
 export function Brand({ collapsed }: { collapsed: boolean }) {
-  const { t } = useTranslation("directions");
+  const { t } = useTranslation();
   return (
     <span className="inline-flex items-center gap-2.5 font-semibold tracking-tight">
       <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
@@ -30,7 +30,7 @@ export function Brand({ collapsed }: { collapsed: boolean }) {
         />
       </svg>
       <span className={cn("fs-16", collapsed && "sr-only")}>
-        {t("panel.brand")}
+        {t("app.name")}
       </span>
     </span>
   );

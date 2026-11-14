@@ -11,6 +11,7 @@ import {
   it,
   vi,
 } from "vitest";
+import { Toaster } from "@/components/common/Toaster";
 import i18n from "@/i18n";
 import { createQueryClient } from "@/lib/query";
 import { useSessionStore } from "@/stores/session";
@@ -138,11 +139,13 @@ function nth(items: readonly HTMLElement[], at: number): HTMLElement {
 function home() {
   return render(
     <QueryClientProvider client={createQueryClient()}>
-      <MemoryRouter initialEntries={["/preview/home"]}>
+      <MemoryRouter initialEntries={["/"]}>
         <Routes>
-          <Route path="/preview/:screen" element={<HomeScreen />} />
+          <Route path="/" element={<HomeScreen />} />
         </Routes>
       </MemoryRouter>
+      {/* The shell draws the toaster on the real page. */}
+      <Toaster />
     </QueryClientProvider>,
   );
 }
@@ -217,7 +220,7 @@ describe("the home screen", () => {
     ).toHaveAttribute("href", "/orders/new");
     expect(
       screen.getByRole("link", { name: "Upload a document" }),
-    ).toHaveAttribute("href", "/preview/upload");
+    ).toHaveAttribute("href", "/upload");
   });
 
   it("builds My timeline from the tasks and says where the estimate comes from", async () => {
@@ -271,16 +274,27 @@ describe("the home screen", () => {
     ).toBeVisible();
   });
 
-  it("says why Support has no five measures, and shows the person's own figures", async () => {
+  it("shows Support its own counts, each opening its list, and no measures it may not read", async () => {
     stubApi();
     home();
+    const numbers = await screen.findByRole("region", {
+      name: "Your numbers",
+    });
+    // The count is the list's own total, and the tile opens that list.
     expect(
-      await screen.findByText(
-        "Your role does not include Spectra's five measures. Management reads them.",
-      ),
-    ).toBeVisible();
-    expect(await screen.findByText("Open orders")).toBeVisible();
-    expect(await screen.findByText("106")).toBeVisible();
+      await within(numbers).findByRole("link", { name: /^My tasks\s*\d+$/ }),
+    ).toHaveAttribute("href", "/workflows");
+    // A list the API does not answer keeps its tile, with a retry.
+    await waitFor(() => {
+      expect(
+        within(numbers).getAllByRole("button", { name: /Retry/ }).length,
+      ).toBeGreaterThan(0);
+    });
+    for (const name of ["Documents to confirm", "Open orders", "Overdue"]) {
+      expect(within(numbers).getByText(name)).toBeVisible();
+    }
+    // Support may not read the five measures, so the page has no such section.
+    expect(screen.queryByText("Spectra's five measures")).toBeNull();
   });
 
   it("notes a finished task in Done today with its time, and takes it out again on Undo", async () => {
@@ -333,7 +347,8 @@ describe("the home screen", () => {
     stubApi();
     const { container } = home();
     await screen.findByRole("heading", { name: "My timeline" });
-    await screen.findByText("106");
+    // The counts have settled: the tasks tile shows its number.
+    await screen.findByRole("link", { name: /^My tasks\s*\d+$/ });
     expect(await axeViolations(container)).toEqual([]);
   }, 60_000);
 });

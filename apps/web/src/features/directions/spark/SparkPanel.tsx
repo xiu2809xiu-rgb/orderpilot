@@ -1,7 +1,6 @@
 import { Dialog } from "radix-ui";
 import { useTranslation } from "react-i18next";
 import { PromptBar } from "@/components/kit/PromptBar";
-import type { SparkPanelProps } from "../screens";
 import { useHomeAccess } from "../screens/home/homeAccess";
 import { SparkEmpty } from "./SparkEmpty";
 import { SparkHead } from "./SparkHead";
@@ -10,6 +9,12 @@ import { classify, useSparkChat } from "./useSparkChat";
 import "./spark.css";
 
 const INPUT_ID = "spark-input";
+
+/** The shell owns whether the panel is open (app/shell/sparkPanel.tsx). */
+interface SparkPanelProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
 
 /**
  * Spark: the assistant panel, opened from the top bar or with Ctrl and a full

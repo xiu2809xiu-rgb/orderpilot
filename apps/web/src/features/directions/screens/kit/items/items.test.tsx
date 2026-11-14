@@ -156,9 +156,9 @@ describe("the kit items", () => {
 
   it("summarises the kits with their counts and a button for each section", () => {
     render(
-      <MemoryRouter initialEntries={["/preview/kit"]}>
+      <MemoryRouter initialEntries={["/gallery/kit"]}>
         <Routes>
-          <Route path="/preview/:screen" element={<KitSummary />} />
+          <Route path="/gallery/kit" element={<KitSummary />} />
         </Routes>
       </MemoryRouter>,
     );
@@ -172,9 +172,9 @@ describe("the kit items", () => {
 
   it("shows each product part with what it follows or is built on", () => {
     render(
-      <MemoryRouter initialEntries={["/preview/kit"]}>
+      <MemoryRouter initialEntries={["/gallery/kit"]}>
         <Routes>
-          <Route path="/preview/:screen" element={<PartsSection />} />
+          <Route path="/gallery/kit" element={<PartsSection />} />
         </Routes>
       </MemoryRouter>,
     );

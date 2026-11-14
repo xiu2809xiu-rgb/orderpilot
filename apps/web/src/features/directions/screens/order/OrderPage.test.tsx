@@ -19,10 +19,11 @@ import {
   stubApi,
   taskOn,
 } from "../orders/ordersTestKit";
-import OrderScreen from "./OrderScreen";
+import { OrderPage } from "./OrderPage";
 
-const open = (query: string) =>
-  renderAt(<OrderScreen />, `/preview/order${query}`);
+/** Opens an order as its route does: the number from the address, the tab from the query. */
+const open = (orderNo: string, query = "") =>
+  renderAt(<OrderPage orderNo={orderNo} />, `/orders/${orderNo}${query}`);
 
 beforeAll(loadNamespaces);
 
@@ -38,7 +39,7 @@ afterEach(() => {
 });
 
 /** SO-0001 waits for payment: the fourth step. */
-const PAID = "?order=SO-0001";
+const PAID = "SO-0001";
 
 describe("the order page", () => {
   it("heads the page with the number, the customer and the facts", async () => {
@@ -122,7 +123,7 @@ describe("the order page", () => {
 
   it("says a document waits for a person when the tracker says so, without naming which", async () => {
     stubApi({ toConfirm: ["SO-0001"] });
-    open("?order=SO-0001&tab=documents");
+    open(PAID, "?tab=documents");
     expect(
       await screen.findByText(
         "A document of this order waits for you to confirm it",
@@ -177,14 +178,14 @@ describe("the order page", () => {
 
   it("says plainly when the order is not found", async () => {
     stubApi();
-    open("?order=SO-9999");
+    open("SO-9999");
     expect(await screen.findByText("That order was not found")).toBeVisible();
     expect(screen.getByRole("link", { name: "Orders" })).toBeVisible();
   });
 
   it("has no accessibility violations", async () => {
     stubApi({ tasks: [taskOn("SO-0001", "SEND_PI")] });
-    const view = open(`${PAID}&tab=checks`);
+    const view = open(PAID, "?tab=checks");
     await screen.findByText("Rule quantity");
     expect(await axeViolations(view.container)).toEqual([]);
   });

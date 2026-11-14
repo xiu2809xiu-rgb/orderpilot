@@ -1,6 +1,32 @@
-/* The side panel, the top bar and the way they sit around the content. Imported
-   by the frame, so only the lazy preview carries it. Colours, radii and
-   durations are the design tokens. */
+/* The side panel, the top bar and the way they sit around the page. Colours,
+   radii and durations are the design tokens. */
+
+/* The page's gutter: 24 px, and 16 px on a phone. A page brings no outer
+   padding of its own, so every page starts at the same line. */
+.dx-main {
+  padding: 1.5rem;
+}
+@media (max-width: 39.99rem) {
+  .dx-main {
+    padding: 1rem;
+  }
+}
+
+/* On paper there is no panel and no bar, and the page is as long as it is. */
+@media print {
+  .dx-shell {
+    display: block;
+    height: auto;
+  }
+  .dx-side,
+  .dx-bar {
+    display: none;
+  }
+  .dx-main {
+    overflow: visible;
+    padding: 0;
+  }
+}
 
 /* The gap between groups adapts to the room the window leaves: each spacer
    between two groups takes an equal share of the free height, from a floor of
@@ -86,13 +112,14 @@
   outline: 2px solid var(--ring);
   outline-offset: -2px;
 }
-/* Only a link answers a hover: a row that goes nowhere stays still. */
-a.dx-entry:hover {
+.dx-entry:hover {
   background: var(--dx-hover-bg);
   color: var(--foreground);
 }
-button.dx-entry[aria-disabled="true"] {
-  cursor: default;
+/* The signed-in person: an avatar beside two lines of text. */
+.dx-person {
+  height: 3rem;
+  cursor: pointer;
 }
 .dx-entry[aria-current="page"] {
   background-color: var(--dx-current-bg);
@@ -102,9 +129,6 @@ button.dx-entry[aria-disabled="true"] {
 }
 .dx-foot {
   padding-inline: var(--dx-panel-edge);
-}
-.dx-foot-person {
-  padding-inline: var(--dx-entry-pad);
 }
 .dx-rail .dx-entry {
   justify-content: center;

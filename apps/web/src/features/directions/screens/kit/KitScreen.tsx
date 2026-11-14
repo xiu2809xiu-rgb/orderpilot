@@ -23,7 +23,7 @@ import { TypeSection } from "./TypeSection";
 export default function KitScreen() {
   const { t } = useTranslation("directions-kit");
   return (
-    <div className="dx-sheet py-8">
+    <div className="dx-sheet">
       <PageHeader title={t("title")} intro={t("intro")} />
       <div className="dx-grid grid gap-5 lg:grid-cols-2">
         <ColourSection />

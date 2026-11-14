@@ -1,7 +1,7 @@
 import { Inbox } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { PermissionDenied, Toaster } from "@/components/common";
+import { PermissionDenied } from "@/components/common";
 import { EmptyState } from "@/components/parts/EmptyState";
 import { PageHeader } from "@/components/parts/PageHeader";
 import { OrderPeek } from "./OrderPeek";
@@ -29,7 +29,7 @@ export default function OrdersScreen() {
   const empty = status === "ready" && w.data.rows.length === 0;
 
   return (
-    <div className="od-page py-6">
+    <div className="od-page">
       <PageHeader
         title={t("title")}
         intro={
@@ -63,7 +63,6 @@ export default function OrdersScreen() {
           setPeekNo(null);
         }}
       />
-      <Toaster />
     </div>
   );
 }

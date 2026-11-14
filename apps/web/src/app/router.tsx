@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import {
   createBrowserRouter,
   createMemoryRouter,
-  Navigate,
   type RouteObject,
 } from "react-router";
 import {
@@ -71,36 +70,6 @@ export function buildRoutes(
         {
           element: <RequireAuth />,
           children: [
-            // A prototype screen draws its own panel and bar, so it sits
-            // beside AppShell, not inside it. It is open to a demo session and
-            // in no menu. Its code is one lazy chunk.
-            {
-              path: "preview",
-              element: <RequireDemo />,
-              children: [
-                {
-                  index: true,
-                  element: <Navigate to="/preview/kit" replace />,
-                },
-                {
-                  path: ":screen",
-                  lazy: async () => ({
-                    Component: (
-                      await import("@/features/directions/PreviewFrame")
-                    ).PreviewFrame,
-                  }),
-                },
-              ],
-            },
-            // The old addresses of the three-design preview lead to it.
-            {
-              path: "directions/*",
-              lazy: async () => ({
-                Component: (
-                  await import("@/features/directions/OldPreviewAddress")
-                ).OldPreviewAddress,
-              }),
-            },
             {
               element: <AppShell />,
               handle: { crumb: "common:nav.home" },
@@ -108,8 +77,9 @@ export function buildRoutes(
                 {
                   index: true,
                   lazy: async () => ({
-                    Component: (await import("./pages/RoleHomePage"))
-                      .RoleHomePage,
+                    Component: (
+                      await import("@/features/directions/screens/home/HomeScreen")
+                    ).default,
                   }),
                 },
                 {
@@ -130,6 +100,33 @@ export function buildRoutes(
                       lazy: async () => ({
                         Component: (await import("./gallery/GalleryPage"))
                           .GalleryPage,
+                      }),
+                    },
+                    {
+                      // The kit sheet: every adapted kit item on one page.
+                      path: "kit",
+                      handle: { crumb: "directions-kit:title" },
+                      lazy: async () => ({
+                        Component: (
+                          await import("@/features/directions/screens/kit/KitScreen")
+                        ).default,
+                      }),
+                    },
+                  ],
+                },
+                {
+                  // Upload and review runs on demo documents until P-18
+                  // stores uploads, so it is a demo page like the gallery.
+                  path: "upload",
+                  element: <RequireDemo />,
+                  handle: { crumb: "directions-intake:title" },
+                  children: [
+                    {
+                      index: true,
+                      lazy: async () => ({
+                        Component: (
+                          await import("@/features/directions/screens/upload/UploadScreen")
+                        ).default,
                       }),
                     },
                   ],

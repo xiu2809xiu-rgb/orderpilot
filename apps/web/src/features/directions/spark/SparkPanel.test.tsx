@@ -75,7 +75,7 @@ describe("the Spark panel", () => {
     ).toBeVisible();
     expect(
       within(dialog).getByText(
-        "Preview: scripted answers. Spark's real tools come with P-95 to P-99.",
+        "Demo: scripted answers from the synthetic data. No AI model is connected.",
       ),
     ).toBeVisible();
     // The sales question needs a role that may read sales: Support does not.
@@ -199,12 +199,7 @@ describe("the Spark panel", () => {
         /came to USD 172\.4 million, 4\.1 percent higher/,
       ),
     ).toBeVisible();
-    // The insights page is not built yet: a plain note, and no control that leads nowhere.
-    expect(
-      within(dialog).getByText(
-        "The dashboard view of this chart comes with the insights page.",
-      ),
-    ).toBeVisible();
+    // There is no dashboard of this chart, so the answer offers no way to one.
     expect(
       within(dialog).queryByRole("link", { name: "Open in dashboard" }),
     ).not.toBeInTheDocument();

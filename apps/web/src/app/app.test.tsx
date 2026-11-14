@@ -15,6 +15,11 @@ import { renderApp, resetApp } from "@/test/render";
 import { App } from "./App";
 import { buildRoutes, createTestRouter } from "./router";
 
+/** The home page greets by the part of the day, so a test names only the person. */
+const GREETING = /^Good (morning|afternoon|evening), /;
+const greeting = (firstName: string) =>
+  new RegExp(`^Good (morning|afternoon|evening), ${firstName}$`);
+
 const paths = (fetchMock: ReturnType<typeof vi.fn>) =>
   (fetchMock.mock.calls as unknown as [string][]).map(([url]) => url);
 
@@ -57,7 +62,7 @@ describe("signed out", () => {
     const roles = await screen.findByRole("list", { name: "Demo roles" });
     await user.click(within(roles).getByRole("button", { name: /Warehouse/ }));
     expect(
-      await screen.findByRole("heading", { name: "Welcome, Hafiz Rahman" }),
+      await screen.findByRole("heading", { name: greeting("Hafiz") }),
     ).toBeInTheDocument();
     expect(router.state.location.pathname).toBe("/");
   });
@@ -98,9 +103,12 @@ describe("signed in", () => {
   it("opens straight onto the role home after a reload with a session", async () => {
     renderApp("/", { session: sessionFor("FINANCE") });
     expect(
-      await screen.findByRole("heading", { name: "Welcome, Grace Ong" }),
+      await screen.findByRole("heading", { name: greeting("Grace") }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/^Finance · /)).toBeInTheDocument();
+    // The role is named beside the person, at the foot of the side panel.
+    expect(
+      screen.getByRole("button", { name: /^Account menu/ }),
+    ).toHaveAccessibleName(/Grace Ong\s*Finance/);
   });
 
   it("falls back to the login page when a stale session cookie cannot be restored", async () => {
@@ -121,24 +129,22 @@ describe("signed in", () => {
 
   it("keeps the page up when a tile cannot load, and offers a retry", async () => {
     renderApp("/", { session: sessionFor("WAREHOUSE") });
-    const tiles = await screen.findByRole("region", { name: "Your counts" });
+    const tiles = await screen.findByRole("region", { name: "Your numbers" });
     await waitFor(() => {
       expect(
         within(tiles).getAllByRole("button", { name: /Retry/ }),
       ).toHaveLength(4);
     });
     expect(tiles.textContent).not.toMatch(/Planned|No count yet/);
-    expect(
-      screen.getByRole("heading", { name: /Welcome/ }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: GREETING })).toBeInTheDocument();
   });
 
   it("gives each role its own menu inside a navigation landmark", async () => {
     renderApp("/", { session: sessionFor("WAREHOUSE") });
-    await screen.findByRole("heading", { name: /Welcome/ });
+    await screen.findByRole("heading", { name: GREETING });
     const nav = screen.getByRole("navigation", { name: "Main navigation" });
     expect(
-      within(nav).getByRole("link", { name: "Order tracker" }),
+      within(nav).getByRole("link", { name: "Orders" }),
     ).toBeInTheDocument();
     expect(
       within(nav).queryByRole("link", { name: "Roles" }),
@@ -198,7 +204,7 @@ describe("signed in", () => {
   it("puts the skip link first in the tab order", async () => {
     const user = userEvent.setup();
     renderApp("/", { session: sessionFor("SUPPORT") });
-    await screen.findByRole("heading", { name: /Welcome/ });
+    await screen.findByRole("heading", { name: GREETING });
     await user.tab();
     expect(
       screen.getByRole("link", { name: "Skip to main content" }),
@@ -219,22 +225,20 @@ describe("signed in", () => {
   it("opens the command palette with Control K and jumps to an area", async () => {
     const user = userEvent.setup();
     const { router } = renderApp("/", { session: sessionFor("SUPPORT") });
-    await screen.findByRole("heading", { name: /Welcome/ });
+    await screen.findByRole("heading", { name: GREETING });
     await user.keyboard("{Control>}k{/Control}");
     const box = await screen.findByRole("combobox");
-    await user.type(box, "tracker");
-    await user.click(
-      await screen.findByRole("option", { name: /Order tracker/ }),
-    );
+    await user.type(box, "exceptions");
+    await user.click(await screen.findByRole("option", { name: /Exceptions/ }));
     await waitFor(() => {
-      expect(router.state.location.pathname).toBe("/order-tracker");
+      expect(router.state.location.pathname).toBe("/exceptions");
     });
   });
 
   it("signs out to the login page", async () => {
     const user = userEvent.setup();
     const { router } = renderApp("/", { session: sessionFor("SUPPORT") });
-    await screen.findByRole("heading", { name: /Welcome/ });
+    await screen.findByRole("heading", { name: GREETING });
     await user.click(screen.getByRole("button", { name: /^Account menu/ }));
     await user.click(await screen.findByRole("menuitem", { name: "Sign out" }));
     await waitFor(() => {
@@ -247,11 +251,11 @@ describe("the demo role switcher", () => {
   it("is there when demo mode is on, and changes the home page", async () => {
     const user = userEvent.setup();
     renderApp("/", { session: sessionFor("SUPPORT"), demoMode: true });
-    await screen.findByRole("heading", { name: "Welcome, Mei Tan" });
+    await screen.findByRole("heading", { name: greeting("Mei") });
     await user.click(await screen.findByRole("button", { name: "Demo role" }));
     await user.click(await screen.findByRole("menuitem", { name: /Auditor/ }));
     expect(
-      await screen.findByRole("heading", { name: "Welcome, Lucas Wong" }),
+      await screen.findByRole("heading", { name: greeting("Lucas") }),
     ).toBeInTheDocument();
   });
 
@@ -260,7 +264,7 @@ describe("the demo role switcher", () => {
       session: sessionFor("SUPPORT"),
       demoMode: false,
     });
-    await screen.findByRole("heading", { name: /Welcome/ });
+    await screen.findByRole("heading", { name: GREETING });
     await waitFor(() => {
       expect(paths(fetch)).toContain("/api/v1/auth/options");
     });
@@ -386,7 +390,7 @@ describe("accessibility (axe)", () => {
 
   it.each(ROLES)("finds nothing on the %s home page", async (role) => {
     const { container } = renderApp("/", { session: sessionFor(role) });
-    await screen.findByRole("heading", { name: /Welcome/ });
+    await screen.findByRole("heading", { name: GREETING });
     expect(await violations(container)).toEqual([]);
   });
 

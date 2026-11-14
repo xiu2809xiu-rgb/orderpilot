@@ -5,7 +5,7 @@
     "title": "Uploading documents is for Support",
     "description": "Your role cannot upload documents. Sign in as Support to try it, or open an order to see its documents."
   },
-  "preview": "In this preview a file you add is not sent anywhere. The review below uses a demo purchase order.",
+  "preview": "Demo: a file you add stays in your browser and is not stored. The review uses a synthetic purchase order.",
   "drop": {
     "title": "Drop documents here",
     "or": "or",
@@ -88,14 +88,14 @@
     "create": "Create draft order",
     "createReady": "Every uncertain field is confirmed.",
     "createdTitle": "Draft order made from {{count}} fields",
-    "createdBody": "In the product this makes a draft order for {{order}} and puts it in the tracker. In this preview nothing is saved.",
+    "createdBody": "Demo: nothing is saved. {{order}} is the synthetic order this purchase order belongs to.",
     "openOrder": "Open order {{order}}",
     "loading": "Loading the demo document",
     "failed": "The demo document could not be loaded.",
     "retry": "Try again",
     "lineGroup": "Lines: line {{number}}",
     "classifiedAs": "Classified as {{type}}",
-    "failedHelp": "Check that the preview is running, then try again.",
+    "failedHelp": "Check your connection, then try again.",
     "createWait_one": "{{count}} field still needs your approval before a draft order can be made.",
     "createWait_other": "{{count}} fields still need your approval before a draft order can be made."
   },

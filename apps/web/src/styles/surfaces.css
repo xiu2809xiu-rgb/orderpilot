@@ -23,13 +23,13 @@
   color: var(--foreground);
 }
 
-/* The column a screen sits in: 72 rem wide, centred, 24 px from the edge. */
+/* The column a page sits in: 72 rem wide and centred. The gutter around it is
+   the shell's (.dx-main), so a page brings no outer padding of its own. */
 .dx-sheet {
   position: relative;
   isolation: isolate;
   max-width: 72rem;
   margin-inline: auto;
-  padding-inline: 1.5rem;
 }
 
 /* A card. A shadcn Card follows the same variables as .dx-card. */

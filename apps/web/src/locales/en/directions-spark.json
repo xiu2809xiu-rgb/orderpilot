@@ -1,6 +1,6 @@
 {
   "title": "Spark",
-  "description": "Ask Spark about stock and sales. Its answers in this preview are scripted.",
+  "description": "Ask Spark about stock and sales. In this demo its answers are scripted.",
   "close": "Close Spark",
   "new": "New conversation",
   "status": {
@@ -18,7 +18,7 @@
     "stock": "How many HP monitors do we have?",
     "trend": "How have sales moved over the last 12 months?"
   },
-  "note": "Preview: scripted answers. Spark's real tools come with P-95 to P-99.",
+  "note": "Demo: scripted answers from the synthetic data. No AI model is connected.",
   "input": {
     "label": "Ask Spark",
     "placeholder": "Ask about stock or sales",
@@ -111,8 +111,6 @@
       "forecast": "Forecast"
     },
     "method": "Method: {{method}}",
-    "open": "Open in dashboard",
-    "dashboardNote": "The dashboard view of this chart comes with the insights page.",
     "source": "From the monthly sales history of the synthetic demo data.",
     "rangeValue": "{{low}} to {{high}}"
   },

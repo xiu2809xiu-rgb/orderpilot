@@ -21,9 +21,9 @@ beforeAll(async () => {
 
 function inPreview(ui: React.ReactNode) {
   return render(
-    <MemoryRouter initialEntries={["/preview/home"]}>
+    <MemoryRouter initialEntries={["/"]}>
       <Routes>
-        <Route path="/preview/:screen" element={ui} />
+        <Route path="/" element={ui} />
       </Routes>
     </MemoryRouter>,
   );

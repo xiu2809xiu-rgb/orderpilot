@@ -1,89 +1,75 @@
-import { Menu, Search } from "lucide-react";
-import { useState } from "react";
+import { PanelLeft, Sparkles, Upload } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "./overlays/sheet";
 import { Breadcrumbs } from "./Breadcrumbs";
+import { MobileMenu } from "./MobileMenu";
 import { Notifications } from "./Notifications";
 import { RoleSwitcher } from "./RoleSwitcher";
-import { SidebarNav } from "./Sidebar";
+import { SearchField } from "./SearchField";
+import { useSparkPanel } from "./sparkPanel";
 import { ThemeSwitch } from "./ThemeSwitch";
-import { UserMenu } from "./UserMenu";
+import { TopBarAction } from "./TopBarAction";
+import { UPLOAD_PATH, useUploadEntry } from "./demoParts";
 
-export function Topbar({ onOpenPalette }: { onOpenPalette: () => void }) {
+interface TopbarProps {
+  collapsed: boolean;
+  onToggleCollapsed: () => void;
+  onOpenPalette: () => void;
+}
+
+/**
+ * The top bar: where you are, search and jump (Ctrl K), Upload, Spark, the
+ * bell, the demo role and the theme. It stands still when the page changes.
+ */
+export function Topbar({
+  collapsed,
+  onToggleCollapsed,
+  onOpenPalette,
+}: TopbarProps) {
   const { t } = useTranslation();
-  const [menuOpen, setMenuOpen] = useState(false);
-
+  const mayUpload = useUploadEntry();
+  const spark = useSparkPanel();
   return (
-    <header className="dx-panel flex h-14 shrink-0 items-center gap-s1 border-b bg-background px-s2">
-      <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
-        <SheetTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden"
-            aria-label={t("shell.openMenu")}
-          >
-            <Menu className="size-4" aria-hidden="true" />
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-72 bg-sidebar p-0">
-          <SheetHeader className="sr-only">
-            <SheetTitle>{t("shell.mobileNavTitle")}</SheetTitle>
-            <SheetDescription>
-              {t("shell.mobileNavDescription")}
-            </SheetDescription>
-          </SheetHeader>
-          <div className="pt-s5">
-            <SidebarNav
-              onNavigate={() => {
-                setMenuOpen(false);
-              }}
-            />
-          </div>
-        </SheetContent>
-      </Sheet>
-
-      <div className="min-w-0 flex-1">
-        <Breadcrumbs />
-      </div>
-
-      <Button
-        variant="outline"
-        size="sm"
-        className="hidden w-52 justify-start font-normal text-muted-foreground xl:inline-flex"
-        aria-keyshortcuts="Control+K Meta+K"
-        onClick={onOpenPalette}
-      >
-        <Search aria-hidden="true" />
-        <span className="flex-1 text-left">{t("shell.search")}</span>
-        <kbd
-          className="rounded border bg-muted px-1.5 font-mono text-xs"
-          aria-hidden="true"
-        >
-          {t("palette.keys")}
-        </kbd>
-      </Button>
+    <header className="dx-bar relative z-20 flex h-14 shrink-0 items-center gap-2 px-3 sm:px-4">
+      <MobileMenu />
       <Button
         variant="ghost"
         size="icon"
-        className="xl:hidden"
-        aria-label={t("shell.search")}
-        onClick={onOpenPalette}
+        className="hidden md:inline-flex"
+        aria-label={
+          collapsed ? t("shell.expandPanel") : t("shell.collapsePanel")
+        }
+        aria-expanded={!collapsed}
+        onClick={onToggleCollapsed}
       >
-        <Search className="size-4" aria-hidden="true" />
+        <PanelLeft aria-hidden="true" />
       </Button>
-      <RoleSwitcher />
+      <div className="min-w-0 flex-1">
+        <Breadcrumbs />
+      </div>
+      <SearchField onOpen={onOpenPalette} />
+      {mayUpload ? (
+        <TopBarAction
+          icon={Upload}
+          label={t("shell.upload")}
+          to={UPLOAD_PATH}
+        />
+      ) : null}
+      {spark.available ? (
+        <TopBarAction
+          icon={Sparkles}
+          label={t("shell.spark")}
+          onClick={() => {
+            spark.setOpen(true);
+          }}
+          shortcut="Control+. Meta+."
+        />
+      ) : null}
       <Notifications />
-      <ThemeSwitch />
-      <UserMenu />
+      <RoleSwitcher />
+      <div className="max-sm:hidden">
+        <ThemeSwitch />
+      </div>
     </header>
   );
 }

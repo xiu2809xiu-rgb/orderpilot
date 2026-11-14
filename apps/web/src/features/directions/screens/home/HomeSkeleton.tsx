@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 /** Home's own shape while its chunk loads: the head, two columns, a row of figures. */
 export function HomeSkeleton() {
   return (
-    <div className="dx-sheet flex flex-col gap-6 py-6" aria-hidden="true">
+    <div className="dx-sheet flex flex-col gap-6" aria-hidden="true">
       <div className="flex flex-col gap-2">
         <Skeleton className="h-8 w-72 max-w-full" />
         <Skeleton className="h-4 w-96 max-w-full" />

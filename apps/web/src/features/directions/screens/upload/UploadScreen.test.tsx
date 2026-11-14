@@ -46,9 +46,9 @@ function reduceMotion() {
 function upload() {
   return render(
     <QueryClientProvider client={createQueryClient()}>
-      <MemoryRouter initialEntries={["/preview/upload"]}>
+      <MemoryRouter initialEntries={["/upload"]}>
         <Routes>
-          <Route path="/preview/:screen" element={<UploadScreen />} />
+          <Route path="/upload" element={<UploadScreen />} />
         </Routes>
       </MemoryRouter>
     </QueryClientProvider>,
@@ -99,7 +99,7 @@ describe("the upload screen", () => {
       ),
     ).toBeVisible();
     expect(
-      screen.getByText(/a file you add is not sent anywhere/),
+      screen.getByText(/a file you add stays in your browser/),
     ).toBeVisible();
     // Nothing to read yet: the primary button is off and says what to do.
     expect(
@@ -285,7 +285,7 @@ describe("the upload screen", () => {
     expect(
       await screen.findByText("Draft order made from 21 fields"),
     ).toBeVisible();
-    expect(screen.getByText(/In this preview nothing is saved/)).toBeVisible();
+    expect(screen.getByText(/Demo: nothing is saved/)).toBeVisible();
     expect(create).toBeDisabled();
   });
 

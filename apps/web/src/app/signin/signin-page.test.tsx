@@ -50,7 +50,9 @@ describe("the sign-in page with demo mode on", () => {
     const { router } = renderApp("/login", { demoMode: true });
     const roles = await screen.findByRole("list", { name: "Demo roles" });
     await user.click(within(roles).getByRole("button", { name: /Finance/ }));
-    await screen.findByRole("heading", { name: /Welcome/ });
+    await screen.findByRole("heading", {
+      name: /^Good (morning|afternoon|evening), /,
+    });
     expect(router.state.location.pathname).toBe("/");
   });
 

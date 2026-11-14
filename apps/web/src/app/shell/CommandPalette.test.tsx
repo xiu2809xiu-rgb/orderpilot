@@ -83,7 +83,7 @@ describe("command palette", () => {
     ).toBeInTheDocument();
   });
 
-  it("goes to the menu's places and to no planned screen", async () => {
+  it("goes to the side panel's places, in its order, and to no planned screen", async () => {
     open("WAREHOUSE");
     await screen.findByRole("combobox");
     const goTo = within(
@@ -92,12 +92,12 @@ describe("command palette", () => {
     expect(goTo.map((o) => o.textContent)).toEqual([
       "Home",
       "My tasks",
+      // One Orders place: the tracker's list is part of it.
       "Orders",
+      "Exceptions",
       "Customers",
       "Vendors",
       "Items",
-      "Order tracker",
-      "Exceptions",
       "Settings",
     ]);
   });

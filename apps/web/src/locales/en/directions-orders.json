@@ -4,8 +4,7 @@
   "intro_other": "{{count}} orders, {{late}} past due.",
   "actions": {
     "newOrder": "New order",
-    "upload": "Upload a PO",
-    "uploadUnavailable": "The upload screen is not part of the preview yet."
+    "upload": "Upload a PO"
   },
   "views": {
     "label": "Views",
@@ -183,8 +182,6 @@
     "intro": "{{customer}}, {{number}}",
     "notFoundTitle": "That order was not found",
     "notFoundBody": "There is no order {{order}} for your role. Go back to the list and pick one.",
-    "pickTitle": "Pick an order",
-    "pickBody": "Open an order from the list to see its journey, lines, documents and checks.",
     "journey": {
       "title": "Journey"
     },
@@ -257,7 +254,7 @@
       "unchecked": "Not checked yet"
     },
     "noChecks": "No check has read this document yet.",
-    "review": "Review the fields",
+    "review": "Open the order's steps",
     "checked": "Checks: {{passed}} passed, {{failed}} found a difference.",
     "confirmTitle": "A document of this order waits for you to confirm it",
     "confirmBody": "The tracker says a person must confirm the fields read from one of the documents. It does not say which one."

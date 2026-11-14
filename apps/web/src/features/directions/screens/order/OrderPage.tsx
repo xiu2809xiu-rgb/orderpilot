@@ -2,17 +2,16 @@ import type { OrderTimeline, SalesOrderDetail } from "@orderpilot/shared";
 import { ArrowLeft, FileQuestion } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
-import { ErrorPanel, PermissionDenied, Toaster } from "@/components/common";
+import { ErrorPanel, PermissionDenied } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { ApiError } from "@/lib/api/errors";
 import { useOrdersOne } from "@/lib/api/generated/endpoints/orders/orders";
 import { useTrackerList } from "@/lib/api/generated/endpoints/tracker/tracker";
 import { isForbidden } from "@/lib/query-status";
-import { screenPath } from "../../screens";
 import { EmptyState } from "@/components/parts/EmptyState";
 import { PageHeader } from "@/components/parts/PageHeader";
 import { Section } from "@/components/parts/Section";
-import { usePageCrumb } from "../../shell/pageCrumb";
+import { usePageCrumb } from "@/app/shell/pageCrumb";
 import { NowCard } from "./NowCard";
 import { OrderAction } from "./OrderAction";
 import { OrderFacts } from "./OrderFacts";
@@ -62,7 +61,7 @@ export function OrderPage({ orderNo }: { orderNo: string }) {
 
   const back = (
     <Button asChild variant="ghost" size="sm" className="od-back">
-      <Link to={screenPath("orders")}>
+      <Link to="/orders">
         <ArrowLeft aria-hidden="true" />
         {t("order.back")}
       </Link>
@@ -76,7 +75,7 @@ export function OrderPage({ orderNo }: { orderNo: string }) {
   }
   if (isForbidden(timeline.error) || isForbidden(detail.error)) {
     return (
-      <div className="dx-sheet py-6">
+      <div className="dx-sheet">
         {back}
         <PermissionDenied />
       </div>
@@ -87,7 +86,7 @@ export function OrderPage({ orderNo }: { orderNo: string }) {
     const failure = timeline.error ?? detail.error;
     const missing = failure instanceof ApiError && failure.code === "NOT_FOUND";
     return (
-      <div className="dx-sheet py-6">
+      <div className="dx-sheet">
         {back}
         {missing ? (
           <EmptyState
@@ -116,7 +115,7 @@ export function OrderPage({ orderNo }: { orderNo: string }) {
   const late = events.overdue.overdue;
 
   return (
-    <div className="dx-sheet od-order py-6">
+    <div className="dx-sheet od-order">
       {back}
       <PageHeader
         title={orderNo}
@@ -164,7 +163,6 @@ export function OrderPage({ orderNo }: { orderNo: string }) {
           />
         </Section>
       </div>
-      <Toaster />
     </div>
   );
 }

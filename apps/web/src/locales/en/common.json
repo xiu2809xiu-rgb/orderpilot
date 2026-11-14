@@ -12,7 +12,30 @@
     "loading": "Loading",
     "close": "Close",
     "mobileNavTitle": "Navigation",
-    "mobileNavDescription": "Choose an area of OrderPilot."
+    "mobileNavDescription": "Choose an area of OrderPilot.",
+    "groups": {
+      "work": "Work",
+      "stock": "Stock and buying",
+      "insights": "Insights",
+      "control": "Control"
+    },
+    "collapsePanel": "Collapse the panel",
+    "expandPanel": "Expand the panel",
+    "upload": "Upload",
+    "spark": "Spark",
+    "help": {
+      "label": "Help",
+      "title": "Keyboard shortcuts",
+      "palette": "Search or jump to a page",
+      "search": "Search the list on the page",
+      "new": "Start a new record",
+      "spark": "Open or close Spark",
+      "close": "Close a panel or a menu",
+      "keysSearch": "/",
+      "keysNew": "N",
+      "keysSpark": "Ctrl .",
+      "keysClose": "Esc"
+    }
   },
   "nav": {
     "home": "Home",
@@ -75,7 +98,7 @@
     "seeAll": "See all ({{count}})"
   },
   "userMenu": {
-    "label": "Account menu, {{initials}}",
+    "label": "Account menu:",
     "signedInAs": "Signed in as",
     "signOut": "Sign out"
   },

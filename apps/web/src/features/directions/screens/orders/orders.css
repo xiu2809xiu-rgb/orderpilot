@@ -9,7 +9,6 @@
   flex-direction: column;
   max-width: 100rem;
   margin-inline: auto;
-  padding-inline: 1.5rem;
 }
 
 /* The head is one row: title and what it says on the left, the two ways in on the right. */
