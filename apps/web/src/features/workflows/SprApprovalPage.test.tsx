@@ -121,6 +121,15 @@ describe("the SPR approval page", () => {
       screen.getByText("Sold a month (3-month average)"),
     ).toBeInTheDocument();
     expect(screen.getByText("41.7")).toBeInTheDocument();
+    // 0.5 months of cover is flagged, since it is what makes the SPR urgent.
+    expect(screen.getByText("Under a month of stock")).toBeInTheDocument();
+    // The decision's facts come before the field-by-field detail.
+    const headings = screen
+      .getAllByRole("heading")
+      .map((heading) => heading.textContent);
+    expect(headings.indexOf("Why this SPR")).toBeLessThan(
+      headings.indexOf("Fields"),
+    );
     expect(screen.getAllByText("98").length).toBeGreaterThan(0);
     expect(screen.queryByText("98.00")).toBeNull();
     // A person, by name: the setup's raw approver id means nothing to staff.

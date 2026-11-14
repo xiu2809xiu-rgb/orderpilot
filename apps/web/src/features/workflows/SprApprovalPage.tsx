@@ -63,16 +63,16 @@ export default function SprApprovalPage() {
                 </div>
               </SectionCard>
               <SectionCard
-                title={t("spr.fieldsHeading")}
-                description={t("spr.fieldsDescription")}
-              >
-                <SprFields fields={spr.fields} />
-              </SectionCard>
-              <SectionCard
                 title={t("spr.basisHeading")}
                 description={t("spr.basisDescription")}
               >
                 <SprBasis basis={spr.basis} />
+              </SectionCard>
+              <SectionCard
+                title={t("spr.fieldsHeading")}
+                description={t("spr.fieldsDescription")}
+              >
+                <SprFields fields={spr.fields} />
               </SectionCard>
             </div>
             <div className="space-y-s3 self-start">

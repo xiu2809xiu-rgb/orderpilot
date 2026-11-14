@@ -177,6 +177,7 @@
     "runRate3m": "Sold a month (3-month average)",
     "monthsOfCover": "Months of cover",
     "noSales": "No sales in 3 months",
+    "lowCover": "Under a month of stock",
     "ordered": "Ordered",
     "inventory": "Inventory",
     "qtyOnSalesOrder": "Qty. on Sales Order",

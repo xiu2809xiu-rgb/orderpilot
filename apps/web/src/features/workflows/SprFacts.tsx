@@ -1,6 +1,7 @@
 import type { SprDetail } from "@orderpilot/shared";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import { StatusBadge } from "@/components/common";
 import { formatAmount, formatQuantity } from "./format";
 
 function Fact({ label, children }: { label: string; children: ReactNode }) {
@@ -62,11 +63,21 @@ export function SprBasis({ basis }: { basis: SprDetail["basis"] }) {
         <Fact label={t("spr.inventory")}>
           {formatQuantity(basis.inventory)}
         </Fact>
-        <Fact label={t("spr.runRate3m")}>{formatAmount(basis.runRate3m)}</Fact>
+        <Fact label={t("spr.runRate3m")}>
+          {formatQuantity(basis.runRate3m)}
+        </Fact>
         <Fact label={t("spr.monthsOfCover")}>
-          {basis.monthsOfCover === null
-            ? t("spr.noSales")
-            : formatAmount(basis.monthsOfCover)}
+          {basis.monthsOfCover === null ? (
+            t("spr.noSales")
+          ) : (
+            <span className="inline-flex flex-wrap items-center gap-2">
+              {formatAmount(basis.monthsOfCover)}
+              {/* Under a month of stock is what makes an SPR urgent. */}
+              {Number(basis.monthsOfCover) < 1 ? (
+                <StatusBadge tone="warning">{t("spr.lowCover")}</StatusBadge>
+              ) : null}
+            </span>
+          )}
         </Fact>
       </Group>
       <Group title={t("spr.thisOrder")}>
