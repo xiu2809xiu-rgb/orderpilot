@@ -144,7 +144,7 @@ describe("empty state", () => {
       </>,
     );
     const heading = screen.getByRole("heading", { name: "Nothing here yet" });
-    const strip = heading.closest("div[class*='border-dashed']");
+    const strip = heading.closest(".st-panel");
     expect(strip?.className).not.toContain("p-s4");
     const buttons = screen.getAllByRole("button", { name: /New order/ });
     // The header button and the empty state's own.

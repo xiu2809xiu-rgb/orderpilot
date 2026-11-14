@@ -1,0 +1,58 @@
+/* The head of a page, as the Orders workspace draws it: the title and the
+   line under it on the left, the page's buttons on the right on the title's
+   baseline. On a phone the buttons go under the words. The date line of the
+   home page is not drawn on a list. Repeats the .od-page head rules of
+   orders.css. The doubled class is there to win over .dx-page-head, whatever
+   the order the stylesheets load in. */
+.dx-page-head.ph-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 1rem;
+  align-items: end;
+  margin-bottom: 1rem;
+}
+
+.ph-head > .ph-title,
+.ph-head > .dx-title-context,
+.ph-head > .dx-page-intro {
+  grid-column: 1;
+}
+
+.ph-title {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.75rem;
+}
+
+.ph-count {
+  color: var(--muted-foreground);
+  font-size: var(--type-14);
+  font-variant-numeric: tabular-nums;
+}
+
+.ph-head > .dx-page-intro {
+  margin-top: 0.25rem;
+  color: var(--muted-foreground);
+}
+
+.ph-head > .dx-page-actions {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  align-items: center;
+  align-self: end;
+  margin-top: 0;
+}
+
+@media (max-width: 47.99rem) {
+  .dx-page-head.ph-head {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ph-head > .dx-page-actions {
+    grid-column: 1;
+    grid-row: auto;
+    margin-top: 0.75rem;
+  }
+}

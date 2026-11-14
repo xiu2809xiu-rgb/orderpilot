@@ -2,11 +2,16 @@ import { Plus } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { formatLongDay } from "@/lib/format";
 import { usePrimaryAction, type PrimaryAction } from "./primaryAction";
+import "./page-header.css";
 
 interface PageHeaderProps {
   title: string;
+  /** The one line under the title. */
   description?: string;
+  /** The same line, under the name the parts head gave it. `description` wins. */
+  intro?: string;
   /** Badges beside the title. */
   meta?: ReactNode;
   /** How many records the list holds, shown quietly beside the title. */
@@ -20,51 +25,60 @@ interface PageHeaderProps {
   actions?: ReactNode;
   /** 2 for a header inside a page that already has its h1, such as a gallery section. */
   headingLevel?: 1 | 2;
+  /** Today's date under the title, for the home page. A list has no use for it. */
+  showDate?: boolean;
 }
 
-/** The top of every page: title, a line of context, then actions. */
+/**
+ * The head of every page: the gradient title with its count, one line under
+ * it, and the page's buttons on the right with at most one primary button. It
+ * is the one head of the app: the parts head (`components/parts/PageHeader`)
+ * draws the same markup and classes, so a screen reads the same wherever it is.
+ */
 export function PageHeader({
   title,
   description,
+  intro,
   meta,
   total,
   primaryAction,
   actions,
   headingLevel = 1,
+  showDate = false,
 }: PageHeaderProps) {
   const Heading = headingLevel === 1 ? "h1" : "h2";
   const { t } = useTranslation("components");
   usePrimaryAction(primaryAction);
   const Icon = primaryAction?.icon ?? Plus;
+  const line = description ?? intro;
   return (
-    <header className="flex flex-wrap items-start justify-between gap-s2">
-      <div className="space-y-2">
-        <div className="flex flex-wrap items-center gap-3">
-          <Heading
-            className={
-              headingLevel === 1
-                ? "dx-title text-2xl font-semibold tracking-tight"
-                : "text-2xl font-semibold tracking-tight"
-            }
-          >
-            {title}
-          </Heading>
-          {total !== undefined ? (
-            <span className="text-sm text-muted-foreground tabular-nums">
-              <span aria-hidden="true">{total.toLocaleString("en")}</span>
-              <span className="sr-only">
-                {t("header.total", { count: total })}
-              </span>
+    <header className="dx-page-head ph-head">
+      <div className="ph-title">
+        <Heading
+          className={
+            headingLevel === 1
+              ? "dx-title"
+              : "fs-20 font-semibold tracking-tight"
+          }
+        >
+          {title}
+        </Heading>
+        {total !== undefined ? (
+          <span className="ph-count">
+            <span aria-hidden="true">{total.toLocaleString("en")}</span>
+            <span className="sr-only">
+              {t("header.total", { count: total })}
             </span>
-          ) : null}
-          {meta}
-        </div>
-        {description ? (
-          <p className="measure text-muted-foreground">{description}</p>
+          </span>
         ) : null}
+        {meta}
       </div>
+      {showDate ? (
+        <p className="dx-title-context">{formatLongDay(new Date())}</p>
+      ) : null}
+      {line ? <p className="dx-page-intro fs-14 max-w-prose">{line}</p> : null}
       {actions || primaryAction ? (
-        <div className="flex items-center gap-2">
+        <div className="dx-page-actions">
           {actions}
           {primaryAction ? (
             <Button
