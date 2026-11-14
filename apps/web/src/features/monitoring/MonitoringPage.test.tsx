@@ -3,7 +3,7 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
 import { HttpResponse, http } from "msw";
-import { MemoryRouter } from "react-router";
+import { MemoryRouter, useLocation } from "react-router";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import {
   getAiUsageReportMockHandler,
@@ -49,11 +49,18 @@ const usage = (calls: number) => ({
   meta: { page: 1, pageSize: 10, total: calls },
 });
 
-function renderPage() {
+/** What the address bar holds, so a test can read the tab from it. */
+function Address() {
+  const { search } = useLocation();
+  return <span data-testid="address">{search}</span>;
+}
+
+function renderPage(address = "/monitoring") {
   return render(
     <QueryClientProvider client={createQueryClient()}>
-      <MemoryRouter>
+      <MemoryRouter initialEntries={[address]}>
         <MonitoringPage />
+        <Address />
       </MemoryRouter>
     </QueryClientProvider>,
   );
@@ -156,6 +163,30 @@ describe("MonitoringPage", () => {
     expect(await screen.findByText("62.5% allowed")).toBeVisible();
     expect(screen.getByText("/orders/:id")).toBeVisible();
     expect(screen.getByText("Mock")).toBeVisible();
+  });
+
+  it("opens the tab a link names", async () => {
+    server.use(
+      getAiUsageReportMockHandler(usage(1)),
+      getOverviewObservabilityMockHandler(),
+    );
+    renderPage("/monitoring?tab=observability");
+    expect(
+      await screen.findByRole("tab", { name: "Observability" }),
+    ).toHaveAttribute("aria-selected", "true");
+  });
+
+  it("keeps the chosen tab in the address bar, and opens the first for an unknown one", async () => {
+    server.use(
+      getAiUsageReportMockHandler(usage(1)),
+      getOverviewClickstreamMockHandler(),
+    );
+    renderPage("/monitoring?tab=nothing");
+    expect(
+      await screen.findByRole("tab", { name: "AI usage and cost" }),
+    ).toHaveAttribute("aria-selected", "true");
+    await userEvent.click(screen.getByRole("tab", { name: "Clickstream" }));
+    expect(screen.getByTestId("address")).toHaveTextContent("?tab=clickstream");
   });
 
   it.todo("shows the permission-denied state when the role cannot read usage");
