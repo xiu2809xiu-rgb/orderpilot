@@ -417,6 +417,48 @@ describe("a vendor", () => {
     expect(await screen.findByText("000-TEST-0001")).toBeVisible();
   });
 
+  // A column empty on every row says nothing; a number from an SPR opens it.
+  it("shows the SPR column only when a purchase order came from an SPR", async () => {
+    await load();
+    const po = (no: string, sprRecordNo: string | null) => ({
+      no,
+      orderDate: "2026-11-02",
+      expectedReceiptDate: "2026-11-20",
+      lines: 1,
+      outstandingQuantity: "10",
+      total: shown("purchaseOrder.total", "100.00"),
+      sprRecordNo,
+    });
+    const base = vendor(false);
+    server.use(
+      getMasterDataVendorMockHandler({
+        ...base,
+        data: { ...base.data, openPurchaseOrders: [po("PO-0001", null)] },
+      }),
+    );
+    const first = renderAt("/master-data/vendors/V-0001");
+    expect(await screen.findByText("PO-0001")).toBeVisible();
+    expect(screen.queryByRole("columnheader", { name: "SPR" })).toBeNull();
+    first.unmount();
+
+    server.use(
+      getMasterDataVendorMockHandler({
+        ...base,
+        data: {
+          ...base.data,
+          openPurchaseOrders: [
+            po("PO-0001", null),
+            po("PO-0002", "SPR-20261102-0001"),
+          ],
+        },
+      }),
+    );
+    renderAt("/master-data/vendors/V-0001");
+    expect(
+      await screen.findByRole("columnheader", { name: "SPR" }),
+    ).toBeVisible();
+  });
+
   it("hides the bank account from another role and offers the reason", async () => {
     await load();
     server.use(getMasterDataVendorMockHandler(vendor(true)));

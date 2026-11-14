@@ -112,7 +112,7 @@ function CustomerRecord({ customer }: { customer: CustomerDetail }) {
         description={customer.name}
         meta={<DemoBadge kind="mockBusinessCentral" />}
         actions={
-          <Button asChild>
+          <Button asChild variant="outline">
             <Link to={tracker}>
               <Truck aria-hidden="true" />
               {t("customer.openTracker")}
