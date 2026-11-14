@@ -91,7 +91,11 @@ export default function WorkflowsPage() {
       ) : (
         <SectionCard
           title={t("inbox.forRole", { role: roleName })}
-          description={t("inbox.count", { count: query.data?.meta.total ?? 0 })}
+          description={
+            query.isPending || query.isError
+              ? undefined
+              : t("inbox.count", { count: query.data.meta.total })
+          }
           work
           actions={
             <ToggleChip

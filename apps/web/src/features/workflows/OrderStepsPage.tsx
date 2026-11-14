@@ -1,8 +1,7 @@
 import { SearchX } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Link, useParams } from "react-router";
+import { useParams } from "react-router";
 import { PageHeader, SectionCard, StatePanel } from "@/components/common";
-import { buttonVariants } from "@/components/ui/button";
 import { useWorkflowsOrderFlow } from "@/lib/api/generated/endpoints/workflows/workflows";
 import { ApiError } from "@/lib/api/errors";
 import { hasPermission, useSessionStore } from "@/stores/session";
@@ -24,15 +23,14 @@ export default function OrderStepsPage() {
 
   if (query.error instanceof ApiError && query.error.status === 404) {
     return (
-      <StatePanel
-        icon={SearchX}
-        title={t("order.notFoundTitle")}
-        description={t("order.notFoundDescription")}
-      >
-        <Link to="/workflows" className={buttonVariants({ size: "lg" })}>
-          {t("order.backToInbox")}
-        </Link>
-      </StatePanel>
+      <div className="dx-sheet flex flex-col gap-s4">
+        <BackToInbox />
+        <StatePanel
+          icon={SearchX}
+          title={t("order.notFoundTitle")}
+          description={t("order.notFoundDescription")}
+        />
+      </div>
     );
   }
 
