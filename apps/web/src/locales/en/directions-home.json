@@ -38,7 +38,11 @@
     },
     "actionOn": "{{action}} for {{order}}",
     "more": "{{count}} more waiting",
-    "viewAll": "View all {{total}} tasks"
+    "viewAll": "View all {{total}} tasks",
+    "sprTask": {
+      "RAISE_SPR": "Raise {{recordNo}}",
+      "APPROVE_SPR": "Approve {{recordNo}}"
+    }
   },
   "timeline": {
     "title": "My timeline",
@@ -66,7 +70,8 @@
       "pastUsual": "Past its usual time. {{usual}}.",
       "noEstimate": "No usual time for this step in the data"
     },
-    "basis": "Estimate from how long this step took on the last {{orders}} orders."
+    "basis": "Estimate from how long this step took on the last {{orders}} orders.",
+    "failed": "Your timeline comes back when your tasks load."
   },
   "measures": {
     "title": "Your numbers",

@@ -30,27 +30,30 @@ export function NeedRow({ task, busy, onComplete }: NeedRowProps) {
   const doIt = isOneClick(task);
   const verb = tHome(`needs.actions.${doIt ? task.kind : "REVIEW_FIELDS"}`);
   const target = "pointer-coarse:min-h-11";
+  const sprPath = task.ref
+    ? `/workflows/sprs/${encodeURIComponent(task.ref.recordNo)}`
+    : null;
   // A task with no order still has its SPR to open.
-  const href = order
-    ? links.order(order)
-    : task.ref
-      ? `/workflows/sprs/${encodeURIComponent(task.ref.recordNo)}`
-      : null;
+  const href = order ? links.order(order) : sprPath;
   const what = order ?? task.ref?.recordNo ?? "";
+  // On an SPR task the SPR is the thing to open, so its number is the title and the link.
+  const sprLink =
+    task.kind === "RAISE_SPR" || task.kind === "APPROVE_SPR" ? sprPath : null;
   return (
     <HomeRow
-      title={t(`needs.kind.${task.kind}`)}
+      title={
+        sprLink ? (
+          <RecordLinkText to={sprLink}>
+            {t(`needs.sprTask.${task.kind}`, { recordNo: task.ref?.recordNo })}
+          </RecordLinkText>
+        ) : (
+          t(`needs.kind.${task.kind}`)
+        )
+      }
       meta={
         <>
           {order ? (
             <RecordLinkText to={links.order(order)}>{order}</RecordLinkText>
-          ) : null}
-          {task.ref ? (
-            <RecordLinkText
-              to={`/workflows/sprs/${encodeURIComponent(task.ref.recordNo)}`}
-            >
-              {task.ref.recordNo}
-            </RecordLinkText>
           ) : null}
           {task.customerName ? (
             <span className="min-w-0 truncate" title={task.customerName}>

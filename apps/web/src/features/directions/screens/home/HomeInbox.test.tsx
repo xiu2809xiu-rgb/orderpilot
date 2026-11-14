@@ -183,7 +183,7 @@ describe("the home page of a role with an inbox", () => {
     const served = serveHome({ tasks: [approval] });
     renderHome("APPROVER");
     expect(
-      await screen.findByRole("link", { name: "SPR-20261102-0001" }),
+      await screen.findByRole("link", { name: "Approve SPR-20261102-0001" }),
     ).toHaveAttribute("href", "/workflows/sprs/SPR-20261102-0001");
     await user.click(
       await screen.findByRole("button", { name: "Approve for SO-0200" }),
@@ -276,6 +276,10 @@ describe("the home page of a role with an inbox", () => {
     await waitFor(() => {
       expect(served.calls.length).toBeGreaterThan(before);
     });
+    // The timeline does not say it a second time.
+    expect(
+      screen.getByText("Your timeline comes back when your tasks load."),
+    ).toBeVisible();
     // The rest of the page stays up.
     expect(screen.getByRole("region", { name: "Your numbers" })).toBeVisible();
   });
