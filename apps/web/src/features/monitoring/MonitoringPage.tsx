@@ -6,24 +6,27 @@ import { AiUsageTab } from "./AiUsageTab";
 import { ClickstreamTab } from "./ClickstreamTab";
 import { ObservabilityTab } from "./ObservabilityTab";
 
+// Health first: it is what someone opening monitoring wants, and AI usage
+// stays empty until the AI reads a document. (From Azri's #270.)
 const TABS = [
-  ["aiUsage", AiUsageTab],
   ["observability", ObservabilityTab],
+  ["aiUsage", AiUsageTab],
   ["clickstream", ClickstreamTab],
 ] as const;
 
 /**
  * Area 4's monitoring base: real AI usage, and labelled mock observability
  * and clickstream. The tab lives in the address bar, as on the governance
- * page, so a refresh or a shared link opens the same tab.
+ * page, so a refresh or a shared link opens the same tab, and the AI use tile
+ * can open the one it means (?tab=aiUsage).
  */
 export default function MonitoringPage() {
   const { t } = useTranslation("monitoring");
   const [params, setParams] = useSearchParams();
   const asked = params.get("tab");
   const tab = TABS.some(([id]) => id === asked)
-    ? (asked ?? "aiUsage")
-    : "aiUsage";
+    ? (asked ?? "observability")
+    : "observability";
   return (
     <div className="space-y-s4">
       <PageHeader title={t("title")} description={t("description")} />

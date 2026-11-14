@@ -76,7 +76,7 @@ describe("MonitoringPage", () => {
 
   it("shows real AI usage and cost with no axe violations", async () => {
     server.use(getAiUsageReportMockHandler(usage(1)));
-    const { container } = renderPage();
+    const { container } = renderPage("/monitoring?tab=aiUsage");
     const table = await screen.findByRole("table", { name: "Latest AI calls" });
     expect(within(table).getByText("mock / mock-small")).toBeVisible();
     expect(within(table).getByText("trace-ai-1")).toBeVisible();
@@ -85,7 +85,7 @@ describe("MonitoringPage", () => {
 
   it("says plainly that nothing has called a model yet", async () => {
     server.use(getAiUsageReportMockHandler(usage(0)));
-    renderPage();
+    renderPage("/monitoring?tab=aiUsage");
     expect(await screen.findByText("No AI calls recorded yet")).toBeVisible();
     expect(
       screen.getByRole("link", { name: "See what data may go to AI" }),
@@ -100,7 +100,7 @@ describe("MonitoringPage", () => {
         }),
       ),
     );
-    renderPage();
+    renderPage("/monitoring?tab=aiUsage");
     expect(await screen.findByText(/trace-fail-9/)).toBeVisible();
     expect(
       screen.getByRole("button", { name: /retry|try again/i }),
@@ -165,25 +165,34 @@ describe("MonitoringPage", () => {
     expect(screen.getByText("Mock")).toBeVisible();
   });
 
-  it("opens the tab a link names", async () => {
-    server.use(
-      getAiUsageReportMockHandler(usage(1)),
-      getOverviewObservabilityMockHandler(),
-    );
-    renderPage("/monitoring?tab=observability");
+  it("opens on Observability, first of the tabs", async () => {
+    server.use(getOverviewObservabilityMockHandler());
+    renderPage();
+    const tabs = await screen.findAllByRole("tab");
+    expect(tabs.map((tab) => tab.textContent)).toEqual([
+      "Observability",
+      "AI usage and cost",
+      "Clickstream",
+    ]);
+    expect(tabs[0]).toHaveAttribute("aria-selected", "true");
+  });
+
+  it("opens the tab a link names, such as the AI use tile's", async () => {
+    server.use(getAiUsageReportMockHandler(usage(1)));
+    renderPage("/monitoring?tab=aiUsage");
     expect(
-      await screen.findByRole("tab", { name: "Observability" }),
+      await screen.findByRole("tab", { name: "AI usage and cost" }),
     ).toHaveAttribute("aria-selected", "true");
   });
 
   it("keeps the chosen tab in the address bar, and opens the first for an unknown one", async () => {
     server.use(
-      getAiUsageReportMockHandler(usage(1)),
+      getOverviewObservabilityMockHandler(),
       getOverviewClickstreamMockHandler(),
     );
     renderPage("/monitoring?tab=nothing");
     expect(
-      await screen.findByRole("tab", { name: "AI usage and cost" }),
+      await screen.findByRole("tab", { name: "Observability" }),
     ).toHaveAttribute("aria-selected", "true");
     await userEvent.click(screen.getByRole("tab", { name: "Clickstream" }));
     expect(screen.getByTestId("address")).toHaveTextContent("?tab=clickstream");
