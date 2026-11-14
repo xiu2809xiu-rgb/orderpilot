@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useInsightsKpis } from "@/lib/api/generated/endpoints/insights/insights";
 import { isForbidden } from "@/lib/query-status";
+import { InsightsSkeleton } from "./InsightsSkeleton";
 import { KpiTable } from "./KpiTable";
 import { KpiTiles } from "./KpiTiles";
 
@@ -28,7 +29,7 @@ export default function InsightsPage() {
   const set = kpis.data?.data;
 
   return (
-    <div className="space-y-s4">
+    <div className="dx-sheet flex flex-col gap-s3 [&>header]:mb-0">
       <PageHeader
         title={t("title")}
         description={t("description")}
@@ -42,7 +43,7 @@ export default function InsightsPage() {
         }
       />
       {kpis.isPending ? (
-        <LoadingState lines={6} />
+        <InsightsSkeleton />
       ) : kpis.isError ? (
         isForbidden(kpis.error) ? (
           <PermissionDenied />
@@ -58,8 +59,10 @@ export default function InsightsPage() {
         />
       ) : (
         <>
-          <p className="measure text-muted-foreground">{set.note}</p>
           <KpiTiles measures={set.measures} />
+          <p className="fs-14 measure text-muted-foreground">
+            {t("kpi.lab", { note: set.note })}
+          </p>
           <SectionCard
             title={t("kpi.chartTitle")}
             description={t("kpi.chartDescription")}
@@ -67,6 +70,7 @@ export default function InsightsPage() {
               <Button
                 variant="outline"
                 size="sm"
+                className="pointer-coarse:h-11"
                 aria-pressed={asTable}
                 onClick={() => {
                   setAsTable((on) => !on);

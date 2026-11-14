@@ -49,7 +49,7 @@ export default function ExceptionsPage() {
         cell: (row) => (
           <RecordLink
             to={`/order-tracker/${row.orderNo}`}
-            className="-my-0.5 inline-block py-0.5 font-mono font-medium text-primary underline-offset-4 hover:underline"
+            className="-my-0.5 inline-block py-0.5 underline-offset-4 hover:underline"
           >
             {row.orderNo}
           </RecordLink>
@@ -79,21 +79,21 @@ export default function ExceptionsPage() {
       {
         id: "expected",
         header: t("list.columns.expected"),
-        cell: (row) => <span className="font-mono">{row.expected}</span>,
+        cell: (row) => <span className="tabular-nums">{row.expected}</span>,
         exportValue: (row) => row.expected,
         defaultHidden: true,
       },
       {
         id: "actual",
         header: t("list.columns.actual"),
-        cell: (row) => <span className="font-mono">{row.actual}</span>,
+        cell: (row) => <span className="tabular-nums">{row.actual}</span>,
         exportValue: (row) => row.actual,
         defaultHidden: true,
       },
       {
         id: "difference",
         header: t("list.columns.difference"),
-        cell: (row) => <span className="font-mono">{row.difference}</span>,
+        cell: (row) => <span className="tabular-nums">{row.difference}</span>,
         exportValue: (row) => row.difference,
       },
       {
@@ -137,24 +137,26 @@ export default function ExceptionsPage() {
         meta={<DemoBadge kind="mock" />}
         total={list.data?.meta.total}
       />
-      <FilterChips
-        chips={
-          state === "ALL"
-            ? []
-            : [{ id: "state", label: t(`list.state.${state}`) }]
-        }
-        filters={query.filters}
-        onChange={(filters) => {
-          setQuery({
-            ...query,
-            page: 1,
-            filters:
-              "state" in filters ? filters : { ...filters, state: "ALL" },
-          });
-        }}
-      />
       <DataTable
         tableId="exceptions"
+        applied={
+          <FilterChips
+            chips={
+              state === "ALL"
+                ? []
+                : [{ id: "state", label: t(`list.state.${state}`) }]
+            }
+            filters={query.filters}
+            onChange={(filters) => {
+              setQuery({
+                ...query,
+                page: 1,
+                filters:
+                  "state" in filters ? filters : { ...filters, state: "ALL" },
+              });
+            }}
+          />
+        }
         caption={t("list.caption")}
         columns={columns}
         rows={list.data?.data ?? []}
