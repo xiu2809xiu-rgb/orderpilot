@@ -160,6 +160,31 @@ describe("GovernancePage", () => {
     expect(screen.queryByText(/roles\.manage permission/)).toBeNull();
   });
 
+  it("offers only the tabs the role may open, and opens the matrix for a link to another", async () => {
+    signIn("AUDITOR");
+    renderPage("/governance?tab=users");
+    const tabs = await screen.findByRole("tablist");
+    expect(within(tabs).queryByRole("tab", { name: "Users" })).toBeNull();
+    expect(
+      within(tabs)
+        .getAllByRole("tab")
+        .map((tab) => tab.textContent),
+    ).toEqual(["Role matrix", "Masking", "Data sent to AI", "Refusals"]);
+    expect(
+      within(tabs).getByRole("tab", { name: "Role matrix" }),
+    ).toHaveAttribute("aria-selected", "true");
+  });
+
+  it("offers the Users tab to a role that may see users", async () => {
+    signIn("SYSTEM_ADMIN");
+    renderPage("/governance?tab=users");
+    const tabs = await screen.findByRole("tablist");
+    expect(within(tabs).getByRole("tab", { name: "Users" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+  });
+
   it("copies one role onto another", async () => {
     signIn("SYSTEM_ADMIN");
     let body: unknown = null;
