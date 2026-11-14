@@ -36,7 +36,6 @@ const SELECT =
 /** What may go to which provider, and a request to try against the rule. */
 export function AiTab() {
   const { t } = useTranslation("governance");
-  const { t: tcomp } = useTranslation("components");
   const rules = usePolicyAiDestinations();
   const [provider, setProvider] = useState<Provider>("mock");
   const [origin, setOrigin] = useState<Origin>("real");
@@ -152,7 +151,7 @@ export function AiTab() {
             >
               {CLASSIFICATIONS.map((level) => (
                 <option key={level} value={level}>
-                  {tcomp(`badges.classification.${level}`)}
+                  {level}
                 </option>
               ))}
             </select>

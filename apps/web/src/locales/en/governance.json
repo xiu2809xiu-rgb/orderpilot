@@ -172,11 +172,7 @@
     "historyFor": "History of {{name}}",
     "historyTitle": "History of {{name}}",
     "historyDescription": "What changed on this user, from the audit trail.",
-    "activeOnly": "Active users",
-    "search": "Search users by name, email or role",
-    "you": "You",
-    "noMatchTitle": "No user matches",
-    "noMatchDescription": "Nobody's name, email or role contains \"{{search}}\"."
+    "activeOnly": "Active users"
   },
   "masking": {
     "title": "Masking",
