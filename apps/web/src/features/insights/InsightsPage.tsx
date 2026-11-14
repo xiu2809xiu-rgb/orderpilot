@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useInsightsKpis } from "@/lib/api/generated/endpoints/insights/insights";
 import { isForbidden } from "@/lib/query-status";
+import { InsightsSkeleton } from "./InsightsSkeleton";
 import { KpiTable } from "./KpiTable";
 import { KpiTiles } from "./KpiTiles";
 
@@ -42,7 +43,7 @@ export default function InsightsPage() {
         }
       />
       {kpis.isPending ? (
-        <LoadingState lines={6} />
+        <InsightsSkeleton />
       ) : kpis.isError ? (
         isForbidden(kpis.error) ? (
           <PermissionDenied />
