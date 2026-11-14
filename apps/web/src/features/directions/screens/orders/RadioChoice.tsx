@@ -27,7 +27,7 @@ export function RadioChoice<T extends string>({
   return (
     <fieldset className="space-y-1">
       <legend className="fs-14 font-medium">{legend}</legend>
-      <div className="flex flex-wrap gap-x-4">
+      <div className="grid grid-cols-2 gap-x-4">
         {all.map((option) => (
           <label
             key={option.value ?? "any"}

@@ -6,6 +6,7 @@ import { formatDay } from "@/lib/format";
 import { StatusChip } from "@/components/kit/StatusChip";
 import { Amount } from "../orders/Amount";
 import { ALL_DONE } from "../orders/orderRow";
+import { EntryFact } from "./EntryFact";
 
 function Fact({
   label,
@@ -59,6 +60,23 @@ export function OrderFacts({
         ) : (
           <span aria-hidden="true">-</span>
         )}
+        {/* Most customers pay before the goods ship, so the share asked up front
+            belongs beside the value. It is a percentage, not a price. */}
+        {detail?.amount.masked && detail.amount.reason ? (
+          // The mask's own reason shows on hover, which a tablet has none of.
+          <span className="od-fact-note fs-12 text-muted-foreground">
+            {t("order.facts.hidden", {
+              reason: t(`mask.${detail.amount.reason}`),
+            })}
+          </span>
+        ) : null}
+        {detail ? (
+          <span className="od-fact-note fs-12 text-muted-foreground">
+            {t("order.facts.prepayment", {
+              percent: Number(detail.prepaymentPercent),
+            })}
+          </span>
+        ) : null}
       </Fact>
       <Fact label={t("columns.shipDate")}>
         {detail?.shipmentDate
@@ -71,6 +89,7 @@ export function OrderFacts({
       <Fact label={t("columns.po")}>
         <span className="numeral">{order.externalDocumentNo}</span>
       </Fact>
+      {detail ? <EntryFact detail={detail} /> : null}
       {overdue.overdue ? (
         <div className="od-fact od-fact-wide">
           <dt className="od-fact-label fs-12">{t("order.facts.pastDue")}</dt>

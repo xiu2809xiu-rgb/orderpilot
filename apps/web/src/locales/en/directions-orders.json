@@ -24,6 +24,9 @@
     "customerNone": "No customer matches.",
     "overdue": "Past due",
     "exceptions": "Has exceptions",
+    "panel": "Filters",
+    "panelOn_one": "{{count}} filter is on",
+    "panelOn_other": "{{count}} filters are on",
     "more": "More filters",
     "moreOn_one": "{{count}} more filter is on",
     "moreOn_other": "{{count}} more filters are on",
@@ -94,6 +97,8 @@
     "shortLine": "Short by {{quantity}} of {{itemNo}}",
     "shortLineMore_one": "Short by {{quantity}} of {{itemNo}} and {{count}} more item",
     "shortLineMore_other": "Short by {{quantity}} of {{itemNo}} and {{count}} more items",
+    "shortItems_one": "{{itemNo}} and {{count}} more",
+    "shortItems_other": "{{itemNo}} and {{count}} more",
     "toConfirm": "To confirm",
     "docsNone": "No document needs attention",
     "differs": "Differs",
@@ -121,7 +126,8 @@
   },
   "empty": {
     "title": "No orders yet",
-    "description": "Orders appear here as soon as a customer PO is entered or read."
+    "description": "Orders appear here as soon as a customer PO is entered or read.",
+    "descriptionCreate": "Use New order, above, to enter a customer's PO. The order appears here as soon as it is saved."
   },
   "notices": {
     "trackerTitle": "Some columns are not available",
@@ -183,14 +189,25 @@
     "notFoundTitle": "That order was not found",
     "notFoundBody": "There is no order {{order}} for your role. Go back to the list and pick one.",
     "journey": {
-      "title": "Journey"
+      "title": "Journey",
+      "region": "Journey of the order, nine steps"
     },
     "details": {
       "title": "Order details"
     },
+    "entry": {
+      "label": "Entry",
+      "sample": "A sample order from Spectra. Samples are not edited here.",
+      "draft": "Entered here as a draft. Only a role that may edit orders can change it.",
+      "submitted": "Entered here and submitted. Only a draft can be changed.",
+      "void": "Entered here and voided. It cannot be changed."
+    },
+    "trackerRefused": "The journey comes from the order tracker, which your role cannot read.",
     "facts": {
       "stage": "Stage",
-      "pastDue": "Past due"
+      "pastDue": "Past due",
+      "prepayment": "{{percent}}% prepayment",
+      "hidden": "Hidden: {{reason}}"
     },
     "now": {
       "label": "Now",

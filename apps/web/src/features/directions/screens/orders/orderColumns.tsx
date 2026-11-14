@@ -6,6 +6,7 @@ import { OrderCell } from "./OrderCell";
 import { AgeCell, DocsCell, StockCell, ValueCell } from "./OrderFigures";
 import { ageInDays, ALL_DONE, type OrderRow } from "./orderRow";
 import { StageCell } from "./StageCell";
+import { shortSentence } from "./stockText";
 
 interface ColumnContext {
   t: TFunction;
@@ -15,6 +16,12 @@ interface ColumnContext {
   today: string;
   /** The role may not see amounts, so the value column cannot sort by them. */
   valueHidden: boolean;
+  /**
+   * The Waiting on stock filter is on, so the Stock column shows until the
+   * viewer chooses their own columns: a list of orders that wait on stock
+   * should say what each is short of.
+   */
+  showStock?: boolean;
 }
 
 /**
@@ -30,6 +37,7 @@ export function orderColumns({
   roleLabel,
   today,
   valueHidden,
+  showStock = false,
 }: ColumnContext): DataTableColumn<OrderRow>[] {
   const day = (value: string | null) =>
     value ? formatDay(value) : t("cells.notSet");
@@ -127,14 +135,8 @@ export function orderColumns({
       id: "stock",
       header: t("columns.stock"),
       cell: (row) => <StockCell row={row} />,
-      exportValue: (row) =>
-        row.shortage
-          ? t("cells.shortLine", {
-              quantity: row.shortage.shortBy,
-              itemNo: row.shortage.itemNo,
-            })
-          : "",
-      defaultHidden: true,
+      exportValue: (row) => shortSentence(row, t),
+      defaultHidden: !showStock,
     },
     {
       id: "externalDocumentNo",
@@ -161,6 +163,7 @@ export function orderColumns({
           : t("cells.notEntered"),
       exportValue: (row) =>
         row.captureState ? t(`entry.${row.captureState}`) : "",
+      sortable: true,
       defaultHidden: true,
     },
     {

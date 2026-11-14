@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { formatQuantity } from "@/lib/format";
 import { StatusChip } from "@/components/kit/StatusChip";
 import { Amount } from "./Amount";
+import { shortSentence } from "./stockText";
 import { ageInDays, type OrderRow } from "./orderRow";
 
 /** How old the order is in days, with a chip when the tracker says it is past due. */
@@ -27,29 +28,31 @@ export function ValueCell({ row }: { row: OrderRow }) {
   return <Amount field={row.amount} currency={row.currencyCode} />;
 }
 
-/** What the order is short of, as one chip: the quantity, and the item in the tooltip text. */
+/**
+ * What the order is short of: a chip with the quantity, and under it the first
+ * item and how many more are short, in words a keyboard or a phone can read
+ * (a tooltip alone would not reach them). The sentence in full is the
+ * tooltip and the export.
+ */
 export function StockCell({ row }: { row: OrderRow }) {
   const { t } = useTranslation("directions-orders");
   const gap = row.shortage;
   if (!gap) {
     return <span className="text-muted-foreground">{t("cells.covered")}</span>;
   }
-  const quantity = formatQuantity(gap.shortBy);
   return (
-    <span
-      title={
-        row.shortageCount > 1
-          ? t("cells.shortLineMore", {
-              quantity,
+    <span className="od-stock" title={shortSentence(row, t)}>
+      <StatusChip kind="warning" icon={PackageMinus}>
+        {t("cells.short", { quantity: formatQuantity(gap.shortBy) })}
+      </StatusChip>
+      <span className="od-stock-item numeral fs-12 text-muted-foreground">
+        {row.shortageCount > 1
+          ? t("cells.shortItems", {
               itemNo: gap.itemNo,
               count: row.shortageCount - 1,
             })
-          : t("cells.shortLine", { quantity, itemNo: gap.itemNo })
-      }
-    >
-      <StatusChip kind="warning" icon={PackageMinus}>
-        {t("cells.short", { quantity })}
-      </StatusChip>
+          : gap.itemNo}
+      </span>
     </span>
   );
 }

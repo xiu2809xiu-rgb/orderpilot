@@ -42,7 +42,7 @@ export function amount(value: string, masked = false) {
     : { ...OPEN_MASK, value };
 }
 
-interface OrderSpec {
+export interface OrderSpec {
   orderNo: string;
   customerNo: string;
   customerName: string;
@@ -54,6 +54,10 @@ interface OrderSpec {
   value: string;
   orderedDaysAgo: number;
   shipInDays: number | null;
+  /** An order entered here: the tracker does not know it, and it has an entry state. */
+  entered?: "draft" | "submitted" | "void";
+  /** How many items are short, when `shortBy` is set. The first is I-0190. */
+  shortItems?: number;
 }
 
 export const SPECS: OrderSpec[] = [
@@ -123,14 +127,14 @@ export const FLOW = {
 function ordersRow(spec: OrderSpec, masked: boolean) {
   return {
     orderNo: spec.orderNo,
-    source: "sample",
-    captureState: null,
+    source: spec.entered ? "stored" : "sample",
+    captureState: spec.entered ?? null,
     customerNo: spec.customerNo,
     customerName: spec.customerName,
     externalDocumentNo: `PO-${spec.orderNo}`,
     orderDate: dateOnly(-spec.orderedDaysAgo),
     shipmentDate: spec.shipInDays === null ? null : dateOnly(spec.shipInDays),
-    workflowStatus: spec.status.label,
+    workflowStatus: spec.entered ? null : spec.status.label,
     amount: amount(spec.value, masked),
     currencyCode: "USD",
     shortage: spec.shortBy
@@ -141,7 +145,7 @@ function ordersRow(spec: OrderSpec, masked: boolean) {
           shortBy: spec.shortBy,
         }
       : null,
-    shortageCount: spec.shortBy ? 1 : 0,
+    shortageCount: spec.shortBy ? (spec.shortItems ?? 1) : 0,
   };
 }
 
@@ -250,8 +254,12 @@ function detailOf(spec: OrderSpec, masked: boolean) {
 export interface ApiOptions {
   masked?: boolean;
   ordersFail?: boolean;
+  /** The tracker answers 403, as for a role that may not read it. */
+  trackerForbidden?: boolean;
   /** The orders list answers 403, as for a role that may not read orders. */
   ordersForbidden?: boolean;
+  /** One order's page cannot be read: the server answers 500. */
+  orderFails?: boolean;
   tasks?: unknown[];
   specs?: OrderSpec[];
   /** Orders with a document to confirm. */
@@ -327,10 +335,25 @@ export function stubApi(options: ApiOptions = {}): string[] {
         }
         return page(specs.map((spec) => ordersRow(spec, masked)));
       }
+      if (path.includes("/tracker/") && options.trackerForbidden) {
+        return reply(
+          {
+            error: {
+              code: "FORBIDDEN",
+              message: "x",
+              details: null,
+              traceId: "trace-403",
+            },
+          },
+          403,
+        );
+      }
       if (path.endsWith("/tracker/orders")) {
         const wanted = url.searchParams.get("documentToConfirm") === "true";
         const search = url.searchParams.get("search");
         const rows = specs
+          // The tracker does not know an order that is only a draft here.
+          .filter((spec) => !spec.entered)
           .filter((spec) =>
             wanted ? (options.toConfirm ?? []).includes(spec.orderNo) : true,
           )
@@ -340,14 +363,27 @@ export function stubApi(options: ApiOptions = {}): string[] {
       if (path.endsWith("/tracker/flow")) {
         return reply({ data: FLOW, meta: { mock: true } });
       }
-      const timeline = /\/tracker\/orders\/(SO-\d+)$/.exec(path);
+      const timeline = /\/tracker\/orders\/(SO-[\w-]+)$/.exec(path);
       if (timeline) {
         const spec = specs.find((s) => s.orderNo === timeline[1]);
-        return spec
+        return spec && !spec.entered
           ? reply({ data: timelineOf(spec), meta: { mock: true } })
           : notFound();
       }
-      const one = /\/orders\/(SO-\d+)$/.exec(path);
+      const one = /\/orders\/(SO-[\w-]+)$/.exec(path);
+      if (one && options.orderFails) {
+        return reply(
+          {
+            error: {
+              code: "INTERNAL_ERROR",
+              message: "x",
+              details: null,
+              traceId: "trace-order-500",
+            },
+          },
+          500,
+        );
+      }
       if (one) {
         const spec = specs.find((s) => s.orderNo === one[1]);
         return spec ? reply({ data: detailOf(spec, masked) }) : notFound();

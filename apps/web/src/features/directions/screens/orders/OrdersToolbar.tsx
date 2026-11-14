@@ -25,6 +25,7 @@ export function OrdersToolbar({
   rows,
   appliedWords,
   ticked,
+  ready,
   onClearTicks,
   onApply,
 }: {
@@ -38,6 +39,8 @@ export function OrdersToolbar({
   appliedWords: readonly string[];
   /** How many rows are ticked. */
   ticked: number;
+  /** The orders have arrived: until then there is nothing to take away. */
+  ready: boolean;
   onClearTicks: () => void;
   onApply: (query: OrdersQuery) => void;
 }) {
@@ -67,14 +70,18 @@ export function OrdersToolbar({
         onOrderChange={prefs.setOrder}
         onReset={prefs.resetColumns}
       />
-      <ExportMenu columns={shown} rows={rows} fileName="orders" />
-      <PrintButton
-        label={t("toolbar.print")}
-        title={t("title")}
-        filters={appliedWords}
-        columns={shown}
-        rows={rows}
-      />
+      {/* A disabled fieldset disables both buttons, so a click before the orders
+          arrive cannot export or print an empty list. */}
+      <fieldset className="od-takeaway" disabled={!ready}>
+        <ExportMenu columns={shown} rows={rows} fileName="orders" />
+        <PrintButton
+          label={t("toolbar.print")}
+          title={t("title")}
+          filters={appliedWords}
+          columns={shown}
+          rows={rows}
+        />
+      </fieldset>
     </div>
   );
 }

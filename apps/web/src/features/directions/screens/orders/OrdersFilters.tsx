@@ -15,6 +15,7 @@ import {
 import { LIFECYCLE_STAGES } from "@/features/order-tracker/trackerParams";
 import { CustomerFilter, type CustomerOption } from "./CustomerFilter";
 import { FilterField } from "./FilterField";
+import { FilterPanel } from "./FilterPanel";
 import { MoreFilters } from "./MoreFilters";
 import {
   fromStageStatus,
@@ -35,11 +36,14 @@ export function OrdersFilters({
   query,
   stageCounts,
   customers,
+  active,
   onChange,
 }: {
   query: OrdersQuery;
   stageCounts: Record<string, number>;
   customers: readonly CustomerOption[];
+  /** How many filters are in force, for the phone's closed panel. */
+  active: number;
   onChange: Patch;
 }) {
   const { t } = useTranslation("directions-orders");
@@ -82,6 +86,9 @@ export function OrdersFilters({
             type="search"
             value={draft}
             placeholder={t("filters.searchHint")}
+            // The slash key finds this field (see app/shell/shortcuts.ts).
+            data-quick-search=""
+            aria-keyshortcuts="/"
             className="od-control"
             onChange={(event) => {
               setDraft(event.target.value);
@@ -89,67 +96,70 @@ export function OrdersFilters({
           />
         </span>
       </FilterField>
-      <FilterField label={t("filters.stage")} htmlFor={stageId}>
-        <Select
-          value={stageStatusValue(query)}
-          onValueChange={(value) => {
-            onChange(fromStageStatus(value));
-          }}
-        >
-          <SelectTrigger id={stageId} className="od-control w-60">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">
-              {t("filters.allStages")} ({stageCounts.all ?? 0})
-            </SelectItem>
-            {LIFECYCLE_STAGES.map((stage) => (
-              <SelectGroup key={stage.id}>
-                <SelectSeparator />
-                <SelectLabel>
-                  {tt(`list.stages.${stage.id}`)} ({stageCounts[stage.id] ?? 0})
-                </SelectLabel>
-                <SelectItem value={`stage:${stage.id}`}>
-                  {t("filters.wholeStage", {
-                    stage: tt(`list.stages.${stage.id}`),
-                  })}
-                </SelectItem>
-                {stage.statuses.map((code) => (
-                  <SelectItem key={code} value={`status:${code}`}>
-                    {tt(`list.statuses.${code}`, { defaultValue: code })}
+      <FilterPanel active={active}>
+        <FilterField label={t("filters.stage")} htmlFor={stageId}>
+          <Select
+            value={stageStatusValue(query)}
+            onValueChange={(value) => {
+              onChange(fromStageStatus(value));
+            }}
+          >
+            <SelectTrigger id={stageId} className="od-control w-60">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">
+                {t("filters.allStages")} ({stageCounts.all ?? 0})
+              </SelectItem>
+              {LIFECYCLE_STAGES.map((stage) => (
+                <SelectGroup key={stage.id}>
+                  <SelectSeparator />
+                  <SelectLabel>
+                    {tt(`list.stages.${stage.id}`)} (
+                    {stageCounts[stage.id] ?? 0})
+                  </SelectLabel>
+                  <SelectItem value={`stage:${stage.id}`}>
+                    {t("filters.wholeStage", {
+                      stage: tt(`list.stages.${stage.id}`),
+                    })}
                   </SelectItem>
-                ))}
-              </SelectGroup>
-            ))}
-          </SelectContent>
-        </Select>
-      </FilterField>
-      <CustomerFilter
-        options={customers}
-        value={query.customer}
-        onChange={(customer) => {
-          onChange({ customer });
-        }}
-      />
-      <div className="od-toggles">
-        <ToggleChip
-          pressed={query.overdue}
-          onPressedChange={(overdue) => {
-            onChange({ overdue });
+                  {stage.statuses.map((code) => (
+                    <SelectItem key={code} value={`status:${code}`}>
+                      {tt(`list.statuses.${code}`, { defaultValue: code })}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              ))}
+            </SelectContent>
+          </Select>
+        </FilterField>
+        <CustomerFilter
+          options={customers}
+          value={query.customer}
+          onChange={(customer) => {
+            onChange({ customer });
           }}
-        >
-          {t("filters.overdue")}
-        </ToggleChip>
-        <ToggleChip
-          pressed={query.exceptions}
-          onPressedChange={(exceptions) => {
-            onChange({ exceptions });
-          }}
-        >
-          {t("filters.exceptions")}
-        </ToggleChip>
-        <MoreFilters query={query} onChange={onChange} />
-      </div>
+        />
+        <div className="od-toggles">
+          <ToggleChip
+            pressed={query.overdue}
+            onPressedChange={(overdue) => {
+              onChange({ overdue });
+            }}
+          >
+            {t("filters.overdue")}
+          </ToggleChip>
+          <ToggleChip
+            pressed={query.exceptions}
+            onPressedChange={(exceptions) => {
+              onChange({ exceptions });
+            }}
+          >
+            {t("filters.exceptions")}
+          </ToggleChip>
+          <MoreFilters query={query} onChange={onChange} />
+        </div>
+      </FilterPanel>
     </div>
   );
 }

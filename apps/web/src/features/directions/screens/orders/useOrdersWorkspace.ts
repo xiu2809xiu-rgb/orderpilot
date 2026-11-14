@@ -47,8 +47,9 @@ export function useOrdersWorkspace() {
         roleLabel: (role) => tc(`roles.${role}`),
         today,
         valueHidden,
+        showStock: query.stock,
       }),
-    [t, tc, today, valueHidden],
+    [t, tc, today, valueHidden, query.stock],
   );
   const table = useOrderColumns(columns);
   // A role that may not see values cannot sort by them, whatever the address says.

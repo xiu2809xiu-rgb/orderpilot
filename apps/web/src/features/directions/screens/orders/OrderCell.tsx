@@ -1,11 +1,9 @@
-import { Ban, FileCheck, FilePen, TriangleAlert } from "lucide-react";
+import { TriangleAlert } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { Badge } from "@/components/kit/Badge";
-import { StatusChip } from "@/components/kit/StatusChip";
+import { EntryChip } from "./EntryChip";
 import type { OrderRow } from "./orderRow";
-
-const ENTRY_ICON = { draft: FilePen, submitted: FileCheck, void: Ban } as const;
 
 /**
  * The order's number, as a link to its page, with the count of open
@@ -19,7 +17,7 @@ export function OrderCell({ row, href }: { row: OrderRow; href: string }) {
     <span className="inline-flex items-center gap-2">
       <Link
         to={href}
-        className="numeral text-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+        className="numeral text-foreground underline-offset-4 hover:underline pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
       >
         {row.orderNo}
       </Link>
@@ -34,9 +32,7 @@ export function OrderCell({ row, href }: { row: OrderRow; href: string }) {
         </Badge>
       ) : null}
       {row.source === "stored" && row.captureState ? (
-        <StatusChip kind="info" icon={ENTRY_ICON[row.captureState]}>
-          {t(`entry.${row.captureState}`)}
-        </StatusChip>
+        <EntryChip state={row.captureState} />
       ) : null}
     </span>
   );

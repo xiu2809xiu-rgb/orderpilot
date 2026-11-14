@@ -55,6 +55,8 @@ describe("the order page", () => {
     expect(within(facts).getByText("Finance")).toBeVisible();
     expect(within(facts).getByText("PO-SO-0001")).toBeVisible();
     expect(within(facts).getByText("3 d late")).toBeVisible();
+    // The read-only order form showed the prepayment, and customers pay before shipping.
+    expect(within(facts).getByText("30% prepayment")).toBeVisible();
   });
 
   it("shows the journey with done, now and later, and who and when for done steps", async () => {
@@ -174,6 +176,37 @@ describe("the order page", () => {
     expect(
       screen.getAllByText(/prices are for roles that work with pricing/).length,
     ).toBeGreaterThan(2);
+    // The reason is on the page in words too: a tablet has no hover to show it.
+    expect(
+      document.querySelector("[data-main] .od-fact-note")?.textContent,
+    ).toBe("Hidden: prices are for roles that work with pricing");
+  });
+
+  it("keeps the facts and the lines for a role the tracker refuses, and says why there is no journey", async () => {
+    stubApi({ trackerForbidden: true });
+    open(PAID);
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "SO-0001" }),
+    ).toBeVisible();
+    expect(
+      screen.getByText(
+        "The journey comes from the order tracker, which your role cannot read.",
+      ),
+    ).toBeVisible();
+    expect(
+      await screen.findByRole("table", { name: "Lines of the order" }),
+    ).toBeVisible();
+  });
+
+  it("tells a role with no tasks nothing about one", async () => {
+    useSessionStore.setState({
+      status: "active",
+      session: sessionFor("MANAGEMENT"),
+    });
+    stubApi();
+    open(PAID);
+    await screen.findByRole("heading", { level: 1, name: "SO-0001" });
+    expect(screen.queryByText(/no open task/)).toBeNull();
   });
 
   it("says plainly when the order is not found", async () => {
@@ -181,6 +214,15 @@ describe("the order page", () => {
     open("SO-9999");
     expect(await screen.findByText("That order was not found")).toBeVisible();
     expect(screen.getByRole("link", { name: "Orders" })).toBeVisible();
+  });
+
+  it("shows the error with its trace id and a way to retry when the order cannot be read", async () => {
+    stubApi({ orderFails: true });
+    open(PAID);
+    expect(await screen.findByText(/trace-order-500/)).toBeVisible();
+    expect(screen.getByRole("button", { name: "Try again" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "Orders" })).toBeVisible();
+    expect(screen.queryByText("That order was not found")).toBeNull();
   });
 
   it("has no accessibility violations", async () => {

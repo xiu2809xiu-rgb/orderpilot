@@ -11,17 +11,19 @@ import { canComplete, useCompleteTask } from "../home/useCompleteTask";
  * task that one click finishes (send the PI, mark packed) is finished here, as
  * on the home screen, with the app's own toast and Undo. A decision (approve an
  * SPR, confirm a payment) is made on the order's steps page of the app, so the
- * button opens that page. When the person has no task on the order, there is
- * no button, and a line says so.
+ * button opens that page. When a person who holds tasks has none on this order,
+ * there is no button, and a line says so.
  */
 export function OrderAction({
   task,
   orderNo,
   pending,
+  hasInbox,
 }: {
   task: WorkflowTask | null;
   orderNo: string;
   pending: boolean;
+  hasInbox: boolean;
 }) {
   const { t } = useTranslation("directions-orders");
   const { t: tHome } = useTranslation("home");
@@ -29,7 +31,8 @@ export function OrderAction({
     onDone: () => undefined,
     onUndone: () => undefined,
   });
-  if (pending) return null;
+  // A role with no inbox (the auditor, management) has no task to be told about.
+  if (pending || !hasInbox) return null;
   if (!task) {
     return (
       <p className="od-no-action fs-14 text-muted-foreground">

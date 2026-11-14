@@ -221,4 +221,64 @@ describe("the order of the rows", () => {
       "SO-2",
     ]);
   });
+
+  it("reads the addresses the old Orders list made", () => {
+    const query = parseQuery(
+      new URLSearchParams(
+        "customerNo=C-0002&captureState=draft&source=stored&orderDateFrom=2026-10-01&orderDateTo=2026-10-31" +
+          "&search=po&sort=customerNo&direction=desc&pageSize=50&stock=waiting",
+      ),
+    );
+    expect(query).toMatchObject({
+      customer: "C-0002",
+      entry: "draft",
+      source: "stored",
+      from: "2026-10-01",
+      to: "2026-10-31",
+      search: "po",
+      sort: { id: "customerName", direction: "desc" },
+      pageSize: 50,
+      stock: true,
+    });
+    expect(parseQuery(new URLSearchParams("sort=captureState")).sort?.id).toBe(
+      "entry",
+    );
+  });
+
+  it("lets a new name win over an old one, and writes only new names", () => {
+    const params = new URLSearchParams("customer=C-0009&customerNo=C-0002");
+    const query = parseQuery(params);
+    expect(query.customer).toBe("C-0009");
+    const written = toParams({ ...query, customer: null }, params);
+    // Neither name stays, or a cleared filter would come back from the old one.
+    expect(written.has("customer")).toBe(false);
+    expect(written.has("customerNo")).toBe(false);
+  });
+
+  it("keeps the page sizes the old list had, and the one the workspace added", () => {
+    for (const size of [10, 25, 50, 100]) {
+      expect(
+        parseQuery(new URLSearchParams(`size=${String(size)}`)).pageSize,
+      ).toBe(size);
+    }
+    expect(parseQuery(new URLSearchParams("size=7")).pageSize).toBe(25);
+  });
+
+  it("sorts by the entry state with an order that has none last", () => {
+    const rows = [
+      row("SO-1"),
+      row("SO-2", { source: "stored", captureState: "submitted" }),
+      row("SO-3", { source: "stored", captureState: "draft" }),
+    ];
+    expect(nos(sortOrders(rows, { id: "entry", direction: "asc" }))).toEqual([
+      "SO-3",
+      "SO-2",
+      "SO-1",
+    ]);
+    expect(nos(sortOrders(rows, { id: "entry", direction: "desc" }))).toEqual([
+      "SO-2",
+      "SO-3",
+      "SO-1",
+    ]);
+  });
 });
