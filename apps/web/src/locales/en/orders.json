@@ -44,8 +44,8 @@
       "prepayment": "Enter a percentage from 0 to 100, with two decimals at most.",
       "item": "Choose an item.",
       "description": "A description has 100 characters at most.",
-      "quantity": "Enter a quantity above zero.",
-      "unitPrice": "Enter a price with two decimals at most.",
+      "quantity": "Above zero.",
+      "unitPrice": "A price, such as 12.50.",
       "none": "Add at least one line.",
       "tooMany": "An order has 200 lines at most."
     },
