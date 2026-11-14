@@ -272,9 +272,17 @@
     },
     "noChecks": "No check has read this document yet.",
     "review": "Open the order's steps",
+    "received": "Received {{date}}",
+    "due": "Due {{date}}",
+    "flow": {
+      "confirmed": "Confirmed",
+      "to-confirm": "To confirm",
+      "expected": "Expected"
+    },
     "checked": "Checks: {{passed}} passed, {{failed}} found a difference.",
     "confirmTitle": "A document of this order waits for you to confirm it",
-    "confirmBody": "The tracker says a person must confirm the fields read from one of the documents. It does not say which one."
+    "confirmBody": "The tracker says a person must confirm the fields read from one of the documents. It does not say which one.",
+    "confirmBodyNamed": "The tracker says a person must confirm the fields read from one of the documents. It is marked To confirm in the list below."
   },
   "mask": {
     "role": "your role does not include this figure",

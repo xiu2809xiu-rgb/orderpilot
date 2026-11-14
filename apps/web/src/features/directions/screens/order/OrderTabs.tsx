@@ -1,11 +1,13 @@
 import type { OrderTimeline, SalesOrderDetail } from "@orderpilot/shared";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router";
+import { useWorkflowsOrderFlow } from "@/lib/api/generated/endpoints/workflows/workflows";
+import { hasPermission, useSessionStore } from "@/stores/session";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ActivityTab } from "./ActivityTab";
 import { ChecksTab } from "./ChecksTab";
 import { DocumentsTab } from "./DocumentsTab";
-import { documentsOf } from "./documentsModel";
+import { documentsOf, withFlow } from "./documentsModel";
 import { LinesTab } from "./LinesTab";
 
 const TABS = ["lines", "documents", "checks", "activity"] as const;
@@ -32,12 +34,24 @@ export function OrderTabs({
 }) {
   const { t } = useTranslation("directions-orders");
   const [params, setParams] = useSearchParams();
+  // The workflow lists the documents received and still expected; a role that may not read it sees the ones the checks read.
+  const mayReadFlow = hasPermission(
+    useSessionStore((state) => state.session),
+    "workflows.read",
+  );
+  const flow = useWorkflowsOrderFlow(orderNo, {
+    query: { enabled: mayReadFlow, retry: false },
+  });
+  const documents = withFlow(
+    documentsOf(timeline.checks, { orderNo }),
+    flow.data?.data.documents ?? [],
+  );
   const asked = params.get("tab");
   const tab: Tab = isTab(asked) ? asked : "lines";
   const failed = timeline.checks.filter((check) => check.outcome !== "pass");
   const counts: Record<Tab, number> = {
     lines: detail?.lines.length ?? 0,
-    documents: documentsOf(timeline.checks, { orderNo }).length,
+    documents: documents.length,
     checks: failed.length > 0 ? failed.length : timeline.checks.length,
     activity: timeline.steps.length,
   };
@@ -72,7 +86,7 @@ export function OrderTabs({
       </TabsContent>
       <TabsContent value="documents">
         <DocumentsTab
-          checks={timeline.checks}
+          documents={documents}
           orderNo={orderNo}
           externalDocumentNo={timeline.externalDocumentNo}
           toConfirm={toConfirm}

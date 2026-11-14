@@ -134,6 +134,53 @@ describe("the order page", () => {
     expect(screen.getByText(/It does not say which one/)).toBeVisible();
   });
 
+  it("lists the documents the workflow knows, with the one waiting for a person marked", async () => {
+    stubApi({
+      toConfirm: ["SO-0001"],
+      flowDocuments: [
+        {
+          id: "d1",
+          type: "CUSTOMER_PO",
+          number: "PO-SO-0001",
+          status: "confirmed",
+          receivedAt: "2026-11-02T01:00:00.000Z",
+          dueDate: null,
+        },
+        {
+          id: "d2",
+          type: "PACKING_LIST",
+          number: "PL-77",
+          status: "to-confirm",
+          receivedAt: "2026-11-05T01:00:00.000Z",
+          dueDate: null,
+        },
+        {
+          id: "d3",
+          type: "AWB",
+          number: null,
+          status: "expected",
+          receivedAt: null,
+          dueDate: "2026-11-23",
+        },
+      ],
+    });
+    open(PAID, "?tab=documents");
+    // The workflow answers after the tracker: wait for its number.
+    await screen.findByText("PL-77");
+    const packing = screen.getByText("Packing list").closest("li");
+    if (!packing) throw new Error("no document row");
+    expect(within(packing).getByText("To confirm")).toBeVisible();
+    expect(within(packing).getByText("PL-77")).toBeVisible();
+    expect(within(packing).getByText("Received 5 Nov 2026")).toBeVisible();
+    const awb = screen.getByText("Air waybill").closest("li");
+    if (!awb) throw new Error("no AWB row");
+    expect(within(awb).getByText("Expected")).toBeVisible();
+    expect(within(awb).getByText("Due 23 Nov 2026")).toBeVisible();
+    // The alert can name the document now, because the list does.
+    expect(screen.getByText(/It is marked To confirm/)).toBeVisible();
+    expect(screen.queryByText(/It does not say which one/)).toBeNull();
+  });
+
   it("makes the person's own task the one primary button, finished here with one click", async () => {
     stubApi({ tasks: [taskOn("SO-0001", "SEND_PI")] });
     open(PAID);

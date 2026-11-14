@@ -264,6 +264,8 @@ export interface ApiOptions {
   specs?: OrderSpec[];
   /** Orders with a document to confirm. */
   toConfirm?: string[];
+  /** The documents the workflow lists for an order; without them its flow is unknown (404). */
+  flowDocuments?: unknown[];
 }
 
 function reply(body: unknown, status = 200) {
@@ -387,6 +389,14 @@ export function stubApi(options: ApiOptions = {}): string[] {
       if (one) {
         const spec = specs.find((s) => s.orderNo === one[1]);
         return spec ? reply({ data: detailOf(spec, masked) }) : notFound();
+      }
+      if (/\/workflows\/orders\/SO-[\w-]+\/flow$/.test(path)) {
+        return options.flowDocuments
+          ? reply({
+              data: { documents: options.flowDocuments },
+              meta: { mock: true },
+            })
+          : notFound();
       }
       if (path.endsWith("/workflows/tasks")) {
         return page(options.tasks ?? []);

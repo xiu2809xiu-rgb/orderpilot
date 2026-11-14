@@ -1,6 +1,7 @@
-import type { CheckResult } from "@orderpilot/shared";
+import type { OrderFlowDocument } from "@orderpilot/shared";
 import {
   CircleCheck,
+  Clock,
   Hourglass,
   TriangleAlert,
   type LucideIcon,
@@ -17,16 +18,22 @@ import {
 import { FileType } from "@/components/kit/FileType";
 import { StatusChip, type StatusKind } from "@/components/kit/StatusChip";
 import { hasPermission, useSessionStore } from "@/stores/session";
-import {
-  documentsOf,
-  type MatchState,
-  type OrderDocumentRow,
-} from "./documentsModel";
+import { type MatchState, type OrderDocumentRow } from "./documentsModel";
+import { formatDate, formatDay } from "../../../workflows/format";
 
 const CHIP: Record<MatchState, { kind: StatusKind; icon: LucideIcon }> = {
   differs: { kind: "destructive", icon: TriangleAlert },
   matches: { kind: "success", icon: CircleCheck },
   unchecked: { kind: "warning", icon: Hourglass },
+};
+
+const FLOW_CHIP: Record<
+  OrderFlowDocument["status"],
+  { kind: StatusKind; icon: LucideIcon }
+> = {
+  confirmed: { kind: "success", icon: CircleCheck },
+  "to-confirm": { kind: "warning", icon: Hourglass },
+  expected: { kind: "info", icon: Clock },
 };
 
 function DocumentItem({
@@ -38,6 +45,13 @@ function DocumentItem({
 }) {
   const { t } = useTranslation("directions-orders");
   const { kind, icon } = CHIP[document.state];
+  const flow = document.flow;
+  const number = flow ? flow.number : null;
+  const when = flow?.receivedAt
+    ? t("documents.received", { date: formatDate(flow.receivedAt) })
+    : flow?.dueDate
+      ? t("documents.due", { date: formatDay(flow.dueDate) })
+      : null;
   return (
     <li className="od-doc">
       <FileType
@@ -48,13 +62,14 @@ function DocumentItem({
       <div className="od-doc-main">
         <p className="fs-14 font-medium text-foreground">
           {t(`documents.type.${document.type}`)}
-          {document.type === "CUSTOMER_PO" ? (
+          {number || document.type === "CUSTOMER_PO" ? (
             <span className="numeral text-muted-foreground">
               {" "}
-              {externalDocumentNo}
+              {number ?? externalDocumentNo}
             </span>
           ) : null}
         </p>
+        {when ? <p className="fs-14 text-muted-foreground">{when}</p> : null}
         <p className="fs-14 text-muted-foreground">
           {document.rules.length === 0
             ? t("documents.noChecks")
@@ -74,9 +89,20 @@ function DocumentItem({
         ) : null}
       </div>
       <div className="od-doc-state">
-        <StatusChip kind={kind} icon={icon}>
-          {t(`documents.state.${document.state}`)}
-        </StatusChip>
+        {flow ? (
+          <StatusChip
+            kind={FLOW_CHIP[flow.status].kind}
+            icon={FLOW_CHIP[flow.status].icon}
+          >
+            {t(`documents.flow.${flow.status}`)}
+          </StatusChip>
+        ) : null}
+        {/* A document still expected has nothing to check yet. */}
+        {flow?.status === "expected" && document.rules.length === 0 ? null : (
+          <StatusChip kind={kind} icon={icon}>
+            {t(`documents.state.${document.state}`)}
+          </StatusChip>
+        )}
       </div>
     </li>
   );
@@ -85,24 +111,26 @@ function DocumentItem({
 /**
  * The documents of the order and where each stands. They are read from what the
  * checks cite, so a document appears when a check read it; the state is what
- * those checks say, never a guess. The customer's PO always leads. When the
+ * those checks say, never a guess; the workflow adds what it knows of each
+ * (its number, when it came or is due, and whether a person has confirmed it),
+ * and lists the ones still expected. The customer's PO always leads. When the
  * tracker says a document of the order waits for a person to confirm it, an
- * alert says so above the list, because it does not say which one, and links
- * to the review once that screen exists.
+ * alert says so above the list and links to the review; it names the document
+ * only when the workflow's list does.
  */
 export function DocumentsTab({
-  checks,
+  documents,
   orderNo,
   externalDocumentNo,
   toConfirm,
 }: {
-  checks: readonly CheckResult[];
+  documents: readonly OrderDocumentRow[];
   orderNo: string;
   externalDocumentNo: string;
   toConfirm: boolean;
 }) {
   const { t } = useTranslation("directions-orders");
-  const documents = documentsOf(checks, { orderNo });
+  const named = documents.some((row) => row.flow?.status === "to-confirm");
   // The task that confirms the fields is on the order's steps page.
   const maySeeSteps = hasPermission(
     useSessionStore((state) => state.session),
@@ -113,7 +141,9 @@ export function DocumentsTab({
       {toConfirm ? (
         <Alert variant="info">
           <AlertTitle>{t("documents.confirmTitle")}</AlertTitle>
-          <AlertDescription>{t("documents.confirmBody")}</AlertDescription>
+          <AlertDescription>
+            {t(named ? "documents.confirmBodyNamed" : "documents.confirmBody")}
+          </AlertDescription>
           {maySeeSteps ? (
             <AlertAction>
               <Button

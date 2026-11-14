@@ -1,6 +1,6 @@
 import type { CheckResult, DocumentType } from "@orderpilot/shared";
 import { describe, expect, it } from "vitest";
-import { documentsOf } from "./documentsModel";
+import { documentsOf, withFlow } from "./documentsModel";
 
 const check = (
   id: string,
@@ -77,5 +77,45 @@ describe("documentsOf", () => {
       state: "unchecked",
     });
     expect(documentsOf([], OPTIONS)).toHaveLength(1);
+  });
+});
+
+describe("withFlow", () => {
+  const flow = (
+    id: string,
+    type: DocumentType,
+    status: "confirmed" | "to-confirm" | "expected",
+  ) => ({
+    id,
+    type,
+    number: null,
+    status,
+    receivedAt: null,
+    dueDate: null,
+  });
+
+  it("gives a workflow document the checked row of its type, and lists one the checks never read", () => {
+    const rows = withFlow(
+      documentsOf([check("1", "fail", [["pl", "PACKING_LIST"]])], OPTIONS),
+      [flow("f1", "PACKING_LIST", "to-confirm"), flow("f2", "AWB", "expected")],
+    );
+    const packing = rows.find((row) => row.type === "PACKING_LIST");
+    expect(packing).toMatchObject({ id: "pl", state: "differs" });
+    expect(packing?.flow?.status).toBe("to-confirm");
+    expect(rows.find((row) => row.type === "AWB")).toMatchObject({
+      state: "unchecked",
+      rules: [],
+    });
+    // One document is one row, and the customer's PO still leads.
+    expect(rows.filter((row) => row.type === "PACKING_LIST")).toHaveLength(1);
+    expect(rows[0]?.type).toBe("CUSTOMER_PO");
+  });
+
+  it("leaves the checked rows as they are when the workflow lists nothing", () => {
+    const rows = documentsOf(
+      [check("1", "pass", [["po", "CUSTOMER_PO"]])],
+      OPTIONS,
+    );
+    expect(withFlow(rows, [])).toEqual(rows);
   });
 });
