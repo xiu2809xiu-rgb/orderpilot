@@ -24,6 +24,7 @@ type Patch = (patch: Partial<OrdersQuery>) => void;
 /** How many of the filters behind the button are on, so a closed button still tells. */
 export function moreCount(query: OrdersQuery): number {
   return [
+    query.stock,
     query.toConfirm,
     query.open,
     query.entry,
@@ -38,7 +39,7 @@ const spanDays = (from: string | null, to: string | null): number | null =>
     ? Math.round((Date.parse(to) - Date.parse(from)) / DAY_MS) + 1
     : null;
 
-/** The filters kept behind "More filters": documents, open orders, entry, source and the date range. */
+/** The filters kept behind "More filters": stock, documents, open orders, entry, source and the date range. */
 export function MoreFilters({
   query,
   onChange,
@@ -50,7 +51,7 @@ export function MoreFilters({
   const id = useId();
   const count = moreCount(query);
   const span = spanDays(query.from, query.to);
-  const toggle = (key: "toConfirm" | "open", label: string) => (
+  const toggle = (key: "stock" | "toConfirm" | "open", label: string) => (
     <div className="flex min-h-9 items-center justify-between gap-4">
       <Label htmlFor={`${id}-${key}`} className="fs-14 font-normal">
         {label}
@@ -82,6 +83,7 @@ export function MoreFilters({
       </PopoverTrigger>
       <PopoverContent align="start" className="w-80 space-y-4">
         <div>
+          {toggle("stock", t("filters.stock"))}
           {toggle("toConfirm", t("filters.toConfirm"))}
           {toggle("open", t("filters.open"))}
         </div>
@@ -113,7 +115,7 @@ export function MoreFilters({
           <legend className="fs-14 font-medium">
             {t("filters.orderDate")}
           </legend>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2 pointer-coarse:grid-cols-1">
             <div className="space-y-1">
               <Label
                 htmlFor={`${id}-from`}

@@ -274,7 +274,9 @@ describe("the Orders workspace keeps what the old list gave", () => {
     const first = open("/orders?stock=waiting");
     expect(orderNos(await bodyRows())).toEqual(["SO-20261108-0001"]);
     expect(
-      screen.getByRole("button", { name: "Waiting on stock", pressed: true }),
+      within(screen.getByRole("list", { name: "Filters in force" })).getByText(
+        "Waiting on stock",
+      ),
     ).toBeVisible();
     first.unmount();
     open("/orders?stock=true");
@@ -287,6 +289,20 @@ describe("the Orders workspace keeps what the old list gave", () => {
     await bodyRows();
     expect(screen.getByText("Short 6")).toBeVisible();
     expect(screen.getByText("I-0190 and 2 more")).toBeVisible();
+  });
+
+  it("shows the entry state and what is short in the side peek of an order entered here", async () => {
+    stubApi({ specs: [nth(SPECS, 0), draft] });
+    const user = userEvent.setup();
+    open();
+    await bodyRows();
+    const row = screen.getByRole("link", { name: draft.orderNo }).closest("tr");
+    if (!row) throw new Error("no row");
+    await user.click(within(row).getByText("Alpha Traders"));
+    const peek = await screen.findByRole("dialog");
+    expect(within(peek).getByText("Draft")).toBeVisible();
+    expect(within(peek).getByText("Short 6")).toBeVisible();
+    expect(within(peek).getByText("I-0190 and 2 more")).toBeVisible();
   });
 
   it("filters by customer, picked by number from the orders' own customers", async () => {

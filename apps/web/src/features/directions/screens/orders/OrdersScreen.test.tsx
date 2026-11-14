@@ -139,7 +139,8 @@ describe("the Orders workspace", () => {
     await user.click(screen.getByRole("button", { name: "Has exceptions" }));
     expect(await bodyRows()).toHaveLength(1);
     await user.click(screen.getByRole("button", { name: "Has exceptions" }));
-    await user.click(screen.getByRole("button", { name: "Waiting on stock" }));
+    await user.click(screen.getByRole("button", { name: /More filters/ }));
+    await user.click(screen.getByRole("switch", { name: "Waiting on stock" }));
     expect(await bodyRows()).toHaveLength(1);
     await user.click(screen.getByRole("button", { name: "Clear all" }));
     expect(await bodyRows()).toHaveLength(4);

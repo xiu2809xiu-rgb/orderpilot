@@ -179,6 +179,15 @@
   gap: 0.75rem;
 }
 
+/* The filter panel is only a wrapper on a wide screen, and a disclosure on a phone. */
+.od-filter-panel {
+  display: contents;
+}
+
+.od-filter-toggle {
+  display: none;
+}
+
 .od-field {
   display: flex;
   min-width: 0;
@@ -970,25 +979,55 @@
   font-size: var(--type-14);
 }
 
-/* ---- Phones: the filters share rows, and the heads stack ---- */
+/* ---- Phones: the search and a Filters button share the first row, and the rest folds ---- */
 @media (max-width: 47.99rem) {
   .od-filters {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 
-  .od-filters .od-field-search {
-    grid-column: 1 / -1;
-  }
-
-  .od-filters .od-search,
-  .od-filters .od-field > button,
-  .od-filters .od-field [data-slot="select-trigger"] {
+  .od-filters .od-search {
     width: 100%;
   }
 
-  .od-filters .od-toggles {
+  .od-filter-toggle {
+    display: inline-flex;
+  }
+
+  .od-filter-panel {
+    display: grid;
     grid-column: 1 / -1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .od-filter-panel[data-open="false"] {
+    display: none;
+  }
+
+  .od-filter-panel .od-field > button,
+  .od-filter-panel .od-field [data-slot="select-trigger"] {
+    width: 100%;
+  }
+
+  .od-filter-panel .od-toggles {
+    grid-column: 1 / -1;
+  }
+
+  .od-top > [data-slot="tabs"] {
+    width: 100%;
+  }
+
+  /* Four views and their counts do not fit one 358 px strip, so they take two even columns. */
+  .od-views {
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-radius: 1.25rem;
+  }
+
+  .od-view {
+    justify-content: space-between;
   }
 }
 /* On a phone the page scrolls as a whole and the table takes the height of its rows. */

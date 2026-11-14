@@ -69,6 +69,7 @@ export function OrdersWorkspace({
         query={query}
         stageCounts={w.stageCounts}
         customers={w.customers}
+        active={w.chips.length}
         onChange={change}
       />
       <AppliedFilters chips={w.chips} onChange={change} />

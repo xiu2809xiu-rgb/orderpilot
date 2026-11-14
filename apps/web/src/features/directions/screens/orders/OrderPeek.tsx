@@ -19,6 +19,8 @@ import { OrderJourney } from "../order/OrderJourney";
 import { ShipLine } from "../order/ShipLine";
 import { useOrderJourney } from "../order/useOrderJourney";
 import { Amount } from "./Amount";
+import { EntryChip } from "./EntryChip";
+import { StockCell } from "./OrderFigures";
 import { ageInDays, ALL_DONE, type OrderRow } from "./orderRow";
 
 /**
@@ -121,6 +123,16 @@ export function OrderPeek({
                   <Fact label={t("columns.po")}>
                     <span className="numeral">{row.externalDocumentNo}</span>
                   </Fact>
+                  {row.source === "stored" && row.captureState ? (
+                    <Fact label={t("columns.entry")}>
+                      <EntryChip state={row.captureState} />
+                    </Fact>
+                  ) : null}
+                  {row.shortage ? (
+                    <Fact label={t("columns.stock")}>
+                      <StockCell row={row} />
+                    </Fact>
+                  ) : null}
                 </dl>
                 <h3 className="od-peek-title fs-14">{t("peek.journey")}</h3>
                 {timeline.isPending ? (

@@ -68,8 +68,16 @@ test.describe("The Orders workspace", () => {
     await signInAs(page, "SUPPORT");
     await page.goto("/orders?stock=waiting");
     await expect(
-      page.getByRole("button", { name: "Waiting on stock", pressed: true }),
+      page
+        .getByRole("list", { name: "Filters in force" })
+        .getByText("Waiting on stock"),
     ).toBeVisible();
+    // The switch is under More filters, and it is on.
+    await page.getByRole("button", { name: /More filters/ }).click();
+    await expect(
+      page.getByRole("switch", { name: "Waiting on stock" }),
+    ).toBeChecked();
+    await page.keyboard.press("Escape");
     await expect(page.getByText(/^Short [\d,.]+$/).first()).toBeVisible();
     // The Stock column says Covered for an order that is not short of anything.
     await expect(page.getByText("Covered")).toHaveCount(0);
