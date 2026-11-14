@@ -28,7 +28,7 @@ export interface AuditSearch {
   readonly refusalsOnly?: boolean;
   /** Leaves refusals out: a record's operation log is what was done to it, not what was refused. */
   readonly withoutRefusals?: boolean;
-  /** Words in the summary, ignoring case. */
+  /** Words in the summary, ignoring case, or a whole trace ID, such as one quoted from a refusal. */
   readonly search?: string;
 }
 
@@ -215,8 +215,19 @@ function toWhere(filters: AuditSearch): Prisma.AuditEventWhereInput {
     ...(filters.action ? { action: { startsWith: filters.action } } : {}),
     ...(filters.entityType ? { entityType: filters.entityType } : {}),
     ...(filters.entityId ? { entityId: filters.entityId } : {}),
+    // Inside AND, so it cannot replace the OR that refusalsOnly sets: an
+    // auditor ticks Refusals only and pastes the trace ID a refusal quoted.
     ...(filters.search
-      ? { summary: { contains: filters.search, mode: "insensitive" } }
+      ? {
+          AND: [
+            {
+              OR: [
+                { summary: { contains: filters.search, mode: "insensitive" } },
+                { traceId: { equals: filters.search, mode: "insensitive" } },
+              ],
+            },
+          ],
+        }
       : {}),
     ...(filters.refusalsOnly
       ? {
