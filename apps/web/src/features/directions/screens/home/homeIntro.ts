@@ -34,7 +34,10 @@ export function introOf(
       ? t("introRefusedNone")
       : t("introRefused", { count: total });
   }
-  const total = queries.rules.data?.data.length;
+  // A rule Spectra settled at the briefing no longer waits for it.
+  const total = queries.rules.data?.data.filter(
+    (rule) => rule.status === "open",
+  ).length;
   if (total === undefined) return undefined;
   return total === 0 ? t("introRulesNone") : t("introRules", { count: total });
 }

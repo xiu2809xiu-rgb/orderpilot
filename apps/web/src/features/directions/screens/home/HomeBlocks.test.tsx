@@ -188,28 +188,29 @@ describe("the auditor's refused actions", () => {
   });
 });
 
-describe("the system administrator's open rules", () => {
-  const NAME = "Waiting for Spectra to confirm";
+describe("the system administrator's business rules", () => {
+  const NAME = "Business rules from Spectra";
 
-  it("lists each rule with its draft value, and opens only a rule that has a screen", async () => {
+  it("shows what Spectra confirmed beside what still waits, and leads nowhere", async () => {
     serveHome({ rules: RULES });
     renderHome("SYSTEM_ADMIN");
     const section = await screen.findByRole("region", { name: NAME });
-    expect(await within(section).findByText("SPR trigger")).toBeVisible();
+    expect(await within(section).findByText("Who approves")).toBeVisible();
     expect(
       within(section).getByText(
-        "Raise an SPR when an order line is short of stock",
+        "Any one of three management approvers decides, after a coordinator routes it",
       ),
     ).toBeVisible();
-    expect(within(section).getByText("Held in configuration")).toBeVisible();
-    // One rule has a screen and one does not: one link, and no button that leads nowhere.
-    const links = within(section).getAllByRole("link");
-    expect(links).toHaveLength(1);
-    expect(links[0]).toHaveAttribute("href", "/governance?tab=limits");
+    // The settled rule says so, with the date of the briefing; the open one still waits.
+    expect(within(section).getByText("Confirmed 5 Nov")).toBeVisible();
+    expect(within(section).getByText("Approval limits")).toBeVisible();
+    expect(within(section).getByText("To confirm")).toBeVisible();
+    // Each stays a setting: no row opens a screen, and nothing in it is a button.
+    expect(within(section).queryAllByRole("link")).toHaveLength(0);
     expect(within(section).queryAllByRole("button")).toHaveLength(0);
     expect(
       await screen.findByText(
-        "2 business rules wait for Spectra to confirm them.",
+        "1 business rule waits for Spectra to confirm it.",
       ),
     ).toBeVisible();
   });
@@ -229,7 +230,7 @@ describe("the system administrator's open rules", () => {
     expect(alert).toHaveTextContent("trace-home-1");
   });
 
-  it("is a real home page: a greeting, its numbers, its list and its shortcuts", async () => {
+  it("is a real home page: a greeting, its numbers, its list and the health of its services", async () => {
     serveHome({ rules: RULES });
     renderHome("SYSTEM_ADMIN");
     expect(
@@ -243,7 +244,7 @@ describe("the system administrator's open rules", () => {
       await screen.findByRole("region", { name: "Your numbers" }),
     ).toBeVisible();
     expect(
-      await screen.findByRole("region", { name: "Shortcuts" }),
+      await screen.findByRole("region", { name: "System health" }),
     ).toBeVisible();
   });
 });

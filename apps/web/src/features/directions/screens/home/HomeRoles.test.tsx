@@ -33,7 +33,7 @@ interface Expected {
 
 const BY_ROLE: Record<Role, Expected> = {
   SYSTEM_ADMIN: {
-    list: "Waiting for Spectra to confirm",
+    list: "Business rules from Spectra",
     inbox: false,
     measures: false,
     trend: false,
@@ -111,9 +111,10 @@ const SECTIONS = [
   "My timeline",
   "Most overdue, by amount",
   "Latest refused actions",
-  "Waiting for Spectra to confirm",
+  "Business rules from Spectra",
   "Your numbers",
   "Shortcuts",
+  "System health",
   "Spectra's five measures",
   "Twelve weeks of the five measures",
   "Orders in each step",
@@ -134,6 +135,8 @@ describe("the home page of each role", () => {
 
   describe.each(ROLES)("as %s", (role) => {
     const want = BY_ROLE[role];
+    // The administrator's menu already holds its places, so health stands where the others' shortcuts do.
+    const side = role === "SYSTEM_ADMIN" ? "System health" : "Shortcuts";
 
     async function open() {
       serveHome({
@@ -146,7 +149,7 @@ describe("the home page of each role", () => {
       await screen.findByRole("heading", { level: 1 });
       // The role's own list has settled, so the page is no longer a skeleton.
       await screen.findByRole("heading", { level: 2, name: want.list });
-      await screen.findByRole("heading", { name: "Shortcuts" });
+      await screen.findByRole("heading", { name: side });
       return view;
     }
 
@@ -158,7 +161,7 @@ describe("the home page of each role", () => {
         const expected = new Set([
           want.list,
           "Your numbers",
-          "Shortcuts",
+          side,
           ...(want.inbox ? ["My timeline"] : []),
           ...(want.measures ? ["Spectra's five measures"] : []),
           ...(want.flows ? ["Orders in each step"] : []),
@@ -220,6 +223,16 @@ describe("the home page of each role", () => {
       const quick = actionsFor(session).filter(
         (action) => action.quick && action.id !== "orders.new",
       );
+      if (role === "SYSTEM_ADMIN") {
+        // Its shortcuts only repeated the menu: health is there in their place.
+        expect(
+          screen.queryByRole("region", { name: "Shortcuts" }),
+        ).not.toBeInTheDocument();
+        expect(
+          screen.getByRole("region", { name: "System health" }),
+        ).toBeVisible();
+        return;
+      }
       const shortcuts = screen.getByRole("region", { name: "Shortcuts" });
       expect(within(shortcuts).getAllByRole("button")).toHaveLength(
         quick.length,
@@ -246,8 +259,9 @@ describe("the home page of each role", () => {
         const link = screen.queryByRole("link", { name: "New order" });
         expect(link !== null).toBe(want.newOrder);
         // New order is the header's button, so it is never also a shortcut.
+        const name = side;
         expect(
-          within(screen.getByRole("region", { name: "Shortcuts" })).queryByText(
+          within(screen.getByRole("region", { name })).queryByText(
             /Start a new order/,
           ),
         ).toBeNull();

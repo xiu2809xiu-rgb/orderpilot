@@ -141,14 +141,17 @@ export const REFUSED_EVENT = {
 
 export const RULES = [
   {
-    id: "sprTrigger",
-    value: "Raise an SPR when an order line is short of stock",
+    id: "approvers",
+    value:
+      "Any one of three management approvers decides, after a coordinator routes it",
+    status: "confirmed",
     screen: null,
   },
   {
-    id: "approversAndLimits",
-    value: "Rachel Goh: purchases up to USD 5,000.00",
-    screen: "/governance?tab=limits",
+    id: "approvalLimits",
+    value: "None set. Limits stay a setting, off until Spectra asks for them",
+    status: "open",
+    screen: null,
   },
 ];
 
@@ -274,6 +277,15 @@ export function serveHome(api: HomeApi = {}): Served {
     http.get("*/api/v1/insights/kpis", () => {
       served.calls.push("GET /api/v1/insights/kpis");
       return HttpResponse.json({ data: KPIS, meta: { mock: true } });
+    }),
+    http.get("*/api/v1/system/checks/status", () => {
+      served.calls.push("GET /api/v1/system/checks/status");
+      return HttpResponse.json({
+        data: [
+          { name: "database", status: "up", durationMs: 3 },
+          { name: "redis", status: "up", durationMs: 4 },
+        ],
+      });
     }),
     http.get("*/api/v1/*", () => HttpResponse.json(page([], 7))),
   );
