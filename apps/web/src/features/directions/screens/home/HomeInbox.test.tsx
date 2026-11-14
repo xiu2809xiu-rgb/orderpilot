@@ -36,7 +36,7 @@ beforeAll(async () => {
 });
 
 beforeEach(() => {
-  useSessionStore.setState({ status: "idle", session: null });
+  useSessionStore.setState({ status: "anonymous", session: null });
   useToastStore.setState({ items: [] });
 });
 

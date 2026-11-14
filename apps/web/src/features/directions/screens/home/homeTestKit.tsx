@@ -293,7 +293,7 @@ export function renderHome(role: Role) {
       <MemoryRouter initialEntries={["/"]}>
         <Routes>
           <Route path="/" element={<HomeScreen />} />
-          <Route path="*" element={<p>Elsewhere</p>} />
+          <Route path="*" element={null} />
         </Routes>
       </MemoryRouter>
       <Toaster />

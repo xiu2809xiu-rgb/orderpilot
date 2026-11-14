@@ -124,7 +124,7 @@ beforeAll(async () => {
 });
 
 beforeEach(() => {
-  useSessionStore.setState({ status: "idle", session: null });
+  useSessionStore.setState({ status: "anonymous", session: null });
 });
 
 describe("the home page of each role", () => {
@@ -150,32 +150,39 @@ describe("the home page of each role", () => {
       return view;
     }
 
-    it("draws exactly the sections that are its own", async () => {
-      await open();
-      const expected = new Set([
-        want.list,
-        "Your numbers",
-        "Shortcuts",
-        ...(want.inbox ? ["My timeline"] : []),
-        ...(want.measures ? ["Spectra's five measures"] : []),
-        ...(want.flows ? ["Orders in each step"] : []),
-      ]);
-      if (want.measures) {
-        await screen.findByText(/^Lab estimate:/);
-      }
-      if (want.trend) {
-        expect(
-          await screen.findByRole("heading", {
-            name: "Twelve weeks of the five measures",
-          }),
-        ).toBeVisible();
-        expected.add("Twelve weeks of the five measures");
-      }
-      const drawn = SECTIONS.filter(
-        (name) => screen.queryByRole("heading", { level: 2, name }) !== null,
-      );
-      expect(drawn.sort()).toEqual([...expected].sort());
-    });
+    it(
+      "draws exactly the sections that are its own",
+      { timeout: 30_000 },
+      async () => {
+        await open();
+        const expected = new Set([
+          want.list,
+          "Your numbers",
+          "Shortcuts",
+          ...(want.inbox ? ["My timeline"] : []),
+          ...(want.measures ? ["Spectra's five measures"] : []),
+          ...(want.flows ? ["Orders in each step"] : []),
+        ]);
+        if (want.measures) {
+          await screen.findByText(/^Lab estimate:/);
+        }
+        if (want.trend) {
+          expect(
+            // The chart is a chunk of its own, and the first load waits for it.
+            await screen.findByRole(
+              "heading",
+              { name: "Twelve weeks of the five measures" },
+              { timeout: 15_000 },
+            ),
+          ).toBeVisible();
+          expected.add("Twelve weeks of the five measures");
+        }
+        const drawn = SECTIONS.filter(
+          (name) => screen.queryByRole("heading", { level: 2, name }) !== null,
+        );
+        expect(drawn.sort()).toEqual([...expected].sort());
+      },
+    );
 
     it("says nothing about a part that is not for the role", async () => {
       await open();
