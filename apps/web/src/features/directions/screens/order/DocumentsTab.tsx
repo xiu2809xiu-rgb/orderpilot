@@ -97,8 +97,8 @@ function DocumentItem({
             {t(`documents.flow.${flow.status}`)}
           </StatusChip>
         ) : null}
-        {/* A document still expected has nothing to check yet. */}
-        {flow?.status === "expected" && document.rules.length === 0 ? null : (
+        {/* The workflow's own chip says where the document stands; a second "Not checked yet" beside it, for a document no check has read, adds nothing. */}
+        {flow && document.rules.length === 0 ? null : (
           <StatusChip kind={kind} icon={icon}>
             {t(`documents.state.${document.state}`)}
           </StatusChip>
