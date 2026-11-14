@@ -10,7 +10,12 @@ import { Button } from "@/components/ui/button";
 
 export type AuditRow = AuditViewerList200DataItem;
 
-/** The columns of the audit table. No column sorts: the trail is always newest first. */
+/**
+ * The columns of the audit table. No column sorts: the trail is always newest
+ * first. The long cells wrap inside themselves, and the role and the refused
+ * badge sit under the name and the action, so the table fits its card at 1440
+ * px and Details stays in view without scrolling sideways.
+ */
 export function useAuditColumns(onOpen: (id: string) => void) {
   const { t } = useTranslation("audit");
   const { t: tc } = useTranslation();
@@ -33,10 +38,10 @@ export function useAuditColumns(onOpen: (id: string) => void) {
         id: "actor",
         header: t("table.actor"),
         cell: (row) => (
-          <span>
-            {row.actorName}
+          <span className="flex flex-col">
+            <span>{row.actorName}</span>
             {row.actorRole ? (
-              <span className="ml-2 text-xs text-muted-foreground">
+              <span className="text-xs text-muted-foreground">
                 {tc(`roles.${row.actorRole}`)}
               </span>
             ) : null}
@@ -47,7 +52,7 @@ export function useAuditColumns(onOpen: (id: string) => void) {
         id: "action",
         header: t("table.action"),
         cell: (row) => (
-          <span className="inline-flex flex-wrap items-center gap-2">
+          <span className="flex flex-col items-start gap-1">
             <code className="font-mono text-xs">{row.action}</code>
             {row.refusal ? (
               <StatusBadge tone="warning">{t("table.refused")}</StatusBadge>
@@ -59,7 +64,7 @@ export function useAuditColumns(onOpen: (id: string) => void) {
         id: "record",
         header: t("table.record"),
         cell: (row) => (
-          <span className="font-mono text-xs">
+          <span className="block max-w-56 font-mono text-xs whitespace-normal [overflow-wrap:anywhere]">
             {row.entityType} {row.entityId}
           </span>
         ),
@@ -67,7 +72,11 @@ export function useAuditColumns(onOpen: (id: string) => void) {
       {
         id: "summary",
         header: t("table.summary"),
-        cell: (row) => row.summary,
+        cell: (row) => (
+          <span className="block min-w-48 whitespace-normal">
+            {row.summary}
+          </span>
+        ),
       },
       {
         id: "ip",
