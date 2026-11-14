@@ -2746,9 +2746,76 @@
                             "confirmations"
                           ],
                           "additionalProperties": false
+                        },
+                        "documents": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "CUSTOMER_PO",
+                                  "PROFORMA_INVOICE",
+                                  "VENDOR_PI",
+                                  "VENDOR_INVOICE",
+                                  "SALES_INVOICE",
+                                  "CREDIT_NOTE",
+                                  "PACKING_LIST",
+                                  "DELIVERY_ORDER",
+                                  "AWB",
+                                  "BILL_OF_LADING",
+                                  "IMPORT_PERMIT",
+                                  "PAYMENT_ADVICE",
+                                  "SPR_FORM",
+                                  "OTHER"
+                                ]
+                              },
+                              "number": {
+                                "nullable": true,
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "status": {
+                                "type": "string",
+                                "enum": ["confirmed", "to-confirm", "expected"]
+                              },
+                              "receivedAt": {
+                                "nullable": true,
+                                "type": "string",
+                                "format": "date-time",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                              },
+                              "dueDate": {
+                                "nullable": true,
+                                "type": "string",
+                                "format": "date",
+                                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "type",
+                              "number",
+                              "status",
+                              "receivedAt",
+                              "dueDate"
+                            ],
+                            "additionalProperties": false
+                          }
                         }
                       },
-                      "required": ["order", "steps", "timeline", "payment"],
+                      "required": [
+                        "order",
+                        "steps",
+                        "timeline",
+                        "payment",
+                        "documents"
+                      ],
                       "additionalProperties": false
                     },
                     "meta": {
@@ -3131,6 +3198,15 @@
                             "shortfall": {
                               "type": "string",
                               "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                            },
+                            "runRate3m": {
+                              "type": "string",
+                              "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                            },
+                            "monthsOfCover": {
+                              "nullable": true,
+                              "type": "string",
+                              "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
                             }
                           },
                           "required": [
@@ -3139,7 +3215,9 @@
                             "qtyOnSalesOrder",
                             "qtyOnPurchOrder",
                             "availableStock",
-                            "shortfall"
+                            "shortfall",
+                            "runRate3m",
+                            "monthsOfCover"
                           ],
                           "additionalProperties": false
                         },

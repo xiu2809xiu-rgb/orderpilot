@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { decimalStringSchema } from "../money.js";
+import { documentTypeSchema } from "../order.js";
 import { roleSchema } from "../roles.js";
 import { orderNoSchema } from "./common.js";
 import { paymentRecordSchema } from "./payment.js";
@@ -52,6 +53,26 @@ export const orderPaymentSchema = z.object({
 });
 export type OrderPayment = z.infer<typeof orderPaymentSchema>;
 
+/** Where one of the order's documents stands: received and confirmed, received and waiting for a person, or still expected. */
+export const ORDER_DOCUMENT_STATUSES = [
+  "confirmed",
+  "to-confirm",
+  "expected",
+] as const;
+
+/** A document on the order, so the order page can list what came in and what is still awaited. */
+export const orderFlowDocumentSchema = z.object({
+  id: z.string().min(1),
+  type: documentTypeSchema,
+  /** The number printed on it; null while it is only expected. */
+  number: z.string().min(1).nullable(),
+  status: z.enum(ORDER_DOCUMENT_STATUSES),
+  receivedAt: z.iso.datetime().nullable(),
+  /** When an expected document is due. */
+  dueDate: z.iso.date().nullable(),
+});
+export type OrderFlowDocument = z.infer<typeof orderFlowDocumentSchema>;
+
 export const orderFlowSchema = z.object({
   order: z.object({
     no: orderNoSchema,
@@ -64,6 +85,7 @@ export const orderFlowSchema = z.object({
   steps: z.array(orderStepSchema),
   timeline: z.array(orderTimelineEventSchema),
   payment: orderPaymentSchema,
+  documents: z.array(orderFlowDocumentSchema),
 });
 export type OrderFlow = z.infer<typeof orderFlowSchema>;
 

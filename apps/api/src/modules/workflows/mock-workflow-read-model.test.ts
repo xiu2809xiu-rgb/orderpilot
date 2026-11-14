@@ -111,7 +111,13 @@ describe("the mock read model", () => {
       // the item moves on (its order joins the figures), so only a request
       // still waiting matches the item as it is now.
       const figures = row.status === "approved" ? row.basis : item;
-      expect(spr.basis).toEqual(
+      // The order half follows the formula; the run rate and cover come from the item.
+      const { runRate3m, monthsOfCover, ...shortfall } = spr.basis;
+      expect({ runRate3m, monthsOfCover }).toEqual({
+        runRate3m: item.runRate3m,
+        monthsOfCover: item.monthsOfCover,
+      });
+      expect(shortfall).toEqual(
         SprSuggestion.fromShortfall({
           ordered: row.basis.ordered,
           inventory: figures.inventory,
@@ -167,10 +173,13 @@ describe("the service over the mock", () => {
   it("adds the approver in the shape of Business Central's Approval User Setup", async () => {
     const spr = await service.spr(sprNo);
     expect(sprDetailSchema.safeParse(spr).success).toBe(true);
+    // As Spectra said on 5 Nov: no limits, and nobody standing in.
     expect(spr.approver.setup).toMatchObject({
-      purchaseAmountApprovalLimit: "5000.00",
-      unlimitedPurchaseApproval: false,
+      unlimitedPurchaseApproval: true,
+      unlimitedSalesApproval: true,
+      substituteUserId: null,
     });
+    expect(spr.substituteName).toBeNull();
   });
 
   it("answers every SPR in the contract's shape", async () => {

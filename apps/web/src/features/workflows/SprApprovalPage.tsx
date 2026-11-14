@@ -19,6 +19,7 @@ export default function SprApprovalPage() {
   const { t } = useTranslation("workflows");
   const { recordNo = "" } = useParams();
   const session = useSessionStore((state) => state.session);
+  const canDecide = hasPermission(session, "approvals.decide");
   const query = useWorkflowsSpr(recordNo);
   const spr = query.data?.data;
 
@@ -75,11 +76,12 @@ export default function SprApprovalPage() {
               </SectionCard>
             </div>
             <div className="space-y-s3 self-start">
-              <SectionCard title={t("spr.decisionHeading")}>
-                <SprDecisionForm
-                  spr={spr}
-                  canDecide={hasPermission(session, "approvals.decide")}
-                />
+              <SectionCard
+                title={t(
+                  canDecide ? "spr.decisionHeading" : "spr.statusHeading",
+                )}
+              >
+                <SprDecisionForm spr={spr} canDecide={canDecide} />
               </SectionCard>
               <SectionCard
                 title={t("spr.approverHeading")}

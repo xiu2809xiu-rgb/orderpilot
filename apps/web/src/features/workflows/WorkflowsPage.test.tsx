@@ -86,7 +86,8 @@ describe("the task inbox", () => {
       ),
     ).toBeInTheDocument();
     expect(screen.getByText("SPR-20261102-0002")).toBeInTheDocument();
-    expect(screen.getByText(/none yet/)).toBeInTheDocument();
+    // A compact row: no "none yet" filler while Business Central has no number.
+    expect(screen.queryByText(/none yet/)).toBeNull();
     expect(screen.getByText("Mock")).toBeInTheDocument();
     expect(screen.getByText("Synthetic demo data")).toBeInTheDocument();
     expect(screen.getByText("Overdue")).toBeInTheDocument();
@@ -95,6 +96,32 @@ describe("the task inbox", () => {
       "/workflows/sprs/SPR-20261102-0002",
     );
     expect(await axeViolations(container)).toEqual([]);
+  });
+
+  it("leads each row with the customer and amount, quietly, with Business Central's number once it exists", async () => {
+    server.use(
+      getWorkflowsMyTasksMockHandler(
+        page([
+          {
+            ...SPR_TASK,
+            customerName: "Brindle Coast Imports",
+            amount: "4867.02",
+            currencyCode: "USD",
+            ref: { recordNo: "SPR-20261102-0002", navisionNo: "SPR-1001" },
+          },
+        ]),
+      ),
+    );
+    open("APPROVER");
+    expect(
+      await screen.findByText("Brindle Coast Imports"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("USD 4,867.02")).toBeInTheDocument();
+    expect(screen.getByText("SPR-1001")).toBeInTheDocument();
+    // No row shouts: the page keeps its one primary action for itself.
+    expect(screen.getByRole("link", { name: /Open request/ })).not.toHaveClass(
+      "bg-primary",
+    );
   });
 
   it("shows an SPR handed to this person above their inbox, saying why", async () => {

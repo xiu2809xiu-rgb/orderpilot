@@ -11,6 +11,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { formatDay, formatQuantity } from "./format";
+
+/** Dates in words and whole quantities, as everywhere else; other values as typed. */
+function shown(field: SprField): string {
+  if (field.key === "quantity") return formatQuantity(field.value);
+  return formatDay(field.value);
+}
 
 /**
  * The SPR's fields with where each value came from. A suggested value carries
@@ -49,7 +56,7 @@ export function SprFields({ fields }: { fields: readonly SprField[] }) {
                   {t("spr.emptyValue")}
                 </span>
               ) : (
-                field.value
+                shown(field)
               )}
             </TableCell>
             <TableCell>

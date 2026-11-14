@@ -38,6 +38,10 @@ export const sprBasisSchema = z.object({
   qtyOnPurchOrder: decimalStringSchema,
   availableStock: decimalStringSchema,
   shortfall: decimalStringSchema,
+  /** Units sold a month, averaged over the last three months (Spectra, 5 Nov). */
+  runRate3m: decimalStringSchema,
+  /** Inventory over the run rate, in months; null when nothing sold. */
+  monthsOfCover: decimalStringSchema.nullable(),
 });
 export type SprBasis = z.infer<typeof sprBasisSchema>;
 

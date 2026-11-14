@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useThemeStore, type ThemePreference } from "@/lib/theme";
-import { useSessionStore } from "@/stores/session";
+import { hasPermission, useSessionStore } from "@/stores/session";
 import { PageHeader } from "@/components/common/PageHeader";
 import { ServiceChecksCard } from "./ServiceChecksCard";
 
@@ -91,7 +91,10 @@ export function SettingsPage() {
           <AnalyticsSettingsCard />
         </Suspense>
 
-        <ServiceChecksCard />
+        {/* Service names mean nothing without their status, which only an admin may run. */}
+        {hasPermission(session, "settings.manage") ? (
+          <ServiceChecksCard />
+        ) : null}
 
         {session ? (
           <Card>

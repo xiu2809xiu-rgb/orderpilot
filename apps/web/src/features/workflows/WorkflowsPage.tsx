@@ -130,7 +130,11 @@ export default function WorkflowsPage() {
                 }
               />
             ) : (
-              <ul className="space-y-s2">
+              <ul
+                className={
+                  role === "WAREHOUSE" ? "space-y-s2" : "divide-y divide-border"
+                }
+              >
                 {tasks.map((task) => (
                   <TaskCard
                     key={task.id}

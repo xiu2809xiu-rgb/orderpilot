@@ -65,7 +65,11 @@ function recordOf(
     unitCost: spr.unitCost,
     amount: spr.amount,
     currencyCode: "USD",
-    basis: spr.basis,
+    basis: {
+      ...spr.basis,
+      runRate3m: item.runRate3m,
+      monthsOfCover: item.monthsOfCover,
+    },
     fields: fieldsOf(
       config,
       {

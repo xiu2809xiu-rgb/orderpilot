@@ -73,6 +73,7 @@ const FLOW = getWorkflowsOrderFlowResponseMock({
         summary: "PO PO-PK-4121 received for SO-0004",
       },
     ],
+    documents: [],
     payment: {
       prepaymentPercent: "50",
       amountDue: "2500.00",

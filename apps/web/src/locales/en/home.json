@@ -11,7 +11,7 @@
     "openExceptions": "Open exceptions",
     "overdue": "Overdue",
     "awaitingApproval": "SPRs to approve",
-    "waitingForApproval": "Orders waiting for approval",
+    "waitingForApproval": "Orders waiting on an SPR",
     "awaitingPayment": "Payments to confirm",
     "readyToPick": "Ready to pick",
     "auditEvents": "Audit events",
