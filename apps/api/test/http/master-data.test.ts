@@ -362,6 +362,9 @@ describe("master data routes (mock Business Central)", () => {
       expect(support).not.toContain(`"${open.total}"`);
       const finance = JSON.stringify((await get("FINANCE", path)).body);
       expect(finance).toContain(`"${open.total}"`);
+      // The approver decides purchases on their cost.
+      const approver = JSON.stringify((await get("APPROVER", path)).body);
+      expect(approver).toContain(`"${open.total}"`);
     });
 
     it("holds no order total for Warehouse on a customer's page", async () => {

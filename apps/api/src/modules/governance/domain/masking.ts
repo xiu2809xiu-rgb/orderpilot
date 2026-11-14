@@ -109,12 +109,14 @@ export const SAMPLE_RULES: readonly MaskingRule[] = [
   bankRule("vendor.bankAccountNo", "Vendor bank account number"),
   bankRule("vendor.swiftCode", "Vendor SWIFT code"),
   bankRule("vendor.iban", "Vendor IBAN"),
+  // The approver decides SPRs on their cost and amount, so cost is shown to
+  // them wherever it appears, not only on the SPR (agreed by Azri, 14 Nov).
   {
     field: "item.unitCost",
     label: "Item cost and amounts built from it (sample rule)",
     classification: "confidential",
     reason: "price",
-    visibleTo: ["FINANCE", "MANAGEMENT", "PRODUCT_MANAGER"],
+    visibleTo: ["FINANCE", "MANAGEMENT", "PRODUCT_MANAGER", "APPROVER"],
     sample: true,
   },
   {
