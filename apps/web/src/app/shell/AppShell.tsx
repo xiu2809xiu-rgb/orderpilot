@@ -154,11 +154,7 @@ export function AppShell() {
             >
               {announcement}
             </div>
-            <div
-              ref={setDock}
-              data-testid="consent-dock"
-              className="flex shrink-0 justify-end empty:hidden sm:px-s3 sm:pb-s3"
-            />
+            <div ref={setDock} data-testid="consent-dock" className="dx-dock" />
           </div>
         </div>
       </CrumbProvider>

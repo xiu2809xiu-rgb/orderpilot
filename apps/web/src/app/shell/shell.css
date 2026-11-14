@@ -223,3 +223,134 @@
     animation-duration: 1ms;
   }
 }
+
+/* A choice among a few, drawn as pills: the theme on the settings page. The
+   chosen one wears the same glow as the current entry of the panel. */
+.dx-choice {
+  display: inline-flex;
+  min-height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding-inline: 1rem;
+  border: 1px solid var(--dx-bar-btn-border);
+  border-radius: var(--dx-bar-btn-radius);
+  background-color: var(--dx-bar-btn-bg);
+  color: var(--foreground);
+  font-size: var(--type-14);
+  font-weight: 500;
+  transition:
+    background-color var(--motion-fast) var(--ease-out),
+    box-shadow var(--motion-fast) var(--ease-out);
+}
+.dx-choice:hover {
+  background-color: var(--dx-bar-btn-hover);
+}
+.dx-choice[aria-checked="true"] {
+  border-color: transparent;
+  background-color: var(--dx-current-bg);
+  background-image: var(--dx-current-image);
+  box-shadow: var(--dx-current-shadow);
+}
+.dx-choice:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+@media (pointer: coarse) {
+  .dx-choice {
+    min-height: 2.75rem;
+  }
+}
+
+/* A small read-only label: a permission, a check. It is not a control, so it
+   has no hover and no pointer. */
+.dx-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  padding-inline: 0.625rem;
+  border: 1px solid var(--dx-rule);
+  border-radius: var(--radius-pill);
+  background-color: color-mix(in oklab, var(--foreground) 5%, transparent);
+  color: var(--foreground);
+}
+
+/* The analytics card on the settings page is area 4's and draws itself as a
+   shadcn Card. Here it takes the padding and the type of a Section, so the
+   five sections of the page share one left edge and one rhythm. */
+.dx-settings [data-slot="card"] {
+  gap: 0;
+  padding-block: 0;
+}
+.dx-settings [data-slot="card-header"] {
+  gap: 1rem;
+  padding: var(--dx-card-pad) var(--dx-card-pad) 0;
+}
+.dx-settings [data-slot="card-title"] {
+  font-size: var(--type-16);
+  line-height: 1.5rem;
+}
+.dx-settings [data-slot="card-header"] > p {
+  font-size: var(--type-14);
+  line-height: 1.25rem;
+}
+.dx-settings [data-slot="card-content"] {
+  padding: 1rem var(--dx-card-pad) var(--dx-card-pad);
+}
+
+/* The consent dock: where the analytics card (area 4's) is drawn. The card
+   never covers the page or the control that has focus, so it sits below the
+   page, and the page is a little shorter while it is there. The dock is a
+   glass bar like the top bar, 12 px from the edges, and the card inside gives
+   up its own box and lies along it: words to the left, buttons to the right.
+   The page above fades out at its foot, so it is not cut by a hard edge. */
+.dx-dock {
+  flex-shrink: 0;
+  margin: 0 0.75rem 0.75rem;
+  background: var(--panel);
+  backdrop-filter: var(--panel-filter);
+  border: var(--dx-card-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--dx-card-shadow);
+}
+.dx-dock:empty {
+  display: none;
+}
+.dx-dock [data-consent-card] {
+  display: flex;
+  width: 100%;
+  flex-flow: row wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 0.75rem 1rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.dx-dock [data-consent-card] > p {
+  flex: 1 1 20rem;
+  font-size: var(--type-14);
+  line-height: 1.25rem;
+}
+@media (max-width: 39.99rem) {
+  /* On a phone the dock is a sheet across the foot of the window. */
+  .dx-dock {
+    margin: 0;
+    border-width: 1px 0 0;
+    border-radius: var(--radius-card) var(--radius-card) 0 0;
+  }
+}
+.dx-shell:has(.dx-dock:not(:empty)) .dx-main {
+  mask-image: linear-gradient(
+    to bottom,
+    #000 calc(100% - 1.25rem),
+    transparent
+  );
+}
+@media print {
+  .dx-dock {
+    display: none;
+  }
+}
