@@ -1065,6 +1065,35 @@
                             "type": "string",
                             "minLength": 1
                           },
+                          "spr": {
+                            "type": "object",
+                            "properties": {
+                              "itemNo": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "itemDescription": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "quantity": {
+                                "type": "string",
+                                "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                              },
+                              "monthsOfCover": {
+                                "nullable": true,
+                                "type": "string",
+                                "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                              }
+                            },
+                            "required": [
+                              "itemNo",
+                              "itemDescription",
+                              "quantity",
+                              "monthsOfCover"
+                            ],
+                            "additionalProperties": false
+                          },
                           "expectedPayment": {
                             "type": "object",
                             "properties": {
@@ -1287,6 +1316,35 @@
                           "assigneeName": {
                             "type": "string",
                             "minLength": 1
+                          },
+                          "spr": {
+                            "type": "object",
+                            "properties": {
+                              "itemNo": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "itemDescription": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "quantity": {
+                                "type": "string",
+                                "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                              },
+                              "monthsOfCover": {
+                                "nullable": true,
+                                "type": "string",
+                                "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                              }
+                            },
+                            "required": [
+                              "itemNo",
+                              "itemDescription",
+                              "quantity",
+                              "monthsOfCover"
+                            ],
+                            "additionalProperties": false
                           },
                           "expectedPayment": {
                             "type": "object",
@@ -1716,6 +1774,35 @@
                             "type": "string",
                             "minLength": 1
                           },
+                          "spr": {
+                            "type": "object",
+                            "properties": {
+                              "itemNo": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "itemDescription": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "quantity": {
+                                "type": "string",
+                                "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                              },
+                              "monthsOfCover": {
+                                "nullable": true,
+                                "type": "string",
+                                "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                              }
+                            },
+                            "required": [
+                              "itemNo",
+                              "itemDescription",
+                              "quantity",
+                              "monthsOfCover"
+                            ],
+                            "additionalProperties": false
+                          },
                           "expectedPayment": {
                             "type": "object",
                             "properties": {
@@ -1860,6 +1947,23 @@
                           "orderNo": {
                             "type": "string",
                             "pattern": "^[A-Za-z0-9-]{1,30}$"
+                          },
+                          "ref": {
+                            "nullable": true,
+                            "type": "object",
+                            "properties": {
+                              "recordNo": {
+                                "type": "string",
+                                "pattern": "^(SPR|PI|EXC|SO)-\\d{8}-\\d{4,}$"
+                              },
+                              "navisionNo": {
+                                "nullable": true,
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            },
+                            "required": ["recordNo", "navisionNo"],
+                            "additionalProperties": false
                           },
                           "message": {
                             "type": "string",
@@ -2380,6 +2484,23 @@
                           "orderNo": {
                             "type": "string",
                             "pattern": "^[A-Za-z0-9-]{1,30}$"
+                          },
+                          "ref": {
+                            "nullable": true,
+                            "type": "object",
+                            "properties": {
+                              "recordNo": {
+                                "type": "string",
+                                "pattern": "^(SPR|PI|EXC|SO)-\\d{8}-\\d{4,}$"
+                              },
+                              "navisionNo": {
+                                "nullable": true,
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            },
+                            "required": ["recordNo", "navisionNo"],
+                            "additionalProperties": false
                           },
                           "message": {
                             "type": "string",
@@ -3358,6 +3479,22 @@
                             "comment",
                             "youDecide"
                           ],
+                          "additionalProperties": false
+                        },
+                        "due": {
+                          "nullable": true,
+                          "type": "object",
+                          "properties": {
+                            "dueAt": {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            },
+                            "overdue": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": ["dueAt", "overdue"],
                           "additionalProperties": false
                         },
                         "decidable": {

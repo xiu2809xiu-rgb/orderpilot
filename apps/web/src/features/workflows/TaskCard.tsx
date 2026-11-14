@@ -1,16 +1,48 @@
 import type { WorkflowTask } from "@orderpilot/shared";
+import type { TFunction } from "i18next";
 import { ArrowRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { RecordLink, StatusBadge } from "@/components/common";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { formatAmount, formatDate } from "./format";
+import { formatAmount, formatDate, formatQuantity, isToday } from "./format";
 import { RecordRefLine } from "./RecordRefLine";
 
 function targetOf(task: WorkflowTask): string | null {
   if (task.ref) return `/workflows/sprs/${task.ref.recordNo}`;
   if (task.orderNo) return `/workflows/orders/${task.orderNo}`;
   return null;
+}
+
+function dueText(task: WorkflowTask, t: TFunction<"workflows">): string {
+  return isToday(task.dueAt)
+    ? t("task.dueToday")
+    : t("task.dueOn", { date: formatDate(task.dueAt) });
+}
+
+/** What an SPR task would buy, flagged when the item has under a month of stock. */
+function SprLine({ spr }: { spr: NonNullable<WorkflowTask["spr"]> }) {
+  const { t } = useTranslation("workflows");
+  const cover = spr.monthsOfCover;
+  return (
+    <>
+      <span className="text-foreground">
+        {t("task.sprLine", {
+          quantity: formatQuantity(spr.quantity),
+          item: spr.itemDescription,
+        })}
+      </span>
+      {cover !== null && Number(cover) < 1 ? (
+        <StatusBadge tone="warning">{t("spr.lowCover")}</StatusBadge>
+      ) : (
+        <span>
+          {cover === null
+            ? t("spr.noSales")
+            : t("task.cover", { months: formatAmount(cover) })}
+        </span>
+      )}
+    </>
+  );
 }
 
 /**
@@ -72,7 +104,7 @@ export function TaskCard({
                 </span>
               </span>
             ) : null}
-            <span>{t("task.dueOn", { date: formatDate(task.dueAt) })}</span>
+            <span>{dueText(task, t)}</span>
           </p>
           {task.ref ? <RecordRefLine value={task.ref} /> : null}
           {note ? <p className="text-sm">{note}</p> : null}
@@ -92,7 +124,12 @@ export function TaskCard({
           ) : null}
         </div>
         <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm text-muted-foreground">
-          {task.customerName ? <span>{task.title}</span> : null}
+          {/* An SPR row says what it buys; the task's title would only repeat "approve the SPR". */}
+          {task.spr ? (
+            <SprLine spr={task.spr} />
+          ) : task.customerName ? (
+            <span>{task.title}</span>
+          ) : null}
           {task.orderNo ? (
             <span data-numeric className="font-mono text-foreground">
               {task.orderNo}
@@ -113,7 +150,7 @@ export function TaskCard({
             </span>
           ) : null}
           <span className={cn(task.overdue && "text-destructive")}>
-            {t("task.dueOn", { date: formatDate(task.dueAt) })}
+            {dueText(task, t)}
           </span>
         </p>
         {note ? <p className="text-sm">{note}</p> : null}

@@ -1,7 +1,12 @@
 import { SearchX } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router";
-import { PageHeader, SectionCard, StatePanel } from "@/components/common";
+import {
+  PageHeader,
+  SectionCard,
+  StatePanel,
+  StatusBadge,
+} from "@/components/common";
 import { buttonVariants } from "@/components/ui/button";
 import { useWorkflowsSpr } from "@/lib/api/generated/endpoints/workflows/workflows";
 import { ApiError } from "@/lib/api/errors";
@@ -12,6 +17,7 @@ import { QueryBoundary } from "./QueryBoundary";
 import { RecordRefLine } from "./RecordRefLine";
 import { SprDecisionForm } from "./SprDecisionForm";
 import { SprFields } from "./SprFields";
+import { SprHistory } from "./SprHistory";
 import { ApproverFacts, SprBasis, SprSummary } from "./SprFacts";
 
 /** The SPR approval page: the request, why this quantity, the approver, and the decision. */
@@ -50,7 +56,19 @@ export default function SprApprovalPage() {
               })
             : undefined
         }
-        meta={<MockBadges mock={query.data?.meta.mock} />}
+        meta={
+          <>
+            {/* The inbox says when it is due; so does the request itself. */}
+            {spr?.due ? (
+              <StatusBadge tone={spr.due.overdue ? "danger" : "neutral"}>
+                {t(spr.due.overdue ? "spr.overdueSince" : "spr.dueOn", {
+                  date: formatDate(spr.due.dueAt),
+                })}
+              </StatusBadge>
+            ) : null}
+            <MockBadges mock={query.data?.meta.mock} />
+          </>
+        }
       />
       <QueryBoundary query={query}>
         {spr ? (
@@ -88,6 +106,9 @@ export default function SprApprovalPage() {
                 description={t("spr.approverDescription")}
               >
                 <ApproverFacts spr={spr} />
+              </SectionCard>
+              <SectionCard title={t("spr.historyHeading")}>
+                <SprHistory spr={spr} />
               </SectionCard>
             </div>
           </div>

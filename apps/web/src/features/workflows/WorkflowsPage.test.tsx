@@ -124,6 +124,39 @@ describe("the task inbox", () => {
     );
   });
 
+  // The approver tells requests apart by what they buy, not by the task's title.
+  it("says what an SPR would buy, flags under a month of stock, and says when it is due today", async () => {
+    server.use(
+      getWorkflowsMyTasksMockHandler(
+        page([
+          {
+            ...SPR_TASK,
+            customerName: "Brindle Coast Imports",
+            dueAt: new Date().toISOString(),
+            spr: {
+              itemNo: "I-0292",
+              itemDescription: "Vertiv Rack Rail Kit",
+              quantity: "90.00",
+              monthsOfCover: "0.4",
+            },
+          },
+        ]),
+      ),
+    );
+    open("APPROVER");
+    expect(
+      await screen.findByText("90 × Vertiv Rack Rail Kit"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Under a month of stock")).toBeInTheDocument();
+    expect(screen.getByText("Due today")).toBeInTheDocument();
+    expect(screen.queryByText(SPR_TASK.title)).toBeNull();
+    // One name for the page, as in the sidebar.
+    expect(
+      screen.getByRole("heading", { level: 1, name: "My tasks" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Waiting on you")).toBeInTheDocument();
+  });
+
   it("shows an SPR handed to this person above their inbox, saying why", async () => {
     server.use(
       getWorkflowsHandedToMeMockHandler(handed([HANDED_TASK])),

@@ -83,6 +83,11 @@ export const sprDetailSchema = z.object({
     })
     .nullable()
     .optional(),
+  /** When the decision is due, while it waits for one. */
+  due: z
+    .object({ dueAt: z.iso.datetime(), overdue: z.boolean() })
+    .nullable()
+    .optional(),
   /** False for a sample the workflow does not run, which nobody can decide. */
   decidable: z.boolean().optional(),
   /** Null until someone decides. */

@@ -1,7 +1,8 @@
 import type { SprDetail } from "@orderpilot/shared";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { StatusBadge } from "@/components/common";
+import { RecordLink, StatusBadge } from "@/components/common";
+import { cn } from "@/lib/utils";
 import { formatAmount, formatQuantity } from "./format";
 
 function Fact({ label, children }: { label: string; children: ReactNode }) {
@@ -15,27 +16,48 @@ function Fact({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
+const LINK = "text-primary underline-offset-4 hover:underline";
+
 /** Money as the rest of the app writes it: the currency, then the amount. */
 function money(amount: string, currency: string): string {
   return `${currency} ${formatAmount(amount)}`;
 }
 
-/** The request itself: vendor, item, quantity and amount. */
+/** The request itself: vendor, item, quantity and amount, each record a link. */
 export function SprSummary({ spr }: { spr: SprDetail }) {
   const { t } = useTranslation("workflows");
   return (
     <dl className="grid gap-s2 sm:grid-cols-2">
       <Fact label={t("spr.vendor")}>
-        {spr.vendor.name} ({spr.vendor.no})
+        <RecordLink
+          to={`/master-data/vendors/${spr.vendor.no}`}
+          className={LINK}
+        >
+          {spr.vendor.name}
+        </RecordLink>{" "}
+        ({spr.vendor.no})
       </Fact>
       <Fact label={t("spr.item")}>
-        {spr.item.description} ({spr.item.no})
+        <RecordLink to={`/master-data/items/${spr.item.no}`} className={LINK}>
+          {spr.item.description}
+        </RecordLink>{" "}
+        ({spr.item.no})
       </Fact>
       <Fact label={t("spr.quantity")}>{formatQuantity(spr.quantity)}</Fact>
       <Fact label={t("spr.unitCost")}>
         {money(spr.unitCost, spr.currencyCode)}
       </Fact>
       <Fact label={t("spr.amount")}>{money(spr.amount, spr.currencyCode)}</Fact>
+      {spr.orderNo ? (
+        <Fact label={t("spr.order")}>
+          <RecordLink
+            to={`/workflows/orders/${spr.orderNo}`}
+            className={cn(LINK, "font-mono")}
+          >
+            {spr.orderNo}
+          </RecordLink>
+        </Fact>
+      ) : null}
     </dl>
   );
 }
@@ -100,9 +122,9 @@ export function SprBasis({ basis }: { basis: SprDetail["basis"] }) {
 }
 
 /**
- * Who decides, as Spectra described it, then the approver on file and any
- * limit or stand-in their setup still holds. A row the setup does not hold is
- * left out rather than shown as "None".
+ * Who decides, as Spectra described it, then any limit or stand-in the setup
+ * still holds. A row the setup does not hold is left out rather than shown as
+ * "None". No single approver is named: any one of the three decides.
  */
 export function ApproverFacts({ spr }: { spr: SprDetail }) {
   const { t } = useTranslation("workflows");
@@ -118,7 +140,6 @@ export function ApproverFacts({ spr }: { spr: SprDetail }) {
   return (
     <dl className="grid gap-s2 sm:grid-cols-2">
       <Fact label={t("spr.decidedBy")}>{t("spr.anyOfThree")}</Fact>
-      <Fact label={t("spr.approverOnFile")}>{spr.approver.displayName}</Fact>
       {noLimits ? (
         <Fact label={t("spr.limits")}>{t("spr.noLimits")}</Fact>
       ) : (

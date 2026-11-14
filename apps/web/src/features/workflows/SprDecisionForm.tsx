@@ -185,6 +185,7 @@ export function SprDecisionForm({
           {t("spr.reject")}
         </Button>
       </div>
+      <p className="text-sm text-muted-foreground">{t("spr.nextStep")}</p>
     </form>
   );
 }

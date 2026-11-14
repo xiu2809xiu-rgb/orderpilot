@@ -24,9 +24,29 @@ interface View {
   readonly customers: ReadonlyMap<string, string>;
 }
 
-/** Each payment task carries what one click confirms: the fixture's type and amount. */
-function tasksOf(dataset: SyntheticDataset): WorkflowTask[] {
+/** What an SPR task would buy, from the SPR it is about. */
+function sprSummaryOf(spr: SprRecord): NonNullable<WorkflowTask["spr"]> {
+  return {
+    itemNo: spr.item.no,
+    itemDescription: spr.item.description,
+    quantity: spr.quantity,
+    monthsOfCover: spr.basis.monthsOfCover,
+  };
+}
+
+/**
+ * Each payment task carries what one click confirms: the fixture's type and
+ * amount. Each SPR task carries what the SPR would buy.
+ */
+function tasksOf(
+  dataset: SyntheticDataset,
+  sprs: ReadonlyMap<string, SprRecord>,
+): WorkflowTask[] {
   return dataset.tasks.map((task) => {
+    const spr = task.ref ? sprs.get(task.ref.recordNo) : undefined;
+    if (task.kind === "APPROVE_SPR" && spr) {
+      return { ...task, spr: sprSummaryOf(spr) };
+    }
     if (task.kind !== "CONFIRM_PAYMENT") return task;
     const due = dataset.payments.find(
       (p) => p.orderNo === task.orderNo && p.status === "expected",
@@ -69,10 +89,13 @@ export class MockWorkflowReadModel extends WorkflowReadModel {
     const dataset = this.source();
     if (this.cached?.dataset !== dataset) {
       this.overlay.startDay(dataset.asOf);
+      const sprs = new Map(
+        buildSprs(dataset).map((spr) => [spr.ref.recordNo, spr]),
+      );
       this.cached = {
         dataset,
-        tasks: tasksOf(dataset),
-        sprs: new Map(buildSprs(dataset).map((spr) => [spr.ref.recordNo, spr])),
+        tasks: tasksOf(dataset, sprs),
+        sprs,
         orders: new Map(dataset.orders.map((o) => [o.header.no, o])),
         customers: new Map(dataset.customers.map((c) => [c.no, c.name])),
       };
@@ -117,19 +140,29 @@ export class MockWorkflowReadModel extends WorkflowReadModel {
     return Promise.resolve(decision ? { ...spr, decision } : spr);
   }
 
-  /** A task the overlay has closed takes its reminder with it. */
+  /**
+   * A task the overlay has closed takes its reminder with it. A reminder about
+   * a record, such as an SPR, carries its number so it opens that record.
+   */
   remindersFor(role: InboxRole): Promise<WorkflowReminder[]> {
     const { dataset, tasks } = this.view();
+    const mine = tasks.filter((t) => t.assigneeRole === role);
     const closedOrders = new Set(
-      tasks
-        .filter((t) => t.assigneeRole === role && this.overlay.isClosed(t.id))
-        .map((t) => t.orderNo),
+      mine.filter((t) => this.overlay.isClosed(t.id)).map((t) => t.orderNo),
+    );
+    const refs = new Map(
+      mine.flatMap((t) => (t.ref && t.orderNo ? [[t.orderNo, t.ref]] : [])),
     );
     return Promise.resolve(
-      dataset.reminders.filter(
-        (reminder) =>
-          reminder.toRole === role && !closedOrders.has(reminder.orderNo),
-      ),
+      dataset.reminders
+        .filter(
+          (reminder) =>
+            reminder.toRole === role && !closedOrders.has(reminder.orderNo),
+        )
+        .map((reminder) => ({
+          ...reminder,
+          ref: refs.get(reminder.orderNo) ?? null,
+        })),
     );
   }
 }

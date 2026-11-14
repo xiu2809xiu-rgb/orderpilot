@@ -138,6 +138,33 @@ describe("the mock read model", () => {
     }
   });
 
+  it("says on each SPR task what its SPR would buy", async () => {
+    const tasks = (await model.tasksFor("APPROVER")).filter(
+      (task) => task.kind === "APPROVE_SPR" && task.ref,
+    );
+    expect(tasks.length).toBeGreaterThan(0);
+    for (const task of tasks) {
+      const spr = await model.sprByRecordNo(task.ref?.recordNo ?? "");
+      expect(task.spr, task.id).toEqual({
+        itemNo: spr?.item.no,
+        itemDescription: spr?.item.description,
+        quantity: spr?.quantity,
+        monthsOfCover: spr?.basis.monthsOfCover,
+      });
+    }
+  });
+
+  it("gives a reminder about an SPR the SPR's number, so it opens the SPR", async () => {
+    const tasks = await model.tasksFor("APPROVER");
+    const reminders = await model.remindersFor("APPROVER");
+    const withRef = reminders.filter((reminder) => reminder.ref);
+    expect(withRef.length).toBeGreaterThan(0);
+    for (const reminder of withRef) {
+      const task = tasks.find((t) => t.orderNo === reminder.orderNo && t.ref);
+      expect(reminder.ref).toEqual(task?.ref);
+    }
+  });
+
   it("follows the dataset when the day, and so the set, changes", async () => {
     let current = createSyntheticDataset({ referenceDate: "2026-11-02" });
     const moving = new MockWorkflowReadModel(() => current);
@@ -180,6 +207,15 @@ describe("the service over the mock", () => {
       substituteUserId: null,
     });
     expect(spr.substituteName).toBeNull();
+  });
+
+  it("says when an undecided SPR is due, from its open task", async () => {
+    const task = (await model.tasksFor("APPROVER")).find(
+      (open) => open.kind === "APPROVE_SPR" && open.ref,
+    );
+    const spr = await service.spr(task?.ref?.recordNo ?? "");
+    expect(spr.decision).toBeNull();
+    expect(spr.due).toEqual({ dueAt: task?.dueAt, overdue: task?.overdue });
   });
 
   it("answers every SPR in the contract's shape", async () => {

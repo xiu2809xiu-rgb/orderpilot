@@ -70,6 +70,8 @@ function spr(decision: null | { outcome: "approved"; by: string }) {
       escalatesToName: "Sophia Chen",
       passedTo: null,
       decidable: true,
+      // Set here, not left to the generated mock, so the page is the same each run.
+      due: decision ? null : { dueAt: "2026-11-03T02:00:00Z", overdue: true },
       decision: decision
         ? {
             ...decision,
@@ -97,8 +99,25 @@ describe("the SPR approval page", () => {
   it("marks the suggested fields and shows both numbers, the stock basis and the approver", async () => {
     server.use(getWorkflowsSprMockHandler(spr(null)));
     const { container } = open("APPROVER");
+    // The vendor, the item and the order open their own records.
     expect(
-      await screen.findByText("Kelmora Power Bank 10000 mAh (I-0008)"),
+      await screen.findByRole("link", { name: "Kelmora Power Bank 10000 mAh" }),
+    ).toHaveAttribute("href", "/master-data/items/I-0008");
+    expect(
+      screen.getByRole("link", { name: "Halvorn Components Ltd" }),
+    ).toHaveAttribute("href", "/master-data/vendors/V-0001");
+    expect(screen.getByRole("link", { name: "SO-0003" })).toHaveAttribute(
+      "href",
+      "/workflows/orders/SO-0003",
+    );
+    // When it is due, on the request itself, and the steps so far.
+    expect(screen.getByText("Overdue since 3 Nov 2026")).toBeInTheDocument();
+    expect(screen.getByText("Requested by Prakash Menon")).toBeInTheDocument();
+    expect(
+      screen.getByText("Waiting for a decision, overdue since 3 Nov 2026"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Support raises the purchase order/),
     ).toBeInTheDocument();
     expect(
       within(screen.getByRole("row", { name: /Quantity/ })).getByText(
@@ -357,7 +376,10 @@ describe("the SPR approval page", () => {
     expect(
       await screen.findByText(/Decided: Approved by Anita Rao/),
     ).toBeInTheDocument();
-    expect(screen.getByText("Within my limit.")).toBeInTheDocument();
+    // In the decision and again in the history.
+    expect(screen.getAllByText("Within my limit.")).toHaveLength(2);
+    expect(screen.getByText("Approved by Anita Rao")).toBeInTheDocument();
+    expect(screen.queryByText(/Waiting for a decision/)).toBeNull();
     expect(
       screen.queryByRole("button", { name: "Reject" }),
     ).not.toBeInTheDocument();

@@ -189,10 +189,18 @@ export class WorkflowsService {
     const next = stored?.passedOn
       ? await this.policy.deciderFor(stored.passedOn.byUserId)
       : null;
+    const decision = stored ? stored.decision : record.decision;
+    // The open task says when the decision is due; a decided SPR has none.
+    const task = decision
+      ? undefined
+      : (await this.model.tasksFor("APPROVER")).find(
+          (open) => open.ref?.recordNo === recordNo,
+        );
     return {
       ...record,
       // Once the workflow runs this SPR, its own record is what is true of it.
-      decision: stored ? stored.decision : record.decision,
+      decision,
+      due: task ? { dueAt: task.dueAt, overdue: task.overdue } : null,
       decidable: stored !== null,
       passedTo: stored?.passedOn
         ? {

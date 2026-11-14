@@ -60,8 +60,13 @@ export function SprFields({ fields }: { fields: readonly SprField[] }) {
               )}
             </TableCell>
             <TableCell>
+              {/* Outlined like the others, in the accent: marked, without outshouting the decision. */}
               <Badge
-                variant={field.origin === "suggested" ? "default" : "outline"}
+                variant="outline"
+                className={cn(
+                  field.origin === "suggested" &&
+                    "border-primary/40 text-primary",
+                )}
               >
                 {field.origin === "suggested" ? (
                   <Sparkles aria-hidden="true" />

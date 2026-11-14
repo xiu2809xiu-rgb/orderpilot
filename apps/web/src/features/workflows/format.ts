@@ -13,6 +13,15 @@ export function formatDate(value: string): string {
   return DATE.format(new Date(value));
 }
 
+const DAY_KEY = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Asia/Singapore",
+});
+
+/** True when the moment falls on today's date in Singapore. */
+export function isToday(value: string, now: Date = new Date()): boolean {
+  return DAY_KEY.format(new Date(value)) === DAY_KEY.format(now);
+}
+
 export function formatDateTime(value: string): string {
   return DATE_TIME.format(new Date(value));
 }

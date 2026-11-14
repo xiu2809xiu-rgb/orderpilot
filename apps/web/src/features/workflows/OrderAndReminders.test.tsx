@@ -204,6 +204,41 @@ describe("reminders", () => {
     expect(await axeViolations(container)).toEqual([]);
   });
 
+  it("opens the SPR a reminder is about", async () => {
+    const [first] = reminders.data;
+    if (!first) throw new Error("no reminder");
+    server.use(
+      getWorkflowsMyRemindersMockHandler({
+        ...reminders,
+        data: [
+          {
+            ...first,
+            kind: "TASK_DUE",
+            stage: "sent",
+            orderNo: "SO-0078",
+            message: "Approve or reject the SPR for SO-0078.",
+            toRole: "APPROVER",
+            escalatedTo: null,
+            ref: { recordNo: "SPR-20261109-0003", navisionNo: null },
+          },
+        ],
+      }),
+    );
+    renderWorkflowPage(<RemindersPage />, {
+      role: "APPROVER",
+      route: "/",
+      path: "/",
+    });
+    expect(
+      await screen.findByRole("link", { name: "SPR-20261109-0003" }),
+    ).toHaveAttribute("href", "/workflows/sprs/SPR-20261109-0003");
+    expect(
+      screen.getByRole("region", { name: "Reminders for Management approver" }),
+    ).toBeInTheDocument();
+    // The message says it is a due task, so the kind is not repeated.
+    expect(screen.queryByText("Task due")).toBeNull();
+  });
+
   it("has an empty state", async () => {
     server.use(
       getWorkflowsMyRemindersMockHandler(
@@ -257,12 +292,27 @@ describe("what has been sent to you", () => {
       await screen.findByRole("region", { name: "Sent to you" }),
     ).toBeInTheDocument();
     expect(screen.getByText("Escalation")).toBeInTheDocument();
-    expect(screen.getByText(/on SO-0005 is overdue/)).toBeInTheDocument();
+    expect(screen.getByText(/for SO-0005 is overdue/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "SO-0005" })).toHaveAttribute(
       "href",
       "/workflows/orders/SO-0005",
     );
     expect(await axeViolations(container)).toEqual([]);
+  });
+
+  // The role's own list already shows what was sent, so this folds away below it.
+  it("folds what was sent below the role's own list", async () => {
+    server.use(getWorkflowsNoticesForMeMockHandler(notices([NOTICE])));
+    open();
+    const summary = await screen.findByText("Show the reminder sent to you");
+    expect(summary.closest("details")).not.toHaveAttribute("open");
+    const list = screen.getByRole("region", {
+      name: "Reminders for Management approver",
+    });
+    const sent = screen.getByRole("region", { name: "Sent to you" });
+    expect(
+      list.compareDocumentPosition(sent) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
   });
 
   it("shows nothing extra when nothing has been sent", async () => {
