@@ -1,9 +1,8 @@
 import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Outlet, useLocation } from "react-router";
+import { useLocation } from "react-router";
 // Direct paths, never the "@/components/common" barrel: the barrel would put
 // every common component in the entry chunk (docs/architecture/patterns.md).
-import { ListPageSkeleton } from "@/components/common/skeletons";
 import { Toaster } from "@/components/common/Toaster";
 import { featureNamespaces } from "@/features/nav";
 import { apiClient } from "@/lib/api/instance";
@@ -11,10 +10,12 @@ import { whenIdle } from "@/lib/deferred";
 import { loadRecordTabs } from "@/lib/loadRecordTabs";
 import { useSessionStore } from "@/stores/session";
 import { CrumbProvider } from "./pageCrumb";
+import { PageRegion } from "./PageRegion";
 import { useGlobalShortcuts } from "./shortcuts";
 import { SidePanel } from "./SidePanel";
 import { SparkPanelProvider } from "./sparkPanel";
 import { Topbar } from "./Topbar";
+import { usePageArrival } from "./usePageArrival";
 import { usePanelCollapsed } from "./usePanelCollapsed";
 import "./shell.css";
 
@@ -99,6 +100,7 @@ export function AppShell() {
   const [dock, setDock] = useState<HTMLElement | null>(null);
   const [collapsed, toggleCollapsed] = usePanelCollapsed();
   const main = useScrollToTopOnNewPage();
+  const announcement = usePageArrival(main);
   useScheduledRefresh();
   useGlobalShortcuts();
   useEffect(
@@ -142,10 +144,16 @@ export function AppShell() {
               tabIndex={-1}
               className="dx-main min-h-0 flex-1 overflow-y-auto outline-none"
             >
-              <Suspense fallback={<ListPageSkeleton />}>
-                <Outlet />
-              </Suspense>
+              <PageRegion />
             </main>
+            <div
+              role="status"
+              aria-live="polite"
+              data-testid="page-announcer"
+              className="sr-only"
+            >
+              {announcement}
+            </div>
             <div
               ref={setDock}
               data-testid="consent-dock"

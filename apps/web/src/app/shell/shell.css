@@ -194,3 +194,32 @@
 .dx-bar [data-slot="button"][data-variant="outline"]:hover {
   background-color: var(--dx-bar-btn-hover);
 }
+
+/* The page region: a page change fades and settles the region alone (the
+   keyframes are in styles/motion.css), so the panel and the bar stand still. */
+.dx-main {
+  position: relative;
+}
+
+/* While a page's code loads. A skeleton block is still, never pulsing. The
+   wrapper and the progress line (styles/motion.css) both wait before they show,
+   so a chunk that is already cached shows no flash. */
+.dx-bone {
+  display: block;
+  border-radius: var(--radius-control);
+  background: color-mix(in oklab, var(--foreground) 9%, transparent);
+}
+@keyframes dx-skeleton-in {
+  from {
+    opacity: 0;
+  }
+}
+.dx-skeleton {
+  animation: dx-skeleton-in var(--motion-fast) var(--ease-out) 140ms both;
+}
+@media (prefers-reduced-motion: reduce) {
+  /* The wait stays, the movement goes: the shape still shows after 140 ms. */
+  .dx-skeleton {
+    animation-duration: 1ms;
+  }
+}

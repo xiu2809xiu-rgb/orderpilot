@@ -10,6 +10,7 @@
     "breadcrumb": "Breadcrumb",
     "search": "Search or jump to",
     "loading": "Loading",
+    "pageTitle": "{{page}} - OrderPilot",
     "close": "Close",
     "mobileNavTitle": "Navigation",
     "mobileNavDescription": "Choose an area of OrderPilot.",

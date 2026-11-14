@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { Suspense, lazy } from "react";
 import {
   createBrowserRouter,
   createMemoryRouter,
@@ -21,6 +21,30 @@ import { RouteCrashPage } from "./pages/CrashPage";
 import { RootLayout } from "./RootLayout";
 import { Splash } from "./Splash";
 import { AppShell } from "./shell/AppShell";
+
+// The pages of the shell itself are React.lazy elements, not route `lazy`
+// functions: the router would hold the old page until the chunk arrived, with
+// nothing on screen to say so, whereas the page region shows the skeleton of
+// the page that is coming (shell/PageRegion). Each is made once, so a chunk
+// that has loaded never suspends again.
+const HomeScreen = lazy(
+  () => import("@/features/directions/screens/home/HomeScreen"),
+);
+const SettingsPage = lazy(async () => ({
+  default: (await import("./pages/SettingsPage")).SettingsPage,
+}));
+const GalleryPage = lazy(async () => ({
+  default: (await import("./gallery/GalleryPage")).GalleryPage,
+}));
+const KitScreen = lazy(
+  () => import("@/features/directions/screens/kit/KitScreen"),
+);
+const UploadScreen = lazy(
+  () => import("@/features/directions/screens/upload/UploadScreen"),
+);
+const NotFoundPage = lazy(async () => ({
+  default: (await import("./pages/NotFoundPage")).NotFoundPage,
+}));
 
 /** A feature's route: its guard, its crumb, and its page as a lazy chunk. */
 export function featureRoute(feature: Feature): RouteObject {
@@ -74,20 +98,10 @@ export function buildRoutes(
               element: <AppShell />,
               handle: { crumb: "common:nav.home" },
               children: [
-                {
-                  index: true,
-                  lazy: async () => ({
-                    Component: (
-                      await import("@/features/directions/screens/home/HomeScreen")
-                    ).default,
-                  }),
-                },
+                { index: true, element: <HomeScreen /> },
                 {
                   path: "settings",
-                  lazy: async () => ({
-                    Component: (await import("./pages/SettingsPage"))
-                      .SettingsPage,
-                  }),
+                  element: <SettingsPage />,
                   handle: { crumb: "common:nav.settings" },
                 },
                 {
@@ -95,22 +109,12 @@ export function buildRoutes(
                   element: <RequireDemo />,
                   handle: { crumb: "common:nav.gallery" },
                   children: [
-                    {
-                      index: true,
-                      lazy: async () => ({
-                        Component: (await import("./gallery/GalleryPage"))
-                          .GalleryPage,
-                      }),
-                    },
+                    { index: true, element: <GalleryPage /> },
                     {
                       // The kit sheet: every adapted kit item on one page.
                       path: "kit",
                       handle: { crumb: "directions-kit:title" },
-                      lazy: async () => ({
-                        Component: (
-                          await import("@/features/directions/screens/kit/KitScreen")
-                        ).default,
-                      }),
+                      element: <KitScreen />,
                     },
                   ],
                 },
@@ -120,24 +124,12 @@ export function buildRoutes(
                   path: "upload",
                   element: <RequireDemo />,
                   handle: { crumb: "directions-intake:title" },
-                  children: [
-                    {
-                      index: true,
-                      lazy: async () => ({
-                        Component: (
-                          await import("@/features/directions/screens/upload/UploadScreen")
-                        ).default,
-                      }),
-                    },
-                  ],
+                  children: [{ index: true, element: <UploadScreen /> }],
                 },
                 ...reachableFeatures(list, withPlanned).map(featureRoute),
                 {
                   path: "*",
-                  lazy: async () => ({
-                    Component: (await import("./pages/NotFoundPage"))
-                      .NotFoundPage,
-                  }),
+                  element: <NotFoundPage />,
                 },
               ],
             },
