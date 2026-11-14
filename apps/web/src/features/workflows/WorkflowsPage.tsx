@@ -10,6 +10,7 @@ import {
   type FilterChip,
   type TableFilters,
 } from "@/components/common";
+import { ToggleChip } from "@/components/common/data-table/Field";
 import { Button } from "@/components/ui/button";
 import {
   useWorkflowsInboxTasks,
@@ -55,7 +56,6 @@ export default function WorkflowsPage() {
   };
   const chips: FilterChip[] = [
     ...(kind ? [{ id: "kind", label: t(`task.kinds.${kind}`) }] : []),
-    ...(overdueOnly ? [{ id: "overdue", label: t("inbox.overdueOnly") }] : []),
   ];
 
   const mine = useWorkflowsMyTasks(params, {
@@ -79,10 +79,10 @@ export default function WorkflowsPage() {
       />
       <WorkflowNav />
       <HandedToYou />
-      <FilterChips chips={chips} filters={filters} onChange={setFilters} />
-      {mayPick ? (
-        <RolePicker value={role ?? "SUPPORT"} onChange={setRole} />
+      {mayPick && role !== undefined ? (
+        <RolePicker value={role} onChange={setRole} />
       ) : null}
+      <FilterChips chips={chips} filters={filters} onChange={setFilters} />
       {role === undefined ? (
         <EmptyState
           title={t("inbox.noInboxTitle")}
@@ -92,17 +92,16 @@ export default function WorkflowsPage() {
         <SectionCard
           title={t("inbox.forRole", { role: roleName })}
           description={t("inbox.count", { count: query.data?.meta.total ?? 0 })}
+          work
           actions={
-            <Button
-              variant="outline"
-              className="min-h-11"
-              aria-pressed={overdueOnly}
-              onClick={() => {
-                setFilters({ ...filters, overdue: !overdueOnly });
+            <ToggleChip
+              checked={overdueOnly}
+              onCheckedChange={(checked) => {
+                setFilters({ ...filters, overdue: checked });
               }}
             >
               {t("inbox.overdueOnly")}
-            </Button>
+            </ToggleChip>
           }
         >
           <QueryBoundary query={query}>
@@ -130,7 +129,7 @@ export default function WorkflowsPage() {
                 }
               />
             ) : (
-              <ul className="space-y-s2">
+              <ul className="divide-y divide-border">
                 {tasks.map((task) => (
                   <TaskCard
                     key={task.id}

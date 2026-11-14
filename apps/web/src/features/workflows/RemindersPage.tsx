@@ -50,7 +50,7 @@ export default function RemindersPage() {
       {mayPick ? (
         <RolePicker value={role ?? "SUPPORT"} onChange={setRole} />
       ) : null}
-      <SectionCard title={t("reminders.heading")}>
+      <SectionCard title={t("reminders.heading")} work>
         <QueryBoundary query={query}>
           {reminders.length === 0 ? (
             <EmptyState
@@ -59,12 +59,9 @@ export default function RemindersPage() {
               description={t("reminders.emptyDescription")}
             />
           ) : (
-            <ul className="space-y-s2">
+            <ul className="divide-y divide-border">
               {reminders.map((reminder) => (
-                <li
-                  key={reminder.id}
-                  className="space-y-2 rounded-xl border p-s3"
-                >
+                <li key={reminder.id} className="space-y-1 py-3">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                       {t(`reminders.kinds.${reminder.kind}`)}
@@ -73,11 +70,11 @@ export default function RemindersPage() {
                       {t(`reminders.stages.${reminder.stage}`)}
                     </StatusBadge>
                   </div>
-                  <p className="font-medium">{reminder.message}</p>
-                  <p className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                  <p className="fs-14 font-medium">{reminder.message}</p>
+                  <p className="fs-14 flex flex-wrap gap-x-4 gap-y-1 text-muted-foreground">
                     <RecordLink
                       to={`/workflows/orders/${reminder.orderNo}`}
-                      className="inline-flex min-h-11 items-center font-mono text-primary underline-offset-4 hover:underline"
+                      className="inline-flex min-h-6 items-center font-mono font-medium text-primary underline-offset-4 hover:underline pointer-coarse:min-h-11"
                     >
                       {reminder.orderNo}
                     </RecordLink>

@@ -213,7 +213,7 @@ describe("the task inbox", () => {
     );
     open("APPROVER");
     await screen.findByText("Add the air waybill");
-    fireEvent.click(screen.getByRole("button", { name: "Overdue only" }));
+    fireEvent.click(screen.getByRole("switch", { name: "Overdue only" }));
     expect(await screen.findByText("No tasks waiting")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Show all tasks" }));
     expect(await screen.findByText("Add the air waybill")).toBeInTheDocument();

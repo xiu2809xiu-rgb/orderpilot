@@ -25,24 +25,25 @@ export function RemindersForYou() {
     <SectionCard
       title={t("forYou.title")}
       description={t("forYou.description")}
+      work
     >
       <QueryBoundary query={query}>
-        <ul className="space-y-s2">
+        <ul className="divide-y divide-border">
           {notices.map((notice) => (
-            <li key={notice.id} className="space-y-2 rounded-xl border p-s3">
+            <li key={notice.id} className="space-y-1 py-3">
               <StatusBadge tone={TONES[notice.kind]}>
                 {t(`forYou.kinds.${notice.kind}`)}
               </StatusBadge>
-              <p className="font-medium">
+              <p className="fs-14 font-medium">
                 {t(`forYou.messages.${notice.kind}`, {
                   task: t(`task.kinds.${notice.taskKind}`),
                   order: notice.orderNo,
                 })}
               </p>
-              <p className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+              <p className="fs-14 flex flex-wrap gap-x-4 gap-y-1 text-muted-foreground">
                 <RecordLink
                   to={`/workflows/orders/${notice.orderNo}`}
-                  className="inline-flex min-h-11 items-center font-mono text-primary underline-offset-4 hover:underline"
+                  className="inline-flex min-h-6 items-center font-mono font-medium text-primary underline-offset-4 hover:underline pointer-coarse:min-h-11"
                 >
                   {notice.orderNo}
                 </RecordLink>
