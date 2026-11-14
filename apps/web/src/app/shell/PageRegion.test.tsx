@@ -1,6 +1,6 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { lazy, useEffect, useRef } from "react";
+import { StrictMode, lazy, useEffect, useRef } from "react";
 import { Link, RouterProvider, createMemoryRouter } from "react-router";
 import { beforeAll, describe, expect, it } from "vitest";
 import i18n from "@/i18n";
@@ -55,7 +55,7 @@ const Slow = lazy(
     }),
 );
 
-function open(path: string) {
+function open(path: string, strict = false) {
   const router = createMemoryRouter(
     [
       {
@@ -79,7 +79,8 @@ function open(path: string) {
     ],
     { initialEntries: [path] },
   );
-  render(<RouterProvider router={router} />);
+  const app = <RouterProvider router={router} />;
+  render(strict ? <StrictMode>{app}</StrictMode> : app);
   return router;
 }
 
@@ -121,6 +122,12 @@ describe("the page region", () => {
 
   it("does not take the focus the first page already has", async () => {
     open("/orders");
+    await screen.findByRole("heading", { name: "Orders" });
+    expect(document.getElementById("main")).not.toHaveFocus();
+  });
+
+  it("does not take the focus on the first load in development either, where effects run twice", async () => {
+    open("/orders", true);
     await screen.findByRole("heading", { name: "Orders" });
     expect(document.getElementById("main")).not.toHaveFocus();
   });

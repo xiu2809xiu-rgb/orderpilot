@@ -24,14 +24,17 @@ export function usePageArrival(main: RefObject<HTMLElement | null>): string {
   const { t } = useTranslation();
   const key = usePageKey();
   const [announcement, setAnnouncement] = useState("");
-  const arrived = useRef(false);
+  // The page the last run was for. A run for the same page again (the effect
+  // runs twice in development) is not an arrival, so the first load never
+  // pulls focus off the skip link's place at the top of the document.
+  const arrivedAt = useRef<string | null>(null);
 
   useEffect(() => {
     const region = main.current;
     if (!region) return;
-    const first = !arrived.current;
-    arrived.current = true;
-    if (!first) {
+    const moved = arrivedAt.current !== null && arrivedAt.current !== key;
+    arrivedAt.current = key;
+    if (moved) {
       setAnnouncement("");
       const active = document.activeElement;
       if (!active || !region.contains(active)) {
@@ -45,7 +48,7 @@ export function usePageArrival(main: RefObject<HTMLElement | null>): string {
       const heading = name();
       if (!heading) return;
       document.title = t("shell.pageTitle", { page: heading });
-      if (final && !first) setAnnouncement(heading);
+      if (final && moved) setAnnouncement(heading);
     };
     const observer = new MutationObserver(() => {
       if (!name()) return;

@@ -77,6 +77,8 @@ export function Notifications() {
       </PopoverTrigger>
       <PopoverContent
         align="end"
+        // Clear of the bar's lower edge: the bar is 56 px and its buttons sit inside it.
+        sideOffset={14}
         collisionPadding={8}
         className="flex max-h-(--radix-popover-content-available-height) w-80 flex-col gap-s1"
       >

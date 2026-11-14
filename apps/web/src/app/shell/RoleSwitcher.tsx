@@ -47,7 +47,7 @@ export function RoleSwitcher() {
           <span className="max-sm:sr-only">{t("demo.switcher")}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64">
+      <DropdownMenuContent align="end" sideOffset={14} className="w-64">
         <DropdownMenuLabel className="font-normal text-muted-foreground">
           {t("demo.switcherHint")}
         </DropdownMenuLabel>

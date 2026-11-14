@@ -30,7 +30,7 @@ export function ThemeSwitch() {
           <Moon className="hidden size-4 dark:block" aria-hidden="true" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" sideOffset={14}>
         <DropdownMenuRadioGroup
           value={preference}
           onValueChange={(value) => {
