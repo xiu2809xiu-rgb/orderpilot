@@ -72,3 +72,22 @@ describe("toListRequest", () => {
     ).toBe("0194f3a0-0000-7000-8000-000000000001");
   });
 });
+
+describe("the events around a sequence (F-9)", () => {
+  it("sends the sequence to centre the list on", () => {
+    const { params, problem } = toListRequest(
+      queryWith({ filters: { around: "1234" } }),
+    );
+    expect(problem).toBeNull();
+    expect(params.around).toBe(1234);
+  });
+
+  it("does not send a sequence that is not a positive whole number", () => {
+    for (const around of ["0", "-2", "1.5", "abc"]) {
+      expect(
+        toListRequest(queryWith({ filters: { around } })).problem,
+        around,
+      ).toBe("around");
+    }
+  });
+});
