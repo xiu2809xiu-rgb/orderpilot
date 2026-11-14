@@ -60,6 +60,12 @@ export interface DataTableProps<Row> {
     state: DataTableState<Row> & { rows: readonly Row[] },
   ) => ReactNode;
   empty?: { title?: string; description?: string; action?: ReactNode };
+  /**
+   * The applied-filter pills, drawn under the filter row and above the
+   * card as the Orders workspace does. A page that draws its own
+   * `FilterChips` above the table passes them here instead.
+   */
+  applied?: ReactNode;
   exportOptions?: ExportOptions<Row>;
   pageSizes?: readonly number[];
   searchDebounceMs?: number;
@@ -99,6 +105,7 @@ export function DataTable<Row>({
   filterSlot,
   toolbar,
   empty,
+  applied,
   exportOptions,
   pageSizes = [10, 25, 50],
   searchDebounceMs = 300,
@@ -130,6 +137,8 @@ export function DataTable<Row>({
           searchDebounceMs={searchDebounceMs}
         />
       )}
+
+      {applied}
 
       {partialNotice ? (
         <PartialNotice description={partialNotice} onRetry={onRetry} />

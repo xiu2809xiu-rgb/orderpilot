@@ -40,7 +40,7 @@ export function itemColumns(
       cell: (row) => (
         <RecordLink
           to={`/master-data/items/${row.no}`}
-          className="font-mono font-medium text-primary underline-offset-4 hover:underline"
+          className="underline-offset-4 hover:underline"
         >
           {row.no}
         </RecordLink>
@@ -55,7 +55,7 @@ export function itemColumns(
       // Capped so that the list fits a laptop screen; the full text is
       // on the item's page and in the export.
       cell: (row) => (
-        <span className="block max-w-44 truncate" title={row.description}>
+        <span className="block max-w-40 truncate" title={row.description}>
           {row.description}
         </span>
       ),
@@ -116,7 +116,7 @@ export function itemColumns(
       cell: (row) => (
         <RecordLink
           to={`/master-data/vendors/${row.vendorNo}`}
-          className="block max-w-36 truncate underline-offset-4 hover:underline"
+          className="block max-w-32 truncate underline-offset-4 hover:underline"
           title={row.vendorName}
         >
           {row.vendorName}

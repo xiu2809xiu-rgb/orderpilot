@@ -470,3 +470,39 @@
     grid-column: 1 / -1;
   }
 }
+
+/* A page can put its own fields in `filterSlot` (the audit log does, with
+   native selects and its own labels). They take the look of the shared
+   fields without the page changing: the label above, muted and small; the
+   select in the same box as every control of the row. */
+.dt-panel label:not(.dt-field-label) {
+  color: var(--muted-foreground);
+  font-size: var(--type-12);
+  font-weight: 500;
+}
+
+.dt-panel select:not(.dt-select > select) {
+  height: 2.25rem;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--foreground);
+  font-size: var(--type-14);
+  padding: 0 0.5rem 0 0.75rem;
+}
+
+.dt-panel select:not(.dt-select > select) option {
+  background: var(--popover);
+  color: var(--popover-foreground);
+}
+
+.dt-panel select:not(.dt-select > select):focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+@media (pointer: coarse) {
+  .dt-panel select:not(.dt-select > select) {
+    min-height: 2.75rem;
+  }
+}
