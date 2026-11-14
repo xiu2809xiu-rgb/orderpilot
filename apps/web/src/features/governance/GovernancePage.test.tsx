@@ -919,6 +919,32 @@ describe("GovernancePage", () => {
     ).toBeInTheDocument();
   });
 
+  it("names each classification in the request form as the badges do", async () => {
+    signIn("SYSTEM_ADMIN");
+    server.use(
+      http.get("*/api/v1/governance/ai-destinations", () =>
+        HttpResponse.json({
+          data: [
+            {
+              provider: "mock",
+              origins: ["synthetic"],
+              classifications: ["public"],
+            },
+          ],
+        }),
+      ),
+    );
+    renderPage("/governance?tab=ai");
+    const select = await screen.findByRole("combobox", {
+      name: "Classification",
+    });
+    expect(
+      within(select)
+        .getAllByRole("option")
+        .map((option) => option.textContent),
+    ).toEqual(["Public", "Internal", "Confidential", "Restricted"]);
+  });
+
   it("shows how a refusal looks, in the page and in the envelope", async () => {
     signIn("SYSTEM_ADMIN");
     renderPage();
