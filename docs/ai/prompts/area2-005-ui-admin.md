@@ -31,3 +31,7 @@ push and open the prs
 ## What the AI found that shaped it
 
 The rules card showed the guesses the 5 Nov briefing replaced. The readiness check is not reachable through the web server, so an admin-only route runs it. The Data scope dropdowns, not the role headers, kept the matrix too wide. A rebuild of only the web container takes under a minute, where a full one takes ten.
+
+## 4. Giving area 4's files back
+
+Angelyn's pull request 272 changes the same audit, governance and monitoring files, and they are her area's. She asked that this one keep only Azri's own changes, and Azri agreed on 15 Nov. The AI put those files back as they are on `main` and removed the four screenshots that showed them. Angelyn takes Observability first with a tab you can link to, the AI use tile opening that tab, short record ids and the folded audit filters into her pull request, and the Users search and the matrix layout after the demo.

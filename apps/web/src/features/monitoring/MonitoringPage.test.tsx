@@ -49,10 +49,10 @@ const usage = (calls: number) => ({
   meta: { page: 1, pageSize: 10, total: calls },
 });
 
-function renderPage(path = "/monitoring") {
+function renderPage() {
   return render(
     <QueryClientProvider client={createQueryClient()}>
-      <MemoryRouter initialEntries={[path]}>
+      <MemoryRouter>
         <MonitoringPage />
       </MemoryRouter>
     </QueryClientProvider>,
@@ -67,16 +67,9 @@ describe("MonitoringPage", () => {
     useSessionStore.getState().setSession(sessionFor("SYSTEM_ADMIN"));
   });
 
-  it("opens on Observability, with the tab in the address", async () => {
-    renderPage();
-    expect(
-      await screen.findByRole("tab", { name: "Observability", selected: true }),
-    ).toBeVisible();
-  });
-
   it("shows real AI usage and cost with no axe violations", async () => {
     server.use(getAiUsageReportMockHandler(usage(1)));
-    const { container } = renderPage("/monitoring?tab=aiUsage");
+    const { container } = renderPage();
     const table = await screen.findByRole("table", { name: "Latest AI calls" });
     expect(within(table).getByText("mock / mock-small")).toBeVisible();
     expect(within(table).getByText("trace-ai-1")).toBeVisible();
@@ -85,7 +78,7 @@ describe("MonitoringPage", () => {
 
   it("says plainly that nothing has called a model yet", async () => {
     server.use(getAiUsageReportMockHandler(usage(0)));
-    renderPage("/monitoring?tab=aiUsage");
+    renderPage();
     expect(await screen.findByText("No AI calls recorded yet")).toBeVisible();
     expect(
       screen.getByRole("link", { name: "See what data may go to AI" }),
@@ -100,7 +93,7 @@ describe("MonitoringPage", () => {
         }),
       ),
     );
-    renderPage("/monitoring?tab=aiUsage");
+    renderPage();
     expect(await screen.findByText(/trace-fail-9/)).toBeVisible();
     expect(
       screen.getByRole("button", { name: /retry|try again/i }),

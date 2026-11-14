@@ -59,7 +59,6 @@ function BrowserChoice() {
 /** Usage summary on mock data until Angelyn reads the ClickstreamEvent table (Sprints 13 to 15). */
 export function ClickstreamTab() {
   const { t } = useTranslation("monitoring");
-  const { t: tc } = useTranslation();
   const query = useOverviewClickstream();
 
   if (query.isPending) return <LoadingState />;
@@ -130,18 +129,14 @@ export function ClickstreamTab() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {[...byRole]
-              .sort((a, b) => b.events - a.events)
-              .map((row) => (
-                <TableRow key={row.role}>
-                  <TableCell>
-                    {tc(`roles.${row.role}`, { defaultValue: row.role })}
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums">
-                    {row.events}
-                  </TableCell>
-                </TableRow>
-              ))}
+            {byRole.map((row) => (
+              <TableRow key={row.role}>
+                <TableCell>{row.role}</TableCell>
+                <TableCell className="text-right tabular-nums">
+                  {row.events}
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </SectionCard>
