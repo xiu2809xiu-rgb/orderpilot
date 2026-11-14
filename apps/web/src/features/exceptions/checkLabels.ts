@@ -15,3 +15,8 @@ export function checkLabelOf(ruleLabel: string): string {
   const cleaned = ruleLabel.replace(/\s*\(sample result\)\s*$/i, "").trim();
   return SHORT_CHECK_LABELS[cleaned] ?? cleaned;
 }
+
+/** The check column's own filter options: the short labels this map knows, each once. */
+export const CHECK_FILTER_OPTIONS = [
+  ...new Set(Object.values(SHORT_CHECK_LABELS)),
+];

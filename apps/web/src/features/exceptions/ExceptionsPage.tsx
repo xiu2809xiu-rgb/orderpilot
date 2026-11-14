@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { Truck } from "lucide-react";
@@ -17,10 +17,35 @@ import {
 import { Button } from "@/components/ui/button";
 import { useExceptionsList } from "@/lib/api/generated/endpoints/exceptions/exceptions";
 import { tableStatusOf } from "@/lib/query-status";
+import { CheckColumnFilter } from "./CheckColumnFilter";
 import { checkLabelOf } from "./checkLabels";
 import { DiscrepancyCell } from "./DiscrepancyCell";
 
-const URL_FILTERS = ["state"] as const;
+const URL_FILTERS = ["state", "rule"] as const;
+
+/**
+ * The rows already on screen, narrowed to one check type and put in order by
+ * its order number or customer. This is the page's own rows only: the server
+ * still decides which page of the queue it sends, so a match outside this
+ * page is not pulled in and the total above the table still counts the
+ * whole, unnarrowed queue.
+ */
+function visibleRows(
+  rows: readonly CheckException[],
+  rule: string | undefined,
+  sort: { columnId: string; direction: "asc" | "desc" } | null,
+): CheckException[] {
+  const narrowed = rule
+    ? rows.filter((row) => checkLabelOf(row.ruleLabel) === rule)
+    : rows;
+  if (!sort || (sort.columnId !== "order" && sort.columnId !== "customer")) {
+    return [...narrowed];
+  }
+  const direction = sort.direction === "asc" ? 1 : -1;
+  const key = (row: CheckException) =>
+    sort.columnId === "order" ? row.orderNo : row.customerName;
+  return [...narrowed].sort((a, b) => key(a).localeCompare(key(b)) * direction);
+}
 
 /** The exceptions queue: failed checks waiting for a person, on mock data. Newest first. */
 export default function ExceptionsPage() {
@@ -42,6 +67,20 @@ export default function ExceptionsPage() {
     },
     { query: { placeholderData: (previous) => previous } },
   );
+  const ruleFilter =
+    typeof query.filters.rule === "string" ? query.filters.rule : undefined;
+  const onSelectRule = useCallback(
+    (next: string | undefined) => {
+      const filters = { ...query.filters };
+      if (next) {
+        filters.rule = next;
+      } else {
+        delete filters.rule;
+      }
+      setQuery({ ...query, page: 1, filters });
+    },
+    [query, setQuery],
+  );
 
   const columns = useMemo<DataTableColumn<CheckException>[]>(
     () => [
@@ -58,6 +97,7 @@ export default function ExceptionsPage() {
         ),
         exportValue: (row) => row.orderNo,
         hideable: false,
+        sortable: true,
       },
       {
         id: "customer",
@@ -71,10 +111,14 @@ export default function ExceptionsPage() {
           </span>
         ),
         exportValue: (row) => `${row.customerNo} ${row.customerName}`,
+        sortable: true,
       },
       {
         id: "rule",
         header: t("list.columns.rule"),
+        headerContent: (
+          <CheckColumnFilter value={ruleFilter} onSelect={onSelectRule} />
+        ),
         cell: (row) => checkLabelOf(row.ruleLabel),
         exportValue: (row) => checkLabelOf(row.ruleLabel),
       },
@@ -134,7 +178,7 @@ export default function ExceptionsPage() {
         exportValue: (row) => row.openedAt,
       },
     ],
-    [t, tc],
+    [t, tc, ruleFilter, onSelectRule],
   );
 
   return (
@@ -165,7 +209,7 @@ export default function ExceptionsPage() {
         tableId="exceptions"
         caption={t("list.caption")}
         columns={columns}
-        rows={list.data?.data ?? []}
+        rows={visibleRows(list.data?.data ?? [], ruleFilter, query.sort)}
         total={list.data?.meta.total ?? 0}
         query={query}
         onQueryChange={setQuery}

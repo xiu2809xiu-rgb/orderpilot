@@ -152,6 +152,51 @@ describe("the exceptions queue", () => {
     expect(screen.getByText("+$1.50 / unit")).toBeVisible();
   });
 
+  it("sorts the rows on screen by order number when its header is clicked", async () => {
+    await i18n.loadNamespaces(["exceptions", "common"]);
+    const first = { ...mismatch, id: "e6", orderNo: "SO-0009" };
+    const second = { ...mismatch, id: "e7", orderNo: "SO-0002" };
+    server.use(getExceptionsListMockHandler(queue([first, second])));
+    renderPage();
+    await screen.findByRole("link", { name: "SO-0009" });
+    const orderOf = (link: HTMLElement) =>
+      within(link.closest("tr") ?? link).queryByRole("link")?.textContent;
+    const rowsBefore = screen.getAllByRole("row").slice(1);
+    expect(rowsBefore.map((r) => orderOf(r))).toEqual(["SO-0009", "SO-0002"]);
+
+    await userEvent.click(screen.getByRole("button", { name: "Order No." }));
+    await waitFor(() => {
+      const rowsAfter = screen.getAllByRole("row").slice(1);
+      expect(rowsAfter.map((r) => orderOf(r))).toEqual(["SO-0002", "SO-0009"]);
+    });
+  });
+
+  it("narrows the rows on screen to one check from the Check column's own filter", async () => {
+    await i18n.loadNamespaces(["exceptions", "common"]);
+    const quantity = { ...mismatch, id: "e8", orderNo: "SO-0009" };
+    const price = {
+      ...mismatch,
+      id: "e9",
+      orderNo: "SO-0010",
+      ruleLabel: "Unit price on the PI against the PO (sample result)",
+    };
+    server.use(getExceptionsListMockHandler(queue([quantity, price])));
+    renderPage();
+    await screen.findByRole("link", { name: "SO-0009" });
+    expect(screen.getByRole("link", { name: "SO-0010" })).toBeVisible();
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Filter by check" }),
+    );
+    await userEvent.click(
+      await screen.findByRole("menuitemradio", { name: "PI vs PO" }),
+    );
+    await waitFor(() => {
+      expect(screen.queryByRole("link", { name: "SO-0009" })).toBeNull();
+    });
+    expect(screen.getByRole("link", { name: "SO-0010" })).toBeVisible();
+  });
+
   it("opens the order when the row itself is clicked, away from its link", async () => {
     await i18n.loadNamespaces(["exceptions", "common"]);
     server.use(getExceptionsListMockHandler(queue([mismatch])));
