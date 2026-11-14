@@ -359,12 +359,14 @@ Two of F-1's loose ends, settled in [ADR 0053](../adr/0053-revocations-survive-t
 
 ## Ready for the Week 5 demo
 
-On 14 Nov a walk through the demo as every role, on a Docker build, found nine gaps in Area 4's screens. They are fixed:
+On 14 Nov a walk through the demo as every role, on a Docker build, found nine gaps in Area 4's screens. They are fixed, with two ideas from Azri's #270:
 
 - **The audit log** fits its card at 1440 px, so Details is in view without scrolling sideways (a browser test in `governance.spec.ts` checks it). Its search also finds a whole trace ID, such as one quoted from a refusal, and an event's trace ID has a copy button.
+- **The audit log's record IDs and filters,** after #270: a UUID shows its first characters, with the whole in its title and a copy button, and the eight filters fold behind "More filters", which opens by itself when one is in use. The action code stays in view, and the search box and its trace ID hint sit outside the fold.
 - **The matrix** tells a read-only role, such as the auditor, that it may read the matrix, and names what changing it needs in the matrix's own words.
 - **Each role sees only the governance tabs it may use:** the Users tab needs `users.read`. Hiding a tab is not the control; the server refuses on its own.
-- **Monitoring** keeps its tab in the address bar (`?tab=`), and the clickstream names roles as the rest of the app does.
+- **Monitoring** keeps its tab in the address bar (`?tab=`) and, after #270, opens on Observability, listed first. The AI use tile and the See AI use quick action open `?tab=aiUsage`. The clickstream names roles as the rest of the app does.
+- **Settings:** the analytics choice is a radio group that marks the chosen setting, as the Appearance choice does.
 - **Wording:** the AI tab's classifications use the badges' words, and "trace ID" is written the same way in every Area 4 text, which `wording.test.ts` checks.
 
 ## Options to consider, not built

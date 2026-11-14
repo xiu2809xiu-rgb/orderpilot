@@ -32,3 +32,38 @@ For D2: no code change; I'll start the monitoring demo on Observability.
 For D1: I've asked Azri to update his mock text; my #252 will remove the limits and stand-in from the sample chain.
 After the fixes, run the checks and redo the walkthrough. In step (c), use the orders list for the masked price. Take light and dark screenshots of each Area 4 screen. Show me the results before pushing.
 ```
+
+## 3. The issue and the pull request
+
+```text
+Before pushing:
+1. Draft an issue for this work: type task, area 4, priority must, M2 and M4, current sprint, titled "Area 4 demo readiness: audit, governance and monitoring fixes". List A1, A2 and A4–A10 as its checklist. Show me it before creating it.
+2. Cherry-pick 8a1d567 (the #266 leftovers fix) onto this branch as its first change, and note in the F-9 branch's plan that it will drop that commit when it resumes.
+3. Draft the PR description: it closes the new issue, names the shared commit f4b1598 for Richie, lists the expected conflicts with F-9, and includes the labels area 4, priority must, type task, M2, M4.
+Show me both drafts. Then create the issue, push and open the PR with the labels.
+```
+
+## 4. Waiting for Azri
+
+```text
+Wait for Azri's answer before changing anything. If he agrees: in #272, adopt from #270 the Observability default for monitoring, the shorter record IDs with copy, and "More filters", but keep the action code visible and the trace ID search easy to find. Credit Azri in the PR description. Keep the post on #103 for the F-9 note too, so it's not only in your memory.
+```
+
+## 5. Azri agreed
+
+```text
+Azri agreed: #270 will keep only his Home cards and the SPR refusal's trace ID, and drop all Area 4 files. Update #272:
+1. Monitoring opens on Observability by default, and the tab stays in the address bar. Check the AI usage tile can link to /monitoring?tab=aiUsage.
+2. The audit table: shorter record IDs with copy, and a "More filters" fold. Keep the action code visible and the trace ID search easy to find.
+3. masking.ts: let the approver see item cost, because the SPR they decide already shows it. Add a test, update the masking tab's text if it lists who sees cost, and record the reason in my area guide.
+4. AnalyticsSettingsCard.tsx: show the chosen setting as selected, with a test.
+Each as its own commit, tested first. Update the PR description: credit Azri for ideas 1 and 2, and note the masking change. Then rerun the checks and the walkthrough, retake the screenshots that changed, and show me before pushing.
+```
+
+## 6. Item 3 dropped
+
+Item 3 would have changed one assertion in area 1's master-data test, so it was first put to Angelyn, who chose to ask Richie, and then dropped:
+
+```text
+actually can we reverse? i want to go with this option. Drop item 3 from #272: it would expose costs across area 1's screens, which is wider than the reason. Leave masking.ts and area 1's test unchanged. Remove the masking note from the PR description. Then run the checks, the walkthrough and the screenshots for items 1, 2 and 4, and show me before pushing.
+```
