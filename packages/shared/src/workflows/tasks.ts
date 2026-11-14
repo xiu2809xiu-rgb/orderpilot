@@ -124,13 +124,18 @@ export type TaskActionResult = z.infer<typeof taskActionResultSchema>;
  */
 export const OPEN_RULE_IDS = [
   "sprTrigger",
+  "approvers",
+  "approvalLimits",
+  "approverDisagreement",
+  "remarksReply",
   "piSequence",
-  "approversAndLimits",
-  "delegation",
 ] as const;
+/** Settled at the 5 Nov briefing, or still waiting for Spectra's answer. */
+export const OPEN_RULE_STATUSES = ["confirmed", "open"] as const;
 export const openRuleSchema = z.object({
   id: z.enum(OPEN_RULE_IDS),
   value: z.string().min(1),
+  status: z.enum(OPEN_RULE_STATUSES),
   screen: z.string().min(1).nullable(),
 });
 export type OpenRule = z.infer<typeof openRuleSchema>;

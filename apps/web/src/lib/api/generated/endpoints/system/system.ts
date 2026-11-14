@@ -21,6 +21,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  SystemCheckStatuses200,
   SystemChecks200,
   SystemChecksParams
 } from '../../model';
@@ -128,6 +129,98 @@ export function useSystemChecks<TData = Awaited<ReturnType<typeof systemChecks>>
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getSystemChecksQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary Runs each readiness check now: up or down, and how long it took. System admin
+ */
+export const systemCheckStatuses = (
+
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<SystemCheckStatuses200>(
+      {url: `/api/v1/system/checks/status`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getSystemCheckStatusesQueryKey = () => {
+    return [
+    `/api/v1/system/checks/status`
+    ] as const;
+    }
+
+
+export const getSystemCheckStatusesQueryOptions = <TData = Awaited<ReturnType<typeof systemCheckStatuses>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof systemCheckStatuses>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getSystemCheckStatusesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof systemCheckStatuses>>> = ({ signal }) => systemCheckStatuses(signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof systemCheckStatuses>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type SystemCheckStatusesQueryResult = NonNullable<Awaited<ReturnType<typeof systemCheckStatuses>>>
+export type SystemCheckStatusesQueryError = ErrorType<unknown>
+
+
+export function useSystemCheckStatuses<TData = Awaited<ReturnType<typeof systemCheckStatuses>>, TError = ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof systemCheckStatuses>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof systemCheckStatuses>>,
+          TError,
+          Awaited<ReturnType<typeof systemCheckStatuses>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSystemCheckStatuses<TData = Awaited<ReturnType<typeof systemCheckStatuses>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof systemCheckStatuses>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof systemCheckStatuses>>,
+          TError,
+          Awaited<ReturnType<typeof systemCheckStatuses>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSystemCheckStatuses<TData = Awaited<ReturnType<typeof systemCheckStatuses>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof systemCheckStatuses>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Runs each readiness check now: up or down, and how long it took. System admin
+ */
+
+export function useSystemCheckStatuses<TData = Awaited<ReturnType<typeof systemCheckStatuses>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof systemCheckStatuses>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getSystemCheckStatusesQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

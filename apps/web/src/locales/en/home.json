@@ -88,21 +88,41 @@
       "when": "When"
     }
   },
+  "health": {
+    "title": "System health",
+    "description": "Each service is checked when this page opens.",
+    "allUp": "Every service answered just now.",
+    "someDown_one": "{{count}} service did not answer. Its reason is in the server log.",
+    "someDown_other": "{{count}} services did not answer. Their reasons are in the server log.",
+    "again": "Check again",
+    "up": "Up, {{ms}} ms",
+    "down": "Down",
+    "names": {
+      "database": "Database",
+      "redis": "Cache and job queue",
+      "storage": "Document storage"
+    }
+  },
   "rules": {
-    "title": "Waiting for Spectra to confirm",
-    "table": "Open business rules and their draft values",
-    "description": "These rules stay as configuration until Spectra confirms them.",
-    "open": "Open",
-    "noScreen": "Held in configuration",
+    "title": "Business rules from Spectra",
+    "table": "Business rules, settled and still to confirm",
+    "description": "What Spectra settled at the 5 Nov briefing, and the drafts that wait for its answer. Each stays a setting, never code.",
     "columns": {
       "rule": "Rule",
-      "draft": "Draft value"
+      "draft": "What we have",
+      "status": "Status"
+    },
+    "status": {
+      "confirmed": "Confirmed 5 Nov",
+      "open": "To confirm"
     },
     "names": {
       "sprTrigger": "SPR trigger",
-      "piSequence": "PI sequence",
-      "approversAndLimits": "Approvers and limits",
-      "delegation": "Delegation"
+      "approvers": "Who approves",
+      "approvalLimits": "Approval limits",
+      "approverDisagreement": "Approvers disagree",
+      "remarksReply": "A reply with remarks",
+      "piSequence": "PI sequence"
     }
   },
   "quick": {

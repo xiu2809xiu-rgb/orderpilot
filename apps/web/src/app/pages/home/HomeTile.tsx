@@ -1,6 +1,7 @@
 import { ChevronRight, RotateCw } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
+import { NumberTicker } from "@/components/common";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { FeatureCue } from "@/features/define";
 import { useListCount } from "@/lib/useListCount";
@@ -59,7 +60,7 @@ export function HomeTile({ cue }: { cue: FeatureCue }) {
         data-numeric
         className="text-3xl font-semibold tracking-tight tabular-nums"
       >
-        {count.data.toLocaleString("en")}
+        <NumberTicker value={count.data} />
       </span>
     </Link>
   );

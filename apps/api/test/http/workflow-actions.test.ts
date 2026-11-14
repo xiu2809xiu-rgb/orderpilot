@@ -414,17 +414,28 @@ describe("acting on the mock tasks", () => {
   });
 
   describe("the rules waiting for Spectra", () => {
-    it("lists the four open rules for the system admin", async () => {
+    it("lists the rules for the system admin, settled ones first", async () => {
       const res = await call(t, as("SYSTEM_ADMIN"), "get", `${W}/open-rules`);
       expect(res.status).toBe(200);
       const rules = openRulesResponseSchema.parse(res.body);
       expect(rules.meta.mock).toBe(true);
-      expect(rules.data.map((rule) => rule.id)).toEqual([
-        "sprTrigger",
-        "piSequence",
-        "approversAndLimits",
-        "delegation",
+      expect(rules.data.map((rule) => [rule.id, rule.status])).toEqual([
+        ["sprTrigger", "confirmed"],
+        ["approvers", "confirmed"],
+        ["approvalLimits", "open"],
+        ["approverDisagreement", "open"],
+        ["remarksReply", "open"],
+        ["piSequence", "open"],
       ]);
+    });
+
+    it("no longer shows the substitute or the single approver's limit the briefing replaced", async () => {
+      const res = await call(t, as("SYSTEM_ADMIN"), "get", `${W}/open-rules`);
+      const text = openRulesResponseSchema
+        .parse(res.body)
+        .data.map((rule) => rule.value)
+        .join(" ");
+      expect(text).not.toMatch(/stands in|USD 5,000/);
     });
 
     it("is refused to a role that does not configure the platform", async () => {
@@ -435,12 +446,7 @@ describe("acting on the mock tasks", () => {
     it("links a rule only to a screen that shows it", async () => {
       const res = await call(t, as("SYSTEM_ADMIN"), "get", `${W}/open-rules`);
       const rules = openRulesResponseSchema.parse(res.body);
-      expect(rules.data.map((rule) => rule.screen)).toEqual([
-        null,
-        null,
-        null,
-        null,
-      ]);
+      expect(rules.data.every((rule) => rule.screen === null)).toBe(true);
     });
   });
 });

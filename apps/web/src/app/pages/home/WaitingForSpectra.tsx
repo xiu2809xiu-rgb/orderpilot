@@ -1,14 +1,12 @@
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router";
-import { SectionCard } from "@/components/common";
-import { buttonVariants } from "@/components/ui/button";
+import { SectionCard, StatusBadge } from "@/components/common";
 import { QueryBoundary } from "@/features/workflows/QueryBoundary";
 import { useWorkflowsOpenRules } from "@/lib/api/generated/endpoints/workflows/workflows";
 import { HomeTable, type HomeColumn } from "./HomeTable";
 
 /**
- * The system admin's list: the business rules that stay configuration until
- * Spectra confirms them. A rule with no screen says so, and has no button.
+ * The system admin's list of business rules: what Spectra settled at the
+ * briefing, and the drafts still waiting for its answer. Each stays a setting.
  */
 export function WaitingForSpectra() {
   const { t } = useTranslation("home");
@@ -17,7 +15,7 @@ export function WaitingForSpectra() {
   const columns: HomeColumn[] = [
     { id: "rule", label: t("rules.columns.rule") },
     { id: "draft", label: t("rules.columns.draft"), wrap: true },
-    { id: "action", label: t("needs.columns.action"), action: true },
+    { id: "status", label: t("rules.columns.status"), single: true },
   ];
 
   return (
@@ -31,24 +29,12 @@ export function WaitingForSpectra() {
             cells: {
               rule: t(`rules.names.${rule.id}`),
               draft: rule.value,
-              action: rule.screen ? (
-                <Link
-                  to={rule.screen}
-                  className={buttonVariants({
-                    variant: "outline",
-                    size: "sm",
-                  })}
-                  aria-label={t("needs.actionOn", {
-                    action: t("rules.open"),
-                    what: t(`rules.names.${rule.id}`),
-                  })}
+              status: (
+                <StatusBadge
+                  tone={rule.status === "confirmed" ? "success" : "warning"}
                 >
-                  {t("rules.open")}
-                </Link>
-              ) : (
-                <span className="text-xs text-muted-foreground">
-                  {t("rules.noScreen")}
-                </span>
+                  {t(`rules.status.${rule.status}`)}
+                </StatusBadge>
               ),
             },
           }))}
