@@ -1,11 +1,11 @@
-import { SearchX, Users } from "lucide-react";
+import { Eye, SearchX, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
   EmptyState,
   LoadingState,
   PartialNotice,
-  PermissionDenied,
   SectionCard,
+  StatePanel,
 } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { useMatrixRead } from "@/lib/api/generated/endpoints/governance/governance";
@@ -71,8 +71,17 @@ export function MatrixTab() {
       }
     >
       <div className="space-y-s2">
+        {/* Reading is allowed, so this is a notice, not a refusal. It names
+            what changing needs in the words the matrix uses for it. */}
         {canManage ? null : (
-          <PermissionDenied description={t("matrix.readOnly")} />
+          <StatePanel
+            variant="inline"
+            icon={Eye}
+            title={t("matrix.readOnlyTitle")}
+            description={t("matrix.readOnly", {
+              permission: t("permissions.roles.manage"),
+            })}
+          />
         )}
         {matrix.isError ? (
           <PartialNotice onRetry={() => void matrix.refetch()} />

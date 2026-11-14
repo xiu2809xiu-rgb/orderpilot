@@ -149,6 +149,17 @@ describe("GovernancePage", () => {
     expect(screen.queryByRole("button", { name: "Copy a role" })).toBeNull();
   });
 
+  it("tells a read-only role it may read, and names what changing needs in words", async () => {
+    signIn("AUDITOR");
+    renderPage();
+    expect(await screen.findByText("Read only")).toBeInTheDocument();
+    expect(
+      screen.getByText(/Changing it needs "Change the role matrix"/),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/You do not have access/)).toBeNull();
+    expect(screen.queryByText(/roles\.manage permission/)).toBeNull();
+  });
+
   it("copies one role onto another", async () => {
     signIn("SYSTEM_ADMIN");
     let body: unknown = null;

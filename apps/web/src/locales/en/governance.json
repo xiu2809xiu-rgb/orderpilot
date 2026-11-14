@@ -46,7 +46,8 @@
       "workflows": "Workflows and tasks",
       "other": "Other"
     },
-    "readOnly": "You can read the matrix. Changing it needs the roles.manage permission.",
+    "readOnlyTitle": "Read only",
+    "readOnly": "You can read the matrix. Changing it needs \"{{permission}}\", which your role does not have.",
     "tableLabel": "Permissions by role",
     "scrollHint": "Scroll sideways to see every role.",
     "permission": "Permission",
