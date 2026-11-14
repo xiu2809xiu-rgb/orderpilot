@@ -153,6 +153,12 @@ describe("audit viewer: reading the trail over HTTP", () => {
     });
 
     describe("a trace ID pasted into the search", () => {
+      // Refusals of its own, two with different trace IDs, so these tests do
+      // not lean on an earlier one and a search that is dropped shows.
+      beforeAll(async () => {
+        await call(t, as("FINANCE"), "get", EVENTS);
+        await call(t, as("WAREHOUSE"), "get", EVENTS);
+      });
       const refusal = async () => {
         const event = (await list("AUDITOR", "?action=auth.permission.refused"))
           .body.data[0];
@@ -182,6 +188,10 @@ describe("audit viewer: reading the trail over HTTP", () => {
         );
         expect(found.body.data.map((e) => e.id)).toContain(event.id);
         expect(found.body.data.every((e) => e.refusal)).toBe(true);
+        // Both narrow: refusals only must not drop the search.
+        expect(found.body.data.every((e) => e.traceId === event.traceId)).toBe(
+          true,
+        );
       });
 
       it("does not match part of a trace ID", async () => {
