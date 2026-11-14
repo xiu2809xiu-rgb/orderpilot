@@ -24,7 +24,7 @@ interface AffixProps {
 }
 
 const AFFIX =
-  "inline-flex h-8 pointer-coarse:h-11 shrink-0 items-center border border-input bg-muted/50 px-2 text-xs text-muted-foreground";
+  "inline-flex h-9 pointer-coarse:h-11 shrink-0 items-center border border-input bg-(--control-readonly-bg) px-2.5 text-xs font-medium text-muted-foreground";
 
 /**
  * The value stays a decimal string: an amount never passes through a float.

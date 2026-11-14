@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import "./record.css";
 
 export interface RecordColumn<Row> {
   id: string;
@@ -48,7 +49,7 @@ export function RecordTable<Row>({
   }
   return (
     <ScrollRegion label={t("table.scroll", { name: caption })}>
-      <Table aria-labelledby={captionId}>
+      <Table aria-labelledby={captionId} className="rec-table">
         <caption id={captionId} className="sr-only">
           {caption}
         </caption>
@@ -66,7 +67,10 @@ export function RecordTable<Row>({
         </TableHeader>
         <TableBody>
           {rows.map((row) => (
-            <TableRow key={rowKey(row)} className="group/row hover:bg-muted">
+            <TableRow
+              key={rowKey(row)}
+              className="group/row hover:bg-transparent"
+            >
               {columns.map((column, position) => (
                 <TableCell
                   key={column.id}

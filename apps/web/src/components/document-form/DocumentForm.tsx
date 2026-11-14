@@ -5,19 +5,22 @@ import type {
   UseFormReturn,
 } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { DemoBadge, PageHeader, type DemoBadgeKind } from "@/components/common";
+import { type DemoBadgeKind } from "@/components/common";
 import {
   FormShell,
   useDraft,
   type DraftOptions,
   type PathMap,
 } from "@/components/form";
+import { Section } from "@/components/parts/Section";
 import { useSessionStore } from "@/stores/session";
 import { usableActions } from "./actions";
 import { DocumentActionBar } from "./DocumentActionBar";
 import { DocumentFooter } from "./DocumentFooter";
+import { DocumentHead } from "./DocumentHead";
 import { DocumentRecordStatePanel } from "./DocumentRecordStatePanel";
 import { DocumentTabs } from "./DocumentTabs";
+import "./document-form.css";
 import { usePrintAction } from "./usePrintAction";
 import type {
   AttachmentItem,
@@ -32,6 +35,10 @@ import { useDocumentSave } from "./useDocumentSave";
 
 const NONE: readonly never[] = [];
 
+/** A page is a column of its own; a form drawn inside another page (a demo) is not. */
+const sheetClass = (headingLevel: 1 | 2 | undefined) =>
+  headingLevel === 2 ? "df-sheet" : "df-sheet dx-sheet";
+
 export interface DocumentFormProps<T extends FieldValues, O, R> {
   /** Names this form for the shared actions and for the draft's owner. */
   formId: string;
@@ -41,6 +48,10 @@ export interface DocumentFormProps<T extends FieldValues, O, R> {
   /** The document's number: the log's title and the shared actions use it. */
   number: string;
   description?: string;
+  /** The list this document belongs to: a way back above the title. */
+  back?: { to: string; label: string };
+  /** Titles of the two cards, where "Header" and "Lines" are too general. */
+  sectionTitles?: { header?: string; lines?: string };
   demo?: DemoBadgeKind;
   headingLevel?: 1 | 2;
   /** Names the form for screen readers. */
@@ -98,11 +109,12 @@ export function DocumentForm<T extends FieldValues, O, R = unknown>(
 ) {
   if (!props.state) return <LoadedDocument {...props} />;
   return (
-    <div className="space-y-s2">
-      <PageHeader
+    <div className={sheetClass(props.headingLevel)}>
+      <DocumentHead
         title={props.title}
-        headingLevel={props.headingLevel ?? 1}
-        meta={props.demo ? <DemoBadge kind={props.demo} /> : null}
+        back={props.back}
+        demo={props.demo}
+        headingLevel={props.headingLevel}
       />
       <DocumentRecordStatePanel state={props.state} />
     </div>
@@ -138,36 +150,58 @@ function LoadedDocument<T extends FieldValues, O, R>(
   const onPrint = usePrintAction(props.print, props.status.label);
 
   return (
-    <div className="space-y-s2">
-      <PageHeader
+    <div className={sheetClass(props.headingLevel)}>
+      <DocumentHead
         title={title}
-        {...(props.description ? { description: props.description } : {})}
-        headingLevel={props.headingLevel ?? 1}
-        meta={props.demo ? <DemoBadge kind={props.demo} /> : null}
+        description={props.description}
+        back={props.back}
+        demo={props.demo}
+        status={props.status}
+        headingLevel={props.headingLevel}
       />
-      <FormShell form={form} draft={draft} aria-label={formLabel}>
-        <DocumentActionBar
-          form={form}
-          actions={props.actions}
-          save={save}
-          saveNew={saveNew}
-          onPrint={onPrint}
-          target={{ formId, label: number }}
-          saveBlocked={props.saveBlocked}
-          allowClean={allowClean}
-        />
+      <FormShell
+        form={form}
+        draft={draft}
+        aria-label={formLabel}
+        className="df-form space-y-0"
+      >
+        <div className="df-bar">
+          <DocumentActionBar
+            form={form}
+            actions={props.actions}
+            save={save}
+            saveNew={saveNew}
+            onPrint={onPrint}
+            target={{ formId, label: number }}
+            saveBlocked={props.saveBlocked}
+            allowClean={allowClean}
+          />
+        </div>
         {props.notices}
-        <section aria-label={t("sections.header")}>{props.header}</section>
+        <Section
+          title={props.sectionTitles?.header ?? t("sections.header")}
+          work
+        >
+          {props.header}
+        </Section>
         {props.lines ? (
-          <section aria-label={t("sections.lines")}>{props.lines}</section>
+          <Section
+            title={props.sectionTitles?.lines ?? t("sections.lines")}
+            work
+          >
+            {props.lines}
+          </Section>
         ) : null}
-        <DocumentFooter
-          status={props.status}
-          attachments={props.attachments ?? NONE}
-          totals={props.totals ?? NONE}
-        />
+        <Section title={t("footer.attachments")} work>
+          <DocumentFooter
+            attachments={props.attachments ?? NONE}
+            totals={props.totals ?? NONE}
+          />
+        </Section>
       </FormShell>
-      <DocumentTabs spec={tabs} label={number} />
+      <Section title={t("tabs.title")} work>
+        <DocumentTabs spec={tabs} label={number} />
+      </Section>
     </div>
   );
 }

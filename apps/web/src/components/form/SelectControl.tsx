@@ -73,8 +73,7 @@ export function SelectControl<T extends FieldValues>({
         <SelectTrigger
           ref={field.ref}
           name={field.name}
-          size="sm"
-          className="pointer-coarse:data-[size=sm]:h-11"
+          className="pointer-coarse:data-[size=default]:h-11"
           aria-required={required === true ? true : undefined}
           onBlur={() => {
             if (!open.current) field.onBlur();

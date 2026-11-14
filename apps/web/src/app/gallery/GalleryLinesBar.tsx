@@ -48,7 +48,11 @@ export function GalleryLinesBar(props: GalleryLinesBarProps) {
             if (next) props.onViewer(next);
           }}
         >
-          <SelectTrigger id="gallery-lines-viewer" size="sm" className="w-56">
+          <SelectTrigger
+            id="gallery-lines-viewer"
+            size="sm"
+            className="w-56 pointer-coarse:h-11"
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -71,7 +75,11 @@ export function GalleryLinesBar(props: GalleryLinesBarProps) {
             if (next) props.onAnswer(next);
           }}
         >
-          <SelectTrigger id="gallery-lines-answer" size="sm" className="w-56">
+          <SelectTrigger
+            id="gallery-lines-answer"
+            size="sm"
+            className="w-56 pointer-coarse:h-11"
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -93,10 +101,22 @@ export function GalleryLinesBar(props: GalleryLinesBarProps) {
           {t("lines.bar.readOnly")}
         </Label>
       </div>
-      <Button type="button" size="sm" variant="outline" onClick={props.onFew}>
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        className="pointer-coarse:h-11"
+        onClick={props.onFew}
+      >
         {t("lines.bar.few")}
       </Button>
-      <Button type="button" size="sm" variant="outline" onClick={props.onMany}>
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        className="pointer-coarse:h-11"
+        onClick={props.onMany}
+      >
         {t("lines.bar.many")}
       </Button>
     </div>

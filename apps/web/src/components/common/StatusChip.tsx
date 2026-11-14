@@ -7,8 +7,8 @@ import {
   OctagonAlert,
   type LucideIcon,
 } from "lucide-react";
-import type { ReactNode } from "react";
-import { Badge } from "@/components/ui/badge";
+import type { ComponentProps, ReactNode } from "react";
+import { Badge } from "@/components/kit/Badge";
 import { cn } from "@/lib/utils";
 
 /**
@@ -24,28 +24,36 @@ export const STATUS_FAMILIES = [
 ] as const;
 export type StatusFamily = (typeof STATUS_FAMILIES)[number];
 
+// The look is the kit's status pill, the one the Orders table and the order
+// page draw, so a status reads the same on every screen. The family only picks
+// the variant and the icon.
 const FAMILIES: Record<
   StatusFamily | "neutral",
-  { icon: LucideIcon; style: string }
+  {
+    icon: LucideIcon;
+    variant: ComponentProps<typeof Badge>["variant"];
+    style?: string;
+  }
 > = {
   // Draft: grey and dashed, because it is not yet anyone's to act on.
   draft: {
     icon: CircleDashed,
-    style:
-      "border-dashed border-muted-foreground/50 bg-secondary text-secondary-foreground",
+    variant: "secondary",
+    style: "border-dashed border-muted-foreground/50",
   },
   // Waiting: amber, because someone must do something.
-  waiting: { icon: Clock, style: "bg-warning-surface text-warning" },
+  waiting: { icon: Clock, variant: "warning" },
   // Ready (approved): green, because it may go ahead.
-  ready: { icon: CircleCheck, style: "bg-accent text-success" },
+  ready: { icon: CircleCheck, variant: "success" },
   // Blocked (overdue): red, because it needs attention now.
-  blocked: { icon: OctagonAlert, style: "bg-destructive/10 text-destructive" },
+  blocked: { icon: OctagonAlert, variant: "destructive" },
   // Done: muted and outlined, because it asks nothing of anyone.
   done: {
     icon: CheckCheck,
-    style: "border-border bg-transparent text-muted-foreground",
+    variant: "outline",
+    style: "text-muted-foreground",
   },
-  neutral: { icon: CircleDot, style: "bg-secondary text-secondary-foreground" },
+  neutral: { icon: CircleDot, variant: "secondary" },
 };
 
 /**
@@ -63,9 +71,14 @@ export function StatusChip({
   className?: string;
 }) {
   const key = family ?? "neutral";
-  const { icon: Icon, style } = FAMILIES[key];
+  const { icon: Icon, variant, style } = FAMILIES[key];
   return (
-    <Badge className={cn(style, className)} data-family={key}>
+    <Badge
+      variant={variant}
+      radius="full"
+      className={cn(style, className)}
+      data-family={key}
+    >
       <Icon aria-hidden="true" />
       {children}
     </Badge>

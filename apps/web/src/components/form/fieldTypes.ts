@@ -22,11 +22,12 @@ export interface FieldBaseProps<T extends FieldValues, O = T> {
 }
 
 /**
- * The compact control of an ERP header, and how a read-only one looks. On a
- * touch screen it grows to 44 px, the size warehouse tablets need.
+ * The size of a control in a form: 36 px, and 44 px on a touch screen, the size
+ * warehouse tablets need. How a read-only one looks is the control's own skin
+ * (components/ui/controlSkin.ts), so a read-only select and a read-only input
+ * cannot differ.
  */
-export const FIELD_CONTROL =
-  "h-8 pointer-coarse:h-11 read-only:border-dashed read-only:bg-muted/40 read-only:shadow-none";
+export const FIELD_CONTROL = "h-9 pointer-coarse:h-11";
 
 /** A field's value as text, whatever the form holds there. */
 export function asText(value: unknown): string {

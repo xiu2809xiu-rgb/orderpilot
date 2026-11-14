@@ -106,6 +106,11 @@ export function OrderDocument({
       title={pageTitle}
       number={orderNo ?? ""}
       demo="synthetic"
+      back={{ to: "/orders", label: t("form.back") }}
+      sectionTitles={{
+        header: t("form.sections.header"),
+        lines: t("form.sections.lines"),
+      }}
       formLabel={t("form.formLabel")}
       {...(readOnly === null
         ? {
