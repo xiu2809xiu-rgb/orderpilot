@@ -29,7 +29,7 @@ const WIDTH: Readonly<Record<string, number>> = {
   shipmentDate: 96,
   amount: 124,
   docs: 116,
-  stock: 108,
+  stock: 132,
   externalDocumentNo: 116,
   orderDate: 100,
   entry: 96,

@@ -1,54 +1,14 @@
 {
   "title": "Orders",
-  "description": "Sales orders: the samples Spectra gave us and the orders entered here. Nothing is ordered from this list.",
   "menu": {
     "orders": "Orders"
   },
-  "caption": "Orders",
-  "emptyTitle": "No orders yet",
-  "emptyDescription": "Orders appear here once they are entered.",
-  "columns": {
-    "orderNo": "Order",
-    "customerNo": "Customer",
-    "workflowStatus": "Status",
-    "captureState": "Entry",
-    "externalDocumentNo": "PO number",
-    "orderDate": "Order date",
-    "shipmentDate": "Shipment date",
-    "amount": "Amount",
-    "stock": "Stock"
-  },
-  "noStatus": "Not started",
-  "hiddenAmount": "Hidden",
   "sampleTag": "Sample",
   "captureStates": {
     "draft": "Draft",
     "submitted": "Submitted",
     "void": "Void"
   },
-  "sources": {
-    "sample": "Sample",
-    "stored": "Entered here"
-  },
-  "filters": {
-    "customer": "Customer",
-    "allCustomers": "All customers",
-    "captureState": "Entry",
-    "allCaptureStates": "Any entry state",
-    "source": "Source",
-    "allSources": "All sources",
-    "stock": "Stock",
-    "allStock": "Any stock",
-    "waiting": "Waiting on stock",
-    "orderDate": "Order date"
-  },
-  "shortage": {
-    "line": "Short by {{quantity}} of {{itemNo}}",
-    "lineWithMore_one": "Short by {{quantity}} of {{itemNo}} and {{count}} more item",
-    "lineWithMore_other": "Short by {{quantity}} of {{itemNo}} and {{count}} more items",
-    "none": "No shortage"
-  },
-  "new": "New order",
   "newCrumb": "New order",
   "form": {
     "title": "Sales order {{number}}",
@@ -123,10 +83,8 @@
       "title": "Void this draft?",
       "description": "A voided order cannot be changed, and its PO number is free to use again. Say why.",
       "confirm": "Void order",
-      "done": "Order {{orderNo}} voided",
-      "unsaved": "Save the order before you void it."
+      "done": "Order {{orderNo}} voided"
     },
-    "denied": "Your role may read orders but not start them.",
-    "notFoundDescription": "This order does not exist, or the number is wrong."
+    "denied": "Your role may read orders but not start them."
   }
 }

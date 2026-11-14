@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { DemoBadge } from "@/components/common/DemoBadge";
 import { Pagination } from "@/components/common/data-table/Pagination";
 import { SALES_STEP_IDS } from "../../data/estimates";
 import { Alert, AlertDescription, AlertTitle } from "@/components/kit/Alert";
@@ -105,7 +106,9 @@ export function OrdersWorkspace({
             rows={w.pageRows}
             status={status}
             error={data.error}
-            filtered={w.chips.length > 0 || query.search !== ""}
+            filtered={
+              w.chips.length > 0 || query.search !== "" || view !== "all"
+            }
             sort={w.sort}
             selection={w.selection.table}
             peeked={peeked}
@@ -117,18 +120,22 @@ export function OrdersWorkspace({
             }}
           />
           {only ? <OrderOperationLog orderNo={only.orderNo} /> : null}
-          <Pagination
-            page={query.page}
-            pageSize={query.pageSize}
-            total={status === "ready" ? w.filtered.length : 0}
-            pageSizes={PAGE_SIZES}
-            onPage={(page) => {
-              change({ page });
-            }}
-            onPageSize={(pageSize) => {
-              change({ pageSize });
-            }}
-          />
+          {/* Every figure here is made up, and the label stays where the count is. */}
+          <div className="od-foot">
+            <DemoBadge kind="synthetic" />
+            <Pagination
+              page={query.page}
+              pageSize={query.pageSize}
+              total={status === "ready" ? w.filtered.length : 0}
+              pageSizes={PAGE_SIZES}
+              onPage={(page) => {
+                change({ page });
+              }}
+              onPageSize={(pageSize) => {
+                change({ pageSize });
+              }}
+            />
+          </div>
         </>
       )}
     </div>

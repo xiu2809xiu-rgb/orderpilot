@@ -82,6 +82,9 @@ export function OrdersFilters({
             type="search"
             value={draft}
             placeholder={t("filters.searchHint")}
+            // The slash key finds this field (see app/shell/shortcuts.ts).
+            data-quick-search=""
+            aria-keyshortcuts="/"
             className="od-control"
             onChange={(event) => {
               setDraft(event.target.value);
@@ -147,6 +150,14 @@ export function OrdersFilters({
           }}
         >
           {t("filters.exceptions")}
+        </ToggleChip>
+        <ToggleChip
+          pressed={query.stock}
+          onPressedChange={(stock) => {
+            onChange({ stock });
+          }}
+        >
+          {t("filters.stock")}
         </ToggleChip>
         <MoreFilters query={query} onChange={onChange} />
       </div>

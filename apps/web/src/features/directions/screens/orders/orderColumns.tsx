@@ -6,6 +6,7 @@ import { OrderCell } from "./OrderCell";
 import { AgeCell, DocsCell, StockCell, ValueCell } from "./OrderFigures";
 import { ageInDays, ALL_DONE, type OrderRow } from "./orderRow";
 import { StageCell } from "./StageCell";
+import { shortSentence } from "./stockText";
 
 interface ColumnContext {
   t: TFunction;
@@ -127,13 +128,7 @@ export function orderColumns({
       id: "stock",
       header: t("columns.stock"),
       cell: (row) => <StockCell row={row} />,
-      exportValue: (row) =>
-        row.shortage
-          ? t("cells.shortLine", {
-              quantity: row.shortage.shortBy,
-              itemNo: row.shortage.itemNo,
-            })
-          : "",
+      exportValue: (row) => shortSentence(row, t),
       defaultHidden: true,
     },
     {
@@ -161,6 +156,7 @@ export function orderColumns({
           : t("cells.notEntered"),
       exportValue: (row) =>
         row.captureState ? t(`entry.${row.captureState}`) : "",
+      sortable: true,
       defaultHidden: true,
     },
     {

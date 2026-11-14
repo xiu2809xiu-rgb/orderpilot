@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { PermissionDenied } from "@/components/common";
 import { EmptyState } from "@/components/parts/EmptyState";
 import { PageHeader } from "@/components/parts/PageHeader";
+import { hasPermission, useSessionStore } from "@/stores/session";
 import { OrderPeek } from "./OrderPeek";
 import { OrdersActions } from "./OrdersActions";
 import { OrdersWorkspace } from "./OrdersWorkspace";
@@ -27,6 +28,11 @@ export default function OrdersScreen() {
   const peekIndex = filtered.findIndex((row) => row.orderNo === peekNo);
   const peeked = peekIndex >= 0 ? (filtered[peekIndex] ?? null) : null;
   const empty = status === "ready" && w.data.rows.length === 0;
+  // The empty page names the way in that this role has, so it is never a dead end.
+  const mayCreate = hasPermission(
+    useSessionStore((state) => state.session),
+    "orders.create",
+  );
 
   return (
     <div className="od-page">
@@ -45,7 +51,9 @@ export default function OrdersScreen() {
         <EmptyState
           icon={Inbox}
           title={t("empty.title")}
-          description={t("empty.description")}
+          description={t(
+            mayCreate ? "empty.descriptionCreate" : "empty.description",
+          )}
         />
       ) : (
         <OrdersWorkspace w={w} peeked={peekNo} onPeek={setPeekNo} />

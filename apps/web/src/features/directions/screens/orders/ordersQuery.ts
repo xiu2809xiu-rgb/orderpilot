@@ -23,6 +23,7 @@ export const SORT_IDS = [
   "shipmentDate",
   "amount",
   "step",
+  "entry",
 ] as const;
 export type SortId = (typeof SORT_IDS)[number];
 export type SortDirection = "asc" | "desc";
@@ -31,7 +32,7 @@ export interface Sort {
   direction: SortDirection;
 }
 
-export const PAGE_SIZES = [25, 50, 100] as const;
+export const PAGE_SIZES = [10, 25, 50, 100] as const;
 
 /**
  * Everything the address can say about the list: the view, the search, every
@@ -109,8 +110,38 @@ const positive = (value: string | null, fallback: number): number => {
   return Number.isInteger(number) && number > 0 ? number : fallback;
 };
 
-export function parseQuery(params: URLSearchParams): OrdersQuery {
-  const sortId = isIn(SORT_IDS, params.get("sort"));
+/**
+ * The words the old Orders list put in its addresses, and what each is called
+ * now. A link, a bookmark or a saved view made before the workspace still
+ * opens the same list. A new name wins when an address carries both.
+ */
+const LEGACY_KEYS: Readonly<Record<string, string>> = {
+  search: "q",
+  customerNo: "customer",
+  captureState: "entry",
+  orderDateFrom: "from",
+  orderDateTo: "to",
+  pageSize: "size",
+  direction: "dir",
+};
+
+/** The old list sorted by customer number and by entry state; those columns are these now. */
+const LEGACY_SORTS: Readonly<Record<string, string>> = {
+  customerNo: "customerName",
+  captureState: "entry",
+};
+
+export function parseQuery(raw: URLSearchParams): OrdersQuery {
+  const params = new URLSearchParams(raw);
+  for (const [old, current] of Object.entries(LEGACY_KEYS)) {
+    const value = params.get(old);
+    if (value !== null && !params.has(current)) params.set(current, value);
+  }
+  const wanted = params.get("sort");
+  const sortId = isIn(
+    SORT_IDS,
+    wanted === null ? null : (LEGACY_SORTS[wanted] ?? wanted),
+  );
   const status = params.get("status");
   const from = params.get("from");
   const to = params.get("to");
@@ -183,7 +214,10 @@ export function toParams(query: OrdersQuery, keep?: URLSearchParams) {
   return params;
 }
 
+// The old names are ours too: a change rewrites them under the new ones, or a
+// cleared filter would be read back from the old name left in the address.
 const OWN_KEYS = new Set([
+  ...Object.keys(LEGACY_KEYS),
   "view",
   "q",
   "customer",
@@ -363,6 +397,8 @@ function keyOf(row: OrderRow, id: SortId): string | number | null {
         : Number(row.amount.value);
     case "step":
       return row.step;
+    case "entry":
+      return row.captureState;
   }
 }
 

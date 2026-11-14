@@ -94,6 +94,8 @@
     "shortLine": "Short by {{quantity}} of {{itemNo}}",
     "shortLineMore_one": "Short by {{quantity}} of {{itemNo}} and {{count}} more item",
     "shortLineMore_other": "Short by {{quantity}} of {{itemNo}} and {{count}} more items",
+    "shortItems_one": "{{itemNo}} and {{count}} more",
+    "shortItems_other": "{{itemNo}} and {{count}} more",
     "toConfirm": "To confirm",
     "docsNone": "No document needs attention",
     "differs": "Differs",
@@ -121,7 +123,8 @@
   },
   "empty": {
     "title": "No orders yet",
-    "description": "Orders appear here as soon as a customer PO is entered or read."
+    "description": "Orders appear here as soon as a customer PO is entered or read.",
+    "descriptionCreate": "Use New order, above, to enter a customer's PO. The order appears here as soon as it is saved."
   },
   "notices": {
     "trackerTitle": "Some columns are not available",
