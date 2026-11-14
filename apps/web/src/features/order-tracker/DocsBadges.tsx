@@ -83,7 +83,7 @@ export function DocsBadges({ row }: { row: TrackerOrder }) {
                 type="button"
                 aria-label={description}
                 className={cn(
-                  "flex size-5 shrink-0 items-center justify-center rounded text-[10px] font-bold",
+                  "flex size-5 shrink-0 items-center justify-center rounded text-[10px] font-bold pointer-coarse:size-11 pointer-coarse:text-xs",
                   BADGE_STYLE[state],
                 )}
               >
