@@ -371,7 +371,8 @@ export class WorkflowsController {
   @RequirePermission("spr.read")
   @recordParam
   @ApiOperation({
-    summary: "A stock purchase request, with its suggested fields (mock data)",
+    summary:
+      "A stock purchase requisition, with its suggested fields (mock data)",
   })
   @ApiOkResponse({ schema: openApiSchema(sprResponseSchema) })
   async spr(
@@ -391,7 +392,7 @@ export class WorkflowsController {
   @idempotencyHeader
   @ApiOperation({
     summary:
-      "Approve a stock purchase request, with a comment. Above the approver's limit it goes on up the chain instead. Audited",
+      "Approve a stock purchase requisition, with a comment. Above the approver's limit it goes on up the chain instead. Audited",
   })
   @ApiBody({ schema: openApiSchema(sprDecisionInputSchema) })
   @ApiOkResponse({ schema: openApiSchema(sprDecisionResponseSchema) })
@@ -422,7 +423,7 @@ export class WorkflowsController {
   @idempotencyHeader
   @ApiOperation({
     summary:
-      "Reject a stock purchase request, with a comment. Above the approver's limit it goes on up the chain instead. Audited",
+      "Reject a stock purchase requisition, with a comment. Above the approver's limit it goes on up the chain instead. Audited",
   })
   @ApiBody({ schema: openApiSchema(sprDecisionInputSchema) })
   @ApiOkResponse({ schema: openApiSchema(sprDecisionResponseSchema) })

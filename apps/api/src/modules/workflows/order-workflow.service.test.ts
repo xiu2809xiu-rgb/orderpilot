@@ -504,7 +504,7 @@ describe("OrderWorkflowService, deciding an SPR", () => {
 });
 
 describe("OrderWorkflowService, reading status", () => {
-  it("answers with the status, Navision's status and the holds", async () => {
+  it("answers with the status, Business Central's status and the holds", async () => {
     const { service } = setUp({
       stored: {
         id: "instance-1",

@@ -244,7 +244,8 @@ export class SprApprovalService {
 
   private async storedOf(recordNo: string): Promise<StoredSpr | null> {
     const record = await this.model.sprByRecordNo(recordNo);
-    if (!record) throw new NotFoundError(`Stock purchase request ${recordNo}`);
+    if (!record)
+      throw new NotFoundError(`Stock purchase requisition ${recordNo}`);
     return record.orderNo ? this.records.findByOrder(record.orderNo) : null;
   }
 

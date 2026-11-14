@@ -1,6 +1,6 @@
 import { addDecimal, compareDecimal, type SprBasis } from "@orderpilot/shared";
 
-/** The Navision figures for one item, plus what the order wants of it. */
+/** The Business Central figures for one item, plus what the order wants of it. */
 export interface StockFigures {
   readonly ordered: string;
   readonly inventory: string;

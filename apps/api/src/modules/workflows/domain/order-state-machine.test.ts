@@ -842,7 +842,7 @@ describe("cancelling", () => {
   });
 });
 
-describe("Navision's Sales Header Status, where the states meet it (an assumption to confirm)", () => {
+describe("Business Central's Sales Header Status, where the states meet it (an assumption to confirm)", () => {
   const expected: readonly [
     OrderStatus,
     ReturnType<typeof navisionStatusOf>,

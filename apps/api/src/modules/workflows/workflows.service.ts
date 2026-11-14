@@ -179,7 +179,8 @@ export class WorkflowsService {
 
   async spr(recordNo: string, viewerUserId?: string): Promise<SprDetail> {
     const record = await this.model.sprByRecordNo(recordNo);
-    if (!record) throw new NotFoundError(`Stock purchase request ${recordNo}`);
+    if (!record)
+      throw new NotFoundError(`Stock purchase requisition ${recordNo}`);
     const approver = await this.approvals.approverFor(record.requestedBy.role);
     if (!approver) throw new NotFoundError(`An approver for ${recordNo}`);
     const stored = record.orderNo

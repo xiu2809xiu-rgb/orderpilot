@@ -3349,7 +3349,7 @@
             }
           }
         },
-        "summary": "A stock purchase request, with its suggested fields (mock data)",
+        "summary": "A stock purchase requisition, with its suggested fields (mock data)",
         "tags": ["Workflows"]
       }
     },
@@ -3448,7 +3448,7 @@
             }
           }
         },
-        "summary": "Approve a stock purchase request, with a comment. Above the approver's limit it goes on up the chain instead. Audited",
+        "summary": "Approve a stock purchase requisition, with a comment. Above the approver's limit it goes on up the chain instead. Audited",
         "tags": ["Workflows"]
       }
     },
@@ -3547,7 +3547,7 @@
             }
           }
         },
-        "summary": "Reject a stock purchase request, with a comment. Above the approver's limit it goes on up the chain instead. Audited",
+        "summary": "Reject a stock purchase requisition, with a comment. Above the approver's limit it goes on up the chain instead. Audited",
         "tags": ["Workflows"]
       }
     },
