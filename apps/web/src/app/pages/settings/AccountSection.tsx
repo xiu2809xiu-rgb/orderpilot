@@ -1,6 +1,21 @@
+import { Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import { Section } from "@/components/parts/Section";
 import { useSessionStore } from "@/stores/session";
+
+/** The permissions in words, with the code kept on hover for whoever needs it. */
+function PermissionNames({ permissions }: { permissions: readonly string[] }) {
+  const { t } = useTranslation("governance");
+  return (
+    <ul className="flex flex-wrap gap-2">
+      {permissions.map((permission) => (
+        <li key={permission} className="dx-chip fs-12" title={permission}>
+          {t(`permissions.${permission}`, { defaultValue: permission })}
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 /** Who is signed in, and what the role may do: the list the server enforces. */
 export function AccountSection() {
@@ -28,13 +43,9 @@ export function AccountSection() {
           {t("settings.accessNone")}
         </p>
       ) : (
-        <ul className="flex flex-wrap gap-2">
-          {session.permissions.map((permission) => (
-            <li key={permission} className="dx-chip fs-12 font-mono">
-              {permission}
-            </li>
-          ))}
-        </ul>
+        <Suspense fallback={null}>
+          <PermissionNames permissions={session.permissions} />
+        </Suspense>
       )}
     </Section>
   );

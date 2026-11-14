@@ -10,7 +10,6 @@ import {
   PermissionDenied,
   SectionCard,
 } from "@/components/common";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useInsightsKpis } from "@/lib/api/generated/endpoints/insights/insights";
 import { isForbidden } from "@/lib/query-status";
@@ -33,14 +32,8 @@ export default function InsightsPage() {
       <PageHeader
         title={t("title")}
         description={t("description")}
-        meta={
-          <>
-            <DemoBadge kind="mock" />
-            <Badge variant="outline" title={t("kpi.labEstimateHint")}>
-              {t("kpi.labEstimate")}
-            </Badge>
-          </>
-        }
+        // One mock label: the sentence under the heading says they are lab estimates.
+        meta={<DemoBadge kind="mock" />}
       />
       {kpis.isPending ? (
         <InsightsSkeleton />

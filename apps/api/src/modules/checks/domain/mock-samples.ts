@@ -30,9 +30,34 @@ function plainQuantity(value: string): string {
   return value.replace(/\.0+$/, "");
 }
 
-function stepTime(order: SampleOrder, index: number): string {
-  const hour = String(8 + index).padStart(2, "0");
-  return `${order.header.orderDate}T${hour}:00:00.000Z`;
+const DAY_MS = 86_400_000;
+
+/**
+ * When the step at `index` of `count` happened: spread from the order date
+ * to the dataset's day, from 9 am Singapore time, a quarter of an hour apart
+ * within a day. No step lands in the future, and steps keep their order.
+ */
+function stepTime(
+  order: SampleOrder,
+  index: number,
+  count: number,
+  asOf: string,
+): string {
+  const start = Date.parse(`${order.header.orderDate}T01:00:00Z`);
+  const end = Math.max(start, Date.parse(`${asOf}T01:00:00Z`));
+  const days = Math.floor((end - start) / DAY_MS);
+  const day = count > 1 ? Math.floor((index * days) / (count - 1)) : 0;
+  return new Date(start + day * DAY_MS + index * 900_000).toISOString();
+}
+
+const DAY_WORDS = new Intl.DateTimeFormat("en-SG", {
+  dateStyle: "medium",
+  timeZone: "UTC",
+});
+
+/** "2026-11-04" as "4 Nov 2026", the way every screen writes a date. */
+function inWords(day: string): string {
+  return DAY_WORDS.format(new Date(`${day}T00:00:00Z`));
 }
 
 /**
@@ -64,7 +89,12 @@ function partPayment(percent: number): Partial<SampleStep> {
   };
 }
 
-export function mockTimeline(order: SampleOrder): TimelineStep[] {
+/** A packing list check the order has passed found nothing to hold it up. */
+const PACKING_PASSED: Partial<SampleStep> = {
+  effect: "The packing list matches the PO, so the goods can ship",
+};
+
+export function mockTimeline(order: SampleOrder, asOf: string): TimelineStep[] {
   const current = SAMPLE_STEPS.findIndex(
     (entry) => entry.state === order.sampleScreenState,
   );
@@ -78,10 +108,13 @@ export function mockTimeline(order: SampleOrder): TimelineStep[] {
       ...(partPaid && step.state === "sample-ready-to-pick"
         ? partPayment(percent)
         : {}),
+      ...(step.state === "sample-packing-list-mismatch" && index < current
+        ? PACKING_PASSED
+        : {}),
     };
     return {
       id: `${order.header.no}-step-${String(index + 1)}`,
-      at: stepTime(order, index),
+      at: stepTime(order, index, current + 1, asOf),
       actor: entry.actor,
       title: entry.title,
       effect: entry.effect,
@@ -110,22 +143,22 @@ export function mockOverdue(order: SampleOrder, asOf: string): OverdueFlag {
     return {
       overdue: true,
       daysOverdue: days,
-      reason: `${what} was due on ${scenario.dueDate}`,
+      reason: `${what} was due on ${inWords(scenario.dueDate)}`,
     };
   }
   return {
     overdue: true,
     daysOverdue: days,
-    reason: `${sampleStepFor(order.sampleScreenState).status.label} was due on ${due}`,
+    reason: `${sampleStepFor(order.sampleScreenState).status.label} was due on ${inWords(due)}`,
   };
 }
 
-export function mockChecks(order: SampleOrder): CheckResult[] {
+export function mockChecks(order: SampleOrder, asOf: string): CheckResult[] {
   const no = order.header.no;
   const index = SAMPLE_STEPS.findIndex(
     (entry) => entry.state === order.sampleScreenState,
   );
-  const checkedAt = stepTime(order, Math.max(index, 0));
+  const checkedAt = stepTime(order, Math.max(index, 0), index + 1, asOf);
   const results: CheckResult[] = [];
   if (index >= 1) {
     results.push({
@@ -241,10 +274,11 @@ export function mockExceptions(
 }
 
 /**
- * Stand-in for the possible matches: the next records in the master data
- * after the one at hand, in file order. It compares no names. Area 3 (Iok
- * Teck) decides what counts as a look-alike. A possible match is for a
- * person to look at and is never used to match.
+ * Stand-in for the possible matches: other records whose name starts with the
+ * same word (a brand, or a company's first name), nearest in the master data
+ * first. A crude look-alike so the demo shows sensible pairs; the real rule is
+ * area 3's to set. A possible match is for a person to look at and is never
+ * used to match.
  */
 function samplePossibleMatches<T extends { no: string }>(
   records: readonly T[],
@@ -252,11 +286,27 @@ function samplePossibleMatches<T extends { no: string }>(
   nameOf: (record: T) => string,
   limit: number,
 ): MasterMatch["possibleMatches"] {
-  const at = records.findIndex((r) => r.no === ownNo);
+  const at = Math.max(
+    records.findIndex((r) => r.no === ownNo),
+    0,
+  );
+  const own = records[at];
+  const word = own ? firstWord(nameOf(own)) : "";
   return records
-    .filter((r) => r.no !== ownNo)
-    .slice(Math.max(at, 0), Math.max(at, 0) + limit)
-    .map((r) => ({ no: r.no, name: nameOf(r) }));
+    .map((record, index) => ({ record, distance: Math.abs(index - at) }))
+    .filter(
+      ({ record }) =>
+        record.no !== ownNo &&
+        word !== "" &&
+        firstWord(nameOf(record)) === word,
+    )
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, limit)
+    .map(({ record }) => ({ no: record.no, name: nameOf(record) }));
+}
+
+function firstWord(name: string): string {
+  return (name.trim().split(/\s+/)[0] ?? "").toLowerCase();
 }
 
 /**

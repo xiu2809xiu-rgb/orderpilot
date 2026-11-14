@@ -57,6 +57,19 @@ export const workflowTaskSchema = z.object({
   priority: taskPrioritySchema.optional(),
   /** The person in the role who holds the task. */
   assigneeName: z.string().min(1).optional(),
+  /**
+   * On an SPR task: what it would buy and how short the item is, so an approver
+   * can tell the requests apart without opening each one.
+   */
+  spr: z
+    .object({
+      itemNo: z.string().min(1),
+      itemDescription: z.string().min(1),
+      quantity: decimalStringSchema,
+      /** Inventory over the 3-month run rate; null when nothing sold. */
+      monthsOfCover: decimalStringSchema.nullable(),
+    })
+    .optional(),
   /** On a payment task: the payment it waits for, so one click can confirm it. */
   expectedPayment: z
     .object({
@@ -124,13 +137,18 @@ export type TaskActionResult = z.infer<typeof taskActionResultSchema>;
  */
 export const OPEN_RULE_IDS = [
   "sprTrigger",
+  "approvers",
+  "approvalLimits",
+  "approverDisagreement",
+  "remarksReply",
   "piSequence",
-  "approversAndLimits",
-  "delegation",
 ] as const;
+/** Settled at the 5 Nov briefing, or still waiting for Spectra's answer. */
+export const OPEN_RULE_STATUSES = ["confirmed", "open"] as const;
 export const openRuleSchema = z.object({
   id: z.enum(OPEN_RULE_IDS),
   value: z.string().min(1),
+  status: z.enum(OPEN_RULE_STATUSES),
   screen: z.string().min(1).nullable(),
 });
 export type OpenRule = z.infer<typeof openRuleSchema>;

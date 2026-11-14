@@ -1,6 +1,7 @@
 import { ArrowUpRight, RotateCw } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
+import { NumberTicker } from "@/components/common";
 import { GradientText } from "@/components/kit/GradientText";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { FeatureCue } from "@/features/define";
@@ -16,7 +17,8 @@ const LABEL = "fs-14 min-w-0 text-muted-foreground";
 /**
  * One count of the role that opens the list it counts. The number is the
  * list's own total (`useListCount`, shared with the side panel), so it cannot
- * disagree with the page behind it. A count that fails keeps its place, says
+ * disagree with the page behind it. It counts up the first time it is seen, and
+ * shows the value at once for a person who asks for reduced motion. A count that fails keeps its place, says
  * so and offers a retry; the rest of the page stays up.
  */
 export function CountTile({ cue }: { cue: FeatureCue }) {
@@ -72,7 +74,9 @@ export function CountTile({ cue }: { cue: FeatureCue }) {
         />
       </span>
       <span className="fs-28 numeral font-semibold">
-        <GradientText>{count.data.toLocaleString("en")}</GradientText>
+        <GradientText>
+          <NumberTicker value={count.data} />
+        </GradientText>
       </span>
     </Link>
   );

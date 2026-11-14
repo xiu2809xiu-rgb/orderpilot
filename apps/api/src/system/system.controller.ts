@@ -1,10 +1,13 @@
 import { Controller, Get, Inject, Query } from "@nestjs/common";
 import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { pageQuerySchema, type PageQuery } from "@orderpilot/shared";
-import { Public } from "../auth/decorators.js";
+import { Public, RequirePermission } from "../auth/decorators.js";
 import { openApiQuery, openApiSchema } from "../common/openapi.js";
 import { ZodValidationPipe } from "../common/zod-validation.pipe.js";
-import { checkListResponseSchema } from "./system.schemas.js";
+import {
+  checkListResponseSchema,
+  checkStatusResponseSchema,
+} from "./system.schemas.js";
 import { SystemService } from "./system.service.js";
 
 /**
@@ -27,5 +30,18 @@ export class SystemController {
   checks(@Query(new ZodValidationPipe(pageQuerySchema)) query: PageQuery) {
     const page = this.system.listChecks(query);
     return { data: page.items, meta: page.meta };
+  }
+
+  // Signed in and settings.manage: running the checks touches every service,
+  // so it is not public like the list of their names.
+  @Get("checks/status")
+  @RequirePermission("settings.manage")
+  @ApiOperation({
+    summary:
+      "Runs each readiness check now: up or down, and how long it took. System admin",
+  })
+  @ApiOkResponse({ schema: openApiSchema(checkStatusResponseSchema) })
+  async checkStatuses() {
+    return { data: await this.system.checkStatuses() };
   }
 }

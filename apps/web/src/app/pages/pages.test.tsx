@@ -75,22 +75,32 @@ describe("the crash view", () => {
 });
 
 describe("settings", () => {
-  it("is five sections: appearance, language, analytics, service checks, account", async () => {
+  it("is three sections for a role that does not manage settings", async () => {
     renderApp("/settings", { session: sessionFor("FINANCE") });
     await screen.findByRole("heading", { name: "Settings" });
-    for (const name of [
-      "Appearance",
-      "Language",
-      "Service checks",
-      "Your account",
-    ]) {
+    for (const name of ["Appearance", "Your account"]) {
       expect(await screen.findByRole("heading", { name })).toBeInTheDocument();
     }
     // The analytics card is area 4's and titles itself without a heading.
     expect(await screen.findByText("Analytics")).toBeInTheDocument();
+    // Service names mean nothing without their status, which only an admin may run.
+    expect(
+      screen.queryByRole("heading", { name: "Service checks" }),
+    ).not.toBeInTheDocument();
+    // English is the only language, so there is no card that offers one.
+    expect(
+      screen.queryByRole("heading", { name: "Language" }),
+    ).not.toBeInTheDocument();
   });
 
-  it("shows who is signed in and the role's permissions", async () => {
+  it("adds the service checks for a role that manages settings", async () => {
+    renderApp("/settings", { session: sessionFor("SYSTEM_ADMIN") });
+    expect(
+      await screen.findByRole("heading", { name: "Service checks" }),
+    ).toBeInTheDocument();
+  });
+
+  it("shows who is signed in and the role's permissions in words, with the code on hover", async () => {
     const session = sessionFor("FINANCE");
     renderApp("/settings", { session });
     const account = (
@@ -99,9 +109,11 @@ describe("settings", () => {
     expect(account).not.toBeNull();
     if (!account) return;
     expect(within(account).getByText(session.user.email)).toBeInTheDocument();
-    expect(
-      within(account).getByText(session.permissions[0] ?? ""),
-    ).toBeInTheDocument();
+    const code = session.permissions.find((p) => p === "orders.read") ?? "";
+    expect(code).not.toBe("");
+    const chip = await within(account).findByText("Read orders");
+    expect(chip).toHaveAttribute("title", code);
+    expect(within(account).queryByText(code)).not.toBeInTheDocument();
   });
 
   it("moves the theme with the arrow keys, as a radio group does", async () => {

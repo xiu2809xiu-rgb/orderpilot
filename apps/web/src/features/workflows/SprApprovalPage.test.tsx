@@ -35,6 +35,8 @@ function spr(decision: null | { outcome: "approved"; by: string }) {
         qtyOnPurchOrder: "22",
         availableStock: "22.00",
         shortfall: "98.00",
+        runRate3m: "41.7",
+        monthsOfCover: "0.5",
       },
       fields: [
         {
@@ -68,6 +70,8 @@ function spr(decision: null | { outcome: "approved"; by: string }) {
       escalatesToName: "Sophia Chen",
       passedTo: null,
       decidable: true,
+      // Set here, not left to the generated mock, so the page is the same each run.
+      due: decision ? null : { dueAt: "2026-11-03T02:00:00Z", overdue: true },
       decision: decision
         ? {
             ...decision,
@@ -95,8 +99,25 @@ describe("the SPR approval page", () => {
   it("marks the suggested fields and shows both numbers, the stock basis and the approver", async () => {
     server.use(getWorkflowsSprMockHandler(spr(null)));
     const { container } = open("APPROVER");
+    // The vendor, the item and the order open their own records.
     expect(
-      await screen.findByText("Kelmora Power Bank 10000 mAh (I-0008)"),
+      await screen.findByRole("link", { name: "Kelmora Power Bank 10000 mAh" }),
+    ).toHaveAttribute("href", "/master-data/items/I-0008");
+    expect(
+      screen.getByRole("link", { name: "Halvorn Components Ltd" }),
+    ).toHaveAttribute("href", "/master-data/vendors/V-0001");
+    expect(screen.getByRole("link", { name: "SO-0003" })).toHaveAttribute(
+      "href",
+      "/workflows/orders/SO-0003",
+    );
+    // When it is due, on the request itself, and the steps so far.
+    expect(screen.getByText("Overdue since 3 Nov 2026")).toBeInTheDocument();
+    expect(screen.getByText("Requested by Prakash Menon")).toBeInTheDocument();
+    expect(
+      screen.getByText("Waiting for a decision, overdue since 3 Nov 2026"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Support raises the purchase order/),
     ).toBeInTheDocument();
     expect(
       within(screen.getByRole("row", { name: /Quantity/ })).getByText(
@@ -113,7 +134,23 @@ describe("the SPR approval page", () => {
     expect(
       screen.getByText("Shortfall (suggested quantity)"),
     ).toBeInTheDocument();
-    expect(screen.getByText("Limited: 5,000.00 USD")).toBeInTheDocument();
+    expect(screen.getByText("Limited: USD 5,000.00")).toBeInTheDocument();
+    // Spectra's figures for raising an SPR, and pieces without decimals.
+    expect(
+      screen.getByText("Sold a month (3-month average)"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("41.7")).toBeInTheDocument();
+    // 0.5 months of cover is flagged, since it is what makes the SPR urgent.
+    expect(screen.getByText("Under a month of stock")).toBeInTheDocument();
+    // The decision's facts come before the field-by-field detail.
+    const headings = screen
+      .getAllByRole("heading")
+      .map((heading) => heading.textContent);
+    expect(headings.indexOf("Why this SPR")).toBeLessThan(
+      headings.indexOf("Fields"),
+    );
+    expect(screen.getAllByText("98").length).toBeGreaterThan(0);
+    expect(screen.queryByText("98.00")).toBeNull();
     // A person, by name: the setup's raw approver id means nothing to staff.
     expect(screen.getByText("Sophia Chen")).toBeInTheDocument();
     expect(screen.queryByText(/00000000-0000/)).toBeNull();
@@ -266,23 +303,69 @@ describe("the SPR approval page", () => {
       }),
     );
     open("APPROVER");
-    expect(await screen.findByText(/does not run yet/)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/sample from the demo data/),
+    ).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Approve" }),
     ).not.toBeInTheDocument();
   });
 
-  it("is read-only for a role that cannot decide", async () => {
+  it("tells the product manager who raised it where it stands, with nothing to decide", async () => {
     server.use(getWorkflowsSprMockHandler(spr(null)));
     open("PRODUCT_MANAGER");
     expect(
-      await screen.findByText(
-        "Your role can read this request but not decide it.",
-      ),
+      await screen.findByText(/Waiting for a management approver/),
     ).toBeInTheDocument();
+    expect(screen.getByText("Decision")).toBeInTheDocument();
+    expect(screen.queryByText("Your decision")).toBeNull();
     expect(
       screen.queryByRole("button", { name: "Approve" }),
     ).not.toBeInTheDocument();
+  });
+
+  it("says where it stands on a sample too, rather than why a sample cannot be decided", async () => {
+    server.use(
+      getWorkflowsSprMockHandler({
+        ...spr(null),
+        data: { ...spr(null).data, decidable: false },
+      }),
+    );
+    open("PRODUCT_MANAGER");
+    expect(
+      await screen.findByText(/Waiting for a management approver/),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/sample from the demo data/)).toBeNull();
+  });
+
+  it("shows the briefing's rule, and no limit or stand-in that the setup does not hold", async () => {
+    const base = spr(null);
+    server.use(
+      getWorkflowsSprMockHandler({
+        ...base,
+        data: {
+          ...base.data,
+          approver: {
+            ...base.data.approver,
+            setup: {
+              ...base.data.approver.setup,
+              unlimitedSalesApproval: true,
+              unlimitedPurchaseApproval: true,
+              substituteUserId: null,
+            },
+          },
+          substituteName: null,
+          escalatesToName: null,
+        },
+      }),
+    );
+    open("APPROVER");
+    expect(
+      await screen.findByText("Any one of three management approvers"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("None set")).toBeInTheDocument();
+    expect(screen.queryByText("Substitute")).toBeNull();
+    expect(screen.queryByText("Escalates to")).toBeNull();
   });
 
   it("shows a decision that was already made, with its comment", async () => {
@@ -293,7 +376,10 @@ describe("the SPR approval page", () => {
     expect(
       await screen.findByText(/Decided: Approved by Anita Rao/),
     ).toBeInTheDocument();
-    expect(screen.getByText("Within my limit.")).toBeInTheDocument();
+    // In the decision and again in the history.
+    expect(screen.getAllByText("Within my limit.")).toHaveLength(2);
+    expect(screen.getByText("Approved by Anita Rao")).toBeInTheDocument();
+    expect(screen.queryByText(/Waiting for a decision/)).toBeNull();
     expect(
       screen.queryByRole("button", { name: "Reject" }),
     ).not.toBeInTheDocument();

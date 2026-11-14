@@ -179,7 +179,8 @@ export class WorkflowsService {
 
   async spr(recordNo: string, viewerUserId?: string): Promise<SprDetail> {
     const record = await this.model.sprByRecordNo(recordNo);
-    if (!record) throw new NotFoundError(`Stock purchase request ${recordNo}`);
+    if (!record)
+      throw new NotFoundError(`Stock purchase requisition ${recordNo}`);
     const approver = await this.approvals.approverFor(record.requestedBy.role);
     if (!approver) throw new NotFoundError(`An approver for ${recordNo}`);
     const stored = record.orderNo
@@ -188,10 +189,18 @@ export class WorkflowsService {
     const next = stored?.passedOn
       ? await this.policy.deciderFor(stored.passedOn.byUserId)
       : null;
+    const decision = stored ? stored.decision : record.decision;
+    // The open task says when the decision is due; a decided SPR has none.
+    const task = decision
+      ? undefined
+      : (await this.model.tasksFor("APPROVER")).find(
+          (open) => open.ref?.recordNo === recordNo,
+        );
     return {
       ...record,
       // Once the workflow runs this SPR, its own record is what is true of it.
-      decision: stored ? stored.decision : record.decision,
+      decision,
+      due: task ? { dueAt: task.dueAt, overdue: task.overdue } : null,
       decidable: stored !== null,
       passedTo: stored?.passedOn
         ? {
@@ -216,8 +225,8 @@ export class WorkflowsService {
     return this.config.list();
   }
 
-  /** What stays open until Spectra confirms it, with today's draft values. */
-  async openRules(): Promise<OpenRule[]> {
-    return mockOpenRules(await this.approvals.approverFor("PRODUCT_MANAGER"));
+  /** What Spectra settled on 5 Nov, and the drafts that wait for its answer. */
+  openRules(): Promise<OpenRule[]> {
+    return Promise.resolve(mockOpenRules());
   }
 }

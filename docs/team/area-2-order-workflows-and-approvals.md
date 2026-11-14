@@ -30,7 +30,7 @@ How area 2 meets the others ([How the areas connect](../../CLAUDE.md#how-the-are
 - **Every transition is checked on the server before it runs:** by role in the state machine's table, or, for SPR decisions, by area 4's policy. A refusal leaves the order as it was.
 - **Every transition is audited,** with who, when, from which state to which, and why.
 - **Open rules are configuration:** the SPR trigger, the PI sequence, approvers and limits, and delegation ([assumptions](../assumptions.md) A-21 to A-24).
-- **Approval limits and delegation** follow the shape of Navision's Approval User Setup (Approver ID, Sales and Purchase Amount Approval Limits, Unlimited flags, Substitute), shared with area 4 ([domain notes](../research/domain-notes.md)).
+- **Approval limits and delegation** follow the shape of the Approval User Setup in Microsoft Dynamics 365 Business Central (Approver ID, Sales and Purchase Amount Approval Limits, Unlimited flags, Substitute), shared with area 4 ([domain notes](../research/domain-notes.md)).
 
 ## Recommended design
 
@@ -38,7 +38,7 @@ How area 2 meets the others ([How the areas connect](../../CLAUDE.md#how-the-are
 - **Commands for actions.** Each action (approve, reject, confirm payment, release) is a command with its own validation, checked by the policy, then applied by the machine.
 - **Events out, through the outbox** (planned: P-15). A transition and its events commit in the same transaction, so a retry never loses or doubles one. Idempotency keys make a repeated command harmless.
 - **Strategies for timing.** Reminder and escalation schedules are a Strategy, configured per step, run by BullMQ jobs (planned: P-9, P-15). Deadlines are in Singapore time.
-- **Numbers.** OrderPilot's own records take a type prefix, the date and a running number, such as `SPR-20261102-0001` (planned: P-7 and C-1), shown beside Navision's numbers.
+- **Numbers.** OrderPilot's own records take a type prefix, the date and a running number, such as `SPR-20261102-0001` (planned: P-7 and C-1), shown beside Business Central's numbers.
 
 The PO-to-approval sequence:
 
@@ -90,7 +90,7 @@ sequenceDiagram
 - **Holds:** a failed check or a payment hold moves the order to `OnHold`. A check's hold belongs to its rule, so one rule passing never frees an order another rule still holds. The order returns only when every hold has cleared.
 - **Cancelling:** needs a reason, and is refused once the goods have gone.
 
-A wrong actor is refused with 403 and an illegal move with 409, in the one error envelope, and each refusal is audited. Where a status meets Navision's Sales Header Status is `navisionStatusOf`, an assumption to confirm (A-36).
+A wrong actor is refused with 403 and an illegal move with 409, in the one error envelope, and each refusal is audited. Where a status meets Business Central's Sales Header Status is `navisionStatusOf`, an assumption to confirm (A-36).
 
 **SPR approval (C-3).** `POST /workflows/sprs/:recordNo/approve`, `reject` and `undo` are real: `SprApprovalService` asks area 4's policy, the machine moves the order, and the decision commits with the move. The amount and the requester come from the SPR's own record (`WorkflowRecord.data`), never from the request. Above the decider's limit, approving or rejecting decides nothing: the SPR passes to the next person on the chain (`deciderFor`), and area 4's route rule follows the chain from that hand-off: the person who passed it on, or the absent approver a substitute stood in for. The original requester is refused separately, whoever it has passed through. The seed puts the orders with a submitted SPR on the machine as `AwaitingSpr`; the rest stay samples, and deciding one is refused.
 
@@ -146,7 +146,7 @@ A wrong actor is refused with 403 and an illegal move with 409, in the one error
 C-1 landed these. Every route and screen answers with typed mock data from `@orderpilot/synthetic-data` and says so (`meta.mock` in the response, the Mock and Synthetic demo data badges on screen), except the document configuration, which is read from its table.
 
 - **Models** (`apps/api/prisma/schema/workflows.prisma`, migration `workflows_base`): `WorkflowDefinition`, `WorkflowInstance`, `WorkflowTask`, `WorkflowEvent`, `WorkflowNotification`, `PaymentConfirmation`, `WorkflowRecord`, `RecordCounter` and `DocumentTypeConfig`. The inbox queries have indexes on role, status and due date. `WorkflowInstance.status` is plain text that only your state machine writes; the base writes it in one place, the demo seed, with the dataset's `sample-` labels. Events carry an optional idempotency key, unique per instance, for your retries story.
-- **Contracts** (`packages/shared/src/workflows`): tasks, order steps and timeline, SPR detail and decisions, reminders, payments with their type, the document configuration, and `ApprovalUserSetup`, the shape of Navision's Approval User Setup (approver, sales and purchase limits, the two unlimited flags, substitute). New permissions are additive: `workflows.read`, `spr.read`, `approvals.decide`, `payments.confirm` and `workflows.inboxes.any`, with the default matrix extended in `DEFAULT_ROLE_PERMISSIONS`.
+- **Contracts** (`packages/shared/src/workflows`): tasks, order steps and timeline, SPR detail and decisions, reminders, payments with their type, the document configuration, and `ApprovalUserSetup`, the shape of Business Central's Approval User Setup (approver, sales and purchase limits, the two unlimited flags, substitute). New permissions are additive: `workflows.read`, `spr.read`, `approvals.decide`, `payments.confirm` and `workflows.inboxes.any`, with the default matrix extended in `DEFAULT_ROLE_PERMISSIONS`.
 - **Routes** (`apps/api/src/modules/workflows`, in layers; every one behind the global guards):
   - `GET /workflows/tasks` and `GET /workflows/reminders`: the caller's own inbox (`workflows.read`).
   - `GET /workflows/tasks/handed-to-me`: the SPRs the approval chain has handed to the caller, whatever their role (`workflows.read`).
@@ -158,7 +158,7 @@ C-1 landed these. Every route and screen answers with typed mock data from `@ord
   - `GET /workflows/sprs/:recordNo`, `POST .../approve` and `POST .../reject` (`spr.read`, `approvals.decide`): the commands validate a comment, check the SPR exists and answer `applied: false`. They change nothing and say so.
   - `GET /workflows/document-config`: the fields and defaults for each document type, read from the `DocumentTypeConfig` table (seeded from `DEFAULT_DOCUMENT_CONFIG`), so a default is an edit to a row.
 - **Two ports, bound to mocks.** `WorkflowReadModel` is where the routes read from (`MockWorkflowReadModel`); `ApprovalPolicy` is what area 2 asks of area 4 (`MockApprovalPolicy`, rows in Approval User Setup shape). Swap each by providing a real class under the same token; the controller, service and screens stay. [ADR 0026](../adr/0026-area-2-base-ports-and-mocks.md) has the reasoning.
-- **Record numbers.** `RecordNumberService.next("SPR")` gives `SPR-20261102-0001` through the shared helper, from one atomic upsert on `RecordCounter`, so concurrent requests never share a number (tested against the database). `WorkflowRecord.navisionNo` holds Navision's number beside it, null until Navision has the record. Both numbers show together on every screen.
+- **Record numbers.** `RecordNumberService.next("SPR")` gives `SPR-20261102-0001` through the shared helper, from one atomic upsert on `RecordCounter`, so concurrent requests never share a number (tested against the database). `WorkflowRecord.navisionNo` holds Business Central's number beside it, null until Business Central has the record. Both numbers show together on every screen.
 - **The SPR pre-fill.** `SprSuggestion` works out available stock (Inventory, minus Qty. on Sales Order, plus Qty. on Purch. Order) and suggests the shortfall. The SPR page marks suggested fields as suggestions, default fields as defaults and typed ones as entered by a person. It is arithmetic only: when to raise an SPR is yours.
 - **Payment type.** The confirmation form and contract carry `prepayment`, `deposit`, `balance` or `full-payment` (area 4's list, imported from the governance contracts). Prepayment is what your payment gate will watch.
 - **Screens** (`apps/web/src/features/workflows`, strings in the lazy `workflows` namespace, generated hooks only):

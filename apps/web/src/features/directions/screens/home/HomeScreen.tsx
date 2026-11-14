@@ -11,6 +11,7 @@ import { MyTimeline } from "./MyTimeline";
 import { NeedsYou } from "./NeedsYou";
 import { RoleBlock } from "./RoleBlock";
 import { Shortcuts } from "./Shortcuts";
+import { SystemHealth } from "./SystemHealth";
 import { YourNumbers } from "./YourNumbers";
 import { useBlockQueries } from "./useBlockQueries";
 import { useCompleteTask } from "./useCompleteTask";
@@ -39,7 +40,9 @@ const CELL = "dx-grid-cell flex min-w-0 flex-col gap-6";
  * Home, for the signed-in role, in the order of the person's day: a greeting,
  * what needs them, their numbers, the measures and the flows. A role with an
  * inbox has its tasks beside its timeline. A role without one has the one list
- * that is its own where the tasks would be, and its shortcuts beside it. A
+ * that is its own where the tasks would be, and its shortcuts beside it (the
+ * system administrator has the health of its services instead, because its
+ * menu already holds its places). A
  * section that has nothing for the role is not drawn. Done today is kept here,
  * because the real tasks API lists only open tasks: a task finished from this
  * screen is noted with its time, and an Undo takes it out again.
@@ -86,7 +89,11 @@ export default function HomeScreen() {
             <RoleBlock block={access.block} queries={queries} />
           </div>
           <div className={CELL}>
-            <Shortcuts layout="rows" className="flex-1" />
+            {access.health ? (
+              <SystemHealth className="flex-1" />
+            ) : (
+              <Shortcuts layout="rows" className="flex-1" />
+            )}
           </div>
         </div>
       )}

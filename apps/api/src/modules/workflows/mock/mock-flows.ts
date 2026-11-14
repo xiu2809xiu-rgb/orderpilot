@@ -214,7 +214,7 @@ function timelineOf(
           step.completedAt,
           "step.completed",
           person(step.ownerRole),
-          `${stepLabel(step.key)} done`,
+          `Step done: ${stepLabel(step.key)}`,
         ),
       );
     }
@@ -245,11 +245,26 @@ function timelineOf(
         paid.confirmedAt,
         "payment.confirmed",
         person("FINANCE"),
-        `${paid.paymentType} of ${paid.amount} ${paid.currencyCode} confirmed`,
+        `${PAYMENT_WORDS[paid.paymentType]} of ${paid.currencyCode} ${grouped(paid.amount)} confirmed`,
       ),
     );
   }
   return events.sort((a, b) => a.at.localeCompare(b.at));
+}
+
+/** How a payment type reads at the start of a sentence. */
+const PAYMENT_WORDS: Record<PaymentRecord["paymentType"], string> = {
+  prepayment: "Prepayment",
+  deposit: "Deposit",
+  balance: "Balance",
+  "full-payment": "Full payment",
+};
+
+/** "2580.11" as "2,580.11", as money is written on every screen. */
+function grouped(amount: string): string {
+  const [whole = "0", fraction] = amount.split(".");
+  const digits = whole.replace(/B(?=(d{3})+(?!d))/g, ",");
+  return fraction ? `${digits}.${fraction}` : digits;
 }
 
 export function buildFlow(
@@ -272,5 +287,13 @@ export function buildFlow(
     steps,
     timeline: timelineOf(order, steps, payment),
     payment,
+    documents: order.documents.map((document) => ({
+      id: document.id,
+      type: document.type,
+      number: document.number,
+      status: document.status,
+      receivedAt: document.receivedAt,
+      dueDate: document.dueDate,
+    })),
   };
 }

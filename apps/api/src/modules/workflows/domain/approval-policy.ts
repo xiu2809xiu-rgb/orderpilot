@@ -12,13 +12,13 @@ export interface ApproverProfile {
 /**
  * What area 2 asks of area 4's approval policy. Area 4 owns the limits, the
  * substitutes and the verdict "is this within your limit"; area 2 calls this
- * port and acts on the answer. Rows come in the shape of Navision's Approval
- * User Setup, so a later Navision link maps one to one.
+ * port and acts on the answer. Rows come in the shape of Business Central's Approval
+ * User Setup, so a later Business Central link maps one to one.
  *
  * The base ships only a mock (`MockApprovalPolicy`). The limit check itself,
  * and the escalation above the limit, are not here: they are the SPR rules.
  */
 export abstract class ApprovalPolicy {
-  /** The approver for a requester (Navision "Approver ID"), or null if none is set up. */
+  /** The approver for a requester (Business Central "Approver ID"), or null if none is set up. */
   abstract approverFor(requesterRole: string): Promise<ApproverProfile | null>;
 }

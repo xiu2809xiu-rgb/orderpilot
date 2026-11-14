@@ -307,7 +307,7 @@ export function currentStepOf(
 }
 
 /**
- * Where OrderPilot's states meet Navision's Sales Header Status: an assumption
+ * Where OrderPilot's states meet Business Central's Sales Header Status: an assumption
  * to confirm at the briefing call. Closed and Cancelled are ours alone.
  */
 export function navisionStatusOf(state: OrderSnapshot): NavisionStatus | null {

@@ -86,8 +86,16 @@ export function itemColumns(
       defaultHidden: true,
     },
     quantity("inventory", t("items.columns.inventory")),
-    quantity("qtyOnSalesOrder", t("items.columns.qtyOnSalesOrder")),
-    quantity("qtyOnPurchOrder", t("items.columns.qtyOnPurchOrder")),
+    // Shown on request: Available already nets them, and hiding them lets the
+    // vendor column fit a laptop screen.
+    {
+      ...quantity("qtyOnSalesOrder", t("items.columns.qtyOnSalesOrder")),
+      defaultHidden: true,
+    },
+    {
+      ...quantity("qtyOnPurchOrder", t("items.columns.qtyOnPurchOrder")),
+      defaultHidden: true,
+    },
     {
       id: "availableStock",
       header: t("items.columns.availableStock"),

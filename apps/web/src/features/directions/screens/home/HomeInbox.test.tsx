@@ -172,8 +172,9 @@ describe("the home page of a role with an inbox", () => {
     );
   });
 
-  it("approves an SPR in one click and reverses it on Undo", async () => {
-    const user = userEvent.setup();
+  // The approver decides on the stock, the cover and the amount, and says why,
+  // so an SPR is never approved from a list row.
+  it("opens an SPR on its own page instead of approving it in one click", async () => {
     const approval = makeTask({
       kind: "APPROVE_SPR",
       assigneeRole: "APPROVER",
@@ -185,19 +186,12 @@ describe("the home page of a role with an inbox", () => {
     expect(
       await screen.findByRole("link", { name: "Approve SPR-20261102-0001" }),
     ).toHaveAttribute("href", "/workflows/sprs/SPR-20261102-0001");
-    await user.click(
-      await screen.findByRole("button", { name: "Approve for SO-0200" }),
-    );
-    await waitFor(() => {
-      expect(served.calls).toContain("POST approve SPR-20261102-0001");
+    const review = await screen.findByRole("link", {
+      name: "Review for SO-0200",
     });
-    expect(useToastStore.getState().items.at(-1)?.message).toBe(
-      "Approved the SPR for SO-0200",
-    );
-    await user.click(await screen.findByRole("button", { name: "Undo" }));
-    await waitFor(() => {
-      expect(served.calls).toContain("POST undo-decision SPR-20261102-0001");
-    });
+    expect(review).toHaveAttribute("href", "/workflows/sprs/SPR-20261102-0001");
+    expect(screen.queryByRole("button", { name: /Approve/ })).toBeNull();
+    expect(served.calls.some((call) => call.includes("approve"))).toBe(false);
   });
 
   it("opens the order for a task the person decides there, instead of a button that would guess", async () => {

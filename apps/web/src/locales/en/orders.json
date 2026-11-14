@@ -92,5 +92,30 @@
       "done": "Order {{orderNo}} voided"
     },
     "denied": "Your role may read orders but not start them."
+  },
+  "documents": {
+    "types": {
+      "CUSTOMER_PO": "Customer PO",
+      "PROFORMA_INVOICE": "Proforma invoice",
+      "VENDOR_PI": "Vendor PI",
+      "VENDOR_INVOICE": "Vendor invoice",
+      "SALES_INVOICE": "Invoice",
+      "CREDIT_NOTE": "Credit note",
+      "PACKING_LIST": "Packing list",
+      "DELIVERY_ORDER": "Delivery order",
+      "AWB": "Air waybill",
+      "BILL_OF_LADING": "Bill of lading",
+      "IMPORT_PERMIT": "Import permit",
+      "PAYMENT_ADVICE": "Payment advice",
+      "SPR_FORM": "SPR form",
+      "OTHER": "Other document"
+    },
+    "status": {
+      "confirmed": "Confirmed",
+      "to-confirm": "To confirm",
+      "expected": "Expected"
+    },
+    "received": "Received {{date}}",
+    "due": "Due {{date}}"
   }
 }

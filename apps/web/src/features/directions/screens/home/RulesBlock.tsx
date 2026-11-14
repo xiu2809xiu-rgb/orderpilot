@@ -1,17 +1,14 @@
-import { ArrowRight, Settings2 } from "lucide-react";
+import { CircleCheck, CircleDashed } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router";
 import { StatusChip } from "@/components/kit/StatusChip";
-import { Button } from "@/components/ui/button";
 import { BlockSection } from "./BlockSection";
 import { HomeRow } from "./HomeRow";
 import type { useBlockQueries } from "./useBlockQueries";
 
 /**
- * The system administrator's block: the business rules that stay
- * configuration until Spectra confirms them, each with today's draft value. A
- * rule that has a screen opens it; one that has none is marked as held in
- * configuration, so no button leads nowhere.
+ * The system administrator's block: the business rules, what Spectra settled at
+ * the 5 Nov briefing beside the drafts that still wait for its answer, each
+ * with the value we hold. Each stays a setting, so no row leads to a screen.
  */
 export function RulesBlock({
   query,
@@ -33,40 +30,18 @@ export function RulesBlock({
         description: t("block.rules.emptyDescription"),
       }}
       row={(rule) => {
-        const name = tHome(`rules.names.${rule.id}`);
+        const confirmed = rule.status === "confirmed";
         return (
           <HomeRow
-            title={
-              <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                {name}
-                {rule.screen ? null : (
-                  <StatusChip kind="info" icon={Settings2}>
-                    {tHome("rules.noScreen")}
-                  </StatusChip>
-                )}
-              </span>
-            }
+            title={tHome(`rules.names.${rule.id}`)}
             meta={<span className="min-w-0">{rule.value}</span>}
             action={
-              rule.screen ? (
-                <Button
-                  asChild
-                  variant="outline"
-                  size="sm"
-                  className="w-full pointer-coarse:min-h-11"
-                >
-                  <Link
-                    to={rule.screen}
-                    aria-label={t("block.actionOn", {
-                      action: tHome("rules.open"),
-                      record: name,
-                    })}
-                  >
-                    {tHome("rules.open")}
-                    <ArrowRight aria-hidden="true" />
-                  </Link>
-                </Button>
-              ) : null
+              <StatusChip
+                kind={confirmed ? "success" : "warning"}
+                icon={confirmed ? CircleCheck : CircleDashed}
+              >
+                {tHome(`rules.status.${rule.status}`)}
+              </StatusChip>
             }
           />
         );

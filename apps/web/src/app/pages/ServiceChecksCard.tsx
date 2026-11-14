@@ -1,8 +1,13 @@
-import { RotateCw } from "lucide-react";
+import { CircleCheck, CircleX, RotateCw } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { StatusChip } from "@/components/kit/StatusChip";
 import { Section } from "@/components/parts/Section";
 import { Button } from "@/components/ui/button";
-import { useSystemChecks } from "@/lib/api/generated/endpoints/system/system";
+import {
+  useSystemCheckStatuses,
+  useSystemChecks,
+} from "@/lib/api/generated/endpoints/system/system";
+import { hasPermission, useSessionStore } from "@/stores/session";
 import { Bone } from "../shell/skeletons/Bone";
 
 /**
@@ -14,7 +19,14 @@ import { Bone } from "../shell/skeletons/Bone";
  */
 export function ServiceChecksCard() {
   const { t } = useTranslation();
+  const session = useSessionStore((state) => state.session);
+  // Running the checks is for those who manage settings; everyone else sees their names.
+  const canRun = hasPermission(session, "settings.manage");
   const checks = useSystemChecks();
+  const statuses = useSystemCheckStatuses({ query: { enabled: canRun } });
+  const statusOf = new Map(
+    (statuses.data?.data ?? []).map((check) => [check.name, check]),
+  );
 
   return (
     <Section title={t("settings.checks")} intro={t("settings.checksHint")}>
@@ -47,11 +59,28 @@ export function ServiceChecksCard() {
         </p>
       ) : (
         <ul className="flex flex-wrap gap-2">
-          {checks.data.data.map((check) => (
-            <li key={check.name} className="dx-chip fs-12 font-mono">
-              {check.name}
-            </li>
-          ))}
+          {checks.data.data.map((check) => {
+            const status = statusOf.get(check.name);
+            return (
+              <li key={check.name}>
+                {status ? (
+                  <StatusChip
+                    kind={status.status === "up" ? "success" : "destructive"}
+                    icon={status.status === "up" ? CircleCheck : CircleX}
+                  >
+                    {t(
+                      status.status === "up"
+                        ? "settings.checkUp"
+                        : "settings.checkDown",
+                      { name: check.name },
+                    )}
+                  </StatusChip>
+                ) : (
+                  <span className="dx-chip fs-12 font-mono">{check.name}</span>
+                )}
+              </li>
+            );
+          })}
         </ul>
       )}
     </Section>

@@ -1,10 +1,10 @@
 import { Suspense, lazy } from "react";
 import { useTranslation } from "react-i18next";
 import { PageHeader } from "@/components/parts/PageHeader";
+import { hasPermission, useSessionStore } from "@/stores/session";
 import { ServiceChecksCard } from "./ServiceChecksCard";
 import { AccountSection } from "./settings/AccountSection";
 import { AppearanceSection } from "./settings/AppearanceSection";
-import { LanguageSection } from "./settings/LanguageSection";
 
 // A separate chunk with the tracker, so the entry bundle does not grow.
 const AnalyticsSettingsCard = lazy(
@@ -14,6 +14,7 @@ const AnalyticsSettingsCard = lazy(
 /** Sections at a reading width: what a person can change comes first. */
 export function SettingsPage() {
   const { t } = useTranslation();
+  const session = useSessionStore((state) => state.session);
   return (
     <div className="dx-settings max-w-3xl">
       <PageHeader
@@ -22,11 +23,13 @@ export function SettingsPage() {
       />
       <div className="flex flex-col gap-4">
         <AppearanceSection />
-        <LanguageSection />
         <Suspense fallback={null}>
           <AnalyticsSettingsCard />
         </Suspense>
-        <ServiceChecksCard />
+        {/* Service names mean nothing without their status, which only an admin may run. */}
+        {hasPermission(session, "settings.manage") ? (
+          <ServiceChecksCard />
+        ) : null}
         <AccountSection />
       </div>
     </div>

@@ -19,8 +19,8 @@ interface NeedRowProps {
 /**
  * One task waiting for the person: what to do, which order and customer, how
  * long until it is due, the money when there is some, and one action. A task
- * that one click does has that button; any other opens its order, where it is
- * reviewed or decided.
+ * that one click does has that button; any other opens its record, where it is
+ * reviewed or decided. An SPR is never approved from the row.
  */
 export function NeedRow({ task, busy, onComplete }: NeedRowProps) {
   const { t } = useTranslation("directions-home");
@@ -33,8 +33,8 @@ export function NeedRow({ task, busy, onComplete }: NeedRowProps) {
   const sprPath = task.ref
     ? `/workflows/sprs/${encodeURIComponent(task.ref.recordNo)}`
     : null;
-  // A task with no order still has its SPR to open.
-  const href = order ? links.order(order) : sprPath;
+  // An SPR opens on its own page, where it is decided; the rest open their order.
+  const href = sprPath ?? (order ? links.order(order) : null);
   const what = order ?? task.ref?.recordNo ?? "";
   // On an SPR task the SPR is the thing to open, so its number is the title and the link.
   const sprLink =

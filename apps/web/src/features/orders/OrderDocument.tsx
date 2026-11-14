@@ -28,6 +28,11 @@ import { searchItems } from "./orderSearches";
 import { useLineColumns } from "./useLineColumns";
 import { useOrderActions } from "./useOrderActions";
 import { useOrderSave } from "./useOrderSave";
+import {
+  OrderChecksTab,
+  OrderDocumentsTab,
+  OrderTimelineTab,
+} from "./OrderTabs";
 
 interface OrderDocumentProps {
   /** Null while the order is new. */
@@ -56,6 +61,8 @@ export function OrderDocument({
 }: OrderDocumentProps) {
   const { t } = useTranslation("orders");
   const orderNo = record?.orderNo ?? null;
+  // Only a sample order has a workflow timeline, tracker checks and documents to show.
+  const sampleNo = readOnly === "sample" ? orderNo : null;
   const schema = useMemo(
     () => makeOrderFormSchema(t, priceMasked),
     [t, priceMasked],
@@ -177,10 +184,21 @@ export function OrderDocument({
         ? { saveBlocked: t(`form.notices.readOnly.${readOnly}`) }
         : {})}
       {...(state ? { state } : {})}
+      // A sample order has a workflow timeline, tracker checks and documents;
+      // a new one has none of them yet.
       tabs={{
-        timeline: { content: null, emptyText: t("form.tabsEmpty") },
-        checks: { content: null, emptyText: t("form.tabsEmpty") },
-        documents: { content: null, emptyText: t("form.tabsEmpty") },
+        timeline: {
+          content: sampleNo ? <OrderTimelineTab orderNo={sampleNo} /> : null,
+          emptyText: t("form.tabsEmpty"),
+        },
+        checks: {
+          content: sampleNo ? <OrderChecksTab orderNo={sampleNo} /> : null,
+          emptyText: t("form.tabsEmpty"),
+        },
+        documents: {
+          content: sampleNo ? <OrderDocumentsTab orderNo={sampleNo} /> : null,
+          emptyText: t("form.tabsEmpty"),
+        },
         ...(orderNo
           ? { log: { entityType: "Order" as const, entityId: orderNo } }
           : {}),

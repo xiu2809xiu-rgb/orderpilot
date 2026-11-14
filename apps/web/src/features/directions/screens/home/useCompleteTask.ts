@@ -4,10 +4,8 @@ import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "@/components/common";
 import {
-  workflowsApprove,
   workflowsCompleteTask,
   workflowsConfirmPayment,
-  workflowsUndoDecision,
   workflowsUndoPayment,
   workflowsUndoTask,
 } from "@/lib/api/generated/endpoints/workflows/workflows";
@@ -24,26 +22,18 @@ export function canComplete(task: WorkflowTask): boolean {
 }
 
 /**
- * True when one click does the task here: the kinds a person simply marks as done,
- * an SPR the person may decide on the spot, and a payment whose expected
- * amount is known. Anything else opens its order, where it is decided.
+ * True when one click does the task here: the kinds a person simply marks as done
+ * and a payment whose expected amount is known. Anything else opens its record.
+ * An SPR approval never does: the approver decides on the stock, the cover and
+ * the amount, and says why, which only the SPR page shows and asks for.
  */
 export function isOneClick(task: WorkflowTask): boolean {
   if (canComplete(task)) return true;
-  if (task.kind === "APPROVE_SPR") return task.ref !== null;
   return task.kind === "CONFIRM_PAYMENT" && task.expectedPayment !== undefined;
 }
 
 /** Does the task, and answers with the call that reverses it. */
-async function perform(
-  task: WorkflowTask,
-  comment: string,
-): Promise<() => Promise<unknown>> {
-  if (task.kind === "APPROVE_SPR" && task.ref) {
-    const { recordNo } = task.ref;
-    await workflowsApprove(recordNo, { comment });
-    return () => workflowsUndoDecision(recordNo);
-  }
+async function perform(task: WorkflowTask): Promise<() => Promise<unknown>> {
   if (task.kind === "CONFIRM_PAYMENT" && task.expectedPayment && task.orderNo) {
     const { orderNo } = task;
     const { paymentType, amount, currencyCode } = task.expectedPayment;
@@ -82,8 +72,7 @@ export function useCompleteTask({
   // here twice. A ref is set at once.
   const working = useRef(new Set<string>());
   const mutation = useMutation({
-    mutationFn: (task: WorkflowTask) =>
-      perform(task, t("needs.approvedComment")),
+    mutationFn: perform,
     onSuccess: async (undo, task) => {
       onDone(task, new Date());
       await queryClient.invalidateQueries();

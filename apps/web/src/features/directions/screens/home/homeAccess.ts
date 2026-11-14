@@ -35,5 +35,7 @@ export function useHomeAccess() {
     tracker: has("tracker.read"),
     measures: has("insights.read"),
     create: has("orders.create"),
+    /** Only the administrator runs the checks: the server refuses any other role. */
+    health: role === "SYSTEM_ADMIN" && has("settings.manage"),
   };
 }
