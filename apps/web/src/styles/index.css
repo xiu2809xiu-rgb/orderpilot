@@ -6,6 +6,7 @@
 @import "./surfaces.css";
 @import "./chrome.css";
 @import "./motion.css";
+@import "./theme-switch.css";
 
 @custom-variant dark (&:is(.dark *));
 
