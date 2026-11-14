@@ -44,7 +44,9 @@ export function GalleryTable() {
       {
         id: "reference",
         header: t("table.order"),
-        cell: (row) => <span className="font-mono">{row.reference}</span>,
+        cell: (row) => (
+          <span className="font-semibold tabular-nums">{row.reference}</span>
+        ),
         exportValue: (row) => row.reference,
         sortable: true,
         hideable: false,
