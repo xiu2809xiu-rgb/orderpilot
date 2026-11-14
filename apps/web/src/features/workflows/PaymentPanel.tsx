@@ -2,19 +2,24 @@ import { PAYMENT_TYPES, type OrderPayment } from "@orderpilot/shared";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
-import { EmptyState, ErrorPanel, toast } from "@/components/common";
+import { ErrorPanel, toast } from "@/components/common";
 import { Button } from "@/components/ui/button";
+import { CONTROL_SKIN } from "@/components/ui/controlSkin";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatMoney } from "@/lib/format";
+import { cn } from "@/lib/utils";
 import {
   workflowsConfirmPayment,
   workflowsUndoPayment,
 } from "@/lib/api/generated/endpoints/workflows/workflows";
 import { formatAmount, formatDate } from "./format";
 
-const SELECT_CLASS =
-  "h-11 w-full rounded-md border bg-background px-3 text-sm focus-visible:outline-2 focus-visible:outline-ring";
+// A select always matches :read-only, so the skin's dashed read-only look is put back to solid.
+const SELECT_CLASS = cn(
+  CONTROL_SKIN,
+  "h-11 w-full rounded-md px-3 text-sm read-only:border-solid read-only:bg-(--control-bg)",
+);
 
 /** What Finance asked for and has confirmed, and the form that confirms a payment with its type. */
 export function PaymentPanel({
@@ -88,11 +93,16 @@ export function PaymentPanel({
       <div className="space-y-2">
         <h3 className="font-medium">{t("payment.confirmed")}</h3>
         {payment.confirmations.length === 0 ? (
-          <EmptyState title={t("payment.noneConfirmed")} />
+          <p className="text-sm text-muted-foreground">
+            {t("payment.noneConfirmed")}
+          </p>
         ) : (
           <ul className="space-y-2">
             {payment.confirmations.map((paid) => (
-              <li key={paid.id} className="rounded-lg border p-s2 text-sm">
+              <li
+                key={paid.id}
+                className="rounded-xl border border-border bg-(--dx-card-work-bg) p-s2 text-sm"
+              >
                 <span className="font-medium">
                   {t(`payment.types.${paid.paymentType}`)}
                 </span>{" "}

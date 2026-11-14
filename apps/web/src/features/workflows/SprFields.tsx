@@ -1,7 +1,7 @@
 import type { SprField } from "@orderpilot/shared";
 import { Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/kit/Badge";
 import {
   Table,
   TableBody,
@@ -54,7 +54,8 @@ export function SprFields({ fields }: { fields: readonly SprField[] }) {
             </TableCell>
             <TableCell>
               <Badge
-                variant={field.origin === "suggested" ? "default" : "outline"}
+                radius="full"
+                variant={field.origin === "suggested" ? "info" : "secondary"}
               >
                 {field.origin === "suggested" ? (
                   <Sparkles aria-hidden="true" />

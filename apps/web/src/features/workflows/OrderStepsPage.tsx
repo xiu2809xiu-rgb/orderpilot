@@ -6,6 +6,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { useWorkflowsOrderFlow } from "@/lib/api/generated/endpoints/workflows/workflows";
 import { ApiError } from "@/lib/api/errors";
 import { hasPermission, useSessionStore } from "@/stores/session";
+import { BackToInbox } from "./BackToInbox";
 import { formatDate } from "./format";
 import { MockBadges } from "./MockBadges";
 import { PaymentPanel } from "./PaymentPanel";
@@ -36,7 +37,8 @@ export default function OrderStepsPage() {
   }
 
   return (
-    <div className="space-y-s4">
+    <div className="dx-sheet flex flex-col gap-s4">
+      <BackToInbox />
       <PageHeader
         title={t("order.heading", { orderNo })}
         description={
