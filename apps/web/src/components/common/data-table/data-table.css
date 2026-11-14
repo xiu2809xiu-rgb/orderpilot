@@ -145,7 +145,8 @@
   background: var(--dx-bar-btn-hover);
 }
 
-.dt-toggle[aria-checked="true"] {
+.dt-toggle[aria-checked="true"],
+.dt-toggle[aria-pressed="true"] {
   border-color: var(--ring);
   background: var(--accent);
 }
@@ -402,8 +403,7 @@
 }
 
 @media (max-width: 47.99rem) {
-  .dt-filters,
-  .lp-filters {
+  .dt-filters {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: end;
@@ -438,9 +438,10 @@
   }
 
   /* Four buttons do not fit one row of a 358 px column: two by two reads as one block. */
-  .dt-tools,
-  .lp-tools,
-  .lp-bar {
+  /* Doubled, so the rule wins whichever stylesheet loads last. */
+  .dt-tools.dt-tools,
+  .lp-tools.lp-tools,
+  .lp-bar.lp-bar {
     display: grid;
     width: 100%;
     grid-template-columns: repeat(2, minmax(0, 1fr));

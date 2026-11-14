@@ -103,7 +103,11 @@ export function ActionBar<Row>({
   const left = actions.filter((a) => LEFT_KINDS.includes(a.kind));
   const right = actions.filter((a) => !LEFT_KINDS.includes(a.kind));
   return (
-    <div role="group" aria-label={t("actions.label")} className="lp-bar">
+    <div
+      role="group"
+      aria-label={t("actions.label")}
+      className={cn("lp-bar", compact && "lp-bar-flat")}
+    >
       {left.map(draw)}
       {selectable ? (
         <SelectionCount count={selection.length} onClear={onClearSelection} />

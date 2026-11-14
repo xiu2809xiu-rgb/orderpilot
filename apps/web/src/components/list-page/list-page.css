@@ -47,16 +47,16 @@
   gap: 0.5rem;
 }
 
+/* With no row of its own the bar joins the filter row: its pieces then sit
+   straight in that row, beside the saved views and the columns. */
+.lp-bar.lp-bar-flat,
+.lp-bar.lp-bar-flat > .lp-tools.lp-tools {
+  display: contents;
+}
+
 /* The tools stay at the far end of the top row, however few actions come before them. */
 .lp-tools-end {
   margin-left: auto;
-}
-
-.lp-filters {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 0.75rem;
 }
 
 .lp-filters-end {

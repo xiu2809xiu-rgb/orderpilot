@@ -38,7 +38,7 @@ export function FilterBar({
   const fields = main.filter((filter) => filter.kind !== "toggle");
   const toggles = main.filter((filter) => filter.kind === "toggle");
   return (
-    <div className="lp-filters">
+    <div className="dt-filters">
       {search === undefined ? null : (
         <SearchBox
           value={search}
