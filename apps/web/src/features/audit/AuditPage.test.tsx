@@ -120,6 +120,26 @@ describe("AuditPage", () => {
     expect(last?.searchParams.get("role")).toBe("FINANCE");
   });
 
+  it("says the search also finds a whole trace ID, and sends a pasted one", async () => {
+    const seen: URL[] = [];
+    server.use(
+      getAuditViewerListMockHandler((info) => {
+        seen.push(new URL(info.request.url));
+        return page([event()]);
+      }),
+    );
+    const user = userEvent.setup();
+    renderAt();
+    await screen.findByText("Farah Finance");
+    expect(
+      screen.getByText(/a whole trace ID quoted from a refusal/),
+    ).toBeInTheDocument();
+    await user.type(screen.getByRole("searchbox"), "trace-abc");
+    await waitFor(() => {
+      expect(seen.at(-1)?.searchParams.get("search")).toBe("trace-abc");
+    });
+  });
+
   it("asks again with refusals only when the switch is turned on", async () => {
     const seen: URL[] = [];
     server.use(
