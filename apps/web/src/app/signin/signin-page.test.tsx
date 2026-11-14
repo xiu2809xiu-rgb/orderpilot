@@ -1,36 +1,10 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { renderApp } from "@/test/render";
 
-/** matchMedia where the named queries match and the others do not. */
-function stubMedia(matching: { reduced: boolean; wide: boolean }) {
-  vi.stubGlobal("matchMedia", (query: string) => ({
-    matches: query.includes("prefers-reduced-motion")
-      ? matching.reduced
-      : query.includes("min-width")
-        ? matching.wide
-        : false,
-    media: query,
-    addEventListener: () => undefined,
-    removeEventListener: () => undefined,
-  }));
-}
-
-function setVisibility(state: "visible" | "hidden") {
-  Object.defineProperty(document, "visibilityState", {
-    configurable: true,
-    get: () => state,
-  });
-  document.dispatchEvent(new Event("visibilitychange"));
-}
-
-afterEach(() => {
-  setVisibility("visible");
-});
-
 describe("the sign-in page with demo mode on", () => {
-  it("leads with the nine roles, each with its persona, and keeps the password form", async () => {
+  it("offers the nine roles, each with its persona, under the password form", async () => {
     renderApp("/login", { demoMode: true });
     const roles = await screen.findByRole("list", { name: "Demo roles" });
     expect(within(roles).getAllByRole("button")).toHaveLength(9);
@@ -40,9 +14,9 @@ describe("the sign-in page with demo mode on", () => {
     expect(screen.getByText("Synthetic demo data")).toBeInTheDocument();
     expect(screen.getByLabelText("Email")).toBeInTheDocument();
     expect(screen.getByLabelText("Password")).toBeInTheDocument();
-    // The demo grid comes before the password form.
-    const grid = roles.compareDocumentPosition(screen.getByLabelText("Email"));
-    expect(grid & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    // The form comes first, so it never moves when the roles arrive below it.
+    const form = screen.getByLabelText("Email").compareDocumentPosition(roles);
+    expect(form & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   it("signs in with one click", async () => {
@@ -104,14 +78,17 @@ describe("the sign-in page with demo mode off", () => {
 });
 
 describe("the promise", () => {
-  it("is readable as text: the tagline and the three steps in order", async () => {
+  it("is readable as text: the tagline as the page heading, then the three steps in order", async () => {
     renderApp("/login", { demoMode: false });
     expect(
       await screen.findByRole("heading", {
+        level: 1,
         name: "AI reads, rules decide, people approve.",
       }),
     ).toBeInTheDocument();
-    const steps = await screen.findByRole("list", { name: "The three steps" });
+    const steps = await screen.findByRole("list", {
+      name: "How OrderPilot works",
+    });
     const titles = within(steps)
       .getAllByRole("heading")
       .map((h) => h.textContent);
@@ -121,55 +98,74 @@ describe("the promise", () => {
     );
   });
 
-  it("shows the animated order flow, hidden from screen readers", async () => {
-    stubMedia({ reduced: false, wide: true });
-    const { container } = renderApp("/login", { demoMode: false });
-    await waitFor(() => {
-      expect(container.querySelector("svg.of")).not.toBeNull();
-    });
-    expect(container.querySelector("svg.of")).toHaveAttribute(
-      "data-motion",
-      "on",
-    );
+  it("puts the form first in the keyboard order and the theme switch last", async () => {
+    const user = userEvent.setup();
+    renderApp("/login", { demoMode: false });
+    const email = await screen.findByLabelText("Email");
+    // The skip link is first, as on every page; the form is the next stop.
+    await user.tab();
     expect(
-      container.querySelector("svg.of")?.closest("[aria-hidden]"),
-    ).toHaveAttribute("aria-hidden", "true");
+      screen.getByRole("link", { name: "Skip to main content" }),
+    ).toHaveFocus();
+    await user.tab();
+    expect(email).toHaveFocus();
+    const theme = screen.getByRole("button", { name: "Theme" });
+    expect(
+      email.compareDocumentPosition(theme) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+});
+
+describe("the form", () => {
+  it("shows and hides the password with the eye", async () => {
+    const user = userEvent.setup();
+    renderApp("/login", { demoMode: false });
+    const field = await screen.findByLabelText("Password");
+    expect(field).toHaveAttribute("type", "password");
+    await user.click(screen.getByRole("button", { name: "Show password" }));
+    expect(field).toHaveAttribute("type", "text");
+    expect(
+      screen.getByRole("button", { name: "Show password" }),
+    ).toHaveAttribute("aria-pressed", "true");
   });
 
-  it("shows a still frame when the visitor prefers reduced motion", async () => {
-    stubMedia({ reduced: true, wide: true });
-    const { container } = renderApp("/login", { demoMode: false });
-    await waitFor(() => {
-      expect(container.querySelector("svg.of")).not.toBeNull();
-    });
-    expect(container.querySelector("svg.of")).toHaveAttribute(
-      "data-motion",
-      "still",
+  it("checks a field when it loses focus, with a message that says how to fix it", async () => {
+    const user = userEvent.setup();
+    renderApp("/login", { demoMode: false });
+    const email = await screen.findByLabelText("Email");
+    await user.type(email, "mei.tan");
+    // Nothing is said while typing.
+    expect(
+      screen.queryByText(
+        "That does not look like an email. Check for an @ and a domain.",
+      ),
+    ).toBeNull();
+    await user.tab();
+    expect(
+      await screen.findByText(
+        "That does not look like an email. Check for an @ and a domain.",
+      ),
+    ).toBeVisible();
+    expect(email).toHaveAttribute("aria-invalid", "true");
+    expect(email).toHaveAccessibleDescription(
+      "That does not look like an email. Check for an @ and a domain.",
     );
   });
 
-  it("pauses while the tab is hidden and resumes when it is back", async () => {
-    stubMedia({ reduced: false, wide: true });
-    const { container } = renderApp("/login", { demoMode: false });
-    await waitFor(() => {
-      expect(container.querySelector("svg.of")).not.toBeNull();
+  it("shows which role it is signing in as while the answer is on its way", async () => {
+    const user = userEvent.setup();
+    renderApp("/login", { demoMode: true });
+    const roles = await screen.findByRole("list", { name: "Demo roles" });
+    await user.click(within(roles).getByRole("button", { name: /Finance/ }));
+    // Every button waits, and the one that was pressed says it is busy.
+    expect(
+      within(roles).getByRole("button", { name: /Finance/ }),
+    ).toHaveAttribute("aria-busy", "true");
+    expect(
+      within(roles).getByRole("button", { name: /Support/ }),
+    ).toBeDisabled();
+    await screen.findByRole("heading", {
+      name: /^Good (morning|afternoon|evening), /,
     });
-    const flow = container.querySelector("svg.of");
-    expect(flow).toHaveAttribute("data-paused", "false");
-    setVisibility("hidden");
-    await waitFor(() => {
-      expect(flow).toHaveAttribute("data-paused", "true");
-    });
-    setVisibility("visible");
-    await waitFor(() => {
-      expect(flow).toHaveAttribute("data-paused", "false");
-    });
-  });
-
-  it("does not load the animation on a phone", async () => {
-    stubMedia({ reduced: false, wide: false });
-    const { container } = renderApp("/login", { demoMode: false });
-    await screen.findByRole("list", { name: "The three steps" });
-    expect(container.querySelector("svg.of")).toBeNull();
   });
 });

@@ -1,0 +1,90 @@
+/* The sign-in page only: its words sharpen in one by one, and a light runs
+   round the card's edge. Plain CSS, so the page loads no animation library.
+   It is imported by LoginPage, so it ships in that page's own chunk. Under
+   reduced motion the global rule (index.css) ends every animation at once, and
+   the edge light is not drawn at all. */
+
+/* A word of the headline: it arrives out of a blur, left to right. */
+.signin-word {
+  display: inline-block;
+  white-space: pre;
+  animation: signin-word 450ms var(--ease-out) both;
+  animation-delay: calc(80ms + var(--i, 0) * 120ms);
+}
+@keyframes signin-word {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+    filter: blur(8px);
+  }
+}
+
+/* The lead and the steps rise a few pixels and sharpen, after the headline. */
+.signin-rise {
+  animation: signin-rise 400ms ease-out both;
+  animation-delay: var(--d, 0ms);
+}
+@keyframes signin-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+    filter: blur(6px);
+  }
+}
+
+/* The aurora canvas fades in over the page's own ground. */
+.signin-ground > * {
+  animation: signin-ground-in 600ms ease-out both;
+}
+@keyframes signin-ground-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* The card's edge light: a short comet on a masked ring, one lap in 8 s. */
+.signin-edge {
+  display: none;
+}
+@supports (offset-path: rect(0 auto auto 0 round 90px)) {
+  .signin-edge {
+    display: block;
+    position: absolute;
+    inset: 0;
+    border: 1px solid transparent;
+    border-radius: inherit;
+    pointer-events: none;
+    mask-image:
+      linear-gradient(transparent, transparent), linear-gradient(#000, #000);
+    mask-clip: padding-box, border-box;
+    mask-composite: intersect;
+  }
+  .signin-edge-light {
+    position: absolute;
+    width: 90px;
+    aspect-ratio: 1;
+    background: linear-gradient(to left, var(--ring), var(--info), transparent);
+    offset-path: rect(0 auto auto 0 round 90px);
+    animation: signin-lap 8s linear infinite;
+  }
+}
+@keyframes signin-lap {
+  from {
+    offset-distance: 0%;
+  }
+  to {
+    offset-distance: 100%;
+  }
+}
+/* Reduced motion: the words are simply there (the global rule only shortens
+   an animation, it would still wait out its delay), and no light runs. */
+@media (prefers-reduced-motion: reduce) {
+  .signin-word,
+  .signin-rise,
+  .signin-ground > * {
+    animation: none;
+  }
+  .signin-edge {
+    display: none;
+  }
+}

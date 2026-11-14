@@ -92,9 +92,13 @@ describe("signed out", () => {
     const user = userEvent.setup();
     const { fetch } = renderApp("/login");
     await user.click(await screen.findByRole("button", { name: "Sign in" }));
-    expect(await screen.findAllByText("This field is required.")).toHaveLength(
-      2,
-    );
+    // Each field says what to do, not only that it is wrong.
+    expect(
+      await screen.findByText(
+        "Enter your email, for example name@example.com.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Enter your password.")).toBeInTheDocument();
     expect(paths(fetch).some((p) => p.endsWith("/auth/login"))).toBe(false);
   });
 });

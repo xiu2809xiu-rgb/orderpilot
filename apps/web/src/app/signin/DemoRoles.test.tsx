@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { Suspense, use } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
+import i18n from "@/i18n";
 import { DemoRoles } from "./DemoRoles";
 
 // A badge whose words never finish loading.
@@ -10,6 +11,11 @@ vi.mock("@/components/common/DemoBadge", () => ({
     return null;
   },
 }));
+
+// The roles read the sign-in words; only the badge words are held back here.
+beforeAll(async () => {
+  await i18n.loadNamespaces("signin");
+});
 
 describe("the demo roles while the badge words load", () => {
   it("stay on screen: only the badge waits", () => {
