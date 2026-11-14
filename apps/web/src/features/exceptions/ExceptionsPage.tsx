@@ -17,6 +17,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { useExceptionsList } from "@/lib/api/generated/endpoints/exceptions/exceptions";
 import { tableStatusOf } from "@/lib/query-status";
+import { checkLabelOf } from "./checkLabels";
+import { DiscrepancyCell } from "./DiscrepancyCell";
 
 const URL_FILTERS = ["state"] as const;
 
@@ -60,21 +62,33 @@ export default function ExceptionsPage() {
       {
         id: "customer",
         header: t("list.columns.customer"),
-        cell: (row) => `${row.customerName} (${row.customerNo})`,
+        cell: (row) => (
+          <span>
+            {row.customerName}{" "}
+            <span className="font-mono text-xs text-muted-foreground">
+              {row.customerNo}
+            </span>
+          </span>
+        ),
         exportValue: (row) => `${row.customerNo} ${row.customerName}`,
       },
       {
         id: "rule",
         header: t("list.columns.rule"),
-        cell: (row) => row.ruleLabel,
-        exportValue: (row) => row.ruleLabel,
+        cell: (row) => checkLabelOf(row.ruleLabel),
+        exportValue: (row) => checkLabelOf(row.ruleLabel),
       },
       {
-        id: "summary",
-        header: t("list.columns.summary"),
-        cell: (row) => row.summary,
-        wrap: true,
-        exportValue: (row) => row.summary,
+        id: "discrepancy",
+        header: t("list.columns.discrepancy"),
+        cell: (row) => (
+          <DiscrepancyCell
+            row={row}
+            expectedLabel={t("list.columns.expected")}
+            actualLabel={t("list.columns.actual")}
+          />
+        ),
+        exportValue: (row) => `${row.summary} (${row.difference})`,
       },
       {
         id: "expected",
@@ -89,12 +103,6 @@ export default function ExceptionsPage() {
         cell: (row) => <span className="font-mono">{row.actual}</span>,
         exportValue: (row) => row.actual,
         defaultHidden: true,
-      },
-      {
-        id: "difference",
-        header: t("list.columns.difference"),
-        cell: (row) => <span className="font-mono">{row.difference}</span>,
-        exportValue: (row) => row.difference,
       },
       {
         id: "tolerance",
