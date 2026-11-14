@@ -25,7 +25,7 @@ export function AmountCell({ row }: { row: string }) {
     line !== undefined &&
     isLineAmountTooLarge(line.quantity ?? "", line.unitPrice ?? "");
   return (
-    <span className="block min-h-8 py-1.5 text-sm [overflow-wrap:anywhere] @lines:text-right">
+    <span className="numeral block min-h-9 py-2 text-sm [overflow-wrap:anywhere] @lines:text-right">
       {tooLarge ? (
         <span className="text-warning">{t("amountTooLarge")}</span>
       ) : amount === null ? (
@@ -61,7 +61,7 @@ export function AvailabilityCell({
   const unit = unitOf(whole);
   if (!line?.item) {
     return (
-      <span className="block py-1.5 text-sm text-muted-foreground">
+      <span className="block min-h-9 py-2 text-sm text-muted-foreground">
         <span aria-hidden="true">-</span>
         <span className="sr-only">{t("availability.noItem")}</span>
       </span>
@@ -69,7 +69,7 @@ export function AvailabilityCell({
   }
   if (line.availableStock === null || line.availableStock === undefined) {
     return (
-      <span className="block py-1.5 text-sm text-muted-foreground">
+      <span className="block min-h-9 py-2 text-sm text-muted-foreground">
         {t("availability.unknown")}
       </span>
     );
@@ -78,7 +78,7 @@ export function AvailabilityCell({
   const stock = `${formatQuantity(line.availableStock)} ${unit}`.trim();
   if (!short) {
     return (
-      <span className="block py-1.5 text-sm tabular-nums">
+      <span className="block min-h-9 py-2 text-sm tabular-nums">
         {t("availability.available", { stock })}
       </span>
     );

@@ -31,14 +31,14 @@ export function DocumentTabs({ spec, label }: DocumentTabsProps) {
   return (
     <Tabs defaultValue="timeline">
       {/* The label goes on the element with role="tablist", not on the root div. */}
-      <TabsList className="max-w-full" aria-label={t("tabs.label")}>
+      <TabsList className="df-tabs" aria-label={t("tabs.label")}>
         {PLAIN.map((key) => (
-          <TabsTrigger key={key} value={key} className="pointer-coarse:h-11">
+          <TabsTrigger key={key} value={key} className="df-tab">
             <TabLabel name={t(`tabs.${key}`)} count={spec[key].count ?? 0} />
           </TabsTrigger>
         ))}
         {allowed ? (
-          <TabsTrigger value="log" className="pointer-coarse:h-11">
+          <TabsTrigger value="log" className="df-tab">
             {t("tabs.log")}
           </TabsTrigger>
         ) : null}

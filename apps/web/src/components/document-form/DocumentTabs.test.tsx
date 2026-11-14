@@ -200,7 +200,7 @@ describe("the operation log tab", () => {
 });
 
 describe("the footer", () => {
-  it("shows the status chip, the attachments and the totals", () => {
+  it("shows the attachments and the totals in the footer, and the status in the head", () => {
     signInAs("SUPPORT");
     renderDocument({
       attachments: [
@@ -213,7 +213,9 @@ describe("the footer", () => {
       ],
     });
     const footer = screen.getByRole("contentinfo");
-    const chip = within(footer).getByText("Waiting for approval");
+    // The status moved to the head, beside the title: it is not in the footer.
+    expect(within(footer).queryByText("Waiting for approval")).toBeNull();
+    const chip = screen.getByText("Waiting for approval");
     expect(chip.closest("[data-family]")).toHaveAttribute(
       "data-family",
       "waiting",

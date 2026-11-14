@@ -8,13 +8,13 @@ import { useMasterDataItem } from "@/lib/api/generated/endpoints/master-data/mas
 import { ItemOrders } from "./ItemOrders";
 import { ItemSupply } from "./ItemSupply";
 import { AvailabilityBadge, KeyFacts, MaskedMoney } from "./pieces";
-import { BackToList, RecordState } from "./RecordState";
+import { BackToList, RecordSheet, RecordState } from "./RecordState";
 import { StockPicture } from "./StockPicture";
 
 function ItemRecord({ item }: { item: ItemDetail }) {
   const { t } = useTranslation("master-data");
   return (
-    <div className="space-y-s3">
+    <RecordSheet>
       <BackToList to="/master-data/items" label={t("item.back")} />
       <PageHeader
         title={item.no}
@@ -85,7 +85,7 @@ function ItemRecord({ item }: { item: ItemDetail }) {
       <StockPicture item={item} />
       <ItemOrders item={item} />
       <ItemSupply item={item} />
-    </div>
+    </RecordSheet>
   );
 }
 

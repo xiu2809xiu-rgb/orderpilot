@@ -14,7 +14,7 @@ import { useMasterDataCustomer } from "@/lib/api/generated/endpoints/master-data
 import { formatDay } from "@/lib/format";
 import { customerFacts } from "./customerFacts";
 import { KeyFacts, MaskedMoney } from "./pieces";
-import { BackToList, RecordState } from "./RecordState";
+import { BackToList, RecordSheet, RecordState } from "./RecordState";
 import { RecordTable, type RecordColumn } from "./RecordTable";
 
 type OpenOrder = CustomerDetail["openOrders"][number];
@@ -105,7 +105,7 @@ function CustomerRecord({ customer }: { customer: CustomerDetail }) {
     },
   ];
   return (
-    <div className="space-y-s3">
+    <RecordSheet>
       <BackToList to="/master-data/customers" label={t("customer.back")} />
       <PageHeader
         title={customer.no}
@@ -153,7 +153,7 @@ function CustomerRecord({ customer }: { customer: CustomerDetail }) {
           emptyText={t("customer.overdue.empty")}
         />
       </SectionCard>
-    </div>
+    </RecordSheet>
   );
 }
 
