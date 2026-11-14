@@ -74,7 +74,7 @@ function FormItem({
     <FormItemContext.Provider value={value}>
       <div
         data-slot="form-item"
-        className={cn("grid content-start gap-1", className)}
+        className={cn("grid content-start gap-1.5", className)}
         {...props}
       />
     </FormItemContext.Provider>
@@ -91,7 +91,10 @@ function FormLabel({
   return (
     <Label
       data-slot="form-label"
-      className={cn("gap-1 text-xs text-muted-foreground", className)}
+      className={cn(
+        "gap-1 text-xs font-medium text-muted-foreground",
+        className,
+      )}
       htmlFor={formItemId}
       {...props}
     >
@@ -138,7 +141,7 @@ function FormDescription({ className, ...props }: React.ComponentProps<"p">) {
     <p
       data-slot="form-description"
       id={formDescriptionId}
-      className={cn("text-xs text-muted-foreground", className)}
+      className={cn("text-xs text-(--faint-foreground)", className)}
       {...props}
     />
   );

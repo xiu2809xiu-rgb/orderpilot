@@ -67,7 +67,7 @@ export function LookupControl({
       <PopoverAnchor asChild>
         <div className="relative">
           <Search
-            className="pointer-events-none absolute top-2 left-2 size-4 text-muted-foreground pointer-coarse:top-3.5"
+            className="pointer-events-none absolute top-2.5 left-2.5 size-4 text-muted-foreground pointer-coarse:top-3.5"
             aria-hidden="true"
           />
           <FormControl describedBy={statusId}>
@@ -87,7 +87,7 @@ export function LookupControl({
               disabled={disabled}
               placeholder={placeholder ?? t("lookup.placeholder")}
               value={combobox.text}
-              className={cn(FIELD_CONTROL, "pl-8")}
+              className={cn(FIELD_CONTROL, "pl-9")}
               onChange={(event) => {
                 combobox.onType(event.target.value);
               }}

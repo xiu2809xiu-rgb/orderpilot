@@ -42,7 +42,7 @@ export function FormShell<T extends FieldValues, O = T>({
     <Form {...form}>
       <form
         noValidate
-        className={cn("space-y-s2", className)}
+        className={cn("space-y-s3", className)}
         onSubmit={(event) => {
           event.preventDefault();
         }}

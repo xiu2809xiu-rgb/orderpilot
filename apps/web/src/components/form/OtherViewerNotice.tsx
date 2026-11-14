@@ -12,7 +12,7 @@ export function OtherViewerNotice() {
   return (
     <div
       role="alert"
-      className="flex flex-wrap items-start gap-s2 rounded-md border px-s2 py-s2 text-sm"
+      className="flex flex-wrap items-start gap-s2 rounded-xl border bg-(--control-readonly-bg) px-s2 py-s2 text-sm"
     >
       <UserRoundX
         className="mt-0.5 size-4 shrink-0 text-muted-foreground"
