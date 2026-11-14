@@ -1,61 +1,19 @@
 import { ROLES } from "@orderpilot/shared";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { TableFilters } from "@/components/common";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {
+  Field,
+  NativeSelect,
+  ToggleChip,
+} from "@/components/common/data-table/Field";
+import { AuditMoreFilters } from "./AuditMoreFilters";
+import { CommitInput } from "./CommitInput";
 import type { FilterId } from "./auditQuery";
 
+/** The filters behind More filters: the ones a person reaches for less often. */
+const MORE_IDS = ["entity", "id", "actor", "from", "to"] as const;
+
 type SetFilter = (id: string, value: string | boolean | undefined) => void;
-
-const SELECT =
-  "h-9 w-full rounded-md border border-input bg-background px-2 text-sm";
-
-/** A text box that applies on Enter or when it loses focus, so typing does not refetch each key. */
-function CommitInput({
-  id,
-  label,
-  placeholder,
-  type = "text",
-  value,
-  onCommit,
-}: {
-  id: string;
-  label: string;
-  placeholder?: string;
-  type?: "text" | "date";
-  value: string;
-  onCommit: (value: string) => void;
-}) {
-  const [draft, setDraft] = useState(value);
-  const [seen, setSeen] = useState(value);
-  // The address bar can change the value (a link, Clear filters): follow it.
-  if (value !== seen) {
-    setSeen(value);
-    setDraft(value);
-  }
-  return (
-    <div className="space-y-1">
-      <Label htmlFor={id}>{label}</Label>
-      <Input
-        id={id}
-        type={type}
-        value={draft}
-        placeholder={placeholder}
-        autoComplete="off"
-        onChange={(event) => {
-          setDraft(event.target.value);
-        }}
-        onBlur={() => {
-          if (draft !== value) onCommit(draft);
-        }}
-        onKeyDown={(event) => {
-          if (event.key === "Enter") onCommit(draft);
-        }}
-      />
-    </div>
-  );
-}
 
 /** The audit log's own filters, shown in the table's toolbar. */
 export function AuditFilters({
@@ -86,14 +44,16 @@ export function AuditFilters({
       {...extra}
     />
   );
+  const inMore = MORE_IDS.filter((id) => text(id) !== "").length;
+  // `contents` keeps the group for a screen reader without a box of its own,
+  // so the fields sit straight in the table's filter row.
   return (
-    <fieldset className="grid w-full grid-cols-1 gap-s2 sm:grid-cols-2 lg:grid-cols-4">
+    <fieldset className="contents">
       <legend className="sr-only">{t("filters.region")}</legend>
-      <div className="space-y-1">
-        <Label htmlFor="audit-filter-kind">{t("filters.kind")}</Label>
-        <select
+      <Field label={t("filters.kind")} htmlFor="audit-filter-kind">
+        <NativeSelect
           id="audit-filter-kind"
-          className={SELECT}
+          className="lp-select"
           value={text("kind")}
           onChange={(event) => {
             setFilter("kind", event.target.value || undefined);
@@ -105,13 +65,12 @@ export function AuditFilters({
               {t(`filters.kinds.${kind}`)}
             </option>
           ))}
-        </select>
-      </div>
-      <div className="space-y-1">
-        <Label htmlFor="audit-filter-role">{t("filters.role")}</Label>
-        <select
+        </NativeSelect>
+      </Field>
+      <Field label={t("filters.role")} htmlFor="audit-filter-role">
+        <NativeSelect
           id="audit-filter-role"
-          className={SELECT}
+          className="lp-select"
           value={text("role")}
           onChange={(event) => {
             setFilter("role", event.target.value || undefined);
@@ -123,20 +82,32 @@ export function AuditFilters({
               {tc(`roles.${role}`)}
             </option>
           ))}
-        </select>
-      </div>
-      {text_input("actor", t("filters.actor"), {
-        placeholder: t("filters.actorHint"),
-      })}
+        </NativeSelect>
+      </Field>
       {text_input("action", t("filters.action"), {
         placeholder: t("filters.actionHint"),
       })}
-      {text_input("entity", t("filters.entity"), {
-        placeholder: t("filters.entityHint"),
-      })}
-      {text_input("id", t("filters.entityId"))}
-      {text_input("from", t("filters.from"), { type: "date" })}
-      {text_input("to", t("filters.to"), { type: "date" })}
+      <div className="dt-toggles">
+        <ToggleChip
+          checked={filters.refusals === true}
+          onCheckedChange={(checked) => {
+            setFilter("refusals", checked);
+          }}
+        >
+          {t("filters.refusals")}
+        </ToggleChip>
+        <AuditMoreFilters applied={inMore}>
+          {text_input("entity", t("filters.entity"), {
+            placeholder: t("filters.entityHint"),
+          })}
+          {text_input("id", t("filters.entityId"))}
+          {text_input("actor", t("filters.actor"), {
+            placeholder: t("filters.actorHint"),
+          })}
+          {text_input("from", t("filters.from"), { type: "date" })}
+          {text_input("to", t("filters.to"), { type: "date" })}
+        </AuditMoreFilters>
+      </div>
     </fieldset>
   );
 }

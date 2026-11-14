@@ -10,7 +10,7 @@ export default function AuditPage() {
   const { t } = useTranslation("audit");
   const { eventId, openEvent } = useAuditQuery();
   return (
-    <div className="space-y-s4">
+    <div className="space-y-s3">
       <PageHeader
         title={t("title")}
         description={t("description")}
