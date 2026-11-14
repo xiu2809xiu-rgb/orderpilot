@@ -35,7 +35,7 @@
       "cost": "Cost (USD)",
       "latency": "Latency",
       "status": "Status",
-      "trace": "Trace id",
+      "trace": "Trace ID",
       "page": "Page {{page}} of {{pages}}",
       "previous": "Previous page",
       "next": "Next page"
@@ -70,9 +70,9 @@
     },
     "traces": {
       "title": "Recent traces",
-      "description": "The latest requests, by route pattern. Search the trace id in Grafana.",
+      "description": "The latest requests, by route pattern. Search the trace ID in Grafana.",
       "label": "Recent traces",
-      "traceId": "Trace id",
+      "traceId": "Trace ID",
       "route": "Route",
       "duration": "Duration",
       "status": "HTTP status"
