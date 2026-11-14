@@ -186,7 +186,8 @@
     "notFoundTitle": "That order was not found",
     "notFoundBody": "There is no order {{order}} for your role. Go back to the list and pick one.",
     "journey": {
-      "title": "Journey"
+      "title": "Journey",
+      "region": "Journey of the order, nine steps"
     },
     "details": {
       "title": "Order details"

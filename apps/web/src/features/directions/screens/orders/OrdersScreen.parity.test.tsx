@@ -281,6 +281,14 @@ describe("the Orders workspace keeps what the old list gave", () => {
     expect(orderNos(await bodyRows())).toHaveLength(2);
   });
 
+  it("shows what each order is short of as soon as Waiting on stock is on", async () => {
+    stubApi({ specs: [nth(SPECS, 0), draft] });
+    open("/orders?stock=waiting");
+    await bodyRows();
+    expect(screen.getByText("Short 6")).toBeVisible();
+    expect(screen.getByText("I-0190 and 2 more")).toBeVisible();
+  });
+
   it("filters by customer, picked by number from the orders' own customers", async () => {
     stubApi();
     const user = userEvent.setup();
@@ -314,6 +322,23 @@ describe("the Orders workspace keeps what the old list gave", () => {
     for (const name of ["Export", "Print", "Saved views", "Columns"]) {
       expect(screen.getByRole("button", { name })).toBeVisible();
     }
+  });
+
+  it("keeps Export and Print off until the orders have arrived, so neither takes an empty list", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() => new Promise<Response>(() => undefined)),
+    );
+    const view = open();
+    expect(screen.getByRole("button", { name: "Print" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Export" })).toBeDisabled();
+    view.unmount();
+    vi.unstubAllGlobals();
+    stubApi();
+    open();
+    await bodyRows();
+    expect(screen.getByRole("button", { name: "Print" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Export" })).toBeEnabled();
   });
 
   it("names the next step when there are no orders at all, and the filter's way back when none match", async () => {

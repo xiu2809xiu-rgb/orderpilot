@@ -56,6 +56,7 @@ export function OrdersWorkspace({
           prefs={w.table.prefs}
           rows={takeaway}
           ticked={w.selection.selected.length}
+          ready={status === "ready"}
           onClearTicks={w.selection.clear}
           appliedWords={[
             ...(view === "all" ? [] : [t(`views.${view}`)]),

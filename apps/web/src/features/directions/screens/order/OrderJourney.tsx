@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { ScrollRegion } from "@/components/common";
 import { JourneyRail, type RailSize } from "@/components/parts/JourneyRail";
 import type { Journey } from "./journeyModel";
 import { journeyDetails } from "./journeyText";
@@ -8,7 +9,8 @@ import { journeyDetails } from "./journeyText";
  * in words and the line the data supports: who and when for a done step, the
  * wait against the usual time for the current one, the expected day for a
  * later one. The same component is full in the order page and vertical in the
- * side peek.
+ * side peek. The full rail is nine columns wide, so on a phone it scrolls in a
+ * box a keyboard can reach, drawn with no frame of its own.
  */
 export function OrderJourney({
   journey,
@@ -20,7 +22,7 @@ export function OrderJourney({
   late: boolean;
 }) {
   const { t } = useTranslation("directions-orders");
-  return (
+  const rail = (
     <JourneyRail
       flow="sales"
       size={size}
@@ -28,5 +30,14 @@ export function OrderJourney({
       late={late}
       details={journeyDetails(t, journey, size === "full")}
     />
+  );
+  if (size !== "full") return rail;
+  return (
+    <ScrollRegion
+      label={t("order.journey.region")}
+      className="od-rail-scroll rounded-none border-0 bg-transparent"
+    >
+      {rail}
+    </ScrollRegion>
   );
 }
