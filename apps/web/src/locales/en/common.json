@@ -136,18 +136,25 @@
     "notFound": {
       "title": "Page not found",
       "description": "The page you asked for does not exist or has moved.",
-      "action": "Go to home"
+      "action": "Go to home",
+      "addressTitle": "The address you opened",
+      "addressHint": "Check it for a typing slip, or open a place from the panel."
     },
     "forbidden": {
       "title": "You do not have access",
       "description": "Your role does not include this area. If you think it should, ask a system admin.",
-      "action": "Go to home"
+      "action": "Go to home",
+      "sectionTitle": "Your access",
+      "signedInAs": "Signed in as {{name}}, {{role}}.",
+      "notForRole": "This area is not part of the {{role}} role. A system admin can change what a role may open."
     },
     "crash": {
       "title": "Something went wrong",
       "description": "This page hit an error. Quote the trace ID if you ask for help.",
-      "reload": "Reload the page",
-      "home": "Go to home"
+      "reload": "Try again",
+      "home": "Go to home",
+      "sectionTitle": "Reference for support",
+      "reference": "The team can find exactly what happened from this trace ID."
     }
   },
   "settings": {
@@ -168,7 +175,8 @@
     "checksHint": "The readiness checks the API runs before it takes traffic.",
     "checksLoading": "Loading the checks.",
     "checksFailed": "The checks could not be loaded. Quote this reference to support:",
-    "checksNone": "No checks are registered yet."
+    "checksNone": "No checks are registered yet.",
+    "languageCurrent": "Language in use"
   },
   "quickActions": {
     "inbox": "Open my inbox",

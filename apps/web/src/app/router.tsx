@@ -98,38 +98,46 @@ export function buildRoutes(
               element: <AppShell />,
               handle: { crumb: "common:nav.home" },
               children: [
-                { index: true, element: <HomeScreen /> },
                 {
-                  path: "settings",
-                  element: <SettingsPage />,
-                  handle: { crumb: "common:nav.settings" },
-                },
-                {
-                  path: "gallery",
-                  element: <RequireDemo />,
-                  handle: { crumb: "common:nav.gallery" },
+                  // An error in one page is drawn here, in the page region, so
+                  // the panel and the bar stay and a person can go elsewhere.
+                  errorElement: <RouteCrashPage />,
                   children: [
-                    { index: true, element: <GalleryPage /> },
+                    { index: true, element: <HomeScreen /> },
                     {
-                      // The kit sheet: every adapted kit item on one page.
-                      path: "kit",
-                      handle: { crumb: "directions-kit:title" },
-                      element: <KitScreen />,
+                      path: "settings",
+                      element: <SettingsPage />,
+                      handle: { crumb: "common:nav.settings" },
+                    },
+                    {
+                      path: "gallery",
+                      element: <RequireDemo />,
+                      handle: { crumb: "common:nav.gallery" },
+                      children: [
+                        { index: true, element: <GalleryPage /> },
+                        {
+                          // The kit sheet: every adapted kit item on one page.
+                          path: "kit",
+                          handle: { crumb: "directions-kit:title" },
+                          element: <KitScreen />,
+                        },
+                      ],
+                    },
+                    {
+                      // Upload and review runs on demo documents until P-18
+                      // stores uploads, so it is a demo page like the gallery.
+                      path: "upload",
+                      element: <RequireDemo />,
+                      handle: { crumb: "directions-intake:title" },
+                      children: [{ index: true, element: <UploadScreen /> }],
+                    },
+                    ...reachableFeatures(list, withPlanned).map(featureRoute),
+                    {
+                      path: "*",
+                      element: <NotFoundPage />,
+                      handle: { crumb: "common:errors.notFound.title" },
                     },
                   ],
-                },
-                {
-                  // Upload and review runs on demo documents until P-18
-                  // stores uploads, so it is a demo page like the gallery.
-                  path: "upload",
-                  element: <RequireDemo />,
-                  handle: { crumb: "directions-intake:title" },
-                  children: [{ index: true, element: <UploadScreen /> }],
-                },
-                ...reachableFeatures(list, withPlanned).map(featureRoute),
-                {
-                  path: "*",
-                  element: <NotFoundPage />,
                 },
               ],
             },
