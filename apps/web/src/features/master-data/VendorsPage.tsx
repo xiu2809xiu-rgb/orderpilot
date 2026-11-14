@@ -16,7 +16,7 @@ import {
 } from "@/lib/api/generated/endpoints/master-data/master-data";
 import type { MasterDataVendorsParams } from "@/lib/api/generated/model";
 import { readOnlyActions } from "./listActions";
-import { MaskedMoney, MasterDataTabs } from "./pieces";
+import { MaskedMoney } from "./pieces";
 
 const URL_FILTERS = {};
 const SORTABLE = [
@@ -115,7 +115,6 @@ export default function VendorsPage() {
       title={t("vendors.title")}
       description={t("vendors.description")}
       demo="mockBusinessCentral"
-      tabs={<MasterDataTabs />}
       caption={t("vendors.caption")}
       columns={columns}
       rowKey={(row) => row.no}

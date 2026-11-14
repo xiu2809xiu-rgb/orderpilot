@@ -82,8 +82,9 @@
   "table": {
     "region": "{{caption}}, scrollable table",
     "search": "Search",
-    "searchPlaceholder": "Search",
+    "searchPlaceholder": "Type to search",
     "filters": "Filters",
+    "filtersOn": "{{count}} in force",
     "columns": "Columns",
     "columnsTitle": "Show and order columns",
     "columnsReset": "Reset columns",

@@ -1,6 +1,7 @@
 import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { TableFilters } from "./data-table/types";
+import "./data-table/data-table.css";
 
 export interface FilterChip {
   /** The filter's key, removed from `filters` when the chip is cleared. */
@@ -13,25 +14,25 @@ export function FilterChips({
   chips,
   filters,
   onChange,
+  clearAll,
 }: {
   chips: readonly FilterChip[];
   filters: TableFilters;
   onChange: (filters: TableFilters) => void;
+  /** Adds a last item that takes every chip off at once. */
+  clearAll?: { label: string; onClear: () => void };
 }) {
   const { t } = useTranslation("components");
   if (chips.length === 0) return null;
   return (
-    <ul aria-label={t("filterChips.label")} className="flex flex-wrap gap-2">
+    <ul aria-label={t("filterChips.label")} className="dt-applied">
       {chips.map((chip) => (
-        <li
-          key={chip.id}
-          className="inline-flex max-w-full items-center gap-1 rounded-full bg-accent py-0.5 pr-0.5 pl-3 text-sm text-accent-foreground"
-        >
+        <li key={chip.id} className="dt-chip">
           <span>{chip.label}</span>
           <button
             type="button"
+            className="relative pointer-coarse:after:absolute pointer-coarse:after:-inset-2 pointer-coarse:after:content-['']"
             aria-label={t("filterChips.clear", { label: chip.label })}
-            className="relative grid size-7 shrink-0 place-items-center rounded-full hover:bg-background/60 focus-visible:outline-2 focus-visible:outline-ring pointer-coarse:after:absolute pointer-coarse:after:-inset-2 pointer-coarse:after:content-['']"
             onClick={() => {
               const next = Object.fromEntries(
                 Object.entries(filters).filter(([key]) => key !== chip.id),
@@ -43,6 +44,13 @@ export function FilterChips({
           </button>
         </li>
       ))}
+      {clearAll ? (
+        <li>
+          <button type="button" className="dt-clear" onClick={clearAll.onClear}>
+            {clearAll.label}
+          </button>
+        </li>
+      ) : null}
     </ul>
   );
 }

@@ -20,7 +20,6 @@ import {
 import type { MasterDataItemsParams } from "@/lib/api/generated/model";
 import { ITEM_SORTABLE, itemColumns } from "./itemColumns";
 import { readOnlyActions } from "./listActions";
-import { MasterDataTabs } from "./pieces";
 
 const URL_FILTERS = {
   brand: null,
@@ -107,7 +106,6 @@ export default function ItemsPage() {
       title={t("items.title")}
       description={t("items.description")}
       demo="mockBusinessCentral"
-      tabs={<MasterDataTabs />}
       caption={t("items.caption")}
       columns={columns}
       rowKey={(row) => row.no}
