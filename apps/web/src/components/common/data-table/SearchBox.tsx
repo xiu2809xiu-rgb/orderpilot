@@ -1,7 +1,8 @@
 import { Search } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Input } from "@/components/ui/input";
+import { Field } from "./Field";
 
 interface SearchBoxProps {
   value: string;
@@ -19,6 +20,7 @@ export function SearchBox({
   label,
 }: SearchBoxProps) {
   const { t } = useTranslation("components");
+  const id = useId();
   const [draft, setDraft] = useState(value);
   // The last value this box sent up, and the last one it was given. A value
   // that comes back unchanged is our own echo; anything else came from the
@@ -48,30 +50,26 @@ export function SearchBox({
   }, [draft, debounceMs]);
 
   return (
-    <div className="relative w-full max-w-xs">
-      <Search
-        className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
-        aria-hidden="true"
-      />
-      <Input
-        type="search"
-        value={draft}
-        onChange={(event) => {
-          setDraft(event.target.value);
-        }}
-        aria-label={label ?? t("table.search")}
-        placeholder={t("table.searchPlaceholder")}
-        // The slash key finds this field (see app/shell/shortcuts.ts).
-        data-quick-search=""
-        aria-keyshortcuts="/"
-        className="peer pr-8 pl-9 pointer-coarse:h-11"
-      />
-      <kbd
-        aria-hidden="true"
-        className="pointer-events-none absolute top-1/2 right-2 hidden -translate-y-1/2 rounded border px-1.5 font-mono text-xs text-muted-foreground peer-focus:opacity-0 peer-not-placeholder-shown:opacity-0 md:block"
-      >
-        /
-      </kbd>
-    </div>
+    <Field label={label ?? t("table.search")} htmlFor={id}>
+      <div className="dt-search">
+        <Search aria-hidden="true" />
+        <Input
+          id={id}
+          type="search"
+          value={draft}
+          onChange={(event) => {
+            setDraft(event.target.value);
+          }}
+          placeholder={t("table.searchPlaceholder")}
+          // The slash key finds this field (see app/shell/shortcuts.ts).
+          data-quick-search=""
+          aria-keyshortcuts="/"
+          className="dt-control"
+        />
+        <kbd aria-hidden="true" className="hidden md:block">
+          /
+        </kbd>
+      </div>
+    </Field>
   );
 }

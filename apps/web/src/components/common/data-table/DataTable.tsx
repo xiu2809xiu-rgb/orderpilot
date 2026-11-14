@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Table } from "@/components/ui/table";
+import "./data-table.css";
 import { ScrollRegion } from "../ScrollRegion";
 import { PartialNotice } from "../states";
 import { DataTableToolbar } from "./DataTableToolbar";
@@ -66,6 +67,12 @@ export interface DataTableProps<Row> {
   selection?: TableSelection<Row>;
   /** The last cell of every row, such as its row menu. */
   rowActions?: RowActionsColumn<Row>;
+  /**
+   * The card takes the height the page has left and scrolls inside it, as the
+   * Orders workspace does. Only for a page whose own height is the screen's:
+   * without it the card stops at 70% of the window.
+   */
+  fill?: boolean;
 }
 
 /**
@@ -97,13 +104,14 @@ export function DataTable<Row>({
   searchDebounceMs = 300,
   selection,
   rowActions,
+  fill = false,
 }: DataTableProps<Row>) {
   const { t } = useTranslation("components");
   const state = useDataTableState(tableId, columns, query, onQueryChange);
   const { shown, change, sortBy, sortNote, filtered } = state;
 
   return (
-    <div className="space-y-s2">
+    <div className="dt" data-fill={fill ? "" : undefined}>
       {toolbar ? (
         toolbar({ ...state, rows })
       ) : (
@@ -131,7 +139,7 @@ export function DataTable<Row>({
         label={t("table.region", { caption })}
         className="max-h-[min(70dvh,48rem)]"
       >
-        <Table aria-busy={status === "loading"}>
+        <Table className="dt-table" aria-busy={status === "loading"}>
           <caption className="sr-only">{caption}</caption>
           <DataTableHead
             columns={shown}
@@ -168,6 +176,7 @@ export function DataTable<Row>({
         page={query.page}
         pageSize={query.pageSize}
         total={status === "ready" ? total : 0}
+        quiet={status !== "ready"}
         pageSizes={pageSizes}
         onPage={(page) => {
           onQueryChange({ ...query, page });
