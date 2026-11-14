@@ -169,6 +169,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  vi.unstubAllEnvs();
 });
 
 describe("the home screen", () => {
@@ -249,7 +250,7 @@ describe("the home screen", () => {
     expect(screen.getByText("Past the usual time for this step")).toBeVisible();
   });
 
-  it("shows the sales flow with the tracker's counts and the purchase flow with none", async () => {
+  it("shows the sales flow with the tracker's counts and no purchase flow", async () => {
     stubApi();
     home();
     const sales = await screen.findByRole("list", {
@@ -264,7 +265,21 @@ describe("the home screen", () => {
       "aria-current",
       "step",
     );
-    const purchase = screen.getByRole("list", {
+    // Phase 2: nothing about the purchase flow is drawn in a production build.
+    expect(
+      screen.queryByRole("list", { name: "Purchase order journey" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/Purchase orders are not/),
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows a developer the purchase steps without counts, with the reason", async () => {
+    vi.stubEnv("DEV", true);
+    vi.stubEnv("VITE_SHOW_PLANNED", "true");
+    stubApi();
+    home();
+    const purchase = await screen.findByRole("list", {
       name: "Purchase order journey",
     });
     expect(within(purchase).getAllByRole("listitem")).toHaveLength(9);

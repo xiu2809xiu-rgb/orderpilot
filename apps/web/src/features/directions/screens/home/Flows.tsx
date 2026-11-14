@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTrackerFlow } from "@/lib/api/generated/endpoints/tracker/tracker";
 import { PURCHASE_STEP_IDS } from "../../data/estimates";
+import { showPlannedFeatures } from "@/features/registry";
 import { Section } from "@/components/parts/Section";
 import { FlowRow, type FlowCell } from "./FlowRow";
 import { HomeQuery } from "./HomeQuery";
@@ -11,9 +12,11 @@ import { useOrderLinks } from "./homeLinks";
 /**
  * The two flows with the orders at each step. The sales flow reads the
  * tracker's own count for each of its nine steps, and a step opens the orders
- * list at that step. The tracker has no purchase orders, so that row shows the
- * nine steps without counts and says why, rather than inventing any. A role
- * that may not read the tracker has no such section at all.
+ * list at that step. The tracker has no purchase orders (Phase 2), so a
+ * production build draws no purchase row at all, as the old home did; a
+ * developer who turns planned features on sees its nine steps without counts
+ * and the reason, rather than invented ones. A role that may not read the
+ * tracker has no such section at all.
  */
 export function Flows() {
   const { t } = useTranslation("directions-home");
@@ -43,6 +46,7 @@ export function Flows() {
       note: t("flows.orders", { count: step.count }),
     };
   });
+  const withPurchase = showPlannedFeatures();
   const purchase: FlowCell[] = PURCHASE_STEP_IDS.map((id, index) => ({
     id,
     title: tParts(`journey.purchase.${id}`),
@@ -78,17 +82,19 @@ export function Flows() {
               cells={sales}
             />
           </div>
-          <div className="flex flex-col gap-2">
-            <h3 className="fs-14 font-semibold">{t("flows.purchase")}</h3>
-            <FlowRow
-              label={tParts("journey.flows.purchase")}
-              labels={labels}
-              cells={purchase}
-            />
-            <p className="fs-14 text-muted-foreground">
-              {t("flows.purchaseNote")}
-            </p>
-          </div>
+          {withPurchase ? (
+            <div className="flex flex-col gap-2">
+              <h3 className="fs-14 font-semibold">{t("flows.purchase")}</h3>
+              <FlowRow
+                label={tParts("journey.flows.purchase")}
+                labels={labels}
+                cells={purchase}
+              />
+              <p className="fs-14 text-muted-foreground">
+                {t("flows.purchaseNote")}
+              </p>
+            </div>
+          ) : null}
         </div>
       </HomeQuery>
     </Section>
