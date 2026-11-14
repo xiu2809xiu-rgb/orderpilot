@@ -55,4 +55,9 @@ refusalsOnly?: AuditViewerListRefusalsOnly;
  * @maxLength 100
  */
 search?: string;
+/**
+ * @minimum 1
+ * @maximum 9007199254740991
+ */
+around?: number;
 };
