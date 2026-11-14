@@ -11,6 +11,7 @@ import type { WorkflowsHandedToMe200DataItemHandedOver } from './workflowsHanded
 import type { WorkflowsHandedToMe200DataItemKind } from './workflowsHandedToMe200DataItemKind.ts';
 import type { WorkflowsHandedToMe200DataItemPriority } from './workflowsHandedToMe200DataItemPriority.ts';
 import type { WorkflowsHandedToMe200DataItemRef } from './workflowsHandedToMe200DataItemRef.ts';
+import type { WorkflowsHandedToMe200DataItemSpr } from './workflowsHandedToMe200DataItemSpr.ts';
 import type { WorkflowsHandedToMe200DataItemStatus } from './workflowsHandedToMe200DataItemStatus.ts';
 
 export type WorkflowsHandedToMe200DataItem = {
@@ -47,6 +48,7 @@ export type WorkflowsHandedToMe200DataItem = {
   priority?: WorkflowsHandedToMe200DataItemPriority;
   /** @minLength 1 */
   assigneeName?: string;
+  spr?: WorkflowsHandedToMe200DataItemSpr;
   expectedPayment?: WorkflowsHandedToMe200DataItemExpectedPayment;
   handedOver: WorkflowsHandedToMe200DataItemHandedOver;
 };

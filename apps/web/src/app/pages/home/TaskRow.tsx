@@ -100,7 +100,12 @@ export function taskCells(
       </Button>
     ) : (
       <RecordLink
-        to={`/order-tracker/${task.orderNo ?? ""}`}
+        // An SPR opens on its own page, where it is decided; the rest open their order.
+        to={
+          task.ref
+            ? `/workflows/sprs/${task.ref.recordNo}`
+            : `/order-tracker/${task.orderNo ?? ""}`
+        }
         data-task-action
         className={cn(
           buttonVariants({ variant: "outline", size: "sm" }),

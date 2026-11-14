@@ -11,7 +11,7 @@
     "openExceptions": "Open exceptions",
     "overdue": "Overdue",
     "awaitingApproval": "SPRs to approve",
-    "waitingForApproval": "Orders waiting for approval",
+    "waitingForApproval": "Orders waiting on an SPR",
     "awaitingPayment": "Payments to confirm",
     "readyToPick": "Ready to pick",
     "auditEvents": "Audit events",
@@ -27,7 +27,6 @@
     "overdue": "Overdue",
     "actionOn": "{{action}}: {{what}}",
     "failed": "Could not finish the task for {{orderNo}}",
-    "approvedComment": "Approved from the home page.",
     "emptyTitle": "You are up to date",
     "emptyDescription": "Nothing needs you right now. The tracker shows where every order stands.",
     "emptyAction": "Open the tracker",
@@ -43,7 +42,6 @@
     "actions": {
       "REVIEW_FIELDS": "Review",
       "RAISE_SPR": "Raise",
-      "APPROVE_SPR": "Approve",
       "SEND_PI": "Mark sent",
       "CONFIRM_PAYMENT": "Confirm",
       "PACK_ORDER": "Mark packed",
@@ -58,7 +56,6 @@
     "done": {
       "REVIEW_FIELDS": "Reviewed {{orderNo}}",
       "RAISE_SPR": "Raised the SPR for {{orderNo}}",
-      "APPROVE_SPR": "Approved the SPR for {{orderNo}}",
       "SEND_PI": "Marked the PI for {{orderNo}} as sent",
       "CONFIRM_PAYMENT": "Confirmed the payment for {{orderNo}}",
       "PACK_ORDER": "Marked {{orderNo}} as packed",

@@ -1,8 +1,9 @@
 import { History } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { TimelineStep } from "@orderpilot/shared";
-import { EmptyState, RelativeTime, SectionCard } from "@/components/common";
+import { EmptyState, SectionCard } from "@/components/common";
 import { Badge } from "@/components/ui/badge";
+import { formatDayTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 /**
@@ -38,7 +39,8 @@ export function StepChain({ steps }: { steps: readonly TimelineStep[] }) {
               </div>
               <p className="text-sm text-muted-foreground">
                 {step.actor} <span aria-hidden="true">-</span>{" "}
-                <RelativeTime value={step.at} />
+                {/* The date itself: "4 weeks ago" on every step tells nothing apart. */}
+                <time dateTime={step.at}>{formatDayTime(step.at)}</time>
               </p>
               <p className="measure">
                 <span className="text-muted-foreground">

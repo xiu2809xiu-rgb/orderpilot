@@ -7,20 +7,20 @@ import {
 import { mockId } from "./fixtures.js";
 
 /**
- * The approver's own Approval User Setup row: who they escalate to, their
- * limits and their substitute. The numbers are invented for the demo. Area 4
- * replaces this class with the real policy (F-1 and its follow-ups) by
- * providing its own under the `ApprovalPolicy` token; nothing in area 2
- * changes.
+ * The approver's own Approval User Setup row, as Spectra described it on 5 Nov:
+ * any one of three management approvers decides, with no limits set and nobody
+ * standing in, so no escalation either. Area 4 replaces this class with the
+ * real policy (F-1 and its follow-ups) by providing its own under the
+ * `ApprovalPolicy` token; nothing in area 2 changes.
  */
 const APPROVER_SETUP: ApprovalUserSetup = {
   userId: mockId(901),
-  approverId: mockId(902),
-  salesAmountApprovalLimit: "20000.00",
-  purchaseAmountApprovalLimit: "5000.00",
-  unlimitedSalesApproval: false,
-  unlimitedPurchaseApproval: false,
-  substituteUserId: mockId(903),
+  approverId: null,
+  salesAmountApprovalLimit: "0.00",
+  purchaseAmountApprovalLimit: "0.00",
+  unlimitedSalesApproval: true,
+  unlimitedPurchaseApproval: true,
+  substituteUserId: null,
 };
 
 @Injectable()
@@ -31,8 +31,8 @@ export class MockApprovalPolicy extends ApprovalPolicy {
     return Promise.resolve({
       displayName: DEMO_PERSONAS.APPROVER,
       setup: APPROVER_SETUP,
-      substituteName: DEMO_PERSONAS.PRODUCT_MANAGER,
-      escalatesToName: DEMO_PERSONAS.MANAGEMENT,
+      substituteName: null,
+      escalatesToName: null,
     });
   }
 }

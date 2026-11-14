@@ -137,6 +137,8 @@ describe("the area 2 routes", () => {
       expect(body.data.steps.some((step) => step.state === "current")).toBe(
         true,
       );
+      // The order page lists these: the customer PO is always there.
+      expect(body.data.documents.map((d) => d.type)).toContain("CUSTOMER_PO");
     });
 
     it("answers 404 for an order that is not in the data", async () => {
@@ -157,9 +159,8 @@ describe("the area 2 routes", () => {
       const body = sprResponseSchema.parse(res.body);
       expect(body.data.ref).toEqual({ recordNo: SPR, navisionNo: null });
       expect(body.data.fields.some((f) => f.origin === "suggested")).toBe(true);
-      expect(body.data.approver.setup.purchaseAmountApprovalLimit).toBe(
-        "5000.00",
-      );
+      expect(body.data.approver.setup.unlimitedPurchaseApproval).toBe(true);
+      expect(body.data.basis.runRate3m).toMatch(/^\d+(\.\d+)?$/);
     });
 
     it("lets the approver approve or reject with a comment, and moves the order", async () => {

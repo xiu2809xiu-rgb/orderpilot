@@ -7,6 +7,7 @@
  */
 import type { WorkflowsMyReminders200DataItemEscalatedTo } from './workflowsMyReminders200DataItemEscalatedTo.ts';
 import type { WorkflowsMyReminders200DataItemKind } from './workflowsMyReminders200DataItemKind.ts';
+import type { WorkflowsMyReminders200DataItemRef } from './workflowsMyReminders200DataItemRef.ts';
 import type { WorkflowsMyReminders200DataItemStage } from './workflowsMyReminders200DataItemStage.ts';
 import type { WorkflowsMyReminders200DataItemToRole } from './workflowsMyReminders200DataItemToRole.ts';
 
@@ -17,6 +18,8 @@ export type WorkflowsMyReminders200DataItem = {
   stage: WorkflowsMyReminders200DataItemStage;
   /** @pattern ^[A-Za-z0-9-]{1,30}$ */
   orderNo: string;
+  /** @nullable */
+  ref?: WorkflowsMyReminders200DataItemRef;
   /** @minLength 1 */
   message: string;
   toRole: WorkflowsMyReminders200DataItemToRole;

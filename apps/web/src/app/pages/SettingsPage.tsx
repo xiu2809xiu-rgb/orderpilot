@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useThemeStore, type ThemePreference } from "@/lib/theme";
-import { useSessionStore } from "@/stores/session";
+import { hasPermission, useSessionStore } from "@/stores/session";
 import { PageHeader } from "@/components/common/PageHeader";
 import { ServiceChecksCard } from "./ServiceChecksCard";
 
@@ -19,6 +19,22 @@ const THEMES: { value: ThemePreference; icon: LucideIcon }[] = [
   { value: "dark", icon: Moon },
   { value: "system", icon: Monitor },
 ];
+
+/** The person's permissions in words, with the code kept for whoever needs it. */
+function PermissionNames({ permissions }: { permissions: readonly string[] }) {
+  const { t } = useTranslation("governance");
+  return (
+    <ul className="flex flex-wrap gap-2">
+      {permissions.map((permission) => (
+        <li key={permission}>
+          <Badge variant="secondary" title={permission}>
+            {t(`permissions.${permission}`, { defaultValue: permission })}
+          </Badge>
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 export function SettingsPage() {
   const { t } = useTranslation();
@@ -73,25 +89,14 @@ export function SettingsPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">
-              {t("settings.language")}
-            </CardTitle>
-            <p className="text-muted-foreground">
-              {t("settings.languageHint")}
-            </p>
-          </CardHeader>
-          <CardContent>
-            <Badge variant="secondary">{t("settings.languageEnglish")}</Badge>
-          </CardContent>
-        </Card>
-
         <Suspense fallback={null}>
           <AnalyticsSettingsCard />
         </Suspense>
 
-        <ServiceChecksCard />
+        {/* Service names mean nothing without their status, which only an admin may run. */}
+        {hasPermission(session, "settings.manage") ? (
+          <ServiceChecksCard />
+        ) : null}
 
         {session ? (
           <Card>
@@ -116,15 +121,9 @@ export function SettingsPage() {
                     {t("settings.accessNone")}
                   </p>
                 ) : (
-                  <ul className="flex flex-wrap gap-2">
-                    {session.permissions.map((permission) => (
-                      <li key={permission}>
-                        <Badge variant="secondary" className="font-mono">
-                          {permission}
-                        </Badge>
-                      </li>
-                    ))}
-                  </ul>
+                  <Suspense fallback={null}>
+                    <PermissionNames permissions={session.permissions} />
+                  </Suspense>
                 )}
               </div>
             </CardContent>

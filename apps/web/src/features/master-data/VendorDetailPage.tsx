@@ -15,6 +15,7 @@ import { formatDay, formatQuantity } from "@/lib/format";
 import { AvailableFigure, KeyFacts, MaskedMoney, MaskedText } from "./pieces";
 import { BackToList, RecordState } from "./RecordState";
 import { RecordTable, type RecordColumn } from "./RecordTable";
+import { SprNumber } from "./SprNumber";
 
 type BankAccount = VendorDetail["bankAccounts"][number];
 type PurchaseOrder = VendorDetail["openPurchaseOrders"][number];
@@ -79,17 +80,25 @@ function BankAccounts({ vendor }: { vendor: VendorDetail }) {
 
 function VendorRecord({ vendor }: { vendor: VendorDetail }) {
   const { t } = useTranslation("master-data");
+  // Most purchase orders were not raised from an SPR: a column empty on every row says nothing.
+  const fromSprs = vendor.openPurchaseOrders.some((po) => po.sprRecordNo);
   const purchaseColumns: RecordColumn<PurchaseOrder>[] = [
     {
       id: "no",
       header: t("vendor.orders.no"),
       cell: (po) => <span className="font-mono">{po.no}</span>,
     },
-    {
-      id: "spr",
-      header: t("vendor.orders.spr"),
-      cell: (po) => <span className="font-mono">{po.sprRecordNo}</span>,
-    },
+    ...(fromSprs
+      ? [
+          {
+            id: "spr",
+            header: t("vendor.orders.spr"),
+            cell: (po: PurchaseOrder) => (
+              <SprNumber recordNo={po.sprRecordNo} />
+            ),
+          },
+        ]
+      : []),
     {
       id: "orderDate",
       header: t("vendor.orders.orderDate"),
@@ -164,7 +173,8 @@ function VendorRecord({ vendor }: { vendor: VendorDetail }) {
         description={vendor.name}
         meta={<DemoBadge kind="mockBusinessCentral" />}
         actions={
-          <Button asChild>
+          // A way to another list, not this page's action: outlined, as on an item.
+          <Button asChild variant="outline">
             <Link to={`/master-data/items?vendor=${vendor.no}`}>
               <Boxes aria-hidden="true" />
               {t("vendor.seeItems")}
