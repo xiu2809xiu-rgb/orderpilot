@@ -94,8 +94,19 @@ export function OrderPage({ orderNo }: { orderNo: string }) {
     );
   }
   const found = detail.data?.data;
-  if ((timeline.isError && !notInTracker) || (!found && !order)) {
-    const failure = timeline.error ?? detail.error;
+  // An order the Orders API cannot read has no facts, lines or value: a page of
+  // dashes would pass for an order with nothing on it, so it says it failed.
+  const detailFailed =
+    detail.isError &&
+    !(detail.error instanceof ApiError && detail.error.code === "NOT_FOUND");
+  if (
+    (timeline.isError && !notInTracker) ||
+    detailFailed ||
+    (!found && !order)
+  ) {
+    const failure = detailFailed
+      ? detail.error
+      : (timeline.error ?? detail.error);
     const missing = failure instanceof ApiError && failure.code === "NOT_FOUND";
     return (
       <div className="dx-sheet">

@@ -216,6 +216,15 @@ describe("the order page", () => {
     expect(screen.getByRole("link", { name: "Orders" })).toBeVisible();
   });
 
+  it("shows the error with its trace id and a way to retry when the order cannot be read", async () => {
+    stubApi({ orderFails: true });
+    open(PAID);
+    expect(await screen.findByText(/trace-order-500/)).toBeVisible();
+    expect(screen.getByRole("button", { name: "Try again" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "Orders" })).toBeVisible();
+    expect(screen.queryByText("That order was not found")).toBeNull();
+  });
+
   it("has no accessibility violations", async () => {
     stubApi({ tasks: [taskOn("SO-0001", "SEND_PI")] });
     const view = open(PAID, "?tab=checks");

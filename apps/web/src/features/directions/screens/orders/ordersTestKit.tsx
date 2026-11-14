@@ -258,6 +258,8 @@ export interface ApiOptions {
   trackerForbidden?: boolean;
   /** The orders list answers 403, as for a role that may not read orders. */
   ordersForbidden?: boolean;
+  /** One order's page cannot be read: the server answers 500. */
+  orderFails?: boolean;
   tasks?: unknown[];
   specs?: OrderSpec[];
   /** Orders with a document to confirm. */
@@ -369,6 +371,19 @@ export function stubApi(options: ApiOptions = {}): string[] {
           : notFound();
       }
       const one = /\/orders\/(SO-[\w-]+)$/.exec(path);
+      if (one && options.orderFails) {
+        return reply(
+          {
+            error: {
+              code: "INTERNAL_ERROR",
+              message: "x",
+              details: null,
+              traceId: "trace-order-500",
+            },
+          },
+          500,
+        );
+      }
       if (one) {
         const spec = specs.find((s) => s.orderNo === one[1]);
         return spec ? reply({ data: detailOf(spec, masked) }) : notFound();
