@@ -1,8 +1,14 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import { axeViolations } from "@/test/axe";
 import { renderApp } from "@/test/render";
+
+// The home page is a lazy route. Loading it here keeps its first import, which
+// is slow on a busy machine, out of the five seconds a test waits for the page.
+beforeAll(async () => {
+  await import("@/features/directions/screens/home/HomeScreen");
+}, 60_000);
 
 describe("the sign-in page with demo mode on", () => {
   it("offers the nine roles, each with its persona, under the password form", async () => {

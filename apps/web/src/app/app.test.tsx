@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import axe from "axe-core";
 import { lazy, useState } from "react";
 import { createMemoryRouter } from "react-router";
-import { describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import { defineFeature } from "@/features/define";
 import i18n from "@/i18n";
 import { allFeatures } from "@/features/registry";
@@ -22,6 +22,12 @@ const greeting = (firstName: string) =>
 
 const paths = (fetchMock: ReturnType<typeof vi.fn>) =>
   (fetchMock.mock.calls as unknown as [string][]).map(([url]) => url);
+
+// The home page is a lazy route. Loading it here keeps its first import, which
+// is slow on a busy machine, out of the five seconds a test waits for the page.
+beforeAll(async () => {
+  await import("@/features/directions/screens/home/HomeScreen");
+}, 60_000);
 
 describe("signed out", () => {
   it("sends a visitor to the login page and asks the API nothing about a session", async () => {
