@@ -1,5 +1,6 @@
 {
   "title": "Orders",
+  "description": "Sales orders: the samples Spectra gave us and the orders entered here. Nothing is ordered from this list.",
   "menu": {
     "orders": "Orders"
   },
