@@ -20,6 +20,22 @@ const THEMES: { value: ThemePreference; icon: LucideIcon }[] = [
   { value: "system", icon: Monitor },
 ];
 
+/** The person's permissions in words, with the code kept for whoever needs it. */
+function PermissionNames({ permissions }: { permissions: readonly string[] }) {
+  const { t } = useTranslation("governance");
+  return (
+    <ul className="flex flex-wrap gap-2">
+      {permissions.map((permission) => (
+        <li key={permission}>
+          <Badge variant="secondary" title={permission}>
+            {t(`permissions.${permission}`, { defaultValue: permission })}
+          </Badge>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export function SettingsPage() {
   const { t } = useTranslation();
   const session = useSessionStore((state) => state.session);
@@ -73,20 +89,6 @@ export function SettingsPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">
-              {t("settings.language")}
-            </CardTitle>
-            <p className="text-muted-foreground">
-              {t("settings.languageHint")}
-            </p>
-          </CardHeader>
-          <CardContent>
-            <Badge variant="secondary">{t("settings.languageEnglish")}</Badge>
-          </CardContent>
-        </Card>
-
         <Suspense fallback={null}>
           <AnalyticsSettingsCard />
         </Suspense>
@@ -119,15 +121,9 @@ export function SettingsPage() {
                     {t("settings.accessNone")}
                   </p>
                 ) : (
-                  <ul className="flex flex-wrap gap-2">
-                    {session.permissions.map((permission) => (
-                      <li key={permission}>
-                        <Badge variant="secondary" className="font-mono">
-                          {permission}
-                        </Badge>
-                      </li>
-                    ))}
-                  </ul>
+                  <Suspense fallback={null}>
+                    <PermissionNames permissions={session.permissions} />
+                  </Suspense>
                 )}
               </div>
             </CardContent>

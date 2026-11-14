@@ -1,6 +1,9 @@
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+
+const SELECTED = "border-primary bg-accent text-accent-foreground";
 import { useSavedChoice } from "./consentCard";
 import { tracker, useConsent } from "./tracker";
 
@@ -38,7 +41,8 @@ export default function AnalyticsSettingsCard() {
         <div className="flex gap-2">
           <Button
             size="sm"
-            variant={consent === "granted" ? "default" : "outline"}
+            variant="outline"
+            className={cn(consent === "granted" && SELECTED)}
             aria-pressed={consent === "granted"}
             disabled={consent === "blocked"}
             onClick={() => {
@@ -49,7 +53,8 @@ export default function AnalyticsSettingsCard() {
           </Button>
           <Button
             size="sm"
-            variant={consent === "denied" ? "default" : "outline"}
+            variant="outline"
+            className={cn(consent === "denied" && SELECTED)}
             aria-pressed={consent === "denied"}
             onClick={() => {
               tracker.deny();
