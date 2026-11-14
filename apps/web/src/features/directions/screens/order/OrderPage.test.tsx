@@ -176,6 +176,10 @@ describe("the order page", () => {
     expect(
       screen.getAllByText(/prices are for roles that work with pricing/).length,
     ).toBeGreaterThan(2);
+    // The reason is on the page in words too: a tablet has no hover to show it.
+    expect(
+      document.querySelector("[data-main] .od-fact-note")?.textContent,
+    ).toBe("Hidden: prices are for roles that work with pricing");
   });
 
   it("keeps the facts and the lines for a role the tracker refuses, and says why there is no journey", async () => {

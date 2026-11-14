@@ -206,7 +206,8 @@
     "facts": {
       "stage": "Stage",
       "pastDue": "Past due",
-      "prepayment": "{{percent}}% prepayment"
+      "prepayment": "{{percent}}% prepayment",
+      "hidden": "Hidden: {{reason}}"
     },
     "now": {
       "label": "Now",

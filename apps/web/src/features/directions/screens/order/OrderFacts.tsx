@@ -62,6 +62,14 @@ export function OrderFacts({
         )}
         {/* Most customers pay before the goods ship, so the share asked up front
             belongs beside the value. It is a percentage, not a price. */}
+        {detail?.amount.masked && detail.amount.reason ? (
+          // The mask's own reason shows on hover, which a tablet has none of.
+          <span className="od-fact-note fs-12 text-muted-foreground">
+            {t("order.facts.hidden", {
+              reason: t(`mask.${detail.amount.reason}`),
+            })}
+          </span>
+        ) : null}
         {detail ? (
           <span className="od-fact-note fs-12 text-muted-foreground">
             {t("order.facts.prepayment", {
