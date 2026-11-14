@@ -258,7 +258,7 @@ describe("the home screen", () => {
     });
     expect(within(sales).getAllByRole("listitem")).toHaveLength(9);
     const busiest = within(sales).getByRole("link", {
-      name: /Stock checked: 22 in this step/,
+      name: /^Stock checked\s*22 orders$/,
     });
     expect(busiest).toBeVisible();
     expect(within(sales).getAllByRole("listitem")[1]).toHaveAttribute(

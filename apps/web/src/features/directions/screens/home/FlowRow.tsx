@@ -15,8 +15,6 @@ export interface FlowCell {
   count: number | null;
   /** Where the cell leads, or null when it is only a label. */
   href: string | null;
-  /** The sentence a screen reader gets for a link. */
-  linkLabel?: string;
   /** The step with the most orders. */
   busiest: boolean;
   /** Says what the number counts, under the title. */
@@ -50,16 +48,25 @@ export function FlowRow({
         className="min-w-[52rem] gap-2"
       >
         {cells.map((cell, index) => {
+          // A cell is named by its own text, in this order: the step, then
+          // the words "14 orders". An aria-label that says more would leave
+          // out what is on screen, and a person who speaks to the browser
+          // could not name the cell (WCAG 2.5.3). The large figure is drawn
+          // above the step's name and kept out of the name, because the words
+          // after it say the number once already.
           const body = (
             <>
-              {cell.count !== null ? (
-                <span className="numeral fs-28 block text-foreground">
-                  {cell.count}
-                </span>
-              ) : null}
               <StepperTitle className="fs-14 leading-tight">
                 {cell.title}
               </StepperTitle>
+              {cell.count !== null ? (
+                <span
+                  aria-hidden="true"
+                  className="numeral fs-28 order-first block text-foreground"
+                >
+                  {cell.count}
+                </span>
+              ) : null}
               <StepperDescription
                 className={cn("fs-12", cell.count !== null && "sr-only")}
               >
@@ -91,7 +98,6 @@ export function FlowRow({
               {cell.href ? (
                 <Link
                   to={cell.href}
-                  aria-label={cell.linkLabel}
                   className={cn(
                     frame,
                     "transition-colors hover:bg-(--dx-hover-bg) focus-visible:outline-2 focus-visible:outline-ring pointer-coarse:min-h-11",

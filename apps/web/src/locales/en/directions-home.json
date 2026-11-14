@@ -93,7 +93,6 @@
     "stepNo": "Step {{n}}",
     "orders_one": "{{count}} order",
     "orders_other": "{{count}} orders",
-    "opens": "{{step}}: {{count}} in this step. Open them in Orders.",
     "purchaseNote": "Purchase orders are not in the tracker, so these steps show no counts."
   },
   "shortcuts": {

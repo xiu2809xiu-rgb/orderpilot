@@ -41,7 +41,6 @@ export function Flows() {
       title,
       count: step.count,
       href: links.step(step.id, step.statuses),
-      linkLabel: t("flows.opens", { step: title, count: step.count }),
       busiest: step.id === busiest?.id,
       note: t("flows.orders", { count: step.count }),
     };
