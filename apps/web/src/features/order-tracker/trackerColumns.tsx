@@ -37,7 +37,7 @@ export function trackerColumns(
         <span className="inline-flex items-center gap-1.5">
           <RecordLink
             to={`/order-tracker/${row.orderNo}`}
-            className="-my-0.5 inline-block py-0.5 font-mono font-medium text-primary underline-offset-4 hover:underline"
+            className="-my-0.5 inline-block py-0.5 underline-offset-4 hover:underline"
           >
             {row.orderNo}
           </RecordLink>
@@ -63,7 +63,7 @@ export function trackerColumns(
       cell: (row) => (
         <span>
           {row.customerName}{" "}
-          <span className="font-mono text-xs text-muted-foreground">
+          <span className="text-xs text-muted-foreground">
             {row.customerNo}
           </span>
         </span>
@@ -75,7 +75,7 @@ export function trackerColumns(
       id: "externalDocumentNo",
       header: t("list.columns.externalDocumentNo"),
       cell: (row) => (
-        <span className="font-mono">{row.externalDocumentNo}</span>
+        <span className="tabular-nums">{row.externalDocumentNo}</span>
       ),
       exportValue: (row) => row.externalDocumentNo,
       defaultHidden: true,

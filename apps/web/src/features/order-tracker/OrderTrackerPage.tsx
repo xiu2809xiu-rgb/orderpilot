@@ -65,26 +65,28 @@ export default function OrderTrackerPage() {
         total={tracker.data?.meta.total}
       />
       <LifecycleStageTabs value={stageTab} onSelectStatus={onSelectStatus} />
-      <FilterChips
-        chips={trackerChips(query.filters, t)}
-        filters={query.filters}
-        onChange={(filters) => {
-          // The status chip only ever shows a narrowed sub-status (never the
-          // whole stage): clearing it resets to the stage's whole group, not
-          // to no status at all, since the stage tab itself stays open.
-          const next = { ...filters };
-          if (
-            typeof query.filters.status === "string" &&
-            typeof next.status !== "string" &&
-            stageTab !== "all"
-          ) {
-            next.status = groupStatusOf(stageTab);
-          }
-          setQuery({ ...query, page: 1, filters: next });
-        }}
-      />
       <DataTable
         tableId="order-tracker"
+        applied={
+          <FilterChips
+            chips={trackerChips(query.filters, t)}
+            filters={query.filters}
+            onChange={(filters) => {
+              // The status chip only ever shows a narrowed sub-status (never the
+              // whole stage): clearing it resets to the stage's whole group, not
+              // to no status at all, since the stage tab itself stays open.
+              const next = { ...filters };
+              if (
+                typeof query.filters.status === "string" &&
+                typeof next.status !== "string" &&
+                stageTab !== "all"
+              ) {
+                next.status = groupStatusOf(stageTab);
+              }
+              setQuery({ ...query, page: 1, filters: next });
+            }}
+          />
+        }
         caption={t("list.caption")}
         columns={columns}
         rows={tracker.data?.data ?? []}
