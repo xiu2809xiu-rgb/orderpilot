@@ -1,6 +1,7 @@
 import { Lock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { ScrollRegion } from "@/components/common";
+import { NativeSelect } from "@/components/common/data-table/Field";
 import { Switch } from "@/components/ui/switch";
 import {
   Table,
@@ -16,8 +17,14 @@ type Role = MatrixRead200Data["roles"][number]["role"];
 type Permission = MatrixRead200Data["permissions"][number];
 type Scope = MatrixRead200Data["roles"][number]["dataScope"];
 
+// The solid background of a pinned cell comes from the shared .dt-table rules,
+// so what scrolls under the first column never shows through.
 const ROW_HEAD =
-  "sticky left-0 z-10 w-56 min-w-56 bg-card font-normal whitespace-normal";
+  "sticky left-0 z-10 w-56 min-w-56 font-normal whitespace-normal";
+// A touch screen gets a 44 px target around the 36 by 20 switch, drawn by an
+// invisible layer so the switch itself keeps its size.
+const SWITCH_REACH =
+  "relative pointer-coarse:after:absolute pointer-coarse:after:-inset-x-1 pointer-coarse:after:-inset-y-3 pointer-coarse:after:content-['']";
 const SCOPES: readonly Scope[] = ["all", "brands", "own"];
 
 interface MatrixTableProps {
@@ -44,10 +51,10 @@ export function MatrixTable({
     <div className="space-y-s1">
       <p className="text-xs text-muted-foreground">{t("matrix.scrollHint")}</p>
       <ScrollRegion label={t("matrix.tableLabel")}>
-        <Table aria-label={t("matrix.tableLabel")}>
+        <Table className="dt-table" aria-label={t("matrix.tableLabel")}>
           <TableHeader>
             <TableRow>
-              <TableHead scope="col" className="sticky left-0 z-10 bg-card">
+              <TableHead scope="col" className="sticky left-0 z-10">
                 {t("matrix.permission")}
               </TableHead>
               {matrix.roles.map(({ role }) => (
@@ -78,12 +85,16 @@ export function MatrixTable({
                     role: tc(`roles.${access.role}`),
                   });
                   return (
-                    <TableCell key={access.role} className="text-center">
+                    <TableCell
+                      key={access.role}
+                      className="text-center pointer-coarse:h-11"
+                    >
                       <span className="inline-flex items-center gap-1">
                         <Switch
                           checked={granted}
                           disabled={!canManage || busy || lock !== undefined}
                           aria-label={name}
+                          className={SWITCH_REACH}
                           onCheckedChange={(next) => {
                             onToggle(access.role, permission, next);
                           }}
@@ -118,8 +129,9 @@ export function MatrixTable({
                 </TableHead>
                 {matrix.roles.map(({ role, dataScope }) => (
                   <TableCell key={role} className="text-center">
-                    <select
-                      className="h-8 rounded-md border border-input bg-background px-2 text-sm disabled:opacity-50"
+                    <NativeSelect
+                      compact
+                      className="has-disabled:opacity-50"
                       value={dataScope}
                       disabled={!canManage || busy}
                       aria-label={`${t("matrix.dataScope")}: ${tc(`roles.${role}`)}`}
@@ -132,7 +144,7 @@ export function MatrixTable({
                           {t(`matrix.scopes.${scope}`)}
                         </option>
                       ))}
-                    </select>
+                    </NativeSelect>
                   </TableCell>
                 ))}
               </TableRow>

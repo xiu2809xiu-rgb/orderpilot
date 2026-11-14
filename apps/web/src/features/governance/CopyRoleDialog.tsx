@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { NativeSelect } from "@/components/common/data-table/Field";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -20,9 +21,6 @@ interface CopyRoleDialogProps {
   busy: boolean;
   onCopy: (body: MatrixCopyBody) => Promise<unknown>;
 }
-
-const SELECT =
-  "h-9 w-full rounded-md border border-input bg-background px-2 text-sm";
 
 /**
  * Copies one role's permissions and data scope onto another. A copy replaces
@@ -119,9 +117,9 @@ export function CopyRoleDialog({ roles, busy, onCopy }: CopyRoleDialogProps) {
                   <Label htmlFor={`copy-${key}`}>
                     {t(`matrix.copy.${key}`)}
                   </Label>
-                  <select
+                  <NativeSelect
                     id={`copy-${key}`}
-                    className={SELECT}
+                    className="w-full"
                     value={value}
                     onChange={(event) => {
                       set(event.target.value as Role);
@@ -132,7 +130,7 @@ export function CopyRoleDialog({ roles, busy, onCopy }: CopyRoleDialogProps) {
                         {tc(`roles.${role}`)}
                       </option>
                     ))}
-                  </select>
+                  </NativeSelect>
                 </div>
               ))}
             </div>

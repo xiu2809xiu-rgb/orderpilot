@@ -87,7 +87,7 @@ const page = (rows: AuditViewerList200DataItem[], total = rows.length) => ({
 
 describe("AuditPage", () => {
   beforeAll(async () => {
-    await i18n.loadNamespaces(["audit", "governance"]);
+    await i18n.loadNamespaces(["audit", "governance", "list-page"]);
   });
   beforeEach(() => {
     signIn("AUDITOR");
@@ -134,6 +134,31 @@ describe("AuditPage", () => {
     await user.click(screen.getByRole("switch", { name: "Refusals only" }));
     await waitFor(() => {
       expect(seen.at(-1)?.searchParams.get("refusalsOnly")).toBe("true");
+    });
+  });
+
+  it("keeps the rarer filters behind More filters and counts the ones in force", async () => {
+    const seen: URL[] = [];
+    server.use(
+      getAuditViewerListMockHandler((info) => {
+        seen.push(new URL(info.request.url));
+        return page([event()]);
+      }),
+    );
+    const user = userEvent.setup();
+    renderAt("/audit?entity=User&id=u-1");
+    await screen.findByText("Farah Finance");
+    expect(screen.getByLabelText("Action starts with")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Record type")).toBeNull();
+    const more = screen.getByRole("button", { name: /More filters/ });
+    expect(within(more).getByLabelText("2 applied")).toBeInTheDocument();
+    await user.click(more);
+    const type = await screen.findByLabelText("Record type");
+    expect(type).toHaveValue("User");
+    await user.clear(type);
+    await user.type(type, "Order{Enter}");
+    await waitFor(() => {
+      expect(seen.at(-1)?.searchParams.get("entityType")).toBe("Order");
     });
   });
 

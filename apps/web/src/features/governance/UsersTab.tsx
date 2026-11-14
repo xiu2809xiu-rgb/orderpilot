@@ -99,7 +99,7 @@ export function UsersTab() {
             label={t("users.tableLabel")}
             className="rounded-none border-0 bg-transparent"
           >
-            <Table aria-label={t("users.tableLabel")}>
+            <Table className="dt-table" aria-label={t("users.tableLabel")}>
               <TableHeader>
                 <TableRow>
                   <TableHead>{t("users.name")}</TableHead>
@@ -135,7 +135,7 @@ export function UsersTab() {
                             variant="outline"
                             size="xs"
                             aria-disabled={change.isPending}
-                            className="aria-disabled:pointer-events-none aria-disabled:opacity-50"
+                            className="pointer-coarse:h-11 aria-disabled:pointer-events-none aria-disabled:opacity-50"
                             aria-label={t(
                               user.disabled
                                 ? "users.enableFor"

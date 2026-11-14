@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { FilterChips, type FilterChip } from "@/components/common";
+import { FilterPanel } from "@/components/common/data-table/FilterPanel";
 import { SearchBox } from "@/components/common/data-table/SearchBox";
 import { FilterSelect } from "@/components/list-page/FilterSelect";
 import type { MatrixRead200Data } from "@/lib/api/generated/model";
@@ -57,7 +58,7 @@ export function MatrixFilterBar({
 
   return (
     <div className="space-y-s1">
-      <div className="flex flex-wrap items-center gap-s1">
+      <div className="dt-filters">
         <SearchBox
           value={filters.search}
           onSearch={(search) => {
@@ -66,30 +67,32 @@ export function MatrixFilterBar({
           debounceMs={SEARCH_PAUSE_MS}
           label={t("matrix.filter.search")}
         />
-        <FilterSelect
-          label={t("matrix.filter.role")}
-          allLabel={t("matrix.filter.allRoles")}
-          value={filters.role}
-          options={matrix.roles.map(({ role }) => ({
-            value: role,
-            label: tc(`roles.${role}`),
-          }))}
-          onChange={(role) => {
-            onChange({ ...filters, role: role ?? "" });
-          }}
-        />
-        <FilterSelect
-          label={t("matrix.filter.group")}
-          allLabel={t("matrix.filter.allGroups")}
-          value={filters.group}
-          options={groupsIn(matrix.permissions).map((group) => ({
-            value: group,
-            label: t(`matrix.groups.${group}`),
-          }))}
-          onChange={(group) => {
-            onChange({ ...filters, group: group ?? "" });
-          }}
-        />
+        <FilterPanel active={(filters.role ? 1 : 0) + (filters.group ? 1 : 0)}>
+          <FilterSelect
+            label={t("matrix.filter.role")}
+            allLabel={t("matrix.filter.allRoles")}
+            value={filters.role}
+            options={matrix.roles.map(({ role }) => ({
+              value: role,
+              label: tc(`roles.${role}`),
+            }))}
+            onChange={(role) => {
+              onChange({ ...filters, role: role ?? "" });
+            }}
+          />
+          <FilterSelect
+            label={t("matrix.filter.group")}
+            allLabel={t("matrix.filter.allGroups")}
+            value={filters.group}
+            options={groupsIn(matrix.permissions).map((group) => ({
+              value: group,
+              label: t(`matrix.groups.${group}`),
+            }))}
+            onChange={(group) => {
+              onChange({ ...filters, group: group ?? "" });
+            }}
+          />
+        </FilterPanel>
       </div>
       <FilterChips
         chips={chips}

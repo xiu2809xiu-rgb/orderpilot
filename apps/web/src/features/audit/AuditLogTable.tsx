@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { DataTable, SectionCard } from "@/components/common";
+import { DataTable } from "@/components/common";
 import { ApiError } from "@/lib/api/errors";
 import { useAuditViewerList } from "@/lib/api/generated/endpoints/audit/audit";
 import { AuditFilters } from "./AuditFilters";
@@ -31,35 +31,32 @@ export function AuditLogTable() {
           : "ready";
 
   return (
-    <SectionCard title={t("table.caption")}>
-      <div className="space-y-s2">
-        {problem ? (
-          <p role="alert" className="text-sm text-destructive">
-            {t(`filters.problems.${problem}`)}
-          </p>
-        ) : null}
-        <DataTable
-          tableId="audit-log"
-          caption={t("table.caption")}
-          columns={columns}
-          rows={problem ? [] : (list.data?.data ?? [])}
-          total={problem ? 0 : (list.data?.meta.total ?? 0)}
-          query={query}
-          onQueryChange={setQuery}
-          rowKey={(row) => row.id}
-          status={status}
-          error={list.error}
-          onRetry={() => void list.refetch()}
-          filterSlot={({ filters, setFilter }) => (
-            <AuditFilters filters={filters} setFilter={setFilter} />
-          )}
-          toggleFilters={[{ id: "refusals", label: t("filters.refusals") }]}
-          empty={{
-            title: t("table.emptyTitle"),
-            description: t("table.emptyDescription"),
-          }}
-        />
-      </div>
-    </SectionCard>
+    <div className="space-y-s2">
+      {problem ? (
+        <p role="alert" className="text-sm text-destructive">
+          {t(`filters.problems.${problem}`)}
+        </p>
+      ) : null}
+      <DataTable
+        tableId="audit-log"
+        caption={t("table.caption")}
+        columns={columns}
+        rows={problem ? [] : (list.data?.data ?? [])}
+        total={problem ? 0 : (list.data?.meta.total ?? 0)}
+        query={query}
+        onQueryChange={setQuery}
+        rowKey={(row) => row.id}
+        status={status}
+        error={list.error}
+        onRetry={() => void list.refetch()}
+        filterSlot={({ filters, setFilter }) => (
+          <AuditFilters filters={filters} setFilter={setFilter} />
+        )}
+        empty={{
+          title: t("table.emptyTitle"),
+          description: t("table.emptyDescription"),
+        }}
+      />
+    </div>
   );
 }
