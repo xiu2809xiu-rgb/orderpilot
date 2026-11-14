@@ -28,7 +28,7 @@ export default function InsightsPage() {
   const set = kpis.data?.data;
 
   return (
-    <div className="space-y-s4">
+    <div className="dx-sheet flex flex-col gap-s3 [&>header]:mb-0">
       <PageHeader
         title={t("title")}
         description={t("description")}
@@ -58,8 +58,10 @@ export default function InsightsPage() {
         />
       ) : (
         <>
-          <p className="measure text-muted-foreground">{set.note}</p>
           <KpiTiles measures={set.measures} />
+          <p className="fs-14 measure text-muted-foreground">
+            {t("kpi.lab", { note: set.note })}
+          </p>
           <SectionCard
             title={t("kpi.chartTitle")}
             description={t("kpi.chartDescription")}
@@ -67,6 +69,7 @@ export default function InsightsPage() {
               <Button
                 variant="outline"
                 size="sm"
+                className="pointer-coarse:h-11"
                 aria-pressed={asTable}
                 onClick={() => {
                   setAsTable((on) => !on);

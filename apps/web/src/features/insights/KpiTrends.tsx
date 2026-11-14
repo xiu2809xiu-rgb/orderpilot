@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
+import { GradientText } from "@/components/kit/GradientText";
 import { DemoBadge, NumberTicker, SectionCard } from "@/components/common";
 import { useInsightsKpis } from "@/lib/api/generated/endpoints/insights/insights";
 import { QueryBoundary } from "@/features/workflows/QueryBoundary";
@@ -33,12 +34,14 @@ export default function KpiTrends() {
           {measures.map((kpi) => (
             <li
               key={kpi.id}
-              className="min-w-0 space-y-1 rounded-lg border p-s2"
+              className="min-w-0 space-y-1 rounded-xl border border-border bg-(--dx-card-work-bg) p-s2"
             >
               <h3 className="text-sm font-medium">{kpi.label}</h3>
               <p className="flex flex-wrap items-baseline gap-x-1.5">
                 <span className="text-2xl font-semibold tracking-tight tabular-nums">
-                  <NumberTicker value={kpi.withOrderPilot} />
+                  <GradientText>
+                    <NumberTicker value={kpi.withOrderPilot} />
+                  </GradientText>
                 </span>
                 <span className="text-xs text-muted-foreground">
                   {kpi.unit}
