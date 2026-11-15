@@ -215,6 +215,9 @@ test.describe("The Orders workspace", () => {
   test("no cell of the list is wider than its column, at a desktop and a tablet width", async ({
     page,
   }) => {
+    // Signed in first, so nothing that can fail stands between entering the
+    // draft and the block that voids it.
+    await signInAs(page, "SUPPORT");
     // An order entered here is numbered by its date, the longest number the
     // list shows, and carries its entry chip; this one is worth six figures
     // (USD 171,400.00), wider than any sample. Enter it, so the list has it.
@@ -230,7 +233,6 @@ test.describe("The Orders workspace", () => {
     } satisfies CreateSalesOrderBody);
     expect(created.status, "Support enters a draft").toBe(201);
     const draft = salesOrderResponseSchema.parse(created.body).data;
-    await signInAs(page, "SUPPORT");
     try {
       for (const [width, height] of [
         [1440, 900],
@@ -273,7 +275,11 @@ test.describe("The Orders workspace", () => {
           reason: "E2E clean-up",
         } satisfies VoidSalesOrderBody,
       );
-      expect(voided.status, "the draft is voided after the check").toBe(200);
+      // Soft, so a failed clean-up is reported beside the check's own failure
+      // rather than in place of it.
+      expect
+        .soft(voided.status, "the draft is voided after the check")
+        .toBe(200);
     }
   });
 
@@ -288,7 +294,7 @@ test.describe("The Orders workspace", () => {
 test.describe("The Orders workspace on a touch screen", () => {
   test.use({ hasTouch: true, viewport: { width: 820, height: 1180 } });
 
-  test("each checkbox is a 44 px target, and the pinned order column covers none of the customer column", async ({
+  test("each checkbox and row menu is a whole 44 px target, and the pinned order column covers none of the customer column", async ({
     page,
   }) => {
     await signInAs(page, "SUPPORT");
@@ -296,18 +302,47 @@ test.describe("The Orders workspace on a touch screen", () => {
     await expect(
       page.getByRole("link", { name: SAMPLE_LINK }).first(),
     ).toBeVisible();
-    const [select, order, customer] = await page.evaluate(() =>
-      [...document.querySelectorAll(".od-table tbody tr:first-child td")]
-        .slice(0, 3)
-        .map((cell) => {
-          const box = cell.getBoundingClientRect();
-          return { left: box.left, right: box.right, width: box.width };
-        }),
-    );
-    if (!select || !order || !customer) {
-      throw new Error("The first row has fewer than three cells.");
+    const found = await page.evaluate(() => {
+      const box = (element: Element | null | undefined) => {
+        if (!element) return null;
+        const rect = element.getBoundingClientRect();
+        return { left: rect.left, right: rect.right, width: rect.width };
+      };
+      const cells = [
+        ...document.querySelectorAll(".od-table tbody tr:first-child td"),
+      ];
+      const first = cells[0];
+      const last = cells[cells.length - 1];
+      return {
+        select: box(first),
+        checkbox: box(first?.querySelector("button")),
+        order: box(cells[1]),
+        customer: box(cells[2]),
+        actions: box(last),
+        menu: box(last?.querySelector("button")),
+        // A cell clips what does not fit, so a button cut short shows here.
+        clipped: [...document.querySelectorAll(".od-table tbody td")].filter(
+          (cell) => cell.scrollWidth > cell.clientWidth,
+        ).length,
+      };
+    });
+    const { select, checkbox, order, customer, actions, menu } = found;
+    if (!select || !checkbox || !order || !customer || !actions || !menu) {
+      throw new Error("The first row is missing a cell or a button.");
     }
-    expect(select.width, "the checkbox cell").toBeGreaterThanOrEqual(44);
+    for (const [name, button, cell] of [
+      ["checkbox", checkbox, select],
+      ["row menu", menu, actions],
+    ] as const) {
+      expect(button.width, `the ${name} button`).toBeGreaterThanOrEqual(44);
+      expect(button.left, `the ${name} starts in its cell`).toBeGreaterThan(
+        cell.left - 0.5,
+      );
+      expect(button.right, `the ${name} ends in its cell`).toBeLessThan(
+        cell.right + 0.5,
+      );
+    }
+    expect(found.clipped, "cells that clip what they hold").toBe(0);
     expect(
       order.right,
       "the pinned order cell ends where the customer cell starts",

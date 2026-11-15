@@ -328,23 +328,35 @@
   font-size: var(--type-14);
 }
 
-/* The checkbox and the row menu are 32 px buttons: they need no more than 4 px each side. */
-.od-table td:first-child,
-.od-table th:first-child,
-.od-table td:last-child,
-.od-table th:last-child {
+/* The list's checkbox and row menu are 32 px buttons: they need no more than
+   4 px each side. On a touch screen they are 44 px buttons in 44 px columns,
+   so they take no padding, or the cell would clip them. */
+.od-scroll .od-table td:first-child,
+.od-scroll .od-table th:first-child,
+.od-scroll .od-table td:last-child,
+.od-scroll .od-table th:last-child {
   padding-inline: 0.25rem;
+}
+
+@media (pointer: coarse) {
+  .od-scroll .od-table td:first-child,
+  .od-scroll .od-table th:first-child,
+  .od-scroll .od-table td:last-child,
+  .od-scroll .od-table th:last-child {
+    padding-inline: 0;
+  }
 }
 
 .od-table td {
   overflow: hidden;
 }
 
-/* The cells keep one line; a role name may take two, as the customer cell does,
-   and an amount too wide for its column puts its currency on the line above
-   rather than lose its last figures. */
+/* The list's cells keep one line; a role name may take two, as the customer
+   cell does, and an amount too wide for its fixed column puts its currency on
+   the line above rather than lose its last figures. The order page's lines
+   table sizes its columns to their content and keeps each amount whole. */
 .od-held,
-.od-table .od-amount {
+.od-scroll .od-amount {
   white-space: normal;
 }
 
@@ -870,6 +882,12 @@
   padding-inline: 0.75rem;
 }
 
+/* An amount keeps its currency on its own line: the lines table scrolls
+   sideways in its box before it breaks a money figure in two. */
+.od-lines .od-amount {
+  white-space: nowrap;
+}
+
 .od-lines .od-customer {
   max-width: 32rem;
 }
@@ -930,7 +948,9 @@
   gap: 2px;
 }
 
-.od-docs-cell [data-slot="badge"]:not(:only-child) {
+/* Two chips stack in the 40 px row, so both are small. The second sits in a
+   span that carries its tooltip, so the rule asks the cell, not the chip. */
+.od-docs-cell:has(> :nth-child(2)) [data-slot="badge"] {
   height: 1.125rem;
   font-size: var(--type-12);
   line-height: 1;

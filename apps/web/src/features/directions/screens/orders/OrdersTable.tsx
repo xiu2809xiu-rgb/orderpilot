@@ -47,16 +47,19 @@ const WIDTH: Readonly<Record<string, number>> = {
 };
 
 /**
- * A touch screen keeps a 44 px checkbox column, so each box stays a 44 px
- * target, and orders.css pins the order column 44 px from the edge to match.
- * The column must be that wide too, or the pinned order cell slides over the
- * customer cell. The customer column gives up the 12 px, so the default
- * columns still fit 1440 px.
+ * On a touch screen the checkbox and the row menu are 44 px buttons, and
+ * orders.css drops their cells' padding and pins the order column 44 px from
+ * the edge to match. Their columns must be that wide too, or the cells clip
+ * the buttons and the pinned order cell slides over the customer cell; the
+ * row menu's column also holds its share of the 1 px border before it. The
+ * customer column gives up the difference, so the default columns still fit
+ * 1440 px.
  */
 const TOUCH = "(pointer: coarse)";
 const TOUCH_WIDTH: Readonly<Record<string, number>> = {
   select: 44,
-  customerName: 122,
+  customerName: 119,
+  actions: 45,
 };
 
 /**
