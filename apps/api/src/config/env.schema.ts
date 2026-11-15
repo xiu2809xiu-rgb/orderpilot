@@ -167,6 +167,11 @@ export const envSchema = z
     // secret: rotating that must not make every vendor look changed. Without
     // it a comparison fails closed.
     BANK_FINGERPRINT_KEY: z.string().min(32).optional(),
+
+    // The approver group's approval limits are switchable, with none set,
+    // until Spectra confirms them (ADR 0049, ADR 0054). Only "on" turns them
+    // on; any other value is refused, so a typo cannot switch them by surprise.
+    APPROVAL_LIMITS: z.enum(["off", "on"]).default("off"),
   })
   .superRefine((env, ctx) => {
     if (env.APP_ENV !== "local" && !env.COOKIE_SECURE) {
