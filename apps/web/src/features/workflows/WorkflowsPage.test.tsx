@@ -263,6 +263,8 @@ describe("the task inbox", () => {
     const action = await screen.findByRole("link", { name: /Open order/ });
     expect(action.className).toContain("min-h-14");
     expect(action.className).toContain("w-full");
+    // Bigger, not louder: the page keeps its one primary action for itself.
+    expect(action).not.toHaveClass("bg-primary");
   });
 
   it("says nothing is overdue and offers all tasks again", async () => {
@@ -275,7 +277,7 @@ describe("the task inbox", () => {
     );
     open("APPROVER");
     await screen.findByText("Add the air waybill");
-    fireEvent.click(screen.getByRole("button", { name: "Overdue only" }));
+    fireEvent.click(screen.getByRole("switch", { name: "Overdue only" }));
     expect(await screen.findByText("No tasks waiting")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Show all tasks" }));
     expect(await screen.findByText("Add the air waybill")).toBeInTheDocument();

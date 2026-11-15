@@ -1,0 +1,111 @@
+/* The states of a list and of a page: nothing here, could not load, not for
+   your role. One layout so each reads the same wherever it appears: a chip
+   with the icon, the title, a line of why, and the next action. The dots frame
+   the words and leave the middle clear. Repeats what components/parts draws
+   for an empty list (EmptyState). */
+.st-panel {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  overflow: hidden;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  border-radius: var(--radius-card);
+}
+
+.st-panel[data-variant="page"] {
+  max-width: 28rem;
+  margin-inline: auto;
+  align-items: flex-start;
+  padding-block: var(--space-6);
+  text-align: left;
+  overflow: visible;
+}
+
+.st-chip {
+  display: grid;
+  flex-shrink: 0;
+  width: 3rem;
+  height: 3rem;
+  place-items: center;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  background: var(--card);
+  color: var(--ring);
+}
+
+.st-chip[data-tone="danger"] {
+  color: var(--destructive);
+}
+
+.st-title {
+  font-size: var(--type-16);
+  line-height: 1.5rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.st-panel[data-variant="page"] .st-title {
+  font-size: var(--type-28);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.st-text {
+  max-width: 65ch;
+  font-size: var(--type-14);
+  line-height: 1.25rem;
+  color: var(--muted-foreground);
+}
+
+.st-trace {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  font-size: var(--type-12);
+  color: var(--muted-foreground);
+}
+
+.st-panel[data-variant="page"] .st-trace {
+  justify-content: flex-start;
+}
+
+.st-trace code {
+  padding: 0.125rem 0.375rem;
+  border-radius: var(--radius-control);
+  background: var(--muted);
+  color: var(--foreground);
+  font-family: var(--font-mono);
+}
+
+.st-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.st-panel[data-variant="page"] .st-actions {
+  justify-content: flex-start;
+  padding-top: 0.5rem;
+}
+
+/* Some data arrived and some did not: a quiet strip above the list, not a state that replaces it. */
+.st-partial {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--warning-surface);
+  color: var(--warning);
+  font-size: var(--type-14);
+}

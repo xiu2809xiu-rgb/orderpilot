@@ -122,17 +122,18 @@ export interface KeyFact {
   wrap?: boolean;
 }
 
-/** The facts under a record's header, one quiet panel rather than a row of boxes. */
+/** The facts under a record's header, on one card, label over value as on the order page. */
 export function KeyFacts({ facts }: { facts: readonly KeyFact[] }) {
   return (
-    <dl className="grid grid-cols-2 gap-x-s3 gap-y-s2 rounded-xl border bg-card p-s2 md:grid-cols-3 xl:grid-cols-4">
+    <dl className="rec-facts dx-card">
       {facts.map((fact) => (
         <div
           key={fact.id}
-          className={cn("min-w-0 space-y-0.5", fact.wrap && "col-span-2")}
+          className="rec-fact"
+          data-wide={fact.wrap === true ? "" : undefined}
         >
-          <dt className="text-xs text-muted-foreground">{fact.label}</dt>
-          <dd className={cn("text-sm", fact.wrap ? "break-words" : "truncate")}>
+          <dt>{fact.label}</dt>
+          <dd className={fact.wrap ? "break-words" : "truncate"}>
             {fact.value}
           </dd>
         </div>

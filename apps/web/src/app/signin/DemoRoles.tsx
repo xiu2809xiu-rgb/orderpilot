@@ -4,6 +4,7 @@ import {
   BadgeCheck,
   ChartNoAxesCombined,
   Headset,
+  LoaderCircle,
   Package,
   ScrollText,
   Settings2,
@@ -14,7 +15,7 @@ import {
 import { Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import { DemoBadge } from "@/components/common/DemoBadge";
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const ICONS: Record<Role, LucideIcon> = {
   SYSTEM_ADMIN: Settings2,
@@ -32,7 +33,10 @@ interface DemoRolesProps {
   roles: AuthOptions["demoRoles"];
   /** Heading id, so the section can name itself. */
   headingId: string;
+  /** True while any sign-in is under way: every button waits. */
   disabled: boolean;
+  /** The role being signed in as, which shows a spinner in its button. */
+  pending?: Role | null;
   onPick: (role: Role) => void;
 }
 
@@ -41,52 +45,70 @@ export function DemoRoles({
   roles,
   headingId,
   disabled,
+  pending = null,
   onPick,
 }: DemoRolesProps) {
-  const { t } = useTranslation();
+  const { t } = useTranslation("signin");
+  const { t: tCommon } = useTranslation();
   return (
-    <section aria-labelledby={headingId} className="space-y-s2">
-      <div className="space-y-1">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 id={headingId} className="text-sm font-semibold">
+    <section aria-labelledby={headingId} className="flex flex-col gap-3">
+      <div>
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+          <h3 id={headingId} className="fs-14 font-semibold">
             {t("login.demoTitle")}
-          </h2>
+          </h3>
           {/* Its words load on their own: without a local boundary the whole form side would suspend and drop focus. */}
           <Suspense fallback={null}>
             <DemoBadge kind="synthetic" />
           </Suspense>
         </div>
-        <p className="text-xs text-muted-foreground">{t("login.demoHint")}</p>
+        <p className="fs-14 text-muted-foreground">{t("login.demoHint")}</p>
       </div>
       <ul
         aria-label={t("login.demoRolesLabel")}
-        className="grid grid-cols-[repeat(auto-fit,minmax(9rem,1fr))] gap-2"
+        className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:auto-rows-fr"
       >
         {roles.map(({ role, displayName }) => {
           const Icon = ICONS[role];
+          const working = pending === role;
           return (
-            <li key={role} className="flex">
-              <Button
+            // Nine roles in two columns leave one alone: it takes the whole row.
+            <li key={role} className="flex min-w-0 max-sm:last:odd:col-span-2">
+              <button
                 type="button"
-                variant="outline"
-                className="h-full min-h-12 w-full justify-start gap-2 px-2 py-2 text-left"
                 disabled={disabled}
+                aria-busy={working || undefined}
                 onClick={() => {
                   onPick(role);
                 }}
+                className={cn(
+                  "flex min-h-14 w-full flex-col items-start gap-0.5 border border-(--border-strong) bg-transparent p-2 text-left text-foreground transition-colors duration-150 hover:bg-(--dx-hover-bg) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed pointer-coarse:min-h-14",
+                  working
+                    ? "bg-accent"
+                    : "disabled:opacity-60 disabled:hover:bg-transparent",
+                )}
+                style={{ borderRadius: "var(--radius-control)" }}
               >
-                <span className="grid size-7 shrink-0 place-items-center rounded-md bg-accent text-accent-foreground">
-                  <Icon className="size-4" aria-hidden="true" />
-                </span>
-                <span className="min-w-0 flex-1 whitespace-normal">
-                  <span className="block text-sm font-medium leading-tight">
-                    {t(`roles.${role}`)}
-                  </span>{" "}
-                  <span className="block text-xs font-normal text-muted-foreground">
-                    {displayName}
+                <span className="fs-14 flex w-full items-start gap-1.5 font-medium">
+                  {working ? (
+                    <LoaderCircle
+                      className="mt-px size-4 shrink-0 animate-spin text-ring"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <Icon
+                      className="mt-px size-4 shrink-0 text-muted-foreground"
+                      aria-hidden="true"
+                    />
+                  )}
+                  <span className="leading-tight">
+                    {tCommon(`roles.${role}`)}
                   </span>
+                </span>{" "}
+                <span className="fs-12 block max-w-full truncate text-muted-foreground">
+                  {displayName}
                 </span>
-              </Button>
+              </button>
             </li>
           );
         })}

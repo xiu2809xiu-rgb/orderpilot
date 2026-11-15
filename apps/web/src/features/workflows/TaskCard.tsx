@@ -50,7 +50,7 @@ function SprLine({ spr }: { spr: NonNullable<WorkflowTask["spr"]> }) {
  * the rest. At a desk it is one compact row in a list, led by what tells tasks
  * apart (the customer and the amount), with a quiet action, so a long inbox
  * fits on a screen and no row shouts. `touch` is the warehouse's tablet
- * layout: a card with bigger text and a full width action, every target 44 px.
+ * layout: a taller row with bigger text and a full width action, every target 44 px.
  */
 export function TaskCard({
   task,
@@ -73,7 +73,12 @@ export function TaskCard({
         to={target}
         className={cn(
           touch
-            ? cn(buttonVariants({ size: "lg" }), "min-h-14 w-full text-base")
+            ? // Outline, as at a desk: twenty bright primary buttons in one inbox
+              // would leave no primary action on the page.
+              cn(
+                buttonVariants({ variant: "outline", size: "lg" }),
+                "min-h-14 w-full text-base",
+              )
             : cn(buttonVariants({ variant: "outline" }), "min-h-11 shrink-0"),
         )}
       >
@@ -84,7 +89,7 @@ export function TaskCard({
 
   if (touch) {
     return (
-      <li className="flex flex-col gap-s2 rounded-xl bg-card p-s4 shadow-card">
+      <li className="flex flex-col gap-s2 py-s4">
         <div className="min-w-0 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">

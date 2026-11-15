@@ -1,5 +1,4 @@
-import { useId } from "react";
-import { Switch } from "@/components/ui/switch";
+import { ToggleChip } from "@/components/common/data-table/Field";
 import type { TableFilters } from "@/components/common";
 import { FilterLookup } from "./FilterLookup";
 import { FilterRange } from "./FilterRange";
@@ -21,22 +20,16 @@ export function FilterControl({
   setFilter,
   showLabel = false,
 }: FilterControlProps) {
-  const switchId = useId();
   if (filter.kind === "toggle") {
     return (
-      <label
-        htmlFor={switchId}
-        className="flex items-center gap-2 text-sm pointer-coarse:min-h-11"
+      <ToggleChip
+        checked={filters[filter.id] === true}
+        onCheckedChange={(checked) => {
+          setFilter(filter.id, checked);
+        }}
       >
-        <Switch
-          id={switchId}
-          checked={filters[filter.id] === true}
-          onCheckedChange={(checked) => {
-            setFilter(filter.id, checked);
-          }}
-        />
-        <span>{filter.label}</span>
-      </label>
+        {filter.label}
+      </ToggleChip>
     );
   }
   if (filter.kind === "range") {

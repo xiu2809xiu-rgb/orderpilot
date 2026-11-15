@@ -378,7 +378,7 @@ These apply to all screens.
 
 Planned with P-11:
 
-- **Design tokens:** a warm neutral base with a deep jade accent; light and dark themes; an 8-pt spacing grid; radius and motion values; the Geist font, with tabular numbers.
+- **Design tokens:** Spectra: a navy ground with teal and cyan aurora blooms (a pale aqua sky in light); glass panels; a teal accent; light and dark themes; an 8-pt spacing grid; radius and motion values; the Geist font, with tabular numbers.
 - **UI sources until P-22 sets up the Pro kits:** shadcn/ui; Magic UI (free); React Bits (free, `@react-bits`); ReUI's free components, only if they install without the licence key.
 
 [`CONTRIBUTING.md`](CONTRIBUTING.md) says how to add a component.

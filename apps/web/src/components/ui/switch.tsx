@@ -11,10 +11,13 @@ function Switch({
     <SwitchPrimitive.Root
       data-slot="switch"
       className={cn(
-        "peer inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-transparent transition-colors",
-        "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
+        // The look stays 36 by 20 (a 1 px border each side); a coarse pointer reaches 44 by 44 through
+        // an invisible layer, so a row of switches does not grow.
+        "peer relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-transparent transition-colors",
+        "pointer-coarse:after:absolute pointer-coarse:after:-inset-x-[5px] pointer-coarse:after:-inset-y-[13px] pointer-coarse:after:content-['']",
+        "focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none",
         "disabled:cursor-not-allowed disabled:opacity-50",
-        "data-[state=checked]:bg-primary data-[state=unchecked]:bg-input",
+        "data-[state=checked]:bg-primary data-[state=unchecked]:bg-input hover:data-[state=unchecked]:bg-input/80",
         className,
       )}
       {...props}

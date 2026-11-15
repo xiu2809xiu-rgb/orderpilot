@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import { SearchBox } from "@/components/common/data-table/SearchBox";
 import type { TableFilters } from "@/components/common";
 import { FilterControl } from "./FilterControl";
+import { FilterPanel } from "@/components/common/data-table/FilterPanel";
+import { isApplied } from "./filterIds";
 import { MoreFilters } from "./MoreFilters";
 import type { ListFilter } from "./types";
 
@@ -32,8 +34,11 @@ export function FilterBar({
 }: FilterBarProps) {
   const main = filters.filter((filter) => !filter.more);
   const more = filters.filter((filter) => filter.more);
+  // Fields first, then the yes or no chips and More filters, as the Orders bar.
+  const fields = main.filter((filter) => filter.kind !== "toggle");
+  const toggles = main.filter((filter) => filter.kind === "toggle");
   return (
-    <div className="flex flex-wrap items-center gap-s1">
+    <div className="dt-filters">
       {search === undefined ? null : (
         <SearchBox
           value={search}
@@ -41,19 +46,39 @@ export function FilterBar({
           debounceMs={searchDebounceMs}
         />
       )}
-      {main.map((filter) => (
-        <FilterControl
-          key={filter.id}
-          filter={filter}
-          filters={values}
-          setFilter={setFilter}
-        />
-      ))}
-      <MoreFilters filters={more} values={values} setFilter={setFilter} />
+      {filters.length > 0 ? (
+        <FilterPanel
+          active={filters.filter((filter) => isApplied(filter, values)).length}
+        >
+          {fields.map((filter) => (
+            <FilterControl
+              key={filter.id}
+              filter={filter}
+              filters={values}
+              setFilter={setFilter}
+            />
+          ))}
+          {toggles.length > 0 || more.length > 0 ? (
+            <div className="dt-toggles">
+              {toggles.map((filter) => (
+                <FilterControl
+                  key={filter.id}
+                  filter={filter}
+                  filters={values}
+                  setFilter={setFilter}
+                />
+              ))}
+              <MoreFilters
+                filters={more}
+                values={values}
+                setFilter={setFilter}
+              />
+            </div>
+          ) : null}
+        </FilterPanel>
+      ) : null}
       {trailing ? (
-        <div className="ml-auto flex flex-wrap items-center gap-2">
-          {trailing}
-        </div>
+        <div className="dt-tools lp-filters-end">{trailing}</div>
       ) : null}
     </div>
   );

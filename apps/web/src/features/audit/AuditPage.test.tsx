@@ -87,7 +87,7 @@ const page = (rows: AuditViewerList200DataItem[], total = rows.length) => ({
 
 describe("AuditPage", () => {
   beforeAll(async () => {
-    await i18n.loadNamespaces(["audit", "governance"]);
+    await i18n.loadNamespaces(["audit", "governance", "list-page"]);
   });
   beforeEach(() => {
     signIn("AUDITOR");
@@ -154,6 +154,30 @@ describe("AuditPage", () => {
     await user.click(screen.getByRole("switch", { name: "Refusals only" }));
     await waitFor(() => {
       expect(seen.at(-1)?.searchParams.get("refusalsOnly")).toBe("true");
+    });
+  });
+
+  it("counts the filters in force on the button, and applies a typed record type on Enter", async () => {
+    const seen: URL[] = [];
+    server.use(
+      getAuditViewerListMockHandler((info) => {
+        seen.push(new URL(info.request.url));
+        return page([event()]);
+      }),
+    );
+    const user = userEvent.setup();
+    renderAt("/audit?entity=User&id=u-1");
+    await screen.findByText("Farah Finance");
+    const more = screen.getByRole("button", {
+      name: "More filters (2 in use)",
+    });
+    expect(more).toHaveTextContent("More filters (2 in use)");
+    const type = screen.getByLabelText("Record type");
+    expect(type).toHaveValue("User");
+    await user.clear(type);
+    await user.type(type, "Order{Enter}");
+    await waitFor(() => {
+      expect(seen.at(-1)?.searchParams.get("entityType")).toBe("Order");
     });
   });
 

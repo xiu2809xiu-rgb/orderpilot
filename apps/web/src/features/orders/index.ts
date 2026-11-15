@@ -32,6 +32,7 @@ export default defineFeature({
     },
   ],
   cues: [],
-  Page: lazy(() => import("./OrdersPage")),
+  // One workspace for every order: the list, the stage of each and a side peek.
+  Page: lazy(() => import("@/features/directions/screens/orders/OrdersScreen")),
   children: orderRoutes,
 });

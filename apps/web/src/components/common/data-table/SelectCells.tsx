@@ -5,9 +5,11 @@ import { cn } from "@/lib/utils";
 import { SELECT_CELL } from "./cells";
 import type { TableSelection } from "./types";
 
-// The box is 24 px (WCAG 2.2 AA target size); on a touch screen its target grows to 44 px around it.
-const BOX =
-  "relative size-6 rounded-[5px] pointer-coarse:after:absolute pointer-coarse:after:-inset-[11px] pointer-coarse:after:content-['']";
+// The box is 24 px (WCAG 2.2 AA target size). On a touch screen the button is
+// a real 44 px square and the box is drawn inside it (`.dt-box` in
+// data-table.css): an invisible layer around a 24 px button is clipped by the
+// scrolling card and covered by the pinned cells beside it.
+const BOX = "dt-box size-6 rounded-[5px]";
 
 /** The heading of the checkbox column: one box that ticks or clears the page. */
 export function SelectHead<Row>({

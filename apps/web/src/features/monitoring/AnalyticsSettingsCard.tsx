@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { Section } from "@/components/parts/Section";
 import { useSavedChoice } from "./consentCard";
 import { tracker, useConsent } from "./tracker";
 
@@ -42,15 +41,14 @@ export default function AnalyticsSettingsCard() {
     },
   ] as const;
 
+  // The same section as its neighbours on the settings page, so the card keeps
+  // its look wherever it is mounted and needs no rules from the shell.
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">
-          {t("analyticsSettings.title")}
-        </CardTitle>
-        <p className="text-muted-foreground">{t("analyticsSettings.hint")}</p>
-      </CardHeader>
-      <CardContent className="space-y-s2">
+    <Section
+      title={t("analyticsSettings.title")}
+      intro={t("analyticsSettings.hint")}
+    >
+      <div className="space-y-s2">
         <p>
           <span className="text-muted-foreground">
             {t("analyticsSettings.current")}:{" "}
@@ -62,7 +60,7 @@ export default function AnalyticsSettingsCard() {
         <div
           role="radiogroup"
           aria-label={t("analyticsSettings.choiceLabel")}
-          className="flex gap-2"
+          className="flex flex-wrap gap-3"
         >
           {options.map((option) => (
             <button
@@ -72,18 +70,13 @@ export default function AnalyticsSettingsCard() {
               aria-checked={chosen === option.value}
               disabled={option.disabled}
               onClick={option.pick}
-              className={cn(
-                "flex h-9 items-center justify-center rounded-md border px-3 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 pointer-coarse:h-11",
-                chosen === option.value
-                  ? "border-primary bg-accent text-accent-foreground"
-                  : "hover:bg-muted",
-              )}
+              className="dx-choice disabled:cursor-not-allowed disabled:opacity-50"
             >
               {option.label}
             </button>
           ))}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </Section>
   );
 }

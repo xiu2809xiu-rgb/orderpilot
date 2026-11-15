@@ -1,0 +1,416 @@
+/* The side panel, the top bar and the way they sit around the page. Colours,
+   radii and durations are the design tokens. */
+
+/* The page's gutter: 24 px, and 16 px on a phone. A page brings no outer
+   padding of its own, so every page starts at the same line. */
+.dx-main {
+  padding: 1.5rem;
+}
+@media (max-width: 39.99rem) {
+  .dx-main {
+    padding: 1rem;
+  }
+}
+
+/* On paper there is no panel and no bar, and the page is as long as it is. */
+@media print {
+  .dx-shell {
+    display: block;
+    height: auto;
+  }
+  .dx-side,
+  .dx-bar {
+    display: none;
+  }
+  .dx-main {
+    overflow: visible;
+    padding: 0;
+  }
+}
+
+/* The gap between groups adapts to the room the window leaves: each spacer
+   between two groups takes an equal share of the free height, from a floor of
+   8 px to a ceiling of 28 px. The middle scrolls only when even the floor
+   does not fit. */
+.dx-groups {
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+}
+.dx-gap {
+  flex: 1 1 0;
+  min-height: 0.5rem;
+  max-height: 1.75rem;
+}
+.dx-group-title {
+  margin-bottom: 0.125rem;
+  padding-inline: var(--dx-entry-pad);
+  font-size: var(--dx-group-size);
+  line-height: 1.25rem;
+  font-weight: var(--dx-group-weight);
+  letter-spacing: var(--dx-group-tracking);
+  color: var(--dx-group-colour);
+}
+
+/* The middle of the panel: it scrolls alone, and a fade on an edge says
+   there is more behind it. */
+.dx-scroll {
+  display: flex;
+  flex-direction: column;
+  --fade-top: 0px;
+  --fade-bottom: 0px;
+  padding-inline: var(--dx-panel-edge);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--fade-top),
+    #000 calc(100% - var(--fade-bottom)),
+    transparent 100%
+  );
+}
+.dx-scroll[data-more-above="true"] {
+  --fade-top: 12px;
+}
+.dx-scroll[data-more-below="true"] {
+  --fade-bottom: 12px;
+}
+
+/* One row of the panel: 40 px, 16 px text at weight 500, an 18 px icon. Richie
+   asked for bigger text than the app's 14 px, and 16 is the next size of the
+   scale. The size is one variable, so going back to 14 is a one-line change. */
+:root {
+  --panel-text: var(--type-16);
+}
+.dx-entry {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 2.5rem;
+  align-items: center;
+  gap: 0.75rem;
+  padding-inline: var(--dx-entry-pad);
+  border-radius: var(--dx-entry-radius);
+  color: var(--sidebar-foreground);
+  font-size: var(--panel-text);
+  line-height: 1.25rem;
+  font-weight: 500;
+  text-align: left;
+  outline: none;
+  transition:
+    background-color var(--motion-fast) var(--ease-out),
+    color var(--motion-fast) var(--ease-out);
+}
+@media (pointer: coarse) {
+  .dx-entry {
+    height: 2.75rem;
+  }
+}
+.dx-entry:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+.dx-entry:hover {
+  background: var(--dx-hover-bg);
+  color: var(--foreground);
+}
+/* The signed-in person: an avatar beside two lines of text. */
+.dx-person {
+  height: 3rem;
+  cursor: pointer;
+}
+.dx-entry[aria-current="page"] {
+  background-color: var(--dx-current-bg);
+  background-image: var(--dx-current-image);
+  color: var(--dx-current-fg);
+  box-shadow: var(--dx-current-shadow);
+}
+/* The strip of open records: inset and glass like the top bar above it, the
+   same corner, with each record a quiet pill. The open one is marked the way
+   the panel marks its current row. */
+.dx-tabs {
+  margin: 0.5rem 0.75rem 0;
+  padding: 0.25rem;
+  background: var(--panel);
+  backdrop-filter: var(--panel-filter);
+  border: var(--dx-card-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--dx-card-shadow);
+}
+.dx-tab {
+  transition:
+    background-color var(--motion-fast) var(--ease-out),
+    color var(--motion-fast) var(--ease-out);
+}
+.dx-tab[data-current="true"] {
+  background-color: var(--dx-current-bg);
+  background-image: var(--dx-current-image);
+  box-shadow: var(--dx-current-shadow);
+}
+.dx-foot {
+  padding-inline: var(--dx-panel-edge);
+}
+.dx-rail .dx-entry {
+  justify-content: center;
+  padding-inline: 0;
+}
+
+/* The panel's own width. 64 px is the collapsed rail. */
+.dx-side-box {
+  width: 16rem;
+  transition: width var(--motion-slow) var(--ease-out);
+}
+.dx-side-box[data-collapsed="true"] {
+  width: 4rem;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dx-side-box {
+    transition: none;
+  }
+}
+
+/* The controls of the top bar share one height, and the ones that shrink to an
+   icon share one square, so the round buttons on a phone are alike. A touch
+   screen gets 44 px for both. */
+.dx-bar {
+  --bar-ctl: 2.25rem;
+}
+@media (pointer: coarse) {
+  .dx-bar {
+    --bar-ctl: 2.75rem;
+  }
+}
+/* A trigger made with asChild takes its slot name from the trigger, so the
+   height is set by class on those. */
+.dx-bar [data-slot="button"],
+.dx-bar-icon,
+.dx-bar-role,
+.dx-search {
+  height: var(--bar-ctl);
+}
+/* The search field in the top bar: a button that reads like a field. */
+.dx-search {
+  display: flex;
+  height: var(--bar-ctl);
+  min-width: 0;
+  align-items: center;
+  gap: 0.5rem;
+  padding-inline: 0.75rem;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-control);
+  background: var(--card);
+  color: var(--muted-foreground);
+  font-size: var(--type-14);
+  transition: border-color var(--motion-fast) var(--ease-out);
+}
+.dx-search:hover {
+  border-color: var(--foreground);
+}
+.dx-search:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.dx-kbd {
+  font-size: var(--type-12);
+  line-height: 1rem;
+  padding: 0 0.375rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  color: var(--muted-foreground);
+}
+
+.dx-bar-icon {
+  width: var(--bar-ctl);
+  padding-inline: 0;
+}
+@media (max-width: 79.99rem) {
+  .dx-search {
+    width: var(--bar-ctl);
+    justify-content: center;
+    padding-inline: 0;
+  }
+}
+@media (max-width: 63.99rem) {
+  .dx-bar-action {
+    width: var(--bar-ctl);
+    padding-inline: 0;
+  }
+}
+@media (max-width: 39.99rem) {
+  .dx-bar-role {
+    width: var(--bar-ctl);
+    padding-inline: 0;
+  }
+}
+
+/* The outlined buttons of the top bar take the pill button skin. */
+.dx-bar [data-slot="button"][data-variant="outline"] {
+  border-color: var(--dx-bar-btn-border);
+  background-color: var(--dx-bar-btn-bg);
+  border-radius: var(--dx-bar-btn-radius);
+}
+.dx-bar [data-slot="button"][data-variant="outline"]:hover {
+  background-color: var(--dx-bar-btn-hover);
+}
+
+/* The page region: a page change fades and settles the region alone (the
+   keyframes are in styles/motion.css), so the panel and the bar stand still. */
+.dx-main {
+  position: relative;
+}
+
+/* While a page's code loads. A skeleton block is still, never pulsing. The
+   wrapper and the progress line (styles/motion.css) both wait before they show,
+   so a chunk that is already cached shows no flash. */
+.dx-bone {
+  display: block;
+  border-radius: var(--radius-control);
+  background: color-mix(in oklab, var(--foreground) 9%, transparent);
+}
+@keyframes dx-skeleton-in {
+  from {
+    opacity: 0;
+  }
+}
+.dx-skeleton {
+  animation: dx-skeleton-in var(--motion-fast) var(--ease-out) 140ms both;
+}
+@media (prefers-reduced-motion: reduce) {
+  /* The wait stays, the movement goes: the shape still shows after 140 ms. */
+  .dx-skeleton {
+    animation-duration: 1ms;
+  }
+}
+
+/* A choice among a few, drawn as pills: the theme on the settings page. The
+   chosen one wears the same glow as the current entry of the panel. */
+.dx-choice {
+  display: inline-flex;
+  min-height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding-inline: 1rem;
+  border: 1px solid var(--dx-bar-btn-border);
+  border-radius: var(--dx-bar-btn-radius);
+  background-color: var(--dx-bar-btn-bg);
+  color: var(--foreground);
+  font-size: var(--type-14);
+  font-weight: 500;
+  transition:
+    background-color var(--motion-fast) var(--ease-out),
+    box-shadow var(--motion-fast) var(--ease-out);
+}
+.dx-choice:hover {
+  background-color: var(--dx-bar-btn-hover);
+}
+.dx-choice[aria-checked="true"] {
+  border-color: transparent;
+  background-color: var(--dx-current-bg);
+  background-image: var(--dx-current-image);
+  box-shadow: var(--dx-current-shadow);
+}
+.dx-choice:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+@media (pointer: coarse) {
+  .dx-choice {
+    min-height: 2.75rem;
+  }
+}
+
+/* A small read-only label: a permission, a check. It is not a control, so it
+   has no hover and no pointer. */
+.dx-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  padding-inline: 0.625rem;
+  border: 1px solid var(--dx-rule);
+  border-radius: var(--radius-pill);
+  background-color: color-mix(in oklab, var(--foreground) 5%, transparent);
+  color: var(--foreground);
+}
+
+/* The analytics card on the settings page is area 4's and draws itself as a
+   shadcn Card. Here it takes the padding and the type of a Section, so the
+   five sections of the page share one left edge and one rhythm. */
+.dx-settings [data-slot="card"] {
+  gap: 0;
+  padding-block: 0;
+}
+.dx-settings [data-slot="card-header"] {
+  gap: 1rem;
+  padding: var(--dx-card-pad) var(--dx-card-pad) 0;
+}
+.dx-settings [data-slot="card-title"] {
+  font-size: var(--type-16);
+  line-height: 1.5rem;
+}
+.dx-settings [data-slot="card-header"] > p {
+  font-size: var(--type-14);
+  line-height: 1.25rem;
+}
+.dx-settings [data-slot="card-content"] {
+  padding: 1rem var(--dx-card-pad) var(--dx-card-pad);
+}
+
+/* The consent dock: where the analytics card (area 4's) is drawn. The card
+   never covers the page or the control that has focus, so it sits below the
+   page, and the page is a little shorter while it is there. The dock is a
+   glass bar like the top bar, 12 px from the edges, and the card inside gives
+   up its own box and lies along it: words to the left, buttons to the right.
+   The page above fades out at its foot, so it is not cut by a hard edge. */
+.dx-dock {
+  flex-shrink: 0;
+  margin: 0 0.75rem 0.75rem;
+  background: var(--panel);
+  backdrop-filter: var(--panel-filter);
+  border: var(--dx-card-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--dx-card-shadow);
+}
+.dx-dock:empty {
+  display: none;
+}
+.dx-dock [data-consent-card] {
+  display: flex;
+  width: 100%;
+  flex-flow: row wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 0.75rem 1rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.dx-dock [data-consent-card] > p {
+  flex: 1 1 20rem;
+  font-size: var(--type-14);
+  line-height: 1.25rem;
+}
+@media (max-width: 39.99rem) {
+  /* On a phone the dock is a sheet across the foot of the window. */
+  .dx-dock {
+    margin: 0;
+    border-width: 1px 0 0;
+    border-radius: var(--radius-card) var(--radius-card) 0 0;
+  }
+}
+.dx-shell:has(.dx-dock:not(:empty)) .dx-main {
+  mask-image: linear-gradient(
+    to bottom,
+    #000 calc(100% - 1.25rem),
+    transparent
+  );
+}
+@media print {
+  .dx-dock {
+    display: none;
+  }
+}

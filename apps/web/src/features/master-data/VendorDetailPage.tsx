@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { useMasterDataVendor } from "@/lib/api/generated/endpoints/master-data/master-data";
 import { formatDay, formatQuantity } from "@/lib/format";
 import { AvailableFigure, KeyFacts, MaskedMoney, MaskedText } from "./pieces";
-import { BackToList, RecordState } from "./RecordState";
+import { BackToList, RecordSheet, RecordState } from "./RecordState";
 import { RecordTable, type RecordColumn } from "./RecordTable";
 import { SprNumber } from "./SprNumber";
 
@@ -166,7 +166,7 @@ function VendorRecord({ vendor }: { vendor: VendorDetail }) {
     },
   ];
   return (
-    <div className="space-y-s3">
+    <RecordSheet>
       <BackToList to="/master-data/vendors" label={t("vendor.back")} />
       <PageHeader
         title={vendor.no}
@@ -174,7 +174,7 @@ function VendorRecord({ vendor }: { vendor: VendorDetail }) {
         meta={<DemoBadge kind="mockBusinessCentral" />}
         actions={
           // A way to another list, not this page's action: outlined, as on an item.
-          <Button asChild variant="outline">
+          <Button asChild variant="outline" className="pointer-coarse:h-11">
             <Link to={`/master-data/items?vendor=${vendor.no}`}>
               <Boxes aria-hidden="true" />
               {t("vendor.seeItems")}
@@ -226,7 +226,7 @@ function VendorRecord({ vendor }: { vendor: VendorDetail }) {
           emptyText={t("vendor.items.empty")}
         />
       </SectionCard>
-    </div>
+    </RecordSheet>
   );
 }
 

@@ -14,14 +14,16 @@ interface FormGridProps {
 }
 
 /**
- * The compact grid of an ERP header. Fields fill it row by row in source order,
- * so the Tab key walks the grid the way the eye does.
+ * The compact grid of an ERP header: 16 px between columns and 24 px between
+ * rows, so a hint under one field never crowds the label of the next. Fields
+ * fill it row by row in source order, so the Tab key walks the grid the way the
+ * eye does.
  */
 export function FormGrid({ columns = 4, className, children }: FormGridProps) {
   return (
     <div
       className={cn(
-        "grid grid-cols-1 gap-x-s2 gap-y-s2",
+        "grid grid-cols-1 gap-x-s2 gap-y-s3",
         COLUMNS[columns],
         className,
       )}

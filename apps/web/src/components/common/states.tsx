@@ -32,9 +32,11 @@ interface EmptyStateProps {
 }
 
 /**
- * Nothing to show yet, and what to do about it. A compact strip, never a big
- * empty card. It always names a next step: your `action`, or your words, or
- * a plain line saying records appear here as they are added.
+ * Nothing to show yet, and what to do about it. It draws the same dotted
+ * field as the parts empty state (the one the Orders workspace shows) but
+ * keeps a real heading, so a screen reader finds it. It always names a next
+ * step: your `action`, or your words, or a plain line saying records appear
+ * here as they are added.
  */
 export function EmptyState({
   icon,
@@ -79,6 +81,7 @@ export function ErrorPanel({ error, onRetry }: ErrorPanelProps) {
       <StatePanel
         variant="inline"
         icon={CircleAlert}
+        tone="danger"
         title={t("states.errorTitle")}
         description={message}
         traceLabel={traceId ? tc("errors.traceId") : undefined}
@@ -108,10 +111,7 @@ interface PartialNoticeProps {
 export function PartialNotice({ description, onRetry }: PartialNoticeProps) {
   const { t } = useTranslation("components");
   return (
-    <div
-      role="status"
-      className="flex flex-wrap items-center justify-between gap-s1 rounded-lg bg-warning-surface px-s2 py-s1 text-sm text-warning"
-    >
+    <div role="status" className="st-partial">
       <p className="flex items-center gap-2">
         <TriangleAlert className="size-4 shrink-0" aria-hidden="true" />
         <span>

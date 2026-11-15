@@ -1,0 +1,14 @@
+/* The skin every form control shares: input, textarea, select trigger and
+   checkbox. A control sits on glass that is already near-opaque, so it is a
+   little lighter than its card (a little whiter in light). Its edge is
+   --input, which keeps 3:1 against the card for the control's boundary; hover
+   warms the edge to the accent and focus adds the soft glowing ring. */
+:root {
+  --control-bg: #ffffff;
+  --control-readonly-bg: rgb(14 124 134 / 0.07);
+}
+
+.dark {
+  --control-bg: rgb(255 255 255 / 0.06);
+  --control-readonly-bg: rgb(255 255 255 / 0.03);
+}

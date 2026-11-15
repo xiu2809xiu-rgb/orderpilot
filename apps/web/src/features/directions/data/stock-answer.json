@@ -1,0 +1,37 @@
+{
+  "source": {
+    "script": "apps/web/scripts/directions-data.mjs",
+    "dataSet": "@orderpilot/synthetic-data",
+    "label": "Synthetic demo data",
+    "seed": 20261102,
+    "referenceDate": "2026-11-02"
+  },
+  "question": "How many HP monitors do we have?",
+  "brand": "HP",
+  "note": "The catalogue holds 1 HP monitor. Available is on hand, minus on sales orders, plus on purchase orders.",
+  "items": [
+    {
+      "itemNo": "I-0025",
+      "description": "HP Monitor 24-inch",
+      "partNumber": "9ZZ0025AA",
+      "vendorNo": "V-0002",
+      "onHand": 880,
+      "onSalesOrders": 6,
+      "onPurchaseOrders": 146,
+      "available": 1020
+    }
+  ],
+  "totals": {
+    "onHand": 880,
+    "onSalesOrders": 6,
+    "onPurchaseOrders": 146,
+    "available": 1020
+  },
+  "otherBrands": [
+    { "brand": "Acer", "items": 4, "available": 2184 },
+    { "brand": "Asus", "items": 2, "available": 813 },
+    { "brand": "Dell", "items": 6, "available": 3164 },
+    { "brand": "Lenovo", "items": 2, "available": 841 },
+    { "brand": "Samsung", "items": 7, "available": 3368 }
+  ]
+}

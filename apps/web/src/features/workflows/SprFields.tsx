@@ -1,7 +1,7 @@
 import type { SprField } from "@orderpilot/shared";
 import { Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/kit/Badge";
 import {
   Table,
   TableBody,
@@ -60,13 +60,10 @@ export function SprFields({ fields }: { fields: readonly SprField[] }) {
               )}
             </TableCell>
             <TableCell>
-              {/* Outlined like the others, in the accent: marked, without outshouting the decision. */}
+              {/* A tinted pill in the info colour: marked, without outshouting the decision. */}
               <Badge
-                variant="outline"
-                className={cn(
-                  field.origin === "suggested" &&
-                    "border-primary/40 text-primary",
-                )}
+                radius="full"
+                variant={field.origin === "suggested" ? "info" : "secondary"}
               >
                 {field.origin === "suggested" ? (
                   <Sparkles aria-hidden="true" />

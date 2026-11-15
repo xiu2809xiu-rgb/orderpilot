@@ -26,9 +26,18 @@ export function trackerColumns(
   t: TFunction,
   roleLabel: (role: TrackerOrder["ownerRole"]) => string,
   statusFilter: StatusFilterState,
+  phone = false,
 ): DataTableColumn<TrackerOrder>[] {
   const day = (value: string | null) =>
     value ? formatDay(value) : t("list.noShipmentDate");
+  const overdueChip = (row: TrackerOrder) =>
+    row.overdue.overdue ? (
+      <StatusBadge tone="danger">
+        {t("list.overdueDays", { count: row.overdue.daysOverdue })}
+      </StatusBadge>
+    ) : (
+      <span className="text-muted-foreground">{t("list.onTime")}</span>
+    );
   return [
     {
       id: "orderNo",
@@ -37,7 +46,7 @@ export function trackerColumns(
         <span className="inline-flex items-center gap-1.5">
           <RecordLink
             to={`/order-tracker/${row.orderNo}`}
-            className="-my-0.5 inline-block py-0.5 font-mono font-medium text-primary underline-offset-4 hover:underline"
+            className="-my-0.5 inline-block py-0.5 underline-offset-4 hover:underline"
           >
             {row.orderNo}
           </RecordLink>
@@ -49,6 +58,14 @@ export function trackerColumns(
               className="inline-flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full bg-destructive/10 px-1 text-[10px] font-bold leading-none text-destructive"
             >
               {row.openExceptions}
+            </span>
+          ) : null}
+          {phone ? (
+            // A phone shows two more columns under the order number, so the
+            // overdue chip and the owner, hidden below, ride with it.
+            <span className="ml-1.5 inline-flex flex-wrap items-center gap-x-2 text-xs font-normal text-muted-foreground">
+              {overdueChip(row)}
+              {roleLabel(row.ownerRole)}
             </span>
           ) : null}
         </span>
@@ -63,7 +80,7 @@ export function trackerColumns(
       cell: (row) => (
         <span>
           {row.customerName}{" "}
-          <span className="font-mono text-xs text-muted-foreground">
+          <span className="text-xs text-muted-foreground">
             {row.customerNo}
           </span>
         </span>
@@ -75,7 +92,7 @@ export function trackerColumns(
       id: "externalDocumentNo",
       header: t("list.columns.externalDocumentNo"),
       cell: (row) => (
-        <span className="font-mono">{row.externalDocumentNo}</span>
+        <span className="tabular-nums">{row.externalDocumentNo}</span>
       ),
       exportValue: (row) => row.externalDocumentNo,
       defaultHidden: true,
@@ -103,20 +120,15 @@ export function trackerColumns(
       header: t("list.columns.owner"),
       cell: (row) => roleLabel(row.ownerRole),
       exportValue: (row) => roleLabel(row.ownerRole),
+      defaultHidden: phone,
     },
     {
       id: "overdue",
       header: t("list.columns.overdue"),
-      cell: (row) =>
-        row.overdue.overdue ? (
-          <StatusBadge tone="danger">
-            {t("list.overdueDays", { count: row.overdue.daysOverdue })}
-          </StatusBadge>
-        ) : (
-          <span className="text-muted-foreground">{t("list.onTime")}</span>
-        ),
+      cell: overdueChip,
       exportValue: (row) =>
         row.overdue.overdue ? (row.overdue.reason ?? "") : "",
+      defaultHidden: phone,
     },
     {
       id: "orderDate",

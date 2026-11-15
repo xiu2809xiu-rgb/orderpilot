@@ -110,6 +110,13 @@ describe("the SPR approval page", () => {
       "href",
       "/workflows/orders/SO-0003",
     );
+    // jsdom has no layout: the class is what makes each record link a 44 px
+    // target under a coarse pointer.
+    for (const name of ["Halvorn Components Ltd", "SO-0003"]) {
+      expect(screen.getByRole("link", { name })).toHaveClass(
+        "pointer-coarse:min-h-11",
+      );
+    }
     // When it is due, on the request itself, and the steps so far.
     expect(screen.getByText("Overdue since 3 Nov 2026")).toBeInTheDocument();
     expect(screen.getByText("Requested by Prakash Menon")).toBeInTheDocument();

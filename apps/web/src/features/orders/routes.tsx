@@ -4,7 +4,7 @@ import type { RouteObject } from "react-router";
 import { Splash } from "@/app/Splash";
 
 const NewOrderPage = lazy(() => import("./NewOrderPage"));
-const DraftOrderPage = lazy(() => import("./DraftOrderPage"));
+const OrderRoute = lazy(() => import("./OrderRoute"));
 
 function element(Page: LazyExoticComponent<ComponentType>) {
   return (
@@ -24,5 +24,5 @@ export const orderRoutes: RouteObject[] = [
     handle: { crumb: "orders:newCrumb" },
     element: element(NewOrderPage),
   },
-  { path: ":orderNo", element: element(DraftOrderPage) },
+  { path: ":orderNo", element: element(OrderRoute) },
 ];

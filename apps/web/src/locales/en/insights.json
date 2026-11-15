@@ -5,6 +5,7 @@
     "kpis": "KPIs"
   },
   "kpi": {
+    "lab": "Lab estimate: {{note}}",
     "manual": "By hand today",
     "withOrderPilot": "With OrderPilot",
     "definition": "Draft definition",

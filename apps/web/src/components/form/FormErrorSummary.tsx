@@ -23,7 +23,7 @@ export function FormErrorSummary() {
       ref={box}
       role="alert"
       tabIndex={-1}
-      className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/5 px-s2 py-s1 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+      className="flex items-start gap-2 rounded-xl border border-destructive/50 bg-(--destructive-surface) px-s2 py-s2 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
     >
       <CircleAlert
         className="mt-0.5 size-4 shrink-0 text-destructive"

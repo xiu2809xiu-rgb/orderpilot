@@ -1,16 +1,16 @@
 import { SearchX } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Link, useParams } from "react-router";
+import { useParams } from "react-router";
 import {
   PageHeader,
   SectionCard,
   StatePanel,
   StatusBadge,
 } from "@/components/common";
-import { buttonVariants } from "@/components/ui/button";
 import { useWorkflowsSpr } from "@/lib/api/generated/endpoints/workflows/workflows";
 import { ApiError } from "@/lib/api/errors";
 import { hasPermission, useSessionStore } from "@/stores/session";
+import { BackToInbox } from "./BackToInbox";
 import { formatDate } from "./format";
 import { MockBadges } from "./MockBadges";
 import { QueryBoundary } from "./QueryBoundary";
@@ -31,20 +31,20 @@ export default function SprApprovalPage() {
 
   if (query.error instanceof ApiError && query.error.status === 404) {
     return (
-      <StatePanel
-        icon={SearchX}
-        title={t("spr.notFoundTitle")}
-        description={t("spr.notFoundDescription")}
-      >
-        <Link to="/workflows" className={buttonVariants({ size: "lg" })}>
-          {t("order.backToInbox")}
-        </Link>
-      </StatePanel>
+      <div className="dx-sheet flex flex-col gap-s4">
+        <BackToInbox />
+        <StatePanel
+          icon={SearchX}
+          title={t("spr.notFoundTitle")}
+          description={t("spr.notFoundDescription")}
+        />
+      </div>
     );
   }
 
   return (
-    <div className="space-y-s4">
+    <div className="dx-sheet flex flex-col gap-s4">
+      <BackToInbox />
       <PageHeader
         title={t("spr.heading", { recordNo })}
         description={

@@ -173,7 +173,7 @@ describe("signing out over a form", () => {
   function withMenu() {
     return renderInRouter(
       <>
-        <UserMenu />
+        <UserMenu collapsed={false} />
         <KitForm />
       </>,
       <h1>Sign in</h1>,

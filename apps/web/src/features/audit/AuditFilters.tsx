@@ -1,63 +1,18 @@
 import { ROLES } from "@orderpilot/shared";
-import { ChevronDown, SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { TableFilters } from "@/components/common";
+import {
+  Field,
+  NativeSelect,
+  ToggleChip,
+} from "@/components/common/data-table/Field";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { CommitInput } from "./CommitInput";
 import type { FilterId } from "./auditQuery";
 
 type SetFilter = (id: string, value: string | boolean | undefined) => void;
-
-const SELECT =
-  "h-9 w-full rounded-md border border-input bg-background px-2 text-sm";
-
-/** A text box that applies on Enter or when it loses focus, so typing does not refetch each key. */
-function CommitInput({
-  id,
-  label,
-  placeholder,
-  type = "text",
-  value,
-  onCommit,
-}: {
-  id: string;
-  label: string;
-  placeholder?: string;
-  type?: "text" | "date";
-  value: string;
-  onCommit: (value: string) => void;
-}) {
-  const [draft, setDraft] = useState(value);
-  const [seen, setSeen] = useState(value);
-  // The address bar can change the value (a link, Clear filters): follow it.
-  if (value !== seen) {
-    setSeen(value);
-    setDraft(value);
-  }
-  return (
-    <div className="space-y-1">
-      <Label htmlFor={id}>{label}</Label>
-      <Input
-        id={id}
-        type={type}
-        value={draft}
-        placeholder={placeholder}
-        autoComplete="off"
-        onChange={(event) => {
-          setDraft(event.target.value);
-        }}
-        onBlur={() => {
-          if (draft !== value) onCommit(draft);
-        }}
-        onKeyDown={(event) => {
-          if (event.key === "Enter") onCommit(draft);
-        }}
-      />
-    </div>
-  );
-}
 
 const FIELDS: readonly FilterId[] = [
   "kind",
@@ -75,7 +30,8 @@ const FIELDS: readonly FilterId[] = [
  * the first thing on the page, and opened by themselves when one is in use,
  * for example from a link. The search box and its trace ID hint sit outside
  * the fold, so pasting a trace ID needs no click. (The fold is from Azri's
- * #270.)
+ * #270.) The button and the Refusals switch sit in the table's filter row,
+ * drawn as the list pages draw theirs; the fold opens under the row.
  */
 export function AuditFilters({
   filters,
@@ -109,40 +65,42 @@ export function AuditFilters({
     />
   );
   return (
-    <div className="w-full space-y-s2">
-      <Button
-        variant="ghost"
-        size="sm"
-        aria-expanded={shown}
-        aria-controls={shown ? "audit-more-filters" : undefined}
-        onClick={() => {
-          setOpen(!shown);
-        }}
-      >
-        <SlidersHorizontal aria-hidden="true" />
-        {inUse > 0
-          ? t("filters.moreInUse", { count: inUse })
-          : t("filters.more")}
-        <ChevronDown
-          aria-hidden="true"
-          className={
-            shown
-              ? "rotate-180 motion-safe:transition-transform"
-              : "motion-safe:transition-transform"
-          }
-        />
-      </Button>
+    <>
+      <div className="dt-toggles">
+        <ToggleChip
+          checked={filters.refusals === true}
+          onCheckedChange={(checked) => {
+            setFilter("refusals", checked);
+          }}
+        >
+          {t("filters.refusals")}
+        </ToggleChip>
+        <Button
+          variant="outline"
+          size="sm"
+          className="lp-more"
+          aria-expanded={shown}
+          aria-controls={shown ? "audit-more-filters" : undefined}
+          onClick={() => {
+            setOpen(!shown);
+          }}
+        >
+          <SlidersHorizontal aria-hidden="true" />
+          {/* The words say the count, so the visible text is the whole name. */}
+          {inUse > 0
+            ? t("filters.moreInUse", { count: inUse })
+            : t("filters.more")}
+        </Button>
+      </div>
       {shown ? (
         <fieldset
           id="audit-more-filters"
-          className="grid w-full grid-cols-1 gap-s2 sm:grid-cols-2 lg:grid-cols-4"
+          className="col-span-full grid w-full basis-full grid-cols-1 gap-s2 sm:grid-cols-2 lg:grid-cols-4"
         >
           <legend className="sr-only">{t("filters.region")}</legend>
-          <div className="space-y-1">
-            <Label htmlFor="audit-filter-kind">{t("filters.kind")}</Label>
-            <select
+          <Field label={t("filters.kind")} htmlFor="audit-filter-kind">
+            <NativeSelect
               id="audit-filter-kind"
-              className={SELECT}
               value={text("kind")}
               onChange={(event) => {
                 setFilter("kind", event.target.value || undefined);
@@ -154,13 +112,11 @@ export function AuditFilters({
                   {t(`filters.kinds.${kind}`)}
                 </option>
               ))}
-            </select>
-          </div>
-          <div className="space-y-1">
-            <Label htmlFor="audit-filter-role">{t("filters.role")}</Label>
-            <select
+            </NativeSelect>
+          </Field>
+          <Field label={t("filters.role")} htmlFor="audit-filter-role">
+            <NativeSelect
               id="audit-filter-role"
-              className={SELECT}
               value={text("role")}
               onChange={(event) => {
                 setFilter("role", event.target.value || undefined);
@@ -172,8 +128,8 @@ export function AuditFilters({
                   {tc(`roles.${role}`)}
                 </option>
               ))}
-            </select>
-          </div>
+            </NativeSelect>
+          </Field>
           {text_input("actor", t("filters.actor"), {
             placeholder: t("filters.actorHint"),
           })}
@@ -188,6 +144,6 @@ export function AuditFilters({
           {text_input("to", t("filters.to"), { type: "date" })}
         </fieldset>
       ) : null}
-    </div>
+    </>
   );
 }

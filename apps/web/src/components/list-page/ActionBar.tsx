@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import type { DataTableColumn, ExportOptions } from "@/components/common";
 import { ExportMenu } from "@/components/common/data-table/ExportMenu";
@@ -32,6 +33,8 @@ interface ActionBarProps<Row> {
    * Print, which then share the filter bar's row instead of leaving one empty.
    */
   compact?: boolean;
+  /** Controls drawn before the right-hand actions, such as saved views and columns. */
+  tools?: ReactNode;
 }
 
 /**
@@ -53,9 +56,10 @@ export function ActionBar<Row>({
   exportOptions,
   pages,
   compact = false,
+  tools,
 }: ActionBarProps<Row>) {
   const { t } = useTranslation("list-page");
-  if (actions.length === 0 && !selectable) return null;
+  if (actions.length === 0 && !selectable && !tools) return null;
 
   const draw = (action: ListAction<Row>) => {
     const label = labelOf(action, t);
@@ -102,19 +106,15 @@ export function ActionBar<Row>({
     <div
       role="group"
       aria-label={t("actions.label")}
-      className="flex flex-wrap items-center gap-2"
+      className={cn("lp-bar", compact && "lp-bar-flat")}
     >
       {left.map(draw)}
       {selectable ? (
         <SelectionCount count={selection.length} onClear={onClearSelection} />
       ) : null}
-      {right.length > 0 ? (
-        <div
-          className={cn(
-            "flex flex-wrap items-center gap-2",
-            !compact && "ml-auto",
-          )}
-        >
+      {right.length > 0 || tools ? (
+        <div className={cn("lp-tools", !compact && "lp-tools-end")}>
+          {tools}
           {right.map(draw)}
         </div>
       ) : null}

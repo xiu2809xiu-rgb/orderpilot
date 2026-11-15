@@ -72,6 +72,7 @@ export function RemindersForYou({ folded = false }: { folded?: boolean }) {
     <SectionCard
       title={t("forYou.title")}
       description={t("forYou.description")}
+      work
     >
       {folded ? (
         <details className="group">

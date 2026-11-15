@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import type {
   DataTableState,
@@ -30,12 +31,16 @@ interface ListToolbarProps<Row> {
   exportOptions?: ExportOptions<Row> | undefined;
   pages?: (() => AsyncIterable<RowPage<Row>>) | undefined;
   searchDebounceMs: number;
+  /** Sibling views (links or tabs), on the top row beside the tools. */
+  tabs?: ReactNode;
 }
 
 /**
- * Everything above the grid, top to bottom: the action bar, the filter bar and
- * the applied filters. A screen with no New, Edit, Void or batch action has
- * nothing for the first row, so its Import, Export and Print join the filter bar.
+ * Everything above the grid, top to bottom, as the Orders workspace draws it:
+ * a top row (sibling views on the left, the actions and view tools on the
+ * right), the filter bar with a label above every field, and the applied
+ * filters. A screen with no views and no Edit, Void or batch action has
+ * nothing for the left of the top row, so its tools join the filter bar.
  */
 export function ListToolbar<Row>({
   table,
@@ -52,6 +57,7 @@ export function ListToolbar<Row>({
   exportOptions,
   pages,
   searchDebounceMs,
+  tabs,
 }: ListToolbarProps<Row>) {
   const { t } = useTranslation("list-page");
   const { shown, arranged, rows, change, setFilter, prefs, visibleIds } = table;
@@ -59,7 +65,16 @@ export function ListToolbar<Row>({
     from: (label) => t("filters.rangeFrom", { label }),
     to: (label) => t("filters.rangeTo", { label }),
   });
-  const ownRow = hasLeftActions(actions);
+  const tools = (
+    <ViewSettings
+      columns={arranged}
+      visibleIds={visibleIds}
+      prefs={prefs}
+      query={query}
+      change={change}
+    />
+  );
+  const ownRow = tabs !== undefined || hasLeftActions(actions);
   const bar = (
     <ActionBar
       actions={actions}
@@ -74,11 +89,17 @@ export function ListToolbar<Row>({
       exportOptions={exportOptions}
       pages={pages}
       compact={!ownRow}
+      tools={ownRow ? tools : undefined}
     />
   );
   return (
-    <div className="space-y-s2">
-      {ownRow ? bar : null}
+    <div className="lp-toolbar">
+      {ownRow ? (
+        <div className="lp-top">
+          {tabs}
+          {bar}
+        </div>
+      ) : null}
       <FilterBar
         filters={filters}
         values={query.filters}
@@ -89,16 +110,12 @@ export function ListToolbar<Row>({
         setFilter={setFilter}
         searchDebounceMs={searchDebounceMs}
         trailing={
-          <>
-            <ViewSettings
-              columns={arranged}
-              visibleIds={visibleIds}
-              prefs={prefs}
-              query={query}
-              change={change}
-            />
-            {ownRow ? null : bar}
-          </>
+          ownRow ? null : (
+            <>
+              {tools}
+              {bar}
+            </>
+          )
         }
       />
       <AppliedFilters

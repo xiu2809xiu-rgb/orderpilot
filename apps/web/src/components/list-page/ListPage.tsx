@@ -4,7 +4,6 @@ import {
   DataTable,
   DemoBadge,
   PageHeader,
-  usePrimaryAction,
   type TableQuery,
 } from "@/components/common";
 import { tableStatusOf } from "@/lib/query-status";
@@ -16,6 +15,7 @@ import {
   rowMenuActions,
   usableActions,
 } from "./actions";
+import "./list-page.css";
 import { assertFiltersInUrl } from "./filterIds";
 import { exportsOf } from "./listExports";
 import type { ListPageProps } from "./ListPageProps";
@@ -41,6 +41,8 @@ export function ListPage<Row>(props: ListPageProps<Row>) {
   const { tableId, title, query, onQueryChange, list, rowKey } = props;
   const { filters = NONE, actions = NONE, operationLog, loadPage } = props;
   const { t } = useTranslation("list-page");
+  // A section inside another page (heading level 2) keeps its own height.
+  const fill = props.headingLevel !== 2;
   const session = useSessionStore((state) => state.session);
   if (import.meta.env.DEV) assertFiltersInUrl(filters, onQueryChange);
   const rows = list.data?.data ?? NONE;
@@ -54,18 +56,10 @@ export function ListPage<Row>(props: ListPageProps<Row>) {
   const { rowHref } = props;
   const withMenu =
     inMenu.length > 0 || rowHref !== undefined || hasRowMenuItems();
+  // New is the page's one primary button, in the head as on the Orders
+  // screen; PageHeader also starts it from the N key.
   const creating = bar.find((action) => action.kind === "new");
-  // N starts the one primary action, wherever the New button is drawn.
-  usePrimaryAction(
-    creating
-      ? {
-          label: labelOf(creating, t),
-          onRun: () => {
-            creating.onRun?.(NONE);
-          },
-        }
-      : undefined,
-  );
+  const drawn = bar.filter((action) => action !== creating);
   const { clear } = selection;
   // Selecting is for the page on screen: a new page, search or sort clears it.
   const changeQuery = useCallback(
@@ -82,17 +76,28 @@ export function ListPage<Row>(props: ListPageProps<Row>) {
   );
 
   return (
-    <div className="space-y-s3">
+    <div className="lp-page" data-fill={fill ? "" : undefined}>
       <PageHeader
         title={title}
         {...(props.headingLevel ? { headingLevel: props.headingLevel } : {})}
         {...(props.description ? { description: props.description } : {})}
         {...(props.demo ? { meta: <DemoBadge kind={props.demo} /> } : {})}
         {...(list.data ? { total: list.data.meta.total } : {})}
+        {...(creating
+          ? {
+              primaryAction: {
+                label: labelOf(creating, t),
+                ...(creating.icon ? { icon: creating.icon } : {}),
+                onRun: () => {
+                  creating.onRun?.(NONE);
+                },
+              },
+            }
+          : {})}
       />
-      {props.tabs}
       <DataTable
         tableId={tableId}
+        fill={fill}
         caption={props.caption}
         columns={props.columns}
         rows={rows}
@@ -138,7 +143,8 @@ export function ListPage<Row>(props: ListPageProps<Row>) {
             searchLabel={t("filters.search")}
             searchable={props.searchable ?? true}
             filters={filters}
-            actions={bar}
+            actions={drawn}
+            {...(props.tabs ? { tabs: props.tabs } : {})}
             selection={selection.selected}
             selectable={selectable}
             onClearSelection={selection.clear}

@@ -41,13 +41,13 @@ export function RoleSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" className="dx-bar-role">
           <UserCog aria-hidden="true" />
           {/* Icon only on a phone, so the trail keeps room for the record number. */}
           <span className="max-sm:sr-only">{t("demo.switcher")}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64">
+      <DropdownMenuContent align="end" sideOffset={14} className="w-64">
         <DropdownMenuLabel className="font-normal text-muted-foreground">
           {t("demo.switcherHint")}
         </DropdownMenuLabel>

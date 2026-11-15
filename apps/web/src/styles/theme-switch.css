@@ -1,0 +1,55 @@
+/* Changing the theme. A person's choice opens the new theme from the control
+   they used, as a circle with a soft edge; a change that comes from the device
+   (the choice is "system") cross-fades. lib/themeSwitch.ts starts the view
+   transition and, for its length, sets data-theme-switch on the root with the
+   point (--theme-x, --theme-y) and the reach (--theme-r). Under reduced motion
+   no transition is started, and motion.css switches every view-transition
+   animation off as well. */
+
+/* How far the new theme has opened. Registered as a length so that it can be
+   animated: an unregistered custom property would jump from one value to the
+   other. */
+@property --theme-reach {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+/* The browser's own cross-fade would show both themes half-through each
+   other, which reads as a flash of grey. */
+:root[data-theme-switch]::view-transition-old(root),
+:root[data-theme-switch]::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* The one movement that crosses the whole window, so it runs longer than the
+   150 to 250 ms of a control: it has further to go. It leaves the control
+   gently enough to be seen leaving it, crosses the window, and settles. The
+   app's own ease-out would cover half the window in the first 40 ms and then
+   crawl into the last corner. */
+:root[data-theme-switch="reveal"]::view-transition-new(root) {
+  mask-image: radial-gradient(
+    circle at var(--theme-x, 50%) var(--theme-y, 50%),
+    #000 calc(var(--theme-reach) - 4rem),
+    transparent var(--theme-reach)
+  );
+  animation: theme-reveal 420ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+@keyframes theme-reveal {
+  from {
+    --theme-reach: 0px;
+  }
+  to {
+    --theme-reach: var(--theme-r, 150vmax);
+  }
+}
+
+:root[data-theme-switch="fade"]::view-transition-new(root) {
+  animation: theme-fade var(--motion-slow) var(--ease-out) both;
+}
+@keyframes theme-fade {
+  from {
+    opacity: 0;
+  }
+}

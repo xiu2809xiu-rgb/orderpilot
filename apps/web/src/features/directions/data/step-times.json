@@ -1,0 +1,360 @@
+{
+  "source": {
+    "script": "apps/web/scripts/directions-data.mjs",
+    "dataSet": "@orderpilot/synthetic-data",
+    "label": "Synthetic demo data",
+    "seed": 20261102,
+    "referenceDate": "2026-11-02"
+  },
+  "method": "For each step, the days (or hours) between the two milestones of the orders that went through it. Percentiles are linear (25th, 50th, 75th). A step with fewer than 8 orders, or with no date in the data, is left out.",
+  "orders": 120,
+  "sales": [
+    {
+      "id": "poIn",
+      "position": 1,
+      "measured": true,
+      "from": "PO received",
+      "to": "fields confirmed",
+      "unit": "days",
+      "n": 106,
+      "p25": 0,
+      "median": 1,
+      "p75": 1,
+      "note": "From the order date to the day the PO's fields were confirmed."
+    },
+    {
+      "id": "stock",
+      "position": 2,
+      "measured": true,
+      "from": "fields confirmed",
+      "to": "stock checked, and the SPR approved when one was raised",
+      "unit": "days",
+      "n": 94,
+      "p25": 0,
+      "median": 2,
+      "p75": 2,
+      "note": "Includes the SPR approval for the orders that needed one."
+    },
+    {
+      "id": "pi",
+      "position": 3,
+      "measured": true,
+      "from": "stock checked, or the SPR approved",
+      "to": "PI sent",
+      "unit": "days",
+      "n": 76,
+      "p25": 1,
+      "median": 1,
+      "p75": 2,
+      "note": "From the end of the stock step to the day the PI went out."
+    },
+    {
+      "id": "payment",
+      "position": 4,
+      "measured": true,
+      "from": "PI sent",
+      "to": "payment received",
+      "unit": "days",
+      "n": 62,
+      "p25": 3,
+      "median": 4,
+      "p75": 5,
+      "note": "Customers pay before goods ship, so this is the longest wait."
+    },
+    {
+      "id": "pack",
+      "position": 5,
+      "measured": true,
+      "from": "payment received",
+      "to": "goods packed",
+      "unit": "days",
+      "n": 48,
+      "p25": 2,
+      "median": 3,
+      "p75": 5,
+      "note": "From Finance's confirmation to the warehouse finishing the pack."
+    },
+    {
+      "id": "documents",
+      "position": 6,
+      "measured": false,
+      "from": null,
+      "to": null,
+      "unit": null,
+      "n": 0,
+      "p25": null,
+      "median": null,
+      "p75": null,
+      "note": "The data set posts the invoice after the goods ship, so no date marks the invoice and packing list being made before release."
+    },
+    {
+      "id": "forwarder",
+      "position": 7,
+      "measured": true,
+      "from": "goods packed",
+      "to": "goods shipped",
+      "unit": "days",
+      "n": 42,
+      "p25": 1,
+      "median": 2,
+      "p75": 3,
+      "note": "From packed to the day the forwarder took the goods."
+    },
+    {
+      "id": "customerTold",
+      "position": 8,
+      "measured": false,
+      "from": null,
+      "to": null,
+      "unit": null,
+      "n": 0,
+      "p25": null,
+      "median": null,
+      "p75": null,
+      "note": "The data set holds no date for the customer being told the shipping details."
+    },
+    {
+      "id": "awbAndPermit",
+      "position": 9,
+      "measured": false,
+      "from": null,
+      "to": null,
+      "unit": null,
+      "n": 0,
+      "p25": null,
+      "median": null,
+      "p75": null,
+      "note": "The data set holds no date for the AWB or BL and the import permit being followed up."
+    }
+  ],
+  "purchase": [
+    {
+      "id": "spr",
+      "position": 1,
+      "measured": false,
+      "from": null,
+      "to": null,
+      "unit": null,
+      "n": 0,
+      "p25": null,
+      "median": null,
+      "p75": null,
+      "note": "The request is the start of the clock for the approval step, so it has no time of its own."
+    },
+    {
+      "id": "approval",
+      "position": 2,
+      "measured": true,
+      "from": "SPR raised",
+      "to": "SPR approved",
+      "unit": "hours",
+      "n": 24,
+      "p25": 5,
+      "median": 23,
+      "p75": 25,
+      "note": "From the request's time to the approver's decision."
+    },
+    {
+      "id": "vendorPo",
+      "position": 3,
+      "measured": false,
+      "from": null,
+      "to": null,
+      "unit": null,
+      "n": 0,
+      "p25": null,
+      "median": null,
+      "p75": null,
+      "note": "The data set makes the vendor PO on the day the SPR is approved, so it never varies."
+    },
+    {
+      "id": "vendorPi",
+      "position": 4,
+      "measured": false,
+      "from": null,
+      "to": null,
+      "unit": null,
+      "n": 0,
+      "p25": null,
+      "median": null,
+      "p75": null,
+      "note": "The data set has no date for this step, so there is nothing to measure."
+    },
+    {
+      "id": "forwarder",
+      "position": 5,
+      "measured": false,
+      "from": null,
+      "to": null,
+      "unit": null,
+      "n": 0,
+      "p25": null,
+      "median": null,
+      "p75": null,
+      "note": "The data set has no date for this step, so there is nothing to measure."
+    },
+    {
+      "id": "goodsCheck",
+      "position": 6,
+      "measured": false,
+      "from": null,
+      "to": null,
+      "unit": null,
+      "n": 0,
+      "p25": null,
+      "median": null,
+      "p75": null,
+      "note": "The data set has no date for this step, so there is nothing to measure."
+    },
+    {
+      "id": "goodsReceived",
+      "position": 7,
+      "measured": false,
+      "from": null,
+      "to": null,
+      "unit": null,
+      "n": 0,
+      "p25": null,
+      "median": null,
+      "p75": null,
+      "note": "Measured together with the steps before it, as the span from vendor PO to goods received."
+    },
+    {
+      "id": "customerTold",
+      "position": 8,
+      "measured": false,
+      "from": null,
+      "to": null,
+      "unit": null,
+      "n": 0,
+      "p25": null,
+      "median": null,
+      "p75": null,
+      "note": "The data set has no date for this step, so there is nothing to measure."
+    },
+    {
+      "id": "vendorPaid",
+      "position": 9,
+      "measured": false,
+      "from": null,
+      "to": null,
+      "unit": null,
+      "n": 0,
+      "p25": null,
+      "median": null,
+      "p75": null,
+      "note": "The data set has no date for this step, so there is nothing to measure."
+    }
+  ],
+  "purchaseSpans": [
+    {
+      "id": "poToReceipt",
+      "fromStep": "vendorPo",
+      "toStep": "goodsReceived",
+      "unit": "days",
+      "n": 2298,
+      "p25": 49,
+      "median": 72,
+      "p75": 121,
+      "note": "Days from the vendor PO to the goods being received, over the 24 months of receipts in the history.",
+      "byVendor": [
+        {
+          "vendorNo": "V-0001",
+          "vendorName": "Halvorn Components Ltd",
+          "n": 155,
+          "p25": 35.5,
+          "median": 120,
+          "p75": 147
+        },
+        {
+          "vendorNo": "V-0002",
+          "vendorName": "Pelagia Source Co",
+          "n": 231,
+          "p25": 39.5,
+          "median": 52,
+          "p75": 102.5
+        },
+        {
+          "vendorNo": "V-0003",
+          "vendorName": "Quenby Origin Works",
+          "n": 240,
+          "p25": 38,
+          "median": 62,
+          "p75": 75.3
+        },
+        {
+          "vendorNo": "V-0004",
+          "vendorName": "Zentarro Electronics Co",
+          "n": 246,
+          "p25": 38,
+          "median": 54,
+          "p75": 64.8
+        },
+        {
+          "vendorNo": "V-0005",
+          "vendorName": "Oriel Vantage Technology",
+          "n": 191,
+          "p25": 38.5,
+          "median": 54,
+          "p75": 67
+        },
+        {
+          "vendorNo": "V-0006",
+          "vendorName": "Mirelle Optics Co",
+          "n": 203,
+          "p25": 40,
+          "median": 54,
+          "p75": 67
+        },
+        {
+          "vendorNo": "V-0007",
+          "vendorName": "Kestrin Devices Ltd",
+          "n": 206,
+          "p25": 50,
+          "median": 73.5,
+          "p75": 123.5
+        },
+        {
+          "vendorNo": "V-0008",
+          "vendorName": "Tolvane Networks Co",
+          "n": 209,
+          "p25": 61,
+          "median": 106,
+          "p75": 142
+        },
+        {
+          "vendorNo": "V-0009",
+          "vendorName": "Arbelle Power Systems",
+          "n": 214,
+          "p25": 93,
+          "median": 113.5,
+          "p75": 128
+        },
+        {
+          "vendorNo": "V-0010",
+          "vendorName": "Fennick Cable Works",
+          "n": 177,
+          "p25": 78,
+          "median": 109,
+          "p75": 144
+        },
+        {
+          "vendorNo": "V-0011",
+          "vendorName": "Draymar Storage Ltd",
+          "n": 154,
+          "p25": 86,
+          "median": 135,
+          "p75": 164
+        },
+        {
+          "vendorNo": "V-0012",
+          "vendorName": "Ilsmoor Peripherals Co",
+          "n": 72,
+          "p25": 127.3,
+          "median": 148,
+          "p75": 163
+        }
+      ]
+    }
+  ]
+}
