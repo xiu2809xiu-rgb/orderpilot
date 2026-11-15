@@ -35,6 +35,7 @@ export function OrderRowMenu({
           size="icon-sm"
           className="pointer-coarse:size-11"
           aria-label={t("rowMenu.open", { order: orderNo })}
+          data-peek-opener={orderNo}
         >
           <Ellipsis aria-hidden="true" />
         </Button>

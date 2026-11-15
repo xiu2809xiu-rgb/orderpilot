@@ -219,6 +219,27 @@ describe("the Orders workspace", () => {
     expect(await within(peek).findByText("2 of 4")).toBeVisible();
   });
 
+  it("gives focus back to the row's menu when the side peek closes", async () => {
+    stubApi();
+    const user = userEvent.setup();
+    open();
+    await bodyRows();
+    const menu = screen.getByRole("button", { name: "Actions for SO-0002" });
+    await user.click(menu);
+    await user.click(
+      await screen.findByRole("menuitem", { name: "Quick look" }),
+    );
+    expect(await screen.findByRole("dialog")).toBeVisible();
+    await user.keyboard("{Escape}");
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).toBeNull();
+    });
+    // Not the top of the page: the control that opened it.
+    await waitFor(() => {
+      expect(menu).toHaveFocus();
+    });
+  });
+
   it("shows the error with its trace id and a way to retry", async () => {
     stubApi({ ordersFail: true });
     open();
