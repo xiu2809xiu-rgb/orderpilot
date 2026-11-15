@@ -4,10 +4,13 @@ import { useNavigate } from "react-router";
 import { Section } from "@/components/parts/Section";
 import { actionsFor } from "@/lib/actions";
 import { cn } from "@/lib/utils";
-import { useSessionStore } from "@/stores/session";
+import { hasPermission, useSessionStore } from "@/stores/session";
 
 /** New order is the primary button of the page header, so it is not offered twice. */
 const IN_THE_HEADER = "orders.new";
+
+/** Orders is in the side panel and shows the same orders, so a role that reads it is not sent to the tracker. */
+const REPEATS_ORDERS = "tracker.open";
 
 const FOCUS = "focus-visible:outline-2 focus-visible:outline-ring";
 
@@ -30,8 +33,12 @@ export function Shortcuts({
   const { t: label } = useTranslation();
   const navigate = useNavigate();
   const session = useSessionStore((state) => state.session);
+  const mayReadOrders = hasPermission(session, "orders.read");
   const actions = actionsFor(session).filter(
-    (action) => action.quick && action.id !== IN_THE_HEADER,
+    (action) =>
+      action.quick &&
+      action.id !== IN_THE_HEADER &&
+      !(mayReadOrders && action.id === REPEATS_ORDERS),
   );
   if (actions.length === 0) return null;
   const rows = layout === "rows";

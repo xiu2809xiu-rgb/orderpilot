@@ -5,8 +5,11 @@
     "evening": "Good evening, {{name}}"
   },
   "introNone": "Nothing is waiting for you.",
-  "intro_one": "{{count}} task is waiting for you, and {{late}} is past its due time.",
-  "intro_other": "{{count}} tasks are waiting for you, and {{late}} are past their due time.",
+  "intro_one": "{{count}} task is waiting for you.",
+  "intro_other": "{{count}} tasks are waiting for you.",
+  "introLateNone": "None is past its due time.",
+  "introLate_one": "{{count}} is past its due time.",
+  "introLate_other": "{{count}} are past their due time.",
   "introOverdueNone": "No order is overdue.",
   "introOverdue_one": "{{count}} order is overdue. The one worth the most is first.",
   "introOverdue_other": "{{count}} orders are overdue. The ones worth the most are first.",

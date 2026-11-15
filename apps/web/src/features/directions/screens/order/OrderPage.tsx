@@ -17,6 +17,7 @@ import { OrderFacts } from "./OrderFacts";
 import { OrderJourney } from "./OrderJourney";
 import { OrderSkeleton } from "./OrderSkeleton";
 import { OrderTabs } from "./OrderTabs";
+import { isUntracked } from "../orders/orderRow";
 import { useOrderAction } from "./useOrderAction";
 import { useOrderJourney } from "./useOrderJourney";
 import "../orders/orders.css";
@@ -46,12 +47,19 @@ function untracked(detail: SalesOrderDetail): OrderTimeline {
 export function OrderPage({ orderNo }: { orderNo: string }) {
   const { t } = useTranslation("directions-orders");
   const { t: tc } = useTranslation("common");
-  const { timeline, order, journey } = useOrderJourney(orderNo);
   // The route has already asked for this order. An order that is not there
   // answered 404, and asking again on mount would put the query back to
   // pending: the route would draw its skeleton, unmount this page, and
   // mount it again for ever.
   const detail = useOrdersOne(orderNo, { query: { retryOnMount: false } });
+  // A draft or a void order is not in the tracker or the workflow: neither is
+  // asked, and the order's own facts and lines are the page. Until the order
+  // has answered nothing is asked either.
+  const asksTracker =
+    !detail.isPending && !isUntracked(detail.data?.data.captureState ?? null);
+  const { timeline, order, journey } = useOrderJourney(
+    asksTracker ? orderNo : null,
+  );
   const waiting = useTrackerList({
     documentToConfirm: "true",
     search: orderNo,
@@ -82,7 +90,7 @@ export function OrderPage({ orderNo }: { orderNo: string }) {
     trackerRefused ||
     (timeline.error instanceof ApiError && timeline.error.code === "NOT_FOUND");
 
-  if (timeline.isPending || detail.isPending) {
+  if ((asksTracker && timeline.isPending) || detail.isPending) {
     return <OrderSkeleton />;
   }
   if (isForbidden(detail.error)) {
@@ -184,6 +192,7 @@ export function OrderPage({ orderNo }: { orderNo: string }) {
             detail={found}
             timeline={events}
             toConfirm={toConfirm}
+            inWorkflow={asksTracker}
           />
         </Section>
       </div>

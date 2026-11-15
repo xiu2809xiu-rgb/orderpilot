@@ -9,7 +9,9 @@ import { joinOrders, type OrderRow } from "./orderRow";
 /** The most the API gives at once. A list this long is read whole, so every view and count is exact. */
 export const LOADED = 200;
 
-const KEEP = { query: { placeholderData: <T>(previous: T) => previous } };
+const keep = (enabled: boolean) => ({
+  query: { placeholderData: <T>(previous: T) => previous, enabled },
+});
 
 /**
  * Every order, read once and joined: the Orders list (the base, with masked
@@ -17,9 +19,12 @@ const KEEP = { query: { placeholderData: <T>(previous: T) => previous } };
  * hold a document to confirm, and the flow that says which step a status is.
  * The views, filters and counts are then worked out here in the browser, so a
  * tab's number is always what it opens. A role that cannot read the tracker
- * still gets its orders, with the tracker's columns empty.
+ * still gets its orders, with the tracker's columns empty. With `enabled`
+ * false nothing is requested: the home page's counts ask only when a tile
+ * opens this list.
  */
-export function useOrderRows() {
+export function useOrderRows(enabled = true) {
+  const KEEP = keep(enabled);
   const orders = useOrdersList({ pageSize: LOADED }, KEEP);
   const tracker = useTrackerList({ pageSize: LOADED }, KEEP);
   const toConfirm = useTrackerList(

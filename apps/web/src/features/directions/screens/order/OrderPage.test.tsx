@@ -16,6 +16,7 @@ import {
   loadNamespaces,
   nth,
   renderAt,
+  SPECS,
   stubApi,
   taskOn,
 } from "../orders/ordersTestKit";
@@ -255,6 +256,35 @@ describe("the order page", () => {
     await screen.findByRole("heading", { level: 1, name: "SO-0001" });
     expect(screen.queryByText(/no open task/)).toBeNull();
   });
+
+  it.each(["draft", "void"] as const)(
+    "does not ask the tracker or the workflow about a %s order, and still shows its facts and lines",
+    async (entered) => {
+      const calls = stubApi({
+        specs: [{ ...nth(SPECS, 1), orderNo: "SO-9001", entered }],
+        flowDocuments: [],
+      });
+      open("SO-9001");
+      expect(
+        await screen.findByRole("heading", { level: 1, name: "SO-9001" }),
+      ).toBeVisible();
+      expect(
+        await screen.findByRole("table", { name: "Lines of the order" }),
+      ).toBeVisible();
+      expect(
+        screen.getByText(
+          "This order has no journey yet: the tracker does not know it.",
+        ),
+      ).toBeVisible();
+      // Each of those would answer 404 and leave an error in the console.
+      expect(
+        calls.filter((call) => call.includes("/tracker/orders/SO-")),
+      ).toEqual([]);
+      expect(
+        calls.filter((call) => call.includes("/workflows/orders/")),
+      ).toEqual([]);
+    },
+  );
 
   it("says plainly when the order is not found", async () => {
     stubApi();

@@ -205,6 +205,30 @@ test.describe("The Orders workspace", () => {
     await checkPage(page);
   });
 
+  test("no cell of the list is wider than its column, at a desktop and a tablet width", async ({
+    page,
+  }) => {
+    await signInAs(page, "SUPPORT");
+    for (const [width, height] of [
+      [1440, 900],
+      [820, 1180],
+    ] as const) {
+      await page.setViewportSize({ width, height });
+      await page.goto("/orders?source=sample");
+      await expect(
+        page.getByRole("link", { name: SAMPLE_LINK }).first(),
+      ).toBeVisible();
+      // A cell clips what does not fit (overflow hidden), so a figure cut
+      // short shows as a cell whose content is wider than the cell.
+      const clipped = await page.evaluate(() =>
+        [...document.querySelectorAll(".od-table tbody td")]
+          .filter((cell) => cell.scrollWidth > cell.clientWidth)
+          .map((cell) => cell.textContent.trim().slice(0, 24)),
+      );
+      expect(clipped, `cells clipped at ${String(width)} px`).toEqual([]);
+    }
+  });
+
   test("a role without orders.read is refused by the server", async () => {
     await expectRefused("SYSTEM_ADMIN", "GET", "/orders");
     await expectRefused("SYSTEM_ADMIN", "GET", "/orders/SO-0001");

@@ -40,7 +40,8 @@ export function OrdersFilters({
   onChange,
 }: {
   query: OrdersQuery;
-  stageCounts: Record<string, number>;
+  /** Null while the list has not answered: the stages then show no count. */
+  stageCounts: Record<string, number> | null;
   customers: readonly CustomerOption[];
   /** How many filters are in force, for the phone's closed panel. */
   active: number;
@@ -50,6 +51,8 @@ export function OrdersFilters({
   const { t: tt } = useTranslation("order-tracker");
   const searchId = useId();
   const stageId = useId();
+  const countOf = (id: string) =>
+    stageCounts ? ` (${String(stageCounts[id] ?? 0)})` : "";
   // What is typed shows at once; the list follows a moment after the last key,
   // so typing is never behind the router. A change from elsewhere (Clear all, a
   // saved view) replaces what is typed.
@@ -109,14 +112,15 @@ export function OrdersFilters({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">
-                {t("filters.allStages")} ({stageCounts.all ?? 0})
+                {t("filters.allStages")}
+                {countOf("all")}
               </SelectItem>
               {LIFECYCLE_STAGES.map((stage) => (
                 <SelectGroup key={stage.id}>
                   <SelectSeparator />
                   <SelectLabel>
-                    {tt(`list.stages.${stage.id}`)} (
-                    {stageCounts[stage.id] ?? 0})
+                    {tt(`list.stages.${stage.id}`)}
+                    {countOf(stage.id)}
                   </SelectLabel>
                   <SelectItem value={`stage:${stage.id}`}>
                     {t("filters.wholeStage", {

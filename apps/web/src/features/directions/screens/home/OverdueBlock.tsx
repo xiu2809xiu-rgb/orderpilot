@@ -11,7 +11,7 @@ import { RecordLinkText } from "./RecordLinkText";
 import { useOrderLinks } from "./homeLinks";
 import type { useBlockQueries } from "./useBlockQueries";
 
-/** The whole list this block is the top of. */
+/** The whole list this block is the top of, as the tracker's address: `links.list` moves it. */
 const ALL = "/order-tracker?overdue=true";
 
 /**
@@ -37,7 +37,7 @@ export function OverdueBlock({
         title: tHome("overdue.emptyTitle"),
         description: tHome("overdue.emptyDescription"),
       }}
-      viewAll={{ to: ALL, total: query.data?.meta.total ?? 0 }}
+      viewAll={{ to: links.list(ALL), total: query.data?.meta.total ?? 0 }}
       row={(order) => (
         <HomeRow
           title={order.status.label}

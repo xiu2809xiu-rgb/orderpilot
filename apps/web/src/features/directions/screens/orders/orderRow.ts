@@ -111,6 +111,16 @@ export function isOpen(row: OrderRow): boolean {
   return row.captureState !== "void";
 }
 
+/**
+ * An order whose entry state says the tracker and the workflow have never
+ * heard of it: a draft is still being entered, and a void one was dropped
+ * before it started. Asking either would only collect a 404 and a console
+ * error.
+ */
+export function isUntracked(state: OrderCaptureState | null): boolean {
+  return state === "draft" || state === "void";
+}
+
 /** The position of a tracker step id, 1 to 9, or null. */
 export function positionOf(id: string): number | null {
   const at = SALES_STEP_IDS.findIndex((candidate) => candidate === id);

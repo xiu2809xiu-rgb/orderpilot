@@ -256,6 +256,8 @@ export interface ApiOptions {
   ordersFail?: boolean;
   /** The tracker answers 403, as for a role that may not read it. */
   trackerForbidden?: boolean;
+  /** The tracker answers 500, as when the whole API is down. */
+  trackerFail?: boolean;
   /** The orders list answers 403, as for a role that may not read orders. */
   ordersForbidden?: boolean;
   /** One order's page cannot be read: the server answers 500. */
@@ -336,6 +338,19 @@ export function stubApi(options: ApiOptions = {}): string[] {
           );
         }
         return page(specs.map((spec) => ordersRow(spec, masked)));
+      }
+      if (path.includes("/tracker/") && options.trackerFail) {
+        return reply(
+          {
+            error: {
+              code: "INTERNAL_ERROR",
+              message: "x",
+              details: null,
+              traceId: "trace-tracker-500",
+            },
+          },
+          500,
+        );
       }
       if (path.includes("/tracker/") && options.trackerForbidden) {
         return reply(

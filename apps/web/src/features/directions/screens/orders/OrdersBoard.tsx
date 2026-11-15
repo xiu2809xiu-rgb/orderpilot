@@ -145,6 +145,7 @@ function Card({
         <button
           type="button"
           className="od-card-open numeral fs-14 font-medium"
+          data-peek-opener={row.orderNo}
           onClick={() => {
             onPeek(row.orderNo);
           }}

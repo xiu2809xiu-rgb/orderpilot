@@ -219,11 +219,43 @@ describe("the Orders workspace", () => {
     expect(await within(peek).findByText("2 of 4")).toBeVisible();
   });
 
+  it("gives focus back to the row's menu when the side peek closes", async () => {
+    stubApi();
+    const user = userEvent.setup();
+    open();
+    await bodyRows();
+    const menu = screen.getByRole("button", { name: "Actions for SO-0002" });
+    await user.click(menu);
+    await user.click(
+      await screen.findByRole("menuitem", { name: "Quick look" }),
+    );
+    expect(await screen.findByRole("dialog")).toBeVisible();
+    await user.keyboard("{Escape}");
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).toBeNull();
+    });
+    // Not the top of the page: the control that opened it.
+    await waitFor(() => {
+      expect(menu).toHaveFocus();
+    });
+  });
+
   it("shows the error with its trace id and a way to retry", async () => {
     stubApi({ ordersFail: true });
     open();
     expect(await screen.findByText(/trace-123/)).toBeVisible();
     expect(screen.getByRole("button", { name: "Try again" })).toBeVisible();
+  });
+
+  it("says one thing when everything fails: no counts of nothing and no columns notice beside the error", async () => {
+    stubApi({ ordersFail: true, trackerFail: true });
+    open();
+    expect(await screen.findByText(/trace-123/)).toBeVisible();
+    // "All 0" would say there are no orders; the tabs show no number until the list has answered.
+    const tabs = screen.getByRole("tablist", { name: "Views" });
+    expect(within(tabs).getByRole("tab", { name: "All" })).toBeVisible();
+    expect(tabs.textContent).not.toMatch(/\d/);
+    expect(screen.queryByText("Some columns are not available")).toBeNull();
   });
 
   it("shows only the refusal to a role that may not read orders, with nothing to filter", async () => {

@@ -16,25 +16,30 @@ import type { Sort, SortId } from "./ordersQuery";
 
 /**
  * Widths in pixels, so the default columns fit one 1440 px screen with the side
- * panel open (1136 px of table) and no column is cut off. A narrower screen
- * scrolls the table inside its own box; a wider one shares out what is left.
+ * panel open (1122 px of table) and no column is cut off. Each width is the
+ * widest content of its column plus the cell's 16 px of padding: the age cell
+ * holds "47 d" over a "10 d late" chip (77 px), the order cell a number, the
+ * exception count and the entry chip (108 px), the documents cell a "To
+ * confirm" chip (105 px). The customer name is the one cell that may truncate.
+ * A narrower screen scrolls the table inside its own box; a wider one shares
+ * out what is left.
  */
 const WIDTH: Readonly<Record<string, number>> = {
   select: 32,
-  orderNo: 118,
-  customerName: 176,
+  orderNo: 124,
+  customerName: 146,
   step: 176,
-  heldAt: 170,
-  age: 82,
-  shipmentDate: 96,
-  amount: 124,
-  docs: 108,
+  heldAt: 160,
+  age: 96,
+  shipmentDate: 100,
+  amount: 120,
+  docs: 124,
   stock: 132,
   externalDocumentNo: 116,
   orderDate: 100,
   entry: 96,
   source: 100,
-  actions: 44,
+  actions: 42,
 };
 
 /**

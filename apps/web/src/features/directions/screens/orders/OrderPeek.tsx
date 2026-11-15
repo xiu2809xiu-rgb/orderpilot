@@ -1,4 +1,5 @@
 import { ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { ErrorPanel, ScrollRegion } from "@/components/common";
@@ -21,7 +22,8 @@ import { useOrderJourney } from "../order/useOrderJourney";
 import { Amount } from "./Amount";
 import { EntryChip } from "./EntryChip";
 import { StockCell } from "./OrderFigures";
-import { ageInDays, ALL_DONE, type OrderRow } from "./orderRow";
+import { ageInDays, ALL_DONE, isUntracked, type OrderRow } from "./orderRow";
+import { focusPeekOpener } from "./peekFocus";
 
 /**
  * The side peek: one order's journey beside the list, so a person can see
@@ -45,7 +47,14 @@ export function OrderPeek({
   roleLabel: (role: NonNullable<OrderRow["ownerRole"]>) => string;
 }) {
   const { t } = useTranslation("directions-orders");
-  const { timeline, journey } = useOrderJourney(row?.orderNo ?? null);
+  // A draft or a void order is not in the tracker: it is not asked.
+  const asks = row !== null && !isUntracked(row.captureState);
+  const { timeline, journey } = useOrderJourney(asks ? row.orderNo : null);
+  // The order that was showing when the peek closed: by then `row` is null.
+  const lastShown = useRef<string | null>(null);
+  useEffect(() => {
+    if (row) lastShown.current = row.orderNo;
+  }, [row]);
   const notInTracker =
     timeline.error instanceof ApiError && timeline.error.code === "NOT_FOUND";
   return (
@@ -55,7 +64,15 @@ export function OrderPeek({
         if (!open) onClose();
       }}
     >
-      <SheetContent className="od-peek dx-panel-strong gap-0 p-0 sm:max-w-[30rem]">
+      <SheetContent
+        className="od-peek dx-panel-strong gap-0 p-0 sm:max-w-[30rem]"
+        onCloseAutoFocus={(event) => {
+          // Back to what opened it, not to the top of the page.
+          if (lastShown.current && focusPeekOpener(lastShown.current)) {
+            event.preventDefault();
+          }
+        }}
+      >
         {row ? (
           <>
             <SheetHeader className="od-peek-head">
@@ -135,7 +152,7 @@ export function OrderPeek({
                   ) : null}
                 </dl>
                 <h3 className="od-peek-title fs-14">{t("peek.journey")}</h3>
-                {timeline.isPending ? (
+                {asks && timeline.isPending ? (
                   <div className="space-y-3" aria-hidden="true">
                     <Skeleton className="h-5 w-3/4" />
                     <Skeleton className="h-40" />

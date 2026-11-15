@@ -42,7 +42,7 @@ export function OrdersWorkspace({
       <div className="od-top">
         <OrdersViews
           view={view}
-          counts={w.counts}
+          counts={status === "ready" ? w.counts : null}
           showMine={w.showMine}
           onChange={(next) => {
             change({ view: next });
@@ -67,13 +67,14 @@ export function OrdersWorkspace({
       </div>
       <OrdersFilters
         query={query}
-        stageCounts={w.stageCounts}
+        stageCounts={status === "ready" ? w.stageCounts : null}
         customers={w.customers}
         active={w.chips.length}
         onChange={change}
       />
       <AppliedFilters chips={w.chips} onChange={change} />
-      {data.trackerMissing ? (
+      {/* One outage, one message: when the list itself failed, its error says so. */}
+      {status === "ready" && data.trackerMissing ? (
         <Alert variant="warning">
           <AlertTitle>{t("notices.trackerTitle")}</AlertTitle>
           <AlertDescription>{t("notices.trackerBody")}</AlertDescription>
