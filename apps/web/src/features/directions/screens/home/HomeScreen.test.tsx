@@ -184,7 +184,7 @@ describe("the home screen", () => {
     ).toBeVisible();
     expect(
       await screen.findByText(
-        "3 tasks are waiting for you, and 2 are past their due time.",
+        "3 tasks are waiting for you. 2 are past their due time.",
       ),
     ).toBeVisible();
   });

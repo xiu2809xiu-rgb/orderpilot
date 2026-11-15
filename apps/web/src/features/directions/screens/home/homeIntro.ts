@@ -16,9 +16,13 @@ export function introOf(
 ): string | undefined {
   if (block === "tasks") {
     if (home.list.isPending || home.list.isError) return undefined;
-    return home.total === 0
-      ? t("introNone")
-      : t("intro", { count: home.total, late: home.late });
+    if (home.total === 0) return t("introNone");
+    // Two counts, two plural rules: each is its own sentence.
+    return `${t("intro", { count: home.total })} ${
+      home.late === 0
+        ? t("introLateNone")
+        : t("introLate", { count: home.late })
+    }`;
   }
   if (block === "overdue") {
     const total = queries.overdue.data?.meta.total;
