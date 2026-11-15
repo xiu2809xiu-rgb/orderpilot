@@ -70,8 +70,8 @@ function subjectAndDetailOf(
  * gives no unit, and the variance is shown on its own.
  */
 function unitOf(toleranceLabel: string): string | null {
-  const match = /\(([^)]+)\)\s*$/.exec(toleranceLabel);
-  return match ? match[1].trim() : null;
+  const [, unit] = /\(([^)]+)\)\s*$/.exec(toleranceLabel) ?? [];
+  return unit ? unit.trim() : null;
 }
 
 /** A unit stays plural for every count but one, where its trailing "s" drops. */
