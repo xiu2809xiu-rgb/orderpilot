@@ -79,11 +79,6 @@ export function AuditFilters({
           variant="outline"
           size="sm"
           className="lp-more"
-          aria-label={
-            inUse > 0
-              ? t("filters.moreInUse", { count: inUse })
-              : t("filters.more")
-          }
           aria-expanded={shown}
           aria-controls={shown ? "audit-more-filters" : undefined}
           onClick={() => {
@@ -91,12 +86,10 @@ export function AuditFilters({
           }}
         >
           <SlidersHorizontal aria-hidden="true" />
-          {t("filters.more")}
-          {inUse > 0 ? (
-            <span aria-hidden="true" className="lp-count">
-              {inUse}
-            </span>
-          ) : null}
+          {/* The words say the count, so the visible text is the whole name. */}
+          {inUse > 0
+            ? t("filters.moreInUse", { count: inUse })
+            : t("filters.more")}
         </Button>
       </div>
       {shown ? (

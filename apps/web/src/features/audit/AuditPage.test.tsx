@@ -171,7 +171,7 @@ describe("AuditPage", () => {
     const more = screen.getByRole("button", {
       name: "More filters (2 in use)",
     });
-    expect(more).toHaveTextContent("2");
+    expect(more).toHaveTextContent("More filters (2 in use)");
     const type = screen.getByLabelText("Record type");
     expect(type).toHaveValue("User");
     await user.clear(type);
