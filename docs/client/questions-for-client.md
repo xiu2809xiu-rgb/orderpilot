@@ -46,6 +46,7 @@ Held on Thursday 5 Nov 2026, with several of Spectra's people. The recording and
 | Q-46 | Which Business Central user roles at Spectra can see customer, vendor and price data today, and which of our roles should not?                                                                                                                      | You named confidentiality of customers, vendors and prices as a requirement  | A-42        |
 | Q-47 | For the forecast and the product-line view, how much history will you send, and does real time mean a refresh every few minutes or on each change? Which Power BI licence do you have?                                                              | Sizes the reporting views                                                    | A-45        |
 | Q-48 | For vendors that need POs entered in their own portal, what reference comes back that we should record?                                                                                                                                             | Closes the vendor PO step                                                    | A-23        |
+| Q-50 | Which team is Janet in, and who may route SPRs?                                                                                                                                                                                                     | Decides who holds spr.route, the coordinator's permission: Support for now   | ADR 0054    |
 
 ## Ask for these first
 
