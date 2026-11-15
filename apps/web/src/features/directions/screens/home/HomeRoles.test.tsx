@@ -6,6 +6,7 @@ import { cuesFor } from "@/features/nav";
 import { actionsFor } from "@/lib/actions";
 import { useSessionStore } from "@/stores/session";
 import { sessionFor } from "@/test/fixtures";
+import { ordersAddressOf } from "./homeLinks";
 import {
   OVERDUE_ORDER,
   REFUSED_EVENT,
@@ -209,7 +210,12 @@ describe("the home page of each role", () => {
         const tile = await within(numbers).findByRole("link", {
           name: new RegExp(`^${label}\\s*[\\d,]+$`),
         });
-        expect(tile).toHaveAttribute("href", cue.to);
+        // The tracker's lists open in Orders for a role that may read them.
+        const inOrders = session.permissions.includes("orders.read");
+        expect(tile).toHaveAttribute(
+          "href",
+          (inOrders ? ordersAddressOf(cue.to) : null) ?? cue.to,
+        );
       }
       // Nothing else is a tile: the count of links is the count of cues.
       expect(within(numbers).getAllByRole("listitem")).toHaveLength(
@@ -220,8 +226,16 @@ describe("the home page of each role", () => {
     it("offers the quick actions the role had, minus New order", async () => {
       await open();
       const session = sessionFor(role);
+      // Orders is in the side panel and shows the tracker's orders too, so a
+      // role that reads it is not offered the tracker as a shortcut.
       const quick = actionsFor(session).filter(
-        (action) => action.quick && action.id !== "orders.new",
+        (action) =>
+          action.quick &&
+          action.id !== "orders.new" &&
+          !(
+            action.id === "tracker.open" &&
+            session.permissions.includes("orders.read")
+          ),
       );
       if (role === "SYSTEM_ADMIN") {
         // Its shortcuts only repeated the menu: health is there in their place.

@@ -64,7 +64,7 @@ describe("Management's overdue orders", () => {
     ).toBe(true);
     expect(
       within(section).getByRole("link", { name: "View all (21)" }),
-    ).toHaveAttribute("href", "/order-tracker?overdue=true");
+    ).toHaveAttribute("href", "/orders?overdue=true");
     expect(
       await screen.findByText(
         "21 orders are overdue. The ones worth the most are first.",

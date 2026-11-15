@@ -6,6 +6,8 @@ import { GradientText } from "@/components/kit/GradientText";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { FeatureCue } from "@/features/define";
 import { useListCount } from "@/lib/useListCount";
+import { useOrdersCount } from "../orders/useOrdersCount";
+import { useOrderLinks } from "./homeLinks";
 
 /**
  * The label takes up to two lines and the figure sits at the foot, so a row of
@@ -17,14 +19,21 @@ const LABEL = "fs-14 min-w-0 text-muted-foreground";
 /**
  * One count of the role that opens the list it counts. The number is the
  * list's own total (`useListCount`, shared with the side panel), so it cannot
- * disagree with the page behind it. It counts up the first time it is seen, and
- * shows the value at once for a person who asks for reduced motion. A count that fails keeps its place, says
- * so and offers a retry; the rest of the page stays up.
+ * disagree with the page behind it. A tile whose list is the tracker's opens
+ * Orders for a role that may read it, and then counts what Orders shows (the
+ * tracker's total leaves out the orders entered here). It counts up the first
+ * time it is seen, and shows the value at once for a person who asks for
+ * reduced motion. A count that fails keeps its place, says so and offers a
+ * retry; the rest of the page stays up.
  */
 export function CountTile({ cue }: { cue: FeatureCue }) {
   const { t } = useTranslation("home");
   const label = t(`tiles.${cue.id}`);
-  const count = useListCount(cue.api);
+  const to = useOrderLinks().list(cue.to);
+  const inOrders = to !== cue.to;
+  const tracker = useListCount(cue.api, !inOrders);
+  const orders = useOrdersCount(to.split("?")[1] ?? "", inOrders);
+  const count = inOrders ? orders : tracker;
 
   if (count.isPending) {
     return (
@@ -63,7 +72,7 @@ export function CountTile({ cue }: { cue: FeatureCue }) {
   }
   return (
     <Link
-      to={cue.to}
+      to={to}
       className={`${TILE} group transition-colors hover:bg-(--dx-hover-bg) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring`}
     >
       <span className={`${LABEL} flex items-start justify-between gap-2`}>
