@@ -3,7 +3,7 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { MemoryRouter, useLocation } from "react-router";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import i18n from "@/i18n";
 import { getTrackerListMockHandler } from "@/lib/api/generated/endpoints/tracker/tracker.msw";
 import type { TrackerList200 } from "@/lib/api/generated/model";
@@ -275,6 +275,39 @@ describe("the order tracker", () => {
       "3 open exceptions",
     );
     expect(badge).toHaveTextContent("3");
+  });
+
+  describe("on a phone", () => {
+    const realMatchMedia = window.matchMedia.bind(window);
+    afterEach(() => {
+      window.matchMedia = realMatchMedia;
+      vi.restoreAllMocks();
+    });
+
+    it("folds the overdue chip and the owner into the order's own cell, with no sideways columns for them", async () => {
+      await i18n.loadNamespaces(["order-tracker", "common"]);
+      window.matchMedia = (query: string) =>
+        ({
+          matches: query === "(max-width: 767px)",
+          media: query,
+          addEventListener: () => undefined,
+          removeEventListener: () => undefined,
+        }) as unknown as MediaQueryList;
+      server.use(getTrackerListMockHandler(page([row(2, true)])));
+      renderPage();
+      const link = await screen.findByRole("link", { name: "SO-0002" });
+      const cell = link.closest("td");
+      expect(cell).not.toBeNull();
+      expect(
+        within(cell as HTMLElement).getByText("3 days overdue"),
+      ).toBeVisible();
+      expect(within(cell as HTMLElement).getByText("Support")).toBeVisible();
+      const heads = screen
+        .getAllByRole("columnheader")
+        .map((head) => head.textContent);
+      expect(heads).not.toContain("Owner");
+      expect(heads).not.toContain("Overdue");
+    });
   });
 
   it("shows an empty state that names what is missing", async () => {
