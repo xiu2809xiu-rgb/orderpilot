@@ -142,7 +142,8 @@ export class MockWorkflowReadModel extends WorkflowReadModel {
 
   /**
    * A task the overlay has closed takes its reminder with it. A reminder about
-   * a record, such as an SPR, carries its number so it opens that record.
+   * a record, such as an SPR, carries its number so it opens that record, and
+   * says what the SPR would buy, as its task does.
    */
   remindersFor(role: InboxRole): Promise<WorkflowReminder[]> {
     const { dataset, tasks } = this.view();
@@ -153,16 +154,23 @@ export class MockWorkflowReadModel extends WorkflowReadModel {
     const refs = new Map(
       mine.flatMap((t) => (t.ref && t.orderNo ? [[t.orderNo, t.ref]] : [])),
     );
+    const sprs = new Map(
+      mine.flatMap((t) => (t.spr && t.orderNo ? [[t.orderNo, t.spr]] : [])),
+    );
     return Promise.resolve(
       dataset.reminders
         .filter(
           (reminder) =>
             reminder.toRole === role && !closedOrders.has(reminder.orderNo),
         )
-        .map((reminder) => ({
-          ...reminder,
-          ref: refs.get(reminder.orderNo) ?? null,
-        })),
+        .map((reminder) => {
+          const spr = sprs.get(reminder.orderNo);
+          return {
+            ...reminder,
+            ref: refs.get(reminder.orderNo) ?? null,
+            ...(spr ? { spr } : {}),
+          };
+        }),
     );
   }
 }

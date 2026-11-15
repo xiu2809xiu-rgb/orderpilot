@@ -1,5 +1,5 @@
 import type { SprField } from "@orderpilot/shared";
-import { Sparkles } from "lucide-react";
+import { Calculator } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/kit/Badge";
 import {
@@ -60,13 +60,17 @@ export function SprFields({ fields }: { fields: readonly SprField[] }) {
               )}
             </TableCell>
             <TableCell>
-              {/* A tinted pill in the info colour: marked, without outshouting the decision. */}
+              {/*
+                A tinted pill in the info colour: marked, without outshouting the decision.
+                A calculator, not the sparkle Spark wears: the value is worked out from
+                stock by a fixed rule, and the sparkle would say an AI chose it.
+              */}
               <Badge
                 radius="full"
                 variant={field.origin === "suggested" ? "info" : "secondary"}
               >
                 {field.origin === "suggested" ? (
-                  <Sparkles aria-hidden="true" />
+                  <Calculator aria-hidden="true" data-icon="calculated" />
                 ) : null}
                 {t(`spr.origin.${field.origin}`)}
               </Badge>

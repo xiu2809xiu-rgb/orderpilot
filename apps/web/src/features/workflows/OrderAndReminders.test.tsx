@@ -171,7 +171,7 @@ describe("an order's steps and timeline", () => {
       await screen.findByText("This order is not in the sample data"),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "Back to the task inbox" }),
+      screen.getByRole("link", { name: "Back to My tasks" }),
     ).toHaveAttribute("href", "/workflows");
   });
 });
@@ -239,6 +239,12 @@ describe("reminders", () => {
             toRole: "APPROVER",
             escalatedTo: null,
             ref: { recordNo: "SPR-20261109-0003", navisionNo: null },
+            spr: {
+              itemNo: "I-0292",
+              itemDescription: "Vertiv Rack Rail Kit",
+              quantity: "90",
+              monthsOfCover: "0.4",
+            },
           },
         ],
       }),
@@ -251,6 +257,9 @@ describe("reminders", () => {
     expect(
       await screen.findByRole("link", { name: "SPR-20261109-0003" }),
     ).toHaveAttribute("href", "/workflows/sprs/SPR-20261109-0003");
+    // What it would buy, as the task row says it.
+    expect(screen.getByText("90 × Vertiv Rack Rail Kit")).toBeInTheDocument();
+    expect(screen.getByText("Under a month of stock")).toBeInTheDocument();
     expect(
       screen.getByRole("region", { name: "Reminders for Management approver" }),
     ).toBeInTheDocument();

@@ -17,6 +17,7 @@ import { MockBadges } from "./MockBadges";
 import { RemindersForYou } from "./RemindersForYou";
 import { QueryBoundary } from "./QueryBoundary";
 import { RolePicker } from "./RolePicker";
+import { SprLine } from "./SprLine";
 import { useInboxRole } from "./useInboxRole";
 import { WorkflowNav } from "./WorkflowNav";
 
@@ -47,6 +48,12 @@ function ReminderRow({ reminder }: { reminder: WorkflowReminder }) {
     <li className="flex flex-col gap-1 py-s2 sm:flex-row sm:items-center sm:gap-s3">
       <div className="min-w-0 flex-1 space-y-1">
         <p className="font-medium">{reminder.message}</p>
+        {/* Its own line, so every row reads the same: the task, what it buys, then its dates. */}
+        {reminder.spr ? (
+          <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+            <SprLine spr={reminder.spr} />
+          </p>
+        ) : null}
         <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
           {/* A due task says so in its message; the other kinds name themselves. */}
           {reminder.kind === "TASK_DUE" ? null : (
