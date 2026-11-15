@@ -226,6 +226,17 @@ describe("the Orders workspace", () => {
     expect(screen.getByRole("button", { name: "Try again" })).toBeVisible();
   });
 
+  it("says one thing when everything fails: no counts of nothing and no columns notice beside the error", async () => {
+    stubApi({ ordersFail: true, trackerFail: true });
+    open();
+    expect(await screen.findByText(/trace-123/)).toBeVisible();
+    // "All 0" would say there are no orders; the tabs show no number until the list has answered.
+    const tabs = screen.getByRole("tablist", { name: "Views" });
+    expect(within(tabs).getByRole("tab", { name: "All" })).toBeVisible();
+    expect(tabs.textContent).not.toMatch(/\d/);
+    expect(screen.queryByText("Some columns are not available")).toBeNull();
+  });
+
   it("shows only the refusal to a role that may not read orders, with nothing to filter", async () => {
     stubApi({ ordersForbidden: true });
     open();

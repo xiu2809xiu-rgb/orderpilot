@@ -14,7 +14,7 @@ const ICON = {
  * The four views across the top of the workspace. Each shows how many orders
  * it holds under the filters in force, so a number is what the tab opens. By
  * stage is the same orders laid out as a board, so it carries no count of its
- * own. Needs me is left out for a role that holds no tasks: it would always
+ * own, and none shows until the list has answered. Needs me is left out for a role that holds no tasks: it would always
  * be empty.
  */
 export function OrdersViews({
@@ -24,7 +24,8 @@ export function OrdersViews({
   onChange,
 }: {
   view: View;
-  counts: ViewCounts;
+  /** Null while the list has not answered: a count of nothing would say there are no orders. */
+  counts: ViewCounts | null;
   showMine: boolean;
   onChange: (view: View) => void;
 }) {
@@ -52,7 +53,7 @@ export function OrdersViews({
                 <Icon aria-hidden="true" className="size-4" />
                 {t(`views.${id}`)}
               </span>
-              {id === "stage" ? null : (
+              {id === "stage" || counts === null ? null : (
                 <span className="od-view-count numeral">{counts[id]}</span>
               )}
             </TabsTrigger>
