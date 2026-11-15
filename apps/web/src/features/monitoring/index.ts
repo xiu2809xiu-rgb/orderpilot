@@ -10,8 +10,9 @@ registerAction({
   permission: "aiUsage.read",
   quick: true,
   keywords: ["cost", "usage"],
+  // Monitoring opens on Observability, so AI use names its tab.
   run: ({ navigate }) => {
-    navigate("/monitoring");
+    navigate("/monitoring?tab=aiUsage");
   },
 });
 
@@ -33,7 +34,7 @@ export default defineFeature({
     {
       id: "aiUse",
       roles: ["SYSTEM_ADMIN"],
-      to: "/monitoring",
+      to: "/monitoring?tab=aiUsage",
       api: "/monitoring/ai-usage",
     },
   ],

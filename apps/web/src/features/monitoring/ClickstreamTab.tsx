@@ -1,3 +1,4 @@
+import { roleSchema } from "@orderpilot/shared";
 import { useTranslation } from "react-i18next";
 import {
   DemoBadge,
@@ -59,7 +60,14 @@ function BrowserChoice() {
 /** Usage summary on mock data until Angelyn reads the ClickstreamEvent table (Sprints 13 to 15). */
 export function ClickstreamTab() {
   const { t } = useTranslation("monitoring");
+  const { t: tc } = useTranslation();
   const query = useOverviewClickstream();
+  // The summary sends the role as text: a role the app knows shows by its
+  // name, as everywhere else, and anything else as it was sent.
+  const roleName = (role: string) => {
+    const known = roleSchema.safeParse(role);
+    return known.success ? tc(`roles.${known.data}`) : role;
+  };
 
   if (query.isPending) return <LoadingState />;
   if (query.isError) {
@@ -131,7 +139,7 @@ export function ClickstreamTab() {
           <TableBody>
             {byRole.map((row) => (
               <TableRow key={row.role}>
-                <TableCell>{row.role}</TableCell>
+                <TableCell>{roleName(row.role)}</TableCell>
                 <TableCell className="text-right tabular-nums">
                   {row.events}
                 </TableCell>
