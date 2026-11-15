@@ -127,6 +127,28 @@
   color: var(--dx-current-fg);
   box-shadow: var(--dx-current-shadow);
 }
+/* The strip of open records: inset and glass like the top bar above it, the
+   same corner, with each record a quiet pill. The open one is marked the way
+   the panel marks its current row. */
+.dx-tabs {
+  margin: 0.5rem 0.75rem 0;
+  padding: 0.25rem;
+  background: var(--panel);
+  backdrop-filter: var(--panel-filter);
+  border: var(--dx-card-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--dx-card-shadow);
+}
+.dx-tab {
+  transition:
+    background-color var(--motion-fast) var(--ease-out),
+    color var(--motion-fast) var(--ease-out);
+}
+.dx-tab[data-current="true"] {
+  background-color: var(--dx-current-bg);
+  background-image: var(--dx-current-image);
+  box-shadow: var(--dx-current-shadow);
+}
 .dx-foot {
   padding-inline: var(--dx-panel-edge);
 }
