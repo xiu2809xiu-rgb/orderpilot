@@ -119,7 +119,9 @@ describe("the order page", () => {
     expect(screen.getByText("C-0009 Look-alike Ltd")).toBeVisible();
 
     await user.click(within(tabs).getByRole("tab", { name: /^Activity/ }));
-    const events = await screen.findByRole("tabpanel");
+    // Found by name: right after the click the Checks panel can still be the
+    // visible one, and a slow runner would read it instead.
+    const events = await screen.findByRole("tabpanel", { name: /^Activity/ });
     expect(await within(events).findByText("Payment received")).toBeVisible();
     expect(within(events).getByText("Current step")).toBeVisible();
   });
