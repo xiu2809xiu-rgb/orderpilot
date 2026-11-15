@@ -48,12 +48,12 @@
     "@commitlint/config-conventional": "21.2.4",
     "@orderpilot/eslint-config": "workspace:*",
     "@orderpilot/tsconfig": "workspace:*",
-    "@secretlint/secretlint-rule-preset-recommend": "13.0.7",
+    "@secretlint/secretlint-rule-preset-recommend": "13.1.0",
     "@types/node": "24.19.2",
-    "eslint": "10.13.0",
+    "eslint": "10.14.0",
     "lint-staged": "17.6.0",
     "prettier": "3.9.10",
-    "secretlint": "13.0.7",
+    "secretlint": "13.1.0",
     "typescript": "6.0.3"
   }
 }
