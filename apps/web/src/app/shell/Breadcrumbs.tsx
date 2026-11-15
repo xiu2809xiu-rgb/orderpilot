@@ -53,13 +53,15 @@ export function Breadcrumbs() {
       ? pages.slice(1)
       : pages;
 
+  // The trail never says a word twice: on "Insights", the group is the page.
+  const groupLabel = group ? t(`shell.groups.${group}`) : null;
+  const showGroup = groupLabel !== null && trail[0]?.label !== groupLabel;
+
   return (
     <nav aria-label={t("shell.breadcrumb")} className="min-w-0">
       <ol className="fs-14 flex items-center gap-1.5 text-muted-foreground">
-        {group ? (
-          <li className="hidden truncate lg:block">
-            {t(`shell.groups.${group}`)}
-          </li>
+        {showGroup ? (
+          <li className="hidden truncate lg:block">{groupLabel}</li>
         ) : null}
         {trail.map((item, index) => {
           const last = index === trail.length - 1;
@@ -67,7 +69,7 @@ export function Breadcrumbs() {
           const samePage = !last && item.path === trail.at(-1)?.path;
           return (
             <Fragment key={`${item.path}${item.mono ? "#no" : ""}`}>
-              {index > 0 || group ? (
+              {index > 0 || showGroup ? (
                 <li aria-hidden="true" className="hidden lg:block">
                   <ChevronRight className="size-3.5" />
                 </li>

@@ -75,20 +75,48 @@ export function panelMenu(session: Session | null): PanelGroup[] {
   })).filter((group) => group.rows.length > 0);
 }
 
-/** Whether a row is where the person is. */
-export function isRowCurrent(
-  row: PanelRow,
-  where: { pathname: string; search: string },
-): boolean {
+interface Where {
+  pathname: string;
+  search: string;
+}
+
+/** Whether a row is where the person is, by its own address and tab. */
+export function isRowCurrent(row: PanelRow, where: Where): boolean {
   return row.covers.some((entry) => isEntryActive(entry, where));
+}
+
+function sharesPath(row: PanelRow, where: Where): boolean {
+  const here = where.pathname.replace(/\/+$/, "") || "/";
+  return row.covers.some((entry) => {
+    const path = entry.to.split("?")[0] ?? "/";
+    return path !== "/" && (here === path || here.startsWith(`${path}/`));
+  });
+}
+
+/**
+ * The row the person is on. A tab of a page that has no menu entry of its own
+ * (Masking beside Users and Roles) is still in the group of the row that
+ * shares its path, and that row is current: the default tab's if there is one.
+ */
+export function currentRow(
+  groups: readonly PanelGroup[],
+  where: Where,
+): PanelRow | undefined {
+  const rows = groups.flatMap((group) => group.rows);
+  const exact = rows.find((row) => isRowCurrent(row, where));
+  if (exact) return exact;
+  const sharing = rows.filter((row) => sharesPath(row, where));
+  return (
+    sharing.find((row) => row.covers.some((e) => e.isDefaultTab === true)) ??
+    sharing[0]
+  );
 }
 
 /** The group of the row the person is on, for the first crumb of the trail. */
 export function currentGroup(
   groups: readonly PanelGroup[],
-  where: { pathname: string; search: string },
+  where: Where,
 ): GroupId | undefined {
-  return groups.find((group) =>
-    group.rows.some((row) => isRowCurrent(row, where)),
-  )?.id;
+  const row = currentRow(groups, where);
+  return groups.find((group) => row && group.rows.includes(row))?.id;
 }

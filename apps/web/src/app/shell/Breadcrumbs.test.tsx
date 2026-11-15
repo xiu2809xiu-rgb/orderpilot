@@ -51,6 +51,11 @@ function trailAt(path: string, role: Role) {
             ],
           },
           {
+            path: "insights",
+            handle: { crumb: "insights:title" },
+            element: null,
+          },
+          {
             path: "settings",
             handle: { crumb: "common:nav.settings" },
             element: null,
@@ -108,6 +113,10 @@ describe("the trail of the top bar", () => {
       "href",
       "/",
     );
+  });
+
+  it("never says a word twice: the group Insights is the page Insights", () => {
+    expect(trailAt("/insights", "MANAGEMENT")).toEqual(["Insights"]);
   });
 
   it("gives no group to a page the role has no menu entry for", () => {

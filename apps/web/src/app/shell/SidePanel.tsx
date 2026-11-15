@@ -7,7 +7,7 @@ import { useSessionStore } from "@/stores/session";
 import { Brand } from "./Brand";
 import { PanelEntryRow } from "./PanelEntryRow";
 import { PanelFoot } from "./PanelFoot";
-import { isRowCurrent, panelMenu } from "./panelMenu";
+import { currentRow, panelMenu } from "./panelMenu";
 import { UserMenu } from "./UserMenu";
 import { useScrollEdges } from "./useScrollEdges";
 
@@ -27,6 +27,7 @@ export function SidePanel({ collapsed, onNavigate }: SidePanelProps) {
   const session = useSessionStore((state) => state.session);
   const { pathname, search } = useLocation();
   const groups = panelMenu(session);
+  const here = currentRow(groups, { pathname, search });
   const edges = useScrollEdges<HTMLDivElement>();
   // The panel is drawn a second time in the sheet of a narrow window, so its
   // headings need ids of their own.
@@ -76,7 +77,7 @@ export function SidePanel({ collapsed, onNavigate }: SidePanelProps) {
                       <li key={row.entry.id}>
                         <PanelEntryRow
                           entry={row.entry}
-                          current={isRowCurrent(row, { pathname, search })}
+                          current={row === here}
                           collapsed={collapsed}
                           onNavigate={onNavigate}
                         />

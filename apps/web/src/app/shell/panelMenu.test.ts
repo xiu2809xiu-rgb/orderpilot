@@ -7,6 +7,7 @@ import {
   ORDERS_ENTRY_ID,
   TRACKER_ENTRY_ID,
   currentGroup,
+  currentRow,
   isRowCurrent,
   panelMenu,
 } from "./panelMenu";
@@ -124,5 +125,18 @@ describe("the panel menu in detail", () => {
     expect(currentGroup(groups, at("/insights"))).toBe("insights");
     expect(currentGroup(groups, at("/settings"))).toBeUndefined();
     expect(currentGroup(groups, at("/nowhere"))).toBeUndefined();
+  });
+
+  it("keeps a tab with no entry of its own in its page's group, on the row of the default tab", () => {
+    const groups = panelMenu(sessionFor("SYSTEM_ADMIN"));
+    for (const tab of ["masking", "ai", "refusals"]) {
+      const where = at("/governance", `?tab=${tab}`);
+      expect(currentGroup(groups, where), tab).toBe("control");
+      expect(currentRow(groups, where)?.entry.id, tab).toBe("governance.roles");
+    }
+    // A tab that has its own entry keeps its own row.
+    expect(currentRow(groups, at("/governance", "?tab=users"))?.entry.id).toBe(
+      "governance.users",
+    );
   });
 });
