@@ -43,7 +43,7 @@ export function limitRefusal(
 /**
  * The amount must be within the decider's own limit, while limits are on.
  * They are switchable, with none set, until Spectra confirms them (ADR 0049,
- * ADR 0054): while they are off, no amount is too large, though an approval
+ * ADR 0055): while they are off, no amount is too large, though an approval
  * still needs one, and it is never below zero.
  */
 export class ApprovalLimitRule implements PolicyRule {

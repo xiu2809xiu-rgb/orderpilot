@@ -1,6 +1,6 @@
 # ADR 0041: The authorisation policy with approval limits
 
-- **Status:** Accepted. Decisions 6, 8 and 10 are ruled on by [ADR 0054](0054-the-approver-group-replaces-the-approval-chain.md): the approver group decides once `APPROVER_GROUP` is on, and #280 removes the chain.
+- **Status:** Accepted. Decisions 6, 8 and 10 are ruled on by [ADR 0055](0055-the-approver-group-replaces-the-approval-chain.md): the approver group decides once `APPROVER_GROUP` is on, and #280 removes the chain.
 - **Date:** 2026-11-03
 - **Story:** F-3
 
