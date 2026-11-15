@@ -328,8 +328,11 @@
   font-size: var(--type-14);
 }
 
+/* The checkbox and the row menu are 32 px buttons: they need no more than 4 px each side. */
 .od-table td:first-child,
-.od-table th:first-child {
+.od-table th:first-child,
+.od-table td:last-child,
+.od-table th:last-child {
   padding-inline: 0.25rem;
 }
 
