@@ -1,3 +1,4 @@
+// Kit: ReUI / badge. Licence: MIT. Adapted to OrderPilot's tokens.
 import type { LucideIcon } from "lucide-react";
 import { Badge } from "./Badge";
 
