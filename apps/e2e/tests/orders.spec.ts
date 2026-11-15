@@ -282,3 +282,35 @@ test.describe("The Orders workspace", () => {
     await expectRefused("SYSTEM_ADMIN", "GET", "/orders/SO-0001");
   });
 });
+
+// A touch screen is what the warehouse uses: Chromium reports a coarse pointer
+// for a context with touch, so the page takes its touch sizes.
+test.describe("The Orders workspace on a touch screen", () => {
+  test.use({ hasTouch: true, viewport: { width: 820, height: 1180 } });
+
+  test("each checkbox is a 44 px target, and the pinned order column covers none of the customer column", async ({
+    page,
+  }) => {
+    await signInAs(page, "SUPPORT");
+    await page.goto("/orders?source=sample");
+    await expect(
+      page.getByRole("link", { name: SAMPLE_LINK }).first(),
+    ).toBeVisible();
+    const [select, order, customer] = await page.evaluate(() =>
+      [...document.querySelectorAll(".od-table tbody tr:first-child td")]
+        .slice(0, 3)
+        .map((cell) => {
+          const box = cell.getBoundingClientRect();
+          return { left: box.left, right: box.right, width: box.width };
+        }),
+    );
+    if (!select || !order || !customer) {
+      throw new Error("The first row has fewer than three cells.");
+    }
+    expect(select.width, "the checkbox cell").toBeGreaterThanOrEqual(44);
+    expect(
+      order.right,
+      "the pinned order cell ends where the customer cell starts",
+    ).toBeLessThanOrEqual(customer.left + 0.5);
+  });
+});

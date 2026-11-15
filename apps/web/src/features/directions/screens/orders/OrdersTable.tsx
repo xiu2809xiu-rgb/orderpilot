@@ -9,6 +9,7 @@ import { DataTableBody } from "@/components/common/data-table/DataTableBody";
 import type { TableStatus } from "@/components/common/data-table/DataTableBody";
 import { DataTableHead } from "@/components/common/data-table/DataTableHead";
 import { Table } from "@/components/ui/table";
+import { useMediaQuery } from "@/lib/useMediaQuery";
 import { orderHref } from "../home/homeLinks";
 import { OrderRowMenu } from "./OrderRowMenu";
 import type { OrderRow } from "./orderRow";
@@ -43,6 +44,19 @@ const WIDTH: Readonly<Record<string, number>> = {
   entry: 96,
   source: 100,
   actions: 42,
+};
+
+/**
+ * A touch screen keeps a 44 px checkbox column, so each box stays a 44 px
+ * target, and orders.css pins the order column 44 px from the edge to match.
+ * The column must be that wide too, or the pinned order cell slides over the
+ * customer cell. The customer column gives up the 12 px, so the default
+ * columns still fit 1440 px.
+ */
+const TOUCH = "(pointer: coarse)";
+const TOUCH_WIDTH: Readonly<Record<string, number>> = {
+  select: 44,
+  customerName: 122,
 };
 
 /**
@@ -83,8 +97,11 @@ export function OrdersTable({
   const tableSort: TableSort | null = sort
     ? { columnId: sort.id, direction: sort.direction }
     : null;
+  const touch = useMediaQuery(TOUCH);
+  const widthOf = (id: string) =>
+    (touch ? TOUCH_WIDTH[id] : undefined) ?? WIDTH[id] ?? 120;
   const widths = ["select", ...columns.map((column) => column.id), "actions"];
-  const total = widths.reduce((sum, id) => sum + (WIDTH[id] ?? 120), 0);
+  const total = widths.reduce((sum, id) => sum + widthOf(id), 0);
   return (
     <ScrollRegion label={t("table.region")} className="od-scroll">
       <Table
@@ -95,7 +112,7 @@ export function OrdersTable({
         <caption className="sr-only">{t("table.caption")}</caption>
         <colgroup>
           {widths.map((id) => (
-            <col key={id} style={{ width: WIDTH[id] ?? 120 }} />
+            <col key={id} style={{ width: widthOf(id) }} />
           ))}
         </colgroup>
         <DataTableHead

@@ -978,7 +978,8 @@
   min-width: 2rem;
 }
 
-/* A touch screen keeps the 44 px checkbox column, so each box stays a 44 px target. */
+/* A touch screen keeps the 44 px checkbox column, so each box stays a 44 px
+   target. OrdersTable sizes the column to match, so the pin covers nothing. */
 @media (pointer: coarse) {
   .od-table [class~="left-11"] {
     left: 2.75rem;
