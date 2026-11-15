@@ -157,6 +157,8 @@ await this.authorisation.enforce(
 
 ### The absence and escalation rule (Q-6)
 
+**Replaced by [the approver group](#the-approver-group-252) once `APPROVER_GROUP` is on.** Until area 2's #251 turns it on, this is still the rule, unchanged, and #280 removes it afterwards.
+
 An open rule, configuration until Spectra answers [Q-6](../client/questions-for-client.md) (A-23, A-24):
 
 1. The requester's approver (their Approver ID) decides.
@@ -191,11 +193,12 @@ F-4 adds three rules to the same chain ([ADR 0044](../adr/0044-no-self-approval-
 
 **The duties kept apart**, configuration until Spectra confirms them:
 
-| Earlier duty                | Rules out, on the same record                                            |
-| --------------------------- | ------------------------------------------------------------------------ |
-| `spr.raise` (the requester) | `spr.approve`                                                            |
-| `vendor-payment.approve`    | `payment-hold.clear`                                                     |
-| `vendor-bank.change`        | `payment-hold.clear`, `vendor-payment.approve`, `vendor-payment.release` |
+| Earlier duty                        | Rules out, on the same record                                            |
+| ----------------------------------- | ------------------------------------------------------------------------ |
+| `spr.raise` (the requester)         | `spr.approve`                                                            |
+| `spr.route` (the coordinator, #252) | `spr.approve`                                                            |
+| `vendor-payment.approve`            | `payment-hold.clear`                                                     |
+| `vendor-bank.change`                | `payment-hold.clear`, `vendor-payment.approve`, `vendor-payment.release` |
 
 Confirming a customer's payment (`customer-payment.confirm`) and paying a vendor (`vendor-payment.approve`, `vendor-payment.release`) are separate actions, and the customer's payment sits in no pair.
 
@@ -285,6 +288,61 @@ await authorisation.enforce(
 - **Area 2 and P-104:** call `enforce` with the stored `vendorNo`, and show `openHoldsFor`.
 - **`payments.post`** is held by no role, so vendor payments are refused for everyone until P-104's permission is decided.
 - **Events** wait for the bus (P-15).
+
+## The approver group (#252)
+
+Spectra's process: a coordinator, a Support user, routes each SPR to three management approvers, any one of whom decides, and hands it back ([ADR 0054](../adr/0054-the-approver-group-replaces-the-approval-chain.md)).
+
+- **The group** is every enabled user with the `APPROVER` role except the requester. Absence moves nothing, and Management is not in it.
+- **Limits** are switchable, with none set: `APPROVAL_LIMITS=off|on`, off by default. While they are on, only the approvers whose own limit covers the amount may decide.
+- **The coordinator** holds `spr.route`, with `spr.read`, and never decides: Support has no `approvals.decide`, and whoever routed an SPR may not decide it. There is no coordinator role, so Support is an assumption until Spectra answers Q-50.
+- **A temporary switch, `APPROVER_GROUP=off|on`, off by default.** While it is off, the old chain above decides, unchanged. #251 turns it on, and #280 then removes the switch, the old chain, `deciderFor`, substitutes and away dates.
+- **Code:** `domain/approver-group.ts` (the group, a pure function), `ApprovalRouteRule` (both paths), `AuthorisationService.approversFor`, and the `spr.route` action with its duties pair.
+- **Tests:** `approver-group.test.ts`, `approval-route.test.ts`, and three blocks in `test/http/governance-controls.test.ts`: the group, the group with its limits on, and the coordinator. F-3's block also proves that the switch off keeps the old chain.
+
+### How area 2 uses it
+
+Area 2 routes, records the decision and refuses a second one. Area 4 says who may decide, and refuses who may not.
+
+```ts
+// 1. Before routing: the coordinator asks the policy; area 2 stores who routed it.
+await authorisation.enforce(
+  {
+    actor: { userId: auth.user.id, role: auth.user.role },
+    action: "spr.route",
+    resource: { type: "Spr", id: spr.recordNo },
+    requesterUserId: spr.raisedByUserId,
+  },
+  { ip: req.ip ?? null, traceId: requestIdOf(req) },
+);
+
+// 2. Whom to route to: each is { userId, displayName }, never an email.
+const { approvers, reason } = await authorisation.approversFor({
+  requester: spr.raisedByUserId,
+  action: "spr.approve",
+  amount: spr.amount,
+});
+// An empty list comes with a reason to show. Otherwise each approver gets the task.
+
+// 3. A decision: any one of them may make it, and the first one closes the SPR.
+await authorisation.enforce(
+  {
+    actor: { userId: auth.user.id, role: auth.user.role },
+    action: "spr.approve",
+    resource: { type: "Spr", id: spr.recordNo },
+    amount: spr.amount,
+    requesterUserId: spr.raisedByUserId,
+    earlierDuties: { "spr.route": spr.routedByUserId },
+  },
+  { ip: req.ip ?? null, traceId: requestIdOf(req) },
+);
+```
+
+- **Take the requester, who routed it and the amount from area 2's stored SPR,** never from the request body.
+- **A second decision** on an SPR already decided is area 2's 409, audited on area 2's side. Area 4's policy is not asked.
+- **`deciderFor` is deprecated.** It still works, and still decides who may approve while `APPROVER_GROUP` is off. Area 2 stops calling it in #251: `spr-routing.service.ts`, `spr-approval.service.ts` and `workflows.service.ts`.
+- **Turning the group on** is #251's, because it changes who may decide, so area 2's tests for the old chain change with it.
+- **Until #251,** a request the old chain escalates to Management while the approver is away is decided by Management only while the group is off. Once it is on, Management decides no SPR.
 
 ## Finding and undoing on the matrix (F-8)
 
