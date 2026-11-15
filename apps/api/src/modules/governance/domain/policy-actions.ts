@@ -1,6 +1,6 @@
 import type { Permission } from "@orderpilot/shared";
 
-/** Which Navision approval limit an action is checked against. */
+/** Which Business Central approval limit an action is checked against. */
 export type LimitKind = "sales" | "purchase";
 
 export interface PolicyAction {

@@ -25,13 +25,13 @@ function isAvailable(approver: Approver | undefined, now: Date): boolean {
 }
 
 /**
- * Who decides a request raised by `requesterUserId`, along Navision's chain.
- * The requester's Approver ID decides. While they are away or disabled, their
- * substitute does. When the substitute is not set, is the approver themselves,
- * has no setup, is disabled or is away too, the request escalates to the
- * absent approver's own Approver ID. One level only: if that person cannot act
- * either, nobody may decide, rather than the request reaching someone the
- * setup never named.
+ * Who decides a request raised by `requesterUserId`, along Business Central's
+ * approval chain. The requester's Approver ID decides. While they are away or
+ * disabled, their substitute does. When the substitute is not set, is the
+ * approver themselves, has no setup, is disabled or is away too, the request
+ * escalates to the absent approver's own Approver ID. One level only: if that
+ * person cannot act either, nobody may decide, rather than the request reaching
+ * someone the setup never named.
  *
  * The requester is never handed their own request (F-4): wherever they appear
  * on the chain, they are passed over like someone away, and the request moves

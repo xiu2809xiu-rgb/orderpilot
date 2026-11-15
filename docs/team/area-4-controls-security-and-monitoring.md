@@ -29,7 +29,7 @@ How area 4 meets the others ([How the areas connect](../../CLAUDE.md#how-the-are
 
 - **The policy is enforced on the server.** Every endpoint that acts calls it, through area 1's guard (planned: P-10). Hiding a button is never the control.
 - **One shape for every decision:** allowed or refused, the rule that decided, and a reason a person can read. A refusal returns the standard error envelope `{ error: { code, message, details, traceId } }` and is audited.
-- **Approval limits and delegation** follow the shape of Navision's Approval User Setup (User ID, Approver ID, Sales and Purchase Amount Approval Limits, Unlimited flags, Substitute), shared with area 2 ([domain notes](../research/domain-notes.md)).
+- **Approval limits and delegation** follow the shape of Business Central's Approval User Setup (User ID, Approver ID, Sales and Purchase Amount Approval Limits, Unlimited flags, Substitute), shared with area 2 ([domain notes](../research/domain-notes.md)).
 - **Bank details are compared with the Vendor Bank Account on record** (Bank Account No., SWIFT Code, IBAN). Any difference holds the payment. Area 2's state machine shows the hold and blocks the payment until it is cleared.
 - **AI destinations:** area 1's gateway asks area 4's policy whether a piece of data may go to a provider. The default is synthetic data only.
 
@@ -70,7 +70,7 @@ F-1 and G-1 have landed. F-2 fills in its item when it does.
   - **Masking** in `apps/api/src/modules/governance/domain/masking.ts`: `mask(rules, role, field, value)` returns a `MaskedField` whose value is `null` for a role the rule does not list, so the value never reaches the browser. One neutral sample rule, `sample.customerNote`, shown on the Masking tab through P-12's `MaskedValue` with the reason. `GET /governance/masking/sample`.
   - **Classification and the AI rule:** the four levels and the mask reasons are in `packages/shared/src/governance/classification.ts`. `decideAiDestination` (`domain/ai-destination-policy.ts`) answers what data may go to which provider; the default is synthetic data only. `GET /governance/ai-destinations`, `POST /governance/ai-destinations/check`: P-17's gateway calls the second.
   - **How a refusal looks:** the standard error envelope with a trace id (403 `FORBIDDEN`, a generic message; the reason goes to the audit trail), drawn by `RefusalPanel`. The Refusals tab shows both. `PolicyRequest` and `PolicyDecision` in `governance/decision.ts` are the shape for your policy.
-  - **Contracts only, no table and no rule:** approval limits and a substitute in the shape of Navision's Approval User Setup (`governance/approval.ts`), and the payment type, prepayment among them, for payment confirmation (`governance/payment.ts`, for C-1's payment step to record).
+  - **Contracts only, no table and no rule:** approval limits and a substitute in the shape of Business Central's Approval User Setup (`governance/approval.ts`), and the payment type, prepayment among them, for payment confirmation (`governance/payment.ts`, for C-1's payment step to record).
   - **Data scope:** `RoleDataScope` in `governance.prisma` holds `all`, `brands` or `own` per role. It is stored and shown. Nothing filters a list by it yet.
   - **Routes and requests:** `apps/api/src/modules/governance/` (controllers, services, `domain/` with its own unit tests), `apps/api/requests/governance.http`, generated hooks in `apps/web/src/lib/api/generated/endpoints/governance`. Component tests use MSW and `test/http/governance.test.ts` runs against the real database.
   - **`it.todo` tests** in `apps/api/test/http/governance-controls.test.ts`, named by control: approval limits, no self-approval, the bank-detail hold, masking for each role, a direct API call being refused (E2E #3), and payment confirmation.
@@ -115,7 +115,7 @@ F-3 brings the first real policy ([ADR 0041](../adr/0041-the-authorisation-polic
   - The rules are `system-admin`, `permission`, `approval-route` and `approval-limit`, in that order, and the first refusal wins.
   - The guard runs the first two through `GovernancePermissionPolicy`.
   - An area runs all four through `AuthorisationService.enforce`.
-- **The approval setup table**, `ApprovalUserSetup`: Navision's Approval User Setup plus `awayFrom` and `awayUntil`.
+- **The approval setup table**, `ApprovalUserSetup`: Business Central's Approval User Setup plus `awayFrom` and `awayUntil`.
   - Every change goes through `ApprovalSetupService.save`, which audits the before and after.
   - `seedApprovalSetups` writes the sample chain.
 - **Tests:** a unit test beside each rule, and `apps/api/test/http/governance-controls.test.ts` against the real database, through a stand-in route that only the test app registers.
