@@ -71,7 +71,8 @@ export default function WorkflowsPage() {
   return (
     <div className="space-y-s4">
       <PageHeader
-        title={t("inbox.heading")}
+        // One name for one page: the sidebar's "My tasks", unless the person looks at other roles.
+        title={t(mayPick ? "inbox.heading" : "inbox.myHeading")}
         description={
           mayPick ? t("inbox.otherDescription") : t("inbox.ownDescription")
         }
@@ -90,7 +91,11 @@ export default function WorkflowsPage() {
         />
       ) : (
         <SectionCard
-          title={t("inbox.forRole", { role: roleName })}
+          title={
+            mayPick
+              ? t("inbox.forRole", { role: roleName })
+              : t("inbox.waitingOnYou")
+          }
           description={t("inbox.count", { count: query.data?.meta.total ?? 0 })}
           actions={
             <Button
@@ -130,7 +135,11 @@ export default function WorkflowsPage() {
                 }
               />
             ) : (
-              <ul className="space-y-s2">
+              <ul
+                className={
+                  role === "WAREHOUSE" ? "space-y-s2" : "divide-y divide-border"
+                }
+              >
                 {tasks.map((task) => (
                   <TaskCard
                     key={task.id}

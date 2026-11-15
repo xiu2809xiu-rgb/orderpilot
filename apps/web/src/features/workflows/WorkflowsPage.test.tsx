@@ -86,7 +86,8 @@ describe("the task inbox", () => {
       ),
     ).toBeInTheDocument();
     expect(screen.getByText("SPR-20261102-0002")).toBeInTheDocument();
-    expect(screen.getByText(/none yet/)).toBeInTheDocument();
+    // A compact row: no "none yet" filler while Business Central has no number.
+    expect(screen.queryByText(/none yet/)).toBeNull();
     expect(screen.getByText("Mock")).toBeInTheDocument();
     expect(screen.getByText("Synthetic demo data")).toBeInTheDocument();
     expect(screen.getByText("Overdue")).toBeInTheDocument();
@@ -95,6 +96,65 @@ describe("the task inbox", () => {
       "/workflows/sprs/SPR-20261102-0002",
     );
     expect(await axeViolations(container)).toEqual([]);
+  });
+
+  it("leads each row with the customer and amount, quietly, with Business Central's number once it exists", async () => {
+    server.use(
+      getWorkflowsMyTasksMockHandler(
+        page([
+          {
+            ...SPR_TASK,
+            customerName: "Brindle Coast Imports",
+            amount: "4867.02",
+            currencyCode: "USD",
+            ref: { recordNo: "SPR-20261102-0002", navisionNo: "SPR-1001" },
+          },
+        ]),
+      ),
+    );
+    open("APPROVER");
+    expect(
+      await screen.findByText("Brindle Coast Imports"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("USD 4,867.02")).toBeInTheDocument();
+    expect(screen.getByText("SPR-1001")).toBeInTheDocument();
+    // No row shouts: the page keeps its one primary action for itself.
+    expect(screen.getByRole("link", { name: /Open request/ })).not.toHaveClass(
+      "bg-primary",
+    );
+  });
+
+  // The approver tells requests apart by what they buy, not by the task's title.
+  it("says what an SPR would buy, flags under a month of stock, and says when it is due today", async () => {
+    server.use(
+      getWorkflowsMyTasksMockHandler(
+        page([
+          {
+            ...SPR_TASK,
+            customerName: "Brindle Coast Imports",
+            dueAt: new Date().toISOString(),
+            spr: {
+              itemNo: "I-0292",
+              itemDescription: "Vertiv Rack Rail Kit",
+              quantity: "90.00",
+              monthsOfCover: "0.4",
+            },
+          },
+        ]),
+      ),
+    );
+    open("APPROVER");
+    expect(
+      await screen.findByText("90 × Vertiv Rack Rail Kit"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Under a month of stock")).toBeInTheDocument();
+    expect(screen.getByText("Due today")).toBeInTheDocument();
+    expect(screen.queryByText(SPR_TASK.title)).toBeNull();
+    // One name for the page, as in the sidebar.
+    expect(
+      screen.getByRole("heading", { level: 1, name: "My tasks" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Waiting on you")).toBeInTheDocument();
   });
 
   it("shows an SPR handed to this person above their inbox, saying why", async () => {

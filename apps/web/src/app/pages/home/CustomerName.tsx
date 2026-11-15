@@ -7,7 +7,7 @@ export function CustomerName({ name }: { name: string | null | undefined }) {
   if (!name) return null;
   return (
     <span
-      className="block in-[table]:max-w-40 in-[table]:truncate"
+      className="block in-[table]:max-w-52 in-[table]:truncate"
       title={name}
     >
       {name}

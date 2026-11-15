@@ -1,7 +1,9 @@
 import type { SprDetail } from "@orderpilot/shared";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { formatAmount } from "./format";
+import { RecordLink, StatusBadge } from "@/components/common";
+import { cn } from "@/lib/utils";
+import { formatAmount, formatQuantity } from "./format";
 
 function Fact({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -14,50 +16,116 @@ function Fact({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-/** The request itself: vendor, item, quantity and amount. */
+const LINK = "text-primary underline-offset-4 hover:underline";
+
+/** Money as the rest of the app writes it: the currency, then the amount. */
+function money(amount: string, currency: string): string {
+  return `${currency} ${formatAmount(amount)}`;
+}
+
+/** The request itself: vendor, item, quantity and amount, each record a link. */
 export function SprSummary({ spr }: { spr: SprDetail }) {
   const { t } = useTranslation("workflows");
   return (
     <dl className="grid gap-s2 sm:grid-cols-2">
       <Fact label={t("spr.vendor")}>
-        {spr.vendor.name} ({spr.vendor.no})
+        <RecordLink
+          to={`/master-data/vendors/${spr.vendor.no}`}
+          className={LINK}
+        >
+          {spr.vendor.name}
+        </RecordLink>{" "}
+        ({spr.vendor.no})
       </Fact>
       <Fact label={t("spr.item")}>
-        {spr.item.description} ({spr.item.no})
+        <RecordLink to={`/master-data/items/${spr.item.no}`} className={LINK}>
+          {spr.item.description}
+        </RecordLink>{" "}
+        ({spr.item.no})
       </Fact>
-      <Fact label={t("spr.quantity")}>{formatAmount(spr.quantity)}</Fact>
+      <Fact label={t("spr.quantity")}>{formatQuantity(spr.quantity)}</Fact>
       <Fact label={t("spr.unitCost")}>
-        {formatAmount(spr.unitCost)} {spr.currencyCode}
+        {money(spr.unitCost, spr.currencyCode)}
       </Fact>
-      <Fact label={t("spr.amount")}>
-        {formatAmount(spr.amount)} {spr.currencyCode}
-      </Fact>
+      <Fact label={t("spr.amount")}>{money(spr.amount, spr.currencyCode)}</Fact>
+      {spr.orderNo ? (
+        <Fact label={t("spr.order")}>
+          <RecordLink
+            to={`/workflows/orders/${spr.orderNo}`}
+            className={cn(LINK, "font-mono")}
+          >
+            {spr.orderNo}
+          </RecordLink>
+        </Fact>
+      ) : null}
     </dl>
   );
 }
 
-/** The stock figures the suggestion was worked out from. */
+function Group({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <section className="space-y-s1">
+      <h3 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+        {title}
+      </h3>
+      <dl className="grid gap-s2 sm:grid-cols-3">{children}</dl>
+    </section>
+  );
+}
+
+/**
+ * Why there is an SPR: first the stock and sales Spectra raises one from, then
+ * the order whose shortfall sets the suggested quantity.
+ */
 export function SprBasis({ basis }: { basis: SprDetail["basis"] }) {
   const { t } = useTranslation("workflows");
   return (
-    <dl className="grid gap-s2 sm:grid-cols-3">
-      <Fact label={t("spr.ordered")}>{formatAmount(basis.ordered)}</Fact>
-      <Fact label={t("spr.inventory")}>{formatAmount(basis.inventory)}</Fact>
-      <Fact label={t("spr.qtyOnSalesOrder")}>
-        {formatAmount(basis.qtyOnSalesOrder)}
-      </Fact>
-      <Fact label={t("spr.qtyOnPurchOrder")}>
-        {formatAmount(basis.qtyOnPurchOrder)}
-      </Fact>
-      <Fact label={t("spr.availableStock")}>
-        {formatAmount(basis.availableStock)}
-      </Fact>
-      <Fact label={t("spr.shortfall")}>{formatAmount(basis.shortfall)}</Fact>
-    </dl>
+    <div className="space-y-s3">
+      <Group title={t("spr.stockAndSales")}>
+        <Fact label={t("spr.inventory")}>
+          {formatQuantity(basis.inventory)}
+        </Fact>
+        <Fact label={t("spr.runRate3m")}>
+          {formatQuantity(basis.runRate3m)}
+        </Fact>
+        <Fact label={t("spr.monthsOfCover")}>
+          {basis.monthsOfCover === null ? (
+            t("spr.noSales")
+          ) : (
+            <span className="inline-flex flex-wrap items-center gap-2">
+              {formatAmount(basis.monthsOfCover)}
+              {/* Under a month of stock is what makes an SPR urgent. */}
+              {Number(basis.monthsOfCover) < 1 ? (
+                <StatusBadge tone="warning">{t("spr.lowCover")}</StatusBadge>
+              ) : null}
+            </span>
+          )}
+        </Fact>
+      </Group>
+      <Group title={t("spr.thisOrder")}>
+        <Fact label={t("spr.ordered")}>{formatQuantity(basis.ordered)}</Fact>
+        <Fact label={t("spr.qtyOnSalesOrder")}>
+          {formatQuantity(basis.qtyOnSalesOrder)}
+        </Fact>
+        <Fact label={t("spr.qtyOnPurchOrder")}>
+          {formatQuantity(basis.qtyOnPurchOrder)}
+        </Fact>
+        <Fact label={t("spr.availableStock")}>
+          {formatQuantity(basis.availableStock)}
+        </Fact>
+        <Fact label={t("spr.shortfall")}>
+          {formatQuantity(basis.shortfall)}
+        </Fact>
+      </Group>
+    </div>
   );
 }
 
-/** The approver, their limits and who stands in, from the approval setup. */
+/**
+ * Who decides, as Spectra described it, then any limit or stand-in the setup
+ * still holds. A row the setup does not hold is left out rather than shown as
+ * "None". No single approver is named: any one of the three decides.
+ */
 export function ApproverFacts({ spr }: { spr: SprDetail }) {
   const { t } = useTranslation("workflows");
   const { setup } = spr.approver;
@@ -65,26 +133,37 @@ export function ApproverFacts({ spr }: { spr: SprDetail }) {
     unlimited
       ? t("spr.unlimited")
       : amount
-        ? `${t("spr.limited")}: ${formatAmount(amount)} ${spr.currencyCode}`
+        ? `${t("spr.limited")}: ${money(amount, spr.currencyCode)}`
         : t("spr.noLimit");
+  const noLimits =
+    setup.unlimitedSalesApproval && setup.unlimitedPurchaseApproval;
   return (
     <dl className="grid gap-s2 sm:grid-cols-2">
-      <Fact label={t("spr.approverName")}>{spr.approver.displayName}</Fact>
-      <Fact label={t("spr.approverId")}>
-        {spr.escalatesToName ?? t("spr.noSubstitute")}
-      </Fact>
-      <Fact label={t("spr.salesLimit")}>
-        {limit(setup.salesAmountApprovalLimit, setup.unlimitedSalesApproval)}
-      </Fact>
-      <Fact label={t("spr.purchaseLimit")}>
-        {limit(
-          setup.purchaseAmountApprovalLimit,
-          setup.unlimitedPurchaseApproval,
-        )}
-      </Fact>
-      <Fact label={t("spr.substitute")}>
-        {spr.substituteName ?? t("spr.noSubstitute")}
-      </Fact>
+      <Fact label={t("spr.decidedBy")}>{t("spr.anyOfThree")}</Fact>
+      {noLimits ? (
+        <Fact label={t("spr.limits")}>{t("spr.noLimits")}</Fact>
+      ) : (
+        <>
+          <Fact label={t("spr.salesLimit")}>
+            {limit(
+              setup.salesAmountApprovalLimit,
+              setup.unlimitedSalesApproval,
+            )}
+          </Fact>
+          <Fact label={t("spr.purchaseLimit")}>
+            {limit(
+              setup.purchaseAmountApprovalLimit,
+              setup.unlimitedPurchaseApproval,
+            )}
+          </Fact>
+        </>
+      )}
+      {spr.escalatesToName ? (
+        <Fact label={t("spr.approverId")}>{spr.escalatesToName}</Fact>
+      ) : null}
+      {spr.substituteName ? (
+        <Fact label={t("spr.substitute")}>{spr.substituteName}</Fact>
+      ) : null}
     </dl>
   );
 }
