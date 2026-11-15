@@ -17,8 +17,11 @@ import { buildRoutes, createTestRouter } from "./router";
 
 /** The home page greets by the part of the day, so a test names only the person. */
 const GREETING = /^Good (morning|afternoon|evening), /;
-const greeting = (firstName: string) =>
-  new RegExp(`^Good (morning|afternoon|evening), ${firstName}$`);
+// A function, not a RegExp built from the name: Semgrep blocks a non-literal RegExp.
+const greeting = (firstName: string) => (name: string) =>
+  ["morning", "afternoon", "evening"].some(
+    (part) => name === `Good ${part}, ${firstName}`,
+  );
 
 const paths = (fetchMock: ReturnType<typeof vi.fn>) =>
   (fetchMock.mock.calls as unknown as [string][]).map(([url]) => url);

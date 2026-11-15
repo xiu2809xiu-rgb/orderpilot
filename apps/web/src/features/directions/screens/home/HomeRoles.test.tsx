@@ -208,7 +208,11 @@ describe("the home page of each role", () => {
       for (const { cue } of cuesFor(session)) {
         const label = i18n.t(`home:tiles.${cue.id}`);
         const tile = await within(numbers).findByRole("link", {
-          name: new RegExp(`^${label}\\s*[\\d,]+$`),
+          // The label, then its figure. A function, because Semgrep blocks a
+          // RegExp built from a variable.
+          name: (name) =>
+            name.startsWith(label) &&
+            /^\s*[\d,]+$/.test(name.slice(label.length)),
         });
         // The tracker's lists open in Orders for a role that may read them.
         const inOrders = session.permissions.includes("orders.read");
