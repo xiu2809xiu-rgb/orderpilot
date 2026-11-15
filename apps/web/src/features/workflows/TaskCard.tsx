@@ -73,7 +73,12 @@ export function TaskCard({
         to={target}
         className={cn(
           touch
-            ? cn(buttonVariants({ size: "lg" }), "min-h-14 w-full text-base")
+            ? // Outline, as at a desk: twenty bright primary buttons in one inbox
+              // would leave no primary action on the page.
+              cn(
+                buttonVariants({ variant: "outline", size: "lg" }),
+                "min-h-14 w-full text-base",
+              )
             : cn(buttonVariants({ variant: "outline" }), "min-h-11 shrink-0"),
         )}
       >
