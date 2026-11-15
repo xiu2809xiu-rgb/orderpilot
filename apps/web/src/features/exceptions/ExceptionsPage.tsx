@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { Truck } from "lucide-react";
@@ -17,9 +17,35 @@ import {
 import { Button } from "@/components/ui/button";
 import { useExceptionsList } from "@/lib/api/generated/endpoints/exceptions/exceptions";
 import { tableStatusOf } from "@/lib/query-status";
-import { ClampedText } from "./ClampedText";
+import { CheckColumnFilter } from "./CheckColumnFilter";
+import { checkLabelOf } from "./checkLabels";
+import { DiscrepancyCell } from "./DiscrepancyCell";
 
-const URL_FILTERS = ["state"] as const;
+const URL_FILTERS = ["state", "rule"] as const;
+
+/**
+ * The rows already on screen, narrowed to one check type and put in order by
+ * its order number or customer. This is the page's own rows only: the server
+ * still decides which page of the queue it sends, so a match outside this
+ * page is not pulled in and the total above the table still counts the
+ * whole, unnarrowed queue.
+ */
+function visibleRows(
+  rows: readonly CheckException[],
+  rule: string | undefined,
+  sort: { columnId: string; direction: "asc" | "desc" } | null,
+): CheckException[] {
+  const narrowed = rule
+    ? rows.filter((row) => checkLabelOf(row.ruleLabel) === rule)
+    : rows;
+  if (!sort || (sort.columnId !== "order" && sort.columnId !== "customer")) {
+    return [...narrowed];
+  }
+  const direction = sort.direction === "asc" ? 1 : -1;
+  const key = (row: CheckException) =>
+    sort.columnId === "order" ? row.orderNo : row.customerName;
+  return [...narrowed].sort((a, b) => key(a).localeCompare(key(b)) * direction);
+}
 
 /** The exceptions queue: failed checks waiting for a person, on mock data. Newest first. */
 export default function ExceptionsPage() {
@@ -41,6 +67,20 @@ export default function ExceptionsPage() {
     },
     { query: { placeholderData: (previous) => previous } },
   );
+  const ruleFilter =
+    typeof query.filters.rule === "string" ? query.filters.rule : undefined;
+  const onSelectRule = useCallback(
+    (next: string | undefined) => {
+      const filters = { ...query.filters };
+      if (next) {
+        filters.rule = next;
+      } else {
+        delete filters.rule;
+      }
+      setQuery({ ...query, page: 1, filters });
+    },
+    [query, setQuery],
+  );
 
   const columns = useMemo<DataTableColumn<CheckException>[]>(
     () => [
@@ -50,79 +90,63 @@ export default function ExceptionsPage() {
         cell: (row) => (
           <RecordLink
             to={`/order-tracker/${row.orderNo}`}
-            className="-my-0.5 inline-block py-0.5 underline-offset-4 hover:underline"
+            className="-my-0.5 inline-block py-0.5 font-mono font-medium text-primary underline-offset-4 hover:underline"
           >
             {row.orderNo}
           </RecordLink>
         ),
         exportValue: (row) => row.orderNo,
         hideable: false,
-      },
-      {
-        id: "summary",
-        header: t("list.columns.summary"),
-        // On a phone this cell moves under the order number, in a cell that
-        // keeps one line, so it asks for its own line breaks and a width to wrap in.
-        cell: (row) => (
-          <span className="whitespace-normal max-md:inline-block max-md:min-w-52">
-            {row.summary}
-          </span>
-        ),
-        wrap: true,
-        exportValue: (row) => row.summary,
-      },
-      {
-        id: "state",
-        header: t("list.columns.state"),
-        cell: (row) => (
-          <StatusBadge tone={row.state === "OPEN" ? "warning" : "success"}>
-            {t(`list.state.${row.state}`)}
-          </StatusBadge>
-        ),
-        exportValue: (row) => t(`list.state.${row.state}`),
+        sortable: true,
       },
       {
         id: "customer",
         header: t("list.columns.customer"),
         cell: (row) => (
-          <ClampedText className="max-w-56">
-            {`${row.customerName} (${row.customerNo})`}
-          </ClampedText>
+          <span>
+            {row.customerName}{" "}
+            <span className="font-mono text-xs text-muted-foreground">
+              {row.customerNo}
+            </span>
+          </span>
         ),
         exportValue: (row) => `${row.customerNo} ${row.customerName}`,
-        // Hidden at first so the columns that say what to do fit a laptop; the
-        // order's own page names the customer.
-        defaultHidden: true,
+        sortable: true,
       },
       {
         id: "rule",
         header: t("list.columns.rule"),
-        cell: (row) => (
-          <ClampedText className="max-w-64">{row.ruleLabel}</ClampedText>
+        headerContent: (
+          <CheckColumnFilter value={ruleFilter} onSelect={onSelectRule} />
         ),
-        exportValue: (row) => row.ruleLabel,
-        // The summary already says which check failed, in the words of the case.
-        defaultHidden: true,
+        cell: (row) => checkLabelOf(row.ruleLabel),
+        exportValue: (row) => checkLabelOf(row.ruleLabel),
+      },
+      {
+        id: "discrepancy",
+        header: t("list.columns.discrepancy"),
+        cell: (row) => (
+          <DiscrepancyCell
+            row={row}
+            expectedLabel={t("list.columns.expected")}
+            actualLabel={t("list.columns.actual")}
+          />
+        ),
+        exportValue: (row) => `${row.summary} (${row.difference})`,
       },
       {
         id: "expected",
         header: t("list.columns.expected"),
-        cell: (row) => <span className="tabular-nums">{row.expected}</span>,
+        cell: (row) => <span className="font-mono">{row.expected}</span>,
         exportValue: (row) => row.expected,
         defaultHidden: true,
       },
       {
         id: "actual",
         header: t("list.columns.actual"),
-        cell: (row) => <span className="tabular-nums">{row.actual}</span>,
+        cell: (row) => <span className="font-mono">{row.actual}</span>,
         exportValue: (row) => row.actual,
         defaultHidden: true,
-      },
-      {
-        id: "difference",
-        header: t("list.columns.difference"),
-        cell: (row) => <span className="tabular-nums">{row.difference}</span>,
-        exportValue: (row) => row.difference,
       },
       {
         id: "tolerance",
@@ -138,13 +162,23 @@ export default function ExceptionsPage() {
         exportValue: (row) => tc(`roles.${row.fixBy}`),
       },
       {
+        id: "state",
+        header: t("list.columns.state"),
+        cell: (row) => (
+          <StatusBadge tone={row.state === "OPEN" ? "warning" : "success"}>
+            {t(`list.state.${row.state}`)}
+          </StatusBadge>
+        ),
+        exportValue: (row) => t(`list.state.${row.state}`),
+      },
+      {
         id: "opened",
         header: t("list.columns.opened"),
         cell: (row) => <RelativeTime value={row.openedAt} />,
         exportValue: (row) => row.openedAt,
       },
     ],
-    [t, tc],
+    [t, tc, ruleFilter, onSelectRule],
   );
 
   return (
@@ -155,29 +189,27 @@ export default function ExceptionsPage() {
         meta={<DemoBadge kind="mock" />}
         total={list.data?.meta.total}
       />
+      <FilterChips
+        chips={
+          state === "ALL"
+            ? []
+            : [{ id: "state", label: t(`list.state.${state}`) }]
+        }
+        filters={query.filters}
+        onChange={(filters) => {
+          setQuery({
+            ...query,
+            page: 1,
+            filters:
+              "state" in filters ? filters : { ...filters, state: "ALL" },
+          });
+        }}
+      />
       <DataTable
         tableId="exceptions"
-        applied={
-          <FilterChips
-            chips={
-              state === "ALL"
-                ? []
-                : [{ id: "state", label: t(`list.state.${state}`) }]
-            }
-            filters={query.filters}
-            onChange={(filters) => {
-              setQuery({
-                ...query,
-                page: 1,
-                filters:
-                  "state" in filters ? filters : { ...filters, state: "ALL" },
-              });
-            }}
-          />
-        }
         caption={t("list.caption")}
         columns={columns}
-        rows={list.data?.data ?? []}
+        rows={visibleRows(list.data?.data ?? [], ruleFilter, query.sort)}
         total={list.data?.meta.total ?? 0}
         query={query}
         onQueryChange={setQuery}

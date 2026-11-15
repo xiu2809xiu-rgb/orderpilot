@@ -10,13 +10,13 @@
     "emptyDescription": "When a check finds a difference between documents, it is listed here with who should fix it.",
     "emptyAction": "Open the order tracker",
     "columns": {
-      "order": "Order",
+      "order": "Order No.",
       "customer": "Customer",
       "rule": "Check",
-      "summary": "What differs",
+      "ruleFilterLabel": "Filter by check",
+      "discrepancy": "Discrepancy",
       "expected": "Expected",
       "actual": "Found",
-      "difference": "Difference",
       "tolerance": "Tolerance",
       "fixBy": "Fix by",
       "state": "State",
@@ -25,6 +25,9 @@
     "state": {
       "OPEN": "Open",
       "RESOLVED": "Resolved"
+    },
+    "checkFilter": {
+      "all": "All checks"
     }
   }
 }
