@@ -7,6 +7,14 @@ function decimalsOf(value: number): number {
   return value.toString().split(".")[1]?.length ?? 0;
 }
 
+/** Thousands are grouped, as the figure reads everywhere else ("2,046"). */
+function grouped(value: number, decimals: number): string {
+  return new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  }).format(value);
+}
+
 /**
  * A number that counts up once, the first time it is on screen: the idea of
  * the kit's ticker (components/kit/NumberTicker) without its animation
@@ -45,9 +53,9 @@ export function NumberTicker({ value }: { value: number }) {
   return (
     <>
       <span ref={ref} aria-hidden="true" className="numeral">
-        {shown.toFixed(decimalsOf(value))}
+        {grouped(shown, decimalsOf(value))}
       </span>
-      <span className="sr-only">{value}</span>
+      <span className="sr-only">{grouped(value, decimalsOf(value))}</span>
     </>
   );
 }
