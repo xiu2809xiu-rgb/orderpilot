@@ -340,8 +340,11 @@
   overflow: hidden;
 }
 
-/* The cells keep one line; a role name may take two, as the customer cell does. */
-.od-held {
+/* The cells keep one line; a role name may take two, as the customer cell does,
+   and an amount too wide for its column puts its currency on the line above
+   rather than lose its last figures. */
+.od-held,
+.od-table .od-amount {
   white-space: normal;
 }
 

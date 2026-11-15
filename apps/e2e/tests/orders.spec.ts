@@ -216,7 +216,8 @@ test.describe("The Orders workspace", () => {
     page,
   }) => {
     // An order entered here is numbered by its date, the longest number the
-    // list shows, and carries its entry chip: enter one, so the list has it.
+    // list shows, and carries its entry chip; this one is worth six figures
+    // (USD 171,400.00), wider than any sample. Enter it, so the list has it.
     const created = await callAs("SUPPORT", "POST", "/orders", {
       customerNo: "C-0001",
       externalDocumentNo: `E2E-${String(Date.now())}-${String(randomInt(1000, 9999))}`,
@@ -225,7 +226,7 @@ test.describe("The Orders workspace", () => {
       }).format(new Date()),
       shipmentDate: null,
       prepaymentPercent: "100",
-      lines: [{ itemNo: "I-0001", quantity: "2", unitPrice: "857.00" }],
+      lines: [{ itemNo: "I-0001", quantity: "200", unitPrice: "857.00" }],
     } satisfies CreateSalesOrderBody);
     expect(created.status, "Support enters a draft").toBe(201);
     const draft = salesOrderResponseSchema.parse(created.body).data;

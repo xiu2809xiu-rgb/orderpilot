@@ -22,9 +22,10 @@ import type { Sort, SortId } from "./ordersQuery";
  * than on Windows. The order cell holds a number entered here
  * ("SO-20261115-0012", 137 px), with its chips under it; the age cell "47 d"
  * over a "10 d late" chip (77 px); the documents cell a "To confirm" chip
- * (105 px). A role name in the held-at cell may take two lines, and the
- * customer name is the one cell that truncates. A narrower screen scrolls the
- * table inside its own box; a wider one shares out what is left.
+ * (105 px). A role name in the held-at cell may take two lines, and so may an
+ * amount of six figures or more, its currency above it; the customer name is
+ * the one cell that truncates. A narrower screen scrolls the table inside its
+ * own box; a wider one shares out what is left.
  */
 const WIDTH: Readonly<Record<string, number>> = {
   select: 32,

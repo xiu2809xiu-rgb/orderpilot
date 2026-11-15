@@ -35,7 +35,7 @@ export function Amount({
   // formatMoney gives "USD 8,600.36": the code, a space, the figure.
   const [, figure = ""] = formatMoney(field.value, currency).split(" ");
   return (
-    <span className="numeral">
+    <span className="numeral od-amount">
       <span className="od-cur">{currency}</span> {figure}
     </span>
   );
