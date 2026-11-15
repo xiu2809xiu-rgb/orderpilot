@@ -21,10 +21,6 @@ type Scope = MatrixRead200Data["roles"][number]["dataScope"];
 // so what scrolls under the first column never shows through.
 const ROW_HEAD =
   "sticky left-0 z-10 w-56 min-w-56 font-normal whitespace-normal";
-// A touch screen gets a 44 px target around the 36 by 20 switch, drawn by an
-// invisible layer so the switch itself keeps its size.
-const SWITCH_REACH =
-  "relative pointer-coarse:after:absolute pointer-coarse:after:-inset-x-1 pointer-coarse:after:-inset-y-3 pointer-coarse:after:content-['']";
 const SCOPES: readonly Scope[] = ["all", "brands", "own"];
 
 interface MatrixTableProps {
@@ -94,7 +90,6 @@ export function MatrixTable({
                           checked={granted}
                           disabled={!canManage || busy || lock !== undefined}
                           aria-label={name}
-                          className={SWITCH_REACH}
                           onCheckedChange={(next) => {
                             onToggle(access.role, permission, next);
                           }}
