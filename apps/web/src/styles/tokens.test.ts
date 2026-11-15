@@ -100,6 +100,22 @@ describe.each(SCHEMES)("%s scheme", (scheme) => {
     expect(failures).toEqual([]);
   });
 
+  it("keeps the quiet text at 4.5:1 straight on the ground, where a page head sits", () => {
+    // A page's date line, its one-line description, the back link and the
+    // count beside a title have no panel under them. In light the aurora
+    // darkens the ground and a phone puts them over any of it, so the whole
+    // window is the worst case. In dark the head sits right of the panel in the top band: the
+    // brightest bloom is at the bottom, under panels.
+    const ground = worstGround(
+      t,
+      scheme === "light" ? undefined : { x0: 0.18, x1: 0.9, y0: 0.08, y1: 0.3 },
+    );
+    expect(
+      contrast(colour("muted-foreground"), ground),
+      "muted-foreground on the bare ground",
+    ).toBeGreaterThanOrEqual(4.5);
+  });
+
   it("keeps the work panel opaque enough for table text", () => {
     // A card that holds a table or a form takes --dx-card-work-bg.
     expect(t["dx-card-work-bg"]).toBe("var(--panel-strong)");
