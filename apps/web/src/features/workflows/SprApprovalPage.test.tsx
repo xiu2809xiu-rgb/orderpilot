@@ -126,11 +126,11 @@ describe("the SPR approval page", () => {
     expect(
       screen.getByText(/Support raises the purchase order/),
     ).toBeInTheDocument();
-    expect(
-      within(screen.getByRole("row", { name: /Quantity/ })).getByText(
-        "Suggested",
-      ),
-    ).toBeInTheDocument();
+    const quantity = screen.getByRole("row", { name: /Quantity/ });
+    expect(within(quantity).getByText("Suggested")).toBeInTheDocument();
+    // Worked out by a rule, so it wears a calculator, never the sparkle that marks AI.
+    expect(quantity.querySelector('[data-icon="calculated"]')).not.toBeNull();
+    expect(container.querySelector(".lucide-sparkles")).toBeNull();
     expect(
       within(screen.getByRole("row", { name: /Delivery terms/ })).getByText(
         "Default",

@@ -9,10 +9,11 @@ import { canComplete, useCompleteTask } from "../home/useCompleteTask";
 /**
  * The page's one primary button: the person's own open task on this order. A
  * task that one click finishes (send the PI, mark packed) is finished here, as
- * on the home screen, with the app's own toast and Undo. A decision (approve an
- * SPR, confirm a payment) is made on the order's steps page of the app, so the
- * button opens that page. When a person who holds tasks has none on this order,
- * there is no button, and a line says so.
+ * on the home screen, with the app's own toast and Undo. An SPR is decided on
+ * its own page, so its button says Review and opens the SPR, as on the home
+ * screen; any other decision (confirm a payment) is made on the order's steps
+ * page of the app, so the button opens that page. When a person who holds tasks
+ * has none on this order, there is no button, and a line says so.
  */
 export function OrderAction({
   task,
@@ -57,7 +58,13 @@ export function OrderAction({
         </Button>
       ) : (
         <Button asChild className="pointer-coarse:h-11">
-          <Link to={`/workflows/orders/${encodeURIComponent(orderNo)}`}>
+          <Link
+            to={
+              task.ref
+                ? `/workflows/sprs/${encodeURIComponent(task.ref.recordNo)}`
+                : `/workflows/orders/${encodeURIComponent(orderNo)}`
+            }
+          >
             {verb}
             <ArrowRight aria-hidden="true" />
           </Link>

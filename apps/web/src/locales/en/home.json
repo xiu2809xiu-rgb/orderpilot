@@ -24,6 +24,7 @@
     "actions": {
       "REVIEW_FIELDS": "Review",
       "RAISE_SPR": "Raise",
+      "APPROVE_SPR": "Review",
       "SEND_PI": "Mark sent",
       "CONFIRM_PAYMENT": "Confirm",
       "PACK_ORDER": "Mark packed",
