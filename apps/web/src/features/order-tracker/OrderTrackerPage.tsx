@@ -9,6 +9,7 @@ import {
 } from "@/components/common";
 import { useTrackerList } from "@/lib/api/generated/endpoints/tracker/tracker";
 import { tableStatusOf } from "@/lib/query-status";
+import { useMediaQuery } from "@/lib/useMediaQuery";
 import { LifecycleStageTabs } from "./LifecycleStageTabs";
 import {
   groupStatusOf,
@@ -46,14 +47,17 @@ export default function OrderTrackerPage() {
     },
     [query, setQuery],
   );
+  // The table folds its columns under 768 px: see DataTableRow.
+  const phone = useMediaQuery("(max-width: 767px)");
   const columns = useMemo(
     () =>
-      trackerColumns(t, (role) => tc(`roles.${role}`), {
-        value: stageTab,
-        status,
-        onSelectStatus,
-      }),
-    [t, tc, stageTab, status, onSelectStatus],
+      trackerColumns(
+        t,
+        (role) => tc(`roles.${role}`),
+        { value: stageTab, status, onSelectStatus },
+        phone,
+      ),
+    [t, tc, stageTab, status, onSelectStatus, phone],
   );
 
   return (

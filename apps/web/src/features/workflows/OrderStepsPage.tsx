@@ -20,6 +20,20 @@ export default function OrderStepsPage() {
   const session = useSessionStore((state) => state.session);
   const query = useWorkflowsOrderFlow(orderNo);
   const flow = query.data?.data;
+  const canConfirm = hasPermission(session, "payments.confirm");
+  const payment = flow ? (
+    <SectionCard
+      title={t("payment.heading")}
+      description={t("payment.description")}
+      className="self-start lg:col-start-2 lg:row-start-1"
+    >
+      <PaymentPanel
+        orderNo={flow.order.no}
+        payment={flow.payment}
+        canConfirm={canConfirm}
+      />
+    </SectionCard>
+  ) : null;
 
   if (query.error instanceof ApiError && query.error.status === 404) {
     return (
@@ -53,7 +67,11 @@ export default function OrderStepsPage() {
       <QueryBoundary query={query}>
         {flow ? (
           <div className="grid gap-s3 lg:grid-cols-[3fr_2fr]">
-            <div className="space-y-s3">
+            {/* Whoever can confirm a payment comes here to do that, so on a
+                narrow screen the card is first, in reading order as well as
+                on screen. The two columns keep their places from lg up. */}
+            {canConfirm ? payment : null}
+            <div className="space-y-s3 lg:col-start-1 lg:row-start-1">
               <SectionCard
                 title={t("order.stepsHeading")}
                 description={t("order.stepsDescription")}
@@ -64,17 +82,7 @@ export default function OrderStepsPage() {
                 <Timeline events={flow.timeline} />
               </SectionCard>
             </div>
-            <SectionCard
-              title={t("payment.heading")}
-              description={t("payment.description")}
-              className="self-start"
-            >
-              <PaymentPanel
-                orderNo={flow.order.no}
-                payment={flow.payment}
-                canConfirm={hasPermission(session, "payments.confirm")}
-              />
-            </SectionCard>
+            {canConfirm ? null : payment}
           </div>
         ) : null}
       </QueryBoundary>

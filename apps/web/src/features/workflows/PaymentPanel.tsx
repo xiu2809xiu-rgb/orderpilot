@@ -3,23 +3,16 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { ErrorPanel, toast } from "@/components/common";
+import { NativeSelect } from "@/components/common/data-table/Field";
 import { Button } from "@/components/ui/button";
-import { CONTROL_SKIN } from "@/components/ui/controlSkin";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatMoney } from "@/lib/format";
-import { cn } from "@/lib/utils";
 import {
   workflowsConfirmPayment,
   workflowsUndoPayment,
 } from "@/lib/api/generated/endpoints/workflows/workflows";
 import { formatAmount, formatDate } from "./format";
-
-// A select always matches :read-only, so the skin's dashed read-only look is put back to solid.
-const SELECT_CLASS = cn(
-  CONTROL_SKIN,
-  "h-11 w-full rounded-md px-3 text-sm read-only:border-solid read-only:bg-(--control-bg)",
-);
 
 /** What Finance asked for and has confirmed, and the form that confirms a payment with its type. */
 export function PaymentPanel({
@@ -128,9 +121,9 @@ export function PaymentPanel({
           <div className="grid gap-s2 sm:grid-cols-2">
             <div className="space-y-1">
               <Label htmlFor="pay-type">{t("payment.form.type")}</Label>
-              <select
+              <NativeSelect
                 id="pay-type"
-                className={SELECT_CLASS}
+                className="w-full"
                 value={type}
                 onChange={(event) => {
                   setType(event.target.value);
@@ -141,14 +134,14 @@ export function PaymentPanel({
                     {t(`payment.types.${value}`)}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
             <div className="space-y-1">
               <Label htmlFor="pay-amount">{t("payment.form.amount")}</Label>
               <Input
                 id="pay-amount"
                 inputMode="decimal"
-                className="h-11"
+                className="h-9 pointer-coarse:h-11"
                 value={amount}
                 onChange={(event) => {
                   setAmount(event.target.value);
@@ -159,7 +152,7 @@ export function PaymentPanel({
               <Label htmlFor="pay-ref">{t("payment.form.reference")}</Label>
               <Input
                 id="pay-ref"
-                className="h-11"
+                className="h-9 pointer-coarse:h-11"
                 value={reference}
                 onChange={(event) => {
                   setReference(event.target.value);
@@ -171,7 +164,7 @@ export function PaymentPanel({
               <Input
                 id="pay-date"
                 type="date"
-                className="h-11"
+                className="h-9 pointer-coarse:h-11"
                 value={paidOn}
                 onChange={(event) => {
                   setPaidOn(event.target.value);

@@ -263,6 +263,8 @@ describe("the task inbox", () => {
     const action = await screen.findByRole("link", { name: /Open order/ });
     expect(action.className).toContain("min-h-14");
     expect(action.className).toContain("w-full");
+    // Bigger, not louder: the page keeps its one primary action for itself.
+    expect(action).not.toHaveClass("bg-primary");
   });
 
   it("says nothing is overdue and offers all tasks again", async () => {

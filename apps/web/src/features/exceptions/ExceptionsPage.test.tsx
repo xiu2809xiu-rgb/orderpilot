@@ -77,6 +77,27 @@ describe("the exceptions queue", () => {
     expect(await axeViolations(view.container)).toEqual([]);
   });
 
+  it("starts with the columns that say what to do, so the queue fits a laptop", async () => {
+    await i18n.loadNamespaces(["exceptions", "common"]);
+    server.use(getExceptionsListMockHandler(queue([mismatch])));
+    renderPage();
+    await screen.findByText(/the packing list says 40, the PO says 50/);
+    const heads = screen
+      .getAllByRole("columnheader")
+      .map((head) => head.textContent);
+    // What differs and the state come straight after the order, which is
+    // what the phone folds into its first cell; the long customer and
+    // check names wait in the Columns menu.
+    expect(heads).toEqual([
+      "Order",
+      "What differs",
+      "State",
+      "Difference",
+      "Fix by",
+      "Opened",
+    ]);
+  });
+
   it("opens the order when the row itself is clicked, away from its link", async () => {
     await i18n.loadNamespaces(["exceptions", "common"]);
     server.use(getExceptionsListMockHandler(queue([mismatch])));
