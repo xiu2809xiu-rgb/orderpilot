@@ -165,6 +165,19 @@ describe("the mock read model", () => {
     }
   });
 
+  it("says on a reminder about an SPR what the SPR would buy, as its task does", async () => {
+    const tasks = await model.tasksFor("APPROVER");
+    const reminders = await model.remindersFor("APPROVER");
+    const withSpr = reminders.filter((reminder) => reminder.spr);
+    expect(withSpr.length).toBeGreaterThan(0);
+    for (const reminder of withSpr) {
+      const task = tasks.find((t) => t.orderNo === reminder.orderNo && t.spr);
+      expect(reminder.spr, reminder.id).toEqual(task?.spr);
+    }
+    const payments = await model.remindersFor("FINANCE");
+    expect(payments.some((reminder) => reminder.spr)).toBe(false);
+  });
+
   it("follows the dataset when the day, and so the set, changes", async () => {
     let current = createSyntheticDataset({ referenceDate: "2026-11-02" });
     const moving = new MockWorkflowReadModel(() => current);

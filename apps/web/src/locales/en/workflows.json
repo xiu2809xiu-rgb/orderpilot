@@ -133,8 +133,8 @@
     },
     "by": "{{name}}",
     "notFoundTitle": "This order is not in the sample data",
-    "notFoundDescription": "Check the order number, or go back to the task inbox.",
-    "backToInbox": "Back to the task inbox",
+    "notFoundDescription": "Check the order number, or go back to My tasks.",
+    "backToInbox": "Back to My tasks",
     "crumb": "Order"
   },
   "payment": {
@@ -244,7 +244,7 @@
     "readOnly": "Your role can read this request but not decide it.",
     "handedNoPermission": "Your role cannot decide this yet, so it stays waiting until an administrator gives it the permission.",
     "notFoundTitle": "This request is not in the sample data",
-    "notFoundDescription": "Check the number, or go back to the task inbox.",
+    "notFoundDescription": "Check the number, or go back to My tasks.",
     "crumb": "Stock purchase requisition",
     "order": "Sales order",
     "dueOn": "Due {{date}}",

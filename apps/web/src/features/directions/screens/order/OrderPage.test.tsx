@@ -210,6 +210,25 @@ describe("the order page", () => {
     ).toBeVisible();
   });
 
+  it("opens the SPR itself for an SPR to decide, with its action in words", async () => {
+    stubApi({
+      tasks: [
+        {
+          ...taskOn("SO-0001", "APPROVE_SPR"),
+          assigneeRole: "APPROVER",
+          ref: { recordNo: "SPR-20261111-0003", navisionNo: null },
+        },
+      ],
+    });
+    open(PAID);
+    expect(await screen.findByRole("link", { name: "Review" })).toHaveAttribute(
+      "href",
+      "/workflows/sprs/SPR-20261111-0003",
+    );
+    // A missing wording would show its key, as it did once.
+    expect(screen.queryByText(/needs\.actions/)).toBeNull();
+  });
+
   it("hides every price from a role that may not see them, with the reason", async () => {
     useSessionStore.setState({
       status: "active",
