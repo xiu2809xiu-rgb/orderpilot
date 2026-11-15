@@ -16,7 +16,10 @@ function Fact({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-const LINK = "text-primary underline-offset-4 hover:underline";
+// A coarse pointer gets a 44 px target; inline-flex keeps the link in its line
+// of text.
+const LINK =
+  "text-primary underline-offset-4 hover:underline pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center";
 
 /** Money as the rest of the app writes it: the currency, then the amount. */
 function money(amount: string, currency: string): string {

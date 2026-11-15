@@ -177,6 +177,10 @@ describe("the order tracker", () => {
     expect(
       screen.getByRole("button", { name: "Filter by sub-status" }),
     ).toBeDisabled();
+    // jsdom has no layout: the class makes it a 44 px target under a coarse pointer.
+    expect(
+      screen.getByRole("button", { name: "Filter by sub-status" }),
+    ).toHaveClass("pointer-coarse:min-h-11");
   });
 
   it("narrows a stage to one status from the Status column's own filter, and keeps the stage's tab active", async () => {
