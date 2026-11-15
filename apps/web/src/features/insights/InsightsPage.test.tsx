@@ -58,7 +58,7 @@ describe("the KPI dashboard", () => {
     }
     // Said once, in the note under the heading, beside one Mock badge.
     expect(
-      screen.getByText("Mock lab estimates on synthetic data."),
+      screen.getByText(/Mock lab estimates on synthetic data./),
     ).toBeVisible();
     expect(screen.queryByText("Mock lab estimates")).toBeNull();
     expect(screen.getByText("Mock")).toBeVisible();

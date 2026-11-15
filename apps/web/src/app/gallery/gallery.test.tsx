@@ -51,7 +51,13 @@ describe("the component gallery route", () => {
     ).toBeVisible();
     // The auditor may read orders but not decide: Approve is not drawn at all.
     expect(within(form).queryByRole("button", { name: "Approve" })).toBeNull();
-    expect(within(form).getByText("Draft")).toBeVisible();
+    // The status is in the head, beside the title, not in the form.
+    expect(within(form).queryByText("Draft")).toBeNull();
+    expect(
+      screen
+        .getAllByText("Draft")
+        .some((node) => node.closest("[data-family]")),
+    ).toBe(true);
     expect(screen.getByRole("tab", { name: /Checks/ })).toBeVisible();
   });
 

@@ -1,0 +1,40 @@
+/* The type scale as classes. The sizes live in tokens.css (--type-*); Tailwind's
+   text-* utilities read the same ones (index.css), so the whole app has seven
+   sizes and no more. */
+
+.fs-12 {
+  font-size: var(--type-12);
+  line-height: 1rem;
+}
+.fs-14 {
+  font-size: var(--type-14);
+  line-height: 1.25rem;
+}
+.fs-16 {
+  font-size: var(--type-16);
+  line-height: 1.5rem;
+}
+.fs-18 {
+  font-size: var(--type-18);
+  line-height: 1.75rem;
+}
+.fs-20 {
+  font-size: var(--type-20);
+  line-height: 1.75rem;
+}
+.fs-28 {
+  font-size: var(--type-28);
+  line-height: 2.125rem;
+  letter-spacing: -0.01em;
+}
+.fs-32 {
+  font-size: var(--type-32);
+  line-height: 2.5rem;
+  letter-spacing: -0.02em;
+}
+
+/* A figure: tabular, semibold. */
+.numeral {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}

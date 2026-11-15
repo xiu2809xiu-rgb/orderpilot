@@ -178,7 +178,7 @@ describe("the Analytics section in Settings", () => {
     expect(decline).toHaveAttribute("aria-checked", "true");
     expect(allow).toHaveAttribute("aria-checked", "false");
     // Marked as chosen, not drawn as a button that asks to be pressed.
-    expect(decline.className).toContain("border-primary");
+    expect(decline.className).toContain("dx-choice");
     expect(decline.className).not.toContain("bg-primary");
     await userEvent.click(allow);
     expect(allow).toHaveAttribute("aria-checked", "true");

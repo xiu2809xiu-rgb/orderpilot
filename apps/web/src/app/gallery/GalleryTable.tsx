@@ -1,3 +1,4 @@
+import { Check } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -43,7 +44,9 @@ export function GalleryTable() {
       {
         id: "reference",
         header: t("table.order"),
-        cell: (row) => <span className="font-mono">{row.reference}</span>,
+        cell: (row) => (
+          <span className="font-semibold tabular-nums">{row.reference}</span>
+        ),
         exportValue: (row) => row.reference,
         sortable: true,
         hideable: false,
@@ -102,19 +105,22 @@ export function GalleryTable() {
 
   return (
     <div className="space-y-s2">
-      <div className="flex flex-wrap gap-2">
+      <div className="dt-toggles">
         {SCENARIOS.map((name) => (
-          <Button
+          <button
             key={name}
-            size="sm"
-            variant={scenario === name ? "default" : "outline"}
+            type="button"
+            className="dt-toggle"
             aria-pressed={scenario === name}
             onClick={() => {
               setScenario(name);
             }}
           >
+            {scenario === name ? (
+              <Check aria-hidden="true" className="size-4" />
+            ) : null}
             {t(`demo.${name}`)}
-          </Button>
+          </button>
         ))}
       </div>
       <DataTable

@@ -12,6 +12,7 @@ import {
   StatusBadge,
   type StatusTone,
 } from "@/components/common";
+import { GradientText } from "@/components/kit/GradientText";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -35,11 +36,23 @@ const STATUS_TONE: Record<string, StatusTone> = {
 
 const number = new Intl.NumberFormat("en");
 
-function Tile({ label, value }: { label: string; value: string }) {
+function Tile({
+  label,
+  value,
+  note,
+}: {
+  label: string;
+  value: string;
+  /** A second figure of the same measure, under the first. */
+  note?: string;
+}) {
   return (
-    <div className="rounded-lg border bg-card p-s2">
-      <dt className="text-sm text-muted-foreground">{label}</dt>
-      <dd className="mt-1 text-2xl font-semibold tabular-nums">{value}</dd>
+    <div className="dx-card flex flex-col gap-2 p-4">
+      <dt className="fs-14 text-muted-foreground">{label}</dt>
+      <dd className="fs-28 font-semibold tabular-nums">
+        <GradientText>{value}</GradientText>
+      </dd>
+      {note ? <dd className="fs-14 text-muted-foreground">{note}</dd> : null}
     </div>
   );
 }
@@ -86,7 +99,10 @@ export function AiUsageTab() {
         />
         <Tile
           label={t("aiUsage.tiles.tokens")}
-          value={`${number.format(summary.inputTokens)} / ${number.format(summary.outputTokens)}`}
+          value={number.format(summary.inputTokens)}
+          note={t("aiUsage.tiles.tokensOut", {
+            out: number.format(summary.outputTokens),
+          })}
         />
         <Tile label={t("aiUsage.tiles.cost")} value={`$${summary.costUsd}`} />
         <Tile
@@ -98,39 +114,47 @@ export function AiUsageTab() {
         title={t("aiUsage.byFeature.title")}
         description={t("aiUsage.byFeature.description")}
       >
-        <Table aria-label={t("aiUsage.byFeature.title")}>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t("aiUsage.byFeature.feature")}</TableHead>
-              <TableHead className="text-right">
-                {t("aiUsage.byFeature.calls")}
-              </TableHead>
-              <TableHead className="text-right">
-                {t("aiUsage.byFeature.cost")}
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {byFeature.map((row) => (
-              <TableRow key={row.feature}>
-                <TableCell>{row.feature}</TableCell>
-                <TableCell className="text-right tabular-nums">
-                  {number.format(row.calls)}
-                </TableCell>
-                <TableCell className="text-right tabular-nums">
-                  {row.costUsd}
-                </TableCell>
+        <ScrollRegion
+          label={t("aiUsage.byFeature.label")}
+          className="rounded-none border-0 bg-transparent"
+        >
+          <Table className="dt-table" aria-label={t("aiUsage.byFeature.label")}>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("aiUsage.byFeature.feature")}</TableHead>
+                <TableHead className="text-right">
+                  {t("aiUsage.byFeature.calls")}
+                </TableHead>
+                <TableHead className="text-right">
+                  {t("aiUsage.byFeature.cost")}
+                </TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {byFeature.map((row) => (
+                <TableRow key={row.feature}>
+                  <TableCell>{row.feature}</TableCell>
+                  <TableCell className="text-right tabular-nums">
+                    {number.format(row.calls)}
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums">
+                    {row.costUsd}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </ScrollRegion>
       </SectionCard>
       <SectionCard
         title={t("aiUsage.records.title")}
         description={t("aiUsage.records.description")}
       >
-        <ScrollRegion label={t("aiUsage.records.label")}>
-          <Table aria-label={t("aiUsage.records.label")}>
+        <ScrollRegion
+          label={t("aiUsage.records.label")}
+          className="rounded-none border-0 bg-transparent"
+        >
+          <Table className="dt-table" aria-label={t("aiUsage.records.label")}>
             <TableHeader>
               <TableRow>
                 <TableHead>{t("aiUsage.records.time")}</TableHead>
@@ -185,6 +209,7 @@ export function AiUsageTab() {
         >
           <Button
             variant="outline"
+            className="pointer-coarse:h-11"
             disabled={page <= 1}
             onClick={() => {
               setPage(page - 1);
@@ -197,6 +222,7 @@ export function AiUsageTab() {
           </span>
           <Button
             variant="outline"
+            className="pointer-coarse:h-11"
             disabled={page >= pages}
             onClick={() => {
               setPage(page + 1);

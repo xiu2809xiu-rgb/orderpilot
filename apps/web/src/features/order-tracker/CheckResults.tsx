@@ -30,7 +30,10 @@ export function CheckResults({ checks }: { checks: readonly CheckResult[] }) {
       ) : (
         <ul className="space-y-s2">
           {checks.map((check) => (
-            <li key={check.id} className="space-y-1 rounded-lg border p-s2">
+            <li
+              key={check.id}
+              className="space-y-1 rounded-xl border border-border bg-(--dx-card-work-bg) p-s2"
+            >
               <div className="flex flex-wrap items-center gap-2">
                 <StatusBadge
                   tone={check.outcome === "pass" ? "success" : "danger"}
@@ -44,13 +47,13 @@ export function CheckResults({ checks }: { checks: readonly CheckResult[] }) {
                   <dt className="text-muted-foreground">
                     {t("detail.checks.expected")}
                   </dt>
-                  <dd className="font-mono">{check.expected}</dd>
+                  <dd className="tabular-nums">{check.expected}</dd>
                 </div>
                 <div>
                   <dt className="text-muted-foreground">
                     {t("detail.checks.found")}
                   </dt>
-                  <dd className="font-mono">{check.actual}</dd>
+                  <dd className="tabular-nums">{check.actual}</dd>
                 </div>
                 <div>
                   <dt className="text-muted-foreground">
@@ -58,7 +61,9 @@ export function CheckResults({ checks }: { checks: readonly CheckResult[] }) {
                   </dt>
                   <dd>
                     {check.tolerance.label}:{" "}
-                    <span className="font-mono">{check.tolerance.value}</span>
+                    <span className="tabular-nums">
+                      {check.tolerance.value}
+                    </span>
                   </dd>
                 </div>
               </dl>

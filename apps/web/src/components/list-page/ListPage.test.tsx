@@ -207,7 +207,7 @@ describe("the action bar", () => {
     expect(screen.queryByRole("group", { name: "Actions" })).toBeNull();
   });
 
-  it("orders the bar New, Edit, Void, batch, Import, Export, Print with one primary button", () => {
+  it("orders the bar Edit, Void, batch, the view tools, Import, Export, Print and keeps New in the head as the one primary button", () => {
     const onRun = vi.fn();
     const mk = (
       id: string,
@@ -235,19 +235,22 @@ describe("the action bar", () => {
       .getAllByRole("button")
       .map((button) => button.textContent.replace(/\s*N$/, ""));
     expect(names).toEqual([
-      "new",
       "edit",
       "void",
       "batch",
+      "Saved views",
+      "Columns",
       "import",
       "Export",
       "print",
     ]);
-    const primary = within(bar)
+    // The page's one primary button is New, in the head with the title.
+    const primary = screen
       .getAllByRole("button")
       .filter((button) => button.dataset.variant === "default");
     expect(primary).toHaveLength(1);
     expect(primary[0]).toHaveTextContent("new");
+    expect(primary[0]?.closest("header")).not.toBeNull();
   });
 
   it("runs New from the N key", async () => {

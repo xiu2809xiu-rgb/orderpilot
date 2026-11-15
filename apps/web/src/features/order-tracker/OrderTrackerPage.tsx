@@ -9,6 +9,7 @@ import {
 } from "@/components/common";
 import { useTrackerList } from "@/lib/api/generated/endpoints/tracker/tracker";
 import { tableStatusOf } from "@/lib/query-status";
+import { useMediaQuery } from "@/lib/useMediaQuery";
 import { LifecycleStageTabs } from "./LifecycleStageTabs";
 import {
   groupStatusOf,
@@ -46,14 +47,17 @@ export default function OrderTrackerPage() {
     },
     [query, setQuery],
   );
+  // The table folds its columns under 768 px: see DataTableRow.
+  const phone = useMediaQuery("(max-width: 767px)");
   const columns = useMemo(
     () =>
-      trackerColumns(t, (role) => tc(`roles.${role}`), {
-        value: stageTab,
-        status,
-        onSelectStatus,
-      }),
-    [t, tc, stageTab, status, onSelectStatus],
+      trackerColumns(
+        t,
+        (role) => tc(`roles.${role}`),
+        { value: stageTab, status, onSelectStatus },
+        phone,
+      ),
+    [t, tc, stageTab, status, onSelectStatus, phone],
   );
 
   return (
@@ -65,26 +69,28 @@ export default function OrderTrackerPage() {
         total={tracker.data?.meta.total}
       />
       <LifecycleStageTabs value={stageTab} onSelectStatus={onSelectStatus} />
-      <FilterChips
-        chips={trackerChips(query.filters, t)}
-        filters={query.filters}
-        onChange={(filters) => {
-          // The status chip only ever shows a narrowed sub-status (never the
-          // whole stage): clearing it resets to the stage's whole group, not
-          // to no status at all, since the stage tab itself stays open.
-          const next = { ...filters };
-          if (
-            typeof query.filters.status === "string" &&
-            typeof next.status !== "string" &&
-            stageTab !== "all"
-          ) {
-            next.status = groupStatusOf(stageTab);
-          }
-          setQuery({ ...query, page: 1, filters: next });
-        }}
-      />
       <DataTable
         tableId="order-tracker"
+        applied={
+          <FilterChips
+            chips={trackerChips(query.filters, t)}
+            filters={query.filters}
+            onChange={(filters) => {
+              // The status chip only ever shows a narrowed sub-status (never the
+              // whole stage): clearing it resets to the stage's whole group, not
+              // to no status at all, since the stage tab itself stays open.
+              const next = { ...filters };
+              if (
+                typeof query.filters.status === "string" &&
+                typeof next.status !== "string" &&
+                stageTab !== "all"
+              ) {
+                next.status = groupStatusOf(stageTab);
+              }
+              setQuery({ ...query, page: 1, filters: next });
+            }}
+          />
+        }
         caption={t("list.caption")}
         columns={columns}
         rows={tracker.data?.data ?? []}

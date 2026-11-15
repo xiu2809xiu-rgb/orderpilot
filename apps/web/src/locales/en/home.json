@@ -1,10 +1,6 @@
 {
-  "welcome": "Welcome, {{name}}",
-  "context": "{{role}} · {{date}}",
   "tiles": {
-    "label": "Your counts",
     "loading": "Loading {{label}}",
-    "retry": "Could not load. Retry",
     "myTasks": "My tasks",
     "documentsToConfirm": "Documents to confirm",
     "openOrders": "Open orders",
@@ -18,27 +14,13 @@
     "refusedActions": "Refused actions",
     "roles": "Roles",
     "activeUsers": "Active users",
-    "aiUse": "AI use"
+    "aiUse": "AI use",
+    "retryShort": "Retry",
+    "unavailable": "Not available",
+    "retryFor": "Could not load {{label}}. Retry"
   },
   "needs": {
-    "title": "Needs you",
-    "table": "Your next tasks, most urgent first",
-    "viewAll": "View all ({{total}})",
-    "overdue": "Overdue",
-    "actionOn": "{{action}}: {{what}}",
     "failed": "Could not finish the task for {{orderNo}}",
-    "emptyTitle": "You are up to date",
-    "emptyDescription": "Nothing needs you right now. The tracker shows where every order stands.",
-    "emptyAction": "Open the tracker",
-    "columns": {
-      "what": "Task",
-      "order": "Order",
-      "customer": "Customer",
-      "amount": "Amount",
-      "due": "Due",
-      "late": "Late",
-      "action": "Action"
-    },
     "actions": {
       "REVIEW_FIELDS": "Review",
       "RAISE_SPR": "Raise",
@@ -47,10 +29,6 @@
       "PACK_ORDER": "Mark packed",
       "RECOUNT_CARTONS": "Mark counted",
       "ADD_SHIPPING_DOCUMENTS": "Mark added"
-    },
-    "sprTask": {
-      "RAISE_SPR": "Review {{recordNo}}",
-      "APPROVE_SPR": "Decide on {{recordNo}}"
     },
     "partOf": "{{part}} of {{whole}}",
     "done": {
@@ -65,25 +43,15 @@
   },
   "overdue": {
     "title": "Most overdue, by amount",
-    "status": "Where it stands",
-    "table": "Overdue orders, largest first",
     "open": "Open order",
     "emptyTitle": "No order is overdue",
-    "emptyDescription": "Every open order is on time. The tracker shows where each one stands.",
-    "daysLate_one": "{{count}} day",
-    "daysLate_other": "{{count}} days"
+    "emptyDescription": "Every open order is on time. The tracker shows where each one stands."
   },
   "refused": {
     "title": "Latest refused actions",
-    "table": "Refused actions, newest first",
     "open": "Open",
     "emptyTitle": "No refused actions",
-    "emptyDescription": "Nobody has been refused anything yet. The audit trail holds every event.",
-    "emptyAction": "Open the audit trail",
-    "columns": {
-      "what": "What was refused",
-      "when": "When"
-    }
+    "emptyDescription": "Nobody has been refused anything yet. The audit trail holds every event."
   },
   "health": {
     "title": "System health",
@@ -102,13 +70,7 @@
   },
   "rules": {
     "title": "Business rules from Spectra",
-    "table": "Business rules, settled and still to confirm",
     "description": "What Spectra settled at the 5 Nov briefing, and the drafts that wait for its answer. Each stays a setting, never code.",
-    "columns": {
-      "rule": "Rule",
-      "draft": "What we have",
-      "status": "Status"
-    },
     "status": {
       "confirmed": "Confirmed 5 Nov",
       "open": "To confirm"
@@ -122,29 +84,9 @@
       "piSequence": "PI sequence"
     }
   },
-  "quick": {
-    "title": "Quick actions"
-  },
   "kpis": {
-    "title": "Spectra's five measures",
+    "title": "Twelve weeks of the five measures",
     "viewAll": "View all KPIs",
     "target": "Target {{value}}"
-  },
-  "flow": {
-    "title": "Sales flow",
-    "summary_one": "{{count}} open order. Most are at {{step}}.",
-    "summary_other": "{{count}} open orders. Most are at {{step}}.",
-    "steps": {
-      "label": "Open orders at each sales step",
-      "poIn": "PO in",
-      "stock": "Stock",
-      "pi": "PI",
-      "payment": "Payment",
-      "pack": "Pack",
-      "documents": "Documents",
-      "forwarder": "Shipped",
-      "customerTold": "Invoiced",
-      "awbAndPermit": "AWB and permit"
-    }
   }
 }

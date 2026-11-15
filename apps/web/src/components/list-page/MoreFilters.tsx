@@ -28,13 +28,13 @@ export function MoreFilters({ filters, values, setFilter }: MoreFiltersProps) {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="pointer-coarse:h-11">
+        <Button variant="outline" size="sm" className="lp-more">
           <SlidersHorizontal aria-hidden="true" />
           {t("filters.more")}
           {applied > 0 ? (
             <span
               aria-label={t("filters.moreApplied", { count: applied })}
-              className="rounded-full bg-primary px-1.5 text-xs text-primary-foreground tabular-nums"
+              className="lp-count"
             >
               {applied}
             </span>

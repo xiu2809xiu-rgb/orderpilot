@@ -23,7 +23,7 @@ export function ChangeList({ changes }: { changes: readonly Change[] }) {
     );
   }
   return (
-    <dl className="divide-y rounded-md border">
+    <dl className="divide-y divide-border rounded-xl border border-border bg-(--dx-card-work-bg)">
       {changes.map((change) => (
         <div
           key={change.field}

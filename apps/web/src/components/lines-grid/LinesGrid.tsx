@@ -22,6 +22,7 @@ function headerClass(kind: ColumnKind): string | undefined {
   if (kind === "remove") return "sr-only";
   const numeric =
     kind === "quantity" || kind === "unitPrice" || kind === "amount";
+  if (kind === "availability") return "@lines:pl-2";
   return numeric ? "@lines:text-right" : undefined;
 }
 
@@ -151,7 +152,7 @@ export function LinesGrid(props: LinesGridProps) {
           >
             <div
               role="row"
-              className="px-0 text-xs font-medium text-muted-foreground @max-lines:sr-only @lines:grid @lines:grid-cols-(--line-tracks-compact) @3xl:grid-cols-(--line-tracks) @lines:gap-x-s1 @lines:border-b @lines:pb-1"
+              className="px-0 text-xs font-medium tracking-wide text-muted-foreground @max-lines:sr-only @lines:grid @lines:grid-cols-(--line-tracks-compact) @3xl:grid-cols-(--line-tracks) @lines:gap-x-s1 @lines:border-b @lines:px-1 @lines:pb-2"
             >
               {columns.map((column) => (
                 <div

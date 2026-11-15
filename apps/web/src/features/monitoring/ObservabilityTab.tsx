@@ -60,8 +60,14 @@ export function ObservabilityTab() {
         title={t("observability.services.title")}
         description={t("observability.services.description")}
       >
-        <ScrollRegion label={t("observability.services.label")}>
-          <Table aria-label={t("observability.services.label")}>
+        <ScrollRegion
+          label={t("observability.services.label")}
+          className="rounded-none border-0 bg-transparent"
+        >
+          <Table
+            className="dt-table"
+            aria-label={t("observability.services.label")}
+          >
             <TableHeader>
               <TableRow>
                 <TableHead>{t("observability.services.name")}</TableHead>
@@ -107,8 +113,14 @@ export function ObservabilityTab() {
         title={t("observability.traces.title")}
         description={t("observability.traces.description")}
       >
-        <ScrollRegion label={t("observability.traces.label")}>
-          <Table aria-label={t("observability.traces.label")}>
+        <ScrollRegion
+          label={t("observability.traces.label")}
+          className="rounded-none border-0 bg-transparent"
+        >
+          <Table
+            className="dt-table"
+            aria-label={t("observability.traces.label")}
+          >
             <TableHeader>
               <TableRow>
                 <TableHead>{t("observability.traces.traceId")}</TableHead>

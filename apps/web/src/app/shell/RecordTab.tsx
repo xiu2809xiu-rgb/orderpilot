@@ -39,12 +39,15 @@ export function RecordTab({
 
   return (
     <div
+      // A quiet pill. The open one is marked as the side panel marks its row
+      // (.dx-tab[data-current], shell.css), and no border takes from its 44 px.
       className={cn(
-        "relative flex h-8 items-center rounded-md border text-xs pointer-coarse:h-11",
+        "dx-tab relative flex h-8 items-center rounded-full text-xs pointer-coarse:h-11",
         active
-          ? "border-border bg-muted text-foreground after:absolute after:inset-x-2 after:-bottom-px after:h-0.5 after:rounded-full after:bg-primary"
-          : "border-transparent text-muted-foreground hover:bg-muted hover:text-foreground",
+          ? "text-foreground"
+          : "text-muted-foreground hover:bg-(--dx-hover-bg) hover:text-foreground",
       )}
+      data-current={active ? "true" : undefined}
     >
       <Link
         ref={linkRef}
@@ -65,7 +68,7 @@ export function RecordTab({
         onMouseDown={(event) => {
           if (event.button === 1) event.preventDefault();
         }}
-        className="flex h-full items-center gap-1.5 rounded-md pr-1 pl-2 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        className="flex h-full items-center gap-1.5 rounded-full pr-1 pl-3 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
       >
         <Icon className="size-3.5 shrink-0" aria-hidden="true" />
         {/* The steps page of an order shares its number with the order: its own word tells them apart. */}
@@ -96,7 +99,7 @@ export function RecordTab({
         tabIndex={-1}
         aria-label={t("close", { name })}
         onClick={onClose}
-        className="mr-0.5 grid size-6 shrink-0 place-items-center rounded-sm text-muted-foreground hover:bg-background hover:text-foreground pointer-coarse:size-11"
+        className="mr-1 grid size-6 shrink-0 place-items-center rounded-full text-muted-foreground hover:bg-(--dx-hover-bg) hover:text-foreground pointer-coarse:mr-0 pointer-coarse:size-11"
       >
         <X className="size-3.5" aria-hidden="true" />
       </button>

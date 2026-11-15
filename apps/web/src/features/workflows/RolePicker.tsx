@@ -13,7 +13,7 @@ export function RolePicker({
   const { t } = useTranslation(["workflows", "common"]);
   return (
     <div role="group" aria-label={t("inbox.pickRole")} className="space-y-2">
-      <p className="text-sm font-medium">{t("inbox.pickRole")}</p>
+      <p className="dt-field-label">{t("inbox.pickRole")}</p>
       <div className="flex flex-wrap gap-2">
         {INBOX_ROLES.map((role) => (
           <button
@@ -24,10 +24,10 @@ export function RolePicker({
               onChange(role);
             }}
             className={cn(
-              "min-h-11 rounded-md border px-4 text-sm font-medium",
+              "min-h-11 rounded-full border px-4 text-sm font-medium",
               role === value
-                ? "border-primary bg-primary text-primary-foreground"
-                : "bg-card hover:bg-accent",
+                ? "border-ring bg-(--dx-current-bg) shadow-(--dx-current-shadow)"
+                : "border-border bg-(--dx-card-work-bg) hover:bg-(--dx-hover-bg)",
             )}
           >
             {t(`roles.${role}`, { ns: "common" })}

@@ -12,7 +12,7 @@ export function LineNumberCell({ index, row }: { index: number; row: string }) {
   const { errors } = useFormState({ control, name: row });
   const wrong = get(errors, row) !== undefined;
   return (
-    <span className="flex min-h-8 items-center gap-1 text-sm font-medium tabular-nums">
+    <span className="flex min-h-9 items-center gap-1 text-sm font-medium tabular-nums">
       <span aria-hidden="true">
         <span className="@lines:hidden">{t("lineWord")} </span>
         {index + 1}
@@ -37,7 +37,7 @@ export function RemoveCell({ index }: { index: number }) {
       type="button"
       variant="ghost"
       aria-label={t("remove", { n: index + 1 })}
-      className="h-8 w-full justify-start pointer-coarse:h-11 @max-lines:h-11 @lines:w-8 @lines:justify-center @lines:px-0 @lines:pointer-coarse:w-11"
+      className="h-9 w-full justify-start pointer-coarse:h-11 @max-lines:h-11 @lines:w-9 @lines:justify-center @lines:px-0 @lines:pointer-coarse:w-11"
       onClick={() => {
         grid.remove(index, "remove" satisfies ColumnKind);
       }}

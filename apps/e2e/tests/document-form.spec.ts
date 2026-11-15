@@ -1,4 +1,10 @@
+import type { Locator } from "@playwright/test";
 import { checkPage, expect, signInAs, test } from "../src/index.js";
+
+// The status chip sits in the document's head, above the form element, so it
+// is looked for in the whole sheet (the head and the form), not in the form.
+const demoOf = (form: Locator) =>
+  form.page().locator(".df-sheet").filter({ has: form });
 
 // P-47: the document form template. The gallery's sales order is the one
 // screen that declares every action and every tab, with a fake server.
@@ -53,7 +59,7 @@ test.describe("The document form on the gallery", () => {
     await page.getByLabel("Status of the demo order").click();
     await page.getByRole("option", { name: "Waiting for approval" }).click();
     const form = page.getByRole("form", { name: "Sales order", exact: true });
-    await expect(form.locator('[data-family="waiting"]')).toHaveText(
+    await expect(demoOf(form).locator('[data-family="waiting"]')).toHaveText(
       "Waiting for approval",
     );
     await expect(
@@ -70,7 +76,9 @@ test.describe("The document form on the gallery", () => {
     await dialog.getByRole("button", { name: "Void", exact: true }).click();
     await expect(dialog).toBeHidden();
     // The status chip is the only element of the blocked family in the form.
-    await expect(form.locator('[data-family="blocked"]')).toHaveText("Void");
+    await expect(demoOf(form).locator('[data-family="blocked"]')).toHaveText(
+      "Void",
+    );
     await expect(
       form.getByRole("button", { name: "Void", exact: true }),
     ).toHaveAttribute("aria-disabled", "true");
@@ -87,7 +95,7 @@ test.describe("The document form on the gallery", () => {
     await page.getByLabel("Status of the demo order").click();
     await page.getByRole("option", { name: "Waiting for approval" }).click();
     const form = page.getByRole("form", { name: "Sales order", exact: true });
-    await expect(form.locator('[data-family="waiting"]')).toBeVisible();
+    await expect(demoOf(form).locator('[data-family="waiting"]')).toBeVisible();
     await expect(
       form.getByRole("button", { name: "Approve", exact: true }),
     ).toHaveCount(0);

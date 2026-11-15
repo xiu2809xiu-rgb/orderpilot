@@ -36,6 +36,7 @@ function BrowserChoice() {
         {consent === "blocked" ? null : consent === "granted" ? (
           <Button
             variant="outline"
+            className="pointer-coarse:h-11"
             onClick={() => {
               tracker.deny();
             }}
@@ -45,6 +46,7 @@ function BrowserChoice() {
         ) : (
           <Button
             variant="outline"
+            className="pointer-coarse:h-11"
             onClick={() => {
               tracker.grant();
             }}
@@ -90,7 +92,7 @@ export function ClickstreamTab() {
         title={t("clickstream.consent.title")}
         description={t("clickstream.consent.description")}
       >
-        <p className="text-2xl font-semibold tabular-nums">
+        <p className="fs-28 font-semibold tabular-nums">
           {t("clickstream.consent.rate", { rate: consentRate })}
         </p>
       </SectionCard>
@@ -98,8 +100,14 @@ export function ClickstreamTab() {
         title={t("clickstream.routes.title")}
         description={t("clickstream.routes.description")}
       >
-        <ScrollRegion label={t("clickstream.routes.label")}>
-          <Table aria-label={t("clickstream.routes.label")}>
+        <ScrollRegion
+          label={t("clickstream.routes.label")}
+          className="rounded-none border-0 bg-transparent"
+        >
+          <Table
+            className="dt-table"
+            aria-label={t("clickstream.routes.label")}
+          >
             <TableHeader>
               <TableRow>
                 <TableHead>{t("clickstream.routes.route")}</TableHead>
@@ -127,26 +135,31 @@ export function ClickstreamTab() {
         title={t("clickstream.roles.title")}
         description={t("clickstream.roles.description")}
       >
-        <Table aria-label={t("clickstream.roles.label")}>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t("clickstream.roles.role")}</TableHead>
-              <TableHead className="text-right">
-                {t("clickstream.roles.events")}
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {byRole.map((row) => (
-              <TableRow key={row.role}>
-                <TableCell>{roleName(row.role)}</TableCell>
-                <TableCell className="text-right tabular-nums">
-                  {row.events}
-                </TableCell>
+        <ScrollRegion
+          label={t("clickstream.roles.label")}
+          className="rounded-none border-0 bg-transparent"
+        >
+          <Table className="dt-table" aria-label={t("clickstream.roles.label")}>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("clickstream.roles.role")}</TableHead>
+                <TableHead className="text-right">
+                  {t("clickstream.roles.events")}
+                </TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {byRole.map((row) => (
+                <TableRow key={row.role}>
+                  <TableCell>{roleName(row.role)}</TableCell>
+                  <TableCell className="text-right tabular-nums">
+                    {row.events}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </ScrollRegion>
       </SectionCard>
     </div>
   );

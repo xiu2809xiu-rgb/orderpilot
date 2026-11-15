@@ -189,6 +189,7 @@
     "openMatrix": "Open the role matrix",
     "viewing": "You are seeing this as {{role}}.",
     "recordsLabel": "Synthetic customers with the sample rule applied",
+    "recordsTableLabel": "Customers and their notes under the sample rule",
     "emptyTitle": "No sample records",
     "emptyDescription": "The synthetic customers could not be listed."
   },

@@ -35,6 +35,7 @@ export function UserHistoryDialog({
         <Button
           variant="ghost"
           size="xs"
+          className="pointer-coarse:h-11"
           aria-label={t("users.historyFor", { name })}
         >
           <History aria-hidden="true" />

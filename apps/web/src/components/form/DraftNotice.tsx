@@ -14,7 +14,7 @@ export function DraftNotice({ draft }: { draft: DraftControl }) {
   return (
     <div
       role="status"
-      className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-md border bg-muted/40 px-s2 py-1 text-xs"
+      className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-xl border border-ring/30 bg-(--control-readonly-bg) px-s2 py-s1 text-sm"
     >
       <History
         className="size-3.5 shrink-0 text-muted-foreground"

@@ -134,6 +134,25 @@ describe("an order's steps and timeline", () => {
     expect(useToastStore.getState().items.at(-1)?.undo).toBeTypeOf("function");
   });
 
+  it("puts the payment card before the steps for a role that can confirm, and after them for the rest", async () => {
+    server.use(getWorkflowsOrderFlowMockHandler(FLOW));
+    const finance = openOrder("FINANCE");
+    const pay = await finance.findByRole("heading", { name: "Payment" });
+    const steps = finance.getByRole("heading", { name: "Steps" });
+    // Document order, not only looks: a keyboard reaches the card first too.
+    expect(
+      pay.compareDocumentPosition(steps) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    finance.unmount();
+    const support = openOrder("SUPPORT");
+    const payLate = await support.findByRole("heading", { name: "Payment" });
+    const stepsFirst = support.getByRole("heading", { name: "Steps" });
+    expect(
+      stepsFirst.compareDocumentPosition(payLate) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
   it("hides the payment form from a role that cannot confirm", async () => {
     server.use(getWorkflowsOrderFlowMockHandler(FLOW));
     openOrder("SUPPORT");

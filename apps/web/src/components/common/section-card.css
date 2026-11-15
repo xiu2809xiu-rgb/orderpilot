@@ -1,0 +1,37 @@
+/* The head of a SectionCard: the title and its description on the left, the
+   actions on the right, wrapping under the title on a narrow screen. The card
+   itself is the order page's (.dx-card, .dx-section in styles/surfaces.css). */
+.sc-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+}
+
+.sc-title {
+  min-width: 0;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.sc-description {
+  max-width: 65ch;
+  font-size: var(--type-14);
+  line-height: 1.25rem;
+  color: var(--muted-foreground);
+}
+
+.sc-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* A card that holds a table, a grid or a form is as opaque as a work card:
+   text on it must keep 4.5:1 over the brightest part of the ground. */
+.sc-card:has(table, [role="grid"], form, [data-slot="input"]) {
+  background-color: var(--dx-card-work-bg);
+  background-image: none;
+}

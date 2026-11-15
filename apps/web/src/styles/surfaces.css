@@ -1,0 +1,120 @@
+/* The surfaces of Spectra: glass over the aurora. A panel or card blurs what
+   is behind it, has a 16 px corner, a highlight along its top edge and a
+   faint glowing border. Plain rules, no layer: they sit above Tailwind's
+   utilities, which is why a card's own classes never need !important. */
+
+/* The panel surface. */
+.dx-panel {
+  background: var(--panel);
+  backdrop-filter: var(--panel-filter);
+  border: 1px solid var(--panel-border);
+}
+.dx-panel-strong {
+  background: var(--panel-strong);
+  backdrop-filter: var(--panel-filter);
+  border: 1px solid var(--panel-border);
+}
+
+/* The ground a screen sits on, for a page that draws its own. */
+.dx-ground {
+  background-color: var(--background);
+  background-image: var(--ground-image);
+  background-attachment: fixed;
+  color: var(--foreground);
+}
+
+/* The column a page sits in: 72 rem wide and centred. The gutter around it is
+   the shell's (.dx-main), so a page brings no outer padding of its own. */
+.dx-sheet {
+  position: relative;
+  isolation: isolate;
+  max-width: 72rem;
+  margin-inline: auto;
+}
+
+/* A card. A shadcn Card follows the same variables as .dx-card. */
+.dx-card,
+[data-slot="card"] {
+  background-color: var(--dx-card-bg);
+  background-image: var(--dx-card-sheen);
+  color: var(--card-foreground);
+  border: var(--dx-card-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--dx-card-shadow);
+  backdrop-filter: var(--dx-card-filter);
+}
+/* A card that holds a table, a grid or a form is as opaque as the design
+   allows: text on it must reach 4.5:1 over the brightest part of the ground,
+   which the plain glass does not promise. */
+.dx-card-work,
+[data-slot="card"]:has(table, [role="grid"], form, [data-slot="input"]) {
+  background-color: var(--dx-card-work-bg);
+  background-image: none;
+}
+
+/* A section of a screen: a title, then its body. */
+.dx-section {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+.dx-section-head {
+  padding: var(--dx-card-pad) var(--dx-card-pad) var(--dx-head-pb);
+  border-bottom: var(--dx-head-rule);
+}
+.dx-section-body {
+  min-width: 0;
+  padding: 1rem var(--dx-card-pad) var(--dx-card-pad);
+}
+.dx-section-title {
+  font-size: var(--type-16);
+  line-height: 1.5rem;
+  font-weight: 600;
+}
+.dx-section-intro {
+  margin-bottom: 1rem;
+  max-width: 65ch;
+  font-size: var(--type-14);
+  line-height: 1.25rem;
+  color: var(--muted-foreground);
+}
+
+/* The title of a screen, and the line of context under it. */
+.dx-page-head {
+  margin-bottom: 1.5rem;
+}
+.dx-title {
+  font-size: var(--dx-title-size);
+  line-height: 1.15;
+  font-weight: var(--dx-title-weight);
+  letter-spacing: var(--dx-title-tracking);
+  /* The title is gradient text, teal to cyan. */
+  background-image: linear-gradient(
+    90deg,
+    var(--dx-title-from),
+    var(--dx-title-to)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  width: fit-content;
+  max-width: 100%;
+}
+.dx-title-context {
+  margin-top: 0.25rem;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--type-14);
+  line-height: 1.25rem;
+  color: var(--muted-foreground);
+}
+.dx-page-intro {
+  margin-top: 0.5rem;
+}
+/* The buttons that belong to the whole screen, under its title. */
+.dx-page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}

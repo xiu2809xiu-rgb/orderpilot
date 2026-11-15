@@ -18,7 +18,7 @@ import {
 } from "@/lib/api/generated/endpoints/master-data/master-data";
 import type { MasterDataCustomersParams } from "@/lib/api/generated/model";
 import { readOnlyActions } from "./listActions";
-import { MasterDataTabs, countryName } from "./pieces";
+import { countryName } from "./pieces";
 
 const URL_FILTERS = { country: null, paymentTerms: null };
 const SORTABLE = ["no", "name", "openOrders", "overdueOrders"];
@@ -131,7 +131,6 @@ export default function CustomersPage() {
       title={t("customers.title")}
       description={t("customers.description")}
       demo="mockBusinessCentral"
-      tabs={<MasterDataTabs />}
       caption={t("customers.caption")}
       columns={columns}
       rowKey={(row) => row.no}

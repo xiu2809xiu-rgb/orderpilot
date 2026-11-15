@@ -27,6 +27,7 @@ export function HandedToYou() {
     <SectionCard
       title={t("handed.title")}
       description={t("handed.description")}
+      work
     >
       <QueryBoundary query={query}>
         <ul className="divide-y divide-border">

@@ -1,0 +1,28 @@
+/* The side panel and the top bar float as glass over the aurora, 12 px from
+   the edges, with rounded corners and a soft glowing edge. */
+
+.dx-side {
+  margin: 0.75rem 0 0.75rem 0.75rem;
+  overflow: hidden;
+  background: var(--panel);
+  backdrop-filter: var(--panel-filter);
+  border: var(--dx-card-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--dx-card-shadow);
+}
+.dx-bar {
+  margin: 0.75rem 0.75rem 0;
+  background: var(--panel);
+  backdrop-filter: var(--panel-filter);
+  border: var(--dx-card-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--dx-card-shadow);
+}
+.dx-search {
+  border-radius: 999px;
+  background: var(--dx-bar-btn-bg);
+}
+/* The brand mark glows. */
+.dx-side svg rect {
+  filter: drop-shadow(0 0 8px rgb(46 230 214 / 0.5));
+}

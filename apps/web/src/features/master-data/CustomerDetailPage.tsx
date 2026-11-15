@@ -14,7 +14,7 @@ import { useMasterDataCustomer } from "@/lib/api/generated/endpoints/master-data
 import { formatDay } from "@/lib/format";
 import { customerFacts } from "./customerFacts";
 import { KeyFacts, MaskedMoney } from "./pieces";
-import { BackToList, RecordState } from "./RecordState";
+import { BackToList, RecordSheet, RecordState } from "./RecordState";
 import { RecordTable, type RecordColumn } from "./RecordTable";
 
 type OpenOrder = CustomerDetail["openOrders"][number];
@@ -105,14 +105,14 @@ function CustomerRecord({ customer }: { customer: CustomerDetail }) {
     },
   ];
   return (
-    <div className="space-y-s3">
+    <RecordSheet>
       <BackToList to="/master-data/customers" label={t("customer.back")} />
       <PageHeader
         title={customer.no}
         description={customer.name}
         meta={<DemoBadge kind="mockBusinessCentral" />}
         actions={
-          <Button asChild variant="outline">
+          <Button asChild variant="outline" className="pointer-coarse:h-11">
             <Link to={tracker}>
               <Truck aria-hidden="true" />
               {t("customer.openTracker")}
@@ -139,7 +139,12 @@ function CustomerRecord({ customer }: { customer: CustomerDetail }) {
         })}
         actions={
           customer.overdueOrders.length > 0 ? (
-            <Button asChild variant="outline" size="sm">
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="pointer-coarse:h-11"
+            >
               <Link to={late}>{t("customer.overdue.inTracker")}</Link>
             </Button>
           ) : undefined
@@ -153,7 +158,7 @@ function CustomerRecord({ customer }: { customer: CustomerDetail }) {
           emptyText={t("customer.overdue.empty")}
         />
       </SectionCard>
-    </div>
+    </RecordSheet>
   );
 }
 

@@ -1,0 +1,89 @@
+{
+  "preview": {
+    "tag": "Design preview: not a real page yet"
+  },
+  "screens": {
+    "signin": {
+      "title": "Sign-in",
+      "group": "Access"
+    },
+    "home": {
+      "title": "Home",
+      "group": "Work"
+    },
+    "orders": {
+      "title": "Orders",
+      "group": "Work"
+    },
+    "order": {
+      "title": "An order",
+      "group": "Work"
+    },
+    "upload": {
+      "title": "Upload and review",
+      "group": "Work"
+    },
+    "spark": {
+      "title": "Spark",
+      "group": "Work"
+    },
+    "insights": {
+      "title": "Insights",
+      "group": "Insights"
+    },
+    "kit": {
+      "title": "Kit sheet",
+      "group": "Design"
+    }
+  },
+  "panel": {
+    "label": "Main navigation",
+    "brand": "OrderPilot",
+    "collapse": "Collapse the panel",
+    "expand": "Expand the panel",
+    "openMenu": "Open navigation",
+    "menuTitle": "Navigation",
+    "menuDescription": "Choose an area of OrderPilot.",
+    "layoutOnly": "Shown for layout",
+    "groups": {
+      "work": "Work",
+      "stock": "Stock and buying",
+      "insights": "Insights",
+      "control": "Control"
+    },
+    "orders": "Orders",
+    "settings": "Settings",
+    "help": "Help",
+    "person": "Signed in as {{name}}, {{role}}"
+  },
+  "bar": {
+    "upload": "Upload",
+    "uploadNote": "Upload and review is not wired in this preview yet",
+    "spark": "Spark",
+    "roleLabel": "Demo role",
+    "paletteTitle": "Search or jump to",
+    "paletteDescription": "Jump to a screen of this preview.",
+    "paletteEmpty": "No screen matches that.",
+    "paletteScreens": "Screens",
+    "keys": "Ctrl K",
+    "palettePlaceholder": "Type a screen name",
+    "breadcrumb": "Breadcrumb"
+  },
+  "spark": {
+    "title": "Spark",
+    "description": "The assistant panel.",
+    "note": "Not wired in this preview yet."
+  },
+  "help": {
+    "title": "Keyboard shortcuts",
+    "search": "Search or jump to",
+    "close": "Close a panel or a menu",
+    "keysSearch": "Ctrl K",
+    "keysClose": "Esc",
+    "keysSpark": "Ctrl .",
+    "spark": "Open or close Spark"
+  },
+  "content": {
+    "loading": "Loading the screen"
+  }
+}

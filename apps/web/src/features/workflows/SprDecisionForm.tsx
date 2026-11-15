@@ -4,7 +4,9 @@ import { useState, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { ErrorPanel, toast } from "@/components/common";
 import { Button } from "@/components/ui/button";
+import { CONTROL_SKIN } from "@/components/ui/controlSkin";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 import {
   workflowsApprove,
   workflowsReject,
@@ -151,7 +153,7 @@ export function SprDecisionForm({
           onChange={(event) => {
             setComment(event.target.value);
           }}
-          className="w-full rounded-md border bg-background px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-ring"
+          className={cn(CONTROL_SKIN, "w-full rounded-md px-3 py-2 text-sm")}
         />
         <p id="spr-comment-hint" className="text-sm text-muted-foreground">
           {t("spr.commentHint")}

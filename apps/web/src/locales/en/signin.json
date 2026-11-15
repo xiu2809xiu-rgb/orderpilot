@@ -1,30 +1,40 @@
 {
-  "promise": {
-    "eyebrow": "How OrderPilot works",
-    "lead": "OrderPilot helps Spectra's teams take a customer order from the first document to a checked, approved order. Every decision stays with a person.",
-    "stepsLabel": "The three steps",
+  "login": {
+    "title": "Sign in to OrderPilot",
+    "email": "Email",
+    "password": "Password",
+    "showPassword": "Show password",
+    "submit": "Sign in",
+    "submitting": "Signing in",
+    "emailRequired": "Enter your email, for example name@example.com.",
+    "emailInvalid": "That does not look like an email. Check for an @ and a domain.",
+    "passwordRequired": "Enter your password.",
+    "demoTitle": "Or open a demo role",
+    "demoHint": "Each role sees its own tasks and numbers.",
+    "demoRolesLabel": "Demo roles",
+    "demoNote": "In this demo the AI and Business Central are stand-ins, and every record is made up.",
+    "optionsFailed": "The demo sign-in could not be checked. You can still sign in with your email."
+  },
+  "sessionEnded": {
+    "title": "Your session ended",
+    "description": "Sign in again to carry on. This page stays as you left it, and anything you typed is kept."
+  },
+  "hero": {
+    "lead": "One place for every order, from the customer's PO to the goods leaving.",
+    "stepsLabel": "How OrderPilot works",
     "steps": {
       "read": {
         "title": "AI reads",
-        "body": "It reads each customer document and picks out the customer, the items, the quantities and the prices."
+        "body": "It reads each document and picks out the customer, items, quantities and prices."
       },
       "decide": {
         "title": "Rules decide",
-        "body": "Clear business rules check the order against prices, stock and limits. The AI does not make this call."
+        "body": "Fixed rules check the order against prices, stock and approval limits."
       },
       "approve": {
         "title": "People approve",
-        "body": "The right person reviews what needs a decision. Business Central stays the system of record."
+        "body": "The right person confirms anything uncertain. Business Central stays the system of record."
       }
-    },
-    "demoNote": "In this demo the AI and Business Central are stand-ins, and every record is made up."
-  },
-  "flow": {
-    "read": "Read",
-    "decide": "Decide",
-    "approve": "Approve",
-    "ai": "AI",
-    "rules": "Rules",
-    "people": "People"
+    }
   }
 }

@@ -10,9 +10,33 @@
     "breadcrumb": "Breadcrumb",
     "search": "Search or jump to",
     "loading": "Loading",
+    "pageTitle": "{{page}} - OrderPilot",
     "close": "Close",
     "mobileNavTitle": "Navigation",
-    "mobileNavDescription": "Choose an area of OrderPilot."
+    "mobileNavDescription": "Choose an area of OrderPilot.",
+    "groups": {
+      "work": "Work",
+      "stock": "Stock and buying",
+      "insights": "Insights",
+      "control": "Control"
+    },
+    "collapsePanel": "Collapse the panel",
+    "expandPanel": "Expand the panel",
+    "upload": "Upload",
+    "spark": "Spark",
+    "help": {
+      "label": "Help",
+      "title": "Keyboard shortcuts",
+      "palette": "Search or jump to a page",
+      "search": "Search the list on the page",
+      "new": "Start a new record",
+      "spark": "Open or close Spark",
+      "close": "Close a panel or a menu",
+      "keysSearch": "/",
+      "keysNew": "N",
+      "keysSpark": "Ctrl .",
+      "keysClose": "Esc"
+    }
   },
   "nav": {
     "home": "Home",
@@ -75,7 +99,7 @@
     "seeAll": "See all ({{count}})"
   },
   "userMenu": {
-    "label": "Account menu, {{initials}}",
+    "label": "Account menu:",
     "signedInAs": "Signed in as",
     "signOut": "Sign out"
   },
@@ -83,23 +107,6 @@
     "switcher": "Demo role",
     "switcherHint": "Switch to another role to see its home page.",
     "current": "Current role"
-  },
-  "login": {
-    "title": "Sign in to OrderPilot",
-    "subtitle": "Sign in to see your tasks.",
-    "email": "Email",
-    "password": "Password",
-    "submit": "Sign in",
-    "submitting": "Signing in",
-    "demoTitle": "Demo sign-in",
-    "demoHint": "Pick a role to look around. One click, no password.",
-    "orEmail": "or sign in with your email",
-    "demoRolesLabel": "Demo roles",
-    "optionsFailed": "The demo sign-in could not be checked. You can still sign in with your email."
-  },
-  "sessionEnded": {
-    "title": "Your session ended",
-    "description": "Sign in again to carry on. This page stays as you left it, and anything you typed is kept."
   },
   "validation": {
     "required": "This field is required.",
@@ -129,18 +136,25 @@
     "notFound": {
       "title": "Page not found",
       "description": "The page you asked for does not exist or has moved.",
-      "action": "Go to home"
+      "action": "Go to home",
+      "addressTitle": "The address you opened",
+      "addressHint": "Check it for a typing slip, or open a place from the panel."
     },
     "forbidden": {
       "title": "You do not have access",
       "description": "Your role does not include this area. If you think it should, ask a system admin.",
-      "action": "Go to home"
+      "action": "Go to home",
+      "sectionTitle": "Your access",
+      "signedInAs": "Signed in as {{name}}, {{role}}.",
+      "notForRole": "This area is not part of the {{role}} role. A system admin can change what a role may open."
     },
     "crash": {
       "title": "Something went wrong",
       "description": "This page hit an error. Quote the trace ID if you ask for help.",
-      "reload": "Reload the page",
-      "home": "Go to home"
+      "reload": "Try again",
+      "home": "Go to home",
+      "sectionTitle": "Reference for support",
+      "reference": "The team can find exactly what happened from this trace ID."
     }
   },
   "settings": {

@@ -117,6 +117,7 @@ export default function RemindersPage() {
         <RolePicker value={role ?? "SUPPORT"} onChange={setRole} />
       ) : null}
       <SectionCard
+        work
         title={
           role
             ? t("reminders.forRole", {
