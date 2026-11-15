@@ -95,11 +95,16 @@ export function SprBasis({ basis }: { basis: SprDetail["basis"] }) {
           {basis.monthsOfCover === null ? (
             t("spr.noSales")
           ) : (
-            <span className="inline-flex flex-wrap items-center gap-2">
+            <span className="inline-flex max-w-full flex-wrap items-center gap-2">
               {formatAmount(basis.monthsOfCover)}
               {/* Under a month of stock is what makes an SPR urgent. */}
               {Number(basis.monthsOfCover) < 1 ? (
-                <StatusBadge tone="warning">{t("spr.lowCover")}</StatusBadge>
+                <StatusBadge
+                  tone="warning"
+                  className="h-auto max-w-full shrink whitespace-normal py-0.5 text-left"
+                >
+                  {t("spr.lowCover")}
+                </StatusBadge>
               ) : null}
             </span>
           )}
