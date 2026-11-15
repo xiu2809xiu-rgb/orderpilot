@@ -1,5 +1,6 @@
 import { Clock, TriangleAlert } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { calendarDaysBetween } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { timerParts } from "../../features/directions/data/timer";
 import { StatusChip } from "../kit/StatusChip";
@@ -13,7 +14,7 @@ interface DueTimerProps {
 }
 
 /**
- * How far a task is from its due time, in words: "Due in 3 h", "2 days late".
+ * How far a task is from its due time, in words: "Due in 3 h", "2 days late", counted in calendar days.
  * Late is a red chip with a warning icon, due within four hours an amber chip
  * with a clock, later a quiet line with a clock. The icon and the words carry
  * the meaning, so colour never does alone.
@@ -22,7 +23,13 @@ export function DueTimer({ due, now, className }: DueTimerProps) {
   const { t } = useTranslation("directions-parts");
   const current = useNow(now);
   const dueAt = typeof due === "string" ? new Date(due) : due;
-  const parts = timerParts(dueAt, current);
+  const sums = timerParts(dueAt, current);
+  // Days late are calendar days in Singapore, as the order and tracker pages
+  // count them; elapsed whole days would read one less here. Hours stay.
+  const parts =
+    sums.late && sums.unit === "days"
+      ? { ...sums, amount: calendarDaysBetween(dueAt, current) }
+      : sums;
   const key =
     parts.unit === "now"
       ? parts.late

@@ -137,6 +137,18 @@ describe("DueTimer", () => {
     expect(screen.getByText("24 h late")).toBeInTheDocument();
   });
 
+  it("counts days late in Singapore calendar days, as the order page does", () => {
+    // Due 12 Nov 17:00 in Singapore, now 15 Nov 11:00 there: 2.75 days have
+    // passed, and the calendar says 3 days late.
+    render(
+      <DueTimer
+        due={new Date("2026-11-12T09:00:00.000Z")}
+        now={new Date("2026-11-15T03:00:00.000Z")}
+      />,
+    );
+    expect(screen.getByText("3 days late")).toBeInTheDocument();
+  });
+
   it("keeps the due time in the markup", () => {
     const { container } = render(<DueTimer due={at(3_600_000)} now={now} />);
     expect(container.querySelector("time")).toHaveAttribute(

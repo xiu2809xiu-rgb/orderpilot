@@ -46,6 +46,31 @@ const LONG_DAY = new Intl.DateTimeFormat("en-SG", {
   timeZone: "Asia/Singapore",
 });
 
+// en-CA writes a date as 2026-11-15, which Date.UTC can read back.
+const SG_DATE = new Intl.DateTimeFormat("en-CA", {
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  timeZone: "Asia/Singapore",
+});
+
+function singaporeDayNumber(value: Date): number {
+  const [year = 0, month = 1, day = 1] = SG_DATE.format(value)
+    .split("-")
+    .map(Number);
+  return Date.UTC(year, month - 1, day) / 86_400_000;
+}
+
+/**
+ * How many calendar days in Singapore lie between two moments (`later` minus
+ * `earlier`), so that a task due at 5 pm on the 12th is 3 days late at any
+ * time on the 15th. The order and tracker pages count lateness this way, and
+ * the home rows use the same count, so one task reads the same everywhere.
+ */
+export function calendarDaysBetween(earlier: Date, later: Date): number {
+  return singaporeDayNumber(later) - singaporeDayNumber(earlier);
+}
+
 /** "Monday, 2 November 2026" in Singapore time. */
 export function formatLongDay(value: Date): string {
   return LONG_DAY.format(value);
