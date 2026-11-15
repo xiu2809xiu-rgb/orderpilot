@@ -1,6 +1,6 @@
 # ADR 0049: The SPR process the client described
 
-- **Status:** Accepted for the words and the personas. The three conflicts below were ruled on by Angelyn in [ADR 0054](0054-the-approver-group-replaces-the-approval-chain.md).
+- **Status:** Accepted for the words and the personas. The three conflicts below were ruled on by Angelyn in [ADR 0055](0055-the-approver-group-replaces-the-approval-chain.md).
 - **Date:** 2026-11-09
 - **Story:** P-84
 
