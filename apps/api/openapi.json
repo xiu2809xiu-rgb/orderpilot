@@ -483,7 +483,8 @@
                               "spr.read",
                               "workflows.inboxes.any",
                               "tasks.complete",
-                              "masking.customerNote"
+                              "masking.customerNote",
+                              "spr.route"
                             ]
                           }
                         },
@@ -588,7 +589,8 @@
                               "spr.read",
                               "workflows.inboxes.any",
                               "tasks.complete",
-                              "masking.customerNote"
+                              "masking.customerNote",
+                              "spr.route"
                             ]
                           }
                         },
@@ -728,7 +730,8 @@
                               "spr.read",
                               "workflows.inboxes.any",
                               "tasks.complete",
-                              "masking.customerNote"
+                              "masking.customerNote",
+                              "spr.route"
                             ]
                           }
                         },
@@ -861,7 +864,8 @@
                               "spr.read",
                               "workflows.inboxes.any",
                               "tasks.complete",
-                              "masking.customerNote"
+                              "masking.customerNote",
+                              "spr.route"
                             ]
                           }
                         },
@@ -8922,7 +8926,8 @@
                               "spr.read",
                               "workflows.inboxes.any",
                               "tasks.complete",
-                              "masking.customerNote"
+                              "masking.customerNote",
+                              "spr.route"
                             ]
                           }
                         },
@@ -8972,7 +8977,8 @@
                                     "spr.read",
                                     "workflows.inboxes.any",
                                     "tasks.complete",
-                                    "masking.customerNote"
+                                    "masking.customerNote",
+                                    "spr.route"
                                   ]
                                 }
                               },
@@ -9029,7 +9035,8 @@
                                   "spr.read",
                                   "workflows.inboxes.any",
                                   "tasks.complete",
-                                  "masking.customerNote"
+                                  "masking.customerNote",
+                                  "spr.route"
                                 ]
                               },
                               "kind": {
@@ -9174,7 +9181,8 @@
                 "spr.read",
                 "workflows.inboxes.any",
                 "tasks.complete",
-                "masking.customerNote"
+                "masking.customerNote",
+                "spr.route"
               ]
             }
           },
@@ -9267,7 +9275,8 @@
                               "spr.read",
                               "workflows.inboxes.any",
                               "tasks.complete",
-                              "masking.customerNote"
+                              "masking.customerNote",
+                              "spr.route"
                             ]
                           }
                         },
@@ -9448,7 +9457,8 @@
                               "spr.read",
                               "workflows.inboxes.any",
                               "tasks.complete",
-                              "masking.customerNote"
+                              "masking.customerNote",
+                              "spr.route"
                             ]
                           }
                         },
@@ -9633,7 +9643,8 @@
                               "spr.read",
                               "workflows.inboxes.any",
                               "tasks.complete",
-                              "masking.customerNote"
+                              "masking.customerNote",
+                              "spr.route"
                             ]
                           }
                         },
