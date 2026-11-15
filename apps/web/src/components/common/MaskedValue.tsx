@@ -53,8 +53,8 @@ export function MaskedValue({
             variant="ghost"
             size="icon"
             // The negative margin keeps the 24 px target without making a
-            // table row taller than its text; a touch screen gets 44 px around it.
-            className="relative -my-0.5 size-6 pointer-coarse:after:absolute pointer-coarse:after:-inset-3 pointer-coarse:after:content-['']"
+            // table row taller than its text; the Button is 44 px on a touch screen.
+            className="-my-0.5 size-6"
             aria-label={t("masked.why")}
           >
             <Lock className="size-3.5" aria-hidden="true" />

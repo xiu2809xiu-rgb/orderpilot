@@ -223,11 +223,61 @@
   color: var(--foreground);
 }
 
-/* A touch screen gets a 44 px target around each pill's button (the utility
-   classes on the button draw it) and around Clear. */
+/* A touch screen gets a 44 px target for each pill's button and for Clear. */
 @media (pointer: coarse) {
+  .dt-chip > button {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
   .dt-clear {
     min-height: 2.75rem;
+  }
+}
+
+/* The row and header checkboxes. On a touch screen the button itself is
+   44 px square and the visible box is drawn inside it with ::before, so the
+   whole square is the target and nothing has to reach outside its cell. */
+@media (pointer: coarse) {
+  .dt-box {
+    position: relative;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-color: transparent;
+    background: transparent;
+    display: block;
+    margin-block: -0.5rem;
+  }
+
+  .dt-box::before {
+    content: "";
+    position: absolute;
+    inset: 0.625rem;
+    border: 1px solid var(--input);
+    border-radius: 5px;
+    background: var(--control-bg);
+  }
+
+  .dt-box[data-state="checked"]::before,
+  .dt-box[data-state="indeterminate"]::before {
+    border-color: var(--primary);
+    background: var(--primary);
+  }
+
+  .dt-box:hover::before {
+    border-color: color-mix(in srgb, var(--ring) 70%, transparent);
+  }
+
+  .dt-box:focus-visible {
+    box-shadow: none;
+    outline: 2px solid var(--ring);
+    outline-offset: -2px;
+  }
+
+  /* Above the box, which is a positioned layer that paints over plain content. */
+  .dt-box > [data-slot="checkbox-indicator"] {
+    position: relative;
+    z-index: 1;
   }
 }
 

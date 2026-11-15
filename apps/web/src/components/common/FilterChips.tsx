@@ -31,7 +31,6 @@ export function FilterChips({
           <span>{chip.label}</span>
           <button
             type="button"
-            className="relative pointer-coarse:after:absolute pointer-coarse:after:-inset-2 pointer-coarse:after:content-['']"
             aria-label={t("filterChips.clear", { label: chip.label })}
             onClick={() => {
               const next = Object.fromEntries(
