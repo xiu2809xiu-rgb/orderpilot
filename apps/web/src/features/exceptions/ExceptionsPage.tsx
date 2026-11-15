@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useExceptionsList } from "@/lib/api/generated/endpoints/exceptions/exceptions";
 import { tableStatusOf } from "@/lib/query-status";
+import { ClampedText } from "./ClampedText";
 
 const URL_FILTERS = ["state"] as const;
 
@@ -58,23 +59,50 @@ export default function ExceptionsPage() {
         hideable: false,
       },
       {
+        id: "summary",
+        header: t("list.columns.summary"),
+        // On a phone this cell moves under the order number, in a cell that
+        // keeps one line, so it asks for its own line breaks and a width to wrap in.
+        cell: (row) => (
+          <span className="whitespace-normal max-md:inline-block max-md:min-w-52">
+            {row.summary}
+          </span>
+        ),
+        wrap: true,
+        exportValue: (row) => row.summary,
+      },
+      {
+        id: "state",
+        header: t("list.columns.state"),
+        cell: (row) => (
+          <StatusBadge tone={row.state === "OPEN" ? "warning" : "success"}>
+            {t(`list.state.${row.state}`)}
+          </StatusBadge>
+        ),
+        exportValue: (row) => t(`list.state.${row.state}`),
+      },
+      {
         id: "customer",
         header: t("list.columns.customer"),
-        cell: (row) => `${row.customerName} (${row.customerNo})`,
+        cell: (row) => (
+          <ClampedText className="max-w-56">
+            {`${row.customerName} (${row.customerNo})`}
+          </ClampedText>
+        ),
         exportValue: (row) => `${row.customerNo} ${row.customerName}`,
+        // Hidden at first so the columns that say what to do fit a laptop; the
+        // order's own page names the customer.
+        defaultHidden: true,
       },
       {
         id: "rule",
         header: t("list.columns.rule"),
-        cell: (row) => row.ruleLabel,
+        cell: (row) => (
+          <ClampedText className="max-w-64">{row.ruleLabel}</ClampedText>
+        ),
         exportValue: (row) => row.ruleLabel,
-      },
-      {
-        id: "summary",
-        header: t("list.columns.summary"),
-        cell: (row) => row.summary,
-        wrap: true,
-        exportValue: (row) => row.summary,
+        // The summary already says which check failed, in the words of the case.
+        defaultHidden: true,
       },
       {
         id: "expected",
@@ -108,16 +136,6 @@ export default function ExceptionsPage() {
         header: t("list.columns.fixBy"),
         cell: (row) => tc(`roles.${row.fixBy}`),
         exportValue: (row) => tc(`roles.${row.fixBy}`),
-      },
-      {
-        id: "state",
-        header: t("list.columns.state"),
-        cell: (row) => (
-          <StatusBadge tone={row.state === "OPEN" ? "warning" : "success"}>
-            {t(`list.state.${row.state}`)}
-          </StatusBadge>
-        ),
-        exportValue: (row) => t(`list.state.${row.state}`),
       },
       {
         id: "opened",
