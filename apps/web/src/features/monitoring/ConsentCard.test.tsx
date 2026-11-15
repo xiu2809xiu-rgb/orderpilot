@@ -134,11 +134,11 @@ describe("the Analytics section in Settings", () => {
     expect(screen.getByTestId("analytics-current")).toHaveTextContent(
       "Not chosen yet",
     );
-    await userEvent.click(screen.getByRole("button", { name: "Allow" }));
+    await userEvent.click(screen.getByRole("radio", { name: "Allow" }));
     expect(screen.getByTestId("analytics-current")).toHaveTextContent(
       "Counting is on",
     );
-    await userEvent.click(screen.getByRole("button", { name: "Do not allow" }));
+    await userEvent.click(screen.getByRole("radio", { name: "Do not allow" }));
     expect(screen.getByTestId("analytics-current")).toHaveTextContent(
       "Counting is off",
     );
@@ -158,6 +158,30 @@ describe("the Analytics section in Settings", () => {
     expect(screen.getByTestId("analytics-current")).toHaveTextContent(
       "saved choice is Allow",
     );
-    expect(screen.getByRole("button", { name: "Allow" })).toBeDisabled();
+    const allow = screen.getByRole("radio", { name: "Allow" });
+    expect(allow).toBeDisabled();
+    // The saved choice still shows as chosen, though it is overridden.
+    expect(allow).toHaveAttribute("aria-checked", "true");
+  });
+
+  it("shows the chosen setting as selected, as the theme choice does", async () => {
+    await mountSettings();
+    const group = screen.getByRole("radiogroup", {
+      name: "Usage analytics in this browser",
+    });
+    const allow = screen.getByRole("radio", { name: "Allow" });
+    const decline = screen.getByRole("radio", { name: "Do not allow" });
+    expect(group).toContainElement(allow);
+    expect(allow).toHaveAttribute("aria-checked", "false");
+    expect(decline).toHaveAttribute("aria-checked", "false");
+    await userEvent.click(decline);
+    expect(decline).toHaveAttribute("aria-checked", "true");
+    expect(allow).toHaveAttribute("aria-checked", "false");
+    // Marked as chosen, not drawn as a button that asks to be pressed.
+    expect(decline.className).toContain("border-primary");
+    expect(decline.className).not.toContain("bg-primary");
+    await userEvent.click(allow);
+    expect(allow).toHaveAttribute("aria-checked", "true");
+    expect(decline).toHaveAttribute("aria-checked", "false");
   });
 });

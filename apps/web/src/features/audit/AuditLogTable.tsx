@@ -33,6 +33,9 @@ export function AuditLogTable() {
   return (
     <SectionCard title={t("table.caption")}>
       <div className="space-y-s2">
+        <p className="text-sm text-muted-foreground">
+          {t("filters.searchHint")}
+        </p>
         {problem ? (
           <p role="alert" className="text-sm text-destructive">
             {t(`filters.problems.${problem}`)}

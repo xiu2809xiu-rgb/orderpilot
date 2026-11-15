@@ -35,7 +35,7 @@
       "cost": "Cost (USD)",
       "latency": "Latency",
       "status": "Status",
-      "trace": "Trace id",
+      "trace": "Trace ID",
       "page": "Page {{page}} of {{pages}}",
       "previous": "Previous page",
       "next": "Next page"
@@ -70,9 +70,9 @@
     },
     "traces": {
       "title": "Recent traces",
-      "description": "The latest requests, by route pattern. Search the trace id in Grafana.",
+      "description": "The latest requests, by route pattern. Search the trace ID in Grafana.",
       "label": "Recent traces",
-      "traceId": "Trace id",
+      "traceId": "Trace ID",
       "route": "Route",
       "duration": "Duration",
       "status": "HTTP status"
@@ -127,7 +127,8 @@
     "overridden": "Your browser sends Do Not Track or Global Privacy Control, so nothing is counted, whatever is chosen here.",
     "overriddenYes": "Your saved choice is Allow, but your browser sends Do Not Track or Global Privacy Control, so nothing is counted.",
     "allow": "Allow",
-    "decline": "Do not allow"
+    "decline": "Do not allow",
+    "choiceLabel": "Usage analytics in this browser"
   },
   "denied": "Your role cannot see monitoring data."
 }
