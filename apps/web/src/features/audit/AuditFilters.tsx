@@ -1,4 +1,6 @@
 import { ROLES } from "@orderpilot/shared";
+import { SlidersHorizontal } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { TableFilters } from "@/components/common";
 import {
@@ -6,16 +8,31 @@ import {
   NativeSelect,
   ToggleChip,
 } from "@/components/common/data-table/Field";
-import { AuditMoreFilters } from "./AuditMoreFilters";
+import { Button } from "@/components/ui/button";
 import { CommitInput } from "./CommitInput";
 import type { FilterId } from "./auditQuery";
 
-/** The filters behind More filters: the ones a person reaches for less often. */
-const MORE_IDS = ["entity", "id", "actor", "from", "to"] as const;
-
 type SetFilter = (id: string, value: string | boolean | undefined) => void;
 
-/** The audit log's own filters, shown in the table's toolbar. */
+const FIELDS: readonly FilterId[] = [
+  "kind",
+  "role",
+  "actor",
+  "action",
+  "entity",
+  "id",
+  "from",
+  "to",
+];
+
+/**
+ * The audit log's own filters, folded behind "More filters" so the trail is
+ * the first thing on the page, and opened by themselves when one is in use,
+ * for example from a link. The search box and its trace ID hint sit outside
+ * the fold, so pasting a trace ID needs no click. (The fold is from Azri's
+ * #270.) The button and the Refusals switch sit in the table's filter row,
+ * drawn as the list pages draw theirs; the fold opens under the row.
+ */
 export function AuditFilters({
   filters,
   setFilter,
@@ -29,6 +46,9 @@ export function AuditFilters({
     const value = filters[id];
     return typeof value === "string" ? value : "";
   };
+  const inUse = FIELDS.filter((id) => text(id) !== "").length;
+  const [open, setOpen] = useState(inUse > 0);
+  const shown = open || inUse > 0;
   const text_input = (
     id: FilterId,
     label: string,
@@ -44,49 +64,8 @@ export function AuditFilters({
       {...extra}
     />
   );
-  const inMore = MORE_IDS.filter((id) => text(id) !== "").length;
-  // `contents` keeps the group for a screen reader without a box of its own,
-  // so the fields sit straight in the table's filter row.
   return (
-    <fieldset className="contents">
-      <legend className="sr-only">{t("filters.region")}</legend>
-      <Field label={t("filters.kind")} htmlFor="audit-filter-kind">
-        <NativeSelect
-          id="audit-filter-kind"
-          className="lp-select"
-          value={text("kind")}
-          onChange={(event) => {
-            setFilter("kind", event.target.value || undefined);
-          }}
-        >
-          <option value="">{t("filters.kinds.any")}</option>
-          {(["user", "system", "ai"] as const).map((kind) => (
-            <option key={kind} value={kind}>
-              {t(`filters.kinds.${kind}`)}
-            </option>
-          ))}
-        </NativeSelect>
-      </Field>
-      <Field label={t("filters.role")} htmlFor="audit-filter-role">
-        <NativeSelect
-          id="audit-filter-role"
-          className="lp-select"
-          value={text("role")}
-          onChange={(event) => {
-            setFilter("role", event.target.value || undefined);
-          }}
-        >
-          <option value="">{t("filters.anyRole")}</option>
-          {ROLES.map((role) => (
-            <option key={role} value={role}>
-              {tc(`roles.${role}`)}
-            </option>
-          ))}
-        </NativeSelect>
-      </Field>
-      {text_input("action", t("filters.action"), {
-        placeholder: t("filters.actionHint"),
-      })}
+    <>
       <div className="dt-toggles">
         <ToggleChip
           checked={filters.refusals === true}
@@ -96,18 +75,75 @@ export function AuditFilters({
         >
           {t("filters.refusals")}
         </ToggleChip>
-        <AuditMoreFilters applied={inMore}>
+        <Button
+          variant="outline"
+          size="sm"
+          className="lp-more"
+          aria-expanded={shown}
+          aria-controls={shown ? "audit-more-filters" : undefined}
+          onClick={() => {
+            setOpen(!shown);
+          }}
+        >
+          <SlidersHorizontal aria-hidden="true" />
+          {/* The words say the count, so the visible text is the whole name. */}
+          {inUse > 0
+            ? t("filters.moreInUse", { count: inUse })
+            : t("filters.more")}
+        </Button>
+      </div>
+      {shown ? (
+        <fieldset
+          id="audit-more-filters"
+          className="col-span-full grid w-full basis-full grid-cols-1 gap-s2 sm:grid-cols-2 lg:grid-cols-4"
+        >
+          <legend className="sr-only">{t("filters.region")}</legend>
+          <Field label={t("filters.kind")} htmlFor="audit-filter-kind">
+            <NativeSelect
+              id="audit-filter-kind"
+              value={text("kind")}
+              onChange={(event) => {
+                setFilter("kind", event.target.value || undefined);
+              }}
+            >
+              <option value="">{t("filters.kinds.any")}</option>
+              {(["user", "system", "ai"] as const).map((kind) => (
+                <option key={kind} value={kind}>
+                  {t(`filters.kinds.${kind}`)}
+                </option>
+              ))}
+            </NativeSelect>
+          </Field>
+          <Field label={t("filters.role")} htmlFor="audit-filter-role">
+            <NativeSelect
+              id="audit-filter-role"
+              value={text("role")}
+              onChange={(event) => {
+                setFilter("role", event.target.value || undefined);
+              }}
+            >
+              <option value="">{t("filters.anyRole")}</option>
+              {ROLES.map((role) => (
+                <option key={role} value={role}>
+                  {tc(`roles.${role}`)}
+                </option>
+              ))}
+            </NativeSelect>
+          </Field>
+          {text_input("actor", t("filters.actor"), {
+            placeholder: t("filters.actorHint"),
+          })}
+          {text_input("action", t("filters.action"), {
+            placeholder: t("filters.actionHint"),
+          })}
           {text_input("entity", t("filters.entity"), {
             placeholder: t("filters.entityHint"),
           })}
           {text_input("id", t("filters.entityId"))}
-          {text_input("actor", t("filters.actor"), {
-            placeholder: t("filters.actorHint"),
-          })}
           {text_input("from", t("filters.from"), { type: "date" })}
           {text_input("to", t("filters.to"), { type: "date" })}
-        </AuditMoreFilters>
-      </div>
-    </fieldset>
+        </fieldset>
+      ) : null}
+    </>
   );
 }

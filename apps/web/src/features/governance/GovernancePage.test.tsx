@@ -149,6 +149,42 @@ describe("GovernancePage", () => {
     expect(screen.queryByRole("button", { name: "Copy a role" })).toBeNull();
   });
 
+  it("tells a read-only role it may read, and names what changing needs in words", async () => {
+    signIn("AUDITOR");
+    renderPage();
+    expect(await screen.findByText("Read only")).toBeInTheDocument();
+    expect(
+      screen.getByText(/Changing it needs "Change the role matrix"/),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/You do not have access/)).toBeNull();
+    expect(screen.queryByText(/roles\.manage permission/)).toBeNull();
+  });
+
+  it("offers only the tabs the role may open, and opens the matrix for a link to another", async () => {
+    signIn("AUDITOR");
+    renderPage("/governance?tab=users");
+    const tabs = await screen.findByRole("tablist");
+    expect(within(tabs).queryByRole("tab", { name: "Users" })).toBeNull();
+    expect(
+      within(tabs)
+        .getAllByRole("tab")
+        .map((tab) => tab.textContent),
+    ).toEqual(["Role matrix", "Masking", "Data sent to AI", "Refusals"]);
+    expect(
+      within(tabs).getByRole("tab", { name: "Role matrix" }),
+    ).toHaveAttribute("aria-selected", "true");
+  });
+
+  it("offers the Users tab to a role that may see users", async () => {
+    signIn("SYSTEM_ADMIN");
+    renderPage("/governance?tab=users");
+    const tabs = await screen.findByRole("tablist");
+    expect(within(tabs).getByRole("tab", { name: "Users" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+  });
+
   it("copies one role onto another", async () => {
     signIn("SYSTEM_ADMIN");
     let body: unknown = null;
@@ -881,6 +917,32 @@ describe("GovernancePage", () => {
     expect(
       screen.getByText("Only synthetic data may leave."),
     ).toBeInTheDocument();
+  });
+
+  it("names each classification in the request form as the badges do", async () => {
+    signIn("SYSTEM_ADMIN");
+    server.use(
+      http.get("*/api/v1/governance/ai-destinations", () =>
+        HttpResponse.json({
+          data: [
+            {
+              provider: "mock",
+              origins: ["synthetic"],
+              classifications: ["public"],
+            },
+          ],
+        }),
+      ),
+    );
+    renderPage("/governance?tab=ai");
+    const select = await screen.findByRole("combobox", {
+      name: "Classification",
+    });
+    expect(
+      within(select)
+        .getAllByRole("option")
+        .map((option) => option.textContent),
+    ).toEqual(["Public", "Internal", "Confidential", "Restricted"]);
   });
 
   it("shows how a refusal looks, in the page and in the envelope", async () => {

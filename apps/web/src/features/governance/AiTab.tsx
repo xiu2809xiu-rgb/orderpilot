@@ -35,6 +35,8 @@ type Classification = PolicyCheckAiDestinationBody["classification"];
 /** What may go to which provider, and a request to try against the rule. */
 export function AiTab() {
   const { t } = useTranslation("governance");
+  // The badges' own words, so the form and the table name a level alike.
+  const { t: tb } = useTranslation("components");
   const rules = usePolicyAiDestinations();
   const [provider, setProvider] = useState<Provider>("mock");
   const [origin, setOrigin] = useState<Origin>("real");
@@ -157,7 +159,7 @@ export function AiTab() {
             >
               {CLASSIFICATIONS.map((level) => (
                 <option key={level} value={level}>
-                  {level}
+                  {tb(`badges.classification.${level}`)}
                 </option>
               ))}
             </NativeSelect>
