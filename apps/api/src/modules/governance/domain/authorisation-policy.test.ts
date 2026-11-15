@@ -117,6 +117,10 @@ describe("the actions the policy knows", () => {
     });
   });
 
+  it("routes an SPR with the coordinator's own permission, and no limit (#252)", () => {
+    expect(policyActionOf("spr.route")).toEqual({ permission: "spr.route" });
+  });
+
   it("knows no other action, not even one named after an object's own keys", () => {
     expect(policyActionOf("order.delete")).toBeUndefined();
     expect(policyActionOf("toString")).toBeUndefined();

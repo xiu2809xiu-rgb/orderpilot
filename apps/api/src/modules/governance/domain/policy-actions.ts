@@ -16,6 +16,9 @@ export interface PolicyAction {
  */
 const POLICY_ACTIONS: Readonly<Record<string, PolicyAction>> = {
   "spr.approve": { permission: "approvals.decide", limit: "purchase" },
+  // The coordinator routes an SPR to the approver group and hands it back
+  // (#252). Routing decides nothing, so it has no limit.
+  "spr.route": { permission: "spr.route" },
   "purchase-order.approve": {
     permission: "approvals.decide",
     limit: "purchase",

@@ -88,6 +88,7 @@ const standInBodySchema = z.object({
   action: z.string().min(1),
   amount: decimalStringSchema.optional(),
   requesterUserId: z.uuid().optional(),
+  earlierDuties: z.object({ "spr.route": z.uuid().optional() }).optional(),
 });
 type StandInBody = z.infer<typeof standInBodySchema>;
 
@@ -120,10 +121,46 @@ class StandInApprovalController {
         resource: { type: "Spr", id: recordNo },
         amount: body.amount,
         requesterUserId: body.requesterUserId,
+        earlierDuties: body.earlierDuties,
       },
       { ip: req.ip ?? null, traceId: requestIdOf(req) },
     );
     return { data: { approved: recordNo } };
+  }
+}
+
+const standInRouteSchema = z.object({ requesterUserId: z.uuid().optional() });
+type StandInRoute = z.infer<typeof standInRouteSchema>;
+
+/**
+ * Stands in for area 2's routing of an SPR (#251) until it asks the policy: the
+ * guard checks spr.route, then the route asks the policy before it acts.
+ * Registered only in this file's test app, never in production code.
+ */
+@Controller("test-only/sprs")
+class StandInRouteController {
+  constructor(@Inject(ModuleRef) private readonly modules: ModuleRef) {}
+
+  @Post(":recordNo/route")
+  @HttpCode(200)
+  @RequirePermission("spr.route")
+  async route(
+    @Param("recordNo") recordNo: string,
+    @Body(new ZodValidationPipe(standInRouteSchema)) body: StandInRoute,
+    @Auth() auth: AuthContext,
+    @Req() req: Request,
+  ) {
+    const policy = this.modules.get(AuthorisationService, { strict: false });
+    await policy.enforce(
+      {
+        actor: { userId: auth.user.id, role: auth.user.role },
+        action: "spr.route",
+        resource: { type: "Spr", id: recordNo },
+        requesterUserId: body.requesterUserId,
+      },
+      { ip: req.ip ?? null, traceId: requestIdOf(req) },
+    );
+    return { data: { routed: recordNo } };
   }
 }
 
@@ -2293,7 +2330,7 @@ describe("the approver group, with APPROVER_GROUP on (#252)", () => {
     // The group decides; its limits stay as they are by default: off.
     t = await createTestApp(
       { APPROVER_GROUP: "on" },
-      [StandInApprovalController],
+      [StandInApprovalController, StandInRouteController],
       (builder) =>
         builder
           .overrideProvider(PermissionPolicy)
@@ -2341,6 +2378,11 @@ describe("the approver group, with APPROVER_GROUP on (#252)", () => {
         requesterUserId: id("requester"),
         ...body,
       },
+    });
+  const route = (who: string, recordNo: string) =>
+    call(t, as(who), "post", `${API}/test-only/sprs/${recordNo}/route`, {
+      csrf: true,
+      body: { requesterUserId: id("requester") },
     });
   const lastRefusal = async () =>
     (await auditEvents(t))
@@ -2435,6 +2477,45 @@ describe("the approver group, with APPROVER_GROUP on (#252)", () => {
           reason: "the only enabled management approver raised the request",
         });
       });
+    });
+  });
+
+  describe("the coordinator routes, and never approves", () => {
+    it("lets Support route an SPR", async () => {
+      expect((await route("support", "SPR-GROUP-0010")).status).toBe(200);
+    });
+
+    it("refuses a role without spr.route at the guard, and audits the refusal", async () => {
+      expect((await route("warehouse", "SPR-GROUP-0011")).status).toBe(403);
+      const refusal = (await auditEvents(t))
+        .filter((event) => event.action === "auth.permission.refused")
+        .at(-1);
+      expect(refusal?.changes).toMatchObject({ permission: "spr.route" });
+    });
+
+    it("refuses the coordinator the approval itself, at the guard", async () => {
+      expect((await approveSpr("support", "SPR-GROUP-0012")).status).toBe(403);
+      // The guard refuses, before the policy: Support never holds approvals.decide.
+      const refusal = (await auditEvents(t))
+        .filter((event) => event.action === "auth.permission.refused")
+        .at(-1);
+      expect(refusal?.changes).toMatchObject({
+        permission: "approvals.decide",
+      });
+      expect(refusal?.actor).toMatchObject({ userId: id("support") });
+    });
+
+    it("refuses an approver the approval of an SPR they routed, and lets another approver decide it", async () => {
+      const routed = { earlierDuties: { "spr.route": id("first") } };
+      expect((await approveSpr("first", "SPR-GROUP-0013", routed)).status).toBe(
+        403,
+      );
+      expect((await lastRefusal())?.changes).toMatchObject({
+        rule: "segregation-of-duties",
+      });
+      expect(
+        (await approveSpr("second", "SPR-GROUP-0013", routed)).status,
+      ).toBe(200);
     });
   });
 });
