@@ -1,7 +1,12 @@
 import { useTranslation } from "react-i18next";
+import { StatusBadge } from "@/components/common";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useSystemChecks } from "@/lib/api/generated/endpoints/system/system";
+import {
+  useSystemCheckStatuses,
+  useSystemChecks,
+} from "@/lib/api/generated/endpoints/system/system";
+import { hasPermission, useSessionStore } from "@/stores/session";
 
 /**
  * The worked example of a generated hook (ADR 0019). `useSystemChecks` is
@@ -12,7 +17,14 @@ import { useSystemChecks } from "@/lib/api/generated/endpoints/system/system";
  */
 export function ServiceChecksCard() {
   const { t } = useTranslation();
+  const session = useSessionStore((state) => state.session);
+  // Running the checks is for those who manage settings; everyone else sees their names.
+  const canRun = hasPermission(session, "settings.manage");
   const checks = useSystemChecks();
+  const statuses = useSystemCheckStatuses({ query: { enabled: canRun } });
+  const statusOf = new Map(
+    (statuses.data?.data ?? []).map((check) => [check.name, check]),
+  );
 
   return (
     <Card>
@@ -33,13 +45,30 @@ export function ServiceChecksCard() {
           <p className="text-muted-foreground">{t("settings.checksNone")}</p>
         ) : (
           <ul className="flex flex-wrap gap-2">
-            {checks.data.data.map((check) => (
-              <li key={check.name}>
-                <Badge variant="secondary" className="font-mono">
-                  {check.name}
-                </Badge>
-              </li>
-            ))}
+            {checks.data.data.map((check) => {
+              const status = statusOf.get(check.name);
+              return (
+                <li key={check.name}>
+                  {status ? (
+                    <StatusBadge
+                      tone={status.status === "up" ? "success" : "danger"}
+                      className="font-mono"
+                    >
+                      {t(
+                        status.status === "up"
+                          ? "settings.checkUp"
+                          : "settings.checkDown",
+                        { name: check.name },
+                      )}
+                    </StatusBadge>
+                  ) : (
+                    <Badge variant="secondary" className="font-mono">
+                      {check.name}
+                    </Badge>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         )}
       </CardContent>

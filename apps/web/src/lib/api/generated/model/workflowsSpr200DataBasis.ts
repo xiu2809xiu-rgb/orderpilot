@@ -19,4 +19,11 @@ export type WorkflowsSpr200DataBasis = {
   availableStock: string;
   /** @pattern ^-?\d{1,15}(\.\d{1,4})?$ */
   shortfall: string;
+  /** @pattern ^-?\d{1,15}(\.\d{1,4})?$ */
+  runRate3m: string;
+  /**
+     * @nullable
+     * @pattern ^-?\d{1,15}(\.\d{1,4})?$
+     */
+  monthsOfCover: string | null;
 };

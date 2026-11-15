@@ -18,11 +18,14 @@ import type {
 } from 'msw';
 
 import type {
+  SystemCheckStatuses200,
   SystemChecks200
 } from '../../model';
 
 
 export const getSystemChecksResponseMock = (overrideResponse: Partial<Extract<SystemChecks200, object>> = {}): SystemChecks200 => ({data: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({name: faker.string.alpha({length: {min: 10, max: 20}})})), meta: {page: faker.number.int({min: 1, max: 9007199254740991}), pageSize: faker.number.int({min: 1, max: 200}), total: faker.number.int({min: 0, max: 9007199254740991})}, ...overrideResponse})
+
+export const getSystemCheckStatusesResponseMock = (overrideResponse: Partial<Extract<SystemCheckStatuses200, object>> = {}): SystemCheckStatuses200 => ({data: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({name: faker.string.alpha({length: {min: 10, max: 20}}), status: faker.helpers.arrayElement(['up','down'] as const), durationMs: faker.number.int({min: 0, max: 9007199254740991})})), ...overrideResponse})
 
 
 export const getSystemChecksMockHandler = (overrideResponse?: SystemChecks200 | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<SystemChecks200> | SystemChecks200), options?: RequestHandlerOptions) => {
@@ -36,6 +39,19 @@ export const getSystemChecksMockHandler = (overrideResponse?: SystemChecks200 | 
       })
   }, options)
 }
+
+export const getSystemCheckStatusesMockHandler = (overrideResponse?: SystemCheckStatuses200 | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<SystemCheckStatuses200> | SystemCheckStatuses200), options?: RequestHandlerOptions) => {
+  return http.get('*/api/v1/system/checks/status', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getSystemCheckStatusesResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
 export const getSystemMock = () => [
-  getSystemChecksMockHandler()
+  getSystemChecksMockHandler(),
+  getSystemCheckStatusesMockHandler()
 ]

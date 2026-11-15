@@ -51,6 +51,17 @@ export function formatLongDay(value: Date): string {
   return LONG_DAY.format(value);
 }
 
+const DAY_TIME = new Intl.DateTimeFormat("en-SG", {
+  dateStyle: "medium",
+  timeStyle: "short",
+  timeZone: "Asia/Singapore",
+});
+
+/** "2 Nov 2026, 9:15 am" in Singapore time. */
+export function formatDayTime(value: string | Date): string {
+  return DAY_TIME.format(typeof value === "string" ? new Date(value) : value);
+}
+
 const ISO_DAY = new Intl.DateTimeFormat("en-CA", {
   timeZone: "Asia/Singapore",
 });

@@ -81,7 +81,7 @@
     "customer": "Customer",
     "status": "Status",
     "owner": "Owner",
-    "overdue": "Overdue",
+    "overdue": "Schedule",
     "steps": {
       "title": "What happened, step by step",
       "description": "Each step with its effect on the order. Postings to the ledger are made in Business Central; this page only shows the result.",

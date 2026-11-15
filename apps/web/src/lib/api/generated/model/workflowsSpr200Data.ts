@@ -8,6 +8,7 @@
 import type { WorkflowsSpr200DataApprover } from './workflowsSpr200DataApprover.ts';
 import type { WorkflowsSpr200DataBasis } from './workflowsSpr200DataBasis.ts';
 import type { WorkflowsSpr200DataDecision } from './workflowsSpr200DataDecision.ts';
+import type { WorkflowsSpr200DataDue } from './workflowsSpr200DataDue.ts';
 import type { WorkflowsSpr200DataFieldsItem } from './workflowsSpr200DataFieldsItem.ts';
 import type { WorkflowsSpr200DataItem } from './workflowsSpr200DataItem.ts';
 import type { WorkflowsSpr200DataPassedTo } from './workflowsSpr200DataPassedTo.ts';
@@ -53,6 +54,8 @@ export type WorkflowsSpr200Data = {
   escalatesToName: string | null;
   /** @nullable */
   passedTo?: WorkflowsSpr200DataPassedTo;
+  /** @nullable */
+  due?: WorkflowsSpr200DataDue;
   decidable?: boolean;
   /** @nullable */
   decision: WorkflowsSpr200DataDecision;

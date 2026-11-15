@@ -11,7 +11,11 @@ const LINKS = [
 export function WorkflowNav() {
   const { t } = useTranslation("workflows");
   return (
-    <nav aria-label={t("nav.label")} className="flex gap-2">
+    // Drawn like the tabs elsewhere, so the two places read as one page with two views.
+    <nav
+      aria-label={t("nav.label")}
+      className="inline-flex gap-1 rounded-lg bg-muted p-1"
+    >
       {LINKS.map((link) => (
         <NavLink
           key={link.key}
@@ -19,10 +23,10 @@ export function WorkflowNav() {
           end={link.end}
           className={({ isActive }) =>
             cn(
-              "inline-flex min-h-11 items-center rounded-md border px-4 text-sm font-medium",
+              "inline-flex min-h-10 items-center rounded-md px-3 text-sm font-medium focus-visible:outline-2 focus-visible:outline-ring",
               isActive
-                ? "border-primary bg-primary text-primary-foreground"
-                : "bg-card text-foreground hover:bg-accent",
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground",
             )
           }
         >

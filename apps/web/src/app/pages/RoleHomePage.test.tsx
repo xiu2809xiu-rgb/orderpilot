@@ -166,4 +166,30 @@ describe("the role home page", () => {
     expect(toast?.message).toBe("Marked SO-0007 as packed");
     expect(toast?.undo).toBeTypeOf("function");
   });
+
+  // The approver decides on the stock, the cover and the amount, and says why,
+  // so an SPR is never approved from a list row.
+  it("opens an SPR on its own page instead of approving it in one click", async () => {
+    api([
+      {
+        ...PACK,
+        kind: "APPROVE_SPR",
+        title: "Approve SPR-0003",
+        assigneeRole: "APPROVER",
+        ref: { recordNo: "SPR-0003", navisionNo: null },
+      },
+    ]);
+    renderWorkflowPage(<RoleHomePage />, {
+      role: "APPROVER",
+      route: "/",
+      path: "/",
+    });
+    const review = await screen.findByRole("link", {
+      name: "Review: SO-0007",
+    });
+    expect(review).toHaveAttribute("href", "/workflows/sprs/SPR-0003");
+    expect(
+      screen.queryByRole("button", { name: /Approve/ }),
+    ).not.toBeInTheDocument();
+  });
 });

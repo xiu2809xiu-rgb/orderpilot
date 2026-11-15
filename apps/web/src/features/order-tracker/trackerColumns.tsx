@@ -121,6 +121,9 @@ export function trackerColumns(
     {
       id: "orderDate",
       header: t("list.columns.orderDate"),
+      // Shown on request, so the shipment date fits a laptop screen; it is what
+      // someone chasing an order needs, and Overdue already says how late.
+      defaultHidden: true,
       cell: (row) => formatDay(row.orderDate),
       exportValue: (row) => row.orderDate,
       sortable: true,

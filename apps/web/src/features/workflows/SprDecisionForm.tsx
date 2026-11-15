@@ -88,6 +88,15 @@ export function SprDecisionForm({
       </p>
     );
   }
+  // Someone who cannot decide, such as the product manager who raised it,
+  // learns where it stands rather than why a sample cannot be decided.
+  if (!canDecide && !spr.passedTo?.youDecide) {
+    return (
+      <p role="status" className="text-muted-foreground">
+        {t("spr.waiting")}
+      </p>
+    );
+  }
   if (spr.decidable === false) {
     return <p className="text-muted-foreground">{t("spr.notRunnable")}</p>;
   }
@@ -176,6 +185,7 @@ export function SprDecisionForm({
           {t("spr.reject")}
         </Button>
       </div>
+      <p className="text-sm text-muted-foreground">{t("spr.nextStep")}</p>
     </form>
   );
 }

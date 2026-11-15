@@ -11,7 +11,7 @@
     "openExceptions": "Open exceptions",
     "overdue": "Overdue",
     "awaitingApproval": "SPRs to approve",
-    "waitingForApproval": "Orders waiting for approval",
+    "waitingForApproval": "Orders waiting on an SPR",
     "awaitingPayment": "Payments to confirm",
     "readyToPick": "Ready to pick",
     "auditEvents": "Audit events",
@@ -27,7 +27,6 @@
     "overdue": "Overdue",
     "actionOn": "{{action}}: {{what}}",
     "failed": "Could not finish the task for {{orderNo}}",
-    "approvedComment": "Approved from the home page.",
     "emptyTitle": "You are up to date",
     "emptyDescription": "Nothing needs you right now. The tracker shows where every order stands.",
     "emptyAction": "Open the tracker",
@@ -43,7 +42,6 @@
     "actions": {
       "REVIEW_FIELDS": "Review",
       "RAISE_SPR": "Raise",
-      "APPROVE_SPR": "Approve",
       "SEND_PI": "Mark sent",
       "CONFIRM_PAYMENT": "Confirm",
       "PACK_ORDER": "Mark packed",
@@ -58,7 +56,6 @@
     "done": {
       "REVIEW_FIELDS": "Reviewed {{orderNo}}",
       "RAISE_SPR": "Raised the SPR for {{orderNo}}",
-      "APPROVE_SPR": "Approved the SPR for {{orderNo}}",
       "SEND_PI": "Marked the PI for {{orderNo}} as sent",
       "CONFIRM_PAYMENT": "Confirmed the payment for {{orderNo}}",
       "PACK_ORDER": "Marked {{orderNo}} as packed",
@@ -88,21 +85,41 @@
       "when": "When"
     }
   },
+  "health": {
+    "title": "System health",
+    "description": "Each service is checked when this page opens.",
+    "allUp": "Every service answered just now.",
+    "someDown_one": "{{count}} service did not answer. Its reason is in the server log.",
+    "someDown_other": "{{count}} services did not answer. Their reasons are in the server log.",
+    "again": "Check again",
+    "up": "Up, {{ms}} ms",
+    "down": "Down",
+    "names": {
+      "database": "Database",
+      "redis": "Cache and job queue",
+      "storage": "Document storage"
+    }
+  },
   "rules": {
-    "title": "Waiting for Spectra to confirm",
-    "table": "Open business rules and their draft values",
-    "description": "These rules stay as configuration until Spectra confirms them.",
-    "open": "Open",
-    "noScreen": "Held in configuration",
+    "title": "Business rules from Spectra",
+    "table": "Business rules, settled and still to confirm",
+    "description": "What Spectra settled at the 5 Nov briefing, and the drafts that wait for its answer. Each stays a setting, never code.",
     "columns": {
       "rule": "Rule",
-      "draft": "Draft value"
+      "draft": "What we have",
+      "status": "Status"
+    },
+    "status": {
+      "confirmed": "Confirmed 5 Nov",
+      "open": "To confirm"
     },
     "names": {
       "sprTrigger": "SPR trigger",
-      "piSequence": "PI sequence",
-      "approversAndLimits": "Approvers and limits",
-      "delegation": "Delegation"
+      "approvers": "Who approves",
+      "approvalLimits": "Approval limits",
+      "approverDisagreement": "Approvers disagree",
+      "remarksReply": "A reply with remarks",
+      "piSequence": "PI sequence"
     }
   },
   "quick": {
