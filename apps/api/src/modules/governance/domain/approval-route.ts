@@ -1,4 +1,5 @@
 import { isAway, type Approver } from "./approval-setup.js";
+import { isInGroup } from "./approver-group.js";
 import type { PolicyContext, PolicyRule } from "./authorisation-policy.js";
 
 /** Who may decide a request, and why it is them. */
@@ -35,6 +36,12 @@ function isAvailable(approver: Approver | undefined, now: Date): boolean {
  * The requester is never handed their own request (F-4): wherever they appear
  * on the chain, they are passed over like someone away, and the request moves
  * on. The no-self-approval rule still refuses them if they act anyway.
+ *
+ * Deprecated since #252: once APPROVER_GROUP is on, any one of the approver
+ * group decides and the approval-route rule stops reading this chain. Area 2
+ * then routes with `AuthorisationService.approversFor` (#251). Until then it
+ * works unchanged; the follow-up removes it with substitutes and away dates.
+ * (In words, not a JSDoc tag: the tag would fail lint at area 2's call sites.)
  */
 export function deciderFor(
   requesterUserId: string,
@@ -95,7 +102,13 @@ const WHO: Record<Exclude<Decider["kind"], "none">, string> = {
   escalated: "the person the absent approver escalates to",
 };
 
-/** Only the person the chain names may decide an approval. */
+/**
+ * Who may decide an approval. While APPROVER_GROUP is on (#252, ADR 0054),
+ * any one member of the approver group: every enabled management approver
+ * except the requester. Nobody else may, Management included, and absence
+ * moves nothing. While it is off, the default until area 2 routes with the
+ * group (#251), only the person the old chain names, exactly as before.
+ */
 export class ApprovalRouteRule implements PolicyRule {
   readonly name = "approval-route";
 
@@ -104,6 +117,14 @@ export class ApprovalRouteRule implements PolicyRule {
     if (requesterUserId === undefined) {
       return "an approval needs the person who raised the request";
     }
+    if (approval.groupDecides) {
+      if (isInGroup(approval.group, actor.userId)) return null;
+      return (
+        approval.group.reason ??
+        "only a management approver who did not raise the request may decide it"
+      );
+    }
+    // The old chain, temporary: the follow-up to #251 removes it.
     const decider = deciderFor(
       requesterUserId,
       approval.approvers,

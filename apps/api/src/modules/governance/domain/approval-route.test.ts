@@ -113,6 +113,10 @@ function context(
       amount: "100.00",
       approvers: chain(),
       now: NOW,
+      // APPROVER_GROUP is off by default: the old chain decides.
+      group: groupOf(APPROVER, SUBSTITUTE),
+      groupDecides: false,
+      limitsOn: true,
       ...approval,
     },
   };
@@ -312,5 +316,75 @@ describe("the approval route rule", () => {
     for (const actor of [APPROVER, SUBSTITUTE, MANAGEMENT]) {
       expect(rule.refusal(context(actor, { approvers })), actor).not.toBeNull();
     }
+  });
+});
+
+/** The approver group as the service hands it to the rule. */
+function groupOf(...userIds: string[]): ApprovalFacts["group"] {
+  return {
+    approvers: userIds.map((userId) => ({ userId, displayName: userId })),
+    reason: null,
+  };
+}
+
+describe("the approval route rule with APPROVER_GROUP on: the group decides (#252)", () => {
+  const rule = new ApprovalRouteRule();
+  /** The same request, with the switch on. */
+  const grouped = (
+    actorUserId: string,
+    overrides: Parameters<typeof context>[1] = {},
+  ) => context(actorUserId, { groupDecides: true, ...overrides });
+
+  it("refuses an approval that does not say who raised the request", () => {
+    expect(
+      rule.refusal(grouped(APPROVER, { requesterUserId: undefined })),
+    ).not.toBeNull();
+  });
+
+  it("lets any one member of the group decide", () => {
+    expect(rule.refusal(grouped(APPROVER))).toBeNull();
+    expect(rule.refusal(grouped(SUBSTITUTE))).toBeNull();
+  });
+
+  it("refuses anyone outside the group, Management among them", () => {
+    for (const actor of [MANAGEMENT, STRANGER]) {
+      expect(rule.refusal(grouped(actor)), actor).toBe(
+        "only a management approver who did not raise the request may decide it",
+      );
+    }
+  });
+
+  it("lets an approver decide while they are away: absence moves nothing", () => {
+    const approvers = chain({ approver: away });
+    expect(rule.refusal(grouped(APPROVER, { approvers }))).toBeNull();
+  });
+
+  it("refuses the requester: they are never in the group", () => {
+    const refusal = rule.refusal(
+      grouped(SUBSTITUTE, {
+        requesterUserId: SUBSTITUTE,
+        group: groupOf(APPROVER),
+      }),
+    );
+    expect(refusal).toBe(
+      "only a management approver who did not raise the request may decide it",
+    );
+  });
+
+  it("refuses everyone with the group's own reason when the group is empty", () => {
+    const group = {
+      approvers: [],
+      reason: "the only enabled management approver raised the request",
+    };
+    for (const actor of [APPROVER, SUBSTITUTE, MANAGEMENT]) {
+      expect(rule.refusal(grouped(actor, { group })), actor).toBe(
+        "the only enabled management approver raised the request",
+      );
+    }
+  });
+
+  it("decides by the old chain again as soon as the switch is off", () => {
+    expect(rule.refusal(context(SUBSTITUTE))).toContain(APPROVER);
+    expect(rule.refusal(grouped(SUBSTITUTE))).toBeNull();
   });
 });

@@ -187,6 +187,13 @@ describe("the order of the rules (F-4)", () => {
       amount: "999.00",
       approvers,
       now: new Date("2026-11-06T09:00:00.000Z"),
+      // I am the only approver, and I raised it (#252).
+      group: {
+        approvers: [],
+        reason: "the only enabled management approver raised the request",
+      },
+      groupDecides: false,
+      limitsOn: true,
     },
   };
 
