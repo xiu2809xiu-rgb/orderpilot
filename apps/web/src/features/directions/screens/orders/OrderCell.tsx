@@ -9,12 +9,14 @@ import type { OrderRow } from "./orderRow";
  * The order's number, as a link to its page, with the count of open
  * exceptions beside it and, for an order entered here, its entry state. A
  * sample carries no tag: nearly every order is one, and the Source column and
- * filter say so for anyone who needs it.
+ * filter say so for anyone who needs it. The number is never cut: a long one
+ * (an order entered here is numbered by its date) keeps the first line, and
+ * its chips move under it.
  */
 export function OrderCell({ row, href }: { row: OrderRow; href: string }) {
   const { t } = useTranslation("directions-orders");
   return (
-    <span className="inline-flex items-center gap-2">
+    <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
       <Link
         to={href}
         className="numeral text-foreground underline-offset-4 hover:underline pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"

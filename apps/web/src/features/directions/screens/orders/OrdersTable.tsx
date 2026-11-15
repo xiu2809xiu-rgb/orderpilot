@@ -17,21 +17,23 @@ import type { Sort, SortId } from "./ordersQuery";
 /**
  * Widths in pixels, so the default columns fit one 1440 px screen with the side
  * panel open (1122 px of table) and no column is cut off. Each width is the
- * widest content of its column plus the cell's 16 px of padding: the age cell
- * holds "47 d" over a "10 d late" chip (77 px), the order cell a number, the
- * exception count and the entry chip (108 px), the documents cell a "To
- * confirm" chip (105 px). The customer name is the one cell that may truncate.
- * A narrower screen scrolls the table inside its own box; a wider one shares
- * out what is left.
+ * widest content of its column plus the cell's 16 px of padding and a few
+ * pixels to spare, because text is a pixel or two wider in Chromium on Linux
+ * than on Windows. The order cell holds a number entered here
+ * ("SO-20261115-0012", 137 px), with its chips under it; the age cell "47 d"
+ * over a "10 d late" chip (77 px); the documents cell a "To confirm" chip
+ * (105 px). A role name in the held-at cell may take two lines, and the
+ * customer name is the one cell that truncates. A narrower screen scrolls the
+ * table inside its own box; a wider one shares out what is left.
  */
 const WIDTH: Readonly<Record<string, number>> = {
   select: 32,
-  orderNo: 124,
-  customerName: 146,
+  orderNo: 164,
+  customerName: 134,
   step: 176,
-  heldAt: 160,
+  heldAt: 128,
   age: 96,
-  shipmentDate: 100,
+  shipmentDate: 104,
   amount: 120,
   docs: 124,
   stock: 132,

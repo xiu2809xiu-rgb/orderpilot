@@ -340,6 +340,11 @@
   overflow: hidden;
 }
 
+/* The cells keep one line; a role name may take two, as the customer cell does. */
+.od-held {
+  white-space: normal;
+}
+
 .od-table th {
   height: 2.25rem;
   background: var(--dx-card-work-bg);

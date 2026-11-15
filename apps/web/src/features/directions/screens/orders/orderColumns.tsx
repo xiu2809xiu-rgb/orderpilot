@@ -83,7 +83,8 @@ export function orderColumns({
         ) : row.step === ALL_DONE ? (
           <span className="text-muted-foreground">{t("cells.done")}</span>
         ) : (
-          roleLabel(row.ownerRole)
+          // A long role name takes two lines rather than widen the column.
+          <span className="od-held">{roleLabel(row.ownerRole)}</span>
         ),
       exportValue: (row) => (row.ownerRole ? roleLabel(row.ownerRole) : ""),
     },

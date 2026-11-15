@@ -1,4 +1,11 @@
+import { randomInt } from "node:crypto";
 import {
+  salesOrderResponseSchema,
+  type CreateSalesOrderBody,
+  type VoidSalesOrderBody,
+} from "@orderpilot/shared";
+import {
+  callAs,
   checkPage,
   expect,
   expectNoButton,
@@ -208,24 +215,64 @@ test.describe("The Orders workspace", () => {
   test("no cell of the list is wider than its column, at a desktop and a tablet width", async ({
     page,
   }) => {
+    // An order entered here is numbered by its date, the longest number the
+    // list shows, and carries its entry chip: enter one, so the list has it.
+    const created = await callAs("SUPPORT", "POST", "/orders", {
+      customerNo: "C-0001",
+      externalDocumentNo: `E2E-${String(Date.now())}-${String(randomInt(1000, 9999))}`,
+      orderDate: new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Singapore",
+      }).format(new Date()),
+      shipmentDate: null,
+      prepaymentPercent: "100",
+      lines: [{ itemNo: "I-0001", quantity: "2", unitPrice: "857.00" }],
+    } satisfies CreateSalesOrderBody);
+    expect(created.status, "Support enters a draft").toBe(201);
+    const draft = salesOrderResponseSchema.parse(created.body).data;
     await signInAs(page, "SUPPORT");
-    for (const [width, height] of [
-      [1440, 900],
-      [820, 1180],
-    ] as const) {
-      await page.setViewportSize({ width, height });
-      await page.goto("/orders?source=sample");
-      await expect(
-        page.getByRole("link", { name: SAMPLE_LINK }).first(),
-      ).toBeVisible();
-      // A cell clips what does not fit (overflow hidden), so a figure cut
-      // short shows as a cell whose content is wider than the cell.
-      const clipped = await page.evaluate(() =>
-        [...document.querySelectorAll(".od-table tbody td")]
-          .filter((cell) => cell.scrollWidth > cell.clientWidth)
-          .map((cell) => cell.textContent.trim().slice(0, 24)),
+    try {
+      for (const [width, height] of [
+        [1440, 900],
+        [820, 1180],
+      ] as const) {
+        await page.setViewportSize({ width, height });
+        for (const [list, row] of [
+          [
+            "/orders?source=sample",
+            page.getByRole("link", { name: SAMPLE_LINK }).first(),
+          ],
+          [
+            `/orders?source=stored&q=${draft.orderNo}`,
+            page.getByRole("link", { name: draft.orderNo, exact: true }),
+          ],
+        ] as const) {
+          await page.goto(list);
+          await expect(row).toBeVisible();
+          // A cell clips what does not fit (overflow hidden), so a figure cut
+          // short shows as a cell whose content is wider than the cell.
+          const clipped = await page.evaluate(() =>
+            [...document.querySelectorAll(".od-table tbody td")]
+              .filter((cell) => cell.scrollWidth > cell.clientWidth)
+              .map((cell) => cell.textContent.trim().slice(0, 24)),
+          );
+          expect(
+            clipped,
+            `cells clipped on ${list} at ${String(width)} px`,
+          ).toEqual([]);
+        }
+      }
+    } finally {
+      const voided = await callAs(
+        "SUPPORT",
+        "POST",
+        `/orders/${draft.orderNo}/void`,
+        {
+          // A stored order always has a version; only a sample has none.
+          version: draft.version ?? 1,
+          reason: "E2E clean-up",
+        } satisfies VoidSalesOrderBody,
       );
-      expect(clipped, `cells clipped at ${String(width)} px`).toEqual([]);
+      expect(voided.status, "the draft is voided after the check").toBe(200);
     }
   });
 
