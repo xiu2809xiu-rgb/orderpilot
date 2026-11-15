@@ -22,7 +22,7 @@ import { useOrderJourney } from "../order/useOrderJourney";
 import { Amount } from "./Amount";
 import { EntryChip } from "./EntryChip";
 import { StockCell } from "./OrderFigures";
-import { ageInDays, ALL_DONE, type OrderRow } from "./orderRow";
+import { ageInDays, ALL_DONE, isUntracked, type OrderRow } from "./orderRow";
 import { focusPeekOpener } from "./peekFocus";
 
 /**
@@ -47,7 +47,9 @@ export function OrderPeek({
   roleLabel: (role: NonNullable<OrderRow["ownerRole"]>) => string;
 }) {
   const { t } = useTranslation("directions-orders");
-  const { timeline, journey } = useOrderJourney(row?.orderNo ?? null);
+  // A draft or a void order is not in the tracker: it is not asked.
+  const asks = row !== null && !isUntracked(row.captureState);
+  const { timeline, journey } = useOrderJourney(asks ? row.orderNo : null);
   // The order that was showing when the peek closed: by then `row` is null.
   const lastShown = useRef<string | null>(null);
   useEffect(() => {
@@ -150,7 +152,7 @@ export function OrderPeek({
                   ) : null}
                 </dl>
                 <h3 className="od-peek-title fs-14">{t("peek.journey")}</h3>
-                {timeline.isPending ? (
+                {asks && timeline.isPending ? (
                   <div className="space-y-3" aria-hidden="true">
                     <Skeleton className="h-5 w-3/4" />
                     <Skeleton className="h-40" />

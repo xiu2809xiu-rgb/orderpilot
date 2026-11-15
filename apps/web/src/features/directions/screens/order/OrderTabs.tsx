@@ -26,11 +26,14 @@ export function OrderTabs({
   detail,
   timeline,
   toConfirm,
+  inWorkflow,
 }: {
   orderNo: string;
   detail: SalesOrderDetail | undefined;
   timeline: OrderTimeline;
   toConfirm: boolean;
+  /** False for a draft or a void order, which the workflow does not know. */
+  inWorkflow: boolean;
 }) {
   const { t } = useTranslation("directions-orders");
   const [params, setParams] = useSearchParams();
@@ -40,7 +43,7 @@ export function OrderTabs({
     "workflows.read",
   );
   const flow = useWorkflowsOrderFlow(orderNo, {
-    query: { enabled: mayReadFlow, retry: false },
+    query: { enabled: mayReadFlow && inWorkflow, retry: false },
   });
   const documents = withFlow(
     documentsOf(timeline.checks, { orderNo }),
