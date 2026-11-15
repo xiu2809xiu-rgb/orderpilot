@@ -46,7 +46,8 @@
       "workflows": "Workflows and tasks",
       "other": "Other"
     },
-    "readOnly": "You can read the matrix. Changing it needs the roles.manage permission.",
+    "readOnlyTitle": "Read only",
+    "readOnly": "You can read the matrix. Changing it needs \"{{permission}}\", which your role does not have.",
     "tableLabel": "Permissions by role",
     "scrollHint": "Scroll sideways to see every role.",
     "permission": "Permission",
@@ -220,12 +221,12 @@
   },
   "refusals": {
     "title": "How a refusal looks",
-    "description": "A refused action is the same everywhere. The server answers 403 with a short message and a trace id. The reason goes to the audit log, so someone probing learns nothing about the rules.",
+    "description": "A refused action is the same everywhere. The server answers 403 with a short message and a trace ID. The reason goes to the audit log, so someone probing learns nothing about the rules.",
     "exampleLabel": "On screen",
     "envelopeLabel": "In the API response",
     "exampleTitle": "You do not have access",
-    "exampleDescription": "Your role does not include this action. If you think it should, ask a system admin and quote the trace id.",
-    "traceLabel": "Trace id",
+    "exampleDescription": "Your role does not include this action. If you think it should, ask a system admin and quote the trace ID.",
+    "traceLabel": "Trace ID",
     "sample": "Sample, not a real refusal"
   },
   "badges": {

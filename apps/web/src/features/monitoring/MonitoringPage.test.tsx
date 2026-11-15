@@ -3,7 +3,7 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
 import { HttpResponse, http } from "msw";
-import { MemoryRouter } from "react-router";
+import { MemoryRouter, useLocation } from "react-router";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import {
   getAiUsageReportMockHandler,
@@ -49,11 +49,18 @@ const usage = (calls: number) => ({
   meta: { page: 1, pageSize: 10, total: calls },
 });
 
-function renderPage() {
+/** What the address bar holds, so a test can read the tab from it. */
+function Address() {
+  const { search } = useLocation();
+  return <span data-testid="address">{search}</span>;
+}
+
+function renderPage(address = "/monitoring") {
   return render(
     <QueryClientProvider client={createQueryClient()}>
-      <MemoryRouter>
+      <MemoryRouter initialEntries={[address]}>
         <MonitoringPage />
+        <Address />
       </MemoryRouter>
     </QueryClientProvider>,
   );
@@ -69,7 +76,7 @@ describe("MonitoringPage", () => {
 
   it("shows real AI usage and cost with no axe violations", async () => {
     server.use(getAiUsageReportMockHandler(usage(1)));
-    const { container } = renderPage();
+    const { container } = renderPage("/monitoring?tab=aiUsage");
     const table = await screen.findByRole("table", { name: "Latest AI calls" });
     expect(within(table).getByText("mock / mock-small")).toBeVisible();
     expect(within(table).getByText("trace-ai-1")).toBeVisible();
@@ -78,7 +85,7 @@ describe("MonitoringPage", () => {
 
   it("says plainly that nothing has called a model yet", async () => {
     server.use(getAiUsageReportMockHandler(usage(0)));
-    renderPage();
+    renderPage("/monitoring?tab=aiUsage");
     expect(await screen.findByText("No AI calls recorded yet")).toBeVisible();
     expect(
       screen.getByRole("link", { name: "See what data may go to AI" }),
@@ -93,7 +100,7 @@ describe("MonitoringPage", () => {
         }),
       ),
     );
-    renderPage();
+    renderPage("/monitoring?tab=aiUsage");
     expect(await screen.findByText(/trace-fail-9/)).toBeVisible();
     expect(
       screen.getByRole("button", { name: /retry|try again/i }),
@@ -156,6 +163,60 @@ describe("MonitoringPage", () => {
     expect(await screen.findByText("62.5% allowed")).toBeVisible();
     expect(screen.getByText("/orders/:id")).toBeVisible();
     expect(screen.getByText("Mock")).toBeVisible();
+  });
+
+  it("opens on Observability, first of the tabs", async () => {
+    server.use(getOverviewObservabilityMockHandler());
+    renderPage();
+    const tabs = await screen.findAllByRole("tab");
+    expect(tabs.map((tab) => tab.textContent)).toEqual([
+      "Observability",
+      "AI usage and cost",
+      "Clickstream",
+    ]);
+    expect(tabs[0]).toHaveAttribute("aria-selected", "true");
+  });
+
+  it("opens the tab a link names, such as the AI use tile's", async () => {
+    server.use(getAiUsageReportMockHandler(usage(1)));
+    renderPage("/monitoring?tab=aiUsage");
+    expect(
+      await screen.findByRole("tab", { name: "AI usage and cost" }),
+    ).toHaveAttribute("aria-selected", "true");
+  });
+
+  it("keeps the chosen tab in the address bar, and opens the first for an unknown one", async () => {
+    server.use(
+      getOverviewObservabilityMockHandler(),
+      getOverviewClickstreamMockHandler(),
+    );
+    renderPage("/monitoring?tab=nothing");
+    expect(
+      await screen.findByRole("tab", { name: "Observability" }),
+    ).toHaveAttribute("aria-selected", "true");
+    await userEvent.click(screen.getByRole("tab", { name: "Clickstream" }));
+    expect(screen.getByTestId("address")).toHaveTextContent("?tab=clickstream");
+  });
+
+  it("names each role in the clickstream, and shows any other value as sent", async () => {
+    server.use(
+      getAiUsageReportMockHandler(usage(1)),
+      getOverviewClickstreamMockHandler({
+        data: {
+          consentRate: "62.5",
+          topRoutes: [{ route: "/orders/:id", views: 14 }],
+          byRole: [
+            { role: "APPROVER", events: 9 },
+            { role: "SALES", events: 2 },
+          ],
+        },
+        meta: { mock: true },
+      }),
+    );
+    renderPage("/monitoring?tab=clickstream");
+    expect(await screen.findByText("Management approver")).toBeVisible();
+    expect(screen.queryByText("APPROVER")).toBeNull();
+    expect(screen.getByText("SALES")).toBeVisible();
   });
 
   it.todo("shows the permission-denied state when the role cannot read usage");

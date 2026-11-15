@@ -17,12 +17,35 @@ import {
 import { useAuditViewerGet } from "@/lib/api/generated/endpoints/audit/audit";
 import { ChangeList } from "./ChangeList";
 
-function Field({ label, children }: { label: string; children: ReactNode }) {
+/**
+ * One labelled value. Long values wrap at a space first and inside a word
+ * only when they must. `wide` takes the whole row, for a value that should
+ * stay on one line, such as a trace ID.
+ */
+function Field({
+  label,
+  wide = false,
+  children,
+}: {
+  label: string;
+  wide?: boolean;
+  children: ReactNode;
+}) {
   return (
-    <div className="space-y-1">
+    <div className={wide ? "space-y-1 sm:col-span-2" : "space-y-1"}>
       <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className="text-sm break-all">{children}</dd>
+      <dd className="text-sm [overflow-wrap:anywhere]">{children}</dd>
     </div>
+  );
+}
+
+/** A value a person may need to quote, such as a trace ID or a hash, with a copy button. */
+function Copyable({ value, what }: { value: string; what: string }) {
+  return (
+    <span className="inline-flex items-center gap-1">
+      <code className="font-mono text-xs">{value}</code>
+      <CopyButton value={value} what={what} />
+    </span>
   );
 }
 
@@ -33,12 +56,7 @@ function Hash({ value, what }: { value: string | null; what: string }) {
       <span className="text-muted-foreground">{t("detail.firstEvent")}</span>
     );
   }
-  return (
-    <span className="inline-flex items-center gap-1">
-      <code className="font-mono text-xs">{value}</code>
-      <CopyButton value={value} what={what} />
-    </span>
-  );
+  return <Copyable value={value} what={what} />;
 }
 
 const LINK = "text-primary underline-offset-4 hover:underline";
@@ -118,8 +136,8 @@ export function EventDetailSheet({
                 <Field label={t("detail.ip")}>
                   {data.ip ?? t("detail.noIp")}
                 </Field>
-                <Field label={t("detail.trace")}>
-                  <code className="font-mono text-xs">{data.traceId}</code>
+                <Field label={t("detail.trace")} wide>
+                  <Copyable value={data.traceId} what={t("detail.trace")} />
                 </Field>
               </dl>
               <section className="space-y-s1">

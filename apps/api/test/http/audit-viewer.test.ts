@@ -152,6 +152,58 @@ describe("audit viewer: reading the trail over HTTP", () => {
       expect(none.body.meta.total).toBe(0);
     });
 
+    describe("a trace ID pasted into the search", () => {
+      // Refusals of its own, two with different trace IDs, so these tests do
+      // not lean on an earlier one and a search that is dropped shows.
+      beforeAll(async () => {
+        await call(t, as("FINANCE"), "get", EVENTS);
+        await call(t, as("WAREHOUSE"), "get", EVENTS);
+      });
+      const refusal = async () => {
+        const event = (await list("AUDITOR", "?action=auth.permission.refused"))
+          .body.data[0];
+        if (!event) throw new Error("no refusal to look for");
+        return event;
+      };
+
+      it("finds the event, whole and in any case", async () => {
+        const event = await refusal();
+        for (const pasted of [event.traceId, event.traceId.toUpperCase()]) {
+          const found = await list(
+            "AUDITOR",
+            `?search=${encodeURIComponent(pasted)}&pageSize=200`,
+          );
+          expect(found.body.data.map((e) => e.id)).toContain(event.id);
+          expect(
+            found.body.data.every((e) => e.traceId === event.traceId),
+          ).toBe(true);
+        }
+      });
+
+      it("finds it with refusals only on, as an auditor quoting a refusal would", async () => {
+        const event = await refusal();
+        const found = await list(
+          "AUDITOR",
+          `?refusalsOnly=true&search=${encodeURIComponent(event.traceId)}`,
+        );
+        expect(found.body.data.map((e) => e.id)).toContain(event.id);
+        expect(found.body.data.every((e) => e.refusal)).toBe(true);
+        // Both narrow: refusals only must not drop the search.
+        expect(found.body.data.every((e) => e.traceId === event.traceId)).toBe(
+          true,
+        );
+      });
+
+      it("does not match part of a trace ID", async () => {
+        const event = await refusal();
+        const found = await list(
+          "AUDITOR",
+          `?search=${encodeURIComponent(event.traceId.slice(0, 8))}&pageSize=200`,
+        );
+        expect(found.body.data.map((e) => e.id)).not.toContain(event.id);
+      });
+    });
+
     it("filters by an inclusive time range", async () => {
       const all = await list("AUDITOR", "?pageSize=200");
       const newest = all.body.data[0];

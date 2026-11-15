@@ -84,7 +84,7 @@ F-1 and G-1 have landed. F-2 fills in its item when it does.
   - **Screenshots** of every tab and state, light and dark, are in `docs/design/screenshots/area-4/` (names start with `monitoring-`).
   - **Tests:** `apps/api/src/telemetry/telemetry.test.ts`, `apps/api/test/http/monitoring.test.ts` (against the real database), `AnalyticsTracker.test.ts`, `lib/monitoring/sentry.test.ts`, `MonitoringPage.test.tsx`, and the shared schemas in `packages/shared/src/monitoring`. Requests: `apps/api/requests/monitoring.http`.
 - **From F-2, the audit viewer** (landed, [ADR 0027](../adr/0027-audit-viewer-base.md)):
-  - **The audit log** at `/audit` (`apps/web/src/features/audit/`): P-12's data table over the real hash-chained trail, newest first, paged on the server, with filters for the kind of actor, role, a person's id, an action prefix, record type and id, a date range, refusals only, and words in the summary. The filters live in the address bar, so P-12's `AuditLink` (`/audit?entity=Order&id=...`) opens the right view. There is no export. The Synthetic demo data label shows.
+  - **The audit log** at `/audit` (`apps/web/src/features/audit/`): P-12's data table over the real hash-chained trail, newest first, paged on the server, with filters for the kind of actor, role, a person's id, an action prefix, record type and id, a date range, refusals only, and words in the summary or a whole trace ID (the demo fixes, below). The filters live in the address bar, so P-12's `AuditLink` (`/audit?entity=Order&id=...`) opens the right view. There is no export. The Synthetic demo data label shows.
   - **An event in full:** the Details button opens a side panel with who, when, where from (IP), the trace id, what changed and the hashes. Values in `changes` are masked on the server by F-1's `mask()`: a value the caller may not see is not in the response, and the panel shows the reason through `MaskedValue`. One neutral sample rule hides a refusal's `reason` from the system admin and shows it to the auditor (`modules/audit/domain/audit-masking.ts`).
   - **The chain check:** a button that walks the whole chain through `AuditService.verify` and answers "Verified up to sequence N" or "Broken at sequence N", with the problem and the last sequence that still verifies.
   - **Routes** in `apps/api/src/modules/audit/`, all `GET`, all needing `audit.read` (the system admin and the auditor hold it): `/audit/events` (filters and paging), `/audit/events/:id` and `/audit/chain`. There is no route that writes, edits or deletes an event. They read only through P-9's `AuditEventRepository` and `AuditService`, to which F-2 added read methods (`search`, `findRecordById`, `lastSequence`, `sequenceOf`, `sequenceBefore`). Requests: `apps/api/requests/audit.http`. Generated hooks: `apps/web/src/lib/api/generated/endpoints/audit`. `test/http/audit-viewer.test.ts` runs against the real database, including a tampered chain.
@@ -322,11 +322,7 @@ await authorisation.enforce(
 - no self-approval and segregation of duties (F-4): the contracts exist, the rules do not. F-3 brought the limits and substitutes, above;
 - the bank-detail control (F-5);
 - a policy class under the `PermissionPolicy` token that runs your rules in a chain (ADR 0012, point 7): F-3 wrote `GovernancePermissionPolicy`, and putting it behind the token is Richie's one line;
-  feat/area4-governance-seed-masking
-- the seed added missing pairs back, so a permission you revoked returned on the next seed: settled in F-8, a pair revoked on the matrix stays out ([ADR 0053](../adr/0053-revocations-survive-the-seed-and-the-masking-sample-reads-the-matrix.md));
-- polish nobody needs this week: a search box and filters on the matrix, an undo for a change, and a browser test of E2E #3 (backlog F-8).
-- the seed adds missing pairs back, so a permission you revoke returns on the next seed: decide whether it should;
-  main
+- the seed added missing pairs back, so a permission you revoked returned on the next seed: settled in F-8, a pair revoked on the matrix stays out ([ADR 0053](../adr/0053-revocations-survive-the-seed-and-the-masking-sample-reads-the-matrix.md)).
 
 **What G-1 deliberately leaves to you** (the monitoring wiring works; the work that needs judgement is yours):
 
@@ -360,6 +356,18 @@ Two of F-1's loose ends, settled in [ADR 0053](../adr/0053-revocations-survive-t
 - **Tests:** `pairsToSeed` in `governance-domain.test.ts`, and `test/http/governance.test.ts` runs the real seed against the real database.
 
 **The masking sample reads the matrix.** Who sees the sample note is the row `masking.customerNote`, held by default by the five roles the hard-coded rule named. `PolicyService` reads the live matrix and builds the note's rule with `sampleNoteRule` (`domain/masking.ts`), so a system admin shows or hides the note for a role from the matrix, with no code change. The Masking tab says so and links to the row, and reads the sample again each time it opens. `SAMPLE_RULES` keeps the default roles for the callers in areas 1 and 3 that mask with it; only the sample reads the matrix.
+
+## Ready for the Week 5 demo
+
+On 14 Nov a walk through the demo as every role, on a Docker build, found nine gaps in Area 4's screens. They are fixed, with two ideas from Azri's #270:
+
+- **The audit log** fits its card at 1440 px, so Details is in view without scrolling sideways (a browser test in `governance.spec.ts` checks it). Its search also finds a whole trace ID, such as one quoted from a refusal, and an event's trace ID has a copy button.
+- **The audit log's record IDs and filters,** after #270: a UUID shows its first characters, with the whole in its title and a copy button, and the eight filters fold behind "More filters", which opens by itself when one is in use. The action code stays in view, and the search box and its trace ID hint sit outside the fold.
+- **The matrix** tells a read-only role, such as the auditor, that it may read the matrix, and names what changing it needs in the matrix's own words.
+- **Each role sees only the governance tabs it may use:** the Users tab needs `users.read`. Hiding a tab is not the control; the server refuses on its own.
+- **Monitoring** keeps its tab in the address bar (`?tab=`) and, after #270, opens on Observability, listed first. The AI use tile and the See AI use quick action open `?tab=aiUsage`. The clickstream names roles as the rest of the app does.
+- **Settings:** the analytics choice is a radio group that marks the chosen setting, as the Appearance choice does.
+- **Wording:** the AI tab's classifications use the badges' words, and "trace ID" is written the same way in every Area 4 text, which `wording.test.ts` checks.
 
 ## Options to consider, not built
 
