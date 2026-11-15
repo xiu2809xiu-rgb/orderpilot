@@ -1,0 +1,92 @@
+# Design review board
+
+The three visual directions the team looked at, the pick, and a before and after of each main page. This is the page that issues #244 (P-106) and #245 (P-107) ask for. All pictures show synthetic demo data.
+
+## The three directions
+
+On 13 November 2026 the team was shown three directions, each as the home page and one order page, in dark and light, at 1440 by 900. Each was a preview inside the app, with its own colours, type and radius, built so the team could pick one before anything rolled out. The pictures are kept in [`docs/design/directions/`](directions/) as they were shown.
+
+| Direction   | What it was                                                                                                                 | Home, dark                                                          | Home, light                                                           | Order page, dark                                                      | Order page, light                                                       |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Ink         | Near-black ground, a lime accent, small monospace labels for sections, and cards with thin borders. Sharp and technical.    | [home-ink-dark-1440.png](directions/home-ink-dark-1440.png)         | [home-ink-light-1440.png](directions/home-ink-light-1440.png)         | [order-ink-dark-1440.png](directions/order-ink-dark-1440.png)         | [order-ink-light-1440.png](directions/order-ink-light-1440.png)         |
+| Paper       | A warm light page, a blue accent, a large greeting, and sections ruled off and numbered, like a printed report. Editorial.  | [home-paper-dark-1440.png](directions/home-paper-dark-1440.png)     | [home-paper-light-1440.png](directions/home-paper-light-1440.png)     | [order-paper-dark-1440.png](directions/order-paper-dark-1440.png)     | [order-paper-light-1440.png](directions/order-paper-light-1440.png)     |
+| **Spectra** | A navy ground with teal and cyan blooms (pale aqua in light), glass panels, pill chips and a gradient page title. Our pick. | [home-spectra-dark-1440.png](directions/home-spectra-dark-1440.png) | [home-spectra-light-1440.png](directions/home-spectra-light-1440.png) | [order-spectra-dark-1440.png](directions/order-spectra-dark-1440.png) | [order-spectra-light-1440.png](directions/order-spectra-light-1440.png) |
+
+All three used Lucide icons only. The teal and navy of Spectra are our own, in the spirit of the client's deck: no colour was sampled from the briefing material and there is no logo (question Q-23).
+
+## The pick
+
+The team chose Spectra on 13 November 2026. The pick is recorded in [`design-system.md`](design-system.md) and in [ADR 0054](../adr/0054-spectra-is-the-products-design-and-its-prototype-screens-are-the-pages.md).
+
+On 14 November Richie asked for Spectra to go directly onto the real site as the only design, not to stay in the preview, and Ink and Paper were deleted. After seeing the old pages in Spectra's colours beside the prototype screens he wrote: "For the UI, I prefer the one you made in the directions. It is much cleaner and more professional. It organizes information logically." So the job was not new colours on old pages: the prototype screens became the real pages (shell, home, Orders, an order, sign-in), and the other pages took the same page anatomy.
+
+## Before and after
+
+"Before" is the closest picture of the same page in the older folders of [`docs/design/screenshots/`](screenshots/). Those were taken at different times by different stories, so some show a different role, or only one colour scheme. Where that is so, the row says it. "After" is [`docs/design/screenshots/spectra/`](screenshots/spectra/), taken from a Docker build of this branch ([its README](screenshots/spectra/README.md) says how). Every picture is 1440 by 900.
+
+### Home
+
+| Page                  | Before, light                                                                 | Before, dark                                                                | After, light                                                       | After, dark                                                       |
+| --------------------- | ----------------------------------------------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------ | ----------------------------------------------------------------- |
+| Home, Support         | [product-pass](screenshots/product-pass/p86-support-home-1440-light.png)      | [product-pass](screenshots/product-pass/support-home-1440-dark.png)         | [spectra](screenshots/spectra/home-support-light-1440.jpg)         | [spectra](screenshots/spectra/home-support-dark-1440.jpg)         |
+| Home, Product manager | [product-pass](screenshots/product-pass/product_manager-home-1440.png)        | [product-pass](screenshots/product-pass/product_manager-home-1440-dark.png) | [spectra](screenshots/spectra/home-product-manager-light-1440.jpg) | [spectra](screenshots/spectra/home-product-manager-dark-1440.jpg) |
+| Home, Approver        | [product-pass](screenshots/product-pass/p86-approver-home-1440-light.png)     | [product-pass](screenshots/product-pass/approver-home-1440-dark.png)        | [spectra](screenshots/spectra/home-approver-light-1440.jpg)        | [spectra](screenshots/spectra/home-approver-dark-1440.jpg)        |
+| Home, Warehouse       | [product-pass](screenshots/product-pass/p86-warehouse-home-1440-light.png)    | [product-pass](screenshots/product-pass/warehouse-home-1440-dark.png)       | [spectra](screenshots/spectra/home-warehouse-light-1440.jpg)       | [spectra](screenshots/spectra/home-warehouse-dark-1440.jpg)       |
+| Home, Management      | [product-pass](screenshots/product-pass/p86-management-home-1440-light.png)   | [product-pass](screenshots/product-pass/management-home-1440-dark.png)      | [spectra](screenshots/spectra/home-management-light-1440.jpg)      | [spectra](screenshots/spectra/home-management-dark-1440.jpg)      |
+| Home, System admin    | [product-pass](screenshots/product-pass/p86-system_admin-home-1440-light.png) | [product-pass](screenshots/product-pass/system_admin-home-1440-dark.png)    | [spectra](screenshots/spectra/home-system-admin-light-1440.jpg)    | [spectra](screenshots/spectra/home-system-admin-dark-1440.jpg)    |
+
+Finance, Logistics and Auditor also have a home in both folders (`product-pass/finance-home-1440.png` and the like, and `spectra/home-finance-light-1440.jpg` and the like).
+
+### Orders, an order and New order
+
+| Page                 | Before, light                                                                      | Before, dark                                                                      | After, light                                                        | After, dark                                                        |
+| -------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| Orders list, Support | [product-pass](screenshots/product-pass/p36-support-orders-1440-light.png)         | [product-pass](screenshots/product-pass/p36-support-orders-1440-dark.png)         | [spectra](screenshots/spectra/orders-support-light-1440.jpg)        | [spectra](screenshots/spectra/orders-support-dark-1440.jpg)        |
+| An order, Support    | [product-pass](screenshots/product-pass/p83-support-tracker-detail-1440-light.png) | [product-pass](screenshots/product-pass/p83-support-tracker-detail-1440-dark.png) | [spectra](screenshots/spectra/order-SO-0024-support-light-1440.jpg) | [spectra](screenshots/spectra/order-SO-0024-support-dark-1440.jpg) |
+| New order, Support   | [product-pass](screenshots/product-pass/p49-support-new-1440-light.png)            | [product-pass](screenshots/product-pass/p49-support-new-1440-dark.png)            | [spectra](screenshots/spectra/orders-new-support-light-1440.jpg)    | [spectra](screenshots/spectra/orders-new-support-dark-1440.jpg)    |
+
+The old order page was the order tracker's detail (SO-0024 in both). The old app had a separate Orders list and Order tracker; Spectra has one Orders entry for both.
+
+### Customers
+
+| Page                | Before, light                                                                          | Before, dark                                               | After, light                                                          | After, dark                                                          |
+| ------------------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Customers list      | [workspace](screenshots/workspace/customers-1440-light.png)                            | [workspace](screenshots/workspace/customers-1440-dark.png) | [spectra](screenshots/spectra/customers-support-light-1440.jpg)       | [spectra](screenshots/spectra/customers-support-dark-1440.jpg)       |
+| A customer, Support | [product-pass](screenshots/product-pass/support-master-data-customers-C-0003-1440.png) | No older dark picture for Support                          | [spectra](screenshots/spectra/customer-C-0001-support-light-1440.jpg) | [spectra](screenshots/spectra/customer-C-0001-support-dark-1440.jpg) |
+
+The customer record before is C-0003 and after is C-0001: the pages are the same, the customer differs.
+
+### Work, checks and the tracker
+
+| Page                | Before, light                                                         | Before, dark                                                               | After, light                                                          | After, dark                                                          |
+| ------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Task inbox, Support | [product-pass](screenshots/product-pass/support-workflows-1440.png)   | [product-pass](screenshots/product-pass/support-workflows-1440-dark.png)   | [spectra](screenshots/spectra/workflows-support-light-1440.jpg)       | [spectra](screenshots/spectra/workflows-support-dark-1440.jpg)       |
+| Exceptions          | [area-3](screenshots/area-3/exceptions-light.png)                     | [area-3](screenshots/area-3/exceptions-dark.png)                           | [spectra](screenshots/spectra/exceptions-support-light-1440.jpg)      | [spectra](screenshots/spectra/exceptions-support-dark-1440.jpg)      |
+| Order tracker       | [area-3](screenshots/area-3/tracker-light.png)                        | [area-3](screenshots/area-3/tracker-dark.png)                              | [spectra](screenshots/spectra/order-tracker-warehouse-light-1440.jpg) | [spectra](screenshots/spectra/order-tracker-warehouse-dark-1440.jpg) |
+| Insights (KPIs)     | [product-pass](screenshots/product-pass/management-insights-1440.png) | [product-pass](screenshots/product-pass/management-insights-1440-dark.png) | [spectra](screenshots/spectra/insights-management-light-1440.jpg)     | [spectra](screenshots/spectra/insights-management-dark-1440.jpg)     |
+
+The Spectra tracker picture is taken as Warehouse, and the Spectra exceptions picture as Support. The older Exceptions and tracker pictures come from area 3's own story and do not name a role.
+
+### Controls, settings and sign-in
+
+| Page                     | Before, light                                                             | Before, dark                                                                   | After, light                                                          | After, dark                                                          |
+| ------------------------ | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | --------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Governance, System admin | [product-pass](screenshots/product-pass/system_admin-governance-1440.png) | [product-pass](screenshots/product-pass/system_admin-governance-1440-dark.png) | [spectra](screenshots/spectra/governance-system-admin-light-1440.jpg) | [spectra](screenshots/spectra/governance-system-admin-dark-1440.jpg) |
+| Audit log                | [area-4](screenshots/area-4/audit-log-light.png)                          | [area-4](screenshots/area-4/audit-log-dark.png)                                | [spectra](screenshots/spectra/audit-system-admin-light-1440.jpg)      | [spectra](screenshots/spectra/audit-system-admin-dark-1440.jpg)      |
+| Settings                 | [product-pass](screenshots/product-pass/system_admin-settings-1440.png)   | [product-pass](screenshots/product-pass/system_admin-settings-1440-dark.png)   | [spectra](screenshots/spectra/settings-support-light-1440.jpg)        | [spectra](screenshots/spectra/settings-support-dark-1440.jpg)        |
+| Sign-in                  | [product-pass](screenshots/product-pass/p84-anon-signin-1440-light.png)   | [product-pass](screenshots/product-pass/p84-anon-signin-1440-dark.png)         | [spectra](screenshots/spectra/login-signed-out-light-1440.jpg)        | [spectra](screenshots/spectra/login-signed-out-dark-1440.jpg)        |
+
+The older Settings picture is taken as System admin and the new one as Support.
+
+### Phone
+
+Spectra has 390 by 844 pictures, in light, for home (Support and Warehouse), sign-in, Orders and an order: the files ending in `-390.png` in [`screenshots/spectra/`](screenshots/spectra/). The older folders hold phone pictures of many pages too, for example `product-pass/support-home-390.png`.
+
+### Pages with no older picture
+
+None of the pages above lacked an older picture. Where a gap remains it is one colour scheme: there is no older dark picture of the Support customer record, and the older Settings and Governance pictures are System admin's, not Support's.
+
+## What is not here
+
+- A Lighthouse run and the bundle check are not part of this page. The pull request reports them.
+- The pictures do not prove the pages work. The end-to-end suite and the other checks in the pull request do that.
