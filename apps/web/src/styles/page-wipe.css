@@ -45,6 +45,38 @@ body {
   color: color-mix(in oklab, var(--primary) 45%, transparent);
 }
 
+/* One slanted stripe leads the name in, as the leading edge of the demo's band:
+   a teal stripe on the outside and a light line beside it, the full height of
+   the screen. It slants about the name's middle, so it passes right beside it. */
+.dx-wipe-pair {
+  position: relative;
+  display: inline-flex;
+}
+.dx-wipe-stripe {
+  --s: clamp(18px, 2.4vw, 34px);
+  --g: clamp(6px, 0.8vw, 10px);
+  --l: clamp(4px, 0.45vw, 6px);
+  position: absolute;
+  top: calc(var(--space-8) * -2);
+  left: calc(100% + var(--space-3));
+  width: calc(var(--s) + var(--g) + var(--l));
+  height: 100vh;
+  transform: skewX(-14deg);
+  transform-origin: 50% calc(var(--space-8) * 2 + var(--space-3));
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--primary) 45%, white) 0 var(--l),
+    transparent var(--l) calc(var(--l) + var(--g)),
+    var(--primary) calc(var(--l) + var(--g)) 100%
+  );
+}
+/* Going Home or Back the name glides right to left, so the stripe leads on the left. */
+.dx-wipe[data-back="true"] .dx-wipe-stripe {
+  left: auto;
+  right: calc(100% + var(--space-3));
+  transform: scaleX(-1) skewX(-14deg);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .dx-wipe {
     display: none;

@@ -54,8 +54,9 @@ const SWEEP: Keyframe[] = [
 
 /**
  * The page-change name: when the page changes, the new page's name glides
- * across the clear strip under the top bar, to the right of the title, the way
- * a race broadcast names the camera it cuts to. It runs between the aurora and
+ * across the clear strip under the top bar, to the right of the title, led in
+ * by one slanted teal stripe, the way a race broadcast names the camera it
+ * cuts to. It runs between the aurora and
  * the content, so it never passes over a word, takes a click or holds anything
  * up: the page has changed before it arrives. Going Home, or Back, it glides
  * the other way. It follows the page key, so a filter, a tab or a sort never
@@ -81,6 +82,8 @@ export function PageWipe() {
     running.current?.cancel();
     box.dataset.on = "true";
     const back = key === "/" || navigation === NavigationType.Pop;
+    // The stripe leads the name in, so it sits on whichever side goes first.
+    box.dataset.back = String(back);
     const animation = strip.animate(SWEEP, {
       duration: WIPE_MS,
       direction: back ? "reverse" : "normal",
@@ -107,7 +110,10 @@ export function PageWipe() {
   return createPortal(
     <div ref={layer} className="dx-wipe" data-on="false" aria-hidden="true">
       <div ref={rider} className="dx-wipe-rider">
-        <span className="dx-wipe-name">{name}</span>
+        <span className="dx-wipe-pair">
+          <span className="dx-wipe-name">{name}</span>
+          <span className="dx-wipe-stripe" />
+        </span>
       </div>
     </div>,
     document.body,

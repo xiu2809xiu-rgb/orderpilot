@@ -102,6 +102,8 @@ describe("the page-change name", () => {
     expect(layer()).toHaveAttribute("data-on", "true");
     expect(lastDirection()).toBe("normal");
     expect(layer()).toHaveTextContent("Orders");
+    expect(layer()).toHaveAttribute("data-back", "false");
+    expect(layer().querySelector(".dx-wipe-stripe")).not.toBeNull();
   });
 
   it("never glides for a filter, a tab or a sort on the same page", async () => {
@@ -122,6 +124,8 @@ describe("the page-change name", () => {
     const router = open("/orders");
     await userEvent.click(screen.getByRole("link", { name: "Go home" }));
     expect(lastDirection()).toBe("reverse");
+    // The stripe leads, so it moves to the side that goes first.
+    expect(layer()).toHaveAttribute("data-back", "true");
     await userEvent.click(screen.getByRole("link", { name: "Go to orders" }));
     await userEvent.click(screen.getByRole("link", { name: "Open SO-7" }));
     expect(lastDirection()).toBe("normal");
