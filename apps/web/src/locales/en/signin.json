@@ -36,5 +36,10 @@
         "body": "The right person confirms anything uncertain. Business Central stays the system of record."
       }
     }
+  },
+  "stage": {
+    "label": "Animated preview of OrderPilot",
+    "pause": "Pause the hero animation",
+    "play": "Play the hero animation"
   }
 }

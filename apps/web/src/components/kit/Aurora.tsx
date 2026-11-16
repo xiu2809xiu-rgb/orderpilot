@@ -8,6 +8,8 @@ interface AuroraProps {
   height?: number;
   /** Overall strength, 0 to 1. Keep it lower on a light scheme. */
   opacity?: number;
+  /** Holds the curtains still: a person's Pause button. */
+  paused?: boolean;
   className?: string;
 }
 
@@ -90,6 +92,7 @@ void main() {
 export function Aurora({
   height = 0.62,
   opacity = 0.9,
+  paused = false,
   className,
 }: AuroraProps) {
   const stops = useTokenRgb(["--ring", "--info", "--primary"]);
@@ -106,6 +109,7 @@ export function Aurora({
       <GlCanvas
         fragment={FRAGMENT}
         redrawKey={key}
+        paused={paused}
         fallback={{
           backgroundImage:
             "radial-gradient(60% 50% at 20% 0%, color-mix(in srgb, var(--ring) 55%, transparent), transparent), radial-gradient(50% 45% at 60% 0%, color-mix(in srgb, var(--info) 45%, transparent), transparent), radial-gradient(45% 40% at 95% 5%, color-mix(in srgb, var(--primary) 40%, transparent), transparent)",

@@ -1,6 +1,6 @@
 // Kit: React Bits / BlurText. Licence: MIT with the Commons Clause. Adapted to OrderPilot's tokens.
 import { motion } from "motion/react";
-import { useRef } from "react";
+import { Fragment, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { useOnScreen, useStill } from "./env";
 
@@ -11,6 +11,11 @@ interface BlurTextProps {
   animateBy?: "words" | "letters";
   /** Pixels of blur each piece starts with. */
   blur?: number;
+  /** Seconds to wait before the first word. */
+  delay?: number;
+  /** From this word on (0-based) the words take `accentClassName`: a closing phrase set apart. */
+  accentFrom?: number;
+  accentClassName?: string;
   className?: string;
 }
 
@@ -26,19 +31,32 @@ export function BlurText({
   stagger = 0.08,
   animateBy = "words",
   blur = 8,
+  delay = 0,
+  accentFrom = Infinity,
+  accentClassName,
   className,
 }: BlurTextProps) {
   const ref = useRef<HTMLSpanElement>(null);
   const still = useStill();
   const seen = useOnScreen(ref, { once: true });
+  const pieces = animateBy === "words" ? text.split(" ") : Array.from(text);
+  const accent = (index: number) =>
+    index >= accentFrom ? accentClassName : undefined;
   if (still) {
     return (
       <span ref={ref} className={className}>
-        {text}
+        {accentFrom === Infinity
+          ? text
+          : // The spaces sit between the spans, as text of their own: a screen reader joins words by them.
+            pieces.map((piece, index) => (
+              <Fragment key={`${piece}-${String(index)}`}>
+                <span className={accent(index)}>{piece}</span>
+                {index < pieces.length - 1 ? " " : ""}
+              </Fragment>
+            ))}
       </span>
     );
   }
-  const pieces = animateBy === "words" ? text.split(" ") : Array.from(text);
   return (
     <span ref={ref} className={cn("inline", className)}>
       <span className="sr-only">{text}</span>
@@ -46,7 +64,7 @@ export function BlurText({
         {pieces.map((piece, index) => (
           <motion.span
             key={`${piece}-${String(index)}`}
-            className="inline-block whitespace-pre"
+            className={cn("inline-block whitespace-pre", accent(index))}
             initial={{ opacity: 0, y: 12, filter: `blur(${String(blur)}px)` }}
             animate={
               seen
@@ -54,7 +72,7 @@ export function BlurText({
                 : { opacity: 0, y: 12, filter: `blur(${String(blur)}px)` }
             }
             transition={{
-              delay: index * stagger,
+              delay: delay + index * stagger,
               duration: 0.45,
               ease: [0.22, 1, 0.36, 1],
             }}
