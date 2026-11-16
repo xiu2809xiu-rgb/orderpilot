@@ -1,4 +1,10 @@
-# Kit items on the sign-in page
+# Kit items in use
+
+Where React Bits, Magic UI and ReUI items are used, page by page. This page
+starts with the sign-in page and Home; other pages join it as they are
+recorded.
+
+## The sign-in page
 
 Every kit item the sign-in page uses, old and new. Each lives in
 `apps/web/src/components/kit/` with its licence in its first line, adapted by
@@ -15,7 +21,7 @@ the CLI's `add`, and no new package was installed.
 | The ground behind the page      | Aurora                 | React Bits     | React Bits (free)                | MIT with the Commons Clause | No  | Old, with a `paused` option                                         |
 | Inside the stage                | DepthField             | React Bits Pro | `@reactbits-pro`, item `hero-21` | React Bits Pro licence      | Yes | New: its aurora noise, rebuilt on WebGL2 (see below)                |
 
-## About DepthField
+### About DepthField
 
 `hero-21` ("Aurora hero with a glowing orb mark") draws its field with `three`.
 That package is not installed here and the page must stay small, so the item
@@ -29,7 +35,7 @@ installed.
 Nothing the items did on their own was kept that fetches over the network,
 loads a remote script, font or image, or touches storage or cookies.
 
-## Motion rules on this page
+### Motion rules on the sign-in page
 
 - Everything that moves by itself for more than five seconds is held by the
   one Pause button on the stage (`aria-label` "Pause the hero animation",
@@ -38,3 +44,25 @@ loads a remote script, font or image, or touches storage or cookies.
   still frame in the stage.
 - The canvas is decoration (`aria-hidden`), clamps the device pixel ratio to 2,
   and stops when the tab is hidden or the stage is off screen.
+
+## Home
+
+First-view motion on the Home page of every role: quick, once, and still under
+reduced motion. Only items already in `apps/web/src/components/kit/` are used,
+and none is a Pro item.
+
+| Where on the page                               | Item          | Vendor     | Licence                     | Pro | Status                                                                 |
+| ----------------------------------------------- | ------------- | ---------- | --------------------------- | --- | ---------------------------------------------------------------------- |
+| The greeting, the date and the line under them  | BlurFade      | Magic UI   | MIT                         | No  | New here                                                               |
+| The figures in the line under the greeting      | NumberTicker  | Magic UI   | MIT                         | No  | New here: they count up once and end on the true figures               |
+| The rows of Needs you and of each role's blocks | AnimatedList  | Magic UI   | MIT                         | No  | Old, now 30 ms apart                                                   |
+| Every card, and the count tiles                 | SpotlightCard | React Bits | MIT with the Commons Clause | No  | New on the cards; the measures' tiles had it                           |
+| My timeline                                     | Timeline      | ReUI       | MIT                         | No  | Old; its entries enter once and the Now dot pulses three times, in CSS |
+
+A figure that changes later (a finished task, a refetch, an Undo) is shown, not
+counted again.
+
+## Upload and review
+
+The pass of light down the page as the review opens is plain CSS in
+`features/directions/screens/upload/upload.css`. It uses no kit item.
