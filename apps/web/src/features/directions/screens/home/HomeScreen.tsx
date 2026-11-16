@@ -2,7 +2,8 @@ import type { WorkflowTask } from "@orderpilot/shared";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSessionStore } from "@/stores/session";
-import { PageHeader } from "@/components/parts/PageHeader";
+import { HomeHeader } from "./HomeHeader";
+import "./home.css";
 import type { DoneItem } from "./doneToday";
 import { Flows } from "./Flows";
 import { HomeActions } from "./HomeActions";
@@ -69,7 +70,7 @@ export default function HomeScreen() {
 
   return (
     <div className="dx-sheet">
-      <PageHeader
+      <HomeHeader
         title={t(`greeting.${partOfDay(new Date())}`, { name: first })}
         intro={intro}
         actions={<HomeActions />}

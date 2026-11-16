@@ -1,7 +1,7 @@
 import { CircleCheck, CircleX, RotateCw } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { StatusChip } from "@/components/kit/StatusChip";
-import { Section } from "@/components/parts/Section";
+import { HomeSection } from "./HomeSection";
 import { Button } from "@/components/ui/button";
 import { useSystemCheckStatuses } from "@/lib/api/generated/endpoints/system/system";
 import { HomeQuery } from "./HomeQuery";
@@ -26,7 +26,7 @@ export function SystemHealth({ className }: { className?: string }) {
     : t("health.description");
 
   return (
-    <Section title={t("health.title")} intro={intro} className={className}>
+    <HomeSection title={t("health.title")} intro={intro} className={className}>
       <HomeQuery query={query} loading={<RowSkeletons rows={3} />}>
         <ul className="flex flex-col divide-y divide-border">
           {checks.map((check) => (
@@ -65,6 +65,6 @@ export function SystemHealth({ className }: { className?: string }) {
           {t("health.again")}
         </Button>
       </HomeQuery>
-    </Section>
+    </HomeSection>
   );
 }

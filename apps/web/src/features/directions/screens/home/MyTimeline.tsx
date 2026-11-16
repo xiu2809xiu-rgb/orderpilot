@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { formatDay } from "@/lib/format";
 import { STEP_TIMES } from "../../data/index";
-import { Section } from "@/components/parts/Section";
+import { HomeSection } from "./HomeSection";
 import { useNow } from "@/components/parts/useNow";
 import type { DoneItem } from "./doneToday";
 import { HomeQuery } from "./HomeQuery";
@@ -41,7 +41,7 @@ export function MyTimeline({
       });
 
   return (
-    <Section title={t("timeline.title")} intro={t("timeline.intro")} work>
+    <HomeSection title={t("timeline.title")} intro={t("timeline.intro")} work>
       {home.list.isError ? (
         // Needs you beside it says what failed and offers the retry; saying it twice helps no one.
         <p className="fs-14 max-w-prose text-muted-foreground">
@@ -60,6 +60,6 @@ export function MyTimeline({
           </p>
         </HomeQuery>
       )}
-    </Section>
+    </HomeSection>
   );
 }

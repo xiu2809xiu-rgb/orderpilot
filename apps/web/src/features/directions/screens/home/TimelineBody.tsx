@@ -18,6 +18,7 @@ import {
 import { JourneyRail } from "@/components/parts/JourneyRail";
 import { StatusTag } from "@/components/parts/StatusTag";
 import type { DoneItem } from "./doneToday";
+import { enterProps, useFirstView } from "./entrance";
 import type { TimelineEntry } from "./timelineModel";
 
 const TIME = new Intl.DateTimeFormat("en-GB", {
@@ -47,6 +48,7 @@ function Group({ title, children }: { title: string; children: ReactNode }) {
 
 export function DoneGroup({ done }: { done: readonly DoneItem[] }) {
   const { t } = useTranslation("directions-home");
+  const first = useFirstView();
   return (
     <Group title={t("timeline.done.title")}>
       {done.length === 0 ? (
@@ -56,7 +58,11 @@ export function DoneGroup({ done }: { done: readonly DoneItem[] }) {
       ) : (
         <Timeline value={done.length}>
           {done.map((item, index) => (
-            <TimelineItem key={item.task.id} step={index + 1}>
+            <TimelineItem
+              key={item.task.id}
+              step={index + 1}
+              {...enterProps(index, first)}
+            >
               <TimelineIndicator />
               <TimelineSeparator />
               <TimelineHeader>
@@ -105,12 +111,13 @@ export function NowGroup({
 }) {
   const { t } = useTranslation("directions-home");
   const { t: tParts } = useTranslation("directions-parts");
+  const first = useFirstView();
   return (
     <Group title={t("timeline.now.title")}>
       {entry ? (
         <Timeline value={0}>
-          <TimelineItem step={1}>
-            <TimelineIndicator className="border-ring bg-background" />
+          <TimelineItem step={1} {...enterProps(1, first)}>
+            <TimelineIndicator className="home-pulse border-ring bg-background" />
             <TimelineHeader>
               <TimelineTitle>
                 {t(`needs.kind.${entry.task.kind}`)}
@@ -165,6 +172,7 @@ function expectedText(
 export function NextGroup({ entries }: { entries: readonly TimelineEntry[] }) {
   const { t } = useTranslation("directions-home");
   const { t: tParts } = useTranslation("directions-parts");
+  const first = useFirstView();
   return (
     <Group title={t("timeline.next.title")}>
       {entries.length === 0 ? (
@@ -174,7 +182,11 @@ export function NextGroup({ entries }: { entries: readonly TimelineEntry[] }) {
       ) : (
         <Timeline value={0}>
           {entries.map((entry, index) => (
-            <TimelineItem key={entry.task.id} step={index + 1}>
+            <TimelineItem
+              key={entry.task.id}
+              step={index + 1}
+              {...enterProps(index + 2, first)}
+            >
               <TimelineIndicator />
               <TimelineSeparator />
               <TimelineHeader>
