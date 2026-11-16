@@ -9,6 +9,7 @@ import { TourCard } from "./TourCard";
 import { TourOverlay } from "./TourOverlay";
 import { TOUR_STEPS, type TourStep, type TourTarget } from "./tourSteps";
 import { roleFor, undoTour } from "./tourUndo";
+import { useOpenMenu } from "./useOpenMenu";
 import { useTourTarget } from "./useTourTarget";
 
 const NOWHERE: TourTarget = { kind: "none" };
@@ -68,6 +69,7 @@ export default function DemoTour() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const queryClient = useQueryClient();
+  const menu = useOpenMenu();
   const [busy, setBusy] = useState(false);
   const [puttingBack, setPuttingBack] = useState(false);
   const prepared = useRef<number | null>(null);
@@ -158,7 +160,8 @@ export default function DemoTour() {
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && !busy) void end();
+      // Escape in an open menu closes the menu, not the tour.
+      if (event.key === "Escape" && !busy && !menu) void end();
     };
     window.addEventListener("keydown", onKey);
     return () => {
@@ -171,7 +174,7 @@ export default function DemoTour() {
   const nextReady =
     !current.ready || (element !== null && current.ready(element));
   return (
-    <TourOverlay rect={target.rect}>
+    <TourOverlay rect={target.rect} menu={menu}>
       <TourCard
         index={index}
         total={TOUR_STEPS.length}
