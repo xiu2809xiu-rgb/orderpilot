@@ -45,6 +45,13 @@ function open(path = "/") {
   return router;
 }
 
+/** The direction the last glide played in: normal is left to right. */
+function lastDirection(): string | undefined {
+  const options = animate.mock.calls.at(-1)?.[1] as
+    KeyframeAnimationOptions | undefined;
+  return options?.direction;
+}
+
 function layer(): HTMLElement {
   const found = document.querySelector<HTMLElement>(".dx-wipe");
   if (!found) throw new Error("no wipe layer");
@@ -77,8 +84,8 @@ afterEach(() => {
   Reflect.deleteProperty(Element.prototype, "animate");
 });
 
-describe("the broadcast wipe", () => {
-  it("opens the first page without a sweep, and hides the band from screen readers", () => {
+describe("the page-change name", () => {
+  it("opens the first page without a glide, and hides the name from screen readers", () => {
     open("/");
     expect(screen.getByText("Home page")).toBeInTheDocument();
     expect(animate).not.toHaveBeenCalled();
@@ -86,18 +93,18 @@ describe("the broadcast wipe", () => {
     expect(layer()).toHaveAttribute("data-on", "false");
   });
 
-  it("sweeps once when the page changes, with the new page's name, left to right", async () => {
+  it("glides the new page's name once when the page changes, left to right", async () => {
     open("/");
     await userEvent.click(screen.getByRole("link", { name: "Go to orders" }));
-    // The page has already changed: the sweep never holds it back.
+    // The page has already changed: the glide never holds it back.
     expect(screen.getByText("Orders page")).toBeInTheDocument();
     expect(animate).toHaveBeenCalledTimes(1);
     expect(layer()).toHaveAttribute("data-on", "true");
-    expect(layer()).toHaveAttribute("data-reverse", "false");
+    expect(lastDirection()).toBe("normal");
     expect(layer()).toHaveTextContent("Orders");
   });
 
-  it("never sweeps for a filter, a tab or a sort on the same page", async () => {
+  it("never glides for a filter, a tab or a sort on the same page", async () => {
     open("/orders");
     await userEvent.click(screen.getByRole("link", { name: "Filter held" }));
     expect(animate).not.toHaveBeenCalled();
@@ -111,23 +118,23 @@ describe("the broadcast wipe", () => {
     expect(layer()).toHaveTextContent("SO-7");
   });
 
-  it("sweeps the other way going Home and going Back", async () => {
+  it("glides the other way going Home and going Back", async () => {
     const router = open("/orders");
     await userEvent.click(screen.getByRole("link", { name: "Go home" }));
-    expect(layer()).toHaveAttribute("data-reverse", "true");
+    expect(lastDirection()).toBe("reverse");
     await userEvent.click(screen.getByRole("link", { name: "Go to orders" }));
     await userEvent.click(screen.getByRole("link", { name: "Open SO-7" }));
-    expect(layer()).toHaveAttribute("data-reverse", "false");
+    expect(lastDirection()).toBe("normal");
     // Back to the orders list, which is not Home: the browser's Back alone turns it.
     await act(async () => {
       await router.navigate(-1);
     });
     expect(screen.getByText("Orders page")).toBeInTheDocument();
-    expect(layer()).toHaveAttribute("data-reverse", "true");
+    expect(lastDirection()).toBe("reverse");
     expect(animate).toHaveBeenCalledTimes(4);
   });
 
-  it("shows no sweep when the person asks for reduced motion", async () => {
+  it("shows no name when the person asks for reduced motion", async () => {
     reduce = true;
     open("/");
     await userEvent.click(screen.getByRole("link", { name: "Go to orders" }));

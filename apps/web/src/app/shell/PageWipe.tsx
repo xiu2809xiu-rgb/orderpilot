@@ -1,5 +1,5 @@
 // Origin: Azri's "Broadcast Wipe" demo (page-wipe.css and page-wipe.js),
-// adapted to React Router, the Spectra tokens and the shell's page key.
+// with its band taken out, adapted to React Router and the shell's page key.
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
@@ -8,7 +8,7 @@ import { recordCrumb } from "@/lib/records";
 import type { CrumbHandle } from "./Breadcrumbs";
 import { usePageKey } from "./pageKey";
 
-/** One pass of the band, in milliseconds. */
+/** One glide of the name, in milliseconds. */
 export const WIPE_MS = 850;
 
 function reducedMotion(): boolean {
@@ -22,7 +22,7 @@ function canAnimate(): boolean {
   return typeof Element.prototype.animate === "function";
 }
 
-/** The name the band carries: a record's number, or else the page's own name. */
+/** The name that glides: a record's number, or else the page's own name. */
 function usePageName(): string {
   const { t } = useTranslation();
   const matches = useMatches();
@@ -36,42 +36,38 @@ function usePageName(): string {
   return last ? t(last) : "";
 }
 
-/** In fast, a short glide across the middle, out fast, as on a race broadcast. */
-function sweep(skew: string): Keyframe[] {
-  const at = (x: string) => `translateX(${x}) skewX(${skew})`;
-  return [
-    {
-      transform: at("-100%"),
-      offset: 0,
-      easing: "cubic-bezier(0.25, 0, 0.2, 1)",
-    },
-    { transform: at("-3%"), offset: 0.42 },
-    {
-      transform: at("3%"),
-      offset: 0.58,
-      easing: "cubic-bezier(0.8, 0, 0.75, 1)",
-    },
-    { transform: at("100%"), offset: 1 },
-  ];
-}
+/** In fast, a short glide past the title, out fast, as on a race broadcast. */
+const SWEEP: Keyframe[] = [
+  {
+    transform: "translateX(-100%)",
+    offset: 0,
+    easing: "cubic-bezier(0.25, 0, 0.2, 1)",
+  },
+  { transform: "translateX(-3%)", offset: 0.42 },
+  {
+    transform: "translateX(3%)",
+    offset: 0.58,
+    easing: "cubic-bezier(0.8, 0, 0.75, 1)",
+  },
+  { transform: "translateX(100%)", offset: 1 },
+];
 
 /**
- * The broadcast wipe: when the page changes, a slanted band in the product's
- * teal sweeps across the background with the new page's name, the way a race
- * broadcast cuts between cameras. It runs between the aurora and the content,
- * so it shows between the cards and through the glass but never passes over a
- * word, takes a click or holds anything up: the page has changed before it
- * arrives. Going Home, or Back, sweeps the other way. It follows the page key,
- * so a filter, a tab or a sort never sets it off, and the first page opens
- * without it. Reduced motion, or a browser without the Web Animations API,
- * shows no band at all.
+ * The page-change name: when the page changes, the new page's name glides
+ * across the clear strip under the top bar, to the right of the title, the way
+ * a race broadcast names the camera it cuts to. It runs between the aurora and
+ * the content, so it never passes over a word, takes a click or holds anything
+ * up: the page has changed before it arrives. Going Home, or Back, it glides
+ * the other way. It follows the page key, so a filter, a tab or a sort never
+ * sets it off, and the first page opens without it. Reduced motion, or a
+ * browser without the Web Animations API, shows nothing.
  */
 export function PageWipe() {
   const key = usePageKey();
   const name = usePageName();
   const navigation = useNavigationType();
   const layer = useRef<HTMLDivElement>(null);
-  const band = useRef<HTMLDivElement>(null);
+  const rider = useRef<HTMLDivElement>(null);
   const shown = useRef(key);
   const running = useRef<Animation | null>(null);
 
@@ -79,17 +75,16 @@ export function PageWipe() {
     if (shown.current === key) return;
     shown.current = key;
     const box = layer.current;
-    const slab = band.current;
-    if (!box || !slab || reducedMotion() || !canAnimate()) return;
-    // A click during a sweep starts a new one; the old one simply stops.
+    const strip = rider.current;
+    if (!box || !strip || reducedMotion() || !canAnimate()) return;
+    // A click during a glide starts a new one; the old one simply stops.
     running.current?.cancel();
-    box.dataset.reverse = String(
-      key === "/" || navigation === NavigationType.Pop,
-    );
     box.dataset.on = "true";
-    const skew =
-      getComputedStyle(box).getPropertyValue("--wipe-skew").trim() || "-14deg";
-    const animation = slab.animate(sweep(skew), { duration: WIPE_MS });
+    const back = key === "/" || navigation === NavigationType.Pop;
+    const animation = strip.animate(SWEEP, {
+      duration: WIPE_MS,
+      direction: back ? "reverse" : "normal",
+    });
     running.current = animation;
     void animation.finished.then(
       () => {
@@ -97,7 +92,7 @@ export function PageWipe() {
         box.dataset.on = "false";
         running.current = null;
       },
-      // Cancelled by a newer sweep, which now owns the band.
+      // Cancelled by a newer glide, which now owns the name.
       () => undefined,
     );
   }, [key, navigation]);
@@ -111,12 +106,8 @@ export function PageWipe() {
 
   return createPortal(
     <div ref={layer} className="dx-wipe" data-on="false" aria-hidden="true">
-      <div className="dx-wipe-track">
-        <div ref={band} className="dx-wipe-slab">
-          <div className="dx-wipe-label">
-            <span className="dx-wipe-name">{name}</span>
-          </div>
-        </div>
+      <div ref={rider} className="dx-wipe-rider">
+        <span className="dx-wipe-name">{name}</span>
       </div>
     </div>,
     document.body,

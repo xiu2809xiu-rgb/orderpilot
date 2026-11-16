@@ -1,27 +1,16 @@
-/* The broadcast wipe (app/shell/PageWipe.tsx), from Azri's "Broadcast Wipe"
-   demo. When the page changes, a slanted band in the product's teal sweeps
-   across the background with the new page's name. It sits above the aurora
-   and below everything else, so it shows between the cards and through the
-   glass, and it never passes over a word or takes a click. */
+/* The page-change name (app/shell/PageWipe.tsx), from Azri's "Broadcast Wipe"
+   demo with its band taken out: when the page changes, the new page's name
+   glides across the clear strip under the top bar, to the right of the title.
+   It sits above the aurora and below everything else, so it never passes over
+   a word or takes a click. */
 
-/* Keeps the band behind every part of the page but in front of the aurora,
+/* Keeps the name behind every part of the page but in front of the aurora,
    which is the body's own background. */
 body {
   isolation: isolate;
 }
 
 .dx-wipe {
-  --wipe-accent: var(--primary);
-  --wipe-line: color-mix(in oklab, var(--primary) 45%, white);
-  --wipe-fill: color-mix(in oklab, var(--primary) 10%, transparent);
-  --wipe-text: color-mix(in oklab, var(--primary) 45%, transparent);
-  --wipe-skew: -14deg;
-  /* Where the name rides: the strip of clear ground under the top bar (and the
-     record tabs), to the right of the page title, which every page leaves
-     empty. Its top sits 128 px down; its middle 70 % of the way across while
-     the band glides. */
-  --wipe-name-top: calc(var(--space-8) * 2);
-  --wipe-name-shift: 40vw;
   position: fixed;
   inset: 0;
   z-index: -1;
@@ -32,71 +21,28 @@ body {
 .dx-wipe[data-on="true"] {
   visibility: visible;
 }
-/* Home and Back sweep right to left; the name stays readable. */
-.dx-wipe[data-reverse="true"] .dx-wipe-track {
-  transform: scaleX(-1);
-}
-.dx-wipe[data-reverse="true"] .dx-wipe-name {
-  transform: scaleX(-1);
-}
-/* Mirrored, the shift goes on the other side, so the name still lands right of the title. */
-.dx-wipe[data-reverse="true"] .dx-wipe-label {
-  padding-inline: 0 var(--wipe-name-shift);
-}
-.dx-wipe-track {
-  position: absolute;
-  inset: 0;
-}
 
-/* One slanted slab, with a teal stripe and a light line on both edges, so the
-   stripes lead it in and trail it out. It is wider than the screen, so the
-   slanted edges never leave a gap, even on a tall phone. */
-.dx-wipe-slab {
-  --s: clamp(18px, 2.4vw, 34px);
-  --g: clamp(6px, 0.8vw, 10px);
-  --l: clamp(4px, 0.45vw, 6px);
+/* The strip the name rides in. Its top is 128 px down, where every page leaves
+   clear ground under the top bar and the record tabs, and the name's middle is
+   70 % of the way across while it glides, to the right of the page title. */
+.dx-wipe-rider {
   position: absolute;
-  top: -10%;
-  bottom: -10%;
-  left: calc(-20% - 30vh);
-  width: calc(140% + 60vh);
-  transform: translateX(-100%) skewX(var(--wipe-skew));
-  background: linear-gradient(
-    90deg,
-    var(--wipe-accent) 0 var(--s),
-    transparent var(--s) calc(var(--s) + var(--g)),
-    var(--wipe-line) calc(var(--s) + var(--g))
-      calc(var(--s) + var(--g) + var(--l)),
-    var(--wipe-fill) calc(var(--s) + var(--g) + var(--l))
-      calc(100% - var(--s) - var(--g) - var(--l)),
-    var(--wipe-line) calc(100% - var(--s) - var(--g) - var(--l))
-      calc(100% - var(--s) - var(--g)),
-    transparent calc(100% - var(--s) - var(--g)) calc(100% - var(--s)),
-    var(--wipe-accent) calc(100% - var(--s)) 100%
-  );
+  inset-inline: 0;
+  top: calc(var(--space-8) * 2);
+  display: flex;
+  justify-content: center;
+  padding-inline-start: 40vw;
+  transform: translateX(-100%);
   will-change: transform;
 }
-
-/* The new page's name rides in the slab, in the clear strip above the cards,
-   so it can be read. The slab starts 10vh above the screen, hence the 10vh. */
-.dx-wipe-label {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: start center;
-  padding-block-start: calc(10vh + var(--wipe-name-top));
-  padding-inline: var(--wipe-name-shift) 0;
-  transform: skewX(calc(var(--wipe-skew) * -1));
-  color: var(--wipe-text);
-}
 .dx-wipe-name {
-  display: inline-block;
   font-size: clamp(40px, 4vw, 56px);
   font-weight: 800;
   line-height: 1;
   letter-spacing: 0.02em;
   text-transform: uppercase;
   white-space: nowrap;
+  color: color-mix(in oklab, var(--primary) 45%, transparent);
 }
 
 @media (prefers-reduced-motion: reduce) {
