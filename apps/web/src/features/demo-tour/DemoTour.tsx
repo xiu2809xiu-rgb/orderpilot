@@ -64,7 +64,8 @@ export default function DemoTour() {
       try {
         if (role !== current.role) {
           await demoLogin(current.role);
-          queryClient.clear();
+          // Reset, not clear: a page already open must fetch again as the new role.
+          await queryClient.resetQueries();
           await navigate(current.path ?? "/");
         } else if (current.path && pathname !== current.path) {
           await navigate(current.path);
@@ -99,7 +100,7 @@ export default function DemoTour() {
   async function end() {
     setBusy(true);
     const result = await undoTour(undo, HOME_ROLE);
-    queryClient.clear();
+    await queryClient.resetQueries();
     await navigate("/");
     stop();
     if (result.failed > 0) {
