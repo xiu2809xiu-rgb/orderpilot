@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowLeft, FilePlus2, Sparkles } from "lucide-react";
+import { ArrowDown, ArrowLeft, ClipboardCheck, Sparkles } from "lucide-react";
 import { CONFIDENCE_HIGH } from "@orderpilot/shared";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -10,8 +10,8 @@ interface ReviewHeadProps {
   document: DemoDocument;
   uncertainCount: number;
   waitingCount: number;
-  created: boolean;
-  onCreate: () => void;
+  finished: boolean;
+  onFinish: () => void;
   onAgain: () => void;
   /** Selects the next uncertain field nobody has confirmed; undefined when none is left. */
   onNext?: () => void;
@@ -20,15 +20,15 @@ interface ReviewHeadProps {
 /**
  * The band over the review: how the document was classified, how many fields
  * were read and how many need a person, the ring of those confirmed so far,
- * and the one primary button of the screen, Create draft order. The button
+ * and the one primary button of the screen, Finish review. The button
  * stays off while an uncertain field is unconfirmed, and says how many.
  */
 export function ReviewHead({
   document: doc,
   uncertainCount,
   waitingCount,
-  created,
-  onCreate,
+  finished,
+  onFinish,
   onAgain,
   onNext,
 }: ReviewHeadProps) {
@@ -36,11 +36,11 @@ export function ReviewHead({
   const total = doc.fields.length;
   const confirmed = uncertainCount - waitingCount;
   const customer = doc.fields.find((field) => field.key === "customerName");
-  const note = created
+  const note = finished
     ? ""
     : waitingCount > 0
-      ? t("review.createWait", { count: waitingCount })
-      : t("review.createReady");
+      ? t("review.finishWait", { count: waitingCount })
+      : t("review.finishReady");
   return (
     <div className="dx-card flex flex-wrap items-center gap-x-6 gap-y-4 px-5 py-4">
       <CircularProgress
@@ -101,12 +101,12 @@ export function ReviewHead({
           ) : null}
           <Button
             type="button"
-            disabled={waitingCount > 0 || created}
-            onClick={onCreate}
+            disabled={waitingCount > 0 || finished}
+            onClick={onFinish}
             className="pointer-coarse:h-11"
           >
-            <FilePlus2 aria-hidden="true" />
-            {t("review.create")}
+            <ClipboardCheck aria-hidden="true" />
+            {t("review.finish")}
           </Button>
         </div>
         <p

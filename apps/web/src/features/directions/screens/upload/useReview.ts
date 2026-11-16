@@ -43,7 +43,7 @@ export function useReview(doc: DemoDocument) {
   const [selected, setSelected] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [states, setStates] = useState<Record<string, FieldState>>({});
-  const [created, setCreated] = useState(false);
+  const [finished, setFinished] = useState(false);
 
   const stateOf = useCallback(
     (id: string): FieldState => states[id] ?? FRESH,
@@ -76,9 +76,9 @@ export function useReview(doc: DemoDocument) {
     confirm,
     edit,
     stateOf,
-    created,
-    create: () => {
-      setCreated(true);
+    finished,
+    finish: () => {
+      setFinished(true);
     },
     uncertainCount: uncertain.length,
     waitingCount: waiting.length,
