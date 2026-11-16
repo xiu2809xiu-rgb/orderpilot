@@ -1,10 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { DomainError } from "../../../common/domain-error.js";
 import {
+  AiCallInTransactionError,
   AiDestinationRefusedError,
+  AiImageLimitError,
   AiInvalidOutputError,
   AiMockScriptMissingError,
   AiProviderError,
+  AiToolStepsExceededError,
+  AiToolsNeedActorError,
+  outcomeOfError,
 } from "./ai-errors.js";
 
 describe("a refused destination", () => {
@@ -76,5 +81,43 @@ describe("an answer that stays invalid", () => {
     expect(error.reasonCode).toBe("invalid-output");
     expect(error.attempts).toBe(3);
     expect(error.message).not.toContain("3");
+  });
+});
+
+describe("how a failed call is recorded", () => {
+  it.each([
+    [new AiDestinationRefusedError("rule-1", "why"), "refused", "rule-1"],
+    [AiProviderError.fromHttpStatus(429), "error", "provider-http-429"],
+    [AiProviderError.timeout(), "timeout", "provider-timeout"],
+    [new AiInvalidOutputError(3), "error", "invalid-output"],
+    [new AiToolStepsExceededError(), "error", "tool-steps-exceeded"],
+    [new AiToolsNeedActorError(), "refused", "tools-need-actor"],
+    [new AiImageLimitError(3), "refused", "too-many-images"],
+    [new AiCallInTransactionError(), "refused", "in-transaction"],
+  ] as const)("%s as %s with the code %s", (error, outcome, reasonCode) => {
+    expect(outcomeOfError(error)).toEqual({ outcome, reasonCode });
+  });
+
+  it("records a failure it does not know as an internal error, never its message", () => {
+    expect(outcomeOfError(new TypeError("password=hunter2"))).toEqual({
+      outcome: "error",
+      reasonCode: "internal",
+    });
+    expect(outcomeOfError("a string")).toEqual({
+      outcome: "error",
+      reasonCode: "internal",
+    });
+  });
+
+  it("keeps every message generic", () => {
+    for (const error of [
+      new AiToolStepsExceededError(),
+      new AiToolsNeedActorError(),
+      new AiImageLimitError(3),
+      new AiCallInTransactionError(),
+    ]) {
+      expect(error.message).not.toMatch(/[0-9]/);
+      expect(error.message).not.toContain(error.reasonCode);
+    }
   });
 });
