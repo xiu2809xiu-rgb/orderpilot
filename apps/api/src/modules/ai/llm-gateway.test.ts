@@ -792,7 +792,8 @@ describe("the gateway: tools", () => {
 
   it("refuses a tool name that was not given to this call, runs nothing, and audits it", async () => {
     const h = harness();
-    askingFor(h, "approve_spr", { id: "SPR-1" });
+    // Arguments that would fit the listed tool: only the name is wrong.
+    askingFor(h, "approve_spr", { itemNo: "IT-1" });
     const execute = vi.fn(() => Promise.resolve(1 as JsonValue));
     const result = await h.gateway.generateText(context, toolInput(execute));
     expect(result.text).toBe("done");
