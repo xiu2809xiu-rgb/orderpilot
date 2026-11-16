@@ -45,7 +45,10 @@ export type AiProbeInput = z.infer<typeof aiProbeInputSchema>;
 
 /**
  * The outcome of one probe. A failed provider call is a result here, not a
- * failed request, so `reasonCode` is a short code and never a message.
+ * failed request, so `reasonCode` is a short code and never a message. The
+ * token and attempt figures are null when the outcome is not "ok": the gateway
+ * keeps a failed call's figures in its usage record and does not hand them to
+ * its caller, and a zero would claim a count nobody made.
  */
 export const aiProbeResultSchema = z.object({
   provider: aiProviderSettingSchema,
@@ -55,9 +58,10 @@ export const aiProbeResultSchema = z.object({
   outcome: z.enum(AI_USAGE_STATUSES),
   reasonCode: z.string().min(1).nullable(),
   latencyMs: z.int().min(0),
-  inputTokens: z.int().min(0),
-  outputTokens: z.int().min(0),
-  attempts: z.int().min(0),
+  inputTokens: z.int().min(0).nullable(),
+  outputTokens: z.int().min(0).nullable(),
+  /** Provider requests made. */
+  attempts: z.int().min(0).nullable(),
 });
 export type AiProbeResult = z.infer<typeof aiProbeResultSchema>;
 export const aiProbeResponseSchema = dataEnvelope(aiProbeResultSchema);

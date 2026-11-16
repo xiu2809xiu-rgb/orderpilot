@@ -92,6 +92,21 @@ describe("the AI probe", () => {
     ).toBe(true);
   });
 
+  it("takes null token and attempt figures for a call that did not succeed", () => {
+    expect(
+      aiProbeResponseSchema.safeParse({
+        data: {
+          ...probe,
+          outcome: "error",
+          reasonCode: "provider-http-401",
+          inputTokens: null,
+          outputTokens: null,
+          attempts: null,
+        },
+      }).success,
+    ).toBe(true);
+  });
+
   it("refuses an outcome outside the usage statuses", () => {
     expect(
       aiProbeResponseSchema.safeParse({ data: { ...probe, outcome: "failed" } })
