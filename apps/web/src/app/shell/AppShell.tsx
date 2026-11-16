@@ -165,7 +165,7 @@ export function AppShell() {
         </Suspense>
       ) : null}
       <Toaster />
-      {/* Behind everything: a page change sweeps a band across the aurora. */}
+      {/* Behind everything: on a page change its name glides across the aurora. */}
       <PageWipe />
       <Suspense fallback={null}>
         <AnalyticsRoot dock={dock} />
