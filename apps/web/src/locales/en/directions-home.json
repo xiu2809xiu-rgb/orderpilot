@@ -21,7 +21,8 @@
   "introRules_other": "{{count}} business rules wait for Spectra to confirm them.",
   "actions": {
     "newOrder": "New order",
-    "upload": "Upload a document"
+    "upload": "Upload a PO",
+    "explain": "Upload a PO for Spark to read, or type a new order in by hand."
   },
   "needs": {
     "title": "Needs you",
