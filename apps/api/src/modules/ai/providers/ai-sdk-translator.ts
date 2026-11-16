@@ -288,6 +288,7 @@ export class AiSdkTranslator {
       const result = await generateText(this.optionsOf(model, request, signal));
       return {
         text: result.text,
+        model: model.modelId,
         toolCalls: result.toolCalls.map((call) => toolCallOf(call)),
         inputTokens: result.usage.inputTokens ?? 0,
         outputTokens: result.usage.outputTokens ?? 0,
@@ -322,6 +323,7 @@ export class AiSdkTranslator {
             finished = true;
             yield {
               type: "finish",
+              model: model.modelId,
               inputTokens: part.totalUsage.inputTokens ?? 0,
               outputTokens: part.totalUsage.outputTokens ?? 0,
               finishReason: finishReasonOf(part.finishReason),

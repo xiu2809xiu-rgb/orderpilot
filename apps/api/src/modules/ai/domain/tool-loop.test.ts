@@ -58,6 +58,7 @@ const call = (
 function step(partial: Partial<AiStepResult> = {}): AiStepResult {
   return {
     text: "",
+    model: "scripted-1",
     toolCalls: [],
     inputTokens: 10,
     outputTokens: 5,
@@ -96,6 +97,7 @@ class ScriptedProvider {
       yield { type: "tool-call", call: item };
     yield {
       type: "finish",
+      model: result.model,
       inputTokens: result.inputTokens,
       outputTokens: result.outputTokens,
       finishReason: result.finishReason,

@@ -123,6 +123,7 @@ describe("the OpenAI-compatible provider, on the wire", () => {
 
     expect(result).toEqual({
       text: "The total is 42.",
+      model: "text-model",
       toolCalls: [],
       inputTokens: 120,
       outputTokens: 9,
@@ -193,6 +194,27 @@ describe("the OpenAI-compatible provider, on the wire", () => {
           },
         ],
       });
+    });
+
+    it("reports the model that answered: the vision model for a page, the text model otherwise", async () => {
+      server.reply({ kind: "completion", content: "ok" });
+      server.reply({ kind: "stream", deltas: ["ok"] });
+      server.reply({ kind: "completion", content: "ok" });
+      const provider = new OpenAiCompatibleLlmProvider(
+        settingsOf({ AI_VISION_MODEL: "vision-model" }),
+      );
+      const page = requestOf({
+        messages: [{ role: "user", parts: [image] }],
+      });
+      expect((await provider.step(page, SIGNAL)).model).toBe("vision-model");
+      const parts = await collect(provider.stream(page, SIGNAL));
+      expect(parts.at(-1)).toMatchObject({
+        type: "finish",
+        model: "vision-model",
+      });
+      expect((await provider.step(requestOf(), SIGNAL)).model).toBe(
+        "text-model",
+      );
     });
 
     it("uses the text model for a page when there is no vision model", async () => {
@@ -468,6 +490,7 @@ describe("the OpenAI-compatible provider, on the wire", () => {
         { type: "text-delta", text: "is 42." },
         {
           type: "finish",
+          model: "text-model",
           inputTokens: 30,
           outputTokens: 5,
           finishReason: "stop",

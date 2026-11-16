@@ -101,6 +101,8 @@ export type FinishReason = (typeof FINISH_REASONS)[number];
 
 export interface AiStepResult {
   readonly text: string;
+  /** The model that answered: a request with page images may go to another model than the text one. */
+  readonly model: string;
   readonly toolCalls: readonly AiToolCall[];
   readonly inputTokens: number;
   readonly outputTokens: number;
@@ -112,6 +114,7 @@ export type AiStreamPart =
   | { readonly type: "tool-call"; readonly call: AiToolCall }
   | {
       readonly type: "finish";
+      readonly model: string;
       readonly inputTokens: number;
       readonly outputTokens: number;
       readonly finishReason: FinishReason;

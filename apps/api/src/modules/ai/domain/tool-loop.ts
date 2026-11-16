@@ -190,6 +190,7 @@ export class ToolLoop {
       for (const call of step.toolCalls) yield { type: "tool-call", call };
       yield {
         type: "finish",
+        model: step.model,
         inputTokens: step.inputTokens,
         outputTokens: step.outputTokens,
         finishReason: step.finishReason,
@@ -257,6 +258,7 @@ export class ToolLoop {
           calls.push(part.call);
         } else {
           meter.addTokens(part.inputTokens, part.outputTokens);
+          meter.noteModel(part.model);
           finishReason = part.finishReason;
         }
       }

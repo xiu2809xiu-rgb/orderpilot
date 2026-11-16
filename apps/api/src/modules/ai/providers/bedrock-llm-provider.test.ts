@@ -133,6 +133,7 @@ describe("the Bedrock provider", () => {
 
     expect(result).toEqual({
       text: "Done.",
+      model: "unit.text-model-v1:0",
       toolCalls: [],
       inputTokens: 21,
       outputTokens: 4,

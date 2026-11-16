@@ -70,6 +70,7 @@ describe("the mock provider", () => {
       signal,
     );
     expect(result.text).toBe(GATEWAY_PROBE_TEXT);
+    expect(result.model).toBe(MOCK_MODEL);
     expect(result.finishReason).toBe("stop");
     expect(result.toolCalls).toEqual([]);
   });
@@ -265,6 +266,7 @@ describe("tool calls", () => {
     expect(parts.filter((part) => part.type === "tool-call")).toHaveLength(2);
     expect(parts.at(-1)).toEqual({
       type: "finish",
+      model: step.model,
       inputTokens: step.inputTokens,
       outputTokens: step.outputTokens,
       finishReason: "tool-calls",

@@ -16,6 +16,7 @@ class FakeProvider extends LlmProvider {
   step(request: AiStepRequest): Promise<AiStepResult> {
     return Promise.resolve({
       text: request.instructions,
+      model: "fake-1",
       toolCalls: [],
       inputTokens: 1,
       outputTokens: 1,
@@ -28,6 +29,7 @@ class FakeProvider extends LlmProvider {
     yield { type: "text-delta", text: "a" };
     yield {
       type: "finish",
+      model: "fake-1",
       inputTokens: 1,
       outputTokens: 1,
       finishReason: "stop",

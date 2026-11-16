@@ -1,6 +1,9 @@
 import { Logger } from "@nestjs/common";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
+import { baseEnv } from "../../../test/support/base-env.js";
+import { FakeChatServer } from "../../../test/support/fake-chat-server.js";
+import { AppConfig } from "../../config/app-config.js";
 import { DomainError } from "../../common/domain-error.js";
 import type {
   AiRefusalAuditor,
@@ -30,6 +33,7 @@ import { defineReadOnlyTool } from "./domain/read-only-tool.js";
 import type { ToolRefusal } from "./domain/tool-loop.js";
 import { LlmGateway, type AiGatewayLimits } from "./llm-gateway.js";
 import { MockLlmProvider } from "./providers/mock-llm-provider.js";
+import { OpenAiCompatibleLlmProvider } from "./providers/openai-compatible-llm-provider.js";
 import {
   MockScriptRegistry,
   mockChunks,
@@ -84,6 +88,7 @@ type Behaviour = AiStepResult | Error | "hang";
 const answer = (text: string, tokens = 10): AiStepResult => ({
   text,
   toolCalls: [],
+  model: "some-model",
   inputTokens: tokens,
   outputTokens: tokens / 2,
   finishReason: "stop",
@@ -133,6 +138,7 @@ class ScriptedProvider extends LlmProvider {
     }
     yield {
       type: "finish",
+      model: behaviour.model,
       inputTokens: behaviour.inputTokens,
       outputTokens: behaviour.outputTokens,
       finishReason: behaviour.finishReason,
@@ -985,5 +991,87 @@ describe("the gateway: a stream", () => {
       "final",
     ]);
     expect(events[0]).toMatchObject({ status: "ran", name: "stock_lookup" });
+  });
+});
+
+describe("the gateway: the model that answered is the one recorded", () => {
+  /** A provider whose answer names a model other than its own, as a vision call does. */
+  class AnsweringProvider extends ScriptedProvider {
+    override step(): Promise<AiStepResult> {
+      return Promise.resolve({ ...answer("ok"), model: "vision-model" });
+    }
+  }
+
+  it("records the model the provider reported, and returns it in the usage", async () => {
+    const h = harness({ provider: new AnsweringProvider([answer("ok")]) });
+    const result = await h.gateway.generateText(context, {
+      instructions: "Go.",
+      messages: [{ role: "user", text: "q" }],
+    });
+    expect(result.usage.model).toBe("vision-model");
+    expect(h.rows[0]?.model).toBe("vision-model");
+  });
+
+  it("falls back to the provider's own model when no request was made", async () => {
+    const provider = new ScriptedProvider([answer("x")]);
+    const h = harness({
+      provider,
+      decision: { allowed: false, rule: "rule-1", reason: "no" },
+    });
+    await expect(
+      h.gateway.generateText(context, {
+        instructions: "Go.",
+        messages: [{ role: "user", text: "q" }],
+      }),
+    ).rejects.toBeInstanceOf(AiDestinationRefusedError);
+    expect(provider.requests).toHaveLength(0);
+    expect(h.rows[0]).toMatchObject({ status: "refused", model: "some-model" });
+  });
+
+  describe("through the OpenAI-compatible provider and the fake server", () => {
+    let server: FakeChatServer;
+    beforeEach(async () => {
+      server = await FakeChatServer.start();
+    });
+    afterEach(async () => {
+      await server.close();
+    });
+
+    function providerOf(): OpenAiCompatibleLlmProvider {
+      return new OpenAiCompatibleLlmProvider(
+        AppConfig.fromEnv(
+          baseEnv({
+            AI_PROVIDER: "openai-compatible",
+            AI_BASE_URL: server.baseUrl,
+            AI_MODEL: "text-model",
+            AI_VISION_MODEL: "vision-model",
+          }),
+        ).ai,
+      );
+    }
+
+    it("records the vision model for a call with a page image, and the text model without one", async () => {
+      server.reply({ kind: "completion", content: "ok" });
+      server.reply({ kind: "completion", content: "ok" });
+      const h = harness({ provider: providerOf() });
+      await h.gateway.generateText(context, {
+        instructions: "Read the page.",
+        images: [
+          {
+            type: "image",
+            mediaType: "image/png",
+            dataBase64: "iVBORw0KGgo=",
+          },
+        ],
+      });
+      await h.gateway.generateText(context, {
+        instructions: "Go.",
+        messages: [{ role: "user", text: "q" }],
+      });
+      expect(h.rows.map((row) => row.model)).toEqual([
+        "vision-model",
+        "text-model",
+      ]);
+    });
   });
 });

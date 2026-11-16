@@ -7,6 +7,8 @@ import type { AiUsageEntry } from "./ai-usage.tracker.js";
 
 /** What one gateway call used, as its caller sees it. */
 export interface AiCallUsage {
+  /** The model that answered the last request; the provider's own model when none was made. */
+  readonly model: string;
   readonly inputTokens: number;
   readonly outputTokens: number;
   /** Provider requests made: a retry or a tool step adds one. */
@@ -46,6 +48,7 @@ export class AiCallScope {
 
   usage(): AiCallUsage {
     return {
+      model: this.answeredModel(),
       inputTokens: this.meter.inputTokens,
       outputTokens: this.meter.outputTokens,
       requests: this.meter.requests,
@@ -64,7 +67,7 @@ export class AiCallScope {
     await this.sink.record({
       context: this.context,
       provider: this.provider.name,
-      model: this.provider.model,
+      model: this.answeredModel(),
       mock: this.provider.mock,
       inputTokens: this.meter.inputTokens,
       outputTokens: this.meter.outputTokens,
@@ -74,6 +77,10 @@ export class AiCallScope {
       reasonCode,
       occurredAt: new Date(this.startedAt),
     });
+  }
+
+  private answeredModel(): string {
+    return this.meter.model ?? this.provider.model;
   }
 
   private elapsed(): number {

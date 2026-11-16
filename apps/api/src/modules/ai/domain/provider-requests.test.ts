@@ -21,6 +21,7 @@ const request: AiStepRequest = {
 
 const answer: AiStepResult = {
   text: "ok",
+  model: "fake-1",
   toolCalls: [],
   inputTokens: 3,
   outputTokens: 2,
@@ -86,6 +87,7 @@ class FakeProvider {
     yield { type: "text-delta", text: "llo" };
     yield {
       type: "finish",
+      model: "fake-1",
       inputTokens: 1,
       outputTokens: 1,
       finishReason: "stop",
@@ -292,6 +294,7 @@ class SlowProvider {
     }
     yield {
       type: "finish",
+      model: "fake-1",
       inputTokens: 1,
       outputTokens: 1,
       finishReason: "stop",

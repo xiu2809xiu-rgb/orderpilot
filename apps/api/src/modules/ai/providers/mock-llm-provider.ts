@@ -144,6 +144,7 @@ export class MockLlmProvider extends LlmProvider {
     const playback = this.play(request);
     return {
       text: playback.chunks.join(""),
+      model: this.model,
       toolCalls: playback.toolCalls,
       inputTokens: playback.inputTokens,
       outputTokens: playback.outputTokens,
@@ -171,6 +172,7 @@ export class MockLlmProvider extends LlmProvider {
     }
     yield {
       type: "finish",
+      model: this.model,
       inputTokens: playback.inputTokens,
       outputTokens: playback.outputTokens,
       finishReason: playback.finishReason,

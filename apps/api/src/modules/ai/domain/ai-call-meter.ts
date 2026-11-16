@@ -8,6 +8,7 @@ export class AiCallMeter {
   private input = 0;
   private output = 0;
   private made = 0;
+  private answered: string | null = null;
 
   /** One provider request left the process, whatever came back. */
   addRequest(): void {
@@ -17,6 +18,15 @@ export class AiCallMeter {
   addTokens(inputTokens: number, outputTokens: number): void {
     this.input += inputTokens;
     this.output += outputTokens;
+  }
+
+  /** The model that answered the latest step, or null while none has. */
+  noteModel(model: string): void {
+    this.answered = model;
+  }
+
+  get model(): string | null {
+    return this.answered;
   }
 
   get inputTokens(): number {
