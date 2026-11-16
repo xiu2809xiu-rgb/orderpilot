@@ -60,8 +60,9 @@ The typeface is Geist (Geist Mono for code), self-hosted from the npm package (`
 
 - **Durations:** `--motion-fast` 160 ms, `--motion-base` 220 ms and `--motion-slow` 250 ms, with the `--ease-out` curve. Spatial movement uses springs (`--spring-stiffness` 260, `--spring-damping` 28).
 - **A page change** fades the page region alone ([`app/shell/PageRegion.tsx`](../../apps/web/src/app/shell/PageRegion.tsx)). It is a view transition named `dx-page`, keyed by the path alone, so a filter, a tab, a sort or the side peek (all in the query string) never moves it. The old page leaves in 140 ms and the new one arrives in 220 ms, scaling up from 0.985 with a blur that clears (`styles/motion.css`). The panel and the top bar stand still. Browser Back and Forward change the page at once, because React skips view transitions there.
+- **The broadcast wipe** plays on the same page change, with the same key ([`app/shell/PageWipe.tsx`](../../apps/web/src/app/shell/PageWipe.tsx), `styles/page-wipe.css`, [ADR 0055](../adr/0055-a-broadcast-wipe-on-a-page-change.md)). Two slanted teal stripes, each with a light line beside it, sweep across over the page in 850 ms, under any dialog, and never take a click. Home and Back sweep right to left. Nothing waits for it: the page has changed before the stripes arrive.
 - **A theme switch** opens the new theme as a circle from the control used, with a soft edge, over 420 ms (`lib/themeSwitch.ts`, `styles/theme-switch.css`). That is longer than a control's 150 to 250 ms because it crosses the whole window. A change that comes from the device (the choice is "system") cross-fades in 250 ms.
-- **Reduced motion:** the theme change and the page change are instant, and the kit's moving items hold a still frame.
+- **Reduced motion:** the theme change and the page change are instant, the broadcast wipe does not play, and the kit's moving items hold a still frame.
 - Tables and forms never animate while they are in use.
 
 ## The shell
