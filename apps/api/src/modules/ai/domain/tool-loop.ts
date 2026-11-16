@@ -68,6 +68,12 @@ export interface ToolRefusal {
   /** Set when the tool exists. */
   readonly permission: Permission | null;
   readonly reason: string;
+  /**
+   * How many calls this one row stands for. Always 1 except for
+   * "too-many-calls": an answer with hundreds of calls must not write hundreds
+   * of rows into the hash-chained audit trail, so a step writes one row.
+   */
+  readonly count: number;
   readonly context: AiCallContext;
 }
 
@@ -278,12 +284,13 @@ export class ToolLoop {
       });
       const results: AiToolResultPart[] = [];
       for (const [index, call] of calls.entries()) {
-        const outcome = await this.runCall(
-          call,
-          index >= MAX_CALLS_PER_STEP,
-          byName,
-          input,
-        );
+        const outcome =
+          index >= MAX_CALLS_PER_STEP
+            ? {
+                result: errorResult(call, TOLD_TOO_MANY),
+                status: "refused" as const,
+              }
+            : await this.runCall(call, byName, input);
         results.push(outcome.result);
         yield {
           type: "tool-activity",
@@ -292,13 +299,26 @@ export class ToolLoop {
           status: outcome.status,
         };
       }
+      const overLimit = calls.slice(MAX_CALLS_PER_STEP);
+      const first = overLimit[0];
+      if (first) {
+        // One row for the step, however many calls went over.
+        await this.deps.auditRefusal({
+          kind: "too-many-calls",
+          toolName: cleanName(first.name),
+          actor: context.actor,
+          permission: null,
+          reason: `${String(overLimit.length)} calls beyond the ${String(MAX_CALLS_PER_STEP)} one step may make`,
+          count: overLimit.length,
+          context,
+        });
+      }
       messages.push({ role: "tool", parts: results });
     }
   }
 
   private async runCall(
     call: AiToolCall,
-    overLimit: boolean,
     byName: ReadonlyMap<string, ReadOnlyTool>,
     input: ToolLoopInput,
   ): Promise<CallOutcome> {
@@ -317,18 +337,12 @@ export class ToolLoop {
         actor,
         permission: tool?.permission ?? null,
         reason,
+        count: 1,
         context,
       });
       return { result: errorResult(call, told), status: "refused" };
     };
 
-    if (overLimit) {
-      return refuse(
-        "too-many-calls",
-        "more calls than one step may make",
-        TOLD_TOO_MANY,
-      );
-    }
     if (!tool) {
       return refuse(
         "unknown-tool",

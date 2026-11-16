@@ -464,7 +464,7 @@ describe("the tool loop", () => {
       });
     });
 
-    it("refuses the calls beyond a few in one step, without running them", async () => {
+    it("refuses the calls beyond a few in one step, without running them, and tells the model for each", async () => {
       const many = Array.from({ length: 10 }, (_, i) =>
         call("stock_lookup", { itemNo: `IT-${String(i)}` }, `c${String(i)}`),
       );
@@ -477,10 +477,33 @@ describe("the tool loop", () => {
       const { loopInput } = h.input(provider, [stockTool(execute)]);
       await h.loop.run(loopInput);
       expect(execute).toHaveBeenCalledTimes(8);
-      expect(h.refusals.map((r) => r.kind)).toEqual([
-        "too-many-calls",
-        "too-many-calls",
+      const results = toolResultsSentOn(provider, 1);
+      expect(results).toHaveLength(10);
+      expect(results.filter((r) => r.isError).map((r) => r.id)).toEqual([
+        "c8",
+        "c9",
       ]);
+    });
+
+    it("writes ONE audit row for the step, with the count, however many calls went over", async () => {
+      const many = Array.from({ length: 300 }, (_, i) =>
+        call("stock_lookup", { itemNo: `IT-${String(i)}` }, `c${String(i)}`),
+      );
+      const provider = new ScriptedProvider([
+        asksFor(...many),
+        step({ text: "ok" }),
+      ]);
+      const h = harness(provider);
+      const { loopInput } = h.input(provider, [
+        stockTool(() => Promise.resolve(1)),
+      ]);
+      await h.loop.run(loopInput);
+      expect(h.refusals).toHaveLength(1);
+      expect(h.refusals[0]).toMatchObject({
+        kind: "too-many-calls",
+        count: 292,
+      });
+      expect(toolResultsSentOn(provider, 1)).toHaveLength(300);
     });
   });
 
