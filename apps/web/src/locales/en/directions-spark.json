@@ -3,6 +3,8 @@
   "description": "Ask Spark about stock and sales. In this demo its answers are scripted.",
   "close": "Close Spark",
   "new": "New conversation",
+  "maximise": "Maximise Spark",
+  "restore": "Restore Spark to its side panel",
   "status": {
     "idle": "Ready",
     "thinking": "Working on it"

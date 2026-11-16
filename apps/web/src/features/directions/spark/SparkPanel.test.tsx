@@ -255,6 +255,59 @@ describe("the Spark panel", () => {
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 
+  it("maximises like a window and restores, from its button or a double click on its head", async () => {
+    const user = userEvent.setup();
+    panel();
+    const dialog = await screen.findByRole("dialog", { name: "Spark" });
+    expect(dialog).toHaveAttribute("data-maximised", "false");
+    await user.click(
+      within(dialog).getByRole("button", { name: "Maximise Spark" }),
+    );
+    expect(dialog).toHaveAttribute("data-maximised", "true");
+    // Restore is the same button, now with two squares.
+    await user.click(
+      within(dialog).getByRole("button", {
+        name: "Restore Spark to its side panel",
+      }),
+    );
+    expect(dialog).toHaveAttribute("data-maximised", "false");
+    // A double click on the head, as on a window's title bar.
+    await user.dblClick(within(dialog).getByRole("heading", { name: "Spark" }));
+    expect(dialog).toHaveAttribute("data-maximised", "true");
+    // A double click on a button is two clicks on it, never a resize as well.
+    await user.dblClick(
+      within(dialog).getByRole("button", {
+        name: "Restore Spark to its side panel",
+      }),
+    );
+    expect(dialog).toHaveAttribute("data-maximised", "true");
+  });
+
+  it("keeps its size when it is closed and opened again", async () => {
+    const user = userEvent.setup();
+    const tree = (open: boolean) => (
+      <MemoryRouter initialEntries={["/directions/spectra/home"]}>
+        <Routes>
+          <Route
+            path="/directions/:direction/:screen"
+            element={<SparkPanel open={open} onOpenChange={vi.fn()} />}
+          />
+        </Routes>
+      </MemoryRouter>
+    );
+    const view = render(tree(true));
+    const dialog = await screen.findByRole("dialog", { name: "Spark" });
+    await user.click(
+      within(dialog).getByRole("button", { name: "Maximise Spark" }),
+    );
+    view.rerender(tree(false));
+    expect(screen.queryByRole("dialog")).toBeNull();
+    view.rerender(tree(true));
+    expect(
+      await screen.findByRole("dialog", { name: "Spark" }),
+    ).toHaveAttribute("data-maximised", "true");
+  });
+
   it("has no accessibility violations, empty or with an answer", async () => {
     const user = userEvent.setup();
     panel();
