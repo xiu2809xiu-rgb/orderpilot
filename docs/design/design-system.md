@@ -108,6 +108,8 @@ Every page has the same anatomy: the header, then the filters and actions, then 
 
 Upload (`/upload`) and Spark (the panel opened from the top bar) are demo parts. They run on demo documents and scripted answers, and show only in a demo session or a development build (`app/shell/demoParts.ts`), Upload only to a role with `documents.upload`. Each says on its own page that it is a demo: a file added to Upload stays in the browser and is not stored, and Spark's answers are scripted with no AI model connected. They stay labelled as demos until P-18 (uploads and the AI document pipeline) and P-17 (the AI gateway) make them real.
 
+The demo tour (`features/demo-tour/`), started from the Demo role menu, walks the sales flow on the sample data. A glowing ring in the accent colour lights the one button to press and a card beside it says what it shows; nothing dims, so each page is seen whole. Before another team's step it lights Demo role and asks the presenter to switch. It undoes what it did as it goes, so it can run again at once. The ring breathes slowly to draw the eye, and holds still under reduced motion.
+
 ## Where the code lives today
 
 - Tokens and styles: `apps/web/src/styles/`.
