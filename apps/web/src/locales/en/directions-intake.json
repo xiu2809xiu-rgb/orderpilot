@@ -52,7 +52,7 @@
   "review": {
     "title": "Review what Spark read",
     "documentType": "Customer PO",
-    "summary": "{{count}} fields read. {{sure}} are above {{threshold}} percent. {{unsure}} need your approval.",
+    "summary": "{{count}} fields read: {{sure}} above {{threshold}} percent, {{unsure}} for you to approve.",
     "mock": "Confidence is what Mock AI reports for this synthetic document.",
     "confirmed": "{{done}} of {{total}} to approve",
     "ring": "Fields to approve that you have confirmed",

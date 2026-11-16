@@ -172,7 +172,7 @@ describe("the upload screen", () => {
     expect(screen.getByText("Classified as Customer PO")).toBeVisible();
     expect(
       screen.getByText(
-        "21 fields read. 19 are above 90 percent. 2 need your approval.",
+        "21 fields read: 19 above 90 percent, 2 for you to approve.",
       ),
     ).toBeVisible();
     // The page of the PDF is a picture; each field has a box named after it.
@@ -208,7 +208,7 @@ describe("the upload screen", () => {
     // Only the quantity is below the threshold, and its page image is this PO's own.
     expect(
       screen.getByText(
-        "16 fields read. 15 are above 90 percent. 1 need your approval.",
+        "16 fields read: 15 above 90 percent, 1 for you to approve.",
       ),
     ).toBeVisible();
     expect(screen.getAllByText("Requires approval")).toHaveLength(1);
