@@ -1,4 +1,5 @@
 // `pnpm db:seed`: fills the development database. Safe to run again.
+import { applyDemoScenario } from "../../common/demo-scenario.js";
 import { AppConfig } from "../../config/app-config.js";
 import { ConfigError } from "../../config/config-error.js";
 import {
@@ -14,6 +15,7 @@ try {
     createFile: ROOT_ENV_FILE,
     readFiles: ENV_FILES,
   });
+  applyDemoScenario(config);
   await runSeed(config, (line) => process.stdout.write(`${line}\n`));
 } catch (error) {
   if (error instanceof ConfigError) {

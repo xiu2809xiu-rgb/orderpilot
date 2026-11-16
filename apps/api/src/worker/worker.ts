@@ -5,6 +5,7 @@
 // consumes no queue yet. P-15 brings the processors into `main`; the image, the
 // compose service and the health check stay as they are.
 import { Redis } from "ioredis";
+import { applyDemoScenario } from "../common/demo-scenario.js";
 import { AppConfig } from "../config/app-config.js";
 import { ConfigError } from "../config/config-error.js";
 import {
@@ -21,6 +22,7 @@ function main(): void {
     createFile: ROOT_ENV_FILE,
     readFiles: ENV_FILES,
   });
+  applyDemoScenario(config);
   const logger = createRootLogger(config);
 
   // Without the offline queue a ping fails at once while Redis is away, rather

@@ -25,6 +25,7 @@ describe("AppConfig.fromEnv", () => {
     expect(config.appEnv).toBe("local");
     expect(config.nodeEnv).toBe("development");
     expect(config.demoMode).toBe(false);
+    expect(config.demoStoryline).toBe(false);
     expect(config.http).toMatchObject({
       host: "127.0.0.1",
       port: 3000,
@@ -52,6 +53,19 @@ describe("AppConfig.fromEnv", () => {
       "https://demo.example.com",
     ]);
     expect(config.http.trustProxyHops).toBe(1);
+  });
+
+  it("reads DEMO_STORYLINE as a flag, off unless it is true", () => {
+    expect(AppConfig.fromEnv(valid).demoStoryline).toBe(false);
+    expect(
+      AppConfig.fromEnv({ ...valid, DEMO_STORYLINE: "true" }).demoStoryline,
+    ).toBe(true);
+    expect(
+      AppConfig.fromEnv({ ...valid, DEMO_STORYLINE: "false" }).demoStoryline,
+    ).toBe(false);
+    expect(messageFor({ ...valid, DEMO_STORYLINE: "maybe" })).toContain(
+      "DEMO_STORYLINE",
+    );
   });
 
   it("requires APP_ENV: a missing value never falls back to local", () => {
