@@ -160,8 +160,12 @@ export default function DemoTour() {
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      // Escape in an open menu closes the menu, not the tour.
-      if (event.key === "Escape" && !busy && !menu) void end();
+      // Escape in a menu or dialog closes that, not the tour. The menu has
+      // already closed by the time this hears the key, so look at where it was pressed.
+      const inLayer =
+        event.target instanceof Element &&
+        event.target.closest('[role="menu"], [role="dialog"]') !== null;
+      if (event.key === "Escape" && !busy && !menu && !inLayer) void end();
     };
     window.addEventListener("keydown", onKey);
     return () => {
