@@ -12,6 +12,7 @@ import { useDemoTour } from "@/stores/demoTour";
 import { useSessionStore } from "@/stores/session";
 import { CrumbProvider } from "./pageCrumb";
 import { PageRegion } from "./PageRegion";
+import { PageWipe } from "./PageWipe";
 import { useGlobalShortcuts } from "./shortcuts";
 import { SidePanel } from "./SidePanel";
 import { SparkPanelProvider } from "./sparkPanel";
@@ -173,6 +174,8 @@ export function AppShell() {
           <DemoTour />
         </Suspense>
       ) : null}
+      {/* Behind everything: on a page change its name glides across the aurora. */}
+      <PageWipe />
       <Suspense fallback={null}>
         <AnalyticsRoot dock={dock} />
       </Suspense>

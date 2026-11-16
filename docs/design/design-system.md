@@ -60,8 +60,9 @@ The typeface is Geist (Geist Mono for code), self-hosted from the npm package (`
 
 - **Durations:** `--motion-fast` 160 ms, `--motion-base` 220 ms and `--motion-slow` 250 ms, with the `--ease-out` curve. Spatial movement uses springs (`--spring-stiffness` 260, `--spring-damping` 28).
 - **A page change** fades the page region alone ([`app/shell/PageRegion.tsx`](../../apps/web/src/app/shell/PageRegion.tsx)). It is a view transition named `dx-page`, keyed by the path alone, so a filter, a tab, a sort or the side peek (all in the query string) never moves it. The old page leaves in 140 ms and the new one arrives in 220 ms, scaling up from 0.985 with a blur that clears (`styles/motion.css`). The panel and the top bar stand still. Browser Back and Forward change the page at once, because React skips view transitions there.
+- **The page's name glides across** on the same page change, with the same key ([`app/shell/PageWipe.tsx`](../../apps/web/src/app/shell/PageWipe.tsx), `styles/page-wipe.css`, [ADR 0055](../adr/0055-the-page-name-glides-on-a-page-change.md)). The new page's name, or a record's number, in large teal capitals and led in by one slanted teal stripe, glides through the clear strip under the top bar, right of the title, in 850 ms: above the aurora, behind every card, panel and word, so it never covers anything or takes a click. Home and Back glide right to left. Nothing waits for it: the page has changed before the name arrives.
 - **A theme switch** opens the new theme as a circle from the control used, with a soft edge, over 420 ms (`lib/themeSwitch.ts`, `styles/theme-switch.css`). That is longer than a control's 150 to 250 ms because it crosses the whole window. A change that comes from the device (the choice is "system") cross-fades in 250 ms.
-- **Reduced motion:** the theme change and the page change are instant, and the kit's moving items hold a still frame.
+- **Reduced motion:** the theme change and the page change are instant, the page's name does not glide, and the kit's moving items hold a still frame.
 - Tables and forms never animate while they are in use.
 
 ## The shell
