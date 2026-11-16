@@ -5,10 +5,13 @@ import { SignInLead } from "./SignInLead";
 import { SignInStage } from "./SignInStage";
 import { SignInSteps } from "./SignInSteps";
 
-// The closing words carry the design's title gradient (large type only).
+// The closing words carry the design's title gradient, pulled most of the way
+// to the headline's own colour: over the moving ground the plain gradient fell
+// under 3 to 1 at the brightest moments, which large type needs.
+const FROM = "color-mix(in srgb, var(--dx-title-from) 40%, var(--foreground))";
+const TO = "color-mix(in srgb, var(--dx-title-to) 40%, var(--foreground))";
 const HEADLINE_GRADIENT = {
-  "--kit-gradient":
-    "linear-gradient(100deg, var(--dx-title-from), var(--dx-title-to), var(--dx-title-from))",
+  "--kit-gradient": `linear-gradient(100deg, ${FROM}, ${TO}, ${FROM})`,
   "--kit-gradient-duration": "9s",
 } as CSSProperties;
 

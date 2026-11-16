@@ -1,5 +1,5 @@
 import { QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router";
 import {
@@ -332,6 +332,26 @@ describe("the home screen", () => {
       expect(calls).toContain("POST /api/v1/workflows/tasks/t1/complete");
     });
     expect(await screen.findByText(/^Finished at \d\d:\d\d$/)).toBeVisible();
+  });
+
+  it("starts again for the next person: a role switch on Home leaves none of the last one's Done today", async () => {
+    stubApi();
+    const user = userEvent.setup();
+    home();
+    await user.click(
+      await screen.findByRole("button", { name: "Mark sent for SO-0080" }),
+    );
+    expect(await screen.findByText(/^Finished at \d\d:\d\d$/)).toBeVisible();
+    // The role switcher signs the next person in and stays on this route.
+    act(() => {
+      useSessionStore.setState({
+        status: "active",
+        session: sessionFor("FINANCE"),
+      });
+    });
+    await waitFor(() => {
+      expect(screen.queryByText(/^Finished at \d\d:\d\d$/)).toBeNull();
+    });
   });
 
   it("lists no tasks for a role with no inbox, and does not ask for any", async () => {

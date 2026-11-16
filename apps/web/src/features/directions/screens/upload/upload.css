@@ -50,9 +50,11 @@
    page the field sits), so the reading is seen once, in order. Only opacity and
    transform move: every box and row is in place and works from the first frame,
    and when the light has left nothing here moves again. A person who asked for
-   less motion gets the finished review at once. The light travels at one speed:
-   1.16 page heights in 1500 ms, which is where the 1293 ms comes from, and a
-   little further so the last row has landed before the pass is called over. */
+   less motion gets the finished review at once. The light travels at one
+   speed: its lower edge crosses the page (1.16 page heights with its own
+   height) in 1500 ms, which is where the 1293 ms a page comes from. It then
+   runs on at that speed for 250 ms more (1.354 page heights in 1750 ms), so
+   the last row has landed before the pass is called over. */
 .dx-scan {
   display: none;
 }
