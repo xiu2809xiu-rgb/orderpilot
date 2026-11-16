@@ -1,17 +1,24 @@
 /* The broadcast wipe (app/shell/PageWipe.tsx), from Azri's "Broadcast Wipe"
-   demo. When the page changes, two slanted teal stripes sweep across the
-   screen. OrderPilot's pages are almost all cards, so a band behind them would
-   barely show: as the demo's "stripes over the content" option, only the
-   thin stripes cross, on top of the page but under any dialog or toast, and
-   they never take a click. */
+   demo. When the page changes, a slanted band in the product's teal sweeps
+   across the background with the new page's name. It sits above the aurora
+   and below everything else, so it shows between the cards and through the
+   glass, and it never passes over a word or takes a click. */
+
+/* Keeps the band behind every part of the page but in front of the aurora,
+   which is the body's own background. */
+body {
+  isolation: isolate;
+}
+
 .dx-wipe {
   --wipe-accent: var(--primary);
   --wipe-line: color-mix(in oklab, var(--primary) 45%, white);
+  --wipe-fill: color-mix(in oklab, var(--primary) 10%, transparent);
+  --wipe-text: color-mix(in oklab, var(--primary) 16%, transparent);
   --wipe-skew: -14deg;
   position: fixed;
   inset: 0;
-  /* Above the page (nothing in it goes past 10), below dialogs (50). */
-  z-index: 40;
+  z-index: -1;
   overflow: hidden;
   pointer-events: none;
   visibility: hidden;
@@ -19,8 +26,11 @@
 .dx-wipe[data-on="true"] {
   visibility: visible;
 }
-/* Home and Back sweep right to left. */
+/* Home and Back sweep right to left; the name stays readable. */
 .dx-wipe[data-reverse="true"] .dx-wipe-track {
+  transform: scaleX(-1);
+}
+.dx-wipe[data-reverse="true"] .dx-wipe-name {
   transform: scaleX(-1);
 }
 .dx-wipe-track {
@@ -28,9 +38,9 @@
   inset: 0;
 }
 
-/* One slanted slab, see-through but for a teal stripe and a light line at each
-   edge, so the stripes lead it in and trail it out. It is wider than the
-   screen, so the slanted edges never leave a gap, even on a tall phone. */
+/* One slanted slab, with a teal stripe and a light line on both edges, so the
+   stripes lead it in and trail it out. It is wider than the screen, so the
+   slanted edges never leave a gap, even on a tall phone. */
 .dx-wipe-slab {
   --s: clamp(18px, 2.4vw, 34px);
   --g: clamp(6px, 0.8vw, 10px);
@@ -47,7 +57,7 @@
     transparent var(--s) calc(var(--s) + var(--g)),
     var(--wipe-line) calc(var(--s) + var(--g))
       calc(var(--s) + var(--g) + var(--l)),
-    transparent calc(var(--s) + var(--g) + var(--l))
+    var(--wipe-fill) calc(var(--s) + var(--g) + var(--l))
       calc(100% - var(--s) - var(--g) - var(--l)),
     var(--wipe-line) calc(100% - var(--s) - var(--g) - var(--l))
       calc(100% - var(--s) - var(--g)),
@@ -55,6 +65,25 @@
     var(--wipe-accent) calc(100% - var(--s)) 100%
   );
   will-change: transform;
+}
+
+/* The new page's name rides in the slab as a faint watermark. */
+.dx-wipe-label {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  transform: skewX(calc(var(--wipe-skew) * -1));
+  color: var(--wipe-text);
+}
+.dx-wipe-name {
+  display: inline-block;
+  font-size: clamp(56px, 12vw, 168px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 @media (prefers-reduced-motion: reduce) {

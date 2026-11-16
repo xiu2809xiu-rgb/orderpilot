@@ -2,10 +2,13 @@
 // adapted to React Router, the Spectra tokens and the shell's page key.
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { NavigationType, useNavigationType } from "react-router";
+import { useTranslation } from "react-i18next";
+import { NavigationType, useMatches, useNavigationType } from "react-router";
+import { recordCrumb } from "@/lib/records";
+import type { CrumbHandle } from "./Breadcrumbs";
 import { usePageKey } from "./pageKey";
 
-/** One pass of the stripes, in milliseconds. */
+/** One pass of the band, in milliseconds. */
 export const WIPE_MS = 850;
 
 function reducedMotion(): boolean {
@@ -17,6 +20,20 @@ function reducedMotion(): boolean {
 
 function canAnimate(): boolean {
   return typeof Element.prototype.animate === "function";
+}
+
+/** The name the band carries: a record's number, or else the page's own name. */
+function usePageName(): string {
+  const { t } = useTranslation();
+  const matches = useMatches();
+  const record = recordCrumb(matches);
+  if (record) return record.no;
+  const crumbs = matches.flatMap((match) => {
+    const { crumb } = (match.handle ?? {}) as CrumbHandle;
+    return crumb ? [crumb] : [];
+  });
+  const last = crumbs.at(-1);
+  return last ? t(last) : "";
 }
 
 /** In fast, a short glide across the middle, out fast, as on a race broadcast. */
@@ -39,16 +56,19 @@ function sweep(skew: string): Keyframe[] {
 }
 
 /**
- * The broadcast wipe: when the page changes, two slanted teal stripes sweep
- * across the screen, the way a race broadcast cuts between cameras. The page
- * itself changes at once and stays usable: the stripes never take a click,
- * and they pass under any dialog. Going Home, or Back, sweeps the other way.
- * It follows the page key, so a filter, a tab or a sort never sets it off, and
- * the first page opens without it. Reduced motion, or a browser without the Web
- * Animations API, shows no stripes at all.
+ * The broadcast wipe: when the page changes, a slanted band in the product's
+ * teal sweeps across the background with the new page's name, the way a race
+ * broadcast cuts between cameras. It runs between the aurora and the content,
+ * so it shows between the cards and through the glass but never passes over a
+ * word, takes a click or holds anything up: the page has changed before it
+ * arrives. Going Home, or Back, sweeps the other way. It follows the page key,
+ * so a filter, a tab or a sort never sets it off, and the first page opens
+ * without it. Reduced motion, or a browser without the Web Animations API,
+ * shows no band at all.
  */
 export function PageWipe() {
   const key = usePageKey();
+  const name = usePageName();
   const navigation = useNavigationType();
   const layer = useRef<HTMLDivElement>(null);
   const band = useRef<HTMLDivElement>(null);
@@ -77,7 +97,7 @@ export function PageWipe() {
         box.dataset.on = "false";
         running.current = null;
       },
-      // Cancelled by a newer sweep, which now owns the stripes.
+      // Cancelled by a newer sweep, which now owns the band.
       () => undefined,
     );
   }, [key, navigation]);
@@ -92,7 +112,11 @@ export function PageWipe() {
   return createPortal(
     <div ref={layer} className="dx-wipe" data-on="false" aria-hidden="true">
       <div className="dx-wipe-track">
-        <div ref={band} className="dx-wipe-slab" />
+        <div ref={band} className="dx-wipe-slab">
+          <div className="dx-wipe-label">
+            <span className="dx-wipe-name">{name}</span>
+          </div>
+        </div>
       </div>
     </div>,
     document.body,

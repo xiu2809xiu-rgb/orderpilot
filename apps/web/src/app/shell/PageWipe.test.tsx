@@ -78,7 +78,7 @@ afterEach(() => {
 });
 
 describe("the broadcast wipe", () => {
-  it("opens the first page without a sweep, and hides the stripes from screen readers", () => {
+  it("opens the first page without a sweep, and hides the band from screen readers", () => {
     open("/");
     expect(screen.getByText("Home page")).toBeInTheDocument();
     expect(animate).not.toHaveBeenCalled();
@@ -86,7 +86,7 @@ describe("the broadcast wipe", () => {
     expect(layer()).toHaveAttribute("data-on", "false");
   });
 
-  it("sweeps once when the page changes, left to right", async () => {
+  it("sweeps once when the page changes, with the new page's name, left to right", async () => {
     open("/");
     await userEvent.click(screen.getByRole("link", { name: "Go to orders" }));
     // The page has already changed: the sweep never holds it back.
@@ -94,6 +94,7 @@ describe("the broadcast wipe", () => {
     expect(animate).toHaveBeenCalledTimes(1);
     expect(layer()).toHaveAttribute("data-on", "true");
     expect(layer()).toHaveAttribute("data-reverse", "false");
+    expect(layer()).toHaveTextContent("Orders");
   });
 
   it("never sweeps for a filter, a tab or a sort on the same page", async () => {
@@ -102,11 +103,12 @@ describe("the broadcast wipe", () => {
     expect(animate).not.toHaveBeenCalled();
   });
 
-  it("sweeps when a record opens from its list", async () => {
+  it("carries a record's number when a record opens from its list", async () => {
     open("/orders");
     await userEvent.click(screen.getByRole("link", { name: "Open SO-7" }));
     expect(screen.getByText("Order page")).toBeInTheDocument();
     expect(animate).toHaveBeenCalledTimes(1);
+    expect(layer()).toHaveTextContent("SO-7");
   });
 
   it("sweeps the other way going Home and going Back", async () => {
