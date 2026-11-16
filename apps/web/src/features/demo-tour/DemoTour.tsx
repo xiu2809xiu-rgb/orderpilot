@@ -1,4 +1,4 @@
-import { useQueryClient } from "@tanstack/react-query";
+import { type QueryClient, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router";
@@ -13,6 +13,19 @@ import { roleFor, undoTour } from "./tourUndo";
 import { useTourTarget } from "./useTourTarget";
 
 const NOWHERE: TourTarget = { kind: "none" };
+/** How long the tour waits for the app's own saves before it undoes them. */
+const SETTLE_MS = 8000;
+
+/**
+ * Resolves once no action of the app is still being saved. An undo sent while
+ * the action it undoes is in flight is refused ("already being recorded").
+ */
+async function settled(client: QueryClient): Promise<void> {
+  const until = Date.now() + SETTLE_MS;
+  while (client.isMutating() > 0 && Date.now() < until) {
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+}
 /** The tour starts and ends as the management approver, on Home. */
 const HOME_ROLE = "APPROVER";
 
@@ -73,6 +86,7 @@ export default function DemoTour() {
             .getState()
             .undo.filter((entry) => roleFor(entry) === role);
           if (role && !later && own.length > 0) {
+            await settled(queryClient);
             const result = await undoTour(own, role, role);
             useDemoTour.getState().forget(own);
             if (result.failed > 0) {
@@ -80,9 +94,10 @@ export default function DemoTour() {
             }
           }
           await demoLogin(current.role);
-          // Reset, not clear: a page already open must fetch again as the new role.
-          await queryClient.resetQueries();
+          // Leave the old role's page first, then reset (not clear) the data,
+          // so the page that is open fetches again as the new role.
           await navigate(current.path ?? "/");
+          await queryClient.resetQueries();
         } else if (current.path && pathname !== current.path) {
           await navigate(current.path);
         }
@@ -115,6 +130,7 @@ export default function DemoTour() {
 
   async function end() {
     setBusy(true);
+    await settled(queryClient);
     const result = await undoTour(undo, role, HOME_ROLE);
     await queryClient.resetQueries();
     await navigate("/");
