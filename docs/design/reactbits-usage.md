@@ -66,3 +66,9 @@ counted again.
 
 The pass of light down the page as the review opens is plain CSS in
 `features/directions/screens/upload/upload.css`. It uses no kit item.
+
+## The click ring
+
+A soft ring answers every press of the pointer, on every page
+(`apps/web/src/app/ClickPulse.tsx` and `styles/click-pulse.css`). It is plain
+CSS on the product's own tokens and uses no kit item.
