@@ -1,23 +1,7 @@
-/* The sign-in page only: its words sharpen in one by one, and a light runs
-   round the card's edge. Plain CSS, so the page loads no animation library.
-   It is imported by LoginPage, so it ships in that page's own chunk. Under
-   reduced motion the global rule (index.css) ends every animation at once, and
-   the edge light is not drawn at all. */
-
-/* A word of the headline: it arrives out of a blur, left to right. */
-.signin-word {
-  display: inline-block;
-  white-space: pre;
-  animation: signin-word 450ms var(--ease-out) both;
-  animation-delay: calc(80ms + var(--i, 0) * 120ms);
-}
-@keyframes signin-word {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-    filter: blur(8px);
-  }
-}
+/* The sign-in page only: the lead and the steps rise in, and the stage, the
+   ground and the role buttons are dressed for show mode. It is imported by
+   LoginPage, so it ships in that page's own chunk. Under reduced motion the
+   global rule (index.css) ends every animation at once. */
 
 /* The lead and the steps rise a few pixels and sharpen, after the headline. */
 .signin-rise {
@@ -42,49 +26,189 @@
   }
 }
 
-/* The card's edge light: a short comet on a masked ring, one lap in 8 s. */
-.signin-edge {
-  display: none;
-}
-@supports (offset-path: rect(0 auto auto 0 round 90px)) {
-  .signin-edge {
-    display: block;
-    position: absolute;
-    inset: 0;
-    border: 1px solid transparent;
-    border-radius: inherit;
-    pointer-events: none;
-    mask-image:
-      linear-gradient(transparent, transparent), linear-gradient(#000, #000);
-    mask-clip: padding-box, border-box;
-    mask-composite: intersect;
-  }
-  .signin-edge-light {
-    position: absolute;
-    width: 90px;
-    aspect-ratio: 1;
-    background: linear-gradient(to left, var(--ring), var(--info), transparent);
-    offset-path: rect(0 auto auto 0 round 90px);
-    animation: signin-lap 8s linear infinite;
-  }
-}
-@keyframes signin-lap {
-  from {
-    offset-distance: 0%;
-  }
-  to {
-    offset-distance: 100%;
-  }
-}
-/* Reduced motion: the words are simply there (the global rule only shortens
-   an animation, it would still wait out its delay), and no light runs. */
+/* Reduced motion: things are simply there (the global rule only shortens an
+   animation, it would still wait out its delay). */
 @media (prefers-reduced-motion: reduce) {
-  .signin-word,
   .signin-rise,
   .signin-ground > * {
     animation: none;
   }
-  .signin-edge {
-    display: none;
+}
+
+/* ---- Show mode: the stage, the glass steps, the ground and the role buttons.
+   The stage is a screen of its own: navy in light and in dark, so its picture
+   reads the same on both pages. Its three colours are the dark scheme's ink,
+   glow and sky, held here because a light page changes the tokens themselves. */
+:root {
+  --signin-stage-ink: #06162b;
+  --signin-stage-glow: #2ee6d6;
+  --signin-stage-sky: #5eb4ff;
+  --signin-stage-fg: #e8fbff;
+}
+
+/* Wide screens: the slot takes what is left between the lead and the steps,
+   and the frame is the largest 16:9 that fits it. */
+.signin-stage-slot {
+  display: flex;
+  align-items: center;
+}
+@media (min-width: 64rem) {
+  .signin-stage-slot {
+    flex: 1 1 0;
+    container-type: size;
+  }
+}
+.signin-stage {
+  transform: perspective(1100px) rotateX(var(--tilt-x, 0deg))
+    rotateY(var(--tilt-y, 0deg));
+  transition: transform 220ms var(--ease-out);
+}
+.signin-stage-glow {
+  position: absolute;
+  inset: -8%;
+  z-index: -1;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--signin-stage-glow) 38%, transparent),
+    transparent
+  );
+  filter: blur(26px);
+  opacity: 0.55;
+  pointer-events: none;
+}
+.signin-stage-frame {
+  background: var(--signin-stage-ink);
+  border-radius: var(--radius-card);
+  border: 1px solid
+    color-mix(in srgb, var(--signin-stage-glow) 30%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--signin-stage-fg) 10%, transparent),
+    0 28px 60px -28px
+      color-mix(in srgb, var(--signin-stage-ink) 90%, transparent);
+}
+.signin-stage-veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent 62%,
+    color-mix(in srgb, var(--signin-stage-ink) 60%, transparent)
+  );
+}
+.signin-stage-btn {
+  position: absolute;
+  right: 0.625rem;
+  bottom: 0.625rem;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-pill);
+  color: var(--signin-stage-fg);
+  background: color-mix(in srgb, var(--signin-stage-ink) 62%, transparent);
+  border: 1px solid color-mix(in srgb, var(--signin-stage-fg) 30%, transparent);
+  backdrop-filter: blur(8px);
+  transition:
+    background-color 180ms var(--ease-out),
+    transform 180ms var(--ease-out);
+}
+.signin-stage-btn:hover {
+  background: color-mix(in srgb, var(--signin-stage-ink) 85%, transparent);
+  transform: scale(1.08);
+}
+.signin-stage-btn:focus-visible {
+  outline: 2px solid var(--signin-stage-glow);
+  outline-offset: 2px;
+}
+@media (pointer: coarse) {
+  .signin-stage-btn {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+}
+
+/* Two soft lights under the aurora, drifting very slowly. */
+.signin-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(56px);
+  opacity: 0.6;
+  will-change: transform;
+}
+.signin-orb-a {
+  width: 46vmax;
+  height: 46vmax;
+  left: -14vmax;
+  bottom: -20vmax;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--ring) 34%, transparent),
+    transparent
+  );
+  animation: signin-drift 38s ease-in-out infinite alternate;
+}
+.signin-orb-b {
+  width: 38vmax;
+  height: 38vmax;
+  right: -12vmax;
+  top: 18vmax;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--info) 30%, transparent),
+    transparent
+  );
+  animation: signin-drift 46s ease-in-out infinite alternate-reverse;
+}
+/* On the light ground the lights are fainter, so text over them keeps its contrast. */
+:root:not(.dark) .signin-orb {
+  opacity: 0.4;
+}
+@keyframes signin-drift {
+  to {
+    transform: translate3d(7vmax, -5vmax, 0) scale(1.14);
+  }
+}
+
+/* The role buttons answer a hover and a press. */
+.signin-role {
+  transition:
+    transform 180ms var(--ease-out),
+    box-shadow 180ms var(--ease-out),
+    border-color 150ms var(--ease-out),
+    background-color 150ms var(--ease-out);
+}
+.signin-role svg {
+  transition: transform 180ms var(--ease-out);
+}
+.signin-role:not(:disabled):hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--ring) 55%, var(--border-strong));
+  box-shadow: 0 10px 20px -12px color-mix(in srgb, var(--ring) 70%, transparent);
+}
+.signin-role:not(:disabled):hover svg {
+  transform: translateX(2px) scale(1.12);
+}
+.signin-role:not(:disabled):active {
+  transform: translateY(0) scale(0.975);
+}
+
+/* Pause holds every light and drift on the page. */
+:root[data-signin-paused] .kit-shine,
+:root[data-signin-paused] .signin-orb,
+:root[data-signin-paused] .kit-gradient-text {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .signin-orb {
+    animation: none;
+  }
+  .signin-stage,
+  .signin-stage-btn,
+  .signin-role,
+  .signin-role svg {
+    transition: none;
+    transform: none !important;
   }
 }

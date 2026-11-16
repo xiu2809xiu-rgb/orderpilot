@@ -82,7 +82,7 @@ export function DemoRoles({
                   onPick(role);
                 }}
                 className={cn(
-                  "flex min-h-14 w-full flex-col items-start gap-0.5 border border-(--border-strong) bg-transparent p-2 text-left text-foreground transition-colors duration-150 hover:bg-(--dx-hover-bg) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed pointer-coarse:min-h-14",
+                  "signin-role flex min-h-14 w-full flex-col items-start gap-0.5 border border-(--border-strong) bg-transparent p-2 text-left text-foreground transition-colors duration-150 hover:bg-(--dx-hover-bg) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed pointer-coarse:min-h-14",
                   working
                     ? "bg-accent"
                     : "disabled:opacity-60 disabled:hover:bg-transparent",
