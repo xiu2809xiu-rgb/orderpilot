@@ -9,7 +9,7 @@ import {
 import type { TourUndo } from "@/stores/demoTour";
 
 /** Who may put each thing back: the role that did it. */
-function roleFor(entry: TourUndo): Role {
+export function roleFor(entry: TourUndo): Role {
   if (entry.kind === "task") return entry.role;
   return entry.kind === "spr" ? "APPROVER" : "FINANCE";
 }
@@ -35,16 +35,18 @@ async function undoOne(entry: TourUndo): Promise<void> {
 
 /**
  * Puts back what the tour did, newest first, each as the role that did it, so
- * the next run finds the same sample data. One that fails, because someone
- * undid it already, does not stop the rest. Ends signed in as `endRole`.
+ * the next run finds the same sample data. It signs in only when it must:
+ * `signedInAs` is the role the browser holds now. One that fails, because
+ * someone undid it already, does not stop the rest. Ends signed in as `endRole`.
  */
 export async function undoTour(
   entries: readonly TourUndo[],
+  signedInAs: Role | undefined,
   endRole: Role,
 ): Promise<{ undone: number; failed: number }> {
   let undone = 0;
   let failed = 0;
-  let current: Role | null = null;
+  let current: Role | null = signedInAs ?? null;
   for (const entry of [...entries].reverse()) {
     const role = roleFor(entry);
     try {

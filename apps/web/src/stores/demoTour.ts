@@ -24,6 +24,8 @@ interface DemoTourState {
   start: () => void;
   goTo: (step: number) => void;
   remember: (entry: TourUndo) => void;
+  /** Drops entries that have been put back. */
+  forget: (entries: readonly TourUndo[]) => void;
   stop: () => void;
 }
 
@@ -64,6 +66,11 @@ export const useDemoTour = create<DemoTourState>((set, get) => ({
   },
   remember: (entry) => {
     const undo = [...get().undo, entry];
+    save(get().step, undo);
+    set({ undo });
+  },
+  forget: (entries) => {
+    const undo = get().undo.filter((entry) => !entries.includes(entry));
     save(get().step, undo);
     set({ undo });
   },

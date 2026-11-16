@@ -9,7 +9,7 @@ import { useSessionStore } from "@/stores/session";
 import { TourCard } from "./TourCard";
 import { TourOverlay } from "./TourOverlay";
 import { TOUR_STEPS, type TourStep, type TourTarget } from "./tourSteps";
-import { undoTour } from "./tourUndo";
+import { roleFor, undoTour } from "./tourUndo";
 import { useTourTarget } from "./useTourTarget";
 
 const NOWHERE: TourTarget = { kind: "none" };
@@ -40,8 +40,9 @@ function undoOf(
  * The demo tour: walks the sales flow across the six teams on the sample data.
  * Each step signs in as its role, opens its page, and lights one button; the
  * person clicks it (or presses Next where there is nothing to click), and the
- * tour moves on. Ending it, at the end or at any point, undoes what it did, so
- * the next run starts from the same data. Escape ends it too.
+ * tour moves on. What it did goes back as it leaves each team for the last time,
+ * and the rest when it ends, at the end or at any point, so the next run starts
+ * from the same data. Escape ends it too.
  */
 export default function DemoTour() {
   const { t } = useTranslation();
@@ -63,6 +64,21 @@ export default function DemoTour() {
     void (async () => {
       try {
         if (role !== current.role) {
+          // Leaving a team for the last time: its actions go back now, as that
+          // team, so the end needs no sign-ins of its own (they are rate limited).
+          const later = TOUR_STEPS.slice(index).some(
+            (next) => next.role === role,
+          );
+          const own = useDemoTour
+            .getState()
+            .undo.filter((entry) => roleFor(entry) === role);
+          if (role && !later && own.length > 0) {
+            const result = await undoTour(own, role, role);
+            useDemoTour.getState().forget(own);
+            if (result.failed > 0) {
+              toast.failed(t("tour.undoFailed", { count: result.failed }));
+            }
+          }
           await demoLogin(current.role);
           // Reset, not clear: a page already open must fetch again as the new role.
           await queryClient.resetQueries();
@@ -99,7 +115,7 @@ export default function DemoTour() {
 
   async function end() {
     setBusy(true);
-    const result = await undoTour(undo, HOME_ROLE);
+    const result = await undoTour(undo, role, HOME_ROLE);
     await queryClient.resetQueries();
     await navigate("/");
     stop();
