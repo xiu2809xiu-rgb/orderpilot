@@ -18,7 +18,6 @@ const ALLOWED_OUTSIDE: Readonly<Record<string, string>> = {
   "audit/audit.module.js": "wires the audit writer",
   "auth/permission-policy.js": "the read-only question: may this role use it",
   "auth/auth-context.js": "the shape of a signed-in user, to ask that question",
-  "auth/auth.module.js": "provides the permission policy",
   "modules/governance/policy.service.js":
     "area 4's read-only destination policy",
   "modules/governance/governance.module.js": "provides that policy",
@@ -26,6 +25,19 @@ const ALLOWED_OUTSIDE: Readonly<Record<string, string>> = {
   "database/database.js":
     "to see whether a transaction is open, and the usage table",
   "config/app-config.js": "the typed settings",
+};
+
+/**
+ * What only the module file may import, to wire the permission policy. The
+ * repository can also change the matrix, so no other file may name it: a class
+ * that wanted it would have to import it, and that import fails this test.
+ */
+const WIRING_FILE = "modules/ai/ai.module.ts";
+const WIRING_ONLY: Readonly<Record<string, string>> = {
+  "auth/role-permission.repository.js":
+    "the matrix the permission policy reads; nothing in the module injects it",
+  "modules/governance/governance-permission-policy.js":
+    "area 4's permission policy, bound under the PermissionPolicy token",
 };
 
 /** Packages a file of the module may use. Anything else, such as a mail or queue client, is a decision. */
@@ -51,6 +63,18 @@ export function importsOf(source: string): string[] {
   return found;
 }
 
+const underSrcOf = (path: string): string =>
+  relative(SRC, path).split(sep).join("/");
+
+/** The path under src/ of what a relative import reaches, or null inside the module. */
+function reachOf(file: string, specifier: string): string | null {
+  const target = resolve(dirname(file), specifier);
+  if (target === AI_DIRECTORY || target.startsWith(AI_DIRECTORY + sep)) {
+    return null;
+  }
+  return underSrcOf(target);
+}
+
 /** The imports of `source`, as it sits at `file`, that the module may not have. */
 export function violationsIn(file: string, source: string): string[] {
   const bad: string[] = [];
@@ -59,12 +83,10 @@ export function violationsIn(file: string, source: string): string[] {
       if (!packageAllowed(specifier)) bad.push(specifier);
       continue;
     }
-    const target = resolve(dirname(file), specifier);
-    if (target === AI_DIRECTORY || target.startsWith(AI_DIRECTORY + sep)) {
-      continue;
-    }
-    const underSrc = relative(SRC, target).split(sep).join("/");
-    if (!(underSrc in ALLOWED_OUTSIDE)) bad.push(specifier);
+    const reach = reachOf(file, specifier);
+    if (reach === null || reach in ALLOWED_OUTSIDE) continue;
+    if (reach in WIRING_ONLY && underSrcOf(file) === WIRING_FILE) continue;
+    bad.push(specifier);
   }
   return bad;
 }
@@ -91,11 +113,25 @@ describe("what the AI module imports", () => {
   it("reaches no service that writes, approves, pays, posts or sends", () => {
     const violations = files.flatMap((file) =>
       violationsIn(file, readFileSync(file, "utf8")).map(
-        (specifier) =>
-          `${relative(SRC, file).split(sep).join("/")} imports ${specifier}`,
+        (specifier) => `${underSrcOf(file)} imports ${specifier}`,
       ),
     );
     expect(violations).toEqual([]);
+  });
+
+  it("allows nothing that no file uses: a reach nobody needs is taken off the list", () => {
+    const reached = new Set(
+      files.flatMap((file) =>
+        importsOf(readFileSync(file, "utf8"))
+          .filter((specifier) => specifier.startsWith("."))
+          .map((specifier) => reachOf(file, specifier)),
+      ),
+    );
+    const unused = [
+      ...Object.keys(ALLOWED_OUTSIDE),
+      ...Object.keys(WIRING_ONLY),
+    ].filter((path) => !reached.has(path));
+    expect(unused).toEqual([]);
   });
 
   describe("the check itself", () => {
@@ -139,6 +175,20 @@ describe("what the AI module imports", () => {
       ).toEqual(["nodemailer"]);
       expect(violationsIn(here, 'const x = await import("bullmq");')).toEqual([
         "bullmq",
+      ]);
+    });
+
+    it("lets the module file wire the permission policy, and no other file name what it is made of", () => {
+      const wiring = [
+        'import { RolePermissionRepository } from "../../auth/role-permission.repository.js";',
+        'import { GovernancePermissionPolicy } from "../governance/governance-permission-policy.js";',
+      ].join("\n");
+      expect(violationsIn(join(AI_DIRECTORY, "ai.module.ts"), wiring)).toEqual(
+        [],
+      );
+      expect(violationsIn(here, wiring)).toEqual([
+        "../../auth/role-permission.repository.js",
+        "../governance/governance-permission-policy.js",
       ]);
     });
 
