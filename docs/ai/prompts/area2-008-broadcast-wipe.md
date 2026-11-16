@@ -26,6 +26,20 @@ please move the transition to only the background so as to not hinder workflow s
 
 The band, its fill and the page's name (or a record's number) now sweep between the aurora and the content, so they never cross a word or take a click.
 
+The name sat in the middle of the screen, where the cards hid it.
+
+```text
+could you move the text of the page name for the transitions a bit higher where there is clear space for the user to see and actually read them? currently, they are being blocked by the UI
+```
+
+The AI moved it to the strip every page leaves clear, under the top bar and right of the title, smaller and darker.
+
+```text
+okay remove the diagonals and only keep the text for the transition :P
+```
+
+The band, its stripes and its tint went. Only the name glides now, played in reverse for Home and Back. ADR 0055 records where it ended.
+
 ## 3. What the AI found that shaped it
 
 The end-to-end tests run with reduced motion (`playwright.config.ts`), so the first screenshots showed no sweep at all; that proved the reduced-motion switch, and the screenshots were retaken with normal motion. The stripes enter fast, so a frame at 200 ms has already missed them; the screenshots froze the animation at set moments instead. A link clicked while frozen stripes were on screen still opened.
