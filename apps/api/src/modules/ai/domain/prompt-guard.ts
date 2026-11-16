@@ -7,7 +7,9 @@ import { randomBytes } from "node:crypto";
 // line holds the nonce, and the guard strips that nonce, and anything that
 // looks like the tag, from what it wraps. This lowers the chance that a model
 // obeys a document; it is not the control. The control is that nothing a model
-// says can write, approve, post, pay or send (decisions.md, section 3).
+// says can write, approve, post, pay or send: the gateway only returns text,
+// validated fields or a request for a read-only tool, and a tool must pass the
+// asking person's permission check first.
 
 /** Gives the nonce of one call. Injected so tests are deterministic. */
 export type NonceSource = () => string;
