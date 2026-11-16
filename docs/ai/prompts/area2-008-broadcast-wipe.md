@@ -18,10 +18,16 @@ The artifact was Azri's "Broadcast Wipe" demo: a page changes the moment you cli
 
 `PageWipe` in `app/shell/` plays the sweep with the Web Animations API whenever the shell's page key changes, so a filter, a tab or a sort never sets it off and the first page opens without it. Home and the browser's Back sweep right to left. The colours are the `--primary` token. The page region's fade from ADR 0054 stays.
 
-The demo's default runs the band behind the content. On the Docker build it showed only in the margins, because OrderPilot's pages are almost all cards, so the AI switched to the demo's own "stripes over the content" mode: only the thin stripes cross, above the page and below every dialog, and they never take a click. The page name and the fill went with it, as in the demo's mode.
+The demo's default runs the band behind the content. On the Docker build it showed mostly in the margins, because OrderPilot's pages are almost all cards, so the AI first switched to the demo's "stripes over the content" mode. Azri asked for it back behind the content:
+
+```text
+please move the transition to only the background so as to not hinder workflow speed
+```
+
+The band, its fill and the page's name (or a record's number) now sweep between the aurora and the content, so they never cross a word or take a click.
 
 ## 3. What the AI found that shaped it
 
 The end-to-end tests run with reduced motion (`playwright.config.ts`), so the first screenshots showed no sweep at all; that proved the reduced-motion switch, and the screenshots were retaken with normal motion. The stripes enter fast, so a frame at 200 ms has already missed them; the screenshots froze the animation at set moments instead. A link clicked while frozen stripes were on screen still opened.
 
-Each new test was seen failing against code broken on purpose: Back sweeping the wrong way, reduced motion ignored, and a sweep on the first page.
+Each new test was seen failing against code broken on purpose: Back sweeping the wrong way, reduced motion ignored, a sweep on the first page, and a record page without its number.
