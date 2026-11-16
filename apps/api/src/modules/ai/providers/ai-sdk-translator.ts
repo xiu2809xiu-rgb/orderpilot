@@ -183,6 +183,8 @@ export function retryAfterMsOf(
   const text = value.trim();
   if (text === "") return null;
   if (/^\d+(\.\d+)?$/.test(text)) return Math.round(Number(text) * 1000);
+  // All three HTTP date forms start with a weekday name. Date.parse would also read "-5" as a year.
+  if (!/^[A-Za-z]{3}/.test(text)) return null;
   const date = Date.parse(text);
   return Number.isNaN(date) ? null : Math.max(0, date - nowMs);
 }
