@@ -1,11 +1,6 @@
-/* The demo tour: the page dims around one lit button, and a card says what to
-   do. Toasts (z-index 50) stay above it, so an action's message still shows;
-   the page and its own layers (10 and below) sit under it. */
-.dx-tour-dim {
-  position: fixed;
-  z-index: 48;
-  background: color-mix(in oklab, var(--background) 30%, rgb(0 0 0 / 0.55));
-}
+/* The demo tour: a glowing ring on the one button to press and a card that
+   says what to do. Nothing dims, so the page stays in view. Toasts (z-index
+   50) stay above it; the page and its own layers (10 and below) sit under it. */
 .dx-tour-light {
   position: fixed;
   z-index: 48;
@@ -22,7 +17,6 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .dx-tour-dim,
   .dx-tour-light,
   .dx-tour-card {
     transition:

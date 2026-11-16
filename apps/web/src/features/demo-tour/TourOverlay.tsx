@@ -8,10 +8,11 @@ const PAD = 8;
 const GAP = 16;
 
 /**
- * The light: four dimmed panels around the target, so only the target can be
- * clicked, a glowing ring on it, and the card beside it. The card goes below
- * the target when the target is in the top part of the screen, else above it.
- * With no target the whole page dims and the card sits in the middle.
+ * The light: a glowing ring on the target and the card beside it. Nothing is
+ * dimmed, so the whole page stays in view and usable while the light shows
+ * which button comes next. The card goes below the target when the target is
+ * in the top part of the screen, else above it; with no target it sits at the
+ * bottom right, clear of the page's work.
  */
 export function TourOverlay({
   rect,
@@ -22,15 +23,9 @@ export function TourOverlay({
 }) {
   if (!rect) {
     return createPortal(
-      <>
-        <div className="dx-tour-dim" style={{ inset: 0 }} />
-        <div
-          className="dx-tour-card"
-          style={{ top: "50%", left: "50%", translate: "-50% -50%" }}
-        >
-          {children}
-        </div>
-      </>,
+      <div className="dx-tour-card" style={{ right: GAP, bottom: GAP }}>
+        {children}
+      </div>,
       document.body,
     );
   }
@@ -47,22 +42,6 @@ export function TourOverlay({
   };
   return createPortal(
     <>
-      <div
-        className="dx-tour-dim"
-        style={{ top: 0, left: 0, right: 0, height: Math.max(0, top) }}
-      />
-      <div
-        className="dx-tour-dim"
-        style={{ top: top + height, left: 0, right: 0, bottom: 0 }}
-      />
-      <div
-        className="dx-tour-dim"
-        style={{ top, left: 0, width: Math.max(0, left), height }}
-      />
-      <div
-        className="dx-tour-dim"
-        style={{ top, left: left + width, right: 0, height }}
-      />
       <div className="dx-tour-light" style={{ top, left, width, height }} />
       <div className="dx-tour-card" style={card}>
         {children}

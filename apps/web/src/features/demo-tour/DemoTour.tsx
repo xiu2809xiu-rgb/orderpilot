@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router";
 import { toast } from "@/components/common/toast";
-import { demoLogin } from "@/lib/api/auth";
 import { useDemoTour, type TourUndo } from "@/stores/demoTour";
 import { useSessionStore } from "@/stores/session";
 import { TourCard } from "./TourCard";
@@ -13,6 +12,8 @@ import { roleFor, undoTour } from "./tourUndo";
 import { useTourTarget } from "./useTourTarget";
 
 const NOWHERE: TourTarget = { kind: "none" };
+/** The top bar's Demo role button (`RoleSwitcher`), lit when the presenter must switch. */
+const ROLE_BUTTON: TourTarget = { kind: "selector", selector: ".dx-bar-role" };
 /** How long the tour waits for the app's own saves before it undoes them. */
 const SETTLE_MS = 8000;
 
@@ -51,9 +52,10 @@ function undoOf(
 
 /**
  * The demo tour: walks the sales flow across the six teams on the sample data.
- * Each step signs in as its role, opens its page, and lights one button; the
- * person clicks it (or presses Next where there is nothing to click), and the
- * tour moves on. What it did goes back as it leaves each team for the last time,
+ * Nothing dims, so the teacher sees each page whole. Before another team's
+ * step the tour lights Demo role and asks the presenter to switch, then opens
+ * the step's page and lights one button; the presenter clicks it (or presses
+ * Next where there is nothing to click), and the tour moves on. What it did goes back as it leaves each team for the last time,
  * and the rest when it ends, at the end or at any point, so the next run starts
  * from the same data. Escape ends it too.
  */
@@ -66,51 +68,63 @@ export default function DemoTour() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const queryClient = useQueryClient();
-  const target = useTourTarget(current?.target ?? NOWHERE);
   const [busy, setBusy] = useState(false);
-  const entered = useRef<number | null>(null);
+  const [puttingBack, setPuttingBack] = useState(false);
+  const prepared = useRef<number | null>(null);
+  const arrived = useRef<number | null>(null);
+  const lastRole = useRef(role);
+  const switching = current !== undefined && role !== current.role;
+  const target = useTourTarget(
+    switching
+      ? puttingBack
+        ? NOWHERE
+        : ROLE_BUTTON
+      : (current?.target ?? NOWHERE),
+  );
 
-  // Entering a step: its role first, then its page.
+  // Before another team's step: the team the tour leaves for good gets its
+  // actions put back now, while it is still signed in (sign-ins are rate
+  // limited), and then the presenter is asked to switch.
   useEffect(() => {
-    if (!current || entered.current === index) return;
-    entered.current = index;
+    if (!current || prepared.current === index) return;
+    prepared.current = index;
+    if (!role || role === current.role) return;
+    const later = TOUR_STEPS.slice(index).some((next) => next.role === role);
+    const own = useDemoTour
+      .getState()
+      .undo.filter((entry) => roleFor(entry) === role);
+    if (later || own.length === 0) return;
+    setPuttingBack(true);
     void (async () => {
-      try {
-        if (role !== current.role) {
-          // Leaving a team for the last time: its actions go back now, as that
-          // team, so the end needs no sign-ins of its own (they are rate limited).
-          const later = TOUR_STEPS.slice(index).some(
-            (next) => next.role === role,
-          );
-          const own = useDemoTour
-            .getState()
-            .undo.filter((entry) => roleFor(entry) === role);
-          if (role && !later && own.length > 0) {
-            await settled(queryClient);
-            const result = await undoTour(own, role, role);
-            useDemoTour.getState().forget(own);
-            if (result.failed > 0) {
-              toast.failed(t("tour.undoFailed", { count: result.failed }));
-            }
-          }
-          await demoLogin(current.role);
-          // Leave the old role's page first, then reset (not clear) the data,
-          // so the page that is open fetches again as the new role.
-          await navigate(current.path ?? "/");
-          await queryClient.resetQueries();
-        } else if (current.path && pathname !== current.path) {
-          await navigate(current.path);
-        }
-      } catch {
-        toast.failed(t("tour.switchFailed"));
+      await settled(queryClient);
+      const result = await undoTour(own, role, role);
+      useDemoTour.getState().forget(own);
+      if (result.failed > 0) {
+        toast.failed(t("tour.undoFailed", { count: result.failed }));
+      }
+      setPuttingBack(false);
+    })();
+  }, [current, index, role, queryClient, t]);
+
+  // Once the step's role is signed in: after a switch, the open page fetches
+  // again as the new role (a reset, not a clear), and the step's page opens.
+  useEffect(() => {
+    if (!current || role !== current.role || arrived.current === index) return;
+    arrived.current = index;
+    const switched = lastRole.current !== role;
+    lastRole.current = role;
+    void (async () => {
+      if (switched) await queryClient.resetQueries();
+      if (current.path && pathname !== current.path) {
+        await navigate(current.path);
       }
     })();
-  }, [current, index, role, pathname, navigate, queryClient, t]);
+  }, [current, index, role, pathname, navigate, queryClient]);
 
   // A "click" step moves on when its target is clicked, after the app has acted.
   const element = target.element;
   useEffect(() => {
-    if (current?.advance !== "click" || !element) return;
+    if (switching || current?.advance !== "click" || !element) return;
     if (element instanceof HTMLElement) element.focus({ preventScroll: true });
     const onClick = (event: MouseEvent) => {
       if (!(event.target instanceof Node) || !element.contains(event.target)) {
@@ -126,7 +140,7 @@ export default function DemoTour() {
     return () => {
       document.removeEventListener("click", onClick, true);
     };
-  }, [current, element, index, goTo, remember]);
+  }, [current, element, index, switching, goTo, remember]);
 
   async function end() {
     setBusy(true);
@@ -167,6 +181,8 @@ export default function DemoTour() {
         missing={target.missing}
         busy={busy}
         last={last}
+        switchTo={switching ? t(`roles.${current.role}`) : null}
+        puttingBack={puttingBack}
         onNext={() => {
           if (last) void end();
           else goTo(index + 1);

@@ -14,6 +14,8 @@ function card(overrides: Partial<Parameters<typeof TourCard>[0]> = {}) {
     missing: false,
     busy: false,
     last: false,
+    switchTo: null,
+    puttingBack: false,
     onNext: vi.fn(),
     onEnd: vi.fn(),
     ...overrides,
@@ -56,5 +58,24 @@ describe("the demo tour's card", () => {
     expect(props.onNext).toHaveBeenCalled();
     await userEvent.click(screen.getByRole("button", { name: "End tour" }));
     expect(props.onEnd).toHaveBeenCalled();
+  });
+
+  it("asks the presenter to switch role before another team's step, with nothing else to press", () => {
+    card({ switchTo: "Support", advance: "next" });
+    expect(
+      screen.getByRole("heading", { name: "Switch to Support" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Open Demo role at the top right and choose Support/),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Next" })).toBeNull();
+    expect(screen.queryByText("Click the lit button to go on.")).toBeNull();
+  });
+
+  it("says to wait while it puts the last team's actions back", () => {
+    card({ switchTo: "Support", puttingBack: true });
+    expect(
+      screen.getByText(/Putting back what this team did/),
+    ).toBeInTheDocument();
   });
 });

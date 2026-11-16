@@ -12,6 +12,13 @@ interface TourCardProps {
   missing: boolean;
   busy: boolean;
   last: boolean;
+  /**
+   * The role the presenter must switch to before this step, in words, or null.
+   * The tour waits for the switch and asks for nothing else meanwhile.
+   */
+  switchTo: string | null;
+  /** True while the tour puts back what the last team did, before the switch. */
+  puttingBack: boolean;
   onNext: () => void;
   onEnd: () => void;
 }
@@ -20,14 +27,17 @@ interface TourCardProps {
  * The tour's card: which step of how many, what this step shows and what to
  * say, and one way on. On a "click" step the way on is the lit button itself,
  * so the card only says so, unless the button never appeared, when it offers
- * to skip. Its words change with each step and are read out politely.
+ * to skip. Before a step of another team it asks the presenter to switch role
+ * with Demo role, so the teacher sees each switch. Its words change with each
+ * step and are read out politely.
  */
 export function TourCard(props: TourCardProps) {
   const { t } = useTranslation();
   const { index, total, stepId, advance, nextReady, missing, busy, last } =
     props;
+  const { switchTo, puttingBack } = props;
   const next = useRef<HTMLButtonElement>(null);
-  const showNext = advance === "next" || missing;
+  const showNext = !switchTo && (advance === "next" || missing);
   useEffect(() => {
     // A "next" step hands the keyboard to Next; a "click" step leaves it on the page.
     if (advance === "next") next.current?.focus();
@@ -43,15 +53,23 @@ export function TourCard(props: TourCardProps) {
       </p>
       <div aria-live="polite" className="flex flex-col gap-2">
         <h2 id="dx-tour-title" className="fs-16 font-semibold">
-          {t(`tour.steps.${stepId}.title`)}
+          {switchTo
+            ? t("tour.switchTitle", { role: switchTo })
+            : t(`tour.steps.${stepId}.title`)}
         </h2>
-        <p className="fs-14">{t(`tour.steps.${stepId}.body`)}</p>
-        {advance === "click" && !missing ? (
+        <p className="fs-14">
+          {switchTo
+            ? puttingBack
+              ? t("tour.puttingBack")
+              : t("tour.switchBody", { role: switchTo })
+            : t(`tour.steps.${stepId}.body`)}
+        </p>
+        {advance === "click" && !missing && !switchTo ? (
           <p className="fs-14 font-medium text-primary">
             {t("tour.clickHint")}
           </p>
         ) : null}
-        {missing ? (
+        {missing && !switchTo ? (
           <p className="fs-14 text-muted-foreground">{t("tour.missing")}</p>
         ) : null}
       </div>

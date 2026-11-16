@@ -199,7 +199,6 @@
     "end": "End tour",
     "clickHint": "Click the lit button to go on.",
     "missing": "This button is not on the screen right now. Skip this step to go on.",
-    "switchFailed": "Could not switch to the next role. End the tour and start it again.",
     "done": "Demo tour finished. The sample data is back as it was.",
     "undoFailed_one": "{{count}} step could not be put back. Reset the demo data before the next run.",
     "undoFailed_other": "{{count}} steps could not be put back. Reset the demo data before the next run.",
@@ -268,6 +267,9 @@
         "title": "That is the sales flow",
         "body": "Press Finish to put the sample data back, ready for the next run."
       }
-    }
+    },
+    "switchTitle": "Switch to {{role}}",
+    "switchBody": "Open Demo role at the top right and choose {{role}}. The tour carries on as soon as you do.",
+    "puttingBack": "Putting back what this team did, so the next run starts the same. One moment."
   }
 }
