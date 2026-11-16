@@ -61,6 +61,13 @@ describe("a provider failure", () => {
     expect(AiProviderError.network().reasonCode).toBe("provider-network");
     expect(AiProviderError.network().outcome).toBe("error");
   });
+
+  it("has a code for a reply that is not an answer, which is not worth another try", () => {
+    const error = AiProviderError.badResponse();
+    expect(error.reasonCode).toBe("provider-bad-response");
+    expect(error.outcome).toBe("error");
+    expect(error.retryAfterMs).toBeNull();
+  });
 });
 
 describe("a feature with no mock script", () => {

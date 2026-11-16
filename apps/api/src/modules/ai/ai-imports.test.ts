@@ -40,8 +40,26 @@ const WIRING_ONLY: Readonly<Record<string, string>> = {
     "area 4's permission policy, bound under the PermissionPolicy token",
 };
 
+/**
+ * The AI SDK and its providers. Only the adapters under providers/ may import
+ * them, so a change of SDK touches those files alone and nothing else in the
+ * module can reach a model by a path the gateway does not control.
+ */
+const SDK_PACKAGES = [
+  "ai",
+  "@ai-sdk/openai-compatible",
+  "@ai-sdk/amazon-bedrock",
+] as const;
+const SDK_DIRECTORY = "modules/ai/providers/";
+
+function sdkPackageOf(name: string): string | undefined {
+  return SDK_PACKAGES.find((pkg) => name === pkg || name.startsWith(`${pkg}/`));
+}
+
 /** Packages a file of the module may use. Anything else, such as a mail or queue client, is a decision. */
-function packageAllowed(name: string): boolean {
+function packageAllowed(name: string, underSrc: string): boolean {
+  if (sdkPackageOf(name) !== undefined)
+    return underSrc.startsWith(SDK_DIRECTORY);
   return (
     name === "@nestjs/common" ||
     name === "@orderpilot/shared" ||
@@ -80,7 +98,7 @@ export function violationsIn(file: string, source: string): string[] {
   const bad: string[] = [];
   for (const specifier of importsOf(source)) {
     if (!specifier.startsWith(".")) {
-      if (!packageAllowed(specifier)) bad.push(specifier);
+      if (!packageAllowed(specifier, underSrcOf(file))) bad.push(specifier);
       continue;
     }
     const reach = reachOf(file, specifier);
@@ -134,6 +152,16 @@ describe("what the AI module imports", () => {
     expect(unused).toEqual([]);
   });
 
+  it("uses every SDK package it lists, in the adapters, so a package nobody imports is taken off", () => {
+    const used = new Set(
+      files
+        .filter((file) => underSrcOf(file).startsWith(SDK_DIRECTORY))
+        .flatMap((file) => importsOf(readFileSync(file, "utf8")))
+        .map((specifier) => sdkPackageOf(specifier)),
+    );
+    expect([...SDK_PACKAGES].filter((pkg) => !used.has(pkg))).toEqual([]);
+  });
+
   describe("the check itself", () => {
     const here = join(AI_DIRECTORY, "llm-gateway.ts");
 
@@ -175,6 +203,35 @@ describe("what the AI module imports", () => {
       ).toEqual(["nodemailer"]);
       expect(violationsIn(here, 'const x = await import("bullmq");')).toEqual([
         "bullmq",
+      ]);
+    });
+
+    it("lets only the adapters under providers/ import the AI SDK, whichever way they import it", () => {
+      const adapter = join(
+        AI_DIRECTORY,
+        "providers",
+        "openai-compatible-llm-provider.ts",
+      );
+      const sources = [
+        'import { generateText } from "ai";',
+        'import type { LanguageModel } from "ai";',
+        'import { createOpenAICompatible } from "@ai-sdk/openai-compatible";',
+        'const sdk = await import("@ai-sdk/amazon-bedrock");',
+        'import { MockLanguageModelV4 } from "ai/test";',
+      ];
+      for (const source of sources) {
+        expect(violationsIn(adapter, source)).toEqual([]);
+        // The same line anywhere else in the module is refused, in a domain class or the gateway too.
+        expect(violationsIn(here, source)).toHaveLength(1);
+        expect(
+          violationsIn(join(AI_DIRECTORY, "domain", "tool-loop.ts"), source),
+        ).toHaveLength(1);
+      }
+    });
+
+    it("does not read a package that merely starts with the letters ai as the SDK", () => {
+      expect(violationsIn(here, 'import x from "aiohttp";')).toEqual([
+        "aiohttp",
       ]);
     });
 

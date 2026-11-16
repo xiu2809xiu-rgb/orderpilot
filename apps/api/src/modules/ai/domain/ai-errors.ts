@@ -60,6 +60,11 @@ export class AiProviderError extends DomainError {
     );
   }
 
+  /** A response arrived, but it is not an answer this gateway can read. */
+  static badResponse(): AiProviderError {
+    return new AiProviderError("provider-bad-response");
+  }
+
   /** The connection never produced a response. */
   static network(): AiProviderError {
     return new AiProviderError("provider-network");
