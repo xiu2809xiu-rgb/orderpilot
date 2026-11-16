@@ -9,8 +9,11 @@ import {
   AiDestinationPolicy,
   GovernanceAiDestinationPolicy,
 } from "./ai-destination.policy.js";
+import { AiProbeService } from "./ai-probe.service.js";
 import { AiRefusalAuditor } from "./ai-refusal.auditor.js";
+import { AiStatusService } from "./ai-status.service.js";
 import { AiToolPermissionAsker } from "./ai-tool-permission.asker.js";
+import { AiController } from "./ai.controller.js";
 import { AiUsageRecordRepository } from "./ai-usage-record.repository.js";
 import { AiUsageTracker } from "./ai-usage.tracker.js";
 import { AiPricing } from "./domain/ai-pricing.js";
@@ -47,6 +50,7 @@ import { LlmProviderFactory } from "./providers/provider-factory.js";
  */
 @Module({
   imports: [AuditModule, GovernanceModule],
+  controllers: [AiController],
   providers: [
     // Stateless, so a second instance beside AuthModule's is harmless.
     RolePermissionRepository,
@@ -94,6 +98,8 @@ import { LlmProviderFactory } from "./providers/provider-factory.js";
     AiUsageRecordRepository,
     AiUsageTracker,
     LlmGateway,
+    AiStatusService,
+    AiProbeService,
   ],
   exports: [LlmGateway, MockScriptRegistry],
 })

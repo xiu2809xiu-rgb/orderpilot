@@ -25,6 +25,10 @@ const ALLOWED_OUTSIDE: Readonly<Record<string, string>> = {
   "database/database.js":
     "to see whether a transaction is open, and the usage table",
   "config/app-config.js": "the typed settings",
+  "auth/decorators.js": "marks who may call a route; the guards decide",
+  "common/openapi.js": "documents a route from its zod schema",
+  "common/request-id.js": "the request id, for the trace id of an audit row",
+  "common/zod-validation.pipe.js": "parses a request body with its zod schema",
 };
 
 /**
@@ -62,6 +66,7 @@ function packageAllowed(name: string, underSrc: string): boolean {
     return underSrc.startsWith(SDK_DIRECTORY);
   return (
     name === "@nestjs/common" ||
+    name === "@nestjs/swagger" ||
     name === "@orderpilot/shared" ||
     name === "zod" ||
     name === "vitest" ||
