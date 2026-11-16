@@ -51,7 +51,7 @@ export function StageMedia({ paused, reduced, pointer }: StageMediaProps) {
     const node = element.current;
     if (!node || video !== "ready") return;
     if (paused) node.pause();
-    else node.play().catch(() => undefined);
+    else void Promise.resolve(node.play()).catch(() => undefined);
   }, [paused, video]);
 
   const mode = reduced ? "still" : video === "ready" ? "video" : "scene";
@@ -92,8 +92,9 @@ export function StageMedia({ paused, reduced, pointer }: StageMediaProps) {
           onLoadedData={() => {
             setVideo("ready");
           }}
-          onError={() => {
-            setVideo("failed");
+          onError={(event) => {
+            // A source's own failure is counted below; this is the video's (a file that stops decoding).
+            if (event.target === event.currentTarget) setVideo("failed");
           }}
         >
           {VIDEO_SOURCES.map(({ src, type }) => (
