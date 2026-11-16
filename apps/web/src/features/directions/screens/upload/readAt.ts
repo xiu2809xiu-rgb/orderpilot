@@ -9,6 +9,6 @@ import type { DemoField } from "./demoDocument";
  */
 export function readAt(
   field: DemoField,
-): CSSProperties & { "--dx-at": number } {
-  return { "--dx-at": field.box[1] };
+): CSSProperties & { "--read-at": number } {
+  return { "--read-at": field.box[1] };
 }

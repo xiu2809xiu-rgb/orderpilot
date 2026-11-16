@@ -46,7 +46,7 @@
 }
 
 /* The review opens with one pass of light down the page. A field's box, and its
-   row in the list, appear as the light reaches it (--dx-at is how far down the
+   row in the list, appear as the light reaches it (--read-at is how far down the
    page the field sits), so the reading is seen once, in order. Only opacity and
    transform move: every box and row is in place and works from the first frame,
    and when the light has left nothing here moves again. A person who asked for
@@ -79,7 +79,7 @@
   [data-arriving="true"] .dx-box,
   [data-arriving="true"] .dx-field {
     animation: dx-read-row 260ms var(--ease-out, ease-out) both;
-    animation-delay: calc(150ms + var(--dx-at, 0) * 1293ms);
+    animation-delay: calc(150ms + var(--read-at, 0) * 1293ms);
   }
 
   [data-arriving="true"] .dx-box {

@@ -226,8 +226,8 @@ describe("the upload screen", () => {
       name: `Show ${field.label} on the page`,
     });
     const row = must(show.closest("li"));
-    expect(box.style.getPropertyValue("--dx-at")).toBe(at);
-    expect(row.style.getPropertyValue("--dx-at")).toBe(at);
+    expect(box.style.getPropertyValue("--read-at")).toBe(at);
+    expect(row.style.getPropertyValue("--read-at")).toBe(at);
 
     endAnimation(light);
     expect(stage).toHaveAttribute("data-arriving", "false");
