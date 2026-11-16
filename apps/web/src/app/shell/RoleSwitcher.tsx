@@ -1,6 +1,6 @@
 import type { Role } from "@orderpilot/shared";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, UserCog } from "lucide-react";
+import { Check, Route, UserCog } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "./overlays/dropdown-menu";
 import { demoLogin, fetchAuthOptions } from "@/lib/api/auth";
+import { useDemoTour } from "@/stores/demoTour";
 import { useSessionStore } from "@/stores/session";
 
 /** Shown only when GET /auth/options says demo mode is on. */
@@ -70,6 +71,16 @@ export function RoleSwitcher() {
             ) : null}
           </DropdownMenuItem>
         ))}
+        <DropdownMenuSeparator />
+        {/* The tour walks the sales flow across the roles above, on the sample data. */}
+        <DropdownMenuItem
+          onSelect={() => {
+            useDemoTour.getState().start();
+          }}
+        >
+          <Route aria-hidden="true" />
+          {t("tour.start")}
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

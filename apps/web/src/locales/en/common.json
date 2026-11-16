@@ -188,5 +188,86 @@
     "audit": "Open the audit trail",
     "aiUse": "See AI use",
     "newOrder": "Start a new order"
+  },
+  "tour": {
+    "start": "Start the demo tour",
+    "stepOf": "Step {{n}} of {{total}}",
+    "next": "Next",
+    "finish": "Finish and put the data back",
+    "finishing": "Putting the data back",
+    "skip": "Skip this step",
+    "end": "End tour",
+    "clickHint": "Click the lit button to go on.",
+    "missing": "This button is not on the screen right now. Skip this step to go on.",
+    "switchFailed": "Could not switch to the next role. End the tour and start it again.",
+    "done": "Demo tour finished. The sample data is back as it was.",
+    "undoFailed_one": "{{count}} step could not be put back. Reset the demo data before the next run.",
+    "undoFailed_other": "{{count}} steps could not be put back. Reset the demo data before the next run.",
+    "steps": {
+      "welcome": {
+        "title": "One sales order, six teams",
+        "body": "This tour follows the sales flow on the sample data, one team at a time. At each step the button to press is lit. At the end the tour puts the data back."
+      },
+      "flows": {
+        "title": "Nine steps for every sales order",
+        "body": "Every order moves through these steps, from the customer's PO to the shipping documents. Each step belongs to one team."
+      },
+      "review": {
+        "title": "Support checks what the AI read",
+        "body": "The AI has read a customer's PO. A person checks the fields before anything is used. Click Review."
+      },
+      "journey": {
+        "title": "The order's journey",
+        "body": "One view shows where the order stands, who has it, and when each step was done. Press Next to go to the product manager."
+      },
+      "raise": {
+        "title": "The product manager raises an SPR",
+        "body": "Stock is short, so OrderPilot suggests a stock purchase requisition from stock on hand and the 3-month sales rate. A person decides to raise it. Click Raise."
+      },
+      "openSpr": {
+        "title": "The approver opens an SPR",
+        "body": "Any one of three management approvers decides. Click Review to open the most overdue request, one raised earlier."
+      },
+      "refused": {
+        "title": "A decision needs a reason",
+        "body": "Click Approve without writing a comment. OrderPilot refuses: every decision says why."
+      },
+      "comment": {
+        "title": "Say why",
+        "body": "Type a short reason in the comment box, such as \"Under a month of cover\". Then press Next."
+      },
+      "approve": {
+        "title": "Approve",
+        "body": "Click Approve. The decision is recorded with who, when and why, and the order moves on in the workflow."
+      },
+      "history": {
+        "title": "Every step is recorded",
+        "body": "The history shows the request, who it went to, and the decision. The audit trail keeps it too."
+      },
+      "sendPi": {
+        "title": "Support sends the PI",
+        "body": "With stock in place, Support sends the customer the pro forma invoice. Click Mark sent."
+      },
+      "payment": {
+        "title": "Finance confirms the payment",
+        "body": "Nothing ships until Finance confirms the customer's prepayment. Click Confirm."
+      },
+      "pack": {
+        "title": "The warehouse packs",
+        "body": "Once the order is paid, the warehouse picks and packs it. Click Mark packed."
+      },
+      "ship": {
+        "title": "Logistics adds the shipping documents",
+        "body": "Logistics adds the air waybill once the goods are with the forwarder. Click Mark added."
+      },
+      "reminders": {
+        "title": "Nobody has to chase",
+        "body": "A late task gets a reminder, then passes up if nobody acts. The SPR approved a moment ago has already left this list."
+      },
+      "finish": {
+        "title": "That is the sales flow",
+        "body": "Press Finish to put the sample data back, ready for the next run."
+      }
+    }
   }
 }

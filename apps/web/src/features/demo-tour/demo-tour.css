@@ -1,0 +1,46 @@
+/* The demo tour: the page dims around one lit button, and a card says what to
+   do. Toasts (z-index 50) stay above it, so an action's message still shows;
+   the page and its own layers (10 and below) sit under it. */
+.dx-tour-dim {
+  position: fixed;
+  z-index: 48;
+  background: color-mix(in oklab, var(--background) 30%, rgb(0 0 0 / 0.55));
+}
+.dx-tour-light {
+  position: fixed;
+  z-index: 48;
+  border-radius: var(--radius-control);
+  box-shadow:
+    0 0 0 3px var(--primary),
+    0 0 24px 6px color-mix(in oklab, var(--primary) 55%, transparent);
+  pointer-events: none;
+}
+.dx-tour-card {
+  position: fixed;
+  z-index: 49;
+  width: min(24rem, calc(100vw - 2 * var(--space-2)));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dx-tour-dim,
+  .dx-tour-light,
+  .dx-tour-card {
+    transition:
+      inset var(--motion-base) var(--ease-out),
+      top var(--motion-base) var(--ease-out),
+      left var(--motion-base) var(--ease-out),
+      width var(--motion-base) var(--ease-out),
+      height var(--motion-base) var(--ease-out);
+  }
+  /* The light breathes once a second, so the eye finds it. */
+  .dx-tour-light {
+    animation: dx-tour-glow 1.2s var(--ease-out) infinite alternate;
+  }
+}
+@keyframes dx-tour-glow {
+  to {
+    box-shadow:
+      0 0 0 3px var(--primary),
+      0 0 36px 12px color-mix(in oklab, var(--primary) 35%, transparent);
+  }
+}
