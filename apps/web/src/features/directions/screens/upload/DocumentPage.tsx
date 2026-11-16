@@ -66,7 +66,7 @@ export function DocumentPage({
         }}
       >
         <img
-          src={demoPageImage(page)}
+          src={demoPageImage(doc, page)}
           alt={t("review.pageImage", { page, number: doc.documentNumber })}
           className="absolute inset-0 size-full select-none"
           draggable={false}

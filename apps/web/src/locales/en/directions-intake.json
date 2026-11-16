@@ -1,6 +1,6 @@
 {
   "title": "Upload and review",
-  "intro": "Add a document, let Spark read it, then confirm what it was not sure of. Nothing becomes an order until a person approves it.",
+  "intro": "Add a document, let Spark read it, then confirm what it was not sure of. A person confirms every field Spark was not sure of before the review is finished.",
   "denied": {
     "title": "Uploading documents is for Support",
     "description": "Your role cannot upload documents. Sign in as Support to try it, or open an order to see its documents."
@@ -85,10 +85,10 @@
     "editLabel": "{{label}}",
     "editHelp": "Change the value as it should read, then save. Saving confirms it.",
     "select": "Show {{label}} on the page",
-    "create": "Create draft order",
-    "createReady": "Every uncertain field is confirmed.",
-    "createdTitle": "Draft order made from {{count}} fields",
-    "createdBody": "Demo: nothing is saved. {{order}} is the synthetic order this purchase order belongs to.",
+    "finish": "Finish review",
+    "finishReady": "Every uncertain field is confirmed.",
+    "finishedTitle": "Review finished: {{count}} fields confirmed",
+    "finishedBody": "This preview saves nothing. The order this purchase order belongs to is in the sample data: {{order}}.",
     "openOrder": "Open order {{order}}",
     "loading": "Loading the demo document",
     "failed": "The demo document could not be loaded.",
@@ -96,8 +96,8 @@
     "lineGroup": "Lines: line {{number}}",
     "classifiedAs": "Classified as {{type}}",
     "failedHelp": "Check your connection, then try again.",
-    "createWait_one": "{{count}} field still needs your approval before a draft order can be made.",
-    "createWait_other": "{{count}} fields still need your approval before a draft order can be made."
+    "finishWait_one": "{{count}} field still needs your approval before the review can be finished.",
+    "finishWait_other": "{{count}} fields still need your approval before the review can be finished."
   },
   "add": {
     "title": "Add documents",

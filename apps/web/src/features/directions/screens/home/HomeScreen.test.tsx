@@ -219,9 +219,16 @@ describe("the home screen", () => {
     expect(
       await screen.findByRole("link", { name: "New order" }),
     ).toHaveAttribute("href", "/orders/new");
+    expect(screen.getByRole("link", { name: "Upload a PO" })).toHaveAttribute(
+      "href",
+      "/upload",
+    );
+    // Two buttons that look alike get one line saying what each is for.
     expect(
-      screen.getByRole("link", { name: "Upload a document" }),
-    ).toHaveAttribute("href", "/upload");
+      screen.getByText(
+        "Upload a PO for Spark to read, or type a new order in by hand.",
+      ),
+    ).toBeVisible();
   });
 
   it("builds My timeline from the tasks and says where the estimate comes from", async () => {

@@ -19,8 +19,8 @@ import { useReview } from "./useReview";
  * The review: the page of the purchase order on the left with a box on every
  * field Spark read, the fields on the right with how sure it is of each. A
  * field and its box light together, whichever is chosen. The uncertain fields
- * must each be confirmed or corrected before Create draft order opens; making
- * the draft order is a person's act, and nothing is saved in this preview.
+ * must each be confirmed or corrected before Finish review opens, and finishing
+ * is a person's act. Nothing is saved in this preview, and the screen says so.
  */
 export function ReviewStage({
   document: doc,
@@ -55,17 +55,17 @@ export function ReviewStage({
               }
             : undefined
         }
-        created={review.created}
-        onCreate={review.create}
+        finished={review.finished}
+        onFinish={review.finish}
         onAgain={onAgain}
       />
-      {review.created ? (
+      {review.finished ? (
         <Alert variant="success">
           <AlertTitle>
-            {t("review.createdTitle", { count: doc.fields.length })}
+            {t("review.finishedTitle", { count: doc.fields.length })}
           </AlertTitle>
           <AlertDescription>
-            {t("review.createdBody", { order: doc.orderNo })}
+            {t("review.finishedBody", { order: doc.orderNo })}
           </AlertDescription>
           <AlertAction>
             <Button asChild variant="outline" size="sm">
