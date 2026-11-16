@@ -11,7 +11,7 @@ ADR 0054 (point 7) gives a page change one motion: the page region fades and set
 ## Decision
 
 1. **The name joins the fade; it does not replace it.** The page region still fades as ADR 0054 says. The name is one more layer, `PageWipe` in `app/shell/`, with its styles in `styles/page-wipe.css`.
-2. **Only the name moves.** The new page's name, or a record's number on a record page, glides across in large uppercase type in the product's teal (`--primary` at 45 %). There is no band, stripe or tint.
+2. **The name and one stripe move.** The new page's name, or a record's number on a record page, glides across in large uppercase type in the product's teal (`--primary` at 45 %), led in by one slanted stripe, the demo band's leading edge: a teal stripe with a light line beside it, the full height of the screen. The band's trailing stripe and its tint are gone. Going Home or Back, the stripe leads on the left.
 3. **It runs behind the content.** It sits above the aurora (the body's background) and below everything else, so it never passes over a word, takes a click or holds anything up.
 4. **It rides in the strip every page leaves clear:** under the top bar and the record tabs, to the right of the page title, its top 128 px down and its middle 70 % across while it glides. In the middle of the screen the cards hid it.
 5. **It follows the page key.** It plays when the path changes, the same rule that moves the page region, so a filter, a tab, a sort or the side peek never sets it off, and the first page opens without it.
@@ -21,7 +21,7 @@ ADR 0054 (point 7) gives a page change one motion: the page region fades and set
 
 ## Alternatives considered
 
-- **The demo's band behind the content, with the name in it.** Built first. Behind the cards the band showed mostly in the margins and through the glass, and Azri asked for the diagonals to go and the text to stay.
+- **The demo's band behind the content, with the name in it.** Built first. Behind the cards the band showed mostly in the margins and through the glass. Azri asked for the diagonals to go and the text to stay, then for the leading stripe to come back.
 - **The stripes over the content, the demo's second mode.** Built and seen: far easier to see, but Azri turned it down, because stripes crossing the words, even for under a second and without taking a click, get in the way of fast work.
 - **The name in the middle of the screen, as in the demo.** The cards hid it.
 - **Keep only the fade.** That is ADR 0054 as it stands; Azri asked for the transition.

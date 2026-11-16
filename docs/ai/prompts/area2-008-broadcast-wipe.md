@@ -38,7 +38,13 @@ The AI moved it to the strip every page leaves clear, under the top bar and righ
 okay remove the diagonals and only keep the text for the transition :P
 ```
 
-The band, its stripes and its tint went. Only the name glides now, played in reverse for Home and Back. ADR 0055 records where it ended.
+The band, its stripes and its tint went. Only the name glides now, played in reverse for Home and Back. 
+
+```text
+okay re add the one diagonal line that comes in alongside the text. the one that comes afterward, keep it gone
+```
+
+The band's leading stripe came back, travelling just ahead of the name and leading on the left for Home and Back; the trailing stripe stayed gone. ADR 0055 records where it ended.
 
 ## 3. What the AI found that shaped it
 
