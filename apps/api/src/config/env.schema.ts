@@ -1,3 +1,4 @@
+import { AI_PROVIDER_SETTINGS } from "@orderpilot/shared";
 import { z } from "zod";
 
 /** Where the API runs. Separate from NODE_ENV: a demo stack runs in production mode. */
@@ -107,14 +108,8 @@ function isLoopbackHost(hostname: string): boolean {
   );
 }
 
-/** The values of AI_PROVIDER. The names match AI_PROVIDER_SETTINGS in @orderpilot/shared. */
-export const AI_PROVIDER_NAMES = [
-  "mock",
-  "gemini",
-  "groq",
-  "openai-compatible",
-  "bedrock",
-] as const;
+/** The values of AI_PROVIDER: the shared tuple is the one source. */
+export const AI_PROVIDER_NAMES = AI_PROVIDER_SETTINGS;
 
 /** How a provider is asked for JSON. zod validates the answer whichever is used. */
 export const AI_STRUCTURED_OUTPUTS = [
