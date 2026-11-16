@@ -54,13 +54,13 @@ and none is a Pro item.
 | Where on the page                               | Item          | Vendor     | Licence                     | Pro | Status                                                                 |
 | ----------------------------------------------- | ------------- | ---------- | --------------------------- | --- | ---------------------------------------------------------------------- |
 | The greeting, the date and the line under them  | BlurFade      | Magic UI   | MIT                         | No  | New here                                                               |
-| The figures in the line under the greeting      | NumberTicker  | Magic UI   | MIT                         | No  | New here: they count up once and end on the true figures               |
 | The rows of Needs you and of each role's blocks | AnimatedList  | Magic UI   | MIT                         | No  | Old, now 30 ms apart                                                   |
 | Every card, and the count tiles                 | SpotlightCard | React Bits | MIT with the Commons Clause | No  | New on the cards; the measures' tiles had it                           |
 | My timeline                                     | Timeline      | ReUI       | MIT                         | No  | Old; its entries enter once and the Now dot pulses three times, in CSS |
 
-A figure that changes later (a finished task, a refetch, an Undo) is shown, not
-counted again.
+The line under the greeting shows its true figures from the first frame: a
+count there showed wrong numbers while a person read it, so it was taken out.
+A role switch made on Home starts Home again for the next person.
 
 ## Upload and review
 
