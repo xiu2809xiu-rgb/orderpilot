@@ -62,6 +62,8 @@ export class AuthModule {
         CsrfGuard,
         PermissionsGuard,
         PasswordHasher,
+        // The AI gateway asks it whether a person may use a tool a model asked for.
+        PermissionPolicy,
         RolePermissionRepository,
         UsersModule,
         SessionsModule,
