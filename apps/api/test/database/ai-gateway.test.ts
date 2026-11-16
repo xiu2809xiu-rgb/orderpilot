@@ -1,12 +1,13 @@
 import { randomUUID } from "node:crypto";
+import { ModulesContainer } from "@nestjs/core";
 import { Test } from "@nestjs/testing";
 import type { INestApplicationContext } from "@nestjs/common";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { z } from "zod";
 import { AppModule } from "../../src/app.module.js";
+import { AuthModule } from "../../src/auth/auth.module.js";
 import { AuditEventRepository } from "../../src/audit/audit-event.repository.js";
 import { Database } from "../../src/database/database.js";
-import { AiModule } from "../../src/modules/ai/ai.module.js";
 import type { AiCallContext } from "../../src/modules/ai/domain/ai-call-context.js";
 import {
   AiCallInTransactionError,
@@ -54,7 +55,7 @@ describe("the AI gateway in the real module graph", () => {
     await resetTestData();
     const config = testConfig();
     const moduleRef = await Test.createTestingModule({
-      imports: [AppModule.register(config), AiModule.register(config)],
+      imports: [AppModule.register(config)],
     }).compile();
     app = await moduleRef.init();
     gateway = app.get(LlmGateway, { strict: false });
@@ -66,6 +67,14 @@ describe("the AI gateway in the real module graph", () => {
   afterAll(async () => {
     await app.close();
     await resetTestData();
+  });
+
+  it("leaves the application with exactly one AuthModule", () => {
+    // Nest tells dynamic modules apart by object reference: a second
+    // AuthModule.register() call would build a second copy of the sign-in
+    // controllers and providers.
+    const modules = [...app.get(ModulesContainer).values()];
+    expect(modules.filter((m) => m.metatype === AuthModule)).toHaveLength(1);
   });
 
   it("answers from the production mock script and leaves one record the monitoring reader sees", async () => {
