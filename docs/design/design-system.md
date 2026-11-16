@@ -108,6 +108,8 @@ Every page has the same anatomy: the header, then the filters and actions, then 
 
 Upload (`/upload`) and Spark (the panel opened from the top bar) are demo parts. They run on demo documents and scripted answers, and show only in a demo session or a development build (`app/shell/demoParts.ts`), Upload only to a role with `documents.upload`. Each says on its own page that it is a demo: a file added to Upload stays in the browser and is not stored, and Spark's answers are scripted with no AI model connected. They stay labelled as demos until P-18 (uploads and the AI document pipeline) and P-17 (the AI gateway) make them real.
 
+The Spark panel works like a window on Windows. Maximise (a square, beside Close) fills the width, edge to edge, and Restore (two squares) puts it back at the side; a double click on its head does the same, as on a title bar. Maximised, the conversation keeps a 72-character measure in the middle. The width grows in 220 ms, at once under reduced motion, and the panel keeps its size when it is closed and opened again. On a phone, where it already fills the screen, the button is hidden (`features/directions/spark/SparkHead.tsx`, `spark.css`).
+
 ## Where the code lives today
 
 - Tokens and styles: `apps/web/src/styles/`.
