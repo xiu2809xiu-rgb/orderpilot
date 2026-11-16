@@ -40,6 +40,26 @@ export const STORYLINE = {
   },
 } as const;
 
+/**
+ * A copy that shares nothing with the original. The data is plain (strings,
+ * numbers, null, arrays, records), and this package builds without the
+ * platform types that `structuredClone` comes from.
+ */
+function deepCopy<T>(value: T): T {
+  if (Array.isArray(value)) {
+    const items: unknown[] = value;
+    return items.map((item) => deepCopy(item)) as T;
+  }
+  if (value !== null && typeof value === "object")
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([key, item]) => [
+        key,
+        deepCopy(item),
+      ]),
+    ) as T;
+  return value;
+}
+
 function required<T>(value: T | undefined, what: string): T {
   if (value === undefined) throw new Error(`The storyline needs ${what}`);
   return value;
@@ -217,7 +237,7 @@ function changePriceOrder(copy: SyntheticDataset, item: Item): void {
  * The input is left as it was.
  */
 export function withDemoStoryline(dataset: SyntheticDataset): SyntheticDataset {
-  const copy = structuredClone(dataset);
+  const copy = deepCopy(dataset);
   const shortOrder = required(
     copy.orders.find((o) => o.header.no === STORYLINE.shortOrder.orderNo),
     STORYLINE.shortOrder.orderNo,
