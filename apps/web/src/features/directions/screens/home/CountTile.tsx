@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { NumberTicker } from "@/components/common";
 import { GradientText } from "@/components/kit/GradientText";
+import { SpotlightCard } from "@/components/kit/SpotlightCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { FeatureCue } from "@/features/define";
 import { useListCount } from "@/lib/useListCount";
@@ -70,23 +71,31 @@ export function CountTile({ cue }: { cue: FeatureCue }) {
       </div>
     );
   }
+  // The spotlight is the card; the link fills it, and its focus ring sits
+  // inside the edge because the card clips what lies outside it.
   return (
-    <Link
-      to={to}
-      className={`${TILE} group transition-colors hover:bg-(--dx-hover-bg) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring`}
+    <SpotlightCard
+      intensity={0.1}
+      size={200}
+      className="dx-card h-full min-h-24"
     >
-      <span className={`${LABEL} flex items-start justify-between gap-2`}>
-        {label}
-        <ArrowUpRight
-          className="mt-0.5 size-4 shrink-0 transition-colors group-hover:text-foreground"
-          aria-hidden="true"
-        />
-      </span>
-      <span className="fs-28 numeral font-semibold">
-        <GradientText>
-          <NumberTicker value={count.data} />
-        </GradientText>
-      </span>
-    </Link>
+      <Link
+        to={to}
+        className="group flex h-full min-h-24 flex-col justify-between gap-2 p-4 transition-colors hover:bg-(--dx-hover-bg) focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
+      >
+        <span className={`${LABEL} flex items-start justify-between gap-2`}>
+          {label}
+          <ArrowUpRight
+            className="mt-0.5 size-4 shrink-0 transition-colors group-hover:text-foreground"
+            aria-hidden="true"
+          />
+        </span>
+        <span className="fs-28 numeral font-semibold">
+          <GradientText>
+            <NumberTicker value={count.data} />
+          </GradientText>
+        </span>
+      </Link>
+    </SpotlightCard>
   );
 }

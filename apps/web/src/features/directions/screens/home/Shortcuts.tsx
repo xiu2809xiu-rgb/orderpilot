@@ -1,7 +1,7 @@
 import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
-import { Section } from "@/components/parts/Section";
+import { HomeSection } from "./HomeSection";
 import { actionsFor } from "@/lib/actions";
 import { cn } from "@/lib/utils";
 import { hasPermission, useSessionStore } from "@/stores/session";
@@ -43,7 +43,7 @@ export function Shortcuts({
   if (actions.length === 0) return null;
   const rows = layout === "rows";
   return (
-    <Section title={t("shortcuts.title")} className={className}>
+    <HomeSection title={t("shortcuts.title")} className={className}>
       <ul className={rows ? "flex flex-col gap-1" : "flex flex-wrap gap-2"}>
         {actions.map((action) => (
           <li key={action.id} className="min-w-0">
@@ -86,6 +86,6 @@ export function Shortcuts({
           </li>
         ))}
       </ul>
-    </Section>
+    </HomeSection>
   );
 }

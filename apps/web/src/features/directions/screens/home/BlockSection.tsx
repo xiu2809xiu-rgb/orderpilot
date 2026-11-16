@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { AnimatedList } from "@/components/kit/AnimatedList";
 import { EmptyState } from "@/components/parts/EmptyState";
-import { Section } from "@/components/parts/Section";
+import { HomeSection } from "./HomeSection";
 import { HomeQuery } from "./HomeQuery";
 import { RowSkeletons } from "./RowSkeletons";
 
@@ -44,7 +44,7 @@ export function BlockSection<T>({
 }: BlockSectionProps<T>) {
   const { t } = useTranslation("directions-home");
   return (
-    <Section title={title} intro={intro} work className="min-w-0">
+    <HomeSection title={title} intro={intro} work className="min-w-0">
       <HomeQuery query={query} loading={<RowSkeletons rows={5} />}>
         {items.length === 0 ? (
           <EmptyState
@@ -54,7 +54,10 @@ export function BlockSection<T>({
           />
         ) : (
           <>
-            <AnimatedList className="-my-3 divide-y divide-border">
+            <AnimatedList
+              stagger={0.03}
+              className="-my-3 divide-y divide-border"
+            >
               {items.map((item) => (
                 <Fragment key={itemKey(item)}>{row(item)}</Fragment>
               ))}
@@ -72,6 +75,6 @@ export function BlockSection<T>({
           </>
         )}
       </HomeQuery>
-    </Section>
+    </HomeSection>
   );
 }

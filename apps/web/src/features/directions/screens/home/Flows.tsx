@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useTrackerFlow } from "@/lib/api/generated/endpoints/tracker/tracker";
 import { PURCHASE_STEP_IDS } from "../../data/estimates";
 import { showPlannedFeatures } from "@/features/registry";
-import { Section } from "@/components/parts/Section";
+import { HomeSection } from "./HomeSection";
 import { FlowRow, type FlowCell } from "./FlowRow";
 import { HomeQuery } from "./HomeQuery";
 import { useHomeAccess } from "./homeAccess";
@@ -56,7 +56,7 @@ export function Flows() {
   }));
 
   return (
-    <Section
+    <HomeSection
       title={t("flows.title")}
       intro={
         flow.data
@@ -96,6 +96,6 @@ export function Flows() {
           ) : null}
         </div>
       </HomeQuery>
-    </Section>
+    </HomeSection>
   );
 }

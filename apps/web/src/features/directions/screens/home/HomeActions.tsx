@@ -19,7 +19,10 @@ export function HomeActions() {
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap items-center gap-3">
         {mayCreate ? (
-          <Button asChild className="pointer-coarse:h-11">
+          <Button
+            asChild
+            className="home-shine relative isolate overflow-hidden pointer-coarse:h-11"
+          >
             <Link to="/orders/new">
               <FilePlus2 aria-hidden="true" />
               {t("actions.newOrder")}
