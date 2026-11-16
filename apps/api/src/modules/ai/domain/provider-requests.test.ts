@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AiCallMeter } from "./ai-call-meter.js";
 import { AiProviderError } from "./ai-errors.js";
 import type { AiRuntime } from "./ai-runtime.js";
@@ -94,7 +94,7 @@ class FakeProvider {
 }
 
 function build(
-  provider: FakeProvider,
+  provider: Pick<FakeProvider, "step" | "stream">,
   options: { maxAttempts?: number; timeoutMs?: number } = {},
 ) {
   const runtime = new FakeRuntime();
@@ -269,5 +269,136 @@ describe("provider requests: a stream", () => {
     }
     expect(provider.signals[0]?.aborted).toBe(true);
     expect(h.meter.requests).toBe(1);
+  });
+});
+
+/** Waits on the (fake) clock, so a test decides exactly how long each part takes. */
+const later = (ms: number): Promise<void> =>
+  new Promise((resolve) => setTimeout(resolve, ms));
+
+/** A stream whose parts arrive after the given gaps; a step that answers after its own gap. */
+class SlowProvider {
+  constructor(private readonly gapsMs: readonly number[]) {}
+
+  async step(): Promise<AiStepResult> {
+    await later(this.gapsMs[0] ?? 0);
+    return answer;
+  }
+
+  async *stream(): AsyncIterable<AiStreamPart> {
+    for (const gap of this.gapsMs) {
+      await later(gap);
+      yield { type: "text-delta", text: "x" };
+    }
+    yield {
+      type: "finish",
+      inputTokens: 1,
+      outputTokens: 1,
+      finishReason: "stop",
+    };
+  }
+}
+
+/** Counts the requests made to a provider it wraps. */
+class FakeProviderOf {
+  calls = 0;
+  constructor(private readonly inner: Pick<FakeProvider, "step" | "stream">) {}
+  step(r: AiStepRequest, signal: AbortSignal): Promise<AiStepResult> {
+    this.calls += 1;
+    return this.inner.step(r, signal);
+  }
+  stream(r: AiStepRequest, signal: AbortSignal): AsyncIterable<AiStreamPart> {
+    this.calls += 1;
+    return this.inner.stream(r, signal);
+  }
+}
+
+describe("provider requests: the timeouts, on a fake clock", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  /** Reads a stream to its end, noting the clock after each part. */
+  async function drain(
+    parts: AsyncIterable<AiStreamPart>,
+    seen: AiStreamPart[],
+    useMs = 0,
+  ): Promise<void> {
+    for await (const part of parts) {
+      seen.push(part);
+      if (useMs > 0) await later(useMs);
+    }
+  }
+
+  it("never cuts a stream that is still arriving, however long it runs in all", async () => {
+    // Six parts, 400 ms apart: 2.4 s in all against a 500 ms timeout.
+    const h = build(
+      new FakeProviderOf(new SlowProvider([400, 400, 400, 400, 400])),
+      {
+        timeoutMs: 500,
+      },
+    );
+    const seen: AiStreamPart[] = [];
+    const done = drain(h.requests.stream(request, never), seen);
+    await vi.advanceTimersByTimeAsync(5_000);
+    await expect(done).resolves.toBeUndefined();
+    expect(seen).toHaveLength(6);
+  });
+
+  it("times out a stream that goes silent after its first part", async () => {
+    const h = build(new FakeProviderOf(new SlowProvider([100, 800])), {
+      timeoutMs: 500,
+    });
+    const seen: AiStreamPart[] = [];
+    const done = drain(h.requests.stream(request, never), seen).catch(
+      (e: unknown) => e,
+    );
+    await vi.advanceTimersByTimeAsync(5_000);
+    expect(await done).toMatchObject({ reasonCode: "provider-timeout" });
+    expect(seen).toHaveLength(1);
+  });
+
+  it("times out a stream that never sends its first part, and does not try again", async () => {
+    const provider = new FakeProviderOf(new SlowProvider([800]));
+    const h = build(provider, { timeoutMs: 500 });
+    const done = drain(h.requests.stream(request, never), []).catch(
+      (e: unknown) => e,
+    );
+    await vi.advanceTimersByTimeAsync(5_000);
+    expect(await done).toMatchObject({ reasonCode: "provider-timeout" });
+    expect(provider.calls).toBe(1);
+  });
+
+  it("does not count the time a slow reader takes as the provider's silence", async () => {
+    // The reader spends 2 s on each part; the provider is quick.
+    const h = build(new FakeProviderOf(new SlowProvider([10, 10, 10])), {
+      timeoutMs: 500,
+    });
+    const seen: AiStreamPart[] = [];
+    const done = drain(h.requests.stream(request, never), seen, 2_000);
+    await vi.advanceTimersByTimeAsync(20_000);
+    await expect(done).resolves.toBeUndefined();
+    expect(seen).toHaveLength(4);
+  });
+
+  it("keeps one timeout for the whole of a plain request", async () => {
+    const h = build(new FakeProviderOf(new SlowProvider([800])), {
+      timeoutMs: 500,
+    });
+    const done = h.requests.step(request, never).catch((e: unknown) => e);
+    await vi.advanceTimersByTimeAsync(5_000);
+    expect(await done).toMatchObject({ reasonCode: "provider-timeout" });
+  });
+
+  it("lets a plain request that finishes inside its timeout answer", async () => {
+    const h = build(new FakeProviderOf(new SlowProvider([400])), {
+      timeoutMs: 500,
+    });
+    const done = h.requests.step(request, never);
+    await vi.advanceTimersByTimeAsync(1_000);
+    await expect(done).resolves.toBe(answer);
   });
 });

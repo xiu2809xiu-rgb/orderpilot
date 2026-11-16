@@ -51,11 +51,15 @@ export const AI_GATEWAY_LIMITS = "AI_GATEWAY_LIMITS";
 export const AI_RUNTIME = "AI_RUNTIME";
 
 export interface AiGatewayLimits {
-  /** Tries of one provider request, and rounds of asking again for an invalid answer. */
+  /**
+   * Caps the tries of one provider request and, separately, the rounds of
+   * asking again for an invalid answer.
+   */
   readonly maxAttempts: number;
   readonly maxToolSteps: number;
   readonly maxImagesPerRequest: number;
   readonly maxOutputTokens: number;
+  /** A plain request's whole time, or a stream's longest silence. */
   readonly timeoutMs: number;
 }
 

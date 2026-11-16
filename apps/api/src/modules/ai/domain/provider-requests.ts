@@ -11,7 +11,10 @@ import type { RetryPolicy } from "./retry-policy.js";
 
 // What stands between the tool loop and the provider: one request at a time,
 // each with its own timeout, counted on the call's meter, and tried again when
-// the failure may pass on its own. A provider is written to honour its signal,
+// the failure may pass on its own. A plain request has one timeout for the whole
+// request. A stream has an idle timeout: it runs to the first part and starts
+// again after each part, so a long answer is never cut while it is still
+// arriving, and a stream that goes silent still times out. A provider is written to honour its signal,
 // but a slow or buggy one must not hold a call open, so the wait is raced
 // against the signal here as well.
 
@@ -20,7 +23,10 @@ export interface ProviderRequestsDeps {
   readonly meter: AiCallMeter;
   readonly runtime: AiRuntime;
   readonly retry: RetryPolicy;
-  /** Each provider request, retries included, gets this long. */
+  /**
+   * A plain request gets this long, each try on its own. A stream gets this
+   * long to its first part, and again after each part: a silence, not a total.
+   */
   readonly timeoutMs: number;
   /** The most times one request is tried. */
   readonly maxAttempts: number;
@@ -56,26 +62,41 @@ function raceAbort<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
 /** One request's own signal: the call's cancel, plus the timeout. */
 class RequestWindow {
   private readonly controller = new AbortController();
-  private readonly timer: ReturnType<typeof setTimeout>;
+  private timer: ReturnType<typeof setTimeout> | null = null;
   private readonly onCallAbort: () => void;
   private expired = false;
 
   constructor(
     private readonly callSignal: AbortSignal,
-    timeoutMs: number,
+    private readonly timeoutMs: number,
   ) {
     this.onCallAbort = () => {
       this.controller.abort(callSignal.reason);
     };
     callSignal.addEventListener("abort", this.onCallAbort, { once: true });
-    this.timer = setTimeout(() => {
-      this.expired = true;
-      this.controller.abort();
-    }, timeoutMs);
+    this.resume();
   }
 
   get signal(): AbortSignal {
     return this.controller.signal;
+  }
+
+  /**
+   * Stops the clock while a part is with the caller: how long the caller takes
+   * to use it is not the provider's silence.
+   */
+  pause(): void {
+    if (this.timer !== null) clearTimeout(this.timer);
+    this.timer = null;
+  }
+
+  /** Starts the timeout again, from now. */
+  resume(): void {
+    this.pause();
+    this.timer = setTimeout(() => {
+      this.expired = true;
+      this.controller.abort();
+    }, this.timeoutMs);
   }
 
   /** A failure caused by our own timeout is a timeout, whatever the provider threw. */
@@ -85,7 +106,7 @@ class RequestWindow {
 
   /** Ends the request. Aborting here also tells a provider still reading that nobody is listening. */
   close(): void {
-    clearTimeout(this.timer);
+    this.pause();
     this.callSignal.removeEventListener("abort", this.onCallAbort);
     this.controller.abort();
   }
@@ -143,7 +164,9 @@ export class ProviderRequests implements Pick<LlmProvider, "step" | "stream"> {
           const next = await raceAbort(iterator.next(), window.signal);
           if (next.done === true) return;
           delivered = true;
+          window.pause();
           yield next.value;
+          window.resume();
         }
       } catch (error) {
         const failure = window.explain(error);
