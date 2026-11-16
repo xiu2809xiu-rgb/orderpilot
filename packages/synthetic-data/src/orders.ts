@@ -81,7 +81,8 @@ export interface OrderInputs {
   documents: DocumentFactory;
 }
 
-function line(
+/** A sales line the way every generated order writes it. */
+export function line(
   item: Item,
   quantity: string,
   shipped: boolean,

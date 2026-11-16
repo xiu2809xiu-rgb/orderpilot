@@ -2,7 +2,7 @@ import { addDecimal } from "@orderpilot/shared";
 import { addDays, atHour } from "./dates.js";
 import type { Journey } from "./journey.js";
 import type { RecordNumberer } from "./records.js";
-import type { SampleException, SampleOrder } from "./types.js";
+import type { SampleException, SampleOrder, SampleScenario } from "./types.js";
 
 const QUANTITY_RULE = {
   ruleId: "mock.sample-quantity",
@@ -14,6 +14,18 @@ const QUANTITY_RULE = {
 /** "5.00" and "25" print the same way: no trailing zero decimals. */
 function plain(value: string): string {
   return value.replace(/\.0+$/, "");
+}
+
+/** The words of a PI price exception, kept in one place so a changed scenario can say the same. */
+export function priceMismatchText(
+  scenario: Extract<SampleScenario, { kind: "pi-price-mismatch" }>,
+): Pick<SampleException, "summary" | "expected" | "found" | "difference"> {
+  return {
+    summary: `Item ${scenario.itemNo}: the PI prints ${scenario.piPrice}, the PO says ${scenario.poPrice}`,
+    expected: scenario.poPrice,
+    found: scenario.piPrice,
+    difference: `${addDecimal(scenario.piPrice, `-${scenario.poPrice}`)} USD a unit`,
+  };
 }
 
 /**
@@ -77,10 +89,7 @@ export function makeExceptions(
       open(journey.enteredOn, {
         ruleId: "mock.sample-price",
         ruleLabel: "Unit price on the PI against the PO (sample result)",
-        summary: `Item ${scenario.itemNo}: the PI prints ${scenario.piPrice}, the PO says ${scenario.poPrice}`,
-        expected: scenario.poPrice,
-        found: scenario.piPrice,
-        difference: `${addDecimal(scenario.piPrice, `-${scenario.poPrice}`)} USD a unit`,
+        ...priceMismatchText(scenario),
         toleranceLabel: "Price difference in USD (sample value)",
         toleranceValue: "0.00",
         fixBy: "SUPPORT",
