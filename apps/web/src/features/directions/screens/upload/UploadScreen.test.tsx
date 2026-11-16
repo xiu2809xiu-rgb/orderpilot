@@ -1,5 +1,11 @@
 import { QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router";
 import {
@@ -16,6 +22,7 @@ import { createQueryClient } from "@/lib/query";
 import { useSessionStore } from "@/stores/session";
 import { axeViolations } from "@/test/axe";
 import { sessionFor } from "@/test/fixtures";
+import { must } from "@/test/must";
 import demo from "@/../public/demo-documents/po-boxed-so-0102.json";
 import storyline from "@/../public/directions/po-4471-26.json";
 import UploadScreen from "./UploadScreen";
@@ -82,6 +89,13 @@ beforeEach(() => {
 afterEach(() => {
   vi.unstubAllGlobals();
 });
+
+// The test DOM has no AnimationEvent, so React listens there for the prefixed
+// name; a browser hears the plain one. Sending both keeps the test true in either.
+function endAnimation(node: Element) {
+  fireEvent(node, new Event("webkitAnimationEnd", { bubbles: true }));
+  fireEvent.animationEnd(node);
+}
 
 async function toReview(user: ReturnType<typeof userEvent.setup>) {
   upload();
@@ -191,6 +205,37 @@ describe("the upload screen", () => {
         "2 fields still need your approval before the review can be finished.",
       ),
     ).toBeVisible();
+  });
+
+  it("reads the page once as the review opens: a field's box and row carry where it sits, and the pass never plays again", async () => {
+    const user = userEvent.setup();
+    await toReview(user);
+    const fields = screen.getByRole("group", { name: "Fields read" });
+    const stage = must(fields.parentElement);
+    expect(stage).toHaveAttribute("data-arriving", "true");
+    const light = must(stage.querySelector('[data-slot="reading-light"]'));
+    expect(light).toHaveAttribute("aria-hidden", "true");
+    // How far down its page a field sits is when the light reaches it, and the
+    // box and the row share that moment.
+    const field = must(demo.fields[1]);
+    const at = String(must(field.box[1]));
+    const box = within(
+      screen.getByRole("group", { name: "Fields on this page" }),
+    ).getByRole("button", { name: `${field.label}: ${field.text}` });
+    const show = within(fields).getByRole("button", {
+      name: `Show ${field.label} on the page`,
+    });
+    const row = must(show.closest("li"));
+    expect(box.style.getPropertyValue("--dx-at")).toBe(at);
+    expect(row.style.getPropertyValue("--dx-at")).toBe(at);
+
+    endAnimation(light);
+    expect(stage).toHaveAttribute("data-arriving", "false");
+    expect(stage.querySelector('[data-slot="reading-light"]')).toBeNull();
+    // Choosing a field afterwards does not bring the pass back.
+    await user.click(show);
+    expect(show).toHaveAttribute("aria-pressed", "true");
+    expect(stage).toHaveAttribute("data-arriving", "false");
   });
 
   it("opens the preview document that the added file is named after, and the default for any other name", async () => {

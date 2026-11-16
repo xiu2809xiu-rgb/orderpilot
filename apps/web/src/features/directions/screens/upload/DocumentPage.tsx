@@ -5,6 +5,7 @@ import {
   type DemoDocument,
   type DemoField,
 } from "./demoDocument";
+import { readAt } from "./readAt";
 import type { FieldState } from "./useReview";
 import "./upload.css";
 
@@ -15,9 +16,17 @@ interface DocumentPageProps {
   selected: string | null;
   onSelect: (field: DemoField) => void;
   stateOf: (id: string) => FieldState;
+  /** True until the reading light has passed down the page, once. */
+  arriving: boolean;
+  onArrived: () => void;
 }
 
-/** Page 1 of the purchase order, rasterised from the real PDF, with the boxes of its fields. */
+/**
+ * Page 1 of the purchase order, rasterised from the real PDF, with the boxes of
+ * its fields. As the review opens a band of light passes down the page once and
+ * each box appears as it is reached; the light is decoration, and tells its
+ * owner when it has left so that nothing here moves again.
+ */
 export function DocumentPage({
   document: doc,
   page,
@@ -25,6 +34,8 @@ export function DocumentPage({
   selected,
   onSelect,
   stateOf,
+  arriving,
+  onArrived,
 }: DocumentPageProps) {
   const { t } = useTranslation("directions-intake");
   const pages = Array.from({ length: doc.pageCount }, (_, index) => index + 1);
@@ -71,6 +82,14 @@ export function DocumentPage({
           className="absolute inset-0 size-full select-none"
           draggable={false}
         />
+        {arriving ? (
+          <span
+            aria-hidden="true"
+            data-slot="reading-light"
+            className="dx-scan"
+            onAnimationEnd={onArrived}
+          />
+        ) : null}
         <div role="group" aria-label={t("review.boxes")}>
           {onPageFields.map((field) => {
             const [x, y, w, h] = field.box;
@@ -96,6 +115,7 @@ export function DocumentPage({
                   top: `${String(y * 100)}%`,
                   width: `${String(w * 100)}%`,
                   height: `${String(h * 100)}%`,
+                  ...readAt(field),
                 }}
               />
             );

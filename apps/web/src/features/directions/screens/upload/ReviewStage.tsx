@@ -1,4 +1,5 @@
 import { ArrowUpRight } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,8 @@ import { useReview } from "./useReview";
  * field and its box light together, whichever is chosen. The uncertain fields
  * must each be confirmed or corrected before Finish review opens, and finishing
  * is a person's act. Nothing is saved in this preview, and the screen says so.
+ * The page is read once as the review opens (upload.css); after that pass
+ * nothing moves again, whatever the person selects, confirms or pages to.
  */
 export function ReviewStage({
   document: doc,
@@ -31,6 +34,7 @@ export function ReviewStage({
 }) {
   const { t } = useTranslation("directions-intake");
   const review = useReview(doc);
+  const [arriving, setArriving] = useState(true);
 
   const select = (field: DemoField) => {
     review.select(field);
@@ -77,7 +81,10 @@ export function ReviewStage({
           </AlertAction>
         </Alert>
       ) : null}
-      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,27rem)]">
+      <div
+        data-arriving={arriving}
+        className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,27rem)]"
+      >
         <div className="lg:sticky lg:top-0">
           <DocumentPage
             document={doc}
@@ -86,6 +93,10 @@ export function ReviewStage({
             selected={review.selected}
             onSelect={select}
             stateOf={review.stateOf}
+            arriving={arriving}
+            onArrived={() => {
+              setArriving(false);
+            }}
           />
         </div>
         <FieldList

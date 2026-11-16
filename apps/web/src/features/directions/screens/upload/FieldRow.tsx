@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/kit/Badge";
 import type { DemoField } from "./demoDocument";
+import { readAt } from "./readAt";
 import type { FieldState } from "./useReview";
 
 interface FieldRowProps {
@@ -60,8 +61,9 @@ export function FieldRow({
     <li
       id={`field-${field.id}`}
       data-selected={selected}
+      style={readAt(field)}
       className={cn(
-        "flex flex-col gap-2 border-b border-border px-3 py-2.5 last:border-b-0",
+        "dx-field flex flex-col gap-2 border-b border-border px-3 py-2.5 last:border-b-0",
         selected && "bg-accent",
       )}
     >
