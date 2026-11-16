@@ -11,6 +11,7 @@ import { loadRecordTabs } from "@/lib/loadRecordTabs";
 import { useSessionStore } from "@/stores/session";
 import { CrumbProvider } from "./pageCrumb";
 import { PageRegion } from "./PageRegion";
+import { PageWipe } from "./PageWipe";
 import { useGlobalShortcuts } from "./shortcuts";
 import { SidePanel } from "./SidePanel";
 import { SparkPanelProvider } from "./sparkPanel";
@@ -164,6 +165,8 @@ export function AppShell() {
         </Suspense>
       ) : null}
       <Toaster />
+      {/* Behind everything: a page change sweeps a band across the aurora. */}
+      <PageWipe />
       <Suspense fallback={null}>
         <AnalyticsRoot dock={dock} />
       </Suspense>
