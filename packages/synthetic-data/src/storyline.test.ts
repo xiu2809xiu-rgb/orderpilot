@@ -105,6 +105,9 @@ describe("the demo storyline", () => {
     expect(spr?.vendorNo).toBe(item?.vendorNo);
     expect(spr?.quantity).toBe(o.stockShortfall?.shortBy);
     expect(spr?.unitCost).toBe(item?.unitCost);
+    // The demo's cost sits under the PO's price, so the SPR never buys dearer than the order sells.
+    expect(item?.unitPrice).toBe("61.20");
+    expect(item?.unitCost).toBe("48.96");
     expect(spr?.amount).toBe(
       multiplyDecimal(spr?.quantity ?? "0", spr?.unitCost ?? "0"),
     );

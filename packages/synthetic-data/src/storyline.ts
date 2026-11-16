@@ -38,6 +38,15 @@ export const STORYLINE = {
     poPrice: "61.20",
     piPrice: "64.80",
   },
+  /**
+   * The item's list price and cost in the demo. The PO is at list and the cost
+   * sits under it: as generated, the item costs more than the storyline's
+   * price, and the SPR would then buy for more than the order sells for.
+   */
+  item: {
+    unitPrice: "61.20",
+    unitCost: "48.96",
+  },
 } as const;
 
 /**
@@ -256,6 +265,9 @@ export function withDemoStoryline(dataset: SyntheticDataset): SyntheticDataset {
     copy.items.find((i) => i.no === STORYLINE.shortOrder.itemNo),
     `item ${STORYLINE.shortOrder.itemNo}`,
   );
+  // Before the orders: the SPR's cost and amount are read from the item.
+  item.unitPrice = STORYLINE.item.unitPrice;
+  item.unitCost = STORYLINE.item.unitCost;
   // The price order moves its demand onto the item first, so the shortfall
   // below is worked out from the stock figures the screens will show.
   changePriceOrder(copy, item);
