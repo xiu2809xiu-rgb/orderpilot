@@ -14,8 +14,14 @@ body {
   --wipe-accent: var(--primary);
   --wipe-line: color-mix(in oklab, var(--primary) 45%, white);
   --wipe-fill: color-mix(in oklab, var(--primary) 10%, transparent);
-  --wipe-text: color-mix(in oklab, var(--primary) 16%, transparent);
+  --wipe-text: color-mix(in oklab, var(--primary) 45%, transparent);
   --wipe-skew: -14deg;
+  /* Where the name rides: the strip of clear ground under the top bar (and the
+     record tabs), to the right of the page title, which every page leaves
+     empty. Its top sits 128 px down; its middle 70 % of the way across while
+     the band glides. */
+  --wipe-name-top: calc(var(--space-8) * 2);
+  --wipe-name-shift: 40vw;
   position: fixed;
   inset: 0;
   z-index: -1;
@@ -32,6 +38,10 @@ body {
 }
 .dx-wipe[data-reverse="true"] .dx-wipe-name {
   transform: scaleX(-1);
+}
+/* Mirrored, the shift goes on the other side, so the name still lands right of the title. */
+.dx-wipe[data-reverse="true"] .dx-wipe-label {
+  padding-inline: 0 var(--wipe-name-shift);
 }
 .dx-wipe-track {
   position: absolute;
@@ -67,18 +77,21 @@ body {
   will-change: transform;
 }
 
-/* The new page's name rides in the slab as a faint watermark. */
+/* The new page's name rides in the slab, in the clear strip above the cards,
+   so it can be read. The slab starts 10vh above the screen, hence the 10vh. */
 .dx-wipe-label {
   position: absolute;
   inset: 0;
   display: grid;
-  place-items: center;
+  place-items: start center;
+  padding-block-start: calc(10vh + var(--wipe-name-top));
+  padding-inline: var(--wipe-name-shift) 0;
   transform: skewX(calc(var(--wipe-skew) * -1));
   color: var(--wipe-text);
 }
 .dx-wipe-name {
   display: inline-block;
-  font-size: clamp(56px, 12vw, 168px);
+  font-size: clamp(40px, 4vw, 56px);
   font-weight: 800;
   line-height: 1;
   letter-spacing: 0.02em;
