@@ -1,4 +1,5 @@
 import { Dialog } from "radix-ui";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { PromptBar } from "@/components/kit/PromptBar";
 import { useHomeAccess } from "../screens/home/homeAccess";
@@ -21,18 +22,22 @@ interface SparkPanelProps {
  * stop, over any screen. It is not modal: the page behind stays readable and
  * usable, and Escape or the close button puts the panel away. The orb heads
  * it; the questions and answers are scripted, and the panel says so under the
- * input. Full height, and full width on a phone.
+ * input. Full height, and full width on a phone. Like a window on Windows it
+ * can be maximised to fill the width and restored to its side panel; it keeps
+ * that size when it is closed and opened again.
  */
 export default function SparkPanel({ open, onOpenChange }: SparkPanelProps) {
   const { t } = useTranslation("directions-spark");
   const mayReadSales = useHomeAccess().measures;
   const chat = useSparkChat();
+  const [maximised, setMaximised] = useState(false);
   const empty = chat.turns.length === 0;
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange} modal={false}>
       <Dialog.Portal>
         <Dialog.Content
           className="spark-panel dx-panel-strong"
+          data-maximised={maximised}
           // The page stays usable beside the panel: a click on it does not close Spark.
           onInteractOutside={(event) => {
             event.preventDefault();
@@ -45,12 +50,16 @@ export default function SparkPanel({ open, onOpenChange }: SparkPanelProps) {
           <SparkHead
             compact={!empty}
             state={chat.busy ? "thinking" : "idle"}
+            maximised={maximised}
             onNew={chat.reset}
+            onToggleMaximised={() => {
+              setMaximised((value) => !value);
+            }}
             onClose={() => {
               onOpenChange(false);
             }}
           />
-          <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">
+          <div className="spark-measure min-h-0 flex-1 overflow-y-auto px-4 pb-4">
             {empty ? (
               <SparkEmpty mayReadSales={mayReadSales} onAsk={chat.send} />
             ) : (
@@ -62,7 +71,7 @@ export default function SparkPanel({ open, onOpenChange }: SparkPanelProps) {
               />
             )}
           </div>
-          <div className="flex shrink-0 flex-col gap-2 border-t border-border px-4 pt-3 pb-4">
+          <div className="spark-measure flex shrink-0 flex-col gap-2 border-t border-border px-4 pt-3 pb-4">
             <PromptBar
               inputId={INPUT_ID}
               label={t("input.label")}

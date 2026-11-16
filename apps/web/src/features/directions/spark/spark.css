@@ -22,9 +22,28 @@
     inset-block-end: var(--dx-panel-edge, 0rem);
     right: var(--dx-panel-edge, 0rem);
   }
+  /* Maximised, as a window on Windows: the panel fills the width, edge to edge. */
+  .spark-panel[data-maximised="true"] {
+    width: calc(100% - 2 * var(--dx-panel-edge, 0rem));
+  }
+}
+@media (max-width: 39.99rem) {
+  /* On a phone the panel already fills the screen, so there is nothing to maximise. */
+  .spark-size {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .spark-panel {
+    transition: width var(--motion-base, 220ms) var(--ease-out, ease-out);
+  }
 }
 .spark-panel {
   border-radius: var(--radius-card);
+}
+/* Maximised, the conversation keeps a readable measure in the middle. */
+.spark-panel[data-maximised="true"] .spark-measure {
+  padding-inline: max(var(--space-2), calc((100% - 72ch) / 2));
 }
 
 .spark-orb-wrap {
