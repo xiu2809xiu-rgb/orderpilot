@@ -40,7 +40,7 @@ function unwrapCodeFence(text: string): string {
  * segments are the schema's own names, except where they are a record's keys,
  * which come from the model: those are replaced.
  */
-function describeIssue(issue: z.core.$ZodIssue): string {
+export function describeIssue(issue: z.core.$ZodIssue): string {
   const path =
     issue.path
       .map((segment) =>
