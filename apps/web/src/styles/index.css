@@ -8,6 +8,7 @@
 @import "./motion.css";
 @import "./page-wipe.css";
 @import "./theme-switch.css";
+@import "./click-pulse.css";
 
 @custom-variant dark (&:is(.dark *));
 
