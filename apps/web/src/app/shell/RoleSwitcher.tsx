@@ -14,6 +14,7 @@ import {
 } from "./overlays/dropdown-menu";
 import { demoLogin, fetchAuthOptions } from "@/lib/api/auth";
 import { useSessionStore } from "@/stores/session";
+import { startAsNewRole } from "./roleSwitch";
 
 /** Shown only when GET /auth/options says demo mode is on. */
 export function RoleSwitcher() {
@@ -33,8 +34,8 @@ export function RoleSwitcher() {
   async function switchTo(role: Role) {
     if (role === current) return;
     await demoLogin(role);
-    // Another role sees other data: start from a clean cache.
-    queryClient.clear();
+    // Another role sees other data: nothing of the old role may stay on screen.
+    await startAsNewRole(queryClient);
     await navigate("/");
   }
 
