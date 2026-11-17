@@ -8,6 +8,7 @@ import { featureNamespaces } from "@/features/nav";
 import { apiClient } from "@/lib/api/instance";
 import { whenIdle } from "@/lib/deferred";
 import { loadRecordTabs } from "@/lib/loadRecordTabs";
+import { useDemoTour } from "@/stores/demoTour";
 import { useSessionStore } from "@/stores/session";
 import { CrumbProvider } from "./pageCrumb";
 import { PageRegion } from "./PageRegion";
@@ -28,6 +29,8 @@ const CommandPalette = lazy(async () => ({
   default: (await loadPalette()).CommandPalette,
 }));
 const loadSessionEnded = () => import("../SessionEndedDialog");
+// The demo tour is fetched only when a person starts it.
+const DemoTour = lazy(() => import("@/features/demo-tour/DemoTour"));
 
 // The open-records strip and the code that keeps it in step with the page are a chunk
 // of their own, so the entry bundle does not carry them. The download starts when the
@@ -101,6 +104,7 @@ export function AppShell() {
   const [dock, setDock] = useState<HTMLElement | null>(null);
   const [collapsed, toggleCollapsed] = usePanelCollapsed();
   const main = useScrollToTopOnNewPage();
+  const touring = useDemoTour((state) => state.step !== null);
   const announcement = usePageArrival(main);
   useScheduledRefresh();
   useGlobalShortcuts();
@@ -165,6 +169,11 @@ export function AppShell() {
         </Suspense>
       ) : null}
       <Toaster />
+      {touring ? (
+        <Suspense fallback={null}>
+          <DemoTour />
+        </Suspense>
+      ) : null}
       {/* Behind everything: on a page change its name glides across the aurora. */}
       <PageWipe />
       <Suspense fallback={null}>
