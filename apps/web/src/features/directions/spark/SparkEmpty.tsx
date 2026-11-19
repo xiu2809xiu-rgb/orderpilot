@@ -1,6 +1,7 @@
 import { ArrowUpRight, Package, TrendingUp } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { BlurFade } from "@/components/kit/BlurFade";
+import { suggestionsFor } from "./suggestions";
 import type { SparkKind } from "./useSparkChat";
 
 interface SparkEmptyProps {
@@ -16,10 +17,7 @@ interface SparkEmptyProps {
  */
 export function SparkEmpty({ mayReadSales, onAsk }: SparkEmptyProps) {
   const { t } = useTranslation("directions-spark");
-  const suggestions = [
-    { kind: "stock", icon: Package, show: true },
-    { kind: "trend", icon: TrendingUp, show: mayReadSales },
-  ] as const;
+  const icons = { stock: Package, trend: TrendingUp } as const;
   return (
     <BlurFade className="flex flex-col gap-4 px-5 pb-4 text-center">
       <div className="flex flex-col gap-2">
@@ -35,9 +33,9 @@ export function SparkEmpty({ mayReadSales, onAsk }: SparkEmptyProps) {
         aria-label={t("empty.suggestions")}
         className="flex flex-col gap-2 text-left"
       >
-        {suggestions
-          .filter((suggestion) => suggestion.show)
-          .map(({ kind, icon: Icon }) => (
+        {suggestionsFor(mayReadSales).map(({ kind }) => {
+          const Icon = icons[kind];
+          return (
             <button
               key={kind}
               type="button"
@@ -54,7 +52,8 @@ export function SparkEmpty({ mayReadSales, onAsk }: SparkEmptyProps) {
                 className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
               />
             </button>
-          ))}
+          );
+        })}
       </div>
     </BlurFade>
   );

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { prefersReducedMotion } from "@/components/kit/env";
+import { stockFacts, type StockFacts } from "./sparkFacts";
 
 export type SparkKind = "stock" | "trend" | "other";
 export type TurnPhase = "thinking" | "streaming" | "done" | "stopped";
@@ -18,18 +19,37 @@ export const THINK_MS = 1500;
 /** Under reduced motion the pause is short and the answer arrives whole. */
 export const THINK_MS_STILL = 250;
 
+/** Whole-word match, so "hp" is not found inside another word. */
+function mentions(text: string, word: string): boolean {
+  const escaped = word.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`(^|[^a-z0-9])${escaped}($|[^a-z0-9])`).test(text);
+}
+
 /**
- * Which scripted answer a typed question gets. The two suggested questions are
- * sent with their kind; anything typed is matched on a word, and anything else
- * gets the honest answer that Spark only knows two things in this preview.
+ * Which scripted answer a typed question gets. The suggested questions are
+ * sent with their kind. A typed one gets the stock answer only when it is
+ * about the item that answer is for (the brand and the product, or one of its
+ * item or part numbers), and the sales answer only when it is about sales and
+ * the role may read them. Anything else gets the plain reply that this is a
+ * preview: a near miss ("Dell monitors", "hp") must never be answered with
+ * another item's figures.
  */
-export function classify(question: string, mayReadSales: boolean): SparkKind {
+export function classify(
+  question: string,
+  mayReadSales: boolean,
+  facts: StockFacts = stockFacts(),
+): SparkKind {
   const text = question.toLowerCase();
-  if (/\b(monitors?|stock|hp)\b/.test(text)) return "stock";
-  if (mayReadSales && /\b(sales|trend|forecast|revenue)\b/.test(text)) {
-    return "trend";
-  }
-  return "other";
+  const aboutBrand = mentions(text, facts.brand);
+  const aboutProduct = mentions(text, "monitor") || mentions(text, "monitors");
+  const aboutItem = facts.items.some(
+    (item) => mentions(text, item.itemNo) || mentions(text, item.partNumber),
+  );
+  if ((aboutBrand && aboutProduct) || aboutItem) return "stock";
+  const aboutSales = ["sales", "revenue", "forecast", "trend"].some((word) =>
+    mentions(text, word),
+  );
+  return mayReadSales && aboutSales ? "trend" : "other";
 }
 
 /**

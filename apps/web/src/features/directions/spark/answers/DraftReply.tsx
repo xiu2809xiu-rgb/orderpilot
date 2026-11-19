@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { grouped } from "../sparkFacts";
 import {
   Frame,
   FrameHeader,
@@ -19,7 +20,10 @@ function readClipboard(): Clipboard | undefined {
 interface DraftReplyProps {
   description: string;
   part: string;
-  available: string;
+  /** What is available now: on hand, less what sales orders hold. */
+  now: number;
+  /** What is still on purchase orders: due, not here yet. */
+  due: number;
 }
 
 /**
@@ -28,7 +32,7 @@ interface DraftReplyProps {
  * the text on the clipboard. Spark never sends: the card says so, and there is
  * no send button, because a person sends from their own mail.
  */
-export function DraftReply({ description, part, available }: DraftReplyProps) {
+export function DraftReply({ description, part, now, due }: DraftReplyProps) {
   const { t } = useTranslation("directions-spark");
   const subjectId = useId();
   const bodyId = useId();
@@ -36,7 +40,16 @@ export function DraftReply({ description, part, available }: DraftReplyProps) {
     t("stock.draft.subject", { description }),
   );
   const [body, setBody] = useState(() =>
-    t("stock.draft.body", { description, part, available }),
+    t("stock.draft.body", {
+      description,
+      part,
+      stock: [
+        t("stock.draft.now", { now: grouped(now) }),
+        due > 0 ? t("stock.draft.due", { due: grouped(due) }) : "",
+      ]
+        .filter(Boolean)
+        .join(" "),
+    }),
   );
   const [copied, setCopied] = useState(false);
   const reset = useRef<number | null>(null);
