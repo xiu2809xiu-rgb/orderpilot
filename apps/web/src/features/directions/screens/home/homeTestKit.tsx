@@ -167,6 +167,12 @@ export interface HomeApi {
   blockStatus?: number;
   /** A list the tiles count answers with this status. */
   trackerStatus?: number;
+  /**
+   * Whether the orders list shows its amounts: the server's answer to "may
+   * this role see prices". False answers them masked, as it does for
+   * Warehouse and Logistics.
+   */
+  prices?: boolean;
 }
 
 /** What the screen sent, and which tasks the server now counts as done. */
@@ -249,6 +255,28 @@ export function serveHome(api: HomeApi = {}): Served {
         return HttpResponse.json({ data: {}, meta: { mock: true } });
       },
     ),
+    http.get("*/api/v1/orders", () => {
+      served.calls.push("GET /api/v1/orders");
+      const seen = api.prices === true;
+      return HttpResponse.json({
+        data: [
+          {
+            orderNo: "SO-0001",
+            customerNo: "C-0001",
+            customerName: "Synthetic Harbour Traders",
+            amount: {
+              field: "item.unitPrice",
+              classification: "confidential",
+              masked: !seen,
+              value: seen ? "100.00" : null,
+              reason: seen ? null : "price",
+            },
+            currencyCode: "USD",
+          },
+        ],
+        meta: { page: 1, pageSize: 1, total: 1, mock: true },
+      });
+    }),
     http.get("*/api/v1/tracker/flow", () => {
       served.calls.push("GET /api/v1/tracker/flow");
       return HttpResponse.json({ data: FLOW, meta: { mock: true } });

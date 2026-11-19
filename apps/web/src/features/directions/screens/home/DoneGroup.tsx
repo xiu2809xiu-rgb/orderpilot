@@ -1,0 +1,85 @@
+import { useTranslation } from "react-i18next";
+import { Link } from "react-router";
+import {
+  Timeline,
+  TimelineDate,
+  TimelineHeader,
+  TimelineIndicator,
+  TimelineItem,
+  TimelineSeparator,
+  TimelineTitle,
+} from "@/components/kit/Timeline";
+import type { DoneItem } from "./doneToday";
+import { enterProps, useFirstView } from "./entrance";
+import { useOrderLinks } from "./homeLinks";
+import { TimelineGroup } from "./TimelineGroup";
+
+const TIME = new Intl.DateTimeFormat("en-GB", {
+  hour: "2-digit",
+  minute: "2-digit",
+  timeZone: "Asia/Singapore",
+});
+
+/**
+ * What the person finished from this screen today, newest first. Each line
+ * says what was done, for which order and when ("Raised the SPR for SO-0082
+ * at 06:03") and is the link to that order, so a person who wants to see the
+ * result is one click from it. The real tasks API lists only open tasks, so
+ * this list lives in the screen and an Undo takes a line out again.
+ */
+export function DoneGroup({ done }: { done: readonly DoneItem[] }) {
+  const { t } = useTranslation("directions-home");
+  const { t: tHome } = useTranslation("home");
+  const first = useFirstView();
+  const links = useOrderLinks();
+  return (
+    <TimelineGroup title={t("timeline.done.title")}>
+      {done.length === 0 ? (
+        <p className="fs-14 max-w-prose text-muted-foreground">
+          {t("timeline.done.empty")}
+        </p>
+      ) : (
+        <Timeline value={done.length}>
+          {done.map(({ task, at }, index) => {
+            const what = tHome(`needs.done.${task.kind}`, {
+              orderNo: task.orderNo ?? task.ref?.recordNo ?? "",
+            });
+            const line = t("timeline.done.at", {
+              what,
+              time: TIME.format(at),
+            });
+            return (
+              <TimelineItem
+                key={task.id}
+                step={index + 1}
+                {...enterProps(index, first)}
+              >
+                <TimelineIndicator />
+                <TimelineSeparator />
+                <TimelineHeader>
+                  <TimelineTitle>
+                    {task.orderNo ? (
+                      <Link
+                        to={links.order(task.orderNo)}
+                        className="text-ring underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-ring"
+                      >
+                        {line}
+                      </Link>
+                    ) : (
+                      line
+                    )}
+                  </TimelineTitle>
+                  {task.customerName ? (
+                    <TimelineDate dateTime={undefined}>
+                      {task.customerName}
+                    </TimelineDate>
+                  ) : null}
+                </TimelineHeader>
+              </TimelineItem>
+            );
+          })}
+        </Timeline>
+      )}
+    </TimelineGroup>
+  );
+}

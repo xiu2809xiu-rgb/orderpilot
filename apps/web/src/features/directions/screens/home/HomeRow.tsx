@@ -5,6 +5,8 @@ interface HomeRowProps {
   title: ReactNode;
   /** The record as a link, with what identifies it. */
   meta: ReactNode;
+  /** A line under the record, for what else a person needs to tell two rows apart. */
+  detail?: ReactNode;
   /** The date or the timer, and any figure that goes with it. */
   trailing?: ReactNode;
   /** The row's one action. */
@@ -19,7 +21,13 @@ interface HomeRowProps {
  * down the list; on a phone each part takes a line of its own, so a customer's
  * name and an amount are never cut to make room for each other.
  */
-export function HomeRow({ title, meta, trailing, action }: HomeRowProps) {
+export function HomeRow({
+  title,
+  meta,
+  detail,
+  trailing,
+  action,
+}: HomeRowProps) {
   return (
     <div className="grid grid-cols-1 items-center gap-x-4 gap-y-2 py-3 sm:grid-cols-[minmax(0,1fr)_auto_8.5rem]">
       <div className="min-w-0">
@@ -27,6 +35,11 @@ export function HomeRow({ title, meta, trailing, action }: HomeRowProps) {
         <div className="fs-14 flex min-w-0 items-baseline gap-x-2 text-muted-foreground">
           {meta}
         </div>
+        {detail ? (
+          <div className="fs-14 flex min-w-0 flex-wrap items-baseline gap-x-2 text-muted-foreground">
+            {detail}
+          </div>
+        ) : null}
       </div>
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 sm:flex-col sm:items-end sm:justify-self-end">
         {trailing}

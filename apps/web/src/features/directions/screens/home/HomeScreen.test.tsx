@@ -202,7 +202,7 @@ describe("the home screen", () => {
     expect(within(nth(rows, 0)).getByText("2 days late")).toBeVisible();
     expect(
       within(nth(rows, 0)).getByRole("button", {
-        name: "Mark sent for SO-0080",
+        name: "Mark PI as sent for SO-0080",
       }),
     ).toBeVisible();
     // A task one click cannot finish opens its order instead.
@@ -213,16 +213,18 @@ describe("the home screen", () => {
     ).toBeVisible();
   });
 
-  it("has one primary button, New order, and an Upload that opens the upload screen", async () => {
+  it("has one filled button, Upload a PO, and a lighter New order that opens the order form", async () => {
     stubApi();
     home();
     expect(
       await screen.findByRole("link", { name: "New order" }),
     ).toHaveAttribute("href", "/orders/new");
-    expect(screen.getByRole("link", { name: "Upload a PO" })).toHaveAttribute(
-      "href",
-      "/upload",
-    );
+    const upload = screen.getByRole("link", { name: "Upload a PO" });
+    expect(upload).toHaveAttribute("href", "/upload");
+    expect(upload.className).toContain("bg-primary");
+    expect(
+      screen.getByRole("link", { name: "New order" }).className,
+    ).not.toContain("bg-primary");
     // Two buttons that look alike get one line saying what each is for.
     expect(
       screen.getByText(
@@ -326,12 +328,18 @@ describe("the home screen", () => {
     const user = userEvent.setup();
     home();
     await user.click(
-      await screen.findByRole("button", { name: "Mark sent for SO-0080" }),
+      await screen.findByRole("button", {
+        name: "Mark PI as sent for SO-0080",
+      }),
     );
     await waitFor(() => {
       expect(calls).toContain("POST /api/v1/workflows/tasks/t1/complete");
     });
-    expect(await screen.findByText(/^Finished at \d\d:\d\d$/)).toBeVisible();
+    expect(
+      await screen.findByText(
+        /^Marked the PI for SO-0080 as sent at \d\d:\d\d$/,
+      ),
+    ).toBeVisible();
   });
 
   it("starts again for the next person: a role switch on Home leaves none of the last one's Done today", async () => {
@@ -339,9 +347,15 @@ describe("the home screen", () => {
     const user = userEvent.setup();
     home();
     await user.click(
-      await screen.findByRole("button", { name: "Mark sent for SO-0080" }),
+      await screen.findByRole("button", {
+        name: "Mark PI as sent for SO-0080",
+      }),
     );
-    expect(await screen.findByText(/^Finished at \d\d:\d\d$/)).toBeVisible();
+    expect(
+      await screen.findByText(
+        /^Marked the PI for SO-0080 as sent at \d\d:\d\d$/,
+      ),
+    ).toBeVisible();
     // The role switcher signs the next person in and stays on this route.
     act(() => {
       useSessionStore.setState({
@@ -350,7 +364,9 @@ describe("the home screen", () => {
       });
     });
     await waitFor(() => {
-      expect(screen.queryByText(/^Finished at \d\d:\d\d$/)).toBeNull();
+      expect(
+        screen.queryByText(/^Marked the PI for SO-0080 as sent at \d\d:\d\d$/),
+      ).toBeNull();
     });
   });
 
