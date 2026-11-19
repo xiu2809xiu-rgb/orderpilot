@@ -46,9 +46,12 @@ function RoleItem({
         </span>
       )}
       <span className="flex-1">
-        <span className="block">{t(`roles.${entry.role}`)}</span>
-        <span className="block text-xs text-foreground">
-          {entry.displayName}
+        {/* Team and person share a row: nine roles with their lines must leave room for the tour entry on a 768 px screen. */}
+        <span className="flex items-baseline gap-2">
+          <span>{t(`roles.${entry.role}`)}</span>
+          <span className="text-xs text-muted-foreground">
+            {entry.displayName}
+          </span>
         </span>
         <span className="block text-xs text-muted-foreground">
           {t(`demo.jobs.${entry.role}`)}
@@ -98,7 +101,7 @@ export function RoleSwitcher() {
           <span className="max-sm:sr-only">{t("demo.switcher")}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" sideOffset={14} className="w-80">
+      <DropdownMenuContent align="end" sideOffset={14} className="w-96">
         <DropdownMenuLabel className="font-normal text-muted-foreground">
           {t("demo.switcherHint")}
         </DropdownMenuLabel>
