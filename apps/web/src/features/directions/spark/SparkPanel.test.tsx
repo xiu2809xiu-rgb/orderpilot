@@ -427,8 +427,9 @@ describe("the Spark panel", () => {
     // Next to the sentence it qualifies, not only in the note under the input.
     const turn = mark.closest("li");
     expect(turn).not.toBeNull();
+    // The sentence arrives a moment after the mark, so wait for it.
     expect(
-      within(turn ?? document.body).getByText(/HP has one monitor/),
+      await within(turn ?? document.body).findByText(/HP has one monitor/),
     ).toBeVisible();
   });
 
