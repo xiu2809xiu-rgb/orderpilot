@@ -106,7 +106,7 @@ describe("the amount on a task row", () => {
           orderNo: "SO-0301",
           amount: "500.00",
           expectedPayment: {
-            paymentType: "full",
+            paymentType: "full-payment",
             amount: "500.00",
             currencyCode: "USD",
           },
