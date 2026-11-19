@@ -381,6 +381,7 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 
 | Story | Title                                                 | Branch                           | State                                                                               |
 | ----- | ----------------------------------------------------- | -------------------------------- | ----------------------------------------------------------------------------------- |
+| #287  | Search or jump to finds records                       | `fix/platform-search-records`    | This pull request. Orders, customers, vendors and items, by number and name         |
 | #191  | Cut CI minutes before the repository goes private     | `ci/minutes-job-conditions`      | Merged, [#192](https://github.com/xiu2809xiu-rgb/orderpilot/pull/192)               |
 | P-42  | Plan prompt 004                                       | `chore/plan-prompt-004`          | Merged, [#138](https://github.com/xiu2809xiu-rgb/orderpilot/pull/138)               |
 | P-13  | Docker images and the IaC scan                        | `ci/docker`                      | Merged, [#172](https://github.com/xiu2809xiu-rgb/orderpilot/pull/172)               |
