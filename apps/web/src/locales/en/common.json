@@ -107,7 +107,6 @@
     "switcher": "Demo role",
     "switcherHint": "Switch to another role to see its home page.",
     "current": "Current role",
-    "step": "Team {{n}} of the order flow",
     "jobs": {
       "SUPPORT": "Takes in the customer's order and sends the proforma invoice",
       "PRODUCT_MANAGER": "Checks stock and asks to buy what is short",
