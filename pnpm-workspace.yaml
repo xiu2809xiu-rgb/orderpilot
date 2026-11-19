@@ -54,36 +54,46 @@ peerDependencyRules:
 
 # Forced versions. Each entry needs a reason and a review date:
 #   <selector>: <version> # <reason>. Review: <date>
+# Rechecked on 2026-11-20: the lockfile still holds each package named below at
+# the version its entry describes, so every entry stays for two more weeks.
 overrides:
   # @nestjs/platform-express 12.1.3 pins multer 2.4.0, which has a high-severity
   # advisory (GHSA-q7qp-rjg7-q26m, fixed in 2.5.0, published 2026-10-22). The API
   # takes no uploads until P-18, but the scan is right to refuse it. Drop this
   # when @nestjs/platform-express depends on multer 2.5.0 or later.
-  # Review: 2026-11-14.
+  # Review: 2026-12-04.
   multer: 2.5.0
   # orval pulls undici 7.29.1 through @scalar/json-magic. It has high-severity
   # advisories (GHSA-qrxm-fqhp-jwvm and others, fixed in 7.30.1, published
   # 2026-10-15). orval only reads the local OpenAPI file at generate time. Drop
-  # this when orval depends on undici 7.30.1 or later. Review: 2026-11-14.
+  # this when orval depends on undici 7.30.1 or later. Review: 2026-12-04.
   "undici@<7.30.1": 7.30.1
-  # exceljs 4.4.0 (the data table'"'"'s Excel export, ADR 0023) depends on uuid 8.3.2,
+  # exceljs 4.4.0 (the data table's Excel export, ADR 0023) depends on uuid 8.3.2,
   # which has a high-severity advisory (GHSA-w5hq-g745-h8pq: no bounds check when
   # a caller passes its own buffer to v3, v5 or v6; fixed in 11.1.1). exceljs only
   # calls v4 without a buffer, so it was not exposed, and its browser file is
   # prebuilt, but the scan is right to refuse it. Drop this when exceljs moves to
-  # uuid 11.1.1 or later. Review: 2026-11-14.
+  # uuid 11.1.1 or later. Review: 2026-12-04.
   "uuid@<11.1.1": 11.1.1
   # Prisma 7.9.1 pulls mysql2 3.15.3 (GHSA-3f6p-5ww8-9rcr, fixed in 3.22.0, and
   # GHSA-rgwj-5xj2-c3m3, fixed in 3.23.1). mysql2 is only the driver for Prisma's
   # MySQL support; this project uses PostgreSQL through the pg adapter, so the
   # code is not reached, but the scan is right to refuse it. Drop this when
-  # prisma depends on mysql2 3.23.1 or later. Review: 2026-11-14.
+  # prisma depends on mysql2 3.23.1 or later. Review: 2026-12-04.
   "mysql2@<3.23.1": 3.23.1
   # @prisma/config 7.9.1 pulls deepmerge-ts 7.1.5 (GHSA-ggr8-5vv4-36mx, fixed in
   # 8.0.0). It merges Prisma's own config file at generate and migrate time,
   # which we write. Drop this when @prisma/config depends on deepmerge-ts 8.0.0
-  # or later. Review: 2026-11-14.
+  # or later. Review: 2026-12-04.
   "deepmerge-ts@<8.0.0": 8.0.0
+  # @prisma/config 7.9.1 pins effect 3.20.0, which has a high-severity advisory
+  # (GHSA-7589-6fvf-x4pw: a regular expression built by Schema.TemplateLiteral
+  # can be made to run for a very long time; fixed in 3.22.1, published
+  # 2026-07-30). Prisma's CLI uses effect to read the config file we write, at
+  # generate and migrate time, so nothing a user sends reaches it, but the scan
+  # is right to refuse it. Drop this when @prisma/config depends on effect
+  # 3.22.1 or later. Review: 2026-12-04.
+  "effect@<3.22.1": 3.22.1
   # @sentry/node 11.9.0 depends on @sentry/bundler-plugins, which pulls glob
   # 13.0.6 (GHSA-3g3m-2fjr-6pw4: a walk cancelled with an AbortSignal keeps
   # reading directories; affects 9.0.0 up to 14.0.2). Only Sentry's build-time
@@ -91,7 +101,7 @@ overrides:
   # we never pass glob an AbortSignal. glob 14 keeps the same CommonJS and ESM
   # entry points; its breaking changes are in matching internals. exceljs's glob
   # 7 is outside the affected range and stays. Drop this when
-  # @sentry/bundler-plugins depends on glob 14.0.2 or later. Review: 2026-11-14.
+  # @sentry/bundler-plugins depends on glob 14.0.2 or later. Review: 2026-12-04.
   "glob@>=9.0.0 <14.0.2": 14.0.3
 
 # `pnpm audit` in the verify job fails on high or critical advisories. An
@@ -103,7 +113,7 @@ audit:
     # minimatch below 11.0.1 (moderate): CPU exhaustion from an attacker's glob
     # pattern. Only dev tools reach it, with patterns we write; the fix is a new
     # major inside the release-age window. Same entry as osv-scanner.toml.
-    # Review: 2026-11-14.
+    # Review: 2026-11-28.
     - GHSA-g3hv-75wg-m249
 
 # A transitive dependency may not come from a git URL or a tarball link, only
