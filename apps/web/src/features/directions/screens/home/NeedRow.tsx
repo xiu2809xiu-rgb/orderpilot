@@ -20,7 +20,8 @@ interface NeedRowProps {
  * One task waiting for the person: what to do, which order and customer, how
  * long until it is due, the money when there is some, and one action. A task
  * that one click does has that button; any other opens its record, where it is
- * reviewed or decided. An SPR is never approved from the row.
+ * reviewed or decided. An SPR is never approved from the row. The action
+ * carries the task's kind and id, which the demo tour finds it by.
  */
 export function NeedRow({ task, busy, onComplete }: NeedRowProps) {
   const { t } = useTranslation("directions-home");
@@ -74,6 +75,9 @@ export function NeedRow({ task, busy, onComplete }: NeedRowProps) {
             variant="outline"
             size="sm"
             data-task-action
+            data-task-kind={task.kind}
+            data-task-id={task.id}
+            data-order={order ?? undefined}
             className={`${target} w-full`}
             disabled={busy}
             aria-label={t("needs.actionOn", { action: verb, order: what })}
@@ -92,6 +96,9 @@ export function NeedRow({ task, busy, onComplete }: NeedRowProps) {
             <Link
               to={href}
               data-task-action
+              data-task-kind={task.kind}
+              data-task-id={task.id}
+              data-order={order ?? undefined}
               aria-label={t("needs.actionOn", { action: verb, order: what })}
             >
               {verb}
