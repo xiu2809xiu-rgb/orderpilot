@@ -74,6 +74,7 @@ export function NeedRow({ task, busy, onComplete }: NeedRowProps) {
           ) : null}
         </>
       }
+      wideAction
       detail={
         sprTask ? (
           <SprDetail task={task} showRef={sprLink === null} />
@@ -94,7 +95,7 @@ export function NeedRow({ task, busy, onComplete }: NeedRowProps) {
             data-task-kind={task.kind}
             data-task-id={task.id}
             data-order={order ?? undefined}
-            className={`${target} w-full`}
+            className={`${target} w-full sm:w-auto`}
             disabled={busy}
             aria-label={t("needs.actionOn", { action: verb, order: what })}
             aria-describedby={recordsId}
@@ -111,7 +112,7 @@ export function NeedRow({ task, busy, onComplete }: NeedRowProps) {
             asChild
             variant="outline"
             size="sm"
-            className={`${target} w-full`}
+            className={`${target} w-full sm:w-auto`}
           >
             <Link
               to={href}

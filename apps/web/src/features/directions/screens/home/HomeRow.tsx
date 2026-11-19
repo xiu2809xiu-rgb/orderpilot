@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 interface HomeRowProps {
   /** What it is, in a few words. */
@@ -11,6 +12,11 @@ interface HomeRowProps {
   trailing?: ReactNode;
   /** The row's one action. */
   action?: ReactNode;
+  /**
+   * Room for an action that names what it records ("Mark documents as
+   * added"): a label cut off at the edge of its card says less than none.
+   */
+  wideAction?: boolean;
 }
 
 /**
@@ -27,9 +33,17 @@ export function HomeRow({
   detail,
   trailing,
   action,
+  wideAction = false,
 }: HomeRowProps) {
   return (
-    <div className="grid grid-cols-1 items-center gap-x-4 gap-y-2 py-3 sm:grid-cols-[minmax(0,1fr)_auto_8.5rem]">
+    <div
+      className={cn(
+        "grid grid-cols-1 items-center gap-x-4 gap-y-2 py-3",
+        wideAction
+          ? "sm:grid-cols-[minmax(0,1fr)_auto_13rem]"
+          : "sm:grid-cols-[minmax(0,1fr)_auto_8.5rem]",
+      )}
+    >
       <div className="min-w-0">
         <p className="fs-14 font-medium text-foreground">{title}</p>
         <div className="fs-14 flex min-w-0 items-baseline gap-x-2 text-muted-foreground">
