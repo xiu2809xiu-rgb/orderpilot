@@ -30,7 +30,7 @@ export function LoginPage() {
       <SignInCard />
       <SignInHero />
       {/* Last in the document so the keyboard meets the form first, drawn in the bar's own cell. Positioned, because the glass bar is a stacking context and would paint over it. */}
-      <div className="relative col-start-1 row-start-1 m-1.5 mr-2 self-start justify-self-end">
+      <div className="signin-theme relative col-start-1 row-start-1 m-1.5 mr-2 self-start justify-self-end">
         <ThemeSwitch />
       </div>
     </main>
