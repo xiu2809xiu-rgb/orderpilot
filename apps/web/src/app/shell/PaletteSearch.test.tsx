@@ -2,6 +2,7 @@ import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { useRecordTabs } from "@/stores/recordTabs";
+import { axeViolations } from "@/test/axe";
 import {
   customerRow,
   itemRow,
@@ -202,6 +203,19 @@ describe("searching the records from the palette", () => {
     expect(screen.getByTestId("where")).toHaveTextContent(
       "/master-data/customers/C-1042",
     );
+  });
+
+  it("has no accessibility violations with results, a failure and nothing found", async () => {
+    const served = everything();
+    served.failing.add("vendors");
+    openPalette();
+    await userEvent.type(await box(), "Meridian");
+    await screen.findByRole("alert");
+    expect(await axeViolations(document.body)).toEqual([]);
+    await userEvent.clear(await box());
+    await userEvent.type(await box(), "SO-0082");
+    await screen.findByRole("option", { name: /Order SO-0082/ });
+    expect(await axeViolations(document.body)).toEqual([]);
   });
 
   it("matches pages and actions by word, not by scattered letters", async () => {
