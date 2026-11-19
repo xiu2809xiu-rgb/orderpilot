@@ -14,7 +14,7 @@ Synthetic data only.
 
 ## The rest, in a few sentences
 
-The demo had to run on one laptop without the network, so the build ships with scripts to start it, to put its data back and to check it, and everything it needs is local. Later that night the lead asked for a more striking entrance and a soft effect at each press, which became the sign-in scene, Home's first view and the click ring.
+The demo had to run on one laptop without the network, so it was started, reset and checked with scripts kept on that laptop, and everything it needs is local. Later that night the lead asked for a more striking entrance and a soft effect at each press, which became the sign-in scene, Home's first view and the click ring.
 
 ## What the AI did
 
