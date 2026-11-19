@@ -262,12 +262,14 @@ Ticked means it exists on `main` and I found it with a command. Planned means th
 
 ### 8. Dates to watch
 
-| Date       | What                                                                                                                                                                                                          |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-11-03 | glob 14.0.2 passes the 7-day release-age window, so an override to glob 14 becomes possible. Done in P-28 with glob 14.0.3                                                                                    |
-| 2026-11-06 | `GHSA-3g3m-2fjr-6pw4` would stop being accepted in `osv-scanner.toml`. P-28 removes the entry, because glob 14.0.3 replaces the affected glob 13.0.6                                                          |
-| 2026-11-14 | Review of `GHSA-g3hv-75wg-m249` (minimatch) in `osv-scanner.toml` and in the `audit.ignore` list of `pnpm-workspace.yaml`, and of the five forced versions there (multer, undici, uuid, mysql2, deepmerge-ts) |
-| 2026-12-01 | Review of the ESLint plugin peer dependency in `pnpm-workspace.yaml`                                                                                                                                          |
+| Date       | What                                                                                                                                                                                                                                                                                                                      |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-11-03 | glob 14.0.2 passes the 7-day release-age window, so an override to glob 14 becomes possible. Done in P-28 with glob 14.0.3                                                                                                                                                                                                |
+| 2026-11-06 | `GHSA-3g3m-2fjr-6pw4` would stop being accepted in `osv-scanner.toml`. P-28 removes the entry, because glob 14.0.3 replaces the affected glob 13.0.6                                                                                                                                                                      |
+| 2026-11-14 | Review of `GHSA-g3hv-75wg-m249` (minimatch) in `osv-scanner.toml` and in the `audit.ignore` list of `pnpm-workspace.yaml`, and of the five forced versions there (multer, undici, uuid, mysql2, deepmerge-ts). Done: minimatch was renewed on 14 Nov to 28 Nov, and the forced versions were rechecked on 20 Nov and kept |
+| 2026-11-28 | Review of `GHSA-g3hv-75wg-m249` (minimatch) in `osv-scanner.toml` and in the `audit.ignore` list of `pnpm-workspace.yaml`. The scan fails on it again after this date                                                                                                                                                     |
+| 2026-12-01 | Review of the ESLint plugin peer dependency in `pnpm-workspace.yaml`                                                                                                                                                                                                                                                      |
+| 2026-12-04 | Review of the seven forced versions in `pnpm-workspace.yaml` (multer, undici, uuid, mysql2, deepmerge-ts, effect, glob): drop each one whose parent package now asks for the fixed version                                                                                                                                |
 
 ### 9. What only Richie can do by hand
 
