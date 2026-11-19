@@ -379,54 +379,54 @@ In flight: new order and draft editing (P-49, `feat/order-form`), and the Pro ki
 
 Why it is slower than planned: every builder stopped at a usage limit several times, and two of the accounts that run them reached their weekly limits on 2 Nov (item bl). Pushed work survived every stop. The last walk of all nine roles has still to run on main, now that Docker Desktop is back. The [screenshot index](design/product-pass-screenshots.md) holds every picture the stories took.
 
-| Story | Title                                                    | Branch                           | State                                                                                  |
-| ----- | -------------------------------------------------------- | -------------------------------- | -------------------------------------------------------------------------------------- |
-| #286  | The sign-in page and the Demo role menu follow the order | `feat/platform-entrance-flow`    | This pull request. Six teams first in flow order, and a role change stays on the order |
-| #191  | Cut CI minutes before the repository goes private        | `ci/minutes-job-conditions`      | Merged, [#192](https://github.com/xiu2809xiu-rgb/orderpilot/pull/192)                  |
-| P-42  | Plan prompt 004                                          | `chore/plan-prompt-004`          | Merged, [#138](https://github.com/xiu2809xiu-rgb/orderpilot/pull/138)                  |
-| P-13  | Docker images and the IaC scan                           | `ci/docker`                      | Merged, [#172](https://github.com/xiu2809xiu-rgb/orderpilot/pull/172)                  |
-| P-14  | End-to-end smoke                                         | `test/e2e-smoke`                 | Merged, [#182](https://github.com/xiu2809xiu-rgb/orderpilot/pull/182)                  |
-| P-39  | Module navigation, showing only what is real             | `feat/workspace-modules`         | Merged, [#187](https://github.com/xiu2809xiu-rgb/orderpilot/pull/187)                  |
-| P-43  | Records open as tabs                                     | `feat/workspace-record-tabs`     | Merged, [#175](https://github.com/xiu2809xiu-rgb/orderpilot/pull/175)                  |
-| P-44  | List template: filter bar, action bar and status chip    | `feat/list-template-bars`        | Merged, [#189](https://github.com/xiu2809xiu-rgb/orderpilot/pull/189)                  |
-| P-45  | List template: grid, saved views and operation log       | `feat/list-template-grid`        | Merged, [#206](https://github.com/xiu2809xiu-rgb/orderpilot/pull/206), part of #141    |
-| P-46  | Form kit                                                 | `feat/form-kit`                  | Merged, [#173](https://github.com/xiu2809xiu-rgb/orderpilot/pull/173)                  |
-| P-47  | Document form                                            | `feat/document-form`             | Merged, [#216](https://github.com/xiu2809xiu-rgb/orderpilot/pull/216), part of #142    |
-| P-48  | Lines grid                                               | `feat/lines-grid`                | Merged, [#190](https://github.com/xiu2809xiu-rgb/orderpilot/pull/190)                  |
-| P-22  | The design system with the Pro kits                      | `feat/platform-design-system`    | In progress on its branch: the keys arrived on 6 Nov                                   |
-| P-36  | Orders: the reader and the list                          | `feat/product-pass-orders`       | Merged, [#217](https://github.com/xiu2809xiu-rgb/orderpilot/pull/217), part of #122    |
-| P-49  | New order and draft editing                              | `feat/order-form`                | Merged, [#218](https://github.com/xiu2809xiu-rgb/orderpilot/pull/218)                  |
-| P-50  | Submit, cancel and copy an order                         | `feat/order-actions`             | Not started                                                                            |
-| P-51  | The one order page                                       | `feat/one-order-page`            | Not started                                                                            |
-| P-37  | Document intake and the inbox                            | `feat/product-pass-documents`    | Not started                                                                            |
-| P-52  | Demo documents                                           | `feat/demo-documents`            | Merged, [#174](https://github.com/xiu2809xiu-rgb/orderpilot/pull/174)                  |
-| P-53  | Mock AI and the review fields                            | `feat/document-review`           | Not started                                                                            |
-| P-54  | Document preview and highlight                           | `feat/document-preview`          | Not started                                                                            |
-| P-55  | An order from a confirmed PO                             | `feat/order-from-po`             | Not started                                                                            |
-| P-15  | Events, queues and live updates                          | `feat/platform-events`           | Not started                                                                            |
-| P-56  | Pins, to-dos and reminders: the records                  | `feat/my-work-records`           | Not started                                                                            |
-| P-57  | Pin to top, Remind me and Add to my to-dos               | `feat/my-work-actions`           | Not started                                                                            |
-| P-58  | The My work panel                                        | `feat/my-work-panel`             | Not started                                                                            |
-| P-59  | Personal reminders fire                                  | `feat/my-work-reminders`         | Not started                                                                            |
-| P-60  | SPR drafts and the SPR list                              | `feat/spr-drafts`                | Not started                                                                            |
-| P-61  | The SPR form                                             | `feat/spr-form`                  | Not started                                                                            |
-| P-62  | Payment confirmations                                    | `feat/payment-entries`           | Not started                                                                            |
-| P-63  | Shipments                                                | `feat/shipments`                 | Not started                                                                            |
-| P-64  | Users                                                    | `feat/system-users`              | Not started                                                                            |
-| P-65  | Roles                                                    | `feat/system-roles`              | Not started                                                                            |
-| P-66  | Approval limits form                                     | `feat/settings-approval-limits`  | Not started                                                                            |
-| P-67  | Check tolerance and reminder rule forms                  | `feat/settings-rule-forms`       | Not started                                                                            |
-| P-68  | Change requests for master data                          | `feat/master-change-requests`    | Not started                                                                            |
-| P-69  | Mock Navision Demo data page                             | `feat/mock-navision-demo-data`   | Not started                                                                            |
-| P-70  | Pick and pack, and Proforma invoices                     | `feat/work-queues`               | Not started                                                                            |
-| P-71  | One status system everywhere                             | `feat/status-families`           | Not started                                                                            |
-| P-72  | SPR approval on the templates                            | `feat/template-spr-approval`     | Not started                                                                            |
-| P-38  | The task inbox on the templates                          | `feat/template-inbox`            | Not started                                                                            |
-| P-73  | Exceptions on the templates                              | `feat/template-exceptions`       | Not started                                                                            |
-| P-74  | Tracker and KPIs on the templates                        | `feat/template-tracker-insights` | Not started                                                                            |
-| P-75  | Audit log on the template                                | `feat/template-audit`            | Not started                                                                            |
-| P-76  | Governance and monitoring on the templates               | `feat/template-monitoring`       | Not started                                                                            |
-| P-78  | Room in the entry bundle                                 | `perf/entry-bundle-room`         | Merged, [#183](https://github.com/xiu2809xiu-rgb/orderpilot/pull/183)                  |
+| Story | Title                                                 | Branch                           | State                                                                               |
+| ----- | ----------------------------------------------------- | -------------------------------- | ----------------------------------------------------------------------------------- |
+| #286  | The entrance: six teams first, in flow order          | `feat/platform-entrance-flow`    | This pull request. A role change stays on the order's page                          |
+| #191  | Cut CI minutes before the repository goes private     | `ci/minutes-job-conditions`      | Merged, [#192](https://github.com/xiu2809xiu-rgb/orderpilot/pull/192)               |
+| P-42  | Plan prompt 004                                       | `chore/plan-prompt-004`          | Merged, [#138](https://github.com/xiu2809xiu-rgb/orderpilot/pull/138)               |
+| P-13  | Docker images and the IaC scan                        | `ci/docker`                      | Merged, [#172](https://github.com/xiu2809xiu-rgb/orderpilot/pull/172)               |
+| P-14  | End-to-end smoke                                      | `test/e2e-smoke`                 | Merged, [#182](https://github.com/xiu2809xiu-rgb/orderpilot/pull/182)               |
+| P-39  | Module navigation, showing only what is real          | `feat/workspace-modules`         | Merged, [#187](https://github.com/xiu2809xiu-rgb/orderpilot/pull/187)               |
+| P-43  | Records open as tabs                                  | `feat/workspace-record-tabs`     | Merged, [#175](https://github.com/xiu2809xiu-rgb/orderpilot/pull/175)               |
+| P-44  | List template: filter bar, action bar and status chip | `feat/list-template-bars`        | Merged, [#189](https://github.com/xiu2809xiu-rgb/orderpilot/pull/189)               |
+| P-45  | List template: grid, saved views and operation log    | `feat/list-template-grid`        | Merged, [#206](https://github.com/xiu2809xiu-rgb/orderpilot/pull/206), part of #141 |
+| P-46  | Form kit                                              | `feat/form-kit`                  | Merged, [#173](https://github.com/xiu2809xiu-rgb/orderpilot/pull/173)               |
+| P-47  | Document form                                         | `feat/document-form`             | Merged, [#216](https://github.com/xiu2809xiu-rgb/orderpilot/pull/216), part of #142 |
+| P-48  | Lines grid                                            | `feat/lines-grid`                | Merged, [#190](https://github.com/xiu2809xiu-rgb/orderpilot/pull/190)               |
+| P-22  | The design system with the Pro kits                   | `feat/platform-design-system`    | In progress on its branch: the keys arrived on 6 Nov                                |
+| P-36  | Orders: the reader and the list                       | `feat/product-pass-orders`       | Merged, [#217](https://github.com/xiu2809xiu-rgb/orderpilot/pull/217), part of #122 |
+| P-49  | New order and draft editing                           | `feat/order-form`                | Merged, [#218](https://github.com/xiu2809xiu-rgb/orderpilot/pull/218)               |
+| P-50  | Submit, cancel and copy an order                      | `feat/order-actions`             | Not started                                                                         |
+| P-51  | The one order page                                    | `feat/one-order-page`            | Not started                                                                         |
+| P-37  | Document intake and the inbox                         | `feat/product-pass-documents`    | Not started                                                                         |
+| P-52  | Demo documents                                        | `feat/demo-documents`            | Merged, [#174](https://github.com/xiu2809xiu-rgb/orderpilot/pull/174)               |
+| P-53  | Mock AI and the review fields                         | `feat/document-review`           | Not started                                                                         |
+| P-54  | Document preview and highlight                        | `feat/document-preview`          | Not started                                                                         |
+| P-55  | An order from a confirmed PO                          | `feat/order-from-po`             | Not started                                                                         |
+| P-15  | Events, queues and live updates                       | `feat/platform-events`           | Not started                                                                         |
+| P-56  | Pins, to-dos and reminders: the records               | `feat/my-work-records`           | Not started                                                                         |
+| P-57  | Pin to top, Remind me and Add to my to-dos            | `feat/my-work-actions`           | Not started                                                                         |
+| P-58  | The My work panel                                     | `feat/my-work-panel`             | Not started                                                                         |
+| P-59  | Personal reminders fire                               | `feat/my-work-reminders`         | Not started                                                                         |
+| P-60  | SPR drafts and the SPR list                           | `feat/spr-drafts`                | Not started                                                                         |
+| P-61  | The SPR form                                          | `feat/spr-form`                  | Not started                                                                         |
+| P-62  | Payment confirmations                                 | `feat/payment-entries`           | Not started                                                                         |
+| P-63  | Shipments                                             | `feat/shipments`                 | Not started                                                                         |
+| P-64  | Users                                                 | `feat/system-users`              | Not started                                                                         |
+| P-65  | Roles                                                 | `feat/system-roles`              | Not started                                                                         |
+| P-66  | Approval limits form                                  | `feat/settings-approval-limits`  | Not started                                                                         |
+| P-67  | Check tolerance and reminder rule forms               | `feat/settings-rule-forms`       | Not started                                                                         |
+| P-68  | Change requests for master data                       | `feat/master-change-requests`    | Not started                                                                         |
+| P-69  | Mock Navision Demo data page                          | `feat/mock-navision-demo-data`   | Not started                                                                         |
+| P-70  | Pick and pack, and Proforma invoices                  | `feat/work-queues`               | Not started                                                                         |
+| P-71  | One status system everywhere                          | `feat/status-families`           | Not started                                                                         |
+| P-72  | SPR approval on the templates                         | `feat/template-spr-approval`     | Not started                                                                         |
+| P-38  | The task inbox on the templates                       | `feat/template-inbox`            | Not started                                                                         |
+| P-73  | Exceptions on the templates                           | `feat/template-exceptions`       | Not started                                                                         |
+| P-74  | Tracker and KPIs on the templates                     | `feat/template-tracker-insights` | Not started                                                                         |
+| P-75  | Audit log on the template                             | `feat/template-audit`            | Not started                                                                         |
+| P-76  | Governance and monitoring on the templates            | `feat/template-monitoring`       | Not started                                                                         |
+| P-78  | Room in the entry bundle                              | `perf/entry-bundle-room`         | Merged, [#183](https://github.com/xiu2809xiu-rgb/orderpilot/pull/183)               |
 
 ## Prompt 003: the product pass
 
