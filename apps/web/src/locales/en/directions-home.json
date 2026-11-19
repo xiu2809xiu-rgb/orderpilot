@@ -44,20 +44,48 @@
     "more": "{{count}} more waiting",
     "viewAll": "View all {{total}} tasks",
     "sprTask": {
-      "RAISE_SPR": "Raise {{recordNo}}",
       "APPROVE_SPR": "Approve {{recordNo}}"
+    },
+    "raiseSpr": "Raise the SPR for {{orderNo}}",
+    "sprShort": "{{quantity}} short: {{item}}",
+    "sprRef": "SPR {{recordNo}}",
+    "actions": {
+      "REVIEW_FIELDS": "Review",
+      "RAISE_SPR": "Raise",
+      "APPROVE_SPR": "Review",
+      "SEND_PI": "Mark PI as sent",
+      "CONFIRM_PAYMENT": "Confirm",
+      "PACK_ORDER": "Mark as packed",
+      "RECOUNT_CARTONS": "Mark as counted",
+      "ADD_SHIPPING_DOCUMENTS": "Mark documents as added"
+    },
+    "records": {
+      "default": "Records that this is done. OrderPilot sends nothing.",
+      "RAISE_SPR": "Raises the SPR for approval. OrderPilot buys nothing.",
+      "CONFIRM_PAYMENT": "Records that the payment arrived. OrderPilot moves no money."
+    },
+    "amount": {
+      "spr": "SPR amount",
+      "due": "Due",
+      "orderValue": "Order value",
+      "of": "{{part}} of {{whole}}"
+    },
+    "next": {
+      "RAISE_SPR": "It goes to the management approvers.",
+      "SEND_PI": "Finance confirms the payment next.",
+      "CONFIRM_PAYMENT": "The warehouse packs next.",
+      "PACK_ORDER": "Support makes the invoice and packing list next.",
+      "ADD_SHIPPING_DOCUMENTS": "That was the order's last step."
     }
   },
   "timeline": {
     "title": "My timeline",
     "intro": "What you finished, what you are on, and what comes next.",
     "summaryNone": "Nothing is waiting, so there is nothing to clear.",
-    "summary_one": "{{count}} task is waiting. It is due {{last}}.",
-    "summary_other": "{{count}} tasks are waiting, {{late}} past their due time. The last one is due {{last}}.",
     "done": {
       "title": "Done today",
       "empty": "Nothing finished yet today. A task you complete here appears with the time.",
-      "at": "Finished at {{time}}"
+      "at": "{{what}} at {{time}}"
     },
     "now": {
       "title": "Now",
@@ -75,7 +103,8 @@
       "noEstimate": "No usual time for this step in the data"
     },
     "basis": "Estimate from how long this step took on the last {{orders}} orders.",
-    "failed": "Your timeline comes back when your tasks load."
+    "failed": "Your timeline comes back when your tasks load.",
+    "summary": "The last task is due {{last}}."
   },
   "measures": {
     "title": "Your numbers",
