@@ -335,8 +335,8 @@ export function renderHome(role: Role) {
           <Route path="/" element={<HomeScreen />} />
           <Route path="*" element={null} />
         </Routes>
+        <Toaster />
       </MemoryRouter>
-      <Toaster />
     </QueryClientProvider>,
   );
 }

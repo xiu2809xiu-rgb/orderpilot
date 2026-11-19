@@ -2,6 +2,13 @@ import { create } from "zustand";
 
 export type ToastKind = "done" | "error";
 
+/** A link beside Undo, such as "Open order". Its words are the caller's, already translated. */
+export interface ToastAction {
+  label: string;
+  /** An address inside the app. */
+  to: string;
+}
+
 export interface ToastItem {
   id: number;
   kind: ToastKind;
@@ -9,6 +16,8 @@ export interface ToastItem {
   description?: string;
   /** Reverses the action. When present the toast shows an Undo button. */
   undo?: () => void | Promise<void>;
+  /** When present the toast shows a link to the record the message is about. */
+  action?: ToastAction;
 }
 
 export interface ToastOptions {
@@ -16,6 +25,8 @@ export interface ToastOptions {
   description?: string;
   /** Pass a function that reverses the action and the toast offers Undo. */
   undo?: () => void | Promise<void>;
+  /** Pass a label and an address and the toast offers a link there. */
+  action?: ToastAction;
 }
 
 interface ToastState {

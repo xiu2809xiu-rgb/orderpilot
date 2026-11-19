@@ -1,6 +1,7 @@
 import { CircleAlert, CircleCheck, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router";
 import { isTyping } from "@/app/shell/shortcuts";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -122,6 +123,13 @@ function ToastCard({ item }: { item: ToastItem }) {
           <p className="text-muted-foreground">{item.description}</p>
         ) : null}
       </div>
+      {item.action ? (
+        <Button variant="ghost" size="sm" asChild>
+          <Link to={item.action.to} onClick={close}>
+            {item.action.label}
+          </Link>
+        </Button>
+      ) : null}
       {item.undo ? (
         <Button
           variant="ghost"

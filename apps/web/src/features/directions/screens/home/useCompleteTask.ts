@@ -85,6 +85,12 @@ export function useCompleteTask({
         : undefined;
       toast.done(t(`needs.done.${task.kind}`, { orderNo: task.orderNo }), {
         description: next,
+        action: task.orderNo
+          ? {
+              label: tNext("needs.openOrder"),
+              to: `/orders/${task.orderNo}`,
+            }
+          : undefined,
         undo: async () => {
           await undo();
           onUndone(task);

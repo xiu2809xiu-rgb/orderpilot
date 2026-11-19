@@ -143,9 +143,9 @@ function home() {
         <Routes>
           <Route path="/" element={<HomeScreen />} />
         </Routes>
+        {/* The shell draws the toaster on the real page, inside the router. */}
+        <Toaster />
       </MemoryRouter>
-      {/* The shell draws the toaster on the real page. */}
-      <Toaster />
     </QueryClientProvider>,
   );
 }

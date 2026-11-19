@@ -41,6 +41,7 @@
       "ADD_SHIPPING_DOCUMENTS": "Add the shipping documents"
     },
     "actionOn": "{{action}} for {{order}}",
+    "openOrder": "Open order",
     "more": "{{count}} more waiting",
     "viewAll": "View all {{total}} tasks",
     "sprTask": {

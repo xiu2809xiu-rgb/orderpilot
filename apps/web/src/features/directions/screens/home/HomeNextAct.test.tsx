@@ -143,7 +143,16 @@ describe.each(CASES)("the $task.kind row", (row) => {
     expect(toast?.message).toBe(row.message);
     expect(toast?.description).toBe(row.next);
     expect(toast?.undo).toBeTypeOf("function");
+    expect(toast?.action).toEqual({
+      label: "Open order",
+      to: `/orders/${order}`,
+    });
     expect(served.calls.some((call) => call.startsWith("POST "))).toBe(true);
+
+    // The toast offers the order beside Undo, drawn by the shell's toaster.
+    const open = await screen.findByRole("link", { name: "Open order" });
+    expect(open).toHaveAttribute("href", `/orders/${order}`);
+    expect(screen.getByRole("button", { name: "Undo" })).toBeInTheDocument();
 
     // Done today says what was done, for which order, and when; and opens the order.
     const link = await screen.findByRole("link", {
