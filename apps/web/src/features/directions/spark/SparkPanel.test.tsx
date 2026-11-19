@@ -15,6 +15,7 @@ import { useSessionStore } from "@/stores/session";
 import { axeViolations } from "@/test/axe";
 import { sessionFor } from "@/test/fixtures";
 import { STOCK_ANSWER } from "../data/index";
+import { availableNow, grouped, stockFacts } from "./sparkFacts";
 import SparkPanel from "./SparkPanel";
 
 // The test runner asks for reduced motion: the pause before an answer is short
@@ -107,13 +108,14 @@ describe("the Spark panel", () => {
       "Item and part number",
       "On hand",
       "On sales orders",
-      "Available",
       "On purchase orders",
+      "Available",
     ]);
     const cells = within(table)
       .getAllByRole("cell")
       .map((cell) => cell.textContent);
-    expect(cells).toEqual(["880", "6", "1,020", "146"]);
+    // On hand, on sales orders, on purchase orders, then Available: the same order as the words.
+    expect(cells).toEqual(["880", "6", "146", "1,020"]);
     // The part number sits in the item's own cell, under its name.
     expect(within(table).getByRole("rowheader").textContent).toContain(
       item?.partNumber ?? "",
@@ -129,9 +131,14 @@ describe("the Spark panel", () => {
     expect(subject).toHaveValue("Stock of HP Monitor 24-inch");
     const message = within(dialog).getByRole("textbox", { name: "Message" });
     expect(message).toBeInstanceOf(HTMLTextAreaElement);
+    // The draft quotes what is here now (880 less 6), and names the 146 as due.
+    const facts = stockFacts();
+    const now = grouped(facts.only ? availableNow(facts.only) : 0);
+    const due = grouped(facts.totals.onPurchaseOrders);
     expect((message as HTMLTextAreaElement).value).toContain(
-      "We have 1,020 available now",
+      `We have ${now} available now. A further ${due} are due on purchase orders.`,
     );
+    expect((message as HTMLTextAreaElement).value).not.toContain("1,020");
     expect(
       within(dialog).getByRole("button", { name: "Copy draft" }),
     ).toBeVisible();
@@ -165,16 +172,19 @@ describe("the Spark panel", () => {
     panel();
     const dialog = await screen.findByRole("dialog", { name: "Spark" });
     const field = within(dialog).getByRole("textbox", { name: "Ask Spark" });
-    await user.type(field, "Is there any stock of HP?{Enter}");
+    await user.type(field, "Is there any stock of HP monitors?{Enter}");
     expect(
       await within(dialog).findByRole("table", {
         name: "HP monitors in stock",
       }),
     ).toBeVisible();
     await user.type(field, "What is the weather?{Enter}");
-    expect(
-      await within(dialog).findByText(/Your role cannot read sales figures/),
-    ).toBeVisible();
+    // Support may not read sales, so the one question it can answer is offered, and no word about sales.
+    const reply = await within(dialog).findByText(
+      "This is a preview with scripted answers, so Spark cannot answer that one. It can answer this question:",
+    );
+    expect(reply).toBeVisible();
+    expect(within(dialog).queryByText(/sales figures/)).toBeNull();
   });
 
   it("answers the sales question for a role that may read sales, with a chart and its table", async () => {
@@ -307,6 +317,177 @@ describe("the Spark panel", () => {
       await screen.findByRole("dialog", { name: "Spark" }),
     ).toHaveAttribute("data-maximised", "true");
   });
+
+  it("keeps the head, the thread and the input as three parts through three questions", async () => {
+    const user = userEvent.setup();
+    panel();
+    const dialog = await screen.findByRole("dialog", { name: "Spark" });
+    const field = within(dialog).getByRole("textbox", { name: "Ask Spark" });
+    const questions = [
+      "How many HP monitors do we have?",
+      "How many Dell monitors do we have?",
+      "hello",
+    ];
+    for (const [index, question] of questions.entries()) {
+      await user.type(field, `${question}{Enter}`);
+      await within(dialog).findByRole("img", { name: "Spark is ready" });
+      expect(within(dialog).getAllByText("Scripted preview")).toHaveLength(
+        index + 1,
+      );
+      // The input is the last part of the panel, and the thread lies in the one region that scrolls.
+      expect(dialog.children).toHaveLength(3);
+      expect(dialog.lastElementChild).toContainElement(field);
+      const region = within(dialog)
+        .getByRole("list", { name: "Conversation with Spark" })
+        .closest(".spark-scroll");
+      expect(region).toBe(dialog.children[1]);
+      expect(region?.className).toContain("overflow-y-auto");
+      expect(region?.className).toContain("min-h-0");
+    }
+  }, 30_000);
+
+  it.each([
+    "How many Dell monitors do we have?",
+    "how much stock of Dell laptops?",
+    "hp",
+    "What is holding up PO 4471-26?",
+  ])(
+    "answers %j with the plain reply, never the HP figures",
+    async (question) => {
+      const user = userEvent.setup();
+      panel();
+      const dialog = await screen.findByRole("dialog", { name: "Spark" });
+      await user.type(
+        within(dialog).getByRole("textbox", { name: "Ask Spark" }),
+        `${question}{Enter}`,
+      );
+      expect(
+        await within(dialog).findByText(/Spark cannot answer that one/),
+      ).toBeVisible();
+      expect(within(dialog).queryByRole("table")).toBeNull();
+      expect(within(dialog).queryByText(/880|1,020/)).toBeNull();
+      // Support reads no sales, so one suggestion: the question it can answer.
+      const thread = within(dialog).getByRole("list", {
+        name: "Conversation with Spark",
+      });
+      expect(
+        await within(thread).findAllByRole("button", { name: /\?$/ }),
+      ).toHaveLength(1);
+      expect(
+        within(thread).getByRole("button", {
+          name: "How many HP monitors do we have?",
+        }),
+      ).toBeVisible();
+    },
+  );
+
+  it("offers a role that may read sales both questions, in the plural", async () => {
+    useSessionStore.setState({
+      status: "active",
+      session: sessionFor("MANAGEMENT"),
+    });
+    const user = userEvent.setup();
+    panel();
+    const dialog = await screen.findByRole("dialog", { name: "Spark" });
+    await user.type(
+      within(dialog).getByRole("textbox", { name: "Ask Spark" }),
+      "How many Dell monitors do we have?{Enter}",
+    );
+    expect(
+      await within(dialog).findByText(
+        "This is a preview with scripted answers, so Spark cannot answer that one. It can answer these questions:",
+      ),
+    ).toBeVisible();
+    const thread = within(dialog).getByRole("list", {
+      name: "Conversation with Spark",
+    });
+    expect(
+      await within(thread).findByRole("button", {
+        name: "How have sales moved over the last 12 months?",
+      }),
+    ).toBeVisible();
+    expect(
+      within(thread).getByRole("button", {
+        name: "How many HP monitors do we have?",
+      }),
+    ).toBeVisible();
+  });
+
+  it("marks each reply as a scripted preview, beside the answer", async () => {
+    const user = userEvent.setup();
+    panel();
+    const dialog = await screen.findByRole("dialog", { name: "Spark" });
+    await user.click(
+      within(dialog).getByRole("button", {
+        name: "How many HP monitors do we have?",
+      }),
+    );
+    const mark = await within(dialog).findByText("Scripted preview");
+    expect(mark).toBeVisible();
+    // Next to the sentence it qualifies, not only in the note under the input.
+    const turn = mark.closest("li");
+    expect(turn).not.toBeNull();
+    expect(
+      within(turn ?? document.body).getByText(/HP has one monitor/),
+    ).toBeVisible();
+  });
+
+  it("keeps what is typed when the panel is closed and opened again, and empties it on send and on a new conversation", async () => {
+    const user = userEvent.setup();
+    const tree = (open: boolean) => (
+      <MemoryRouter initialEntries={["/directions/spectra/home"]}>
+        <Routes>
+          <Route
+            path="/directions/:direction/:screen"
+            element={<SparkPanel open={open} onOpenChange={vi.fn()} />}
+          />
+        </Routes>
+      </MemoryRouter>
+    );
+    const view = render(tree(true));
+    const field = async () =>
+      within(await screen.findByRole("dialog", { name: "Spark" })).getByRole(
+        "textbox",
+        { name: "Ask Spark" },
+      );
+    await user.type(await field(), "half a quest");
+    view.rerender(tree(false));
+    expect(screen.queryByRole("dialog")).toBeNull();
+    view.rerender(tree(true));
+    expect(await field()).toHaveValue("half a quest");
+    // Sending empties it: closed and opened again, it is still empty.
+    await user.clear(await field());
+    await user.type(await field(), "How many HP monitors do we have?{Enter}");
+    await screen.findByRole("table", { name: "HP monitors in stock" });
+    view.rerender(tree(false));
+    view.rerender(tree(true));
+    expect(await field()).toHaveValue("");
+    // A new conversation empties it too, and puts focus in the field.
+    await user.type(await field(), "another draft");
+    await user.click(screen.getByRole("button", { name: "New conversation" }));
+    expect(await field()).toHaveValue("");
+    expect(await field()).toHaveFocus();
+    expect(screen.queryByRole("table")).toBeNull();
+  }, 30_000);
+
+  it("puts focus in the field when it opens, and keeps it there after a question is sent", async () => {
+    const user = userEvent.setup();
+    panel();
+    const dialog = await screen.findByRole("dialog", { name: "Spark" });
+    const field = within(dialog).getByRole("textbox", { name: "Ask Spark" });
+    expect(field).toHaveFocus();
+    // The suggestion's button goes with the welcome, and focus must not go with it.
+    await user.click(
+      within(dialog).getByRole("button", {
+        name: "How many HP monitors do we have?",
+      }),
+    );
+    await within(dialog).findByRole("table", { name: "HP monitors in stock" });
+    expect(field).toHaveFocus();
+    await user.type(field, "hello{Enter}");
+    await within(dialog).findByText(/Spark cannot answer that one/);
+    expect(field).toHaveFocus();
+  }, 30_000);
 
   it("has no accessibility violations, empty or with an answer", async () => {
     const user = userEvent.setup();

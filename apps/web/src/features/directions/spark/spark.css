@@ -8,8 +8,24 @@
   display: flex;
   width: 100%;
   flex-direction: column;
+  /* Clip, not hidden: a clipped box can never be scrolled, so no script can slide
+     the head and the input out of the panel. */
   overflow: hidden;
+  overflow: clip;
   color: var(--foreground);
+}
+
+/* The thread's region: the one thing in the panel that scrolls. It contains its
+   own positioned children (the screen-reader-only labels), which otherwise
+   reach out to the panel and make the panel itself scrollable. */
+.spark-scroll {
+  position: relative;
+  overscroll-behavior: contain;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .spark-scroll {
+    scroll-behavior: smooth;
+  }
 }
 
 @media (min-width: 40rem) {
@@ -19,7 +35,8 @@
     inset-block-start: calc(
       var(--dx-chrome-h, 2.5rem) + var(--dx-panel-edge, 0rem)
     );
-    inset-block-end: var(--dx-panel-edge, 0rem);
+    /* Above the strip under the page while it holds the analytics card. */
+    inset-block-end: calc(var(--spark-dock, 0px) + var(--dx-panel-edge, 0rem));
     right: var(--dx-panel-edge, 0rem);
   }
   /* Maximised, as a window on Windows: the panel fills the width, edge to edge. */
@@ -28,6 +45,9 @@
   }
 }
 @media (max-width: 39.99rem) {
+  .spark-panel {
+    inset-block-end: var(--spark-dock, 0px);
+  }
   /* On a phone the panel already fills the screen, so there is nothing to maximise. */
   .spark-size {
     display: none;
