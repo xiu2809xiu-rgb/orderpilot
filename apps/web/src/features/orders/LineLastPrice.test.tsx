@@ -50,7 +50,7 @@ async function pickOtherCustomer(user: ReturnType<typeof userEvent.setup>) {
 }
 
 describe("the customer's last agreed price beside a line", () => {
-  it("shows the price and its date, and starts the line's price at it", async () => {
+  it("shows the price and its date, and never writes it into the line's price", async () => {
     const user = userEvent.setup();
     const server = fakeServer();
     renderOrders("/orders/new");
@@ -62,9 +62,7 @@ describe("the customer's last agreed price beside a line", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Last USD 17.90")).toBeVisible();
     expect(screen.getByText("14 Oct 2026")).toBeVisible();
-    await waitFor(() => {
-      expect(unitPrice()).toHaveValue("17.90");
-    });
+    expect(unitPrice()).toHaveValue("");
     expect(server.requests.lastPriceReads).toBeGreaterThan(0);
   });
 
@@ -74,8 +72,7 @@ describe("the customer's last agreed price beside a line", () => {
     renderOrders("/orders/new");
     await pickCustomerAndItem(user);
     expect(await screen.findByText("No earlier price")).toBeVisible();
-    // Nothing agreed before: the line keeps the item's list price.
-    expect(unitPrice()).toHaveValue("18.40");
+    expect(unitPrice()).toHaveValue("");
   });
 
   it("asks for nothing until there is a customer and an item", async () => {
@@ -134,7 +131,7 @@ describe("the customer's last agreed price beside a line", () => {
       await screen.findByText("Last price not known", {}, { timeout: 8000 }),
     ).toBeVisible();
     expect(screen.queryByText("No earlier price")).not.toBeInTheDocument();
-    expect(unitPrice()).toHaveValue("18.40");
+    expect(unitPrice()).toHaveValue("");
   }, 15_000);
 
   describe("asking again by itself after a failure", () => {

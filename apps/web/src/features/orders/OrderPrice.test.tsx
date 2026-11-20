@@ -41,78 +41,51 @@ async function pickItem(user: User) {
   });
 }
 
-describe("the price a line starts with", () => {
-  it("is the item's list price when the item is chosen, before any customer", async () => {
+// The customer's PO sets the price (ADR 0047, decision 10): picking an item
+// never fills it, and the field says where its figure comes from.
+describe("the price of an order line", () => {
+  it("stays empty when the item is chosen, and says it comes from the PO", async () => {
     const user = userEvent.setup();
     fakeServer();
     renderOrders("/orders/new");
     await pickItem(user);
-    expect(unitPrice()).toHaveValue("18.40");
+    expect(unitPrice()).toHaveValue("");
+    expect(unitPrice()).toHaveAttribute("placeholder", "From the PO");
   });
 
-  it("changes to what the customer last agreed once that is known", async () => {
-    const user = userEvent.setup();
-    fakeServer();
-    renderOrders("/orders/new");
-    await pickItem(user);
-    await pickCustomer(user);
-    await waitFor(() => {
-      expect(unitPrice()).toHaveValue("17.90");
-    });
-  });
-
-  it("goes back to the list price for a customer with no agreed price", async () => {
-    const user = userEvent.setup();
-    fakeServer({ lastPrice: (no) => (no === "C-0001" ? "17.90" : null) });
-    renderOrders("/orders/new");
-    await pickCustomer(user);
-    await pickItem(user);
-    await waitFor(() => {
-      expect(unitPrice()).toHaveValue("17.90");
-    });
-    await pickCustomer(user, "C-0002", /Marlowe/);
-    await waitFor(() => {
-      expect(unitPrice()).toHaveValue("18.40");
-    });
-  });
-
-  it("can be typed over, and choosing the same item again does not take it back", async () => {
+  it("stays empty when the customer's last price arrives, which is shown beside it", async () => {
     const user = userEvent.setup();
     fakeServer();
     renderOrders("/orders/new");
     await pickCustomer(user);
     await pickItem(user);
-    await waitFor(() => {
-      expect(unitPrice()).toHaveValue("17.90");
-    });
-    await user.clear(unitPrice());
+    expect(await screen.findByText("Last USD 17.90")).toBeVisible();
+    expect(unitPrice()).toHaveValue("");
+  });
+
+  it("stays empty for a customer with no earlier price, and says so", async () => {
+    const user = userEvent.setup();
+    fakeServer({ lastPrice: () => null });
+    renderOrders("/orders/new");
+    await pickCustomer(user);
+    await pickItem(user);
+    expect(await screen.findByText("No earlier price")).toBeVisible();
+    expect(unitPrice()).toHaveValue("");
+  });
+
+  it("keeps the price the person typed when the same item is chosen again", async () => {
+    const user = userEvent.setup();
+    fakeServer();
+    renderOrders("/orders/new");
+    await pickCustomer(user);
+    await pickItem(user);
     await user.type(unitPrice(), "15.00");
     await pickItem(user);
-    expect(unitPrice()).toHaveValue("15.00");
-    // Give the last-price lookup its turn: it must leave the typed price alone.
-    await screen.findByText("Last USD 17.90");
-    expect(unitPrice()).toHaveValue("15.00");
-  });
-
-  it("is not replaced by an agreed price that arrives after the person typed", async () => {
-    const user = userEvent.setup();
-    let release: (price: string) => void = () => undefined;
-    const held = new Promise<string>((resolve) => {
-      release = resolve;
-    });
-    fakeServer({ lastPrice: () => held });
-    renderOrders("/orders/new");
-    await pickCustomer(user);
-    await pickItem(user);
-    expect(unitPrice()).toHaveValue("18.40");
-    await user.clear(unitPrice());
-    await user.type(unitPrice(), "16.00");
-    release("17.90");
     expect(await screen.findByText("Last USD 17.90")).toBeVisible();
-    expect(unitPrice()).toHaveValue("16.00");
+    expect(unitPrice()).toHaveValue("15.00");
   });
 
-  it("fills nothing for a role that may not see prices", async () => {
+  it("shows no price field and asks for no last price for a role that may not see prices", async () => {
     const user = userEvent.setup();
     const server = fakeServer({ masked: true });
     renderOrders("/orders/new", "WAREHOUSE", ["orders.create"]);

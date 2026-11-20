@@ -49,11 +49,8 @@ async function fillOrder(
     expect(quantity).toHaveFocus();
   });
   await user.keyboard("2");
-  // The price starts from the item or the customer; the PO may say otherwise.
-  if (price !== null) {
-    await user.clear(unitPrice());
-    await user.type(unitPrice(), price);
-  }
+  // The PO sets the price, so it is typed and never filled from the list.
+  if (price !== null) await user.type(unitPrice(), price);
 }
 
 const unitPrice = () =>
@@ -66,15 +63,12 @@ describe("the New order page", () => {
     const { router } = renderOrders("/orders/new");
     await fillOrder(user, "PO-7731", null);
     expect(await item()).toHaveValue("I-0001  Norvale Wireless Mouse");
-    // Picking the item shows what this customer last paid, and starts the
-    // price there: the agreed price is a better start than the list price.
+    // Picking the item shows what this customer last paid as context, and
+    // leaves the price empty: the PO sets it.
+    expect(unitPrice()).toHaveValue("");
     expect(
       await screen.findByText(/Last agreed price USD 17.90 on 14 Oct 2026/),
     ).toBeVisible();
-    await waitFor(() => {
-      expect(unitPrice()).toHaveValue("17.90");
-    });
-    await user.clear(unitPrice());
     await user.type(unitPrice(), "17.25");
     expect(unitPrice()).toHaveValue("17.25");
     expect(await screen.findByText(/40 PCS available/)).toBeVisible();
