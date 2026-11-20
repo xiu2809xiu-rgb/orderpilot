@@ -87,12 +87,13 @@ describe("the home page of a role with an inbox", () => {
     const served = serveHome({ tasks: [PACK] });
     const { container } = renderHome("WAREHOUSE");
     const action = await screen.findByRole("button", {
-      name: "Mark packed for SO-0100",
+      name: "Mark as packed for SO-0100",
     });
     await waitFor(() => {
       expect(tile(/My tasks/)).toHaveTextContent("1");
     });
-    expect(screen.getByText("USD 12,340.00")).toBeVisible();
+    // Warehouse works with no prices: the row shows no figure at all.
+    expect(screen.queryByText(/USD 12,340/)).toBeNull();
     expect(await axeViolations(container)).toEqual([]);
 
     fireEvent.click(action);
@@ -107,6 +108,9 @@ describe("the home page of a role with an inbox", () => {
     });
     const toast = useToastStore.getState().items.at(-1);
     expect(toast?.message).toBe("Marked SO-0100 as packed");
+    expect(toast?.description).toBe(
+      "Support makes the invoice and packing list next.",
+    );
     expect(toast?.undo).toBeTypeOf("function");
   });
 
@@ -115,7 +119,7 @@ describe("the home page of a role with an inbox", () => {
     const served = serveHome({ tasks: [PACK] });
     renderHome("WAREHOUSE");
     await user.click(
-      await screen.findByRole("button", { name: "Mark packed for SO-0100" }),
+      await screen.findByRole("button", { name: "Mark as packed for SO-0100" }),
     );
     await screen.findByText("Nothing needs you right now");
     await user.click(await screen.findByRole("button", { name: "Undo" }));
@@ -123,7 +127,7 @@ describe("the home page of a role with an inbox", () => {
       expect(served.calls).toContain(`POST undo ${PACK.id}`);
     });
     const back = await screen.findByRole("button", {
-      name: "Mark packed for SO-0100",
+      name: "Mark as packed for SO-0100",
     });
     await waitFor(() => {
       expect(back).toHaveFocus();
@@ -135,10 +139,10 @@ describe("the home page of a role with an inbox", () => {
     serveHome({ tasks: [PACK, SECOND] });
     renderHome("WAREHOUSE");
     await user.click(
-      await screen.findByRole("button", { name: "Mark packed for SO-0100" }),
+      await screen.findByRole("button", { name: "Mark as packed for SO-0100" }),
     );
     const next = await screen.findByRole("button", {
-      name: "Mark packed for SO-0101",
+      name: "Mark as packed for SO-0101",
     });
     await waitFor(() => {
       expect(next).toHaveFocus();
@@ -150,7 +154,7 @@ describe("the home page of a role with an inbox", () => {
     serveHome({ tasks: [PACK] });
     renderHome("WAREHOUSE");
     await user.click(
-      await screen.findByRole("button", { name: "Mark packed for SO-0100" }),
+      await screen.findByRole("button", { name: "Mark as packed for SO-0100" }),
     );
     await screen.findByText("Nothing needs you right now");
     await waitFor(() => {
@@ -164,7 +168,7 @@ describe("the home page of a role with an inbox", () => {
     serveHome({ tasks: [PACK] });
     renderHome("WAREHOUSE");
     const action = await screen.findByRole("button", {
-      name: "Mark packed for SO-0100",
+      name: "Mark as packed for SO-0100",
     });
     expect(action.className).toContain("pointer-coarse:min-h-11");
     expect(screen.getByRole("link", { name: "SO-0100" }).className).toContain(
@@ -223,13 +227,15 @@ describe("the home page of a role with an inbox", () => {
         currencyCode: "USD",
       },
     });
-    const served = serveHome({ tasks: [payment] });
+    const served = serveHome({ tasks: [payment], prices: true });
     renderHome("FINANCE");
     const row = (
       await within(needs()).findByText("Confirm the payment")
     ).closest("[role='listitem']");
     if (!(row instanceof HTMLElement)) throw new Error("No row");
-    expect(within(row).getByText("USD 5,303.77 of 10,607.54")).toBeVisible();
+    await waitFor(() => {
+      expect(row).toHaveTextContent("Due USD 5,303.77 of USD 10,607.54");
+    });
     expect(within(needs()).queryByRole("table")).toBeNull();
     expect(needs().querySelector(".overflow-x-auto, [data-scroll]")).toBeNull();
     await user.click(
@@ -256,7 +262,7 @@ describe("the home page of a role with an inbox", () => {
   it("has no link to the inbox when every task is already listed", async () => {
     serveHome({ tasks: [PACK, SECOND] });
     renderHome("WAREHOUSE");
-    await screen.findAllByRole("button", { name: /^Mark packed for/ });
+    await screen.findAllByRole("button", { name: /^Mark as packed for/ });
     expect(screen.queryByRole("link", { name: /^View all/ })).toBeNull();
   });
 

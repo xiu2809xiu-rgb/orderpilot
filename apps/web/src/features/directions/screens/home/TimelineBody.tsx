@@ -1,6 +1,5 @@
 import type { WorkflowTask } from "@orderpilot/shared";
 import type { TFunction } from "i18next";
-import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { formatDay } from "@/lib/format";
 import { timerParts } from "../../data/timer";
@@ -17,15 +16,9 @@ import {
 } from "@/components/kit/Timeline";
 import { JourneyRail } from "@/components/parts/JourneyRail";
 import { StatusTag } from "@/components/parts/StatusTag";
-import type { DoneItem } from "./doneToday";
 import { enterProps, useFirstView } from "./entrance";
+import { TimelineGroup } from "./TimelineGroup";
 import type { TimelineEntry } from "./timelineModel";
-
-const TIME = new Intl.DateTimeFormat("en-GB", {
-  hour: "2-digit",
-  minute: "2-digit",
-  timeZone: "Asia/Singapore",
-});
 
 /** The order and customer under a task's title, as the list above shows them. */
 function OrderLine({ task }: { task: WorkflowTask }) {
@@ -34,51 +27,6 @@ function OrderLine({ task }: { task: WorkflowTask }) {
     <TimelineDate
       dateTime={undefined}
     >{`${task.orderNo ?? ""}${customer}`}</TimelineDate>
-  );
-}
-
-function Group({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <div className="flex flex-col gap-3">
-      <h3 className="fs-14 font-semibold text-foreground">{title}</h3>
-      {children}
-    </div>
-  );
-}
-
-export function DoneGroup({ done }: { done: readonly DoneItem[] }) {
-  const { t } = useTranslation("directions-home");
-  const first = useFirstView();
-  return (
-    <Group title={t("timeline.done.title")}>
-      {done.length === 0 ? (
-        <p className="fs-14 max-w-prose text-muted-foreground">
-          {t("timeline.done.empty")}
-        </p>
-      ) : (
-        <Timeline value={done.length}>
-          {done.map((item, index) => (
-            <TimelineItem
-              key={item.task.id}
-              step={index + 1}
-              {...enterProps(index, first)}
-            >
-              <TimelineIndicator />
-              <TimelineSeparator />
-              <TimelineHeader>
-                <TimelineTitle>
-                  {t(`needs.kind.${item.task.kind}`)}
-                </TimelineTitle>
-                <OrderLine task={item.task} />
-              </TimelineHeader>
-              <TimelineContent>
-                {t("timeline.done.at", { time: TIME.format(item.at) })}
-              </TimelineContent>
-            </TimelineItem>
-          ))}
-        </Timeline>
-      )}
-    </Group>
   );
 }
 
@@ -113,7 +61,7 @@ export function NowGroup({
   const { t: tParts } = useTranslation("directions-parts");
   const first = useFirstView();
   return (
-    <Group title={t("timeline.now.title")}>
+    <TimelineGroup title={t("timeline.now.title")}>
       {entry ? (
         <Timeline value={0}>
           <TimelineItem step={1} {...enterProps(1, first)}>
@@ -151,7 +99,7 @@ export function NowGroup({
           </TimelineItem>
         </Timeline>
       ) : null}
-    </Group>
+    </TimelineGroup>
   );
 }
 
@@ -174,7 +122,7 @@ export function NextGroup({ entries }: { entries: readonly TimelineEntry[] }) {
   const { t: tParts } = useTranslation("directions-parts");
   const first = useFirstView();
   return (
-    <Group title={t("timeline.next.title")}>
+    <TimelineGroup title={t("timeline.next.title")}>
       {entries.length === 0 ? (
         <p className="fs-14 max-w-prose text-muted-foreground">
           {t("timeline.next.empty")}
@@ -202,6 +150,6 @@ export function NextGroup({ entries }: { entries: readonly TimelineEntry[] }) {
           ))}
         </Timeline>
       )}
-    </Group>
+    </TimelineGroup>
   );
 }
