@@ -129,6 +129,54 @@ describe("buildJourney", () => {
   });
 });
 
+// The tracker's sample timeline stamps its newest event with today, so the
+// workflow's record is what says how long an order has waited at its step.
+describe("when the current step began", () => {
+  const withSince = (since: Date | null | undefined) =>
+    buildJourney({
+      current: 5,
+      events: EVENTS,
+      stepTimes: STEP_TIMES.sales,
+      today: "2026-11-12",
+      since,
+    })?.steps[4];
+
+  it("takes the workflow's time over the tracker's current event", () => {
+    const now = withSince(new Date("2026-11-06T08:00:00.000Z"));
+    expect(now?.since).toEqual(new Date("2026-11-06T08:00:00.000Z"));
+    expect(now?.waitedDays).toBe(6);
+    // Six days against a usual three: the step has run over.
+    expect(now?.late).toBe(true);
+  });
+
+  it("says no wait while the workflow's record has not answered", () => {
+    const now = withSince(null);
+    expect(now?.since).toBeNull();
+    expect(now?.waitedDays).toBeNull();
+    expect(now?.late).toBe(false);
+  });
+
+  it("keeps the tracker's time when the workflow has none to give", () => {
+    const now = withSince(undefined);
+    expect(now?.since).toEqual(new Date("2026-11-10T12:00:00.000Z"));
+    expect(now?.waitedDays).toBe(2);
+  });
+
+  it("dates the later steps from the workflow's time too", () => {
+    const steps =
+      buildJourney({
+        current: 5,
+        events: EVENTS,
+        stepTimes: STEP_TIMES.sales,
+        today: "2026-11-12",
+        since: new Date("2026-11-06T08:00:00.000Z"),
+      })?.steps ?? [];
+    // Packing began on 6 Nov and usually takes 3 days: it has run over, so
+    // forwarding (2 days) is counted from today, 12 Nov.
+    expect(steps[6]?.expectedOn).toBe("2026-11-14");
+  });
+});
+
 describe("daysPastShipDate", () => {
   it("compares the expected day with the order's own ship date", () => {
     const ship = journey("2026-11-12")?.ship ?? null;
