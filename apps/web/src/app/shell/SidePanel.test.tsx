@@ -102,7 +102,7 @@ describe("the side panel", () => {
       within(nav)
         .getAllByRole("heading", { level: 2 })
         .map((h) => h.textContent),
-    ).toEqual(["Work", "Stock and buying"]);
+    ).toEqual(["Work", "Master data"]);
     expect(within(nav).getAllByRole("link", { name: "Orders" })).toHaveLength(
       1,
     );

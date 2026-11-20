@@ -16,7 +16,7 @@
     "mobileNavDescription": "Choose an area of OrderPilot.",
     "groups": {
       "work": "Work",
-      "stock": "Stock and buying",
+      "stock": "Master data",
       "insights": "Insights",
       "control": "Control"
     },

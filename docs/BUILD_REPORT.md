@@ -388,6 +388,7 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 | #288  | Home leads with what needs the team                   | `feat/platform-home-next-act`    | This pull request. Needs you first, labelled amounts and honest one-click words     |
 | #286  | The entrance: six teams first, in flow order          | `feat/platform-entrance-flow`    | This pull request. A role change stays on the order's page                          |
 | #285  | The build shown at the proposal presentation          | `feat/platform-proposal-demo`    | This pull request. It brings the 25 commits shown on 17 Nov, with `main` merged in  |
+| #307  | Master data: names, stock words and search            | `fix/area1-master-data-pages`    | This pull request. Names first, stock words, a wider search and plain masks         |
 | #303  | Upload and review: in view, honest, edits checked     | `fix/area1-upload-review`        | This pull request. Progress card in view, the sample named, edits checked           |
 | #306  | The new order form: price, dates, look-alikes         | `fix/area1-new-order-form`       | This pull request. The PO sets the price. It also finishes #278, the tablet grid    |
 | #302  | The Orders list: fit, held reason, last page          | `fix/area1-orders-list-fit`      | This pull request. Fits 1366 by 768 and says why an order is held                   |
