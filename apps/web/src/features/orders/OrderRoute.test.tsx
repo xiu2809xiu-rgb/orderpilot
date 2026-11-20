@@ -137,7 +137,7 @@ describe("one order at /orders/:orderNo", () => {
     expect(badge).toHaveAccessibleName(/It cannot be changed/);
   });
 
-  it("gives a sample order the order page and says samples are read only here", async () => {
+  it("gives a sample order the order page and says its details cannot be edited here", async () => {
     open(sample.orderNo, "SUPPORT");
     expect(await heading(sample.orderNo)).toBeVisible();
     expect(screen.queryByText("The order form")).toBeNull();
@@ -145,7 +145,7 @@ describe("one order at /orders/:orderNo", () => {
     expect(within(badge).getByText("Sample")).toBeVisible();
     // It is a sample of the synthetic demo set, and says nothing of where it came from.
     expect(badge).toHaveAccessibleName(
-      "Sample. A sample order of the synthetic demo set. Samples are read only here.",
+      "Sample. A sample order of the synthetic demo set. Its details cannot be edited here.",
     );
   });
 
@@ -220,12 +220,14 @@ describe("one order at /orders/:orderNo", () => {
     stubApi({ specs: ALL, tasks: [taskOn(sample.orderNo, "SEND_PI")] });
     const view = open(sample.orderNo, "SUPPORT");
     expect(
-      await screen.findByRole("button", { name: "Mark sent" }),
+      await screen.findByRole("button", { name: "Mark PI as sent" }),
     ).toBeVisible();
     view.unmount();
     open(sample.orderNo, "MANAGEMENT");
     await heading(sample.orderNo);
-    expect(screen.queryByRole("button", { name: "Mark sent" })).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: "Mark PI as sent" }),
+    ).toBeNull();
     expect(screen.queryByText(/no open task/)).toBeNull();
   });
 

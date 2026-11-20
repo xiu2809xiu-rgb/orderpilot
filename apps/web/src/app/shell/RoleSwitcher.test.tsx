@@ -187,16 +187,20 @@ describe("changing role keeps the order on screen", () => {
     open("/orders/SO-0001", "SUPPORT");
     // Support's own task is the page's action.
     expect(
-      await screen.findByRole("button", { name: "Mark sent" }),
+      await screen.findByRole("button", { name: "Mark PI as sent" }),
     ).toBeVisible();
 
     await switchTo(user, /Finance/);
 
-    expect(await screen.findByRole("link", { name: /Confirm/ })).toBeVisible();
+    expect(
+      await screen.findByRole("link", { name: "Enter payment details" }),
+    ).toBeVisible();
     expect(screen.getByTestId("where")).toHaveTextContent("/orders/SO-0001");
     // Nothing of the old role is left on the page.
     await waitFor(() => {
-      expect(screen.queryByRole("button", { name: "Mark sent" })).toBeNull();
+      expect(
+        screen.queryByRole("button", { name: "Mark PI as sent" }),
+      ).toBeNull();
     });
   });
 
@@ -205,7 +209,7 @@ describe("changing role keeps the order on screen", () => {
     const stays: string[] = [];
     const stop = onStay((path) => stays.push(path));
     const view = open("/orders/SO-0001", "SUPPORT");
-    await screen.findByRole("button", { name: "Mark sent" });
+    await screen.findByRole("button", { name: "Mark PI as sent" });
     await switchTo(user, /Finance/);
     await waitFor(() => {
       expect(stays).toEqual(["/orders/SO-0001"]);
@@ -242,13 +246,13 @@ describe("changing role keeps the order on screen", () => {
   it("goes Home from an order's page when the new role may not read orders", async () => {
     const user = userEvent.setup();
     open("/orders/SO-0001", "SUPPORT");
-    await screen.findByRole("button", { name: "Mark sent" });
+    await screen.findByRole("button", { name: "Mark PI as sent" });
     await switchTo(user, /System admin/);
     await waitFor(() => {
       expect(screen.getByTestId("where")).toHaveTextContent(/^\/$/);
     });
     expect(
-      within(document.body).queryByRole("button", { name: "Mark sent" }),
+      within(document.body).queryByRole("button", { name: "Mark PI as sent" }),
     ).toBeNull();
   });
 });

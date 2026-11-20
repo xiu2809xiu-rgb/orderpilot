@@ -21,16 +21,6 @@
   },
   "needs": {
     "failed": "Could not finish the task for {{orderNo}}",
-    "actions": {
-      "REVIEW_FIELDS": "Review",
-      "RAISE_SPR": "Raise",
-      "APPROVE_SPR": "Review",
-      "SEND_PI": "Mark sent",
-      "CONFIRM_PAYMENT": "Confirm",
-      "PACK_ORDER": "Mark packed",
-      "RECOUNT_CARTONS": "Mark counted",
-      "ADD_SHIPPING_DOCUMENTS": "Mark added"
-    },
     "partOf": "{{part}} of {{whole}}",
     "done": {
       "REVIEW_FIELDS": "Reviewed {{orderNo}}",

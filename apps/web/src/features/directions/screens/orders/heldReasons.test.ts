@@ -20,9 +20,13 @@ describe("why a held order is held", () => {
     expect(heldReasons(row, t())).toEqual(["707 short"]);
   });
 
-  it("says the payment is not confirmed for an order at the payment step", () => {
-    expect(heldReasons(makeRow({ step: 4 }), t())).toEqual([
-      "Payment not confirmed",
+  // The row holds no payment, only the step its status belongs to. Finance can
+  // have confirmed the payment while the status has not moved yet, so the line
+  // would say what is not true.
+  it("says nothing about a payment, whatever step the order is at", () => {
+    expect(heldReasons(makeRow({ step: 4 }), t())).toEqual([]);
+    expect(heldReasons(makeRow({ step: 4, openExceptions: 1 }), t())).toEqual([
+      "1 open exception",
     ]);
   });
 
@@ -39,12 +43,8 @@ describe("why a held order is held", () => {
       openExceptions: 1,
     });
     const reasons = heldReasons(row, t());
-    expect(reasons).toEqual([
-      "707 short",
-      "Payment not confirmed",
-      "1 open exception",
-    ]);
-    expect(heldLine(reasons, t())).toBe("707 short and 2 more");
+    expect(reasons).toEqual(["707 short", "1 open exception"]);
+    expect(heldLine(reasons, t())).toBe("707 short and 1 more");
   });
 
   it("says nothing for an order that is not held up, even when it is short", () => {
@@ -57,7 +57,7 @@ describe("why a held order is held", () => {
   });
 
   it("says nothing where the row cannot say why", () => {
-    // Late at a step that is not payment, no shortage and no exception.
+    // Late, with no shortage and no exception.
     const row = makeRow({ step: 6 });
     expect(heldReasons(row, t())).toEqual([]);
     expect(heldLine([], t())).toBe("");

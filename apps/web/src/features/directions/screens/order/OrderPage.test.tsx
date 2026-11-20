@@ -87,7 +87,10 @@ describe("the order page", () => {
     expect(steps[3]).toHaveAttribute("aria-current", "step");
     // Done: the actor and the day, from the order's own events.
     expect(within(nth(steps, 2)).getByText(/Support, /)).toBeVisible();
-    expect(within(nth(steps, 3)).getByText(/^Now, late/)).toBeVisible();
+    // The badge under the title says how late the order is; the rail's current
+    // step says "Now" and no more, so the page has one lateness figure.
+    expect(within(nth(steps, 3)).getByText(/^Now:/)).toBeInTheDocument();
+    expect(screen.queryByText(/Now, late/)).toBeNull();
     // The current step says how long it has waited and what is usual, in one short line.
     expect(
       within(nth(steps, 3)).getByText("Waiting 14 days, usually 4 days"),
@@ -179,10 +182,10 @@ describe("the order page", () => {
     open(PAID, "?tab=documents");
     expect(
       await screen.findByText(
-        "A document of this order waits for you to confirm it",
+        "A document of this order waits for a person to confirm its fields",
       ),
     ).toBeVisible();
-    expect(screen.getByText(/It does not say which one/)).toBeVisible();
+    expect(screen.getByText(/does not say which one/)).toBeVisible();
   });
 
   it("lists the documents the workflow knows, with the one waiting for a person marked", async () => {
@@ -229,26 +232,26 @@ describe("the order page", () => {
     if (!awb) throw new Error("no AWB row");
     expect(within(awb).getByText("Expected by 23 Nov 2026")).toBeVisible();
     // The alert can name the document now, because the list does.
-    expect(screen.getByText(/It is marked To confirm/)).toBeVisible();
-    expect(screen.queryByText(/It does not say which one/)).toBeNull();
+    expect(screen.getByText(/is marked To confirm/)).toBeVisible();
+    expect(screen.queryByText(/does not say which one/)).toBeNull();
   });
 
   it("makes the person's own task the one primary button, finished here with one click", async () => {
     stubApi({ tasks: [taskOn("SO-0001", "SEND_PI")] });
     open(PAID);
     expect(
-      await screen.findByRole("button", { name: "Mark sent" }),
+      await screen.findByRole("button", { name: "Mark PI as sent" }),
     ).toBeVisible();
-    expect(screen.getAllByRole("button", { name: /Mark sent/ })).toHaveLength(
-      1,
-    );
+    expect(
+      screen.getAllByRole("button", { name: /Mark PI as sent/ }),
+    ).toHaveLength(1);
   });
 
   it("opens the order's own page of the app for a decision, and says when there is no task", async () => {
     stubApi({ tasks: [taskOn("SO-0001", "CONFIRM_PAYMENT")] });
     const view = open(PAID);
     expect(
-      await screen.findByRole("link", { name: /Confirm/ }),
+      await screen.findByRole("link", { name: "Enter payment details" }),
     ).toHaveAttribute("href", "/workflows/orders/SO-0001");
     view.unmount();
     vi.unstubAllGlobals();

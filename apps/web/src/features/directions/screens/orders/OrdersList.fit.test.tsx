@@ -218,12 +218,13 @@ describe("a narrow window", () => {
 });
 
 describe("the held reason in a row", () => {
-  it("says why under the stage, from the row's own data", async () => {
+  it("says nothing about a payment under the stage, which the row's data cannot support", async () => {
     stubApi();
     open("?view=held");
     const rows = await bodyRows();
+    expect(within(nth(rows, 0)).getByText(/Waiting for payment/)).toBeVisible();
     expect(
-      within(nth(rows, 0)).getByText("Payment not confirmed"),
-    ).toBeVisible();
+      within(nth(rows, 0)).queryByText("Payment not confirmed"),
+    ).toBeNull();
   });
 });

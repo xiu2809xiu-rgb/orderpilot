@@ -249,7 +249,7 @@ describe("a draft order's page", () => {
       "a sample order",
       { captureState: null, source: "sample" as const, version: null },
       "SUPPORT",
-      "A sample order of the synthetic demo set. Samples are read only here.",
+      "A sample order of the synthetic demo set. Its details cannot be edited here.",
     ],
     [
       "a draft opened by a role that may only read",
