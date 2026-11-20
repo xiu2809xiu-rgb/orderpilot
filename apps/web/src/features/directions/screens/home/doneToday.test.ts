@@ -36,16 +36,52 @@ describe("Done today, kept in the browser per person", () => {
 
   it("drops another day's entries when read, by the Singapore date", () => {
     recordDone(ANNA, sent("SO-0001"), NOON);
-    // 17:00 UTC on the 20th is 01:00 on the 21st in Singapore: a new day.
-    const nextDay = new Date("2026-11-20T17:00:00.000Z");
-    expect(readDone(ANNA, nextDay)).toEqual([]);
     // 15:59 UTC on the 20th is still the 20th in Singapore.
     expect(readDone(ANNA, new Date("2026-11-20T15:59:00.000Z"))).toHaveLength(
       1,
     );
+    // 17:00 UTC on the 20th is 01:00 on the 21st in Singapore: a new day. The
+    // read comes last because it also clears the entry from the browser.
+    const nextDay = new Date("2026-11-20T17:00:00.000Z");
+    expect(readDone(ANNA, nextDay)).toEqual([]);
     // Yesterday's entry does not come back with today's first act.
     const afterwards = recordDone(ANNA, sent("SO-0002"), nextDay);
     expect(afterwards.map((item) => item.orderNo)).toEqual(["SO-0002"]);
+  });
+
+  it("writes the cleaned list back when a read finds another day's entries", () => {
+    recordDone(ANNA, sent("SO-0001"), new Date("2026-11-19T04:00:00.000Z"));
+    // Written for the 19th; read on the 20th, so it is dropped from the browser too.
+    expect(readDone(ANNA, NOON)).toEqual([]);
+    expect(localStorage.getItem(doneKey(ANNA))).toBe("[]");
+
+    // A mix keeps today's entry and removes only the older one from storage.
+    localStorage.setItem(
+      doneKey(ANNA),
+      JSON.stringify([
+        { kind: "SEND_PI", orderNo: "SO-0002", at: NOON.toISOString() },
+        {
+          kind: "SEND_PI",
+          orderNo: "SO-0001",
+          at: "2026-11-19T04:00:00.000Z",
+        },
+      ]),
+    );
+    expect(readDone(ANNA, NOON).map((item) => item.orderNo)).toEqual([
+      "SO-0002",
+    ]);
+    const stored: unknown = JSON.parse(
+      localStorage.getItem(doneKey(ANNA)) ?? "null",
+    );
+    expect(stored).toMatchObject([{ orderNo: "SO-0002" }]);
+    expect(JSON.stringify(stored)).not.toContain("SO-0001");
+  });
+
+  it("leaves the stored copy alone when every entry is today's", () => {
+    recordDone(ANNA, sent("SO-0001"), NOON);
+    const before = localStorage.getItem(doneKey(ANNA));
+    readDone(ANNA, NOON);
+    expect(localStorage.getItem(doneKey(ANNA))).toBe(before);
   });
 
   it("takes the newest note of a task out again on Undo, and no other", () => {

@@ -34,7 +34,7 @@ export function doneKey(viewerId: string): string {
   return `op.done.${viewerId}`;
 }
 
-/** What the person finished today (Singapore), newest first. Another day's entries are dropped. */
+/** What the person finished today (Singapore), newest first. Another day's entries are dropped, and from the browser too. */
 export function readDone(
   viewerId: string | null,
   now = new Date(),
@@ -46,9 +46,13 @@ export function readDone(
     const parsed = storedSchema.safeParse(JSON.parse(raw));
     if (!parsed.success) return [];
     const today = todayInSingapore(now);
-    return parsed.data
+    const kept = parsed.data
       .map((entry) => ({ ...entry, at: new Date(entry.at) }))
       .filter((entry) => todayInSingapore(entry.at) === today);
+    // Another day's order numbers and customer names are not kept in the
+    // browser for a write that may never come, so the cleaned list goes back.
+    if (kept.length < parsed.data.length) write(viewerId, kept);
+    return kept;
   } catch {
     // Blocked storage or a broken copy: start with an empty list. Nothing else depends on it.
     return [];
