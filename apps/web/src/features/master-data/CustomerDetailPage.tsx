@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useMasterDataCustomer } from "@/lib/api/generated/endpoints/master-data/master-data";
 import { customerFacts } from "./customerFacts";
 import { openOrderColumns, overdueOrderColumns } from "./customerOrderColumns";
-import { KeyFacts } from "./pieces";
+import { KeyFacts, maskedColumnReason } from "./pieces";
 import { RecordNumber } from "./RecordNumber";
 import { BackToList, RecordSheet, RecordState } from "./RecordState";
 import { RecordTable } from "./RecordTable";
@@ -53,7 +53,12 @@ function CustomerRecord({ customer }: { customer: CustomerDetail }) {
       >
         <RecordTable
           caption={t("customer.open.caption")}
-          columns={openOrderColumns(t)}
+          columns={openOrderColumns(
+            t,
+            maskedColumnReason(
+              customer.openOrders.map((order) => order.amount),
+            ),
+          )}
           rows={customer.openOrders}
           rowKey={(order) => order.orderNo}
           emptyText={t("customer.open.empty")}

@@ -53,7 +53,9 @@ export const row = (no: string, availability: "short" | "low" | "ok") => ({
   vendorName: "Synthetic Vendor One",
 });
 
-export const itemList = (rows: MasterDataItems200["data"]) => ({
+export const itemList = (
+  rows: MasterDataItems200["data"],
+): MasterDataItems200 => ({
   data: rows,
   meta: { page: 1, pageSize: 25, total: rows.length, mock: true },
 });

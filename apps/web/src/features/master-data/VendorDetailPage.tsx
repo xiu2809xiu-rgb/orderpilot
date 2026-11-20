@@ -6,7 +6,7 @@ import { DemoBadge, PageHeader, SectionCard } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { useMasterDataVendor } from "@/lib/api/generated/endpoints/master-data/master-data";
 import { paymentTermsLabel } from "./paymentTerms";
-import { KeyFacts, MaskedMoney } from "./pieces";
+import { KeyFacts, MaskedMoney, maskedColumnReason } from "./pieces";
 import { RecordNumber } from "./RecordNumber";
 import { BackToList, RecordSheet, RecordState } from "./RecordState";
 import { RecordTable } from "./RecordTable";
@@ -16,6 +16,9 @@ import { purchaseOrderColumns, suppliedItemColumns } from "./vendorColumns";
 function VendorRecord({ vendor }: { vendor: VendorDetail }) {
   const { t } = useTranslation("master-data");
   const fromSprs = vendor.openPurchaseOrders.some((po) => po.sprRecordNo);
+  const totalReason = maskedColumnReason(
+    vendor.openPurchaseOrders.map((po) => po.total),
+  );
   return (
     <RecordSheet>
       <BackToList to="/master-data/vendors" label={t("vendor.back")} />
@@ -64,7 +67,7 @@ function VendorRecord({ vendor }: { vendor: VendorDetail }) {
       >
         <RecordTable
           caption={t("vendor.orders.caption")}
-          columns={purchaseOrderColumns(t, fromSprs)}
+          columns={purchaseOrderColumns(t, fromSprs, totalReason)}
           rows={vendor.openPurchaseOrders}
           rowKey={(po) => po.no}
           emptyText={t("vendor.orders.empty")}

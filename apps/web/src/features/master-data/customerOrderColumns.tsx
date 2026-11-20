@@ -1,8 +1,9 @@
 import type { TFunction } from "i18next";
 import type { CustomerDetail } from "@orderpilot/shared";
-import { RecordLink, StatusBadge } from "@/components/common";
+import { RecordLink, StatusBadge, type MaskReason } from "@/components/common";
 import { formatDay } from "@/lib/format";
-import { MaskedMoney } from "./pieces";
+import { MaskedColumnHeader } from "./MaskedColumnHeader";
+import { MaskedMoney, QuietDash } from "./pieces";
 import type { RecordColumn } from "./RecordTable";
 
 type OpenOrder = CustomerDetail["openOrders"][number];
@@ -18,7 +19,11 @@ const orderLink = (orderNo: string) => (
   </RecordLink>
 );
 
-export function openOrderColumns(t: TFunction): RecordColumn<OpenOrder>[] {
+/** An amount the role cannot read in any row is said once, in the header. */
+export function openOrderColumns(
+  t: TFunction,
+  amountReason: MaskReason | null,
+): RecordColumn<OpenOrder>[] {
   return [
     {
       id: "order",
@@ -53,7 +58,14 @@ export function openOrderColumns(t: TFunction): RecordColumn<OpenOrder>[] {
     {
       id: "amount",
       header: t("customer.open.amount"),
-      cell: (order) => <MaskedMoney field={order.amount} />,
+      headerContent: amountReason ? (
+        <MaskedColumnHeader
+          label={t("customer.open.amount")}
+          reason={amountReason}
+        />
+      ) : undefined,
+      cell: (order) =>
+        amountReason ? <QuietDash /> : <MaskedMoney field={order.amount} />,
       kind: "money",
     },
   ];

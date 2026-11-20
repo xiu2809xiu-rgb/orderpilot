@@ -329,6 +329,59 @@ describe("a column that is hidden for the role", () => {
     ).toBeVisible();
   });
 
+  it("does the same for a vendor's purchase order totals", async () => {
+    await load();
+    const po = (no: string) => ({
+      no,
+      orderDate: "2026-11-02",
+      expectedReceiptDate: "2026-11-20",
+      lines: 1,
+      outstandingQuantity: "10",
+      total: hidden("purchaseOrder.total", "price"),
+      sprRecordNo: null,
+    });
+    server.use(
+      getMasterDataVendorMockHandler({
+        ...vendorDetail,
+        data: {
+          ...vendorDetail.data,
+          openPurchaseOrders: [po("PO-0001"), po("PO-0002")],
+        },
+      }),
+    );
+    renderAt("/master-data/vendors/V-0001", "WAREHOUSE");
+    await screen.findByText("PO-0001");
+    expect(
+      screen.getByRole("button", { name: "Why is Total hidden?" }),
+    ).toBeVisible();
+    expect(screen.getAllByText("Hidden for your role")).toHaveLength(2);
+  });
+
+  it("does the same for the amounts of a customer's open orders", async () => {
+    await load();
+    server.use(
+      getMasterDataCustomerMockHandler(
+        customerDetail({
+          openOrders: [
+            {
+              orderNo: "SO-0031",
+              externalDocumentNo: "PO-IN-4301",
+              orderDate: "2026-11-02",
+              shipmentDate: null,
+              status: "Packing",
+              amount: hidden("order.amount", "price"),
+            },
+          ],
+        }),
+      ),
+    );
+    renderAt("/master-data/customers/C-0003", "WAREHOUSE");
+    await screen.findByRole("link", { name: "SO-0031" });
+    expect(
+      screen.getByRole("button", { name: "Why is Amount hidden?" }),
+    ).toBeVisible();
+  });
+
   it("leaves a column alone when the role can read it", async () => {
     await load();
     server.use(

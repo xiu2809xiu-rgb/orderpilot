@@ -253,7 +253,6 @@
       "swift": "SWIFT",
       "iban": "IBAN",
       "financeOnly": "Finance only",
-      "hidden": "Hidden for your role",
       "empty": "No bank account is on file for this vendor."
     },
     "orders": {

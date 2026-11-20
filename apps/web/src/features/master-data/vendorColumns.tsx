@@ -1,8 +1,9 @@
 import type { TFunction } from "i18next";
 import type { VendorDetail } from "@orderpilot/shared";
-import { RecordLink } from "@/components/common";
+import { RecordLink, type MaskReason } from "@/components/common";
 import { formatDay, formatQuantity } from "@/lib/format";
-import { AvailableFigure, MaskedMoney } from "./pieces";
+import { MaskedColumnHeader } from "./MaskedColumnHeader";
+import { AvailableFigure, MaskedMoney, QuietDash } from "./pieces";
 import type { RecordColumn } from "./RecordTable";
 import { SprNumber } from "./SprNumber";
 import { StockRule } from "./StockRule";
@@ -12,11 +13,13 @@ type SuppliedItem = VendorDetail["items"][number];
 
 /**
  * Most purchase orders were not raised from an SPR: a column empty on every
- * row says nothing, so `fromSprs` brings it in only when one was.
+ * row says nothing, so `fromSprs` brings it in only when one was. A total the
+ * role cannot read in any row is said once, in the header.
  */
 export function purchaseOrderColumns(
   t: TFunction,
   fromSprs: boolean,
+  totalReason: MaskReason | null,
 ): RecordColumn<PurchaseOrder>[] {
   return [
     {
@@ -62,7 +65,14 @@ export function purchaseOrderColumns(
     {
       id: "total",
       header: t("vendor.orders.total"),
-      cell: (po) => <MaskedMoney field={po.total} />,
+      headerContent: totalReason ? (
+        <MaskedColumnHeader
+          label={t("vendor.orders.total")}
+          reason={totalReason}
+        />
+      ) : undefined,
+      cell: (po) =>
+        totalReason ? <QuietDash /> : <MaskedMoney field={po.total} />,
       kind: "money",
     },
   ];
