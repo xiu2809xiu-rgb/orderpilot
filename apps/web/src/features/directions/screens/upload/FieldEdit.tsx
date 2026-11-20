@@ -31,9 +31,14 @@ export function FieldEdit({
   const input = useRef<HTMLInputElement>(null);
   const [draft, setDraft] = useState(value);
   const [refusal, setRefusal] = useState<EditRefusal | null>(null);
+  const message = useRef<HTMLParagraphElement>(null);
   useEffect(() => {
     input.current?.focus();
   }, []);
+  // The message sits under the help line, which can be below the fold.
+  useEffect(() => {
+    if (refusal) message.current?.scrollIntoView({ block: "nearest" });
+  }, [refusal]);
 
   const save = () => {
     const result = checkEdit(field.key, draft);
@@ -77,7 +82,12 @@ export function FieldEdit({
         {t(`review.editHelp.${fieldKind(field.key)}`)}
       </p>
       {refusal ? (
-        <p id={errorId} role="alert" className="fs-14 text-destructive">
+        <p
+          ref={message}
+          id={errorId}
+          role="alert"
+          className="fs-14 text-destructive"
+        >
           {t(`review.editError.${refusal}`)}
         </p>
       ) : null}

@@ -133,7 +133,8 @@
       "body": "Your review is not saved. If you leave, what you confirmed or corrected here is lost.",
       "stay": "Keep reviewing",
       "leave": "Leave the review"
-    }
+    },
+    "finishedShort": "Review finished"
   },
   "add": {
     "title": "Add documents",

@@ -66,7 +66,7 @@ export function ReviewProgress({
         role="status"
       >
         {finished
-          ? ""
+          ? t("review.finishedShort")
           : waitingCount > 0
             ? t("review.left", { count: waitingCount })
             : t("review.leftNone")}

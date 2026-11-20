@@ -178,6 +178,8 @@ describe("the end of the review", () => {
     await toStoryline(user);
     await user.click(screen.getByRole("button", { name: "Confirm Quantity" }));
     await user.click(screen.getByRole("button", { name: "Finish review" }));
+    // The card that stayed in view says so too.
+    expect(screen.getByText("Review finished")).toBeVisible();
     expect(
       screen.getByText(
         "Review finished: 1 field confirmed by you, 15 fields read above 90 percent",
