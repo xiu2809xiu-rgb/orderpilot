@@ -42,6 +42,20 @@ describe("the order filter", () => {
     ]);
   });
 
+  it("searches the customer's name too, and skips an order that carries none", () => {
+    const named = entry({
+      orderNo: "SO-0042",
+      customerNo: "C-1042",
+      customerName: "Meridian Vale Technologies Pvt Ltd",
+    });
+    const found = filterOrders(
+      [...all, named],
+      { ...query, search: "meridian" },
+      true,
+    );
+    expect(numbers(found)).toEqual(["SO-0042"]);
+  });
+
   it("matches a customer exactly, not by a part of the number", () => {
     expect(apply({ customerNo: "C-000" })).toHaveLength(0);
     expect(apply({ customerNo: "C-0002" })).toHaveLength(1);
