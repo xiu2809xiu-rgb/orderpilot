@@ -386,6 +386,7 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 | #288  | Home leads with what needs the team                   | `feat/platform-home-next-act`    | This pull request. Needs you first, labelled amounts and honest one-click words     |
 | #286  | The entrance: six teams first, in flow order          | `feat/platform-entrance-flow`    | This pull request. A role change stays on the order's page                          |
 | #285  | The build shown at the proposal presentation          | `feat/platform-proposal-demo`    | This pull request. It brings the 25 commits shown on 17 Nov, with `main` merged in  |
+| #301  | The order page says who has it, why and what is next  | `feat/area1-order-page-status`   | This pull request. The sentence, the latest act, the documents and the address      |
 | #191  | Cut CI minutes before the repository goes private     | `ci/minutes-job-conditions`      | Merged, [#192](https://github.com/xiu2809xiu-rgb/orderpilot/pull/192)               |
 | P-42  | Plan prompt 004                                       | `chore/plan-prompt-004`          | Merged, [#138](https://github.com/xiu2809xiu-rgb/orderpilot/pull/138)               |
 | P-13  | Docker images and the IaC scan                        | `ci/docker`                      | Merged, [#172](https://github.com/xiu2809xiu-rgb/orderpilot/pull/172)               |
