@@ -396,6 +396,7 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 | #301  | The order page says who has it, why and what is next  | `feat/area1-order-page-status`   | This pull request. The sentence, the latest act, the documents and the address      |
 | #314  | The order form: what the review found                 | `fix/area1-order-form-review`    | This pull request. Corrects #306 after a review against the ADRs                    |
 | #312  | The order page review fixes                           | `fix/area1-order-page-review`    | This pull request. Corrections to #298, #301 and #309 found by a review             |
+| #319  | Sign-out forgets what the browser kept                | `fix/platform-sign-out-forgets`  | This pull request. The next person at a tab is not drawn the last one's answers     |
 | #311  | Words and claims corrected after review               | `fix/platform-words-and-claims`  | This pull request. Home, sign-in and Spark say no more than the workflow does       |
 | #191  | Cut CI minutes before the repository goes private     | `ci/minutes-job-conditions`      | Merged, [#192](https://github.com/xiu2809xiu-rgb/orderpilot/pull/192)               |
 | P-42  | Plan prompt 004                                       | `chore/plan-prompt-004`          | Merged, [#138](https://github.com/xiu2809xiu-rgb/orderpilot/pull/138)               |
