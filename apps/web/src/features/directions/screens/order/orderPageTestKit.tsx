@@ -1,4 +1,29 @@
+import type { OrderTimelineEvent } from "@orderpilot/shared";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { render } from "@testing-library/react";
+import type { ReactElement } from "react";
+import { MemoryRouter, Route, Routes } from "react-router";
 import { vi } from "vitest";
+import { Toaster } from "@/components/common/Toaster";
+import { createQueryClient } from "@/lib/query";
+
+/**
+ * Renders a page at an address with the toaster inside the router, because a
+ * finished task's toast carries a link to the order. The shared kit draws the
+ * toaster outside the router, which is enough for a page that never toasts.
+ */
+export function renderWithToasts(element: ReactElement, path: string) {
+  return render(
+    <QueryClientProvider client={createQueryClient()}>
+      <MemoryRouter initialEntries={[path]}>
+        <Routes>
+          <Route path="*" element={element} />
+        </Routes>
+        <Toaster />
+      </MemoryRouter>
+    </QueryClientProvider>,
+  );
+}
 
 /** What the workflow's record of an order can hold, as the API sends it. */
 export interface FlowBody {
@@ -35,10 +60,10 @@ export function flowOf(orderNo: string, body: FlowBody = {}) {
 export function entry(
   id: number,
   at: string,
-  kind: string,
-  actor: { kind: "user" | "system"; name: string },
+  kind: OrderTimelineEvent["kind"],
+  actor: OrderTimelineEvent["actor"],
   summary: string,
-) {
+): OrderTimelineEvent {
   return {
     id: `00000000-0000-4000-8000-${String(id).padStart(12, "0")}`,
     at,

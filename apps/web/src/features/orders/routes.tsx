@@ -29,8 +29,9 @@ export function canonicalOrderAddress({ params, request }: LoaderFunctionArgs) {
   const typed = params.orderNo ?? "";
   const canonical = canonicalOrderNo(typed);
   if (canonical === typed || !isOrderNo(canonical)) return null;
-  const { search, hash } = new URL(request.url);
-  return redirect(`/orders/${canonical}${search}${hash}`);
+  // The router hands a loader the address without its hash, so only the query is kept.
+  const { search } = new URL(request.url);
+  return redirect(`/orders/${canonical}${search}`);
 }
 
 /**
