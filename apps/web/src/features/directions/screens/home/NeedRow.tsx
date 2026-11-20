@@ -4,6 +4,7 @@ import { useId } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button";
+import { withTerms } from "@/components/common/Term";
 import { DueTimer } from "@/components/parts/DueTimer";
 import { HomeRow } from "./HomeRow";
 import { RecordLinkText } from "./RecordLinkText";
@@ -57,7 +58,7 @@ export function NeedRow({ task, busy, onComplete }: NeedRowProps) {
       {t(`needs.sprTask.${task.kind}`, { recordNo: task.ref?.recordNo })}
     </RecordLinkText>
   ) : (
-    doing
+    withTerms(doing)
   );
   return (
     <HomeRow

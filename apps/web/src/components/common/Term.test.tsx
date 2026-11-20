@@ -77,10 +77,10 @@ describe("withTerms", () => {
   it("draws each glossary word of a sentence as a term and leaves the rest", () => {
     render(<p>{withTerms("Send the PI to the customer")}</p>);
     expect(screen.getByText("PI").tagName).toBe("ABBR");
-    // The description is read out, not shown, so the words around it stay as they were.
-    const words = screen.getByRole("paragraph");
-    expect(words.firstChild).toHaveTextContent("Send the");
-    expect(words.lastChild).toHaveTextContent("to the customer");
+    // The description is read out, not part of the text, so the sentence is as it was.
+    expect(screen.getByRole("paragraph")).toHaveTextContent(
+      "Send the PI to the customer",
+    );
   });
 
   it("finds a phrase and an abbreviation in one sentence", () => {

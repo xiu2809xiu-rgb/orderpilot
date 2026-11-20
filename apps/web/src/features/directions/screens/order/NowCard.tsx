@@ -1,5 +1,6 @@
 import { CircleCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { withTerms } from "@/components/common/Term";
 import { ShineBorder } from "@/components/kit/ShineBorder";
 import type { Journey } from "./journeyModel";
 import { usualWords } from "./journeyText";
@@ -31,7 +32,7 @@ export function NowCard({
       {done ? null : <ShineBorder />}
       <div className="od-now-main">
         <p className="od-now-label fs-12">{t("order.now.label")}</p>
-        <p className="od-now-stage fs-20">{stageLabel}</p>
+        <p className="od-now-stage fs-20">{withTerms(stageLabel)}</p>
         {done ? (
           <p className="fs-14 flex items-center gap-2 text-muted-foreground">
             <CircleCheck aria-hidden="true" className="size-4" />

@@ -2,6 +2,7 @@ import type { SalesOrderDetail } from "@orderpilot/shared";
 import { Clock } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import { Term, withTerms } from "@/components/common/Term";
 import { formatDay } from "@/lib/format";
 import { StatusChip } from "@/components/kit/StatusChip";
 import { Amount } from "../orders/Amount";
@@ -13,7 +14,7 @@ function Fact({
   children,
   main = false,
 }: {
-  label: string;
+  label: ReactNode;
   children: ReactNode;
   /** The figure the eye should land on: set larger. */
   main?: boolean;
@@ -50,8 +51,8 @@ export function OrderFacts({
   const { t } = useTranslation("directions-orders");
   return (
     <dl className="od-facts-bar dx-card">
-      <Fact label={t("order.facts.stage")}>{stageLabel}</Fact>
-      <Fact label={t("columns.heldAt")}>
+      <Fact label={t("order.facts.stage")}>{withTerms(stageLabel)}</Fact>
+      <Fact label={<Term word="heldAt">{t("columns.heldAt")}</Term>}>
         {step === ALL_DONE ? t("cells.done") : heldAt}
       </Fact>
       <Fact label={t("columns.value")} main>

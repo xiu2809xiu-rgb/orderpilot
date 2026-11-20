@@ -1,5 +1,6 @@
 import type { TFunction } from "i18next";
 import type { DataTableColumn } from "@/components/common";
+import { Term, withTerms } from "@/components/common/Term";
 import { formatDay } from "@/lib/format";
 import { orderHref } from "../home/homeLinks";
 import { OrderCell } from "./OrderCell";
@@ -77,6 +78,7 @@ export function orderColumns({
     {
       id: "heldAt",
       header: t("columns.heldAt"),
+      headerContent: <Term word="heldAt">{t("columns.heldAt")}</Term>,
       cell: (row) =>
         row.ownerRole === null ? (
           <span className="text-muted-foreground">-</span>
@@ -142,6 +144,7 @@ export function orderColumns({
     {
       id: "externalDocumentNo",
       header: t("columns.po"),
+      headerContent: withTerms(t("columns.po")),
       cell: (row) => <span className="numeral">{row.externalDocumentNo}</span>,
       exportValue: (row) => row.externalDocumentNo,
       defaultHidden: true,

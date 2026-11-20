@@ -1,4 +1,4 @@
-import { Fragment, useId, type ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Tooltip,
@@ -40,9 +40,10 @@ export function useGlossaryLine(word: GlossaryKey): {
 
 /**
  * An abbreviation with its long form in reach: shown on hover and on keyboard
- * focus, and read out as the abbreviation's description. The description sits
- * in a hidden element rather than a `title`, so the pointer sees one tooltip,
- * not two. Never put it inside a button or a link: it is itself focusable.
+ * focus, and read out as the abbreviation's description. The description is
+ * an attribute, not a `title` (the pointer would see two tooltips) and not a
+ * hidden element (it would join the text of the row that holds it). Never put
+ * it inside a button or a link: it is itself focusable.
  */
 export function Term({
   word,
@@ -52,30 +53,24 @@ export function Term({
   children?: ReactNode;
 }) {
   const { term, long, meaning } = useGlossaryLine(word);
-  const descriptionId = useId();
   return (
-    <>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <abbr
-            // Focus is the only way a keyboard reaches the long form (WCAG 2.1.1, 1.4.13).
-            // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
-            tabIndex={0}
-            aria-describedby={descriptionId}
-            className="cursor-help rounded-sm underline decoration-dotted underline-offset-4 focus-visible:outline-2 focus-visible:outline-ring"
-          >
-            {children ?? term}
-          </abbr>
-        </TooltipTrigger>
-        <TooltipContent side="top" className="fs-14 max-w-72">
-          {long ? <span className="block font-medium">{long}</span> : null}
-          <span className="block">{meaning}</span>
-        </TooltipContent>
-      </Tooltip>
-      <span id={descriptionId} hidden>
-        {long ? `${long}. ${meaning}` : meaning}
-      </span>
-    </>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <abbr
+          // Focus is the only way a keyboard reaches the long form (WCAG 2.1.1, 1.4.13).
+          // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+          tabIndex={0}
+          aria-description={long ? `${long}. ${meaning}` : meaning}
+          className="cursor-help rounded-sm underline decoration-dotted underline-offset-4 focus-visible:outline-2 focus-visible:outline-ring"
+        >
+          {children ?? term}
+        </abbr>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="fs-14 max-w-72">
+        {long ? <span className="block font-medium">{long}</span> : null}
+        <span className="block">{meaning}</span>
+      </TooltipContent>
+    </Tooltip>
   );
 }
 
