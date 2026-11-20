@@ -95,6 +95,31 @@ describe("Done today on Home", () => {
     ).toBeVisible();
   });
 
+  // A browser may still hold a line an earlier build noted for a kind that no
+  // screen records any more, and the list reads its words by kind, so the two
+  // strings of home.json for them stay.
+  it("still words a stored line of a kind nothing records any more", async () => {
+    const id = sessionFor("FINANCE").user.id;
+    localStorage.setItem(
+      `op.done.${id}`,
+      JSON.stringify([
+        {
+          kind: "CONFIRM_PAYMENT",
+          orderNo: "SO-0084",
+          customerName: null,
+          at: new Date().toISOString(),
+        },
+      ]),
+    );
+    serveHome({ tasks: [] });
+    renderHome("FINANCE", { keepDone: true });
+    expect(
+      await screen.findByText(
+        /^Confirmed the payment for SO-0084 at \d\d:\d\d$/,
+      ),
+    ).toBeVisible();
+  });
+
   it("lists an act made on an order's page", async () => {
     const user = userEvent.setup();
     useSessionStore.setState({

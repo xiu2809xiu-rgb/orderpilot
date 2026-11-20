@@ -42,6 +42,9 @@ export function DoneGroup({ done }: { done: readonly DoneItem[] }) {
       ) : (
         <Timeline value={done.length}>
           {done.map(({ kind, orderNo, customerName, at }, index) => {
+            // Every kind has its words, including two that nothing records now
+            // (a payment, a review): an earlier build may have left such a line
+            // in this browser, and a missing key would print as the key.
             const what = tHome(`needs.done.${kind}`, { orderNo });
             const line = t("timeline.done.at", {
               what,
