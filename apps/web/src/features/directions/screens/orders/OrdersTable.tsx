@@ -11,40 +11,45 @@ import { DataTableHead } from "@/components/common/data-table/DataTableHead";
 import { Table } from "@/components/ui/table";
 import { useMediaQuery } from "@/lib/useMediaQuery";
 import { orderHref } from "../home/homeLinks";
+import { foldedAt, type Fit } from "./orderFit";
 import { OrderRowMenu } from "./OrderRowMenu";
 import type { OrderRow } from "./orderRow";
 import type { Sort, SortId } from "./ordersQuery";
 
 /**
- * Widths in pixels, so the default columns fit one 1440 px screen with the side
- * panel open (1122 px of table) and no column is cut off. Each width is the
- * widest content of its column plus the cell's 16 px of padding and a few
- * pixels to spare, because text is a pixel or two wider in Chromium on Linux
- * than on Windows. The order cell holds a number entered here
- * ("SO-20261115-0012", 137 px), with its chips under it; the age cell "47 d"
- * over a "10 d late" chip (77 px); the documents cell a "To confirm" chip
- * (105 px). A role name in the held-at cell may take two lines, and so may an
- * amount of six figures or more, its currency above it; the customer name is
- * the one cell that truncates. A narrower screen scrolls the table inside its
- * own box; a wider one shares out what is left.
+ * Widths in pixels, so the eight default columns fit the 1048 px of table that
+ * a 1366 px window leaves beside the side panel, and no column is cut off. Each
+ * width is the widest content of its column plus the cell's 12 px of padding
+ * and a few pixels to spare, because text is a pixel or two wider in Chromium
+ * on Linux than on Windows. The order cell holds a number entered here
+ * ("SO-20261115-0012", 137 px), with its chips under it; the PO number
+ * "PO-BD-4317" is 94 px; the documents cell holds the "1 open exception" chip
+ * (138 px). A role name in the held-at cell may take two lines, and so may an
+ * amount of six figures or more, its currency above it, and the stage's
+ * words; the customer name is the one cell that truncates, and its full name
+ * is its tooltip. A narrower window leaves columns out (`orderFit`), so the
+ * table needs no sideways scroll; a wider one shares out what is left.
  */
 const WIDTH: Readonly<Record<string, number>> = {
   select: 32,
-  orderNo: 164,
-  customerName: 134,
-  step: 176,
-  heldAt: 128,
-  age: 96,
-  shipmentDate: 104,
-  amount: 120,
-  docs: 124,
+  orderNo: 152,
+  externalDocumentNo: 106,
+  customerName: 104,
+  step: 136,
+  heldAt: 100,
+  age: 92,
+  shipmentDate: 96,
+  amount: 116,
+  docs: 146,
   stock: 132,
-  externalDocumentNo: 116,
   orderDate: 100,
   entry: 96,
   source: 100,
   actions: 42,
 };
+
+/** With facts under the number the column is a little wider, so a PO number or a value does not wrap to a word a line. */
+const ORDER_WITH_FACTS = 176;
 
 /**
  * On a touch screen the checkbox and the row menu are 44 px buttons, and
@@ -58,7 +63,7 @@ const WIDTH: Readonly<Record<string, number>> = {
 const TOUCH = "(pointer: coarse)";
 const TOUCH_WIDTH: Readonly<Record<string, number>> = {
   select: 44,
-  customerName: 119,
+  customerName: 96,
   actions: 45,
 };
 
@@ -71,6 +76,7 @@ const TOUCH_WIDTH: Readonly<Record<string, number>> = {
  */
 export function OrdersTable({
   columns,
+  fit,
   rows,
   status,
   error,
@@ -84,6 +90,7 @@ export function OrdersTable({
   onClearFilters,
 }: {
   columns: readonly DataTableColumn<OrderRow>[];
+  fit: Fit;
   rows: readonly OrderRow[];
   status: TableStatus;
   error: unknown;
@@ -102,7 +109,9 @@ export function OrdersTable({
     : null;
   const touch = useMediaQuery(TOUCH);
   const widthOf = (id: string) =>
-    (touch ? TOUCH_WIDTH[id] : undefined) ?? WIDTH[id] ?? 120;
+    id === "orderNo" && foldedAt(fit).length > 0
+      ? ORDER_WITH_FACTS
+      : ((touch ? TOUCH_WIDTH[id] : undefined) ?? WIDTH[id] ?? 120);
   const widths = ["select", ...columns.map((column) => column.id), "actions"];
   const total = widths.reduce((sum, id) => sum + widthOf(id), 0);
   return (
@@ -110,6 +119,8 @@ export function OrdersTable({
       <Table
         className="od-table"
         aria-busy={status === "loading"}
+        // The stage cell shows the age itself, unless the age has its own column.
+        data-age-column={columns.some((c) => c.id === "age") || undefined}
         style={{ minWidth: total }}
       >
         <caption className="sr-only">{t("table.caption")}</caption>

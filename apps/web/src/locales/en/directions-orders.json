@@ -41,6 +41,7 @@
     "to": "To",
     "span_one": "{{count}} day in range",
     "span_other": "{{count}} days in range",
+    "rangeReversed": "From is after To. Put the dates in order and the range will filter the list.",
     "wholeStage": "All of {{stage}}"
   },
   "applied": {
@@ -101,9 +102,12 @@
     "shortItems_other": "{{itemNo}} and {{count}} more",
     "toConfirm": "To confirm",
     "docsNone": "No document needs attention",
-    "differs": "Differs",
-    "differsCount_one": "{{count}} difference found by the checks",
-    "differsCount_other": "{{count}} differences found by the checks"
+    "whyShort": "{{quantity}} short",
+    "whyPayment": "Payment not confirmed",
+    "whyMore": "{{reason}} and {{count}} more",
+    "heldAtFact": "Held at {{team}}",
+    "shipFact": "Ships {{date}}",
+    "poFact": "PO number"
   },
   "table": {
     "caption": "Orders",

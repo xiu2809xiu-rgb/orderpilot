@@ -73,17 +73,33 @@ describe("the workspace's columns", () => {
     expect(value?.exportValue?.(hidden)).toBe("Hidden");
   });
 
-  it("starts with the PO number, the order date, the entry state, the source and the stock under Columns", () => {
+  it("starts with the age on its own, the order date, the entry state, the source and the stock under Columns", () => {
     const hiddenIds = columns()
       .filter((column) => column.defaultHidden)
       .map((column) => column.id);
-    expect(hiddenIds).toEqual([
-      "stock",
+    expect(hiddenIds).toEqual(["age", "stock", "orderDate", "entry", "source"]);
+  });
+
+  it("shows the PO number by default, right after the order", () => {
+    const shown = columns()
+      .filter((column) => !column.defaultHidden)
+      .map((column) => column.id);
+    expect(shown.slice(0, 3)).toEqual([
+      "orderNo",
       "externalDocumentNo",
-      "orderDate",
-      "entry",
-      "source",
+      "customerName",
     ]);
+  });
+
+  it("exports the documents as the screen says them: an open exception, never a difference", () => {
+    const docs = columns().find((column) => column.id === "docs");
+    expect(docs?.exportValue?.({ ...base, openExceptions: 1 })).toBe(
+      "1 open exception",
+    );
+    expect(
+      docs?.exportValue?.({ ...base, openExceptions: 2, toConfirm: true }),
+    ).toBe("To confirm; 2 open exceptions");
+    expect(docs?.exportValue?.(base)).toBe("");
   });
 
   it("cannot sort by the amount for a role that may not see it", () => {
