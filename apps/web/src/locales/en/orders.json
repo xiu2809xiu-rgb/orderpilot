@@ -41,7 +41,7 @@
       "poLong": "A PO number has {{max}} characters at most, and this one has {{length}}. Shorten it.",
       "orderDate": "Enter the order date.",
       "shipmentDate": "Enter a valid shipment date, or leave it empty.",
-      "shipmentBeforeOrder": "The shipment date cannot be before the order date. Choose the order date or a later day.",
+      "shipmentBeforeOrder": "This is before the order date. Choose that day or a later one.",
       "prepayment": "Enter a percentage from 0 to 100, with two decimals at most.",
       "item": "Choose an item from the list.",
       "description": "A description has 100 characters at most. Shorten it.",

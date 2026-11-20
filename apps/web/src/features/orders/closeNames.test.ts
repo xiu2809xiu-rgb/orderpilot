@@ -22,10 +22,18 @@ describe("nameSlips", () => {
     expect(nameSlips("Sagaran", "Sagarun Trading Co")).toBe(1);
     expect(nameSlips("Mer1dian", "Meridian Peripherals")).toBe(1);
     expect(nameSlips("Meridan Periphrals", "Meridian Peripherals")).toBe(2);
+    expect(nameSlips("Meridiann", "Meridian")).toBe(1);
+    expect(nameSlips("Meridaian", "Meridian")).toBe(1);
   });
 
   it("lets a word that is still being typed be close to the start of a word", () => {
     expect(nameSlips("Meridin Perip", "Meridian Peripherals")).not.toBeNull();
+  });
+
+  it("allows one slip in a word of seven letters or fewer, so look-alikes stay few", () => {
+    // Jakaran and Selarang are two slips from Sagaran, and not what was meant.
+    expect(nameSlips("Sagaran", "PT Jakaran Teknologi")).toBeNull();
+    expect(nameSlips("Sagaran", "Selarang Distribution")).toBeNull();
   });
 
   it("asks short words to match exactly, so a few letters match nothing by chance", () => {

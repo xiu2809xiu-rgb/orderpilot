@@ -112,7 +112,8 @@ export function LookupControl({
         sideOffset={4}
         // The popover is a dialog to a screen reader, and a dialog needs a name.
         aria-label={label}
-        className="w-(--radix-popover-trigger-width) overflow-hidden p-0"
+        // A narrow cell, such as an item in a line, still lists whole names.
+        className="w-(--radix-popover-trigger-width) max-w-[calc(100vw-2rem)] min-w-80 overflow-hidden p-0"
         onOpenAutoFocus={(event) => {
           event.preventDefault();
         }}

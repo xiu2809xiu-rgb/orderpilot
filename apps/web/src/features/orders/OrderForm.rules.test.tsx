@@ -23,8 +23,7 @@ beforeEach(() => {
 const orderDate = () => screen.getByLabelText(/Order date/);
 const shipmentDate = () => screen.getByLabelText(/Shipment date/);
 const po = () => screen.getByRole("textbox", { name: /PO number/ });
-const CLASH =
-  "The shipment date cannot be before the order date. Choose the order date or a later day.";
+const CLASH = "This is before the order date. Choose that day or a later one.";
 
 async function ready() {
   await screen.findByRole("combobox", { name: /^Customer$/ });

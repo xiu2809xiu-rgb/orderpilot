@@ -5,10 +5,14 @@
  * a name, so one or two slipped, missing or swapped characters still find it.
  */
 
-/** Slips allowed for a word of this length: short words must match exactly. */
+/**
+ * Slips allowed for a word of this length: short words must match exactly, and
+ * two slips are for words of eight letters or more, or a name with only a few
+ * letters changed would match half the list.
+ */
 function allowedSlips(length: number): number {
   if (length <= 3) return 0;
-  return length <= 5 ? 1 : 2;
+  return length <= 7 ? 1 : 2;
 }
 
 /** Letters and digits only, in lower case, one word at a time. */
