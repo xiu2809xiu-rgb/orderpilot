@@ -1,6 +1,6 @@
 # New order form pictures
 
-Taken on 20 Nov 2026 from a Docker build of this branch at commit fe9f215b, on the synthetic demo data.
+Taken on 20 Nov 2026 from a Docker build of this branch at commit fe9f215b, on the synthetic demo data. Two pictures are dark, order-form-empty-dark.png and order-form-sticky-dark.png (the names that end in -dark); the other twelve are light only.
 
 The script signs in as Support and creates one draft order of its own, with a PO number that starts with SHOT-, to show that a blank last line does not block Save. It voids that draft again. It touches no other record.
 
