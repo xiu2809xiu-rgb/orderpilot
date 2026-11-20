@@ -24,7 +24,7 @@ describe("the sign-in page with demo mode on", () => {
     expect(buttons).toHaveLength(6);
     expect(buttons.map((b) => b.textContent)).toEqual([
       "1SupportMei TanTakes in the customer's order and sends the proforma invoice",
-      "2Product managerPriya NairChecks stock and asks to buy what is short",
+      "2Product managerPriya NairWatches stock and run rate, and raises the request to buy",
       "3Management approverRachel GohApproves or rejects the request to buy",
       "4FinanceGrace OngConfirms the customer's payment",
       "5WarehouseHafiz RahmanPacks the goods and checks them against the papers",
