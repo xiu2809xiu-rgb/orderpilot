@@ -95,7 +95,9 @@ describe("the blank line that Enter adds", () => {
       "3",
     );
     await user.click(screen.getByRole("button", { name: /^Save$/ }));
-    expect(await screen.findByText("Choose an item.")).toBeVisible();
+    expect(
+      await screen.findByText("Choose an item from the list."),
+    ).toBeVisible();
     expect(server.requests.posts).toHaveLength(0);
   });
 });

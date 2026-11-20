@@ -274,7 +274,9 @@ describe("a draft order's page", () => {
         screen.queryByText(/Search by Business Central number/),
       ).toBeNull();
       expect(screen.queryByText(/One customer and PO number/)).toBeNull();
-      expect(screen.queryByText(/comes from the customer's PO/)).toBeNull();
+      expect(
+        screen.queryByText(/starts from what this customer last agreed/),
+      ).toBeNull();
       expect(screen.getByText(/Availability is mock/)).toBeVisible();
       const row = await screen.findByRole("row", { name: "Line 1" });
       expect(within(row).queryByRole("textbox")).toBeNull();
