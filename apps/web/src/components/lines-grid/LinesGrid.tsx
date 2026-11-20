@@ -9,7 +9,8 @@ import "./lines-grid.css";
 import { LineRow } from "./LineRow";
 import { LinesFooter } from "./LinesFooter";
 import { editableKinds, trackTemplate } from "./lineValues";
-import type { ColumnKind, LineColumn, LinesGridProps } from "./types";
+import { afterItem, headerClass } from "./gridHelpers";
+import type { LineColumn, LinesGridProps } from "./types";
 import { useGridKeys } from "./useGridKeys";
 import { useItemPick } from "./useItemPick";
 import { useItemSearch } from "./useItemSearch";
@@ -17,20 +18,6 @@ import { useLineActions } from "./useLineActions";
 import { useLineTotals } from "./useLineTotals";
 import { usePendingFocus } from "./usePendingFocus";
 import { useStable } from "./useStable";
-
-// Whole class names for Tailwind. Numbers line up on the right, as their cells do.
-function headerClass(kind: ColumnKind): string | undefined {
-  if (kind === "remove") return "sr-only";
-  const numeric =
-    kind === "quantity" || kind === "unitPrice" || kind === "amount";
-  if (kind === "availability") return "@lines:pl-2";
-  return numeric ? "@lines:text-right" : undefined;
-}
-
-/** Where Enter on an item goes: the quantity, since the pick filled the description. */
-function afterItem(editable: readonly string[]): string | undefined {
-  return editable.find((kind) => kind !== "item" && kind !== "description");
-}
 
 /**
  * A table of order or SPR lines that is typed into, not clicked through. Put it
