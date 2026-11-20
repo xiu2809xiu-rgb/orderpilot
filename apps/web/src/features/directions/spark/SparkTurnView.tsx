@@ -109,6 +109,12 @@ export function SparkTurnView({
             {done && turn.kind === "other" ? (
               <SparkChoices mayReadSales={mayReadSales} onAsk={onAsk} />
             ) : null}
+            {done && turn.kind === "other" && !mayReadSales ? (
+              // Why the sales question is not among the suggestions.
+              <p className="fs-12 text-muted-foreground">
+                {t("other.noSales")}
+              </p>
+            ) : null}
           </>
         )}
       </div>

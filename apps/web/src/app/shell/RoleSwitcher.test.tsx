@@ -145,7 +145,7 @@ describe("the Demo role menu", () => {
     const items = await screen.findAllByRole("menuitem");
     expect(items.map((item) => item.textContent)).toEqual([
       "1SupportMei TanTakes in the customer's order and sends the proforma invoice",
-      "2Product managerPriya NairChecks stock and asks to buy what is short",
+      "2Product managerPriya NairWatches stock and run rate, and raises the request to buy",
       "3Management approverRachel GohApproves or rejects the request to buy",
       "4FinanceGrace OngConfirms the customer's payment",
       "5WarehouseHafiz RahmanPacks the goods and checks them against the papers",
@@ -158,6 +158,17 @@ describe("the Demo role menu", () => {
     expect(Object.keys(DEMO_PERSONAS)).toHaveLength(ROLES.length);
     // Two dividers: one under the hint, one before the tour, and one between the six and the rest.
     expect(screen.getAllByRole("separator")).toHaveLength(3);
+  });
+
+  it("says what a change of role does: an open order stays open", async () => {
+    const user = userEvent.setup();
+    open("/", "FINANCE");
+    await user.click(await screen.findByRole("button", { name: "Demo role" }));
+    expect(
+      await screen.findByText(
+        "Switch to another role. An order you have open stays open.",
+      ),
+    ).toBeInTheDocument();
   });
 
   it("ticks the current role and no other", async () => {

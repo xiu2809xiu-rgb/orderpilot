@@ -12,8 +12,9 @@ import {
 } from "./homeTestKit";
 
 /**
- * A one-click row says what it records, and what follows it says who has the
- * order next. Each case is one kind of task, as the role that holds it sees it.
+ * A one-click row says what it records, and names who has the order next only
+ * where the state machine always sends it to the same team. Each case is one
+ * kind of task, as the role that holds it sees it.
  */
 beforeAll(async () => {
   await loadHomeNamespaces();
@@ -45,7 +46,9 @@ const CASES: Case[] = [
     }),
     button: "Raise",
     message: "Raised the SPR for SO-0082",
-    next: "It goes to the management approvers.",
+    // No next team: a coordinator routes a raised SPR to the approver group
+    // (ADR 0049, decision 3), and today it reaches nobody's list (#290).
+    next: undefined,
     records: "Raises the SPR for approval. OrderPilot buys nothing.",
   },
   {
@@ -57,7 +60,10 @@ const CASES: Case[] = [
     }),
     button: "Mark PI as sent",
     message: "Marked the PI for SO-0084 as sent",
-    next: "Finance confirms the payment next.",
+    // No next team: waitingOnOf in order-state-machine.ts sends an order with no
+    // prepayment due from AwaitingPayment straight to the warehouse, so Finance
+    // is not always next.
+    next: undefined,
     records: NOTHING,
   },
   {
@@ -74,6 +80,7 @@ const CASES: Case[] = [
     }),
     button: "Confirm",
     message: "Confirmed the payment for SO-0086",
+    // PAYMENT_CONFIRMED always lands on Paid, which waits on the warehouse.
     next: "The warehouse packs next.",
     records: "Records that the payment arrived. OrderPilot moves no money.",
   },
@@ -82,6 +89,7 @@ const CASES: Case[] = [
     task: makeTask({ kind: "PACK_ORDER", orderNo: "SO-0088" }),
     button: "Mark as packed",
     message: "Marked SO-0088 as packed",
+    // Packing always waits on Support's invoice (WAITING_ON in the machine).
     next: "Support makes the invoice and packing list next.",
     records: NOTHING,
   },
@@ -103,6 +111,7 @@ const CASES: Case[] = [
     }),
     button: "Mark documents as added",
     message: "Marked the documents for SO-0092 as added",
+    // SHIPPING_DOCUMENTS_RECEIVED always closes the order.
     next: "That was the order's last step.",
     records: NOTHING,
   },
@@ -127,7 +136,7 @@ describe.each(CASES)("the $task.kind row", (row) => {
     expect(button.querySelector("svg")).not.toBeNull();
   });
 
-  it("names the order and who has it next, with Undo, and notes it in Done today", async () => {
+  it("names the order, and the next team only where it is fixed, with Undo, and notes it in Done today", async () => {
     const user = userEvent.setup();
     const served = serveHome({ tasks: [task] });
     renderHome(row.role);

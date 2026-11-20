@@ -8,6 +8,7 @@ import { demoLogin, login } from "@/lib/api/auth";
 import { describeError } from "@/lib/errors";
 import { DemoRoles } from "./signin/DemoRoles";
 import { PasswordForm } from "./signin/PasswordForm";
+import { RolesPlaceholder } from "./signin/RolesPlaceholder";
 import { SignInFailure, type Failure } from "./signin/SignInFailure";
 import { useAuthOptions } from "./signin/useAuthOptions";
 import "./signin/preloadWords";
@@ -23,10 +24,11 @@ interface SignInFormProps {
 /**
  * With demo mode on, the six teams lead and the email form waits behind
  * "Sign in with email" (open from the start when the email is known, such as
- * after a session ended). With demo mode off, or while that is still unknown,
- * the form is simply there. The form stays mounted through all of it, hidden
- * when closed, so what a person is typing keeps its place and its focus when
- * the roles arrive.
+ * after a session ended). While that is still unknown, a placeholder of the
+ * roles' size holds their place and the form is not drawn. With demo mode
+ * off, or when the options cannot be loaded, the form is simply there. The
+ * form stays mounted through all of it, hidden when closed, so what a person
+ * is typing keeps its place and its focus when the roles arrive.
  */
 export function SignInForm({
   defaultEmail = "",
@@ -66,7 +68,10 @@ export function SignInForm({
   }
 
   const demo = options.data?.demoMode ? options.data : null;
-  const formShown = demo === null || emailOpen;
+  // Until the options answer, the form is not drawn: with demo mode on it
+  // would show and then fold away. If demo mode is off, or the request failed,
+  // it is there as before. A person already in it (an expired session) keeps it.
+  const formShown = emailOpen || (!options.isPending && demo === null);
   // A failed password is drawn at the form's button; a failed role click is
   // drawn under the roles, so it is seen whichever part is open.
   const inForm = failure?.from === "password" && formShown;
@@ -74,17 +79,7 @@ export function SignInForm({
 
   return (
     <div className="flex flex-col gap-3">
-      {options.isPending ? (
-        // The roles are on their way: keep their room so nothing jumps.
-        <div
-          aria-hidden="true"
-          className="grid grid-cols-2 gap-2 sm:grid-cols-3"
-        >
-          {Array.from({ length: 6 }, (_, index) => (
-            <Skeleton key={index} className="h-24" />
-          ))}
-        </div>
-      ) : null}
+      {options.isPending ? <RolesPlaceholder /> : null}
       {demo ? (
         <DemoRoles
           roles={demo.demoRoles}
@@ -119,6 +114,9 @@ export function SignInForm({
             />
             {t("login.emailToggle")}
           </button>
+        ) : options.isPending ? (
+          // Holds the toggle's room, so the card keeps its height when it arrives.
+          <Skeleton aria-hidden="true" className="h-9 w-40" />
         ) : null}
         <div
           id={formId}
