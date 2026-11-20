@@ -288,7 +288,7 @@
     "activity": {
       "emptyTitle": "Nothing has happened yet",
       "emptyBody": "Events appear here as the order moves through its steps.",
-      "note": "What happened on the order, newest first. Postings to the ledger are made in Business Central; this page shows the result.",
+      "note": "What happened on the order, newest first. Nothing is posted from this page. Business Central stays the system of record.",
       "current": "Current step",
       "by": "{{actor}}, {{when}}"
     }
