@@ -185,7 +185,9 @@ describe("the latest act", () => {
       },
     });
     open("SO-0001");
-    const button = await screen.findByRole("button", { name: "Mark sent" });
+    const button = await screen.findByRole("button", {
+      name: "Mark PI as sent",
+    });
     expect(screen.queryByText(/^Latest:/)).toBeNull();
     await user.click(button);
     expect(

@@ -67,24 +67,6 @@ const CASES: Case[] = [
     records: NOTHING,
   },
   {
-    role: "FINANCE",
-    task: makeTask({
-      kind: "CONFIRM_PAYMENT",
-      assigneeRole: "FINANCE",
-      orderNo: "SO-0086",
-      expectedPayment: {
-        paymentType: "prepayment",
-        amount: "100.00",
-        currencyCode: "USD",
-      },
-    }),
-    button: "Confirm",
-    message: "Confirmed the payment for SO-0086",
-    // PAYMENT_CONFIRMED always lands on Paid, which waits on the warehouse.
-    next: "The warehouse packs next.",
-    records: "Records that the payment arrived. OrderPilot moves no money.",
-  },
-  {
     role: "WAREHOUSE",
     task: makeTask({ kind: "PACK_ORDER", orderNo: "SO-0088" }),
     button: "Mark as packed",
@@ -172,6 +154,74 @@ describe.each(CASES)("the $task.kind row", (row) => {
         name.startsWith(lead) && /^\d\d:\d\d$/.test(name.slice(lead.length)),
     });
     expect(link).toHaveAttribute("href", `/orders/${order}`);
+  });
+});
+
+// A payment is never confirmed from Home: the amount, the bank reference and the
+// date come from the bank advice, so the row opens the form that asks for them.
+// It used to record the expected amount under a reference made up here.
+describe("the row of the payment task", () => {
+  const payment = makeTask({
+    kind: "CONFIRM_PAYMENT",
+    assigneeRole: "FINANCE",
+    orderNo: "SO-0086",
+    expectedPayment: {
+      paymentType: "prepayment",
+      amount: "100.00",
+      currencyCode: "USD",
+    },
+  });
+
+  it("opens the form that asks for the amount, the reference and the date, and says so", async () => {
+    serveHome({ tasks: [payment] });
+    renderHome("FINANCE");
+    const link = await screen.findByRole("link", {
+      name: "Enter payment details for SO-0086",
+    });
+    expect(link).toHaveAttribute("href", "/workflows/orders/SO-0086");
+    expect(link).toHaveAccessibleDescription(
+      "Opens the form for the amount, the bank reference and the date.",
+    );
+    // The tour and the focus helper find the row by these.
+    expect(link).toHaveAttribute("data-task-action");
+    expect(link).toHaveAttribute("data-task-kind", "CONFIRM_PAYMENT");
+    expect(screen.queryByRole("button", { name: /Confirm/ })).toBeNull();
+  });
+
+  it("sends no request to confirm a payment, whatever is pressed", async () => {
+    const user = userEvent.setup();
+    const served = serveHome({ tasks: [payment] });
+    renderHome("FINANCE");
+    await user.click(
+      await screen.findByRole("link", {
+        name: "Enter payment details for SO-0086",
+      }),
+    );
+    expect(served.calls.some((call) => call.startsWith("POST "))).toBe(false);
+    expect(served.paid).toEqual([]);
+  });
+});
+
+describe("the row that confirms the fields read from a PO", () => {
+  const review = makeTask({
+    kind: "REVIEW_FIELDS",
+    assigneeRole: "SUPPORT",
+    orderNo: "SO-0102",
+  });
+
+  // No screen confirms a stored document's fields, so the row promises no review.
+  it("only opens the order, and offers no review of the steps page", async () => {
+    serveHome({ tasks: [review] });
+    renderHome("SUPPORT");
+    const link = await screen.findByRole("link", {
+      name: "Open order for SO-0102",
+    });
+    expect(link).toHaveAttribute("href", "/orders/SO-0102");
+    expect(link).toHaveTextContent("Open order");
+    expect(screen.queryByRole("link", { name: /Review/ })).toBeNull();
+    for (const anchor of screen.getAllByRole("link")) {
+      expect(anchor.getAttribute("href")).not.toBe("/workflows/orders/SO-0102");
+    }
   });
 });
 

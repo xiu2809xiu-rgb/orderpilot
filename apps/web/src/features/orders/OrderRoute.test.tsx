@@ -220,12 +220,14 @@ describe("one order at /orders/:orderNo", () => {
     stubApi({ specs: ALL, tasks: [taskOn(sample.orderNo, "SEND_PI")] });
     const view = open(sample.orderNo, "SUPPORT");
     expect(
-      await screen.findByRole("button", { name: "Mark sent" }),
+      await screen.findByRole("button", { name: "Mark PI as sent" }),
     ).toBeVisible();
     view.unmount();
     open(sample.orderNo, "MANAGEMENT");
     await heading(sample.orderNo);
-    expect(screen.queryByRole("button", { name: "Mark sent" })).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: "Mark PI as sent" }),
+    ).toBeNull();
     expect(screen.queryByText(/no open task/)).toBeNull();
   });
 

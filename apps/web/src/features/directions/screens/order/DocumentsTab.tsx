@@ -7,7 +7,7 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/components/kit/Alert";
-import { hasPermission, useSessionStore } from "@/stores/session";
+import { UPLOAD_PATH, useDemoParts } from "@/app/shell/demoParts";
 import { DocumentItem } from "./DocumentItem";
 import { type OrderDocumentRow } from "./documentsModel";
 
@@ -19,8 +19,10 @@ import { type OrderDocumentRow } from "./documentsModel";
  * whether a person has confirmed it) and, when it can be read, the papers the
  * order has not got yet. The customer's PO always leads. When the
  * tracker says a document of the order waits for a person to confirm it, an
- * alert says so above the list and links to the review; it names the document
- * only when the workflow's list does.
+ * alert says so above the list; it names the document only when the workflow's
+ * list does. It does not lead to a review, because no screen confirms a stored
+ * document's fields yet: the order's steps page has no control for it. A demo
+ * session is shown the labelled review on a sample instead.
  */
 export function DocumentsTab({
   documents,
@@ -38,11 +40,7 @@ export function DocumentsTab({
 }) {
   const { t } = useTranslation("directions-orders");
   const named = documents.some((row) => row.flow?.status === "to-confirm");
-  // The task that confirms the fields is on the order's steps page.
-  const maySeeSteps = hasPermission(
-    useSessionStore((state) => state.session),
-    "workflows.read",
-  );
+  const demo = useDemoParts();
   return (
     <div className="od-docs-wrap">
       {toConfirm ? (
@@ -51,7 +49,7 @@ export function DocumentsTab({
           <AlertDescription>
             {t(named ? "documents.confirmBodyNamed" : "documents.confirmBody")}
           </AlertDescription>
-          {maySeeSteps ? (
+          {demo ? (
             <AlertAction>
               <Button
                 asChild
@@ -59,9 +57,7 @@ export function DocumentsTab({
                 size="sm"
                 className="pointer-coarse:h-11"
               >
-                <Link to={`/workflows/orders/${encodeURIComponent(orderNo)}`}>
-                  {t("documents.review")}
-                </Link>
+                <Link to={UPLOAD_PATH}>{t("action.reviewSample")}</Link>
               </Button>
             </AlertAction>
           ) : null}

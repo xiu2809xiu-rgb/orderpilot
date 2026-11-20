@@ -189,6 +189,8 @@
     "allDone": "Every step is done."
   },
   "action": {
+    "reviewNotice": "A document of this order waits for a person to confirm its fields. This build has no screen that confirms a stored document.",
+    "reviewSample": "See the review on a sample",
     "none": "You have no open task on this order.",
     "yourTask": "Your task"
   },
@@ -329,7 +331,6 @@
       "none": "No file in the demo set"
     },
     "noChecks": "No check has read this document yet.",
-    "review": "Open the order's steps",
     "received": "Received {{date}}",
     "flow": {
       "confirmed": "Confirmed",
@@ -338,9 +339,9 @@
       "expectedBy": "Expected by {{date}}"
     },
     "checked": "Checks: {{passed}} passed, {{failed}} found a difference.",
-    "confirmTitle": "A document of this order waits for you to confirm it",
-    "confirmBody": "The tracker says a person must confirm the fields read from one of the documents. It does not say which one.",
-    "confirmBodyNamed": "The tracker says a person must confirm the fields read from one of the documents. It is marked To confirm in the list below."
+    "confirmTitle": "A document of this order waits for a person to confirm its fields",
+    "confirmBody": "This build has no screen that confirms a stored document. The tracker does not say which one waits.",
+    "confirmBodyNamed": "This build has no screen that confirms a stored document. The one that waits is marked To confirm in the list below."
   },
   "mask": {
     "role": "your role does not include this figure",
