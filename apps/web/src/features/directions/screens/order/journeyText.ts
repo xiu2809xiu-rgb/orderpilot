@@ -46,7 +46,7 @@ export function usualWords(t: TFunction, usual: Usual): string {
 export function journeyDetails(
   t: TFunction,
   journey: Journey,
-  /** The full rail has 120 px a step: dates lose the year and the current step leaves the usual time to the card above. */
+  /** The full rail has 120 px a step: dates lose the year, and the current step has no line, because the order page says who holds the order and how late it is once, above. */
   compact = false,
 ): Partial<Record<number, string>> {
   const details: Partial<Record<number, string>> = {};
@@ -58,19 +58,18 @@ export function journeyDetails(
         actor: step.doneBy.actor,
         when: day(step.doneBy.at),
       });
-    } else if (step.state === "now" && step.since !== null) {
+    } else if (step.state === "now" && step.since !== null && !compact) {
       const waited = step.waitedDays ?? 0;
       const since =
         waited === 0
           ? t("journey.sinceToday")
           : t("journey.since", { when: day(step.since), count: waited });
-      details[step.position] =
-        step.usual && !compact
-          ? t(step.late ? "journey.sinceLate" : "journey.sinceUsual", {
-              since,
-              usual: usualWords(t, step.usual),
-            })
-          : since;
+      details[step.position] = step.usual
+        ? t(step.late ? "journey.sinceLate" : "journey.sinceUsual", {
+            since,
+            usual: usualWords(t, step.usual),
+          })
+        : since;
     } else if (step.state === "later") {
       if (step.expectedOn) {
         details[step.position] = t("journey.by", {
@@ -80,6 +79,9 @@ export function journeyDetails(
         details[step.position] = t("journey.usually", {
           usual: usualWords(t, step.usual),
         });
+      } else if (compact && journey.ship?.missing.includes(step.id)) {
+        // The forecast of the ship day leaves this step out: say so on the step itself.
+        details[step.position] = t("journey.noUsual");
       }
     }
   }
