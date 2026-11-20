@@ -187,6 +187,8 @@ describe("the row of the Product manager", () => {
     const title = await screen.findByText("SPR", { selector: "abbr" });
     const row = title.closest("[role='listitem']");
     if (!(row instanceof HTMLElement)) throw new Error("No row");
+    // The abbr only finds the row: the title is pinned by its whole text.
+    expect(row).toHaveTextContent("Raise the SPR for SO-0083");
     expect(
       within(row).getByText("707 short: Samsung SSD 1 TB NVMe"),
     ).toBeVisible();
@@ -209,6 +211,8 @@ describe("the row of the Product manager", () => {
     const title = await screen.findByText("SPR", { selector: "abbr" });
     const row = title.closest("[role='listitem']");
     if (!(row instanceof HTMLElement)) throw new Error("No row");
+    // The abbr only finds the row: the title is pinned by its whole text.
+    expect(row).toHaveTextContent("Raise the SPR for SO-0083");
     expect(within(row).queryByText(/short:/)).toBeNull();
     expect(
       within(row).getByRole("link", { name: "SPR-20261115-0007" }),
