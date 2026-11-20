@@ -1,10 +1,8 @@
 import type { WorkflowTask } from "@orderpilot/shared";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSessionStore } from "@/stores/session";
 import { HomeHeader } from "./HomeHeader";
 import "./home.css";
-import type { DoneItem } from "./doneToday";
 import { Flows } from "./Flows";
 import { HomeActions } from "./HomeActions";
 import { Measures } from "./Measures";
@@ -16,6 +14,7 @@ import { SystemHealth } from "./SystemHealth";
 import { YourNumbers } from "./YourNumbers";
 import { useBlockQueries } from "./useBlockQueries";
 import { useCompleteTask } from "./useCompleteTask";
+import { useDoneToday } from "./useDoneToday";
 import { useHomeAccess } from "./homeAccess";
 import { useHomeTasks } from "./useHomeTasks";
 import { useNeedFocus } from "./useNeedFocus";
@@ -47,10 +46,10 @@ const CELL = "dx-grid-cell flex min-w-0 flex-col gap-6";
  * actions the side panel does not already hold beside it when there are any
  * (the system administrator has the health of its services instead, because
  * its menu already holds its places). A section that has nothing for the role
- * is not drawn. Done today is kept here, because the real tasks API lists only
- * open tasks: a task finished from this screen is noted with its time, and an
- * Undo takes it out again. It belongs to one person: HomeScreen starts this
- * component again for the next one.
+ * is not drawn. Done today is kept in the browser per person (`useDoneToday`),
+ * because the real tasks API lists only open tasks: a task finished from this
+ * screen or from an order's page is noted with its time, and an Undo takes it
+ * out again. HomeScreen starts this component again for the next person.
  */
 export function HomeBody() {
   const { t } = useTranslation("directions-home");
@@ -60,13 +59,11 @@ export function HomeBody() {
   const home = useHomeTasks(access.tasks);
   const queries = useBlockQueries(access.block);
   const focus = useNeedFocus(home.tasks);
-  const [done, setDone] = useState<DoneItem[]>([]);
+  const { done, record, forget } = useDoneToday();
   const completion = useCompleteTask({
-    onDone: (task: WorkflowTask, at: Date) => {
-      setDone((items) => [{ task, at }, ...items]);
-    },
+    onDone: record,
     onUndone: (task: WorkflowTask) => {
-      setDone((items) => items.filter((item) => item.task.id !== task.id));
+      forget(task);
       focus.followBack(task);
     },
   });

@@ -104,7 +104,6 @@
     "toConfirm": "To confirm",
     "docsNone": "No document needs attention",
     "whyShort": "{{quantity}} short",
-    "whyPayment": "Payment not confirmed",
     "whyMore": "{{reason}} and {{count}} more",
     "heldAtFact": "Held at {{team}}",
     "shipFact": "Ships {{date}}",
@@ -191,6 +190,8 @@
   },
   "action": {
     "none": "You have no open task on this order.",
+    "reviewNotice": "A document of this order waits for a person to confirm its fields. This build has no screen that confirms a stored document.",
+    "reviewSample": "See the review on a sample",
     "yourTask": "Your task"
   },
   "order": {
@@ -211,6 +212,11 @@
       "stage": "{{stage}}.",
       "stageWhy": "{{stage}}: {{why}}.",
       "why": {
+        "check": {
+          "quantity": "the packing list differs from the PO",
+          "price": "the unit price on the PI differs from the PO"
+        },
+        "checkOther": "a check did not pass: {{label}}",
         "short": "{{quantity}} short on {{item}}",
         "shortMore_one": "{{quantity}} short on {{item}} and {{count}} more item",
         "shortMore_other": "{{quantity}} short on {{item}} and {{count}} more items"
@@ -249,7 +255,7 @@
       "title": "Order details"
     },
     "entry": {
-      "sample": "A sample order of the synthetic demo set. Samples are read only here.",
+      "sample": "A sample order of the synthetic demo set. Its details cannot be edited here.",
       "draft": "Entered here as a draft. Only a role that may edit orders can change it.",
       "submitted": "Entered here and submitted. Only a draft can be changed.",
       "void": "Entered here and voided. It cannot be changed."
@@ -330,7 +336,6 @@
       "none": "No file in the demo set"
     },
     "noChecks": "No check has read this document yet.",
-    "review": "Open the order's steps",
     "received": "Received {{date}}",
     "flow": {
       "confirmed": "Confirmed",
@@ -339,9 +344,9 @@
       "expectedBy": "Expected by {{date}}"
     },
     "checked": "Checks: {{passed}} passed, {{failed}} found a difference.",
-    "confirmTitle": "A document of this order waits for you to confirm it",
-    "confirmBody": "The tracker says a person must confirm the fields read from one of the documents. It does not say which one.",
-    "confirmBodyNamed": "The tracker says a person must confirm the fields read from one of the documents. It is marked To confirm in the list below."
+    "confirmTitle": "A document of this order waits for a person to confirm its fields",
+    "confirmBody": "This build has no screen that confirms a stored document. The tracker does not say which one waits.",
+    "confirmBodyNamed": "This build has no screen that confirms a stored document. The one that waits is marked To confirm in the list below."
   },
   "mask": {
     "role": "your role does not include this figure",

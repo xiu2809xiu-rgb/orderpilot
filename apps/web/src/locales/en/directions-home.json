@@ -51,11 +51,11 @@
     "sprShort": "{{quantity}} short: {{item}}",
     "sprRef": "SPR {{recordNo}}",
     "actions": {
-      "REVIEW_FIELDS": "Review",
+      "REVIEW_FIELDS": "Open order",
       "RAISE_SPR": "Raise",
       "APPROVE_SPR": "Review",
       "SEND_PI": "Mark PI as sent",
-      "CONFIRM_PAYMENT": "Confirm",
+      "CONFIRM_PAYMENT": "Enter payment details",
       "PACK_ORDER": "Mark as packed",
       "RECOUNT_CARTONS": "Mark as counted",
       "ADD_SHIPPING_DOCUMENTS": "Mark documents as added"
@@ -63,7 +63,7 @@
     "records": {
       "default": "Records that this is done. OrderPilot sends nothing.",
       "RAISE_SPR": "Raises the SPR for approval. OrderPilot buys nothing.",
-      "CONFIRM_PAYMENT": "Records that the payment arrived. OrderPilot moves no money."
+      "CONFIRM_PAYMENT": "Opens the form for the amount, the bank reference and the date."
     },
     "amount": {
       "spr": "SPR amount",
@@ -72,7 +72,6 @@
       "of": "{{part}} of {{whole}}"
     },
     "next": {
-      "CONFIRM_PAYMENT": "The warehouse packs next.",
       "PACK_ORDER": "Support makes the invoice and packing list next.",
       "ADD_SHIPPING_DOCUMENTS": "That was the order's last step."
     }
@@ -155,7 +154,7 @@
       },
       "decide": {
         "title": "Rules decide",
-        "body": "Fixed rules check the order against prices, stock and approval limits."
+        "body": "Fixed rules compare quantities, prices and PO references across the documents, and check stock."
       },
       "approve": {
         "title": "People approve",

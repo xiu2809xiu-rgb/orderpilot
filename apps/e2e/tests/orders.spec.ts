@@ -160,7 +160,7 @@ test.describe("The Orders workspace", () => {
     await badge.click();
     await expect(
       page.getByText(
-        "A sample order of the synthetic demo set. Samples are read only here.",
+        "A sample order of the synthetic demo set. Its details cannot be edited here.",
       ),
     ).toBeVisible();
     await page.keyboard.press("Escape");

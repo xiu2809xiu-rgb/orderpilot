@@ -119,3 +119,12 @@
   padding-block: 0.625rem;
   gap: 0.25rem;
 }
+
+/* The notice that stands where a button would: a sentence of a readable width, with its one link under it. */
+.od-review-notice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  max-width: 28rem;
+}

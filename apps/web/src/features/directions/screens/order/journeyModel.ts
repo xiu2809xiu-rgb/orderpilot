@@ -9,6 +9,7 @@ import {
   type ShipEstimate,
   type Usual,
 } from "../../data/estimates";
+import { todayInSingapore } from "@/lib/format";
 import type { StepTime } from "../../data/types";
 import { ALL_DONE } from "../orders/orderRow";
 
@@ -108,7 +109,12 @@ export function buildJourney(input: {
    * tracker's sample timeline stamps its newest event with today for every
    * order, so on its time alone an order that is days late would read "Here
    * today". `null` means the record has not answered yet, so no wait is said;
-   * left out, the tracker's own time stands.
+   * left out, the tracker's own time stands. A finished step whose event is
+   * dated after this moment shows no person and no date, because it cannot
+   * have been finished after the order came to the step it is at now: it is
+   * the sample timeline's today stamp, and a second date for one act is wrong.
+   * While the record has not answered (`null`) no finished step shows a person
+   * or a date either, so a date is never printed and then taken back.
    */
   since?: Date | null;
 }): Journey | null {
@@ -134,7 +140,21 @@ export function buildJourney(input: {
       : currentEvent
         ? new Date(currentEvent.at)
         : null;
-  const sinceDay = since ? since.toISOString().slice(0, 10) : null;
+  // Days are counted on Singapore's calendar on both sides. `today` is the
+  // Singapore date, so the moment the step began is read as a Singapore date
+  // too: read as a UTC date it is a day behind for eight hours of every day,
+  // and the count then says one day too many.
+  const sinceDay = since ? todayInSingapore(since) : null;
+  // Only a record's time can say this: the tracker's own current event is the
+  // newest one, so against it every finished step would be earlier anyway.
+  // While the record is on its way (null) no finished step names a person or a
+  // date, so the page never prints the tracker's stamp and then takes it back.
+  const finishedBy = (found: DoneBy | undefined): DoneBy | undefined => {
+    if (input.since === null) return undefined;
+    return found && input.since && found.at.getTime() > input.since.getTime()
+      ? undefined
+      : found;
+  };
 
   const nowId = SALES_STEP_IDS[current - 1];
   const nowStat = nowId ? statOf(stepTimes, nowId) : null;
@@ -144,9 +164,7 @@ export function buildJourney(input: {
   // When the current step should end at the usual pace, never before today.
   let cursor: string | null = null;
   if (nowStat && sinceDay) {
-    const due = expectedBy(since ?? new Date(), nowStat)
-      .at.toISOString()
-      .slice(0, 10);
+    const due = todayInSingapore(expectedBy(since ?? new Date(), nowStat).at);
     cursor = due < today ? today : due;
   }
 
@@ -165,7 +183,8 @@ export function buildJourney(input: {
       id,
       state,
       team: STEP_TEAM[id],
-      doneBy: state === "done" ? (doneBy.get(position) ?? null) : null,
+      doneBy:
+        state === "done" ? (finishedBy(doneBy.get(position)) ?? null) : null,
       since: state === "now" ? since : null,
       waitedDays: state === "now" ? waitedDays : null,
       usual: state === "done" || !stat ? null : usualDuration(stat),

@@ -6,6 +6,7 @@ import { MemoryRouter, Route, Routes } from "react-router";
 import { vi } from "vitest";
 import { Toaster } from "@/components/common/Toaster";
 import { createQueryClient } from "@/lib/query";
+import type { timelineOf } from "../orders/ordersTestKit";
 
 /**
  * Renders a page at an address with the toaster inside the router, because a
@@ -159,4 +160,40 @@ export function stubFlow(
     }),
   );
   return asked;
+}
+
+/** The tracker's answer for one order, as the orders kit writes it. */
+export type TrackerTimeline = ReturnType<typeof timelineOf>;
+
+/**
+ * Lays a change over the tracker's timeline of every order, over whatever
+ * `fetch` stub is in place, so a test can give an order the checks it needs
+ * (the kit's own timeline has one failed quantity check on every order).
+ */
+export function stubTimeline(
+  change: (timeline: TrackerTimeline) => TrackerTimeline,
+): void {
+  const inner = globalThis.fetch;
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const answer = await inner(input, init);
+      const path = new URL(
+        typeof input === "string"
+          ? input
+          : input instanceof URL
+            ? input.href
+            : input.url,
+        "http://localhost",
+      ).pathname;
+      if (!/\/tracker\/orders\/SO-[\w-]+$/.test(path) || !answer.ok) {
+        return answer;
+      }
+      const body = (await answer.json()) as { data: TrackerTimeline };
+      return new Response(
+        JSON.stringify({ ...body, data: change(body.data) }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+    }),
+  );
 }

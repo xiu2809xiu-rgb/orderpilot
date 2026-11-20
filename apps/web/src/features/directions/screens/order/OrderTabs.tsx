@@ -44,7 +44,8 @@ export function OrderTabs({
     flow,
   );
   // The demo PDFs print prices, so a role whose prices the server masks on this
-  // page is not offered them. Until the order has answered nothing is offered.
+  // page is not offered them, and the Checks tab covers its price checks by the
+  // same test. Until the order has answered nothing is offered or shown.
   const amount = detail?.amount;
   const priceMask =
     amount && !amount.masked && amount.value !== null
@@ -98,7 +99,11 @@ export function OrderTabs({
         />
       </TabsContent>
       <TabsContent value="checks">
-        <ChecksTab checks={timeline.checks} matches={timeline.matches} />
+        <ChecksTab
+          checks={timeline.checks}
+          matches={timeline.matches}
+          priceMask={priceMask}
+        />
       </TabsContent>
       <TabsContent value="activity">
         <ActivityTab orderNo={orderNo} steps={timeline.steps} />

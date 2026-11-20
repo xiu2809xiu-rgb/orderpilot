@@ -27,7 +27,11 @@ export function OrderJourney({
       flow="sales"
       size={size}
       current={journey.current}
-      late={late}
+      // The full rail is the order page's, where the badge under the title says
+      // how late the order is, once. The rail would add a second figure from
+      // another sum ("Now, late" beside the wait), so it says "Now" only. The
+      // side peek has no badge, so its vertical rail keeps the word.
+      late={size === "full" ? false : late}
       details={journeyDetails(t, journey, size === "full")}
     />
   );

@@ -75,7 +75,7 @@
       "reload": "Reload",
       "readOnlyTitle": "This order is read-only",
       "readOnly": {
-        "sample": "A sample order of the synthetic demo set. Samples are read only here.",
+        "sample": "A sample order of the synthetic demo set. Its details cannot be edited here.",
         "submitted": "This order is submitted. Only a draft can be changed.",
         "void": "This order is void. It cannot be changed.",
         "permission": "Your role may read orders but not change them."
