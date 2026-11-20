@@ -489,6 +489,16 @@
   color: var(--faint-foreground);
 }
 
+/*
+ * A PO number is what a person matches on, so it is never cut: a long one
+ * (they run to 35 characters) breaks onto a second line inside its column.
+ */
+.od-po {
+  display: block;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
 /* ---- The board: static columns, one card per order ---- */
 .od-board {
   display: flex;

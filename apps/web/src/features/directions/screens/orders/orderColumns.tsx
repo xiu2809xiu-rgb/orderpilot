@@ -69,7 +69,9 @@ export function orderColumns({
     {
       id: "externalDocumentNo",
       header: t("columns.po"),
-      cell: (row) => <span className="numeral">{row.externalDocumentNo}</span>,
+      cell: (row) => (
+        <span className="numeral od-po">{row.externalDocumentNo}</span>
+      ),
       exportValue: (row) => row.externalDocumentNo,
     },
     {
