@@ -135,12 +135,12 @@ export function LinesGrid(props: LinesGridProps) {
                 "--line-tracks": trackTemplate(
                   columns,
                   false,
-                  itemPrice !== "fill",
+                  itemPrice === "reference",
                 ),
                 "--line-tracks-compact": trackTemplate(
                   columns,
                   true,
-                  itemPrice !== "fill",
+                  itemPrice === "reference",
                 ),
               } as CSSProperties
             }

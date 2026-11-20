@@ -29,20 +29,6 @@ export interface LineValue {
    * price of the line.
    */
   lastPrice?: LastPrice | "none" | "unknown" | null | undefined;
-  /**
-   * Where the price came from, for a grid in `itemPrice: "agreed"` mode. A
-   * price the grid filled (the item's list price, then what the customer last
-   * agreed) can still be replaced by a better one; a price the person typed
-   * never is. `list` keeps the item's list price, to go back to.
-   */
-  priceFrom?: PriceFrom | null | undefined;
-}
-
-export interface PriceFrom {
-  source: "item" | "agreed" | "typed";
-  /** The item the price was set for. Empty when typed before any item. */
-  itemNo: string;
-  list: string;
 }
 
 /** The price a customer last paid for an item, and the document it was on. */
@@ -52,9 +38,6 @@ export const lastPriceSchema = z.object({
   documentNo: z.string(),
 });
 export type LastPrice = z.infer<typeof lastPriceSchema>;
-
-/** What picking an item does to the price. See `LinesGridProps.itemPrice`. */
-export type ItemPriceMode = "fill" | "reference" | "agreed";
 
 /** A record the item lookup found, with what picking it fills in. */
 export const itemOptionSchema = z.object({
@@ -154,11 +137,9 @@ export interface LinesGridProps {
    * line at the item's Unit Price. "reference" leaves the price empty for the
    * person to type, and shows the customer's last agreed price beside it as
    * context (written by the screen), for a screen where a document sets the
-   * price (an order's PO). "agreed" starts at the list price like "fill", and
-   * shows the last agreed price like "reference"; the screen then writes it,
-   * and the screen swaps it in for a price nobody typed.
+   * price (an order's PO).
    */
-  itemPrice?: ItemPriceMode;
+  itemPrice?: "fill" | "reference";
   /**
    * What picking an item puts in the description. "copy" (the default) writes
    * the item's own words. "own" leaves it empty, for a person's own wording

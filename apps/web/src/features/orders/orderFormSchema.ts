@@ -36,16 +36,6 @@ export function makeOrderFormSchema(
       : z.string().regex(ORDER_PRICE_PATTERN, t("form.errors.unitPrice")),
     unit: z.string(),
     availableStock: z.string().nullable(),
-    // Where the price came from, so a better price never replaces a typed one.
-    // Never sent.
-    priceFrom: z
-      .object({
-        source: z.enum(["item", "agreed", "typed"]),
-        itemNo: z.string(),
-        list: z.string(),
-      })
-      .nullable()
-      .optional(),
     // What the customer last paid, shown beside the price as context. Never sent.
     lastPrice: z
       .union([lastPriceSchema, z.literal("none"), z.literal("unknown")])
