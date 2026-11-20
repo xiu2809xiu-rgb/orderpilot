@@ -1,8 +1,8 @@
 # Pictures of story #308
 
-Taken on 20 Nov 2026 from a Docker build of this branch at commit 2731587f, on the synthetic demo data.
+Taken on 20 Nov 2026 from a Docker build of this branch at commit b8317ea1, on the synthetic demo data.
 
-The script only reads. It signs in as demo roles, opens pages, hovers and focuses, and creates or changes no record.
+Made by a throwaway Playwright script that is not kept in the repository; it only reads, and presses nothing that records something. It signs in as demo roles, opens pages, hovers and focuses.
 
 | File                         | Role and page                                                                                | What it shows                                                                       |
 | ---------------------------- | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
