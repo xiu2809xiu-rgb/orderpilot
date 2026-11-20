@@ -123,7 +123,7 @@ describe("the file list, before anything is read", () => {
       await screen.findByText(/book\.xlsx says it is an XLSX file but/),
     ).toBeVisible();
     expect(
-      screen.getByText(/scan\.png says it is a PNG file but/),
+      await screen.findByText(/scan\.png says it is a PNG file but/),
     ).toBeVisible();
   });
 

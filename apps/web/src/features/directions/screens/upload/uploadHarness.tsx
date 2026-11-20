@@ -41,7 +41,7 @@ export function upload() {
   const router = createMemoryRouter(
     [
       { path: "/upload", element: <UploadScreen /> },
-      { path: "/elsewhere", element: <h1>Elsewhere</h1> },
+      { path: "/elsewhere", element: <main /> },
     ],
     { initialEntries: ["/upload"] },
   );
