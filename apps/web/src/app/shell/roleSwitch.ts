@@ -1,6 +1,7 @@
 import type { Session } from "@orderpilot/shared";
 import type { QueryClient } from "@tanstack/react-query";
 import { forgetKeptLists } from "@/features/orders/orderSearches";
+import { forgetShown } from "@/lib/query";
 import { hasPermission } from "@/stores/session";
 
 // One order's page: /orders/<number>. "new" is the entry form, not an order.
@@ -42,18 +43,12 @@ export function onStay(listener: StayListener): () => void {
 
 /**
  * After a sign-in as another role, nothing the old role was shown may stay on
- * screen. Emptying the cache alone does not do that: a list that is on screen
- * keeps the query it already holds, so switching role on Home left the old
- * role's tasks under the new role's name until a reload. So what is on screen
- * is put back to loading and asked for again as the new role, and what is only
- * cached is dropped. A request sent as the old role may still be on its way:
- * it is stopped first, so its answer cannot arrive afterwards.
+ * screen. What is on screen is asked for again as the new role and what is
+ * only kept is dropped (`forgetShown`, which says why emptying the store
+ * alone is not enough).
  */
 export async function startAsNewRole(client: QueryClient): Promise<void> {
-  await client.cancelQueries();
-  client.removeQueries({ type: "inactive" });
   // The possible-match lists are kept outside the query cache, for a minute.
   forgetKeptLists();
-  // Not awaited: the new role's page should open at once, and fill as it loads.
-  void client.resetQueries();
+  await forgetShown(client);
 }

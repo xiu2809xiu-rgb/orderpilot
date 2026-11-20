@@ -6,6 +6,7 @@ import {
   type Session,
 } from "@orderpilot/shared";
 import { removeDraftsOf } from "@/lib/draft-keys";
+import { forgetShown, queryClient } from "@/lib/query";
 import { useSessionStore } from "@/stores/session";
 import { apiClient } from "./instance";
 
@@ -14,8 +15,21 @@ export async function fetchAuthOptions(): Promise<AuthOptions> {
 }
 
 function begin(session: Session): Session {
+  const before = useSessionStore.getState();
   apiClient.markSessionStarted();
-  useSessionStore.getState().setSession(session);
+  before.setSession(session);
+  // A session that ended while its page was open leaves that page on screen
+  // under a sign-in form. If someone else signs in there, the page must not
+  // keep what the earlier person was shown. The same person keeps their page.
+  // A change of role from the menu does this itself, once, so it is not
+  // repeated here for a session that is still open.
+  if (
+    before.status === "expired" &&
+    before.session !== null &&
+    before.session.user.id !== session.user.id
+  ) {
+    void forgetShown(queryClient);
+  }
   return session;
 }
 
@@ -37,6 +51,12 @@ export async function logout(): Promise<void> {
     if (viewerId !== undefined) removeDraftsOf(viewerId);
     apiClient.markSessionEnded();
     useSessionStore.getState().setAnonymous();
+    // The server masks by role, but an answer the browser already keeps is
+    // drawn again without asking. So every kept answer goes with the session:
+    // the next person to sign in at this tab starts with none. Requests still
+    // on their way are stopped first, so none can land afterwards.
+    await queryClient.cancelQueries();
+    queryClient.clear();
   }
 }
 

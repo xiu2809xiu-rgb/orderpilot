@@ -39,6 +39,7 @@ Every area needs to know who is calling and what that person may do, and the pan
 - Rotating `JWT_SECRET` signs everyone out (access tokens fail, CSRF tokens fail; the refresh tokens survive and a refresh with a fresh CSRF cookie is not possible, so users sign in again). That is acceptable for now.
 - Nothing creates the first real administrator in production: the seeded accounts have no password there. A one-time bootstrap command is on the backlog; until then production is not usable, and nothing claims it is.
 - The audit trigger stops accidents, not the database owner. A non-owner runtime role (ADR 0010) is on the backlog under epic F.
+- _Note, 2026-11-20 (#319):_ ending a session also ends what the browser keeps of it. The web app holds the answers it was given, so that a page opens at once. Signing out now empties that store, and a different person signing in over an expired session resets the page that stayed open. Before this, a vendor's bank details shown to Finance were drawn again for Warehouse after a sign-out in the same tab, with no request made. The server's masking was never at fault. `forgetShown` in `apps/web/src/lib/query.ts` is the one place that does it, and the change of role from the menu uses it too.
 
 ## Alternatives considered
 
