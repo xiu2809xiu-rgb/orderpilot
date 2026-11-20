@@ -15,7 +15,7 @@
     "title": "Sales order {{number}}",
     "newTitle": "New order",
     "newDescription": "Enter a customer's PO as a draft. Nothing is posted to Business Central from here.",
-    "draftDescription": "A draft: entry is not finished and nothing is reserved. Stock figures are from the mock Business Central.",
+    "draftDescription": "A draft: entry is not finished and nothing is reserved. It can be edited or voided here, and it is not in the order journey yet. Stock figures are from the mock Business Central.",
     "formLabel": "Sales order",
     "statusNew": "Not saved yet",
     "tabsEmpty": "Nothing here yet.",
