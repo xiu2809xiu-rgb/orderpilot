@@ -6,7 +6,7 @@ import { axeViolations } from "@/test/axe";
 import { GLOSSARY_KEYS, Term, withTerms } from "./Term";
 
 beforeAll(async () => {
-  await i18n.loadNamespaces(["common"]);
+  await i18n.loadNamespaces(["common", "components"]);
 });
 
 describe("Term", () => {
@@ -54,10 +54,10 @@ describe("Term", () => {
 
   it("gives every word of the glossary a term and a meaning", () => {
     for (const key of GLOSSARY_KEYS) {
-      expect(i18n.t(`common:glossary.${key}.term`)).not.toBe(
+      expect(i18n.t(`components:glossary.${key}.term`)).not.toBe(
         `glossary.${key}.term`,
       );
-      expect(i18n.t(`common:glossary.${key}.meaning`)).not.toBe(
+      expect(i18n.t(`components:glossary.${key}.meaning`)).not.toBe(
         `glossary.${key}.meaning`,
       );
     }

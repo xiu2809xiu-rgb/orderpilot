@@ -1,8 +1,9 @@
 import { CircleHelp } from "lucide-react";
-import { useId } from "react";
+import { useEffect, useId } from "react";
 import { useTranslation } from "react-i18next";
+import { prefetch, useDeferredModule, whenIdle } from "@/lib/deferred";
 import { cn } from "@/lib/utils";
-import { HelpWords } from "./HelpWords";
+import { helpWordsModule } from "./helpWordsModule";
 import { Popover, PopoverContent, PopoverTrigger } from "./overlays/popover";
 import { useSparkPanel } from "./sparkPanel";
 
@@ -11,6 +12,15 @@ export function PanelHelp({ collapsed }: { collapsed: boolean }) {
   const { t } = useTranslation();
   const spark = useSparkPanel();
   const wordsId = useId();
+  const words = useDeferredModule(helpWordsModule);
+  // The glossary is a chunk of its own, fetched once the first paint is done.
+  useEffect(
+    () =>
+      whenIdle(() => {
+        prefetch(helpWordsModule);
+      }),
+    [],
+  );
   const keys: { keys: string; does: string }[] = [
     { keys: t("palette.keys"), does: t("shell.help.palette") },
     { keys: t("shell.help.keysSearch"), does: t("shell.help.search") },
@@ -46,7 +56,7 @@ export function PanelHelp({ collapsed }: { collapsed: boolean }) {
             </div>
           ))}
         </dl>
-        <HelpWords headingId={wordsId} />
+        {words ? <words.HelpWords headingId={wordsId} /> : null}
       </PopoverContent>
     </Popover>
   );
