@@ -12,7 +12,6 @@ import { OrderFacts } from "./OrderFacts";
 import { OrderHeader } from "./OrderHeader";
 import { OrderJourneySection } from "./OrderJourneySection";
 import { OrderNotFound } from "./OrderNotFound";
-import { statusSentence } from "./statusSentence";
 import { OrderSkeleton } from "./OrderSkeleton";
 import { OrderStatus } from "./OrderStatus";
 import { OrderTabs } from "./OrderTabs";
@@ -25,10 +24,10 @@ import "../orders/orders.css";
 import "./order.css";
 
 /**
- * One order. The first screen answers who has it, why and what comes next, in
- * one sentence under the title, with the latest act a person made and the
- * person's own task as the one primary button; then the facts, the journey as
- * one row of nine steps, and the tabs Lines (open first), Documents, Checks and
+ * One order. The first screen answers who has it (its stage and the team
+ * that holds it) and the latest act a person made, with the person's own
+ * task as the one primary button; then the facts, the journey as one row of
+ * nine steps, and the tabs Lines (open first), Documents, Checks and
  * Activity. The tracker gives the events, checks and matches; the Orders API
  * gives the lines and the masked prices; the workflow's record gives the latest
  * act and the documents.
@@ -128,19 +127,13 @@ export function OrderPage({ orderNo }: { orderNo: string }) {
     order?.status.label ?? found?.workflowStatus ?? t("cells.notStarted");
   const heldAt = order ? tc(`roles.${order.ownerRole}`) : t("cells.notSet");
   const late = events.overdue.overdue;
-  const sentence = statusSentence(t, (role) => tc(`roles.${role}`), {
-    journey,
-    heldBy: order?.ownerRole ?? null,
-    stage: stageLabel,
-    entry: found?.captureState ?? null,
-    detail: found ?? null,
-  });
 
   return (
     <div className="dx-sheet od-order">
       <OrderHeader
         orderNo={orderNo}
-        intro={t("order.intro", { customer, number: events.customerNo })}
+        customerName={customer}
+        customerNo={events.customerNo}
         detail={found}
         actions={
           <OrderAction
@@ -151,19 +144,17 @@ export function OrderPage({ orderNo }: { orderNo: string }) {
           />
         }
       />
-      <OrderStatus
-        orderNo={orderNo}
-        sentence={sentence}
-        overdue={events.overdue}
-        timeline={flow.data?.data.timeline}
-      />
-      <OrderFacts
-        order={events}
-        detail={found}
-        stageLabel={stageLabel}
-        heldAt={heldAt}
-        step={journey?.current ?? null}
-      />
+      <div className="od-top-row">
+        <OrderStatus
+          orderNo={orderNo}
+          overdue={events.overdue}
+          timeline={flow.data?.data.timeline}
+          stageLabel={stageLabel}
+          heldAt={heldAt}
+          step={journey?.current ?? null}
+        />
+        <OrderFacts order={events} detail={found} />
+      </div>
       <div className="dx-grid mt-4 flex flex-col gap-4">
         <OrderJourneySection
           journey={journey}

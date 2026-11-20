@@ -45,23 +45,31 @@ afterEach(() => {
 const PAID = "SO-0001";
 
 describe("the order page", () => {
-  it("heads the page with the number, the customer and the facts", async () => {
+  it("heads the page with the number, the customer, its stage and its facts", async () => {
     stubApi();
     open(PAID);
     expect(
       await screen.findByRole("heading", { level: 1, name: "SO-0001" }),
     ).toBeVisible();
-    expect(screen.getByText("Alpha Traders, C-0001")).toBeVisible();
-    const facts = screen.getByText("Stage").closest("dl");
+    // Inline with the title, vertically centred with "Sample", with no comma
+    // and the customer's number styled as the Orders table styles it.
+    expect(screen.getByText("Alpha Traders")).toBeVisible();
+    expect(screen.getByText("C-0001")).toBeVisible();
+    // The stage and the team that holds it are the status card's own facts.
+    const status = screen.getByText("Current Stage").closest("dl");
+    if (!status) throw new Error("no status facts");
+    expect(within(status).getByText("Waiting for payment")).toBeVisible();
+    expect(within(status).getByText("Finance")).toBeVisible();
+    // The value, the PO and the dates are the facts bar below it.
+    const facts = screen.getByText("PO number").closest("dl");
     if (!facts) throw new Error("no facts");
-    expect(within(facts).getByText("Waiting for payment")).toBeVisible();
-    expect(within(facts).getByText("Finance")).toBeVisible();
     expect(within(facts).getByText("PO-SO-0001")).toBeVisible();
-    // Lateness is said once, by the badge under the title, not in the facts.
-    expect(within(facts).queryByText("3 d late")).toBeNull();
-    expect(screen.getAllByText("3 d late")).toHaveLength(1);
     // The read-only order form showed the prepayment, and customers pay before shipping.
     expect(within(facts).getByText("30% prepayment")).toBeVisible();
+    // Lateness is said once, by the badge under the title, not in either facts block.
+    expect(within(status).queryByText("3 d late")).toBeNull();
+    expect(within(facts).queryByText("3 d late")).toBeNull();
+    expect(screen.getAllByText("3 d late")).toHaveLength(1);
   });
 
   it("shows the journey with done, now and later, and who and when for done steps", async () => {

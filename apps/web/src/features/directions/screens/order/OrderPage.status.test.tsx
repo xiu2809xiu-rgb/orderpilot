@@ -76,31 +76,19 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe("the sentence under the title", () => {
-  it("says who has the order and why, from the order's own data, and names no next step for a short order (ADR 0049)", async () => {
+describe("the status card", () => {
+  it("shows the stage and the team that holds it, and says nothing else: Current Stage and Held at are the page's own facts, with no sentence repeating them", async () => {
     stubApi({ specs: [SHORT] });
     open("SO-0082");
-    const sentence = await screen.findByText(/^With Product manager:/);
-    // The stub's line carries no description, so the item is named by its number.
-    expect(sentence).toHaveTextContent(
-      "With Product manager: 707 short on I-0190.",
-    );
-    // It agrees with the page's own facts and never contradicts them.
-    const facts = screen.getByText("Held at").closest("dl");
+    const held = await screen.findByText("Held at");
+    const facts = held.closest("dl");
     if (!facts) throw new Error("no facts");
     expect(within(facts).getByText("Product manager")).toBeVisible();
     expect(within(facts).getByText("Short on stock")).toBeVisible();
+    expect(document.querySelector(".od-status-sentence")).toBeNull();
   });
 
-  it("is built from the data and not from one order: another order says another thing", async () => {
-    stubApi();
-    open("SO-0001");
-    expect(
-      await screen.findByText("With Finance. Next: Warehouse packs the goods."),
-    ).toBeVisible();
-  });
-
-  it("says nothing is waiting on a finished order", async () => {
+  it("shows a finished order's own stage, with nothing more said about it", async () => {
     stubApi({
       specs: [
         {
@@ -111,17 +99,16 @@ describe("the sentence under the title", () => {
       ],
     });
     open("SO-0009");
-    expect(
-      await screen.findByText(
-        "Every step is done. Nothing is waiting on this order.",
-      ),
-    ).toBeVisible();
+    expect(await screen.findByText("Closed")).toBeVisible();
+    expect(document.querySelector(".od-status-sentence")).toBeNull();
   });
 
-  it("falls back to the stage for a role the tracker refuses", async () => {
+  it("falls back to the stage from the Orders API for a role the tracker refuses", async () => {
     stubApi({ trackerForbidden: true });
     open("SO-0001");
-    expect(await screen.findByText("Waiting for payment.")).toBeVisible();
+    const facts = (await screen.findByText("Held at")).closest("dl");
+    if (!facts) throw new Error("no facts");
+    expect(within(facts).getByText("Waiting for payment")).toBeVisible();
   });
 });
 
