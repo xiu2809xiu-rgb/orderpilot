@@ -1,4 +1,4 @@
-Taken on 20 Nov 2026 from a Docker build of this branch at commit 46221d01, on the synthetic demo data.
+Taken on 20 Nov 2026 from a Docker build of this branch at commit e2ef9c8c, on the synthetic demo data.
 Made by a throwaway Playwright script that is not kept in the repository.
 
 | File                                                  | Role and page                           | What it shows                                                                                                                                                                 |
