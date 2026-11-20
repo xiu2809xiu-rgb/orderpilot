@@ -4,9 +4,9 @@ import {
   useEffect,
   useId,
   useRef,
-  useState,
   type ReactNode,
 } from "react";
+import { useHoverTip } from "@/components/common/useHoverTip";
 import { cn } from "@/lib/utils";
 
 // Like the rail's tooltip, its code is a chunk of its own, so the entry
@@ -31,7 +31,6 @@ export function HintTip({
 }) {
   const descriptionId = useId();
   const box = useRef<HTMLSpanElement>(null);
-  const [open, setOpen] = useState(false);
   // The button is another component's, so it cannot be given the id as a prop.
   useEffect(() => {
     const target = box.current?.querySelector("button, a");
@@ -42,28 +41,10 @@ export function HintTip({
       `${current} ${descriptionId}`.trim(),
     );
   });
-  // Native listeners on the wrapper: pointer and focus both reach it from
-  // the button inside, and it is not a control itself.
-  useEffect(() => {
-    const el = box.current;
-    if (!el) return;
-    const show = () => {
-      setOpen(true);
-    };
-    const hide = () => {
-      setOpen(false);
-    };
-    el.addEventListener("pointerenter", show);
-    el.addEventListener("pointerleave", hide);
-    el.addEventListener("focusin", show);
-    el.addEventListener("focusout", hide);
-    return () => {
-      el.removeEventListener("pointerenter", show);
-      el.removeEventListener("pointerleave", hide);
-      el.removeEventListener("focusin", show);
-      el.removeEventListener("focusout", hide);
-    };
-  }, []);
+  // Pointer and focus both reach the wrapper from the button inside, and it
+  // is not a control itself. The tip outlasts the pointer a moment, so the
+  // pointer can cross onto it (WCAG 2.2, 1.4.13).
+  const tip = useHoverTip(box, { holdsFocus: true });
   return (
     <span ref={box} className={cn("relative inline-flex", className)}>
       {children}
@@ -71,7 +52,15 @@ export function HintTip({
         {hint}
       </span>
       <Suspense fallback={null}>
-        <HintTipBody hint={hint} open={open} onOpenChange={setOpen} />
+        <HintTipBody
+          hint={hint}
+          open={tip.open}
+          onOpenChange={(open) => {
+            if (!open) tip.close();
+          }}
+          onPointerEnter={tip.enter}
+          onPointerLeave={tip.leave}
+        />
       </Suspense>
     </span>
   );

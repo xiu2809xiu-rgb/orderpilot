@@ -13,10 +13,15 @@ export default function HintTipBody({
   hint,
   open,
   onOpenChange,
+  onPointerEnter,
+  onPointerLeave,
 }: {
   hint: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** The pointer on the tip keeps it open, so its text can be read: WCAG 2.2, 1.4.13. */
+  onPointerEnter: () => void;
+  onPointerLeave: () => void;
 }) {
   return (
     <Tooltip open={open} onOpenChange={onOpenChange}>
@@ -27,7 +32,12 @@ export default function HintTipBody({
           className="pointer-events-none absolute inset-0"
         />
       </TooltipTrigger>
-      <TooltipContent side="bottom" className="fs-14">
+      <TooltipContent
+        side="bottom"
+        className="fs-14"
+        onPointerEnter={onPointerEnter}
+        onPointerLeave={onPointerLeave}
+      >
         {hint}
       </TooltipContent>
     </Tooltip>
