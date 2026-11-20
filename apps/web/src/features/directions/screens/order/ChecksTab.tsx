@@ -16,9 +16,9 @@ import { MaskedValue } from "@/components/parts/MaskedValue";
 import { isPriceCheck } from "./priceChecks";
 
 /**
- * One check. `priceMask` is the reason this role's prices are masked on the
- * order, or null when it may see them; a price check then shows the mask in
- * place of every figure it carries.
+ * One check. `priceMask` is the reason the order's amount is not shown in clear
+ * to this role (masked, absent, or not answered yet), or null when it is; a
+ * price check then shows the mask in place of every figure it carries.
  *
  * This is a cover on this page for a server-side gap, not the control: the
  * tracker sends every check's expected and actual values as plain text to every

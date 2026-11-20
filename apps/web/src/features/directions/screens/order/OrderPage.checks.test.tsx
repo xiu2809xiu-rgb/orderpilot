@@ -90,11 +90,19 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-/** The order's Checks tab, as one role sees it, with a price check and a quantity check. */
-async function checksAs(role: Role, masked: boolean) {
+/**
+ * The order's Checks tab, as one role sees it. `noRecord` has the Orders API
+ * answer 404 for the order while the tracker still knows it: the page has the
+ * checks but not the order's own amount.
+ */
+async function checksWith(
+  role: Role,
+  checks: readonly Check[],
+  options: { masked: boolean; noRecord?: boolean },
+) {
   useSessionStore.setState({ status: "active", session: sessionFor(role) });
   stubApi({
-    masked,
+    masked: options.masked,
     specs: [
       {
         orderNo: ORDER,
@@ -112,10 +120,41 @@ async function checksAs(role: Role, masked: boolean) {
     ],
   });
   // The kit types a check's document as a plain string; the page reads the shared type.
-  stubTimeline((timeline) => ({
-    ...timeline,
-    checks: [price, quantity],
-  }));
+  stubTimeline((timeline) => ({ ...timeline, checks: [...checks] }));
+  if (options.noRecord) {
+    const inner = globalThis.fetch;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+        const path = new URL(
+          typeof input === "string"
+            ? input
+            : input instanceof URL
+              ? input.href
+              : input.url,
+          "http://localhost",
+        ).pathname;
+        return /\/orders\/SO-[\w-]+$/.test(path) && !path.includes("/tracker/")
+          ? Promise.resolve(
+              new Response(
+                JSON.stringify({
+                  error: {
+                    code: "NOT_FOUND",
+                    message: "x",
+                    details: null,
+                    traceId: "trace-404",
+                  },
+                }),
+                {
+                  status: 404,
+                  headers: { "Content-Type": "application/json" },
+                },
+              ),
+            )
+          : inner(input, init);
+      }),
+    );
+  }
   renderWithToasts(
     <OrderPage orderNo={ORDER} />,
     `/orders/${ORDER}?tab=checks`,
@@ -127,6 +166,14 @@ async function checksAs(role: Role, masked: boolean) {
     if (!row) throw new Error("No check row");
     return row;
   };
+  return { panel, byRule };
+}
+
+/** The order's Checks tab, as one role sees it, with a price check and a quantity check. */
+async function checksAs(role: Role, masked: boolean) {
+  const { panel, byRule } = await checksWith(role, [price, quantity], {
+    masked,
+  });
   return {
     panel,
     price: byRule(/^.*Unit price/),
@@ -187,5 +234,98 @@ describe("what makes a check a price check", () => {
         evidence: [],
       }),
     ).toBe(false);
+  });
+});
+
+const invoiceTotal: Check = {
+  ...price,
+  id: "total",
+  ruleId: "rule.pi-total",
+  ruleLabel: "Invoice total against the PI",
+  expected: "7344.00",
+  actual: "7776.00",
+  tolerance: { label: "Difference allowed", value: "5.00" },
+  evidence: [{ ...unitPricePlace, location: "header: total" }],
+};
+
+const totalQuantity: Check = {
+  ...quantity,
+  id: "total-quantity",
+  ruleId: "rule.total-quantity",
+  ruleLabel: "Total quantity against the PO",
+  expected: "480",
+  actual: "432",
+  evidence: [{ ...unitPricePlace, location: "header: total quantity" }],
+};
+
+describe("a cover that fails closed", () => {
+  it("covers a check on a total for a role whose prices are masked", async () => {
+    const { byRule } = await checksWith(
+      "WAREHOUSE",
+      [invoiceTotal, totalQuantity],
+      { masked: true },
+    );
+    const row = byRule(/Invoice total/);
+    expect(row).not.toHaveTextContent(/7344|7776/);
+    expect(within(row).getAllByText("Hidden").length).toBeGreaterThan(0);
+  });
+
+  it("shows a total quantity, which is a count and not money", async () => {
+    const { byRule } = await checksWith(
+      "WAREHOUSE",
+      [invoiceTotal, totalQuantity],
+      { masked: true },
+    );
+    const row = byRule(/Total quantity/);
+    expect(row).toHaveTextContent("480");
+    expect(row).toHaveTextContent("432");
+  });
+
+  it("covers a price check when the order's record has not answered", async () => {
+    const { byRule, panel } = await checksWith("WAREHOUSE", [price, quantity], {
+      masked: false,
+      noRecord: true,
+    });
+    expect(byRule(/Unit price/)).not.toHaveTextContent(/61\.20|64\.80/);
+    expect(panel.textContent).not.toMatch(/61\.20|64\.80/);
+    expect(byRule(/Packing list quantity/)).toHaveTextContent("108");
+  });
+
+  it("shows Support every figure, a total included", async () => {
+    const { byRule } = await checksWith("SUPPORT", [invoiceTotal, price], {
+      masked: false,
+    });
+    expect(byRule(/Invoice total/)).toHaveTextContent("7344.00");
+    expect(byRule(/Invoice total/)).toHaveTextContent("7776.00");
+    expect(byRule(/Unit price/)).toHaveTextContent("64.80");
+  });
+});
+
+describe("what makes a check a money check, in the words of the check", () => {
+  it("reads the label, the tolerance label and the place, in any case", () => {
+    const plain: Check = {
+      ...quantity,
+      ruleId: "rule.x",
+      ruleLabel: "Check",
+      evidence: [],
+    };
+    expect(isPriceCheck({ ...plain, ruleLabel: "Unit PRICE on the PI" })).toBe(
+      true,
+    );
+    expect(
+      isPriceCheck({
+        ...plain,
+        tolerance: { label: "Cost difference", value: "1" },
+      }),
+    ).toBe(true);
+    expect(
+      isPriceCheck({
+        ...plain,
+        evidence: [{ ...unitPricePlace, location: "header: Total" }],
+      }),
+    ).toBe(true);
+    expect(isPriceCheck(totalQuantity)).toBe(false);
+    // The word value does not make a check a money check.
+    expect(isPriceCheck(quantity)).toBe(false);
   });
 });

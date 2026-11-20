@@ -44,18 +44,13 @@ export function OrderTabs({
     flow,
   );
   // The demo PDFs print prices, so a role whose prices the server masks on this
-  // page is not offered them. Until the order has answered nothing is offered.
+  // page is not offered them, and the Checks tab covers its price checks by the
+  // same test. Until the order has answered nothing is offered or shown.
   const amount = detail?.amount;
   const priceMask =
     amount && !amount.masked && amount.value !== null
       ? null
       : t(`mask.${amount?.reason ?? "price"}`);
-  // Only an amount the server sent masked says this role's prices are hidden.
-  // The PDFs above are withheld until the order has answered; a check is not
-  // covered on a guess, so it waits for the amount itself.
-  const checkMask = amount?.masked
-    ? t(`mask.${amount.reason ?? "price"}`)
-    : null;
   const asked = params.get("tab");
   const tab: Tab = isTab(asked) ? asked : "lines";
   const failed = timeline.checks.filter((check) => check.outcome !== "pass");
@@ -107,7 +102,7 @@ export function OrderTabs({
         <ChecksTab
           checks={timeline.checks}
           matches={timeline.matches}
-          priceMask={checkMask}
+          priceMask={priceMask}
         />
       </TabsContent>
       <TabsContent value="activity">

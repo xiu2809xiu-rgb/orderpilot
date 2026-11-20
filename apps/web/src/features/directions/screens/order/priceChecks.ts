@@ -1,18 +1,35 @@
 import type { CheckResult } from "@orderpilot/shared";
 
-/** A rule on a unit price or a unit cost: `mock.sample-price`, and the like. */
-const PRICE_RULE = /(price|cost)$/;
-/** Where a check read a price, as the tracker words the place: "item I-0075: unit price". */
-const PRICE_PLACE = /\b(price|cost|amount)\b/;
+/**
+ * Words that name money. Matched anywhere in the word and in any case, so
+ * `mock.sample-price`, `unitCost` and "Amount due" are all caught: the cover
+ * fails closed, and a word that merely looks like one costs a masked figure,
+ * not a leaked price. "value" is left out on purpose: the sample quantity
+ * check's tolerance label reads "(sample value)".
+ */
+const MONEY = /price|cost|amount/i;
+/** A total is money unless the same text says what is totalled. */
+const TOTAL = /total/i;
+/** What is counted, not paid: a text that says one of these is about a quantity. */
+const COUNTED =
+  /\b(quantity|quantities|unit|units|carton|cartons|piece|pieces)\b/i;
+
+function aboutMoney(text: string): boolean {
+  return MONEY.test(text) || (TOTAL.test(text) && !COUNTED.test(text));
+}
 
 /**
  * Whether a check is about money, judged from what the check carries: its rule
- * id ends in "price" or "cost", or one of its evidence places names a unit
- * price, a price or an amount. A quantity or a number is not.
+ * id, its rule label, its tolerance label or one of its evidence places says
+ * price, cost or amount, or says total without saying a quantity. Each text is
+ * read on its own, so "Total quantity" stays visible for a warehouse while
+ * "Invoice total against the PI" is covered.
  */
 export function isPriceCheck(check: CheckResult): boolean {
-  return (
-    PRICE_RULE.test(check.ruleId) ||
-    check.evidence.some((place) => PRICE_PLACE.test(place.location))
-  );
+  return [
+    check.ruleId,
+    check.ruleLabel,
+    check.tolerance.label,
+    ...check.evidence.map((place) => place.location),
+  ].some(aboutMoney);
 }
