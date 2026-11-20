@@ -15,7 +15,8 @@
   "noLastPrice": "No earlier price",
   "unknownLastPrice": "Last price not known",
   "placeholders": {
-    "item": "Part number or name"
+    "item": "Part number or name",
+    "description": "If different"
   },
   "amountTooLarge": "Too large to price",
   "remove": "Remove line {{n}}",

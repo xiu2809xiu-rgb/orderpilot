@@ -17,6 +17,7 @@ export interface GridContextValue {
   readOnly: boolean;
   priceMask: PriceMask | null;
   itemPrice: ItemPriceMode;
+  itemDescription: "copy" | "own";
   shortfallAction: ((shortfall: Shortfall) => ReactNode) | undefined;
   pick: (index: number, option: LookupOption) => void;
   remove: (index: number, from: ColumnKind | null) => void;

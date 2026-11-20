@@ -110,7 +110,7 @@ describe("the words of the line messages", () => {
       "Choose the customer from the list.",
       "Enter the customer's PO number.",
       "Choose an item from the list.",
-      "Enter a quantity above zero, for example 5.",
+      "Enter a quantity above zero.",
       "Enter a unit price, for example 12.50.",
     ]) {
       expect((await screen.findAllByText(text)).length).toBeGreaterThan(0);

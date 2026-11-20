@@ -1,0 +1,73 @@
+/* The order's lines at the widths between a phone and a desktop. A line with
+   prices needs about 62rem of the grid's own width to sit on one row. Below
+   that, and down to 40rem (a tablet, with the side menu a rail), each line
+   takes two rows: the item and the description above, then the quantity, the
+   price, the amount and the availability. Every cell keeps the room to be
+   read and typed in, and the labels return, since the header row is gone.
+   Under 40rem the line is a card, as before. The container is the grid's
+   own wrapper, so the side menu's state is already counted. */
+@container (min-width: 40rem) and (max-width: 61.99rem) {
+  [data-lines-rich] [role="row"]:not([data-row]) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  [data-lines-rich] [role="row"][data-row] {
+    grid-template-columns: 2.75rem repeat(4, minmax(0, 1fr)) 2.75rem;
+    grid-template-areas:
+      "no item item description description remove"
+      ". quantity unitPrice amount availability availability";
+    align-items: start;
+    row-gap: var(--spacing-s2);
+    padding-block: var(--spacing-s2);
+  }
+
+  [data-lines-rich] [role="row"][data-row] > [data-cell="lineNo"] {
+    grid-area: no;
+  }
+  [data-lines-rich] [role="row"][data-row] > [data-cell="item"] {
+    grid-area: item;
+  }
+  [data-lines-rich] [role="row"][data-row] > [data-cell="description"] {
+    grid-area: description;
+  }
+  [data-lines-rich] [role="row"][data-row] > [data-cell="quantity"] {
+    grid-area: quantity;
+  }
+  [data-lines-rich] [role="row"][data-row] > [data-cell="unitPrice"] {
+    grid-area: unitPrice;
+  }
+  [data-lines-rich] [role="row"][data-row] > [data-cell="amount"] {
+    grid-area: amount;
+  }
+  [data-lines-rich] [role="row"][data-row] > [data-cell="availability"] {
+    grid-area: availability;
+  }
+  [data-lines-rich] [role="row"][data-row] > [data-cell="remove"] {
+    grid-area: remove;
+    justify-self: end;
+  }
+
+  /* The label above each cell: the utility that hides it from 40rem up is
+     the one this tier undoes. */
+  [data-lines-rich]
+    [role="row"][data-row]
+    > [role="cell"]
+    > span[aria-hidden="true"]:first-child {
+    display: block;
+  }
+
+  /* The amount reads from the left, under its label, not from the far side. */
+  [data-lines-rich] [role="row"][data-row] > [data-cell="amount"] .numeral {
+    text-align: left;
+  }
+
+  /* The cell under a label is not pushed to the right of its box. */
+  [data-lines-rich] [role="row"][data-row] > [data-cell="availability"] {
+    padding-left: 0;
+  }
+}

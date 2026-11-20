@@ -21,6 +21,10 @@ export function useLineColumns(): LineColumn[] {
       COLUMN_KINDS.map((kind) => ({
         kind,
         header: t(`form.lines.columns.${kind}`),
+        // The number and the whole name sit in the item cell, so it gets the
+        // room first. The description is usually empty: the item has its own.
+        ...(kind === "item" ? { width: "minmax(15rem, 3fr)" } : {}),
+        ...(kind === "description" ? { width: "minmax(7rem, 1.5fr)" } : {}),
       })),
     [t],
   );

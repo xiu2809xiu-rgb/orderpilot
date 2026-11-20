@@ -9,6 +9,7 @@ interface PickOptions {
   name: string;
   priceMask: PriceMask | null;
   itemPrice: ItemPriceMode;
+  itemDescription: "copy" | "own";
   /** Where the focus goes after an item picked by Enter, such as the quantity. */
   advanceTo: string | undefined;
   /** The line that asked to move on once its item is picked, if any. */
@@ -28,19 +29,27 @@ export function useItemPick({
   name,
   priceMask,
   itemPrice,
+  itemDescription,
   advance,
   advanceTo,
   root,
 }: PickOptions) {
   const { setValue, getValues } = useFormContext();
-  const latest = useRef({ name, priceMask, advanceTo, itemPrice });
+  const latest = useRef({
+    name,
+    priceMask,
+    advanceTo,
+    itemPrice,
+    itemDescription,
+  });
   useEffect(() => {
-    latest.current = { name, priceMask, advanceTo, itemPrice };
+    latest.current = { name, priceMask, advanceTo, itemPrice, itemDescription };
   });
 
   return useCallback(
     (index: number, option: LookupOption) => {
-      const { name, priceMask, advanceTo, itemPrice } = latest.current;
+      const { name, priceMask, advanceTo, itemPrice, itemDescription } =
+        latest.current;
       const parsed = itemOptionSchema.safeParse(option);
       const item = parsed.success
         ? parsed.data
@@ -52,9 +61,11 @@ export function useItemPick({
       };
       set(
         "description",
-        "description" in item && item.description
-          ? item.description
-          : item.name,
+        itemDescription === "own"
+          ? ""
+          : "description" in item && item.description
+            ? item.description
+            : item.name,
       );
       set("unit", "unit" in item ? (item.unit ?? "") : "");
       set(

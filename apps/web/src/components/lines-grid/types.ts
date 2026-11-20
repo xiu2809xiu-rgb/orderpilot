@@ -159,6 +159,13 @@ export interface LinesGridProps {
    * and the screen swaps it in for a price nobody typed.
    */
   itemPrice?: ItemPriceMode;
+  /**
+   * What picking an item puts in the description. "copy" (the default) writes
+   * the item's own words. "own" leaves it empty, for a person's own wording
+   * only: a description that repeats the item's name says nothing the item
+   * cell does not, and the server gives an empty one the item's own.
+   */
+  itemDescription?: "copy" | "own";
   /** Draws the footer from the totals. The default shows lines, quantity and total. */
   footer?: (totals: LineTotals) => ReactNode;
   serverTotals?: ServerTotals;

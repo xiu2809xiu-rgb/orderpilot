@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { lookupText, lookupValueSchema } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import { GridContext, type GridContextValue } from "./gridContext";
+import "./lines-grid.css";
 import { LineRow } from "./LineRow";
 import { LinesFooter } from "./LinesFooter";
 import { editableKinds, trackTemplate } from "./lineValues";
@@ -82,10 +83,12 @@ export function LinesGrid(props: LinesGridProps) {
     },
   });
   const itemPrice = props.itemPrice ?? "fill";
+  const itemDescription = props.itemDescription ?? "copy";
   const pick = useItemPick({
     name,
     priceMask,
     itemPrice,
+    itemDescription,
     advance,
     advanceTo: afterItem(editable),
     root: rootRef,
@@ -99,6 +102,7 @@ export function LinesGrid(props: LinesGridProps) {
       readOnly,
       priceMask,
       itemPrice,
+      itemDescription,
       shortfallAction: props.shortfallAction,
       pick,
       remove,
@@ -110,6 +114,7 @@ export function LinesGrid(props: LinesGridProps) {
       readOnly,
       priceMask,
       itemPrice,
+      itemDescription,
       props.shortfallAction,
       pick,
       remove,
@@ -133,6 +138,9 @@ export function LinesGrid(props: LinesGridProps) {
         >
           <div
             role="table"
+            data-lines-rich={
+              columns.some((c) => c.kind === "amount") ? "" : undefined
+            }
             aria-label={props.label}
             aria-describedby={readOnly ? undefined : hintId}
             style={
