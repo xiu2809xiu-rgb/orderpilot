@@ -9,7 +9,7 @@ export function HelpWords({ headingId }: { headingId: string }) {
       <h2 id={headingId} className="fs-14 mb-2 font-semibold">
         {t("shell.help.wordsTitle")}
       </h2>
-      <dl className="fs-14 grid gap-y-2">
+      <dl className="fs-14 grid gap-x-6 gap-y-3 sm:grid-cols-2">
         {GLOSSARY_KEYS.map((key) => {
           const long = t(`glossary.${key}.long`, { defaultValue: "" });
           const meaning = t(`glossary.${key}.meaning`);

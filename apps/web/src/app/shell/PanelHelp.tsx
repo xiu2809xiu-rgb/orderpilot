@@ -28,12 +28,12 @@ export function PanelHelp({ collapsed }: { collapsed: boolean }) {
           {t("shell.help.label")}
         </span>
       </PopoverTrigger>
-      {/* The words are long, so the panel scrolls rather than run off a short screen. */}
+      {/* Nine words in two columns fit a 768 px screen; a shorter one scrolls the panel rather than cut it off. */}
       <PopoverContent
         side="right"
         align="end"
         aria-label={t("shell.help.label")}
-        className="max-h-(--radix-popover-content-available-height) w-96 overflow-y-auto"
+        className="max-h-(--radix-popover-content-available-height) w-[36rem] max-w-[calc(100vw-2rem)] overflow-y-auto"
       >
         <h2 className="fs-14 mb-2 font-semibold">{t("shell.help.title")}</h2>
         <dl className="fs-14 grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-2">
