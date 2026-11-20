@@ -177,6 +177,43 @@ describe("when the current step began", () => {
   });
 });
 
+// SO-0049 on the demo data: the payment was confirmed on 13 Nov and the order
+// came to packing on 16 Nov, yet the tracker's sample timeline dates its newest
+// event (the payment's) today, 20 Nov. A finished step cannot be dated after the
+// step the order is at, so the page must not print that date.
+describe("a finished step dated after the current step began", () => {
+  const SO_0049 = [
+    event(1, "Customer PO received", "System", "2026-11-02T08:00:00.000Z"),
+    event(3, "Proforma invoice sent", "Support", "2026-11-04T10:00:00.000Z"),
+    event(4, "Payment received", "Finance", "2026-11-20T09:00:00.000Z", true),
+  ];
+  const at = (since?: Date | null) =>
+    buildJourney({
+      current: 5,
+      events: SO_0049,
+      stepTimes: STEP_TIMES.sales,
+      today: "2026-11-20",
+      since,
+    })?.steps ?? [];
+
+  it("shows the step as done with no person and no date", () => {
+    const payment = at(new Date("2026-11-16T08:00:00.000Z"))[3];
+    expect(payment?.state).toBe("done");
+    expect(payment?.doneBy).toBeNull();
+  });
+
+  it("keeps the person and the date of a step finished before the current one began", () => {
+    const steps = at(new Date("2026-11-16T08:00:00.000Z"));
+    expect(steps[0]?.doneBy?.actor).toBe("System");
+    expect(steps[2]?.doneBy?.actor).toBe("Support");
+  });
+
+  it("changes nothing without the record's time", () => {
+    expect(at(undefined)[3]?.doneBy?.actor).toBe("Finance");
+    expect(at(null)[3]?.doneBy?.actor).toBe("Finance");
+  });
+});
+
 describe("daysPastShipDate", () => {
   it("compares the expected day with the order's own ship date", () => {
     const ship = journey("2026-11-12")?.ship ?? null;

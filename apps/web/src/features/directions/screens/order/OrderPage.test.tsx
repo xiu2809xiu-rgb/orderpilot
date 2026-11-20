@@ -87,7 +87,10 @@ describe("the order page", () => {
     expect(steps[3]).toHaveAttribute("aria-current", "step");
     // Done: the actor and the day, from the order's own events.
     expect(within(nth(steps, 2)).getByText(/Support, /)).toBeVisible();
-    expect(within(nth(steps, 3)).getByText(/^Now, late/)).toBeVisible();
+    // The badge under the title says how late the order is; the rail's current
+    // step says "Now" and no more, so the page has one lateness figure.
+    expect(within(nth(steps, 3)).getByText(/^Now:/)).toBeInTheDocument();
+    expect(screen.queryByText(/Now, late/)).toBeNull();
     // The current step says how long it has waited and what is usual, in one short line.
     expect(
       within(nth(steps, 3)).getByText("Waiting 14 days, usually 4 days"),

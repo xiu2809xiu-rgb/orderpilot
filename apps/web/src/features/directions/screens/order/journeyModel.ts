@@ -108,7 +108,10 @@ export function buildJourney(input: {
    * tracker's sample timeline stamps its newest event with today for every
    * order, so on its time alone an order that is days late would read "Here
    * today". `null` means the record has not answered yet, so no wait is said;
-   * left out, the tracker's own time stands.
+   * left out, the tracker's own time stands. A finished step whose event is
+   * dated after this moment shows no person and no date, because it cannot
+   * have been finished after the order came to the step it is at now: it is
+   * the sample timeline's today stamp, and a second date for one act is wrong.
    */
   since?: Date | null;
 }): Journey | null {
@@ -135,6 +138,12 @@ export function buildJourney(input: {
         ? new Date(currentEvent.at)
         : null;
   const sinceDay = since ? since.toISOString().slice(0, 10) : null;
+  // Only a record's time can say this: the tracker's own current event is the
+  // newest one, so against it every finished step would be earlier anyway.
+  const finishedBy = (found: DoneBy | undefined): DoneBy | undefined =>
+    found && input.since && found.at.getTime() > input.since.getTime()
+      ? undefined
+      : found;
 
   const nowId = SALES_STEP_IDS[current - 1];
   const nowStat = nowId ? statOf(stepTimes, nowId) : null;
@@ -165,7 +174,8 @@ export function buildJourney(input: {
       id,
       state,
       team: STEP_TEAM[id],
-      doneBy: state === "done" ? (doneBy.get(position) ?? null) : null,
+      doneBy:
+        state === "done" ? (finishedBy(doneBy.get(position)) ?? null) : null,
       since: state === "now" ? since : null,
       waitedDays: state === "now" ? waitedDays : null,
       usual: state === "done" || !stat ? null : usualDuration(stat),
