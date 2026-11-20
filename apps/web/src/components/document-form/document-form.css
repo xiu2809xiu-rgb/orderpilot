@@ -24,10 +24,25 @@
   margin-bottom: 0;
 }
 
+/* The sizes the bar depends on, named once. --df-gutter is the page's own
+   padding (1.5rem, 1rem on a phone, see .dx-main in shell.css): a sticky offset
+   is measured inside that padding, so the bar is lifted by the gutter to sit
+   flush under the top bar. --df-bar-clear is the room a field brought into
+   view by the keyboard keeps below the bar, so it never stops behind it. */
 .df-form {
+  --df-gutter: 1.5rem;
+  --df-bar-pad-y: 0.5rem;
+  --df-bar-pad-x: 0.75rem;
+  --df-bar-clear: 4.5rem;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+}
+
+@media (max-width: 39.99rem) {
+  .df-form {
+    --df-gutter: 1rem;
+  }
 }
 
 /* FormShell spaces its children with a margin; this column spaces them with
@@ -36,19 +51,45 @@
   margin-block: 0;
 }
 
-/* The bar sits on glass and keeps to the top of the scrolling page while the
-   fields move under it, so Save is never a scroll away. It is a pill row like
-   the Orders toolbar, so it reads as the page's own controls. */
+/* The bar keeps to the top of the scrolling page while the fields move under
+   it, so Save is never a scroll away, and it is held flush under the top bar:
+   with a gap, the fields scrolled through it. It reads as the page's own
+   controls, a pill row like the Orders toolbar.
+   The glass is drawn by a pseudo-element, so that its top corners can square
+   off while the bar is stuck to the top bar and stay round at rest. The
+   border is the pseudo-element's, and the bar's padding adds its width, so the
+   bar does not change size. A browser without scroll-state queries keeps the
+   round corners: only a corner shows. */
 .df-bar {
   position: sticky;
-  top: 0.5rem;
+  top: calc(-1 * var(--df-gutter));
   z-index: 20;
-  padding: 0.5rem 0.75rem;
+  container-type: scroll-state;
+  isolation: isolate;
+  padding: calc(var(--df-bar-pad-y) + 1px) calc(var(--df-bar-pad-x) + 1px);
+}
+
+.df-bar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
   border: var(--dx-card-border);
   border-radius: var(--radius-card);
   background-color: var(--dx-card-work-bg);
   box-shadow: var(--dx-card-shadow);
   backdrop-filter: var(--dx-card-filter);
+}
+
+@container scroll-state(stuck: top) {
+  .df-bar::before {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+}
+
+.df-form :is(input, select, textarea, button, [role="row"], [role="combobox"]) {
+  scroll-margin-top: var(--df-bar-clear);
 }
 
 .df-footer {

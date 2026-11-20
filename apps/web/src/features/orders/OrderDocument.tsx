@@ -15,7 +15,6 @@ import {
 } from "@/components/lines-grid";
 import { todayInSingapore } from "@/lib/format";
 import { CAPTURE_FAMILY } from "./captureFamily";
-import "./order-form.css";
 import { LineContext } from "./LineContext";
 import { OrderHeaderFields } from "./OrderHeaderFields";
 import { OrderNotices, type ReadOnlyReason } from "./OrderNotices";
