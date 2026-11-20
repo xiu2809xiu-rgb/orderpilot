@@ -36,18 +36,19 @@
       "percentUnit": "%"
     },
     "errors": {
-      "customer": "Choose the customer.",
+      "customer": "Choose the customer from the list.",
       "po": "Enter the customer's PO number.",
-      "poLong": "A PO number has 35 characters at most.",
+      "poLong": "A PO number has {{max}} characters at most, and this one has {{length}}. Shorten it.",
       "orderDate": "Enter the order date.",
       "shipmentDate": "Enter a valid shipment date, or leave it empty.",
+      "shipmentBeforeOrder": "This is before the order date. Choose that day or a later one.",
       "prepayment": "Enter a percentage from 0 to 100, with two decimals at most.",
-      "item": "Choose an item.",
-      "description": "A description has 100 characters at most.",
-      "quantity": "Above zero.",
-      "unitPrice": "A price, such as 12.50.",
+      "item": "Choose an item from the list.",
+      "description": "A description has 100 characters at most. Shorten it.",
+      "quantity": "Enter a quantity above zero.",
+      "unitPrice": "Enter a unit price, for example 12.50.",
       "none": "Add at least one line.",
-      "tooMany": "An order has 200 lines at most."
+      "tooMany": "An order has 200 lines at most. Remove some lines."
     },
     "lines": {
       "tableLabel": "Order lines",

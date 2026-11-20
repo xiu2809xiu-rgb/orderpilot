@@ -15,6 +15,12 @@ interface ZodFormOptions<T extends FieldValues, O> {
   /** Lives in `packages/shared` when the API checks the same thing. */
   schema: z.ZodType<O, T>;
   defaultValues: DefaultValues<T>;
+  /**
+   * Tidies the values before the schema reads them, such as leaving out a
+   * blank line nobody typed in. It must only drop what it can name: the paths
+   * of every error are those of the values as typed.
+   */
+  prepare?: (values: T) => T;
 }
 
 /** Errors the schema raised, as opposed to the server's or a lookup's own. */
@@ -30,9 +36,13 @@ const FROM_SCHEMA = (type: string) => type !== "server" && type !== "lookup";
 export function useZodForm<T extends FieldValues, O = T>({
   schema,
   defaultValues,
+  prepare,
 }: ZodFormOptions<T, O>): UseFormReturn<T, unknown, O> {
+  const check = zodResolver(schema);
   const form = useForm<T, unknown, O>({
-    resolver: zodResolver(schema),
+    resolver: prepare
+      ? (values, context, options) => check(prepare(values), context, options)
+      : check,
     defaultValues,
     mode: "onTouched",
     reValidateMode: "onChange",

@@ -1,13 +1,5 @@
-import { QueryClientProvider } from "@tanstack/react-query";
-import {
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-  within,
-} from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter, Route, Routes } from "react-router";
 import {
   afterEach,
   beforeAll,
@@ -18,55 +10,20 @@ import {
   vi,
 } from "vitest";
 import i18n from "@/i18n";
-import { createQueryClient } from "@/lib/query";
 import { useSessionStore } from "@/stores/session";
 import { axeViolations } from "@/test/axe";
 import { sessionFor } from "@/test/fixtures";
 import { must } from "@/test/must";
-import demo from "@/../public/demo-documents/po-boxed-so-0102.json";
-import storyline from "@/../public/directions/po-4471-26.json";
-import UploadScreen from "./UploadScreen";
-
-// Like the site, each preview document answers at its own address.
-function stubDemo() {
-  const fetchMock = vi.fn((url: string) =>
-    Promise.resolve(
-      new Response(
-        JSON.stringify(url.endsWith("po-4471-26.json") ? storyline : demo),
-        { status: 200, headers: { "Content-Type": "application/json" } },
-      ),
-    ),
-  );
-  vi.stubGlobal("fetch", fetchMock);
-  return fetchMock;
-}
-
-// Reduced motion: the reading is short and its steps are all there at once.
-function reduceMotion() {
-  vi.stubGlobal("matchMedia", (query: string) => ({
-    matches: query.includes("reduce"),
-    media: query,
-    addEventListener: () => undefined,
-    removeEventListener: () => undefined,
-  }));
-}
-
-function upload() {
-  return render(
-    <QueryClientProvider client={createQueryClient()}>
-      <MemoryRouter initialEntries={["/upload"]}>
-        <Routes>
-          <Route path="/upload" element={<UploadScreen />} />
-        </Routes>
-      </MemoryRouter>
-    </QueryClientProvider>,
-  );
-}
-
-const pdf = (name = "po.pdf") =>
-  new File([new TextEncoder().encode("%PDF-1.7 demo")], name, {
-    type: "application/pdf",
-  });
+import {
+  demo,
+  endAnimation,
+  pdf,
+  reduceMotion,
+  signInAsSupport,
+  stubDemo,
+  toReview,
+  upload,
+} from "./uploadHarness";
 
 beforeAll(async () => {
   await i18n.loadNamespaces([
@@ -80,30 +37,12 @@ beforeAll(async () => {
 beforeEach(() => {
   reduceMotion();
   stubDemo();
-  useSessionStore.setState({
-    status: "active",
-    session: sessionFor("SUPPORT"),
-  });
+  signInAsSupport();
 });
 
 afterEach(() => {
   vi.unstubAllGlobals();
 });
-
-// The test DOM has no AnimationEvent, so React listens there for the prefixed
-// name; a browser hears the plain one. Sending both keeps the test true in either.
-function endAnimation(node: Element) {
-  fireEvent(node, new Event("webkitAnimationEnd", { bubbles: true }));
-  fireEvent.animationEnd(node);
-}
-
-async function toReview(user: ReturnType<typeof userEvent.setup>) {
-  upload();
-  await user.click(
-    await screen.findByRole("button", { name: "Use the demo purchase order" }),
-  );
-  return screen.findByRole("heading", { name: "Review what Spark read" });
-}
 
 describe("the upload screen", () => {
   it("writes the limits inside the drop zone before anyone tries", async () => {
@@ -113,8 +52,11 @@ describe("the upload screen", () => {
         "PDF, PNG, JPEG, XLSX or CSV. Up to 10 MB each, up to 5 files.",
       ),
     ).toBeVisible();
+    // The line says it is a demo on synthetic documents (ADR 0054 decision 6).
     expect(
-      screen.getByText(/a file you add stays in your browser/),
+      screen.getByText(
+        "Demo: a file you add stays in your browser and is not stored. Spark reads synthetic sample documents only, and no AI model is connected.",
+      ),
     ).toBeVisible();
     // Nothing to read yet: the primary button is off and says what to do.
     expect(
@@ -160,9 +102,10 @@ describe("the upload screen", () => {
       ),
     ).toBeVisible();
     expect(within(list).getByText("empty.csv is empty.")).toBeVisible();
+    // po.pdf is a real PDF but has no sample: nothing here can be read yet.
     expect(
       screen.getByRole("button", { name: "Read with Spark" }),
-    ).toBeEnabled();
+    ).toBeDisabled();
     await user.click(
       within(list).getByRole("button", { name: "Remove invoice.pdf" }),
     );
@@ -201,9 +144,7 @@ describe("the upload screen", () => {
       screen.getByRole("button", { name: "Finish review" }),
     ).toBeDisabled();
     expect(
-      screen.getByText(
-        "2 fields still need your approval before the review can be finished.",
-      ),
+      screen.getByText("2 fields left to approve before you can finish"),
     ).toBeVisible();
   });
 
@@ -238,7 +179,7 @@ describe("the upload screen", () => {
     expect(stage).toHaveAttribute("data-arriving", "false");
   });
 
-  it("opens the preview document that the added file is named after, and the default for any other name", async () => {
+  it("opens the preview document that the added file is named after", async () => {
     const user = userEvent.setup();
     const fetchMock = stubDemo();
     upload();
@@ -262,7 +203,7 @@ describe("the upload screen", () => {
     ).toHaveAttribute("src", "/directions/po-4471-26-p1.png");
   });
 
-  it("opens the default preview document for a file with any other name", async () => {
+  it("does not read a file that has no sample, and says so before and instead", async () => {
     const user = userEvent.setup();
     const fetchMock = stubDemo();
     upload();
@@ -271,14 +212,14 @@ describe("the upload screen", () => {
       pdf("customer-po.pdf"),
     );
     await screen.findByText("Ready");
-    await user.click(screen.getByRole("button", { name: "Read with Spark" }));
-    await screen.findByRole("heading", { name: "Review what Spark read" });
-    expect(fetchMock).toHaveBeenCalledWith(
-      "/demo-documents/po-boxed-so-0102.json",
-    );
+    expect(screen.getByText("Not read in this preview")).toBeVisible();
     expect(
-      screen.getByRole("img", { name: /Page 1 of purchase order PO-IN-4807/ }),
-    ).toHaveAttribute("src", "/directions/po-boxed-so-0102-p1.png");
+      screen.getByText(/No file added has a sample in this preview/),
+    ).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Read with Spark" }),
+    ).toBeDisabled();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("lights a field's box when its row is chosen, and the row when its box is", async () => {
@@ -332,10 +273,13 @@ describe("the upload screen", () => {
       screen.getByRole("button", { name: "Show Ship to on the page" }),
     ).toHaveAttribute("aria-pressed", "true");
     await user.click(screen.getByRole("button", { name: "Confirm Ship to" }));
-    await user.click(screen.getByRole("button", { name: "Next to approve" }));
+    // Confirming takes the person on: the next field to approve is chosen, on its page.
     expect(
       screen.getByRole("img", { name: /Page 2 of purchase order/ }),
     ).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Show Payment terms on the page" }),
+    ).toHaveAttribute("aria-pressed", "true");
     await user.click(
       screen.getByRole("button", { name: "Confirm Payment terms" }),
     );
@@ -351,9 +295,7 @@ describe("the upload screen", () => {
     await user.click(screen.getByRole("button", { name: "Confirm Ship to" }));
     expect(create).toBeDisabled();
     expect(
-      screen.getByText(
-        "1 field still needs your approval before the review can be finished.",
-      ),
+      screen.getByText("1 field left to approve before you can finish"),
     ).toBeVisible();
     await user.click(
       screen.getByRole("button", { name: "Edit Payment terms" }),
@@ -372,11 +314,13 @@ describe("the upload screen", () => {
     expect(create).toBeEnabled();
     await user.click(create);
     expect(
-      await screen.findByText("Review finished: 21 fields confirmed"),
+      await screen.findByText(
+        "Review finished: 1 field confirmed by you, 1 field corrected by you, 19 fields read above 90 percent",
+      ),
     ).toBeVisible();
     expect(
       screen.getByText(
-        "This preview saves nothing. The order this purchase order belongs to is in the sample data: SO-0102.",
+        "Nothing was saved and no order was made. This sample belongs to order SO-0102 in the sample data.",
       ),
     ).toBeVisible();
     expect(
