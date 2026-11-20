@@ -156,6 +156,39 @@ X-CSRF-Token: {{csrf}}
   "lines": [{ "itemNo": "I-0001", "quantity": "5", "unitPrice": "12.50" }]
 }
 
+### One date in a change is met with the date the draft already holds. First a
+### draft shipping a week after its order date (201, version 1) ...
+# @name dated
+POST {{baseUrl}}/api/v1/orders
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{
+  "customerNo": "C-0001",
+  "externalDocumentNo": "po-http-dates-patch",
+  "orderDate": "2026-11-20",
+  "shipmentDate": "2026-11-27",
+  "prepaymentPercent": "30",
+  "lines": [{ "itemNo": "I-0001", "quantity": "5", "unitPrice": "12.50" }]
+}
+
+### ... then a change that sends only a shipment date before the stored order
+### date: 400, with an issue on the path shipmentDate. Nothing is saved, so the
+### draft is still at version 1.
+@datedNo = {{dated.response.body.$.data.orderNo}}
+PATCH {{baseUrl}}/api/v1/orders/{{datedNo}}
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "version": 1, "shipmentDate": "2020-01-01" }
+
+### Void the draft again to free its PO number.
+POST {{baseUrl}}/api/v1/orders/{{datedNo}}/void
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "version": 1, "reason": "Example only." }
+
 ### A void without a reason: 400.
 POST {{baseUrl}}/api/v1/orders/{{orderNo}}/void
 Content-Type: application/json

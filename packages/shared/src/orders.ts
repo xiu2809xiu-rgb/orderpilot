@@ -116,6 +116,8 @@ export const salesOrderResponseSchema = dataEnvelope(salesOrderDetailSchema);
 // (`openApiSchema`) throws on a transform.
 
 export const ORDER_MAX_LINES = AVAILABLE_STOCK_MAX_ITEMS;
+/** The longest PO number, after trimming. The order form says so before the API does. */
+export const ORDER_PO_MAX_LENGTH = 35;
 /** Above zero, three decimals at most: the column is a Decimal(18, 3). */
 export const ORDER_QUANTITY_PATTERN = /^(?!0+(\.0+)?$)\d{1,15}(\.\d{1,3})?$/;
 /** Two decimals at most: the column is a Decimal(18, 2). */
@@ -155,7 +157,7 @@ export const SHIPMENT_BEFORE_ORDER_MESSAGE =
 // carries the check itself.
 const createSalesOrderFields = z.object({
   customerNo: navisionNoSchema,
-  externalDocumentNo: z.string().trim().min(1).max(35),
+  externalDocumentNo: z.string().trim().min(1).max(ORDER_PO_MAX_LENGTH),
   orderDate: z.iso.date(),
   shipmentDate: z.iso.date().nullable(),
   prepaymentPercent: z.string().regex(ORDER_PERCENT_PATTERN),

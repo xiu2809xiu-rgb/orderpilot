@@ -191,7 +191,10 @@ export class SalesOrder {
     ) as SalesOrderChanges;
     const edited = new SalesOrder({ ...this.input, ...sent });
     // Checked here and not in the constructor: an order stored before the rule
-    // existed must still load. A change that sends one date meets the stored other.
+    // existed still loads, and a client that sends no dates can still edit it.
+    // The order form always sends both dates, so for such an order it asks for
+    // the date to be put right first. A change that sends one date meets the
+    // stored other.
     if (
       ("orderDate" in sent || "shipmentDate" in sent) &&
       shipmentIsBeforeOrder(edited.orderDate, edited.shipmentDate)

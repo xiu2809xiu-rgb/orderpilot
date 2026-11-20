@@ -1,6 +1,7 @@
 import {
   ORDER_MAX_LINES,
   ORDER_PERCENT_PATTERN,
+  ORDER_PO_MAX_LENGTH,
   ORDER_PRICE_PATTERN,
   ORDER_QUANTITY_PATTERN,
   shipmentIsBeforeOrder,
@@ -9,9 +10,6 @@ import type { TFunction } from "i18next";
 import { z } from "zod";
 import { requiredLookup } from "@/components/form";
 import { lastPriceSchema } from "@/components/lines-grid";
-
-/** What the API holds a PO number to: the form says so before the API does. */
-export const PO_MAX_LENGTH = 35;
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -51,10 +49,10 @@ export function makeOrderFormSchema(
       .string()
       .trim()
       .min(1, t("form.errors.po"))
-      .max(PO_MAX_LENGTH, {
+      .max(ORDER_PO_MAX_LENGTH, {
         error: (issue) =>
           t("form.errors.poLong", {
-            max: PO_MAX_LENGTH,
+            max: ORDER_PO_MAX_LENGTH,
             length: typeof issue.input === "string" ? issue.input.length : 0,
           }),
       }),
