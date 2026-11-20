@@ -2,6 +2,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useId } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { clampPage, pageCount } from "@/lib/paging";
 import { NativeSelect } from "./Field";
 
 interface PaginationProps {
@@ -27,9 +28,13 @@ export function Pagination({
 }: PaginationProps) {
   const { t } = useTranslation("components");
   const sizeId = useId();
-  const pages = Math.max(1, Math.ceil(total / pageSize));
-  const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
-  const to = Math.min(total, page * pageSize);
+  const pages = pageCount(total, pageSize);
+  // A page past the end is shown as the last one: the screens open that page,
+  // and until they do this never says "Page 99 of 5" or a range that ends
+  // before it starts.
+  const shown = clampPage(page, total, pageSize);
+  const from = total === 0 ? 0 : (shown - 1) * pageSize + 1;
+  const to = Math.min(total, shown * pageSize);
 
   return (
     <div className="dt-foot">
@@ -66,22 +71,22 @@ export function Pagination({
             size="icon-sm"
             className="pointer-coarse:size-11"
             aria-label={t("table.previous")}
-            disabled={page <= 1}
+            disabled={shown <= 1}
             onClick={() => {
-              onPage(page - 1);
+              onPage(shown - 1);
             }}
           >
             <ChevronLeft aria-hidden="true" />
           </Button>
-          <span data-numeric>{t("table.page", { page, pages })}</span>
+          <span data-numeric>{t("table.page", { page: shown, pages })}</span>
           <Button
             variant="outline"
             size="icon-sm"
             className="pointer-coarse:size-11"
             aria-label={t("table.next")}
-            disabled={page >= pages}
+            disabled={shown >= pages}
             onClick={() => {
-              onPage(page + 1);
+              onPage(shown + 1);
             }}
           >
             <ChevronRight aria-hidden="true" />
