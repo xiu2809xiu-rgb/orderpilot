@@ -70,7 +70,8 @@ export function DocumentItem({
             {t("documents.received", { date: formatDate(flow.receivedAt) })}
           </p>
         ) : null}
-        {pending ? null : (
+        {/* A paper that has not come cannot have been read by a check. */}
+        {pending || flow?.status === "expected" ? null : (
           <p className="fs-14 text-muted-foreground">
             {document.rules.length === 0
               ? t("documents.noChecks")
