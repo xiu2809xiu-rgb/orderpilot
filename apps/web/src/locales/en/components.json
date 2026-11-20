@@ -169,7 +169,7 @@
     },
     "shortOnStock": {
       "term": "Short on stock",
-      "meaning": "There is less stock than the order needs, so stock has to be bought first."
+      "meaning": "There is less stock than the order asks for, so the order is held."
     },
     "businessCentral": {
       "term": "Business Central",
