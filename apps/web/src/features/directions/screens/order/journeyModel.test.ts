@@ -233,6 +233,32 @@ describe("a finished step dated after the current step began", () => {
   });
 });
 
+// `today` is Singapore's date, so the moment a step began is read on the same
+// calendar. Read as a UTC date it was a day behind from midnight to 8 am in
+// Singapore, and the page said one day too many for those eight hours.
+describe("the calendar the wait is counted on", () => {
+  const waited = (since: string, today: string) =>
+    buildJourney({
+      current: 5,
+      events: EVENTS,
+      stepTimes: STEP_TIMES.sales,
+      today,
+      since: new Date(since),
+    })?.steps[4]?.waitedDays;
+
+  it("reads a step that began after midnight in Singapore as that Singapore day", () => {
+    // 16 Nov 18:00 UTC is 17 Nov 02:00 in Singapore: three days before 20 Nov.
+    expect(waited("2026-11-16T18:00:00.000Z", "2026-11-20")).toBe(3);
+  });
+
+  it("gives the same count just before and just after Singapore's midnight for one moment", () => {
+    // 6 Nov 16:07 UTC is 7 Nov 00:07 in Singapore: fourteen days before 21 Nov.
+    expect(waited("2026-11-06T16:07:00.000Z", "2026-11-21")).toBe(14);
+    // 6 Nov 15:53 UTC is 6 Nov 23:53 in Singapore: fourteen days before 20 Nov.
+    expect(waited("2026-11-06T15:53:00.000Z", "2026-11-20")).toBe(14);
+  });
+});
+
 describe("daysPastShipDate", () => {
   it("compares the expected day with the order's own ship date", () => {
     const ship = journey("2026-11-12")?.ship ?? null;

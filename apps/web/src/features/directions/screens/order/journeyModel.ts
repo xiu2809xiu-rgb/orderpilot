@@ -9,6 +9,7 @@ import {
   type ShipEstimate,
   type Usual,
 } from "../../data/estimates";
+import { todayInSingapore } from "@/lib/format";
 import type { StepTime } from "../../data/types";
 import { ALL_DONE } from "../orders/orderRow";
 
@@ -139,7 +140,11 @@ export function buildJourney(input: {
       : currentEvent
         ? new Date(currentEvent.at)
         : null;
-  const sinceDay = since ? since.toISOString().slice(0, 10) : null;
+  // Days are counted on Singapore's calendar on both sides. `today` is the
+  // Singapore date, so the moment the step began is read as a Singapore date
+  // too: read as a UTC date it is a day behind for eight hours of every day,
+  // and the count then says one day too many.
+  const sinceDay = since ? todayInSingapore(since) : null;
   // Only a record's time can say this: the tracker's own current event is the
   // newest one, so against it every finished step would be earlier anyway.
   // While the record is on its way (null) no finished step names a person or a
@@ -159,9 +164,7 @@ export function buildJourney(input: {
   // When the current step should end at the usual pace, never before today.
   let cursor: string | null = null;
   if (nowStat && sinceDay) {
-    const due = expectedBy(since ?? new Date(), nowStat)
-      .at.toISOString()
-      .slice(0, 10);
+    const due = todayInSingapore(expectedBy(since ?? new Date(), nowStat).at);
     cursor = due < today ? today : due;
   }
 
