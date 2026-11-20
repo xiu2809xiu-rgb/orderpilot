@@ -1,8 +1,7 @@
-import { CircleCheck, FlaskConical, TriangleAlert, X } from "lucide-react";
+import { CircleCheck, FlaskConical, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { extensionOf, FileType } from "@/components/kit/FileType";
-import { MAX_FILES, MAX_MB } from "./uploadRules";
+import { FileType } from "@/components/kit/FileType";
 import type { UploadRow } from "./useUploads";
 
 /** "13 B", "84 KB" or "2.4 MB" from a size in bytes. */
@@ -23,8 +22,8 @@ export type SampleNote =
 
 /**
  * One file the person added: its icon, name and size, a progress bar while the
- * browser reads it, then "Ready", or the reason it was refused. Every row can
- * be removed. A refused file keeps its row so the reason stays on the screen.
+ * browser reads it, then "Ready". Every row can be removed. A file that was
+ * refused has no row: its reason is a message of its own (RefusedNotes).
  */
 export function FileRow({
   row,
@@ -32,12 +31,11 @@ export function FileRow({
   onRemove,
 }: {
   row: UploadRow;
-  /** Shown under a file that is not refused; null while it is still being checked. */
+  /** Shown under the file; null while it is still being checked. */
   sample: SampleNote | null;
   onRemove: (id: number) => void;
 }) {
   const { t } = useTranslation("directions-intake");
-  const refused = row.status === "refused";
   return (
     <li
       className="flex items-center gap-3 border border-border bg-card px-3 py-2.5"
@@ -85,28 +83,6 @@ export function FileRow({
             {sample.kind === "sample"
               ? t("files.sample", { document: sample.document })
               : t(sample.kind === "later" ? "files.notRead" : "files.noSample")}
-          </p>
-        ) : null}
-        {refused ? (
-          <p
-            role="alert"
-            className="fs-14 flex items-start gap-1.5 text-destructive"
-          >
-            <TriangleAlert
-              aria-hidden="true"
-              className="mt-0.5 size-3.5 shrink-0"
-            />
-            <span>
-              {t(`refused.${row.reason}`, {
-                name: row.name,
-                size: MAX_MB,
-                count: MAX_FILES,
-                claimed: t(
-                  `refused.claimed.${row.claimed ?? extensionOf(row.name)}`,
-                  { defaultValue: "a" },
-                ),
-              })}
-            </span>
           </p>
         ) : null}
       </div>

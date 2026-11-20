@@ -108,7 +108,9 @@ describe("the file list, before anything is read", () => {
     ]);
     await screen.findByText("Ready");
     expect(screen.getByText("13 B")).toBeVisible();
-    expect(screen.getByText("0 B")).toBeVisible();
+    // The empty file is refused: a message, and no row to show its size.
+    expect(screen.getByText("blank.csv is empty.")).toBeVisible();
+    expect(screen.queryByText("0 B")).toBeNull();
     expect(screen.queryByText("1 KB")).toBeNull();
   });
 
@@ -141,6 +143,12 @@ describe("the file list, before anything is read", () => {
         "po-4471-26.pdf is already in the list. It was not added twice.",
       ),
     ).toBeVisible();
+    // It is not in the list twice: one row, and the message beside it.
+    const list = screen.getByRole("list", { name: "Files to read" });
+    expect(within(list).getAllByRole("listitem")).toHaveLength(1);
+    expect(
+      screen.getAllByRole("button", { name: "Remove po-4471-26.pdf" }),
+    ).toHaveLength(1);
   });
 });
 

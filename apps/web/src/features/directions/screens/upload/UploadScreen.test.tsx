@@ -91,25 +91,34 @@ describe("the upload screen", () => {
     await waitFor(() => {
       expect(within(list).getByText("Ready")).toBeVisible();
     });
+    // Only the file that was taken is in the list.
+    expect(within(list).getAllByRole("listitem")).toHaveLength(1);
+    expect(within(list).queryByText(/invoice.pdf/)).toBeNull();
+    // The others leave a message each, in a place of their own.
+    const notes = await screen.findByRole("list", {
+      name: "Files that were not added",
+    });
     expect(
-      within(list).getByText(
-        /invoice\.pdf says it is a PDF file but its content is not/,
+      within(notes).getByText(
+        /invoice.pdf says it is a PDF file but its content is not/,
       ),
     ).toBeVisible();
     expect(
-      within(list).getByText(
+      within(notes).getByText(
         "setup.exe is not a PDF, PNG, JPEG, XLSX or CSV file.",
       ),
     ).toBeVisible();
-    expect(within(list).getByText("empty.csv is empty.")).toBeVisible();
+    expect(within(notes).getByText("empty.csv is empty.")).toBeVisible();
     // po.pdf is a real PDF but has no sample: nothing here can be read yet.
     expect(
       screen.getByRole("button", { name: "Read with Spark" }),
     ).toBeDisabled();
     await user.click(
-      within(list).getByRole("button", { name: "Remove invoice.pdf" }),
+      within(notes).getByRole("button", {
+        name: "Dismiss the message about invoice.pdf",
+      }),
     );
-    expect(within(list).queryByText(/invoice\.pdf says/)).toBeNull();
+    expect(within(notes).queryByText(/invoice.pdf says/)).toBeNull();
   });
 
   it("refuses a file over the size limit without reading it", async () => {
