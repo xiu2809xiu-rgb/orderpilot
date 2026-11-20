@@ -58,7 +58,7 @@ export function NeedRow({ task, busy, onComplete }: NeedRowProps) {
       {t(`needs.sprTask.${task.kind}`, { recordNo: task.ref?.recordNo })}
     </RecordLinkText>
   ) : (
-    withTerms(doing)
+    withTerms(doing, { focusable: false })
   );
   return (
     <HomeRow
