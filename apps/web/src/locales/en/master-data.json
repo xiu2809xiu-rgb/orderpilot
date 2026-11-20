@@ -34,7 +34,7 @@
   "stockRule": {
     "label": "How Short and Low are decided",
     "title": "When an item is Short or Low",
-    "short": "Short: an open order needs more of this item than is Available, and the SPR for the rest is not approved yet. Available can still be above zero.",
+    "short": "Short: an open order needs more of this item than is Available, and no approved SPR covers the rest. Available can still be above zero.",
     "low": "Low: Available is under {{count}}, and no open order is short."
   },
   "emptyDescription": "Records appear here once they are read from Business Central.",

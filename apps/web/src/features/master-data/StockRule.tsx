@@ -1,15 +1,12 @@
 import { Info } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { LOW_STOCK_THRESHOLD } from "@orderpilot/shared";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-
-// The API's LOW_STOCK_THRESHOLD, which no response carries. Both are samples
-// for the demo until Spectra sets the real level.
-const LOW_UNDER = 25;
 
 /**
  * Says how an item comes to be marked Short or Low, in the words of the rule
@@ -35,7 +32,7 @@ export function StockRule() {
         <p className="font-medium">{t("stockRule.title")}</p>
         <p className="text-muted-foreground">{t("stockRule.short")}</p>
         <p className="text-muted-foreground">
-          {t("stockRule.low", { count: LOW_UNDER })}
+          {t("stockRule.low", { count: LOW_STOCK_THRESHOLD })}
         </p>
       </PopoverContent>
     </Popover>

@@ -1,5 +1,5 @@
 import { createSyntheticDataset } from "@orderpilot/synthetic-data";
-import { compareDecimal } from "@orderpilot/shared";
+import { LOW_STOCK_THRESHOLD, compareDecimal } from "@orderpilot/shared";
 import { describe, expect, it } from "vitest";
 import { NotFoundError } from "../../common/domain-error.js";
 import { SampleOrderSource } from "../orders/directory/sample-order-source.js";
@@ -7,11 +7,7 @@ import { MockChecksRepository } from "../checks/mock-checks.repository.js";
 import { MockOrderStatusReader } from "../checks/mock-order-status-reader.js";
 import { TrackerService } from "../checks/tracker.service.js";
 import type { MasterDataSalesOrder } from "./domain/master-data-reader.js";
-import {
-  LOW_STOCK_THRESHOLD,
-  StockPosition,
-  isOpenOrder,
-} from "./domain/stock-position.js";
+import { StockPosition, isOpenOrder } from "./domain/stock-position.js";
 import { MasterDataService } from "./master-data.service.js";
 import { MockBusinessCentralMasterData } from "./mock-business-central-master-data.js";
 
@@ -112,8 +108,8 @@ describe("the stock position of an item", () => {
     const at = (po: string) =>
       new StockPosition(stockOf({ inventory: "0", so: "0", po }), [])
         .availability;
-    expect(at(LOW_STOCK_THRESHOLD)).toBe("ok");
-    expect(at(String(Number(LOW_STOCK_THRESHOLD) - 1))).toBe("low");
+    expect(at(String(LOW_STOCK_THRESHOLD))).toBe("ok");
+    expect(at(String(LOW_STOCK_THRESHOLD - 1))).toBe("low");
   });
 });
 

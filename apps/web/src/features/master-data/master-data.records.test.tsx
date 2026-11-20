@@ -1,6 +1,7 @@
 import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
+import { LOW_STOCK_THRESHOLD } from "@orderpilot/shared";
 import {
   getMasterDataCustomerMockHandler,
   getMasterDataCustomersMockHandler,
@@ -191,7 +192,16 @@ describe("the rule behind Short", () => {
         /an open order needs more of this item than is Available/,
       ),
     ).toBeVisible();
-    expect(within(dialog).getByText(/Available is under 25/)).toBeVisible();
+    expect(
+      within(dialog).getByText(/and no approved SPR covers the rest/),
+    ).toBeVisible();
+    // Read from the shared constant, so the sentence and the API's rule cannot
+    // drift apart.
+    expect(
+      within(dialog).getByText(
+        `Low: Available is under ${String(LOW_STOCK_THRESHOLD)}, and no open order is short.`,
+      ),
+    ).toBeVisible();
   });
 
   it("is not offered beside an item that is fine", async () => {
