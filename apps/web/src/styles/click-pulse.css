@@ -1,0 +1,62 @@
+/* A soft ring where the pointer pressed. One element for each press, moved
+   only by transform and opacity, on a layer that takes no pointer events and
+   sits above menus and dialogs (they are in the body too). The ring trails the
+   press and blocks nothing, so it may last longer than interface motion: under
+   300 ms it reads as a flicker, not as an answer. It grows fast and fades
+   late (two animations, so each has its own curve): with one curve for both
+   it had faded before it was large enough to see. Its two edges, the accent
+   outside and the colour of a primary button's text inside, keep it readable
+   on glass, on the page and on a primary button, in both schemes. */
+.click-pulse-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+}
+
+.click-pulse {
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .click-pulse {
+    position: absolute;
+    display: block;
+    width: 44px;
+    height: 44px;
+    margin: -22px 0 0 -22px;
+    border: 1.5px solid var(--primary);
+    border-radius: 9999px;
+    background: radial-gradient(
+      circle,
+      color-mix(in srgb, var(--primary) 30%, transparent),
+      transparent 70%
+    );
+    box-shadow:
+      inset 0 0 0 1px
+        color-mix(in srgb, var(--primary-foreground) 60%, transparent),
+      0 0 14px color-mix(in srgb, var(--primary) 45%, transparent);
+    animation:
+      click-pulse-grow 420ms var(--ease-out) both,
+      click-pulse-fade 420ms ease-in both;
+    will-change: transform, opacity;
+  }
+
+  @keyframes click-pulse-grow {
+    from {
+      transform: scale(0.2);
+    }
+  }
+
+  @keyframes click-pulse-fade {
+    from {
+      opacity: 0.9;
+    }
+
+    to {
+      opacity: 0;
+    }
+  }
+}

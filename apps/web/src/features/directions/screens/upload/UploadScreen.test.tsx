@@ -1,5 +1,11 @@
 import { QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router";
 import {
@@ -16,21 +22,23 @@ import { createQueryClient } from "@/lib/query";
 import { useSessionStore } from "@/stores/session";
 import { axeViolations } from "@/test/axe";
 import { sessionFor } from "@/test/fixtures";
+import { must } from "@/test/must";
 import demo from "@/../public/demo-documents/po-boxed-so-0102.json";
+import storyline from "@/../public/directions/po-4471-26.json";
 import UploadScreen from "./UploadScreen";
 
+// Like the site, each preview document answers at its own address.
 function stubDemo() {
-  vi.stubGlobal(
-    "fetch",
-    vi.fn(() =>
-      Promise.resolve(
-        new Response(JSON.stringify(demo), {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
-        }),
+  const fetchMock = vi.fn((url: string) =>
+    Promise.resolve(
+      new Response(
+        JSON.stringify(url.endsWith("po-4471-26.json") ? storyline : demo),
+        { status: 200, headers: { "Content-Type": "application/json" } },
       ),
     ),
   );
+  vi.stubGlobal("fetch", fetchMock);
+  return fetchMock;
 }
 
 // Reduced motion: the reading is short and its steps are all there at once.
@@ -81,6 +89,13 @@ beforeEach(() => {
 afterEach(() => {
   vi.unstubAllGlobals();
 });
+
+// The test DOM has no AnimationEvent, so React listens there for the prefixed
+// name; a browser hears the plain one. Sending both keeps the test true in either.
+function endAnimation(node: Element) {
+  fireEvent(node, new Event("webkitAnimationEnd", { bubbles: true }));
+  fireEvent.animationEnd(node);
+}
 
 async function toReview(user: ReturnType<typeof userEvent.setup>) {
   upload();
@@ -171,7 +186,7 @@ describe("the upload screen", () => {
     expect(screen.getByText("Classified as Customer PO")).toBeVisible();
     expect(
       screen.getByText(
-        "21 fields read. 19 are above 90 percent. 2 need your approval.",
+        "21 fields read: 19 above 90 percent, 2 for you to approve.",
       ),
     ).toBeVisible();
     // The page of the PDF is a picture; each field has a box named after it.
@@ -183,13 +198,87 @@ describe("the upload screen", () => {
     expect(within(boxes).getAllByRole("button")).toHaveLength(20);
     expect(screen.getAllByText("Requires approval")).toHaveLength(2);
     expect(
-      screen.getByRole("button", { name: "Create draft order" }),
+      screen.getByRole("button", { name: "Finish review" }),
     ).toBeDisabled();
     expect(
       screen.getByText(
-        "2 fields still need your approval before a draft order can be made.",
+        "2 fields still need your approval before the review can be finished.",
       ),
     ).toBeVisible();
+  });
+
+  it("reads the page once as the review opens: a field's box and row carry where it sits, and the pass never plays again", async () => {
+    const user = userEvent.setup();
+    await toReview(user);
+    const fields = screen.getByRole("group", { name: "Fields read" });
+    const stage = must(fields.parentElement);
+    expect(stage).toHaveAttribute("data-arriving", "true");
+    const light = must(stage.querySelector('[data-slot="reading-light"]'));
+    expect(light).toHaveAttribute("aria-hidden", "true");
+    // How far down its page a field sits is when the light reaches it, and the
+    // box and the row share that moment.
+    const field = must(demo.fields[1]);
+    const at = String(must(field.box[1]));
+    const box = within(
+      screen.getByRole("group", { name: "Fields on this page" }),
+    ).getByRole("button", { name: `${field.label}: ${field.text}` });
+    const show = within(fields).getByRole("button", {
+      name: `Show ${field.label} on the page`,
+    });
+    const row = must(show.closest("li"));
+    expect(box.style.getPropertyValue("--read-at")).toBe(at);
+    expect(row.style.getPropertyValue("--read-at")).toBe(at);
+
+    endAnimation(light);
+    expect(stage).toHaveAttribute("data-arriving", "false");
+    expect(stage.querySelector('[data-slot="reading-light"]')).toBeNull();
+    // Choosing a field afterwards does not bring the pass back.
+    await user.click(show);
+    expect(show).toHaveAttribute("aria-pressed", "true");
+    expect(stage).toHaveAttribute("data-arriving", "false");
+  });
+
+  it("opens the preview document that the added file is named after, and the default for any other name", async () => {
+    const user = userEvent.setup();
+    const fetchMock = stubDemo();
+    upload();
+    await user.upload(
+      await screen.findByLabelText("Documents to upload"),
+      pdf("PO-4471-26.PDF"),
+    );
+    await screen.findByText("Ready");
+    await user.click(screen.getByRole("button", { name: "Read with Spark" }));
+    await screen.findByRole("heading", { name: "Review what Spark read" });
+    expect(fetchMock).toHaveBeenCalledWith("/directions/po-4471-26.json");
+    // Only the quantity is below the threshold, and its page image is this PO's own.
+    expect(
+      screen.getByText(
+        "16 fields read: 15 above 90 percent, 1 for you to approve.",
+      ),
+    ).toBeVisible();
+    expect(screen.getAllByText("Requires approval")).toHaveLength(1);
+    expect(
+      screen.getByRole("img", { name: /Page 1 of purchase order 4471-26/ }),
+    ).toHaveAttribute("src", "/directions/po-4471-26-p1.png");
+  });
+
+  it("opens the default preview document for a file with any other name", async () => {
+    const user = userEvent.setup();
+    const fetchMock = stubDemo();
+    upload();
+    await user.upload(
+      await screen.findByLabelText("Documents to upload"),
+      pdf("customer-po.pdf"),
+    );
+    await screen.findByText("Ready");
+    await user.click(screen.getByRole("button", { name: "Read with Spark" }));
+    await screen.findByRole("heading", { name: "Review what Spark read" });
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/demo-documents/po-boxed-so-0102.json",
+    );
+    expect(
+      screen.getByRole("img", { name: /Page 1 of purchase order PO-IN-4807/ }),
+    ).toHaveAttribute("src", "/directions/po-boxed-so-0102-p1.png");
   });
 
   it("lights a field's box when its row is chosen, and the row when its box is", async () => {
@@ -255,15 +344,15 @@ describe("the upload screen", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("opens Create draft order only when every uncertain field is confirmed or corrected", async () => {
+  it("opens Finish review only when every uncertain field is confirmed or corrected", async () => {
     const user = userEvent.setup();
     await toReview(user);
-    const create = screen.getByRole("button", { name: "Create draft order" });
+    const create = screen.getByRole("button", { name: "Finish review" });
     await user.click(screen.getByRole("button", { name: "Confirm Ship to" }));
     expect(create).toBeDisabled();
     expect(
       screen.getByText(
-        "1 field still needs your approval before a draft order can be made.",
+        "1 field still needs your approval before the review can be finished.",
       ),
     ).toBeVisible();
     await user.click(
@@ -283,9 +372,16 @@ describe("the upload screen", () => {
     expect(create).toBeEnabled();
     await user.click(create);
     expect(
-      await screen.findByText("Draft order made from 21 fields"),
+      await screen.findByText("Review finished: 21 fields confirmed"),
     ).toBeVisible();
-    expect(screen.getByText(/Demo: nothing is saved/)).toBeVisible();
+    expect(
+      screen.getByText(
+        "This preview saves nothing. The order this purchase order belongs to is in the sample data: SO-0102.",
+      ),
+    ).toBeVisible();
+    expect(
+      screen.getByRole("link", { name: "Open order SO-0102" }),
+    ).toBeVisible();
     expect(create).toBeDisabled();
   });
 

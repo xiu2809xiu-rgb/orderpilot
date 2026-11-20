@@ -358,7 +358,7 @@ The board sync keeps an open card's Sprint, so the cards of P-21 (#36) and P-61 
 | P-106 | Three visual directions                                          | P    | must     | 8      | 3, 4    | `feat/platform-direction-rollout`     | Done in one branch with P-107, pull request to come           |
 | P-107 | Roll the picked direction onto the shell and templates           | P    | must     | 8      | 5       | `feat/platform-direction-rollout`     | Done in one branch with P-106, pull request to come           |
 | P-108 | The landing page                                                 | P    | should   | 8      | 11      | `feat/platform-landing`               | Not started                                                   |
-| P-109 | The sign-in page with the scene                                  | P    | should   | 3      | 6       | `feat/platform-sign-in-scene`         | Not started                                                   |
+| P-109 | The sign-in page with the scene                                  | P    | should   | 3      | 6       | `feat/platform-sign-in-scene`         | The scene is in #285; the story stays open                    |
 | P-110 | The speed bar                                                    | P    | should   | 5      | 7       | `feat/platform-speed-bar`             | Not started                                                   |
 | P-111 | Grid polish                                                      | P    | could    | 5      | 13      | `feat/platform-grid-polish`           | Not started                                                   |
 | P-112 | Small delights                                                   | P    | could    | 3      | 13      | `feat/platform-small-delights`        | Not started                                                   |
@@ -383,6 +383,7 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 
 | Story | Title                                                 | Branch                           | State                                                                               |
 | ----- | ----------------------------------------------------- | -------------------------------- | ----------------------------------------------------------------------------------- |
+| #285  | The build shown at the proposal presentation          | `feat/platform-proposal-demo`    | This pull request. It brings the 25 commits shown on 17 Nov, with `main` merged in  |
 | #191  | Cut CI minutes before the repository goes private     | `ci/minutes-job-conditions`      | Merged, [#192](https://github.com/xiu2809xiu-rgb/orderpilot/pull/192)               |
 | P-42  | Plan prompt 004                                       | `chore/plan-prompt-004`          | Merged, [#138](https://github.com/xiu2809xiu-rgb/orderpilot/pull/138)               |
 | P-13  | Docker images and the IaC scan                        | `ci/docker`                      | Merged, [#172](https://github.com/xiu2809xiu-rgb/orderpilot/pull/172)               |

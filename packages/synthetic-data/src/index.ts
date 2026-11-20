@@ -3,8 +3,10 @@ export {
   DEFAULT_SEED,
   createSyntheticDataset,
   describeDataset,
+  setDemoStoryline,
   syntheticDataset,
 } from "./dataset.js";
+export { STORYLINE, withDemoStoryline } from "./storyline.js";
 export type { Milestone } from "./journey.js";
 export type { DatasetOptions } from "./dataset.js";
 export {

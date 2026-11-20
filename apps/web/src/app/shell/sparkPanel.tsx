@@ -9,6 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useSessionStore } from "@/stores/session";
 import { useDemoParts } from "./demoParts";
 
 interface SparkControl {
@@ -42,10 +43,13 @@ function isSparkKey(event: KeyboardEvent): boolean {
  * Owns whether Spark is open, and mounts the panel only after it has been
  * opened once, so its code and the orb cost nothing until a person asks for
  * them. After that the panel stays mounted (closed), so the conversation is
- * still there when it is opened again. The shortcut works on every page.
+ * still there when it is opened again. It is keyed by the signed-in person:
+ * after a role switch the next person starts with an empty conversation, not
+ * with the answers the last one was given. The shortcut works on every page.
  */
 export function SparkPanelProvider({ children }: { children: ReactNode }) {
   const available = useDemoParts();
+  const person = useSessionStore((state) => state.session?.user.id);
   const [open, setOpen] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const change = useCallback((next: boolean) => {
@@ -76,7 +80,7 @@ export function SparkPanelProvider({ children }: { children: ReactNode }) {
       {children}
       {loaded && available ? (
         <Suspense fallback={null}>
-          <SparkPanel open={open} onOpenChange={change} />
+          <SparkPanel key={person} open={open} onOpenChange={change} />
         </Suspense>
       ) : null}
     </SparkContext>

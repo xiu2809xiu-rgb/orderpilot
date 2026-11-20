@@ -20,6 +20,7 @@ import { makePurchaseOrders } from "./purchase-orders.js";
 import { SeededRandom } from "./random.js";
 import { RecordNumberer } from "./records.js";
 import { makeSprs } from "./sprs.js";
+import { withDemoStoryline } from "./storyline.js";
 import { SYNTHETIC_LABEL, type SyntheticDataset } from "./types.js";
 import { makeReminders, makeTasks } from "./work.js";
 
@@ -97,11 +98,24 @@ export function createSyntheticDataset(
 }
 
 const cache = new Map<string, SyntheticDataset>();
+const storylineCache = new Map<string, SyntheticDataset>();
+let demoStoryline = false;
+
+/**
+ * Switches the demo storyline on or off for `syntheticDataset`. Off by
+ * default, so tests and fixtures see the generated set; the API turns it on
+ * once at start-up from its setting, before anything reads the data.
+ */
+export function setDemoStoryline(enabled: boolean): void {
+  demoStoryline = enabled;
+}
 
 /**
  * The dataset for a reference date (today in Asia/Singapore by default),
  * built once and kept for the day. Callers share it, so they must not change
- * it: use `createSyntheticDataset` for a copy a test may edit.
+ * it: use `createSyntheticDataset` for a copy a test may edit. With the demo
+ * storyline on (`setDemoStoryline`) it is the same set with that storyline in
+ * it, also kept for the day.
  */
 export function syntheticDataset(
   options: DatasetOptions = {},
@@ -113,10 +127,19 @@ export function syntheticDataset(
   if (!dataset) {
     dataset = createSyntheticDataset({ seed, referenceDate });
     // Yesterday's set is no use once the day has turned over.
-    if (cache.size >= 2) cache.clear();
+    if (cache.size >= 2) {
+      cache.clear();
+      storylineCache.clear();
+    }
     cache.set(key, dataset);
   }
-  return dataset;
+  if (!demoStoryline) return dataset;
+  let told = storylineCache.get(key);
+  if (!told) {
+    told = withDemoStoryline(dataset);
+    storylineCache.set(key, told);
+  }
+  return told;
 }
 
 /** One line for a log: the label and the counts. */

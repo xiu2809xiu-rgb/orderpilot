@@ -17,14 +17,21 @@ export function AddStage({
   onRead,
 }: {
   uploads: ReturnType<typeof useUploads>;
-  onRead: () => void;
+  /** The name of the first checked file, or null for the demo purchase order. */
+  onRead: (fileName: string | null) => void;
 }) {
   const { t } = useTranslation("directions-intake");
   const { rows, add, remove, ready } = uploads;
+  const firstReady = rows.find((row) => row.status === "ready");
   return (
     <Section title={t("add.title")} intro={t("add.intro")} work>
       <div className="flex flex-col gap-4">
-        <DropZone onFiles={add} onDemo={onRead} />
+        <DropZone
+          onFiles={add}
+          onDemo={() => {
+            onRead(null);
+          }}
+        />
         {rows.length > 0 ? (
           <ul aria-label={t("files.label")} className="flex flex-col gap-2">
             {rows.map((row) => (
@@ -41,7 +48,9 @@ export function AddStage({
           <Button
             type="button"
             disabled={ready === 0}
-            onClick={onRead}
+            onClick={() => {
+              onRead(firstReady?.name ?? null);
+            }}
             className="pointer-coarse:h-11"
           >
             <ScanText aria-hidden="true" />

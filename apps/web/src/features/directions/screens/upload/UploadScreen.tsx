@@ -13,7 +13,12 @@ import {
 import { EmptyState } from "@/components/parts/EmptyState";
 import { PageHeader } from "@/components/parts/PageHeader";
 import { AddStage } from "./AddStage";
-import { useDemoDocument } from "./demoDocument";
+import {
+  DEMO_NAME,
+  previewFor,
+  useDemoDocument,
+  type PreviewName,
+} from "./demoDocument";
 import { ReadStage } from "./ReadStage";
 import { ReviewStage } from "./ReviewStage";
 import { useUploads } from "./useUploads";
@@ -34,7 +39,9 @@ export default function UploadScreen() {
   );
   const [stage, setStage] = useState<Stage>("add");
   const uploads = useUploads();
-  const demo = useDemoDocument(stage !== "add");
+  // Which preview document Spark reads is chosen by the file added, when Read with Spark is pressed.
+  const [preview, setPreview] = useState<PreviewName>(DEMO_NAME);
+  const demo = useDemoDocument(preview, stage !== "add");
   const reading = useCallback(() => {
     setStage("review");
   }, []);
@@ -64,7 +71,8 @@ export default function UploadScreen() {
       {stage === "add" ? (
         <AddStage
           uploads={uploads}
-          onRead={() => {
+          onRead={(fileName) => {
+            setPreview(previewFor(fileName));
             setStage("read");
           }}
         />

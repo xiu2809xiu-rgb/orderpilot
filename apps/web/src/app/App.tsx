@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { RouterProvider, type DataRouter } from "react-router";
 import { bootstrapSession } from "@/lib/api/auth";
 import { queryClient } from "@/lib/query";
+import { ClickPulse } from "./ClickPulse";
 import { AppErrorBoundary } from "./pages/CrashPage";
 import { createAppRouter } from "./router";
 
@@ -18,6 +19,7 @@ export function App({ router }: { router?: DataRouter }) {
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={appRouter} />
       </QueryClientProvider>
+      <ClickPulse />
     </AppErrorBoundary>
   );
 }
