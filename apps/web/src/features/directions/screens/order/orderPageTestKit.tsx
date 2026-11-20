@@ -1,4 +1,4 @@
-import type { OrderTimelineEvent } from "@orderpilot/shared";
+import type { OrderStep, OrderTimelineEvent } from "@orderpilot/shared";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { render } from "@testing-library/react";
 import type { ReactElement } from "react";
@@ -74,7 +74,10 @@ export function entry(
 }
 
 /** A step of the workflow, as the order's steps page lists it. */
-export function step(key: string, state: "done" | "current" | "upcoming") {
+export function step(
+  key: string,
+  state: "done" | "current" | "upcoming",
+): OrderStep {
   return {
     key,
     ownerRole: "SUPPORT",
