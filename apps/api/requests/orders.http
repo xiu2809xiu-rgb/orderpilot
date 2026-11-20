@@ -95,8 +95,7 @@ X-CSRF-Token: {{csrf}}
   "lines": [{ "itemNo": "I-0001", "quantity": "5", "unitPrice": "12.50" }]
 }
 
-### The same customer and PO number again, in any case and with or without
-### spaces ("po-http- 1" is "po-http-1"): 409. The issue on the path
+### The same customer and PO number again, in any case: 409. The issue on the path
 ### `existingOrderNo` carries the number of the order that already holds it.
 POST {{baseUrl}}/api/v1/orders
 Content-Type: application/json
@@ -104,7 +103,7 @@ X-CSRF-Token: {{csrf}}
 
 {
   "customerNo": "C-0001",
-  "externalDocumentNo": "po-http- 1",
+  "externalDocumentNo": "po-http-1",
   "orderDate": "2026-11-10",
   "shipmentDate": null,
   "prepaymentPercent": "30",

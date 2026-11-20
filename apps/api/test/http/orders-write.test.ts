@@ -391,31 +391,21 @@ describe("writing draft orders over HTTP", () => {
       expect(existingOrderOf(error.details as never)).toBe(first.orderNo);
     });
 
-    it("takes a space inside the PO number for no difference, and stores it as typed", async () => {
+    it("keeps the key as the ADR states it: upper case, runs of spaces collapsed before storing", async () => {
       const first = await create("SUPPORT", {
-        externalDocumentNo: "AUD-DUP-011930",
+        externalDocumentNo: "  AUD-DUP   011930 ",
       });
+      expect(first.externalDocumentNo).toBe("AUD-DUP 011930");
       const res = await send(
         "post",
         "SUPPORT",
         O,
-        body({ externalDocumentNo: "AUD-DUP- 011930" }),
+        body({ externalDocumentNo: "aud-dup 011930" }),
       );
       expect(res.status, res.text).toBe(409);
       expect(existingOrderOf(errorOf(res).details as never)).toBe(
         first.orderNo,
       );
-      const spaced = await create("SUPPORT", {
-        externalDocumentNo: "AUD-SP 7 7",
-      });
-      expect(spaced.externalDocumentNo).toBe("AUD-SP 7 7");
-      const again = await send(
-        "post",
-        "SUPPORT",
-        O,
-        body({ externalDocumentNo: "aud-sp77" }),
-      );
-      expect(again.status, again.text).toBe(409);
     });
 
     it("lets another customer use the same PO number", async () => {

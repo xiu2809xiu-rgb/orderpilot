@@ -4,7 +4,6 @@ import { Prisma } from "../../generated/prisma/client.js";
 import type { OrderCaptureState as RowCaptureState } from "../../generated/prisma/enums.js";
 import { Database } from "../../database/database.js";
 import { OrderConflictError } from "./domain/order-errors.js";
-import { poMatchKey } from "./domain/po-number.js";
 import { SalesOrder } from "./domain/sales-order.js";
 
 /**
@@ -177,11 +176,8 @@ export class SalesOrderRepository {
 
   /**
    * The number of the live order that holds this customer and PO number, or
-   * null. Case and spaces are ignored, inside the number too. It compares
-   * with `upper` and `regexp_replace` and not with `mode: "insensitive"`,
-   * which would compile to ILIKE, where `_` and `%` in a PO number are
-   * wildcards. The unique index only knows the upper-case form, so it still
-   * decides a race between two spellings that differ in case alone.
+   * null. It uses the index's own expression: `mode: "insensitive"` would
+   * compile to ILIKE, where `_` and `%` in a PO number are wildcards.
    */
   async findLiveByPo(
     customerNo: string,
@@ -189,11 +185,10 @@ export class SalesOrderRepository {
     exceptOrderNo?: string,
   ): Promise<string | null> {
     const except = exceptOrderNo ?? null;
-    const key = poMatchKey(po);
     const rows = await this.database.client.$queryRaw<{ orderNo: string }[]>`
       SELECT "orderNo" FROM "SalesOrder"
       WHERE "customerNo" = ${customerNo}
-        AND upper(regexp_replace("externalDocumentNo", '[[:space:]]', '', 'g')) = ${key}
+        AND upper("externalDocumentNo") = upper(${po})
         AND "captureState" <> 'VOID'
         AND (${except}::text IS NULL OR "orderNo" <> ${except}::text)
       LIMIT 1`;
