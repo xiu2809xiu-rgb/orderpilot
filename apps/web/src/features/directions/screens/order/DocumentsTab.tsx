@@ -27,11 +27,14 @@ export function DocumentsTab({
   orderNo,
   externalDocumentNo,
   toConfirm,
+  priceMask,
 }: {
   documents: readonly OrderDocumentRow[];
   orderNo: string;
   externalDocumentNo: string;
   toConfirm: boolean;
+  /** Why the role's prices are masked, in words, or null when it may see them. */
+  priceMask: string | null;
 }) {
   const { t } = useTranslation("directions-orders");
   const named = documents.some((row) => row.flow?.status === "to-confirm");
@@ -71,6 +74,7 @@ export function DocumentsTab({
             document={document}
             orderNo={orderNo}
             externalDocumentNo={externalDocumentNo}
+            priceMask={priceMask}
           />
         ))}
       </ul>
