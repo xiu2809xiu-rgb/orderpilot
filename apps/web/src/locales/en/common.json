@@ -23,9 +23,14 @@
     "collapsePanel": "Collapse the panel",
     "expandPanel": "Expand the panel",
     "upload": "Upload",
+    "uploadHint": "Upload a PO for Spark to read",
     "spark": "Spark",
+    "sparkHint": "Ask Spark about stock or sales",
+    "demoMark": "Synthetic demo data",
+    "extras": "Upload and theme",
     "help": {
       "label": "Help",
+      "wordsTitle": "What the words mean",
       "title": "Keyboard shortcuts",
       "palette": "Search or jump to a page",
       "search": "Search the list on the page",
@@ -66,6 +71,49 @@
     "LOGISTICS": "Logistics",
     "MANAGEMENT": "Management",
     "AUDITOR": "Auditor"
+  },
+  "glossary": {
+    "spr": {
+      "term": "SPR",
+      "long": "Stock purchase requisition",
+      "meaning": "A request to buy stock that a management approver decides."
+    },
+    "po": {
+      "term": "PO",
+      "long": "Purchase order",
+      "meaning": "The document a buyer sends to order goods."
+    },
+    "pi": {
+      "term": "PI",
+      "long": "Proforma invoice",
+      "meaning": "The invoice sent before payment, with the bank details, so the customer can pay."
+    },
+    "packingList": {
+      "term": "Packing list",
+      "meaning": "The list of what is in each carton of a shipment."
+    },
+    "awb": {
+      "term": "AWB",
+      "long": "Air waybill",
+      "meaning": "The shipping document for goods sent by air. Its number tracks the shipment."
+    },
+    "bl": {
+      "term": "BL",
+      "long": "Bill of lading",
+      "meaning": "The shipping document for goods sent by sea."
+    },
+    "heldAt": {
+      "term": "Held at",
+      "meaning": "The team that has the order now."
+    },
+    "shortOnStock": {
+      "term": "Short on stock",
+      "meaning": "There is less stock than the order needs, so stock has to be bought first."
+    },
+    "businessCentral": {
+      "term": "Business Central",
+      "meaning": "The ERP beside which OrderPilot works. In this demo it is a stand-in."
+    }
   },
   "theme": {
     "label": "Theme",
