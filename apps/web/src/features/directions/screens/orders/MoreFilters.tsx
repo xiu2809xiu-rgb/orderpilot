@@ -8,7 +8,6 @@ import { SlidersHorizontal } from "lucide-react";
 import { useId } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Popover,
@@ -16,7 +15,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
-import type { OrdersQuery } from "./ordersQuery";
+import { DateRangeField } from "./DateRangeField";
+import { rangeReversed, type OrdersQuery } from "./ordersQuery";
 import { RadioChoice } from "./RadioChoice";
 
 type Patch = (patch: Partial<OrdersQuery>) => void;
@@ -29,15 +29,10 @@ export function moreCount(query: OrdersQuery): number {
     query.open,
     query.entry,
     query.source,
-    query.from ?? query.to,
+    // A reversed range filters nothing, so it does not count as on.
+    (query.from ?? query.to) && !rangeReversed(query),
   ].filter(Boolean).length;
 }
-
-const DAY_MS = 86_400_000;
-const spanDays = (from: string | null, to: string | null): number | null =>
-  from && to
-    ? Math.round((Date.parse(to) - Date.parse(from)) / DAY_MS) + 1
-    : null;
 
 /** The filters kept behind "More filters": stock, documents, open orders, entry, source and the date range. */
 export function MoreFilters({
@@ -50,7 +45,6 @@ export function MoreFilters({
   const { t } = useTranslation("directions-orders");
   const id = useId();
   const count = moreCount(query);
-  const span = spanDays(query.from, query.to);
   const toggle = (key: "stock" | "toConfirm" | "open", label: string) => (
     <div className="flex min-h-9 items-center justify-between gap-4 pointer-coarse:min-h-11">
       {/* The label fills the row, so on a touch screen the whole row is the target. */}
@@ -85,7 +79,12 @@ export function MoreFilters({
           ) : null}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-80 space-y-4">
+      {/* Radix measures the room under the button: the panel scrolls inside itself rather than run off a short window. */}
+      <PopoverContent
+        align="start"
+        collisionPadding={12}
+        className="w-80 max-h-(--radix-popover-content-available-height) space-y-4 overflow-y-auto"
+      >
         <div>
           {toggle("stock", t("filters.stock"))}
           {toggle("toConfirm", t("filters.toConfirm"))}
@@ -115,54 +114,7 @@ export function MoreFilters({
             onChange({ source });
           }}
         />
-        <fieldset className="space-y-2">
-          <legend className="fs-14 font-medium">
-            {t("filters.orderDate")}
-          </legend>
-          <div className="grid grid-cols-2 gap-2 pointer-coarse:grid-cols-1">
-            <div className="space-y-1">
-              <Label
-                htmlFor={`${id}-from`}
-                className="fs-12 text-muted-foreground"
-              >
-                {t("filters.from")}
-              </Label>
-              <Input
-                id={`${id}-from`}
-                type="date"
-                className="pointer-coarse:h-11"
-                value={query.from ?? ""}
-                max={query.to ?? undefined}
-                onChange={(event) => {
-                  onChange({ from: event.target.value || null });
-                }}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label
-                htmlFor={`${id}-to`}
-                className="fs-12 text-muted-foreground"
-              >
-                {t("filters.to")}
-              </Label>
-              <Input
-                id={`${id}-to`}
-                type="date"
-                className="pointer-coarse:h-11"
-                value={query.to ?? ""}
-                min={query.from ?? undefined}
-                onChange={(event) => {
-                  onChange({ to: event.target.value || null });
-                }}
-              />
-            </div>
-          </div>
-          {span !== null ? (
-            <p className="od-span fs-14">
-              {t("filters.span", { count: span })}
-            </p>
-          ) : null}
-        </fieldset>
+        <DateRangeField from={query.from} to={query.to} onChange={onChange} />
       </PopoverContent>
     </Popover>
   );
