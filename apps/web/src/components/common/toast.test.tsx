@@ -1,5 +1,6 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter, Route, Routes } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { must } from "@/test/must";
 import { axeViolations } from "@/test/axe";
@@ -133,6 +134,40 @@ describe("toast", () => {
     await waitFor(() => {
       expect(assertive()).toHaveTextContent("Could not undo");
     });
+  });
+
+  it("offers a link beside Undo only where the caller passes an action", async () => {
+    render(
+      <MemoryRouter>
+        <Toaster />
+        <Routes>
+          <Route path="/" element={<p>Start</p>} />
+          <Route path="/orders/:no" element={<p>The order page</p>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    act(() => {
+      toast.done("Marked SO-0049 as packed");
+    });
+    expect(screen.queryByRole("link", { name: "Open order" })).toBeNull();
+
+    const undo = vi.fn();
+    act(() => {
+      toast.done("Marked SO-0050 as packed", {
+        undo,
+        action: { label: "Open order", to: "/orders/SO-0050" },
+      });
+    });
+    const link = screen.getByRole("link", { name: "Open order" });
+    expect(link).toHaveAttribute("href", "/orders/SO-0050");
+    expect(screen.getByRole("button", { name: "Undo" })).toBeInTheDocument();
+    expect(await axeViolations(document.body)).toEqual([]);
+
+    await userEvent.click(link);
+    expect(await screen.findByText("The order page")).toBeInTheDocument();
+    // Going to the order closes the message, and Undo was not pressed.
+    expect(screen.queryByText("Marked SO-0050 as packed")).toBeNull();
+    expect(undo).not.toHaveBeenCalled();
   });
 
   it("shows at most three at once", () => {

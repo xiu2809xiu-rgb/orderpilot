@@ -3,7 +3,6 @@ import { screen, waitFor, within } from "@testing-library/react";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import i18n from "@/i18n";
 import { cuesFor } from "@/features/nav";
-import { actionsFor } from "@/lib/actions";
 import { useSessionStore } from "@/stores/session";
 import { sessionFor } from "@/test/fixtures";
 import { ordersAddressOf } from "./homeLinks";
@@ -136,8 +135,9 @@ describe("the home page of each role", () => {
 
   describe.each(ROLES)("as %s", (role) => {
     const want = BY_ROLE[role];
-    // The administrator's menu already holds its places, so health stands where the others' shortcuts do.
-    const side = role === "SYSTEM_ADMIN" ? "System health" : "Shortcuts";
+    // The administrator has the health of its services beside its list; every
+    // other role's shortcuts repeated its side panel, so they are gone.
+    const side = role === "SYSTEM_ADMIN" ? "System health" : null;
 
     async function open() {
       serveHome({
@@ -150,7 +150,7 @@ describe("the home page of each role", () => {
       await screen.findByRole("heading", { level: 1 });
       // The role's own list has settled, so the page is no longer a skeleton.
       await screen.findByRole("heading", { level: 2, name: want.list });
-      await screen.findByRole("heading", { name: side });
+      if (side) await screen.findByRole("heading", { name: side });
       return view;
     }
 
@@ -162,7 +162,7 @@ describe("the home page of each role", () => {
         const expected = new Set([
           want.list,
           "Your numbers",
-          side,
+          ...(side ? [side] : []),
           ...(want.inbox ? ["My timeline"] : []),
           ...(want.measures ? ["Spectra's five measures"] : []),
           ...(want.flows ? ["Orders in each step"] : []),
@@ -227,47 +227,21 @@ describe("the home page of each role", () => {
       );
     });
 
-    it("offers the quick actions the role had, minus New order", async () => {
+    it("offers no shortcut, because the side panel holds every place they opened", async () => {
       await open();
-      const session = sessionFor(role);
-      // Orders is in the side panel and shows the tracker's orders too, so a
-      // role that reads it is not offered the tracker as a shortcut.
-      const quick = actionsFor(session).filter(
-        (action) =>
-          action.quick &&
-          action.id !== "orders.new" &&
-          !(
-            action.id === "tracker.open" &&
-            session.permissions.includes("orders.read")
-          ),
-      );
+      expect(
+        screen.queryByRole("region", { name: "Shortcuts" }),
+      ).not.toBeInTheDocument();
       if (role === "SYSTEM_ADMIN") {
-        // Its shortcuts only repeated the menu: health is there in their place.
-        expect(
-          screen.queryByRole("region", { name: "Shortcuts" }),
-        ).not.toBeInTheDocument();
         expect(
           screen.getByRole("region", { name: "System health" }),
-        ).toBeVisible();
-        return;
-      }
-      const shortcuts = screen.getByRole("region", { name: "Shortcuts" });
-      expect(within(shortcuts).getAllByRole("button")).toHaveLength(
-        quick.length,
-      );
-      for (const action of quick) {
-        const label = i18n.t(action.label, {
-          ns: action.namespace ?? "common",
-        });
-        expect(
-          within(shortcuts).getByRole("button", { name: label }),
         ).toBeVisible();
       }
     });
 
     it(
       want.newOrder
-        ? "has New order as the one primary button"
+        ? "has New order, as a lighter button than Upload a PO"
         : "has no New order button, because the role may not create orders",
       async () => {
         await open();
@@ -276,13 +250,7 @@ describe("the home page of each role", () => {
         );
         const link = screen.queryByRole("link", { name: "New order" });
         expect(link !== null).toBe(want.newOrder);
-        // New order is the header's button, so it is never also a shortcut.
-        const name = side;
-        expect(
-          within(screen.getByRole("region", { name })).queryByText(
-            /Start a new order/,
-          ),
-        ).toBeNull();
+        if (link) expect(link.className).not.toContain("bg-primary");
       },
     );
 

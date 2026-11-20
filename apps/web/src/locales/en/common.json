@@ -122,7 +122,18 @@
   "demo": {
     "switcher": "Demo role",
     "switcherHint": "Switch to another role to see its home page.",
-    "current": "Current role"
+    "current": "Current role",
+    "jobs": {
+      "SUPPORT": "Takes in the customer's order and sends the proforma invoice",
+      "PRODUCT_MANAGER": "Checks stock and asks to buy what is short",
+      "APPROVER": "Approves or rejects the request to buy",
+      "FINANCE": "Confirms the customer's payment",
+      "WAREHOUSE": "Packs the goods and checks them against the papers",
+      "LOGISTICS": "Books the forwarder and follows the shipping papers",
+      "MANAGEMENT": "Reads the tracker and the KPIs",
+      "AUDITOR": "Reads the audit trail",
+      "SYSTEM_ADMIN": "Sets up users and roles"
+    }
   },
   "validation": {
     "required": "This field is required.",

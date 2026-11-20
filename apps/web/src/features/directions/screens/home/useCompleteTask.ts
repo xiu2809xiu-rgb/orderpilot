@@ -67,6 +67,7 @@ export function useCompleteTask({
   onUndone: (task: WorkflowTask) => void;
 }) {
   const { t } = useTranslation("home");
+  const { t: tNext, i18n } = useTranslation("directions-home");
   const queryClient = useQueryClient();
   // The button only disables on the next render, so a double click would get
   // here twice. A ref is set at once.
@@ -76,7 +77,20 @@ export function useCompleteTask({
     onSuccess: async (undo, task) => {
       onDone(task, new Date());
       await queryClient.invalidateQueries();
+      // Who has the order next, from the sales flow's nine steps. A kind that
+      // cannot be placed keeps the plain message: a guess here would be a claim.
+      const nextKey = `needs.next.${task.kind}`;
+      const next = i18n.exists(nextKey, { ns: "directions-home" })
+        ? tNext(nextKey)
+        : undefined;
       toast.done(t(`needs.done.${task.kind}`, { orderNo: task.orderNo }), {
+        description: next,
+        action: task.orderNo
+          ? {
+              label: tNext("needs.openOrder"),
+              to: `/orders/${task.orderNo}`,
+            }
+          : undefined,
         undo: async () => {
           await undo();
           onUndone(task);
