@@ -35,6 +35,7 @@ import { useSessionStore } from "@/stores/session";
 import { optionsFixture, sessionFor } from "@/test/fixtures";
 import { loadShellOverlays } from "./overlays/preload";
 import { RoleSwitcher } from "./RoleSwitcher";
+import { onStay } from "./roleSwitch";
 
 beforeAll(async () => {
   await loadNamespaces();
@@ -186,6 +187,32 @@ describe("changing role keeps the order on screen", () => {
     await waitFor(() => {
       expect(screen.queryByRole("button", { name: "Mark sent" })).toBeNull();
     });
+  });
+
+  it("says it stayed on the order, so the order becomes a tab for the new person, and says nothing when it leaves the page", async () => {
+    const user = userEvent.setup();
+    const stays: string[] = [];
+    const stop = onStay((path) => stays.push(path));
+    const view = open("/orders/SO-0001", "SUPPORT");
+    await screen.findByRole("button", { name: "Mark sent" });
+    await switchTo(user, /Finance/);
+    await waitFor(() => {
+      expect(stays).toEqual(["/orders/SO-0001"]);
+    });
+    stop();
+    view.unmount();
+
+    // From a page that is not an order the change leaves it: nothing is kept.
+    vi.unstubAllGlobals();
+    const left: string[] = [];
+    const stopLeft = onStay((path) => left.push(path));
+    open("/tracker", "SUPPORT");
+    await switchTo(user, /Finance/);
+    await waitFor(() => {
+      expect(screen.getByTestId("where")).toHaveTextContent(/^\/$/);
+    });
+    expect(left).toEqual([]);
+    stopLeft();
   });
 
   it("goes Home from the order list, the entry form and any other page", async () => {
