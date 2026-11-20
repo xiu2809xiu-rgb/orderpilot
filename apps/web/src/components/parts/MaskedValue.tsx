@@ -74,6 +74,17 @@ export function MaskedValue({
           onClick={() => {
             setPinned((was) => !was);
           }}
+          onBlur={(event) => {
+            // A reason pinned with Enter must not outlive the mark it explains
+            // once the keyboard has moved on. Only a move to another element
+            // counts: a tap inside the reason, or focus going nowhere, keeps it,
+            // and a press elsewhere is already handled above.
+            const to = event.relatedTarget;
+            if (!(to instanceof Element)) return;
+            if (event.currentTarget.contains(to)) return;
+            if (to.closest("[data-slot=tooltip-content]")) return;
+            setPinned(false);
+          }}
           aria-describedby={reasonId}
           className={cn(
             "numeral inline-flex min-h-6 cursor-help items-center gap-1 text-muted-foreground",

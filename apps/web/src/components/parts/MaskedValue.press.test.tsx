@@ -58,6 +58,32 @@ describe("MaskedValue pressed", () => {
     expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
   });
 
+  it("puts a reason pinned with Enter away when the keyboard moves on", async () => {
+    const user = userEvent.setup();
+    render(
+      <div>
+        <MaskedValue masked reason="Prices are hidden from Warehouse" />
+        <button type="button">Next control</button>
+      </div>,
+    );
+    await user.tab();
+    await user.keyboard("{Enter}");
+    expect(await screen.findByRole("tooltip")).toHaveTextContent(REASON);
+    await user.tab();
+    expect(screen.getByRole("button", { name: "Next control" })).toHaveFocus();
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+  });
+
+  it("keeps a pinned reason when focus moves into the reason itself", async () => {
+    render(<MaskedValue masked reason="Prices are hidden from Warehouse" />);
+    fireEvent.click(mask());
+    await screen.findByRole("tooltip");
+    const content = document.querySelector("[data-slot=tooltip-content]");
+    expect(content).not.toBeNull();
+    fireEvent.blur(mask(), { relatedTarget: content });
+    expect(screen.getByRole("tooltip")).toBeInTheDocument();
+  });
+
   it("still shows the reason on keyboard focus", async () => {
     const user = userEvent.setup();
     render(<MaskedValue masked reason="Prices are hidden from Warehouse" />);
