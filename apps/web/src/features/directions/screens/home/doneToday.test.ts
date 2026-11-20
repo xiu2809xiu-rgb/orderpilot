@@ -87,9 +87,13 @@ describe("Done today, kept in the browser per person", () => {
   it("takes the newest note of a task out again on Undo, and no other", () => {
     recordDone(ANNA, sent("SO-0001"), NOON);
     recordDone(ANNA, sent("SO-0002"), NOON);
-    const items = forgetDone(ANNA, sent("SO-0002"));
+    // The same fixed moment for every read: with the real clock this test
+    // would see yesterday's notes dropped from the day after it was written.
+    const items = forgetDone(ANNA, sent("SO-0002"), NOON);
     expect(items.map((item) => item.orderNo)).toEqual(["SO-0001"]);
-    expect(readDone(ANNA).map((item) => item.orderNo)).toEqual(["SO-0001"]);
+    expect(readDone(ANNA, NOON).map((item) => item.orderNo)).toEqual([
+      "SO-0001",
+    ]);
   });
 
   it("starts empty when the stored copy is broken or the kind is unknown", () => {

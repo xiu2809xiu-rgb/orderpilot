@@ -100,8 +100,9 @@ export function recordDone(
 export function forgetDone(
   viewerId: string | null,
   task: WorkflowTask,
+  now = new Date(),
 ): DoneItem[] {
-  const before = readDone(viewerId);
+  const before = readDone(viewerId, now);
   if (!viewerId) return before;
   const at = before.findIndex(
     (item) => item.kind === task.kind && item.orderNo === task.orderNo,
