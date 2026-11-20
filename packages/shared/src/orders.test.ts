@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import {
   DUPLICATE_ORDER_PATH,
+  ORDER_PO_MAX_LENGTH,
   availableStockResponseSchema,
   createSalesOrderSchema,
   existingOrderOf,
@@ -129,6 +130,15 @@ describe("the order write contract", () => {
     expect(withLine({ quantity: "1.2345" })).toBe(false);
     expect(withLine({ quantity: "1", unitPrice: "1.005" })).toBe(false);
     expect(withLine({ quantity: "0.5", unitPrice: "0" })).toBe(true);
+  });
+  it("holds a PO number to one shared limit: the limit passes and one more is refused", () => {
+    const withPo = (externalDocumentNo: string) =>
+      createSalesOrderSchema.safeParse({ ...createBody, externalDocumentNo });
+    expect(ORDER_PO_MAX_LENGTH).toBe(35);
+    expect(withPo("P".repeat(ORDER_PO_MAX_LENGTH)).success).toBe(true);
+    expect(withPo("P".repeat(ORDER_PO_MAX_LENGTH + 1)).success).toBe(false);
+    // The limit is on the trimmed text, which is what is stored.
+    expect(withPo(`  ${"P".repeat(ORDER_PO_MAX_LENGTH)}  `).success).toBe(true);
   });
   it("refuses an order with no lines and a bad date", () => {
     expect(
