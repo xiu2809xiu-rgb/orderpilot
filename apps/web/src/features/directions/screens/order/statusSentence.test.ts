@@ -49,10 +49,15 @@ const input = (over: Partial<StatusInput>): StatusInput => ({
 });
 
 describe("statusSentence", () => {
-  it("says who has the order, why, and what comes next", () => {
-    expect(statusSentence(t, team, input({ detail: SHORT }))).toBe(
-      "With Product manager: 707 short on Samsung SSD 1 TB NVMe. Next: Management approver decides the request to buy.",
+  // ADR 0049, decision 2: "A short order therefore raises no SPR." It is held
+  // and the customer is asked to revise the PO, so the sentence says who has the
+  // order and why, and names no next step, least of all an approval.
+  it("says who has a short order and why, and names no next step (ADR 0049)", () => {
+    const sentence = statusSentence(t, team, input({ detail: SHORT }));
+    expect(sentence).toBe(
+      "With Product manager: 707 short on Samsung SSD 1 TB NVMe.",
     );
+    expect(sentence).not.toMatch(/Next|approv|request to buy/i);
   });
 
   it("names the item by its number when the lines do not carry it", () => {
@@ -79,11 +84,21 @@ describe("statusSentence", () => {
     );
   });
 
-  it("does not send a request to an approver who already holds the order", () => {
+  it("names no next step for a short order whoever holds it, so a short order is never sent on to the proforma invoice (ADR 0049)", () => {
     expect(
       statusSentence(t, team, input({ detail: SHORT, heldBy: "APPROVER" })),
+    ).toBe("With Management approver: 707 short on Samsung SSD 1 TB NVMe.");
+  });
+
+  it("keeps the next step of every other stage, even when the data names a shortage", () => {
+    expect(
+      statusSentence(
+        t,
+        team,
+        input({ journey: journeyAt(3), heldBy: "SUPPORT", detail: SHORT }),
+      ),
     ).toBe(
-      "With Management approver: 707 short on Samsung SSD 1 TB NVMe. Next: Support sends the proforma invoice.",
+      "With Support: 707 short on Samsung SSD 1 TB NVMe. Next: Finance confirms the payment.",
     );
   });
 

@@ -383,7 +383,7 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 
 | Story | Title                                                 | Branch                           | State                                                                               |
 | ----- | ----------------------------------------------------- | -------------------------------- | ----------------------------------------------------------------------------------- |
-| #289  | The Spark panel: input at the foot, scripted answers  | `fix/platform-spark-panel`       | This pull request. Keyboard use works, and the draft quotes the stock now available |
+| #289  | The Spark panel: input at the foot, scripted answers  | `fix/platform-spark-panel`       | This pull request. Keyboard use works, and the draft says what can ship now         |
 | #287  | Search or jump to finds records                       | `fix/platform-search-records`    | This pull request. Orders, customers, vendors and items, by number and name         |
 | #288  | Home leads with what needs the team                   | `feat/platform-home-next-act`    | This pull request. Needs you first, labelled amounts and honest one-click words     |
 | #286  | The entrance: six teams first, in flow order          | `feat/platform-entrance-flow`    | This pull request. A role change stays on the order's page                          |
@@ -393,6 +393,8 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 | #302  | The Orders list: fit, held reason, last page          | `fix/area1-orders-list-fit`      | This pull request. Fits 1366 by 768 and says why an order is held                   |
 | #301  | The order page says who has it, why and what is next  | `feat/area1-order-page-status`   | This pull request. The sentence, the latest act, the documents and the address      |
 | #314  | The order form: what the review found                 | `fix/area1-order-form-review`    | This pull request. Corrects #306 after a review against the ADRs                    |
+| #312  | The order page review fixes                           | `fix/area1-order-page-review`    | This pull request. Corrections to #298, #301 and #309 found by a review             |
+| #311  | Words and claims corrected after review               | `fix/platform-words-and-claims`  | This pull request. Home, sign-in and Spark say no more than the workflow does       |
 | #191  | Cut CI minutes before the repository goes private     | `ci/minutes-job-conditions`      | Merged, [#192](https://github.com/xiu2809xiu-rgb/orderpilot/pull/192)               |
 | P-42  | Plan prompt 004                                       | `chore/plan-prompt-004`          | Merged, [#138](https://github.com/xiu2809xiu-rgb/orderpilot/pull/138)               |
 | P-13  | Docker images and the IaC scan                        | `ci/docker`                      | Merged, [#172](https://github.com/xiu2809xiu-rgb/orderpilot/pull/172)               |

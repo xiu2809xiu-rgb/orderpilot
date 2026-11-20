@@ -162,6 +162,10 @@
     "sinceToday": "Since today",
     "since_one": "Since {{when}}, {{count}} day",
     "since_other": "Since {{when}}, {{count}} days",
+    "waitingToday": "Here today",
+    "waiting_one": "Waiting {{count}} day",
+    "waiting_other": "Waiting {{count}} days",
+    "waitingUsual": "{{waiting}}, usually {{usual}}",
     "sinceUsual": "{{since}}. Usually {{usual}}.",
     "sinceLate": "{{since}}. Past the usual {{usual}}.",
     "by": "By {{when}}",
@@ -197,6 +201,7 @@
     "status": {
       "open": "With {{team}}. Next: {{next}}.",
       "openWhy": "With {{team}}: {{why}}. Next: {{next}}.",
+      "held": "With {{team}}: {{why}}.",
       "last": "With {{team}}. This is the last step.",
       "lastWhy": "With {{team}}: {{why}}. This is the last step.",
       "done": "Every step is done. Nothing is waiting on this order.",
@@ -210,7 +215,6 @@
         "shortMore_other": "{{quantity}} short on {{item}} and {{count}} more items"
       },
       "next": {
-        "approval": "{{team}} decides the request to buy",
         "stock": "{{team}} checks the stock",
         "pi": "{{team}} sends the proforma invoice",
         "payment": "{{team}} confirms the payment",
@@ -225,6 +229,7 @@
       "stepDone": "Latest: {{name}} marked {{step}} as done, {{when}}",
       "payment": "Latest: {{name}} confirmed a payment, {{when}}",
       "other": "Latest: {{summary}}, by {{name}}, {{when}}",
+      "otherNamed": "Latest: {{summary}}, {{when}}",
       "when": "{{day}} at {{time}}",
       "steps": "All steps"
     },

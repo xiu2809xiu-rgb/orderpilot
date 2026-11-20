@@ -43,6 +43,13 @@ export function OrderTabs({
     withFlow(documentsOf(timeline.checks, { orderNo }), flow?.documents ?? []),
     flow,
   );
+  // The demo PDFs print prices, so a role whose prices the server masks on this
+  // page is not offered them. Until the order has answered nothing is offered.
+  const amount = detail?.amount;
+  const priceMask =
+    amount && !amount.masked && amount.value !== null
+      ? null
+      : t(`mask.${amount?.reason ?? "price"}`);
   const asked = params.get("tab");
   const tab: Tab = isTab(asked) ? asked : "lines";
   const failed = timeline.checks.filter((check) => check.outcome !== "pass");
@@ -87,6 +94,7 @@ export function OrderTabs({
           orderNo={orderNo}
           externalDocumentNo={timeline.externalDocumentNo}
           toConfirm={toConfirm}
+          priceMask={priceMask}
         />
       </TabsContent>
       <TabsContent value="checks">

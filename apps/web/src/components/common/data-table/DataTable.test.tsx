@@ -265,6 +265,52 @@ describe("DataTable does not do the server's work", () => {
   });
 });
 
+// A list that filters in the browser (the exceptions page does) hands the table
+// the rows it kept, and the total the server gave, which is not the count of
+// those rows. The page correction of an address past the end is for an empty
+// page only: it must never move a person off a page that has rows.
+describe("the page correction on a list that filters in the browser", () => {
+  const kept = ALL.slice(0, 7);
+
+  function renderAt(page: number, total: number, rows: readonly Row[]) {
+    const onQueryChange = vi.fn();
+    render(
+      <DataTable
+        tableId="filtered"
+        caption="Filtered"
+        columns={columns}
+        rows={rows}
+        total={total}
+        query={{ ...DEFAULT_QUERY, page }}
+        onQueryChange={onQueryChange}
+        rowKey={(r) => r.id}
+      />,
+    );
+    return onQueryChange;
+  }
+
+  it("leaves a page with rows alone when the server's total is smaller than the rows on screen", () => {
+    const onQueryChange = renderAt(2, 5, kept);
+    expect(onQueryChange).not.toHaveBeenCalled();
+    expect(names()).toHaveLength(7);
+    expect(screen.queryByRole("table", { busy: true })).toBeNull();
+  });
+
+  it("leaves a page with rows alone when the server's total is larger than the rows on screen", () => {
+    const onQueryChange = renderAt(3, 100, kept);
+    expect(onQueryChange).not.toHaveBeenCalled();
+    expect(names()).toHaveLength(7);
+  });
+
+  it("still opens the last page when the page past the end has no rows at all", () => {
+    const onQueryChange = renderAt(99, 100, []);
+    expect(onQueryChange).toHaveBeenCalledTimes(1);
+    expect(onQueryChange).toHaveBeenCalledWith(
+      expect.objectContaining({ page: 10 }),
+    );
+  });
+});
+
 function headings() {
   return screen.getAllByRole("columnheader").map((cell) => cell.textContent);
 }

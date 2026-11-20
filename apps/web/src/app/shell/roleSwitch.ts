@@ -19,6 +19,27 @@ export function landingAfterSwitch(pathname: string, session: Session): string {
   return staysOnOrder ? pathname : "/";
 }
 
+type StayListener = (pathname: string) => void;
+const stayListeners = new Set<StayListener>();
+
+/**
+ * Says that a change of role has deliberately kept the page at `pathname`. The
+ * strip of open records listens: a page the viewer did not leave is theirs to
+ * keep as a tab (ADR 0032, decision 2, note of 20 Nov 2026), unlike a page that
+ * was only on screen for a moment while the person was being replaced.
+ */
+export function announceStay(pathname: string): void {
+  for (const listener of [...stayListeners]) listener(pathname);
+}
+
+/** Listens for `announceStay`. Returns the function that stops listening. */
+export function onStay(listener: StayListener): () => void {
+  stayListeners.add(listener);
+  return () => {
+    stayListeners.delete(listener);
+  };
+}
+
 /**
  * After a sign-in as another role, nothing the old role was shown may stay on
  * screen. Emptying the cache alone does not do that: a list that is on screen
