@@ -3,8 +3,9 @@ import type { StockFacts } from "../sparkFacts";
 import { grouped } from "../sparkFacts";
 
 /**
- * The stock figures behind the answer: one row per item, in the order a buyer
- * reads them (what we hold, what is promised, what is left, what is coming).
+ * The stock figures behind the answer: one row per item, in the order Spark
+ * says them everywhere (on hand, on sales orders, on purchase orders, then
+ * Available last, because it is made from the three before it).
  * The part number sits under the item's name: a 420 px panel has no room for
  * six columns, and the number belongs to the item.
  * Numbers are right-aligned tabular figures. It scrolls sideways inside its
@@ -27,7 +28,7 @@ export function StockTable({ facts }: { facts: StockFacts }) {
             >
               {t("stock.columns.itemPart")}
             </th>
-            {(["onHand", "sales", "available", "po"] as const).map((key) => (
+            {(["onHand", "sales", "po", "available"] as const).map((key) => (
               <th
                 key={key}
                 scope="col"
@@ -59,11 +60,11 @@ export function StockTable({ facts }: { facts: StockFacts }) {
               <td className="numeral px-2 py-2 text-right">
                 {grouped(item.onSalesOrders)}
               </td>
-              <td className="numeral px-2 py-2 text-right font-semibold text-foreground">
-                {grouped(item.available)}
-              </td>
-              <td className="numeral px-2 py-2 pr-3 text-right">
+              <td className="numeral px-2 py-2 text-right">
                 {grouped(item.onPurchaseOrders)}
+              </td>
+              <td className="numeral px-2 py-2 pr-3 text-right font-semibold text-foreground">
+                {grouped(item.available)}
               </td>
             </tr>
           ))}

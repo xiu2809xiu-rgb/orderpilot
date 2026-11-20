@@ -151,11 +151,16 @@ test.describe("The Orders workspace", () => {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
       SAMPLE_LINK,
     );
+    // A sample says so on its badge by the title, and what that means opens from the badge.
+    const badge = page.getByRole("button", { name: /^Sample\./ });
+    await expect(badge).toBeVisible();
+    await badge.click();
     await expect(
       page.getByText(
-        "A sample order from Spectra. Samples are not edited here.",
+        "A sample order of the synthetic demo set. Samples are read only here.",
       ),
     ).toBeVisible();
+    await page.keyboard.press("Escape");
     await page.getByRole("tab", { name: /^Checks/ }).click();
     await expect(page).toHaveURL(/[?&]tab=checks/);
     await page.reload();

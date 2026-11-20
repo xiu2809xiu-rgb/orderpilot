@@ -19,9 +19,13 @@ export function filterOrders(
   return entries.filter(({ facts, shortages }) => {
     if (
       search &&
-      ![facts.orderNo, facts.customerNo, facts.externalDocumentNo].some(
-        (text) => contains(text, search),
-      )
+      ![
+        facts.orderNo,
+        facts.customerNo,
+        // Not every order carries the name: one without it matches by its numbers.
+        facts.customerName ?? "",
+        facts.externalDocumentNo,
+      ].some((text) => contains(text, search))
     )
       return false;
     if (query.customerNo && facts.customerNo !== query.customerNo) return false;

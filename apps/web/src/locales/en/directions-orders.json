@@ -166,6 +166,7 @@
     "sinceLate": "{{since}}. Past the usual {{usual}}.",
     "by": "By {{when}}",
     "usually": "Usually {{usual}}",
+    "noUsual": "No usual time",
     "usual": {
       "sameDay": "the same day",
       "hours": "{{count}} h",
@@ -192,6 +193,48 @@
     "intro": "{{customer}}, {{number}}",
     "notFoundTitle": "That order was not found",
     "notFoundBody": "There is no order {{order}} for your role. Go back to the list and pick one.",
+    "notFoundBack": "Back to Orders",
+    "status": {
+      "open": "With {{team}}. Next: {{next}}.",
+      "openWhy": "With {{team}}: {{why}}. Next: {{next}}.",
+      "last": "With {{team}}. This is the last step.",
+      "lastWhy": "With {{team}}: {{why}}. This is the last step.",
+      "done": "Every step is done. Nothing is waiting on this order.",
+      "draft": "A draft that has not been submitted, so no team has it yet.",
+      "void": "Voided. Nothing more happens to this order.",
+      "stage": "{{stage}}.",
+      "stageWhy": "{{stage}}: {{why}}.",
+      "why": {
+        "short": "{{quantity}} short on {{item}}",
+        "shortMore_one": "{{quantity}} short on {{item}} and {{count}} more item",
+        "shortMore_other": "{{quantity}} short on {{item}} and {{count}} more items"
+      },
+      "next": {
+        "approval": "{{team}} decides the request to buy",
+        "stock": "{{team}} checks the stock",
+        "pi": "{{team}} sends the proforma invoice",
+        "payment": "{{team}} confirms the payment",
+        "pack": "{{team}} packs the goods",
+        "documents": "{{team}} makes the invoice and packing list",
+        "forwarder": "{{team}} hands the goods to the forwarder",
+        "customerTold": "{{team}} tells the customer",
+        "awbAndPermit": "{{team}} follows up the AWB/BL and the import permit"
+      }
+    },
+    "latest": {
+      "stepDone": "Latest: {{name}} marked {{step}} as done, {{when}}",
+      "payment": "Latest: {{name}} confirmed a payment, {{when}}",
+      "other": "Latest: {{summary}}, by {{name}}, {{when}}",
+      "when": "{{day}} at {{time}}",
+      "steps": "All steps"
+    },
+    "ship": {
+      "plain": "Expected to ship {{day}}",
+      "after_one": "Expected to ship {{day}}: {{count}} day after the order's ship date",
+      "after_other": "Expected to ship {{day}}: {{count}} days after the order's ship date",
+      "inTime": "Expected to ship {{day}}: in time for the order's ship date",
+      "basis": "From how long each step took on similar orders."
+    },
     "journey": {
       "title": "Journey",
       "region": "Journey of the order, nine steps"
@@ -200,8 +243,7 @@
       "title": "Order details"
     },
     "entry": {
-      "label": "Entry",
-      "sample": "A sample order from Spectra. Samples are not edited here.",
+      "sample": "A sample order of the synthetic demo set. Samples are read only here.",
       "draft": "Entered here as a draft. Only a role that may edit orders can change it.",
       "submitted": "Entered here and submitted. Only a draft can be changed.",
       "void": "Entered here and voided. It cannot be changed."
@@ -209,15 +251,8 @@
     "trackerRefused": "The journey comes from the order tracker, which your role cannot read.",
     "facts": {
       "stage": "Stage",
-      "pastDue": "Past due",
       "prepayment": "{{percent}}% prepayment",
       "hidden": "Hidden: {{reason}}"
-    },
-    "now": {
-      "label": "Now",
-      "heldAt": "Held at {{team}}.",
-      "usual": "The step usually takes {{usual}}.",
-      "pastUsual": "It has run past the usual {{usual}}."
     },
     "tabs": {
       "label": "Order details",
@@ -270,18 +305,32 @@
       "OTHER": "Other document"
     },
     "state": {
-      "differs": "Differs",
-      "matches": "Matches",
+      "differs": "Differs from the PO",
+      "matches": "Matches the PO",
       "unchecked": "Not checked yet"
+    },
+    "poState": {
+      "differs": "A check found a difference",
+      "matches": "Passes every check"
+    },
+    "pending": {
+      "notMade": "Not yet made",
+      "noCopy": "Marked done, but no copy is on record",
+      "shipping": "Air waybill or bill of lading"
+    },
+    "file": {
+      "open": "Open file",
+      "openLabel": "Open the file of {{document}}, in a new tab",
+      "none": "No file in the demo set"
     },
     "noChecks": "No check has read this document yet.",
     "review": "Open the order's steps",
     "received": "Received {{date}}",
-    "due": "Due {{date}}",
     "flow": {
       "confirmed": "Confirmed",
       "to-confirm": "To confirm",
-      "expected": "Expected"
+      "expected": "Expected",
+      "expectedBy": "Expected by {{date}}"
     },
     "checked": "Checks: {{passed}} passed, {{failed}} found a difference.",
     "confirmTitle": "A document of this order waits for you to confirm it",
