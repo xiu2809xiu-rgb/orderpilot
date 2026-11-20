@@ -1,4 +1,5 @@
 import { TriangleAlert } from "lucide-react";
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { Badge } from "@/components/kit/Badge";
@@ -11,31 +12,43 @@ import type { OrderRow } from "./orderRow";
  * sample carries no tag: nearly every order is one, and the Source column and
  * filter say so for anyone who needs it. The number is never cut: a long one
  * (an order entered here is numbered by its date) keeps the first line, and
- * its chips move under it.
+ * its chips move under it. In a narrow window `facts` holds the columns that
+ * had no room, under the number.
  */
-export function OrderCell({ row, href }: { row: OrderRow; href: string }) {
+export function OrderCell({
+  row,
+  href,
+  facts = null,
+}: {
+  row: OrderRow;
+  href: string;
+  facts?: ReactNode;
+}) {
   const { t } = useTranslation("directions-orders");
   return (
-    <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
-      <Link
-        to={href}
-        className="numeral text-foreground underline-offset-4 hover:underline pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-      >
-        {row.orderNo}
-      </Link>
-      {row.openExceptions > 0 ? (
-        <Badge
-          variant="destructive"
-          size="sm"
-          aria-label={t("cells.exceptions", { count: row.openExceptions })}
+    <span className="od-order-cell">
+      <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <Link
+          to={href}
+          className="numeral text-foreground underline-offset-4 hover:underline pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         >
-          <TriangleAlert aria-hidden="true" />
-          {row.openExceptions}
-        </Badge>
-      ) : null}
-      {row.source === "stored" && row.captureState ? (
-        <EntryChip state={row.captureState} />
-      ) : null}
+          {row.orderNo}
+        </Link>
+        {row.openExceptions > 0 ? (
+          <Badge
+            variant="destructive"
+            size="sm"
+            aria-label={t("cells.exceptions", { count: row.openExceptions })}
+          >
+            <TriangleAlert aria-hidden="true" />
+            {row.openExceptions}
+          </Badge>
+        ) : null}
+        {row.source === "stored" && row.captureState ? (
+          <EntryChip state={row.captureState} />
+        ) : null}
+      </span>
+      {facts}
     </span>
   );
 }

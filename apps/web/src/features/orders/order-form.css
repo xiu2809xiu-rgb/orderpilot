@@ -1,0 +1,49 @@
+/* The order form's sticky bar. The page's gutter (1.5rem, 1rem on a phone) is
+   padding of the scrolling region, and a sticky offset is measured inside that
+   padding, so the bar floated 2rem under the top bar and the fields scrolled
+   through the gap. Here the bar is held flush under the top bar instead, and
+   a field brought into view by the keyboard stops below it, not behind it.
+   The glass is drawn by a pseudo-element, so that its top corners can square
+   off while the bar is stuck to the top bar and stay round at rest. A browser
+   without scroll-state queries keeps the round corners: only a corner shows. */
+.df-form:has([data-lines-rich]) > .df-bar {
+  top: -1.5rem;
+  container-type: scroll-state;
+  border: 0;
+  padding: calc(0.5rem + 1px) calc(0.75rem + 1px);
+  background: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  isolation: isolate;
+}
+
+.df-form:has([data-lines-rich]) > .df-bar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border: var(--dx-card-border);
+  border-radius: var(--radius-card);
+  background-color: var(--dx-card-work-bg);
+  box-shadow: var(--dx-card-shadow);
+  backdrop-filter: var(--dx-card-filter);
+}
+
+@container scroll-state(stuck: top) {
+  .df-form:has([data-lines-rich]) > .df-bar::before {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+}
+
+@media (max-width: 39.99rem) {
+  .df-form:has([data-lines-rich]) > .df-bar {
+    top: -1rem;
+  }
+}
+
+/* Scoped to a form that holds a priced lines grid, which is the order form. */
+.df-form:has([data-lines-rich])
+  :is(input, select, textarea, button, [role="row"], [role="combobox"]) {
+  scroll-margin-top: 4.5rem;
+}

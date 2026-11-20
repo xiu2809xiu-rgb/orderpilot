@@ -105,7 +105,8 @@ export function OrdersWorkspace({
       ) : (
         <>
           <OrdersTable
-            columns={w.table.shown}
+            columns={w.fitted}
+            fit={w.fit}
             rows={w.pageRows}
             status={status}
             error={data.error}
@@ -127,7 +128,7 @@ export function OrdersWorkspace({
           <div className="od-foot">
             <DemoBadge kind="synthetic" />
             <Pagination
-              page={query.page}
+              page={w.page}
               pageSize={query.pageSize}
               total={status === "ready" ? w.filtered.length : 0}
               pageSizes={PAGE_SIZES}

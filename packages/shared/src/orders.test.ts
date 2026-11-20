@@ -10,6 +10,8 @@ import {
   salesOrderDetailSchema,
   salesOrderListSchema,
   salesOrderQuerySchema,
+  SHIPMENT_BEFORE_ORDER_MESSAGE,
+  shipmentIsBeforeOrder,
 } from "./index.js";
 
 const amount = {
@@ -136,6 +138,50 @@ describe("the order write contract", () => {
       createSalesOrderSchema.safeParse({ ...createBody, orderDate: "9/11" })
         .success,
     ).toBe(false);
+  });
+  it("refuses a shipment date before the order date, naming the field", () => {
+    const result = createSalesOrderSchema.safeParse({
+      ...createBody,
+      orderDate: "2026-11-20",
+      shipmentDate: "2020-01-01",
+    });
+    expect(result.success).toBe(false);
+    const issue = result.error?.issues[0];
+    expect(issue?.path).toEqual(["shipmentDate"]);
+    expect(issue?.message).toBe(SHIPMENT_BEFORE_ORDER_MESSAGE);
+  });
+  it("accepts a shipment date on the order date, after it, or none", () => {
+    for (const shipmentDate of ["2026-11-20", "2026-12-01", null]) {
+      expect(
+        createSalesOrderSchema.safeParse({
+          ...createBody,
+          orderDate: "2026-11-20",
+          shipmentDate,
+        }).success,
+        String(shipmentDate),
+      ).toBe(true);
+    }
+  });
+  it("checks a patch that sends both dates, and leaves one date to the order", () => {
+    expect(
+      patchSalesOrderSchema.safeParse({
+        version: 1,
+        orderDate: "2026-11-20",
+        shipmentDate: "2026-11-01",
+      }).success,
+    ).toBe(false);
+    expect(
+      patchSalesOrderSchema.safeParse({
+        version: 1,
+        shipmentDate: "2026-11-01",
+      }).success,
+    ).toBe(true);
+  });
+  it("answers the date question the same way for the form", () => {
+    expect(shipmentIsBeforeOrder("2026-11-20", "2026-11-19")).toBe(true);
+    expect(shipmentIsBeforeOrder("2026-11-20", "2026-11-20")).toBe(false);
+    expect(shipmentIsBeforeOrder("2026-11-20", "")).toBe(false);
+    expect(shipmentIsBeforeOrder("", "2026-11-20")).toBe(false);
   });
   it("keeps exactly the keys a patch sends", () => {
     const parsed = patchSalesOrderSchema.parse({

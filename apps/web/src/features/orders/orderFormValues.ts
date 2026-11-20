@@ -26,6 +26,29 @@ function twoDecimals(value: string): string {
   return value.replace(/(\.\d{2})0+$/, "$1");
 }
 
+/** A line nobody touched: no item, no quantity, no price and no words. */
+function isBlankLine(line: LineValue): boolean {
+  return (
+    line.item === null &&
+    line.quantity.trim() === "" &&
+    line.unitPrice.trim() === "" &&
+    line.description.trim() === ""
+  );
+}
+
+/**
+ * The values with the blank lines at the end left out, so that the empty line
+ * Enter adds in the last cell never blocks Save or shows an error. A line that
+ * was touched and left incomplete stays and shows its errors, and so does the
+ * only line of a form nobody has typed in, which is where the errors point.
+ */
+export function withoutBlankTail(values: OrderFormInput): OrderFormInput {
+  const lines = values.lines;
+  const last = lines.findLastIndex((line) => !isBlankLine(line));
+  if (last < 0 || last === lines.length - 1) return values;
+  return { ...values, lines: lines.slice(0, last + 1) };
+}
+
 /** An order with nothing in it yet. The date is today, in Singapore. */
 export function blankOrder(today: string): OrderFormInput {
   return {

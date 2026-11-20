@@ -37,7 +37,7 @@
     "short": "Short: an open order needs more of this item than is Available, and the SPR for the rest is not approved yet. Available can still be above zero.",
     "low": "Low: Available is under {{count}}, and no open order is short."
   },
-  "emptyDescription": "Records appear here once they are read from Business Central. Open Connectors to check the link.",
+  "emptyDescription": "Records appear here once they are read from Business Central.",
   "availability": {
     "short": "Short",
     "low": "Low",
