@@ -17,15 +17,12 @@
 
 /* The thread's region: the one thing in the panel that scrolls. It contains its
    own positioned children (the screen-reader-only labels), which otherwise
-   reach out to the panel and make the panel itself scrollable. */
+   reach out to the panel and make the panel itself scrollable. It never
+   scrolls smoothly: the thread follows the newest answer as it grows, and a
+   smooth scroll would be aimed at a place the answer has already left. */
 .spark-scroll {
   position: relative;
   overscroll-behavior: contain;
-}
-@media (prefers-reduced-motion: no-preference) {
-  .spark-scroll {
-    scroll-behavior: smooth;
-  }
 }
 
 @media (min-width: 40rem) {

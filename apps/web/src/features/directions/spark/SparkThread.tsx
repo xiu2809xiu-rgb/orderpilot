@@ -1,7 +1,8 @@
-import { memo, useEffect, useRef, type RefObject } from "react";
+import { memo, useRef, type RefObject } from "react";
 import { useTranslation } from "react-i18next";
 import { SparkTurnView } from "./SparkTurnView";
 import type { SparkKind, Turn } from "./useSparkChat";
+import { useStayAtEnd } from "./useStayAtEnd";
 
 interface SparkThreadProps {
   turns: readonly Turn[];
@@ -13,9 +14,10 @@ interface SparkThreadProps {
 }
 
 /**
- * The conversation. A new question brings its own turn to the top of the
- * scrolling region, so the answer is read from its first line; the parts that
- * follow never move it. Memoised: typing in the input must not redraw it.
+ * The conversation. The scrolling region stays at the end of it while the
+ * newest answer is written in and its parts appear, until the person scrolls
+ * up; a new question brings it back. Memoised: typing in the input must not
+ * redraw it.
  */
 export const SparkThread = memo(function SparkThread({
   turns,
@@ -26,18 +28,7 @@ export const SparkThread = memo(function SparkThread({
 }: SparkThreadProps) {
   const { t } = useTranslation("directions-spark");
   const list = useRef<HTMLOListElement>(null);
-  useEffect(() => {
-    const region = scroller.current;
-    const newest = list.current?.lastElementChild;
-    if (!region || !newest) return;
-    // Set on the region itself. scrollIntoView would scroll every ancestor
-    // too, and moved the whole panel up when the sr-only labels (positioned
-    // against the panel) made it look scrollable.
-    region.scrollTop =
-      region.scrollTop +
-      newest.getBoundingClientRect().top -
-      region.getBoundingClientRect().top;
-  }, [turns.length, scroller]);
+  useStayAtEnd(scroller, list, turns.length);
   return (
     <ol
       ref={list}
