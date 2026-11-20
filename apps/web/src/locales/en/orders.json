@@ -53,7 +53,7 @@
       "tableLabel": "Order lines",
       "visibleTo": "Roles that handle prices",
       "hint": "Availability is mock Business Central's figure, refreshed every 30 seconds. A draft reserves nothing.",
-      "priceHint": "The price comes from the customer's PO. The last agreed price under a price is for reference only.",
+      "priceHint": "A price starts from what this customer last agreed to pay, or the item's list price. Change it if the PO says otherwise.",
       "columns": {
         "lineNo": "Line",
         "item": "Item",

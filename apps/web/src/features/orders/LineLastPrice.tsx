@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useFormState, useWatch } from "react-hook-form";
+import { priceForCustomer } from "@/components/lines-grid";
 import { useMasterDataLastPrices } from "@/lib/api/generated/endpoints/master-data/master-data";
 import {
   setLinePrices,
@@ -13,8 +14,10 @@ const REFRESH_MS = 30_000;
 /**
  * Keeps what the order's customer last paid beside each line. It draws
  * nothing, like `LineAvailability`, so a lookup re-renders only this leaf and
- * never the lines being typed in. The price is context only: it is written
- * to the line's `lastPrice`, never to its `unitPrice`.
+ * never the lines being typed in. The price is written to the line's
+ * `lastPrice` as context. A line whose price the grid filled (the item's list
+ * price) takes the agreed price instead, because what a customer agreed to pay
+ * is a better start than the list; a price the person typed never changes.
  *
  * A failed lookup is shown as "not known" and asked again by itself, so the
  * person is never left guessing whether there is no price or none was read.
@@ -44,6 +47,13 @@ export function LineLastPrice({
   // The item on each line, in order: a swap for an item already asked about
   // changes no query, but its line still needs the price written again.
   const lineItems = lines.map((line) => line.item?.number ?? "").join(",");
+  // A pick can put a fresh list price on a line whose item did not change, and
+  // the agreed price is then due again, so the price sources count too.
+  const lineSources = lines
+    .map(
+      (line) => `${line.priceFrom?.source ?? "-"}${line.lastPrice ? "+" : "-"}`,
+    )
+    .join(",");
   const asking = customerNo !== "" && itemNos !== "" && !priceMasked && !paused;
   const prices = useMasterDataLastPrices(
     customerNo,
@@ -94,6 +104,10 @@ export function LineLastPrice({
         : [],
     );
     const writes: LinePrice[] = [];
+    const fills: {
+      index: number;
+      fill: NonNullable<ReturnType<typeof priceForCustomer>>;
+    }[] = [];
     form.getValues("lines").forEach((line, index) => {
       if (!line.item) return;
       const found = byItem.get(line.item.number);
@@ -111,6 +125,8 @@ export function LineLastPrice({
                   documentNo: found.documentNo,
                 }
               : null;
+      const fill = priceForCustomer(line, next);
+      if (fill) fills.push({ index, fill });
       const current = line.lastPrice ?? null;
       const same =
         typeof next === "object" && next !== null
@@ -124,6 +140,11 @@ export function LineLastPrice({
       writes.push({ index, itemNo: line.item.number, lastPrice: next });
     });
     setLinePrices(form, writes);
+    for (const { index, fill } of fills) {
+      const at = `lines.${String(index)}` as `lines.${number}`;
+      form.setValue(`${at}.unitPrice`, fill.unitPrice, { shouldDirty: true });
+      form.setValue(`${at}.priceFrom`, fill.priceFrom);
+    }
     shownFor.current = customerNo;
   }, [
     answer,
@@ -132,6 +153,7 @@ export function LineLastPrice({
     priceMasked,
     isSubmitting,
     lineItems,
+    lineSources,
     customerNo,
     form,
   ]);

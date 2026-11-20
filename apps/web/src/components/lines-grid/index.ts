@@ -3,11 +3,13 @@
 export { LinesGrid } from "./LinesGrid";
 export { LinesFooter } from "./LinesFooter";
 export { emptyLine, lineDraftOptions, newLineId } from "./lineValues";
+export { priceForCustomer } from "./priceFill";
 export { useLineTotals } from "./useLineTotals";
 export {
   itemOptionSchema,
   lastPriceSchema,
   type ColumnKind,
+  type ItemPriceMode,
   type LastPrice,
   type ItemOption,
   type ItemSearch,
@@ -15,6 +17,7 @@ export {
   type LinesGridProps,
   type LineTotals,
   type LineValue,
+  type PriceFrom,
   type PriceMask,
   type ServerTotals,
   type Shortfall,

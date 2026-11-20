@@ -1,6 +1,12 @@
 import { createContext, useContext, type ReactNode } from "react";
 import type { LookupOption, LookupSearch } from "@/components/form";
-import type { ColumnKind, LineColumn, PriceMask, Shortfall } from "./types";
+import type {
+  ColumnKind,
+  ItemPriceMode,
+  LineColumn,
+  PriceMask,
+  Shortfall,
+} from "./types";
 
 /** What every line of one grid shares. It changes rarely, so lines can skip renders. */
 export interface GridContextValue {
@@ -10,7 +16,7 @@ export interface GridContextValue {
   debounceMs: number;
   readOnly: boolean;
   priceMask: PriceMask | null;
-  itemPrice: "fill" | "reference";
+  itemPrice: ItemPriceMode;
   shortfallAction: ((shortfall: Shortfall) => ReactNode) | undefined;
   pick: (index: number, option: LookupOption) => void;
   remove: (index: number, from: ColumnKind | null) => void;

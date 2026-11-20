@@ -9,6 +9,7 @@ import {
 import { formatDay, formatMoney } from "@/lib/format";
 import { useGrid } from "./gridContext";
 import { MaskedPrice, ReadItem, ReadText } from "./LineReadCells";
+import { typedPrice } from "./priceFill";
 import { lastPriceSchema, type LastPrice } from "./types";
 
 interface CellProps {
@@ -71,20 +72,30 @@ export function QuantityCell({ index, row, readOnly }: CellProps) {
 
 export function PriceCell({ index, row, readOnly }: CellProps) {
   const { t } = useTranslation("linesGrid");
-  const { control } = useFormContext();
+  const { control, getValues, setValue } = useFormContext();
   const { priceMask, itemPrice } = useGrid();
   if (priceMask !== null) return <MaskedPrice />;
   if (readOnly) return <ReadText field="unitPrice" row={row} numeric />;
   return (
     <>
-      <NumberField
-        control={control}
-        name={`${row}.unitPrice`}
-        label={t("cells.unitPrice", { n: index + 1 })}
-        hideLabel
-        scale={2}
-      />
-      {itemPrice === "reference" ? <LastPriceNote row={row} /> : null}
+      {/* Typing, pasting or an autofill is the person's price from then on.
+          The input event bubbles, so the field itself needs no extra prop. */}
+      <div
+        onInput={() => {
+          if (itemPrice !== "agreed") return;
+          const line = getValues(row) as Parameters<typeof typedPrice>[0];
+          setValue(`${row}.priceFrom`, typedPrice(line));
+        }}
+      >
+        <NumberField
+          control={control}
+          name={`${row}.unitPrice`}
+          label={t("cells.unitPrice", { n: index + 1 })}
+          hideLabel
+          scale={2}
+        />
+      </div>
+      {itemPrice === "fill" ? null : <LastPriceNote row={row} />}
     </>
   );
 }

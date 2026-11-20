@@ -139,7 +139,7 @@ export function OrderDocument({
             searchItems={searchItems}
             readOnly={readOnly !== null}
             priceMask={priceMask}
-            itemPrice="reference"
+            itemPrice="agreed"
             footer={(totals: LineTotals) => (
               <div className="space-y-s1">
                 <LinesFooter totals={totals} />

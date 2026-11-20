@@ -2,12 +2,13 @@ import { useCallback, useEffect, useRef } from "react";
 import { useFormContext } from "react-hook-form";
 import { normaliseDecimal, type LookupOption } from "@/components/form";
 import { focusPlace } from "./gridNav";
-import { itemOptionSchema, type PriceMask } from "./types";
+import { listPrice, priceForPick } from "./priceFill";
+import { itemOptionSchema, type ItemPriceMode, type PriceMask } from "./types";
 
 interface PickOptions {
   name: string;
   priceMask: PriceMask | null;
-  itemPrice: "fill" | "reference";
+  itemPrice: ItemPriceMode;
   /** Where the focus goes after an item picked by Enter, such as the quantity. */
   advanceTo: string | undefined;
   /** The line that asked to move on once its item is picked, if any. */
@@ -19,7 +20,9 @@ interface PickOptions {
  * What picking an item fills in on its line: the description, the unit, the
  * stock the API reported and, if the role may see prices, the default price (or,
  * for a screen where a document sets the price, only a cleared last agreed price).
- * A masked price is never written, so it cannot reach a draft.
+ * In "agreed" mode the price starts at the list price unless the person has
+ * typed one for this item, and the screen swaps in the customer's agreed
+ * price. A masked price is never written, so it cannot reach a draft.
  */
 export function useItemPick({
   name,
@@ -29,7 +32,7 @@ export function useItemPick({
   advanceTo,
   root,
 }: PickOptions) {
-  const { setValue } = useFormContext();
+  const { setValue, getValues } = useFormContext();
   const latest = useRef({ name, priceMask, advanceTo, itemPrice });
   useEffect(() => {
     latest.current = { name, priceMask, advanceTo, itemPrice };
@@ -42,7 +45,7 @@ export function useItemPick({
       const item = parsed.success
         ? parsed.data
         : { number: option.number, name: option.name };
-      const set = (field: string, value: string | null) => {
+      const set = (field: string, value: unknown) => {
         setValue(`${name}.${String(index)}.${field}`, value, {
           shouldDirty: true,
         });
@@ -70,6 +73,17 @@ export function useItemPick({
           // The last agreed price belongs to the old item, and the screen
           // writes the new one when its answer arrives.
           set("lastPrice", null);
+          if (itemPrice === "agreed") {
+            const fill = priceForPick(
+              getValues(`${name}.${String(index)}`) as Parameters<
+                typeof priceForPick
+              >[0],
+              item.number,
+              listPrice("unitPrice" in item ? item.unitPrice : undefined),
+            );
+            set("unitPrice", fill.unitPrice);
+            set("priceFrom", fill.priceFrom);
+          }
         }
       }
       if (advance.current === index) {
@@ -81,6 +95,6 @@ export function useItemPick({
         }, 0);
       }
     },
-    [setValue, advance, root],
+    [setValue, getValues, advance, root],
   );
 }
