@@ -147,7 +147,7 @@
     "pi": {
       "term": "PI",
       "long": "Proforma invoice",
-      "meaning": "The invoice sent before payment, with the bank details, so the customer can pay."
+      "meaning": "An invoice sent before payment, with the seller's bank details, so the buyer can pay."
     },
     "packingList": {
       "term": "Packing list",
