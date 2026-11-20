@@ -20,7 +20,7 @@ import { ReviewNotice } from "./ReviewNotice";
  * the order's steps page, where the form asks for the amount, the bank
  * reference and the date, so its button opens that page. The task that confirms
  * the fields has no screen for a stored document, so a notice stands in its
- * place. When a person who holds tasks has none on this order, there is no
+ * place, with the task's due time beside it. When a person who holds tasks has none on this order, there is no
  * button, and a line says so.
  */
 export function OrderAction({
@@ -49,7 +49,13 @@ export function OrderAction({
     );
   }
   const verb = tHome(`needs.actions.${task.kind}`);
-  const due = <DueTimer due={task.dueAt} />;
+  // The same line for every task, so the notice for the fields keeps the due time Home shows.
+  const dueLine = (
+    <span className="od-action-due fs-14">
+      <span className="text-muted-foreground">{t("action.yourTask")}</span>
+      <DueTimer due={task.dueAt} />
+    </span>
+  );
   const paying = task.kind === "CONFIRM_PAYMENT";
   const records = tHome(
     `needs.records.${task.kind === "RAISE_SPR" || paying ? task.kind : "default"}`,
@@ -59,7 +65,14 @@ export function OrderAction({
       {records}
     </span>
   );
-  if (task.kind === "REVIEW_FIELDS") return <ReviewNotice />;
+  if (task.kind === "REVIEW_FIELDS") {
+    return (
+      <>
+        <ReviewNotice />
+        {dueLine}
+      </>
+    );
+  }
   return (
     <>
       {canComplete(task) ? (
@@ -91,10 +104,7 @@ export function OrderAction({
       )}
       {/* Beside the button, not inside it, so the line describes the button and is not part of its name. */}
       {canComplete(task) || paying ? caption : null}
-      <span className="od-action-due fs-14">
-        <span className="text-muted-foreground">{t("action.yourTask")}</span>
-        {due}
-      </span>
+      {dueLine}
     </>
   );
 }

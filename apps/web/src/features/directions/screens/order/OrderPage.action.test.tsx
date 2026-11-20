@@ -66,6 +66,19 @@ describe("the task that confirms the fields read from a PO", () => {
     expect(hrefs()).not.toContain(STEPS);
   });
 
+  it("keeps the task's due time beside the notice, as Home's row shows it", async () => {
+    const task = taskOn(ORDER, "REVIEW_FIELDS");
+    stubApi({ tasks: [task] });
+    const { container } = open();
+    await screen.findByText(/This build has no screen that confirms/);
+    expect(screen.getByText("Your task")).toBeVisible();
+    const due = container.querySelector("time");
+    expect(due?.getAttribute("dateTime")).toBe(
+      new Date(task.dueAt).toISOString(),
+    );
+    expect(due).toHaveTextContent(/late/);
+  });
+
   it("points a demo session to the labelled review on a sample", async () => {
     stubApi(review);
     open();
