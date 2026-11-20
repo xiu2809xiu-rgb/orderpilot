@@ -15,6 +15,7 @@ import {
 } from "@/components/lines-grid";
 import { todayInSingapore } from "@/lib/format";
 import { CAPTURE_FAMILY } from "./captureFamily";
+import "./order-form.css";
 import { LineContext } from "./LineContext";
 import { OrderHeaderFields } from "./OrderHeaderFields";
 import { OrderNotices, type ReadOnlyReason } from "./OrderNotices";
@@ -23,7 +24,7 @@ import {
   type OrderFormInput,
   type OrderFormOutput,
 } from "./orderFormSchema";
-import { blankOrder, fromDetail } from "./orderFormValues";
+import { blankOrder, fromDetail, withoutBlankTail } from "./orderFormValues";
 import { searchItems } from "./orderSearches";
 import { useLineColumns } from "./useLineColumns";
 import { useOrderActions } from "./useOrderActions";
@@ -63,6 +64,7 @@ export function OrderDocument({
   const form = useZodForm<OrderFormInput, OrderFormOutput>({
     schema,
     defaultValues: record ? fromDetail(record) : blankOrder(todayInSingapore()),
+    prepare: withoutBlankTail,
   });
   const save = useOrderSave({ form, orderNo, priceMasked });
   const actions = useOrderActions({
@@ -140,6 +142,7 @@ export function OrderDocument({
             readOnly={readOnly !== null}
             priceMask={priceMask}
             itemPrice="reference"
+            itemDescription="own"
             footer={(totals: LineTotals) => (
               <div className="space-y-s1">
                 <LinesFooter totals={totals} />

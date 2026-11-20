@@ -1,19 +1,25 @@
-import { CircleCheck, TriangleAlert, X } from "lucide-react";
+import { CircleCheck, FlaskConical, TriangleAlert, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { extensionOf, FileType } from "@/components/kit/FileType";
 import { MAX_FILES, MAX_MB } from "./uploadRules";
 import type { UploadRow } from "./useUploads";
 
-/** "84 KB" or "2.4 MB" from a size in bytes. */
+/** "13 B", "84 KB" or "2.4 MB" from a size in bytes. */
 function sizeText(
   t: (key: string, options?: Record<string, unknown>) => string,
   bytes: number,
 ): string {
-  return bytes >= 1024 * 1024
-    ? t("files.sizeMb", { size: (bytes / (1024 * 1024)).toFixed(1) })
-    : t("files.size", { size: Math.max(1, Math.round(bytes / 1024)) });
+  // 1,048,000 bytes would round up to "1024 KB", so MB starts a little early.
+  if (bytes >= 1023.5 * 1024)
+    return t("files.sizeMb", { size: (bytes / (1024 * 1024)).toFixed(1) });
+  if (bytes < 1024) return t("files.bytes", { size: bytes });
+  return t("files.size", { size: Math.round(bytes / 1024) });
 }
+
+/** What the preview will do with a ready file, said before any reading starts. */
+export type SampleNote =
+  { kind: "sample"; document: string } | { kind: "later" } | { kind: "none" };
 
 /**
  * One file the person added: its icon, name and size, a progress bar while the
@@ -22,9 +28,12 @@ function sizeText(
  */
 export function FileRow({
   row,
+  sample,
   onRemove,
 }: {
   row: UploadRow;
+  /** Shown under a file that is not refused; null while it is still being checked. */
+  sample: SampleNote | null;
   onRemove: (id: number) => void;
 }) {
   const { t } = useTranslation("directions-intake");
@@ -68,6 +77,16 @@ export function FileRow({
             </span>
           </p>
         ) : null}
+        {sample ? (
+          <p
+            className={`fs-14 flex items-center gap-1.5 ${sample.kind === "sample" ? "font-medium text-foreground" : "text-muted-foreground"}`}
+          >
+            <FlaskConical aria-hidden="true" className="size-3.5" />
+            {sample.kind === "sample"
+              ? t("files.sample", { document: sample.document })
+              : t(sample.kind === "later" ? "files.notRead" : "files.noSample")}
+          </p>
+        ) : null}
         {refused ? (
           <p
             role="alert"
@@ -82,7 +101,10 @@ export function FileRow({
                 name: row.name,
                 size: MAX_MB,
                 count: MAX_FILES,
-                claimed: (row.claimed ?? extensionOf(row.name)).toUpperCase(),
+                claimed: t(
+                  `refused.claimed.${row.claimed ?? extensionOf(row.name)}`,
+                  { defaultValue: "a" },
+                ),
               })}
             </span>
           </p>
@@ -93,6 +115,7 @@ export function FileRow({
         variant="ghost"
         size="icon"
         aria-label={t("files.remove", { name: row.name })}
+        data-remove=""
         onClick={() => {
           onRemove(row.id);
         }}

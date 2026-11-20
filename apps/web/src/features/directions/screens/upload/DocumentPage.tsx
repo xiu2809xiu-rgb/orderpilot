@@ -97,6 +97,7 @@ export function DocumentPage({
             return (
               <button
                 key={field.id}
+                id={`box-${field.id}`}
                 type="button"
                 tabIndex={-1}
                 aria-label={t("review.boxLabel", {
@@ -105,7 +106,7 @@ export function DocumentPage({
                 })}
                 data-selected={selected === field.id}
                 data-uncertain={field.uncertain && !state.confirmed}
-                data-confirmed={field.uncertain && state.confirmed}
+                data-confirmed={state.confirmed}
                 onClick={() => {
                   onSelect(field);
                 }}

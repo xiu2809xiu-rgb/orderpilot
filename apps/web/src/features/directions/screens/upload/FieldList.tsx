@@ -1,11 +1,12 @@
+import { CONFIDENCE_HIGH } from "@orderpilot/shared";
 import { useId } from "react";
 import { useTranslation } from "react-i18next";
 import type { DemoField } from "./demoDocument";
 import { FieldRow } from "./FieldRow";
-import type { FieldGroups, FieldState } from "./useReview";
+import { lineNumber, type FieldSplit, type FieldState } from "./useReview";
 
 interface FieldListProps {
-  groups: FieldGroups;
+  split: FieldSplit;
   selected: string | null;
   stateOf: (id: string) => FieldState;
   onSelect: (field: DemoField) => void;
@@ -13,36 +14,33 @@ interface FieldListProps {
   onEdit: (id: string, text: string) => void;
 }
 
-type GroupProps = { title: string; fields: readonly DemoField[] } & Omit<
+type RowsProps = { fields: readonly DemoField[] } & Omit<
   FieldListProps,
-  "groups"
+  "split"
 >;
 
-function Group({
-  title,
+function Rows({
   fields,
-  stateOf,
   selected,
+  stateOf,
   onSelect,
   onConfirm,
   onEdit,
-}: GroupProps) {
-  const headingId = useId();
+}: RowsProps) {
+  const { t } = useTranslation("directions-intake");
   return (
-    <section aria-labelledby={headingId} className="flex flex-col">
-      <h3
-        id={headingId}
-        className="fs-14 border-b border-border bg-muted/50 px-3 py-1.5 font-semibold text-foreground"
-      >
-        {title}
-      </h3>
-      <ul>
-        {fields.map((field) => (
+    <ul>
+      {fields.map((field) => {
+        const line = lineNumber(field);
+        return (
           <FieldRow
             key={field.id}
             field={field}
             state={stateOf(field.id)}
             selected={selected === field.id}
+            context={
+              line === null ? undefined : t("review.line", { number: line })
+            }
             onSelect={() => {
               onSelect(field);
             }}
@@ -53,15 +51,25 @@ function Group({
               onEdit(field.id, text);
             }}
           />
-        ))}
-      </ul>
-    </section>
+        );
+      })}
+    </ul>
   );
 }
 
-/** Every field Spark read, in groups: the header, each line, the totals. */
-export function FieldList({ groups, ...rest }: FieldListProps) {
+const HEADING =
+  "fs-14 border-b border-border bg-muted/50 px-3 py-1.5 font-semibold text-foreground";
+
+/**
+ * Every field Spark read, in two parts. The ones it was unsure of come first,
+ * so the work is at the top of the list; a plain divider then says how many
+ * it was sure of, and those follow. Rows keep the order of the document inside
+ * each part, and a line field says which line it belongs to.
+ */
+export function FieldList({ split, ...rest }: FieldListProps) {
   const { t } = useTranslation("directions-intake");
+  const unsureId = useId();
+  const sureId = useId();
   return (
     <div
       role="group"
@@ -69,24 +77,26 @@ export function FieldList({ groups, ...rest }: FieldListProps) {
       className="flex flex-col border border-border bg-card"
       style={{ borderRadius: "var(--radius-control)" }}
     >
-      <Group
-        title={t("review.groups.header")}
-        fields={groups.header}
-        {...rest}
-      />
-      {groups.lines.map((line) => (
-        <Group
-          key={line.number}
-          title={t("review.lineGroup", { number: line.number })}
-          fields={line.fields}
-          {...rest}
-        />
-      ))}
-      <Group
-        title={t("review.groups.totals")}
-        fields={groups.totals}
-        {...rest}
-      />
+      {split.unsure.length > 0 ? (
+        <section aria-labelledby={unsureId}>
+          <h3 id={unsureId} className={HEADING}>
+            {t("review.toApprove")}
+          </h3>
+          <Rows fields={split.unsure} {...rest} />
+        </section>
+      ) : null}
+      <section aria-labelledby={sureId}>
+        <h3
+          id={sureId}
+          className={`${HEADING} ${split.unsure.length > 0 ? "border-t" : ""}`}
+        >
+          {t("review.sure", {
+            count: split.sure.length,
+            threshold: Math.round(CONFIDENCE_HIGH * 100),
+          })}
+        </h3>
+        <Rows fields={split.sure} {...rest} />
+      </section>
     </div>
   );
 }

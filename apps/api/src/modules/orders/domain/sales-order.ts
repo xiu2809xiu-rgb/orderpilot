@@ -3,6 +3,8 @@ import {
   isDecimalString,
   lineAmount,
   parseRecordNumber,
+  SHIPMENT_BEFORE_ORDER_MESSAGE,
+  shipmentIsBeforeOrder,
   sumDecimal,
   type FieldIssue,
   type OrderCaptureState,
@@ -187,7 +189,17 @@ export class SalesOrder {
     const sent = Object.fromEntries(
       Object.entries(changes).filter(([, value]) => value !== undefined),
     ) as SalesOrderChanges;
-    return new SalesOrder({ ...this.input, ...sent });
+    const edited = new SalesOrder({ ...this.input, ...sent });
+    // Checked here and not in the constructor: an order stored before the rule
+    // existed must still load. A change that sends one date meets the stored other.
+    if (
+      ("orderDate" in sent || "shipmentDate" in sent) &&
+      shipmentIsBeforeOrder(edited.orderDate, edited.shipmentDate)
+    )
+      throw new ValidationFailedError([
+        { path: "shipmentDate", message: SHIPMENT_BEFORE_ORDER_MESSAGE },
+      ]);
+    return edited;
   }
 
   /** A copy that is void. Only a draft can be: cancelling a submitted order is P-50. */

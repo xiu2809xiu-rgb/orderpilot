@@ -44,6 +44,8 @@ export const itemOptionSchema = z.object({
   number: z.string(),
   name: z.string(),
   detail: z.string().optional(),
+  /** A look-alike name the search did not find by its text. See `LookupOption`. */
+  possible: z.boolean().optional(),
   description: z.string().optional(),
   unit: z.string().optional(),
   /** Inventory minus open sales demand plus open purchases, by the API's formula. */
@@ -138,6 +140,13 @@ export interface LinesGridProps {
    * price (an order's PO).
    */
   itemPrice?: "fill" | "reference";
+  /**
+   * What picking an item puts in the description. "copy" (the default) writes
+   * the item's own words. "own" leaves it empty, for a person's own wording
+   * only: a description that repeats the item's name says nothing the item
+   * cell does not, and the server gives an empty one the item's own.
+   */
+  itemDescription?: "copy" | "own";
   /** Draws the footer from the totals. The default shows lines, quantity and total. */
   footer?: (totals: LineTotals) => ReactNode;
   serverTotals?: ServerTotals;

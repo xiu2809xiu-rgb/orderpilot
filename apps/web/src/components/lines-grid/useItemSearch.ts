@@ -42,9 +42,12 @@ export function useItemSearch(
     () => async (query, signal) => {
       const found = await latest.current(query, signal);
       if (!signal.aborted) {
-        last.current = { query, count: found.length };
+        // A look-alike name is not a part number the search found: Enter on
+        // a number that exists nowhere still says so.
+        const count = found.filter((item) => item.possible !== true).length;
+        last.current = { query, count };
         // Enter came before the answer did: it has nothing to pick.
-        if (advance.current !== null && found.length === 0) {
+        if (advance.current !== null && count === 0) {
           flagUnknown(advance.current, query);
         }
       }

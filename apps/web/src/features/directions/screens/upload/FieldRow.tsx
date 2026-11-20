@@ -1,12 +1,12 @@
 import { Check, CircleCheck, Pencil, Sparkles } from "lucide-react";
 import { confidenceBand } from "@orderpilot/shared";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/kit/Badge";
 import type { DemoField } from "./demoDocument";
+import { FieldEdit } from "./FieldEdit";
 import { readAt } from "./readAt";
 import type { FieldState } from "./useReview";
 
@@ -14,6 +14,8 @@ interface FieldRowProps {
   field: DemoField;
   state: FieldState;
   selected: boolean;
+  /** Where the field sits when the list is not grouped, such as "Line 2". */
+  context?: string;
   onSelect: () => void;
   onConfirm: () => void;
   onEdit: (text: string) => void;
@@ -22,40 +24,50 @@ interface FieldRowProps {
 /**
  * One field Spark read: its name, its value, how sure it is, and where it sits
  * on the page (the row and its box light together). A field it was unsure of
- * says "Requires approval" and offers Confirm and Edit; Edit opens a labelled
- * field with its help line, and saving a correction confirms it. A field the
- * person has dealt with says so.
+ * says "Requires approval" and offers Confirm and Edit. Every field can be
+ * edited, a sure one too, by the pencil beside it; saving a good correction
+ * confirms it. A field the person has dealt with says so.
  */
 export function FieldRow({
   field,
   state,
   selected,
+  context,
   onSelect,
   onConfirm,
   onEdit,
 }: FieldRowProps) {
   const { t } = useTranslation("directions-intake");
-  const editId = useId();
-  const helpId = useId();
   const [editing, setEditing] = useState(false);
-  const editField = useRef<HTMLInputElement>(null);
+  const opener = useRef<HTMLButtonElement>(null);
+  // Cancelling gives focus back to the button that opened the edit.
+  const cancelled = useRef(false);
   useEffect(() => {
-    if (editing) editField.current?.focus();
+    if (!editing && cancelled.current) {
+      cancelled.current = false;
+      opener.current?.focus();
+    }
   }, [editing]);
-  const [draft, setDraft] = useState("");
   const value = state.edited ?? field.text;
   const band = confidenceBand(field.confidence);
   const percent = Math.round(field.confidence * 100);
   const waiting = field.uncertain && !state.confirmed;
+  const dealtWith = state.confirmed;
 
-  const start = () => {
-    setDraft(value);
-    setEditing(true);
-  };
-  const save = () => {
-    onEdit(draft.trim() === "" ? value : draft.trim());
+  const save = (text: string) => {
     setEditing(false);
+    // Saved as it is, there is nothing to correct: a field waiting for approval
+    // is confirmed as read, and any other stays as it was.
+    if (text === value) {
+      if (waiting) onConfirm();
+      // A sure field stays as it is, so this is a cancel: focus goes back to
+      // its pencil rather than dropping to the page's start.
+      else cancelled.current = true;
+      return;
+    }
+    onEdit(text);
   };
+  const editButtonLabel = t("review.editField", { label: field.label });
 
   return (
     <li
@@ -67,112 +79,97 @@ export function FieldRow({
         selected && "bg-accent",
       )}
     >
-      <button
-        type="button"
-        aria-pressed={selected}
-        aria-label={t("review.select", { label: field.label })}
-        onClick={onSelect}
-        className="flex w-full items-start justify-between gap-3 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring pointer-coarse:min-h-11"
-      >
-        <span className="flex min-w-0 flex-col gap-0.5">
-          <span className="fs-12 text-muted-foreground">{field.label}</span>
-          <span className="fs-14 whitespace-pre-line text-foreground">
-            {value}
+      <div className="flex items-start gap-1">
+        <button
+          type="button"
+          id={`field-pick-${field.id}`}
+          aria-pressed={selected}
+          aria-label={t("review.select", { label: field.label })}
+          onClick={onSelect}
+          className="flex w-full min-w-0 items-start justify-between gap-3 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring pointer-coarse:min-h-11"
+        >
+          <span className="flex min-w-0 flex-col gap-0.5">
+            <span className="fs-12 text-muted-foreground">
+              {context ? `${context}: ${field.label}` : field.label}
+            </span>
+            <span className="fs-14 whitespace-pre-line text-foreground">
+              {value}
+            </span>
           </span>
-        </span>
-        <span className="numeral fs-14 flex shrink-0 items-center gap-1 text-muted-foreground">
-          <span className="sr-only">
-            {t("review.confidence", { percent })}
-            {", "}
-            {t(`review.${band}`)}
+          <span className="numeral fs-14 flex shrink-0 items-center gap-1 text-muted-foreground">
+            <span className="sr-only">
+              {t("review.confidence", { percent })}
+              {", "}
+              {t(`review.${band}`)}
+            </span>
+            <span aria-hidden="true">{percent}%</span>
           </span>
-          <span aria-hidden="true">{percent}%</span>
-        </span>
-      </button>
-      {waiting && !editing ? (
+        </button>
+        {!waiting && !editing ? (
+          <Button
+            ref={opener}
+            type="button"
+            size="icon-sm"
+            variant="ghost"
+            aria-label={editButtonLabel}
+            onClick={() => {
+              setEditing(true);
+            }}
+            className="shrink-0 pointer-coarse:size-11"
+          >
+            <Pencil aria-hidden="true" />
+          </Button>
+        ) : null}
+      </div>
+      {waiting ? (
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="warning" size="lg">
             <Sparkles aria-hidden="true" />
             {t("review.requires")}
           </Badge>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            aria-label={t("review.confirmField", { label: field.label })}
-            onClick={onConfirm}
-            className="pointer-coarse:h-11"
-          >
-            <Check aria-hidden="true" />
-            {t("review.confirm")}
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant="ghost"
-            aria-label={t("review.editField", { label: field.label })}
-            onClick={start}
-            className="pointer-coarse:h-11"
-          >
-            <Pencil aria-hidden="true" />
-            {t("review.edit")}
-          </Button>
+          {editing ? null : (
+            <>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                aria-label={t("review.confirmField", { label: field.label })}
+                onClick={onConfirm}
+                className="pointer-coarse:h-11"
+              >
+                <Check aria-hidden="true" />
+                {t("review.confirm")}
+              </Button>
+              <Button
+                ref={opener}
+                type="button"
+                size="sm"
+                variant="ghost"
+                aria-label={editButtonLabel}
+                onClick={() => {
+                  setEditing(true);
+                }}
+                className="pointer-coarse:h-11"
+              >
+                <Pencil aria-hidden="true" />
+                {t("review.edit")}
+              </Button>
+            </>
+          )}
         </div>
       ) : null}
       {editing ? (
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor={editId} className="fs-14 font-medium">
-            {t("review.editLabel", { label: field.label })}
-          </label>
-          <Input
-            ref={editField}
-            id={editId}
-            value={draft}
-            aria-describedby={helpId}
-            onChange={(event) => {
-              setDraft(event.target.value);
-            }}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                event.preventDefault();
-                save();
-              }
-              // Escape leaves the field alone, and must not close anything around it.
-              if (event.key === "Escape") {
-                event.stopPropagation();
-                setEditing(false);
-              }
-            }}
-            className="fs-14"
-          />
-          <p id={helpId} className="fs-12 text-muted-foreground">
-            {t("review.editHelp")}
-          </p>
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              onClick={save}
-              className="pointer-coarse:h-11"
-            >
-              {t("review.save")}
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              onClick={() => {
-                setEditing(false);
-              }}
-              className="pointer-coarse:h-11"
-            >
-              {t("review.cancel")}
-            </Button>
-          </div>
-        </div>
+        <FieldEdit
+          field={field}
+          value={value}
+          onSave={save}
+          onCancel={() => {
+            cancelled.current = true;
+            setEditing(false);
+          }}
+        />
       ) : null}
-      {field.uncertain && state.confirmed ? (
+      {dealtWith && !editing && (field.uncertain || state.edited !== null) ? (
         <Badge variant="success" size="lg" className="self-start">
           <CircleCheck aria-hidden="true" />
           {t(state.edited === null ? "review.approved" : "review.edited")}
