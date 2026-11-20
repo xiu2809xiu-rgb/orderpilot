@@ -383,6 +383,8 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 
 | Story | Title                                                 | Branch                           | State                                                                               |
 | ----- | ----------------------------------------------------- | -------------------------------- | ----------------------------------------------------------------------------------- |
+| #289  | The Spark panel: input at the foot, scripted answers  | `fix/platform-spark-panel`       | This pull request. Keyboard use works, and the draft quotes the stock now available |
+| #287  | Search or jump to finds records                       | `fix/platform-search-records`    | This pull request. Orders, customers, vendors and items, by number and name         |
 | #288  | Home leads with what needs the team                   | `feat/platform-home-next-act`    | This pull request. Needs you first, labelled amounts and honest one-click words     |
 | #286  | The entrance: six teams first, in flow order          | `feat/platform-entrance-flow`    | This pull request. A role change stays on the order's page                          |
 | #285  | The build shown at the proposal presentation          | `feat/platform-proposal-demo`    | This pull request. It brings the 25 commits shown on 17 Nov, with `main` merged in  |

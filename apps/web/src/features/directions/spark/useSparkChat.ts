@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { prefersReducedMotion } from "@/components/kit/env";
+import { stockFacts, type StockFacts } from "./sparkFacts";
 
 export type SparkKind = "stock" | "trend" | "other";
 export type TurnPhase = "thinking" | "streaming" | "done" | "stopped";
@@ -18,18 +19,52 @@ export const THINK_MS = 1500;
 /** Under reduced motion the pause is short and the answer arrives whole. */
 export const THINK_MS_STILL = 250;
 
+const WORD_CHARACTER = /[a-z0-9]/;
+
 /**
- * Which scripted answer a typed question gets. The two suggested questions are
- * sent with their kind; anything typed is matched on a word, and anything else
- * gets the honest answer that Spark only knows two things in this preview.
+ * Whole-word match, so "hp" is not found inside another word. It walks the
+ * text instead of building a pattern from the word: a pattern made from data
+ * is what the static scan refuses, and the walk needs no escaping.
  */
-export function classify(question: string, mayReadSales: boolean): SparkKind {
-  const text = question.toLowerCase();
-  if (/\b(monitors?|stock|hp)\b/.test(text)) return "stock";
-  if (mayReadSales && /\b(sales|trend|forecast|revenue)\b/.test(text)) {
-    return "trend";
+function mentions(text: string, word: string): boolean {
+  const needle = word.toLowerCase();
+  if (needle === "") return false;
+  let at = text.indexOf(needle);
+  while (at !== -1) {
+    const before = at === 0 ? "" : (text[at - 1] ?? "");
+    const after = text[at + needle.length] ?? "";
+    if (!WORD_CHARACTER.test(before) && !WORD_CHARACTER.test(after))
+      return true;
+    at = text.indexOf(needle, at + 1);
   }
-  return "other";
+  return false;
+}
+
+/**
+ * Which scripted answer a typed question gets. The suggested questions are
+ * sent with their kind. A typed one gets the stock answer only when it is
+ * about the item that answer is for (the brand and the product, or one of its
+ * item or part numbers), and the sales answer only when it is about sales and
+ * the role may read them. Anything else gets the plain reply that this is a
+ * preview: a near miss ("Dell monitors", "hp") must never be answered with
+ * another item's figures.
+ */
+export function classify(
+  question: string,
+  mayReadSales: boolean,
+  facts: StockFacts = stockFacts(),
+): SparkKind {
+  const text = question.toLowerCase();
+  const aboutBrand = mentions(text, facts.brand);
+  const aboutProduct = mentions(text, "monitor") || mentions(text, "monitors");
+  const aboutItem = facts.items.some(
+    (item) => mentions(text, item.itemNo) || mentions(text, item.partNumber),
+  );
+  if ((aboutBrand && aboutProduct) || aboutItem) return "stock";
+  const aboutSales = ["sales", "revenue", "forecast", "trend"].some((word) =>
+    mentions(text, word),
+  );
+  return mayReadSales && aboutSales ? "trend" : "other";
 }
 
 /**
