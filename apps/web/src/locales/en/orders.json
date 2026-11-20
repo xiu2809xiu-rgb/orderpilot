@@ -1,6 +1,6 @@
 {
   "title": "Orders",
-  "description": "Sales orders: the samples Spectra gave us and the orders entered here. Nothing is ordered from this list.",
+  "description": "Sales orders: the sample orders of the synthetic demo set and the orders entered here. Nothing is ordered from this list.",
   "menu": {
     "orders": "Orders"
   },
@@ -75,7 +75,7 @@
       "reload": "Reload",
       "readOnlyTitle": "This order is read-only",
       "readOnly": {
-        "sample": "This is a sample order from Spectra. Samples are not edited here.",
+        "sample": "A sample order of the synthetic demo set. Samples are read only here.",
         "submitted": "This order is submitted. Only a draft can be changed.",
         "void": "This order is void. It cannot be changed.",
         "permission": "Your role may read orders but not change them."

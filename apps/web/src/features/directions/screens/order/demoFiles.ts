@@ -35,3 +35,20 @@ export function demoFileFor(
   const file = DEMO_FILES[`${orderNo}|${type}`];
   return file ? `/demo-documents/${file}` : null;
 }
+
+/**
+ * Whether a document's file prints prices, so that only a role that may see
+ * prices may open it. The demo set's packing lists are made without a price
+ * column (`priced` is false in `packages/synthetic-documents`), so they stay
+ * open to every role that can open the order. A proforma invoice also prints
+ * Spectra's demo bank details; the order's API does not say whether a role may
+ * see those, so for now it is held to the same price rule (see the pull
+ * request: the server owes the page that answer).
+ */
+export function printsPrices(type: DocumentType): boolean {
+  return (
+    type === "CUSTOMER_PO" ||
+    type === "PROFORMA_INVOICE" ||
+    type === "SALES_INVOICE"
+  );
+}

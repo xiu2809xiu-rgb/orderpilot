@@ -125,11 +125,11 @@
   },
   "demo": {
     "switcher": "Demo role",
-    "switcherHint": "Switch to another role to see its home page.",
+    "switcherHint": "Switch to another role. An order you have open stays open.",
     "current": "Current role",
     "jobs": {
       "SUPPORT": "Takes in the customer's order and sends the proforma invoice",
-      "PRODUCT_MANAGER": "Checks stock and asks to buy what is short",
+      "PRODUCT_MANAGER": "Watches stock and run rate, and raises the request to buy",
       "APPROVER": "Approves or rejects the request to buy",
       "FINANCE": "Confirms the customer's payment",
       "WAREHOUSE": "Packs the goods and checks them against the papers",

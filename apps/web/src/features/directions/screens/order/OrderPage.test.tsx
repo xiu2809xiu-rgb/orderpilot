@@ -9,6 +9,7 @@ import {
   it,
   vi,
 } from "vitest";
+import { todayInSingapore } from "@/lib/format";
 import { useSessionStore } from "@/stores/session";
 import { axeViolations } from "@/test/axe";
 import { sessionFor } from "@/test/fixtures";
@@ -21,7 +22,7 @@ import {
   taskOn,
 } from "../orders/ordersTestKit";
 import { OrderPage } from "./OrderPage";
-import { flowOf, stubFlow } from "./orderPageTestKit";
+import { flowOf, step, stubFlow } from "./orderPageTestKit";
 
 /** Opens an order as its route does: the number from the address, the tab from the query. */
 const open = (orderNo: string, query = "") =>
@@ -86,9 +87,40 @@ describe("the order page", () => {
     expect(steps[3]).toHaveAttribute("aria-current", "step");
     // Done: the actor and the day, from the order's own events.
     expect(within(nth(steps, 2)).getByText(/Support, /)).toBeVisible();
-    expect(within(nth(steps, 3)).getByText("Now, late")).toBeVisible();
+    expect(within(nth(steps, 3)).getByText(/^Now, late/)).toBeVisible();
+    // The current step says how long it has waited and what is usual, in one short line.
+    expect(
+      within(nth(steps, 3)).getByText("Waiting 14 days, usually 4 days"),
+    ).toBeVisible();
     // Later: a day the step is expected, worked from the usual times.
     expect(within(nth(steps, 4)).getByText(/^By /)).toBeVisible();
+  });
+
+  it("counts the wait from the workflow's record, not from the tracker's newest event", async () => {
+    stubApi();
+    // The workflow finished its last step six days ago; the tracker's own
+    // current event is fourteen days old here, and on the sample data it is
+    // always today, which is why the record's time is the one shown.
+    const sixDaysAgo = new Date(
+      Date.parse(`${todayInSingapore()}T12:00:00.000Z`) - 6 * 86_400_000,
+    ).toISOString();
+    stubFlow(() =>
+      flowOf(PAID, {
+        steps: [
+          { ...step("pi-sent", "done"), completedAt: sixDaysAgo },
+          step("payment-confirmed", "current"),
+        ],
+      }),
+    );
+    open(PAID);
+    const rail = await screen.findByRole("list", {
+      name: "Sales order journey",
+    });
+    const now = nth(within(rail).getAllByRole("listitem"), 3);
+    expect(
+      await within(now).findByText("Waiting 6 days, usually 4 days"),
+    ).toBeVisible();
+    expect(within(now).queryByText(/Waiting 14 days/)).toBeNull();
   });
 
   it("names the expected ship day as what it is and sets it against the order's ship date", async () => {

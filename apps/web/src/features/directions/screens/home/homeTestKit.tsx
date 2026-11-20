@@ -17,6 +17,7 @@ import HomeScreen from "./HomeScreen";
 export const NAMESPACES = [
   "directions",
   "directions-home",
+  "directions-orders",
   "directions-parts",
   "home",
   "components",
@@ -173,6 +174,11 @@ export interface HomeApi {
    * Warehouse and Logistics.
    */
   prices?: boolean;
+  /**
+   * Overrides the orders list the price answer is read from: no order to ask
+   * about, or a failed request. Either leaves the answer about prices unknown.
+   */
+  orders?: "empty" | "failed";
 }
 
 /** What the screen sent, and which tasks the server now counts as done. */
@@ -257,6 +263,8 @@ export function serveHome(api: HomeApi = {}): Served {
     ),
     http.get("*/api/v1/orders", () => {
       served.calls.push("GET /api/v1/orders");
+      if (api.orders === "failed") return fail(500);
+      if (api.orders === "empty") return HttpResponse.json(page([], 0));
       const seen = api.prices === true;
       return HttpResponse.json({
         data: [
