@@ -103,7 +103,6 @@
     "toConfirm": "To confirm",
     "docsNone": "No document needs attention",
     "whyShort": "{{quantity}} short",
-    "whyPayment": "Payment not confirmed",
     "whyMore": "{{reason}} and {{count}} more",
     "heldAtFact": "Held at {{team}}",
     "shipFact": "Ships {{date}}",
