@@ -262,12 +262,14 @@ Ticked means it exists on `main` and I found it with a command. Planned means th
 
 ### 8. Dates to watch
 
-| Date       | What                                                                                                                                                                                                          |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-11-03 | glob 14.0.2 passes the 7-day release-age window, so an override to glob 14 becomes possible. Done in P-28 with glob 14.0.3                                                                                    |
-| 2026-11-06 | `GHSA-3g3m-2fjr-6pw4` would stop being accepted in `osv-scanner.toml`. P-28 removes the entry, because glob 14.0.3 replaces the affected glob 13.0.6                                                          |
-| 2026-11-14 | Review of `GHSA-g3hv-75wg-m249` (minimatch) in `osv-scanner.toml` and in the `audit.ignore` list of `pnpm-workspace.yaml`, and of the five forced versions there (multer, undici, uuid, mysql2, deepmerge-ts) |
-| 2026-12-01 | Review of the ESLint plugin peer dependency in `pnpm-workspace.yaml`                                                                                                                                          |
+| Date       | What                                                                                                                                                                                                                                                                                                                      |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-11-03 | glob 14.0.2 passes the 7-day release-age window, so an override to glob 14 becomes possible. Done in P-28 with glob 14.0.3                                                                                                                                                                                                |
+| 2026-11-06 | `GHSA-3g3m-2fjr-6pw4` would stop being accepted in `osv-scanner.toml`. P-28 removes the entry, because glob 14.0.3 replaces the affected glob 13.0.6                                                                                                                                                                      |
+| 2026-11-14 | Review of `GHSA-g3hv-75wg-m249` (minimatch) in `osv-scanner.toml` and in the `audit.ignore` list of `pnpm-workspace.yaml`, and of the five forced versions there (multer, undici, uuid, mysql2, deepmerge-ts). Done: minimatch was renewed on 14 Nov to 28 Nov, and the forced versions were rechecked on 20 Nov and kept |
+| 2026-11-28 | Review of `GHSA-g3hv-75wg-m249` (minimatch) in `osv-scanner.toml` and in the `audit.ignore` list of `pnpm-workspace.yaml`. The scan fails on it again after this date                                                                                                                                                     |
+| 2026-12-01 | Review of the ESLint plugin peer dependency in `pnpm-workspace.yaml`                                                                                                                                                                                                                                                      |
+| 2026-12-04 | Review of the seven forced versions in `pnpm-workspace.yaml` (multer, undici, uuid, mysql2, deepmerge-ts, effect, glob): drop each one whose parent package now asks for the fixed version                                                                                                                                |
 
 ### 9. What only Richie can do by hand
 
@@ -356,7 +358,7 @@ The board sync keeps an open card's Sprint, so the cards of P-21 (#36) and P-61 
 | P-106 | Three visual directions                                          | P    | must     | 8      | 3, 4    | `feat/platform-direction-rollout`     | Done in one branch with P-107, pull request to come           |
 | P-107 | Roll the picked direction onto the shell and templates           | P    | must     | 8      | 5       | `feat/platform-direction-rollout`     | Done in one branch with P-106, pull request to come           |
 | P-108 | The landing page                                                 | P    | should   | 8      | 11      | `feat/platform-landing`               | Not started                                                   |
-| P-109 | The sign-in page with the scene                                  | P    | should   | 3      | 6       | `feat/platform-sign-in-scene`         | Not started                                                   |
+| P-109 | The sign-in page with the scene                                  | P    | should   | 3      | 6       | `feat/platform-sign-in-scene`         | The scene is in #285; the story stays open                    |
 | P-110 | The speed bar                                                    | P    | should   | 5      | 7       | `feat/platform-speed-bar`             | Not started                                                   |
 | P-111 | Grid polish                                                      | P    | could    | 5      | 13      | `feat/platform-grid-polish`           | Not started                                                   |
 | P-112 | Small delights                                                   | P    | could    | 3      | 13      | `feat/platform-small-delights`        | Not started                                                   |
@@ -382,6 +384,8 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 | Story | Title                                                 | Branch                           | State                                                                               |
 | ----- | ----------------------------------------------------- | -------------------------------- | ----------------------------------------------------------------------------------- |
 | #288  | Home leads with what needs the team                   | `feat/platform-home-next-act`    | This pull request. Needs you first, labelled amounts and honest one-click words     |
+| #286  | The entrance: six teams first, in flow order          | `feat/platform-entrance-flow`    | This pull request. A role change stays on the order's page                          |
+| #285  | The build shown at the proposal presentation          | `feat/platform-proposal-demo`    | This pull request. It brings the 25 commits shown on 17 Nov, with `main` merged in  |
 | #191  | Cut CI minutes before the repository goes private     | `ci/minutes-job-conditions`      | Merged, [#192](https://github.com/xiu2809xiu-rgb/orderpilot/pull/192)               |
 | P-42  | Plan prompt 004                                       | `chore/plan-prompt-004`          | Merged, [#138](https://github.com/xiu2809xiu-rgb/orderpilot/pull/138)               |
 | P-13  | Docker images and the IaC scan                        | `ci/docker`                      | Merged, [#172](https://github.com/xiu2809xiu-rgb/orderpilot/pull/172)               |
