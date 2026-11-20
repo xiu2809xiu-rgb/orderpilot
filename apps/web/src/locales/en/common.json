@@ -125,7 +125,13 @@
   },
   "demo": {
     "switcher": "Demo role",
-    "switcherHint": "Switch to another role. An order you have open stays open.",
+    "switcherHint": "Switch to another role. The order on screen stays open, and each role keeps its own open records.",
+    "switchAsk": {
+      "title": "Switch role?",
+      "body": "What you have typed is not saved.",
+      "switch": "Switch role",
+      "stay": "Stay here"
+    },
     "current": "Current role",
     "jobs": {
       "SUPPORT": "Takes in the customer's order and sends the proforma invoice",
