@@ -66,14 +66,18 @@ describe("what Upload and Spark do", () => {
   it("describes Upload before it is pressed, to assistive technology", async () => {
     await open();
     const upload = await barButton("Upload", "link");
-    expect(upload).toHaveAccessibleDescription("Upload a PO for Spark to read");
+    expect(upload).toHaveAccessibleDescription(
+      "Demo: let Spark read a sample PO",
+    );
     expect(upload).toHaveAttribute("href", "/upload");
   });
 
   it("describes Spark, and keeps what says it opens a panel", async () => {
     await open();
     const spark = await barButton("Spark", "button");
-    expect(spark).toHaveAccessibleDescription("Ask Spark about stock or sales");
+    expect(spark).toHaveAccessibleDescription(
+      "Demo: ask Spark about stock or sales",
+    );
     expect(spark).toHaveAttribute("aria-expanded", "false");
     expect(spark).toHaveAttribute("aria-controls");
   });
@@ -85,7 +89,7 @@ describe("what Upload and Spark do", () => {
       upload.focus();
     });
     expect(await screen.findByRole("tooltip")).toHaveTextContent(
-      "Upload a PO for Spark to read",
+      "Demo: let Spark read a sample PO",
     );
   });
 
@@ -94,7 +98,7 @@ describe("what Upload and Spark do", () => {
     await open();
     await user.hover(await barButton("Spark", "button"));
     expect(await screen.findByRole("tooltip")).toHaveTextContent(
-      "Ask Spark about stock or sales",
+      "Demo: ask Spark about stock or sales",
     );
   });
 
@@ -137,7 +141,7 @@ describe("the menu of a narrow window", () => {
     expect(within(menu).getByRole("button", { name: "Theme" })).toBeVisible();
   });
 
-  it("changes the theme from the menu and closes the menu on Upload", async () => {
+  it("changes the theme from the menu", async () => {
     const user = userEvent.setup();
     await open();
     await user.click(
@@ -149,5 +153,23 @@ describe("the menu of a narrow window", () => {
       await screen.findByRole("menuitemradio", { name: "Dark" }),
     );
     expect(document.documentElement).toHaveClass("dark");
+  });
+
+  it("closes on Upload, which opens the upload page", async () => {
+    const user = userEvent.setup();
+    await open();
+    await user.click(
+      screen.getByRole("button", { name: "Open navigation menu" }),
+    );
+    const menu = await screen.findByRole("dialog", { name: "Navigation" });
+    await user.click(within(menu).getByRole("link", { name: "Upload" }));
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog", { name: "Navigation" })).toBeNull();
+    });
+    // The route changed: the trail of the top bar now ends on the upload page.
+    const trail = await screen.findByRole("navigation", { name: "Breadcrumb" });
+    await waitFor(() => {
+      expect(within(trail).getByText("Upload and review")).toBeVisible();
+    });
   });
 });

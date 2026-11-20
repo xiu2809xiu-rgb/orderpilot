@@ -23,9 +23,9 @@
     "collapsePanel": "Collapse the panel",
     "expandPanel": "Expand the panel",
     "upload": "Upload",
-    "uploadHint": "Upload a PO for Spark to read",
+    "uploadHint": "Demo: let Spark read a sample PO",
     "spark": "Spark",
-    "sparkHint": "Ask Spark about stock or sales",
+    "sparkHint": "Demo: ask Spark about stock or sales",
     "extras": "Upload and theme",
     "help": {
       "label": "Help",
