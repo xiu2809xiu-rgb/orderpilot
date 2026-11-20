@@ -21,7 +21,7 @@
     "scroll": "{{name}}, scrollable",
     "hidden": "Hidden"
   },
-  "emptyDescription": "Records appear here once they are read from Business Central. Open Connectors to check the link.",
+  "emptyDescription": "Records appear here once they are read from Business Central.",
   "availability": {
     "short": "Short",
     "low": "Low",
