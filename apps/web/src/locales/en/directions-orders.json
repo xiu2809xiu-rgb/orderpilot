@@ -188,9 +188,9 @@
     "allDone": "Every step is done."
   },
   "action": {
+    "none": "You have no open task on this order.",
     "reviewNotice": "A document of this order waits for a person to confirm its fields. This build has no screen that confirms a stored document.",
     "reviewSample": "See the review on a sample",
-    "none": "You have no open task on this order.",
     "yourTask": "Your task"
   },
   "order": {
@@ -210,12 +210,12 @@
       "void": "Voided. Nothing more happens to this order.",
       "stage": "{{stage}}.",
       "stageWhy": "{{stage}}: {{why}}.",
-      "check": {
-        "quantity": "the packing list differs from the PO",
-        "price": "the unit price on the PI differs from the PO"
-      },
-      "checkOther": "a check did not pass: {{label}}",
       "why": {
+        "check": {
+          "quantity": "the packing list differs from the PO",
+          "price": "the unit price on the PI differs from the PO"
+        },
+        "checkOther": "a check did not pass: {{label}}",
         "short": "{{quantity}} short on {{item}}",
         "shortMore_one": "{{quantity}} short on {{item}} and {{count}} more item",
         "shortMore_other": "{{quantity}} short on {{item}} and {{count}} more items"
@@ -254,7 +254,7 @@
       "title": "Order details"
     },
     "entry": {
-      "sample": "A sample order of the synthetic demo set. Samples are read only here.",
+      "sample": "A sample order of the synthetic demo set. Its details cannot be edited here.",
       "draft": "Entered here as a draft. Only a role that may edit orders can change it.",
       "submitted": "Entered here and submitted. Only a draft can be changed.",
       "void": "Entered here and voided. It cannot be changed."

@@ -287,7 +287,7 @@ describe("the first screen", () => {
     await user.keyboard("{Enter}");
     expect(
       await screen.findByText(
-        "A sample order of the synthetic demo set. Samples are read only here.",
+        "A sample order of the synthetic demo set. Its details cannot be edited here.",
       ),
     ).toBeVisible();
   });
