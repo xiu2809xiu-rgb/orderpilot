@@ -20,7 +20,11 @@ function readClipboard(): Clipboard | undefined {
 interface DraftReplyProps {
   description: string;
   part: string;
-  /** What is available now: on hand, less what sales orders hold. */
+  /**
+   * What we can ship now: on hand, less what sales orders hold. It is not
+   * called "available" because the table's Available adds purchase orders
+   * (assumption A-17), and the customer must not read the two as one figure.
+   */
   now: number;
   /** What is still on purchase orders: due, not here yet. */
   due: number;

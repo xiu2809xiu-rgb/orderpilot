@@ -85,7 +85,7 @@
       "subjectLabel": "Subject",
       "subject": "Stock of {{description}}",
       "bodyLabel": "Message",
-      "now": "We have {{now}} available now.",
+      "now": "We can ship {{now}} now.",
       "due": "A further {{due}} are due on purchase orders.",
       "body": "Hello,\n\nThank you for asking about the {{description}} ({{part}}). {{stock}} We can confirm a shipping date as soon as we receive your purchase order.\n\nKind regards,\nSpectra Innovations",
       "copy": "Copy draft",
@@ -120,7 +120,8 @@
   },
   "other": {
     "answer_one": "This is a preview with scripted answers, so Spark cannot answer that one. It can answer this question:",
-    "answer_other": "This is a preview with scripted answers, so Spark cannot answer that one. It can answer these questions:"
+    "answer_other": "This is a preview with scripted answers, so Spark cannot answer that one. It can answer these questions:",
+    "noSales": "Sales questions are for roles that may read sales figures."
   },
   "scripted": "Scripted preview"
 }
