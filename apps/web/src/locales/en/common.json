@@ -75,11 +75,27 @@
   },
   "palette": {
     "title": "Command palette",
-    "description": "Search for an area or an action.",
-    "placeholder": "Type an area or an action",
+    "description": "Search for an order, customer, vendor, item, page or action.",
+    "placeholder": "Search orders, customers, vendors, items or pages",
     "empty": "Nothing matches.",
+    "emptyRecords": "No order, customer, vendor or item matches \"{{query}}\". Try an order or PO number.",
+    "searching": "Searching orders, customers, vendors and items",
+    "failed": "Could not search the records.",
+    "failedTrace": "Could not search the records. Trace id {{traceId}}.",
+    "retry": "Retry",
+    "resultsCount_one": "{{count}} result",
+    "resultsCount_other": "{{count}} results",
+    "recent": "Opened lately",
     "goTo": "Go to",
     "actions": "Actions",
+    "groups": {
+      "order": "Orders",
+      "customer": "Customers",
+      "vendor": "Vendors",
+      "item": "Items"
+    },
+    "po": "PO {{po}}",
+    "rowName": "{{kind}} {{no}}",
     "themeLight": "Use the light theme",
     "themeDark": "Use the dark theme",
     "helpLabel": "Keyboard shortcuts",
@@ -106,7 +122,18 @@
   "demo": {
     "switcher": "Demo role",
     "switcherHint": "Switch to another role to see its home page.",
-    "current": "Current role"
+    "current": "Current role",
+    "jobs": {
+      "SUPPORT": "Takes in the customer's order and sends the proforma invoice",
+      "PRODUCT_MANAGER": "Checks stock and asks to buy what is short",
+      "APPROVER": "Approves or rejects the request to buy",
+      "FINANCE": "Confirms the customer's payment",
+      "WAREHOUSE": "Packs the goods and checks them against the papers",
+      "LOGISTICS": "Books the forwarder and follows the shipping papers",
+      "MANAGEMENT": "Reads the tracker and the KPIs",
+      "AUDITOR": "Reads the audit trail",
+      "SYSTEM_ADMIN": "Sets up users and roles"
+    }
   },
   "validation": {
     "required": "This field is required.",

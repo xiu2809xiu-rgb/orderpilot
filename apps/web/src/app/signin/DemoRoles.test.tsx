@@ -33,3 +33,28 @@ describe("the demo roles while the badge words load", () => {
     expect(screen.getByRole("button", { name: /Grace Ong/ })).toBeEnabled();
   });
 });
+
+describe("the demo roles when the list has no other roles", () => {
+  it("draws the six teams and no More roles control", () => {
+    render(
+      <Suspense fallback={null}>
+        <DemoRoles
+          roles={[
+            { role: "LOGISTICS", displayName: "Arjun Mehta" },
+            { role: "SUPPORT", displayName: "Mei Tan" },
+          ]}
+          headingId="demo"
+          disabled={false}
+          onPick={() => undefined}
+        />
+      </Suspense>,
+    );
+    const names = screen
+      .getAllByRole("button")
+      .map((button) => button.textContent);
+    // The flow order wins over the order the list came in, and the numbers close up.
+    expect(names[0]).toMatch(/^1Support/);
+    expect(names[1]).toMatch(/^2Logistics/);
+    expect(screen.queryByRole("button", { name: "More roles" })).toBeNull();
+  });
+});

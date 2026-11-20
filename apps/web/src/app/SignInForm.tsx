@@ -1,7 +1,9 @@
 import type { Role, Session } from "@orderpilot/shared";
-import { useState } from "react";
+import { ChevronDown } from "lucide-react";
+import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import { demoLogin, login } from "@/lib/api/auth";
 import { describeError } from "@/lib/errors";
 import { DemoRoles } from "./signin/DemoRoles";
@@ -19,9 +21,12 @@ interface SignInFormProps {
 }
 
 /**
- * Email and password first, then the demo roles when the API says demo mode
- * is on. The form never moves when the roles arrive below it, so what a person
- * is typing keeps its place and its focus.
+ * With demo mode on, the six teams lead and the email form waits behind
+ * "Sign in with email" (open from the start when the email is known, such as
+ * after a session ended). With demo mode off, or while that is still unknown,
+ * the form is simply there. The form stays mounted through all of it, hidden
+ * when closed, so what a person is typing keeps its place and its focus when
+ * the roles arrive.
  */
 export function SignInForm({
   defaultEmail = "",
@@ -31,7 +36,12 @@ export function SignInForm({
   // describeError reads the common error texts; the form's own words are in signin.
   const { t: tCommon } = useTranslation();
   const { t } = useTranslation("signin");
-  const [failure, setFailure] = useState<Failure | null>(null);
+  const [failure, setFailure] = useState<
+    (Failure & { from: "role" | "password" }) | null
+  >(null);
+  // Anyone who has already put a hand to the form keeps it open.
+  const [emailOpen, setEmailOpen] = useState(defaultEmail !== "");
+  const formId = useId();
   const [busy, setBusy] = useState(false);
   const [pending, setPending] = useState<Role | null>(null);
   const options = useAuthOptions();
@@ -45,7 +55,10 @@ export function SignInForm({
       const session = await action();
       onSignedIn?.(session);
     } catch (error) {
-      setFailure(describeError(error, tCommon));
+      setFailure({
+        ...describeError(error, tCommon),
+        from: role ? "role" : "password",
+      });
     } finally {
       setBusy(false);
       setPending(null);
@@ -53,48 +66,79 @@ export function SignInForm({
   }
 
   const demo = options.data?.demoMode ? options.data : null;
+  const formShown = demo === null || emailOpen;
+  // A failed password is drawn at the form's button; a failed role click is
+  // drawn under the roles, so it is seen whichever part is open.
+  const inForm = failure?.from === "password" && formShown;
+  const failureNode = failure ? <SignInFailure failure={failure} /> : null;
 
   return (
-    <div className="flex flex-col gap-5">
-      <PasswordForm
-        defaultEmail={defaultEmail}
-        idPrefix={idPrefix}
-        busy={busy}
-        alert={failure ? <SignInFailure failure={failure} /> : null}
-        onSubmit={(values) => run(() => login(values), null)}
-      />
+    <div className="flex flex-col gap-3">
+      {options.isPending ? (
+        // The roles are on their way: keep their room so nothing jumps.
+        <div
+          aria-hidden="true"
+          className="grid grid-cols-2 gap-2 sm:grid-cols-3"
+        >
+          {Array.from({ length: 6 }, (_, index) => (
+            <Skeleton key={index} className="h-24" />
+          ))}
+        </div>
+      ) : null}
+      {demo ? (
+        <DemoRoles
+          roles={demo.demoRoles}
+          headingId={`${idPrefix}-demo`}
+          disabled={busy}
+          pending={pending}
+          onPick={(role) => {
+            void run(() => demoLogin(role), role);
+          }}
+        />
+      ) : null}
+      {failure && !inForm ? failureNode : null}
       {options.isError ? (
         <p className="fs-14 text-muted-foreground">
           {t("login.optionsFailed")}
         </p>
       ) : null}
-      {options.isPending ? (
-        // The roles are on their way: keep their room so nothing jumps.
-        <div
-          aria-hidden="true"
-          className="flex flex-col gap-3 border-t border-border pt-5"
-        >
-          <Skeleton className="h-10 w-3/5" />
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-            {Array.from({ length: 9 }, (_, index) => (
-              <Skeleton key={index} className="h-14" />
-            ))}
-          </div>
-        </div>
-      ) : null}
-      {demo ? (
-        <div className="flex flex-col gap-4 border-t border-border pt-5">
-          <DemoRoles
-            roles={demo.demoRoles}
-            headingId={`${idPrefix}-demo`}
-            disabled={busy}
-            pending={pending}
-            onPick={(role) => {
-              void run(() => demoLogin(role), role);
+      <div className="flex flex-col gap-3">
+        {demo ? (
+          <button
+            type="button"
+            aria-expanded={formShown}
+            aria-controls={formId}
+            onClick={() => {
+              setEmailOpen(!formShown);
             }}
+            className="signin-toggle"
+          >
+            <ChevronDown
+              aria-hidden="true"
+              className={cn("size-4", formShown && "rotate-180")}
+            />
+            {t("login.emailToggle")}
+          </button>
+        ) : null}
+        <div
+          id={formId}
+          hidden={!formShown}
+          onFocusCapture={() => {
+            setEmailOpen(true);
+          }}
+        >
+          <PasswordForm
+            defaultEmail={defaultEmail}
+            idPrefix={idPrefix}
+            busy={busy}
+            alert={inForm ? failureNode : null}
+            onEdit={() => {
+              setFailure(null);
+            }}
+            onSubmit={(values) => run(() => login(values), null)}
           />
         </div>
-      ) : null}
+      </div>
       <p role="status" className="sr-only">
         {pending ? t("login.submitting") : ""}
       </p>

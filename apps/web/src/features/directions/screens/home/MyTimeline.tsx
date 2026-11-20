@@ -8,13 +8,14 @@ import type { DoneItem } from "./doneToday";
 import { HomeQuery } from "./HomeQuery";
 import { RowSkeletons } from "./RowSkeletons";
 import { buildTimeline } from "./timelineModel";
-import { DoneGroup, NextGroup, NowGroup } from "./TimelineBody";
+import { DoneGroup } from "./DoneGroup";
+import { NextGroup, NowGroup } from "./TimelineBody";
 import type { useHomeTasks } from "./useHomeTasks";
 
 /**
  * My timeline: what the person finished today, the task in hand with how long
  * it has waited and how long its step usually takes, and the queue behind it
- * with when each should be done. The line above totals the queue. Every
+ * with when each should be done. The line above says when the last is due. Every
  * estimate is the measured median of the step on the data set, and the
  * screen says so; a step the data cannot time shows no number.
  */
@@ -32,13 +33,10 @@ export function MyTimeline({
     [home.tasks, home.total, at],
   );
   const last = model.lastDue ? formatDay(model.lastDue) : "";
+  // How many wait is said once, in the sentence under the greeting.
   const summary = !model.lastDue
     ? t("timeline.summaryNone")
-    : t("timeline.summary", {
-        count: model.waiting,
-        late: model.late,
-        last,
-      });
+    : t("timeline.summary", { last });
 
   return (
     <HomeSection title={t("timeline.title")} intro={t("timeline.intro")} work>

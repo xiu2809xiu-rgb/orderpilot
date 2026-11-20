@@ -32,7 +32,8 @@ export function SignInHero() {
       className="flex min-w-0 flex-col justify-between gap-6 col-start-1 row-start-3 lg:row-span-2 lg:row-start-2 lg:gap-7"
     >
       <div className="flex max-w-2xl flex-col gap-4">
-        <h1
+        {/* The card's title is the page's one h1: the tagline is its promise, not its name. */}
+        <p
           id="signin-promise"
           style={HEADLINE_GRADIENT}
           className="fs-32 max-w-lg font-semibold tracking-tight text-balance max-lg:text-(length:--type-28)"
@@ -44,7 +45,7 @@ export function SignInHero() {
             accentFrom={words.length - 2}
             accentClassName="kit-gradient-text"
           />
-        </h1>
+        </p>
         <Suspense fallback={null}>
           <SignInLead />
         </Suspense>

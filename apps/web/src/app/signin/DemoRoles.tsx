@@ -1,33 +1,11 @@
 import type { AuthOptions, Role } from "@orderpilot/shared";
-import {
-  Banknote,
-  BadgeCheck,
-  ChartNoAxesCombined,
-  Headset,
-  LoaderCircle,
-  Package,
-  ScrollText,
-  Settings2,
-  Truck,
-  Warehouse,
-  type LucideIcon,
-} from "lucide-react";
-import { Suspense } from "react";
+import { ChevronDown } from "lucide-react";
+import { Suspense, useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { DemoBadge } from "@/components/common/DemoBadge";
 import { cn } from "@/lib/utils";
-
-const ICONS: Record<Role, LucideIcon> = {
-  SYSTEM_ADMIN: Settings2,
-  PRODUCT_MANAGER: Package,
-  APPROVER: BadgeCheck,
-  SUPPORT: Headset,
-  WAREHOUSE: Warehouse,
-  FINANCE: Banknote,
-  LOGISTICS: Truck,
-  MANAGEMENT: ChartNoAxesCombined,
-  AUDITOR: ScrollText,
-};
+import { splitDemoRoles } from "../demoRoles";
+import { DemoRoleButton } from "./DemoRoleButton";
 
 interface DemoRolesProps {
   roles: AuthOptions["demoRoles"];
@@ -40,7 +18,11 @@ interface DemoRolesProps {
   onPick: (role: Role) => void;
 }
 
-/** One click per role: the role's name and the persona, in a compact grid. */
+/**
+ * One click per role. The teams of one sales order lead, numbered in the order
+ * the order passes through them; every other role is behind "More roles",
+ * closed at first so the first view stays short.
+ */
 export function DemoRoles({
   roles,
   headingId,
@@ -49,14 +31,16 @@ export function DemoRoles({
   onPick,
 }: DemoRolesProps) {
   const { t } = useTranslation("signin");
-  const { t: tCommon } = useTranslation();
+  const [moreOpen, setMoreOpen] = useState(false);
+  const moreId = useId();
+  const { flow, more } = splitDemoRoles(roles);
   return (
     <section aria-labelledby={headingId} className="flex flex-col gap-3">
       <div>
         <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-          <h3 id={headingId} className="fs-14 font-semibold">
+          <h2 id={headingId} className="fs-16 font-semibold">
             {t("login.demoTitle")}
-          </h3>
+          </h2>
           {/* Its words load on their own: without a local boundary the whole form side would suspend and drop focus. */}
           <Suspense fallback={null}>
             <DemoBadge kind="synthetic" />
@@ -64,55 +48,60 @@ export function DemoRoles({
         </div>
         <p className="fs-14 text-muted-foreground">{t("login.demoHint")}</p>
       </div>
-      <ul
+      <ol
         aria-label={t("login.demoRolesLabel")}
-        className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:auto-rows-fr"
+        className="grid grid-cols-2 gap-2 sm:grid-cols-3"
       >
-        {roles.map(({ role, displayName }) => {
-          const Icon = ICONS[role];
-          const working = pending === role;
-          return (
-            // Nine roles in two columns leave one alone: it takes the whole row.
-            <li key={role} className="flex min-w-0 max-sm:last:odd:col-span-2">
-              <button
-                type="button"
-                disabled={disabled}
-                aria-busy={working || undefined}
-                onClick={() => {
-                  onPick(role);
-                }}
-                className={cn(
-                  "signin-role flex min-h-14 w-full flex-col items-start gap-0.5 border border-(--border-strong) bg-transparent p-2 text-left text-foreground transition-colors duration-150 hover:bg-(--dx-hover-bg) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed pointer-coarse:min-h-14",
-                  working
-                    ? "bg-accent"
-                    : "disabled:opacity-60 disabled:hover:bg-transparent",
-                )}
-                style={{ borderRadius: "var(--radius-control)" }}
-              >
-                <span className="fs-14 flex w-full items-start gap-1.5 font-medium">
-                  {working ? (
-                    <LoaderCircle
-                      className="mt-px size-4 shrink-0 animate-spin text-ring"
-                      aria-hidden="true"
-                    />
-                  ) : (
-                    <Icon
-                      className="mt-px size-4 shrink-0 text-muted-foreground"
-                      aria-hidden="true"
-                    />
-                  )}
-                  <span className="leading-tight">
-                    {tCommon(`roles.${role}`)}
-                  </span>
-                </span>{" "}
-                <span className="fs-12 block max-w-full truncate text-muted-foreground">
-                  {displayName}
-                </span>
-              </button>
-            </li>
-          );
-        })}
-      </ul>
+        {flow.map(({ role, displayName, step }) => (
+          <li key={role} className="flex min-w-0">
+            <DemoRoleButton
+              role={role}
+              displayName={displayName}
+              step={step}
+              disabled={disabled}
+              working={pending === role}
+              onPick={onPick}
+            />
+          </li>
+        ))}
+      </ol>
+      {more.length > 0 ? (
+        <div className="flex flex-col gap-2">
+          <button
+            type="button"
+            aria-expanded={moreOpen}
+            aria-controls={moreId}
+            onClick={() => {
+              setMoreOpen((open) => !open);
+            }}
+            className="signin-toggle"
+          >
+            <ChevronDown
+              aria-hidden="true"
+              className={cn("size-4", moreOpen && "rotate-180")}
+            />
+            {t("login.moreRoles")}
+          </button>
+          <ul
+            id={moreId}
+            hidden={!moreOpen}
+            aria-label={t("login.moreRolesLabel")}
+            className="grid grid-cols-2 gap-2 sm:grid-cols-3"
+          >
+            {more.map(({ role, displayName }) => (
+              <li key={role} className="flex min-w-0">
+                <DemoRoleButton
+                  role={role}
+                  displayName={displayName}
+                  disabled={disabled}
+                  working={pending === role}
+                  onPick={onPick}
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
     </section>
   );
 }
