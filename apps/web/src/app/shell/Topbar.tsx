@@ -1,6 +1,7 @@
-import { PanelLeft, Sparkles, Upload } from "lucide-react";
+import { PanelLeft, Upload } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { SparkButton } from "@/features/directions/spark/SparkButton";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { MobileMenu } from "./MobileMenu";
 import { Notifications } from "./Notifications";
@@ -58,13 +59,11 @@ export function Topbar({
         />
       ) : null}
       {spark.available ? (
-        <TopBarAction
-          icon={Sparkles}
-          label={t("shell.spark")}
-          onClick={() => {
-            spark.setOpen(true);
+        <SparkButton
+          open={spark.open}
+          onToggle={() => {
+            spark.setOpen(!spark.open);
           }}
-          shortcut="Control+. Meta+."
         />
       ) : null}
       <Notifications />
