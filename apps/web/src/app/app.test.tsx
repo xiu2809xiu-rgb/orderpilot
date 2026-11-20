@@ -89,6 +89,10 @@ describe("signed out", () => {
   it("shows the server's reason and trace id for a wrong password", async () => {
     const user = userEvent.setup();
     renderApp("/login");
+    // With demo mode on, the email form waits behind its own control.
+    await user.click(
+      await screen.findByRole("button", { name: "Sign in with email" }),
+    );
     await user.type(await screen.findByLabelText("Email"), "mei@example.test");
     await user.type(screen.getByLabelText("Password"), "wrong");
     await user.click(screen.getByRole("button", { name: "Sign in" }));
@@ -100,6 +104,9 @@ describe("signed out", () => {
   it("checks the form before sending anything", async () => {
     const user = userEvent.setup();
     const { fetch } = renderApp("/login");
+    await user.click(
+      await screen.findByRole("button", { name: "Sign in with email" }),
+    );
     await user.click(await screen.findByRole("button", { name: "Sign in" }));
     // Each field says what to do, not only that it is wrong.
     expect(
