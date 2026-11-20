@@ -13,6 +13,12 @@
   margin-left: 0.25rem;
 }
 
+/* What became of an order entered here takes a line of its own under the number. */
+.od-order .od-title-row .od-entry-meaning {
+  flex-basis: 100%;
+  color: var(--muted-foreground);
+}
+
 .od-entry-badge {
   display: inline-flex;
   align-items: center;
