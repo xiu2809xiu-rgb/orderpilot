@@ -42,6 +42,7 @@ export function ItemCell({ index, row, readOnly }: CellProps) {
 export function DescriptionCell({ index, row, readOnly }: CellProps) {
   const { t } = useTranslation("linesGrid");
   const { control } = useFormContext();
+  const { itemDescription } = useGrid();
   if (readOnly) return <ReadText field="description" row={row} />;
   return (
     <TextField
@@ -50,6 +51,9 @@ export function DescriptionCell({ index, row, readOnly }: CellProps) {
       label={t("cells.description", { n: index + 1 })}
       hideLabel
       maxLength={100}
+      placeholder={
+        itemDescription === "own" ? t("placeholders.description") : undefined
+      }
     />
   );
 }
@@ -83,6 +87,11 @@ export function PriceCell({ index, row, readOnly }: CellProps) {
         label={t("cells.unitPrice", { n: index + 1 })}
         hideLabel
         scale={2}
+        // Empty on purpose: the PO sets the price, so the field says where
+        // the figure comes from.
+        placeholder={
+          itemPrice === "reference" ? t("placeholders.unitPrice") : undefined
+        }
       />
       {itemPrice === "reference" ? <LastPriceNote row={row} /> : null}
     </>

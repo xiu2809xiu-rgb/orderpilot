@@ -92,8 +92,8 @@ describe("the New order page", () => {
         prepaymentPercent: "100.00",
         lines: [
           {
+            // No description of its own: the server gives the item's.
             itemNo: "I-0001",
-            description: "Norvale Wireless Mouse",
             quantity: "2",
             unitPrice: "17.25",
           },

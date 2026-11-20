@@ -6,6 +6,7 @@ import {
   fromDetail,
   toCreateBody,
   toPatchBody,
+  withoutBlankTail,
 } from "./orderFormValues";
 import type { OrderFormOutput } from "./orderFormSchema";
 
@@ -108,5 +109,37 @@ describe("the order form's values", () => {
 
   it("builds the patch body with the version the form was typed against", () => {
     expect(toPatchBody(output({ version: 7 }), false).version).toBe(7);
+  });
+});
+
+describe("the blank line at the end", () => {
+  const typed = (over: object = {}) => ({
+    ...must(fromDetail(draftDetail()).lines[0]),
+    ...over,
+  });
+  const blank = () => ({ ...must(blankOrder("2026-11-09").lines[0]) });
+
+  it("is left out, however many there are, when a typed line comes before", () => {
+    const values = {
+      ...blankOrder("2026-11-09"),
+      lines: [typed(), blank(), blank()],
+    };
+    expect(withoutBlankTail(values).lines).toEqual([typed()]);
+  });
+
+  it("keeps a blank line between typed ones, and a line touched with only a quantity", () => {
+    const touched = { ...blank(), quantity: "3" };
+    const values = {
+      ...blankOrder("2026-11-09"),
+      lines: [typed(), blank(), touched],
+    };
+    expect(withoutBlankTail(values).lines).toHaveLength(3);
+    const tail = { ...blankOrder("2026-11-09"), lines: [typed(), touched] };
+    expect(withoutBlankTail(tail)).toBe(tail);
+  });
+
+  it("leaves a form nobody has typed in alone, so its errors say where to start", () => {
+    const empty = blankOrder("2026-11-09");
+    expect(withoutBlankTail(empty)).toBe(empty);
   });
 });
