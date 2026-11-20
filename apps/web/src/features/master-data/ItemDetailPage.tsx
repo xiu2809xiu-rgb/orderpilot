@@ -8,8 +8,10 @@ import { useMasterDataItem } from "@/lib/api/generated/endpoints/master-data/mas
 import { ItemOrders } from "./ItemOrders";
 import { ItemSupply } from "./ItemSupply";
 import { AvailabilityBadge, KeyFacts, MaskedMoney } from "./pieces";
+import { RecordNumber } from "./RecordNumber";
 import { BackToList, RecordSheet, RecordState } from "./RecordState";
 import { StockPicture } from "./StockPicture";
+import { StockRule } from "./StockRule";
 
 function ItemRecord({ item }: { item: ItemDetail }) {
   const { t } = useTranslation("master-data");
@@ -17,11 +19,13 @@ function ItemRecord({ item }: { item: ItemDetail }) {
     <RecordSheet>
       <BackToList to="/master-data/items" label={t("item.back")} />
       <PageHeader
-        title={item.no}
-        description={`${item.description}, ${item.brand}`}
+        title={item.description}
+        description={item.brand}
         meta={
           <>
+            <RecordNumber no={item.no} label={t("item.numberLabel")} />
             <AvailabilityBadge availability={item.availability} />
+            {item.availability === "ok" ? null : <StockRule />}
             <DemoBadge kind="mockBusinessCentral" />
           </>
         }

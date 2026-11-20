@@ -1,10 +1,6 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor, within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { screen, waitFor, within } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
-import { MemoryRouter, Route, Routes } from "react-router";
 import { describe, expect, it } from "vitest";
-import i18n from "@/i18n";
 import {
   getMasterDataCustomerMockHandler,
   getMasterDataFiltersMockHandler,
@@ -14,150 +10,22 @@ import {
 } from "@/lib/api/generated/endpoints/master-data/master-data.msw";
 import type {
   MasterDataCustomer200,
-  MasterDataFilters200,
   MasterDataItem200,
-  MasterDataItems200,
   MasterDataVendor200,
 } from "@/lib/api/generated/model";
 import { axeViolations } from "@/test/axe";
-import { useSessionStore } from "@/stores/session";
-import { errorBody, sessionFor } from "@/test/fixtures";
+import { errorBody } from "@/test/fixtures";
 import { server } from "@/test/server";
-import CustomerDetailPage from "./CustomerDetailPage";
-import ItemDetailPage from "./ItemDetailPage";
-import ItemsPage from "./ItemsPage";
-import VendorDetailPage from "./VendorDetailPage";
-
-const shown = (field: string, value: string) => ({
-  field,
-  classification: "confidential" as const,
-  masked: false,
-  value,
-  reason: null,
-});
-
-const hidden = (field: string, reason: "price" | "bankDetails" | "role") => ({
-  field,
-  classification: "restricted" as const,
-  masked: true,
-  value: null,
-  reason,
-});
-
-const row = (no: string, availability: "short" | "low" | "ok") => ({
-  no,
-  description: `Synthetic switch ${no}`,
-  partNumber: `PN-${no}`,
-  brand: "Synthetic Brand",
-  category: "NETWORKING" as const,
-  baseUnitOfMeasure: "PCS",
-  inventory: "120",
-  qtyOnSalesOrder: "80",
-  qtyOnPurchOrder: "6",
-  availableStock: "46",
-  availability,
-  unitPrice: shown("item.unitPrice", "250.00"),
-  vendorNo: "V-0001",
-  vendorName: "Synthetic Vendor One",
-});
-
-const itemList = (rows: ReturnType<typeof row>[]) =>
-  ({
-    data: rows,
-    meta: { page: 1, pageSize: 25, total: rows.length, mock: true },
-  }) as MasterDataItems200;
-
-const filters: MasterDataFilters200 = {
-  data: {
-    brands: ["Synthetic Brand"],
-    categories: [
-      "COMPONENTS",
-      "PERIPHERALS",
-      "PCS",
-      "ENTERPRISE",
-      "SECURITY",
-      "NETWORKING",
-    ],
-    vendors: [{ no: "V-0001", name: "Synthetic Vendor One" }],
-    countries: ["IN"],
-    paymentTerms: ["PREPAID"],
-  },
-  meta: { mock: true },
-};
-
-const shortItem = {
-  data: {
-    ...row("I-0004", "short"),
-    inventory: "70",
-    qtyOnSalesOrder: "30",
-    vendorItemNo: "VN-77",
-    unitCost: hidden("item.unitCost", "price"),
-    orderLines: [
-      {
-        orderNo: "SO-0012",
-        customerNo: "C-0003",
-        customerName: "Synthetic Traders",
-        orderDate: "2026-10-20",
-        shipmentDate: null,
-        status: "Waiting for SPR",
-        quantity: "146",
-        heldOut: true,
-        shortfall: {
-          state: "waiting" as const,
-          ordered: "146",
-          availableStock: "46",
-          shortBy: "100",
-          sprRecordNo: "SPR-0009",
-          purchaseOrderNo: null,
-          purchaseOrderStatus: null,
-        },
-      },
-      {
-        orderNo: "SO-0013",
-        customerNo: "C-0004",
-        customerName: "Synthetic Systems",
-        orderDate: "2026-10-22",
-        shipmentDate: null,
-        status: "Packing",
-        quantity: "30",
-        heldOut: false,
-        shortfall: null,
-      },
-    ],
-    salesOrderBreakdown: { listed: "30", heldOut: "146" },
-    purchaseLines: [],
-    sprs: [],
-  },
-  meta: { mock: true },
-} as MasterDataItem200;
-
-function renderAt(path: string) {
-  useSessionStore.getState().setSession(sessionFor("SUPPORT"));
-  const client = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
-  return render(
-    <QueryClientProvider client={client}>
-      <MemoryRouter initialEntries={[path]}>
-        <Routes>
-          <Route path="/master-data/items" element={<ItemsPage />} />
-          <Route path="/master-data/items/:no" element={<ItemDetailPage />} />
-          <Route
-            path="/master-data/vendors/:no"
-            element={<VendorDetailPage />}
-          />
-          <Route
-            path="/master-data/customers/:no"
-            element={<CustomerDetailPage />}
-          />
-        </Routes>
-      </MemoryRouter>
-    </QueryClientProvider>,
-  );
-}
-
-const load = () =>
-  i18n.loadNamespaces(["master-data", "common", "components", "list-page"]);
+import {
+  filters,
+  hidden,
+  itemList,
+  load,
+  renderAt,
+  row,
+  shortItem,
+  shown,
+} from "./masterDataTestKit";
 
 describe("the items list", () => {
   it("lists items with the Mock Business Central badge, marks the short one and links each record", async () => {
@@ -255,11 +123,11 @@ describe("an item", () => {
     server.use(getMasterDataItemMockHandler(shortItem));
     const view = renderAt("/master-data/items/I-0004");
     expect(
-      await screen.findByRole("heading", { name: "I-0004" }),
+      await screen.findByRole("heading", { name: "Synthetic switch I-0004" }),
     ).toBeVisible();
     expect(
       screen.getByText(
-        "Available Stock is Inventory minus Qty. on Sales Order plus Qty. on Purch. Order.",
+        "Available is on hand, minus on sales orders, plus on purchase orders.",
       ),
     ).toBeVisible();
     expect(
@@ -313,7 +181,7 @@ describe("an item", () => {
     } as MasterDataItem200;
     server.use(getMasterDataItemMockHandler(covered));
     const view = renderAt("/master-data/items/I-0004");
-    await screen.findByRole("heading", { name: "I-0004" });
+    await screen.findByRole("heading", { name: "Synthetic switch I-0004" });
     expect(screen.queryByText("Demand under review")).toBeNull();
     expect(screen.getByText("PO-0033 received")).toBeVisible();
     expect(
@@ -329,7 +197,7 @@ describe("an item", () => {
     await load();
     server.use(getMasterDataItemMockHandler(shortItem));
     const view = renderAt("/master-data/items/I-0004");
-    await screen.findByRole("heading", { name: "I-0004" });
+    await screen.findByRole("heading", { name: "Synthetic switch I-0004" });
     expect(
       screen.getByRole("link", { name: "See this item's orders" }),
     ).toBeVisible();
@@ -355,7 +223,7 @@ describe("an item", () => {
     await load();
     server.use(getMasterDataItemMockHandler(shortItem));
     renderAt("/master-data/items/I-0004");
-    await screen.findByRole("heading", { name: "I-0004" });
+    await screen.findByRole("heading", { name: "Synthetic switch I-0004" });
     expect(
       screen.getAllByRole("img", { name: "Hidden" }).length,
     ).toBeGreaterThan(0);
@@ -459,21 +327,30 @@ describe("a vendor", () => {
     ).toBeVisible();
   });
 
-  it("hides the bank account from another role and offers the reason", async () => {
+  it("tells Finance who may see the bank account, as a plain mark and not a warning", async () => {
+    await load();
+    server.use(getMasterDataVendorMockHandler(vendor(false)));
+    const view = renderAt("/master-data/vendors/V-0001", "FINANCE");
+    expect(await screen.findByText("000-TEST-0001")).toBeVisible();
+    expect(screen.getByText("Finance only")).toBeVisible();
+    expect(screen.queryByText("Restricted")).toBeNull();
+    expect(await axeViolations(view.container)).toEqual([]);
+  });
+
+  it("gives a role that may not see the bank account one line with the reason, and no dots", async () => {
     await load();
     server.use(getMasterDataVendorMockHandler(vendor(true)));
-    const view = renderAt("/master-data/vendors/V-0001");
-    await screen.findByRole("heading", { name: "V-0001" });
+    const view = renderAt("/master-data/vendors/V-0001", "WAREHOUSE");
+    await screen.findByRole("heading", { name: "Synthetic Vendor One" });
     expect(screen.queryByText("000-TEST-0001")).toBeNull();
-    expect(screen.getAllByRole("img", { name: "Hidden" })).toHaveLength(4);
-    const [why] = screen.getAllByRole("button", { name: /Why is this hidden/ });
-    if (!why) throw new Error("no reason button");
-    await userEvent.click(why);
     expect(
-      within(await screen.findByRole("dialog")).getByText(
+      screen.getByText(
         "Bank details are hidden unless your role handles payments.",
       ),
     ).toBeVisible();
+    expect(screen.queryByText("Finance only")).toBeNull();
+    expect(screen.queryByRole("img", { name: "Hidden" })).toBeNull();
+    expect(screen.queryByRole("table", { name: "Bank accounts" })).toBeNull();
     expect(await axeViolations(view.container)).toEqual([]);
   });
 });
@@ -540,7 +417,7 @@ describe("a customer", () => {
     await load();
     server.use(getMasterDataCustomerMockHandler(customer(true)));
     const view = renderAt("/master-data/customers/C-0003");
-    await screen.findByRole("heading", { name: "C-0003" });
+    await screen.findByRole("heading", { name: "Synthetic Traders" });
     expect(screen.queryByText(/108,000/)).toBeNull();
     expect(screen.getAllByRole("img", { name: "Hidden" })).toHaveLength(2);
     expect(await axeViolations(view.container)).toEqual([]);

@@ -2,8 +2,11 @@ import type { TFunction } from "i18next";
 import type { ItemRow } from "@orderpilot/shared";
 import type { DataTableColumn } from "@/components/common";
 import { formatQuantity } from "@/lib/format";
-import { AvailabilityBadge, MaskedMoney } from "./pieces";
+import type { MaskReason } from "@/components/common";
 import { RecordLink } from "@/components/common";
+import { MaskedColumnHeader } from "./MaskedColumnHeader";
+import { AvailabilityBadge, MaskedMoney, QuietDash } from "./pieces";
+import { StockRule } from "./StockRule";
 
 export const ITEM_SORTABLE = [
   "no",
@@ -28,10 +31,14 @@ const quantity = (
   sortable: true,
 });
 
-/** The price column cannot sort for a role that cannot see prices: the server refuses that too. */
+/**
+ * The price column cannot sort for a role that cannot see prices: the server
+ * refuses that too. When no row shows a price, the header says why, once.
+ */
 export function itemColumns(
   t: TFunction,
   priceHidden: boolean,
+  priceReason: MaskReason | null = null,
 ): DataTableColumn<ItemRow>[] {
   return [
     {
@@ -107,13 +114,27 @@ export function itemColumns(
     {
       id: "availability",
       header: t("items.columns.availability"),
+      // Where the mark is, so is the rule that gives it.
+      headerContent: (
+        <span className="inline-flex items-center gap-1">
+          {t("items.columns.availability")}
+          <StockRule />
+        </span>
+      ),
       cell: (row) => <AvailabilityBadge availability={row.availability} />,
       exportValue: (row) => t(`availability.${row.availability}`),
     },
     {
       id: "unitPrice",
       header: t("items.columns.unitPrice"),
-      cell: (row) => <MaskedMoney field={row.unitPrice} />,
+      headerContent: priceReason ? (
+        <MaskedColumnHeader
+          label={t("items.columns.unitPrice")}
+          reason={priceReason}
+        />
+      ) : undefined,
+      cell: (row) =>
+        priceReason ? <QuietDash /> : <MaskedMoney field={row.unitPrice} />,
       exportValue: (row) => row.unitPrice.value ?? t("table.hidden"),
       kind: "money",
       sortable: !priceHidden,

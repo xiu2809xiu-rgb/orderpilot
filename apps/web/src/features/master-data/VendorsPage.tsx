@@ -8,6 +8,7 @@ import {
   RecordLink,
   useUrlQuery,
   type DataTableColumn,
+  type MaskReason,
 } from "@/components/common";
 import { ListPage } from "@/components/list-page";
 import {
@@ -16,7 +17,9 @@ import {
 } from "@/lib/api/generated/endpoints/master-data/master-data";
 import type { MasterDataVendorsParams } from "@/lib/api/generated/model";
 import { readOnlyActions } from "./listActions";
-import { MaskedMoney } from "./pieces";
+import { MaskedColumnHeader } from "./MaskedColumnHeader";
+import { paymentTermsLabel } from "./paymentTerms";
+import { maskedColumnReason, MaskedMoney, QuietDash } from "./pieces";
 
 const URL_FILTERS = {};
 const SORTABLE = [
@@ -29,7 +32,7 @@ const SORTABLE = [
 
 function vendorColumns(
   t: TFunction,
-  balanceHidden: boolean,
+  balanceReason: MaskReason | null,
 ): DataTableColumn<VendorRow>[] {
   return [
     {
@@ -63,8 +66,8 @@ function vendorColumns(
     {
       id: "paymentTerms",
       header: t("vendors.columns.paymentTerms"),
-      cell: (row) => row.paymentTermsCode,
-      exportValue: (row) => row.paymentTermsCode,
+      cell: (row) => paymentTermsLabel(t, row.paymentTermsCode),
+      exportValue: (row) => paymentTermsLabel(t, row.paymentTermsCode),
     },
     {
       id: "openPurchaseOrders",
@@ -85,10 +88,18 @@ function vendorColumns(
     {
       id: "balanceLcy",
       header: t("vendors.columns.balance"),
-      cell: (row) => <MaskedMoney field={row.balanceLcy} />,
+      // No row shows a balance to this role: the header says why, once.
+      headerContent: balanceReason ? (
+        <MaskedColumnHeader
+          label={t("vendors.columns.balance")}
+          reason={balanceReason}
+        />
+      ) : undefined,
+      cell: (row) =>
+        balanceReason ? <QuietDash /> : <MaskedMoney field={row.balanceLcy} />,
       exportValue: (row) => row.balanceLcy.value ?? t("table.hidden"),
       kind: "money",
-      sortable: !balanceHidden,
+      sortable: balanceReason === null,
     },
   ];
 }
@@ -103,10 +114,14 @@ export default function VendorsPage() {
   const list = useMasterDataVendors(params, {
     query: { placeholderData: (previous) => previous },
   });
-  const balanceHidden = list.data?.data[0]?.balanceLcy.masked ?? false;
+  const rows = list.data?.data;
+  const balanceReason = useMemo(
+    () => maskedColumnReason((rows ?? []).map((row) => row.balanceLcy)),
+    [rows],
+  );
   const columns = useMemo(
-    () => vendorColumns(t, balanceHidden),
-    [t, balanceHidden],
+    () => vendorColumns(t, balanceReason),
+    [t, balanceReason],
   );
 
   return (
