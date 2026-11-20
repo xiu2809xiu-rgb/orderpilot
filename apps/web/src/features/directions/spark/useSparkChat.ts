@@ -19,10 +19,25 @@ export const THINK_MS = 1500;
 /** Under reduced motion the pause is short and the answer arrives whole. */
 export const THINK_MS_STILL = 250;
 
-/** Whole-word match, so "hp" is not found inside another word. */
+const WORD_CHARACTER = /[a-z0-9]/;
+
+/**
+ * Whole-word match, so "hp" is not found inside another word. It walks the
+ * text instead of building a pattern from the word: a pattern made from data
+ * is what the static scan refuses, and the walk needs no escaping.
+ */
 function mentions(text: string, word: string): boolean {
-  const escaped = word.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  return new RegExp(`(^|[^a-z0-9])${escaped}($|[^a-z0-9])`).test(text);
+  const needle = word.toLowerCase();
+  if (needle === "") return false;
+  let at = text.indexOf(needle);
+  while (at !== -1) {
+    const before = at === 0 ? "" : (text[at - 1] ?? "");
+    const after = text[at + needle.length] ?? "";
+    if (!WORD_CHARACTER.test(before) && !WORD_CHARACTER.test(after))
+      return true;
+    at = text.indexOf(needle, at + 1);
+  }
+  return false;
 }
 
 /**
