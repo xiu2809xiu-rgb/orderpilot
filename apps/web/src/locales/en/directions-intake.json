@@ -3,7 +3,10 @@
   "intro": "Add a document, let Spark read it, then confirm what it was not sure of. A person confirms every field Spark was not sure of before the review is finished.",
   "denied": {
     "title": "Uploading documents is for Support",
-    "description": "Your role cannot upload documents. Sign in as Support to try it, or open an order to see its documents."
+    "description": "Your role cannot upload documents. Sign in as Support to try it, or open an order to see its documents.",
+    "demoDescription": "Your role cannot upload documents. Switch to Support to try it, or open an order to see its documents.",
+    "switch": "Switch to Support",
+    "failed": "Could not switch. Try the Demo role menu in the top bar."
   },
   "preview": "Demo: a file you add stays in your browser and is not stored. Spark reads synthetic sample documents only, and no AI model is connected.",
   "drop": {
