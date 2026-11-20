@@ -74,7 +74,11 @@ describe("the order page", () => {
     expect(steps[3]).toHaveAttribute("aria-current", "step");
     // Done: the actor and the day, from the order's own events.
     expect(within(nth(steps, 2)).getByText(/Support, /)).toBeVisible();
-    expect(within(nth(steps, 3)).getByText("Now, late")).toBeVisible();
+    expect(within(nth(steps, 3)).getByText(/^Now, late/)).toBeVisible();
+    // The current step says how long it has waited and what is usual, in one short line.
+    expect(
+      within(nth(steps, 3)).getByText("Waiting 14 days, usually 4 days"),
+    ).toBeVisible();
     // Later: a day the step is expected, worked from the usual times.
     expect(within(nth(steps, 4)).getByText(/^By /)).toBeVisible();
   });
