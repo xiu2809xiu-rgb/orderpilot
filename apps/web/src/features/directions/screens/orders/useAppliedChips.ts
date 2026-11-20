@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { formatDay } from "@/lib/format";
 import type { CustomerOption } from "./CustomerFilter";
-import type { OrdersQuery } from "./ordersQuery";
+import { rangeReversed, type OrdersQuery } from "./ordersQuery";
 
 export interface AppliedChip {
   id: string;
@@ -84,7 +84,8 @@ export function useAppliedChips(
       clear: { source: null },
     });
   }
-  if (query.from ?? query.to) {
+  // A reversed range filters nothing, so it is not "in force".
+  if ((query.from ?? query.to) && !rangeReversed(query)) {
     chips.push({
       id: "date",
       label: t("applied.dates", {

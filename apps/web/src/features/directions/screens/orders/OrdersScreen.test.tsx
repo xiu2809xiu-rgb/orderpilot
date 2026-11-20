@@ -50,16 +50,18 @@ describe("the Orders workspace", () => {
       .map((head) => head.textContent.trim());
     for (const name of [
       "Order",
+      "PO number",
       "Customer",
       "Stage",
       "Held at",
-      "Order age",
       "Ship date",
       "Value",
       "Documents",
     ]) {
       expect(heads).toContain(name);
     }
+    // The age is a line of the stage cell now; its own column is under Columns.
+    expect(heads).not.toContain("Order age");
     // The first order is the most overdue, as the tracker sorts them.
     expect(within(nth(rows, 0)).getByText("SO-0001")).toBeVisible();
     expect(within(nth(rows, 0)).getByText("3 d late")).toBeVisible();
