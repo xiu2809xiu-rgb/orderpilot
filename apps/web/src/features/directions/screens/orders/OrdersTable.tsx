@@ -11,6 +11,7 @@ import { DataTableHead } from "@/components/common/data-table/DataTableHead";
 import { Table } from "@/components/ui/table";
 import { useMediaQuery } from "@/lib/useMediaQuery";
 import { orderHref } from "../home/homeLinks";
+import { foldedAt, type Fit } from "./orderFit";
 import { OrderRowMenu } from "./OrderRowMenu";
 import type { OrderRow } from "./orderRow";
 import type { Sort, SortId } from "./ordersQuery";
@@ -30,21 +31,24 @@ import type { Sort, SortId } from "./ordersQuery";
  */
 const WIDTH: Readonly<Record<string, number>> = {
   select: 32,
-  orderNo: 164,
-  customerName: 134,
-  step: 176,
-  heldAt: 128,
-  age: 96,
-  shipmentDate: 104,
-  amount: 120,
-  docs: 124,
+  orderNo: 152,
+  externalDocumentNo: 106,
+  customerName: 104,
+  step: 136,
+  heldAt: 100,
+  age: 92,
+  shipmentDate: 96,
+  amount: 116,
+  docs: 146,
   stock: 132,
-  externalDocumentNo: 116,
   orderDate: 100,
   entry: 96,
   source: 100,
   actions: 42,
 };
+
+/** With facts under the number the column is a little wider, so a PO number or a value does not wrap to a word a line. */
+const ORDER_WITH_FACTS = 176;
 
 /**
  * On a touch screen the checkbox and the row menu are 44 px buttons, and
@@ -58,7 +62,7 @@ const WIDTH: Readonly<Record<string, number>> = {
 const TOUCH = "(pointer: coarse)";
 const TOUCH_WIDTH: Readonly<Record<string, number>> = {
   select: 44,
-  customerName: 119,
+  customerName: 96,
   actions: 45,
 };
 
@@ -71,6 +75,7 @@ const TOUCH_WIDTH: Readonly<Record<string, number>> = {
  */
 export function OrdersTable({
   columns,
+  fit,
   rows,
   status,
   error,
@@ -84,6 +89,7 @@ export function OrdersTable({
   onClearFilters,
 }: {
   columns: readonly DataTableColumn<OrderRow>[];
+  fit: Fit;
   rows: readonly OrderRow[];
   status: TableStatus;
   error: unknown;
@@ -102,7 +108,9 @@ export function OrdersTable({
     : null;
   const touch = useMediaQuery(TOUCH);
   const widthOf = (id: string) =>
-    (touch ? TOUCH_WIDTH[id] : undefined) ?? WIDTH[id] ?? 120;
+    id === "orderNo" && foldedAt(fit).length > 0
+      ? ORDER_WITH_FACTS
+      : ((touch ? TOUCH_WIDTH[id] : undefined) ?? WIDTH[id] ?? 120);
   const widths = ["select", ...columns.map((column) => column.id), "actions"];
   const total = widths.reduce((sum, id) => sum + widthOf(id), 0);
   return (
@@ -110,6 +118,8 @@ export function OrdersTable({
       <Table
         className="od-table"
         aria-busy={status === "loading"}
+        // The stage cell shows the age itself, unless the age has its own column.
+        data-age-column={columns.some((c) => c.id === "age") || undefined}
         style={{ minWidth: total }}
       >
         <caption className="sr-only">{t("table.caption")}</caption>

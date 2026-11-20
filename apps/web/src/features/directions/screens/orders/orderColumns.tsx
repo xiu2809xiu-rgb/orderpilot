@@ -2,6 +2,8 @@ import type { TFunction } from "i18next";
 import type { DataTableColumn } from "@/components/common";
 import { formatDay } from "@/lib/format";
 import { orderHref } from "../home/homeLinks";
+import { FoldedFacts } from "./FoldedFacts";
+import { foldedAt, type Fit } from "./orderFit";
 import { OrderCell } from "./OrderCell";
 import { AgeCell, DocsCell, StockCell, ValueCell } from "./OrderFigures";
 import { ageInDays, ALL_DONE, type OrderRow } from "./orderRow";
@@ -22,15 +24,22 @@ interface ColumnContext {
    * should say what each is short of.
    */
   showStock?: boolean;
+  /**
+   * How much of the table the window fits. The order's cell writes the facts
+   * of the columns left out under its number. Wide when not said.
+   */
+  fit?: Fit;
 }
 
 /**
  * The columns of the merged list: everything the two old pages showed, in one
- * table. The record number leads and cannot be hidden. Nine columns show by
- * default; the rest of the two old tables' columns (PO number, order date,
- * entry state, source) are under Columns. Numbers and money sit on the right.
- * The value cannot sort for a role that may not see it: the order of hidden
- * figures would give them away.
+ * table. The record number leads and cannot be hidden. Eight columns show by
+ * default: the order, the PO number, the customer, the stage (with the order's
+ * age and, for a held order, why), the team that holds it, the ship date, the
+ * value and the documents. The order's age as a column of its own, the order
+ * date, the entry state and the source are under Columns. Numbers and money
+ * sit on the right. The value cannot sort for a role that may not see it: the
+ * order of hidden figures would give them away.
  */
 export function orderColumns({
   t,
@@ -38,24 +47,46 @@ export function orderColumns({
   today,
   valueHidden,
   showStock = false,
+  fit = "dots",
 }: ColumnContext): DataTableColumn<OrderRow>[] {
   const day = (value: string | null) =>
     value ? formatDay(value) : t("cells.notSet");
+  const folded = foldedAt(fit);
   return [
     {
       id: "orderNo",
       header: t("columns.orderNo"),
-      cell: (row) => <OrderCell row={row} href={orderHref(row.orderNo)} />,
+      cell: (row) => (
+        <OrderCell
+          row={row}
+          href={orderHref(row.orderNo)}
+          facts={
+            folded.length > 0 ? (
+              <FoldedFacts row={row} ids={folded} roleLabel={roleLabel} />
+            ) : null
+          }
+        />
+      ),
       exportValue: (row) => row.orderNo,
       sortable: true,
       hideable: false,
+    },
+    {
+      id: "externalDocumentNo",
+      header: t("columns.po"),
+      cell: (row) => <span className="numeral">{row.externalDocumentNo}</span>,
+      exportValue: (row) => row.externalDocumentNo,
     },
     {
       id: "customerName",
       header: t("columns.customer"),
       cell: (row) => (
         <span className="od-customer">
-          <span className="od-customer-name">
+          {/* The name is shortened to the column, so the full one is a tooltip. */}
+          <span
+            className="od-customer-name"
+            title={row.customerName ?? row.customerNo}
+          >
             {row.customerName ?? row.customerNo}
           </span>
           <span className="numeral od-customer-no">{row.customerNo}</span>
@@ -70,7 +101,9 @@ export function orderColumns({
     {
       id: "step",
       header: t("columns.stage"),
-      cell: (row) => <StageCell row={row} />,
+      cell: (row) => (
+        <StageCell row={row} today={today} dots={fit === "dots"} />
+      ),
       exportValue: (row) => row.status?.label ?? row.workflowStatus ?? "",
       sortable: true,
     },
@@ -97,6 +130,8 @@ export function orderColumns({
           ? `${String(ageInDays(row.orderDate, today))} (${row.overdue.reason ?? ""})`
           : String(ageInDays(row.orderDate, today)),
       kind: "number",
+      // The stage cell shows the age; this column is for a person who wants it apart.
+      defaultHidden: true,
     },
     {
       id: "shipmentDate",
@@ -125,8 +160,9 @@ export function orderColumns({
       exportValue: (row) =>
         [
           row.toConfirm ? t("cells.toConfirm") : "",
+          // The words of the screen: the row carries a count, not the kind.
           row.openExceptions > 0
-            ? t("cells.differsCount", { count: row.openExceptions })
+            ? t("cells.exceptions", { count: row.openExceptions })
             : "",
         ]
           .filter(Boolean)
@@ -138,13 +174,6 @@ export function orderColumns({
       cell: (row) => <StockCell row={row} />,
       exportValue: (row) => shortSentence(row, t),
       defaultHidden: !showStock,
-    },
-    {
-      id: "externalDocumentNo",
-      header: t("columns.po"),
-      cell: (row) => <span className="numeral">{row.externalDocumentNo}</span>,
-      exportValue: (row) => row.externalDocumentNo,
-      defaultHidden: true,
     },
     {
       id: "orderDate",

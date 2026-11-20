@@ -59,8 +59,12 @@ export function StockCell({ row }: { row: OrderRow }) {
 
 /**
  * The documents column says only what the data says: a document waits for a
- * person to confirm it, or a check found a difference. Anything else is a
- * dash, because nothing here proves a document was checked.
+ * person to confirm it, or the order has open exceptions. The row carries the
+ * count of its exceptions, not what each one is, so the chip says "open
+ * exception": a late bill of lading and a packing list that differs from the
+ * PO are both that, and "Differs" would be wrong for the first. The order
+ * page lists each exception by name. Anything else is a dash, because nothing
+ * here proves a document was checked.
  */
 export function DocsCell({ row }: { row: OrderRow }) {
   const { t } = useTranslation("directions-orders");
@@ -80,11 +84,9 @@ export function DocsCell({ row }: { row: OrderRow }) {
         </StatusChip>
       ) : null}
       {row.openExceptions > 0 ? (
-        <span title={t("cells.differsCount", { count: row.openExceptions })}>
-          <StatusChip kind="destructive" icon={TriangleAlert}>
-            {t("cells.differs")}
-          </StatusChip>
-        </span>
+        <StatusChip kind="destructive" icon={TriangleAlert}>
+          {t("cells.exceptions", { count: row.openExceptions })}
+        </StatusChip>
       ) : null}
     </span>
   );
