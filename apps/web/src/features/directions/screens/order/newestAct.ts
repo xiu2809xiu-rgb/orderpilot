@@ -38,7 +38,9 @@ const STEP_PREFIX = "Step done: ";
  * "Latest: Hafiz Rahman marked Packed as done, 6 Nov at 16:00". A step the
  * workflow records as "Step done: X" reads as a sentence; a payment is said
  * without its amount, which a role that may not see figures should not read
- * here; anything else keeps the workflow's own words.
+ * here; anything else keeps the workflow's own words, whole. The workflow's
+ * real records start with the person's name ("Mei Tan: SEND_PI on SO-0001, ..."):
+ * then the sentence already says who, and the line does not say it twice.
  */
 export function latestWords(t: TFunction, entry: OrderTimelineEvent): string {
   const at = new Date(entry.at);
@@ -60,5 +62,10 @@ export function latestWords(t: TFunction, entry: OrderTimelineEvent): string {
       when,
     });
   }
-  return t("order.latest.other", { summary: entry.summary, name, when });
+  const named = entry.summary.startsWith(name);
+  return t(named ? "order.latest.otherNamed" : "order.latest.other", {
+    summary: entry.summary,
+    name,
+    when,
+  });
 }

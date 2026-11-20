@@ -229,6 +229,7 @@
       "stepDone": "Latest: {{name}} marked {{step}} as done, {{when}}",
       "payment": "Latest: {{name}} confirmed a payment, {{when}}",
       "other": "Latest: {{summary}}, by {{name}}, {{when}}",
+      "otherNamed": "Latest: {{summary}}, {{when}}",
       "when": "{{day}} at {{time}}",
       "steps": "All steps"
     },
