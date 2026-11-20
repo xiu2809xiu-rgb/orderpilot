@@ -1,4 +1,3 @@
-import type { OrderTimeline, SalesOrderDetail } from "@orderpilot/shared";
 import { ArrowLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
@@ -18,27 +17,12 @@ import { OrderSkeleton } from "./OrderSkeleton";
 import { OrderStatus } from "./OrderStatus";
 import { OrderTabs } from "./OrderTabs";
 import { isUntracked } from "../orders/orderRow";
+import { untracked } from "./untracked";
 import { useOrderAction } from "./useOrderAction";
 import { useOrderFlow } from "./useOrderFlow";
 import { useOrderJourney } from "./useOrderJourney";
 import "../orders/orders.css";
 import "./order.css";
-
-/** An order entered here that the tracker does not know yet: no events, no checks, no journey. */
-function untracked(detail: SalesOrderDetail): OrderTimeline {
-  return {
-    orderNo: detail.orderNo,
-    externalDocumentNo: detail.externalDocumentNo,
-    customerNo: detail.customerNo,
-    customerName: detail.customerName ?? detail.customerNo,
-    status: { code: "none", label: "" },
-    ownerRole: "SUPPORT",
-    overdue: { overdue: false, daysOverdue: 0, reason: null },
-    steps: [],
-    checks: [],
-    matches: [],
-  };
-}
 
 /**
  * One order. The first screen answers who has it, why and what comes next, in
