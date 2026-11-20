@@ -68,9 +68,14 @@ export type FlowAnswer = ReturnType<typeof flowOf> | "forbidden" | "missing";
  * Lays an answer for the workflow's record of an order over whatever `fetch`
  * stub is in place, so the answer can change between two reads (a task was
  * finished and the workflow now has a new entry). Everything else goes to the
- * stub underneath. Returns the paths asked of the record, in order.
+ * stub underneath. Finishing a task is answered here too (with `onComplete`
+ * called first), because that is what makes the workflow's record change.
+ * Returns the paths asked of the record, in order.
  */
-export function stubFlow(answer: () => FlowAnswer): string[] {
+export function stubFlow(
+  answer: () => FlowAnswer,
+  options: { onComplete?: () => void } = {},
+): string[] {
   const asked: string[] = [];
   const inner = globalThis.fetch;
   vi.stubGlobal(
@@ -84,6 +89,18 @@ export function stubFlow(answer: () => FlowAnswer): string[] {
             : input.url,
         "http://localhost",
       );
+      if (
+        init?.method === "POST" &&
+        /\/workflows\/tasks\/[^/]+\/complete$/.test(url.pathname)
+      ) {
+        options.onComplete?.();
+        return Promise.resolve(
+          new Response(JSON.stringify({ data: {}, meta: {} }), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          }),
+        );
+      }
       if (!/\/workflows\/orders\/[^/]+\/flow$/.test(url.pathname)) {
         return inner(input, init);
       }
