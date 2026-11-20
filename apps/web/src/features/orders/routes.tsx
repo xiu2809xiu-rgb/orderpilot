@@ -36,9 +36,10 @@ export function canonicalOrderAddress({ params, request }: LoaderFunctionArgs) {
 
 /**
  * The pages below /orders. An order's page carries the record handle that an
- * item's or a customer's page has, so it opens as a tab named by its number
- * and joins "Opened lately" in the search palette. The tab is the page's path,
- * so one order is one tab, whatever the query says.
+ * item's or a customer's page has, so it opens as a tab named by its number and
+ * is one of the open records the shell reads (the strip, and whatever lists
+ * them). The tab is the page's path, so one order is one tab, whatever the
+ * query says.
  */
 export const orderRoutes: RouteObject[] = [
   {
