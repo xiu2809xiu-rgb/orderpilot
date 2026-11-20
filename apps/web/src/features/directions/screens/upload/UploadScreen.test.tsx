@@ -370,4 +370,20 @@ describe("the upload screen", () => {
     await screen.findByRole("heading", { name: "Review what Spark read" });
     expect(await axeViolations(container)).toEqual([]);
   }, 60_000);
+
+  it("has no accessibility violations with a refused file on screen", async () => {
+    // The input's accept list would drop the file before the page saw it, and
+    // then nothing would be refused for axe to look at.
+    const user = userEvent.setup({ applyAccept: false });
+    const { container } = upload();
+    const input = await screen.findByLabelText("Documents to upload");
+    await user.upload(input, [pdf(), new File(["MZ"], "setup.exe")]);
+    const notes = await screen.findByRole("list", {
+      name: "Files that were not added",
+    });
+    // A list of plain items: the announcement sits inside each, so an item
+    // keeps its role as an item.
+    expect(within(notes).getAllByRole("listitem")).toHaveLength(1);
+    expect(await axeViolations(container)).toEqual([]);
+  }, 60_000);
 });

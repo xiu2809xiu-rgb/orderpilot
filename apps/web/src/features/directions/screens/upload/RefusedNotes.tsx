@@ -25,7 +25,6 @@ export function RefusedNotes({
       {notes.map((note) => (
         <li
           key={note.id}
-          role="alert"
           className="fs-14 flex items-start gap-2 border border-border bg-card px-3 py-2 text-destructive"
           style={{ borderRadius: "var(--radius-control)" }}
         >
@@ -33,7 +32,9 @@ export function RefusedNotes({
             aria-hidden="true"
             className="mt-0.5 size-3.5 shrink-0"
           />
-          <span className="min-w-0 flex-1">
+          {/* The alert is on the text, not the item: a role on an item takes away
+              its role as a list item. */}
+          <span role="alert" className="min-w-0 flex-1">
             {t(`refused.${note.reason}`, {
               name: note.name,
               size: MAX_MB,
