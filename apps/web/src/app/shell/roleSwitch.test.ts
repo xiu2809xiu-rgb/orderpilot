@@ -4,11 +4,21 @@ import { describe, expect, it, vi } from "vitest";
 import { sessionFor } from "@/test/fixtures";
 import { landingAfterSwitch, startAsNewRole } from "./roleSwitch";
 
+const forgetKeptLists = vi.hoisted(() => vi.fn());
+
+vi.mock("@/features/orders/orderSearches", () => ({ forgetKeptLists }));
+
 function clientForTest(): QueryClient {
   return new QueryClient({ defaultOptions: { queries: { retry: false } } });
 }
 
 describe("starting as a new role", () => {
+  it("forgets the possible-match lists kept for the old role", async () => {
+    forgetKeptLists.mockClear();
+    await startAsNewRole(clientForTest());
+    expect(forgetKeptLists).toHaveBeenCalledTimes(1);
+  });
+
   it("asks again for what is on screen, so the old role's list does not stay", async () => {
     const client = clientForTest();
     let who = "Priya";

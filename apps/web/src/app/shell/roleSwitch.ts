@@ -1,5 +1,6 @@
 import type { Session } from "@orderpilot/shared";
 import type { QueryClient } from "@tanstack/react-query";
+import { forgetKeptLists } from "@/features/orders/orderSearches";
 import { hasPermission } from "@/stores/session";
 
 // One order's page: /orders/<number>. "new" is the entry form, not an order.
@@ -30,6 +31,8 @@ export function landingAfterSwitch(pathname: string, session: Session): string {
 export async function startAsNewRole(client: QueryClient): Promise<void> {
   await client.cancelQueries();
   client.removeQueries({ type: "inactive" });
+  // The possible-match lists are kept outside the query cache, for a minute.
+  forgetKeptLists();
   // Not awaited: the new role's page should open at once, and fill as it loads.
   void client.resetQueries();
 }
