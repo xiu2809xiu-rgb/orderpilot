@@ -65,21 +65,26 @@ async function openPalette(user: ReturnType<typeof userEvent.setup>) {
 }
 
 const goTo = () => within(screen.getByRole("group", { name: "Go to" }));
+const demo = () => within(screen.getByRole("group", { name: "Demo" }));
 
 describe("Upload and Spark in the palette", () => {
-  it("lists both under Go to in a demo session, with the top bar's labels", async () => {
+  it("lists both under Demo in a demo session, with the top bar's labels, and never under Go to", async () => {
     const user = userEvent.setup();
     show("SUPPORT", true);
     await openPalette(user);
-    expect(goTo().getByRole("option", { name: "Upload" })).toBeVisible();
-    expect(goTo().getByRole("option", { name: "Spark" })).toBeVisible();
+    expect(demo().getByRole("option", { name: "Upload" })).toBeVisible();
+    expect(demo().getByRole("option", { name: "Spark" })).toBeVisible();
+    // "Go to" is the menu and nothing else (ADR 0036): the end-to-end test of
+    // every role's menu counts its rows against the side panel's links.
+    expect(goTo().queryByRole("option", { name: "Upload" })).toBeNull();
+    expect(goTo().queryByRole("option", { name: "Spark" })).toBeNull();
   });
 
   it("opens the upload page from its row", async () => {
     const user = userEvent.setup();
     show("SUPPORT", true);
     await openPalette(user);
-    await user.click(goTo().getByRole("option", { name: "Upload" }));
+    await user.click(demo().getByRole("option", { name: "Upload" }));
     expect(screen.getByTestId("probe")).toHaveTextContent("/upload");
   });
 
@@ -111,7 +116,7 @@ describe("Upload and Spark in the palette", () => {
     show("WAREHOUSE", true);
     await openPalette(user);
     expect(screen.queryByRole("option", { name: "Upload" })).toBeNull();
-    expect(goTo().getByRole("option", { name: "Spark" })).toBeVisible();
+    expect(demo().getByRole("option", { name: "Spark" })).toBeVisible();
   });
 });
 

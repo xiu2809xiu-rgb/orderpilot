@@ -255,7 +255,9 @@ describe("the palette with nothing typed", () => {
     });
     openPalette("SUPPORT");
     await box();
-    expect(headings()).toEqual(["Opened lately", "Go to", "Actions"]);
+    // The demo tools of the top bar have a group of their own, after the
+    // places and before the actions: "Go to" is the menu and nothing else.
+    expect(headings()).toEqual(["Opened lately", "Go to", "Demo", "Actions"]);
     const recent = within(
       screen.getByRole("group", { name: "Opened lately" }),
     ).getAllByRole("option");

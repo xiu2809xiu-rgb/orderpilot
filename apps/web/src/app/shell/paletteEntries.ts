@@ -26,9 +26,10 @@ const LAST = ["theme.light", "theme.dark", "session.signOut"];
 export const SPARK_ENTRY_ID = "spark.open";
 
 /**
- * What a demo session adds to the places: the two demo tools of the top bar,
- * with the labels it uses. A real deployment has neither, so a session that is
- * not a demo passes nothing.
+ * The two demo tools of the top bar, with the labels it uses. They are not
+ * places of the menu, so they never join "Go to": that list is the menu and
+ * nothing else (ADR 0036, and the end-to-end test of every role's menu). They
+ * get a group of their own. A real deployment has neither.
  */
 export interface DemoPlaces {
   upload: boolean;
@@ -36,11 +37,10 @@ export interface DemoPlaces {
   openSpark: () => void;
 }
 
-/** The places of the side panel, in its order, then Settings, then the demo tools. */
+/** The places of the side panel, in its order, then Settings. */
 export function pageEntries(
   session: Session | null,
   t: TFunction,
-  demo?: DemoPlaces,
 ): PlainEntry[] {
   const pages = panelMenu(session)
     .flatMap((group) => group.rows)
@@ -60,7 +60,13 @@ export function pageEntries(
       keywords: [],
       to: "/settings",
     },
-    ...(demo?.upload
+  ];
+}
+
+/** What a demo session adds to the palette, under its own heading. */
+export function demoEntries(t: TFunction, demo: DemoPlaces): PlainEntry[] {
+  return [
+    ...(demo.upload
       ? [
           {
             id: "upload",
@@ -71,7 +77,7 @@ export function pageEntries(
           },
         ]
       : []),
-    ...(demo?.spark
+    ...(demo.spark
       ? [
           {
             id: SPARK_ENTRY_ID,
