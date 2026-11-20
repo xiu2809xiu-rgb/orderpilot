@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { useEffect, useId, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,6 +32,23 @@ export function DateRangeField({
   const reversed = rangeReversed({ from, to });
   const span = reversed ? null : spanDays(from, to);
   const errorId = `${id}-error`;
+  const errorRef = useRef<HTMLParagraphElement>(null);
+  // The panel scrolls inside a short window, and the dates are at its foot: the
+  // message must not be left below the fold of the panel.
+  useEffect(() => {
+    if (!reversed) return;
+    // The popover is still opening on the first frame, so its size is not final.
+    const frame = requestAnimationFrame(() => {
+      const message = errorRef.current;
+      // jsdom has no scrollIntoView, and a test must not fail on that.
+      if (message && "scrollIntoView" in message) {
+        message.scrollIntoView({ block: "nearest" });
+      }
+    });
+    return () => {
+      cancelAnimationFrame(frame);
+    };
+  }, [reversed]);
   const field = (key: "from" | "to", value: string | null) => (
     <div className="space-y-1">
       <Label htmlFor={`${id}-${key}`} className="fs-12 text-muted-foreground">
@@ -58,7 +75,12 @@ export function DateRangeField({
         {field("to", to)}
       </div>
       {reversed ? (
-        <p id={errorId} role="alert" className="od-range-error fs-14">
+        <p
+          id={errorId}
+          ref={errorRef}
+          role="alert"
+          className="od-range-error fs-14"
+        >
           {t("filters.rangeReversed")}
         </p>
       ) : span !== null ? (

@@ -83,7 +83,7 @@ export function MoreFilters({
       <PopoverContent
         align="start"
         collisionPadding={12}
-        className="w-80 max-h-(--radix-popover-content-available-height) space-y-4 overflow-y-auto"
+        className="w-80 max-h-(--radix-popover-content-available-height) space-y-3 overflow-y-auto"
       >
         <div>
           {toggle("stock", t("filters.stock"))}
