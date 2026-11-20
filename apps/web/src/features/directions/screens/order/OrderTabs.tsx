@@ -50,6 +50,12 @@ export function OrderTabs({
     amount && !amount.masked && amount.value !== null
       ? null
       : t(`mask.${amount?.reason ?? "price"}`);
+  // Only an amount the server sent masked says this role's prices are hidden.
+  // The PDFs above are withheld until the order has answered; a check is not
+  // covered on a guess, so it waits for the amount itself.
+  const checkMask = amount?.masked
+    ? t(`mask.${amount.reason ?? "price"}`)
+    : null;
   const asked = params.get("tab");
   const tab: Tab = isTab(asked) ? asked : "lines";
   const failed = timeline.checks.filter((check) => check.outcome !== "pass");
@@ -98,7 +104,11 @@ export function OrderTabs({
         />
       </TabsContent>
       <TabsContent value="checks">
-        <ChecksTab checks={timeline.checks} matches={timeline.matches} />
+        <ChecksTab
+          checks={timeline.checks}
+          matches={timeline.matches}
+          priceMask={checkMask}
+        />
       </TabsContent>
       <TabsContent value="activity">
         <ActivityTab orderNo={orderNo} steps={timeline.steps} />
