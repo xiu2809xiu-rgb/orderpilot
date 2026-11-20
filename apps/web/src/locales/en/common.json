@@ -126,10 +126,10 @@
   },
   "demo": {
     "switcher": "Demo role",
-    "switcherHint": "Switch to another role. The order on screen stays open, and each role keeps its own open records.",
+    "switcherHint": "Switch to another role. An order on screen stays open for a role that may read orders, and each role keeps its own open records.",
     "switchAsk": {
       "title": "Switch role?",
-      "body": "What you have typed is not saved.",
+      "body": "Anything on this page that is not saved may be lost.",
       "switch": "Switch role",
       "stay": "Stay here"
     },

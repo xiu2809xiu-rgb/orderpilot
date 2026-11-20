@@ -1,5 +1,5 @@
 import { DEMO_PERSONAS, demoLoginRequestSchema } from "@orderpilot/shared";
-import { QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider, type QueryClient } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
@@ -14,12 +14,19 @@ import {
 } from "vitest";
 import { registerDirtyForm } from "@/lib/dirty-forms";
 import { apiClient } from "@/lib/api/instance";
-import { createQueryClient } from "@/lib/query";
+import { createQueryClient, forgetShown } from "@/lib/query";
+import type * as QueryModule from "@/lib/query";
 import { useSessionStore } from "@/stores/session";
 import { optionsFixture, sessionFor } from "@/test/fixtures";
 import i18n from "@/i18n";
 import { loadShellOverlays } from "./overlays/preload";
 import { RoleSwitcher } from "./RoleSwitcher";
+
+// Counts the resets, and still does them: the test below also looks at the cache.
+vi.mock("@/lib/query", async (original) => {
+  const real = await original<typeof QueryModule>();
+  return { ...real, forgetShown: vi.fn(real.forgetShown) };
+});
 
 // A change of role drops what a form or a review holds, as signing out does,
 // so it asks first, and only when something is unsaved.
@@ -42,6 +49,7 @@ const asked: string[] = [];
 
 beforeEach(() => {
   asked.length = 0;
+  vi.mocked(forgetShown).mockClear();
   vi.stubGlobal(
     "fetch",
     vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
@@ -74,9 +82,9 @@ afterEach(() => {
   apiClient.reset();
 });
 
-function show() {
+function show(client: QueryClient = createQueryClient()) {
   return render(
-    <QueryClientProvider client={createQueryClient()}>
+    <QueryClientProvider client={client}>
       <MemoryRouter initialEntries={["/"]}>
         <RoleSwitcher />
       </MemoryRouter>
@@ -107,15 +115,25 @@ describe("a change of role over unsaved input", () => {
   it("asks first when a form holds unsaved input, and switches on the answer", async () => {
     const user = userEvent.setup();
     const forget = registerDirtyForm(() => true);
-    show();
+    const client = createQueryClient();
+    // What the earlier role was given: gone once the new role has signed in.
+    client.setQueryData(["earlier-role"], { rows: ["seen by Support"] });
+    show(client);
     await pickFinance(user);
     const dialog = await screen.findByRole("dialog", { name: "Switch role?" });
-    expect(dialog).toHaveTextContent("What you have typed is not saved.");
+    expect(dialog).toHaveTextContent(
+      "Anything on this page that is not saved may be lost.",
+    );
     expect(asked).toEqual([]);
+    expect(client.getQueryData(["earlier-role"])).toBeDefined();
     await user.click(screen.getByRole("button", { name: "Switch role" }));
     await waitFor(() => {
       expect(asked).toEqual(["FINANCE"]);
     });
+    await waitFor(() => {
+      expect(client.getQueryData(["earlier-role"])).toBeUndefined();
+    });
+    expect(forgetShown).toHaveBeenCalledTimes(1);
     forget();
   });
 

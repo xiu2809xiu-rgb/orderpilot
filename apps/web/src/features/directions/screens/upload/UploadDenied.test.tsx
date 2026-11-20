@@ -10,6 +10,8 @@ import {
   vi,
 } from "vitest";
 import i18n from "@/i18n";
+import { createQueryClient, forgetShown } from "@/lib/query";
+import type * as QueryModule from "@/lib/query";
 import { apiClient } from "@/lib/api/instance";
 import { useSessionStore } from "@/stores/session";
 import { sessionFor } from "@/test/fixtures";
@@ -19,11 +21,18 @@ beforeAll(async () => {
   await i18n.loadNamespaces(["directions", "directions-intake"]);
 });
 
+// Counts the resets, and still does them: the test below also looks at the cache.
+vi.mock("@/lib/query", async (original) => {
+  const real = await original<typeof QueryModule>();
+  return { ...real, forgetShown: vi.fn(real.forgetShown) };
+});
+
 const asked: string[] = [];
 
 beforeEach(() => {
   reduceMotion();
   asked.length = 0;
+  vi.mocked(forgetShown).mockClear();
   const preview = stubDemo();
   vi.stubGlobal(
     "fetch",
@@ -63,7 +72,10 @@ describe("Upload for a role that may not use it", () => {
   it("in a demo session offers a switch to Support, and then opens the page for Support", async () => {
     const user = userEvent.setup();
     signInAs("WAREHOUSE", true);
-    upload();
+    const client = createQueryClient();
+    // What Warehouse was given: gone once Support has signed in.
+    client.setQueryData(["earlier-role"], { rows: ["seen by Warehouse"] });
+    upload(client);
     expect(
       await screen.findByText(/Switch to Support to try it/),
     ).toBeVisible();
@@ -75,6 +87,8 @@ describe("Upload for a role that may not use it", () => {
     expect(
       screen.queryByRole("button", { name: "Switch to Support" }),
     ).toBeNull();
+    expect(client.getQueryData(["earlier-role"])).toBeUndefined();
+    expect(forgetShown).toHaveBeenCalledTimes(1);
   });
 
   it("outside a demo session keeps the sentence and offers nothing to press", async () => {
