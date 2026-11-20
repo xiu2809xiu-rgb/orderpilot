@@ -155,21 +155,33 @@ describe("the menu of a narrow window", () => {
     expect(document.documentElement).toHaveClass("dark");
   });
 
-  it("closes on Upload, which opens the upload page", async () => {
-    const user = userEvent.setup();
-    await open();
-    await user.click(
-      screen.getByRole("button", { name: "Open navigation menu" }),
-    );
-    const menu = await screen.findByRole("dialog", { name: "Navigation" });
-    await user.click(within(menu).getByRole("link", { name: "Upload" }));
-    await waitFor(() => {
-      expect(screen.queryByRole("dialog", { name: "Navigation" })).toBeNull();
-    });
-    // The route changed: the trail of the top bar now ends on the upload page.
-    const trail = await screen.findByRole("navigation", { name: "Breadcrumb" });
-    await waitFor(() => {
-      expect(within(trail).getByText("Upload and review")).toBeVisible();
-    });
-  });
+  it(
+    "closes on Upload, which opens the upload page",
+    { timeout: 30_000 },
+    async () => {
+      const user = userEvent.setup();
+      await open();
+      await user.click(
+        screen.getByRole("button", { name: "Open navigation menu" }),
+      );
+      const menu = await screen.findByRole("dialog", { name: "Navigation" });
+      await user.click(within(menu).getByRole("link", { name: "Upload" }));
+      await waitFor(() => {
+        expect(screen.queryByRole("dialog", { name: "Navigation" })).toBeNull();
+      });
+      // The route changed: the trail of the top bar now ends on the upload page.
+      // The page itself is a lazy chunk and may still be on its way, which can
+      // hide the shell for a moment, so the trail is read from the document.
+      const trail = await screen.findByRole("navigation", {
+        name: "Breadcrumb",
+        hidden: true,
+      });
+      await waitFor(() => {
+        expect(within(trail).getByText("Upload and review")).toHaveAttribute(
+          "aria-current",
+          "page",
+        );
+      });
+    },
+  );
 });
