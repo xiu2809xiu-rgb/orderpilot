@@ -16,7 +16,7 @@ import { demoLogin, fetchAuthOptions } from "@/lib/api/auth";
 import { useDemoTour } from "@/stores/demoTour";
 import { useSessionStore } from "@/stores/session";
 import { splitDemoRoles, type DemoRole } from "../demoRoles";
-import { landingAfterSwitch, startAsNewRole } from "./roleSwitch";
+import { announceStay, landingAfterSwitch, startAsNewRole } from "./roleSwitch";
 
 /** One role in the menu: its number when it has one, the team, the person and what the team does. */
 function RoleItem({
@@ -88,6 +88,7 @@ export function RoleSwitcher() {
     const landing = landingAfterSwitch(pathname, session);
     // Staying put needs no navigation: the reset above already redraws the page.
     if (landing !== pathname) await navigate(landing);
+    else announceStay(pathname);
   }
 
   const { flow, more } = splitDemoRoles(options.data.demoRoles);

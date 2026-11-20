@@ -103,6 +103,14 @@ export function buildJourney(input: {
   stepTimes: readonly StepTime[];
   /** `YYYY-MM-DD`, in Singapore. */
   today: string;
+  /**
+   * When the order came to its current step, from the workflow's record. The
+   * tracker's sample timeline stamps its newest event with today for every
+   * order, so on its time alone an order that is days late would read "Here
+   * today". `null` means the record has not answered yet, so no wait is said;
+   * left out, the tracker's own time stands.
+   */
+  since?: Date | null;
 }): Journey | null {
   const { current, events, stepTimes, today } = input;
   if (current === null) return null;
@@ -117,9 +125,15 @@ export function buildJourney(input: {
       doneBy.set(position, { actor: event.actor, at });
     }
   }
-  // The current step began when the order's current event happened.
+  // The current step began when the workflow's record says so; without that
+  // record, when the order's current event happened.
   const currentEvent = events.find((event) => event.current);
-  const since = currentEvent ? new Date(currentEvent.at) : null;
+  const since =
+    input.since !== undefined
+      ? input.since
+      : currentEvent
+        ? new Date(currentEvent.at)
+        : null;
   const sinceDay = since ? since.toISOString().slice(0, 10) : null;
 
   const nowId = SALES_STEP_IDS[current - 1];

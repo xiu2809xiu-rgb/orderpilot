@@ -77,13 +77,13 @@ afterEach(() => {
 });
 
 describe("the sentence under the title", () => {
-  it("says who has the order, why and what comes next, from the order's own data", async () => {
+  it("says who has the order and why, from the order's own data, and names no next step for a short order (ADR 0049)", async () => {
     stubApi({ specs: [SHORT] });
     open("SO-0082");
     const sentence = await screen.findByText(/^With Product manager:/);
     // The stub's line carries no description, so the item is named by its number.
     expect(sentence).toHaveTextContent(
-      "With Product manager: 707 short on I-0190. Next: Management approver decides the request to buy.",
+      "With Product manager: 707 short on I-0190.",
     );
     // It agrees with the page's own facts and never contradicts them.
     const facts = screen.getByText("Held at").closest("dl");

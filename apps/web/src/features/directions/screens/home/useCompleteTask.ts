@@ -77,8 +77,11 @@ export function useCompleteTask({
     onSuccess: async (undo, task) => {
       onDone(task, new Date());
       await queryClient.invalidateQueries();
-      // Who has the order next, from the sales flow's nine steps. A kind that
-      // cannot be placed keeps the plain message: a guess here would be a claim.
+      // Only a kind whose next team the order's state machine always fixes has
+      // a sentence (needs.next.*): a payment, packing, the shipping documents.
+      // SEND_PI has none: an order with no prepayment due goes straight to the
+      // warehouse. RAISE_SPR has none: a coordinator routes the SPR (ADR 0049).
+      // A kind that cannot be placed keeps the plain message: a guess is a claim.
       const nextKey = `needs.next.${task.kind}`;
       const next = i18n.exists(nextKey, { ns: "directions-home" })
         ? tNext(nextKey)

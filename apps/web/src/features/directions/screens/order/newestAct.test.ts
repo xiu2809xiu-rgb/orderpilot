@@ -124,4 +124,37 @@ describe("latestWords", () => {
       "Latest: PO PO-1 received for SO-1, by Mei Tan, 4 Nov at 14:00",
     );
   });
+
+  // Not the "Step done: " form: the workflow's own record names the person and
+  // the command, and the line must show that sentence whole, not parse it.
+  it("shows a sentence in another form whole, with who and when, and says the person once", () => {
+    const summary =
+      "Mei Tan: SEND_PI_COMPLETED on SO-0001, AwaitingPI to AwaitingPayment";
+    const written = entry(
+      1,
+      "2026-11-04T06:00:00.000Z",
+      "step.completed",
+      PERSON("Mei Tan"),
+      summary,
+    );
+    const words = latestWords(t, written);
+    expect(words).toBe(`Latest: ${summary}, 4 Nov at 14:00`);
+    expect(words.match(/Mei Tan/g)).toHaveLength(1);
+  });
+
+  it("adds who when the sentence in another form does not name the person", () => {
+    const words = latestWords(
+      t,
+      entry(
+        1,
+        "2026-11-04T06:00:00.000Z",
+        "step.completed",
+        PERSON("Mei Tan"),
+        "Goods released to the forwarder",
+      ),
+    );
+    expect(words).toBe(
+      "Latest: Goods released to the forwarder, by Mei Tan, 4 Nov at 14:00",
+    );
+  });
 });

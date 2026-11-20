@@ -67,7 +67,14 @@ function readFile(
 export function useUploads() {
   const [rows, setRows] = useState<UploadRow[]>([]);
   const next = useRef(1);
-  const count = useRef(0);
+  // The files that count towards the limit, by row id, each with the key that
+  // makes a second copy of it a duplicate. A file leaves this map once, however
+  // it leaves (refused after its read, failed, or removed while still being
+  // read), so a count that is only lowered and raised can never drift.
+  const live = useRef(new Map<number, string>());
+  const release = useCallback((id: number) => {
+    live.current.delete(id);
+  }, []);
 
   const patch = useCallback((id: number, row: UploadRow) => {
     setRows((all) => all.map((item) => (item.id === id ? row : item)));
@@ -78,8 +85,10 @@ export function useUploads() {
       for (const file of files) {
         const id = next.current;
         next.current += 1;
-        const early =
-          count.current >= MAX_FILES
+        const key = `${file.name}\u0000${String(file.size)}\u0000${String(file.lastModified)}`;
+        const early = [...live.current.values()].includes(key)
+          ? "duplicate"
+          : live.current.size >= MAX_FILES
             ? "tooMany"
             : precheck(file.name, file.size);
         if (early) {
@@ -95,7 +104,7 @@ export function useUploads() {
           ]);
           continue;
         }
-        count.current += 1;
+        live.current.set(id, key);
         setRows((all) => [
           ...all,
           {
@@ -126,7 +135,7 @@ export function useUploads() {
                 kind: verdict.kind,
               });
             } else {
-              count.current -= 1;
+              release(id);
               patch(id, {
                 id,
                 name: file.name,
@@ -138,7 +147,7 @@ export function useUploads() {
             }
           })
           .catch(() => {
-            count.current -= 1;
+            release(id);
             patch(id, {
               id,
               name: file.name,
@@ -149,16 +158,16 @@ export function useUploads() {
           });
       }
     },
-    [patch],
+    [patch, release],
   );
 
-  const remove = useCallback((id: number) => {
-    setRows((all) => {
-      const gone = all.find((item) => item.id === id);
-      if (gone && gone.status !== "refused") count.current -= 1;
-      return all.filter((item) => item.id !== id);
-    });
-  }, []);
+  const remove = useCallback(
+    (id: number) => {
+      release(id);
+      setRows((all) => all.filter((item) => item.id !== id));
+    },
+    [release],
+  );
 
   const ready = rows.filter((row) => row.status === "ready").length;
   return { rows, add, remove, ready };

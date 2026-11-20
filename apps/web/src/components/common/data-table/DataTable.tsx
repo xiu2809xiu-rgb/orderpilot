@@ -119,9 +119,13 @@ export function DataTable<Row>({
   const { shown, change, sortBy, sortNote, filtered } = state;
   // An address can name a page past the end (`?page=99`). The server answers
   // with no rows and the true total, so the table opens the last page instead
-  // of an empty state that would say there is nothing here.
+  // of an empty state that would say there is nothing here. Only a page with
+  // no rows is corrected: a list that filters in the browser is given a total
+  // that is not the count of its rows, and a person on a page that has rows
+  // is never moved off it.
   const lastPage = pageCount(total, query.pageSize);
-  const pastEnd = status === "ready" && query.page > lastPage;
+  const pastEnd =
+    status === "ready" && rows.length === 0 && query.page > lastPage;
   useEffect(() => {
     if (pastEnd) onQueryChange({ ...query, page: lastPage });
   }, [pastEnd, lastPage, query, onQueryChange]);

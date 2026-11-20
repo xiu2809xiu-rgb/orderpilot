@@ -40,23 +40,16 @@ function whyShort(t: TFunction, detail: StatusInput["detail"]): string | null {
 }
 
 /**
- * What happens next, in words. A step that is short of stock goes to a
- * Management approver as a request to buy, unless the approver already holds
- * the order: then the sentence would say the same team twice, so it moves on to
- * the step after. The last step has nothing next.
+ * What happens next, in words: the step after the page's own journey step. The
+ * last step has nothing next.
  */
 function nextWords(
   t: TFunction,
   team: (role: Role) => string,
-  input: StatusInput,
   journey: Journey,
 ): string | null {
   const here = journey.steps.find((step) => step.state === "now");
   if (!here) return null;
-  const short = Boolean(input.detail?.shortage);
-  if (here.id === "stock" && short && input.heldBy !== "APPROVER") {
-    return t("order.status.next.approval", { team: team("APPROVER") });
-  }
   const after = journey.steps[here.position];
   if (!after) return null;
   return t(`order.status.next.${after.id}`, { team: team(after.team) });
@@ -84,7 +77,12 @@ export function statusSentence(
       : t("order.status.stage", { stage: input.stage });
   }
   const values = { team: team(heldBy), why };
-  const next = nextWords(t, team, input, journey);
+  // ADR 0049, decision 2: a short order is held and the customer is asked to
+  // revise the PO, so it raises no request to buy. The page's journey has no
+  // approval step either, so the sentence names no next step for it.
+  const here = journey.steps.find((step) => step.state === "now");
+  if (why && here?.id === "stock") return t("order.status.held", values);
+  const next = nextWords(t, team, journey);
   if (next === null) {
     return t(why ? "order.status.lastWhy" : "order.status.last", values);
   }

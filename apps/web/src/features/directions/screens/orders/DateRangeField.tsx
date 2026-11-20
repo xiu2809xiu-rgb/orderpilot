@@ -49,6 +49,8 @@ export function DateRangeField({
       cancelAnimationFrame(frame);
     };
   }, [reversed]);
+  // Each day is held to the other in the picker, so a reversed range can only
+  // come from typing or from an old address; the message below covers those.
   const field = (key: "from" | "to", value: string | null) => (
     <div className="space-y-1">
       <Label htmlFor={`${id}-${key}`} className="fs-12 text-muted-foreground">
@@ -58,6 +60,8 @@ export function DateRangeField({
         id={`${id}-${key}`}
         type="date"
         className="pointer-coarse:h-11"
+        min={key === "to" ? (from ?? undefined) : undefined}
+        max={key === "from" ? (to ?? undefined) : undefined}
         value={value ?? ""}
         aria-invalid={reversed || undefined}
         aria-describedby={reversed ? errorId : undefined}

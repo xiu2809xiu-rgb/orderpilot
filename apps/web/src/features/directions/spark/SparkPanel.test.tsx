@@ -136,7 +136,7 @@ describe("the Spark panel", () => {
     const now = grouped(facts.only ? availableNow(facts.only) : 0);
     const due = grouped(facts.totals.onPurchaseOrders);
     expect((message as HTMLTextAreaElement).value).toContain(
-      `We have ${now} available now. A further ${due} are due on purchase orders.`,
+      `We can ship ${now} now. A further ${due} are due on purchase orders.`,
     );
     expect((message as HTMLTextAreaElement).value).not.toContain("1,020");
     expect(
@@ -179,12 +179,25 @@ describe("the Spark panel", () => {
       }),
     ).toBeVisible();
     await user.type(field, "What is the weather?{Enter}");
-    // Support may not read sales, so the one question it can answer is offered, and no word about sales.
+    // Support may not read sales, so the one question it can answer is offered,
+    // and one short line says why the sales question is not (a masked thing
+    // always has its reason).
     const reply = await within(dialog).findByText(
       "This is a preview with scripted answers, so Spark cannot answer that one. It can answer this question:",
     );
     expect(reply).toBeVisible();
-    expect(within(dialog).queryByText(/sales figures/)).toBeNull();
+    const why = await within(dialog).findByText(
+      "Sales questions are for roles that may read sales figures.",
+    );
+    expect(why).toBeVisible();
+    // It follows the suggestion, so the answerable question comes first.
+    const suggestion = within(dialog).getByRole("button", {
+      name: "How many HP monitors do we have?",
+    });
+    expect(
+      suggestion.compareDocumentPosition(why) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
   });
 
   it("answers the sales question for a role that may read sales, with a chart and its table", async () => {
@@ -411,6 +424,12 @@ describe("the Spark panel", () => {
         name: "How many HP monitors do we have?",
       }),
     ).toBeVisible();
+    // A role that may read sales is offered the sales question, so it is told no reason.
+    expect(
+      within(dialog).queryByText(
+        "Sales questions are for roles that may read sales figures.",
+      ),
+    ).toBeNull();
   });
 
   it("marks each reply as a scripted preview, beside the answer", async () => {

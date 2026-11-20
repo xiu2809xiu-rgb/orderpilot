@@ -134,6 +134,9 @@ describe("the date range", () => {
     expect(await screen.findByText("10 days in range")).toBeVisible();
     expect(screen.queryByRole("alert")).toBeNull();
     expect(screen.getByLabelText("From")).not.toHaveAttribute("aria-invalid");
+    // The picker holds each day to the other, so it cannot make a reversed range.
+    expect(screen.getByLabelText("From")).toHaveAttribute("max", "2026-11-10");
+    expect(screen.getByLabelText("To")).toHaveAttribute("min", "2026-11-01");
   });
 });
 

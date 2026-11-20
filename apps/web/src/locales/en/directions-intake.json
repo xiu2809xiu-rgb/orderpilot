@@ -5,7 +5,7 @@
     "title": "Uploading documents is for Support",
     "description": "Your role cannot upload documents. Sign in as Support to try it, or open an order to see its documents."
   },
-  "preview": "Demo: a file you add stays in your browser and is not stored. The review uses a synthetic purchase order.",
+  "preview": "Demo: a file you add stays in your browser and is not stored. Spark reads synthetic sample documents only, and no AI model is connected.",
   "drop": {
     "title": "Drop documents here",
     "or": "or",
@@ -24,15 +24,27 @@
     "progress": "Progress for {{name}}",
     "size": "{{size}} KB",
     "sizeMb": "{{size}} MB",
-    "refusedBy": "Not added"
+    "bytes": "{{size}} B",
+    "sample": "Sample: {{document}}",
+    "noSample": "Not read in this preview",
+    "notRead": "Not read: only the first sample is read"
   },
   "refused": {
     "type": "{{name}} is not a PDF, PNG, JPEG, XLSX or CSV file.",
     "size": "{{name}} is larger than {{size}} MB.",
     "empty": "{{name}} is empty.",
-    "disguised": "{{name}} says it is a {{claimed}} file but its content is not. It was not added.",
+    "disguised": "{{name}} says it is {{claimed}} file but its content is not. It was not added.",
     "tooMany": "Only {{count}} files at a time. {{name}} was not added.",
-    "unreadable": "{{name}} could not be read in your browser."
+    "unreadable": "{{name}} could not be read in your browser.",
+    "duplicate": "{{name}} is already in the list. It was not added twice.",
+    "claimed": {
+      "pdf": "a PDF",
+      "png": "a PNG",
+      "jpg": "a JPEG",
+      "jpeg": "a JPEG",
+      "xlsx": "an XLSX",
+      "csv": "a CSV"
+    }
   },
   "start": "Read with Spark",
   "startNeeds": "Add a file or use the demo purchase order first.",
@@ -54,7 +66,6 @@
     "documentType": "Customer PO",
     "summary": "{{count}} fields read: {{sure}} above {{threshold}} percent, {{unsure}} for you to approve.",
     "mock": "Confidence is what Mock AI reports for this synthetic document.",
-    "confirmed": "{{done}} of {{total}} to approve",
     "ring": "Fields to approve that you have confirmed",
     "again": "Start again",
     "next": "Next to approve",
@@ -64,11 +75,6 @@
     "boxes": "Fields on this page",
     "boxLabel": "{{label}}: {{value}}",
     "fields": "Fields read",
-    "groups": {
-      "header": "Header",
-      "lines": "Lines",
-      "totals": "Totals"
-    },
     "confidence": "{{percent}} percent sure",
     "high": "Confident",
     "medium": "Check",
@@ -83,24 +89,58 @@
     "save": "Save",
     "cancel": "Cancel",
     "editLabel": "{{label}}",
-    "editHelp": "Change the value as it should read, then save. Saving confirms it.",
     "select": "Show {{label}} on the page",
     "finish": "Finish review",
-    "finishReady": "Every uncertain field is confirmed.",
-    "finishedTitle": "Review finished: {{count}} fields confirmed",
-    "finishedBody": "This preview saves nothing. The order this purchase order belongs to is in the sample data: {{order}}.",
+    "finishedTitle": "Review finished: {{summary}}",
+    "finishedBody": "Nothing was saved and no order was made. This sample belongs to order {{order}} in the sample data.",
     "openOrder": "Open order {{order}}",
     "loading": "Loading the demo document",
     "failed": "The demo document could not be loaded.",
     "retry": "Try again",
-    "lineGroup": "Lines: line {{number}}",
     "classifiedAs": "Classified as {{type}}",
     "failedHelp": "Check your connection, then try again.",
-    "finishWait_one": "{{count}} field still needs your approval before the review can be finished.",
-    "finishWait_other": "{{count}} fields still need your approval before the review can be finished."
+    "done": {
+      "confirmed_one": "{{count}} field confirmed by you",
+      "confirmed_other": "{{count}} fields confirmed by you",
+      "corrected_one": "{{count}} field corrected by you",
+      "corrected_other": "{{count}} fields corrected by you",
+      "reader_one": "{{count}} field read above {{threshold}} percent",
+      "reader_other": "{{count}} fields read above {{threshold}} percent",
+      "none": "no field needed your approval"
+    },
+    "toApprove": "For you to approve",
+    "sure_one": "{{count}} field read above {{threshold}} percent",
+    "sure_other": "{{count}} fields read above {{threshold}} percent",
+    "line": "Line {{number}}",
+    "left_one": "{{count}} field left to approve before you can finish",
+    "left_other": "{{count}} fields left to approve before you can finish",
+    "leftNone": "Nothing left to approve. You can finish the review.",
+    "progress": "Progress of the review",
+    "editHelp": {
+      "text": "Change the value as it should read, then save. Saving confirms it.",
+      "quantity": "A whole or decimal number above zero, such as 1,200 or 2.5. Saving confirms it.",
+      "price": "An amount of money as a number, such as 61.20. Saving confirms it.",
+      "date": "A real date, such as 11 Nov 2026. Saving confirms it."
+    },
+    "editError": {
+      "blank": "This field cannot be blank. It keeps its old value.",
+      "quantity": "Enter a whole or decimal number above zero. It keeps its old value.",
+      "price": "Enter an amount of money as a number, such as 61.20. It keeps its old value.",
+      "date": "Enter a real date, such as 11 Nov 2026. It keeps its old value."
+    },
+    "leave": {
+      "title": "Leave this review?",
+      "body": "Your review is not saved. If you leave, what you confirmed or corrected here is lost.",
+      "stay": "Keep reviewing",
+      "leave": "Leave the review"
+    },
+    "finishedShort": "Review finished"
   },
   "add": {
     "title": "Add documents",
     "intro": "Each file is checked in your browser: its type, its size and what is really inside it."
-  }
+  },
+  "saves": "Nothing is saved and no order is made in this preview.",
+  "startChecking": "Checking your files first.",
+  "startNoSample": "No file added has a sample in this preview. Use the demo purchase order, or add a sample file such as po-4471-26.pdf."
 }
