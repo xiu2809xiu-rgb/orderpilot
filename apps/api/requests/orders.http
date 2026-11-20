@@ -140,6 +140,22 @@ X-CSRF-Token: {{csrf}}
   "lines": []
 }
 
+### A shipment date before the order date: 400, with an issue on the path
+### shipmentDate. The same rule is checked when a change sends only one of the
+### two dates, against the date the draft already holds.
+POST {{baseUrl}}/api/v1/orders
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{
+  "customerNo": "C-0001",
+  "externalDocumentNo": "po-http-dates",
+  "orderDate": "2026-11-20",
+  "shipmentDate": "2020-01-01",
+  "prepaymentPercent": "30",
+  "lines": [{ "itemNo": "I-0001", "quantity": "5", "unitPrice": "12.50" }]
+}
+
 ### A void without a reason: 400.
 POST {{baseUrl}}/api/v1/orders/{{orderNo}}/void
 Content-Type: application/json
