@@ -10,6 +10,7 @@ import {
   recentTabs,
   type PlainEntry,
 } from "./paletteEntries";
+import { useUploadEntry } from "./demoParts";
 import { trimQuery } from "./paletteMatch";
 import {
   MIN_QUERY_LENGTH,
@@ -17,6 +18,7 @@ import {
   type RecordHit,
 } from "./paletteRecords";
 import { usePaletteRecords } from "./paletteSearch";
+import { useSparkPanel } from "./sparkPanel";
 
 export type PaletteRow =
   | { type: "plain"; entry: PlainEntry }
@@ -47,8 +49,22 @@ export function usePaletteModel(raw: string) {
   const tabs = useRecordTabs((state) => state.tabs);
   const query = trimQuery(raw);
   const records = usePaletteRecords(query);
+  // The demo tools of the top bar, offered under the pages on the same terms.
+  const upload = useUploadEntry();
+  const spark = useSparkPanel();
+  const { available, setOpen } = spark;
 
-  const pages = useMemo(() => pageEntries(session, t), [session, t]);
+  const pages = useMemo(
+    () =>
+      pageEntries(session, t, {
+        upload,
+        spark: available,
+        openSpark: () => {
+          setOpen(true);
+        },
+      }),
+    [session, t, upload, available, setOpen],
+  );
   const actions = useMemo(
     () => actionEntries(session, t, pages),
     [session, t, pages],

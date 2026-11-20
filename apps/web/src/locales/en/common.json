@@ -91,6 +91,7 @@
     "resultsCount_other": "{{count}} results",
     "recent": "Opened lately",
     "goTo": "Go to",
+    "void": "Void",
     "actions": "Actions",
     "groups": {
       "order": "Orders",

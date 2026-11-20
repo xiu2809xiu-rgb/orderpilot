@@ -39,6 +39,7 @@ export function PaletteList({ sections, onGo, onRun }: PaletteListProps) {
                   name={hit.name}
                   {...(hit.po ? { po: hit.po } : {})}
                   {...(hit.stage ? { stage: hit.stage } : {})}
+                  {...(hit.voided ? { voided: true } : {})}
                   onSelect={() => {
                     onGo(hit.to);
                   }}

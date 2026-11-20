@@ -12,6 +12,8 @@ interface PaletteRecordRowProps {
   /** The customer's PO number. */
   po?: string;
   stage?: string;
+  /** A voided order says so beside its number. */
+  voided?: boolean;
   onSelect: () => void;
 }
 
@@ -26,6 +28,7 @@ export function PaletteRecordRow({
   name,
   po,
   stage,
+  voided,
   onSelect,
 }: PaletteRecordRowProps) {
   const { t } = useTranslation(["common", "record-tabs"]);
@@ -36,6 +39,7 @@ export function PaletteRecordRow({
   // reads the same as the row looks (WCAG 2.5.3).
   const label = [
     t("palette.rowName", { kind: kindName, no }),
+    voided ? t("palette.void") : undefined,
     name,
     poText,
     stage,
@@ -47,6 +51,11 @@ export function PaletteRecordRow({
     <CommandItem value={value} aria-label={label} onSelect={onSelect}>
       <Icon aria-hidden="true" />
       <span className="shrink-0 font-medium tabular-nums">{no}</span>
+      {voided ? (
+        <span className="shrink-0 text-xs font-medium text-muted-foreground">
+          {t("palette.void")}
+        </span>
+      ) : null}
       <span className="min-w-0 flex-1 truncate text-muted-foreground">
         {name ?? kindName}
       </span>

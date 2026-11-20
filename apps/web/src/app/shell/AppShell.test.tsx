@@ -98,7 +98,8 @@ describe("the shell around every page", () => {
     const names = within(places)
       .getAllByRole("option")
       .map((option) => option.textContent);
-    // The same places as the panel: Orders once, and no order tracker.
+    // The same places as the panel: Orders once, and no order tracker. A demo
+    // session adds the two demo tools of the top bar at the end.
     expect(names).toEqual([
       "Home",
       "My tasks",
@@ -108,6 +109,8 @@ describe("the shell around every page", () => {
       "Vendors",
       "Items",
       "Settings",
+      "Upload",
+      "Spark",
     ]);
     await user.click(within(places).getByRole("option", { name: "Customers" }));
     await waitFor(() => {
