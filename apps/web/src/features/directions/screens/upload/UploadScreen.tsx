@@ -13,14 +13,11 @@ import {
 import { EmptyState } from "@/components/parts/EmptyState";
 import { PageHeader } from "@/components/parts/PageHeader";
 import { AddStage } from "./AddStage";
-import {
-  DEMO_NAME,
-  previewFor,
-  useDemoDocument,
-  type PreviewName,
-} from "./demoDocument";
+import { DEMO_NAME, useDemoDocument, type PreviewName } from "./demoDocument";
 import { ReadStage } from "./ReadStage";
+import { ReviewLeaveGuard } from "./ReviewLeaveGuard";
 import { ReviewStage } from "./ReviewStage";
+import { useStopStrayDrops } from "./useStopStrayDrops";
 import { useUploads } from "./useUploads";
 
 type Stage = "add" | "read" | "review";
@@ -30,7 +27,9 @@ type Stage = "add" | "read" | "review";
  * browser, with their limits written first), let Spark read the demo purchase
  * order, then review what it read against the page. Only a role that may upload
  * documents sees it; any other role gets the reason. A file added here is not
- * sent anywhere, and the screen says so once, in one quiet line.
+ * sent anywhere, and the screen says so. A reading that has started and a
+ * review that is not finished are guarded against leaving, and a file dropped
+ * outside the drop zone is stopped.
  */
 export default function UploadScreen() {
   const { t } = useTranslation("directions-intake");
@@ -41,6 +40,8 @@ export default function UploadScreen() {
   const uploads = useUploads();
   // Which preview document Spark reads is chosen by the file added, when Read with Spark is pressed.
   const [preview, setPreview] = useState<PreviewName>(DEMO_NAME);
+  const [finished, setFinished] = useState(false);
+  useStopStrayDrops();
   const demo = useDemoDocument(preview, stage !== "add");
   const reading = useCallback(() => {
     setStage("review");
@@ -63,6 +64,7 @@ export default function UploadScreen() {
 
   return (
     <div className="dx-sheet">
+      <ReviewLeaveGuard active={stage !== "add" && !finished} />
       <PageHeader title={t("title")} intro={t("intro")} />
       <p className="fs-14 mb-6 flex items-start gap-2 text-muted-foreground">
         <Info aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
@@ -71,8 +73,8 @@ export default function UploadScreen() {
       {stage === "add" ? (
         <AddStage
           uploads={uploads}
-          onRead={(fileName) => {
-            setPreview(previewFor(fileName));
+          onRead={(sample) => {
+            setPreview(sample);
             setStage("read");
           }}
         />
@@ -106,7 +108,11 @@ export default function UploadScreen() {
       {stage === "review" && demo.data ? (
         <ReviewStage
           document={demo.data}
+          onFinished={() => {
+            setFinished(true);
+          }}
           onAgain={() => {
+            setFinished(false);
             setStage("add");
           }}
         />

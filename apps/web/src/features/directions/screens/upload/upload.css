@@ -10,6 +10,13 @@
   --paper-green: #176b3a;
 }
 
+/* A box or a row brought into view stops below the progress card, which stays
+   under the top bar (--review-bar is its measured height). */
+.dx-box,
+.dx-field {
+  scroll-margin-top: calc(var(--review-bar, 5rem) + 1rem);
+}
+
 .dx-box {
   box-sizing: content-box;
   margin: -2px 0 0 -3px;
