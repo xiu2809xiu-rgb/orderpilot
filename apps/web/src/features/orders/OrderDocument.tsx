@@ -23,7 +23,7 @@ import {
   type OrderFormInput,
   type OrderFormOutput,
 } from "./orderFormSchema";
-import { blankOrder, fromDetail } from "./orderFormValues";
+import { blankOrder, fromDetail, withoutBlankTail } from "./orderFormValues";
 import { searchItems } from "./orderSearches";
 import { useLineColumns } from "./useLineColumns";
 import { useOrderActions } from "./useOrderActions";
@@ -63,6 +63,7 @@ export function OrderDocument({
   const form = useZodForm<OrderFormInput, OrderFormOutput>({
     schema,
     defaultValues: record ? fromDetail(record) : blankOrder(todayInSingapore()),
+    prepare: withoutBlankTail,
   });
   const save = useOrderSave({ form, orderNo, priceMasked });
   const actions = useOrderActions({
