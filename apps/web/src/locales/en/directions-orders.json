@@ -211,6 +211,11 @@
       "void": "Voided. Nothing more happens to this order.",
       "stage": "{{stage}}.",
       "stageWhy": "{{stage}}: {{why}}.",
+      "check": {
+        "quantity": "the packing list differs from the PO",
+        "price": "the unit price on the PI differs from the PO"
+      },
+      "checkOther": "a check did not pass: {{label}}",
       "why": {
         "short": "{{quantity}} short on {{item}}",
         "shortMore_one": "{{quantity}} short on {{item}} and {{count}} more item",

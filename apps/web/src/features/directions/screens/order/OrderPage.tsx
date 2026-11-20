@@ -134,6 +134,7 @@ export function OrderPage({ orderNo }: { orderNo: string }) {
     stage: stageLabel,
     entry: found?.captureState ?? null,
     detail: found ?? null,
+    checks: events.checks,
   });
 
   return (

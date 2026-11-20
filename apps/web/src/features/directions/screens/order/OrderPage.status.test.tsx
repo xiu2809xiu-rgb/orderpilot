@@ -26,6 +26,7 @@ import {
   renderWithToasts,
   step,
   stubFlow,
+  stubTimeline,
   type FlowAnswer,
 } from "./orderPageTestKit";
 
@@ -94,10 +95,52 @@ describe("the sentence under the title", () => {
 
   it("is built from the data and not from one order: another order says another thing", async () => {
     stubApi();
+    // The kit gives every order a failed quantity check; this one has passed.
+    stubTimeline((timeline) => ({
+      ...timeline,
+      checks: timeline.checks.map((check) => ({
+        ...check,
+        outcome: "pass" as const,
+      })),
+    }));
     open("SO-0001");
     expect(
       await screen.findByText("With Finance. Next: Warehouse packs the goods."),
     ).toBeVisible();
+  });
+
+  // SO-0041 on the demo data: held at Warehouse by a failed quantity check. The
+  // sentence took the journey's next step and sent the reader to the forwarder.
+  it("says who has an order held by a failed check and why, and names no next step", async () => {
+    stubApi({
+      specs: [
+        {
+          ...first,
+          orderNo: "SO-0041",
+          status: {
+            code: "sample-packing-list-mismatch",
+            label: "Packing list differs from the PO",
+          },
+          ownerRole: "WAREHOUSE",
+          openExceptions: 1,
+        },
+      ],
+    });
+    // The tracker's real rule id for the packing list quantity.
+    stubTimeline((timeline) => ({
+      ...timeline,
+      checks: timeline.checks.map((check) =>
+        check.outcome === "fail"
+          ? { ...check, ruleId: "mock.sample-quantity" }
+          : check,
+      ),
+    }));
+    open("SO-0041");
+    const sentence = await screen.findByText(/^With Warehouse:/);
+    expect(sentence).toHaveTextContent(
+      "With Warehouse: the packing list differs from the PO.",
+    );
+    expect(sentence).not.toHaveTextContent(/Next|forwarder/);
   });
 
   it("says nothing is waiting on a finished order", async () => {

@@ -1,4 +1,4 @@
-import type { Role } from "@orderpilot/shared";
+import type { CheckResult, Role } from "@orderpilot/shared";
 import { beforeAll, describe, expect, it } from "vitest";
 import i18n from "@/i18n";
 import { buildJourney } from "./journeyModel";
@@ -45,8 +45,18 @@ const input = (over: Partial<StatusInput>): StatusInput => ({
   stage: "Short on stock",
   entry: null,
   detail: NO_SHORTAGE,
+  checks: [],
   ...over,
 });
+
+/** A check as the tracker sends it; only what the sentence reads is set. */
+const check = (ruleId: string, outcome: "pass" | "fail"): CheckResult =>
+  ({
+    id: `c-${ruleId}`,
+    ruleId,
+    ruleLabel: `Label of ${ruleId}`,
+    outcome,
+  }) as unknown as CheckResult;
 
 describe("statusSentence", () => {
   // ADR 0049, decision 2: "A short order therefore raises no SPR." It is held
@@ -100,6 +110,68 @@ describe("statusSentence", () => {
     ).toBe(
       "With Support: 707 short on Samsung SSD 1 TB NVMe. Next: Finance confirms the payment.",
     );
+  });
+
+  // SO-0041 on the demo data: the packing list says 108 where the PO says 120.
+  // The failed check holds the order at Warehouse; it is not on its way to the
+  // forwarder, so the sentence names who has it and why, and no next step.
+  it("says who has an order held by a failed check and why, and names no next step", () => {
+    const sentence = statusSentence(
+      t,
+      team,
+      input({
+        journey: journeyAt(6),
+        heldBy: "WAREHOUSE",
+        stage: "Packing list differs from the PO",
+        checks: [
+          check("mock.sample-customer-no", "pass"),
+          check("mock.sample-quantity", "fail"),
+        ],
+      }),
+    );
+    expect(sentence).toBe(
+      "With Warehouse: the packing list differs from the PO.",
+    );
+    expect(sentence).not.toMatch(/Next|forwarder/);
+  });
+
+  it("says a failed price check in its own words, and a rule it does not know by its label", () => {
+    expect(
+      statusSentence(
+        t,
+        team,
+        input({
+          journey: journeyAt(3),
+          heldBy: "SUPPORT",
+          checks: [check("mock.sample-price", "fail")],
+        }),
+      ),
+    ).toBe("With Support: the unit price on the PI differs from the PO.");
+    expect(
+      statusSentence(
+        t,
+        team,
+        input({
+          journey: journeyAt(3),
+          heldBy: "SUPPORT",
+          checks: [check("rule.other", "fail")],
+        }),
+      ),
+    ).toBe("With Support: a check did not pass: Label of rule.other.");
+  });
+
+  it("keeps the next step when every check passed", () => {
+    expect(
+      statusSentence(
+        t,
+        team,
+        input({
+          journey: journeyAt(6),
+          heldBy: "WAREHOUSE",
+          checks: [check("mock.sample-quantity", "pass")],
+        }),
+      ),
+    ).toBe("With Warehouse. Next: Logistics hands the goods to the forwarder.");
   });
 
   it("names the next step and its team from the page's own journey, with no why when the data gives none", () => {

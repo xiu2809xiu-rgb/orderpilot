@@ -1,4 +1,5 @@
 import type {
+  CheckResult,
   OrderCaptureState,
   Role,
   SalesOrderDetail,
@@ -17,6 +18,37 @@ export interface StatusInput {
   stage: string;
   entry: OrderCaptureState | null;
   detail: Pick<SalesOrderDetail, "shortage" | "shortageCount" | "lines"> | null;
+  /** The checks the tracker ran on the order. A failed one is what holds it. */
+  checks: readonly CheckResult[];
+}
+
+/**
+ * The words for a failed rule, by the rule's id. The ids are the sample rules
+ * of the tracker's mock; a rule this does not know is still said, by its own
+ * label, so a new rule never makes the page silent about a hold.
+ */
+const CHECK_WORDS: Readonly<Record<string, string>> = {
+  "mock.sample-quantity": "quantity",
+  "mock.sample-price": "price",
+};
+
+/**
+ * Why a failed check holds the order, or null when no check failed. The failed
+ * check is the signal rather than the tracker's status code, because a status
+ * is a label the mock writes for one stage, while a check is what actually
+ * found the difference and stays the same when area 3's engine replaces the
+ * mock. The first failed check speaks; a second is not guessed at.
+ */
+function whyFailed(
+  t: TFunction,
+  checks: readonly CheckResult[],
+): string | null {
+  const failed = checks.find((check) => check.outcome === "fail");
+  if (!failed) return null;
+  const words = CHECK_WORDS[failed.ruleId];
+  return words
+    ? t(`order.status.why.check.${words}`)
+    : t("order.status.why.checkOther", { label: failed.ruleLabel });
 }
 
 /** The shortage in words, or null when the order's data names none. */
@@ -82,6 +114,10 @@ export function statusSentence(
   // approval step either, so the sentence names no next step for it.
   const here = journey.steps.find((step) => step.state === "now");
   if (why && here?.id === "stock") return t("order.status.held", values);
+  // A failed check holds the order where it is: who has it and why, and no next
+  // step, because the order does not go on until the difference is settled.
+  const failed = whyFailed(t, input.checks);
+  if (failed) return t("order.status.held", { team: values.team, why: failed });
   const next = nextWords(t, team, journey);
   if (next === null) {
     return t(why ? "order.status.lastWhy" : "order.status.last", values);
