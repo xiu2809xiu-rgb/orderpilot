@@ -140,6 +140,26 @@ describe("items over the mock", () => {
     }
   });
 
+  it("finds an item by its vendor's number and name", async () => {
+    const some = dataset.items[7];
+    const vendor = dataset.vendors.find((v) => v.no === some?.vendorNo);
+    if (!some || !vendor) throw new Error("no item or vendor");
+    for (const search of [vendor.no, vendor.name.split(" ")[0] ?? ""]) {
+      const found = await service.listItems(
+        { ...everything, search },
+        "SUPPORT",
+      );
+      expect(found.items.map((r) => r.no)).toContain(some.no);
+      // Every hit is that vendor's, or has the words somewhere else it shows.
+      expect(found.total).toBeGreaterThan(0);
+    }
+    const byVendor = await service.listItems(
+      { ...everything, search: vendor.no },
+      "SUPPORT",
+    );
+    expect(byVendor.items.every((r) => r.vendorNo === vendor.no)).toBe(true);
+  });
+
   it("filters by brand, category and vendor", async () => {
     const some = dataset.items[0];
     if (!some) throw new Error("no item");
@@ -345,6 +365,30 @@ describe("customers over the mock", () => {
     for (const row of found.items) {
       expect(row.countryRegionCode).toBe(some.countryRegionCode);
     }
+  });
+
+  it("finds a customer by its country's name and by its code", async () => {
+    const some = dataset.customers.find((c) => c.countryRegionCode === "LK");
+    if (!some) throw new Error("no customer in Sri Lanka");
+    const inCountry = dataset.customers.filter(
+      (c) => c.countryRegionCode === "LK",
+    );
+    for (const search of ["Sri Lanka", "sri lanka", "LK", "lk"]) {
+      const found = await service.listCustomers({ ...everything, search });
+      expect(found.items.map((r) => r.no)).toContain(some.no);
+      expect(
+        found.items.filter((r) => r.countryRegionCode === "LK"),
+      ).toHaveLength(inCountry.length);
+    }
+  });
+
+  it("does not find every customer by a two-letter code", async () => {
+    const found = await service.listCustomers({ ...everything, search: "IN" });
+    const india = dataset.customers.filter((c) => c.countryRegionCode === "IN");
+    // Names that merely contain "in" are still found, as before, but a
+    // customer elsewhere with no "in" in its name is not.
+    expect(found.items.length).toBeGreaterThanOrEqual(india.length);
+    expect(found.items.length).toBeLessThan(dataset.customers.length);
   });
 
   it("counts what the detail lists, and overdue agrees with the tracker", async () => {
