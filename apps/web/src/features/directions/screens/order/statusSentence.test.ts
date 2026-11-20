@@ -160,6 +160,31 @@ describe("statusSentence", () => {
     ).toBe("With Support: a check did not pass: Label of rule.other.");
   });
 
+  // The page says one reason in this sentence and the Checks tab lists every
+  // failed check, so the first one in the tracker's order is the one said.
+  it("says only the first failed check when two failed, in the tracker's order", () => {
+    const sentence = (checks: readonly CheckResult[]) =>
+      statusSentence(
+        t,
+        team,
+        input({ journey: journeyAt(6), heldBy: "WAREHOUSE", checks }),
+      );
+    const quantityFirst = sentence([
+      check("mock.sample-quantity", "fail"),
+      check("mock.sample-price", "fail"),
+    ]);
+    expect(quantityFirst).toBe(
+      "With Warehouse: the packing list differs from the PO.",
+    );
+    expect(quantityFirst).not.toMatch(/price/);
+    expect(
+      sentence([
+        check("mock.sample-price", "fail"),
+        check("mock.sample-quantity", "fail"),
+      ]),
+    ).toBe("With Warehouse: the unit price on the PI differs from the PO.");
+  });
+
   it("keeps the next step when every check passed", () => {
     expect(
       statusSentence(
