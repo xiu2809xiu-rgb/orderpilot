@@ -64,6 +64,18 @@ describe("the order page", () => {
     expect(within(facts).getByText("30% prepayment")).toBeVisible();
   });
 
+  it("explains Held at where it is a heading of the facts", async () => {
+    stubApi();
+    open(PAID);
+    const facts = (await screen.findByText("Stage")).closest("dl");
+    if (!facts) throw new Error("no facts");
+    const term = within(facts).getByText("Held at");
+    expect(term.tagName).toBe("ABBR");
+    expect(term).toHaveAccessibleDescription(
+      "The team that has the order now.",
+    );
+  });
+
   it("shows the journey with done, now and later, and who and when for done steps", async () => {
     stubApi();
     open(PAID);

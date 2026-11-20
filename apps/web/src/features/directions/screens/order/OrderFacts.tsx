@@ -1,6 +1,7 @@
 import type { SalesOrderDetail } from "@orderpilot/shared";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import { Term, withTerms } from "@/components/common/Term";
 import { formatDay } from "@/lib/format";
 import { Amount } from "../orders/Amount";
 import { ALL_DONE } from "../orders/orderRow";
@@ -10,7 +11,7 @@ function Fact({
   children,
   main = false,
 }: {
-  label: string;
+  label: ReactNode;
   children: ReactNode;
   /** The figure the eye should land on: set larger. */
   main?: boolean;
@@ -45,8 +46,8 @@ export function OrderFacts({
   const { t } = useTranslation("directions-orders");
   return (
     <dl className="od-facts-bar dx-card">
-      <Fact label={t("order.facts.stage")}>{stageLabel}</Fact>
-      <Fact label={t("columns.heldAt")}>
+      <Fact label={t("order.facts.stage")}>{withTerms(stageLabel)}</Fact>
+      <Fact label={<Term word="heldAt">{t("columns.heldAt")}</Term>}>
         {step === ALL_DONE ? t("cells.done") : heldAt}
       </Fact>
       <Fact label={t("columns.value")} main>
@@ -81,7 +82,7 @@ export function OrderFacts({
       <Fact label={t("columns.orderDate")}>
         {detail ? formatDay(detail.orderDate) : t("cells.notSet")}
       </Fact>
-      <Fact label={t("columns.po")}>
+      <Fact label={withTerms(t("columns.po"))}>
         <span className="numeral">{order.externalDocumentNo}</span>
       </Fact>
     </dl>

@@ -221,6 +221,15 @@
   color: var(--muted-foreground);
 }
 
+/* The menu of a narrow window holds the theme control, which is sized by the bar's variable. */
+.dx-sheet-extras {
+  --bar-ctl: 2.25rem;
+}
+@media (pointer: coarse) {
+  .dx-sheet-extras {
+    --bar-ctl: 2.75rem;
+  }
+}
 .dx-bar-icon {
   width: var(--bar-ctl);
   padding-inline: 0;

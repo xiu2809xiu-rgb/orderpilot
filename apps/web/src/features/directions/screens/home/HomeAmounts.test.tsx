@@ -25,7 +25,11 @@ beforeEach(() => {
 function rowOf(title: string): HTMLElement {
   // The title is on the timeline too, so the row is looked for in Needs you.
   const needs = screen.getByRole("region", { name: "Needs you" });
-  const row = within(needs).getByText(title).closest("[role='listitem']");
+  // A sentence with a glossary word in it is split in elements: match its whole text.
+  const [titled] = within(needs).getAllByText(
+    (_, node) => node?.textContent === title,
+  );
+  const row = titled?.closest("[role='listitem']");
   if (!(row instanceof HTMLElement)) throw new Error(`No row for ${title}`);
   return row;
 }

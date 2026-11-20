@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { SparkButton } from "@/features/directions/spark/SparkButton";
 import { Breadcrumbs } from "./Breadcrumbs";
+import { HintTip } from "./HintTip";
 import { MobileMenu } from "./MobileMenu";
 import { Notifications } from "./Notifications";
 import { RoleSwitcher } from "./RoleSwitcher";
@@ -50,21 +51,24 @@ export function Topbar({
       </div>
       <SearchField onOpen={onOpenPalette} />
       {mayUpload ? (
-        <TopBarAction
-          icon={Upload}
-          label={t("shell.upload")}
-          to={UPLOAD_PATH}
-          // Home and Orders offer Upload too, so a phone keeps the room for the record number.
-          className="max-[30rem]:hidden"
-        />
+        // A phone finds Upload in the menu: the bar keeps the room for the record number.
+        <HintTip hint={t("shell.uploadHint")} className="max-[30rem]:hidden">
+          <TopBarAction
+            icon={Upload}
+            label={t("shell.upload")}
+            to={UPLOAD_PATH}
+          />
+        </HintTip>
       ) : null}
       {spark.available ? (
-        <SparkButton
-          open={spark.open}
-          onToggle={() => {
-            spark.setOpen(!spark.open);
-          }}
-        />
+        <HintTip hint={t("shell.sparkHint")}>
+          <SparkButton
+            open={spark.open}
+            onToggle={() => {
+              spark.setOpen(!spark.open);
+            }}
+          />
+        </HintTip>
       ) : null}
       <Notifications />
       <RoleSwitcher />

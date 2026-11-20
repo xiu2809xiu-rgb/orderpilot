@@ -16,16 +16,20 @@
     "mobileNavDescription": "Choose an area of OrderPilot.",
     "groups": {
       "work": "Work",
-      "stock": "Stock and buying",
+      "stock": "Master data",
       "insights": "Insights",
       "control": "Control"
     },
     "collapsePanel": "Collapse the panel",
     "expandPanel": "Expand the panel",
     "upload": "Upload",
+    "uploadHint": "Demo: let Spark read a sample PO",
     "spark": "Spark",
+    "sparkHint": "Demo: ask Spark about stock or sales",
+    "extras": "Upload and theme",
     "help": {
       "label": "Help",
+      "wordsTitle": "What the words mean",
       "title": "Keyboard shortcuts",
       "palette": "Search or jump to a page",
       "search": "Search the list on the page",
