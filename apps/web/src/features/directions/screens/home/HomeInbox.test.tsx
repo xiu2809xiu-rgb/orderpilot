@@ -92,7 +92,7 @@ describe("the home page of a role with an inbox", () => {
     await waitFor(() => {
       expect(tile(/My tasks/)).toHaveTextContent("1");
     });
-    // Warehouse works with no prices: the row shows no figure at all.
+    // Warehouse works with no prices: the row shows no figure, only the mask.
     expect(screen.queryByText(/USD 12,340/)).toBeNull();
     expect(await axeViolations(container)).toEqual([]);
 

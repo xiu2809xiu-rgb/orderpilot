@@ -72,8 +72,6 @@
       "of": "{{part}} of {{whole}}"
     },
     "next": {
-      "RAISE_SPR": "It goes to the management approvers.",
-      "SEND_PI": "Finance confirms the payment next.",
       "CONFIRM_PAYMENT": "The warehouse packs next.",
       "PACK_ORDER": "Support makes the invoice and packing list next.",
       "ADD_SHIPPING_DOCUMENTS": "That was the order's last step."

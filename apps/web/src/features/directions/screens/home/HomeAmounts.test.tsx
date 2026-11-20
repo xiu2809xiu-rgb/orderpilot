@@ -144,7 +144,7 @@ describe("the amount on a task row", () => {
   });
 
   it.each(["WAREHOUSE", "LOGISTICS"] as const)(
-    "shows %s no amount, because the server masks prices for the role",
+    "shows %s the Orders page's mask with its reason, and no figure",
     async (role) => {
       const served = serveHome({
         prices: false,
@@ -157,26 +157,70 @@ describe("the amount on a task row", () => {
       await waitFor(() => {
         expect(served.calls).toContain("GET /api/v1/orders");
       });
-      // Let the answer land before looking for what must not be there.
-      await waitFor(() => {
-        expect(screen.getByRole("region", { name: "Needs you" })).toBeVisible();
+      const row = await waitFor(() => {
+        const found = rowOf("Pack the order");
+        // The mask is a button with the reason as its description, as on the Orders page.
+        expect(
+          within(found).getByRole("button", { name: /Hidden/ }),
+        ).toBeVisible();
+        return found;
       });
-      const needs = screen.getByRole("region", { name: "Needs you" });
-      expect(within(needs).queryByText(/USD/)).toBeNull();
-      expect(within(needs).queryByText(/Order value/)).toBeNull();
+      const mask = within(row).getByRole("button", { name: /Hidden/ });
+      expect(mask).toHaveAccessibleDescription(
+        "Hidden: prices are for roles that work with pricing",
+      );
+      // The label stays, so the mask says which figure is hidden; the figure never reaches the page.
+      expect(row).toHaveTextContent("Order value");
+      expect(within(row).queryByText(/USD/)).toBeNull();
+      expect(row).not.toHaveTextContent("12,340");
     },
   );
 
-  it("shows no amount while the answer about prices has not come, or failed", async () => {
+  it("draws the mask where an SPR amount would be, for a role that may not see prices", async () => {
     serveHome({
-      tasks: [makeTask({ assigneeRole: "SUPPORT" })],
-      prices: undefined,
+      prices: false,
+      tasks: [
+        makeTask({
+          kind: "RAISE_SPR",
+          assigneeRole: "PRODUCT_MANAGER",
+          orderNo: "SO-0082",
+          ref: { recordNo: "SPR-20261115-0006", navisionNo: null },
+          amount: "34614.72",
+        }),
+      ],
     });
-    renderHome("SUPPORT");
-    await within(
-      await screen.findByRole("region", { name: "Needs you" }),
-    ).findByText("Pack the order");
-    // The default answer lists no order to read the mask from: nothing is shown.
-    expect(screen.queryByText(/USD 12,340/)).toBeNull();
+    renderHome("PRODUCT_MANAGER");
+    const row = await waitFor(() => {
+      const found = rowOf("Raise the SPR for SO-0082");
+      within(found).getByRole("button", { name: /Hidden/ });
+      return found;
+    });
+    expect(row).toHaveTextContent("SPR amount");
+    expect(row).not.toHaveTextContent("34,614");
   });
+
+  it.each(["empty", "failed"] as const)(
+    "shows neither a figure nor a mask when the orders list is %s, so a mask is never drawn on a guess",
+    async (orders) => {
+      // A role that may see prices loses its figure here, because the answer is
+      // read from the first order: with none (or no answer) it is not known.
+      const served = serveHome({
+        orders,
+        tasks: [makeTask({ assigneeRole: "SUPPORT" })],
+      });
+      renderHome("SUPPORT");
+      await within(
+        await screen.findByRole("region", { name: "Needs you" }),
+      ).findByText("Pack the order");
+      await waitFor(() => {
+        expect(served.calls).toContain("GET /api/v1/orders");
+      });
+      // Let the answer land before looking for what must not be there.
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      const row = rowOf("Pack the order");
+      expect(within(row).queryByText(/USD/)).toBeNull();
+      expect(within(row).queryByText("Order value")).toBeNull();
+      expect(within(row).queryByRole("button", { name: /Hidden/ })).toBeNull();
+    },
+  );
 });
