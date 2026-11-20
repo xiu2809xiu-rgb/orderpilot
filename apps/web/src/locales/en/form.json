@@ -34,6 +34,10 @@
     "failed": "The search did not work.",
     "retry": "Try again",
     "notChosen": "Choose one of the records in the list.",
+    "possible": "Possible matches",
+    "possibleOption": "possible match",
+    "possibleCount_one": "{{count}} possible match.",
+    "possibleCount_other": "{{count}} possible matches.",
     "results_one": "{{count}} record found.",
     "results_other": "{{count}} records found."
   },
