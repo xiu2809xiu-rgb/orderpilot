@@ -145,6 +145,8 @@ describe("the sign-in page with demo mode on", () => {
     expect(screen.getByTestId("roles-placeholder")).toBeInTheDocument();
     expect(screen.queryByRole("textbox", { name: "Email" })).toBeNull();
     expect(screen.queryByRole("list", { name: "Demo roles" })).toBeNull();
+    // Nor does the demo note claim anything before the options say it is a demo.
+    expect(screen.queryByText(/stand-ins/)).toBeNull();
   });
 
   it("shows a failed role sign-in while the email form is closed", async () => {
