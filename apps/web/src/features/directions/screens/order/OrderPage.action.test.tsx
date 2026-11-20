@@ -128,6 +128,35 @@ describe("the Documents tab banner outside a demo session", () => {
   });
 });
 
+describe("the sample review for a role that may not upload", () => {
+  // /upload tells such a role to sign in as Support, so the link is not
+  // offered to it: the same test as the other entries to /upload.
+  it("says the words on the Documents tab to a demo session as Warehouse, with no link", async () => {
+    useSessionStore.setState({
+      status: "active",
+      session: { ...sessionFor("WAREHOUSE"), demo: true },
+    });
+    stubApi({ toConfirm: [ORDER] });
+    open("?tab=documents");
+    expect(
+      await screen.findByText(
+        "A document of this order waits for a person to confirm its fields",
+      ),
+    ).toBeVisible();
+    expect(
+      screen.queryByRole("link", { name: "See the review on a sample" }),
+    ).toBeNull();
+  });
+
+  it("still offers the link to a demo session as Support on the Documents tab", async () => {
+    stubApi({ toConfirm: [ORDER] });
+    open("?tab=documents");
+    expect(
+      await screen.findByRole("link", { name: "See the review on a sample" }),
+    ).toHaveAttribute("href", "/upload");
+  });
+});
+
 describe("the same words as Home for the same task", () => {
   const NOTHING = "Records that this is done. OrderPilot sends nothing.";
   const CASES = [

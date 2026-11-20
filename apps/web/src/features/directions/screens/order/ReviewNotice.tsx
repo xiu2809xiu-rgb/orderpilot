@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
-import { UPLOAD_PATH, useDemoParts } from "@/app/shell/demoParts";
+import { UPLOAD_PATH, useUploadEntry } from "@/app/shell/demoParts";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
  */
 export function ReviewNotice() {
   const { t } = useTranslation("directions-orders");
-  const demo = useDemoParts();
+  const demo = useUploadEntry();
   return (
     <div className="od-review-notice fs-14">
       <p className="text-muted-foreground">{t("action.reviewNotice")}</p>

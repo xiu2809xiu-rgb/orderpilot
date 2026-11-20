@@ -7,7 +7,7 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/components/kit/Alert";
-import { UPLOAD_PATH, useDemoParts } from "@/app/shell/demoParts";
+import { UPLOAD_PATH, useUploadEntry } from "@/app/shell/demoParts";
 import { DocumentItem } from "./DocumentItem";
 import { type OrderDocumentRow } from "./documentsModel";
 
@@ -40,7 +40,7 @@ export function DocumentsTab({
 }) {
   const { t } = useTranslation("directions-orders");
   const named = documents.some((row) => row.flow?.status === "to-confirm");
-  const demo = useDemoParts();
+  const demo = useUploadEntry();
   return (
     <div className="od-docs-wrap">
       {toConfirm ? (
