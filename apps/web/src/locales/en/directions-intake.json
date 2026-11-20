@@ -94,7 +94,6 @@
     "editLabel": "{{label}}",
     "select": "Show {{label}} on the page",
     "finish": "Finish review",
-    "finishedTitle": "Review finished: {{summary}}",
     "finishedBody": "Nothing was saved and no order was made. This sample belongs to order {{order}} in the sample data.",
     "openOrder": "Open order {{order}}",
     "loading": "Loading the demo document",

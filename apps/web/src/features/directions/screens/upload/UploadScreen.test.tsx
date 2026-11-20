@@ -315,7 +315,7 @@ describe("the upload screen", () => {
     await user.click(create);
     expect(
       await screen.findByText(
-        "Review finished: 1 field confirmed by you, 1 field corrected by you, 19 fields read above 90 percent",
+        "1 field confirmed by you, 1 field corrected by you, 19 fields read above 90 percent",
       ),
     ).toBeVisible();
     expect(
@@ -326,7 +326,7 @@ describe("the upload screen", () => {
     expect(
       screen.getByRole("link", { name: "Open order SO-0102" }),
     ).toBeVisible();
-    expect(create).toBeDisabled();
+    expect(screen.queryByRole("button", { name: "Finish review" })).toBeNull();
   });
 
   it("says so, with a way to try again, when the demo document cannot be loaded", async () => {

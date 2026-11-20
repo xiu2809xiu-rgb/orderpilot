@@ -86,17 +86,20 @@ export function ReviewProgress({
             {t("review.next")}
           </Button>
         ) : null}
-        <Button
-          ref={finishRef}
-          type="button"
-          disabled={waitingCount > 0 || finished}
-          aria-describedby={statusId}
-          onClick={onFinish}
-          className="pointer-coarse:h-11"
-        >
-          <ClipboardCheck aria-hidden="true" />
-          {t("review.finish")}
-        </Button>
+        {/* Once finished there is nothing left to press: no disabled copy stays. */}
+        {finished ? null : (
+          <Button
+            ref={finishRef}
+            type="button"
+            disabled={waitingCount > 0}
+            aria-describedby={statusId}
+            onClick={onFinish}
+            className="pointer-coarse:h-11"
+          >
+            <ClipboardCheck aria-hidden="true" />
+            {t("review.finish")}
+          </Button>
+        )}
       </div>
     </div>
   );
