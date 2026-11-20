@@ -24,22 +24,17 @@ interface ColumnContext {
    * should say what each is short of.
    */
   showStock?: boolean;
-  /**
-   * How much of the table the window fits. The order's cell writes the facts
-   * of the columns left out under its number. Wide when not said.
-   */
+  /** How much of the table the window fits; wide when not said. */
   fit?: Fit;
 }
 
 /**
- * The columns of the merged list: everything the two old pages showed, in one
- * table. The record number leads and cannot be hidden. Eight columns show by
- * default: the order, the PO number, the customer, the stage (with the order's
- * age and, for a held order, why), the team that holds it, the ship date, the
- * value and the documents. The order's age as a column of its own, the order
- * date, the entry state and the source are under Columns. Numbers and money
- * sit on the right. The value cannot sort for a role that may not see it: the
- * order of hidden figures would give them away.
+ * The columns of the merged list, in one table. The record number leads and
+ * cannot be hidden. Eight show by default: the order, the PO number, the
+ * customer, the stage (with the age and, for a held order, why), the team
+ * that holds it, the ship date, the value and the documents. The rest are
+ * under Columns. Numbers and money sit on the right. The value cannot sort for
+ * a role that may not see it: the order of hidden figures would give them away.
  */
 export function orderColumns({
   t,
