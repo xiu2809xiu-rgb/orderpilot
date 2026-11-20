@@ -15,6 +15,7 @@
     "moreRoles": "More roles",
     "moreRolesLabel": "More demo roles",
     "emailToggle": "Sign in with email",
+    "loadingRoles": "Loading the demo roles",
     "demoNote": "In this demo the AI and Business Central are stand-ins, and every record is made up.",
     "optionsFailed": "The demo sign-in could not be checked. You can still sign in with your email."
   },

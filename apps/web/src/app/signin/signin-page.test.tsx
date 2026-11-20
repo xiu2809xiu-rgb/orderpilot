@@ -137,28 +137,14 @@ describe("the sign-in page with demo mode on", () => {
     expect(router.state.location.pathname).toBe("/");
   });
 
-  it("keeps what was typed, and the focus, when the roles arrive", async () => {
-    const user = userEvent.setup();
-    renderApp("/login", { demoMode: true, optionsDelayMs: 300 });
-    await user.click(await screen.findByLabelText("Email"));
-    await user.keyboard("abc");
-    await sixTeams();
-    await user.keyboard("def");
-    expect(screen.getByLabelText("Email")).toHaveValue("abcdef");
-    expect(screen.getByLabelText("Email")).toHaveFocus();
-    // The person is in the form, so it stays open under the roles.
-    expect(screen.getByLabelText("Email")).toBeVisible();
-  });
-
-  it("shows a sign-in failure once while the roles are still loading", async () => {
-    const user = userEvent.setup();
+  // Moved to SignInForm.test.tsx: typing while the roles load can now happen
+  // only for a person whose session ended, whose form is open from the start.
+  it("holds the roles' place while they load, and draws no email form", async () => {
     renderApp("/login", { demoMode: true, optionsDelayMs: 30_000 });
-    await user.type(await screen.findByLabelText("Email"), "a@b.sg");
-    await user.type(screen.getByLabelText("Password"), "wrong{Enter}");
-    await screen.findByRole("alert");
-    // The roles are still on their way: only one place may draw the failure.
+    await screen.findByRole("heading", { name: "Sign in to OrderPilot" });
+    expect(screen.getByTestId("roles-placeholder")).toBeInTheDocument();
+    expect(screen.queryByRole("textbox", { name: "Email" })).toBeNull();
     expect(screen.queryByRole("list", { name: "Demo roles" })).toBeNull();
-    expect(screen.getAllByRole("alert")).toHaveLength(1);
   });
 
   it("shows a failed role sign-in while the email form is closed", async () => {
@@ -292,9 +278,11 @@ describe("the form", () => {
   it("shows and hides the password with the eye", async () => {
     const user = userEvent.setup();
     renderApp("/login", { demoMode: false });
-    const field = await screen.findByLabelText("Password");
+    // The form is drawn once the options have answered, not before.
+    const eye = await screen.findByRole("button", { name: "Show password" });
+    const field = screen.getByLabelText("Password");
     expect(field).toHaveAttribute("type", "password");
-    await user.click(screen.getByRole("button", { name: "Show password" }));
+    await user.click(eye);
     expect(field).toHaveAttribute("type", "text");
     expect(
       screen.getByRole("button", { name: "Show password" }),
