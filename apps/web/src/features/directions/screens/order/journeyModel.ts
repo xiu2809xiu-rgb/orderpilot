@@ -1,10 +1,11 @@
-import type { TimelineStep } from "@orderpilot/shared";
+import type { Role, TimelineStep } from "@orderpilot/shared";
 import {
   expectedBy,
   expectedShipDate,
   SALES_STEP_IDS,
   statOf,
   usualDuration,
+  type SalesStepId,
   type ShipEstimate,
   type Usual,
 } from "../../data/estimates";
@@ -39,6 +40,24 @@ const STEP_OF_EVENT: Readonly<Record<string, number>> = {
   "AWB recorded": 9,
 };
 
+/**
+ * The team that does each of the nine steps, in the order of the sales flow:
+ * Support takes the PO, makes the PI, the invoice and packing list and tells
+ * the customer. The page says who holds an order from the tracker, never from
+ * here: this only says who does the step that comes next.
+ */
+export const STEP_TEAM: Readonly<Record<SalesStepId, Role>> = {
+  poIn: "SUPPORT",
+  stock: "PRODUCT_MANAGER",
+  pi: "SUPPORT",
+  payment: "FINANCE",
+  pack: "WAREHOUSE",
+  documents: "SUPPORT",
+  forwarder: "LOGISTICS",
+  customerTold: "SUPPORT",
+  awbAndPermit: "LOGISTICS",
+};
+
 export interface DoneBy {
   actor: string;
   at: Date;
@@ -46,8 +65,10 @@ export interface DoneBy {
 
 export interface JourneyStepInfo {
   position: number;
-  id: string;
+  id: SalesStepId;
   state: "done" | "now" | "later";
+  /** The team that does this step. */
+  team: Role;
   /** Who finished it and when, from the order's events. */
   doneBy: DoneBy | null;
   /** The current step: when it began, and how many whole days it has waited. */
@@ -129,6 +150,7 @@ export function buildJourney(input: {
       position,
       id,
       state,
+      team: STEP_TEAM[id],
       doneBy: state === "done" ? (doneBy.get(position) ?? null) : null,
       since: state === "now" ? since : null,
       waitedDays: state === "now" ? waitedDays : null,

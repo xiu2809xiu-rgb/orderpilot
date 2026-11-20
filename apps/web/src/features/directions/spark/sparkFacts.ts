@@ -11,6 +11,17 @@ export interface StockFacts {
   otherBrands: StockAnswer["otherBrands"];
 }
 
+/**
+ * What can be promised to a customer today: on hand, less what sales orders
+ * already hold. The stock still on purchase orders is due, not here, so it is
+ * kept apart (the table's Available column adds it).
+ */
+export function availableNow(
+  item: Pick<StockItem, "onHand" | "onSalesOrders">,
+): number {
+  return item.onHand - item.onSalesOrders;
+}
+
 export function stockFacts(data: StockAnswer = STOCK_ANSWER): StockFacts {
   return {
     brand: data.brand,

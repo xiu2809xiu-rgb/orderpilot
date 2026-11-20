@@ -138,6 +138,38 @@ describe("DataTable with a server", () => {
     expect(screen.getByText("Showing 1 to 23 of 23")).toBeInTheDocument();
   });
 
+  it("opens the last page when the address names one past the end, and never says so in an empty state", async () => {
+    const changes: number[] = [];
+    function PastEnd() {
+      const [query, setQuery] = useState<TableQuery>({
+        ...DEFAULT_QUERY,
+        page: 99,
+      });
+      const { rows, total } = serve(query);
+      return (
+        <DataTable
+          tableId="customers"
+          caption="Customers"
+          columns={columns}
+          rows={rows}
+          total={total}
+          query={query}
+          onQueryChange={(next) => {
+            changes.push(next.page);
+            setQuery(next);
+          }}
+          rowKey={(r) => r.id}
+        />
+      );
+    }
+    render(<PastEnd />);
+    expect(await screen.findByText("Showing 21 to 23 of 23")).toBeVisible();
+    expect(screen.getByText("Page 3 of 3")).toBeVisible();
+    expect(names()).toHaveLength(3);
+    expect(changes).toEqual([3]);
+    expect(screen.queryByText(/Page 99/)).not.toBeInTheDocument();
+  });
+
   it("sorts through the server and announces it in the heading", async () => {
     const user = userEvent.setup();
     render(<Harness />);

@@ -1,0 +1,121 @@
+/* The order page's own rules. Loaded after orders.css, so where the two meet this one wins. */
+
+/* The number and its entry badge share a line. */
+.od-order .od-title-row {
+  grid-column: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.75rem;
+}
+
+.od-order .od-title-row .dx-page-intro {
+  margin-left: 0.25rem;
+}
+
+/* What became of an order entered here takes a line of its own under the number. */
+.od-order .od-title-row .od-entry-meaning {
+  flex-basis: 100%;
+  color: var(--muted-foreground);
+}
+
+.od-entry-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-control);
+  cursor: pointer;
+}
+
+.od-entry-badge:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Who has the order, why, what next, the latest act and the one lateness badge. */
+.od-status {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+.od-status-sentence {
+  max-width: 110ch;
+}
+
+/* The latest act and the lateness badge share a line when there is room. */
+.od-status-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 1.5rem;
+}
+
+.od-latest,
+.od-late {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.75rem;
+}
+
+.od-late {
+  gap: 0.25rem 0.5rem;
+}
+
+.od-latest-link {
+  display: inline-flex;
+  align-items: center;
+  color: var(--foreground);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.od-latest-link:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* The journey card: the title and the forecast of the ship day share a line, then the rail. */
+.od-journey-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.875rem var(--dx-card-pad) 1rem;
+}
+
+.od-journey-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 1.25rem;
+}
+
+.od-expected {
+  display: flex;
+  flex: 1 1 24rem;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+/* The tabs card holds the tab strip and its panel: no heading, because the strip names it. */
+.od-details {
+  min-width: 0;
+  padding: 0.5rem var(--dx-card-pad) var(--dx-card-pad);
+}
+
+/* An order that is not there: a heading and the one way back. */
+.od-missing {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding-top: 3rem;
+}
+
+/* One row of facts, tighter than the card it replaces, so the lines come into the first screen. */
+.od-order .od-facts-bar .od-fact {
+  padding-block: 0.625rem;
+  gap: 0.25rem;
+}
