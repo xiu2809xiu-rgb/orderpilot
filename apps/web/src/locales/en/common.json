@@ -26,7 +26,6 @@
     "uploadHint": "Upload a PO for Spark to read",
     "spark": "Spark",
     "sparkHint": "Ask Spark about stock or sales",
-    "demoMark": "Synthetic demo data",
     "extras": "Upload and theme",
     "help": {
       "label": "Help",

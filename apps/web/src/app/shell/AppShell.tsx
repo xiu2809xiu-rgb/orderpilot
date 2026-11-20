@@ -10,6 +10,7 @@ import { whenIdle } from "@/lib/deferred";
 import { loadRecordTabs } from "@/lib/loadRecordTabs";
 import { useDemoTour } from "@/stores/demoTour";
 import { useSessionStore } from "@/stores/session";
+import { DemoMark } from "./DemoMark";
 import { CrumbProvider } from "./pageCrumb";
 import { PageRegion } from "./PageRegion";
 import { PageWipe } from "./PageWipe";
@@ -159,6 +160,7 @@ export function AppShell() {
             >
               {announcement}
             </div>
+            <DemoMark />
             <div ref={setDock} data-testid="consent-dock" className="dx-dock" />
           </div>
         </div>
