@@ -1,6 +1,6 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MemoryRouter, useLocation } from "react-router";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { useSessionStore } from "@/stores/session";
@@ -126,6 +126,50 @@ describe("Escape in the palette", () => {
       expect(screen.queryByRole("combobox")).toBeNull();
     });
     expect(trigger).toHaveFocus();
+  });
+
+  it("puts focus on the page's main region when nothing had it, not on the body", async () => {
+    const user = userEvent.setup();
+    vi.stubEnv("DEV", false);
+    useSessionStore
+      .getState()
+      .setSession({ ...sessionFor("SUPPORT"), demo: true });
+    // The shell opens the palette from the keyboard, with nothing focused.
+    function KeyPage() {
+      const [open, setOpen] = useState(false);
+      useEffect(() => {
+        const onKey = (event: KeyboardEvent) => {
+          if (event.ctrlKey && event.key.toLowerCase() === "k") setOpen(true);
+        };
+        document.addEventListener("keydown", onKey);
+        return () => {
+          document.removeEventListener("keydown", onKey);
+        };
+      }, []);
+      return (
+        <>
+          <main id="main" tabIndex={-1}>
+            A page
+          </main>
+          <CommandPalette open={open} onOpenChange={setOpen} />
+        </>
+      );
+    }
+    render(
+      <MemoryRouter>
+        <SparkPanelProvider>
+          <KeyPage />
+        </SparkPanelProvider>
+      </MemoryRouter>,
+    );
+    expect(document.body).toHaveFocus();
+    await user.keyboard("{Control>}k{/Control}");
+    await screen.findByRole("combobox");
+    await user.keyboard("{Escape}");
+    await waitFor(() => {
+      expect(screen.queryByRole("combobox")).toBeNull();
+    });
+    expect(document.getElementById("main")).toHaveFocus();
   });
 });
 

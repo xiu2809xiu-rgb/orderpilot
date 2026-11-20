@@ -112,9 +112,13 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
           handsFocusOn.current = false;
           return;
         }
-        const target = opener.current?.isConnected
-          ? opener.current
-          : document.getElementById("main");
+        // The body is what has focus when the palette opens from the keyboard
+        // with nothing selected: giving focus back to it would leave it nowhere.
+        const remembered = opener.current;
+        const target =
+          remembered?.isConnected && remembered !== document.body
+            ? remembered
+            : document.getElementById("main");
         target?.focus();
       }}
     >
