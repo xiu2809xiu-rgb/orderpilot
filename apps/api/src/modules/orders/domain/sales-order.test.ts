@@ -121,6 +121,27 @@ describe("SalesOrder", () => {
       expect(() => order.edit({ lines: [] })).toThrow(ValidationFailedError);
     });
 
+    it("refuses a change that puts the shipment before the order date", () => {
+      const order = new SalesOrder(input({ shipmentDate: "2026-11-20" }));
+      expect(() => order.edit({ shipmentDate: "2026-11-01" })).toThrow(
+        ValidationFailedError,
+      );
+      // One date sent meets the stored other.
+      expect(() => order.edit({ orderDate: "2026-11-25" })).toThrow(
+        ValidationFailedError,
+      );
+      expect(order.edit({ shipmentDate: "2026-11-08" }).shipmentDate).toBe(
+        "2026-11-08",
+      );
+    });
+
+    it("loads an order stored before the rule, and edits what is not a date", () => {
+      const old = new SalesOrder(input({ shipmentDate: "2020-01-01" }));
+      expect(old.edit({ prepaymentPercent: "50" }).prepaymentPercent).toBe(
+        "50",
+      );
+    });
+
     it.each(["submitted", "void"] as const)(
       "refuses to edit or void a %s order",
       (captureState) => {

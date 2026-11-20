@@ -132,7 +132,28 @@ const orderLineBodySchema = z.object({
   unitPrice: z.string().regex(ORDER_PRICE_PATTERN).optional(),
 });
 
-export const createSalesOrderSchema = z.object({
+/**
+ * True when the shipment date falls before the order date. Both are
+ * `YYYY-MM-DD`, so comparing the text compares the days. A missing or blank
+ * date is not before anything. The form and the API both ask this one
+ * question, so they cannot disagree about it.
+ */
+export function shipmentIsBeforeOrder(
+  orderDate: string | null | undefined,
+  shipmentDate: string | null | undefined,
+): boolean {
+  if (!orderDate || !shipmentDate) return false;
+  return shipmentDate < orderDate;
+}
+
+/** The API's words for the refusal; the form words it again in its own locale. */
+export const SHIPMENT_BEFORE_ORDER_MESSAGE =
+  "The shipment date cannot be before the order date.";
+
+// The fields apart from the cross-field check, which is a refinement: a
+// refinement is lost on .partial(), so the patch is built from this and
+// carries the check itself.
+const createSalesOrderFields = z.object({
   customerNo: navisionNoSchema,
   externalDocumentNo: z.string().trim().min(1).max(35),
   orderDate: z.iso.date(),
@@ -140,14 +161,27 @@ export const createSalesOrderSchema = z.object({
   prepaymentPercent: z.string().regex(ORDER_PERCENT_PATTERN),
   lines: z.array(orderLineBodySchema).min(1).max(ORDER_MAX_LINES),
 });
+
+export const createSalesOrderSchema = createSalesOrderFields.refine(
+  (body) => !shipmentIsBeforeOrder(body.orderDate, body.shipmentDate),
+  { path: ["shipmentDate"], message: SHIPMENT_BEFORE_ORDER_MESSAGE },
+);
 export type CreateSalesOrderBody = z.infer<typeof createSalesOrderSchema>;
 
-/** Only the fields sent change. `version` is the one the form was typed against. */
-export const patchSalesOrderSchema = createSalesOrderSchema
+/**
+ * Only the fields sent change. `version` is the one the form was typed against.
+ * A patch that sends one of the two dates is checked against the stored other
+ * by the order itself; this check covers a patch that sends both.
+ */
+export const patchSalesOrderSchema = createSalesOrderFields
   .partial()
   .extend({ version: z.int().min(1) })
   .refine((body) => Object.keys(body).some((key) => key !== "version"), {
     message: "Send at least one field to change",
+  })
+  .refine((body) => !shipmentIsBeforeOrder(body.orderDate, body.shipmentDate), {
+    path: ["shipmentDate"],
+    message: SHIPMENT_BEFORE_ORDER_MESSAGE,
   });
 export type PatchSalesOrderBody = z.infer<typeof patchSalesOrderSchema>;
 

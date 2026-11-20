@@ -7,3 +7,12 @@
 export function normalisePoNumber(raw: string): string {
   return raw.trim().replace(/\s+/g, " ");
 }
+
+/**
+ * What the duplicate rule compares: upper case, with every space left out, so
+ * "aud-dup- 011930" and "AUD-DUP-011930" are one PO number. The stored number
+ * keeps the customer's own spacing and case.
+ */
+export function poMatchKey(raw: string): string {
+  return raw.replace(/\s+/g, "").toUpperCase();
+}

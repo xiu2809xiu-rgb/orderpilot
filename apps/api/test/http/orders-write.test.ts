@@ -209,6 +209,49 @@ describe("writing draft orders over HTTP", () => {
       await refused({ externalDocumentNo: "   " }, "externalDocumentNo");
     });
 
+    it("refuses a shipment date before the order date, at the field, and stores nothing", async () => {
+      const before = await storedCount();
+      const res = await send(
+        "post",
+        "SUPPORT",
+        O,
+        body({ orderDate: "2026-11-20", shipmentDate: "2020-01-01" }),
+      );
+      expect(res.status).toBe(400);
+      const error = errorOf(res);
+      expect(error.code).toBe("VALIDATION_FAILED");
+      expect(error.details).toEqual([
+        expect.objectContaining({ path: "shipmentDate" }),
+      ]);
+      expect(await storedCount()).toBe(before);
+    });
+
+    it("refuses a change whose dates leave the shipment before the order, sent together or against the stored one", async () => {
+      const order = await create("SUPPORT", {
+        orderDate: "2026-11-10",
+        shipmentDate: "2026-11-15",
+      });
+      const both = await send("patch", "SUPPORT", `${O}/${order.orderNo}`, {
+        version: 1,
+        orderDate: "2026-11-20",
+        shipmentDate: "2026-11-01",
+      });
+      expect(both.status).toBe(400);
+      const alone = await send("patch", "SUPPORT", `${O}/${order.orderNo}`, {
+        version: 1,
+        orderDate: "2026-11-25",
+      });
+      expect(alone.status, alone.text).toBe(400);
+      expect(errorOf(alone).details).toEqual([
+        expect.objectContaining({ path: "shipmentDate" }),
+      ]);
+      const fine = await send("patch", "SUPPORT", `${O}/${order.orderNo}`, {
+        version: 1,
+        shipmentDate: "2026-11-10",
+      });
+      expect(fine.status, fine.text).toBe(200);
+    });
+
     it("refuses a zero quantity at the line's own index, and a 3-decimal price", async () => {
       await refused(line({ quantity: "0" }), "lines.0.quantity");
       await refused(line({ quantity: "1.0001" }), "lines.0.quantity");
@@ -346,6 +389,33 @@ describe("writing draft orders over HTTP", () => {
       const error = errorOf(res);
       expect(error.code).toBe("CONFLICT");
       expect(existingOrderOf(error.details as never)).toBe(first.orderNo);
+    });
+
+    it("takes a space inside the PO number for no difference, and stores it as typed", async () => {
+      const first = await create("SUPPORT", {
+        externalDocumentNo: "AUD-DUP-011930",
+      });
+      const res = await send(
+        "post",
+        "SUPPORT",
+        O,
+        body({ externalDocumentNo: "AUD-DUP- 011930" }),
+      );
+      expect(res.status, res.text).toBe(409);
+      expect(existingOrderOf(errorOf(res).details as never)).toBe(
+        first.orderNo,
+      );
+      const spaced = await create("SUPPORT", {
+        externalDocumentNo: "AUD-SP 7 7",
+      });
+      expect(spaced.externalDocumentNo).toBe("AUD-SP 7 7");
+      const again = await send(
+        "post",
+        "SUPPORT",
+        O,
+        body({ externalDocumentNo: "aud-sp77" }),
+      );
+      expect(again.status, again.text).toBe(409);
     });
 
     it("lets another customer use the same PO number", async () => {
