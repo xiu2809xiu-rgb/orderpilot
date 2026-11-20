@@ -31,6 +31,9 @@ export function BankAccounts({ vendor }: { vendor: VendorDetail }) {
   const { t } = useTranslation("master-data");
   const { t: tc } = useTranslation("components");
   const hidden = hiddenField(vendor.bankAccounts[0]);
+  // The mark is a claim about accounts that were sent unmasked, so a vendor
+  // with none has nothing to mark. The server's answer decides, never the role.
+  const readable = vendor.bankAccounts.length > 0 && hidden === null;
   const columns: RecordColumn<BankAccount>[] = [
     {
       id: "code",
@@ -62,12 +65,12 @@ export function BankAccounts({ vendor }: { vendor: VendorDetail }) {
     <SectionCard
       title={t("vendor.bank.title")}
       actions={
-        hidden ? undefined : (
+        readable ? (
           <Badge variant="secondary">
             <Lock aria-hidden="true" />
             {t("vendor.bank.financeOnly")}
           </Badge>
-        )
+        ) : undefined
       }
     >
       {hidden ? (

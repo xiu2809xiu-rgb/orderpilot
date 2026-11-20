@@ -337,6 +337,22 @@ describe("a vendor", () => {
     expect(await axeViolations(view.container)).toEqual([]);
   });
 
+  it("shows the empty text and no Finance only mark for a vendor with no bank account, whoever asks", async () => {
+    await load();
+    const base = vendor(false);
+    server.use(
+      getMasterDataVendorMockHandler({
+        ...base,
+        data: { ...base.data, bankAccounts: [] },
+      }),
+    );
+    renderAt("/master-data/vendors/V-0001", "WAREHOUSE");
+    expect(
+      await screen.findByText("No bank account is on file for this vendor."),
+    ).toBeVisible();
+    expect(screen.queryByText("Finance only")).toBeNull();
+  });
+
   it("gives a role that may not see the bank account one line with the reason, and no dots", async () => {
     await load();
     server.use(getMasterDataVendorMockHandler(vendor(true)));
