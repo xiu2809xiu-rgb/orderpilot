@@ -161,6 +161,8 @@ beforeAll(async () => {
 });
 
 beforeEach(() => {
+  // Done today is the browser's own copy, which jsdom keeps between tests.
+  localStorage.clear();
   useSessionStore.setState({
     status: "active",
     session: sessionFor("SUPPORT"),
@@ -208,7 +210,7 @@ describe("the home screen", () => {
     // A task one click cannot finish opens its order instead.
     expect(
       within(nth(rows, 1)).getByRole("link", {
-        name: "Review for SO-0102",
+        name: "Open order for SO-0102",
       }),
     ).toBeVisible();
   });
