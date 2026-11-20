@@ -61,6 +61,7 @@ export function LookupControl({
   const combobox = useLookupCombobox(behaviour);
   const { listId, state, listed, current } = combobox;
   const said = announcementKey(state);
+  const possible = state.options.filter((o) => o.possible === true).length;
 
   return (
     <Popover open={combobox.open}>
@@ -98,7 +99,10 @@ export function LookupControl({
           </FormControl>
           <span id={statusId} role="status" className="sr-only">
             {combobox.open && said !== null
-              ? t(said, { count: state.options.length })
+              ? t(said, { count: state.options.length - possible })
+              : ""}
+            {combobox.open && state.status === "done" && possible > 0
+              ? ` ${t("lookup.possibleCount", { count: possible })}`
               : ""}
           </span>
         </div>

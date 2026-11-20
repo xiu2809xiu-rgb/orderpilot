@@ -6,6 +6,12 @@ export interface LookupOption {
   name: string;
   /** A short extra, such as the country or the stock on hand. */
   detail?: string;
+  /**
+   * A look-alike name the search did not find by its text: shown under its own
+   * heading, and never picked by Tab or Enter on the typed text. Only a click,
+   * or the arrows and then Enter, picks it.
+   */
+  possible?: boolean;
 }
 
 /**
