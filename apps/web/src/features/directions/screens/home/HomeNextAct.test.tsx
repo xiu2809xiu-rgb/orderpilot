@@ -192,9 +192,12 @@ describe("the row of the Product manager", () => {
   it("is titled by what must be done and for which order, with the SPR as detail", async () => {
     serveHome({ tasks: [raise] });
     renderHome("PRODUCT_MANAGER");
-    const title = await screen.findByText("Raise the SPR for SO-0083");
+    // The SPR of the title is a term, so the sentence is in more than one element.
+    const title = await screen.findByText("SPR", { selector: "abbr" });
     const row = title.closest("[role='listitem']");
     if (!(row instanceof HTMLElement)) throw new Error("No row");
+    // The abbr only finds the row: the title is pinned by its whole text.
+    expect(row).toHaveTextContent("Raise the SPR for SO-0083");
     expect(
       within(row).getByText("707 short: Samsung SSD 1 TB NVMe"),
     ).toBeVisible();
@@ -213,9 +216,12 @@ describe("the row of the Product manager", () => {
   it("says only what the task carries", async () => {
     serveHome({ tasks: [{ ...raise, spr: undefined }] });
     renderHome("PRODUCT_MANAGER");
-    const title = await screen.findByText("Raise the SPR for SO-0083");
+    // The SPR of the title is a term, so the sentence is in more than one element.
+    const title = await screen.findByText("SPR", { selector: "abbr" });
     const row = title.closest("[role='listitem']");
     if (!(row instanceof HTMLElement)) throw new Error("No row");
+    // The abbr only finds the row: the title is pinned by its whole text.
+    expect(row).toHaveTextContent("Raise the SPR for SO-0083");
     expect(within(row).queryByText(/short:/)).toBeNull();
     expect(
       within(row).getByRole("link", { name: "SPR-20261115-0007" }),

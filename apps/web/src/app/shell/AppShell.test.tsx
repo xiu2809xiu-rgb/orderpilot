@@ -50,11 +50,8 @@ describe("the shell around every page", () => {
       "aria-current",
       "page",
     );
-    // Settings is in no group, so the trail keeps the way back to Home.
-    expect(within(crumbs).getByRole("link", { name: "Home" })).toHaveAttribute(
-      "href",
-      "/",
-    );
+    // A top-level page shows its own name alone: the panel is the way back.
+    expect(within(crumbs).queryByRole("link")).toBeNull();
     const bar = found(crumbs.closest("header"));
     expect(
       within(bar).getByRole("button", { name: "Search or jump to" }),
