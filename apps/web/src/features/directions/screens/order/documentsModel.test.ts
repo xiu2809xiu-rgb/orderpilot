@@ -1,6 +1,7 @@
 import type { CheckResult, DocumentType } from "@orderpilot/shared";
 import { describe, expect, it } from "vitest";
-import { documentsOf, withFlow } from "./documentsModel";
+import { documentsOf, withFlow, withPending } from "./documentsModel";
+import { step } from "./orderPageTestKit";
 
 const check = (
   id: string,
@@ -117,5 +118,74 @@ describe("withFlow", () => {
       OPTIONS,
     );
     expect(withFlow(rows, [])).toEqual(rows);
+  });
+});
+
+describe("withPending", () => {
+  const po = documentsOf(
+    [check("1", "pass", [["po", "CUSTOMER_PO"]])],
+    OPTIONS,
+  );
+  const kinds = (rows: ReturnType<typeof withPending>) =>
+    rows.map((row) => [row.type, row.pending ? "pending" : "has"]);
+
+  it("lists the papers still to come after the ones the order has, in the order they are made", () => {
+    const rows = withPending(po, { steps: [] });
+    expect(kinds(rows)).toEqual([
+      ["CUSTOMER_PO", "has"],
+      ["PROFORMA_INVOICE", "pending"],
+      ["PACKING_LIST", "pending"],
+      ["SALES_INVOICE", "pending"],
+      ["AWB", "pending"],
+    ]);
+    expect(rows[4]?.pending?.shipping).toBe(true);
+  });
+
+  it("does not list a paper the order already has, and counts either shipping paper as the one", () => {
+    const rows = withPending(
+      [
+        ...po,
+        ...withFlow(
+          [],
+          [
+            {
+              id: "bl",
+              type: "BILL_OF_LADING",
+              number: null,
+              status: "expected",
+              receivedAt: null,
+              dueDate: "2026-11-23",
+            },
+            {
+              id: "pl",
+              type: "PACKING_LIST",
+              number: "PL-1",
+              status: "confirmed",
+              receivedAt: "2026-11-05T01:00:00.000Z",
+              dueDate: null,
+            },
+          ],
+        ),
+      ],
+      { steps: [] },
+    );
+    expect(kinds(rows).filter(([, state]) => state === "pending")).toEqual([
+      ["PROFORMA_INVOICE", "pending"],
+      ["SALES_INVOICE", "pending"],
+    ]);
+  });
+
+  it("says a paper is made, though no copy is on record, when its step is done", () => {
+    const rows = withPending(po, {
+      steps: [step("invoiced", "done"), step("pi-sent", "upcoming")],
+    });
+    const byType = (type: string) => rows.find((row) => row.type === type);
+    expect(byType("SALES_INVOICE")?.pending?.made).toBe(true);
+    expect(byType("PACKING_LIST")?.pending?.made).toBe(true);
+    expect(byType("PROFORMA_INVOICE")?.pending?.made).toBe(false);
+  });
+
+  it("says nothing of what is missing without the workflow's record", () => {
+    expect(withPending(po, undefined)).toEqual(po);
   });
 });
