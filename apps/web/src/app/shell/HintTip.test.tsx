@@ -1,4 +1,10 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeAll, describe, expect, it } from "vitest";
 import { HintTip } from "./HintTip";
@@ -43,6 +49,23 @@ describe("the tip of a top bar button", () => {
     await user.hover(button);
     const box = await tipBox();
     await user.hover(box);
+    await wait();
+    expect(screen.getByRole("tooltip")).toHaveTextContent(WORDS);
+  });
+
+  it("stays open when the browser reports the tip entered before the button was left", async () => {
+    const { user, button } = renderHint();
+    await user.hover(button);
+    const box = await tipBox();
+    const wrapper = button.parentElement;
+    if (!wrapper) throw new Error("No wrapper");
+    // A real browser sends pointerout first: React reports the tip entered
+    // from it, and the wrapper's own pointerleave comes after.
+    fireEvent.pointerOut(button, { relatedTarget: box });
+    // The testing library's fireEvent.pointerLeave is a pointerout, so this is sent by hand.
+    act(() => {
+      wrapper.dispatchEvent(new Event("pointerleave"));
+    });
     await wait();
     expect(screen.getByRole("tooltip")).toHaveTextContent(WORDS);
   });

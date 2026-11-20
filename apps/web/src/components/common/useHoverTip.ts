@@ -38,18 +38,34 @@ export function useHoverTip(
   const [pointer, setPointer] = useState(false);
   const [focused, setFocused] = useState(false);
   const timer = useRef<number | undefined>(undefined);
-  const enter = useCallback(() => {
-    window.clearTimeout(timer.current);
-    setPointer(true);
-  }, []);
-  const leave = useCallback(() => {
+  // Whether the pointer is on the tip. React reports the pointer arriving on
+  // the tip from the same event that ends the element's own pointer leave, and
+  // a browser runs it first, so the element's leave comes last: the timer asks
+  // where the pointer is, not which of the two came last.
+  const onTip = useRef(false);
+  const settle = useCallback(() => {
     window.clearTimeout(timer.current);
     timer.current = window.setTimeout(() => {
-      setPointer(false);
+      if (!onTip.current) setPointer(false);
     }, LEAVE_MS);
   }, []);
+  const enterElement = useCallback(() => {
+    window.clearTimeout(timer.current);
+    onTip.current = false;
+    setPointer(true);
+  }, []);
+  const enterTip = useCallback(() => {
+    window.clearTimeout(timer.current);
+    onTip.current = true;
+    setPointer(true);
+  }, []);
+  const leaveTip = useCallback(() => {
+    onTip.current = false;
+    settle();
+  }, [settle]);
   const close = useCallback(() => {
     window.clearTimeout(timer.current);
+    onTip.current = false;
     setPointer(false);
     setFocused(false);
   }, []);
@@ -62,7 +78,7 @@ export function useHoverTip(
     };
     const onEnter = () => {
       arm();
-      enter();
+      enterElement();
     };
     const onFocus = () => {
       arm();
@@ -74,16 +90,22 @@ export function useHoverTip(
     const focusIn = holdsFocus ? "focusin" : "focus";
     const focusOut = holdsFocus ? "focusout" : "blur";
     el.addEventListener("pointerenter", onEnter);
-    el.addEventListener("pointerleave", leave);
+    el.addEventListener("pointerleave", settle);
     el.addEventListener(focusIn, onFocus);
     el.addEventListener(focusOut, onBlur);
     return () => {
       el.removeEventListener("pointerenter", onEnter);
-      el.removeEventListener("pointerleave", leave);
+      el.removeEventListener("pointerleave", settle);
       el.removeEventListener(focusIn, onFocus);
       el.removeEventListener(focusOut, onBlur);
       window.clearTimeout(timer.current);
     };
-  }, [element, holdsFocus, onArm, enter, leave]);
-  return { armed, open: pointer || focused, enter, leave, close };
+  }, [element, holdsFocus, onArm, enterElement, settle]);
+  return {
+    armed,
+    open: pointer || focused,
+    enter: enterTip,
+    leave: leaveTip,
+    close,
+  };
 }
