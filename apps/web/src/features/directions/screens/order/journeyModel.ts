@@ -112,6 +112,8 @@ export function buildJourney(input: {
    * dated after this moment shows no person and no date, because it cannot
    * have been finished after the order came to the step it is at now: it is
    * the sample timeline's today stamp, and a second date for one act is wrong.
+   * While the record has not answered (`null`) no finished step shows a person
+   * or a date either, so a date is never printed and then taken back.
    */
   since?: Date | null;
 }): Journey | null {
@@ -140,10 +142,14 @@ export function buildJourney(input: {
   const sinceDay = since ? since.toISOString().slice(0, 10) : null;
   // Only a record's time can say this: the tracker's own current event is the
   // newest one, so against it every finished step would be earlier anyway.
-  const finishedBy = (found: DoneBy | undefined): DoneBy | undefined =>
-    found && input.since && found.at.getTime() > input.since.getTime()
+  // While the record is on its way (null) no finished step names a person or a
+  // date, so the page never prints the tracker's stamp and then takes it back.
+  const finishedBy = (found: DoneBy | undefined): DoneBy | undefined => {
+    if (input.since === null) return undefined;
+    return found && input.since && found.at.getTime() > input.since.getTime()
       ? undefined
       : found;
+  };
 
   const nowId = SALES_STEP_IDS[current - 1];
   const nowStat = nowId ? statOf(stepTimes, nowId) : null;

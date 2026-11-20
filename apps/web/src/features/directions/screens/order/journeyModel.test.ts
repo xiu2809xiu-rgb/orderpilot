@@ -208,9 +208,28 @@ describe("a finished step dated after the current step began", () => {
     expect(steps[2]?.doneBy?.actor).toBe("Support");
   });
 
-  it("changes nothing without the record's time", () => {
+  it("keeps the tracker's dates when there is no record to wait for", () => {
     expect(at(undefined)[3]?.doneBy?.actor).toBe("Finance");
-    expect(at(null)[3]?.doneBy?.actor).toBe("Finance");
+  });
+
+  // Changed from pinning the tracker's date while the record loads: that
+  // printed the wrong date and then took it back.
+  it("shows no person and no date for a finished step while the record has not answered", () => {
+    const steps = at(null);
+    expect(steps.filter((step) => step.state === "done")).toHaveLength(4);
+    expect(steps.every((step) => step.doneBy === null)).toBe(true);
+  });
+
+  it("shows dates only once the record has answered, and none later than it", () => {
+    const since = new Date("2026-11-16T08:00:00.000Z");
+    const dated = at(since).filter((step) => step.doneBy !== null);
+    expect(dated.map((step) => step.doneBy?.actor)).toEqual([
+      "System",
+      "Support",
+    ]);
+    for (const step of dated) {
+      expect(step.doneBy?.at.getTime()).toBeLessThanOrEqual(since.getTime());
+    }
   });
 });
 
