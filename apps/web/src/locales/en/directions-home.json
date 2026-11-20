@@ -154,7 +154,7 @@
       },
       "decide": {
         "title": "Rules decide",
-        "body": "Fixed rules check the order against prices, stock and approval limits."
+        "body": "Fixed rules compare quantities, prices and PO references across the documents, and check stock."
       },
       "approve": {
         "title": "People approve",
