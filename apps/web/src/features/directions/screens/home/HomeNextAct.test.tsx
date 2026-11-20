@@ -155,8 +155,12 @@ describe.each(CASES)("the $task.kind row", (row) => {
     expect(screen.getByRole("button", { name: "Undo" })).toBeInTheDocument();
 
     // Done today says what was done, for which order, and when; and opens the order.
+    // The words are fixed text and only the time varies, so the pattern stays a
+    // literal: the static scan refuses one built from a string.
+    const lead = `${row.message} at `;
     const link = await screen.findByRole("link", {
-      name: new RegExp(`^${row.message} at \\d\\d:\\d\\d$`),
+      name: (name) =>
+        name.startsWith(lead) && /^\d\d:\d\d$/.test(name.slice(lead.length)),
     });
     expect(link).toHaveAttribute("href", `/orders/${order}`);
   });
