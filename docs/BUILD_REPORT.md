@@ -392,6 +392,7 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 | #306  | The new order form: price, dates, look-alikes         | `fix/area1-new-order-form`       | This pull request. The PO sets the price. It also finishes #278, the tablet grid    |
 | #302  | The Orders list: fit, held reason, last page          | `fix/area1-orders-list-fit`      | This pull request. Fits 1366 by 768 and says why an order is held                   |
 | #301  | The order page says who has it, why and what is next  | `feat/area1-order-page-status`   | This pull request. The sentence, the latest act, the documents and the address      |
+| #314  | The order form: what the review found                 | `fix/area1-order-form-review`    | This pull request. Corrects #306 after a review against the ADRs                    |
 | #191  | Cut CI minutes before the repository goes private     | `ci/minutes-job-conditions`      | Merged, [#192](https://github.com/xiu2809xiu-rgb/orderpilot/pull/192)               |
 | P-42  | Plan prompt 004                                       | `chore/plan-prompt-004`          | Merged, [#138](https://github.com/xiu2809xiu-rgb/orderpilot/pull/138)               |
 | P-13  | Docker images and the IaC scan                        | `ci/docker`                      | Merged, [#172](https://github.com/xiu2809xiu-rgb/orderpilot/pull/172)               |
