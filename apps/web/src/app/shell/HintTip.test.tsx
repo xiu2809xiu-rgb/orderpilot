@@ -1,12 +1,18 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import { HintTip } from "./HintTip";
 
 // WCAG 2.2, 1.4.13: content shown on hover or focus can be pointed at, put
 // away without moving focus, and stays until it is put away or left.
 
 const WORDS = "Demo: ask a question";
+
+// The tip is a lazy chunk: load it before the first test, so that test is not
+// the one that pays for importing the tooltip library.
+beforeAll(async () => {
+  await import("./HintTipBody");
+}, 60_000);
 
 /** The tooltip's code is a chunk of its own, so the tip is found once it has arrived. */
 async function tipBox(): Promise<HTMLElement> {
