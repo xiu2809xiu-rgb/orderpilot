@@ -1,18 +1,8 @@
 import { useCallback, useEffect, useRef } from "react";
-import { useTranslation } from "react-i18next";
 import { useBlocker } from "react-router";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { registerDirtyForm } from "@/lib/dirty-forms";
-import { useRestoreFocus } from "@/lib/useRestoreFocus";
 import { useSessionStore } from "@/stores/session";
+import { ReviewLeaveDialog } from "./ReviewLeaveDialog";
 
 /**
  * Asks before a review in progress is lost: the browser's own question when
@@ -22,7 +12,6 @@ import { useSessionStore } from "@/stores/session";
  * finished; before that and after that nothing is held. Sign out asks too.
  */
 export function ReviewLeaveGuard({ active }: { active: boolean }) {
-  const { t } = useTranslation("directions-intake");
   // A ref, so the blocker and the listeners always see the latest answer.
   const held = useRef(active);
   useEffect(() => {
@@ -59,45 +48,15 @@ export function ReviewLeaveGuard({ active }: { active: boolean }) {
       [],
     ),
   );
-  const stay = useRef<HTMLButtonElement>(null);
-  // Keep reviewing is the safe answer, so Enter gives it.
-  const focus = useRestoreFocus(() => stay.current);
-
   return (
-    <Dialog
+    <ReviewLeaveDialog
       open={blocker.state === "blocked"}
-      onOpenChange={(open) => {
-        if (!open) blocker.reset?.();
+      onStay={() => {
+        blocker.reset?.();
       }}
-    >
-      <DialogContent
-        showCloseButton={false}
-        onOpenAutoFocus={focus.onOpenAutoFocus}
-        onCloseAutoFocus={focus.onCloseAutoFocus}
-      >
-        <DialogHeader>
-          <DialogTitle>{t("review.leave.title")}</DialogTitle>
-          <DialogDescription>{t("review.leave.body")}</DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => {
-              blocker.proceed?.();
-            }}
-          >
-            {t("review.leave.leave")}
-          </Button>
-          <Button
-            ref={stay}
-            onClick={() => {
-              blocker.reset?.();
-            }}
-          >
-            {t("review.leave.stay")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      onLeave={() => {
+        blocker.proceed?.();
+      }}
+    />
   );
 }

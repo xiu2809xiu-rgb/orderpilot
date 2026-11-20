@@ -51,7 +51,9 @@ describe("the progress card", () => {
     const card = must(finish.closest(".sticky"));
     expect(card).toHaveClass("top-0");
     expect(
-      within(card as HTMLElement).getByText("2 fields left to approve"),
+      within(card as HTMLElement).getByText(
+        "2 fields left to approve before you can finish",
+      ),
     ).toBeVisible();
     await user.click(screen.getByRole("button", { name: "Confirm Ship to" }));
     await user.click(
@@ -170,6 +172,21 @@ describe("editing a field", () => {
     await user.click(screen.getByRole("button", { name: "Cancel" }));
     expect(screen.getByRole("button", { name: "Edit Customer" })).toHaveFocus();
   });
+
+  it("gives focus back to the pencil when a sure field is saved without a change, by the keyboard", async () => {
+    const user = userEvent.setup();
+    await toStoryline(user);
+    await user.click(screen.getByRole("button", { name: "Edit Customer" }));
+    const input = screen.getByRole("textbox", { name: "Customer" });
+    expect(input).toHaveFocus();
+    await user.keyboard("{Enter}");
+    expect(screen.queryByRole("textbox", { name: "Customer" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Edit Customer" })).toHaveFocus();
+    // Nothing was corrected, so nothing says it was.
+    expect(
+      within(rowOf("Customer")).queryByText("Edited and confirmed"),
+    ).toBeNull();
+  });
 });
 
 describe("the end of the review", () => {
@@ -262,6 +279,76 @@ describe("bringing a field into view", () => {
     const asked = scroll.mock.contexts.map((node) => (node as HTMLElement).id);
     expect(asked).toContain("box-buyerContact");
     scroll.mockRestore();
+  });
+});
+
+describe("the finish button says why it is off", () => {
+  it("is described by the count of what is left, which says it is needed before finishing", async () => {
+    const user = userEvent.setup();
+    await toReview(user);
+    const finish = screen.getByRole("button", { name: "Finish review" });
+    expect(finish).toBeDisabled();
+    const reason = screen.getByText(
+      "2 fields left to approve before you can finish",
+    );
+    expect(finish.getAttribute("aria-describedby")).toBe(reason.id);
+    expect(finish).toHaveAccessibleDescription(
+      "2 fields left to approve before you can finish",
+    );
+    await user.click(screen.getByRole("button", { name: "Confirm Ship to" }));
+    expect(finish).toHaveAccessibleDescription(
+      "1 field left to approve before you can finish",
+    );
+  });
+});
+
+describe("starting again", () => {
+  it("asks first while the review is in progress: Keep reviewing stays with the work and the focus", async () => {
+    const user = userEvent.setup();
+    await toReview(user);
+    await user.click(screen.getByRole("button", { name: "Confirm Ship to" }));
+    await user.click(screen.getByRole("button", { name: "Start again" }));
+    const dialog = await screen.findByRole("dialog", {
+      name: "Leave this review?",
+    });
+    expect(
+      within(dialog).getByRole("button", { name: "Keep reviewing" }),
+    ).toHaveFocus();
+    await user.click(
+      within(dialog).getByRole("button", { name: "Keep reviewing" }),
+    );
+    expect(screen.queryByRole("dialog")).toBeNull();
+    // The review and what was confirmed in it are still there.
+    expect(
+      screen.getByText("1 field left to approve before you can finish"),
+    ).toBeVisible();
+    expect(screen.getByRole("button", { name: "Start again" })).toHaveFocus();
+  });
+
+  it("goes back to adding files only once the person says to leave the review", async () => {
+    const user = userEvent.setup();
+    await toReview(user);
+    await user.click(screen.getByRole("button", { name: "Start again" }));
+    await user.click(
+      await screen.findByRole("button", { name: "Leave the review" }),
+    );
+    expect(await screen.findByLabelText("Documents to upload")).toBeVisible();
+    expect(
+      screen.queryByRole("heading", { name: "Review what Spark read" }),
+    ).toBeNull();
+  });
+
+  it("does not ask once the review is finished", async () => {
+    const user = userEvent.setup();
+    await toReview(user);
+    await user.click(screen.getByRole("button", { name: "Confirm Ship to" }));
+    await user.click(
+      screen.getByRole("button", { name: "Confirm Payment terms" }),
+    );
+    await user.click(screen.getByRole("button", { name: "Finish review" }));
+    await user.click(screen.getByRole("button", { name: "Start again" }));
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(await screen.findByLabelText("Documents to upload")).toBeVisible();
   });
 });
 

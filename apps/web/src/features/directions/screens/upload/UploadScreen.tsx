@@ -15,6 +15,7 @@ import { PageHeader } from "@/components/parts/PageHeader";
 import { AddStage } from "./AddStage";
 import { DEMO_NAME, useDemoDocument, type PreviewName } from "./demoDocument";
 import { ReadStage } from "./ReadStage";
+import { ReviewLeaveDialog } from "./ReviewLeaveDialog";
 import { ReviewLeaveGuard } from "./ReviewLeaveGuard";
 import { ReviewStage } from "./ReviewStage";
 import { useStopStrayDrops } from "./useStopStrayDrops";
@@ -41,8 +42,14 @@ export default function UploadScreen() {
   // Which preview document Spark reads is chosen by the file added, when Read with Spark is pressed.
   const [preview, setPreview] = useState<PreviewName>(DEMO_NAME);
   const [finished, setFinished] = useState(false);
+  const [askingAgain, setAskingAgain] = useState(false);
   useStopStrayDrops();
   const demo = useDemoDocument(preview, stage !== "add");
+  const startAgain = () => {
+    setAskingAgain(false);
+    setFinished(false);
+    setStage("add");
+  };
   const reading = useCallback(() => {
     setStage("review");
   }, []);
@@ -112,11 +119,19 @@ export default function UploadScreen() {
             setFinished(true);
           }}
           onAgain={() => {
-            setFinished(false);
-            setStage("add");
+            // A review in progress is asked about first, as when leaving the page.
+            if (finished) startAgain();
+            else setAskingAgain(true);
           }}
         />
       ) : null}
+      <ReviewLeaveDialog
+        open={askingAgain}
+        onStay={() => {
+          setAskingAgain(false);
+        }}
+        onLeave={startAgain}
+      />
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { ArrowDown, ClipboardCheck } from "lucide-react";
-import { useEffect, useRef, type Ref } from "react";
+import { useEffect, useId, useRef, type Ref } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { CircularProgress } from "@/components/kit/CircularProgress";
@@ -31,6 +31,8 @@ export function ReviewProgress({
 }: ReviewProgressProps) {
   const { t } = useTranslation("directions-intake");
   const bar = useRef<HTMLDivElement>(null);
+  // The count is also the reason Finish review is off, so the button points at it.
+  const statusId = useId();
   useEffect(() => {
     const node = bar.current;
     const stage = node?.closest<HTMLElement>("[data-review-stage]");
@@ -63,6 +65,7 @@ export function ReviewProgress({
       </CircularProgress>
       <p
         className="fs-14 min-w-0 flex-1 basis-48 font-medium text-foreground"
+        id={statusId}
         role="status"
       >
         {finished
@@ -87,6 +90,7 @@ export function ReviewProgress({
           ref={finishRef}
           type="button"
           disabled={waitingCount > 0 || finished}
+          aria-describedby={statusId}
           onClick={onFinish}
           className="pointer-coarse:h-11"
         >

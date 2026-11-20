@@ -60,6 +60,9 @@ export function FieldRow({
     // is confirmed as read, and any other stays as it was.
     if (text === value) {
       if (waiting) onConfirm();
+      // A sure field stays as it is, so this is a cancel: focus goes back to
+      // its pencil rather than dropping to the page's start.
+      else cancelled.current = true;
       return;
     }
     onEdit(text);

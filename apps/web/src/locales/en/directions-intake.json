@@ -5,7 +5,7 @@
     "title": "Uploading documents is for Support",
     "description": "Your role cannot upload documents. Sign in as Support to try it, or open an order to see its documents."
   },
-  "preview": "Preview: a file you add stays in your browser and is not stored. Spark reads sample documents only; no AI model is connected here.",
+  "preview": "Demo: a file you add stays in your browser and is not stored. Spark reads synthetic sample documents only, and no AI model is connected.",
   "drop": {
     "title": "Drop documents here",
     "or": "or",
@@ -112,8 +112,8 @@
     "sure_one": "{{count}} field read above {{threshold}} percent",
     "sure_other": "{{count}} fields read above {{threshold}} percent",
     "line": "Line {{number}}",
-    "left_one": "{{count}} field left to approve",
-    "left_other": "{{count}} fields left to approve",
+    "left_one": "{{count}} field left to approve before you can finish",
+    "left_other": "{{count}} fields left to approve before you can finish",
     "leftNone": "Nothing left to approve. You can finish the review.",
     "progress": "Progress of the review",
     "editHelp": {

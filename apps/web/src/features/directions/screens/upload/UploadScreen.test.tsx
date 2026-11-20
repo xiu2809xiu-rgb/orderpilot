@@ -52,8 +52,11 @@ describe("the upload screen", () => {
         "PDF, PNG, JPEG, XLSX or CSV. Up to 10 MB each, up to 5 files.",
       ),
     ).toBeVisible();
+    // The line says it is a demo on synthetic documents (ADR 0054 decision 6).
     expect(
-      screen.getByText(/a file you add stays in your browser/),
+      screen.getByText(
+        "Demo: a file you add stays in your browser and is not stored. Spark reads synthetic sample documents only, and no AI model is connected.",
+      ),
     ).toBeVisible();
     // Nothing to read yet: the primary button is off and says what to do.
     expect(
@@ -140,7 +143,9 @@ describe("the upload screen", () => {
     expect(
       screen.getByRole("button", { name: "Finish review" }),
     ).toBeDisabled();
-    expect(screen.getByText("2 fields left to approve")).toBeVisible();
+    expect(
+      screen.getByText("2 fields left to approve before you can finish"),
+    ).toBeVisible();
   });
 
   it("reads the page once as the review opens: a field's box and row carry where it sits, and the pass never plays again", async () => {
@@ -174,7 +179,7 @@ describe("the upload screen", () => {
     expect(stage).toHaveAttribute("data-arriving", "false");
   });
 
-  it("opens the preview document that the added file is named after, and the default for any other name", async () => {
+  it("opens the preview document that the added file is named after", async () => {
     const user = userEvent.setup();
     const fetchMock = stubDemo();
     upload();
@@ -289,7 +294,9 @@ describe("the upload screen", () => {
     const create = screen.getByRole("button", { name: "Finish review" });
     await user.click(screen.getByRole("button", { name: "Confirm Ship to" }));
     expect(create).toBeDisabled();
-    expect(screen.getByText("1 field left to approve")).toBeVisible();
+    expect(
+      screen.getByText("1 field left to approve before you can finish"),
+    ).toBeVisible();
     await user.click(
       screen.getByRole("button", { name: "Edit Payment terms" }),
     );
