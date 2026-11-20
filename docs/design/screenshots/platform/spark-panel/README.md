@@ -1,0 +1,11 @@
+# Spark panel screenshots
+
+Taken on 20 Nov 2026 at 1366 x 768 from a Docker build of this branch at commit 0d3a1085, on the synthetic demo data.
+
+| File                            | Role and page                    | What it shows                                                                                                                                                                                                                                                                                                                             |
+| ------------------------------- | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `spark-three-answers-light.png` | Support, Home, Spark open, light | After three questions (HP monitors, Dell monitors, PO 4471-26): the input "Ask Spark" at the foot of the panel, each reply marked "Scripted preview", and the plain reply to the Dell question with one suggestion. The newest reply's sentence is just below the visible edge of the thread (about 108 px) until the thread is scrolled. |
+| `spark-three-answers-dark.png`  | Support, Home, Spark open, dark  | The same three questions in dark.                                                                                                                                                                                                                                                                                                         |
+| `spark-draft-reply-light.png`   | Support, Home, Spark open, light | The drafted reply to the customer for the HP monitor: "We have 874 available now. A further 146 are due on purchase orders."                                                                                                                                                                                                              |
+
+The input's box after the empty panel and after each of the three answers was y 636 to 672 every time, and the panel's box was y 48 to 760 and x 938 to 1358 every time, in light and in dark.
