@@ -12,7 +12,7 @@ import { Badge } from "@/components/kit/Badge";
 import { FileType } from "@/components/kit/FileType";
 import { StatusChip, type StatusKind } from "@/components/kit/StatusChip";
 import { formatDate, formatDay } from "../../../workflows/format";
-import { demoFileFor } from "./demoFiles";
+import { demoFileFor, printsPrices } from "./demoFiles";
 import { DocumentFile } from "./DocumentFile";
 import { type MatchState, type OrderDocumentRow } from "./documentsModel";
 
@@ -41,10 +41,13 @@ export function DocumentItem({
   document,
   orderNo,
   externalDocumentNo,
+  priceMask,
 }: {
   document: OrderDocumentRow;
   orderNo: string;
   externalDocumentNo: string;
+  /** Why the role's prices are masked, in words, or null when it may see them. */
+  priceMask: string | null;
 }) {
   const { t } = useTranslation("directions-orders");
   const { pending, flow, type } = document;
@@ -126,6 +129,7 @@ export function DocumentItem({
           <DocumentFile
             href={demoFileFor(orderNo, type)}
             name={shown ? `${label} ${shown}` : label}
+            withheldReason={printsPrices(type) ? priceMask : null}
           />
         )}
       </div>

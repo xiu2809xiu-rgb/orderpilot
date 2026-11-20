@@ -2,7 +2,12 @@ import { ROLES } from "@orderpilot/shared";
 import { QueryClient, QueryObserver } from "@tanstack/react-query";
 import { describe, expect, it, vi } from "vitest";
 import { sessionFor } from "@/test/fixtures";
-import { landingAfterSwitch, startAsNewRole } from "./roleSwitch";
+import {
+  announceStay,
+  landingAfterSwitch,
+  onStay,
+  startAsNewRole,
+} from "./roleSwitch";
 
 function clientForTest(): QueryClient {
   return new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -101,5 +106,22 @@ describe("where a role change lands", () => {
         mayRead ? "/orders/SO-0001" : "/",
       );
     }
+  });
+});
+
+describe("saying that a role change stayed on the page", () => {
+  it("tells every listener the path, and stops telling one that has stopped", () => {
+    const first = vi.fn();
+    const second = vi.fn();
+    const stopFirst = onStay(first);
+    const stopSecond = onStay(second);
+    announceStay("/orders/SO-0001");
+    expect(first).toHaveBeenCalledWith("/orders/SO-0001");
+    expect(second).toHaveBeenCalledWith("/orders/SO-0001");
+    stopFirst();
+    announceStay("/orders/SO-0002");
+    expect(first).toHaveBeenCalledTimes(1);
+    expect(second).toHaveBeenCalledTimes(2);
+    stopSecond();
   });
 });
