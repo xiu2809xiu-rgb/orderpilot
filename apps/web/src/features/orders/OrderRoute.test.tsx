@@ -75,11 +75,11 @@ function open(orderNo: string, role: Role = "SUPPORT", query = "") {
 const heading = (name: string) =>
   screen.findByRole("heading", { level: 1, name });
 
-/** The entry line of the facts: the chip and what it means for this person. */
-function entryFact(): HTMLElement {
-  const entry = screen.getByText("Entry").closest("div");
-  if (!entry) throw new Error("no entry fact");
-  return entry;
+/** The entry badge by the title: its name holds the state and what it means for this person. */
+function entryBadge(): HTMLElement {
+  return screen.getByRole("button", {
+    name: /^(Sample|Draft|Submitted|Void)./,
+  });
 }
 
 beforeAll(loadNamespaces);
@@ -108,11 +108,11 @@ describe("one order at /orders/:orderNo", () => {
       open(DRAFT.orderNo, role);
       expect(await heading(DRAFT.orderNo)).toBeVisible();
       expect(screen.queryByText("The order form")).toBeNull();
-      const entry = within(entryFact());
-      expect(entry.getByText("Draft")).toBeVisible();
-      expect(
-        entry.getByText(/Only a role that may edit orders can change/),
-      ).toBeVisible();
+      const badge = entryBadge();
+      expect(within(badge).getByText("Draft")).toBeVisible();
+      expect(badge).toHaveAccessibleName(
+        /Only a role that may edit orders can change/,
+      );
     },
   );
 
@@ -120,41 +120,41 @@ describe("one order at /orders/:orderNo", () => {
     open(SUBMITTED.orderNo, "SUPPORT");
     expect(await heading(SUBMITTED.orderNo)).toBeVisible();
     expect(screen.queryByText("The order form")).toBeNull();
-    const entry = within(entryFact());
-    expect(entry.getByText("Submitted")).toBeVisible();
-    expect(
-      entry.getByText(
-        "Entered here and submitted. Only a draft can be changed.",
-      ),
-    ).toBeVisible();
+    const badge = entryBadge();
+    expect(within(badge).getByText("Submitted")).toBeVisible();
+    expect(badge).toHaveAccessibleName(
+      "Submitted. Entered here and submitted. Only a draft can be changed.",
+    );
   });
 
   it("gives a void order the order page, struck through, and says it cannot be changed", async () => {
     open(VOID.orderNo, "SUPPORT");
     expect(await heading(VOID.orderNo)).toBeVisible();
     expect(screen.queryByText("The order form")).toBeNull();
-    const entry = within(entryFact());
-    const chip = entry.getByText("Void").closest("[data-entry]");
+    const badge = entryBadge();
+    const chip = within(badge).getByText("Void").closest("[data-entry]");
     expect(chip?.className).toContain("line-through");
-    expect(entry.getByText(/It cannot be changed/)).toBeVisible();
+    expect(badge).toHaveAccessibleName(/It cannot be changed/);
   });
 
-  it("gives a sample order the order page and says samples are not edited here", async () => {
+  it("gives a sample order the order page and says its details cannot be edited here", async () => {
     open(sample.orderNo, "SUPPORT");
     expect(await heading(sample.orderNo)).toBeVisible();
     expect(screen.queryByText("The order form")).toBeNull();
-    const entry = within(entryFact());
-    expect(entry.getByText("Sample")).toBeVisible();
-    expect(entry.getByText(/Samples are not edited here/)).toBeVisible();
+    const badge = entryBadge();
+    expect(within(badge).getByText("Sample")).toBeVisible();
+    // It is a sample of the synthetic demo set, and says nothing of where it came from.
+    expect(badge).toHaveAccessibleName(
+      "Sample. A sample order of the synthetic demo set. Its details cannot be edited here.",
+    );
   });
 
-  it("says the order was not found, with the way back to the list", async () => {
+  it("says the order was not found, with a heading and the way back to the list", async () => {
     open("SO-9999");
-    expect(await screen.findByText("That order was not found")).toBeVisible();
-    expect(screen.getByRole("link", { name: "Orders" })).toHaveAttribute(
-      "href",
-      "/orders",
-    );
+    expect(await heading("That order was not found")).toBeVisible();
+    expect(
+      screen.getByRole("link", { name: "Back to Orders" }),
+    ).toHaveAttribute("href", "/orders");
     expect(screen.queryByText("The order form")).toBeNull();
   });
 
@@ -220,12 +220,38 @@ describe("one order at /orders/:orderNo", () => {
     stubApi({ specs: ALL, tasks: [taskOn(sample.orderNo, "SEND_PI")] });
     const view = open(sample.orderNo, "SUPPORT");
     expect(
-      await screen.findByRole("button", { name: "Mark sent" }),
+      await screen.findByRole("button", { name: "Mark PI as sent" }),
     ).toBeVisible();
     view.unmount();
     open(sample.orderNo, "MANAGEMENT");
     await heading(sample.orderNo);
-    expect(screen.queryByRole("button", { name: "Mark sent" })).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: "Mark PI as sent" }),
+    ).toBeNull();
     expect(screen.queryByText(/no open task/)).toBeNull();
   });
+
+  it("opens a lower-case order number as the order, at the address in capitals, keeping the query", async () => {
+    open("so-0001", "SUPPORT", "?tab=checks");
+    expect(await heading("SO-0001")).toBeVisible();
+    expect(screen.getByLabelText("address")).toHaveTextContent(
+      "/orders/SO-0001?tab=checks",
+    );
+    expect(screen.queryByText("That order was not found")).toBeNull();
+  });
+
+  it.each(["NOPE!", "SO_0001", "SO-0001<b>"])(
+    "says %s is not found, with a heading and no retry, without asking the API",
+    async (typed) => {
+      vi.unstubAllGlobals();
+      const calls = stubApi({ specs: ALL });
+      open(typed);
+      expect(await heading("That order was not found")).toBeVisible();
+      expect(screen.queryByRole("button", { name: "Try again" })).toBeNull();
+      expect(
+        screen.getByRole("link", { name: "Back to Orders" }),
+      ).toHaveAttribute("href", "/orders");
+      expect(calls.filter((call) => call.includes("/orders/"))).toEqual([]);
+    },
+  );
 });

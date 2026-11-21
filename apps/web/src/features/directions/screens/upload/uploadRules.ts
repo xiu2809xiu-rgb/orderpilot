@@ -11,7 +11,8 @@ export const MAX_FILES = 5;
 /** The `accept` attribute of the file input: extensions and types. */
 export const ACCEPT = ".pdf,.png,.jpg,.jpeg,.xlsx,.csv";
 
-export type Refusal = "type" | "size" | "empty" | "disguised" | "tooMany";
+export type Refusal =
+  "type" | "size" | "empty" | "disguised" | "tooMany" | "duplicate";
 
 export type Verdict =
   | { ok: true; kind: AcceptedKind }

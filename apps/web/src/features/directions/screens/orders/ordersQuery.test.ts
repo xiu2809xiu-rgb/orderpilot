@@ -6,6 +6,7 @@ import {
   DEFAULT_QUERY,
   filterOrders,
   parseQuery,
+  rangeReversed,
   sortOrders,
   toParams,
   type OrdersQuery,
@@ -174,6 +175,17 @@ describe("the filters of the two old pages", () => {
     expect(run({ entry: "draft" })).toEqual([]);
     expect(run({ to: "2026-10-31" })).toEqual(["SO-4"]);
     expect(run({ from: "2026-11-01" })).toEqual(["SO-1", "SO-2", "SO-3"]);
+  });
+  it("filters nothing by a From after its To, and says it is reversed", () => {
+    const reversed = { from: "2026-11-10", to: "2026-10-01" };
+    expect(rangeReversed(query(reversed))).toBe(true);
+    expect(rangeReversed(query({ from: "2026-10-01", to: "2026-11-10" }))).toBe(
+      false,
+    );
+    expect(rangeReversed(query({ from: "2026-11-10" }))).toBe(false);
+    expect(run(reversed)).toEqual(["SO-1", "SO-2", "SO-3", "SO-4"]);
+    // The same two days the right way round do filter.
+    expect(run({ from: "2026-10-01", to: "2026-10-31" })).toEqual(["SO-4"]);
   });
   it("counts the stages under the other filters", () => {
     const counts = countStages(ROWS, query({ search: "alpha" }), WHO);

@@ -21,7 +21,8 @@
   "introRules_other": "{{count}} business rules wait for Spectra to confirm them.",
   "actions": {
     "newOrder": "New order",
-    "upload": "Upload a document"
+    "upload": "Upload a PO",
+    "explain": "Upload a PO for Spark to read, or type a new order in by hand."
   },
   "needs": {
     "title": "Needs you",
@@ -33,6 +34,7 @@
       "REVIEW_FIELDS": "Confirm the fields read from the PO",
       "RAISE_SPR": "Raise an SPR",
       "APPROVE_SPR": "Approve the SPR",
+      "PLACE_VENDOR_PO": "Place the vendor PO",
       "SEND_PI": "Send the PI to the customer",
       "CONFIRM_PAYMENT": "Confirm the payment",
       "PACK_ORDER": "Pack the order",
@@ -40,23 +42,51 @@
       "ADD_SHIPPING_DOCUMENTS": "Add the shipping documents"
     },
     "actionOn": "{{action}} for {{order}}",
+    "openOrder": "Open order",
     "more": "{{count}} more waiting",
     "viewAll": "View all {{total}} tasks",
     "sprTask": {
-      "RAISE_SPR": "Raise {{recordNo}}",
       "APPROVE_SPR": "Approve {{recordNo}}"
+    },
+    "raiseSpr": "Raise the SPR for {{orderNo}}",
+    "sprShort": "{{quantity}} short: {{item}}",
+    "sprRef": "SPR {{recordNo}}",
+    "actions": {
+      "REVIEW_FIELDS": "Open order",
+      "RAISE_SPR": "Raise",
+      "APPROVE_SPR": "Review",
+      "PLACE_VENDOR_PO": "Mark as placed",
+      "SEND_PI": "Mark PI as sent",
+      "CONFIRM_PAYMENT": "Enter payment details",
+      "PACK_ORDER": "Mark as packed",
+      "RECOUNT_CARTONS": "Mark as counted",
+      "ADD_SHIPPING_DOCUMENTS": "Mark documents as added"
+    },
+    "records": {
+      "default": "Records that this is done. OrderPilot sends nothing.",
+      "RAISE_SPR": "Raises the SPR for approval. OrderPilot buys nothing.",
+      "CONFIRM_PAYMENT": "Opens the form for the amount, the bank reference and the date."
+    },
+    "amount": {
+      "spr": "SPR amount",
+      "due": "Due",
+      "orderValue": "Order value",
+      "of": "{{part}} of {{whole}}"
+    },
+    "next": {
+      "PACK_ORDER": "Support makes the invoice and packing list next.",
+      "ADD_SHIPPING_DOCUMENTS": "That was the order's last step."
     }
   },
   "timeline": {
     "title": "My timeline",
     "intro": "What you finished, what you are on, and what comes next.",
     "summaryNone": "Nothing is waiting, so there is nothing to clear.",
-    "summary_one": "{{count}} task is waiting. It is due {{last}}.",
-    "summary_other": "{{count}} tasks are waiting, {{late}} past their due time. The last one is due {{last}}.",
     "done": {
       "title": "Done today",
-      "empty": "Nothing finished yet today. A task you complete here appears with the time.",
-      "at": "Finished at {{time}}"
+      "hint": "A task you finish with a button on Home or on an order's page appears here with the time. Payments and SPR decisions are recorded on their own pages.",
+      "empty": "Nothing marked done here yet today.",
+      "at": "{{what}} at {{time}}"
     },
     "now": {
       "title": "Now",
@@ -74,7 +104,8 @@
       "noEstimate": "No usual time for this step in the data"
     },
     "basis": "Estimate from how long this step took on the last {{orders}} orders.",
-    "failed": "Your timeline comes back when your tasks load."
+    "failed": "Your timeline comes back when your tasks load.",
+    "summary": "The last task is due {{last}}."
   },
   "measures": {
     "title": "Your numbers",
@@ -126,7 +157,7 @@
       },
       "decide": {
         "title": "Rules decide",
-        "body": "Fixed rules check the order against prices, stock and approval limits."
+        "body": "Fixed rules compare quantities, prices and PO references across the documents, and check stock."
       },
       "approve": {
         "title": "People approve",

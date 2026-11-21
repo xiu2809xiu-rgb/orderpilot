@@ -4,11 +4,10 @@ import {
   type OrderCaptureState,
   type OrderSource,
 } from "@orderpilot/shared";
-import { SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal, TriangleAlert } from "lucide-react";
 import { useId } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Popover,
@@ -16,7 +15,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
-import type { OrdersQuery } from "./ordersQuery";
+import { DateRangeField } from "./DateRangeField";
+import { rangeReversed, type OrdersQuery } from "./ordersQuery";
 import { RadioChoice } from "./RadioChoice";
 
 type Patch = (patch: Partial<OrdersQuery>) => void;
@@ -29,15 +29,10 @@ export function moreCount(query: OrdersQuery): number {
     query.open,
     query.entry,
     query.source,
-    query.from ?? query.to,
+    // A reversed range filters nothing, so it does not count as on.
+    (query.from ?? query.to) && !rangeReversed(query),
   ].filter(Boolean).length;
 }
-
-const DAY_MS = 86_400_000;
-const spanDays = (from: string | null, to: string | null): number | null =>
-  from && to
-    ? Math.round((Date.parse(to) - Date.parse(from)) / DAY_MS) + 1
-    : null;
 
 /** The filters kept behind "More filters": stock, documents, open orders, entry, source and the date range. */
 export function MoreFilters({
@@ -50,7 +45,10 @@ export function MoreFilters({
   const { t } = useTranslation("directions-orders");
   const id = useId();
   const count = moreCount(query);
-  const span = spanDays(query.from, query.to);
+  // A reversed range is ignored, yet the address still holds both dates: with
+  // the panel closed nothing else would say why the list is not narrowed.
+  const reversed = rangeReversed(query);
+  const warningId = `${id}-dates`;
   const toggle = (key: "stock" | "toConfirm" | "open", label: string) => (
     <div className="flex min-h-9 items-center justify-between gap-4 pointer-coarse:min-h-11">
       {/* The label fills the row, so on a touch screen the whole row is the target. */}
@@ -70,100 +68,73 @@ export function MoreFilters({
     </div>
   );
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="outline" className="od-control">
-          <SlidersHorizontal aria-hidden="true" />
-          {t("filters.more")}
-          {count > 0 ? (
-            <span
-              className="numeral od-count"
-              aria-label={t("filters.moreOn", { count })}
-            >
-              {count}
-            </span>
-          ) : null}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent align="start" className="w-80 space-y-4">
-        <div>
-          {toggle("stock", t("filters.stock"))}
-          {toggle("toConfirm", t("filters.toConfirm"))}
-          {toggle("open", t("filters.open"))}
-        </div>
-        <RadioChoice<OrderCaptureState>
-          legend={t("filters.entry")}
-          anyLabel={t("filters.any")}
-          value={query.entry}
-          options={ORDER_CAPTURE_STATES.map((state) => ({
-            value: state,
-            label: t(`entry.${state}`),
-          }))}
-          onChange={(entry) => {
-            onChange({ entry });
-          }}
-        />
-        <RadioChoice<OrderSource>
-          legend={t("filters.source")}
-          anyLabel={t("filters.any")}
-          value={query.source}
-          options={ORDER_SOURCES.map((source) => ({
-            value: source,
-            label: t(`source.${source}`),
-          }))}
-          onChange={(source) => {
-            onChange({ source });
-          }}
-        />
-        <fieldset className="space-y-2">
-          <legend className="fs-14 font-medium">
-            {t("filters.orderDate")}
-          </legend>
-          <div className="grid grid-cols-2 gap-2 pointer-coarse:grid-cols-1">
-            <div className="space-y-1">
-              <Label
-                htmlFor={`${id}-from`}
-                className="fs-12 text-muted-foreground"
+    <span className="inline-flex flex-wrap items-center gap-2">
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            className="od-control"
+            aria-describedby={reversed ? warningId : undefined}
+          >
+            <SlidersHorizontal aria-hidden="true" />
+            {t("filters.more")}
+            {count > 0 ? (
+              <span
+                className="numeral od-count"
+                aria-label={t("filters.moreOn", { count })}
               >
-                {t("filters.from")}
-              </Label>
-              <Input
-                id={`${id}-from`}
-                type="date"
-                className="pointer-coarse:h-11"
-                value={query.from ?? ""}
-                max={query.to ?? undefined}
-                onChange={(event) => {
-                  onChange({ from: event.target.value || null });
-                }}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label
-                htmlFor={`${id}-to`}
-                className="fs-12 text-muted-foreground"
-              >
-                {t("filters.to")}
-              </Label>
-              <Input
-                id={`${id}-to`}
-                type="date"
-                className="pointer-coarse:h-11"
-                value={query.to ?? ""}
-                min={query.from ?? undefined}
-                onChange={(event) => {
-                  onChange({ to: event.target.value || null });
-                }}
-              />
-            </div>
+                {count}
+              </span>
+            ) : null}
+          </Button>
+        </PopoverTrigger>
+        {/* Radix measures the room under the button: the panel scrolls inside itself rather than run off a short window. */}
+        <PopoverContent
+          align="start"
+          collisionPadding={12}
+          className="w-80 max-h-(--radix-popover-content-available-height) space-y-3 overflow-y-auto"
+        >
+          <div>
+            {toggle("stock", t("filters.stock"))}
+            {toggle("toConfirm", t("filters.toConfirm"))}
+            {toggle("open", t("filters.open"))}
           </div>
-          {span !== null ? (
-            <p className="od-span fs-14">
-              {t("filters.span", { count: span })}
-            </p>
-          ) : null}
-        </fieldset>
-      </PopoverContent>
-    </Popover>
+          <RadioChoice<OrderCaptureState>
+            legend={t("filters.entry")}
+            anyLabel={t("filters.any")}
+            value={query.entry}
+            options={ORDER_CAPTURE_STATES.map((state) => ({
+              value: state,
+              label: t(`entry.${state}`),
+            }))}
+            onChange={(entry) => {
+              onChange({ entry });
+            }}
+          />
+          <RadioChoice<OrderSource>
+            legend={t("filters.source")}
+            anyLabel={t("filters.any")}
+            value={query.source}
+            options={ORDER_SOURCES.map((source) => ({
+              value: source,
+              label: t(`source.${source}`),
+            }))}
+            onChange={(source) => {
+              onChange({ source });
+            }}
+          />
+          <DateRangeField from={query.from} to={query.to} onChange={onChange} />
+        </PopoverContent>
+      </Popover>
+      {reversed ? (
+        <span
+          id={warningId}
+          className="od-range-error fs-12 inline-flex items-center gap-1"
+        >
+          <TriangleAlert aria-hidden="true" className="size-3.5 shrink-0" />
+          {t("filters.datesNotInOrder")}
+        </span>
+      ) : null}
+    </span>
   );
 }

@@ -1,13 +1,15 @@
-import type { TimelineStep } from "@orderpilot/shared";
+import type { Role, TimelineStep } from "@orderpilot/shared";
 import {
   expectedBy,
   expectedShipDate,
   SALES_STEP_IDS,
   statOf,
   usualDuration,
+  type SalesStepId,
   type ShipEstimate,
   type Usual,
 } from "../../data/estimates";
+import { todayInSingapore } from "@/lib/format";
 import type { StepTime } from "../../data/types";
 import { ALL_DONE } from "../orders/orderRow";
 
@@ -39,6 +41,24 @@ const STEP_OF_EVENT: Readonly<Record<string, number>> = {
   "AWB recorded": 9,
 };
 
+/**
+ * The team that does each of the nine steps, in the order of the sales flow:
+ * Support takes the PO, makes the PI, the invoice and packing list and tells
+ * the customer. The page says who holds an order from the tracker, never from
+ * here: this only says who does the step that comes next.
+ */
+export const STEP_TEAM: Readonly<Record<SalesStepId, Role>> = {
+  poIn: "SUPPORT",
+  stock: "PRODUCT_MANAGER",
+  pi: "SUPPORT",
+  payment: "FINANCE",
+  pack: "WAREHOUSE",
+  documents: "SUPPORT",
+  forwarder: "LOGISTICS",
+  customerTold: "SUPPORT",
+  awbAndPermit: "LOGISTICS",
+};
+
 export interface DoneBy {
   actor: string;
   at: Date;
@@ -46,8 +66,10 @@ export interface DoneBy {
 
 export interface JourneyStepInfo {
   position: number;
-  id: string;
+  id: SalesStepId;
   state: "done" | "now" | "later";
+  /** The team that does this step. */
+  team: Role;
   /** Who finished it and when, from the order's events. */
   doneBy: DoneBy | null;
   /** The current step: when it began, and how many whole days it has waited. */
@@ -82,6 +104,19 @@ export function buildJourney(input: {
   stepTimes: readonly StepTime[];
   /** `YYYY-MM-DD`, in Singapore. */
   today: string;
+  /**
+   * When the order came to its current step, from the workflow's record. The
+   * tracker's sample timeline stamps its newest event with today for every
+   * order, so on its time alone an order that is days late would read "Here
+   * today". `null` means the record has not answered yet, so no wait is said;
+   * left out, the tracker's own time stands. A finished step whose event is
+   * dated after this moment shows no person and no date, because it cannot
+   * have been finished after the order came to the step it is at now: it is
+   * the sample timeline's today stamp, and a second date for one act is wrong.
+   * While the record has not answered (`null`) no finished step shows a person
+   * or a date either, so a date is never printed and then taken back.
+   */
+  since?: Date | null;
 }): Journey | null {
   const { current, events, stepTimes, today } = input;
   if (current === null) return null;
@@ -96,10 +131,30 @@ export function buildJourney(input: {
       doneBy.set(position, { actor: event.actor, at });
     }
   }
-  // The current step began when the order's current event happened.
+  // The current step began when the workflow's record says so; without that
+  // record, when the order's current event happened.
   const currentEvent = events.find((event) => event.current);
-  const since = currentEvent ? new Date(currentEvent.at) : null;
-  const sinceDay = since ? since.toISOString().slice(0, 10) : null;
+  const since =
+    input.since !== undefined
+      ? input.since
+      : currentEvent
+        ? new Date(currentEvent.at)
+        : null;
+  // Days are counted on Singapore's calendar on both sides. `today` is the
+  // Singapore date, so the moment the step began is read as a Singapore date
+  // too: read as a UTC date it is a day behind for eight hours of every day,
+  // and the count then says one day too many.
+  const sinceDay = since ? todayInSingapore(since) : null;
+  // Only a record's time can say this: the tracker's own current event is the
+  // newest one, so against it every finished step would be earlier anyway.
+  // While the record is on its way (null) no finished step names a person or a
+  // date, so the page never prints the tracker's stamp and then takes it back.
+  const finishedBy = (found: DoneBy | undefined): DoneBy | undefined => {
+    if (input.since === null) return undefined;
+    return found && input.since && found.at.getTime() > input.since.getTime()
+      ? undefined
+      : found;
+  };
 
   const nowId = SALES_STEP_IDS[current - 1];
   const nowStat = nowId ? statOf(stepTimes, nowId) : null;
@@ -109,9 +164,7 @@ export function buildJourney(input: {
   // When the current step should end at the usual pace, never before today.
   let cursor: string | null = null;
   if (nowStat && sinceDay) {
-    const due = expectedBy(since ?? new Date(), nowStat)
-      .at.toISOString()
-      .slice(0, 10);
+    const due = todayInSingapore(expectedBy(since ?? new Date(), nowStat).at);
     cursor = due < today ? today : due;
   }
 
@@ -129,7 +182,9 @@ export function buildJourney(input: {
       position,
       id,
       state,
-      doneBy: state === "done" ? (doneBy.get(position) ?? null) : null,
+      team: STEP_TEAM[id],
+      doneBy:
+        state === "done" ? (finishedBy(doneBy.get(position)) ?? null) : null,
       since: state === "now" ? since : null,
       waitedDays: state === "now" ? waitedDays : null,
       usual: state === "done" || !stat ? null : usualDuration(stat),

@@ -2,7 +2,7 @@ import { addDecimal } from "@orderpilot/shared";
 import { addDays, atHour } from "./dates.js";
 import type { Journey } from "./journey.js";
 import type { RecordNumberer } from "./records.js";
-import type { SampleException, SampleOrder } from "./types.js";
+import type { SampleException, SampleOrder, SampleScenario } from "./types.js";
 
 const QUANTITY_RULE = {
   ruleId: "mock.sample-quantity",
@@ -14,6 +14,28 @@ const QUANTITY_RULE = {
 /** "5.00" and "25" print the same way: no trailing zero decimals. */
 function plain(value: string): string {
   return value.replace(/\.0+$/, "");
+}
+
+/** The word follows the number: "1 unit", "2 units". */
+function counted(count: number, word: string): string {
+  return `${String(count)} ${word}${count === 1 ? "" : "s"}`;
+}
+
+/** How far a packing list falls short of its PO, as the exception screens word it. */
+export function shortfallText(count: number): string {
+  return `${counted(count, "unit")} fewer than the PO`;
+}
+
+/** The words of a PI price exception, kept in one place so a changed scenario can say the same. */
+export function priceMismatchText(
+  scenario: Extract<SampleScenario, { kind: "pi-price-mismatch" }>,
+): Pick<SampleException, "summary" | "expected" | "found" | "difference"> {
+  return {
+    summary: `Item ${scenario.itemNo}: the PI prints ${scenario.piPrice}, the PO says ${scenario.poPrice}`,
+    expected: scenario.poPrice,
+    found: scenario.piPrice,
+    difference: `${addDecimal(scenario.piPrice, `-${scenario.poPrice}`)} USD a unit`,
+  };
 }
 
 /**
@@ -57,7 +79,7 @@ export function makeExceptions(
         summary: `Item ${scenario.itemNo}: the packing list says ${packed}, the PO says ${ordered}`,
         expected: ordered,
         found: packed,
-        difference: `${String(Number(ordered) - Number(packed))} units fewer than the PO`,
+        difference: shortfallText(Number(ordered) - Number(packed)),
         fixBy: "SUPPORT",
       });
     } else if (scenario.kind === "awb-overdue") {
@@ -68,7 +90,7 @@ export function makeExceptions(
         summary: `The ${what} was due on ${scenario.dueDate} and has not arrived`,
         expected: `Received by ${scenario.dueDate}`,
         found: "Not received",
-        difference: `${String(scenario.daysOverdue)} days late`,
+        difference: `${counted(scenario.daysOverdue, "day")} late`,
         toleranceLabel: "Days late (sample value)",
         toleranceValue: "0",
         fixBy: "LOGISTICS",
@@ -77,10 +99,7 @@ export function makeExceptions(
       open(journey.enteredOn, {
         ruleId: "mock.sample-price",
         ruleLabel: "Unit price on the PI against the PO (sample result)",
-        summary: `Item ${scenario.itemNo}: the PI prints ${scenario.piPrice}, the PO says ${scenario.poPrice}`,
-        expected: scenario.poPrice,
-        found: scenario.piPrice,
-        difference: `${addDecimal(scenario.piPrice, `-${scenario.poPrice}`)} USD a unit`,
+        ...priceMismatchText(scenario),
         toleranceLabel: "Price difference in USD (sample value)",
         toleranceValue: "0.00",
         fixBy: "SUPPORT",
@@ -105,7 +124,7 @@ export function makeExceptions(
         summary: `Item ${first.no}: the packing list said ${found}, the PO says ${ordered}`,
         expected: ordered,
         found,
-        difference: "1 unit fewer than the PO",
+        difference: shortfallText(1),
         fixBy: "SUPPORT",
         state: "RESOLVED",
         openedAt,

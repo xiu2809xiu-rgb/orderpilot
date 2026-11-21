@@ -41,6 +41,8 @@
     "to": "To",
     "span_one": "{{count}} day in range",
     "span_other": "{{count}} days in range",
+    "datesNotInOrder": "Dates not in order",
+    "rangeReversed": "From is after To. Put the dates in order and the range will filter the list.",
     "wholeStage": "All of {{stage}}"
   },
   "applied": {
@@ -101,9 +103,11 @@
     "shortItems_other": "{{itemNo}} and {{count}} more",
     "toConfirm": "To confirm",
     "docsNone": "No document needs attention",
-    "differs": "Differs",
-    "differsCount_one": "{{count}} difference found by the checks",
-    "differsCount_other": "{{count}} differences found by the checks"
+    "whyShort": "{{quantity}} short",
+    "whyMore": "{{reason}} and {{count}} more",
+    "heldAtFact": "Held at {{team}}",
+    "shipFact": "Ships {{date}}",
+    "poFact": "PO number"
   },
   "table": {
     "caption": "Orders",
@@ -158,10 +162,13 @@
     "sinceToday": "Since today",
     "since_one": "Since {{when}}, {{count}} day",
     "since_other": "Since {{when}}, {{count}} days",
+    "waitingCompact": "Waiting {{count}}d",
+    "waitingCompactUsual": "{{waiting}} \u00b7 ~{{usual}} avg",
     "sinceUsual": "{{since}}. Usually {{usual}}.",
     "sinceLate": "{{since}}. Past the usual {{usual}}.",
     "by": "By {{when}}",
     "usually": "Usually {{usual}}",
+    "noUsual": "No usual time",
     "usual": {
       "sameDay": "the same day",
       "hours": "{{count}} h",
@@ -181,39 +188,62 @@
   },
   "action": {
     "none": "You have no open task on this order.",
+    "reviewNotice": "A document of this order waits for a person to confirm its fields. This build has no screen that confirms a stored document.",
+    "reviewSample": "See the review on a sample",
     "yourTask": "Your task"
   },
   "order": {
     "back": "Orders",
-    "intro": "{{customer}}, {{number}}",
     "notFoundTitle": "That order was not found",
     "notFoundBody": "There is no order {{order}} for your role. Go back to the list and pick one.",
+    "notFoundBack": "Back to Orders",
+    "status": {
+      "whyOnly": "{{why}}.",
+      "why": {
+        "check": {
+          "quantity": "The packing list differs from the PO",
+          "price": "The unit price on the PI differs from the PO"
+        },
+        "checkOther": "A check did not pass: {{label}}",
+        "short": "{{quantity}} short on {{item}}",
+        "shortMore_one": "{{quantity}} short on {{item}} and {{count}} more item",
+        "shortMore_other": "{{quantity}} short on {{item}} and {{count}} more items"
+      }
+    },
+    "latest": {
+      "stepDone": "Latest: {{name}} marked {{step}} as done, {{when}}",
+      "payment": "Latest: {{name}} confirmed a payment, {{when}}",
+      "other": "Latest: {{summary}}, by {{name}}, {{when}}",
+      "otherNamed": "Latest: {{summary}}, {{when}}",
+      "when": "{{day}} at {{time}}",
+      "steps": "All steps"
+    },
     "journey": {
       "title": "Journey",
-      "region": "Journey of the order, nine steps"
+      "region": "Journey of the order, nine steps",
+      "subtitle": "Forecast based on similar orders",
+      "estShip": "Est. ship {{day}}",
+      "status": {
+        "onTrack": "On track",
+        "atRisk": "At risk",
+        "delayed": "Delayed"
+      }
     },
     "details": {
       "title": "Order details"
     },
     "entry": {
-      "label": "Entry",
-      "sample": "A sample order from Spectra. Samples are not edited here.",
+      "sample": "A sample order of the synthetic demo set. Its details cannot be edited here.",
       "draft": "Entered here as a draft. Only a role that may edit orders can change it.",
       "submitted": "Entered here and submitted. Only a draft can be changed.",
       "void": "Entered here and voided. It cannot be changed."
     },
     "trackerRefused": "The journey comes from the order tracker, which your role cannot read.",
     "facts": {
-      "stage": "Stage",
-      "pastDue": "Past due",
+      "currentStage": "Current Stage",
       "prepayment": "{{percent}}% prepayment",
-      "hidden": "Hidden: {{reason}}"
-    },
-    "now": {
-      "label": "Now",
-      "heldAt": "Held at {{team}}.",
-      "usual": "The step usually takes {{usual}}.",
-      "pastUsual": "It has run past the usual {{usual}}."
+      "hidden": "Hidden: {{reason}}",
+      "viewException": "View exception"
     },
     "tabs": {
       "label": "Order details",
@@ -243,7 +273,7 @@
     "activity": {
       "emptyTitle": "Nothing has happened yet",
       "emptyBody": "Events appear here as the order moves through its steps.",
-      "note": "What happened on the order, newest first. Postings to the ledger are made in Business Central; this page shows the result.",
+      "note": "What happened on the order, newest first. Nothing is posted from this page. Business Central stays the system of record.",
       "current": "Current step",
       "by": "{{actor}}, {{when}}"
     }
@@ -266,23 +296,36 @@
       "OTHER": "Other document"
     },
     "state": {
-      "differs": "Differs",
-      "matches": "Matches",
+      "differs": "Differs from the PO",
+      "matches": "Matches the PO",
       "unchecked": "Not checked yet"
     },
+    "poState": {
+      "differs": "A check found a difference",
+      "matches": "Passes every check"
+    },
+    "pending": {
+      "notMade": "Not yet made",
+      "noCopy": "Marked done, but no copy is on record",
+      "shipping": "Air waybill or bill of lading"
+    },
+    "file": {
+      "open": "Open file",
+      "openLabel": "Open the file of {{document}}, in a new tab",
+      "none": "No file in the demo set"
+    },
     "noChecks": "No check has read this document yet.",
-    "review": "Open the order's steps",
     "received": "Received {{date}}",
-    "due": "Due {{date}}",
     "flow": {
       "confirmed": "Confirmed",
       "to-confirm": "To confirm",
-      "expected": "Expected"
+      "expected": "Expected",
+      "expectedBy": "Expected by {{date}}"
     },
     "checked": "Checks: {{passed}} passed, {{failed}} found a difference.",
-    "confirmTitle": "A document of this order waits for you to confirm it",
-    "confirmBody": "The tracker says a person must confirm the fields read from one of the documents. It does not say which one.",
-    "confirmBodyNamed": "The tracker says a person must confirm the fields read from one of the documents. It is marked To confirm in the list below."
+    "confirmTitle": "A document of this order waits for a person to confirm its fields",
+    "confirmBody": "This build has no screen that confirms a stored document. The tracker does not say which one waits.",
+    "confirmBodyNamed": "This build has no screen that confirms a stored document. The one that waits is marked To confirm in the list below."
   },
   "mask": {
     "role": "your role does not include this figure",

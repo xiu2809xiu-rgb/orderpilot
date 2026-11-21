@@ -1,60 +1,48 @@
 import type { SalesOrderDetail } from "@orderpilot/shared";
-import { Clock } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { formatDay } from "@/lib/format";
-import { StatusChip } from "@/components/kit/StatusChip";
 import { Amount } from "../orders/Amount";
-import { ALL_DONE } from "../orders/orderRow";
-import { EntryFact } from "./EntryFact";
 
 function Fact({
   label,
   children,
   main = false,
+  labelClassName = "od-fact-label fs-12",
 }: {
-  label: string;
+  label: ReactNode;
   children: ReactNode;
   /** The figure the eye should land on: set larger. */
   main?: boolean;
+  /** The Value label is styled as the status card's "Current Stage" is. */
+  labelClassName?: string;
 }) {
   return (
     <div className="od-fact" data-main={main || undefined}>
-      <dt className="od-fact-label fs-12">{label}</dt>
+      <dt className={labelClassName}>{label}</dt>
       <dd className="od-fact-value fs-14">{children}</dd>
     </div>
   );
 }
 
 /**
- * The order in six facts: its stage, the team that holds it, its value (masked
- * for a role that may not see prices, with the reason), the ship date, the
- * order date and the customer's PO. Past due says so with a chip and the
- * tracker's own reason.
+ * The order in four facts, two rows of two: its value (masked for a role
+ * that may not see prices, with the reason), the customer's PO, the order
+ * date and the ship date. The stage and the team that holds it are the
+ * status card's to say, just above; how late it is, if it is, is that
+ * card's to say too, once.
  */
 export function OrderFacts({
   order,
   detail,
-  stageLabel,
-  heldAt,
-  step,
-  overdue,
 }: {
   order: { externalDocumentNo: string };
   detail: SalesOrderDetail | undefined;
-  stageLabel: string;
-  heldAt: string;
-  step: number | null;
-  overdue: { overdue: boolean; daysOverdue: number; reason: string | null };
 }) {
   const { t } = useTranslation("directions-orders");
   return (
     <dl className="od-facts-bar dx-card">
-      <Fact label={t("order.facts.stage")}>{stageLabel}</Fact>
-      <Fact label={t("columns.heldAt")}>
-        {step === ALL_DONE ? t("cells.done") : heldAt}
-      </Fact>
-      <Fact label={t("columns.value")} main>
+      <Fact label={t("columns.value")} main labelClassName="dx-section-title">
         {detail ? (
           <Amount field={detail.amount} currency={detail.currencyCode} />
         ) : (
@@ -78,31 +66,17 @@ export function OrderFacts({
           </span>
         ) : null}
       </Fact>
+      <Fact label={t("columns.po")}>
+        <span className="numeral">{order.externalDocumentNo}</span>
+      </Fact>
+      <Fact label={t("columns.orderDate")}>
+        {detail ? formatDay(detail.orderDate) : t("cells.notSet")}
+      </Fact>
       <Fact label={t("columns.shipDate")}>
         {detail?.shipmentDate
           ? formatDay(detail.shipmentDate)
           : t("cells.notSet")}
       </Fact>
-      <Fact label={t("columns.orderDate")}>
-        {detail ? formatDay(detail.orderDate) : t("cells.notSet")}
-      </Fact>
-      <Fact label={t("columns.po")}>
-        <span className="numeral">{order.externalDocumentNo}</span>
-      </Fact>
-      {detail ? <EntryFact detail={detail} /> : null}
-      {overdue.overdue ? (
-        <div className="od-fact od-fact-wide">
-          <dt className="od-fact-label fs-12">{t("order.facts.pastDue")}</dt>
-          <dd className="od-fact-value fs-14">
-            <StatusChip kind="destructive" icon={Clock}>
-              {t("cells.late", { count: overdue.daysOverdue })}
-            </StatusChip>
-            {overdue.reason ? (
-              <span className="text-muted-foreground"> {overdue.reason}</span>
-            ) : null}
-          </dd>
-        </div>
-      ) : null}
     </dl>
   );
 }

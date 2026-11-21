@@ -1,7 +1,5 @@
-import { QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter, Route, Routes } from "react-router";
 import {
   afterEach,
   beforeAll,
@@ -12,53 +10,20 @@ import {
   vi,
 } from "vitest";
 import i18n from "@/i18n";
-import { createQueryClient } from "@/lib/query";
 import { useSessionStore } from "@/stores/session";
 import { axeViolations } from "@/test/axe";
 import { sessionFor } from "@/test/fixtures";
-import demo from "@/../public/demo-documents/po-boxed-so-0102.json";
-import UploadScreen from "./UploadScreen";
-
-function stubDemo() {
-  vi.stubGlobal(
-    "fetch",
-    vi.fn(() =>
-      Promise.resolve(
-        new Response(JSON.stringify(demo), {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
-        }),
-      ),
-    ),
-  );
-}
-
-// Reduced motion: the reading is short and its steps are all there at once.
-function reduceMotion() {
-  vi.stubGlobal("matchMedia", (query: string) => ({
-    matches: query.includes("reduce"),
-    media: query,
-    addEventListener: () => undefined,
-    removeEventListener: () => undefined,
-  }));
-}
-
-function upload() {
-  return render(
-    <QueryClientProvider client={createQueryClient()}>
-      <MemoryRouter initialEntries={["/upload"]}>
-        <Routes>
-          <Route path="/upload" element={<UploadScreen />} />
-        </Routes>
-      </MemoryRouter>
-    </QueryClientProvider>,
-  );
-}
-
-const pdf = (name = "po.pdf") =>
-  new File([new TextEncoder().encode("%PDF-1.7 demo")], name, {
-    type: "application/pdf",
-  });
+import { must } from "@/test/must";
+import {
+  demo,
+  endAnimation,
+  pdf,
+  reduceMotion,
+  signInAsSupport,
+  stubDemo,
+  toReview,
+  upload,
+} from "./uploadHarness";
 
 beforeAll(async () => {
   await i18n.loadNamespaces([
@@ -72,23 +37,12 @@ beforeAll(async () => {
 beforeEach(() => {
   reduceMotion();
   stubDemo();
-  useSessionStore.setState({
-    status: "active",
-    session: sessionFor("SUPPORT"),
-  });
+  signInAsSupport();
 });
 
 afterEach(() => {
   vi.unstubAllGlobals();
 });
-
-async function toReview(user: ReturnType<typeof userEvent.setup>) {
-  upload();
-  await user.click(
-    await screen.findByRole("button", { name: "Use the demo purchase order" }),
-  );
-  return screen.findByRole("heading", { name: "Review what Spark read" });
-}
 
 describe("the upload screen", () => {
   it("writes the limits inside the drop zone before anyone tries", async () => {
@@ -98,8 +52,11 @@ describe("the upload screen", () => {
         "PDF, PNG, JPEG, XLSX or CSV. Up to 10 MB each, up to 5 files.",
       ),
     ).toBeVisible();
+    // The line says it is a demo on synthetic documents (ADR 0054 decision 6).
     expect(
-      screen.getByText(/a file you add stays in your browser/),
+      screen.getByText(
+        "Demo: a file you add stays in your browser and is not stored. Spark reads synthetic sample documents only, and no AI model is connected.",
+      ),
     ).toBeVisible();
     // Nothing to read yet: the primary button is off and says what to do.
     expect(
@@ -134,24 +91,34 @@ describe("the upload screen", () => {
     await waitFor(() => {
       expect(within(list).getByText("Ready")).toBeVisible();
     });
+    // Only the file that was taken is in the list.
+    expect(within(list).getAllByRole("listitem")).toHaveLength(1);
+    expect(within(list).queryByText(/invoice.pdf/)).toBeNull();
+    // The others leave a message each, in a place of their own.
+    const notes = await screen.findByRole("list", {
+      name: "Files that were not added",
+    });
     expect(
-      within(list).getByText(
-        /invoice\.pdf says it is a PDF file but its content is not/,
+      within(notes).getByText(
+        /invoice.pdf says it is a PDF file but its content is not/,
       ),
     ).toBeVisible();
     expect(
-      within(list).getByText(
+      within(notes).getByText(
         "setup.exe is not a PDF, PNG, JPEG, XLSX or CSV file.",
       ),
     ).toBeVisible();
-    expect(within(list).getByText("empty.csv is empty.")).toBeVisible();
+    expect(within(notes).getByText("empty.csv is empty.")).toBeVisible();
+    // po.pdf is a real PDF but has no sample: nothing here can be read yet.
     expect(
       screen.getByRole("button", { name: "Read with Spark" }),
-    ).toBeEnabled();
+    ).toBeDisabled();
     await user.click(
-      within(list).getByRole("button", { name: "Remove invoice.pdf" }),
+      within(notes).getByRole("button", {
+        name: "Dismiss the message about invoice.pdf",
+      }),
     );
-    expect(within(list).queryByText(/invoice\.pdf says/)).toBeNull();
+    expect(within(notes).queryByText(/invoice.pdf says/)).toBeNull();
   });
 
   it("refuses a file over the size limit without reading it", async () => {
@@ -171,7 +138,7 @@ describe("the upload screen", () => {
     expect(screen.getByText("Classified as Customer PO")).toBeVisible();
     expect(
       screen.getByText(
-        "21 fields read. 19 are above 90 percent. 2 need your approval.",
+        "21 fields read: 19 above 90 percent, 2 for you to approve.",
       ),
     ).toBeVisible();
     // The page of the PDF is a picture; each field has a box named after it.
@@ -183,13 +150,85 @@ describe("the upload screen", () => {
     expect(within(boxes).getAllByRole("button")).toHaveLength(20);
     expect(screen.getAllByText("Requires approval")).toHaveLength(2);
     expect(
-      screen.getByRole("button", { name: "Create draft order" }),
+      screen.getByRole("button", { name: "Finish review" }),
     ).toBeDisabled();
     expect(
+      screen.getByText("2 fields left to approve before you can finish"),
+    ).toBeVisible();
+  });
+
+  it("reads the page once as the review opens: a field's box and row carry where it sits, and the pass never plays again", async () => {
+    const user = userEvent.setup();
+    await toReview(user);
+    const fields = screen.getByRole("group", { name: "Fields read" });
+    const stage = must(fields.parentElement);
+    expect(stage).toHaveAttribute("data-arriving", "true");
+    const light = must(stage.querySelector('[data-slot="reading-light"]'));
+    expect(light).toHaveAttribute("aria-hidden", "true");
+    // How far down its page a field sits is when the light reaches it, and the
+    // box and the row share that moment.
+    const field = must(demo.fields[1]);
+    const at = String(must(field.box[1]));
+    const box = within(
+      screen.getByRole("group", { name: "Fields on this page" }),
+    ).getByRole("button", { name: `${field.label}: ${field.text}` });
+    const show = within(fields).getByRole("button", {
+      name: `Show ${field.label} on the page`,
+    });
+    const row = must(show.closest("li"));
+    expect(box.style.getPropertyValue("--read-at")).toBe(at);
+    expect(row.style.getPropertyValue("--read-at")).toBe(at);
+
+    endAnimation(light);
+    expect(stage).toHaveAttribute("data-arriving", "false");
+    expect(stage.querySelector('[data-slot="reading-light"]')).toBeNull();
+    // Choosing a field afterwards does not bring the pass back.
+    await user.click(show);
+    expect(show).toHaveAttribute("aria-pressed", "true");
+    expect(stage).toHaveAttribute("data-arriving", "false");
+  });
+
+  it("opens the preview document that the added file is named after", async () => {
+    const user = userEvent.setup();
+    const fetchMock = stubDemo();
+    upload();
+    await user.upload(
+      await screen.findByLabelText("Documents to upload"),
+      pdf("PO-4471-26.PDF"),
+    );
+    await screen.findByText("Ready");
+    await user.click(screen.getByRole("button", { name: "Read with Spark" }));
+    await screen.findByRole("heading", { name: "Review what Spark read" });
+    expect(fetchMock).toHaveBeenCalledWith("/directions/po-4471-26.json");
+    // Only the quantity is below the threshold, and its page image is this PO's own.
+    expect(
       screen.getByText(
-        "2 fields still need your approval before a draft order can be made.",
+        "16 fields read: 15 above 90 percent, 1 for you to approve.",
       ),
     ).toBeVisible();
+    expect(screen.getAllByText("Requires approval")).toHaveLength(1);
+    expect(
+      screen.getByRole("img", { name: /Page 1 of purchase order 4471-26/ }),
+    ).toHaveAttribute("src", "/directions/po-4471-26-p1.png");
+  });
+
+  it("does not read a file that has no sample, and says so before and instead", async () => {
+    const user = userEvent.setup();
+    const fetchMock = stubDemo();
+    upload();
+    await user.upload(
+      await screen.findByLabelText("Documents to upload"),
+      pdf("customer-po.pdf"),
+    );
+    await screen.findByText("Ready");
+    expect(screen.getByText("Not read in this preview")).toBeVisible();
+    expect(
+      screen.getByText(/No file added has a sample in this preview/),
+    ).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Read with Spark" }),
+    ).toBeDisabled();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("lights a field's box when its row is chosen, and the row when its box is", async () => {
@@ -243,10 +282,13 @@ describe("the upload screen", () => {
       screen.getByRole("button", { name: "Show Ship to on the page" }),
     ).toHaveAttribute("aria-pressed", "true");
     await user.click(screen.getByRole("button", { name: "Confirm Ship to" }));
-    await user.click(screen.getByRole("button", { name: "Next to approve" }));
+    // Confirming takes the person on: the next field to approve is chosen, on its page.
     expect(
       screen.getByRole("img", { name: /Page 2 of purchase order/ }),
     ).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Show Payment terms on the page" }),
+    ).toHaveAttribute("aria-pressed", "true");
     await user.click(
       screen.getByRole("button", { name: "Confirm Payment terms" }),
     );
@@ -255,16 +297,14 @@ describe("the upload screen", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("opens Create draft order only when every uncertain field is confirmed or corrected", async () => {
+  it("opens Finish review only when every uncertain field is confirmed or corrected", async () => {
     const user = userEvent.setup();
     await toReview(user);
-    const create = screen.getByRole("button", { name: "Create draft order" });
+    const create = screen.getByRole("button", { name: "Finish review" });
     await user.click(screen.getByRole("button", { name: "Confirm Ship to" }));
     expect(create).toBeDisabled();
     expect(
-      screen.getByText(
-        "1 field still needs your approval before a draft order can be made.",
-      ),
+      screen.getByText("1 field left to approve before you can finish"),
     ).toBeVisible();
     await user.click(
       screen.getByRole("button", { name: "Edit Payment terms" }),
@@ -283,10 +323,19 @@ describe("the upload screen", () => {
     expect(create).toBeEnabled();
     await user.click(create);
     expect(
-      await screen.findByText("Draft order made from 21 fields"),
+      await screen.findByText(
+        "1 field confirmed by you, 1 field corrected by you, 19 fields read above 90 percent",
+      ),
     ).toBeVisible();
-    expect(screen.getByText(/Demo: nothing is saved/)).toBeVisible();
-    expect(create).toBeDisabled();
+    expect(
+      screen.getByText(
+        "Nothing was saved and no order was made. This sample belongs to order SO-0102 in the sample data.",
+      ),
+    ).toBeVisible();
+    expect(
+      screen.getByRole("link", { name: "Open order SO-0102" }),
+    ).toBeVisible();
+    expect(screen.queryByRole("button", { name: "Finish review" })).toBeNull();
   });
 
   it("says so, with a way to try again, when the demo document cannot be loaded", async () => {
@@ -319,6 +368,22 @@ describe("the upload screen", () => {
       screen.getByRole("button", { name: "Use the demo purchase order" }),
     );
     await screen.findByRole("heading", { name: "Review what Spark read" });
+    expect(await axeViolations(container)).toEqual([]);
+  }, 60_000);
+
+  it("has no accessibility violations with a refused file on screen", async () => {
+    // The input's accept list would drop the file before the page saw it, and
+    // then nothing would be refused for axe to look at.
+    const user = userEvent.setup({ applyAccept: false });
+    const { container } = upload();
+    const input = await screen.findByLabelText("Documents to upload");
+    await user.upload(input, [pdf(), new File(["MZ"], "setup.exe")]);
+    const notes = await screen.findByRole("list", {
+      name: "Files that were not added",
+    });
+    // A list of plain items: the announcement sits inside each, so an item
+    // keeps its role as an item.
+    expect(within(notes).getAllByRole("listitem")).toHaveLength(1);
     expect(await axeViolations(container)).toEqual([]);
   }, 60_000);
 });

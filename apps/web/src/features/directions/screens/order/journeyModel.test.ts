@@ -129,6 +129,136 @@ describe("buildJourney", () => {
   });
 });
 
+// The tracker's sample timeline stamps its newest event with today, so the
+// workflow's record is what says how long an order has waited at its step.
+describe("when the current step began", () => {
+  const withSince = (since: Date | null | undefined) =>
+    buildJourney({
+      current: 5,
+      events: EVENTS,
+      stepTimes: STEP_TIMES.sales,
+      today: "2026-11-12",
+      since,
+    })?.steps[4];
+
+  it("takes the workflow's time over the tracker's current event", () => {
+    const now = withSince(new Date("2026-11-06T08:00:00.000Z"));
+    expect(now?.since).toEqual(new Date("2026-11-06T08:00:00.000Z"));
+    expect(now?.waitedDays).toBe(6);
+    // Six days against a usual three: the step has run over.
+    expect(now?.late).toBe(true);
+  });
+
+  it("says no wait while the workflow's record has not answered", () => {
+    const now = withSince(null);
+    expect(now?.since).toBeNull();
+    expect(now?.waitedDays).toBeNull();
+    expect(now?.late).toBe(false);
+  });
+
+  it("keeps the tracker's time when the workflow has none to give", () => {
+    const now = withSince(undefined);
+    expect(now?.since).toEqual(new Date("2026-11-10T12:00:00.000Z"));
+    expect(now?.waitedDays).toBe(2);
+  });
+
+  it("dates the later steps from the workflow's time too", () => {
+    const steps =
+      buildJourney({
+        current: 5,
+        events: EVENTS,
+        stepTimes: STEP_TIMES.sales,
+        today: "2026-11-12",
+        since: new Date("2026-11-06T08:00:00.000Z"),
+      })?.steps ?? [];
+    // Packing began on 6 Nov and usually takes 3 days: it has run over, so
+    // forwarding (2 days) is counted from today, 12 Nov.
+    expect(steps[6]?.expectedOn).toBe("2026-11-14");
+  });
+});
+
+// SO-0049 on the demo data: the payment was confirmed on 13 Nov and the order
+// came to packing on 16 Nov, yet the tracker's sample timeline dates its newest
+// event (the payment's) today, 20 Nov. A finished step cannot be dated after the
+// step the order is at, so the page must not print that date.
+describe("a finished step dated after the current step began", () => {
+  const SO_0049 = [
+    event(1, "Customer PO received", "System", "2026-11-02T08:00:00.000Z"),
+    event(3, "Proforma invoice sent", "Support", "2026-11-04T10:00:00.000Z"),
+    event(4, "Payment received", "Finance", "2026-11-20T09:00:00.000Z", true),
+  ];
+  const at = (since?: Date | null) =>
+    buildJourney({
+      current: 5,
+      events: SO_0049,
+      stepTimes: STEP_TIMES.sales,
+      today: "2026-11-20",
+      since,
+    })?.steps ?? [];
+
+  it("shows the step as done with no person and no date", () => {
+    const payment = at(new Date("2026-11-16T08:00:00.000Z"))[3];
+    expect(payment?.state).toBe("done");
+    expect(payment?.doneBy).toBeNull();
+  });
+
+  it("keeps the person and the date of a step finished before the current one began", () => {
+    const steps = at(new Date("2026-11-16T08:00:00.000Z"));
+    expect(steps[0]?.doneBy?.actor).toBe("System");
+    expect(steps[2]?.doneBy?.actor).toBe("Support");
+  });
+
+  it("keeps the tracker's dates when there is no record to wait for", () => {
+    expect(at(undefined)[3]?.doneBy?.actor).toBe("Finance");
+  });
+
+  // Changed from pinning the tracker's date while the record loads: that
+  // printed the wrong date and then took it back.
+  it("shows no person and no date for a finished step while the record has not answered", () => {
+    const steps = at(null);
+    expect(steps.filter((step) => step.state === "done")).toHaveLength(4);
+    expect(steps.every((step) => step.doneBy === null)).toBe(true);
+  });
+
+  it("shows dates only once the record has answered, and none later than it", () => {
+    const since = new Date("2026-11-16T08:00:00.000Z");
+    const dated = at(since).filter((step) => step.doneBy !== null);
+    expect(dated.map((step) => step.doneBy?.actor)).toEqual([
+      "System",
+      "Support",
+    ]);
+    for (const step of dated) {
+      expect(step.doneBy?.at.getTime()).toBeLessThanOrEqual(since.getTime());
+    }
+  });
+});
+
+// `today` is Singapore's date, so the moment a step began is read on the same
+// calendar. Read as a UTC date it was a day behind from midnight to 8 am in
+// Singapore, and the page said one day too many for those eight hours.
+describe("the calendar the wait is counted on", () => {
+  const waited = (since: string, today: string) =>
+    buildJourney({
+      current: 5,
+      events: EVENTS,
+      stepTimes: STEP_TIMES.sales,
+      today,
+      since: new Date(since),
+    })?.steps[4]?.waitedDays;
+
+  it("reads a step that began after midnight in Singapore as that Singapore day", () => {
+    // 16 Nov 18:00 UTC is 17 Nov 02:00 in Singapore: three days before 20 Nov.
+    expect(waited("2026-11-16T18:00:00.000Z", "2026-11-20")).toBe(3);
+  });
+
+  it("gives the same count just before and just after Singapore's midnight for one moment", () => {
+    // 6 Nov 16:07 UTC is 7 Nov 00:07 in Singapore: fourteen days before 21 Nov.
+    expect(waited("2026-11-06T16:07:00.000Z", "2026-11-21")).toBe(14);
+    // 6 Nov 15:53 UTC is 6 Nov 23:53 in Singapore: fourteen days before 20 Nov.
+    expect(waited("2026-11-06T15:53:00.000Z", "2026-11-20")).toBe(14);
+  });
+});
+
 describe("daysPastShipDate", () => {
   it("compares the expected day with the order's own ship date", () => {
     const ship = journey("2026-11-12")?.ship ?? null;

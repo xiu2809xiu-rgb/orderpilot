@@ -10,12 +10,16 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "./overlays/sheet";
+import { MobileExtras } from "./MobileExtras";
 import { SidePanel } from "./SidePanel";
 
 /** Below the md breakpoint the panel lives in a sheet, behind this button. */
 export function MobileMenu() {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const close = () => {
+    setOpen(false);
+  };
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
@@ -36,12 +40,10 @@ export function MobileMenu() {
           <SheetTitle>{t("shell.mobileNavTitle")}</SheetTitle>
           <SheetDescription>{t("shell.mobileNavDescription")}</SheetDescription>
         </SheetHeader>
-        <SidePanel
-          collapsed={false}
-          onNavigate={() => {
-            setOpen(false);
-          }}
-        />
+        <div className="min-h-0 flex-1">
+          <SidePanel collapsed={false} onNavigate={close} />
+        </div>
+        <MobileExtras onNavigate={close} />
       </SheetContent>
     </Sheet>
   );

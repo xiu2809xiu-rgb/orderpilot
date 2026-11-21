@@ -105,6 +105,9 @@ test.describe("The Orders workspace", () => {
     ).toBeVisible();
     // Every row is that customer's: the number is shown beside the name.
     const customers = page.getByRole("cell").filter({ hasText: /^.+C-\d{4}$/ });
+    // The link above can show a moment before the rows' customer cells are
+    // drawn, and a count does not wait: wait for the first cell, then count.
+    await expect(customers.first()).toBeVisible();
     expect(await customers.count()).toBeGreaterThan(0);
     for (const text of await customers.allInnerTexts()) {
       expect(text).toContain("C-0001");
@@ -151,11 +154,16 @@ test.describe("The Orders workspace", () => {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
       SAMPLE_LINK,
     );
+    // A sample says so on its badge by the title, and what that means opens from the badge.
+    const badge = page.getByRole("button", { name: /^Sample\./ });
+    await expect(badge).toBeVisible();
+    await badge.click();
     await expect(
       page.getByText(
-        "A sample order from Spectra. Samples are not edited here.",
+        "A sample order of the synthetic demo set. Its details cannot be edited here.",
       ),
     ).toBeVisible();
+    await page.keyboard.press("Escape");
     await page.getByRole("tab", { name: /^Checks/ }).click();
     await expect(page).toHaveURL(/[?&]tab=checks/);
     await page.reload();

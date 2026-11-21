@@ -50,22 +50,40 @@ describe("the Orders workspace", () => {
       .map((head) => head.textContent.trim());
     for (const name of [
       "Order",
+      "PO number",
       "Customer",
       "Stage",
       "Held at",
-      "Order age",
       "Ship date",
       "Value",
       "Documents",
     ]) {
       expect(heads).toContain(name);
     }
+    // The age is a line of the stage cell now; its own column is under Columns.
+    expect(heads).not.toContain("Order age");
     // The first order is the most overdue, as the tracker sorts them.
     expect(within(nth(rows, 0)).getByText("SO-0001")).toBeVisible();
     expect(within(nth(rows, 0)).getByText("3 d late")).toBeVisible();
     expect(
       within(nth(rows, 0)).getByRole("link", { name: "SO-0001" }),
     ).toHaveAttribute("href", "/orders/SO-0001");
+  });
+
+  it("gives the Held at heading its meaning on hover and focus", async () => {
+    stubApi();
+    open();
+    await bodyRows();
+    const table = nth(screen.getAllByRole("table"), 0);
+    const term = within(table).getByText("Held at");
+    expect(term.tagName).toBe("ABBR");
+    expect(term).toHaveAccessibleDescription(
+      "The team that has the order now.",
+    );
+    await userEvent.setup().hover(term);
+    expect(await screen.findByRole("tooltip")).toHaveTextContent(
+      "The team that has the order now.",
+    );
   });
 
   it("puts the journey rail in each row, at the step the status belongs to", async () => {

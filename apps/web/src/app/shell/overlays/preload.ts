@@ -1,3 +1,4 @@
+import { helpWordsModule } from "../helpWordsModule";
 import { dropdownMenuModule } from "./dropdown-menu";
 import { popoverModule } from "./popover";
 import { sheetModule } from "./sheet";
@@ -11,5 +12,6 @@ export async function loadShellOverlays(): Promise<void> {
     dropdownMenuModule.load(),
     popoverModule.load(),
     sheetModule.load(),
+    helpWordsModule.load(),
   ]);
 }

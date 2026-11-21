@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Section } from "@/components/parts/Section";
+import { HomeSection } from "./HomeSection";
 import { cuesFor } from "@/features/nav";
 import { useSessionStore } from "@/stores/session";
 import { CountTile } from "./CountTile";
@@ -33,7 +33,7 @@ export function YourNumbers() {
   const cues = cuesFor(session);
   if (cues.length === 0) return null;
   return (
-    <Section title={t("measures.title")}>
+    <HomeSection title={t("measures.title")}>
       <div className="@container">
         <ul className={`grid gap-3 ${GRIDS[cues.length] ?? MANY}`}>
           {cues.map(({ feature, cue }) => (
@@ -43,6 +43,6 @@ export function YourNumbers() {
           ))}
         </ul>
       </div>
-    </Section>
+    </HomeSection>
   );
 }

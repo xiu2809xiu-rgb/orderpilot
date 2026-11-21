@@ -17,6 +17,7 @@ import HomeScreen from "./HomeScreen";
 export const NAMESPACES = [
   "directions",
   "directions-home",
+  "directions-orders",
   "directions-parts",
   "home",
   "components",
@@ -167,6 +168,17 @@ export interface HomeApi {
   blockStatus?: number;
   /** A list the tiles count answers with this status. */
   trackerStatus?: number;
+  /**
+   * Whether the orders list shows its amounts: the server's answer to "may
+   * this role see prices". False answers them masked, as it does for
+   * Warehouse and Logistics.
+   */
+  prices?: boolean;
+  /**
+   * Overrides the orders list the price answer is read from: no order to ask
+   * about, or a failed request. Either leaves the answer about prices unknown.
+   */
+  orders?: "empty" | "failed";
 }
 
 /** What the screen sent, and which tasks the server now counts as done. */
@@ -249,6 +261,30 @@ export function serveHome(api: HomeApi = {}): Served {
         return HttpResponse.json({ data: {}, meta: { mock: true } });
       },
     ),
+    http.get("*/api/v1/orders", () => {
+      served.calls.push("GET /api/v1/orders");
+      if (api.orders === "failed") return fail(500);
+      if (api.orders === "empty") return HttpResponse.json(page([], 0));
+      const seen = api.prices === true;
+      return HttpResponse.json({
+        data: [
+          {
+            orderNo: "SO-0001",
+            customerNo: "C-0001",
+            customerName: "Synthetic Harbour Traders",
+            amount: {
+              field: "item.unitPrice",
+              classification: "confidential",
+              masked: !seen,
+              value: seen ? "100.00" : null,
+              reason: seen ? null : "price",
+            },
+            currencyCode: "USD",
+          },
+        ],
+        meta: { page: 1, pageSize: 1, total: 1, mock: true },
+      });
+    }),
     http.get("*/api/v1/tracker/flow", () => {
       served.calls.push("GET /api/v1/tracker/flow");
       return HttpResponse.json({ data: FLOW, meta: { mock: true } });
@@ -293,7 +329,13 @@ export function serveHome(api: HomeApi = {}): Served {
 }
 
 /** Renders the home screen as one role, with the toaster the shell would draw. */
-export function renderHome(role: Role) {
+/**
+ * Home as the signed-in role. The browser's copy of Done today lives in
+ * localStorage, which jsdom keeps from one test to the next, so it starts empty
+ * unless a test says it carries on from an earlier screen (`keepDone`).
+ */
+export function renderHome(role: Role, options: { keepDone?: boolean } = {}) {
+  if (!options.keepDone) localStorage.clear();
   useSessionStore.setState({ status: "active", session: sessionFor(role) });
   document.cookie = "op_csrf=csrf-token-1";
   // No retries: a failed request must show its error at once, not after a back-off.
@@ -307,8 +349,8 @@ export function renderHome(role: Role) {
           <Route path="/" element={<HomeScreen />} />
           <Route path="*" element={null} />
         </Routes>
+        <Toaster />
       </MemoryRouter>
-      <Toaster />
     </QueryClientProvider>,
   );
 }

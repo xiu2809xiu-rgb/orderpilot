@@ -1,11 +1,12 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { render } from "@testing-library/react";
 import type { ReactElement } from "react";
-import { MemoryRouter, Route, Routes } from "react-router";
+import { MemoryRouter, Route, Routes, useLocation } from "react-router";
 import { vi } from "vitest";
 import { Toaster } from "@/components/common/Toaster";
 import i18n from "@/i18n";
 import { createQueryClient } from "@/lib/query";
+import type { OrderRow } from "./orderRow";
 
 // What the preview's two screens read, as the real API would send it: the same
 // shapes, a few rows. Nothing here is typed into a screen itself.
@@ -28,6 +29,25 @@ const NOW = Date.now();
 const day = (daysFromNow: number) =>
   new Date(NOW + daysFromNow * 86_400_000).toISOString();
 const dateOnly = (daysFromNow: number) => day(daysFromNow).slice(0, 10);
+
+/** Singapore keeps one offset all year: eight hours ahead of UTC. */
+const SINGAPORE_AHEAD_MS = 8 * 3_600_000;
+
+/**
+ * A moment on Singapore's calendar: so many days from its today, so many hours
+ * after nine in the morning there. An order's sample events are dated with
+ * this and not with "now plus some hours", because the page counts Singapore
+ * calendar days, and four hours after now is tomorrow there for any test that
+ * runs after eight in the evening.
+ */
+const morningIn = (daysFromToday: number, hours: number) => {
+  const midnight =
+    Math.floor((NOW + SINGAPORE_AHEAD_MS) / 86_400_000) * 86_400_000 -
+    SINGAPORE_AHEAD_MS;
+  return new Date(
+    midnight + daysFromToday * 86_400_000 + (9 + hours) * 3_600_000,
+  ).toISOString();
+};
 
 const OPEN_MASK = {
   field: "item.unitPrice",
@@ -173,7 +193,7 @@ function trackerRow(spec: OrderSpec) {
 
 /** The order's own events: it is paid and waits to be packed. */
 export function timelineOf(spec: OrderSpec) {
-  const at = (hours: number) => day(-spec.orderedDaysAgo + hours / 24);
+  const at = (hours: number) => morningIn(-spec.orderedDaysAgo, hours);
   const steps = [
     ["Customer PO received", "System", 0],
     ["Fields read from the PO", "System", 1],
@@ -458,4 +478,70 @@ export function nth<T>(items: readonly T[], at: number): T {
   const item = items[at];
   if (item === undefined) throw new Error(`No item at ${String(at)}`);
   return item;
+}
+
+/** One row of the list as the screens read it, with only what a test names changed. */
+export function makeRow(over: Partial<OrderRow> = {}): OrderRow {
+  return {
+    orderNo: "SO-0001",
+    source: "sample",
+    captureState: null,
+    customerNo: "C-0001",
+    customerName: "Alpha Traders",
+    externalDocumentNo: "PO-AE-4261",
+    orderDate: dateOnly(-14),
+    shipmentDate: dateOnly(7),
+    workflowStatus: "Waiting for payment",
+    amount: amount("7960.80") as OrderRow["amount"],
+    currencyCode: "USD",
+    shortage: null,
+    shortageCount: 0,
+    status: { code: "sample-awaiting-payment", label: "Waiting for payment" },
+    ownerRole: "FINANCE",
+    overdue: { overdue: true, daysOverdue: 3, reason: "was due" },
+    openExceptions: 0,
+    toConfirm: false,
+    step: 4,
+    ...over,
+  };
+}
+
+/**
+ * Makes the window this wide and, when `coarse`, a touch screen, for the
+ * hooks that ask matchMedia. It reads the width and the pointer queries the
+ * list uses; any other query does not match.
+ */
+export function stubWindow(width: number, coarse = false) {
+  vi.stubGlobal("matchMedia", (query: string) => {
+    const max = /max-width:\s*([\d.]+)px/.exec(query);
+    const min = /min-width:\s*([\d.]+)px/.exec(query);
+    const matches =
+      (max ? width <= Number(max[1]) : true) &&
+      (min ? width >= Number(min[1]) : true) &&
+      (query.includes("pointer: coarse") ? coarse : true) &&
+      (max !== null || min !== null || query.includes("pointer: coarse"));
+    return {
+      matches,
+      media: query,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+    };
+  });
+}
+
+/** Shows the address the router holds, so a test can read what a screen rewrote it to. */
+export function LocationProbe() {
+  const location = useLocation();
+  return <output data-testid="address">{location.search}</output>;
+}
+
+/** `count` copies of the sample orders, each with its own number, for a list longer than a page. */
+export function manySpecs(count: number): OrderSpec[] {
+  return Array.from({ length: count }, (_, index) => {
+    const base = nth(SPECS, index % SPECS.length);
+    return {
+      ...base,
+      orderNo: `SO-${String(1000 + index)}`,
+    };
+  });
 }

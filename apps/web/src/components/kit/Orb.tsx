@@ -15,6 +15,8 @@ interface OrbProps {
   thinking?: boolean;
   /** Called once if WebGL2 is missing, so the caller can draw the still orb. */
   onUnavailable?: () => void;
+  /** Called once, after the first frame has been drawn, so the caller can reveal it. */
+  onFirstFrame?: () => void;
   className?: string;
 }
 
@@ -83,6 +85,7 @@ export function Orb({
   ground,
   thinking = false,
   onUnavailable,
+  onFirstFrame,
   className,
 }: OrbProps) {
   const holder = useRef<HTMLDivElement>(null);
@@ -90,6 +93,7 @@ export function Orb({
   const latest = useRef({ colours, ground, thinking });
   const redraw = useRef<(() => void) | null>(null);
   const unavailable = useRef(onUnavailable);
+  const firstFrame = useRef(onFirstFrame);
 
   useEffect(() => {
     latest.current = { colours, ground, thinking };
@@ -97,6 +101,7 @@ export function Orb({
   });
   useEffect(() => {
     unavailable.current = onUnavailable;
+    firstFrame.current = onFirstFrame;
   });
 
   useEffect(() => {
@@ -135,6 +140,12 @@ export function Orb({
     let raf = 0;
     let last = 0;
     let visible = true;
+    let reported = false;
+    const report = () => {
+      if (reported) return;
+      reported = true;
+      firstFrame.current?.();
+    };
 
     const draw = () => {
       const { colours: palette, ground: back } = latest.current;
@@ -183,6 +194,7 @@ export function Orb({
       state.swirl += step * 2 * (1 + state.kick);
       state.orbit -= step;
       draw();
+      report();
       raf = requestAnimationFrame(frame);
     };
     const wake = () => {
@@ -195,6 +207,7 @@ export function Orb({
       canvas.width = Math.max(1, Math.round(holderEl.clientWidth * ratio));
       canvas.height = Math.max(1, Math.round(holderEl.clientHeight * ratio));
       draw();
+      if (reduced) report();
       wake();
     };
     const sizeWatcher = new ResizeObserver(resize);

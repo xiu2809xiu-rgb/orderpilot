@@ -1,13 +1,17 @@
 import {
   ORDER_MAX_LINES,
   ORDER_PERCENT_PATTERN,
+  ORDER_PO_MAX_LENGTH,
   ORDER_PRICE_PATTERN,
   ORDER_QUANTITY_PATTERN,
+  shipmentIsBeforeOrder,
 } from "@orderpilot/shared";
 import type { TFunction } from "i18next";
 import { z } from "zod";
 import { requiredLookup } from "@/components/form";
 import { lastPriceSchema } from "@/components/lines-grid";
+
+const DAY = /^\d{4}-\d{2}-\d{2}$/;
 
 /**
  * The order form's schema, on the patterns the server checks with, so a value
@@ -36,7 +40,7 @@ export function makeOrderFormSchema(
       .nullable()
       .optional(),
   });
-  return z.object({
+  const fields = z.object({
     // The number of saves this form was typed against. It is a form value, so
     // a restored draft sends its own version and a stale one is refused.
     version: z.number().int().nullable(),
@@ -45,7 +49,13 @@ export function makeOrderFormSchema(
       .string()
       .trim()
       .min(1, t("form.errors.po"))
-      .max(35, t("form.errors.poLong")),
+      .max(ORDER_PO_MAX_LENGTH, {
+        error: (issue) =>
+          t("form.errors.poLong", {
+            max: ORDER_PO_MAX_LENGTH,
+            length: typeof issue.input === "string" ? issue.input.length : 0,
+          }),
+      }),
     orderDate: z.iso.date(t("form.errors.orderDate")),
     shipmentDate: z.union([
       z.literal(""),
@@ -61,6 +71,20 @@ export function makeOrderFormSchema(
       .min(1, t("form.errors.none"))
       .max(ORDER_MAX_LINES, t("form.errors.tooMany")),
   });
+  // The rule of the two dates is the one the API applies, and it sits on a
+  // small object of its own so that it runs whatever the other fields hold.
+  const dates = z
+    .object({ orderDate: z.string(), shipmentDate: z.string() })
+    .refine(
+      (order) =>
+        !(
+          DAY.test(order.orderDate) &&
+          DAY.test(order.shipmentDate) &&
+          shipmentIsBeforeOrder(order.orderDate, order.shipmentDate)
+        ),
+      { path: ["shipmentDate"], message: t("form.errors.shipmentBeforeOrder") },
+    );
+  return fields.and(dates);
 }
 
 export type OrderFormSchema = ReturnType<typeof makeOrderFormSchema>;

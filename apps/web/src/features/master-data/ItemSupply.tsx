@@ -74,7 +74,7 @@ export function ItemSupply({ item }: { item: ItemDetail }) {
       header: t("item.sprs.order"),
       cell: (spr) => (
         <RecordLink
-          to={`/order-tracker/${spr.orderNo}`}
+          to={`/orders/${spr.orderNo}`}
           className="font-mono text-primary underline-offset-4 hover:underline"
         >
           {spr.orderNo}

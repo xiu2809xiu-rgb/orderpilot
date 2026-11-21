@@ -2,11 +2,12 @@ import { ChevronRight } from "lucide-react";
 import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useLocation, useMatches } from "react-router";
+import { menuFor } from "@/features/nav";
 import { recordCrumb } from "@/lib/records";
 import { cn } from "@/lib/utils";
 import { useSessionStore } from "@/stores/session";
 import { useCrumbTail } from "./pageCrumb";
-import { currentGroup, panelMenu } from "./panelMenu";
+import { buildTrail, type Crumb } from "./trail";
 
 /**
  * A route sets `handle: { crumb: "namespace:key" }` to appear in the trail. A
@@ -16,22 +17,16 @@ export interface CrumbHandle {
   crumb?: string;
 }
 
-interface Crumb {
-  path: string;
-  label: string;
-  mono?: boolean;
-}
-
 /**
- * Where you are: the group of the side panel the page sits in, the page, and
- * a record's number. Below the large breakpoint the trail shows only the page
- * you are on, so a record number stays readable beside the search and role
- * buttons.
+ * Where you are: the page, and before it the page it belongs to, as a link.
+ * A record reads "Customers, C-1042"; a top-level page shows its own name.
+ * Below the large breakpoint the trail shows only the page you are on, so a
+ * record number stays readable beside the search and role buttons.
  */
 export function Breadcrumbs() {
   const { t } = useTranslation();
   const matches = useMatches();
-  const { pathname, search } = useLocation();
+  const { pathname } = useLocation();
   const session = useSessionStore((state) => state.session);
   const tail = useCrumbTail();
   const pages: Crumb[] = matches.flatMap((match) => {
@@ -42,41 +37,27 @@ export function Breadcrumbs() {
   if (record) pages.push({ path: record.path, label: record.no, mono: true });
   // A page without a record route names its own record, such as an order.
   else if (tail) pages.push({ path: pathname, label: tail, mono: true });
-  if (pages.length === 0) return null;
-
-  // Under a group the trail reads "Work, Orders", as the panel does: "Home"
-  // then names only the home page itself. A page of no group, such as
-  // Settings, keeps the way back to Home.
-  const group = currentGroup(panelMenu(session), { pathname, search });
-  const trail =
-    group && pages.length > 1 && pages[0]?.path === "/"
-      ? pages.slice(1)
-      : pages;
-
-  // The trail never says a word twice: on "Insights", the group is the page.
-  const groupLabel = group ? t(`shell.groups.${group}`) : null;
-  const showGroup = groupLabel !== null && trail[0]?.label !== groupLabel;
+  const menuPaths = new Set(
+    menuFor(session).map((entry) => entry.to.split("?")[0] ?? "/"),
+  );
+  const trail = buildTrail(pages, menuPaths);
+  if (trail.length === 0) return null;
 
   return (
     <nav aria-label={t("shell.breadcrumb")} className="min-w-0">
       <ol className="fs-14 flex items-center gap-1.5 text-muted-foreground">
-        {showGroup ? (
-          <li className="hidden truncate lg:block">{groupLabel}</li>
-        ) : null}
         {trail.map((item, index) => {
           const last = index === trail.length - 1;
-          // "Order steps" and its number are one page: only the number is current.
-          const samePage = !last && item.path === trail.at(-1)?.path;
           return (
             <Fragment key={`${item.path}${item.mono ? "#no" : ""}`}>
-              {index > 0 || showGroup ? (
+              {index > 0 ? (
                 <li aria-hidden="true" className="hidden lg:block">
                   <ChevronRight className="size-3.5" />
                 </li>
               ) : null}
               <li
                 className={cn(
-                  last ? "min-w-0 truncate" : "hidden truncate lg:block",
+                  last ? "min-w-0 truncate" : "hidden shrink-0 lg:block",
                 )}
               >
                 {last ? (
@@ -89,10 +70,11 @@ export function Breadcrumbs() {
                   >
                     {item.label}
                   </span>
-                ) : samePage ? (
-                  <span>{item.label}</span>
                 ) : (
-                  <Link to={item.path} className="hover:text-foreground">
+                  <Link
+                    to={item.path}
+                    className="rounded-sm hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring"
+                  >
                     {item.label}
                   </Link>
                 )}

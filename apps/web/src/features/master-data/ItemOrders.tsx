@@ -37,9 +37,9 @@ function Note({ line }: { line: OrderLine }) {
 }
 
 /**
- * The open orders holding this item, and how they make up Qty. on Sales
- * Order. The sum is spelt out under the table: the counted lines are Qty. on
- * Sales Order, and any short line held out of it is the demand under review.
+ * The open orders holding this item, and how they make up On sales orders. The
+ * sum is spelt out under the table: the counted lines are On sales orders, and
+ * any short line held out of it is the demand under review.
  */
 export function ItemOrders({ item }: { item: ItemDetail }) {
   const { t } = useTranslation("master-data");
@@ -50,7 +50,7 @@ export function ItemOrders({ item }: { item: ItemDetail }) {
       header: t("item.orders.order"),
       cell: (line) => (
         <RecordLink
-          to={`/order-tracker/${line.orderNo}`}
+          to={`/orders/${line.orderNo}`}
           className="font-mono font-medium text-primary underline-offset-4 hover:underline"
         >
           {line.orderNo}

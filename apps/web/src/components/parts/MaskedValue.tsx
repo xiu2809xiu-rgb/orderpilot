@@ -7,6 +7,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { useMaskReveal } from "./useMaskReveal";
 
 interface MaskedValueProps {
   /** Whether the server hid it. */
@@ -21,9 +22,10 @@ interface MaskedValueProps {
 /**
  * A figure the person's role may not see, shown as a mask. The reason appears
  * when the mask is focused or hovered, and a screen reader hears it as the
- * mask's description, so "hidden" is never unexplained. An unmasked value is
- * plain text, tabular. The server decides; this only
- * shows it.
+ * mask's description, so "hidden" is never unexplained. A tap or a click also
+ * shows it and keeps it, because a touch screen has no hover and no focus
+ * ring: a second one or Escape puts it away. An unmasked value is plain text,
+ * tabular. The server decides; this only shows it.
  */
 export function MaskedValue({
   masked,
@@ -33,6 +35,7 @@ export function MaskedValue({
 }: MaskedValueProps) {
   const { t } = useTranslation("directions-parts");
   const reasonId = useId();
+  const reveal = useMaskReveal();
   if (!masked) {
     return <span className={cn("numeral", className)}>{value}</span>;
   }
@@ -40,10 +43,11 @@ export function MaskedValue({
     reason: reason ?? t("masked.defaultReason"),
   });
   return (
-    <Tooltip>
+    <Tooltip {...reveal.tooltip}>
       <TooltipTrigger asChild>
         <button
           type="button"
+          {...reveal.trigger}
           aria-describedby={reasonId}
           className={cn(
             "numeral inline-flex min-h-6 cursor-help items-center gap-1 text-muted-foreground",

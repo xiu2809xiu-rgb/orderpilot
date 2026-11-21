@@ -15,7 +15,9 @@ const added: (() => void)[] = [];
 
 beforeAll(async () => {
   await i18n.loadNamespaces(
-    allFeatures.map((feature) => feature.namespace).concat("common"),
+    allFeatures
+      .map((feature) => feature.namespace)
+      .concat("common", "record-tabs"),
   );
 });
 
@@ -36,14 +38,14 @@ function open(role: Parameters<typeof sessionFor>[0] = "SYSTEM_ADMIN") {
 }
 
 describe("command palette", () => {
-  it("lists actions above navigation, and does not crash without cmdk's wrapper", async () => {
+  it("lists the pages above the actions, and does not crash without cmdk's wrapper", async () => {
     open();
     await screen.findByRole("combobox");
     const groups = screen.getAllByRole("group");
+    expect(within(must(groups[0])).getByText("Home")).toBeInTheDocument();
     expect(
-      within(must(groups[0])).getByText("Use the dark theme"),
+      within(must(groups[1])).getByText("Use the dark theme"),
     ).toBeInTheDocument();
-    expect(within(must(groups[1])).getByText("Home")).toBeInTheDocument();
   });
 
   it("runs an action a feature registered", async () => {
@@ -116,6 +118,14 @@ describe("command palette", () => {
       "Monitoring",
       "Settings",
     ]);
+  });
+
+  it("says in its box what it searches", async () => {
+    open("SUPPORT");
+    expect(await screen.findByRole("combobox")).toHaveAttribute(
+      "placeholder",
+      "Search orders, customers, vendors, items or pages",
+    );
   });
 
   it("explains the keys in its help", async () => {

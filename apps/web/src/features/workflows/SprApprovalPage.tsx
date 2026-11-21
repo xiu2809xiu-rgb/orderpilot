@@ -49,11 +49,16 @@ export default function SprApprovalPage() {
         title={t("spr.heading", { recordNo })}
         description={
           spr
-            ? t("spr.description", {
-                name: spr.requestedBy.name,
-                date: formatDate(spr.requestedAt),
-                orderNo: spr.orderNo ?? "-",
-              })
+            ? t(
+                spr.stage === "suggested"
+                  ? "spr.descriptionSuggested"
+                  : "spr.description",
+                {
+                  name: spr.requestedBy.name,
+                  date: formatDate(spr.requestedAt),
+                  orderNo: spr.orderNo ?? "-",
+                },
+              )
             : undefined
         }
         meta={
@@ -96,7 +101,11 @@ export default function SprApprovalPage() {
             <div className="space-y-s3 self-start">
               <SectionCard
                 title={t(
-                  canDecide ? "spr.decisionHeading" : "spr.statusHeading",
+                  spr.stage === "suggested"
+                    ? "spr.raise.heading"
+                    : canDecide
+                      ? "spr.decisionHeading"
+                      : "spr.statusHeading",
                 )}
               >
                 <SprDecisionForm spr={spr} canDecide={canDecide} />

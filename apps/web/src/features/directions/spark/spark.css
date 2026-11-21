@@ -8,8 +8,21 @@
   display: flex;
   width: 100%;
   flex-direction: column;
+  /* Clip, not hidden: a clipped box can never be scrolled, so no script can slide
+     the head and the input out of the panel. */
   overflow: hidden;
+  overflow: clip;
   color: var(--foreground);
+}
+
+/* The thread's region: the one thing in the panel that scrolls. It contains its
+   own positioned children (the screen-reader-only labels), which otherwise
+   reach out to the panel and make the panel itself scrollable. It never
+   scrolls smoothly: the thread follows the newest answer as it grows, and a
+   smooth scroll would be aimed at a place the answer has already left. */
+.spark-scroll {
+  position: relative;
+  overscroll-behavior: contain;
 }
 
 @media (min-width: 40rem) {
@@ -19,12 +32,35 @@
     inset-block-start: calc(
       var(--dx-chrome-h, 2.5rem) + var(--dx-panel-edge, 0rem)
     );
-    inset-block-end: var(--dx-panel-edge, 0rem);
+    /* Above the strip under the page while it holds the analytics card. */
+    inset-block-end: calc(var(--spark-dock, 0px) + var(--dx-panel-edge, 0rem));
     right: var(--dx-panel-edge, 0rem);
+  }
+  /* Maximised, as a window on Windows: the panel fills the width, edge to edge. */
+  .spark-panel[data-maximised="true"] {
+    width: calc(100% - 2 * var(--dx-panel-edge, 0rem));
+  }
+}
+@media (max-width: 39.99rem) {
+  .spark-panel {
+    inset-block-end: var(--spark-dock, 0px);
+  }
+  /* On a phone the panel already fills the screen, so there is nothing to maximise. */
+  .spark-size {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .spark-panel {
+    transition: width var(--motion-base, 220ms) var(--ease-out, ease-out);
   }
 }
 .spark-panel {
   border-radius: var(--radius-card);
+}
+/* Maximised, the conversation keeps a readable measure in the middle. */
+.spark-panel[data-maximised="true"] .spark-measure {
+  padding-inline: max(var(--space-2), calc((100% - 72ch) / 2));
 }
 
 .spark-orb-wrap {
@@ -109,11 +145,14 @@
     }
   }
 }
-/* The still orb: what shows under reduced motion, and where neither WebGPU
-   nor WebGL works. A lit sphere in the accent, drawn in CSS. */
+/* The CSS orb: what shows from the first render until the drawn orb has its
+   first frame, and what stays under reduced motion or where neither WebGPU
+   nor WebGL works. A lit sphere in the accent. Still under reduced motion;
+   otherwise light slowly turns inside it (transform only, no layout). */
 .spark-orb-still {
   position: absolute;
   inset: 6%;
+  overflow: hidden;
   border-radius: 9999px;
   background:
     radial-gradient(
@@ -136,6 +175,91 @@
   box-shadow:
     0 0 0 1px color-mix(in srgb, var(--ring) 55%, transparent),
     0 0 44px color-mix(in srgb, var(--ring) 55%, transparent);
+}
+
+/* Under the WebGPU orb the CSS orb takes that orb's size. The shader draws its
+   disc 72.6% of the holder wide and keeps the rest for its glow, so at 6% the
+   CSS orb was a fifth wider and every hand-over showed the orb shrink. */
+[data-engine="webgpu"] > .spark-orb-still {
+  inset: 13.7%;
+}
+
+.spark-orb-still::before,
+.spark-orb-still::after {
+  content: "";
+  position: absolute;
+  inset: -30%;
+  border-radius: 9999px;
+  pointer-events: none;
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .spark-orb-still::before,
+  .spark-orb-still::after {
+    display: block;
+    will-change: transform;
+  }
+  /* Bands of the two hues, turning slowly. */
+  .spark-orb-still::before {
+    background: conic-gradient(
+      from 0deg,
+      transparent 0,
+      color-mix(in srgb, var(--info) 55%, transparent) 14%,
+      transparent 30%,
+      color-mix(in srgb, var(--ring) 70%, white) 48%,
+      transparent 64%,
+      color-mix(in srgb, var(--info) 45%, transparent) 82%,
+      transparent 100%
+    );
+    opacity: 0.55;
+    animation: spark-orb-turn 18s linear infinite;
+  }
+  /* The highlight drifts across the face, as light does on glass that moves. */
+  .spark-orb-still::after {
+    inset: 0;
+    background: radial-gradient(
+      circle at 50% 50%,
+      color-mix(in srgb, var(--ring) 40%, white) 0,
+      transparent 36%
+    );
+    opacity: 0.5;
+    animation: spark-orb-drift 9s ease-in-out infinite alternate;
+  }
+  .spark-orb-still[data-state="thinking"]::before {
+    animation-duration: 6s;
+    opacity: 0.8;
+  }
+  .spark-orb-still[data-state="thinking"]::after {
+    animation-duration: 3.5s;
+  }
+  @keyframes spark-orb-turn {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes spark-orb-drift {
+    from {
+      transform: translate(-22%, -18%);
+    }
+    to {
+      transform: translate(22%, 20%);
+    }
+  }
+}
+
+/* The drawn orb over the CSS one: clear until its first frame is on the
+   screen, then a short fade. */
+.spark-orb-layer {
+  opacity: 0;
+}
+.spark-orb-layer[data-ready="true"] {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .spark-orb-layer[data-ready="true"] {
+    transition: opacity 200ms var(--ease-out, ease-out);
+  }
 }
 
 /* The WebGL orb on a light panel: a deep disc, so its ring keeps its light. */

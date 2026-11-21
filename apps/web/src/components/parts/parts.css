@@ -224,6 +224,94 @@
   top: calc(26px + 7px);
 }
 
+/* The order page's full rail only: the order's own tone (read from
+   data-tone, set by the journey card) colours the line into the current
+   step and its glow. A list row and the vertical rail never set a tone
+   other than "normal", so they keep today's plain teal, unchanged. */
+.jr[data-size="full"][data-tone="warning"] {
+  --jr-active: var(--warning);
+}
+
+.jr[data-size="full"][data-tone="critical"] {
+  --jr-active: var(--destructive);
+}
+
+/* The last done step's line runs into the current one as a gradient, from
+   the rail's usual teal to the order's tone: emerald on track, amber for a
+   blocker, red when the order has also run out of time. */
+.jr[data-size="full"] .jr-step[data-leads-to-now]:not(:last-child)::before {
+  border-top: none;
+  height: var(--jr-line-w);
+  background-image: linear-gradient(
+    to right,
+    var(--jr-line-done),
+    var(--jr-active, var(--success))
+  );
+}
+
+/* The current step's circle glows in the order's tone; "normal" is emerald,
+   not the rail's usual ring colour, so "on track" reads as good news. */
+.jr[data-size="full"] .jr-step[data-state="now"] .jr-mark {
+  border-color: var(--jr-active, var(--success));
+  background: var(--jr-active, var(--success));
+  box-shadow:
+    0 0 0 4px
+      color-mix(in srgb, var(--jr-active, var(--success)) 22%, transparent),
+    0 0 20px
+      color-mix(in srgb, var(--jr-active, var(--success)) 45%, transparent);
+}
+
+/* A completed step's title reads as plainly done as the current one's: bold
+   and full contrast, not the same fade as a step still to come. Only the
+   full rail needs this much contrast; a list row and the side peek's
+   vertical rail keep their own quieter look. */
+.jr[data-size="full"] .jr-step[data-state="done"] .jr-label {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+/* The current step's second line takes the order's tone too. */
+.jr[data-size="full"] .jr-step[data-state="now"] .jr-detail {
+  color: var(--jr-active, var(--success));
+}
+
+/* Every step's second line reads in full: it wraps rather than clipping
+   with an ellipsis, now that the wording itself is kept short enough to sit
+   on one line in the usual case. It also sits flush under the title above
+   it: the base indent made room for an icon beside the title, which the
+   full rail no longer draws. */
+.jr[data-size="full"] .jr-detail {
+  display: block;
+  padding-left: 0;
+  white-space: normal;
+  line-height: 1.2;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .jr[data-size="full"] .jr-step[data-state="now"] .jr-mark {
+    animation: jr-glow-tone 2.6s ease-in-out infinite;
+  }
+
+  @keyframes jr-glow-tone {
+    0%,
+    100% {
+      box-shadow:
+        0 0 0 4px
+          color-mix(in srgb, var(--jr-active, var(--success)) 22%, transparent),
+        0 0 20px
+          color-mix(in srgb, var(--jr-active, var(--success)) 45%, transparent);
+    }
+
+    50% {
+      box-shadow:
+        0 0 0 6px
+          color-mix(in srgb, var(--jr-active, var(--success)) 14%, transparent),
+        0 0 28px
+          color-mix(in srgb, var(--jr-active, var(--success)) 55%, transparent);
+    }
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   @keyframes jr-pulse {
     0% {

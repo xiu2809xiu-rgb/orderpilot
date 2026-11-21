@@ -1,6 +1,7 @@
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Table } from "@/components/ui/table";
+import { pageCount } from "@/lib/paging";
 import "./data-table.css";
 import { ScrollRegion } from "../ScrollRegion";
 import { PartialNotice } from "../states";
@@ -116,6 +117,18 @@ export function DataTable<Row>({
   const { t } = useTranslation("components");
   const state = useDataTableState(tableId, columns, query, onQueryChange);
   const { shown, change, sortBy, sortNote, filtered } = state;
+  // An address can name a page past the end (`?page=99`). The server answers
+  // with no rows and the true total, so the table opens the last page instead
+  // of an empty state that would say there is nothing here. Only a page with
+  // no rows is corrected: a list that filters in the browser is given a total
+  // that is not the count of its rows, and a person on a page that has rows
+  // is never moved off it.
+  const lastPage = pageCount(total, query.pageSize);
+  const pastEnd =
+    status === "ready" && rows.length === 0 && query.page > lastPage;
+  useEffect(() => {
+    if (pastEnd) onQueryChange({ ...query, page: lastPage });
+  }, [pastEnd, lastPage, query, onQueryChange]);
 
   return (
     <div className="dt" data-fill={fill ? "" : undefined}>
@@ -161,7 +174,7 @@ export function DataTable<Row>({
             columns={shown}
             rows={rows}
             rowKey={rowKey}
-            status={status}
+            status={pastEnd ? "loading" : status}
             pageSize={query.pageSize}
             onRowClick={onRowClick}
             rowHref={rowHref}

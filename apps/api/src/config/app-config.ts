@@ -13,6 +13,7 @@ export class AppConfig {
   readonly appEnv: Env["APP_ENV"];
   readonly nodeEnv: Env["NODE_ENV"];
   readonly demoMode: boolean;
+  readonly demoStoryline: boolean;
   readonly gitSha: string | null;
 
   readonly http: {
@@ -108,6 +109,7 @@ export class AppConfig {
     this.appEnv = env.APP_ENV;
     this.nodeEnv = env.NODE_ENV;
     this.demoMode = env.DEMO_MODE;
+    this.demoStoryline = env.DEMO_STORYLINE;
     this.gitSha = env.GIT_SHA ?? null;
     this.http = {
       host: env.API_HOST,

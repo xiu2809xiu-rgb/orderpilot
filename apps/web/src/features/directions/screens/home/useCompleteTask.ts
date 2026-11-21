@@ -5,47 +5,25 @@ import { useTranslation } from "react-i18next";
 import { toast } from "@/components/common";
 import {
   workflowsCompleteTask,
-  workflowsConfirmPayment,
-  workflowsUndoPayment,
   workflowsUndoTask,
 } from "@/lib/api/generated/endpoints/workflows/workflows";
-import { todayInSingapore } from "@/lib/format";
 
 const COMPLETES: readonly string[] = COMPLETABLE_TASK_KINDS;
 
 /**
- * True when the task is one a person simply marks as done. The order page
- * imports this by name for the same question, so it keeps its meaning.
+ * True when one click does the task: only the kinds a person simply marks as
+ * done. A payment never is: it needs the amount, the bank reference and the
+ * date a person read from the bank advice, so it opens the order's form and no
+ * reference is made up here. An SPR approval never is either: the approver
+ * decides on the stock, the cover and the amount, and says why, which only the
+ * SPR page shows and asks for. Home and the order page both ask this.
  */
 export function canComplete(task: WorkflowTask): boolean {
   return COMPLETES.includes(task.kind);
 }
 
-/**
- * True when one click does the task here: the kinds a person simply marks as done
- * and a payment whose expected amount is known. Anything else opens its record.
- * An SPR approval never does: the approver decides on the stock, the cover and
- * the amount, and says why, which only the SPR page shows and asks for.
- */
-export function isOneClick(task: WorkflowTask): boolean {
-  if (canComplete(task)) return true;
-  return task.kind === "CONFIRM_PAYMENT" && task.expectedPayment !== undefined;
-}
-
 /** Does the task, and answers with the call that reverses it. */
 async function perform(task: WorkflowTask): Promise<() => Promise<unknown>> {
-  if (task.kind === "CONFIRM_PAYMENT" && task.expectedPayment && task.orderNo) {
-    const { orderNo } = task;
-    const { paymentType, amount, currencyCode } = task.expectedPayment;
-    const answer = await workflowsConfirmPayment(orderNo, {
-      paymentType,
-      amount,
-      currencyCode,
-      reference: `HOME-${orderNo}`,
-      paidOn: todayInSingapore(),
-    });
-    return () => workflowsUndoPayment(orderNo, answer.data.paymentId);
-  }
   await workflowsCompleteTask(task.id);
   return () => workflowsUndoTask(task.id);
 }
@@ -61,12 +39,19 @@ async function perform(task: WorkflowTask): Promise<() => Promise<unknown>> {
 export function useCompleteTask({
   onDone,
   onUndone,
+  offerOrder = true,
 }: {
   onDone: (task: WorkflowTask, at: Date) => void;
   /** Called just before an Undo asks the lists again, so focus can follow the row back. */
   onUndone: (task: WorkflowTask) => void;
+  /**
+   * Whether the toast offers Open order. On Home it does; on the order's own
+   * page the button would lead to the page the person is on and change nothing.
+   */
+  offerOrder?: boolean;
 }) {
   const { t } = useTranslation("home");
+  const { t: tNext, i18n } = useTranslation("directions-home");
   const queryClient = useQueryClient();
   // The button only disables on the next render, so a double click would get
   // here twice. A ref is set at once.
@@ -76,7 +61,24 @@ export function useCompleteTask({
     onSuccess: async (undo, task) => {
       onDone(task, new Date());
       await queryClient.invalidateQueries();
+      // Only a kind whose next team the order's state machine always fixes has
+      // a sentence (needs.next.*): packing, the shipping documents.
+      // SEND_PI has none: an order with no prepayment due goes straight to the
+      // warehouse. RAISE_SPR has none: a coordinator routes the SPR (ADR 0049).
+      // A kind that cannot be placed keeps the plain message: a guess is a claim.
+      const nextKey = `needs.next.${task.kind}`;
+      const next = i18n.exists(nextKey, { ns: "directions-home" })
+        ? tNext(nextKey)
+        : undefined;
       toast.done(t(`needs.done.${task.kind}`, { orderNo: task.orderNo }), {
+        description: next,
+        action:
+          offerOrder && task.orderNo
+            ? {
+                label: tNext("needs.openOrder"),
+                to: `/orders/${task.orderNo}`,
+              }
+            : undefined,
         undo: async () => {
           await undo();
           onUndone(task);

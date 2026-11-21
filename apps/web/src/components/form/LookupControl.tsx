@@ -43,7 +43,8 @@ function announcementKey(state: LookupState) {
 /**
  * The search box of a lookup, on the ARIA combobox pattern. Typing searches;
  * the arrows move through the results of what is typed now; Enter or Tab picks
- * the record the text names, or the highlighted one; Escape closes the list,
+ * the record the text names, or the highlighted one (Enter on text that names
+ * none says so at once, and chooses nothing); Escape closes the list,
  * then puts back what was there before. Leaving with text that names no record
  * leaves the field empty and says so. The list is a popover, so that a grid
  * cell or a short window can neither clip it nor push it off screen.
@@ -61,6 +62,7 @@ export function LookupControl({
   const combobox = useLookupCombobox(behaviour);
   const { listId, state, listed, current } = combobox;
   const said = announcementKey(state);
+  const possible = state.options.filter((o) => o.possible === true).length;
 
   return (
     <Popover open={combobox.open}>
@@ -98,7 +100,10 @@ export function LookupControl({
           </FormControl>
           <span id={statusId} role="status" className="sr-only">
             {combobox.open && said !== null
-              ? t(said, { count: state.options.length })
+              ? t(said, { count: state.options.length - possible })
+              : ""}
+            {combobox.open && state.status === "done" && possible > 0
+              ? ` ${t("lookup.possibleCount", { count: possible })}`
               : ""}
           </span>
         </div>
@@ -108,7 +113,8 @@ export function LookupControl({
         sideOffset={4}
         // The popover is a dialog to a screen reader, and a dialog needs a name.
         aria-label={label}
-        className="w-(--radix-popover-trigger-width) overflow-hidden p-0"
+        // A narrow cell, such as an item in a line, still lists whole names.
+        className="w-(--radix-popover-trigger-width) max-w-[calc(100vw-2rem)] min-w-80 overflow-hidden p-0"
         onOpenAutoFocus={(event) => {
           event.preventDefault();
         }}

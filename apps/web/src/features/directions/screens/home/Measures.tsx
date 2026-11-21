@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useInsightsKpis } from "@/lib/api/generated/endpoints/insights/insights";
 import { KpiTile } from "@/components/parts/KpiTile";
-import { Section } from "@/components/parts/Section";
+import { HomeSection } from "./HomeSection";
 import { HomeQuery } from "./HomeQuery";
 import { useHomeAccess } from "./homeAccess";
 import { TrendSection } from "./TrendSection";
@@ -23,7 +23,7 @@ export function Measures() {
 
   return (
     <>
-      <Section title={t("measures.five")}>
+      <HomeSection title={t("measures.five")}>
         <HomeQuery
           query={kpis}
           loading={<Skeleton className="h-28" aria-hidden="true" />}
@@ -54,7 +54,7 @@ export function Measures() {
             {t("measures.lab", { note: kpis.data?.data.note })}
           </p>
         </HomeQuery>
-      </Section>
+      </HomeSection>
       {access.role === "MANAGEMENT" ? <TrendSection /> : null}
     </>
   );

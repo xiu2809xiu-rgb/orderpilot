@@ -9,9 +9,13 @@
     "emailRequired": "Enter your email, for example name@example.com.",
     "emailInvalid": "That does not look like an email. Check for an @ and a domain.",
     "passwordRequired": "Enter your password.",
-    "demoTitle": "Or open a demo role",
-    "demoHint": "Each role sees its own tasks and numbers.",
+    "demoTitle": "Open the demo as a team",
+    "demoHint": "Six teams handle an order, in this order.",
     "demoRolesLabel": "Demo roles",
+    "moreRoles": "More roles",
+    "moreRolesLabel": "More demo roles",
+    "emailToggle": "Sign in with email",
+    "loadingRoles": "Loading the demo roles",
     "demoNote": "In this demo the AI and Business Central are stand-ins, and every record is made up.",
     "optionsFailed": "The demo sign-in could not be checked. You can still sign in with your email."
   },
@@ -29,12 +33,17 @@
       },
       "decide": {
         "title": "Rules decide",
-        "body": "Fixed rules check the order against prices, stock and approval limits."
+        "body": "Fixed rules compare quantities, prices and PO references across the documents, and check stock."
       },
       "approve": {
         "title": "People approve",
         "body": "The right person confirms anything uncertain. Business Central stays the system of record."
       }
     }
+  },
+  "stage": {
+    "label": "Animated preview of OrderPilot",
+    "pause": "Pause the hero animation",
+    "play": "Play the hero animation"
   }
 }

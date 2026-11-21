@@ -6,7 +6,9 @@ import {
   type Session,
 } from "@orderpilot/shared";
 import { removeDraftsOf } from "@/lib/draft-keys";
+import { queryClient } from "@/lib/query";
 import { useSessionStore } from "@/stores/session";
+import { adoptSession } from "./adopt-session";
 import { apiClient } from "./instance";
 
 export async function fetchAuthOptions(): Promise<AuthOptions> {
@@ -15,7 +17,9 @@ export async function fetchAuthOptions(): Promise<AuthOptions> {
 
 function begin(session: Session): Session {
   apiClient.markSessionStarted();
-  useSessionStore.getState().setSession(session);
+  // The guard for a different person is in adoptSession, which a silent
+  // refresh goes through as well.
+  adoptSession(session);
   return session;
 }
 
@@ -37,6 +41,12 @@ export async function logout(): Promise<void> {
     if (viewerId !== undefined) removeDraftsOf(viewerId);
     apiClient.markSessionEnded();
     useSessionStore.getState().setAnonymous();
+    // The server masks by role, but an answer the browser already keeps is
+    // drawn again without asking. So every kept answer goes with the session:
+    // the next person to sign in at this tab starts with none. Requests still
+    // on their way are stopped first, so none can land afterwards.
+    await queryClient.cancelQueries();
+    queryClient.clear();
   }
 }
 

@@ -1,5 +1,5 @@
 import { createSyntheticDataset } from "@orderpilot/synthetic-data";
-import { compareDecimal } from "@orderpilot/shared";
+import { LOW_STOCK_THRESHOLD, compareDecimal } from "@orderpilot/shared";
 import { describe, expect, it } from "vitest";
 import { NotFoundError } from "../../common/domain-error.js";
 import { SampleOrderSource } from "../orders/directory/sample-order-source.js";
@@ -7,11 +7,7 @@ import { MockChecksRepository } from "../checks/mock-checks.repository.js";
 import { MockOrderStatusReader } from "../checks/mock-order-status-reader.js";
 import { TrackerService } from "../checks/tracker.service.js";
 import type { MasterDataSalesOrder } from "./domain/master-data-reader.js";
-import {
-  LOW_STOCK_THRESHOLD,
-  StockPosition,
-  isOpenOrder,
-} from "./domain/stock-position.js";
+import { StockPosition, isOpenOrder } from "./domain/stock-position.js";
 import { MasterDataService } from "./master-data.service.js";
 import { MockBusinessCentralMasterData } from "./mock-business-central-master-data.js";
 
@@ -112,8 +108,8 @@ describe("the stock position of an item", () => {
     const at = (po: string) =>
       new StockPosition(stockOf({ inventory: "0", so: "0", po }), [])
         .availability;
-    expect(at(LOW_STOCK_THRESHOLD)).toBe("ok");
-    expect(at(String(Number(LOW_STOCK_THRESHOLD) - 1))).toBe("low");
+    expect(at(String(LOW_STOCK_THRESHOLD))).toBe("ok");
+    expect(at(String(LOW_STOCK_THRESHOLD - 1))).toBe("low");
   });
 });
 
@@ -138,6 +134,26 @@ describe("items over the mock", () => {
       );
       expect(found.items.map((r) => r.no)).toContain(some.no);
     }
+  });
+
+  it("finds an item by its vendor's number and name", async () => {
+    const some = dataset.items[7];
+    const vendor = dataset.vendors.find((v) => v.no === some?.vendorNo);
+    if (!some || !vendor) throw new Error("no item or vendor");
+    for (const search of [vendor.no, vendor.name.split(" ")[0] ?? ""]) {
+      const found = await service.listItems(
+        { ...everything, search },
+        "SUPPORT",
+      );
+      expect(found.items.map((r) => r.no)).toContain(some.no);
+      // Every hit is that vendor's, or has the words somewhere else it shows.
+      expect(found.total).toBeGreaterThan(0);
+    }
+    const byVendor = await service.listItems(
+      { ...everything, search: vendor.no },
+      "SUPPORT",
+    );
+    expect(byVendor.items.every((r) => r.vendorNo === vendor.no)).toBe(true);
   });
 
   it("filters by brand, category and vendor", async () => {
@@ -345,6 +361,30 @@ describe("customers over the mock", () => {
     for (const row of found.items) {
       expect(row.countryRegionCode).toBe(some.countryRegionCode);
     }
+  });
+
+  it("finds a customer by its country's name and by its code", async () => {
+    const some = dataset.customers.find((c) => c.countryRegionCode === "LK");
+    if (!some) throw new Error("no customer in Sri Lanka");
+    const inCountry = dataset.customers.filter(
+      (c) => c.countryRegionCode === "LK",
+    );
+    for (const search of ["Sri Lanka", "sri lanka", "LK", "lk"]) {
+      const found = await service.listCustomers({ ...everything, search });
+      expect(found.items.map((r) => r.no)).toContain(some.no);
+      expect(
+        found.items.filter((r) => r.countryRegionCode === "LK"),
+      ).toHaveLength(inCountry.length);
+    }
+  });
+
+  it("does not find every customer by a two-letter code", async () => {
+    const found = await service.listCustomers({ ...everything, search: "IN" });
+    const india = dataset.customers.filter((c) => c.countryRegionCode === "IN");
+    // Names that merely contain "in" are still found, as before, but a
+    // customer elsewhere with no "in" in its name is not.
+    expect(found.items.length).toBeGreaterThanOrEqual(india.length);
+    expect(found.items.length).toBeLessThan(dataset.customers.length);
   });
 
   it("counts what the detail lists, and overdue agrees with the tracker", async () => {

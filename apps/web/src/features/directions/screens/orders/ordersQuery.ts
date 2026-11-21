@@ -274,6 +274,15 @@ export interface Who {
   role: Role | undefined;
 }
 
+/**
+ * A From after its To. The address can carry one (typed, or a stale link), and
+ * the panel says so at the field. The range then filters nothing, rather than
+ * empty the list with a span of negative days that no order can be in.
+ */
+export function rangeReversed(query: Pick<OrdersQuery, "from" | "to">) {
+  return query.from !== null && query.to !== null && query.from > query.to;
+}
+
 /** Whether a row passes every filter except the view. */
 function passes(row: OrderRow, query: OrdersQuery): boolean {
   const search = query.search.trim().toLowerCase();
@@ -307,8 +316,10 @@ function passes(row: OrderRow, query: OrdersQuery): boolean {
   if (query.open && !isOpen(row)) return false;
   if (query.entry && row.captureState !== query.entry) return false;
   if (query.source && row.source !== query.source) return false;
-  if (query.from && row.orderDate.slice(0, 10) < query.from) return false;
-  if (query.to && row.orderDate.slice(0, 10) > query.to) return false;
+  if (!rangeReversed(query)) {
+    if (query.from && row.orderDate.slice(0, 10) < query.from) return false;
+    if (query.to && row.orderDate.slice(0, 10) > query.to) return false;
+  }
   return true;
 }
 
