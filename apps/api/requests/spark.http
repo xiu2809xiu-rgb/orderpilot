@@ -1,0 +1,46 @@
+### Area 1: Spark's server side (P-95, step 1). No tools yet: every question gets the mock's
+### scripted "I cannot look anything up yet" answer, with AI_PROVIDER unset.
+### Sign in first (requests/auth.http), then paste the op_csrf cookie value below.
+### Every route needs spark.use: every role but the System admin holds it by default.
+### Conversations are the caller's own: another person's id answers 404 like an unknown one,
+### and in a demo session they are kept per sign-in session.
+@baseUrl = http://localhost:3000
+@csrf = paste the op_csrf cookie value here after signing in
+@conversationId = paste a conversation id from the create response here
+
+### Start a conversation. The title is optional: without one the first question names it.
+POST {{baseUrl}}/api/v1/spark/conversations
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{}
+
+### The caller's own conversations, newest first. Paged by page and pageSize.
+GET {{baseUrl}}/api/v1/spark/conversations?page=1&pageSize=25
+
+### One conversation with its messages.
+GET {{baseUrl}}/api/v1/spark/conversations/{{conversationId}}
+
+### Ask a question (1 to 2000 characters). The answer comes back stored and audited. A failed
+### model call is still 201: read data.answer.status (OK or FAILED) and data.answer.errorCode.
+### 409: a question in this conversation is still waiting for its answer.
+### 429 RATE_LIMITED: too many questions in a minute (SPARK_QUESTIONS_PER_MINUTE) or in a day
+### (SPARK_QUESTIONS_PER_DAY).
+POST {{baseUrl}}/api/v1/spark/conversations/{{conversationId}}/messages
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "question": "How many HP monitors do we have?" }
+
+### Refused (400): the question takes one field and nothing else.
+POST {{baseUrl}}/api/v1/spark/conversations/{{conversationId}}/messages
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "question": "Hello", "model": "another-model" }
+
+### Archive a conversation. It is kept, no longer listed, and reads as 404 afterwards.
+DELETE {{baseUrl}}/api/v1/spark/conversations/{{conversationId}}
+X-CSRF-Token: {{csrf}}
+
+### Refused (403): signed in as the System admin. The refusal is audited as auth.permission.refused.

@@ -1,6 +1,7 @@
 ### Area 1: the AI gateway's two routes.
 ### Sign in first (requests/auth.http), then paste the op_csrf cookie value below.
-### Neither route takes free text: no route forwards a question to a model.
+### Neither route takes free text. The one route that forwards a person's question to a
+### model is Spark's (requests/spark.http), and it goes through this gateway.
 @baseUrl = http://localhost:3000
 @csrf = paste the op_csrf cookie value here after signing in
 
