@@ -6,7 +6,7 @@ import { HomeRow } from "./HomeRow";
 import type { useBlockQueries } from "./useBlockQueries";
 
 /**
- * The system administrator's block: the business rules, what Spectra settled at
+ * The block of a role that manages settings: the business rules, what Spectra settled at
  * the 5 Nov briefing beside the drafts that still wait for its answer, each
  * with the value we hold. Each stays a setting, so no row leads to a screen.
  */
