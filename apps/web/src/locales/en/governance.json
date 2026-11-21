@@ -97,6 +97,9 @@
     "masking": {
       "customerNote": "See the sample customer note"
     },
+    "spark": {
+      "use": "Ask Spark"
+    },
     "settings": {
       "manage": "Change settings"
     },

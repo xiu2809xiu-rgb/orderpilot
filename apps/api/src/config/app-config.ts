@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import type { AiProvider } from "@orderpilot/shared";
+import type { AiProvider, DataOrigin } from "@orderpilot/shared";
 import { ConfigError } from "./config-error.js";
 import { envSchema, type Env } from "./env.schema.js";
 
@@ -90,6 +90,17 @@ export class AppConfig {
     } | null;
   };
 
+  /**
+   * What the stored data is: "synthetic" unless DATA_ORIGIN says "real". Spark
+   * declares it to the AI destination check, so it must be true.
+   */
+  readonly dataOrigin: DataOrigin;
+
+  readonly spark: {
+    readonly questionsPerMinute: number;
+    readonly questionsPerDay: number;
+  };
+
   readonly database: { readonly url: string };
   readonly redis: { readonly url: string };
   readonly workflows: { readonly sweepSeconds: number };
@@ -141,6 +152,11 @@ export class AppConfig {
       bankFingerprintKey: env.BANK_FINGERPRINT_KEY ?? null,
     };
     this.ai = aiSettings(env);
+    this.dataOrigin = env.DATA_ORIGIN;
+    this.spark = {
+      questionsPerMinute: env.SPARK_QUESTIONS_PER_MINUTE,
+      questionsPerDay: env.SPARK_QUESTIONS_PER_DAY,
+    };
     this.database = { url: env.DATABASE_URL };
     this.redis = { url: env.REDIS_URL };
     this.workflows = { sweepSeconds: env.WORKFLOW_SWEEP_SECONDS };

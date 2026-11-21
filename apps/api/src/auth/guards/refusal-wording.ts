@@ -29,6 +29,7 @@ const ATTEMPT: Readonly<Record<Permission, string>> = {
   "workflows.inboxes.any": "viewing another role's inbox",
   "tasks.complete": "acting on a task",
   "masking.customerNote": "seeing the sample customer note",
+  "spark.use": "asking Spark",
 };
 
 /** "Sophia Chen was refused acting on a task". */

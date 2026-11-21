@@ -1,4 +1,4 @@
-import { AI_PROVIDER_SETTINGS } from "@orderpilot/shared";
+import { AI_PROVIDER_SETTINGS, DATA_ORIGINS } from "@orderpilot/shared";
 import { z } from "zod";
 
 /** Where the API runs. Separate from NODE_ENV: a demo stack runs in production mode. */
@@ -286,6 +286,18 @@ export const envSchema = z
     AI_BEDROCK_ACCESS_KEY_ID: optionalSecret,
     AI_BEDROCK_SECRET_ACCESS_KEY: optionalSecret,
     AI_BEDROCK_SESSION_TOKEN: optionalSecret,
+
+    // What the stored data is (P-95). Spark tells the destination check from
+    // this, so it is the one switch between "synthetic" and a deployment that
+    // holds a real customer's data. Anything but these two words is refused at
+    // start-up, and Spark itself treats anything it cannot read as real.
+    DATA_ORIGIN: z.preprocess(
+      unsetWhenEmpty,
+      z.enum(DATA_ORIGINS).default("synthetic"),
+    ),
+    // Spark's cost limits: questions a person may ask in a minute, and in a day.
+    SPARK_QUESTIONS_PER_MINUTE: boundedInt(1, 10_000, 6),
+    SPARK_QUESTIONS_PER_DAY: boundedInt(1, 100_000, 100),
   })
   .superRefine((env, ctx) => {
     if (env.APP_ENV !== "local" && !env.COOKIE_SECURE) {

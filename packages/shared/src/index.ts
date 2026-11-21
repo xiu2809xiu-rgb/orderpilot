@@ -19,4 +19,5 @@ export * from "./orders.js";
 export * from "./permissions.js";
 export * from "./record-number.js";
 export * from "./roles.js";
+export * from "./spark.js";
 export * from "./workflows/index.js";
