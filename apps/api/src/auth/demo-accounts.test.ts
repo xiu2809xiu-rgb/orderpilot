@@ -8,7 +8,11 @@ import {
   offeredAccounts,
 } from "./demo-accounts.js";
 
-/** Today's nine demo emails, written out so that a changed one fails here. */
+/**
+ * Today's nine demo emails, written out so that a changed one fails here. Step
+ * 6 of ADR 0058 edits this test on purpose: the cut takes two values out of
+ * ROLES, and Management's account becomes the second approver.
+ */
 const TODAY_EMAILS: Record<(typeof ROLES)[number], string> = {
   SYSTEM_ADMIN: "system.admin@example.test",
   PRODUCT_MANAGER: "product.manager@example.test",

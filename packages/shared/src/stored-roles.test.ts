@@ -19,6 +19,10 @@ describe("stored roles (ADR 0058)", () => {
     for (const role of RETIRED_ROLES) expect(STORED_ROLES).toContain(role);
   });
 
+  it("retires exactly Management and the auditor", () => {
+    expect(RETIRED_ROLES).toEqual(["MANAGEMENT", "AUDITOR"]);
+  });
+
   it("holds nothing that is neither a role nor a retired role", () => {
     const known: readonly string[] = [...ROLES, ...RETIRED_ROLES];
     for (const role of STORED_ROLES) expect(known).toContain(role);
