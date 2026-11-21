@@ -9,7 +9,11 @@ const IDLE_TIMEOUT_MS = 2000;
 /** The entry bundle holds only this file: the GPU module and its shader are fetched when it is time. */
 function prepareNow() {
   if (prefersReducedMotion() || document.hidden || !gpuApi()) return;
-  void import("./orbGpu").then(({ prepareOrbGpu }) => prepareOrbGpu());
+  // Best effort: a chunk that fails to load (offline, a stale deploy) must not
+  // raise an unhandled rejection from a trigger nobody asked for.
+  void import("./orbGpu")
+    .then(({ prepareOrbGpu }) => prepareOrbGpu())
+    .catch(() => undefined);
 }
 
 /** Calls `run` when the browser is idle, or after the timeout where it has no idle callback. */

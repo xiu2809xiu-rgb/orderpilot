@@ -187,11 +187,16 @@ export class LiquidOrb {
   /** Tells the caller once that the first frame has been drawn and handed to the screen. */
   private reportFirstFrame() {
     this.reported = true;
-    void this.gpu.device.queue.onSubmittedWorkDone().then(() => {
-      requestAnimationFrame(() => {
-        if (!this.destroyed) this.hooks.onFirstFrame();
-      });
-    });
+    // Best effort: a device that goes away while we wait is handled by the loss
+    // path, so the wait itself has nothing to report.
+    void this.gpu.device.queue
+      .onSubmittedWorkDone()
+      .then(() => {
+        requestAnimationFrame(() => {
+          if (!this.destroyed) this.hooks.onFirstFrame();
+        });
+      })
+      .catch(() => undefined);
   }
 
   private progress(now: number) {
