@@ -1,8 +1,26 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { manualFrames } from "@/test/webglStub";
 import { installFakeGpu, removeFakeGpu } from "./fakeGpu";
 import { LiquidOrb } from "./LiquidOrb";
 import { prepareOrbGpu } from "./orbGpu";
+import type * as OrbGpuModule from "./orbGpu";
 import type { OrbTokens } from "./orbPalette";
+
+// The real store, with a count of how often an orb stops listening for a loss.
+const stopped = vi.hoisted(() => ({ count: 0 }));
+vi.mock("./orbGpu", async (importOriginal) => {
+  const real = await importOriginal<typeof OrbGpuModule>();
+  return {
+    ...real,
+    onOrbGpuLoss: (listener: Parameters<typeof real.onOrbGpuLoss>[0]) => {
+      const stop = real.onOrbGpuLoss(listener);
+      return () => {
+        stopped.count += 1;
+        stop();
+      };
+    },
+  };
+});
 
 const TOKENS: OrbTokens = {
   ground: [0.1, 0.1, 0.1],
@@ -11,7 +29,11 @@ const TOKENS: OrbTokens = {
   ink: [0.9, 0.9, 0.9],
 };
 
-afterEach(removeFakeGpu);
+afterEach(() => {
+  removeFakeGpu();
+  vi.unstubAllGlobals();
+  stopped.count = 0;
+});
 
 async function borrow() {
   const gpu = installFakeGpu({ compiled: true });
@@ -82,6 +104,7 @@ describe("an orb that borrows the page's program", () => {
 describe("what an orb reports", () => {
   it("says once that its first frame is on the screen, and draws nothing while it may not run", async () => {
     const { gpu, parts } = await borrow();
+    const frames = manualFrames();
     const told = hooks();
     const orb = LiquidOrb.create(
       document.createElement("canvas"),
@@ -89,21 +112,24 @@ describe("what an orb reports", () => {
       TOKENS,
       told,
     );
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    frames.step();
+    frames.step();
     expect(gpu.devices[0]?.submits).not.toHaveBeenCalled();
     expect(told.onFirstFrame).not.toHaveBeenCalled();
     orb?.setRunning(true);
+    // The first frame is told once the GPU has answered, so the frames are stepped until then.
     await vi.waitFor(() => {
+      frames.step();
       expect(told.onFirstFrame).toHaveBeenCalledTimes(1);
     });
-    await new Promise((resolve) => setTimeout(resolve, 80));
+    frames.step();
+    frames.step();
     expect(told.onFirstFrame).toHaveBeenCalledTimes(1);
-    expect(
-      vi.mocked(gpu.devices[0]?.submits ?? vi.fn()).mock.calls.length,
-    ).toBeGreaterThan(1);
+    expect(gpu.devices[0]?.submits.mock.calls.length).toBeGreaterThan(1);
     orb?.setRunning(false);
     const drawn = gpu.devices[0]?.submits.mock.calls.length ?? 0;
-    await new Promise((resolve) => setTimeout(resolve, 60));
+    frames.step();
+    frames.step();
     expect(gpu.devices[0]?.submits.mock.calls.length).toBe(drawn);
     orb?.destroy();
   });
@@ -135,6 +161,22 @@ describe("what an orb reports", () => {
     });
     expect(told.onFail).toHaveBeenCalledWith("device lost");
     expect(gpu.contexts.get(canvas)?.unconfigure).toHaveBeenCalledTimes(1);
+  });
+
+  it("stops listening for a loss when it is destroyed, so that the page does not keep it alive", async () => {
+    const { parts } = await borrow();
+    const orb = LiquidOrb.create(
+      document.createElement("canvas"),
+      parts,
+      TOKENS,
+      hooks(),
+    );
+    expect(stopped.count).toBe(0);
+    orb?.destroy();
+    expect(stopped.count).toBe(1);
+    // Destroying twice does not stop twice.
+    orb?.destroy();
+    expect(stopped.count).toBe(1);
   });
 
   it("does not tell a caller that has already destroyed it", async () => {

@@ -1,6 +1,7 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import { StrictMode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { manualFrames, stubWebgl2 } from "@/test/webglStub";
 import { installFakeGpu, removeFakeGpu } from "./fakeGpu";
 import { SparkOrb } from "./SparkOrb";
 
@@ -30,6 +31,32 @@ function reducedMotion(reduce: boolean) {
   }));
 }
 
+/** A reduced-motion setting that the test can switch while the orb is on screen. */
+function switchableMotion() {
+  let reduce = false;
+  const listeners = new Set<() => void>();
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    get matches() {
+      return reduce && query.includes("reduce");
+    },
+    media: query,
+    addEventListener: (_type: string, listener: () => void) => {
+      listeners.add(listener);
+    },
+    removeEventListener: (_type: string, listener: () => void) => {
+      listeners.delete(listener);
+    },
+  }));
+  return {
+    reduce(on: boolean) {
+      reduce = on;
+      act(() => {
+        for (const listener of listeners) listener();
+      });
+    },
+  };
+}
+
 beforeEach(() => {
   vi.stubGlobal("IntersectionObserver", Everything);
   reducedMotion(false);
@@ -37,6 +64,7 @@ beforeEach(() => {
 afterEach(() => {
   removeFakeGpu();
   vi.unstubAllGlobals();
+  vi.useRealTimers();
 });
 
 const orb = () => screen.getByRole("img", { name: "Spark is ready" });
@@ -129,7 +157,12 @@ class Driven {
 
 const framesOf = (gpu: ReturnType<typeof installFakeGpu>) =>
   gpu.devices[0]?.submits.mock.calls.length ?? 0;
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+/** Steps the page's frames by hand, a few of them: no waiting on a clock. */
+function stepFrames(frames: ReturnType<typeof manualFrames>, count = 3) {
+  act(() => {
+    for (let index = 0; index < count; index += 1) frames.step();
+  });
+}
 
 describe("an orb nobody can see", () => {
   afterEach(() => {
@@ -139,6 +172,7 @@ describe("an orb nobody can see", () => {
 
   it("draws no frames while it is off screen, and draws once it is on screen", async () => {
     vi.stubGlobal("IntersectionObserver", Driven);
+    const frames = manualFrames();
     const gpu = installFakeGpu({ compiled: true });
     show();
     await waitFor(() => {
@@ -150,20 +184,18 @@ describe("an orb nobody can see", () => {
     act(() => {
       for (const watcher of Driven.all) watcher.show(false);
     });
-    await wait(80);
+    stepFrames(frames);
     expect(framesOf(gpu)).toBe(0);
     act(() => {
       for (const watcher of Driven.all) watcher.show(true);
     });
-    await waitFor(() => {
-      expect(framesOf(gpu)).toBeGreaterThan(1);
-    });
+    stepFrames(frames);
+    expect(framesOf(gpu)).toBeGreaterThan(1);
     act(() => {
       for (const watcher of Driven.all) watcher.show(false);
     });
-    await wait(40);
     const stopped = framesOf(gpu);
-    await wait(80);
+    stepFrames(frames);
     expect(framesOf(gpu)).toBe(stopped);
   });
 
@@ -172,12 +204,13 @@ describe("an orb nobody can see", () => {
       value: true,
       configurable: true,
     });
+    const frames = manualFrames();
     const gpu = installFakeGpu({ compiled: true });
     show();
     await waitFor(() => {
       expect(gpu.contexts.size).toBe(1);
     });
-    await wait(80);
+    stepFrames(frames);
     expect(framesOf(gpu)).toBe(0);
     Object.defineProperty(document, "hidden", {
       value: false,
@@ -186,9 +219,8 @@ describe("an orb nobody can see", () => {
     act(() => {
       document.dispatchEvent(new Event("visibilitychange"));
     });
-    await waitFor(() => {
-      expect(framesOf(gpu)).toBeGreaterThan(1);
-    });
+    stepFrames(frames);
+    expect(framesOf(gpu)).toBeGreaterThan(1);
   });
 });
 
@@ -197,13 +229,43 @@ describe("reduced motion", () => {
     reducedMotion(true);
     const gpu = installFakeGpu({ compiled: true });
     show();
-    await new Promise((resolve) => setTimeout(resolve, 60));
+    // Let every promise the orb could have started settle: it starts none.
+    await act(async () => {
+      for (let turn = 0; turn < 10; turn += 1) await Promise.resolve();
+    });
     const holder = orb();
     expect(holder).toHaveAttribute("data-engine", "still");
     expect(holder).toHaveAttribute("data-showing", "css");
     expect(cssOrb(holder)).not.toBeNull();
     expect(gpu.adapterRequests).toBe(0);
     expect(gpu.contexts.size).toBe(0);
+  });
+
+  it("is never an empty square when reduced motion is switched off again after the drawn orb was shown", async () => {
+    const motion = switchableMotion();
+    installFakeGpu({ compiled: true });
+    show();
+    await waitFor(() => {
+      expect(cssOrb(orb())).toBeNull();
+    });
+    expect(orb()).toHaveAttribute("data-showing", "webgpu");
+    motion.reduce(true);
+    expect(orb()).toHaveAttribute("data-engine", "still");
+    expect(orb()).toHaveAttribute("data-showing", "css");
+    expect(cssOrb(orb())).not.toBeNull();
+    motion.reduce(false);
+    // A new canvas has been mounted, and it has drawn nothing yet.
+    expect(orb()).toHaveAttribute("data-engine", "webgpu");
+    expect(orb()).toHaveAttribute("data-showing", "css");
+    expect(cssOrb(orb())).not.toBeNull();
+    expect(orbOf(orb())).toHaveAttribute("data-ready", "false");
+    // Until its first frame, and then the same hand-over as the first time.
+    await waitFor(() => {
+      expect(orb()).toHaveAttribute("data-showing", "webgpu");
+    });
+    await waitFor(() => {
+      expect(cssOrb(orb())).toBeNull();
+    });
   });
 });
 
@@ -254,6 +316,29 @@ describe("what takes over when the GPU does not", () => {
     expect(cssOrb(orb())).not.toBeNull();
     expect(orb()).toHaveAttribute("data-showing", "css");
     expect(told).toHaveBeenLastCalledWith("still");
+  });
+
+  it("hands over to the WebGL orb where there is no WebGPU: CSS first, then the drawn orb, then the CSS orb leaves", () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    stubWebgl2();
+    const frames = manualFrames();
+    show();
+    const holder = orb();
+    expect(holder).toHaveAttribute("data-engine", "webgl");
+    expect(holder).toHaveAttribute("data-showing", "css");
+    expect(cssOrb(holder)).not.toBeNull();
+    const layer = holder.querySelector(".spark-orb-layer");
+    expect(layer).toHaveAttribute("data-ready", "false");
+    stepFrames(frames, 1);
+    expect(holder).toHaveAttribute("data-showing", "webgl");
+    expect(layer).toHaveAttribute("data-ready", "true");
+    // Over the CSS orb for the length of the fade, never a gap.
+    expect(cssOrb(holder)).not.toBeNull();
+    act(() => {
+      vi.advanceTimersByTime(250);
+    });
+    expect(cssOrb(holder)).toBeNull();
+    vi.useRealTimers();
   });
 
   it("draws the CSS orb where there is no WebGPU and no WebGL", async () => {
