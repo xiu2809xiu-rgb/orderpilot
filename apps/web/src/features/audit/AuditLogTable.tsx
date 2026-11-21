@@ -14,8 +14,8 @@ import { toListRequest, useAuditQuery } from "./auditQuery";
 export function AuditLogTable() {
   const { t } = useTranslation("audit");
   const { query, setQuery, openEvent } = useAuditQuery();
-  const columns = useAuditColumns(openEvent);
   const { params, problem } = toListRequest(query);
+  const columns = useAuditColumns(openEvent, params.around);
   const list = useAuditViewerList(params, { query: { enabled: !problem } });
 
   const forbidden =

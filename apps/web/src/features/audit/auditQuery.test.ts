@@ -82,6 +82,18 @@ describe("the events around a sequence (F-9)", () => {
     expect(params.around).toBe(1234);
   });
 
+  it("sends the sequence with the other filters, which it combines with", () => {
+    const { params, problem } = toListRequest(
+      queryWith({ filters: { around: "9", role: "FINANCE", refusals: true } }),
+    );
+    expect(problem).toBeNull();
+    expect(params).toMatchObject({
+      around: 9,
+      role: "FINANCE",
+      refusalsOnly: "true",
+    });
+  });
+
   it("does not send a sequence that is not a positive whole number", () => {
     for (const around of ["0", "-2", "1.5", "abc"]) {
       expect(

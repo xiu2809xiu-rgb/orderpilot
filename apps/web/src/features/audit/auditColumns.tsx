@@ -26,9 +26,11 @@ export function shortId(id: string): string {
  * The columns of the audit table. No column sorts: the trail is always newest
  * first. The long cells wrap inside themselves, and the role and the refused
  * badge sit under the name and the action, so the table fits its card at 1440
- * px and Details stays in view without scrolling sideways.
+ * px and Details stays in view without scrolling sideways. When the list is
+ * centred on a sequence (F-9), that row says so, because the events either
+ * side of it are only there as its neighbours.
  */
-export function useAuditColumns(onOpen: (id: string) => void) {
+export function useAuditColumns(onOpen: (id: string) => void, centre?: number) {
   const { t } = useTranslation("audit");
   const { t: tc } = useTranslation();
   return useMemo<DataTableColumn<AuditRow>[]>(
@@ -38,7 +40,15 @@ export function useAuditColumns(onOpen: (id: string) => void) {
         header: t("table.sequence"),
         hideable: false,
         kind: "number",
-        cell: (row) => <span data-numeric>{row.sequence}</span>,
+        cell: (row) =>
+          row.sequence === centre ? (
+            <span className="flex flex-col items-start gap-1">
+              <span data-numeric>{row.sequence}</span>
+              <StatusBadge tone="info">{t("table.centre")}</StatusBadge>
+            </span>
+          ) : (
+            <span data-numeric>{row.sequence}</span>
+          ),
         exportValue: (row) => row.sequence,
       },
       {
@@ -126,6 +136,6 @@ export function useAuditColumns(onOpen: (id: string) => void) {
         ),
       },
     ],
-    [t, tc, onOpen],
+    [t, tc, onOpen, centre],
   );
 }

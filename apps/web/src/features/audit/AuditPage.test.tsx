@@ -387,13 +387,22 @@ describe("EntityOperationLog", () => {
   });
 });
 
+/**
+ * The pickers sit behind More filters (#270), which opens by itself only when
+ * a filter is in use. The F-9 blocks sign in as the system admin: any role
+ * with audit.read would do, and the auditor is retired by ADR 0058.
+ */
+async function openMoreFilters(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(await screen.findByRole("button", { name: "More filters" }));
+}
+
 describe("the person and action pickers (F-9)", () => {
   beforeAll(async () => {
     await i18n.loadNamespaces(["audit", "list-page", "components"]);
   });
   const seen: URL[] = [];
   beforeEach(() => {
-    signIn("AUDITOR");
+    signIn("SYSTEM_ADMIN");
     seen.length = 0;
     server.use(
       getAuditViewerListMockHandler((info) => {
@@ -408,8 +417,10 @@ describe("the person and action pickers (F-9)", () => {
     const user = userEvent.setup();
     renderAt();
     await screen.findByText("Farah Finance");
+    await openMoreFilters(user);
     expect(screen.queryByPlaceholderText("Paste a user ID")).toBeNull();
-    await user.click(screen.getByRole("combobox", { name: "Person" }));
+    expect(screen.queryByLabelText("Person ID")).toBeNull();
+    await user.click(await screen.findByRole("combobox", { name: "Person" }));
     await user.click(
       await screen.findByRole("option", { name: "Wei Warehouse" }),
     );
@@ -427,6 +438,7 @@ describe("the person and action pickers (F-9)", () => {
     );
     const user = userEvent.setup();
     const { baseElement } = renderAt();
+    await openMoreFilters(user);
     await user.click(await screen.findByRole("combobox", { name: "Person" }));
     expect(
       await screen.findByRole("option", { name: "Wei Warehouse" }),
@@ -460,7 +472,8 @@ describe("the person and action pickers (F-9)", () => {
     const user = userEvent.setup();
     renderAt();
     await screen.findByText("Farah Finance");
-    await user.click(screen.getByRole("combobox", { name: "Action" }));
+    await openMoreFilters(user);
+    await user.click(await screen.findByRole("combobox", { name: "Action" }));
     for (const action of OPTIONS.actions) {
       expect(
         await screen.findByRole("option", { name: action }),
@@ -503,6 +516,7 @@ describe("the person and action pickers (F-9)", () => {
       "/audit",
       new QueryClient({ defaultOptions: { queries: { retry: false } } }),
     );
+    await openMoreFilters(user);
     expect(await screen.findByText(/trace-opt/)).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /try again/i }));
     await user.click(await screen.findByRole("combobox", { name: "Person" }));
@@ -511,9 +525,18 @@ describe("the person and action pickers (F-9)", () => {
     ).toBeInTheDocument();
   });
 
+  it("counts the pickers as filters in use", async () => {
+    renderAt(`/audit?actor=${WEI}&action=auth.`);
+    const more = await screen.findByRole("button", {
+      name: "More filters (2 in use)",
+    });
+    expect(more).toHaveAttribute("aria-expanded", "true");
+  });
+
   it("has no axe violations with a picker open", async () => {
     const user = userEvent.setup();
     const { baseElement } = renderAt();
+    await openMoreFilters(user);
     await user.click(await screen.findByRole("combobox", { name: "Person" }));
     await screen.findByRole("option", { name: "Wei Warehouse" });
     expect(await axeViolations(baseElement)).toEqual([]);
@@ -527,7 +550,7 @@ describe("a broken chain and the events around it (F-9)", () => {
   const BROKEN = "0194f3a0-0000-7000-8000-000000000009";
   const seen: URL[] = [];
   beforeEach(() => {
-    signIn("AUDITOR");
+    signIn("SYSTEM_ADMIN");
     seen.length = 0;
     server.use(
       getAuditViewerListMockHandler((info) => {
@@ -628,6 +651,43 @@ describe("a broken chain and the events around it (F-9)", () => {
       "sequence is not a whole number",
     );
     expect(seen).toHaveLength(0);
+  });
+
+  it("keeps the events around a sequence when another filter changes", async () => {
+    const user = userEvent.setup();
+    renderAt("/audit?around=9");
+    await screen.findByRole("button", { name: "Details of event 9" });
+    await user.click(screen.getByRole("switch", { name: "Refusals only" }));
+    await waitFor(() => {
+      expect(seen.at(-1)?.searchParams.get("refusalsOnly")).toBe("true");
+    });
+    expect(seen.at(-1)?.searchParams.get("around")).toBe("9");
+  });
+
+  it("offers no break links while the chain verifies", async () => {
+    server.use(
+      getAuditViewerChainMockHandler({
+        data: {
+          ok: true,
+          checked: 10,
+          verifiedThrough: 10,
+          brokenAtSequence: null,
+          brokenAtEventId: null,
+          problem: null,
+          checkedAt: new Date().toISOString(),
+        },
+      }),
+    );
+    const user = userEvent.setup();
+    renderAt();
+    await user.click(
+      await screen.findByRole("button", { name: "Check the chain" }),
+    );
+    await screen.findByText("Verified up to sequence 10");
+    expect(screen.queryByRole("link", { name: /^Open event/ })).toBeNull();
+    expect(
+      screen.queryByRole("link", { name: "Show the events around it" }),
+    ).toBeNull();
   });
 });
 

@@ -15,13 +15,17 @@
     },
     "role": "Role",
     "anyRole": "Any role",
-    "action": "Action starts with",
-    "actionHint": "For example auth.",
+    "action": "Action",
+    "anyAction": "Any action",
+    "actionPrefix": "Starts with {{prefix}}",
     "entity": "Record type",
     "entityHint": "For example User",
     "entityId": "Record ID",
-    "actor": "Person ID",
-    "actorHint": "Paste a user ID",
+    "actor": "Person",
+    "anyPerson": "Anyone",
+    "personLoading": "Loading the name",
+    "personUnknown": "Someone not in the trail",
+    "around": "Around sequence {{n}}",
     "from": "From",
     "to": "To",
     "refusals": "Refusals only",
@@ -33,7 +37,8 @@
     "problems": {
       "actor": "The person ID is not a valid ID, so nothing was searched.",
       "range": "The start date is after the end date, so nothing was searched.",
-      "date": "A date is not valid, so nothing was searched."
+      "date": "A date is not valid, so nothing was searched.",
+      "around": "The sequence is not a whole number above zero, so nothing was searched."
     }
   },
   "table": {
@@ -49,6 +54,7 @@
     "openFor": "Details of event {{sequence}}",
     "recordIdOf": "record ID of event {{sequence}}",
     "refused": "Refused",
+    "centre": "Centre",
     "emptyTitle": "No audit events yet",
     "emptyDescription": "Every sign-in, decision and change is recorded here as it happens.",
     "system": "System",
@@ -94,6 +100,7 @@
       "prevHash-mismatch": "The event does not follow the one before it."
     },
     "checkedAt": "Checked",
-    "seeBroken": "Find the event"
+    "openBroken": "Open event {{n}}",
+    "seeAround": "Show the events around it"
   }
 }
