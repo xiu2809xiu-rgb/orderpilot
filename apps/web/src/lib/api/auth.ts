@@ -6,8 +6,9 @@ import {
   type Session,
 } from "@orderpilot/shared";
 import { removeDraftsOf } from "@/lib/draft-keys";
-import { forgetShown, queryClient } from "@/lib/query";
+import { queryClient } from "@/lib/query";
 import { useSessionStore } from "@/stores/session";
+import { adoptSession } from "./adopt-session";
 import { apiClient } from "./instance";
 
 export async function fetchAuthOptions(): Promise<AuthOptions> {
@@ -15,19 +16,10 @@ export async function fetchAuthOptions(): Promise<AuthOptions> {
 }
 
 function begin(session: Session): Session {
-  const before = useSessionStore.getState();
   apiClient.markSessionStarted();
-  // Every sign-in answer passes here. When it hands the tab to another person,
-  // whether the earlier session ended while its page was open or is still open
-  // (a change of role from the menu), what that person was shown goes first.
-  // The store is given the new person only afterwards, so no render can pair
-  // the new name with the earlier figures. It waits for the answer, not before:
-  // emptying earlier would let the page ask again as the earlier person. The
-  // same person arriving again (a refresh, the me call) keeps the page.
-  if (before.session !== null && before.session.user.id !== session.user.id) {
-    forgetShown(queryClient);
-  }
-  before.setSession(session);
+  // The guard for a different person is in adoptSession, which a silent
+  // refresh goes through as well.
+  adoptSession(session);
   return session;
 }
 

@@ -17,7 +17,7 @@ const json = (status: number, body: unknown) =>
   });
 
 /** A tiny API: the demo sign-in answers with that role's session, sign-out with ok. */
-function stubAuth(options: { signOutFails?: boolean } = {}) {
+function stubAuth(options: { signOutFails?: boolean; refreshAs?: Role } = {}) {
   vi.stubGlobal(
     "fetch",
     vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
@@ -34,6 +34,11 @@ function stubAuth(options: { signOutFails?: boolean } = {}) {
           typeof init?.body === "string" ? init.body : "{}",
         ) as { role: Role };
         return Promise.resolve(json(200, { data: sessionFor(role) }));
+      }
+      if (url.pathname.endsWith("/auth/refresh")) {
+        return Promise.resolve(
+          json(200, { data: sessionFor(options.refreshAs ?? "FINANCE") }),
+        );
       }
       if (url.pathname.endsWith("/auth/logout")) {
         return options.signOutFails
@@ -242,5 +247,61 @@ describe("a sign-in while a session is open", () => {
     await demoLogin("WAREHOUSE");
 
     expect(seenAtRequest).toBe("what Finance was given");
+  });
+});
+
+describe("a silent refresh of the session", () => {
+  it("leaves nothing of the earlier person in the cache at the first notification that carries a different one", async () => {
+    stubAuth({ refreshAs: "WAREHOUSE" });
+    const warehouse = sessionFor("WAREHOUSE");
+    useSessionStore.getState().setSession(sessionFor("FINANCE"));
+    apiClient.markSessionStarted();
+    const page = onScreen("on-screen");
+    await vi.waitFor(() => {
+      expect(page.asked.times).toBe(1);
+    });
+    queryClient.setQueryData(["vendor", "V-0007"], {
+      accountNo: "000000000007",
+    });
+    const held: unknown[][] = [];
+    const stop = useSessionStore.subscribe((state) => {
+      if (state.session?.user.id === warehouse.user.id && held.length === 0) {
+        held.push(
+          queryClient
+            .getQueryCache()
+            .getAll()
+            .map((query) => query.state.data),
+        );
+      }
+    });
+
+    await apiClient.refresh();
+
+    expect(held).toHaveLength(1);
+    expect(held[0]?.filter((data) => data !== undefined)).toEqual([]);
+    expect(useSessionStore.getState().session?.user.role).toBe("WAREHOUSE");
+    stop();
+    page.stop();
+  });
+
+  it("empties nothing for the same person", async () => {
+    stubAuth({ refreshAs: "FINANCE" });
+    useSessionStore.getState().setSession(sessionFor("FINANCE"));
+    apiClient.markSessionStarted();
+    const page = onScreen("on-screen");
+    await vi.waitFor(() => {
+      expect(page.asked.times).toBe(1);
+    });
+    queryClient.setQueryData(["only-kept"], "what Finance was given");
+
+    await apiClient.refresh();
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    expect(page.asked.times).toBe(1);
+    expect(queryClient.getQueryData(["only-kept"])).toBe(
+      "what Finance was given",
+    );
+    expect(useSessionStore.getState().status).toBe("active");
+    page.stop();
   });
 });
