@@ -78,7 +78,11 @@ describe("the tip of a task button on Home", () => {
     await screen.findByRole("tooltip");
     expect(button.getAttribute("aria-describedby")).toBe(before);
     expect(button).toHaveAccessibleDescription(LINE);
-    // The button's own text is one sr-only line, and the tip adds nothing hidden beside it.
+    // The tooltip library renders a visually hidden copy of the line for its
+    // own role, which the top bar's HintTip accepts too; it is not the
+    // button's description. What this guards is that description and the
+    // button's aria-describedby, unchanged while the tip is open. The button's
+    // own text is the one sr-only line.
     expect(
       screen.getAllByText(LINE, { selector: "span.sr-only" }),
     ).toHaveLength(1);
@@ -116,6 +120,34 @@ describe("the tip of a task button on Home", () => {
     renderHome("SUPPORT");
     const link = await screen.findByRole("link", { name: /for SO-0802/ });
     expect(link.parentElement?.tagName).not.toBe("SPAN");
+  });
+});
+
+describe("one tip whose button gains a line of its own", () => {
+  function Slot({ enabled }: { enabled: boolean }) {
+    return (
+      <TaskTip hint={LINE} enabled={enabled}>
+        <button type="button">Pay now</button>
+      </TaskTip>
+    );
+  }
+
+  it("shows the line on hover once it is enabled, on the same instance", async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(<Slot enabled={false} />);
+    rerender(<Slot enabled />);
+    await user.hover(screen.getByRole("button", { name: "Pay now" }));
+    expect(await screen.findByRole("tooltip")).toHaveTextContent(LINE);
+  });
+
+  it("shows the line on keyboard focus once it is enabled, on the same instance", async () => {
+    const { rerender } = render(<Slot enabled={false} />);
+    rerender(<Slot enabled />);
+    const button = screen.getByRole("button", { name: "Pay now" });
+    act(() => {
+      button.focus();
+    });
+    expect(await screen.findByRole("tooltip")).toHaveTextContent(LINE);
   });
 });
 

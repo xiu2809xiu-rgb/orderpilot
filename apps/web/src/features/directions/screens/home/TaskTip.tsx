@@ -48,10 +48,31 @@ export function TaskTip({
   className?: string;
   children: ReactNode;
 }) {
+  if (!enabled) return <>{children}</>;
+  return (
+    <TipBox hint={hint} className={className}>
+      {children}
+    </TipBox>
+  );
+}
+
+// Its own component so the hover and focus listeners are attached by an effect
+// that runs where the wrapper exists. One TaskTip instance can go from not
+// enabled to enabled (the order page keeps one across tasks), and a hook in
+// TaskTip itself would have run its effect while there was no wrapper to
+// listen on, and never again.
+function TipBox({
+  hint,
+  className,
+  children,
+}: {
+  hint: string;
+  className?: string;
+  children: ReactNode;
+}) {
   const box = useRef<HTMLSpanElement>(null);
   const tip = useHoverTip(box, { holdsFocus: true });
   const touch = useSyncExternalStore(subscribe, isTouch, () => false);
-  if (!enabled) return <>{children}</>;
   return (
     <span ref={box} className={cn("relative inline-flex", className)}>
       {children}
