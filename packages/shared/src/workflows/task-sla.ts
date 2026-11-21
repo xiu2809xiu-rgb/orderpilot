@@ -37,7 +37,7 @@ const HOUR = 60;
 
 /**
  * What the seed starts from. Spectra's one stated rule is an approval not actioned
- * in 24 hours going to the management team. The rest are our drafts (A-37).
+ * in 24 hours going to the management approvers. The rest are our drafts (A-37).
  */
 const draft = (
   taskKind: TaskKind,
@@ -49,7 +49,7 @@ const draft = (
   dueAfterMinutes: dueAfterHours * HOUR,
   remindBeforeMinutes: remindBeforeHours * HOUR,
   escalateAfterMinutes: escalateAfterHours * HOUR,
-  escalateToRole: "MANAGEMENT",
+  escalateToRole: "APPROVER",
 });
 
 export const DEFAULT_TASK_SLAS: readonly TaskSla[] = [
