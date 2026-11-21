@@ -14,7 +14,13 @@ import { join } from "node:path";
 import { PassThrough } from "node:stream";
 import { afterEach, beforeEach, describe, it } from "node:test";
 
-import { Answers, configureAiKey, PROVIDERS, setVariable } from "./ai-key.mjs";
+import {
+  Answers,
+  configureAiKey,
+  HiddenInputUnavailable,
+  PROVIDERS,
+  setVariable,
+} from "./ai-key.mjs";
 
 // Text that looks like nothing real, so no scanner takes it for a key.
 const FAKE_KEY = "not-a-real-key-for-tests-7f3a";
@@ -315,6 +321,46 @@ describe("Answers", () => {
     assert.deepEqual(input.raw, []);
   });
 
+  it("refuses a secret when the input is not a terminal but the screen is, and shows nothing", async () => {
+    // Git Bash without winpty: a person at the screen, a pipe for input, and the
+    // terminal itself would echo the key.
+    const { input, written } = terminal(false);
+    const screen = {
+      write: (/** @type {string} */ t) => written.push(t),
+      isTTY: true,
+    };
+    const answers = new Answers(input, screen);
+    input.write(`${FAKE_KEY}\n`);
+    await assert.rejects(
+      answers.ask("Key: ", { secret: true }),
+      HiddenInputUnavailable,
+    );
+    assert.deepEqual(written, []);
+    assert.deepEqual(input.raw, []);
+  });
+
+  it("still reads a plain question, and a secret from a real terminal, on a screen", async () => {
+    const piped = terminal(false);
+    const pipedScreen = {
+      write: (/** @type {string} */ t) => piped.written.push(t),
+      isTTY: true,
+    };
+    const plain = new Answers(piped.input, pipedScreen).ask("Provider? ");
+    piped.input.write("groq\n");
+    assert.equal(await plain, "groq");
+
+    const real = terminal(true);
+    const realScreen = {
+      write: (/** @type {string} */ t) => real.written.push(t),
+      isTTY: true,
+    };
+    const secret = new Answers(real.input, realScreen).ask("Key: ", {
+      secret: true,
+    });
+    real.input.write(`${FAKE_KEY}\r`);
+    assert.equal(await secret, FAKE_KEY);
+  });
+
   it("applies backspace and drops control characters", async () => {
     const { input, output } = terminal(true);
     const answers = new Answers(input, output);
@@ -349,6 +395,33 @@ describe("Answers", () => {
     second.input.write("abc\u0003");
     await assert.rejects(cancelled, /cancelled/);
     assert.deepEqual(second.input.raw, [true, false]);
+  });
+});
+
+describe("the command in a terminal that cannot hide the key", () => {
+  it("says to use PowerShell, Windows Terminal or the VS Code terminal, and changes nothing", async () => {
+    const input = Object.assign(new PassThrough(), { isTTY: false });
+    /** @type {string[]} */
+    const written = [];
+    const answers = new Answers(input, {
+      write: (text) => written.push(text),
+      isTTY: true,
+    });
+    input.write(`gemini\n${FAKE_KEY}\nsome-model\n`);
+    const code = await configureAiKey({
+      root,
+      env: {},
+      log: (line) => lines.push(line),
+      ask: (question) => answers.ask(question),
+      askSecret: (question) => answers.ask(question, { secret: true }),
+    });
+    assert.equal(code, 1);
+    assert.equal(existsSync(envPath()), false);
+    const said = lines.join("\n");
+    assert.match(said, /PowerShell, Windows Terminal or the VS Code terminal/);
+    assert.match(said, /Nothing was changed/);
+    assert.ok(!said.includes(FAKE_KEY));
+    assert.ok(!written.join("").includes(FAKE_KEY));
   });
 });
 

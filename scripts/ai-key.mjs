@@ -99,10 +99,27 @@ export function setVariable(text, name, value) {
 }
 
 /**
+ * Thrown when a key would be typed where this script cannot turn the echo off:
+ * a terminal whose input is not a TTY, such as Git Bash without winpty. The
+ * terminal itself would then show the key.
+ */
+export class HiddenInputUnavailable extends Error {
+  constructor() {
+    super(
+      "This terminal cannot hide what you type, so the key would show. Run pnpm ai:key in PowerShell, Windows Terminal or the VS Code terminal.",
+    );
+    this.name = "HiddenInputUnavailable";
+  }
+}
+
+/**
  * Reads answers one at a time from a stream. Anything typed ahead of a
  * question stays for the next one, so piped input works too. A secret answer is
  * collected character by character and never written back: in a terminal the
  * raw mode turns the terminal's own echo off, and in a pipe there is none.
+ * Where a person is at the screen (the output is a TTY) but the input is not a
+ * TTY, the terminal would echo the key and this script cannot stop it, so a
+ * secret is refused there.
  */
 export class Answers {
   /**
@@ -110,7 +127,7 @@ export class Answers {
    *   isTTY?: boolean,
    *   setRawMode?: (mode: boolean) => unknown,
    * }} input
-   * @param {{ write: (text: string) => unknown }} output
+   * @param {{ write: (text: string) => unknown, isTTY?: boolean }} output
    */
   constructor(input, output) {
     this.input = input;
@@ -130,6 +147,9 @@ export class Answers {
   ask(question, options = {}) {
     const secret = options.secret === true;
     const { input, output } = this;
+    if (secret && input.isTTY !== true && output.isTTY === true) {
+      return Promise.reject(new HiddenInputUnavailable());
+    }
     output.write(question);
     const raw = secret && input.isTTY === true && !!input.setRawMode;
 
@@ -243,7 +263,7 @@ export async function configureAiKey(options) {
 
     key = (
       await options.askSecret(
-        `The ${providerName} key (nothing shows as you type or paste): `,
+        `The ${providerName} key (in a terminal nothing shows as you type or paste): `,
       )
     ).trim();
     if (key === "") {
@@ -271,8 +291,12 @@ export async function configureAiKey(options) {
       );
       return 1;
     }
-  } catch {
-    log("Cancelled. Nothing was changed.");
+  } catch (error) {
+    if (error instanceof HiddenInputUnavailable) {
+      log(`${error.message} Nothing was changed.`);
+    } else {
+      log("Cancelled. Nothing was changed.");
+    }
     return 1;
   }
 

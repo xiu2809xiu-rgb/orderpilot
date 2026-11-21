@@ -109,9 +109,9 @@ The API answers from the mock, which is offline, until the root `.env` names a r
 pnpm ai:key
 ```
 
-It asks which provider (`gemini`, the default, or `groq`), then the key with nothing shown as you type or paste, then the model id. The id has no default because providers rename and retire models often, and the question says where to find the current ones. It then sets `AI_PROVIDER`, the provider's key variable (`GEMINI_API_KEY` or `GROQ_API_KEY`) and `AI_MODEL` in the root `.env`, creating that file from `.env.example` if it is missing, and keeps every other line as it was.
+It asks which provider (`gemini`, the default, or `groq`), then the key (in a terminal nothing shows as you type or paste), then the model id. The id has no default because providers rename and retire models often, and the question says where to find the current ones. It then sets `AI_PROVIDER`, the provider's key variable (`GEMINI_API_KEY` or `GROQ_API_KEY`) and `AI_MODEL` in the root `.env`, creating that file from `.env.example` if it is missing, and keeps every other line as it was.
 
-- **It never shows the key.** Not on screen, not in a log, not even in part. An empty or malformed answer changes nothing, and so does Ctrl+C.
+- **It never shows the key.** Not on screen, not in a log, not even in part: in a terminal nothing shows as you type or paste. It can only hide the key where the terminal gives it a real keyboard input, so in a terminal that does not (for example Git Bash without winpty) it refuses with one line and changes nothing. Run it in PowerShell, Windows Terminal or the VS Code terminal. An empty or malformed answer changes nothing, and so does Ctrl+C.
 - **It sends nothing anywhere.** The key is checked by the gateway, not by this command: restart the API (Ctrl+C on `pnpm dev`, then start it again), sign in as System admin and send the probe request in `apps/api/requests/ai.http`. The answer says `ok`, `error` or `timeout` with a reason code, and never a key.
 - **Where it can be overruled.** A variable set in your shell wins over the file, and `apps/api/.env`, if you have one, is read before the root `.env`. The command says so when it sees either.
 - **Only synthetic data may be sent to a real provider,** and a free tier may keep what it is sent.
