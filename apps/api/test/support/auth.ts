@@ -120,7 +120,7 @@ export async function emailForRole(role: Role): Promise<string> {
 export function call(
   t: TestApp,
   browser: Browser | null,
-  method: "get" | "post" | "put" | "patch",
+  method: "get" | "post" | "put" | "patch" | "delete",
   path: string,
   options: { csrf?: boolean | string; body?: object } = {},
 ): request.Test {
