@@ -69,6 +69,12 @@ x-app-env: &app-env
   AI_BEDROCK_ACCESS_KEY_ID:
   AI_BEDROCK_SECRET_ACCESS_KEY:
   AI_BEDROCK_SESSION_TOKEN:
+  # Spark (P-95): what the stored data is, and its question limits. The origin
+  # must reach the container, or "real" in the .env would be ignored and Spark
+  # would declare real data synthetic. The limits are passed as they are.
+  DATA_ORIGIN: ${DATA_ORIGIN:-synthetic}
+  SPARK_QUESTIONS_PER_MINUTE:
+  SPARK_QUESTIONS_PER_DAY:
 
 x-api-build: &api-build
   context: .

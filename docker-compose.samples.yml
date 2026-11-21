@@ -49,6 +49,9 @@ x-no-ai: &no-ai
   AI_BEDROCK_ACCESS_KEY_ID: ""
   AI_BEDROCK_SECRET_ACCESS_KEY: ""
   AI_BEDROCK_SESSION_TOKEN: ""
+  # Client samples are real data, whatever the root .env says. With this label
+  # Spark is refused for every provider, so the stack fails closed.
+  DATA_ORIGIN: real
 
 services:
   postgres:
