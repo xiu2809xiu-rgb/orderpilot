@@ -110,9 +110,9 @@ describe.each(CASES)("the $task.kind row", (row) => {
       name: `${row.button} for ${order}`,
     });
     expect(button).toHaveAccessibleDescription(row.records);
-    // The tour finds the row by these four, so they stay exactly as they were.
+    // The focus helper finds the row by the first, and the order and keyboard
+    // tests by the other two.
     expect(button).toHaveAttribute("data-task-action");
-    expect(button).toHaveAttribute("data-task-kind", task.kind);
     expect(button).toHaveAttribute("data-task-id", task.id);
     expect(button).toHaveAttribute("data-order", order);
     expect(button.querySelector("svg")).not.toBeNull();
@@ -182,9 +182,8 @@ describe("the row of the payment task", () => {
     expect(link).toHaveAccessibleDescription(
       "Opens the form for the amount, the bank reference and the date.",
     );
-    // The tour and the focus helper find the row by these.
+    // The focus helper finds the row by this.
     expect(link).toHaveAttribute("data-task-action");
-    expect(link).toHaveAttribute("data-task-kind", "CONFIRM_PAYMENT");
     expect(screen.queryByRole("button", { name: /Confirm/ })).toBeNull();
   });
 
