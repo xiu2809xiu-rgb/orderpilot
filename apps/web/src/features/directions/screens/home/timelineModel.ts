@@ -17,6 +17,7 @@ const STEP_OF_TASK: Record<WorkflowTask["kind"], SalesStepId> = {
   REVIEW_FIELDS: "poIn",
   RAISE_SPR: "stock",
   APPROVE_SPR: "stock",
+  PLACE_VENDOR_PO: "stock",
   SEND_PI: "pi",
   CONFIRM_PAYMENT: "payment",
   PACK_ORDER: "pack",

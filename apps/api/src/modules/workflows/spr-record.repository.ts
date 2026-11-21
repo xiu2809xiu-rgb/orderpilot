@@ -5,8 +5,9 @@ import {
   type OrderStatus,
 } from "@orderpilot/shared";
 import { z } from "zod";
-import { ConflictError } from "../../common/domain-error.js";
+import { ConflictError, NotFoundError } from "../../common/domain-error.js";
 import { Database } from "../../database/database.js";
+import { Prisma } from "../../generated/prisma/client.js";
 
 const sprDataSchema = z.object({
   /** What the approver's limit is set against. Read here, never from a request. */
@@ -147,5 +148,38 @@ export class SprRecordRepository {
         "Someone else changed this request first. Reload it and try again.",
       );
     }
+  }
+
+  /**
+   * Gives a suggested SPR its data, which is what raising it means: from now on
+   * it has a requester, an amount to judge and room for a decision. A suggestion
+   * can be raised, and so can an SPR the approvers rejected, once it is corrected;
+   * one that waits for a decision or was approved cannot.
+   */
+  async raise(
+    orderRef: string,
+    data: Pick<SprData, "amount" | "requesterUserId">,
+  ): Promise<void> {
+    const row = await this.database.client.workflowRecord.findFirst({
+      where: { recordType: SPR_TYPE, instance: { orderRef } },
+      select: { id: true, data: true },
+    });
+    if (!row) throw new NotFoundError(`An SPR for ${orderRef}`);
+    const stored = row.data === null ? null : sprDataSchema.parse(row.data);
+    if (stored && stored.decision?.outcome !== "rejected") {
+      throw new ConflictError("This request has already been raised.");
+    }
+    await this.database.client.workflowRecord.update({
+      where: { id: row.id },
+      data: { data: { ...data, decision: null, passedOn: null } },
+    });
+  }
+
+  /** Takes a raise back: the SPR is a suggestion again, with no data, while nobody has decided it. */
+  async withdraw(orderRef: string): Promise<void> {
+    await this.database.client.workflowRecord.updateMany({
+      where: { recordType: SPR_TYPE, instance: { orderRef } },
+      data: { data: Prisma.DbNull },
+    });
   }
 }

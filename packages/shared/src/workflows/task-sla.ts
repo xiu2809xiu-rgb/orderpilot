@@ -56,6 +56,7 @@ export const DEFAULT_TASK_SLAS: readonly TaskSla[] = [
   draft("REVIEW_FIELDS", 8, 2, 8),
   draft("RAISE_SPR", 24, 4, 24),
   draft("APPROVE_SPR", 24, 4, 0),
+  draft("PLACE_VENDOR_PO", 24, 4, 24),
   draft("SEND_PI", 24, 4, 24),
   draft("CONFIRM_PAYMENT", 48, 8, 24),
   draft("PACK_ORDER", 48, 8, 24),
