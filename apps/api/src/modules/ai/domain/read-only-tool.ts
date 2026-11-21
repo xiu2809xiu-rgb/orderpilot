@@ -15,7 +15,12 @@ export interface ToolContext {
   readonly actor: AiActor;
   readonly traceId: string;
   readonly documentId?: string;
-  /** Fires on the call's timeout or a cancel. A tool should stop and not write anything on it. */
+  /**
+   * Fires only when a stream is stopped early (its reader quits). The text and
+   * object calls have no deadline of their own and never fire it: each provider
+   * request has its own timeout, and a slow tool is not told to stop. A tool
+   * should stop and not write anything when it fires.
+   */
   readonly signal: AbortSignal;
 }
 
