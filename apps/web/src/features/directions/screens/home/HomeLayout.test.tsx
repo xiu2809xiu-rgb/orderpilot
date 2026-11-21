@@ -51,8 +51,14 @@ describe("the order of Home for a team with tasks", () => {
       const names = screen
         .getAllByRole("heading", { level: 2 })
         .map((heading) => heading.textContent);
-      expect(names.slice(0, 3)).toEqual([
+      // A role that may decide approvals and read the tracker has the overdue
+      // orders directly below Needs you; the permissions say who that is.
+      const held = sessionFor(role).permissions;
+      const overdue =
+        held.includes("approvals.decide") && held.includes("tracker.read");
+      expect(names.slice(0, overdue ? 4 : 3)).toEqual([
         "Needs you",
+        ...(overdue ? ["Most overdue, by amount"] : []),
         "My timeline",
         "Your numbers",
       ]);
