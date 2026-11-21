@@ -24,7 +24,7 @@ const W = `${API}/workflows`;
 const HOUR = 3_600_000;
 const SPRS = syntheticDataset().sprs.filter((s) => s.status === "submitted");
 
-describe("reminders and escalations (C-4), with the seeded settings: due in 24 h, reminded 4 h before, and at 24 h the management team is told, as Spectra asked", () => {
+describe("reminders and escalations (C-4), with the seeded settings: due in 24 h, reminded 4 h before, and at 24 h the management approvers are told, as Spectra asked", () => {
   let t: TestApp;
   let database: Database;
   const sessions = new Map<Role, Browser>();
@@ -167,7 +167,7 @@ describe("reminders and escalations (C-4), with the seeded settings: due in 24 h
       ]);
     });
 
-    it("tells the management team when an approval is not actioned in 24 hours, as Spectra asked", async () => {
+    it("tells the management approvers when an approval is not actioned in 24 hours, as Spectra asked", async () => {
       const task = await openTask();
 
       await sweep(task.at(24));
@@ -175,8 +175,8 @@ describe("reminders and escalations (C-4), with the seeded settings: due in 24 h
       const escalation = (await noticesOf(task.taskId)).find(
         (n) => n.kind === "ESCALATION",
       );
-      expect(escalation).toMatchObject({ recipientRole: "MANAGEMENT" });
-      const mine = await noticesFor("MANAGEMENT");
+      expect(escalation).toMatchObject({ recipientRole: "APPROVER" });
+      const mine = await noticesFor("APPROVER");
       expect(mine.data.map((n) => n.id)).toContain(escalation?.id);
     });
 
@@ -294,7 +294,7 @@ describe("reminders and escalations (C-4), with the seeded settings: due in 24 h
           t,
           as("SYSTEM_ADMIN"),
           "put",
-          `${API}/governance/matrix/MANAGEMENT/permissions/workflows.read`,
+          `${API}/governance/matrix/APPROVER/permissions/workflows.read`,
           { csrf: true, body: { granted } },
         );
       const escalations = async () =>
