@@ -18,7 +18,7 @@ import { AiProviderError } from "../../src/modules/ai/domain/ai-errors.js";
 import { MOCK_MODEL } from "../../src/modules/ai/providers/mock-llm-provider.js";
 import { SPARK_INSTRUCTIONS } from "../../src/modules/spark/domain/spark-instructions.js";
 import { SparkConversationRepository } from "../../src/modules/spark/spark-conversation.repository.js";
-import { SPARK_NO_TOOLS_REPLY } from "../../src/modules/spark/spark.mock-script.js";
+import { SPARK_CANNOT_REPLY } from "../../src/modules/spark/spark.mock-script.js";
 import {
   API,
   auditEvents,
@@ -117,8 +117,17 @@ class FakeProvider extends LlmProvider {
     };
   }
 
-  stream(): AsyncIterable<AiStreamPart> {
-    throw new Error("Spark does not stream in this step.");
+  async *stream(request: AiStepRequest): AsyncIterable<AiStreamPart> {
+    // Spark reads the gateway's stream, so it plays the one step it scripts.
+    const step = await this.step(request);
+    yield { type: "text-delta", text: step.text };
+    yield {
+      type: "finish",
+      model: step.model,
+      inputTokens: step.inputTokens,
+      outputTokens: step.outputTokens,
+      finishReason: step.finishReason,
+    };
   }
 }
 
@@ -136,14 +145,14 @@ describe("asking Spark a question, with the offline mock", () => {
 
   it("stores the question and a scripted answer, says it is the mock, and keeps the thread in order", async () => {
     const id = await start(t, support);
-    const res = await ask(t, support, id, "How many HP monitors do we have?");
+    const res = await ask(t, support, id, "Which suppliers are late?");
     expect(res.status, res.text).toBe(201);
     const { question, answer } = sparkAskResponseSchema.parse(res.body).data;
     expect(question).toMatchObject({
       seq: 1,
       role: "USER",
       status: "OK",
-      text: "How many HP monitors do we have?",
+      text: "Which suppliers are late?",
       provider: null,
       errorCode: null,
     });
@@ -151,7 +160,7 @@ describe("asking Spark a question, with the offline mock", () => {
       seq: 2,
       role: "ASSISTANT",
       status: "OK",
-      text: SPARK_NO_TOOLS_REPLY,
+      text: SPARK_CANNOT_REPLY,
       sources: [],
       steps: [],
       provider: { provider: "mock", model: MOCK_MODEL, mock: true },
@@ -258,8 +267,8 @@ describe("asking Spark a question, with the offline mock", () => {
     });
     const everything = JSON.stringify(events);
     expect(everything).not.toContain("marker-order-7731");
-    expect(everything).not.toContain(SPARK_NO_TOOLS_REPLY);
-    expect(everything).not.toContain("cannot look anything up");
+    expect(everything).not.toContain(SPARK_CANNOT_REPLY);
+    expect(everything).not.toContain("I cannot answer that one");
   });
 });
 
@@ -280,7 +289,7 @@ describe("a question and its answer, with a provider the test controls", () => {
   });
 
   describe("the second turn", () => {
-    it("sends the model no earlier answer text, no source label and no tool a record could have named, and offers it no tools", async () => {
+    it("sends the model no earlier answer text, no source label and no tool a record could have named, and offers it only the three read-only tools", async () => {
       const id = await start(t, support);
       // A thread whose first answer carries hostile text in its prose, in a
       // source label and in a tool name, as an order's description could.
@@ -333,8 +342,12 @@ describe("a question and its answer, with a provider the test controls", () => {
       expect(request?.messages.at(-1)).toMatchObject({ role: "user" });
       expect(request?.instructions).toContain(SPARK_INSTRUCTIONS);
       expect(request?.feature).toBe("spark");
-      // No tool is offered in this step: nothing the model says can be a call.
-      expect(request?.tools).toEqual([]);
+      // Only the three read-only tools are offered: nothing the model says can be a call to anything else.
+      expect(request?.tools.map((tool) => tool.name)).toEqual([
+        "check_stock",
+        "find_orders",
+        "get_order",
+      ]);
     });
   });
 
