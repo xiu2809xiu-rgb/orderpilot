@@ -106,6 +106,41 @@ describe("a lost device", () => {
     },
   );
 
+  it.each([
+    [
+      "is lost",
+      (device: { lose: (m: string) => void }) => {
+        device.lose("gone");
+      },
+    ],
+    [
+      "raises an error nobody caught",
+      (device: { raise: (m: string) => void }) => {
+        device.raise("gone");
+      },
+    ],
+  ])(
+    "is not handed out, and is freed, when it %s while the program is still being made",
+    async (_name, breakIt) => {
+      const gpu = installFakeGpu();
+      const prepared = prepareOrbGpu();
+      await vi.waitFor(() => {
+        expect(gpu.devices[0]?.calls).toContain("createRenderPipelineAsync");
+      });
+      const device = gpu.devices[0];
+      if (!device) throw new Error("no device");
+      breakIt(device);
+      // Let the report be heard before the compile ends.
+      await Promise.resolve();
+      gpu.finishCompile();
+      expect(await prepared).toBeNull();
+      expect(device.destroy).toHaveBeenCalledTimes(1);
+      // WebGPU is not tried again: the callers draw the WebGL orb.
+      expect(await prepareOrbGpu()).toBeNull();
+      expect(gpu.adapterRequests).toBe(1);
+    },
+  );
+
   it("does not tell an orb that has stopped listening", async () => {
     const gpu = installFakeGpu({ compiled: true });
     await prepareOrbGpu();

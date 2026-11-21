@@ -71,6 +71,20 @@ async function build(): Promise<OrbGpu | null> {
   const adapter = await gpu.requestAdapter();
   if (!adapter) return null;
   const device = await adapter.requestDevice();
+  // Listening starts now, not after the compile: a device lost while the
+  // program is being made must not be handed out as if it were fine.
+  const early: { reason: string | null } = { reason: null };
+  const lose = (reason: string) => {
+    if (held?.device === device) forget(device, reason);
+    else early.reason ??= reason;
+  };
+  void device.lost.then((lost) => {
+    lose(lost.message ?? lost.reason ?? "device lost");
+  });
+  device.addEventListener("uncapturederror", (event) => {
+    event.preventDefault();
+    lose(event.error.message);
+  });
   let parts: OrbGpu;
   try {
     const format = gpu.getPreferredCanvasFormat();
@@ -95,14 +109,12 @@ async function build(): Promise<OrbGpu | null> {
     device.destroy();
     return null;
   }
+  if (early.reason !== null) {
+    // The callers draw the WebGL orb: they are given nothing, not a dead device.
+    device.destroy();
+    return null;
+  }
   held = parts;
-  void device.lost.then((lost) => {
-    forget(device, lost.message ?? lost.reason ?? "device lost");
-  });
-  device.addEventListener("uncapturederror", (event) => {
-    event.preventDefault();
-    forget(device, event.error.message);
-  });
   return parts;
 }
 
