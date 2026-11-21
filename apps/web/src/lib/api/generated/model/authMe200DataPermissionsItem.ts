@@ -33,4 +33,5 @@ export const AuthMe200DataPermissionsItem = {
   workflowsinboxesany: 'workflows.inboxes.any',
   taskscomplete: 'tasks.complete',
   maskingcustomerNote: 'masking.customerNote',
+  sparkuse: 'spark.use',
 } as const;
