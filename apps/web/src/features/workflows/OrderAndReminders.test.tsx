@@ -1,9 +1,10 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import i18n from "@/i18n";
 import {
   getWorkflowsConfirmPaymentMockHandler,
+  getWorkflowsInboxRemindersMockHandler,
   getWorkflowsMyRemindersMockHandler,
   getWorkflowsMyRemindersResponseMock,
   getWorkflowsNoticesForMeMockHandler,
@@ -197,7 +198,7 @@ describe("reminders", () => {
         dueAt: "2026-10-30T09:00:00Z",
         remindAt: "2026-10-31T01:00:00Z",
         escalatesAt: null,
-        escalatedTo: "MANAGEMENT",
+        escalatedTo: "APPROVER",
       },
     ],
     meta: {
@@ -219,7 +220,9 @@ describe("reminders", () => {
       await screen.findByText("The air waybill for SO-0008 is still missing."),
     ).toBeInTheDocument();
     expect(screen.getByText("Escalated")).toBeInTheDocument();
-    expect(screen.getByText("Passed up to Management")).toBeInTheDocument();
+    expect(
+      screen.getByText("Passed up to Management approver"),
+    ).toBeInTheDocument();
     expect(await axeViolations(container)).toEqual([]);
   });
 
@@ -287,6 +290,35 @@ describe("reminders", () => {
       path: "/",
     });
     expect(await screen.findByText("No reminders")).toBeInTheDocument();
+  });
+
+  // The picker is an extra choice: it must not move a role with a list of its own off it.
+  it("opens its own reminders first for a role that holds an inbox and may read any", async () => {
+    const asked: string[] = [];
+    server.use(
+      getWorkflowsMyRemindersMockHandler(reminders),
+      getWorkflowsInboxRemindersMockHandler(({ params }) => {
+        asked.push(String(params.role));
+        return getWorkflowsMyRemindersResponseMock({
+          data: [],
+          meta: { page: 1, pageSize: 25, total: 0, mock: true },
+        });
+      }),
+    );
+    renderWorkflowPage(<RemindersPage />, {
+      role: "APPROVER",
+      route: "/",
+      path: "/",
+      extraPermissions: ["workflows.inboxes.any"],
+    });
+    expect(
+      await screen.findByText("The air waybill for SO-0008 is still missing."),
+    ).toBeInTheDocument();
+    expect(asked).toEqual([]);
+    const group = screen.getByRole("group", { name: "Show the inbox of" });
+    fireEvent.click(within(group).getByRole("button", { name: "Logistics" }));
+    expect(await screen.findByText("No reminders")).toBeInTheDocument();
+    expect(asked).toEqual(["LOGISTICS"]);
   });
 });
 

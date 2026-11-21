@@ -100,14 +100,14 @@ function ReminderRow({ reminder }: { reminder: WorkflowReminder }) {
  */
 export default function RemindersPage() {
   const { t } = useTranslation(["workflows", "common"]);
-  const { role, mayPick, setRole } = useInboxRole();
+  const { role, mayPick, other, setRole } = useInboxRole();
   const mine = useWorkflowsMyReminders(undefined, {
-    query: { enabled: !mayPick && role !== undefined },
+    query: { enabled: !other && role !== undefined },
   });
   const theirs = useWorkflowsInboxReminders(role ?? "SUPPORT", undefined, {
-    query: { enabled: mayPick },
+    query: { enabled: other },
   });
-  const query = mayPick ? theirs : mine;
+  const query = other ? theirs : mine;
   const reminders = query.data?.data ?? [];
   const hasList = role !== undefined;
 
