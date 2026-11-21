@@ -7,12 +7,16 @@ import {
   useTabVisible,
 } from "@/components/kit/env";
 import { Orb as WebGlOrb } from "@/components/kit/Orb";
-import { LiquidOrb } from "./LiquidOrb";
 import { useOrbTokens, webglLook, type OrbState } from "./orbPalette";
+import { useLiquidOrb } from "./useLiquidOrb";
+import { gpuApi } from "./webgpu";
 import "../spark.css";
 
-/** What draws the orb: WebGPU first, then WebGL, then a still picture in CSS. */
+/** What draws the orb: WebGPU first, then WebGL, then a picture in CSS. */
 export type Engine = "webgpu" | "webgl" | "still";
+
+/** The fade from the CSS orb to the drawn one, as long as spark.css says. */
+const FADE_MS = 200;
 
 interface SparkOrbProps {
   state: OrbState;
@@ -24,75 +28,61 @@ interface SparkOrbProps {
 }
 
 /**
- * Spark's orb. Idle while it waits, thinking while it works. It tries the
- * WebGPU liquid orb (LerSent001/orb, MIT), falls back to React Bits' WebGL
- * orb, and under reduced motion, or when neither works, shows a still orb
- * drawn in CSS. Its colours are the design tokens, it is paused when it
- * is off screen or the tab is hidden, and the pixel ratio is at most 2.
+ * Spark's orb. Idle while it waits, thinking while it works. An orb drawn in
+ * CSS is on screen from the first render, so there is never an empty square.
+ * The WebGPU liquid orb (LerSent001/orb, MIT) is drawn over it, on a program
+ * the page prepared once (orbGpu.ts), and fades in when its first frame is
+ * on the screen; the CSS orb is then taken out. Where WebGPU is missing it is
+ * React Bits' WebGL orb in the same way. Under reduced motion, or when
+ * neither works, the CSS orb stays: still under reduced motion, otherwise
+ * moving gently. The colours are the design tokens, nothing is drawn while
+ * the orb is off screen or the tab is hidden, and the pixel ratio is at most 2.
+ * `data-showing` says which of them the person can see.
  */
 export function SparkOrb({ state, label, className, onEngine }: SparkOrbProps) {
   const still = useStill();
   const holder = useRef<HTMLDivElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
-  const orb = useRef<LiquidOrb | null>(null);
-  const [engine, setEngine] = useState<Engine>("webgpu");
+  // WebGPU is asked for only where the browser has it: elsewhere WebGL starts at once.
+  const [engine, setEngine] = useState<Engine>(() =>
+    gpuApi() ? "webgpu" : "webgl",
+  );
+  const [painted, setPainted] = useState<Engine | null>(null);
+  const [covered, setCovered] = useState<Engine | null>(null);
   const tokens = useOrbTokens();
   const onScreen = useOnScreen(holder);
   const visible = useTabVisible();
-  const running = onScreen && visible;
-  const latest = useLatest({ tokens, state, running });
   const told = useLatest(onEngine);
 
-  useEffect(() => {
-    const node = canvas.current;
-    if (still || engine !== "webgpu" || !node) return;
-    let cancelled = false;
-    let made: LiquidOrb | null = null;
-    // Started on the next tick: a development re-mount (StrictMode) runs this
-    // effect, cleans up and runs it again at once, and two orbs must not
-    // configure the one canvas at the same time.
-    const timer = window.setTimeout(() => {
-      LiquidOrb.create(node, latest.current.tokens, () => {
-        if (!cancelled) setEngine("webgl");
-      })
-        .then((created) => {
-          if (cancelled) {
-            created?.destroy();
-            return;
-          }
-          if (!created) {
-            setEngine("webgl");
-            return;
-          }
-          made = created;
-          orb.current = created;
-          told.current?.("webgpu");
-          // Catch up with what changed while the GPU was being asked for.
-          created.setTokens(latest.current.tokens);
-          created.setState(latest.current.state);
-          created.setRunning(latest.current.running);
-        })
-        .catch(() => {
-          if (!cancelled) setEngine("webgl");
-        });
-    }, 0);
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timer);
-      orb.current = null;
-      made?.destroy();
-    };
-  }, [still, engine, latest, told]);
+  useLiquidOrb({
+    canvas,
+    enabled: !still && engine === "webgpu",
+    tokens,
+    state,
+    running: onScreen && visible,
+    onCreated: () => {
+      told.current?.("webgpu");
+    },
+    onFail: () => {
+      setEngine("webgl");
+    },
+    onFirstFrame: () => {
+      setPainted("webgpu");
+    },
+  });
 
+  // The CSS orb goes once the drawn one has faded in over it, so that nothing
+  // animates underneath. Both are derived from the engine, so when WebGPU is
+  // lost after it was shown, the CSS orb comes back under the WebGL orb.
   useEffect(() => {
-    orb.current?.setTokens(tokens);
-  }, [tokens]);
-  useEffect(() => {
-    orb.current?.setState(state);
-  }, [state]);
-  useEffect(() => {
-    orb.current?.setRunning(running);
-  }, [running, engine]);
+    if (painted === null) return;
+    const timer = window.setTimeout(() => {
+      setCovered(painted);
+    }, FADE_MS + 20);
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [painted]);
 
   const shown: Engine = still ? "still" : engine;
   // WebGPU is reported only once the GPU has answered, not while it is asked.
@@ -100,6 +90,8 @@ export function SparkOrb({ state, label, className, onEngine }: SparkOrbProps) {
     if (shown !== "webgpu") told.current?.(shown);
   }, [shown, told]);
 
+  const ready = painted === shown;
+  const showCss = shown === "still" || covered !== shown;
   const look = webglLook(tokens, state);
   return (
     <div
@@ -107,35 +99,46 @@ export function SparkOrb({ state, label, className, onEngine }: SparkOrbProps) {
       role="img"
       aria-label={label}
       data-engine={shown}
+      data-showing={ready ? shown : "css"}
       data-state={state}
       className={cn("relative aspect-square", className)}
     >
-      {still || engine === "still" ? (
+      {showCss ? (
         <div
           aria-hidden="true"
           className="spark-orb-still"
           data-state={state}
         />
-      ) : engine === "webgl" ? (
+      ) : null}
+      {shown === "webgl" ? (
         <div
-          className={cn("absolute", look.disc ? "spark-orb-disc" : "inset-0")}
+          data-ready={ready}
+          className={cn(
+            "spark-orb-layer absolute",
+            look.disc ? "spark-orb-disc" : "inset-0",
+          )}
         >
           <WebGlOrb
             colours={look.colours}
             ground={look.ground}
             thinking={state === "thinking"}
+            onFirstFrame={() => {
+              setPainted("webgl");
+            }}
             onUnavailable={() => {
               setEngine("still");
             }}
           />
         </div>
-      ) : (
+      ) : null}
+      {shown === "webgpu" ? (
         <canvas
           ref={canvas}
           aria-hidden="true"
-          className="absolute inset-0 block size-full"
+          data-ready={ready}
+          className="spark-orb-layer absolute inset-0 block size-full"
         />
-      )}
+      ) : null}
     </div>
   );
 }

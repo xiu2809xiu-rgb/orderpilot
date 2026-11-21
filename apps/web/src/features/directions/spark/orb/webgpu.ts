@@ -42,6 +42,7 @@ export interface GpuDevice {
   readonly queue: {
     writeBuffer(buffer: GpuBuffer, offset: number, data: Float32Array): void;
     submit(buffers: object[]): void;
+    onSubmittedWorkDone(): Promise<void>;
   };
   addEventListener(
     type: "uncapturederror",
@@ -52,7 +53,8 @@ export interface GpuDevice {
       messages: { type: string; message: string; lineNum: number }[];
     }>;
   };
-  createRenderPipeline(descriptor: object): GpuRenderPipeline;
+  /** Never the blocking createRenderPipeline: it holds the GPU process, and the page with it, while it compiles. */
+  createRenderPipelineAsync(descriptor: object): Promise<GpuRenderPipeline>;
   createBuffer(descriptor: { size: number; usage: number }): GpuBuffer;
   createBindGroup(descriptor: {
     layout: unknown;

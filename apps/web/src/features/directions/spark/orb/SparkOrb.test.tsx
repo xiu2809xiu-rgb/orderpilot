@@ -1,0 +1,189 @@
+import { render, screen, waitFor } from "@testing-library/react";
+import { StrictMode } from "react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { installFakeGpu, removeFakeGpu } from "./fakeGpu";
+import { SparkOrb } from "./SparkOrb";
+
+/** jsdom cannot tell what is on screen: say that everything is, as a browser would. */
+class Everything {
+  constructor(private readonly callback: IntersectionObserverCallback) {}
+  observe(target: Element) {
+    this.callback(
+      [{ isIntersecting: true, target } as IntersectionObserverEntry],
+      this as unknown as IntersectionObserver,
+    );
+  }
+  unobserve() {
+    // Nothing to stop.
+  }
+  disconnect() {
+    // Nothing to stop.
+  }
+}
+
+function reducedMotion(reduce: boolean) {
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: reduce && query.includes("reduce"),
+    media: query,
+    addEventListener: () => undefined,
+    removeEventListener: () => undefined,
+  }));
+}
+
+beforeEach(() => {
+  vi.stubGlobal("IntersectionObserver", Everything);
+  reducedMotion(false);
+});
+afterEach(() => {
+  removeFakeGpu();
+  vi.unstubAllGlobals();
+});
+
+const orb = () => screen.getByRole("img", { name: "Spark is ready" });
+const cssOrb = (holder: HTMLElement) =>
+  holder.querySelector(".spark-orb-still");
+const orbOf = (holder: HTMLElement) =>
+  holder.querySelector<HTMLCanvasElement>("canvas");
+
+function show(state: "idle" | "thinking" = "idle") {
+  return render(<SparkOrb state={state} label="Spark is ready" />);
+}
+
+describe("an orb that is never an empty square", () => {
+  it("draws the CSS orb at once, while the GPU program is still being made, with the canvas clear", async () => {
+    const gpu = installFakeGpu();
+    show();
+    const holder = orb();
+    // The very first render: before the GPU has been asked anything.
+    expect(cssOrb(holder)).not.toBeNull();
+    expect(holder).toHaveAttribute("data-showing", "css");
+    await waitFor(() => {
+      expect(gpu.devices[0]?.calls).toContain("createRenderPipelineAsync");
+    });
+    expect(cssOrb(holder)).not.toBeNull();
+    expect(holder).toHaveAttribute("data-showing", "css");
+    expect(orbOf(holder)).toHaveAttribute("data-ready", "false");
+  });
+
+  it("fades the drawn orb in on its first frame, then takes the CSS orb out of the tree", async () => {
+    const gpu = installFakeGpu();
+    show();
+    const holder = orb();
+    gpu.finishCompile();
+    await waitFor(() => {
+      expect(holder).toHaveAttribute("data-showing", "webgpu");
+    });
+    expect(orbOf(holder)).toHaveAttribute("data-ready", "true");
+    // Over the CSS orb for the length of the fade, never a gap.
+    expect(cssOrb(holder)).not.toBeNull();
+    await waitFor(() => {
+      expect(cssOrb(holder)).toBeNull();
+    });
+    expect(holder).toHaveAttribute("data-engine", "webgpu");
+  });
+
+  it("is on screen at once the second time, with no second preparation", async () => {
+    const gpu = installFakeGpu({ compiled: true });
+    const first = show();
+    await waitFor(() => {
+      expect(orb()).toHaveAttribute("data-showing", "webgpu");
+    });
+    first.unmount();
+    show();
+    // The CSS orb is there in the first render, and the same device is used.
+    expect(cssOrb(orb())).not.toBeNull();
+    await waitFor(() => {
+      expect(orb()).toHaveAttribute("data-showing", "webgpu");
+    });
+    expect(gpu.adapterRequests).toBe(1);
+    expect(gpu.deviceRequests).toBe(1);
+    expect(gpu.devices[0]?.destroy).not.toHaveBeenCalled();
+    expect(
+      gpu.devices[0]?.calls.filter((call) => call.includes("Pipeline")),
+    ).toEqual(["createRenderPipelineAsync"]);
+  });
+});
+
+describe("reduced motion", () => {
+  it("shows the CSS orb and starts no GPU work", async () => {
+    reducedMotion(true);
+    const gpu = installFakeGpu({ compiled: true });
+    show();
+    await new Promise((resolve) => setTimeout(resolve, 60));
+    const holder = orb();
+    expect(holder).toHaveAttribute("data-engine", "still");
+    expect(holder).toHaveAttribute("data-showing", "css");
+    expect(cssOrb(holder)).not.toBeNull();
+    expect(gpu.adapterRequests).toBe(0);
+    expect(gpu.contexts.size).toBe(0);
+  });
+});
+
+describe("two mounts in a row, as a development server does", () => {
+  it("end with one working orb, one device and no error", async () => {
+    const gpu = installFakeGpu({ compiled: true });
+    const told = vi.fn();
+    const consoleError = vi.spyOn(console, "error");
+    render(
+      <StrictMode>
+        <SparkOrb state="idle" label="Spark is ready" onEngine={told} />
+      </StrictMode>,
+    );
+    await waitFor(() => {
+      expect(orb()).toHaveAttribute("data-showing", "webgpu");
+    });
+    expect(orb()).toHaveAttribute("data-engine", "webgpu");
+    expect(gpu.deviceRequests).toBe(1);
+    const canvas = orbOf(orb());
+    if (!canvas) throw new Error("no canvas");
+    const context = gpu.contexts.get(canvas);
+    // Configured by the mount that stayed, and not unconfigured by the one that left.
+    expect(context?.configure).toHaveBeenCalledTimes(1);
+    expect(context?.unconfigure).not.toHaveBeenCalled();
+    expect(gpu.devices[0]?.buffers.length).toBe(1);
+    expect(gpu.devices[0]?.buffers[0]?.destroy).not.toHaveBeenCalled();
+    expect(told).toHaveBeenCalledWith("webgpu");
+    expect(consoleError).not.toHaveBeenCalled();
+  });
+});
+
+describe("what takes over when the GPU does not", () => {
+  it("falls back to the WebGL orb when the device is lost, and says so", async () => {
+    const gpu = installFakeGpu({ compiled: true });
+    const told = vi.fn();
+    render(<SparkOrb state="idle" label="Spark is ready" onEngine={told} />);
+    await waitFor(() => {
+      expect(orb()).toHaveAttribute("data-showing", "webgpu");
+    });
+    gpu.devices[0]?.lose("lost");
+    await waitFor(() => {
+      expect(orb()).not.toHaveAttribute("data-engine", "webgpu");
+    });
+    // jsdom has no WebGL either, so the CSS orb is what is left, and it is there.
+    await waitFor(() => {
+      expect(orb()).toHaveAttribute("data-engine", "still");
+    });
+    expect(cssOrb(orb())).not.toBeNull();
+    expect(orb()).toHaveAttribute("data-showing", "css");
+    expect(told).toHaveBeenLastCalledWith("still");
+  });
+
+  it("draws the CSS orb where there is no WebGPU and no WebGL", async () => {
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null);
+    show();
+    await waitFor(() => {
+      expect(orb()).toHaveAttribute("data-engine", "still");
+    });
+    expect(cssOrb(orb())).not.toBeNull();
+    expect(orb()).toHaveAttribute("data-showing", "css");
+  });
+});
+
+describe("the orb on the page", () => {
+  it("keeps its label for assistive technology and passes the state on", () => {
+    installFakeGpu();
+    show("thinking");
+    expect(orb()).toHaveAttribute("data-state", "thinking");
+    expect(cssOrb(orb())).toHaveAttribute("data-state", "thinking");
+  });
+});
