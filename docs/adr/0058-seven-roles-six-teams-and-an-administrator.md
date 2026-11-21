@@ -1,6 +1,6 @@
 # ADR 0058: Seven roles: six teams and one administrator
 
-- **Status:** Accepted. Richie decided on 21 Nov 2026.
+- **Status:** Accepted. Richie decided on 21 Nov 2026. Amends [ADR 0027](0027-audit-viewer-base.md) point 7 and [ADR 0050](0050-the-bank-detail-hold.md) point 12: what they show the auditor, decision 2 here shows the administrator, from step 4.
 - **Date:** 2026-11-21
 - **Story:** [#293](https://github.com/xiu2809xiu-rgb/orderpilot/issues/293)
 
@@ -14,7 +14,7 @@ A read of the code on 20 Nov, repeated on 21 Nov, found:
 - The approval rules (no self-approval, limits, the route, the second approver on a hold) compare people, not roles. They hold when two roles become one.
 - Each audit event's hash covers the role of the actor, and a database trigger blocks every update, delete and truncate of audit events. A role value that appears in an old event cannot be removed or rewritten.
 - Stored rows still name Management: eight SLA rows pass overdue tasks up to it, and the synthetic reminders name it. The approval setup in the demo data ends in Management's account, which is the last step of Rachel's chain.
-- Area 2's four workflow test files in `apps/api/test/http` name Management or the auditor 60 times: 38 sign in as one of them, 18 look up the demo account's user id and 4 are expected values. Its web tests name them 4 times, 2 of them sign-ins. Area 4's governance, audit viewer and monitoring API tests name them 49 times: 46 sign in, 2 look up an id and 1 lists roles. Its web tests sign in as the auditor 8 times, and its unit tests name them 27 times as data, with no sign-in.
+- Tests quote the two role values often. Area 2's four workflow test files in `apps/api/test/http` quote them 60 times: 38 in sign-ins or helper calls, 18 to look up the demo account's user id and 4 as expected values. Its web tests quote them 4 times. Area 4's governance, audit viewer and monitoring API tests quote them 49 times, 46 of them in sign-ins. Its web tests sign in as the auditor 8 times, and its unit tests quote a role value 8 times, with no sign-in.
 - The approver group, in review as pull request 327 (ADR 0055 on that branch), is every enabled user with the approver role, except the person who raised the request. It has no record of its own. ADR 0049, decision 5, keeps limits a switch with none set, so any one of the group decides.
 
 ## Decision
@@ -68,4 +68,5 @@ A read of the code on 20 Nov, repeated on 21 Nov, found:
 - **Old events stay readable.** The trail still verifies. The audit role filter still offers the two retired values so past events can be found.
 - **Rows that named the two roles in the matrix are deleted.** A live edit made for those roles is lost.
 - **Other areas' files change only where the cut forces it,** and each owner reviews theirs. A choice of behaviour in another area stays with its owner.
+- **Code outside the tests names the two roles too,** and moves before or at the cut: Home's blocks (step 2), the masking lists (`masking.ts`, `audit-masking.ts`) and the monitoring mock's role list (step 4), and the web menus that list roles (the tracker, workflows, exceptions, audit and governance menus) at step 6, each with its owner's review.
 - **Tests that count the approvers change at the cut.** The tests of the approver group in pull request 327 take the demo seed to hold one approver. Once Management's account is an approver the group has one more person, so those tests either expect her or leave her out on purpose. Their intent stays: any one approver decides, and never the requester.
