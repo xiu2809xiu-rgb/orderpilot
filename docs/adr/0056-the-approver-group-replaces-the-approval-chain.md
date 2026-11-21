@@ -1,4 +1,4 @@
-# ADR 0055: The approver group replaces the approval chain
+# ADR 0056: The approver group replaces the approval chain
 
 - **Status:** Accepted. Rules on decisions 6, 8 and 10 of [ADR 0041](0041-the-authorisation-policy-with-approval-limits.md), which [ADR 0049](0049-the-spr-process-the-client-described.md) left open. The `APPROVER_GROUP` switch below is temporary: [#280](https://github.com/xiu2809xiu-rgb/orderpilot/issues/280) removes it.
 - **Date:** 2026-11-15

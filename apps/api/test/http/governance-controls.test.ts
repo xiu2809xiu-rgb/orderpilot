@@ -2427,7 +2427,7 @@ describe("the approver group, with APPROVER_GROUP on (#252)", () => {
       );
     });
 
-    it("leaves Management out while limits are off, and says why in the trail (ADR 0055)", async () => {
+    it("leaves Management out while limits are off, and says why in the trail (ADR 0056)", async () => {
       expect((await approveSpr("management", "SPR-GROUP-0005")).status).toBe(
         403,
       );

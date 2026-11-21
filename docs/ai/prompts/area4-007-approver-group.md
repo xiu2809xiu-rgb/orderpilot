@@ -1,8 +1,8 @@
 # Prompt area4-007: #252, the approver group
 
-Angelyn's prompts for the approver group and the coordinator ([#252](https://github.com/xiu2809xiu-rgb/orderpilot/issues/252)), as written, in the order sent. The result is in [ADR 0055](../../adr/0055-the-approver-group-replaces-the-approval-chain.md) and the [area 4 guide](../../team/area-4-controls-security-and-monitoring.md#the-approver-group-252).
+Angelyn's prompts for the approver group and the coordinator ([#252](https://github.com/xiu2809xiu-rgb/orderpilot/issues/252)), as written, in the order sent. The result is in [ADR 0056](../../adr/0056-the-approver-group-replaces-the-approval-chain.md) and the [area 4 guide](../../team/area-4-controls-security-and-monitoring.md#the-approver-group-252).
 
-The prompts call it ADR 0054; it became ADR 0055, because main took 0054 while this work was open.
+The prompts call it ADR 0054. It became ADR 0055 because main took 0054 while this work was open, then ADR 0056 because main took 0055.
 
 ## 1. The brief
 

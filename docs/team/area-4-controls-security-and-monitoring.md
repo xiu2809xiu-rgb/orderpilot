@@ -291,7 +291,7 @@ await authorisation.enforce(
 
 ## The approver group (#252)
 
-Spectra's process: a coordinator, a Support user, routes each SPR to three management approvers, any one of whom decides, and hands it back ([ADR 0055](../adr/0055-the-approver-group-replaces-the-approval-chain.md)).
+Spectra's process: a coordinator, a Support user, routes each SPR to three management approvers, any one of whom decides, and hands it back ([ADR 0056](../adr/0056-the-approver-group-replaces-the-approval-chain.md)).
 
 - **The group** is every enabled user with the `APPROVER` role except the requester. Absence moves nothing, and Management is not in it.
 - **Limits** are switchable, with none set: `APPROVAL_LIMITS=off|on`, off by default. While they are on, only the approvers whose own limit covers the amount may decide.

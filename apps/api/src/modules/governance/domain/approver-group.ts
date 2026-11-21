@@ -33,7 +33,7 @@ export interface ApproverGroup {
 }
 
 /**
- * The approver group (#252, ADR 0055): any one of Spectra's management
+ * The approver group (#252, ADR 0056): any one of Spectra's management
  * approvers decides, so there is no chain, no substitute and no escalation by
  * absence. The group is every enabled approver except the person who raised
  * the request. While limits are on, it keeps only those whose own limit

@@ -3,7 +3,7 @@ import { baseEnv } from "../../../test/support/base-env.js";
 import { AppConfig } from "../../config/app-config.js";
 
 // The approver group's limits are switchable, with none set, until Spectra
-// confirms them (ADR 0049, ADR 0055): off unless someone turns them on.
+// confirms them (ADR 0049, ADR 0056): off unless someone turns them on.
 describe("APPROVAL_LIMITS", () => {
   it("is off when it is not set", () => {
     expect(AppConfig.fromEnv(baseEnv()).governance.approvalLimits).toBe(false);
@@ -30,7 +30,7 @@ describe("APPROVAL_LIMITS", () => {
   });
 });
 
-// Temporary (ADR 0055): off keeps the old chain until area 2 moves (#251).
+// Temporary (ADR 0056): off keeps the old chain until area 2 moves (#251).
 describe("APPROVER_GROUP", () => {
   it("is off when it is not set, so main behaves as before #252", () => {
     expect(AppConfig.fromEnv(baseEnv()).governance.approverGroup).toBe(false);

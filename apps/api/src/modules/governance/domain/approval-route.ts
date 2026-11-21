@@ -103,7 +103,7 @@ const WHO: Record<Exclude<Decider["kind"], "none">, string> = {
 };
 
 /**
- * Who may decide an approval. While APPROVER_GROUP is on (#252, ADR 0055),
+ * Who may decide an approval. While APPROVER_GROUP is on (#252, ADR 0056),
  * any one member of the approver group: every enabled management approver
  * except the requester. Nobody else may, Management included, and absence
  * moves nothing. While it is off, the default until area 2 routes with the
