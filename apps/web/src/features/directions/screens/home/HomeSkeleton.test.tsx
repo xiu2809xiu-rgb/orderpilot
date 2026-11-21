@@ -1,4 +1,4 @@
-import { INBOX_ROLES, ROLES, type Role } from "@orderpilot/shared";
+import { ROLES, type Role } from "@orderpilot/shared";
 import { render } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 import { cuesFor } from "@/features/nav";
@@ -6,26 +6,18 @@ import { useSessionStore } from "@/stores/session";
 import { sessionFor } from "@/test/fixtures";
 import { HomeSkeleton } from "./HomeSkeleton";
 
-/** The main block, by permission: an inbox first, then the settings, then the audit trail. */
-function mainOf(role: Role): string {
-  const held = sessionFor(role).permissions;
-  if (INBOX_ROLES.some((inbox) => inbox === role)) return "tasks";
-  if (held.includes("settings.manage")) return "rules";
-  return held.includes("audit.read") ? "refused" : "overdue";
-}
-
-/** The block added below the main one, by permission. */
-function addedOf(role: Role): string | null {
-  const held = sessionFor(role).permissions;
-  if (mainOf(role) === "tasks") {
-    return held.includes("approvals.decide") && held.includes("tracker.read")
-      ? "overdue"
-      : null;
-  }
-  return mainOf(role) === "rules" && held.includes("audit.read")
-    ? "refused"
-    : null;
-}
+/** The main block and the added one of each role, as the default permissions give them. */
+const BY_ROLE: Record<Role, { main: string; extra: string | null }> = {
+  SYSTEM_ADMIN: { main: "rules", extra: "refused" },
+  PRODUCT_MANAGER: { main: "tasks", extra: null },
+  APPROVER: { main: "tasks", extra: "overdue" },
+  SUPPORT: { main: "tasks", extra: null },
+  WAREHOUSE: { main: "tasks", extra: null },
+  FINANCE: { main: "tasks", extra: null },
+  LOGISTICS: { main: "tasks", extra: null },
+  MANAGEMENT: { main: "overdue", extra: null },
+  AUDITOR: { main: "refused", extra: null },
+};
 
 describe("the home skeleton", () => {
   beforeEach(() => {
@@ -39,12 +31,12 @@ describe("the home skeleton", () => {
       const { container } = render(<HomeSkeleton />);
       expect(
         container.querySelector("[data-block]")?.getAttribute("data-block"),
-      ).toBe(mainOf(role));
+      ).toBe(BY_ROLE[role].main);
       // The room of an added block is kept, full width, and no other role has one.
       expect(
         container.querySelector("[data-extra]")?.getAttribute("data-extra") ??
           null,
-      ).toBe(addedOf(role));
+      ).toBe(BY_ROLE[role].extra);
       const counts = cuesFor(sessionFor(role)).length;
       // The count blocks are the last grid's children.
       const grids = container.querySelectorAll(":scope > div > div.grid");
@@ -54,4 +46,38 @@ describe("the home skeleton", () => {
       expect(drawn).toBe(counts);
     },
   );
+
+  it("draws the approver's rows in the order of the page: Needs you, the overdue block, then the pair", () => {
+    useSessionStore.setState({
+      status: "active",
+      session: sessionFor("APPROVER"),
+    });
+    const { container } = render(<HomeSkeleton />);
+    const marks = Array.from(
+      container.querySelectorAll("[data-block], [data-extra], [data-pair]"),
+    ).map((node) =>
+      node.hasAttribute("data-block")
+        ? "needs-you"
+        : node.hasAttribute("data-extra")
+          ? "overdue"
+          : "pair",
+    );
+    expect(marks).toEqual(["needs-you", "overdue", "pair"]);
+    // Needs you is one full-width block, not a column of a two-column row.
+    const needs = container.querySelector("[data-block]");
+    expect(needs?.parentElement?.className).not.toContain("grid");
+    expect(container.querySelector("[data-pair]")?.children).toHaveLength(2);
+  });
+
+  it("draws an inbox role without an added block as Needs you, then the pair", () => {
+    useSessionStore.setState({
+      status: "active",
+      session: sessionFor("SUPPORT"),
+    });
+    const { container } = render(<HomeSkeleton />);
+    const marks = Array.from(
+      container.querySelectorAll("[data-block], [data-extra], [data-pair]"),
+    ).map((node) => (node.hasAttribute("data-block") ? "needs-you" : "pair"));
+    expect(marks).toEqual(["needs-you", "pair"]);
+  });
 });
