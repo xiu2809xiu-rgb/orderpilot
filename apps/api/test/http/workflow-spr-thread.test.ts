@@ -200,6 +200,10 @@ describe("the SPR thread (#251, #290): raised, sent to the approvers, decided an
     const again = await taskFor("PRODUCT_MANAGER", spr.orderNo, "RAISE_SPR");
     expect(again).toBeDefined();
     if (!again) throw new Error("No task to raise it again");
+    // The SPR page offers the same raise, beside the rejection.
+    const rejected = await sprPage(spr.recordNo);
+    expect(rejected.stage).toBe("decided");
+    expect(rejected.raiseTaskId).toBe(again.id);
     expect((await act("PRODUCT_MANAGER", again.id, "complete")).status).toBe(
       200,
     );

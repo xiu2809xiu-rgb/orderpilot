@@ -221,19 +221,13 @@ async function seedOrdersAwaitingSpr(
     if (order?.sampleScreenState !== "sample-pending-approval" || !instanceId) {
       continue;
     }
-    const due = roundToCents(
-      multiplyDecimal(
-        multiplyDecimal(order.total, order.header.prepaymentPercent),
-        "0.01",
-      ),
-    );
     await client.workflowInstance.updateMany({
       where: { id: instanceId, status: "sample-pending-approval" },
       data: {
         status: "AwaitingSpr",
         currentStep: "spr-approval",
         facts: {
-          prepaymentDue: compareDecimal(due, "0") > 0 ? due : null,
+          prepaymentDue: prepaymentOf(order),
           stockCoversOrder: false,
           holds: [],
           resumeTo: null,

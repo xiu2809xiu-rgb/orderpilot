@@ -228,9 +228,11 @@ export class WorkflowsService {
       : (await this.openTasks("APPROVER")).find(
           (open) => open.ref?.recordNo === recordNo,
         );
-    // A suggestion has no data until the product manager raises it.
+    // A suggestion has no data until the product manager raises it; a rejected
+    // SPR goes back to them to correct and raise again.
+    const raisable = !stored || stored.decision?.outcome === "rejected";
     const raiseTask =
-      !stored && record.orderNo && this.storedTasks
+      raisable && record.orderNo && this.storedTasks
         ? await this.storedTasks.openOf(record.orderNo, "RAISE_SPR")
         : null;
     const stage = decision

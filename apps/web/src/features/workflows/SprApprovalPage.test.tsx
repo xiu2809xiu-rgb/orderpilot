@@ -3,6 +3,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import i18n from "@/i18n";
 import {
   getWorkflowsApproveMockHandler,
+  getWorkflowsCompleteTaskMockHandler,
   getWorkflowsSprMockHandler,
   getWorkflowsSprResponseMock,
 } from "@/lib/api/generated/endpoints/workflows/workflows.msw";
@@ -70,6 +71,8 @@ function spr(decision: null | { outcome: "approved"; by: string }) {
       escalatesToName: "Sophia Chen",
       passedTo: null,
       decidable: true,
+      stage: decision ? ("decided" as const) : ("with-approvers" as const),
+      raiseTaskId: null,
       // Set here, not left to the generated mock, so the page is the same each run.
       due: decision ? null : { dueAt: "2026-11-03T02:00:00Z", overdue: true },
       decision: decision
@@ -124,7 +127,7 @@ describe("the SPR approval page", () => {
       screen.getByText("Waiting for a decision, overdue since 3 Nov 2026"),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/Support raises the purchase order/),
+      screen.getByText(/the product manager places the vendor PO/),
     ).toBeInTheDocument();
     const quantity = screen.getByRole("row", { name: /Quantity/ });
     expect(within(quantity).getByText("Suggested")).toBeInTheDocument();
@@ -373,6 +376,101 @@ describe("the SPR approval page", () => {
     expect(screen.getByText("None set")).toBeInTheDocument();
     expect(screen.queryByText("Substitute")).toBeNull();
     expect(screen.queryByText("Escalates to")).toBeNull();
+  });
+
+  it("lets the product manager raise a suggested SPR from the page, with Undo", async () => {
+    const taskId = "00000000-0000-4000-8000-000000000901";
+    server.use(
+      getWorkflowsSprMockHandler({
+        ...spr(null),
+        data: {
+          ...spr(null).data,
+          stage: "suggested",
+          raiseTaskId: taskId,
+          due: null,
+        },
+      }),
+      getWorkflowsCompleteTaskMockHandler({
+        data: {
+          applied: true,
+          message: "Recorded. The order has moved on.",
+          taskId,
+          status: "DONE",
+        },
+      }),
+    );
+    const { container } = open("PRODUCT_MANAGER");
+    expect(await screen.findByText("Not raised yet")).toBeInTheDocument();
+    // Not sent anywhere yet, so the history says who raises it.
+    expect(
+      screen.getByText("Suggested by the stock check"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Waiting for Prakash Menon to raise it"),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Sent to the management approvers")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Approve" })).toBeNull();
+    expect(await axeViolations(container)).toEqual([]);
+
+    fireEvent.click(screen.getByRole("button", { name: "Raise the SPR" }));
+
+    await waitFor(() => {
+      expect(useToastStore.getState().items.at(-1)?.message).toBe(
+        "SPR-20261102-0001 raised and sent to the approvers",
+      );
+    });
+    expect(useToastStore.getState().items.at(-1)?.undo).toBeTypeOf("function");
+  });
+
+  it("tells an approver that a suggested SPR has not reached them yet", async () => {
+    server.use(
+      getWorkflowsSprMockHandler({
+        ...spr(null),
+        data: {
+          ...spr(null).data,
+          stage: "suggested",
+          raiseTaskId: "00000000-0000-4000-8000-000000000901",
+          due: null,
+        },
+      }),
+    );
+    open("APPROVER");
+    expect(
+      await screen.findByText(/has not raised this SPR yet/),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Approve" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Raise the SPR" })).toBeNull();
+  });
+
+  it("gives a rejected SPR back to the product manager to raise again", async () => {
+    const rejected = spr(null);
+    server.use(
+      getWorkflowsSprMockHandler({
+        ...rejected,
+        data: {
+          ...rejected.data,
+          stage: "decided",
+          raiseTaskId: "00000000-0000-4000-8000-000000000901",
+          due: null,
+          decision: {
+            outcome: "rejected",
+            by: "Anita Rao",
+            comment: "Order 60 for now.",
+            at: "2026-11-02T05:00:00Z",
+          },
+        },
+      }),
+    );
+    open("PRODUCT_MANAGER");
+    expect(
+      await screen.findByText(/Decided: Rejected by Anita Rao/),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Raise it again" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Back with Prakash Menon to correct and raise again"),
+    ).toBeInTheDocument();
   });
 
   it("shows a decision that was already made, with its comment", async () => {
