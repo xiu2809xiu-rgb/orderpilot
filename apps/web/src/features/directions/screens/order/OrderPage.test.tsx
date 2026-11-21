@@ -45,29 +45,37 @@ afterEach(() => {
 const PAID = "SO-0001";
 
 describe("the order page", () => {
-  it("heads the page with the number, the customer and the facts", async () => {
+  it("heads the page with the number, the customer, its stage and its facts", async () => {
     stubApi();
     open(PAID);
     expect(
       await screen.findByRole("heading", { level: 1, name: "SO-0001" }),
     ).toBeVisible();
-    expect(screen.getByText("Alpha Traders, C-0001")).toBeVisible();
-    const facts = screen.getByText("Stage").closest("dl");
+    // Inline with the title, vertically centred with "Sample", with no comma
+    // and the customer's number styled as the Orders table styles it.
+    expect(screen.getByText("Alpha Traders")).toBeVisible();
+    expect(screen.getByText("C-0001")).toBeVisible();
+    // The stage and the team that holds it are the status card's own facts.
+    const status = screen.getByText("Current Stage").closest("dl");
+    if (!status) throw new Error("no status facts");
+    expect(within(status).getByText("Waiting for payment")).toBeVisible();
+    expect(within(status).getByText("Finance")).toBeVisible();
+    // The value, the PO and the dates are the facts bar below it.
+    const facts = screen.getByText("PO number").closest("dl");
     if (!facts) throw new Error("no facts");
-    expect(within(facts).getByText("Waiting for payment")).toBeVisible();
-    expect(within(facts).getByText("Finance")).toBeVisible();
     expect(within(facts).getByText("PO-SO-0001")).toBeVisible();
-    // Lateness is said once, by the badge under the title, not in the facts.
-    expect(within(facts).queryByText("3 d late")).toBeNull();
-    expect(screen.getAllByText("3 d late")).toHaveLength(1);
     // The read-only order form showed the prepayment, and customers pay before shipping.
     expect(within(facts).getByText("30% prepayment")).toBeVisible();
+    // Lateness is said once, by the badge under the title, not in either facts block.
+    expect(within(status).queryByText("3 d late")).toBeNull();
+    expect(within(facts).queryByText("3 d late")).toBeNull();
+    expect(screen.getAllByText("3 d late")).toHaveLength(1);
   });
 
   it("explains Held at where it is a heading of the facts", async () => {
     stubApi();
     open(PAID);
-    const facts = (await screen.findByText("Stage")).closest("dl");
+    const facts = (await screen.findByText("Current Stage")).closest("dl");
     if (!facts) throw new Error("no facts");
     const term = within(facts).getByText("Held at");
     expect(term.tagName).toBe("ABBR");
@@ -93,7 +101,7 @@ describe("the order page", () => {
     expect(screen.queryByText(/Now, late/)).toBeNull();
     // The current step says how long it has waited and what is usual, in one short line.
     expect(
-      within(nth(steps, 3)).getByText("Waiting 14 days, usually 4 days"),
+      within(nth(steps, 3)).getByText("Waiting 14d \u00b7 ~4d avg"),
     ).toBeVisible();
     // Later: a day the step is expected, worked from the usual times.
     expect(within(nth(steps, 4)).getByText(/^By /)).toBeVisible();
@@ -121,20 +129,21 @@ describe("the order page", () => {
     });
     const now = nth(within(rail).getAllByRole("listitem"), 3);
     expect(
-      await within(now).findByText("Waiting 6 days, usually 4 days"),
+      await within(now).findByText("Waiting 6d \u00b7 ~4d avg"),
     ).toBeVisible();
-    expect(within(now).queryByText(/Waiting 14 days/)).toBeNull();
+    expect(within(now).queryByText(/Waiting 14d/)).toBeNull();
   });
 
-  it("names the expected ship day as what it is and sets it against the order's ship date", async () => {
+  it("names the expected ship day as a compact estimate, with a tone pill beside it", async () => {
     stubApi();
     open(PAID);
+    // The subtitle says the forecast's basis once, for every order.
     expect(
-      await screen.findByText(
-        /^Expected to ship \w{3}, \d{1,2} \w{3}: (\d+ days? after the order.s ship date|in time for the order.s ship date)\.$/,
-      ),
+      await screen.findByText("Forecast based on similar orders"),
     ).toBeVisible();
-    expect(screen.getByText(/^From how long each step took/)).toBeVisible();
+    expect(screen.getByText(/^Est\. ship \w{3}, \d{1,2} \w{3}$/)).toBeVisible();
+    // SO-0001 is overdue, so the journey card reads it as delayed.
+    expect(screen.getByText("Delayed")).toBeVisible();
     // A step the data cannot time says so on the rail, where it is.
     const rail = screen.getByRole("list", { name: "Sales order journey" });
     expect(within(rail).getByText("No usual time")).toBeVisible();

@@ -44,24 +44,24 @@ const journeyOn = (today: string) => {
 };
 
 describe("the current step on the full rail", () => {
-  it("says how long the order has waited and the step's usual time, in one short line", () => {
+  it("says how long the order has waited and the step's usual time, short enough for one line", () => {
     expect(journeyDetails(t, journeyOn("2026-11-12"), true)[5]).toBe(
-      "Waiting 2 days, usually 3 days",
+      "Waiting 2d \u00b7 ~3d avg",
     );
   });
 
   it("says the same line when the step has run past its usual time: lateness is the badge's to say", () => {
     const line = journeyDetails(t, journeyOn("2026-11-16"), true)[5];
-    expect(line).toBe("Waiting 6 days, usually 3 days");
+    expect(line).toBe("Waiting 6d \u00b7 ~3d avg");
     expect(line).not.toMatch(/late|past/i);
   });
 
-  it("reads a first day and a single day in the right words", () => {
+  it("reads a first day and a single day as a short number of days", () => {
     expect(journeyDetails(t, journeyOn("2026-11-10"), true)[5]).toBe(
-      "Here today, usually 3 days",
+      "Waiting 0d \u00b7 ~3d avg",
     );
     expect(journeyDetails(t, journeyOn("2026-11-11"), true)[5]).toBe(
-      "Waiting 1 day, usually 3 days",
+      "Waiting 1d \u00b7 ~3d avg",
     );
   });
 
@@ -75,7 +75,7 @@ describe("the current step on the full rail", () => {
         step === now ? { ...step, usual: null } : step,
       ),
     };
-    expect(journeyDetails(t, untimed, true)[5]).toBe("Waiting 2 days");
+    expect(journeyDetails(t, untimed, true)[5]).toBe("Waiting 2d");
   });
 
   it("is a longer sentence with the date on the narrow vertical rail, as before", () => {
