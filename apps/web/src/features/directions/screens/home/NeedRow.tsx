@@ -28,8 +28,8 @@ interface NeedRowProps {
  * never confirmed from it: the row opens the form that asks for the amount, the
  * bank reference and the date. The fields read from a PO have no screen of
  * their own for a stored document, so that row only opens the order and says
- * nothing of a review. The action carries the task's kind, id and order as
- * data attributes, which the row tests and the keyboard test find it by.
+ * nothing of a review. The action carries the task's id and order as data
+ * attributes, which the order test and the keyboard test find it by.
  */
 export function NeedRow({ task, busy, onComplete }: NeedRowProps) {
   const { t } = useTranslation("directions-home");
@@ -104,7 +104,6 @@ export function NeedRow({ task, busy, onComplete }: NeedRowProps) {
               variant="outline"
               size="sm"
               data-task-action
-              data-task-kind={task.kind}
               data-task-id={task.id}
               data-order={order ?? undefined}
               className={`${target} w-full sm:w-auto`}
@@ -131,7 +130,6 @@ export function NeedRow({ task, busy, onComplete }: NeedRowProps) {
               <Link
                 to={href}
                 data-task-action
-                data-task-kind={task.kind}
                 data-task-id={task.id}
                 data-order={order ?? undefined}
                 aria-label={t("needs.actionOn", { action: verb, order: what })}
