@@ -51,11 +51,9 @@ describe("the order of Home for a team with tasks", () => {
       const names = screen
         .getAllByRole("heading", { level: 2 })
         .map((heading) => heading.textContent);
-      // A role that may decide approvals and read the tracker has the overdue
-      // orders directly below Needs you; the permissions say who that is.
-      const held = sessionFor(role).permissions;
-      const overdue =
-        held.includes("approvals.decide") && held.includes("tracker.read");
+      // Of the inbox roles only the approver has the overdue orders, directly
+      // below Needs you.
+      const overdue = role === "APPROVER";
       expect(names.slice(0, overdue ? 4 : 3)).toEqual([
         "Needs you",
         ...(overdue ? ["Most overdue, by amount"] : []),
