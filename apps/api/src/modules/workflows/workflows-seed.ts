@@ -162,6 +162,7 @@ export async function seedWorkflows(client: DbClient): Promise<string> {
     skipDuplicates: true,
   });
   await seedOrdersAwaitingSpr(client, dataset, instanceIds);
+  await seedOrdersShortOfStock(client, dataset, instanceIds);
 
   await client.workflowTaskSla.createMany({
     data: DEFAULT_TASK_SLAS.map((sla) => ({ ...sla })),
@@ -220,19 +221,13 @@ async function seedOrdersAwaitingSpr(
     if (order?.sampleScreenState !== "sample-pending-approval" || !instanceId) {
       continue;
     }
-    const due = roundToCents(
-      multiplyDecimal(
-        multiplyDecimal(order.total, order.header.prepaymentPercent),
-        "0.01",
-      ),
-    );
     await client.workflowInstance.updateMany({
       where: { id: instanceId, status: "sample-pending-approval" },
       data: {
         status: "AwaitingSpr",
         currentStep: "spr-approval",
         facts: {
-          prepaymentDue: compareDecimal(due, "0") > 0 ? due : null,
+          prepaymentDue: prepaymentOf(order),
           stockCoversOrder: false,
           holds: [],
           resumeTo: null,
@@ -265,6 +260,70 @@ async function seedOrdersAwaitingSpr(
           decision: null,
           passedOn: null,
         },
+      },
+    });
+  }
+}
+
+/** The prepayment the gate waits for, or null when the order asks for none. */
+function prepaymentOf(
+  order: ReturnType<typeof syntheticDataset>["orders"][number],
+): string | null {
+  const due = roundToCents(
+    multiplyDecimal(
+      multiplyDecimal(order.total, order.header.prepaymentPercent),
+      "0.01",
+    ),
+  );
+  return compareDecimal(due, "0") > 0 ? due : null;
+}
+
+/**
+ * Puts the orders whose SPR the product manager has still to raise on the state
+ * machine, at the stock check with the stock short, so that Raise really sends
+ * the SPR to the approvers (#251, #290). The SPR's record keeps no data until it
+ * is raised. A label someone has already moved on is left alone, so a second run
+ * changes nothing.
+ */
+async function seedOrdersShortOfStock(
+  client: DbClient,
+  dataset: ReturnType<typeof syntheticDataset>,
+  instanceIds: ReadonlyMap<string, string>,
+): Promise<void> {
+  const now = new Date();
+  const raiseSprSla = DEFAULT_TASK_SLAS.find(
+    (sla) => sla.taskKind === "RAISE_SPR",
+  );
+  const orders = new Map(
+    dataset.orders.map((order) => [order.header.no, order]),
+  );
+  for (const spr of dataset.sprs.filter((s) => s.status === "suggested")) {
+    const order = orders.get(spr.orderNo);
+    const instanceId = instanceIds.get(spr.orderNo);
+    if (order?.sampleScreenState !== "sample-short-stock" || !instanceId) {
+      continue;
+    }
+    const moved = await client.workflowInstance.updateMany({
+      where: { id: instanceId, status: "sample-short-stock" },
+      data: {
+        status: "StockChecked",
+        currentStep: "spr-approval",
+        facts: {
+          prepaymentDue: prepaymentOf(order),
+          stockCoversOrder: false,
+          holds: [],
+          resumeTo: null,
+          enteredAt: spr.requestedAt,
+        },
+      },
+    });
+    if (moved.count === 0) continue;
+    // Its clock starts now, so the demo's dated fixtures do not arrive overdue.
+    await client.workflowTask.updateMany({
+      where: { instanceId, kind: "RAISE_SPR" },
+      data: {
+        createdAt: now,
+        dueAt: raiseSprSla ? scheduleOf(now, raiseSprSla).dueAt : now,
       },
     });
   }

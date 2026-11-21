@@ -13,6 +13,7 @@ import {
   workflowsUndoDecision,
 } from "@/lib/api/generated/endpoints/workflows/workflows";
 import { formatDateTime } from "./format";
+import { SprRaisePanel } from "./SprRaisePanel";
 
 type Outcome = "approved" | "rejected";
 
@@ -65,8 +66,17 @@ export function SprDecisionForm({
     onError: () => toast.failed(t("spr.toast.failed")),
   });
 
+  if (spr.stage === "suggested") {
+    return spr.raiseTaskId ? (
+      <SprRaisePanel spr={spr} raiseTaskId={spr.raiseTaskId} />
+    ) : (
+      <p role="status" className="text-muted-foreground">
+        {t("spr.raise.others")}
+      </p>
+    );
+  }
   if (spr.decision) {
-    return (
+    const decided = (
       <p role="status" className="font-medium">
         {t("spr.decisionDone", {
           outcome: t(`spr.outcomes.${spr.decision.outcome}`),
@@ -77,6 +87,15 @@ export function SprDecisionForm({
           {spr.decision.comment}
         </span>
       </p>
+    );
+    // A rejected SPR goes back to the product manager to correct and raise again.
+    return spr.raiseTaskId ? (
+      <div className="space-y-s3">
+        {decided}
+        <SprRaisePanel spr={spr} raiseTaskId={spr.raiseTaskId} />
+      </div>
+    ) : (
+      decided
     );
   }
   if (spr.passedTo && !spr.passedTo.youDecide) {

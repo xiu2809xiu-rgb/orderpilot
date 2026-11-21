@@ -95,6 +95,18 @@ describe("SPR approval within limits (C-3), on the real state machine and area 4
       where: { orderRef: spr.orderNo },
       data: { status: "AwaitingSpr" },
     });
+    // Waiting means the approvers' task is open and nothing was handed back, as an undo leaves it.
+    await database.client.workflowTask.updateMany({
+      where: { kind: "APPROVE_SPR", instance: { orderRef: spr.orderNo } },
+      data: { status: "OPEN", completedAt: null },
+    });
+    await database.client.workflowTask.updateMany({
+      where: {
+        kind: { in: ["PLACE_VENDOR_PO", "RAISE_SPR"] },
+        instance: { orderRef: spr.orderNo },
+      },
+      data: { status: "DONE" },
+    });
     return spr;
   }
 

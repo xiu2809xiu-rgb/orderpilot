@@ -47,6 +47,12 @@ export type SprBasis = z.infer<typeof sprBasisSchema>;
 
 export const SPR_DECISIONS = ["approved", "rejected"] as const;
 
+/**
+ * Where an SPR is: suggested from stock and not raised yet, raised and with the
+ * approvers, or decided. Only the product manager raises a suggestion.
+ */
+export const SPR_STAGES = ["suggested", "with-approvers", "decided"] as const;
+
 export const sprDetailSchema = z.object({
   ref: recordRefSchema,
   orderNo: orderNoSchema.nullable(),
@@ -83,6 +89,9 @@ export const sprDetailSchema = z.object({
     })
     .nullable()
     .optional(),
+  stage: z.enum(SPR_STAGES).optional(),
+  /** The product manager's Raise task, while the SPR is a suggestion they hold. */
+  raiseTaskId: z.uuid().nullable().optional(),
   /** When the decision is due, while it waits for one. */
   due: z
     .object({ dueAt: z.iso.datetime(), overdue: z.boolean() })
