@@ -283,6 +283,8 @@ The first screen (the sign-in page or a role's home page) waits for the entry ch
 
 ## Spark's orb: one GPU program for the page (#326)
 
+The decision is recorded in [ADR 0057](../adr/0057-sparks-orb-is-prepared-once-and-ahead.md).
+
 | Pattern                               | Where                                                   | Why                                                                                                                                                        |
 | ------------------------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | One promise per page                  | `features/directions/spark/orb/orbGpu.ts`               | The device and the compiled program are made once, whoever asks first, so closing and opening Spark costs nothing and the compile never repeats            |
