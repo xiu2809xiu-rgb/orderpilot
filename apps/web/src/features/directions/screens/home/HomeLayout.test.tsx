@@ -51,8 +51,12 @@ describe("the order of Home for a team with tasks", () => {
       const names = screen
         .getAllByRole("heading", { level: 2 })
         .map((heading) => heading.textContent);
-      expect(names.slice(0, 3)).toEqual([
+      // Of the inbox roles only the approver has the overdue orders, directly
+      // below Needs you.
+      const overdue = role === "APPROVER";
+      expect(names.slice(0, overdue ? 4 : 3)).toEqual([
         "Needs you",
+        ...(overdue ? ["Most overdue, by amount"] : []),
         "My timeline",
         "Your numbers",
       ]);
