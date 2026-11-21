@@ -1,14 +1,20 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
+import "reflect-metadata";
 import { describe, expect, it } from "vitest";
+import { MasterDataModule } from "../master-data/master-data.module.js";
+import { MasterDataService } from "../master-data/master-data.service.js";
+import { OrdersModule } from "../orders/orders.module.js";
+import { OrdersService } from "../orders/orders.service.js";
+import { OrdersWriteService } from "../orders/orders-write.service.js";
 
 // Nothing in the Spark module may import a service that writes, approves, pays,
 // posts or sends: what a model says can only ever reach the code listed here.
 // It is the AI module's check (ai-imports.test.ts), made for Spark. A new
 // import fails the test until a person has decided that what it reaches is
-// read-only and adds it below, by name, with a reason. The story that adds
-// Spark's tools adds the read services they call to this list the same way.
+// read-only and adds it below, by name, with a reason. Spark's tools reach two
+// read services, named below, and no other service of orders or master data.
 
 const SRC = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const SPARK_DIRECTORY = resolve(SRC, "modules/spark");
@@ -23,8 +29,18 @@ const ALLOWED_OUTSIDE: Readonly<Record<string, string>> = {
   "modules/ai/domain/ai-errors.js":
     "the gateway's own error classes and mapping",
   "modules/ai/domain/ai-call-context.js": "the labels a call must carry",
+  "modules/ai/domain/read-only-tool.js":
+    "defineReadOnlyTool: the only kind of tool the gateway takes, with no write path",
   "modules/ai/providers/mock-scripts.js":
     "the registry Spark's offline script is added to",
+  "modules/orders/orders.service.js":
+    "the orders reader: lists and reads, and masks money by role",
+  "modules/orders/orders.module.js":
+    "exports the reader and nothing that writes an order",
+  "modules/master-data/master-data.service.js":
+    "the item reader: lists and reads, and masks prices by role",
+  "modules/master-data/master-data.module.js":
+    "exports the item reader and the lookups",
   "audit/audit.service.js":
     "the audit writer, to record a question and an answer",
   "audit/audit.module.js": "wires the audit writer",
@@ -144,17 +160,34 @@ describe("what the Spark module imports", () => {
     expect(users).toEqual([REPOSITORY_FILE]);
   });
 
+  it("imports an orders module that exports the reader and not the writer, and a master data module that exports no writer", () => {
+    // The second control: even a file that named the writer could not inject it.
+    const ordersExports = Reflect.getMetadata(
+      "exports",
+      OrdersModule,
+    ) as unknown[];
+    expect(ordersExports).toContain(OrdersService);
+    expect(ordersExports).not.toContain(OrdersWriteService);
+    const masterExports = Reflect.getMetadata(
+      "exports",
+      MasterDataModule,
+    ) as unknown[];
+    expect(masterExports).toContain(MasterDataService);
+  });
+
   describe("the check itself", () => {
     const here = join(SPARK_DIRECTORY, "spark.service.ts");
 
     it("flags an orders, workflows, approvals, master data, queue or storage service, and a package it has no business with", () => {
       for (const specifier of [
         "../orders/orders-write.service.js",
-        "../orders/orders.service.js",
+        "../orders/order-number.allocator.js",
+        "../orders/sales-order.repository.js",
         "../workflows/workflows.service.js",
         "../workflows/spr-approval.service.js",
         "../governance/authorisation.service.js",
-        "../master-data/master-data.service.js",
+        "../master-data/stock-lookup.js",
+        "../master-data/item-lookup.js",
         "../../queue/queue.service.js",
         "../../storage/storage.service.js",
       ]) {
@@ -187,6 +220,15 @@ describe("what the Spark module imports", () => {
       }
     });
 
+    it("refuses the provider port itself: a tool result type comes from the mock's own types", () => {
+      expect(
+        violationsIn(
+          here,
+          'import type { AiToolResultPart } from "../ai/domain/llm-provider.js";',
+        ),
+      ).toEqual(["../ai/domain/llm-provider.js"]);
+    });
+
     it("lets only the repository import Prisma", () => {
       const prisma =
         'import { Prisma } from "../../generated/prisma/client.js";';
@@ -202,6 +244,8 @@ describe("what the Spark module imports", () => {
           here,
           [
             'import { LlmGateway } from "../ai/llm-gateway.js";',
+            'import { OrdersService } from "../orders/orders.service.js";',
+            'import { MasterDataService } from "../master-data/master-data.service.js";',
             'import { AuditService } from "../../audit/audit.service.js";',
             'import { x } from "./domain/spark-history.js";',
             'import { z } from "zod";',

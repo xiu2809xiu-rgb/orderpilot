@@ -7,6 +7,8 @@ import type {
   SparkConversation,
   SparkConversationDetail,
   SparkCreateConversation,
+  SparkSource,
+  SparkStep,
 } from "@orderpilot/shared";
 import { AuditService } from "../../audit/audit.service.js";
 import {
@@ -18,7 +20,7 @@ import { AppConfig } from "../../config/app-config.js";
 import { Database } from "../../database/database.js";
 import { AiStatusService } from "../ai/ai-status.service.js";
 import type { AiCallContext } from "../ai/domain/ai-call-context.js";
-import { LlmGateway } from "../ai/llm-gateway.js";
+import { LlmGateway, type AiStreamEvent } from "../ai/llm-gateway.js";
 import { isAbandoned, type PendingLimits } from "./domain/pending-question.js";
 import { failureOf, type SparkFailure } from "./domain/spark-failure.js";
 import { HISTORY_MESSAGE_LIMIT, historyOf } from "./domain/spark-history.js";
@@ -34,6 +36,8 @@ import {
   type StoredMessage,
 } from "./spark-conversation.repository.js";
 import { conversationOf, messageOf } from "./spark-message.mapper.js";
+import { SparkRun } from "./spark-run.js";
+import { SPARK_TOOL_NAMES, SparkToolset } from "./spark-toolset.js";
 
 /** Injection token for the clock, so a test fixes the time. */
 export const SPARK_NOW = "SPARK_NOW";
@@ -67,9 +71,15 @@ function fingerprintOf(text: string): { length: number; sha256: string } {
   };
 }
 
+/** What a question's tools did, as it is stored beside the answer. */
+interface Trail {
+  readonly sources: readonly SparkSource[];
+  readonly steps: readonly SparkStep[];
+}
+
 /** What the gateway gave back, reduced to what is stored. */
 type Outcome =
-  | {
+  | ({
       readonly kind: "ok";
       readonly text: string;
       readonly model: string;
@@ -78,15 +88,24 @@ type Outcome =
       readonly outputTokens: number;
       readonly requests: number;
       readonly finishReason: string;
-    }
-  | { readonly kind: "failed"; readonly failure: SparkFailure };
+    } & Trail)
+  | ({ readonly kind: "failed"; readonly failure: SparkFailure } & Trail);
+
+/** A refused tool is told to the person in the one word a destination refusal uses. */
+const REFUSED_TOOL: SparkFailure = {
+  code: "refused",
+  outcome: "refused",
+  reasonCode: "tool-refused",
+};
 
 /**
  * Spark's use cases. A question is two small transactions around the gateway
  * call, because the gateway refuses to run inside one: the first stores the
  * question and its audit event, the second stores the answer and its audit
  * event. Between them the question is pending, and that is what makes a
- * second question wait its turn. This service calls no model tool yet.
+ * second question wait its turn. The model may ask for Spark's read-only
+ * tools while it works; they run as the person asking, outside both
+ * transactions, and what they looked at is stored with the answer.
  */
 @Injectable()
 export class SparkService {
@@ -95,6 +114,7 @@ export class SparkService {
     private readonly conversations: SparkConversationRepository,
     @Inject(LlmGateway) private readonly gateway: LlmGateway,
     @Inject(AiStatusService) private readonly status: AiStatusService,
+    @Inject(SparkToolset) private readonly toolset: SparkToolset,
     @Inject(AuditService) private readonly audit: AuditService,
     @Inject(Database) private readonly database: Database,
     @Inject(AppConfig) private readonly config: AppConfig,
@@ -285,9 +305,15 @@ export class SparkService {
   }
 
   /**
-   * The model call, outside any transaction. Whatever goes wrong becomes a
-   * failed answer with a safe code: the gateway has already written its usage
-   * record and, for a refusal, its audit event.
+   * The model call, outside any transaction, with Spark's tools for this one
+   * question. Whatever goes wrong becomes a failed answer with a safe code: the
+   * gateway has already written its usage record and, for a refusal, its audit
+   * event. What the tools looked at is kept on a failure too, because the
+   * record of what was read matters most when something went wrong.
+   *
+   * It reads the gateway's stream and not its plain call because only the
+   * stream reports each tool call, including the ones a permission refused. No
+   * text reaches the person as it arrives: the answer is stored whole.
    */
   private async callGateway(
     caller: SparkCaller,
@@ -295,31 +321,51 @@ export class SparkService {
     question: string,
     traceId: string,
   ): Promise<Outcome> {
+    const run = new SparkRun();
     try {
       const earlier = await this.conversations.before(
         asked.conversationId,
         asked.seq,
         HISTORY_MESSAGE_LIMIT,
       );
-      const result = await this.gateway.generateText(
+      let final: Extract<AiStreamEvent, { type: "final" }> | null = null;
+      for await (const event of this.gateway.streamText(
         this.contextOf(caller, traceId),
         {
           instructions: SPARK_INSTRUCTIONS,
           messages: [...historyOf(earlier), { role: "user", text: question }],
+          tools: this.toolset.forRun(run),
         },
-      );
+      )) {
+        if (event.type === "tool-activity") {
+          run.noteStep({ tool: event.name, status: event.status });
+        } else if (event.type === "final") {
+          final = event;
+        }
+      }
+      if (final === null) throw new Error("The gateway ended with no answer.");
+      const trail = { sources: run.sources, steps: run.steps };
+      if (run.hasUnresolvedRefusal(SPARK_TOOL_NAMES)) {
+        return { kind: "failed", failure: REFUSED_TOOL, ...trail };
+      }
       return {
         kind: "ok",
-        text: result.text,
-        model: result.usage.model,
-        mock: result.mock,
-        inputTokens: result.usage.inputTokens,
-        outputTokens: result.usage.outputTokens,
-        requests: result.usage.requests,
-        finishReason: result.finishReason,
+        text: final.text,
+        model: final.usage.model,
+        mock: final.mock,
+        inputTokens: final.usage.inputTokens,
+        outputTokens: final.usage.outputTokens,
+        requests: final.usage.requests,
+        finishReason: final.finishReason,
+        ...trail,
       };
     } catch (error) {
-      return { kind: "failed", failure: failureOf(error) };
+      return {
+        kind: "failed",
+        failure: failureOf(error),
+        sources: run.sources,
+        steps: run.steps,
+      };
     }
   }
 
@@ -360,6 +406,8 @@ export class SparkService {
         role: "ASSISTANT",
         actorRole: caller.role,
         traceId,
+        sources: outcome.sources,
+        steps: outcome.steps,
         ...(outcome.kind === "ok"
           ? {
               status: "OK" as const,
@@ -411,8 +459,16 @@ export class SparkService {
       messageId: stored.id,
       questionMessageId: asked.id,
       traceId,
-      tools: [] as string[],
-      sourceCount: 0,
+      // The tools the model asked for, and the ones among them that were refused.
+      tools: [...new Set(outcome.steps.map((step) => step.tool))],
+      refusedTools: [
+        ...new Set(
+          outcome.steps
+            .filter((step) => step.status === "refused")
+            .map((step) => step.tool),
+        ),
+      ],
+      sourceCount: outcome.sources.length,
     };
     if (outcome.kind === "failed") {
       return {

@@ -25,6 +25,7 @@ import { MockBusinessCentralMasterData } from "./mock-business-central-master-da
     CustomerLookup,
     ItemLookup,
   ],
-  exports: [StockLookup, CustomerLookup, ItemLookup],
+  // MasterDataService only reads, and masks by role; Spark's stock tool calls it.
+  exports: [StockLookup, CustomerLookup, ItemLookup, MasterDataService],
 })
 export class MasterDataModule {}

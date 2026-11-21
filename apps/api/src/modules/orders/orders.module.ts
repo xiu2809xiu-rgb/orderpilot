@@ -26,6 +26,9 @@ import { OrdersWriteService } from "./orders-write.service.js";
     OrderNumberAllocator,
     OrderMasking,
   ],
-  exports: [OrderDirectoryModule, OrderNumberAllocator],
+  // OrdersService only reads. OrdersWriteService stays inside this module, so a
+  // module that imports OrdersModule (Spark does, for its read-only tools)
+  // cannot inject anything that writes an order.
+  exports: [OrderDirectoryModule, OrderNumberAllocator, OrdersService],
 })
 export class OrdersModule {}
