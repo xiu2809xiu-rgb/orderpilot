@@ -1,6 +1,6 @@
 import {
   isRefusalAction,
-  type AuditEvent,
+  type StoredAuditEvent,
   type AuditEventView,
   type MaskingRule,
   type Role,
@@ -9,7 +9,7 @@ import { maskChanges } from "./domain/audit-masking.js";
 
 /** The name to show for whoever acted: the person, the system part or the model. */
 export function actorNameOf(
-  actor: AuditEvent["actor"],
+  actor: StoredAuditEvent["actor"],
   names: ReadonlyMap<string, string>,
 ): string {
   switch (actor.kind) {
@@ -24,7 +24,7 @@ export function actorNameOf(
 
 /** One event as the viewer receives it, with its changes masked for `role`. */
 export function toEventView(
-  record: { sequence: number; event: AuditEvent },
+  record: { sequence: number; event: StoredAuditEvent },
   role: Role,
   rules: readonly MaskingRule[],
   names: ReadonlyMap<string, string>,

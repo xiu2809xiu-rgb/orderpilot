@@ -1,10 +1,11 @@
 import { Inject, Injectable } from "@nestjs/common";
 import {
   REFUSAL_ACTION_SUFFIXES,
-  type AuditActor,
   type AuditEvent,
   type PageQuery,
-  type Role,
+  type StoredAuditActor,
+  type StoredAuditEvent,
+  type StoredRole,
 } from "@orderpilot/shared";
 import { BaseRepository, type Page } from "../common/repository.js";
 import { Database } from "../database/database.js";
@@ -18,7 +19,7 @@ const CHAIN_LOCK_KEY = 7_340_289_113_070_251n;
 export interface AuditSearch {
   readonly actorKind?: "user" | "system" | "ai";
   readonly actorUserId?: string;
-  readonly role?: Role;
+  readonly role?: StoredRole;
   /** An action that starts with this text. */
   readonly action?: string;
   readonly entityType?: string;
@@ -35,12 +36,15 @@ export interface AuditSearch {
 /** An event with its place in the chain, which the viewer shows. */
 export interface AuditRecord {
   readonly sequence: number;
-  readonly event: AuditEvent;
+  readonly event: StoredAuditEvent;
 }
 
 /** The only place the audit table is read or written. */
 @Injectable()
-export class AuditEventRepository extends BaseRepository<AuditEvent, string> {
+export class AuditEventRepository extends BaseRepository<
+  StoredAuditEvent,
+  string
+> {
   protected readonly entityName = "Audit event";
 
   constructor(@Inject(Database) private readonly database: Database) {
@@ -68,7 +72,7 @@ export class AuditEventRepository extends BaseRepository<AuditEvent, string> {
     return last?.hash ?? null;
   }
 
-  async insert(event: AuditEvent): Promise<AuditEvent> {
+  async insert(event: AuditEvent): Promise<StoredAuditEvent> {
     const row = await this.database.client.auditEvent.create({
       data: {
         id: event.id,
@@ -97,7 +101,7 @@ export class AuditEventRepository extends BaseRepository<AuditEvent, string> {
     return toEvent(row);
   }
 
-  async findById(id: string): Promise<AuditEvent | null> {
+  async findById(id: string): Promise<StoredAuditEvent | null> {
     const row = await this.database.client.auditEvent.findUnique({
       where: { id },
     });
@@ -105,7 +109,7 @@ export class AuditEventRepository extends BaseRepository<AuditEvent, string> {
   }
 
   /** Newest first. */
-  async list(query: PageQuery): Promise<Page<AuditEvent>> {
+  async list(query: PageQuery): Promise<Page<StoredAuditEvent>> {
     const [rows, total] = await Promise.all([
       this.database.client.auditEvent.findMany({
         orderBy: { sequence: "desc" },
@@ -181,7 +185,7 @@ export class AuditEventRepository extends BaseRepository<AuditEvent, string> {
   }
 
   /** The whole trail, oldest first, a batch at a time. */
-  async *readChain(batchSize = 500): AsyncGenerator<AuditEvent> {
+  async *readChain(batchSize = 500): AsyncGenerator<StoredAuditEvent> {
     let after: bigint | null = null;
     for (;;) {
       const rows: AuditEventRow[] =
@@ -251,7 +255,7 @@ function toRecord(row: AuditEventRow): AuditRecord {
   return { sequence: Number(row.sequence), event: toEvent(row) };
 }
 
-function toActor(row: AuditEventRow): AuditActor {
+function toActor(row: AuditEventRow): StoredAuditActor {
   switch (row.actorKind) {
     case "user":
       if (row.actorUserId === null || row.actorRole === null) {
@@ -265,7 +269,7 @@ function toActor(row: AuditEventRow): AuditActor {
   }
 }
 
-function toEvent(row: AuditEventRow): AuditEvent {
+function toEvent(row: AuditEventRow): StoredAuditEvent {
   return {
     id: row.id,
     occurredAt: row.occurredAt.toISOString(),
