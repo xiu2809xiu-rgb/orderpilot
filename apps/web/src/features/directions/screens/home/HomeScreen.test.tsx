@@ -372,18 +372,10 @@ describe("the home screen", () => {
 
   it("lists no tasks for a role with no inbox, and does not ask for any", async () => {
     const calls = stubApi();
-    // Its list is chosen by what it may do: it manages no settings and reads no
-    // audit trail, so the most overdue orders stand where Needs you would be.
-    const management = sessionFor("MANAGEMENT");
+    // Management holds neither settings.manage nor audit.read by default.
     useSessionStore.setState({
       status: "active",
-      session: {
-        ...management,
-        permissions: management.permissions.filter(
-          (permission) =>
-            permission !== "settings.manage" && permission !== "audit.read",
-        ),
-      },
+      session: sessionFor("MANAGEMENT"),
     });
     home();
     // Its own list stands where Needs you would be, and nothing says a part is missing.

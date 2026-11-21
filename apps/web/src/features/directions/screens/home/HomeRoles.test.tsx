@@ -19,7 +19,8 @@ import {
 /**
  * Which sections the home page draws for each of the nine roles, and what each
  * holds. The block a role has besides its main one (the approver's overdue
- * orders, the administrator's refused actions) is the one its permissions bring. The old home gave a role its tiles, its list, its quick actions, the
+ * orders, the administrator's refused actions) is the one its permissions
+ * bring. The old home gave a role its tiles, its list, its quick actions, the
  * trend chart for Management and the flows; every one of those is here, and a
  * section that is not for the role is not drawn at all.
  */
