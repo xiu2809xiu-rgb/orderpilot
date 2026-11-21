@@ -1,6 +1,7 @@
 import type { Role } from "@orderpilot/shared";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, Route, UserCog } from "lucide-react";
+import { lazy, Suspense, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
@@ -13,10 +14,16 @@ import {
   DropdownMenuTrigger,
 } from "./overlays/dropdown-menu";
 import { demoLogin, fetchAuthOptions } from "@/lib/api/auth";
+import { anyFormDirty } from "@/lib/dirty-forms";
 import { useDemoTour } from "@/stores/demoTour";
 import { useSessionStore } from "@/stores/session";
 import { splitDemoRoles, type DemoRole } from "../demoRoles";
 import { announceStay, landingAfterSwitch, startAsNewRole } from "./roleSwitch";
+
+// Only needed when someone switches over unsaved input.
+const RoleSwitchDialog = lazy(() =>
+  import("./RoleSwitchDialog").then((m) => ({ default: m.RoleSwitchDialog })),
+);
 
 /** One role in the menu: its number when it has one, the team, the person and what the team does. */
 function RoleItem({
@@ -78,6 +85,11 @@ export function RoleSwitcher() {
     retry: false,
   });
 
+  // The role asked for while the question is open.
+  const [asking, setAsking] = useState<Role | null>(null);
+  // Loaded on the first ask, then kept so that closing can return focus.
+  const [askedOnce, setAskedOnce] = useState(false);
+
   if (!options.data?.demoMode) return null;
 
   async function switchTo(role: Role) {
@@ -91,55 +103,77 @@ export function RoleSwitcher() {
     else announceStay(pathname);
   }
 
+  // A switch drops what forms and reviews hold, so unsaved input is asked about first.
+  function pick(role: Role) {
+    if (role === current) return;
+    if (anyFormDirty()) {
+      setAskedOnce(true);
+      setAsking(role);
+    } else void switchTo(role);
+  }
+
   const { flow, more } = splitDemoRoles(options.data.demoRoles);
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="dx-bar-role">
-          <UserCog aria-hidden="true" />
-          {/* Icon only on a phone, so the trail keeps room for the record number. */}
-          <span className="max-sm:sr-only">{t("demo.switcher")}</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" sideOffset={14} className="w-96">
-        <DropdownMenuLabel className="font-normal text-muted-foreground">
-          {t("demo.switcherHint")}
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        {flow.map((entry) => (
-          <RoleItem
-            key={entry.role}
-            entry={entry}
-            step={entry.step}
-            current={entry.role === current}
-            onPick={(role) => {
-              void switchTo(role);
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" size="sm" className="dx-bar-role">
+            <UserCog aria-hidden="true" />
+            {/* Icon only on a phone, so the trail keeps room for the record number. */}
+            <span className="max-sm:sr-only">{t("demo.switcher")}</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" sideOffset={14} className="w-96">
+          <DropdownMenuLabel className="font-normal text-muted-foreground">
+            {t("demo.switcherHint")}
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {flow.map((entry) => (
+            <RoleItem
+              key={entry.role}
+              entry={entry}
+              step={entry.step}
+              current={entry.role === current}
+              onPick={pick}
+            />
+          ))}
+          {more.length > 0 ? <DropdownMenuSeparator /> : null}
+          {more.map((entry) => (
+            <RoleItem
+              key={entry.role}
+              entry={entry}
+              current={entry.role === current}
+              onPick={pick}
+            />
+          ))}
+          <DropdownMenuSeparator />
+          {/* The tour walks the sales flow across the roles above, on the sample data. */}
+          <DropdownMenuItem
+            onSelect={() => {
+              useDemoTour.getState().start();
+            }}
+          >
+            <Route aria-hidden="true" />
+            {t("tour.start")}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      {askedOnce ? (
+        <Suspense fallback={null}>
+          <RoleSwitchDialog
+            open={asking !== null}
+            onStay={() => {
+              setAsking(null);
+            }}
+            onSwitch={() => {
+              const role = asking;
+              setAsking(null);
+              if (role) void switchTo(role);
             }}
           />
-        ))}
-        {more.length > 0 ? <DropdownMenuSeparator /> : null}
-        {more.map((entry) => (
-          <RoleItem
-            key={entry.role}
-            entry={entry}
-            current={entry.role === current}
-            onPick={(role) => {
-              void switchTo(role);
-            }}
-          />
-        ))}
-        <DropdownMenuSeparator />
-        {/* The tour walks the sales flow across the roles above, on the sample data. */}
-        <DropdownMenuItem
-          onSelect={() => {
-            useDemoTour.getState().start();
-          }}
-        >
-          <Route aria-hidden="true" />
-          {t("tour.start")}
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </Suspense>
+      ) : null}
+    </>
   );
 }

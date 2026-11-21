@@ -227,6 +227,39 @@ test.describe("New order and draft editing", () => {
     await voidDraft(page, orderNo);
   });
 
+  test("a possible match is chosen with the down arrow and Enter, and never by Enter on the typed text alone", async ({
+    page,
+  }) => {
+    await signInAs(page, "SUPPORT");
+    await page.goto("/orders/new");
+    await expect(
+      page.getByRole("heading", { level: 1, name: "New order" }),
+    ).toBeVisible();
+    const customer = page.getByRole("combobox", { name: /^Customer$/ });
+    const possible = page.getByRole("option", {
+      name: /Vellamar Network.*possible match/,
+    });
+
+    // A customer of the base data set, misspelt by one letter: the demo
+    // storyline's customer is not in the data this suite runs on in CI.
+    // At the speed of a typist: the arrow comes before the search has
+    // answered, which is where a component test, that waits, never looked.
+    await customer.click();
+    await page.keyboard.type("Vellamor");
+    await page.keyboard.press("ArrowDown");
+    await expect(possible).toHaveAttribute("aria-selected", "true");
+    // Seen and highlighted, not chosen: the box still holds what was typed.
+    await expect(customer).toHaveValue("Vellamor");
+    await page.keyboard.press("Enter");
+    await expect(customer).toHaveValue(/^C-\d{4}\s+Vellamar Network/);
+
+    // Enter on the typed text alone never chooses the look-alike.
+    await customer.fill("Vellamor");
+    await expect(possible).toBeVisible();
+    await page.keyboard.press("Enter");
+    await expect(customer).toHaveValue("Vellamor");
+  });
+
   test("Warehouse sees no New order button, and the server refuses its writes", async ({
     page,
   }) => {

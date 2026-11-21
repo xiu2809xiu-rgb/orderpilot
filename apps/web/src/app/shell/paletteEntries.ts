@@ -1,10 +1,11 @@
 import type { Session } from "@orderpilot/shared";
 import type { TFunction } from "i18next";
-import { Settings, type LucideIcon } from "lucide-react";
+import { Settings, Sparkles, Upload, type LucideIcon } from "lucide-react";
 import { actionsFor, type AppAction } from "@/lib/actions";
 import type { RecordTab } from "@/stores/recordTabs";
 import { matchesQuery } from "./paletteMatch";
 import { panelMenu } from "./panelMenu";
+import { UPLOAD_PATH } from "./demoParts";
 
 /** A page or an action: one line with an icon, and what happens on Enter. */
 export interface PlainEntry {
@@ -20,6 +21,21 @@ export interface PlainEntry {
 
 /** The theme and sign-out sit at the end: they are the ones nobody searches for. */
 const LAST = ["theme.light", "theme.dark", "session.signOut"];
+
+/** The id of the entry that opens the Spark panel. */
+export const SPARK_ENTRY_ID = "spark.open";
+
+/**
+ * The two demo tools of the top bar, with the labels it uses. They are not
+ * places of the menu, so they never join "Go to": that list is the menu and
+ * nothing else (ADR 0036, and the end-to-end test of every role's menu). They
+ * get a group of their own. A real deployment has neither.
+ */
+export interface DemoPlaces {
+  upload: boolean;
+  spark: boolean;
+  openSpark: () => void;
+}
 
 /** The places of the side panel, in its order, then Settings. */
 export function pageEntries(
@@ -44,6 +60,39 @@ export function pageEntries(
       keywords: [],
       to: "/settings",
     },
+  ];
+}
+
+/** What a demo session adds to the palette, under its own heading. */
+export function demoEntries(t: TFunction, demo: DemoPlaces): PlainEntry[] {
+  return [
+    ...(demo.upload
+      ? [
+          {
+            id: "upload",
+            label: t("shell.upload"),
+            icon: Upload,
+            keywords: ["document", "purchase order", "read"],
+            to: UPLOAD_PATH,
+          },
+        ]
+      : []),
+    ...(demo.spark
+      ? [
+          {
+            id: SPARK_ENTRY_ID,
+            label: t("shell.spark"),
+            icon: Sparkles,
+            keywords: ["ask", "stock", "sales"],
+            action: {
+              id: SPARK_ENTRY_ID,
+              label: "shell.spark",
+              icon: Sparkles,
+              run: demo.openSpark,
+            },
+          },
+        ]
+      : []),
   ];
 }
 

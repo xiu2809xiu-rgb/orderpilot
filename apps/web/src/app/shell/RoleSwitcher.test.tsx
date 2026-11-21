@@ -160,13 +160,13 @@ describe("the Demo role menu", () => {
     expect(screen.getAllByRole("separator")).toHaveLength(3);
   });
 
-  it("says what a change of role does: an open order stays open", async () => {
+  it("says what a change of role does: an order stays open for a role that may read orders, and each role keeps its own records", async () => {
     const user = userEvent.setup();
     open("/", "FINANCE");
     await user.click(await screen.findByRole("button", { name: "Demo role" }));
     expect(
       await screen.findByText(
-        "Switch to another role. An order you have open stays open.",
+        "Switch to another role. An order on screen stays open for a role that may read orders, and each role keeps its own open records.",
       ),
     ).toBeInTheDocument();
   });

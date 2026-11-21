@@ -47,17 +47,29 @@ class WatchingObserver {
   }
 }
 
-function setup(turn = 1) {
+/** The newest answer, with its start at `start` in the region content. */
+function fakeAnswer(geometry: Geometry, start: { value: number }) {
+  const answer = document.createElement("div");
+  answer.getBoundingClientRect = () =>
+    ({ top: start.value - geometry.scrollTop }) as DOMRect;
+  return answer;
+}
+
+function setup(turn = 1, answerStart: number | null = null) {
   const geometry: Geometry = {
     scrollHeight: 1000,
     clientHeight: 400,
     scrollTop: 0,
   };
   const region = fakeRegion(geometry);
+  region.getBoundingClientRect = () => ({ top: 0 }) as DOMRect;
   const content = document.createElement("ol");
+  const start = { value: answerStart ?? 0 };
+  const answer = fakeAnswer(geometry, start);
+  const newest = answerStart === null ? undefined : () => answer;
   const view = renderHook(
     ({ id }) => {
-      useStayAtEnd({ current: region }, { current: content }, id);
+      useStayAtEnd({ current: region }, { current: content }, id, newest);
     },
     { initialProps: { id: turn } },
   );
@@ -73,7 +85,7 @@ function setup(turn = 1) {
       region.dispatchEvent(new Event("scroll"));
     });
   };
-  return { geometry, view, grow, scrollTo };
+  return { geometry, view, grow, scrollTo, start };
 }
 
 describe("useStayAtEnd", () => {
@@ -121,5 +133,53 @@ describe("useStayAtEnd", () => {
     expect(geometry.scrollTop).toBe(750);
     grow(60);
     expect(geometry.scrollTop).toBe(810);
+  });
+
+  describe("with the start of the newest answer", () => {
+    it("follows a short answer to the end", () => {
+      // The answer starts 300 px above the end of a 400 px view: it fits.
+      const { geometry, grow } = setup(1, 800);
+      grow(100);
+      expect(geometry.scrollTop).toBe(700);
+    });
+
+    it("holds the start of a tall answer at the top of the view", () => {
+      const { geometry, grow } = setup(1, 900);
+      grow(200);
+      expect(geometry.scrollTop).toBe(800);
+      grow(300);
+      // The end is now 1500 - 400 = 1100, but the answer starts at 900.
+      expect(geometry.scrollTop).toBe(900);
+      grow(500);
+      expect(geometry.scrollTop).toBe(900);
+    });
+
+    it("leaves a scroll by the person alone, up or down", () => {
+      const { geometry, grow, scrollTo } = setup(1, 900);
+      grow(600);
+      expect(geometry.scrollTop).toBe(900);
+      scrollTo(1000);
+      grow(200);
+      expect(geometry.scrollTop).toBe(1000);
+      scrollTo(300);
+      grow(200);
+      expect(geometry.scrollTop).toBe(300);
+    });
+
+    it("goes to the end when the person scrolls there, and follows on", () => {
+      const { geometry, grow, scrollTo } = setup(1, 900);
+      grow(600);
+      scrollTo(geometry.scrollHeight - geometry.clientHeight);
+      grow(100);
+      expect(geometry.scrollTop).toBe(1300);
+    });
+
+    it("goes back to the end for a new question", () => {
+      const { geometry, view, grow } = setup(1, 900);
+      grow(600);
+      geometry.scrollHeight += 150;
+      view.rerender({ id: 2 });
+      expect(geometry.scrollTop).toBe(geometry.scrollHeight - 400);
+    });
   });
 });

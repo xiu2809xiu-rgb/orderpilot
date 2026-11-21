@@ -33,6 +33,8 @@ export interface RecordHit {
   po?: string;
   /** Spectra's word for where the order stands. */
   stage?: string;
+  /** An order entered here and voided: it is listed, and marked. */
+  voided?: boolean;
   to: string;
   /** The texts the search was matched on, used to put the best match first. */
   keys: readonly string[];
@@ -55,6 +57,7 @@ export const fromOrders = (rows: readonly OrdersList200DataItem[]) =>
     name: row.customerName ?? row.customerNo,
     po: row.externalDocumentNo,
     ...(row.workflowStatus ? { stage: row.workflowStatus } : {}),
+    ...(row.captureState === "void" ? { voided: true } : {}),
     to: recordHref.order(row.orderNo),
     keys: [row.orderNo, row.externalDocumentNo, row.customerNo],
   }));

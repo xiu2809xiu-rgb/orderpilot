@@ -6,6 +6,7 @@ import type { AppAction } from "@/lib/actions";
 import { PaletteDialog } from "./PaletteDialog";
 import { PaletteList, rowValue } from "./PaletteList";
 import { PaletteNotices } from "./PaletteNotices";
+import { SPARK_ENTRY_ID } from "./paletteEntries";
 import { NAMESPACES, usePaletteModel } from "./paletteModel";
 
 interface CommandPaletteProps {
@@ -55,6 +56,9 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   const [highlighted, setHighlighted] = useState("");
   const { query, sections, count, lookedUp, records } = usePaletteModel(raw);
   const opener = useRef<HTMLElement | null>(null);
+  // Spark takes focus into its own input as it opens: handing focus back to
+  // the opener at the same moment would take it from there.
+  const handsFocusOn = useRef(false);
 
   // Radix returns focus to a trigger, and the palette has none: remember who
   // had focus before it opened and give it back on close.
@@ -85,6 +89,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   }
 
   function run(action: AppAction) {
+    handsFocusOn.current = action.id === SPARK_ENTRY_ID;
     onOpenChange(false);
     void action.run({
       navigate: (to) => {
@@ -103,9 +108,17 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
       onValueChange={setHighlighted}
       onCloseAutoFocus={(event) => {
         event.preventDefault();
-        const target = opener.current?.isConnected
-          ? opener.current
-          : document.getElementById("main");
+        if (handsFocusOn.current) {
+          handsFocusOn.current = false;
+          return;
+        }
+        // The body is what has focus when the palette opens from the keyboard
+        // with nothing selected: giving focus back to it would leave it nowhere.
+        const remembered = opener.current;
+        const target =
+          remembered?.isConnected && remembered !== document.body
+            ? remembered
+            : document.getElementById("main");
         target?.focus();
       }}
     >

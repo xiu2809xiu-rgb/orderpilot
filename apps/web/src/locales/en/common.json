@@ -91,6 +91,8 @@
     "resultsCount_other": "{{count}} results",
     "recent": "Opened lately",
     "goTo": "Go to",
+    "demo": "Demo",
+    "void": "Void",
     "actions": "Actions",
     "groups": {
       "order": "Orders",
@@ -125,7 +127,13 @@
   },
   "demo": {
     "switcher": "Demo role",
-    "switcherHint": "Switch to another role. An order you have open stays open.",
+    "switcherHint": "Switch to another role. An order on screen stays open for a role that may read orders, and each role keeps its own open records.",
+    "switchAsk": {
+      "title": "Switch role?",
+      "body": "Anything on this page that is not saved may be lost.",
+      "switch": "Switch role",
+      "stay": "Stay here"
+    },
     "current": "Current role",
     "jobs": {
       "SUPPORT": "Takes in the customer's order and sends the proforma invoice",
