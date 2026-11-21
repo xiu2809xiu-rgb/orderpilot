@@ -46,7 +46,9 @@ export function onStay(listener: StayListener): () => void {
  * given client only holds. What is on screen is not touched here. The sign-in
  * answer empties and asks again before the store holds the new person (`begin`
  * in `lib/api/auth.ts`), the one place that can promise no render pairs the
- * new name with the old figures.
+ * new name with the old figures. It does only synchronous work now, and stays
+ * promise-shaped so the callers that await it (the role menu, and Upload's
+ * switch to Support in screens/upload) keep working unchanged.
  */
 export function startAsNewRole(client: QueryClient): Promise<void> {
   forgetKeptLists();
