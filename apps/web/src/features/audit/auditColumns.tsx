@@ -42,7 +42,7 @@ export function useAuditColumns(onOpen: (id: string) => void, centre?: number) {
         kind: "number",
         cell: (row) =>
           row.sequence === centre ? (
-            <span className="flex flex-col items-start gap-1">
+            <span className="flex flex-col items-end gap-1">
               <span data-numeric>{row.sequence}</span>
               <StatusBadge tone="info">{t("table.centre")}</StatusBadge>
             </span>

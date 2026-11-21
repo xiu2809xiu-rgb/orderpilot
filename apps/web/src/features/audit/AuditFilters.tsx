@@ -113,6 +113,13 @@ export function AuditFilters({
           className="col-span-full grid w-full basis-full grid-cols-1 gap-s2 sm:grid-cols-2 lg:grid-cols-4"
         >
           <legend className="sr-only">{t("filters.region")}</legend>
+          {/* First, so that when their options fail to load, the error sits
+              above the other fields instead of splitting them in two. */}
+          <AuditPickers
+            actor={text("actor")}
+            action={text("action")}
+            setFilter={setFilter}
+          />
           <Field label={t("filters.kind")} htmlFor="audit-filter-kind">
             <NativeSelect
               id="audit-filter-kind"
@@ -145,11 +152,6 @@ export function AuditFilters({
               ))}
             </NativeSelect>
           </Field>
-          <AuditPickers
-            actor={text("actor")}
-            action={text("action")}
-            setFilter={setFilter}
-          />
           {text_input("entity", t("filters.entity"), {
             placeholder: t("filters.entityHint"),
           })}
