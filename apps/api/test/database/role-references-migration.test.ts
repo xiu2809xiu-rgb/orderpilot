@@ -17,6 +17,7 @@ const MIGRATION_SQL = readFileSync(
 );
 
 const ACTOR = "00000000-0000-4000-8000-0000000000a1";
+const NAMED_PERSON = "00000000-0000-4000-8000-0000000000b2";
 
 describe("the migration that moves stored role references to the approvers (#344)", () => {
   let t: TestContext;
@@ -87,11 +88,13 @@ describe("the migration that moves stored role references to the approvers (#344
     const notice = (
       recipientRole: "MANAGEMENT" | "AUDITOR" | "SUPPORT",
       message: string,
+      recipientUserId?: string,
     ) =>
       prisma.workflowNotification.create({
         data: {
           kind: "ESCALATION",
           recipientRole,
+          recipientUserId,
           message,
           scheduledFor: now,
         },
@@ -99,6 +102,13 @@ describe("the migration that moves stored role references to the approvers (#344
     const managementNotice = await notice("MANAGEMENT", "to Management");
     const auditorNotice = await notice("AUDITOR", "to the auditor");
     const supportNotice = await notice("SUPPORT", "to Support");
+    // What the sweep writes for a handover: a named person, still under the role
+    // they hold. Only the role moves, the person must stay.
+    const personNotice = await notice(
+      "MANAGEMENT",
+      "to a named person",
+      NAMED_PERSON,
+    );
 
     const definition = await prisma.workflowDefinition.create({
       data: { key: "sales-order", version: 1, name: "Sales order", config: {} },
@@ -193,6 +203,15 @@ describe("the migration that moves stored role references to the approvers (#344
     ];
     expect(moved).toEqual(Array(7).fill("APPROVER"));
 
+    const { rows: personRows } = await client.query<{
+      role: string;
+      person: string | null;
+    }>(
+      'SELECT "recipientRole"::text AS role, "recipientUserId"::text AS person FROM "WorkflowNotification" WHERE id = $1',
+      [personNotice.id],
+    );
+    expect(personRows).toEqual([{ role: "APPROVER", person: NAMED_PERSON }]);
+
     const kept = [
       await roleOf(
         "WorkflowTaskSla",
@@ -223,7 +242,10 @@ describe("the migration that moves stored role references to the approvers (#344
       "SUPPORT",
     ]);
 
-    // Row for row, the audit trail and the click stream are what they were.
+    // Row for row, the audit trail and the click stream are what they were. The
+    // audit equality cannot fail on its own: the append-only trigger would refuse
+    // an UPDATE of an AuditEvent first, so it is a second guard, not the only one.
+    // The click-stream equality has no trigger behind it, so it is the real guard.
     expect(await auditRows()).toEqual(auditBefore);
     expect(await clickRows()).toEqual(clicksBefore);
     await expect(t.app.get(AuditService).verify()).resolves.toMatchObject({
