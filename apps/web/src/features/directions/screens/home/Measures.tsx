@@ -12,8 +12,9 @@ const decimalsOf = (value: number): number => (Number.isInteger(value) ? 0 : 1);
 /**
  * Spectra's five measures from the insights API, for the roles that may read
  * them; a role that may not has no such section. The measures are lab
- * estimates and the page says so. Management also gets the twelve-week trend
- * of each, the insights area's own chart, loaded only when it is wanted.
+ * estimates and the page says so. A role that has the overdue orders block on
+ * its page also gets the twelve-week trend of each, the insights area's own
+ * chart, loaded only when it is wanted.
  */
 export function Measures() {
   const { t } = useTranslation("directions-home");
@@ -55,7 +56,7 @@ export function Measures() {
           </p>
         </HomeQuery>
       </HomeSection>
-      {access.role === "MANAGEMENT" ? <TrendSection /> : null}
+      {access.trend ? <TrendSection /> : null}
     </>
   );
 }

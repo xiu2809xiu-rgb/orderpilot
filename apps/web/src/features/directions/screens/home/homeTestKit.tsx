@@ -1,4 +1,4 @@
-import type { Role, WorkflowTask } from "@orderpilot/shared";
+import type { Permission, Role, WorkflowTask } from "@orderpilot/shared";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
@@ -334,9 +334,27 @@ export function serveHome(api: HomeApi = {}): Served {
  * localStorage, which jsdom keeps from one test to the next, so it starts empty
  * unless a test says it carries on from an earlier screen (`keepDone`).
  */
-export function renderHome(role: Role, options: { keepDone?: boolean } = {}) {
+export function renderHome(
+  role: Role,
+  options: {
+    keepDone?: boolean;
+    /**
+     * The permissions the session holds instead of the role's defaults. Home
+     * chooses its blocks by permission, so a test that is about a block says
+     * which permissions it is about; the role then only says whether there is
+     * an inbox.
+     */
+    permissions?: readonly Permission[];
+  } = {},
+) {
   if (!options.keepDone) localStorage.clear();
-  useSessionStore.setState({ status: "active", session: sessionFor(role) });
+  const session = sessionFor(role);
+  useSessionStore.setState({
+    status: "active",
+    session: options.permissions
+      ? { ...session, permissions: [...options.permissions] }
+      : session,
+  });
   document.cookie = "op_csrf=csrf-token-1";
   // No retries: a failed request must show its error at once, not after a back-off.
   const client = new QueryClient({
@@ -354,3 +372,23 @@ export function renderHome(role: Role, options: { keepDone?: boolean } = {}) {
     </QueryClientProvider>,
   );
 }
+
+/**
+ * The permission sets Home's blocks are chosen by. Each is the least a session
+ * needs to be given that block, plus what the screens around it read.
+ */
+export const HOLDING = {
+  /** Manages settings and reads the audit trail: the rules, the health, the refused actions. */
+  settings: ["settings.manage", "audit.read"],
+  /** Reads the audit trail and does not manage settings: the refused actions. */
+  auditOnly: ["audit.read", "orders.read", "tracker.read", "insights.read"],
+  /** Neither: the overdue orders, and the trend where the insights are read. */
+  tracker: ["orders.read", "tracker.read", "insights.read"],
+  /** Decides approvals and reads the tracker: Needs you, then the overdue orders. */
+  approvals: [
+    "approvals.decide",
+    "orders.read",
+    "tracker.read",
+    "tasks.complete",
+  ],
+} as const satisfies Record<string, readonly Permission[]>;

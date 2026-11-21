@@ -41,11 +41,15 @@ const CELL = "dx-grid-cell flex min-w-0 flex-col gap-6";
  * an inbox has the header (the greeting, one sentence saying how much waits,
  * and the buttons), then "Needs you" across the whole page, because the next
  * act is the reason to open Home; then its timeline beside its numbers, and
- * the measures and the flows where it may read them. A role without an inbox
+ * the measures and the flows where it may read them. A role that may decide
+ * approvals and read the tracker has the overdue orders directly below
+ * "Needs you", across the page. A role without an inbox
  * has the one list that is its own where the tasks would be, with the quick
  * actions the side panel does not already hold beside it when there are any
- * (the system administrator has the health of its services instead, because
- * its menu already holds its places). A section that has nothing for the role
+ * (a role that manages settings has the health of its services instead,
+ * because its menu already holds its places, and below them the refused
+ * actions when it may read the audit trail). Which list is whose is decided
+ * by permission (`homeAccess.ts`). A section that has nothing for the role
  * is not drawn. Done today is kept in the browser per person (`useDoneToday`),
  * because the real tasks API lists only open tasks: a task finished from this
  * screen or from an order's page is noted with its time, and an Undo takes it
@@ -57,7 +61,7 @@ export function HomeBody() {
   const access = useHomeAccess();
   const shortcuts = useShortcutActions();
   const home = useHomeTasks(access.tasks);
-  const queries = useBlockQueries(access.block);
+  const queries = useBlockQueries(access.block, access.extra);
   const focus = useNeedFocus(home.tasks);
   const { done, record, forget } = useDoneToday();
   const completion = useCompleteTask({
@@ -85,6 +89,9 @@ export function HomeBody() {
       {access.block === "tasks" ? (
         <div className="dx-grid flex flex-col gap-6">
           <NeedsYou home={home} completion={completion} focus={focus} />
+          {access.extra ? (
+            <RoleBlock block={access.extra} queries={queries} />
+          ) : null}
           <div className={PAIR}>
             <div className={CELL}>
               <MyTimeline home={home} done={done} />
@@ -111,6 +118,9 @@ export function HomeBody() {
           ) : (
             <RoleBlock block={access.block} queries={queries} />
           )}
+          {access.extra ? (
+            <RoleBlock block={access.extra} queries={queries} />
+          ) : null}
           <YourNumbers />
           <Measures />
           <Flows />

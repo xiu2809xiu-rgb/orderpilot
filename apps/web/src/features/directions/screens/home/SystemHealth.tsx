@@ -8,11 +8,11 @@ import { HomeQuery } from "./HomeQuery";
 import { RowSkeletons } from "./RowSkeletons";
 
 /**
- * The system administrator's first question on arrival: is everything up? Each
+ * The first question of a role that manages settings: is everything up? Each
  * readiness check runs when the page opens, and again on request. The reason a
  * check failed stays in the server's log, so this shows up or down only. It
- * stands where the other roles have their shortcuts, because the administrator's
- * menu already holds its places.
+ * stands where the other roles have their shortcuts, because the menu of a role
+ * that manages settings already holds its places.
  */
 export function SystemHealth({ className }: { className?: string }) {
   const { t } = useTranslation("home");

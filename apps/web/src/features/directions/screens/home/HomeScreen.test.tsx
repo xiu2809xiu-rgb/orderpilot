@@ -372,6 +372,7 @@ describe("the home screen", () => {
 
   it("lists no tasks for a role with no inbox, and does not ask for any", async () => {
     const calls = stubApi();
+    // Management holds neither settings.manage nor audit.read by default.
     useSessionStore.setState({
       status: "active",
       session: sessionFor("MANAGEMENT"),
