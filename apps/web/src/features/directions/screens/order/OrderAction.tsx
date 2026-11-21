@@ -38,7 +38,11 @@ export function OrderAction({
   const { t: tHome } = useTranslation("directions-home");
   const recordsId = useId();
   const { record, forget } = useDoneToday();
-  const completion = useCompleteTask({ onDone: record, onUndone: forget });
+  const completion = useCompleteTask({
+    onDone: record,
+    onUndone: forget,
+    offerOrder: false,
+  });
   // A role with no inbox (the auditor, management) has no task to be told about.
   if (pending || !hasInbox) return null;
   if (!task) {
