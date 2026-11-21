@@ -141,7 +141,7 @@ afterEach(() => {
 });
 
 describe("the Demo role menu", () => {
-  it("lists the six teams in flow order with their numbers and lines, then the others, then the tour", async () => {
+  it("lists the six teams in flow order with their numbers and lines, then the others", async () => {
     const user = userEvent.setup();
     open("/", "FINANCE");
     await user.click(await screen.findByRole("button", { name: "Demo role" }));
@@ -156,11 +156,10 @@ describe("the Demo role menu", () => {
       "System adminDaniel KohSets up users and roles",
       "ManagementSophia ChenReads the tracker and the KPIs",
       "AuditorLucas WongReads the audit trail",
-      "Start the demo tour",
     ]);
     expect(Object.keys(DEMO_PERSONAS)).toHaveLength(ROLES.length);
-    // Two dividers: one under the hint, one before the tour, and one between the six and the rest.
-    expect(screen.getAllByRole("separator")).toHaveLength(3);
+    // Two dividers: one under the hint, and one between the six and the rest.
+    expect(screen.getAllByRole("separator")).toHaveLength(2);
   });
 
   it("says what a change of role does: an order stays open for a role that may read orders, and each role keeps its own records", async () => {
