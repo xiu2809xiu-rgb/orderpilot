@@ -30,6 +30,25 @@ const day = (daysFromNow: number) =>
   new Date(NOW + daysFromNow * 86_400_000).toISOString();
 const dateOnly = (daysFromNow: number) => day(daysFromNow).slice(0, 10);
 
+/** Singapore keeps one offset all year: eight hours ahead of UTC. */
+const SINGAPORE_AHEAD_MS = 8 * 3_600_000;
+
+/**
+ * A moment on Singapore's calendar: so many days from its today, so many hours
+ * after nine in the morning there. An order's sample events are dated with
+ * this and not with "now plus some hours", because the page counts Singapore
+ * calendar days, and four hours after now is tomorrow there for any test that
+ * runs after eight in the evening.
+ */
+const morningIn = (daysFromToday: number, hours: number) => {
+  const midnight =
+    Math.floor((NOW + SINGAPORE_AHEAD_MS) / 86_400_000) * 86_400_000 -
+    SINGAPORE_AHEAD_MS;
+  return new Date(
+    midnight + daysFromToday * 86_400_000 + (9 + hours) * 3_600_000,
+  ).toISOString();
+};
+
 const OPEN_MASK = {
   field: "item.unitPrice",
   classification: "confidential",
@@ -174,7 +193,7 @@ function trackerRow(spec: OrderSpec) {
 
 /** The order's own events: it is paid and waits to be packed. */
 export function timelineOf(spec: OrderSpec) {
-  const at = (hours: number) => day(-spec.orderedDaysAgo + hours / 24);
+  const at = (hours: number) => morningIn(-spec.orderedDaysAgo, hours);
   const steps = [
     ["Customer PO received", "System", 0],
     ["Fields read from the PO", "System", 1],
