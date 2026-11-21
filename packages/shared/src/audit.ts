@@ -1,13 +1,35 @@
 import { z } from "zod";
 import { decimalStringSchema } from "./money.js";
-import { roleSchema } from "./roles.js";
+import { roleSchema, storedRoleSchema } from "./roles.js";
 
+const systemActor = z.object({
+  kind: z.literal("system"),
+  name: z.string().min(1),
+});
+const aiActor = z.object({ kind: z.literal("ai"), model: z.string().min(1) });
+
+/** Who writes an event: a role that can sign in today. */
 export const auditActorSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("user"), userId: z.uuid(), role: roleSchema }),
-  z.object({ kind: z.literal("system"), name: z.string().min(1) }),
-  z.object({ kind: z.literal("ai"), model: z.string().min(1) }),
+  systemActor,
+  aiActor,
 ]);
 export type AuditActor = z.infer<typeof auditActorSchema>;
+
+/**
+ * Who an event says acted, as read back. An old event can name a retired role
+ * (ADR 0058), so reading uses the stored role and writing never does.
+ */
+export const storedAuditActorSchema = z.discriminatedUnion("kind", [
+  z.object({
+    kind: z.literal("user"),
+    userId: z.uuid(),
+    role: storedRoleSchema,
+  }),
+  systemActor,
+  aiActor,
+]);
+export type StoredAuditActor = z.infer<typeof storedAuditActorSchema>;
 
 /** One append-only audit event. Each hash covers the one before it, so a gap shows. */
 export const auditEventSchema = z.object({
@@ -26,6 +48,12 @@ export const auditEventSchema = z.object({
   hash: z.string().min(1),
 });
 export type AuditEvent = z.infer<typeof auditEventSchema>;
+
+/** An event as read back from storage: the same fields, with a stored actor. */
+export const storedAuditEventSchema = auditEventSchema.extend({
+  actor: storedAuditActorSchema,
+});
+export type StoredAuditEvent = z.infer<typeof storedAuditEventSchema>;
 
 export const AI_USAGE_STATUSES = ["ok", "error", "refused", "timeout"] as const;
 
