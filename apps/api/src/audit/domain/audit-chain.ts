@@ -1,8 +1,8 @@
 import { createHash } from "node:crypto";
-import type { AuditEvent } from "@orderpilot/shared";
+import type { StoredAuditEvent } from "@orderpilot/shared";
 
 /** Everything about an event except the hashes. */
-export type AuditEventBody = Omit<AuditEvent, "prevHash" | "hash">;
+export type AuditEventBody = Omit<StoredAuditEvent, "prevHash" | "hash">;
 
 /** JSON with object keys in sorted order, so one value always gives one text. */
 export function canonicalJson(value: unknown): string {
@@ -51,7 +51,7 @@ export function hashEvent(
 }
 
 /** Checks a whole trail, oldest event first. */
-export function verifyEvents(events: Iterable<AuditEvent>): ChainReport {
+export function verifyEvents(events: Iterable<StoredAuditEvent>): ChainReport {
   const verifier = new ChainVerifier();
   for (const event of events) {
     if (!verifier.accept(event)) break;
@@ -73,7 +73,7 @@ export class ChainVerifier {
   private broken: ChainReport["brokenAt"] = null;
 
   /** Returns false at the first event that does not fit. */
-  accept(event: AuditEvent): boolean {
+  accept(event: StoredAuditEvent): boolean {
     if (this.broken) return false;
     const { prevHash, hash, ...body } = event;
     const problem: ChainProblem | null =

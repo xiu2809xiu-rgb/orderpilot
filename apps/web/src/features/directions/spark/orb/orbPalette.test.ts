@@ -57,9 +57,10 @@ describe("how fast each state flows", () => {
   it("lets idle drift a visible distance each second, and still gently", () => {
     // The aurora moves by speed times 0.18 radians a second (liquidOrb.wgsl,
     // glsAuroraLayer): the old 0.66 moved the curtains about a tenth of their
-    // width in a second, which nobody sees.
-    expect(speed("idle")).toBeGreaterThanOrEqual(1.2);
-    expect(speed("idle")).toBeLessThanOrEqual(2.5);
+    // width in a second, which nobody sees, and on 21 Nov Richie found 2 still
+    // too slow to see clearly. Above 4.5 the idle orb would look busy.
+    expect(speed("idle")).toBeGreaterThanOrEqual(3);
+    expect(speed("idle")).toBeLessThanOrEqual(4.5);
   });
 
   it("makes thinking clearly livelier than idle", () => {

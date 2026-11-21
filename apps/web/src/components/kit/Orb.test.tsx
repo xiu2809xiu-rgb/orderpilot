@@ -68,3 +68,58 @@ describe("the WebGL orb tells its caller when it has drawn", () => {
     expect(onFirstFrame).not.toHaveBeenCalled();
   });
 });
+
+/**
+ * A WebGL2 context like the stub's, which also keeps every value given to the
+ * uniform named `uTime`, so a test can read how far the orb's clock moved.
+ */
+function glThatKeepsTime() {
+  const times: number[] = [];
+  const named = { uTime: { name: "uTime" } };
+  const gl = new Proxy(
+    {
+      getUniformLocation: (_program: unknown, name: string) =>
+        name === "uTime" ? named.uTime : {},
+      uniform1f: (location: unknown, value: number) => {
+        if (location === named.uTime) times.push(value);
+      },
+    },
+    {
+      get: (target, key) =>
+        key in target ? target[key as keyof typeof target] : vi.fn(() => ({})),
+    },
+  ) as unknown as WebGL2RenderingContext;
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(
+    function (kind: string) {
+      return kind === "webgl2" ? gl : null;
+    } as HTMLCanvasElement["getContext"],
+  );
+  return times;
+}
+
+describe("how fast the WebGL orb flows", () => {
+  const stepOf = (times: number[]) => (times.at(-1) ?? 0) - (times.at(-2) ?? 0);
+
+  it("flows 1.75 times the kit's pace at idle, as the WebGPU orb's idle went from 2 to 3.5", () => {
+    const times = glThatKeepsTime();
+    const frames = manualFrames();
+    render(<Orb colours={COLOURS} ground={COLOUR} />);
+    act(() => {
+      frames.step(1000);
+      frames.step(1016);
+    });
+    // 16 ms of the page's time moves the orb's clock 1.75 times as far.
+    expect(stepOf(times)).toBeCloseTo(0.016 * 1.75, 6);
+  });
+
+  it("flows half as fast again while Spark is thinking", () => {
+    const times = glThatKeepsTime();
+    const frames = manualFrames();
+    render(<Orb colours={COLOURS} ground={COLOUR} thinking />);
+    act(() => {
+      frames.step(1000);
+      frames.step(1016);
+    });
+    expect(stepOf(times)).toBeCloseTo(0.016 * 1.75 * 1.5, 6);
+  });
+});

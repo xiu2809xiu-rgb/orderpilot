@@ -45,6 +45,14 @@ const UNIFORMS = [
   "uTilt",
 ] as const;
 
+/**
+ * How fast the orb flows, against the kit's own pace. The WebGPU orb's idle
+ * speed went from 2 to 3.5 when Richie found the idle movement too slow to see
+ * (21 Nov 2026, issue #337), and this orb, which browsers without WebGPU show,
+ * keeps in step with it.
+ */
+export const ORB_PACE = 1.75;
+
 function compile(gl: WebGL2RenderingContext, type: number, source: string) {
   const shader = gl.createShader(type);
   if (!shader) return null;
@@ -189,7 +197,7 @@ export function Orb({
         ((working ? 1 : 0) - state.awake) * (1 - Math.exp(-dt / 0.2));
       state.kick +=
         ((working ? 1.6 : 0) - state.kick) * (1 - Math.exp(-dt / 0.3));
-      const step = dt * (working ? 1.5 : 1);
+      const step = dt * ORB_PACE * (working ? 1.5 : 1);
       state.time += step;
       state.swirl += step * 2 * (1 + state.kick);
       state.orbit -= step;
