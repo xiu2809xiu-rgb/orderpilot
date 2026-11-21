@@ -29,7 +29,10 @@ export type SparkMessageStatus = z.infer<typeof sparkMessageStatusSchema>;
  * rule of the destination check is not named to whoever is probing it.
  */
 export const SPARK_ERROR_CODES = [
-  // The destination check or a permission said no.
+  // The destination check said no, or a call of Spark's own tools was refused
+  // and never put right (unknown tool, bad arguments, too many calls, no
+  // permission). A tool step with status failed is not this: it leaves an OK
+  // answer, and the step is the only mark of it.
   "refused",
   "timeout",
   "provider-error",
