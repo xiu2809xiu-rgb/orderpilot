@@ -2,6 +2,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import {
   ROLE_LABELS,
   TASK_RECORDED_MESSAGE,
+  TASK_UNDONE_MESSAGE,
   type TaskActionResult,
 } from "@orderpilot/shared";
 import { AuditService } from "../../audit/audit.service.js";
@@ -135,5 +136,10 @@ function result(
   taskId: string,
   status: TaskActionResult["status"],
 ): TaskActionResult {
-  return { applied: true, message: TASK_RECORDED_MESSAGE, taskId, status };
+  return {
+    applied: true,
+    message: status === "DONE" ? TASK_RECORDED_MESSAGE : TASK_UNDONE_MESSAGE,
+    taskId,
+    status,
+  };
 }

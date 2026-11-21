@@ -1,6 +1,7 @@
 import {
   ROLES,
   TASK_RECORDED_MESSAGE,
+  TASK_UNDONE_MESSAGE,
   type Role,
   type WorkflowTask,
 } from "@orderpilot/shared";
@@ -218,6 +219,9 @@ describe("the SPR thread (#251, #290): raised, sent to the approvers, decided an
     const res = await act("PRODUCT_MANAGER", taskId, "undo");
 
     expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      data: { message: TASK_UNDONE_MESSAGE, status: "OPEN" },
+    });
     expect(await statusOf(spr.orderNo)).toBe("StockChecked");
     expect(
       await taskFor("APPROVER", spr.orderNo, "APPROVE_SPR"),
