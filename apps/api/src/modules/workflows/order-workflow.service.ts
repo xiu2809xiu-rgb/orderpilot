@@ -239,6 +239,12 @@ export class OrderWorkflowService {
     return stored ? this.viewOf(orderRef, stored) : null;
   }
 
+  /** The prepayment the order's gate waits for; null with none due, or for an order the machine does not run. */
+  async prepaymentDueOf(orderRef: string): Promise<string | null> {
+    const stored = await this.repository.find(orderRef);
+    return stored?.state?.prepaymentDue ?? null;
+  }
+
   /** The orders the machine runs, by number. Others are simply absent. */
   async statusOfMany(
     orderRefs: readonly string[],

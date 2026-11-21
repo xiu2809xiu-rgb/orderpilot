@@ -35,6 +35,8 @@ const ACTIONABLE_IN: Partial<Record<TaskKind, OrderStatus>> = {
   RAISE_SPR: "StockChecked",
   APPROVE_SPR: "AwaitingSpr",
   PLACE_VENDOR_PO: "SprApproved",
+  CONFIRM_PAYMENT: "AwaitingPayment",
+  PACK_ORDER: "Paid",
 };
 
 /** One task on an order the state machine runs, read by its id. */

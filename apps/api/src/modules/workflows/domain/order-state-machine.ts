@@ -52,7 +52,9 @@ export type OrderCommand =
       /** Everything confirmed so far against the prepayment. */
       readonly amount: string;
     }
+  | { readonly type: "PAYMENT_UNDONE" }
   | { readonly type: "PACKING_STARTED" }
+  | { readonly type: "PACKING_UNDONE" }
   | { readonly type: "INVOICED" }
   | { readonly type: "RELEASED" }
   | { readonly type: "SHIPPING_DETAILS_SENT" }
@@ -213,10 +215,24 @@ const TRANSITIONS: readonly Transition[] = [
     to: "Paid",
     by: "FINANCE",
   },
+  // Undo after Finance confirms; only until the warehouse has started packing.
+  {
+    on: "PAYMENT_UNDONE",
+    from: ["Paid"],
+    to: "AwaitingPayment",
+    by: "FINANCE",
+  },
   {
     on: "PACKING_STARTED",
     from: ["AwaitingPayment", "Paid"],
     to: "Packing",
+    by: "WAREHOUSE",
+  },
+  // Undo after the warehouse marks it packed; only until Support has invoiced it.
+  {
+    on: "PACKING_UNDONE",
+    from: ["Packing"],
+    to: "Paid",
     by: "WAREHOUSE",
   },
   { on: "INVOICED", from: ["Packing"], to: "Invoiced", by: "SUPPORT" },
@@ -479,6 +495,11 @@ export class OrderStateMachine {
         return state.status === "AwaitingPayment" &&
           state.prepaymentDue !== null
           ? "the prepayment must be confirmed by Finance first."
+          : null;
+      // Back to Paid is only true of an order a prepayment was confirmed for.
+      case "PACKING_UNDONE":
+        return state.prepaymentDue === null
+          ? "it was packed with no prepayment due, so there is no payment to go back to."
           : null;
       case "SPR_REJECTED":
         return command.reason.trim() ? null : "say why it was rejected.";

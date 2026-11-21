@@ -13,13 +13,16 @@ import {
   NotFoundError,
 } from "../../common/domain-error.js";
 import type { RequestInfo } from "../governance/authorisation.service.js";
+import { actorOf } from "./actor-of.js";
+import { OrderWorkflowService } from "./order-workflow.service.js";
 import { SprRaiseService } from "./spr-raise.service.js";
 import type { StoredTask } from "./workflow-task.repository.js";
 import { WorkflowTaskRepository } from "./workflow-task.repository.js";
 
 /**
  * Completing and undoing the tasks of orders the state machine runs. Raising an
- * SPR moves the order (`SprRaiseService`); placing the vendor PO, the product
+ * SPR moves the order (`SprRaiseService`), and so does packing, which starts the
+ * order's packing on the machine for Support to invoice; placing the vendor PO, the product
  * manager's step after an approval, only closes its task, because what follows
  * is Support's PI, which the machine already waits for. Every other kind is
  * finished on its own screen. Only the task's own role may act, and a refusal is
@@ -32,6 +35,8 @@ export class RunningTaskActions {
     private readonly tasks: WorkflowTaskRepository,
     @Inject(SprRaiseService) private readonly raises: SprRaiseService,
     @Inject(AuditService) private readonly audit: AuditService,
+    @Inject(OrderWorkflowService)
+    private readonly workflow: OrderWorkflowService,
   ) {}
 
   /** The task when its order runs on the machine; null hands it back to the mock. */
@@ -50,6 +55,15 @@ export class RunningTaskActions {
     if (!task.open) throw new NotFoundError("Task");
     if (task.kind === "RAISE_SPR") {
       await this.raises.raise(task, auth, info, now);
+    } else if (task.kind === "PACK_ORDER") {
+      await this.workflow.apply(
+        task.orderRef,
+        { type: "PACKING_STARTED" },
+        actorOf(auth),
+        info,
+        now,
+        () => this.tasks.setOpenById(task.id, false, now),
+      );
     } else {
       await this.tasks.setOpenById(task.id, false, now);
       await this.record(
@@ -74,6 +88,15 @@ export class RunningTaskActions {
     if (task.open) throw new NotFoundError("A completed task");
     if (task.kind === "RAISE_SPR") {
       await this.raises.withdraw(task, auth, info, now);
+    } else if (task.kind === "PACK_ORDER") {
+      await this.workflow.apply(
+        task.orderRef,
+        { type: "PACKING_UNDONE" },
+        actorOf(auth),
+        info,
+        now,
+        () => this.tasks.setOpenById(task.id, true, now),
+      );
     } else {
       await this.tasks.setOpenById(task.id, true, now);
       await this.record(task, auth, info, "workflows.task.reopened", "undid");
@@ -124,6 +147,7 @@ export class RunningTaskActions {
 const DONE_HERE: ReadonlySet<string> = new Set([
   "RAISE_SPR",
   "PLACE_VENDOR_PO",
+  "PACK_ORDER",
 ]);
 
 function finishedElsewhere(): ConflictError {

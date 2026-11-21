@@ -18,6 +18,9 @@ import { AuthorisationService } from "../governance/authorisation.service.js";
 import { ApprovalPolicy } from "./domain/approval-policy.js";
 import { DocumentConfigRepository } from "./document-config.repository.js";
 import { mockOpenRules } from "./mock/mock-open-rules.js";
+import { OrderWorkflowService } from "./order-workflow.service.js";
+import { PaymentConfirmationRepository } from "./payment-confirmation.repository.js";
+import { runningFlowOf } from "./running-flow.js";
 import { SprRecordRepository } from "./spr-record.repository.js";
 import { SprRoutingService, type SprHandover } from "./spr-routing.service.js";
 import { WorkflowReadModel } from "./workflow-read-model.js";
@@ -67,6 +70,12 @@ export class WorkflowsService {
     @Optional()
     @Inject(WorkflowTaskRepository)
     private readonly storedTasks?: WorkflowTaskRepository,
+    @Optional()
+    @Inject(OrderWorkflowService)
+    private readonly orders?: OrderWorkflowService,
+    @Optional()
+    @Inject(PaymentConfirmationRepository)
+    private readonly payments?: PaymentConfirmationRepository,
   ) {}
 
   /** A role's tasks, filtered and paged on the server so a long inbox stays quick. */
@@ -203,10 +212,14 @@ export class WorkflowsService {
     );
   }
 
+  /** On an order the state machine runs, the machine says where it stands and whose move it is. */
   async flow(orderNo: string): Promise<OrderFlow> {
     const flow = await this.model.flowOf(orderNo);
     if (!flow) throw new NotFoundError(`Order ${orderNo}`);
-    return flow;
+    const view = await this.orders?.statusOf(orderNo);
+    if (!view) return flow;
+    const payments = (await this.payments?.forOrder(orderNo)) ?? [];
+    return runningFlowOf(flow, view, payments);
   }
 
   async spr(recordNo: string, viewerUserId?: string): Promise<SprDetail> {
