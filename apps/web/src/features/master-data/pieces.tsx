@@ -7,6 +7,7 @@ import {
   MaskedValue,
   Money,
   StatusChip,
+  type MaskReason,
   type StatusFamily,
 } from "@/components/common";
 import { formatQuantity } from "@/lib/format";
@@ -52,6 +53,30 @@ export function MaskedMoney({ field }: { field: MaskedField }) {
     return <MaskedValue masked reason={field.reason ?? "role"} />;
   }
   return <Money value={field.value} />;
+}
+
+/**
+ * Why a whole column is hidden, or null when any cell of it can be read. A
+ * column is only quietened when no row shows a value, so one readable cell
+ * never hides behind a header that says otherwise.
+ */
+export function maskedColumnReason(
+  fields: readonly MaskedField[],
+): MaskReason | null {
+  const first = fields[0];
+  if (!first || !fields.every((field) => field.masked)) return null;
+  return first.reason ?? "role";
+}
+
+/** A cell of a column that the header already says is hidden: a dash, said as "Hidden" to a screen reader. */
+export function QuietDash() {
+  const { t } = useTranslation("master-data");
+  return (
+    <span className="text-muted-foreground">
+      <span aria-hidden="true">-</span>
+      <span className="sr-only">{t("table.hiddenCell")}</span>
+    </span>
+  );
 }
 
 /** A bank detail or other text the server may have masked. Codes read best in mono, names do not. */
@@ -122,17 +147,18 @@ export interface KeyFact {
   wrap?: boolean;
 }
 
-/** The facts under a record's header, one quiet panel rather than a row of boxes. */
+/** The facts under a record's header, on one card, label over value as on the order page. */
 export function KeyFacts({ facts }: { facts: readonly KeyFact[] }) {
   return (
-    <dl className="grid grid-cols-2 gap-x-s3 gap-y-s2 rounded-xl border bg-card p-s2 md:grid-cols-3 xl:grid-cols-4">
+    <dl className="rec-facts dx-card">
       {facts.map((fact) => (
         <div
           key={fact.id}
-          className={cn("min-w-0 space-y-0.5", fact.wrap && "col-span-2")}
+          className="rec-fact"
+          data-wide={fact.wrap === true ? "" : undefined}
         >
-          <dt className="text-xs text-muted-foreground">{fact.label}</dt>
-          <dd className={cn("text-sm", fact.wrap ? "break-words" : "truncate")}>
+          <dt>{fact.label}</dt>
+          <dd className={fact.wrap ? "break-words" : "truncate"}>
             {fact.value}
           </dd>
         </div>

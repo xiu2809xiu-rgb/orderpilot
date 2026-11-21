@@ -4,7 +4,7 @@ import {
   classificationSchema,
   maskReasonSchema,
 } from "../governance/classification.js";
-import { roleSchema } from "../roles.js";
+import { storedRoleSchema } from "../roles.js";
 
 /**
  * One entry of an event's `changes`, after masking. A masked entry has no
@@ -30,7 +30,8 @@ export const auditEventViewSchema = z.object({
   occurredAt: z.iso.datetime(),
   actorKind: z.enum(["user", "system", "ai"]),
   actorUserId: z.uuid().nullable(),
-  actorRole: roleSchema.nullable(),
+  // A stored role: an old event can name a retired one (ADR 0058).
+  actorRole: storedRoleSchema.nullable(),
   /** The person's name, or the system or model that acted. */
   actorName: z.string(),
   action: z.string(),

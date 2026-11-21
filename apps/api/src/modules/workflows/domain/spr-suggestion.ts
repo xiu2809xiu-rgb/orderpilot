@@ -1,6 +1,6 @@
 import { addDecimal, compareDecimal, type SprBasis } from "@orderpilot/shared";
 
-/** The Navision figures for one item, plus what the order wants of it. */
+/** The Business Central figures for one item, plus what the order wants of it. */
 export interface StockFigures {
   readonly ordered: string;
   readonly inventory: string;
@@ -21,6 +21,9 @@ function negate(value: string): string {
  * safety stock, rounding to the vendor's pack size, the choice of vendor) is
  * the SPR rules, which are Azri's to build.
  */
+/** The order half of an SPR's basis: what this order is short of. The run rate comes from the item. */
+export type OrderShortfall = Omit<SprBasis, "runRate3m" | "monthsOfCover">;
+
 export const SprSuggestion = {
   /** Inventory, minus Qty. on Sales Order, plus Qty. on Purch. Order. */
   availableStock(
@@ -37,7 +40,7 @@ export const SprSuggestion = {
   },
 
   /** The figures behind a suggestion, or null when the stock already covers the order. */
-  fromShortfall(figures: StockFigures): SprBasis | null {
+  fromShortfall(figures: StockFigures): OrderShortfall | null {
     const availableStock = SprSuggestion.availableStock(figures);
     const shortfall = addDecimal(figures.ordered, negate(availableStock));
     if (compareDecimal(shortfall, "0") <= 0) return null;

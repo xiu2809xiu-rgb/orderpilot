@@ -160,3 +160,29 @@ test.describe("F-9: a refusal read in the audit viewer", () => {
     expect(JSON.stringify(admin)).not.toContain(JSON.stringify(shown));
   });
 });
+
+test.describe("The audit log at the demo's screen width", () => {
+  // Refusals carry the longest records (a route pattern), so they are the
+  // widest view. At 1440 px the table must fit its card, so Details is in
+  // view without scrolling sideways.
+  test("fits its card at 1440 px, with Details in view", async ({ page }) => {
+    await signInAs(page, "AUDITOR");
+    await page.goto("/audit?refusals=1");
+    const details = page
+      .getByRole("button", { name: /^Details of event/ })
+      .first();
+    await expect(details).toBeVisible();
+    const fit = await page.locator("main table").evaluate((table) => ({
+      scroll: table.parentElement?.scrollWidth ?? Infinity,
+      client: table.parentElement?.clientWidth ?? 0,
+    }));
+    expect(fit.scroll).toBeLessThanOrEqual(fit.client);
+    const button = await details.boundingBox();
+    const card = await page
+      .locator("main table")
+      .evaluate((table) => table.parentElement?.getBoundingClientRect().right);
+    expect((button?.x ?? 0) + (button?.width ?? 0)).toBeLessThanOrEqual(
+      card ?? 0,
+    );
+  });
+});

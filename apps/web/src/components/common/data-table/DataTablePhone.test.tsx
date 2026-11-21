@@ -75,12 +75,12 @@ describe("a row on a phone", () => {
 });
 
 describe("the row checkbox", () => {
-  it("is 24 px, and grows its target to 44 px on a touch screen", () => {
+  it("is 24 px, and is a real 44 px square on a touch screen", () => {
     setPhone(false);
     draw();
     const box = screen.getByRole("checkbox", { name: "Select C-001" });
     expect(box).toHaveClass("size-6");
-    expect(box.className).toContain("pointer-coarse:after:-inset-[11px]");
+    expect(box).toHaveClass("dt-box");
   });
 });
 

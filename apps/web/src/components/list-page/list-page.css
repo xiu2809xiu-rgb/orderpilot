@@ -1,0 +1,122 @@
+/* The list page, as the Orders workspace draws its own: the head, a top row
+   (sibling views on the left, the actions and view tools on the right), the
+   filter row with a label above each field, what is in force, the card, and
+   the foot. The fields, chips and table are in common/data-table/data-table.css.
+   Repeats .od-top, .od-toolbar, .od-filters and .od-toggles of orders.css. */
+.lp-page {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+/* What follows the list (the operation log) sits as far from it as the list's own rows do. */
+.lp-page > .dt + * {
+  margin-top: 0.75rem;
+}
+
+.lp-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.lp-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.lp-top > .lp-bar {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.lp-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.lp-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* With no row of its own the bar joins the filter row: its pieces then sit
+   straight in that row, beside the saved views and the columns. */
+.lp-bar.lp-bar-flat,
+.lp-bar.lp-bar-flat > .lp-tools.lp-tools {
+  display: contents;
+}
+
+/* The tools stay at the far end of the top row, however few actions come before them. */
+.lp-tools-end {
+  margin-left: auto;
+}
+
+.lp-filters-end {
+  margin-left: auto;
+}
+
+/* Selects size to their words between two limits; in the popover they fill the column. */
+.lp-select {
+  min-width: 11rem;
+  max-width: 16rem;
+}
+
+.lp-lookup {
+  min-width: 11rem;
+  max-width: 16rem;
+}
+
+.lp-wide {
+  width: 100%;
+  max-width: none;
+}
+
+.dt-range {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.lp-more {
+  height: 2.25rem;
+}
+
+@media (pointer: coarse) {
+  .lp-more {
+    height: 2.75rem;
+  }
+}
+
+/* How many filters are in force, on the button that opens them. */
+.lp-count {
+  min-width: 1.25rem;
+  padding-inline: 0.25rem;
+  border-radius: var(--radius-control);
+  background: var(--accent);
+  color: var(--accent-foreground);
+  font-size: var(--type-12);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+/* The page is the screen's height, so the head and filters stay and the card scrolls (Orders does the same). */
+.lp-page[data-fill] {
+  height: 100%;
+  min-height: 34rem;
+}
+
+@media (max-width: 47.99rem) {
+  .lp-page[data-fill] {
+    height: auto;
+    min-height: 0;
+  }
+}

@@ -71,6 +71,11 @@ const CASES: readonly CommandCase[] = [
     legal: { StockChecked: "AwaitingSpr" },
   },
   {
+    command: { type: "SPR_RAISE_WITHDRAWN" },
+    actor: person("PRODUCT_MANAGER"),
+    legal: { AwaitingSpr: "StockChecked" },
+  },
+  {
     command: { type: "SPR_APPROVED" },
     actor: person("APPROVER"),
     legal: { AwaitingSpr: "SprApproved" },
@@ -224,7 +229,7 @@ describe("every status against every event", () => {
 
   it("covers every status and every event in the machine", () => {
     expect(ORDER_STATUSES).toHaveLength(14);
-    expect(every).toHaveLength(14 * 16);
+    expect(every).toHaveLength(14 * 17);
   });
 });
 
@@ -842,7 +847,7 @@ describe("cancelling", () => {
   });
 });
 
-describe("Navision's Sales Header Status, where the states meet it (an assumption to confirm)", () => {
+describe("Business Central's Sales Header Status, where the states meet it (an assumption to confirm)", () => {
   const expected: readonly [
     OrderStatus,
     ReturnType<typeof navisionStatusOf>,

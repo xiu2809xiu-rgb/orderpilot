@@ -38,7 +38,7 @@ export function useLookupCombobox({
   onPick,
 }: LookupBehaviour) {
   const { t } = useTranslation("form");
-  const { setError, getFieldState } = useFormContext();
+  const { setError, getFieldState, trigger } = useFormContext();
   const listId = useId();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState<string | null>(null);
@@ -47,6 +47,9 @@ export function useLookupCombobox({
   const ownChange = useRef(false);
   // Enter or Tab came before the search answered: pick when it does.
   const waiting = useRef(false);
+  // The down arrow came before the search answered: highlight the first row
+  // when it does. The key is not lost, and nothing is picked unseen.
+  const armed = useRef(false);
   const { state, run, schedule, stop } = useLookupSearch(search, debounceMs);
   const options = state.options;
   const current = active < options.length ? active : -1;
@@ -109,14 +112,29 @@ export function useLookupCombobox({
   });
 
   useEffect(() => {
-    if (!waiting.current || state.status === "loading") return;
-    waiting.current = false;
-    const hit = resolveTyped(state, query ?? "");
-    if (hit) latest.current.pick(hit);
-    else if (query?.trim()) latest.current.flagUnmatched();
+    if (state.status === "loading") return;
+    const wasArmed = armed.current;
+    armed.current = false;
+    const showFirst = wasArmed && state.options.length > 0;
+    if (waiting.current) {
+      waiting.current = false;
+      const hit = resolveTyped(state, query ?? "");
+      if (hit) {
+        latest.current.pick(hit);
+        return;
+      }
+      // A person who pressed the down arrow asked for the list, not for a verdict
+      // on the typed text: show them the first row to press Enter on.
+      if (!showFirst && query?.trim()) {
+        latest.current.flagUnmatched();
+        return;
+      }
+    }
+    if (showFirst) setActive(0);
   }, [state, query]);
 
-  function openList(text: string) {
+  function openList(text: string, byArrow = false) {
+    armed.current = byArrow;
     setOpen(true);
     setActive(-1);
     run(text);
@@ -127,7 +145,12 @@ export function useLookupCombobox({
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
       event.preventDefault();
       if (!open || state.status === "failed") {
-        openList(text);
+        openList(text, event.key === "ArrowDown");
+        return;
+      }
+      if (options.length === 0) {
+        // The answer is on its way: remember the key rather than lose it.
+        armed.current = event.key === "ArrowDown" && state.status === "loading";
         return;
       }
       const step = event.key === "ArrowDown" ? 1 : -1;
@@ -140,8 +163,20 @@ export function useLookupCombobox({
       if (hit) pick(hit);
       else if (text.trim() !== "" && state.status === "loading") {
         waiting.current = true;
+      } else if (text.trim() !== "" && state.status === "done") {
+        // Nothing is chosen, so say so now, in the field's own words, as leaving
+        // the field would: the form's rule runs first, and the generic line is
+        // only the fallback for a form whose rule says nothing about it. After
+        // this key's other handlers, so that a message a screen has just set
+        // for it (a grid saying no item has that number) is not replaced.
+        setTimeout(() => {
+          if (getFieldState(name).error === undefined) {
+            void trigger(name).then(flagUnmatched);
+          }
+        }, 0);
       }
     } else if (event.key === "Escape") {
+      armed.current = false;
       if (open) {
         event.preventDefault();
         event.stopPropagation();
@@ -158,6 +193,7 @@ export function useLookupCombobox({
   function onType(text: string) {
     if (query === null) before.current = value;
     waiting.current = false;
+    armed.current = false;
     setQuery(text);
     setOpen(true);
     setActive(-1);
@@ -166,6 +202,7 @@ export function useLookupCombobox({
   }
 
   function onLeave() {
+    armed.current = false;
     setOpen(false);
     const typed = query?.trim() ?? "";
     if (typed === "") {

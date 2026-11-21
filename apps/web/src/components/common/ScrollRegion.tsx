@@ -1,5 +1,6 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import "./ScrollRegion.css";
 
 /**
  * Wide or tall content that scrolls inside its own box, so the page itself
@@ -48,10 +49,7 @@ export function ScrollRegion({
       ref={ref}
       role="region"
       aria-label={label}
-      className={cn(
-        "relative overflow-auto rounded-xl border bg-card focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none",
-        className,
-      )}
+      className={cn("sr-region overflow-auto", className)}
     >
       {children}
     </div>

@@ -48,22 +48,18 @@ export function FilterLookup({
     setOpen(false);
   };
   return (
-    <div className={showLabel ? "space-y-1" : undefined}>
-      <span
-        id={id}
-        className={showLabel ? "text-xs text-muted-foreground" : "sr-only"}
-      >
+    <div className="dt-field">
+      <span id={id} className="dt-field-label">
         {label}
       </span>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            size="sm"
             role="combobox"
             aria-expanded={open}
             aria-labelledby={id}
-            className={`justify-between pointer-coarse:h-11 ${showLabel ? "w-full" : "max-w-44"}`}
+            className={`dt-control lp-lookup justify-between font-normal ${showLabel ? "lp-wide" : ""}`}
           >
             <span className="truncate">
               {current?.label ?? (value || allLabel)}

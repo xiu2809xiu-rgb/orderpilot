@@ -8,26 +8,30 @@ import { useMasterDataItem } from "@/lib/api/generated/endpoints/master-data/mas
 import { ItemOrders } from "./ItemOrders";
 import { ItemSupply } from "./ItemSupply";
 import { AvailabilityBadge, KeyFacts, MaskedMoney } from "./pieces";
-import { BackToList, RecordState } from "./RecordState";
+import { RecordNumber } from "./RecordNumber";
+import { BackToList, RecordSheet, RecordState } from "./RecordState";
 import { StockPicture } from "./StockPicture";
+import { StockRule } from "./StockRule";
 
 function ItemRecord({ item }: { item: ItemDetail }) {
   const { t } = useTranslation("master-data");
   return (
-    <div className="space-y-s3">
+    <RecordSheet>
       <BackToList to="/master-data/items" label={t("item.back")} />
       <PageHeader
-        title={item.no}
-        description={`${item.description}, ${item.brand}`}
+        title={item.description}
+        description={item.brand}
         meta={
           <>
+            <RecordNumber no={item.no} label={t("item.numberLabel")} />
             <AvailabilityBadge availability={item.availability} />
+            {item.availability === "ok" ? null : <StockRule />}
             <DemoBadge kind="mockBusinessCentral" />
           </>
         }
         actions={
           item.orderLines.length > 0 ? (
-            <Button asChild variant="outline">
+            <Button asChild variant="outline" className="pointer-coarse:h-11">
               <a href="#item-orders">
                 <ListChecks aria-hidden="true" />
                 {t("item.seeOrders")}
@@ -85,7 +89,7 @@ function ItemRecord({ item }: { item: ItemDetail }) {
       <StockPicture item={item} />
       <ItemOrders item={item} />
       <ItemSupply item={item} />
-    </div>
+    </RecordSheet>
   );
 }
 

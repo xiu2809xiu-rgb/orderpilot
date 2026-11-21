@@ -1,12 +1,13 @@
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { EmptyState, ErrorPanel, PermissionDenied } from "../states";
 import { usePrimaryActionStore } from "../primaryAction";
-import { ACTIONS_CELL, cellClass, SELECT_CELL } from "./cells";
+import { absorbedOnPhone, ACTIONS_CELL, cellClass, SELECT_CELL } from "./cells";
 import { firstSticky } from "./DataTableHead";
 import { DataTableRow } from "./DataTableRow";
 import {
@@ -91,12 +92,24 @@ export function DataTableBody<Row>({
             {columns.map((column, position) => (
               <TableCell
                 key={column.id}
-                className={cellClass(column, position === 0 ? first : "none")}
+                className={cn(
+                  cellClass(column, position === 0 ? first : "none"),
+                  // The same columns the head and the rows drop on a phone.
+                  absorbedOnPhone(position) && "max-md:hidden",
+                )}
               >
                 <Skeleton
                   className={`h-5 animate-none ${alignsEnd(column) ? "ml-auto w-16" : "w-3/4"}`}
                   aria-hidden="true"
                 />
+                {position === 0 ? (
+                  // On a phone the first cell carries a second line, so the
+                  // rows are as tall as the real ones and nothing jumps.
+                  <Skeleton
+                    className="mt-1.5 h-4 w-1/2 animate-none md:hidden"
+                    aria-hidden="true"
+                  />
+                ) : null}
               </TableCell>
             ))}
             {rowActions ? <TableCell className={ACTIONS_CELL} /> : null}

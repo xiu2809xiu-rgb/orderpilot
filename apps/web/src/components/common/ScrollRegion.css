@@ -1,0 +1,18 @@
+/* The work card: one glass surface that holds a table or a grid and scrolls
+   inside itself, so the page's head and filters stay in view. It is opaque
+   enough for 4.5:1 text over the brightest part of the ground. Repeats
+   .od-scroll of orders.css. */
+.sr-region {
+  position: relative;
+  min-height: 0;
+  border: var(--dx-card-border);
+  border-radius: var(--radius-card);
+  background: var(--dx-card-work-bg);
+  box-shadow: var(--dx-card-shadow);
+}
+
+/* The card's own box shadow would swallow a ring drawn with one, so focus is an outline. */
+.sr-region:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}

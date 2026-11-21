@@ -89,6 +89,19 @@ function renderPage() {
 }
 
 describe("an order's detail page", () => {
+  it("lets a long status chip wrap inside its fact, so it never runs into the next one", async () => {
+    await i18n.loadNamespaces(["order-tracker", "common"]);
+    server.use(getTrackerTimelineMockHandler(timeline));
+    renderPage();
+    const chip = (
+      await screen.findByText("Packing list differs from the PO")
+    ).closest("[data-tone]");
+    // jsdom has no layout, so the test reads the classes that give the
+    // behaviour: a chip that may wrap, in a row of facts that wraps.
+    expect(chip).toHaveClass("whitespace-normal", "max-w-full");
+    expect(chip?.closest("dl")).toHaveClass("flex", "flex-wrap");
+  });
+
   it("shows each step with its effect, the checks, the matches and the operation log", async () => {
     await i18n.loadNamespaces(["order-tracker", "common"]);
     server.use(getTrackerTimelineMockHandler(timeline));

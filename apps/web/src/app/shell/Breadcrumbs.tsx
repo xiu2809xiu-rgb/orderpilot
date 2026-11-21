@@ -1,9 +1,13 @@
 import { ChevronRight } from "lucide-react";
 import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useMatches } from "react-router";
+import { Link, useLocation, useMatches } from "react-router";
+import { menuFor } from "@/features/nav";
 import { recordCrumb } from "@/lib/records";
 import { cn } from "@/lib/utils";
+import { useSessionStore } from "@/stores/session";
+import { useCrumbTail } from "./pageCrumb";
+import { buildTrail, type Crumb } from "./trail";
 
 /**
  * A route sets `handle: { crumb: "namespace:key" }` to appear in the trail. A
@@ -13,34 +17,37 @@ export interface CrumbHandle {
   crumb?: string;
 }
 
-interface Crumb {
-  path: string;
-  label: string;
-  mono?: boolean;
-}
-
 /**
+ * Where you are: the page, and before it the page it belongs to, as a link.
+ * A record reads "Customers, C-1042"; a top-level page shows its own name.
  * Below the large breakpoint the trail shows only the page you are on, so a
  * record number stays readable beside the search and role buttons.
  */
 export function Breadcrumbs() {
   const { t } = useTranslation();
   const matches = useMatches();
-  const trail: Crumb[] = matches.flatMap((match) => {
+  const { pathname } = useLocation();
+  const session = useSessionStore((state) => state.session);
+  const tail = useCrumbTail();
+  const pages: Crumb[] = matches.flatMap((match) => {
     const { crumb } = (match.handle ?? {}) as CrumbHandle;
     return crumb ? [{ path: match.pathname, label: t(crumb) }] : [];
   });
   const record = recordCrumb(matches);
-  if (record) trail.push({ path: record.path, label: record.no, mono: true });
+  if (record) pages.push({ path: record.path, label: record.no, mono: true });
+  // A page without a record route names its own record, such as an order.
+  else if (tail) pages.push({ path: pathname, label: tail, mono: true });
+  const menuPaths = new Set(
+    menuFor(session).map((entry) => entry.to.split("?")[0] ?? "/"),
+  );
+  const trail = buildTrail(pages, menuPaths);
   if (trail.length === 0) return null;
 
   return (
     <nav aria-label={t("shell.breadcrumb")} className="min-w-0">
-      <ol className="flex items-center gap-1 text-sm text-muted-foreground">
+      <ol className="fs-14 flex items-center gap-1.5 text-muted-foreground">
         {trail.map((item, index) => {
           const last = index === trail.length - 1;
-          // "Order steps" and its number are one page: only the number is current.
-          const samePage = !last && item.path === trail.at(-1)?.path;
           return (
             <Fragment key={`${item.path}${item.mono ? "#no" : ""}`}>
               {index > 0 ? (
@@ -49,22 +56,25 @@ export function Breadcrumbs() {
                 </li>
               ) : null}
               <li
-                className={cn(last ? "shrink-0" : "hidden truncate lg:block")}
+                className={cn(
+                  last ? "min-w-0 truncate" : "hidden shrink-0 lg:block",
+                )}
               >
                 {last ? (
                   <span
                     aria-current="page"
                     className={cn(
                       "font-medium text-foreground",
-                      item.mono && "font-mono",
+                      item.mono && "numeral",
                     )}
                   >
                     {item.label}
                   </span>
-                ) : samePage ? (
-                  <span>{item.label}</span>
                 ) : (
-                  <Link to={item.path} className="hover:text-foreground">
+                  <Link
+                    to={item.path}
+                    className="rounded-sm hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring"
+                  >
                     {item.label}
                   </Link>
                 )}

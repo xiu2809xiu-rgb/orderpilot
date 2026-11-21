@@ -2,6 +2,7 @@ import type { OrderStep } from "@orderpilot/shared";
 import { Circle, CircleCheck, CircleDot, CircleSlash } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { StatusBadge } from "@/components/common";
+import { cn } from "@/lib/utils";
 import { formatDate } from "./format";
 
 const ICONS = {
@@ -15,18 +16,23 @@ const ICONS = {
 export function StepList({ steps }: { steps: readonly OrderStep[] }) {
   const { t } = useTranslation(["workflows", "common"]);
   return (
-    <ol className="space-y-2">
+    <ol className="space-y-1">
       {steps.map((step) => {
         const Icon = ICONS[step.state];
         return (
           <li
             key={step.key}
             aria-current={step.state === "current" ? "step" : undefined}
-            className="flex items-start gap-3 rounded-lg border p-s2 data-[current=true]:border-primary"
+            className="flex items-start gap-3 rounded-xl border border-transparent p-s2 data-[current=true]:border-ring data-[current=true]:bg-(--dx-current-bg)"
             data-current={step.state === "current"}
           >
             <Icon
-              className="mt-0.5 size-5 shrink-0 text-muted-foreground"
+              className={cn(
+                "mt-0.5 size-5 shrink-0",
+                step.state === "current" || step.state === "done"
+                  ? "text-primary"
+                  : "text-muted-foreground",
+              )}
               aria-hidden="true"
             />
             <div className="min-w-0 flex-1 space-y-1">

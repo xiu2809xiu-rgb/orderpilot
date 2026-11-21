@@ -1,0 +1,262 @@
+/* The sign-in page only: the lead and the steps rise in, and the stage, the
+   ground and the role buttons are dressed for show mode. It is imported by
+   LoginPage, so it ships in that page's own chunk. Under reduced motion the
+   global rule (index.css) ends every animation at once. */
+
+/* The lead and the steps rise a few pixels and sharpen, after the headline. */
+.signin-rise {
+  animation: signin-rise 400ms ease-out both;
+  animation-delay: var(--d, 0ms);
+}
+@keyframes signin-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+    filter: blur(6px);
+  }
+}
+
+/* The aurora canvas fades in over the page's own ground. */
+.signin-ground > * {
+  animation: signin-ground-in 600ms ease-out both;
+}
+@keyframes signin-ground-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Reduced motion: things are simply there (the global rule only shortens an
+   animation, it would still wait out its delay). */
+@media (prefers-reduced-motion: reduce) {
+  .signin-rise,
+  .signin-ground > * {
+    animation: none;
+  }
+}
+
+/* ---- Show mode: the stage, the glass steps, the ground and the role buttons.
+   The stage is a screen of its own: navy in light and in dark, so its picture
+   reads the same on both pages. Its three colours are the dark scheme's ink,
+   glow and sky, held here because a light page changes the tokens themselves. */
+:root {
+  --signin-stage-ink: #06162b;
+  --signin-stage-glow: #2ee6d6;
+  --signin-stage-sky: #5eb4ff;
+  --signin-stage-fg: #e8fbff;
+}
+
+/* Wide screens: the slot takes what is left between the lead and the steps,
+   and the frame is the largest 16:9 that fits it. */
+.signin-stage-slot {
+  display: flex;
+  align-items: center;
+}
+@media (min-width: 64rem) {
+  .signin-stage-slot {
+    flex: 1 1 0;
+    container-type: size;
+  }
+}
+.signin-stage {
+  transform: perspective(1100px) rotateX(var(--tilt-x, 0deg))
+    rotateY(var(--tilt-y, 0deg));
+  transition: transform 220ms var(--ease-out);
+}
+.signin-stage-glow {
+  position: absolute;
+  inset: -8%;
+  z-index: -1;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--signin-stage-glow) 38%, transparent),
+    transparent
+  );
+  filter: blur(26px);
+  opacity: 0.55;
+  pointer-events: none;
+}
+.signin-stage-frame {
+  background: var(--signin-stage-ink);
+  border-radius: var(--radius-card);
+  border: 1px solid
+    color-mix(in srgb, var(--signin-stage-glow) 30%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--signin-stage-fg) 10%, transparent),
+    0 28px 60px -28px
+      color-mix(in srgb, var(--signin-stage-ink) 90%, transparent);
+}
+.signin-stage-veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent 62%,
+    color-mix(in srgb, var(--signin-stage-ink) 60%, transparent)
+  );
+}
+.signin-stage-btn {
+  position: absolute;
+  right: 0.625rem;
+  bottom: 0.625rem;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-pill);
+  color: var(--signin-stage-fg);
+  background: color-mix(in srgb, var(--signin-stage-ink) 62%, transparent);
+  border: 1px solid color-mix(in srgb, var(--signin-stage-fg) 30%, transparent);
+  backdrop-filter: blur(8px);
+  transition:
+    background-color 180ms var(--ease-out),
+    transform 180ms var(--ease-out);
+}
+.signin-stage-btn:hover {
+  background: color-mix(in srgb, var(--signin-stage-ink) 85%, transparent);
+  transform: scale(1.08);
+}
+.signin-stage-btn:focus-visible {
+  outline: 2px solid var(--signin-stage-glow);
+  outline-offset: 2px;
+}
+@media (pointer: coarse) {
+  .signin-stage-btn {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+}
+
+/* Two soft lights under the aurora, drifting very slowly. */
+.signin-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(56px);
+  opacity: 0.6;
+  will-change: transform;
+}
+.signin-orb-a {
+  width: 46vmax;
+  height: 46vmax;
+  left: -14vmax;
+  bottom: -20vmax;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--ring) 34%, transparent),
+    transparent
+  );
+  animation: signin-drift 38s ease-in-out infinite alternate;
+}
+.signin-orb-b {
+  width: 38vmax;
+  height: 38vmax;
+  right: -12vmax;
+  top: 18vmax;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--info) 30%, transparent),
+    transparent
+  );
+  animation: signin-drift 46s ease-in-out infinite alternate-reverse;
+}
+/* On the light ground the lights are fainter, so text over them keeps its contrast. */
+:root:not(.dark) .signin-orb {
+  opacity: 0.4;
+}
+@keyframes signin-drift {
+  to {
+    transform: translate3d(7vmax, -5vmax, 0) scale(1.14);
+  }
+}
+
+/* The role buttons answer a hover and a press. The button itself never moves:
+   a button that lifts leaves a pointer resting on its lower edge, loses the
+   hover, drops back and flickers. The lift is a shadow, and the icon moves. */
+.signin-role {
+  transition:
+    box-shadow 180ms var(--ease-out),
+    border-color 150ms var(--ease-out),
+    background-color 150ms var(--ease-out);
+}
+.signin-role svg {
+  transition: transform 180ms var(--ease-out);
+}
+.signin-role:not(:disabled):hover {
+  border-color: color-mix(in srgb, var(--ring) 55%, var(--border-strong));
+  box-shadow: 0 10px 20px -12px color-mix(in srgb, var(--ring) 70%, transparent);
+}
+.signin-role:not(:disabled):hover svg {
+  transform: translateX(2px) scale(1.12);
+}
+.signin-role:not(:disabled):active {
+  box-shadow: none;
+}
+.signin-role:not(:disabled):active svg {
+  transform: translateX(2px) scale(1);
+}
+
+/* Pause holds every light and drift on the page. */
+:root[data-signin-paused] .kit-shine,
+:root[data-signin-paused] .signin-orb,
+:root[data-signin-paused] .kit-gradient-text {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .signin-orb {
+    animation: none;
+  }
+  .signin-stage,
+  .signin-stage-btn,
+  .signin-role,
+  .signin-role svg {
+    transition: none;
+    transform: none !important;
+  }
+}
+
+/* The two disclosures under the role buttons ("More roles" and "Sign in with
+   email"): plain text buttons that read as controls, 36 px high and 44 px on a
+   touch screen. */
+.signin-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  align-self: flex-start;
+  min-height: 2.25rem;
+  padding-inline: 0.5rem;
+  margin-inline-start: -0.5rem;
+  border-radius: var(--radius-control);
+  color: var(--foreground);
+  font-size: var(--type-14);
+  font-weight: 500;
+  transition: background-color var(--motion-fast) var(--ease-out);
+}
+.signin-toggle:hover {
+  background-color: var(--dx-hover-bg);
+}
+.signin-toggle:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+@media (pointer: coarse) {
+  .signin-toggle {
+    min-height: 2.75rem;
+  }
+}
+
+/* The theme control sits outside the top bar, which is where the bar's size
+   comes from: give it the same two sizes here, and leave the bar's alone. */
+.signin-theme {
+  --bar-ctl: 2.25rem;
+}
+@media (pointer: coarse) {
+  .signin-theme {
+    --bar-ctl: 2.75rem;
+  }
+}
+.signin-theme .dx-bar-icon {
+  width: var(--bar-ctl);
+  height: var(--bar-ctl);
+}

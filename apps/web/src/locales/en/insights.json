@@ -5,8 +5,7 @@
     "kpis": "KPIs"
   },
   "kpi": {
-    "labEstimate": "Mock lab estimates",
-    "labEstimateHint": "No real run has happened. These numbers only show how the dashboard will read. They are not linked to the order tracker.",
+    "lab": "Lab estimate: {{note}}",
     "manual": "By hand today",
     "withOrderPilot": "With OrderPilot",
     "definition": "Draft definition",

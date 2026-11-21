@@ -56,7 +56,11 @@ describe("the KPI dashboard", () => {
     for (const [, label] of ids) {
       expect(await screen.findByRole("heading", { name: label })).toBeVisible();
     }
-    expect(screen.getByText("Mock lab estimates")).toBeVisible();
+    // Said once, in the note under the heading, beside one Mock badge.
+    expect(
+      screen.getByText(/Mock lab estimates on synthetic data./),
+    ).toBeVisible();
+    expect(screen.queryByText("Mock lab estimates")).toBeNull();
     expect(screen.getByText("Mock")).toBeVisible();
     expect(
       await screen.findAllByRole("img", {

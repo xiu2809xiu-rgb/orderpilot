@@ -1,47 +1,49 @@
 import type { OpenRule } from "@orderpilot/shared";
-import type { ApproverProfile } from "../domain/approval-policy.js";
-
-function usd(value: string): string {
-  const amount = Number(value).toLocaleString("en-SG", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-  return `USD ${amount}`;
-}
 
 /**
- * The rules that stay open until Spectra answers Q-4 to Q-6. The two with no
- * configuration yet carry the draft the sample data follows. Approvers, limits
- * and delegation are read from the approval policy, so this list cannot drift
- * from what the SPR page shows. It only reports a draft: it decides nothing.
+ * The business rules as they stand after the 5 Nov briefing: what Spectra
+ * settled, and the drafts that wait for its answer (#251's questions). It only
+ * reports them: the workflow reads its own configuration, and this decides
+ * nothing. No rule has a screen of its own yet.
  */
-export function mockOpenRules(approver: ApproverProfile | null): OpenRule[] {
-  const setup = approver?.setup;
+export function mockOpenRules(): OpenRule[] {
   return [
     {
       id: "sprTrigger",
-      value: "Raise an SPR when an order line is short of available stock",
+      value:
+        "The product manager raises it from stock on hand and the last three months' sales",
+      status: "confirmed",
+      screen: null,
+    },
+    {
+      id: "approvers",
+      value:
+        "Any one of three management approvers decides, after a coordinator routes it",
+      status: "confirmed",
+      screen: null,
+    },
+    {
+      id: "approvalLimits",
+      value: "None set. Limits stay a setting, off until Spectra asks for them",
+      status: "open",
+      screen: null,
+    },
+    {
+      id: "approverDisagreement",
+      value: "The first decision stands, and the others see it",
+      status: "open",
+      screen: null,
+    },
+    {
+      id: "remarksReply",
+      value: "The SPR goes back to the product manager with the remarks",
+      status: "open",
       screen: null,
     },
     {
       id: "piSequence",
       value: "The PI goes to the customer first, and packing waits for payment",
-      screen: null,
-    },
-    {
-      id: "approversAndLimits",
-      value: setup
-        ? `${approver.displayName}: purchases up to ${usd(setup.purchaseAmountApprovalLimit)}, sales up to ${usd(setup.salesAmountApprovalLimit)}`
-        : "No approver set up yet",
-      // The role matrix holds neither the approver nor the limits, and the SPR
-      // page shows them for one request only, so no screen holds this rule yet.
-      screen: null,
-    },
-    {
-      id: "delegation",
-      value: approver?.substituteName
-        ? `${approver.substituteName} stands in while the approver is away`
-        : "Nobody stands in yet",
+      status: "open",
       screen: null,
     },
   ];

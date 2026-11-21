@@ -1,0 +1,226 @@
+{
+  "licence": {
+    "mit": "MIT",
+    "commons": "MIT with the Commons Clause"
+  },
+  "vendors": {
+    "magic": {
+      "title": "Magic UI",
+      "intro": "Motion and patterns: numbers that count, content that fades in, borders that carry a light."
+    },
+    "bits": {
+      "title": "React Bits",
+      "intro": "Figures, type effects, glass, and the marks that show Spark working."
+    },
+    "reui": {
+      "title": "ReUI",
+      "intro": "The structure of the product screens: the journey, the activity, labels, frames, messages and file icons."
+    },
+    "grounds": {
+      "title": "Grounds",
+      "intro": "The aurora behind the sign-in page and the dots of an empty state. The canvas one pauses when off screen or when the tab is hidden, and holds a still frame under reduced motion."
+    },
+    "orb": {
+      "title": "LerSent001 orb",
+      "source": "github.com/LerSent001/orb"
+    },
+    "spark": {
+      "title": "Upload and Spark",
+      "intro": "The drop zone and prompt bar that the upload screen and Spark use, and the two orbs that head Spark. Each reads the design tokens."
+    }
+  },
+  "vendorLine": "{{vendor}}, {{licence}}",
+  "items": {
+    "numberTicker": "Number ticker",
+    "blurFade": "Blur fade",
+    "borderBeam": "Border beam",
+    "shineBorder": "Shine border",
+    "animatedList": "Animated list",
+    "shinyText": "Shiny text",
+    "circularProgress": "Circular progress",
+    "dotPattern": "Dot pattern",
+    "gradientText": "Gradient text",
+    "blurText": "Blur text",
+    "spotlightCard": "Spotlight card",
+    "glassSurface": "Glass surface",
+    "statusMark": "Status mark",
+    "latticeLoader": "Lattice loader",
+    "thoughtLine": "Thought line",
+    "holdButton": "Hold button",
+    "aurora": "Aurora",
+    "stepper": "Stepper",
+    "timeline": "Timeline",
+    "badge": "Badge",
+    "frame": "Frame",
+    "alert": "Alert",
+    "fileType": "File type",
+    "fileDropzone": "File drop zone",
+    "promptBar": "Prompt bar",
+    "orb": "Orb (WebGL)",
+    "liquidOrb": "Liquid orb (WebGPU)"
+  },
+  "demo": {
+    "ordersInDataSet": "orders in the synthetic data set",
+    "needsYou": "Needs you",
+    "rows": {
+      "read": "Customer PO read",
+      "stock": "Stock checked in Business Central",
+      "spr": "SPR raised and sent for approval"
+    },
+    "reading": "Reading the document",
+    "stepsOfNine": "6 of 9 steps done",
+    "journeyProgress": "Journey progress",
+    "pointer": "Move the pointer over this card.",
+    "insights": "Insights",
+    "tagline": "AI reads, rules decide, people approve.",
+    "glass": "A pane of glass over the ground.",
+    "status": {
+      "pending": "Queued",
+      "running": "Reading",
+      "done": "Read",
+      "failed": "Failed",
+      "cancelled": "Cancelled"
+    },
+    "lattice": {
+      "working": "Reading the PO",
+      "done": "Read in 4.2 s",
+      "error": "Could not read the file"
+    },
+    "thought": {
+      "working": "Reading the document",
+      "done": "Read the document",
+      "toggle": "Show what Spark did",
+      "timer": "3.1 s",
+      "steps": {
+        "classified": "Classified as a customer PO",
+        "read": "Read the header and the lines",
+        "review": "Marked 2 fields for review"
+      }
+    },
+    "hold": {
+      "label": "Hold to approve",
+      "done": "Approved",
+      "hint": "Press and hold for one second. A short press does nothing."
+    },
+    "stepper": {
+      "journey": "Order journey",
+      "completed": "Done",
+      "active": "Now",
+      "inactive": "Later",
+      "steps": {
+        "po": "PO received",
+        "stock": "Stock checked",
+        "pi": "PI generated in Business Central",
+        "sent": "PI sent to the customer"
+      },
+      "waiting": "Waiting on Support"
+    },
+    "badge": {
+      "paid": "Paid",
+      "hold": "On hold",
+      "late": "2 days late",
+      "draft": "Draft"
+    },
+    "frame": {
+      "title": "Orders",
+      "description": "Open orders by stage"
+    },
+    "alert": {
+      "title": "Quantity differs from the PO",
+      "description": "The packing list says 48 and the PO says 50.",
+      "action": "Open the checks",
+      "refused": "This file type is not accepted. Use PDF, PNG, JPEG, XLSX or CSV."
+    },
+    "files": {
+      "pdf": "PDF document",
+      "xlsx": "Spreadsheet",
+      "csv": "CSV file",
+      "jpg": "JPEG image",
+      "png": "PNG image"
+    },
+    "ground": {
+      "dots": "Empty state",
+      "aurora": "Sign-in"
+    },
+    "drop": {
+      "title": "Drop files here",
+      "dragging": "Release to add the files",
+      "hint": "PDF, PNG, JPEG, XLSX or CSV, up to 10 MB each.",
+      "choose": "Choose files",
+      "input": "Choose files for the drop zone demo",
+      "none": "No files chosen yet.",
+      "chosen_one": "1 file chosen. Nothing is uploaded from this sheet.",
+      "chosen_other": "{{count}} files chosen. Nothing is uploaded from this sheet."
+    },
+    "prompt": {
+      "label": "Ask Spark",
+      "placeholder": "Ask about stock, orders or documents",
+      "send": "Send",
+      "stop": "Stop",
+      "help": "Enter sends, Shift and Enter adds a line.",
+      "sent": "Sent: {{text}}",
+      "idle": "Nothing sent yet."
+    },
+    "orb": {
+      "idle": "Idle",
+      "thinking": "Thinking",
+      "switch": "Orb state",
+      "labelIdle": "The orb, idle",
+      "labelThinking": "The orb, thinking",
+      "engine": "Drawing with {{engine}}",
+      "pending": "Asking the browser for a GPU",
+      "engines": {
+        "webgpu": "WebGPU",
+        "webgl": "WebGL",
+        "still": "a still image"
+      }
+    }
+  },
+  "summary": {
+    "title": "Kits in use",
+    "intro": "{{count}} items from three kits and one orb, each shown live below. Each one reads the design tokens, holds still under reduced motion and pauses when it is off screen.",
+    "items_one": "item",
+    "items_other": "items",
+    "jump": "Jump to a section",
+    "total": "Items in all"
+  },
+  "parts": {
+    "title": "Product parts",
+    "intro": "The parts the screens are made from. Each one is built on kit items from the sections above and takes its look from the design tokens.",
+    "builtOn": "Built on {{items}}",
+    "alone": "Built on the design tokens",
+    "names": {
+      "journeyRail": "Journey rail",
+      "statusChip": "Status chip and due timer",
+      "kpiTile": "KPI tile",
+      "maskedValue": "Masked value",
+      "sectionEmpty": "Section header and empty state"
+    },
+    "demo": {
+      "journeyFull": "The full rail, for an order's header",
+      "journeyVertical": "The vertical rail, for a timeline",
+      "journeyRow": "The small rail, for a list row",
+      "purchase": "A purchase order",
+      "shipLine_one": "Expected to ship in {{count}} day, from how long each step took on {{orders}} orders.",
+      "shipLine_other": "Expected to ship in {{count}} days, from how long each step took on {{orders}} orders.",
+      "usualNote": "{{usual}}, from {{n}} orders",
+      "tone": "Statuses",
+      "timers": "Due times",
+      "ordersInSet": "Orders in the data set",
+      "daysToPay": "Time customers take to pay",
+      "hpAvailable": "HP monitors available",
+      "days": "days",
+      "units": "units",
+      "orders": "orders",
+      "maskedLabel": "Order value",
+      "maskedReason": "Prices are hidden from Warehouse",
+      "maskedValue": "USD 12,340.00",
+      "shown": "Visible to Finance",
+      "sectionTitle": "Documents",
+      "emptyTitle": "No documents waiting",
+      "emptyText": "Upload a PO and Spark reads it here, ready for a person to confirm.",
+      "emptyAction": "Upload a document"
+    },
+    "follows": "Follows the Stepper and Timeline items"
+  }
+}

@@ -1,12 +1,12 @@
 {
-  "title": "Workflows",
+  "title": "My tasks",
   "description": "Tasks, approvals and the steps every order passes through.",
   "menu": {
     "myTasks": "My tasks"
   },
   "nav": {
     "label": "Workflow pages",
-    "inbox": "Task inbox",
+    "inbox": "Tasks",
     "reminders": "Reminders"
   },
   "notice": {
@@ -38,7 +38,9 @@
     "count_one": "{{count}} task",
     "count_other": "{{count}} tasks",
     "noInboxTitle": "Your role has no task inbox",
-    "noInboxDescription": "Ask for the permission to open other roles' inboxes, or sign in as a role that has tasks."
+    "noInboxDescription": "Ask for the permission to open other roles' inboxes, or sign in as a role that has tasks.",
+    "myHeading": "My tasks",
+    "waitingOnYou": "Waiting on you"
   },
   "task": {
     "dueOn": "Due {{date}}",
@@ -54,25 +56,31 @@
       "REVIEW_FIELDS": "Review fields",
       "RAISE_SPR": "Raise SPR",
       "APPROVE_SPR": "Approve SPR",
+      "PLACE_VENDOR_PO": "Place vendor PO",
       "SEND_PI": "Send pro forma invoice",
       "CONFIRM_PAYMENT": "Confirm payment",
       "PACK_ORDER": "Pack order",
       "RECOUNT_CARTONS": "Recount cartons",
       "ADD_SHIPPING_DOCUMENTS": "Add shipping documents"
-    }
+    },
+    "dueToday": "Due today",
+    "sprLine": "{{quantity}} × {{item}}",
+    "cover": "{{months}} months of cover"
   },
   "forYou": {
     "title": "Sent to you",
     "description": "Reminders and escalations on tasks still open. They clear when the task is done.",
     "sentOn": "Sent {{date}}",
     "messages": {
-      "REMINDER": "{{task}} on {{order}} needs you.",
-      "ESCALATION": "{{task}} on {{order}} is overdue."
+      "REMINDER": "{{task}} for {{order}}",
+      "ESCALATION": "{{task}} for {{order}} is overdue"
     },
     "kinds": {
       "REMINDER": "Reminder",
       "ESCALATION": "Escalation"
-    }
+    },
+    "show_one": "Show the reminder sent to you",
+    "show_other": "Show the {{count}} reminders sent to you"
   },
   "reminders": {
     "heading": "Reminders",
@@ -93,7 +101,8 @@
       "PAYMENT_DUE": "Payment due",
       "SHIPPING_DOCUMENT_MISSING": "Shipping document missing",
       "IMPORT_PERMIT_MISSING": "Import permit missing"
-    }
+    },
+    "forRole": "Reminders for {{role}}"
   },
   "steps": {
     "po-received": "PO received",
@@ -125,8 +134,8 @@
     },
     "by": "{{name}}",
     "notFoundTitle": "This order is not in the sample data",
-    "notFoundDescription": "Check the order number, or go back to the task inbox.",
-    "backToInbox": "Back to the task inbox",
+    "notFoundDescription": "Check the order number, or go back to My tasks.",
+    "backToInbox": "Back to My tasks",
     "crumb": "Order"
   },
   "payment": {
@@ -159,8 +168,9 @@
     }
   },
   "spr": {
-    "heading": "Stock purchase request {{recordNo}}",
+    "heading": "Stock purchase requisition {{recordNo}}",
     "description": "Requested by {{name}} on {{date}} for {{orderNo}}.",
+    "descriptionSuggested": "Suggested by the stock check of {{orderNo}} on {{date}}, for {{name}} to raise.",
     "navision": "Business Central number",
     "navisionNone": "none yet",
     "ourNumber": "OrderPilot number",
@@ -170,8 +180,14 @@
     "quantity": "Quantity",
     "unitCost": "Unit cost",
     "amount": "Amount",
-    "basisHeading": "Why this quantity",
-    "basisDescription": "Available stock is Inventory, minus Qty. on Sales Order, plus Qty. on Purch. Order. The suggestion is the shortfall.",
+    "basisHeading": "Why this SPR",
+    "basisDescription": "Spectra raises an SPR from stock on hand and the last three months' sales. The suggested quantity covers this order's shortfall: inventory, minus what sales orders hold, plus what is on order.",
+    "stockAndSales": "Stock and sales",
+    "thisOrder": "This order",
+    "runRate3m": "Sold a month (3-month average)",
+    "monthsOfCover": "Months of cover",
+    "noSales": "No sales in 3 months",
+    "lowCover": "Under a month of stock",
     "ordered": "Ordered",
     "inventory": "Inventory",
     "qtyOnSalesOrder": "Qty. on Sales Order",
@@ -190,8 +206,14 @@
       "default": "Default",
       "person": "Entered by a person"
     },
-    "approverHeading": "Approver",
-    "approverDescription": "Who approves this request and up to what amount. The limits are draft values until Spectra confirms them.",
+    "approverHeading": "Who decides",
+    "approverDescription": "As Spectra described it on 5 Nov: a coordinator routes each SPR, and any one of three management approvers decides.",
+    "decidedBy": "Decided by",
+    "anyOfThree": "Any one of three management approvers",
+    "limits": "Limits",
+    "noLimits": "None set",
+    "statusHeading": "Decision",
+    "waiting": "Waiting for a management approver. Any one of the three decides, and the decision shows here.",
     "approverName": "Approver",
     "approverId": "Escalates to",
     "salesLimit": "Sales limit",
@@ -205,7 +227,7 @@
     "decisionDone": "Decided: {{outcome}} by {{name}} on {{date}}",
     "passedOn": "Above the limit: {{by}} passed this on to {{name}} on {{date}}. It is waiting for their decision.",
     "passedToYou": "{{by}} passed this on to you on {{date}}, because it is above their limit. They would have marked it {{asked}}.",
-    "notRunnable": "This is a sample the workflow does not run yet, so it cannot be decided here.",
+    "notRunnable": "This is a sample from the demo data, so it is not decided here. An SPR the workflow runs is decided on this page.",
     "toast": {
       "done": "{{ref}} {{outcome}}",
       "passedOn": "{{ref}} is above your limit, so it went to {{name}}",
@@ -224,7 +246,34 @@
     "readOnly": "Your role can read this request but not decide it.",
     "handedNoPermission": "Your role cannot decide this yet, so it stays waiting until an administrator gives it the permission.",
     "notFoundTitle": "This request is not in the sample data",
-    "notFoundDescription": "Check the number, or go back to the task inbox.",
-    "crumb": "Stock purchase request"
+    "notFoundDescription": "Check the number, or go back to My tasks.",
+    "crumb": "Stock purchase requisition",
+    "order": "Sales order",
+    "dueOn": "Due {{date}}",
+    "overdueSince": "Overdue since {{date}}",
+    "nextStep": "When you approve, the product manager places the vendor PO in Business Central.",
+    "historyHeading": "History",
+    "history": {
+      "requested": "Requested by {{name}}",
+      "routed": "Sent to the management approvers",
+      "waiting": "Waiting for a decision, due {{date}}",
+      "overdue": "Waiting for a decision, overdue since {{date}}",
+      "decided": "{{outcome}} by {{name}}",
+      "suggested": "Suggested by the stock check",
+      "toRaise": "Waiting for {{name}} to raise it",
+      "backToRaise": "Back with {{name}} to correct and raise again"
+    },
+    "raise": {
+      "heading": "Not raised yet",
+      "intro": "OrderPilot worked this SPR out from the stock check. Check it, then raise it: it goes to the management approvers, and any one of them decides.",
+      "introAgain": "Correct what the approver asked for, then raise it again. It goes back to the management approvers.",
+      "button": "Raise the SPR",
+      "buttonAgain": "Raise it again",
+      "sending": "Raising",
+      "others": "The product manager has not raised this SPR yet, so it has not gone to the approvers.",
+      "othersAgain": "It is back with the product manager to correct and raise again.",
+      "done": "{{ref}} raised and sent to the approvers",
+      "failed": "The SPR was not raised. Reload the page and try again."
+    }
   }
 }

@@ -6,17 +6,17 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import type { ReactNode } from "react";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { Badge } from "@/components/kit/Badge";
 
 export type StatusTone = "neutral" | "info" | "success" | "warning" | "danger";
 
+// The kit's status pill, as the order page and the Orders table draw it.
 const TONES = {
-  neutral: { icon: CircleDot, style: "bg-secondary text-secondary-foreground" },
-  info: { icon: Info, style: "bg-accent text-accent-foreground" },
-  success: { icon: CircleCheck, style: "bg-accent text-success" },
-  warning: { icon: TriangleAlert, style: "bg-warning-surface text-warning" },
-  danger: { icon: CircleAlert, style: "bg-destructive/10 text-destructive" },
+  neutral: { icon: CircleDot, variant: "secondary" },
+  info: { icon: Info, variant: "info" },
+  success: { icon: CircleCheck, variant: "success" },
+  warning: { icon: TriangleAlert, variant: "warning" },
+  danger: { icon: CircleAlert, variant: "destructive" },
 } as const;
 
 /**
@@ -32,9 +32,14 @@ export function StatusBadge({
   children: ReactNode;
   className?: string;
 }) {
-  const { icon: Icon, style } = TONES[tone];
+  const { icon: Icon, variant } = TONES[tone];
   return (
-    <Badge className={cn(style, className)} data-tone={tone}>
+    <Badge
+      variant={variant}
+      radius="full"
+      className={className}
+      data-tone={tone}
+    >
       <Icon aria-hidden="true" />
       {children}
     </Badge>

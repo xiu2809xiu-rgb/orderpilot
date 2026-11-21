@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { watchThemeOrigin, withThemeTransition } from "./themeSwitch";
 
 export type ThemePreference = "light" | "dark" | "system";
 
@@ -21,12 +22,25 @@ function prefersDark(): boolean {
   return window.matchMedia("(prefers-color-scheme: dark)").matches;
 }
 
+function isDark(preference: ThemePreference): boolean {
+  return preference === "dark" || (preference === "system" && prefersDark());
+}
+
 export function applyTheme(preference: ThemePreference): void {
-  const dark =
-    preference === "dark" || (preference === "system" && prefersDark());
+  const dark = isDark(preference);
   const root = document.documentElement;
   root.classList.toggle("dark", dark);
   root.style.colorScheme = dark ? "dark" : "light";
+}
+
+/**
+ * Whether this choice changes what is on the page. Going from "light" to
+ * "system" on a light device does not, and then nothing is animated.
+ */
+function changesThePage(preference: ThemePreference): boolean {
+  return (
+    document.documentElement.classList.contains("dark") !== isDark(preference)
+  );
 }
 
 interface ThemeState {
@@ -42,17 +56,28 @@ export const useThemeStore = create<ThemeState>()((set) => ({
     } catch {
       // The choice still applies for this visit.
     }
-    applyTheme(preference);
-    set({ preference });
+    const change = () => {
+      applyTheme(preference);
+      set({ preference });
+    };
+    // A person chose it, so the new theme opens from the control they used.
+    if (changesThePage(preference)) withThemeTransition(change, "reveal");
+    else change();
   },
 }));
 
 /** Applies the stored theme and follows the system while the choice is "system". */
 export function initTheme(): void {
   applyTheme(useThemeStore.getState().preference);
+  watchThemeOrigin();
   window
     .matchMedia("(prefers-color-scheme: dark)")
     .addEventListener("change", () => {
-      applyTheme(useThemeStore.getState().preference);
+      const { preference } = useThemeStore.getState();
+      if (!changesThePage(preference)) return;
+      // The device changed it: there is no control to open from, so it fades.
+      withThemeTransition(() => {
+        applyTheme(preference);
+      }, "fade");
     });
 }

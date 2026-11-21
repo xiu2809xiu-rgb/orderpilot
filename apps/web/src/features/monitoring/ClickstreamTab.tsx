@@ -1,3 +1,4 @@
+import { roleSchema } from "@orderpilot/shared";
 import { useTranslation } from "react-i18next";
 import {
   DemoBadge,
@@ -35,6 +36,7 @@ function BrowserChoice() {
         {consent === "blocked" ? null : consent === "granted" ? (
           <Button
             variant="outline"
+            className="pointer-coarse:h-11"
             onClick={() => {
               tracker.deny();
             }}
@@ -44,6 +46,7 @@ function BrowserChoice() {
         ) : (
           <Button
             variant="outline"
+            className="pointer-coarse:h-11"
             onClick={() => {
               tracker.grant();
             }}
@@ -59,7 +62,14 @@ function BrowserChoice() {
 /** Usage summary on mock data until Angelyn reads the ClickstreamEvent table (Sprints 13 to 15). */
 export function ClickstreamTab() {
   const { t } = useTranslation("monitoring");
+  const { t: tc } = useTranslation();
   const query = useOverviewClickstream();
+  // The summary sends the role as text: a role the app knows shows by its
+  // name, as everywhere else, and anything else as it was sent.
+  const roleName = (role: string) => {
+    const known = roleSchema.safeParse(role);
+    return known.success ? tc(`roles.${known.data}`) : role;
+  };
 
   if (query.isPending) return <LoadingState />;
   if (query.isError) {
@@ -82,7 +92,7 @@ export function ClickstreamTab() {
         title={t("clickstream.consent.title")}
         description={t("clickstream.consent.description")}
       >
-        <p className="text-2xl font-semibold tabular-nums">
+        <p className="fs-28 font-semibold tabular-nums">
           {t("clickstream.consent.rate", { rate: consentRate })}
         </p>
       </SectionCard>
@@ -90,8 +100,14 @@ export function ClickstreamTab() {
         title={t("clickstream.routes.title")}
         description={t("clickstream.routes.description")}
       >
-        <ScrollRegion label={t("clickstream.routes.label")}>
-          <Table aria-label={t("clickstream.routes.label")}>
+        <ScrollRegion
+          label={t("clickstream.routes.label")}
+          className="rounded-none border-0 bg-transparent"
+        >
+          <Table
+            className="dt-table"
+            aria-label={t("clickstream.routes.label")}
+          >
             <TableHeader>
               <TableRow>
                 <TableHead>{t("clickstream.routes.route")}</TableHead>
@@ -119,26 +135,31 @@ export function ClickstreamTab() {
         title={t("clickstream.roles.title")}
         description={t("clickstream.roles.description")}
       >
-        <Table aria-label={t("clickstream.roles.label")}>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t("clickstream.roles.role")}</TableHead>
-              <TableHead className="text-right">
-                {t("clickstream.roles.events")}
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {byRole.map((row) => (
-              <TableRow key={row.role}>
-                <TableCell>{row.role}</TableCell>
-                <TableCell className="text-right tabular-nums">
-                  {row.events}
-                </TableCell>
+        <ScrollRegion
+          label={t("clickstream.roles.label")}
+          className="rounded-none border-0 bg-transparent"
+        >
+          <Table className="dt-table" aria-label={t("clickstream.roles.label")}>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("clickstream.roles.role")}</TableHead>
+                <TableHead className="text-right">
+                  {t("clickstream.roles.events")}
+                </TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {byRole.map((row) => (
+                <TableRow key={row.role}>
+                  <TableCell>{roleName(row.role)}</TableCell>
+                  <TableCell className="text-right tabular-nums">
+                    {row.events}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </ScrollRegion>
       </SectionCard>
     </div>
   );

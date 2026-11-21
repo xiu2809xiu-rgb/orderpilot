@@ -1,4 +1,4 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, Optional } from "@nestjs/common";
 import type {
   DocumentTypeConfig,
   HandedTask,
@@ -21,6 +21,7 @@ import { mockOpenRules } from "./mock/mock-open-rules.js";
 import { SprRecordRepository } from "./spr-record.repository.js";
 import { SprRoutingService, type SprHandover } from "./spr-routing.service.js";
 import { WorkflowReadModel } from "./workflow-read-model.js";
+import { WorkflowTaskRepository } from "./workflow-task.repository.js";
 
 export interface Page<T> {
   readonly items: T[];
@@ -63,6 +64,9 @@ export class WorkflowsService {
     @Inject(AuthorisationService)
     private readonly policy: AuthorisationService,
     @Inject(SprRoutingService) private readonly routing: SprRoutingService,
+    @Optional()
+    @Inject(WorkflowTaskRepository)
+    private readonly storedTasks?: WorkflowTaskRepository,
   ) {}
 
   /** A role's tasks, filtered and paged on the server so a long inbox stays quick. */
@@ -137,10 +141,38 @@ export class WorkflowsService {
       task.kind === "APPROVE_SPR" && task.orderNo ? [task.orderNo] : [],
     );
     const gone = await this.sprsNoLongerWithApprover(orders);
-    return tasks.filter(
+    const sample = tasks.filter(
       (task) =>
         task.kind !== "APPROVE_SPR" || !task.orderNo || !gone.has(task.orderNo),
     );
+    return this.withRunningTasks(role, sample);
+  }
+
+  /**
+   * On an order the state machine runs, its stored task says whether there is
+   * still something to do, and a move can open a task the sample data never had,
+   * such as the approvers' once an SPR is raised (#251, #290). Those join the list.
+   */
+  private async withRunningTasks(
+    role: InboxRole,
+    sample: WorkflowTask[],
+  ): Promise<WorkflowTask[]> {
+    if (!this.storedTasks) return sample;
+    const stored = await this.storedTasks.forRole(role);
+    const byId = new Map(stored.map((task) => [task.id, task]));
+    const kept = sample.filter((task) => byId.get(task.id)?.open ?? true);
+    const now = new Date();
+    const opened = await Promise.all(
+      stored
+        .filter((task) => task.open)
+        .map(async (task) =>
+          // A task the sample data has is already in the list above.
+          (await this.model.taskById(task.id))
+            ? null
+            : this.model.describe(task, now),
+        ),
+    );
+    return [...kept, ...opened.filter((task) => task !== null)];
   }
 
   private async sprsNoLongerWithApprover(
@@ -179,7 +211,8 @@ export class WorkflowsService {
 
   async spr(recordNo: string, viewerUserId?: string): Promise<SprDetail> {
     const record = await this.model.sprByRecordNo(recordNo);
-    if (!record) throw new NotFoundError(`Stock purchase request ${recordNo}`);
+    if (!record)
+      throw new NotFoundError(`Stock purchase requisition ${recordNo}`);
     const approver = await this.approvals.approverFor(record.requestedBy.role);
     if (!approver) throw new NotFoundError(`An approver for ${recordNo}`);
     const stored = record.orderNo
@@ -188,10 +221,32 @@ export class WorkflowsService {
     const next = stored?.passedOn
       ? await this.policy.deciderFor(stored.passedOn.byUserId)
       : null;
+    const decision = stored ? stored.decision : record.decision;
+    // The open task says when the decision is due; a decided SPR has none.
+    const task = decision
+      ? undefined
+      : (await this.openTasks("APPROVER")).find(
+          (open) => open.ref?.recordNo === recordNo,
+        );
+    // A suggestion has no data until the product manager raises it; a rejected
+    // SPR goes back to them to correct and raise again.
+    const raisable = !stored || stored.decision?.outcome === "rejected";
+    const raiseTask =
+      raisable && record.orderNo && this.storedTasks
+        ? await this.storedTasks.openOf(record.orderNo, "RAISE_SPR")
+        : null;
+    const stage = decision
+      ? ("decided" as const)
+      : raiseTask
+        ? ("suggested" as const)
+        : ("with-approvers" as const);
     return {
       ...record,
       // Once the workflow runs this SPR, its own record is what is true of it.
-      decision: stored ? stored.decision : record.decision,
+      decision,
+      stage,
+      raiseTaskId: raiseTask?.id ?? null,
+      due: task ? { dueAt: task.dueAt, overdue: task.overdue } : null,
       decidable: stored !== null,
       passedTo: stored?.passedOn
         ? {
@@ -216,8 +271,8 @@ export class WorkflowsService {
     return this.config.list();
   }
 
-  /** What stays open until Spectra confirms it, with today's draft values. */
-  async openRules(): Promise<OpenRule[]> {
-    return mockOpenRules(await this.approvals.approverFor("PRODUCT_MANAGER"));
+  /** What Spectra settled on 5 Nov, and the drafts that wait for its answer. */
+  openRules(): Promise<OpenRule[]> {
+    return Promise.resolve(mockOpenRules());
   }
 }

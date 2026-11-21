@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatDay, formatMoney } from "./format";
+import { calendarDaysBetween, formatDay, formatMoney } from "./format";
 
 describe("formatMoney", () => {
   it("groups thousands and keeps two decimals", () => {
@@ -38,5 +38,32 @@ describe("formatDay", () => {
     expect(formatDay("2026-11-02T00:00:00Z")).toBe("2 Nov 2026");
     // 17:00 UTC is already the next day in Singapore.
     expect(formatDay("2026-11-02T17:00:00Z")).toBe("3 Nov 2026");
+  });
+});
+
+describe("calendarDaysBetween", () => {
+  it("counts calendar days in Singapore, not elapsed 24 hours", () => {
+    // 12 Nov 17:00 and 15 Nov 11:00 in Singapore.
+    expect(
+      calendarDaysBetween(
+        new Date("2026-11-12T09:00:00.000Z"),
+        new Date("2026-11-15T03:00:00.000Z"),
+      ),
+    ).toBe(3);
+  });
+
+  it("uses the Singapore date: 11 pm UTC is already the next day there", () => {
+    expect(
+      calendarDaysBetween(
+        new Date("2026-11-12T20:00:00.000Z"),
+        new Date("2026-11-13T02:00:00.000Z"),
+      ),
+    ).toBe(0);
+    expect(
+      calendarDaysBetween(
+        new Date("2026-11-12T15:00:00.000Z"),
+        new Date("2026-11-12T17:00:00.000Z"),
+      ),
+    ).toBe(1);
   });
 });

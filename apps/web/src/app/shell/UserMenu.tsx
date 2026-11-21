@@ -1,9 +1,8 @@
-import { LogOut, Settings } from "lucide-react";
+import { ChevronsUpDown, LogOut, Settings } from "lucide-react";
 import { lazy, Suspense, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,6 +13,7 @@ import {
 } from "./overlays/dropdown-menu";
 import { logout } from "@/lib/api/auth";
 import { anyFormDirty } from "@/lib/dirty-forms";
+import { cn } from "@/lib/utils";
 import { useSessionStore } from "@/stores/session";
 // Only needed when someone signs out over unsaved changes.
 const SignOutDialog = lazy(() =>
@@ -28,7 +28,11 @@ function initials(name: string): string {
     .join("");
 }
 
-export function UserMenu() {
+/**
+ * Who is signed in, at the foot of the side panel. The row opens the account
+ * menu: settings and signing out. In the 64 px rail only the initials show.
+ */
+export function UserMenu({ collapsed }: { collapsed: boolean }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const user = useSessionStore((state) => state.session?.user);
@@ -45,25 +49,36 @@ export function UserMenu() {
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-full"
-            // The initials are the visible text, so the name carries them too
-            // (WCAG 2.5.3, label in name).
-            aria-label={t("userMenu.label", {
-              initials: initials(user.displayName),
-            })}
-          >
-            <Avatar className="size-8">
-              <AvatarFallback className="bg-accent text-xs font-medium text-accent-foreground">
-                {initials(user.displayName)}
-              </AvatarFallback>
-            </Avatar>
-          </Button>
+        <DropdownMenuTrigger className="dx-entry dx-person">
+          <Avatar className="size-8 shrink-0" aria-hidden="true">
+            <AvatarFallback className="fs-12 bg-accent font-semibold text-accent-foreground">
+              {initials(user.displayName)}
+            </AvatarFallback>
+          </Avatar>
+          {/* The name and the role are the visible text, so they are part of
+              the button's name too (WCAG 2.5.3, label in name). */}
+          <span className={cn("min-w-0 flex-1", collapsed && "sr-only")}>
+            <span className="sr-only">{t("userMenu.label")}</span>
+            <span className="fs-14 block truncate font-medium text-foreground">
+              {user.displayName}
+            </span>
+            <span className="fs-12 block truncate text-muted-foreground">
+              {t(`roles.${user.role}`)}
+            </span>
+          </span>
+          <ChevronsUpDown
+            className={cn(
+              "size-4 shrink-0 text-muted-foreground",
+              collapsed && "hidden",
+            )}
+            aria-hidden="true"
+          />
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-64">
+        <DropdownMenuContent
+          side={collapsed ? "right" : "top"}
+          align={collapsed ? "end" : "start"}
+          className="w-60"
+        >
           <DropdownMenuLabel className="font-normal">
             <span className="block text-xs text-muted-foreground">
               {t("userMenu.signedInAs")}

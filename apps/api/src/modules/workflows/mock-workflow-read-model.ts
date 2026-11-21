@@ -2,6 +2,7 @@ import { Inject, Injectable, Optional } from "@nestjs/common";
 import type {
   InboxRole,
   OrderFlow,
+  TaskKind,
   WorkflowReminder,
   WorkflowTask,
 } from "@orderpilot/shared";
@@ -15,6 +16,7 @@ import { MockDecisionOverlay } from "./mock/mock-decision-overlay.js";
 import { buildFlow } from "./mock/mock-flows.js";
 import { buildSprs, type SprRecord } from "./mock/mock-sprs.js";
 import { WorkflowReadModel } from "./workflow-read-model.js";
+import type { RoleTask } from "./workflow-task.repository.js";
 
 interface View {
   readonly dataset: SyntheticDataset;
@@ -24,9 +26,36 @@ interface View {
   readonly customers: ReadonlyMap<string, string>;
 }
 
-/** Each payment task carries what one click confirms: the fixture's type and amount. */
-function tasksOf(dataset: SyntheticDataset): WorkflowTask[] {
+/** The kinds of task that are about an SPR, and so open it and say what it buys. */
+const SPR_KINDS: ReadonlySet<TaskKind> = new Set([
+  "RAISE_SPR",
+  "APPROVE_SPR",
+  "PLACE_VENDOR_PO",
+]);
+
+/** What an SPR task would buy, from the SPR it is about. */
+function sprSummaryOf(spr: SprRecord): NonNullable<WorkflowTask["spr"]> {
+  return {
+    itemNo: spr.item.no,
+    itemDescription: spr.item.description,
+    quantity: spr.quantity,
+    monthsOfCover: spr.basis.monthsOfCover,
+  };
+}
+
+/**
+ * Each payment task carries what one click confirms: the fixture's type and
+ * amount. Each SPR task carries what the SPR would buy.
+ */
+function tasksOf(
+  dataset: SyntheticDataset,
+  sprs: ReadonlyMap<string, SprRecord>,
+): WorkflowTask[] {
   return dataset.tasks.map((task) => {
+    const spr = task.ref ? sprs.get(task.ref.recordNo) : undefined;
+    if (task.kind === "APPROVE_SPR" && spr) {
+      return { ...task, spr: sprSummaryOf(spr) };
+    }
     if (task.kind !== "CONFIRM_PAYMENT") return task;
     const due = dataset.payments.find(
       (p) => p.orderNo === task.orderNo && p.status === "expected",
@@ -69,10 +98,13 @@ export class MockWorkflowReadModel extends WorkflowReadModel {
     const dataset = this.source();
     if (this.cached?.dataset !== dataset) {
       this.overlay.startDay(dataset.asOf);
+      const sprs = new Map(
+        buildSprs(dataset).map((spr) => [spr.ref.recordNo, spr]),
+      );
       this.cached = {
         dataset,
-        tasks: tasksOf(dataset),
-        sprs: new Map(buildSprs(dataset).map((spr) => [spr.ref.recordNo, spr])),
+        tasks: tasksOf(dataset, sprs),
+        sprs,
         orders: new Map(dataset.orders.map((o) => [o.header.no, o])),
         customers: new Map(dataset.customers.map((c) => [c.no, c.name])),
       };
@@ -110,6 +142,43 @@ export class MockWorkflowReadModel extends WorkflowReadModel {
     );
   }
 
+  sprByOrder(orderNo: string): Promise<SprRecord | null> {
+    const spr = [...this.view().sprs.values()].find(
+      (entry) => entry.orderNo === orderNo,
+    );
+    return spr ? this.sprByRecordNo(spr.ref.recordNo) : Promise.resolve(null);
+  }
+
+  describe(task: RoleTask, now: Date): Promise<WorkflowTask | null> {
+    const { orders, customers, sprs } = this.view();
+    const order = orders.get(task.orderRef);
+    if (!order) return Promise.resolve(null);
+    const spr = [...sprs.values()].find(
+      (entry) => entry.orderNo === task.orderRef,
+    );
+    const aboutSpr = SPR_KINDS.has(task.kind) && spr !== undefined;
+    const customerNo = order.header.sellToCustomerNo;
+    return Promise.resolve({
+      id: task.id,
+      kind: task.kind,
+      title: task.title,
+      assigneeRole: task.assigneeRole,
+      orderNo: task.orderRef,
+      ref: aboutSpr ? spr.ref : null,
+      status: "OPEN",
+      createdAt: task.createdAt.toISOString(),
+      dueAt: task.dueAt.toISOString(),
+      overdue: task.dueAt < now,
+      customerNo,
+      customerName: customers.get(customerNo) ?? customerNo,
+      // An SPR task's amount is the request's, as for the sample's own tasks.
+      amount: aboutSpr ? spr.amount : order.total,
+      currencyCode: "USD",
+      priority: order.priority,
+      ...(aboutSpr ? { spr: sprSummaryOf(spr) } : {}),
+    });
+  }
+
   sprByRecordNo(recordNo: string): Promise<SprRecord | null> {
     const spr = this.view().sprs.get(recordNo);
     if (!spr) return Promise.resolve(null);
@@ -117,19 +186,37 @@ export class MockWorkflowReadModel extends WorkflowReadModel {
     return Promise.resolve(decision ? { ...spr, decision } : spr);
   }
 
-  /** A task the overlay has closed takes its reminder with it. */
+  /**
+   * A task the overlay has closed takes its reminder with it. A reminder about
+   * a record, such as an SPR, carries its number so it opens that record, and
+   * says what the SPR would buy, as its task does.
+   */
   remindersFor(role: InboxRole): Promise<WorkflowReminder[]> {
     const { dataset, tasks } = this.view();
+    const mine = tasks.filter((t) => t.assigneeRole === role);
     const closedOrders = new Set(
-      tasks
-        .filter((t) => t.assigneeRole === role && this.overlay.isClosed(t.id))
-        .map((t) => t.orderNo),
+      mine.filter((t) => this.overlay.isClosed(t.id)).map((t) => t.orderNo),
+    );
+    const refs = new Map(
+      mine.flatMap((t) => (t.ref && t.orderNo ? [[t.orderNo, t.ref]] : [])),
+    );
+    const sprs = new Map(
+      mine.flatMap((t) => (t.spr && t.orderNo ? [[t.orderNo, t.spr]] : [])),
     );
     return Promise.resolve(
-      dataset.reminders.filter(
-        (reminder) =>
-          reminder.toRole === role && !closedOrders.has(reminder.orderNo),
-      ),
+      dataset.reminders
+        .filter(
+          (reminder) =>
+            reminder.toRole === role && !closedOrders.has(reminder.orderNo),
+        )
+        .map((reminder) => {
+          const spr = sprs.get(reminder.orderNo);
+          return {
+            ...reminder,
+            ref: refs.get(reminder.orderNo) ?? null,
+            ...(spr ? { spr } : {}),
+          };
+        }),
     );
   }
 }

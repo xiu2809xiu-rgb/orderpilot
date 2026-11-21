@@ -71,8 +71,9 @@ async function voidDraft(page: Page, orderNo: string): Promise<void> {
   await page.getByRole("textbox", { name: /Reason/ }).fill("E2E clean-up");
   await page.getByRole("button", { name: "Void order" }).click();
   await expect(page.getByText(`Order ${orderNo} voided`)).toBeVisible();
+  // The draft is no longer a form: the route opens the order's page, which says what became of it.
   await expect(
-    page.getByText("This order is void. It cannot be changed."),
+    page.getByText("Entered here and voided. It cannot be changed."),
   ).toBeVisible();
 }
 
@@ -85,8 +86,8 @@ test.describe("New order and draft editing", () => {
     const po = freshPo();
     await signInAs(page, "SUPPORT");
     await page.goto("/orders");
-    await expect(page.getByRole("button", { name: "New order" })).toBeVisible();
-    await page.getByRole("button", { name: "New order" }).click();
+    await expect(page.getByRole("link", { name: "New order" })).toBeVisible();
+    await page.getByRole("link", { name: "New order" }).click();
     await expect(page).toHaveURL((url) => url.pathname === "/orders/new");
 
     await fillNewOrder(page, po);
@@ -144,11 +145,17 @@ test.describe("New order and draft editing", () => {
         const other = await context.newPage();
         await signInAs(other, "WAREHOUSE");
         await other.goto(`/orders/${orderNo}`);
+        // A reader gets the order page, not the form: its facts say it is a draft.
         await expect(
-          other.getByRole("heading", { name: `Sales order ${orderNo}` }),
+          other.getByRole("heading", { level: 1, name: orderNo }),
         ).toBeVisible();
         await expect(
-          other.getByText("Your role may read orders but not change them."),
+          other.getByText(
+            "Entered here as a draft. Only a role that may edit orders can change it.",
+          ),
+        ).toBeVisible();
+        await expect(
+          other.getByRole("table", { name: "Lines of the order" }),
         ).toBeVisible();
         await expect(other.getByText(/USD\s?[\d,]+\.\d{2}/)).toHaveCount(0);
         await expect(
@@ -220,6 +227,39 @@ test.describe("New order and draft editing", () => {
     await voidDraft(page, orderNo);
   });
 
+  test("a possible match is chosen with the down arrow and Enter, and never by Enter on the typed text alone", async ({
+    page,
+  }) => {
+    await signInAs(page, "SUPPORT");
+    await page.goto("/orders/new");
+    await expect(
+      page.getByRole("heading", { level: 1, name: "New order" }),
+    ).toBeVisible();
+    const customer = page.getByRole("combobox", { name: /^Customer$/ });
+    const possible = page.getByRole("option", {
+      name: /Vellamar Network.*possible match/,
+    });
+
+    // A customer of the base data set, misspelt by one letter: the demo
+    // storyline's customer is not in the data this suite runs on in CI.
+    // At the speed of a typist: the arrow comes before the search has
+    // answered, which is where a component test, that waits, never looked.
+    await customer.click();
+    await page.keyboard.type("Vellamor");
+    await page.keyboard.press("ArrowDown");
+    await expect(possible).toHaveAttribute("aria-selected", "true");
+    // Seen and highlighted, not chosen: the box still holds what was typed.
+    await expect(customer).toHaveValue("Vellamor");
+    await page.keyboard.press("Enter");
+    await expect(customer).toHaveValue(/^C-\d{4}\s+Vellamar Network/);
+
+    // Enter on the typed text alone never chooses the look-alike.
+    await customer.fill("Vellamor");
+    await expect(possible).toBeVisible();
+    await page.keyboard.press("Enter");
+    await expect(customer).toHaveValue("Vellamor");
+  });
+
   test("Warehouse sees no New order button, and the server refuses its writes", async ({
     page,
   }) => {
@@ -229,6 +269,7 @@ test.describe("New order and draft editing", () => {
       page.getByRole("link", { name: /^SO-\d{4}$/ }).first(),
     ).toBeVisible();
     await expectNoButton(page, "New order");
+    await expect(page.getByRole("link", { name: "New order" })).toHaveCount(0);
 
     const create = {
       customerNo: "C-0001",
@@ -268,7 +309,7 @@ test.describe("New order and draft editing", () => {
   }) => {
     await signInAs(page, "SUPPORT");
     await page.goto("/orders");
-    await expect(page.getByRole("button", { name: "New order" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "New order" })).toBeVisible();
     await page.keyboard.press("n");
     await expect(page).toHaveURL((url) => url.pathname === "/orders/new");
 

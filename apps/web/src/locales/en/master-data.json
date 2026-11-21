@@ -19,9 +19,25 @@
   },
   "table": {
     "scroll": "{{name}}, scrollable",
-    "hidden": "Hidden"
+    "hidden": "Hidden",
+    "whyHidden": "Why is {{column}} hidden?",
+    "hiddenCell": "Hidden for your role"
   },
-  "emptyDescription": "Records appear here once they are read from Business Central. Open Connectors to check the link.",
+  "terms": {
+    "days30": "30 days",
+    "days60": "60 days",
+    "prepaid": "Prepaid",
+    "advance50": "50% advance",
+    "deposit30": "30% deposit",
+    "lcAtSight": "Letter of credit at sight"
+  },
+  "stockRule": {
+    "label": "How Short and Low are decided",
+    "title": "When an item is Short or Low",
+    "short": "Short: an open order needs more of this item than is Available, and no approved SPR covers the rest. Available can still be above zero.",
+    "low": "Low: Available is under {{count}}, and no open order is short."
+  },
+  "emptyDescription": "Records appear here once they are read from Business Central.",
   "availability": {
     "short": "Short",
     "low": "Low",
@@ -46,9 +62,9 @@
       "partNumber": "Part number",
       "brand": "Brand",
       "category": "Category",
-      "inventory": "Stock",
-      "qtyOnSalesOrder": "On sales order",
-      "qtyOnPurchOrder": "On purch. order",
+      "inventory": "On hand",
+      "qtyOnSalesOrder": "On sales orders",
+      "qtyOnPurchOrder": "On purchase orders",
       "availableStock": "Available",
       "availability": "Availability",
       "unitPrice": "Price",
@@ -67,6 +83,7 @@
   },
   "item": {
     "back": "Items",
+    "numberLabel": "item number",
     "seeOrders": "See this item's orders",
     "partNumber": "Part number",
     "category": "Category",
@@ -79,11 +96,11 @@
     "notFoundDescription": "Business Central has no item numbered {{no}}.",
     "stock": {
       "title": "Stock",
-      "inventory": "Inventory",
-      "qtyOnSalesOrder": "Qty. on Sales Order",
-      "qtyOnPurchOrder": "Qty. on Purch. Order",
-      "availableStock": "Available Stock",
-      "formula": "Available Stock is Inventory minus Qty. on Sales Order plus Qty. on Purch. Order.",
+      "inventory": "On hand",
+      "qtyOnSalesOrder": "On sales orders",
+      "qtyOnPurchOrder": "On purchase orders",
+      "availableStock": "Available",
+      "formula": "Available is on hand, minus on sales orders, plus on purchase orders.",
       "short": "needs {{ordered}}, {{available}} are available, and it is short by {{shortBy}}."
     },
     "orders": {
@@ -102,13 +119,13 @@
       "received": "{{po}} received",
       "covered": "Needed {{ordered}} with {{available}} available, {{shortBy}} short.",
       "empty": "No open order holds this item.",
-      "listed": "Orders above, in Qty. on Sales Order",
+      "listed": "Orders above, counted in On sales orders",
       "heldOutTotal": "Orders above, held out as demand under review"
     },
     "purchases": {
       "title_one": "{{count}} open purchase order",
       "title_other": "{{count}} open purchase orders",
-      "description": "{{total}} still to arrive, which is the Qty. on Purch. Order.",
+      "description": "{{total}} still to arrive, which is On purchase orders.",
       "caption": "Open purchase orders for this item",
       "no": "Purchase order",
       "spr": "SPR",
@@ -165,7 +182,8 @@
   },
   "customer": {
     "back": "Customers",
-    "openTracker": "All orders in the tracker",
+    "numberLabel": "customer number",
+    "allOrders": "All orders of {{no}}",
     "country": "Country",
     "currency": "Currency",
     "paymentTerms": "Payment terms",
@@ -176,23 +194,23 @@
     "notFoundTitle": "No such customer",
     "notFoundDescription": "Business Central has no customer numbered {{no}}.",
     "open": {
-      "title_one": "{{count}} order to ship",
-      "title_other": "{{count}} orders to ship",
-      "description": "Orders with something still to ship. The tracker's open orders also include orders already shipped.",
-      "caption": "Orders to ship for this customer",
+      "title": "Open orders",
+      "description_one": "{{count}} order with goods still to ship.",
+      "description_other": "{{count}} orders with goods still to ship.",
+      "caption": "Open orders of this customer",
       "order": "Order",
       "po": "Customer PO",
       "status": "Status",
       "orderDate": "Order date",
       "shipmentDate": "Shipment date",
       "amount": "Amount",
-      "empty": "Nothing is waiting to ship for this customer."
+      "empty": "This customer has no open orders."
     },
     "overdue": {
       "title_one": "{{count}} overdue",
       "title_other": "{{count}} overdue",
       "caption": "Overdue orders for this customer",
-      "inTracker": "Open in the tracker",
+      "inOrders": "See them in Orders",
       "order": "Order",
       "po": "Customer PO",
       "late": "Late by",
@@ -220,6 +238,7 @@
   },
   "vendor": {
     "back": "Vendors",
+    "numberLabel": "vendor number",
     "seeItems": "See this vendor's items",
     "currency": "Currency",
     "paymentTerms": "Payment terms",
@@ -233,6 +252,7 @@
       "accountNo": "Account No.",
       "swift": "SWIFT",
       "iban": "IBAN",
+      "financeOnly": "Finance only",
       "empty": "No bank account is on file for this vendor."
     },
     "orders": {

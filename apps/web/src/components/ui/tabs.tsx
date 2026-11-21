@@ -1,7 +1,8 @@
-// Origin: shadcn/ui "tabs", written out here with our tokens.
+// Origin: shadcn/ui "tabs", written out here with our tokens. The look is in tabs.css.
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { Tabs as TabsPrimitive } from "radix-ui";
+import "./tabs.css";
 
 function Tabs({
   className,
@@ -23,10 +24,7 @@ function TabsList({
   return (
     <TabsPrimitive.List
       data-slot="tabs-list"
-      className={cn(
-        "inline-flex w-fit flex-wrap items-center gap-1 rounded-lg bg-muted p-1",
-        className,
-      )}
+      className={cn("tabs-list", className)}
       {...props}
     />
   );
@@ -39,12 +37,7 @@ function TabsTrigger({
   return (
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
-      className={cn(
-        "inline-flex h-8 items-center justify-center rounded-md px-3 text-sm font-medium whitespace-nowrap text-foreground transition-colors",
-        "hover:bg-background/60 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
-        "data-[state=active]:bg-background data-[state=active]:shadow-sm",
-        className,
-      )}
+      className={cn("tabs-trigger", className)}
       {...props}
     />
   );
@@ -57,10 +50,7 @@ function TabsContent({
   return (
     <TabsPrimitive.Content
       data-slot="tabs-content"
-      className={cn(
-        "space-y-s3 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
-        className,
-      )}
+      className={cn("tabs-panel space-y-s3", className)}
       {...props}
     />
   );

@@ -47,6 +47,7 @@
       "timeline": "No steps yet. They appear as the document moves.",
       "checks": "No checks have run on this document.",
       "documents": "No documents are linked to this one."
-    }
+    },
+    "title": "Details"
   }
 }

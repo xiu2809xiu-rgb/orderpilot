@@ -10,7 +10,7 @@
 //   for the orders whose SPR waits for a decision.
 // - No relation points at another area's table (User, orders), because a
 //   relation needs a field on that table and this file may not edit theirs.
-//   The ids are plain UUIDs or Navision numbers, checked by the service.
+//   The ids are plain UUIDs or Business Central numbers, checked by the service.
 
 enum TaskStatus {
   OPEN
@@ -57,7 +57,7 @@ model WorkflowDefinition {
 model WorkflowInstance {
   id           String    @id @default(uuid(7)) @db.Uuid
   definitionId String    @db.Uuid
-  /// Navision's sales order number (SO-0003). The order itself is area 1's.
+  /// Business Central's sales order number (SO-0003). The order itself is area 1's.
   orderRef     String
   /// Area 1's order id, once the order table exists.
   orderId      String?   @db.Uuid
@@ -233,13 +233,15 @@ model PaymentConfirmation {
   @@index([paymentType, confirmedAt])
 }
 
-/// OrderPilot's own number for a record, beside Navision's. `recordNo` is
-/// `SPR-20261102-0001`; `navisionNo` stays null until Navision has the record.
+/// OrderPilot's own number for a record, beside Business Central's. `recordNo` is
+/// `SPR-20261102-0001`; `navisionNo` stays null until Business Central has the record.
 model WorkflowRecord {
   id         String   @id @default(uuid(7)) @db.Uuid
   recordNo   String   @unique
   /// SPR, PI or EXC (RECORD_TYPES in packages/shared).
   recordType String
+  /// Holds the record's Business Central number. The column keeps its first
+  /// name, so no migration renames it (ADR 0048).
   navisionNo String?
   instanceId String?  @db.Uuid
   /// The record's fields as the person last saw them, with where each came from.

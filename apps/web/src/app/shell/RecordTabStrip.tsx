@@ -94,12 +94,12 @@ export default function RecordTabStrip({
   }
 
   return (
-    <nav aria-label={t("label")} className="shrink-0 border-b bg-background">
+    <nav aria-label={t("label")} className="dx-tabs shrink-0">
       <p id={RECORD_TABS_HINT_ID} className="sr-only">
         {t("hint")}
       </p>
       <ul
-        className="flex items-center gap-1 overflow-x-auto scroll-px-s2 px-s2 py-1 [scrollbar-width:thin]"
+        className="flex items-center gap-1 overflow-x-auto scroll-px-1 [scrollbar-width:thin]"
         onWheel={(event) => {
           // A mouse wheel has no sideways motion: turn it into one here.
           if (event.deltaX === 0)

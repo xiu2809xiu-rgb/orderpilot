@@ -1,0 +1,1245 @@
+/* The Orders workspace and the order page of the prototype. Imported by both
+   screens and their skeletons, only by the lazy preview. */
+
+/* ---- The workspace frame: the head and filters stay, the table scrolls ---- */
+.od-page {
+  display: flex;
+  height: 100%;
+  min-height: 34rem;
+  flex-direction: column;
+  max-width: 100rem;
+  margin-inline: auto;
+}
+
+/* The head is one row: title and what it says on the left, the two ways in on the right. */
+.od-page .dx-page-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 1rem;
+  align-items: end;
+  margin-bottom: 1rem;
+}
+
+.od-page .dx-title,
+.od-page .dx-title-context,
+.od-page .dx-page-intro {
+  grid-column: 1;
+}
+
+.od-page .dx-page-actions {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  margin-top: 0;
+  align-self: end;
+}
+
+@media (max-width: 47.99rem) {
+  .od-page .dx-page-head {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .od-page .dx-page-actions {
+    grid-column: 1;
+    grid-row: auto;
+    margin-top: 0.75rem;
+  }
+}
+.od-work {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.od-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.od-foot > :last-child {
+  flex: 1;
+}
+
+.od-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+/* Export and Print sit in a fieldset only to be disabled together: it draws as nothing. */
+.od-takeaway {
+  display: contents;
+}
+
+.od-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.od-count-line {
+  color: var(--muted-foreground);
+}
+
+.od-count-line:empty {
+  display: none;
+}
+
+/* ---- Views and tabs: one strip, a count beside each name ---- */
+.od-views,
+.od-tabs {
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  flex-wrap: nowrap;
+  gap: 0.25rem;
+  overflow-x: auto;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  border-bottom: 1px solid var(--border);
+}
+
+.od-view,
+.od-tab {
+  position: relative;
+  display: inline-flex;
+  height: 2.5rem;
+  align-items: center;
+  gap: 0.5rem;
+  padding-inline: 0.75rem;
+  border-radius: var(--radius-control) var(--radius-control) 0 0;
+  background: transparent;
+  color: var(--muted-foreground);
+  font-weight: 500;
+  box-shadow: none;
+  transition: color var(--motion-fast) var(--ease-out);
+}
+
+.od-view-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.od-view-count {
+  font-size: var(--type-12);
+  color: var(--faint-foreground);
+}
+
+.od-view[data-state="active"],
+.od-tab[data-state="active"] {
+  background: transparent;
+  color: var(--foreground);
+  box-shadow: none;
+}
+
+.od-view[data-state="active"]::after,
+.od-tab[data-state="active"]::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--ring);
+}
+
+.od-view[data-state="active"] .od-view-count,
+.od-tab[data-state="active"] .od-view-count {
+  color: var(--foreground);
+}
+
+.od-view-count[data-alert] {
+  color: var(--destructive);
+}
+
+.od-view:hover,
+.od-tab:hover {
+  background: var(--dx-hover-bg);
+  color: var(--foreground);
+}
+
+@media (pointer: coarse) {
+  .od-view,
+  .od-tab {
+    height: 2.75rem;
+  }
+}
+/* ---- Filters: each with its label in view ---- */
+.od-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+/* The filter panel is only a wrapper on a wide screen, and a disclosure on a phone. */
+.od-filter-panel {
+  display: contents;
+}
+
+.od-filter-toggle {
+  display: none;
+}
+
+.od-field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.od-field-label {
+  color: var(--muted-foreground);
+  font-weight: 500;
+}
+
+.od-control {
+  height: 2.25rem;
+  font-size: var(--type-14);
+}
+
+@media (pointer: coarse) {
+  .od-control {
+    height: 2.75rem;
+  }
+}
+.od-search {
+  position: relative;
+  display: block;
+  width: 17rem;
+  max-width: 100%;
+}
+
+.od-search > svg {
+  position: absolute;
+  top: 50%;
+  left: 0.625rem;
+  width: 1rem;
+  height: 1rem;
+  translate: 0 -50%;
+  color: var(--muted-foreground);
+  pointer-events: none;
+}
+
+.od-search input {
+  padding-left: 2.125rem;
+}
+
+.od-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.od-toggle[data-pressed="true"] {
+  border-color: var(--ring);
+  background: var(--accent);
+  color: var(--foreground);
+}
+
+.od-count {
+  margin-left: 0.125rem;
+  min-width: 1.25rem;
+  padding-inline: 0.25rem;
+  border-radius: var(--radius-control);
+  background: var(--accent);
+  color: var(--accent-foreground);
+  font-size: var(--type-12);
+  text-align: center;
+}
+
+.od-span {
+  color: var(--accent-foreground);
+  background: var(--accent);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-control);
+  width: fit-content;
+}
+
+.od-applied {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+  list-style: none;
+}
+
+.od-chip {
+  display: inline-flex;
+  min-height: 1.75rem;
+  align-items: center;
+  gap: 0.375rem;
+  padding-inline: 0.625rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  color: var(--foreground);
+}
+
+.od-chip:hover {
+  border-color: var(--ring);
+}
+
+.od-clear {
+  min-height: 1.75rem;
+  padding-inline: 0.5rem;
+  color: var(--muted-foreground);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.od-clear:hover {
+  color: var(--foreground);
+}
+
+@media (pointer: coarse) {
+  .od-chip,
+  .od-clear {
+    min-height: 2.75rem;
+  }
+}
+/* ---- The table: one surface, rows of 40 px, nothing that animates ---- */
+.od-scroll,
+.od-board-scroll,
+.od-lines-scroll {
+  min-height: 0;
+  background: var(--dx-card-work-bg);
+  border: var(--dx-card-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--dx-card-shadow);
+}
+
+.od-scroll,
+.od-board-scroll {
+  flex: 1 1 auto;
+  min-height: 16rem;
+}
+
+.od-table {
+  table-layout: fixed;
+  font-size: var(--type-14);
+}
+
+/* The list's checkbox and row menu are 32 px buttons: they need no more than
+   4 px each side. On a touch screen they are 44 px buttons in 44 px columns,
+   so they take no padding, or the cell would clip them. */
+.od-scroll .od-table td:first-child,
+.od-scroll .od-table th:first-child,
+.od-scroll .od-table td:last-child,
+.od-scroll .od-table th:last-child {
+  padding-inline: 0.25rem;
+}
+
+@media (pointer: coarse) {
+  .od-scroll .od-table td:first-child,
+  .od-scroll .od-table th:first-child,
+  .od-scroll .od-table td:last-child,
+  .od-scroll .od-table th:last-child {
+    padding-inline: 0;
+  }
+}
+
+.od-table td {
+  overflow: hidden;
+}
+
+/* The list's cells keep one line; a role name may take two, as the customer
+   cell does, and an amount too wide for its fixed column puts its currency on
+   the line above rather than lose its last figures. The order page's lines
+   table sizes its columns to their content and keeps each amount whole. */
+.od-held,
+.od-scroll .od-amount {
+  white-space: normal;
+}
+
+.od-table th {
+  height: 2.25rem;
+  background: var(--dx-card-work-bg);
+  color: var(--muted-foreground);
+  font-size: var(--type-12);
+  font-weight: 600;
+}
+
+.od-table th button {
+  font-size: var(--type-12);
+  font-weight: 600;
+}
+
+/* 6 px each side: eight columns and the row's chips fit the 1048 px a 1366 px
+   window leaves beside the side panel. */
+.od-table td {
+  height: 2.5rem;
+  padding: 0.25rem 0.375rem;
+}
+
+.od-table th {
+  padding-inline: 0.375rem;
+}
+
+.od-table tbody tr {
+  border-bottom: 1px solid var(--border);
+}
+
+.od-table tbody tr:hover > td {
+  background: var(--dx-hover-bg);
+}
+
+.od-table tbody tr[data-selected] > td {
+  background: var(--accent);
+}
+
+.od-table td[data-numeric],
+.od-table th:has(> button.flex-row-reverse) {
+  text-align: right;
+}
+
+.od-stage {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.125rem;
+}
+
+.od-stage .jr-now {
+  display: none;
+}
+
+/* The status is Spectra's own words ("Packing list differs from the PO"), so
+   it takes a second line rather than lose its end. */
+.od-stage-label {
+  max-width: 100%;
+  font-size: var(--type-14);
+  color: var(--foreground);
+  white-space: normal;
+  overflow-wrap: break-word;
+  line-height: 1.25;
+}
+
+/* The age sits beside its late flag, under the status; a separate age column,
+   when the viewer shows one, takes the age out of here. */
+.od-stage .od-age {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+}
+
+.od-table[data-age-column] .od-stage .od-age {
+  display: none;
+}
+
+.od-why {
+  color: var(--muted-foreground);
+  white-space: normal;
+  line-height: 1.25;
+}
+
+.od-order-cell {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* The facts of the columns a narrow window had no room for. */
+.od-folded {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.125rem 0.625rem;
+  white-space: normal;
+}
+
+.od-range-error {
+  color: var(--destructive);
+}
+
+/* A right-aligned column's sort arrow follows its label, as it does in every other heading. */
+.od-table th button.flex-row-reverse {
+  flex-direction: row;
+}
+
+.od-customer {
+  display: flex;
+  max-width: 100%;
+  min-width: 0;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.od-customer-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.od-customer-no {
+  flex: none;
+  font-size: var(--type-12);
+  color: var(--faint-foreground);
+}
+
+/*
+ * A PO number is what a person matches on, so it is never cut: a long one
+ * (they run to 35 characters) breaks onto a second line inside its column.
+ */
+.od-po {
+  display: block;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* ---- The board: static columns, one card per order ---- */
+.od-board {
+  display: flex;
+  min-width: min-content;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem;
+}
+
+.od-column {
+  flex: 0 0 15.5rem;
+}
+
+.od-column-head {
+  padding: 0.5rem 0.625rem;
+}
+
+.od-column-count {
+  font-size: var(--type-12);
+  color: var(--muted-foreground);
+}
+
+.od-column-empty {
+  padding: 0.5rem 0.625rem 0.75rem;
+  color: var(--faint-foreground);
+}
+
+.od-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  list-style: none;
+}
+
+.od-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--card);
+  color: var(--card-foreground);
+}
+
+.od-card:hover {
+  border-color: var(--border-strong);
+}
+
+.od-card:has(.od-card-open:focus-visible) {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.od-card-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem 0.5rem;
+}
+
+.od-card-open {
+  text-align: left;
+  white-space: nowrap;
+}
+
+.od-card-open::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.od-card-open:focus-visible {
+  outline: none;
+}
+
+.od-card-flags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.25rem;
+}
+
+.od-card-customer {
+  overflow: hidden;
+  color: var(--muted-foreground);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.od-card-value {
+  position: relative;
+  z-index: 1;
+  width: fit-content;
+}
+
+.od-more {
+  margin: 0.5rem 0.625rem 0.5rem;
+  color: var(--accent-foreground);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.od-more:disabled {
+  color: var(--faint-foreground);
+  text-decoration: none;
+}
+
+/* ---- The side peek ---- */
+.od-peek-head {
+  gap: 0.25rem;
+  padding: 1.25rem 3rem 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.od-peek-step {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.od-peek-step > span {
+  margin-right: auto;
+}
+
+.od-peek-body {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.25rem 1.5rem;
+}
+
+.od-peek-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.od-peek-title {
+  margin-top: 0.5rem;
+  font-weight: 600;
+}
+
+.od-peek-foot {
+  border-top: 1px solid var(--border);
+  padding: 1rem 1.5rem;
+}
+
+.od-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.875rem 1.25rem;
+}
+
+.od-fact dd {
+  margin-top: 0.125rem;
+}
+
+/* ---- The order page ---- */
+.od-order .od-back {
+  margin: 0 0 0.5rem -0.5rem;
+  color: var(--muted-foreground);
+}
+
+/* The head is one row, as on the Orders screen: the number and customer, and the one action. */
+.od-order .dx-page-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 1rem;
+  align-items: end;
+  margin-bottom: 1rem;
+}
+
+.od-order .dx-title,
+.od-order .dx-title-context,
+.od-order .dx-page-intro {
+  grid-column: 1;
+}
+
+.od-order .dx-page-actions {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  align-items: center;
+  align-self: end;
+  margin-top: 0;
+}
+
+.od-order .dx-title-context {
+  display: none;
+}
+
+@media (max-width: 47.99rem) {
+  .od-order .dx-page-head {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .od-order .dx-page-actions {
+    grid-column: 1;
+    grid-row: auto;
+    margin-top: 0.75rem;
+  }
+}
+.od-no-action {
+  align-self: center;
+}
+
+.od-action-due {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.od-facts-bar {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 0;
+}
+
+@media (min-width: 40rem) {
+  .od-facts-bar {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 64rem) {
+  .od-facts-bar {
+    grid-template-columns: 1.35fr 1fr 1.3fr 1fr 1fr 1fr;
+  }
+}
+.od-facts-bar .od-fact {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  /* Each value sits under its own label: space-between pulled a short value to the foot of a
+     row that a wrapped PO number or the prepayment note had made taller. */
+  justify-content: flex-start;
+  gap: 0.375rem;
+  padding: 0.875rem 1rem;
+  border-left: 1px solid var(--border);
+}
+
+.od-facts-bar .od-fact:first-child {
+  border-left: 0;
+}
+
+.od-fact-label {
+  color: var(--muted-foreground);
+}
+
+.od-fact-value {
+  min-width: 0;
+  color: var(--foreground);
+}
+
+.od-fact-note {
+  display: block;
+  /* The value above may be set bold and large: a note under it never is. */
+  font-weight: 400;
+  margin-top: 0.125rem;
+}
+
+.od-fact[data-main] .od-fact-value {
+  font-size: var(--type-20);
+  line-height: 1.75rem;
+  font-weight: 600;
+}
+
+.od-facts-bar .od-fact-wide {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1rem;
+  border-left: 0;
+  border-top: 1px solid var(--border);
+}
+
+/* The scroll box is the region's, so the rail inside does not scroll on its own. */
+.od-rail-scroll .jr[data-size="full"] {
+  overflow: visible;
+}
+
+.od-entry {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.75rem;
+}
+
+.od-journey {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.od-now {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem 2rem;
+  padding: 1.125rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--accent);
+}
+
+@media (min-width: 48rem) {
+  .od-now {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+    align-items: center;
+  }
+
+  /* A rule between the two halves: where the order is, and when it should ship. */
+  .od-now-ship {
+    padding-left: 2rem;
+    border-left: 1px solid var(--border-strong);
+  }
+}
+.od-now-label {
+  color: var(--accent-foreground);
+  font-weight: 600;
+}
+
+.od-now-stage {
+  margin-block: 0.125rem 0.25rem;
+  font-weight: 600;
+}
+
+.od-ship-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.od-ship {
+  color: var(--foreground);
+  font-weight: 500;
+}
+
+/* ---- Documents, checks and activity ---- */
+.od-docs {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+}
+
+.od-doc {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 1rem;
+  padding-block: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.od-doc:last-child {
+  border-bottom: 0;
+}
+
+.od-doc-state {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.od-doc-rules {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  margin-top: 0.5rem;
+  list-style: none;
+  color: var(--muted-foreground);
+}
+
+.od-doc-rules li[data-outcome="fail"] {
+  color: var(--destructive);
+  font-weight: 500;
+}
+
+.od-checks {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.od-check-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  list-style: none;
+}
+
+.od-check {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+}
+
+.od-check-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.od-check-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 0.5rem 1.5rem;
+}
+
+.od-matches {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.od-activity {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.od-lines-scroll {
+  box-shadow: none;
+}
+
+.od-lines td,
+.od-lines th {
+  padding-inline: 0.75rem;
+}
+
+/* An amount keeps its currency on its own line: the lines table scrolls
+   sideways in its box before it breaks a money figure in two. */
+.od-lines .od-amount {
+  white-space: nowrap;
+}
+
+.od-lines .od-customer {
+  max-width: 32rem;
+}
+
+/* ---- Spectra: glass over the aurora; the current step glows ---- */
+.od-views,
+.od-tabs {
+  gap: 0.375rem;
+  padding: 0.25rem;
+  border: 1px solid var(--panel-border);
+  border-radius: 999px;
+  background: var(--panel-strong);
+}
+
+.od-view,
+.od-tab {
+  height: 2.25rem;
+  border-radius: 999px;
+}
+
+/* After the pill height above, or the touch height set earlier would lose to it. */
+@media (pointer: coarse) {
+  .od-view,
+  .od-tab {
+    height: 2.75rem;
+  }
+}
+
+.od-view[data-state="active"],
+.od-tab[data-state="active"] {
+  background-color: var(--dx-current-bg);
+  background-image: var(--dx-current-image);
+  box-shadow: var(--dx-current-shadow);
+}
+
+.od-view[data-state="active"]::after,
+.od-tab[data-state="active"]::after {
+  display: none;
+}
+
+.od-now {
+  border-color: rgb(46 230 214 / 0.35);
+  box-shadow: var(--glow);
+}
+
+.od-card {
+  border-radius: 12px;
+}
+
+.od-chip {
+  background: var(--accent);
+}
+
+/* The chips of the documents cell stack, small: "1 open exception" is long, and
+   two of them must stay in one short row. */
+.od-docs-cell {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.od-docs-cell [data-slot="badge"] {
+  height: 1.125rem;
+  font-size: var(--type-12);
+  line-height: 1;
+}
+
+/* The chip over the first short item, small, so both fit the 40 px row. */
+.od-stock {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  line-height: 1.1;
+}
+
+.od-stock [data-slot="badge"] {
+  height: 1.125rem;
+  font-size: var(--type-12);
+  line-height: 1;
+}
+
+/* Age over the late flag, small, so both fit the narrow column. */
+.od-age {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  line-height: 1.1;
+}
+
+.od-age [data-slot="badge"] {
+  height: 1.125rem;
+  padding-inline: 0.25rem;
+  font-size: var(--type-12);
+  line-height: 1;
+}
+
+/* The app's table pins the first column beside a 44 px checkbox column. The
+   workspace's checkbox column is 32 px, so the pin moves with it. */
+.od-table [class~="left-11"] {
+  left: 2rem;
+}
+
+.od-table [class~="w-11"] {
+  width: 2rem;
+  min-width: 2rem;
+}
+
+/* A touch screen keeps the 44 px checkbox column, so each box stays a 44 px
+   target. OrdersTable sizes the column to match, so the pin covers nothing. */
+@media (pointer: coarse) {
+  .od-table [class~="left-11"] {
+    left: 2.75rem;
+  }
+
+  .od-table [class~="w-11"] {
+    width: 2.75rem;
+    min-width: 2.75rem;
+  }
+}
+
+.od-stage .jr[data-size="row"] {
+  --jr-w: 7px;
+  --jr-h: 7px;
+  gap: 3px;
+}
+
+/* The lines and matches tables size to their words, unlike the workspace's fixed columns. */
+.od-table.od-lines {
+  table-layout: auto;
+}
+
+.od-docs-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* The currency code is a small muted prefix to the figure. */
+.od-cur {
+  color: var(--muted-foreground);
+  font-size: var(--type-12);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+.od-fact[data-main] .od-cur {
+  font-size: var(--type-14);
+}
+
+/* ---- Phones: the search and a Filters button share the first row, and the rest folds ---- */
+@media (max-width: 47.99rem) {
+  .od-filters {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .od-filters .od-search {
+    width: 100%;
+  }
+
+  .od-filter-toggle {
+    display: inline-flex;
+  }
+
+  .od-filter-panel {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .od-filter-panel[data-open="false"] {
+    display: none;
+  }
+
+  .od-filter-panel .od-field > button,
+  .od-filter-panel .od-field [data-slot="select-trigger"] {
+    width: 100%;
+  }
+
+  .od-filter-panel .od-toggles {
+    grid-column: 1 / -1;
+  }
+
+  .od-top > [data-slot="tabs"] {
+    width: 100%;
+  }
+
+  /* Four views and their counts do not fit one 358 px strip, so they take two even columns. */
+  .od-views {
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-radius: 1.25rem;
+  }
+
+  .od-view {
+    justify-content: space-between;
+  }
+}
+/* On a phone the page scrolls as a whole and the table takes the height of its rows. */
+@media (max-width: 47.99rem) {
+  .od-page {
+    height: auto;
+    min-height: 0;
+  }
+
+  .od-work,
+  .od-scroll,
+  .od-board-scroll {
+    flex: none;
+    min-height: 0;
+  }
+
+  .od-board-scroll {
+    max-height: 70dvh;
+  }
+}
+/* The table's phone summary folds the customer and the stage into the order's cell, so their
+   columns draw nothing and the widths set in the table's markup would land on the wrong
+   columns. The order's own column takes their room, so the customer and the stage read whole. */
+@media (max-width: 47.99rem) {
+  .od-table col:nth-child(3),
+  .od-table col:nth-child(4) {
+    display: none;
+  }
+
+  /* Only the order's column is left, with the checkbox and the row menu, so it
+     takes what they leave and the table needs no sideways scroll. */
+  .od-table col:nth-child(2) {
+    width: auto !important;
+  }
+
+  .od-table {
+    min-width: 21rem !important;
+  }
+
+  /* Four buttons do not fit one row of a 358 px column: two by two reads as one block. */
+  .od-toolbar {
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .od-toolbar > * {
+    min-width: 0;
+  }
+
+  .od-toolbar button:not(.od-toolbar > span:first-child button) {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* The count of ticked rows is a live region that is always there: with nothing ticked it
+     keeps its place for a screen reader but takes no row. */
+  .od-toolbar > span:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .od-toolbar > span:first-child:has([role="status"]:empty) {
+    height: 0;
+    margin-top: -0.5rem;
+    overflow: hidden;
+  }
+}
+/* Focus stays visible. The strips and scroll boxes above set their own box
+   shadow, which would swallow the ring a component draws with one, so they
+   draw an outline instead. */
+.od-view:focus-visible,
+.od-tab:focus-visible,
+.od-scroll:focus-visible,
+.od-board-scroll:focus-visible,
+.od-lines-scroll:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+
+.od-chip:focus-visible,
+.od-clear:focus-visible,
+.od-more:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Orders keeps its head to the title and one line: the date is the shell's job here. */
+.od-page .dx-title-context {
+  display: none;
+}
+
+/* The pinned cells of a scrolling table are solid, so what scrolls under them never shows through glass. */
+.od-table [class~="sticky"] {
+  background-color: var(--background);
+  background-image: linear-gradient(var(--panel-strong), var(--panel-strong));
+}

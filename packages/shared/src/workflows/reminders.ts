@@ -1,7 +1,9 @@
 import { z } from "zod";
 import { pageQuerySchema } from "../envelope.js";
+import { recordRefSchema } from "../record-number.js";
 import { roleSchema } from "../roles.js";
 import { orderNoSchema } from "./common.js";
+import { taskSprSchema } from "./tasks.js";
 
 export const REMINDER_KINDS = [
   "TASK_DUE",
@@ -18,6 +20,10 @@ export const workflowReminderSchema = z.object({
   kind: z.enum(REMINDER_KINDS),
   stage: z.enum(REMINDER_STAGES),
   orderNo: orderNoSchema,
+  /** The record the task is about, such as an SPR, so the reminder opens it. */
+  ref: recordRefSchema.nullable().optional(),
+  /** On a reminder about an SPR: what it would buy, as its task says. */
+  spr: taskSprSchema.optional(),
   message: z.string().min(1),
   toRole: roleSchema,
   /** When the thing being waited for is due. */

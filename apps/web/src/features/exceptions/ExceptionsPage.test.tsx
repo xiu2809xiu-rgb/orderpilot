@@ -35,7 +35,7 @@ const mismatch = {
   expected: "50",
   actual: "40",
   difference: "-10",
-  tolerance: { label: "Quantity difference (sample value)", value: "0" },
+  tolerance: { label: "Quantity difference (units)", value: "0" },
   fixBy: "SUPPORT",
   state: "OPEN",
   openedAt: "2026-10-02T09:00:00.000Z",
@@ -64,24 +64,144 @@ describe("the exceptions queue", () => {
     await i18n.loadNamespaces(["exceptions", "common"]);
     server.use(getExceptionsListMockHandler(queue([mismatch])));
     const view = renderPage();
-    expect(
-      await screen.findByText(/the packing list says 40, the PO says 50/),
-    ).toBeVisible();
-    expect(screen.getByText("-10")).toBeVisible();
+    expect(await screen.findByText("Item 1000")).toBeVisible();
+    expect(screen.getByText("PL: 40 \u00b7 PO: 50")).toBeVisible();
+    expect(screen.getByText("10 units fewer")).toBeVisible();
+    expect(screen.getByText("PL vs PO")).toBeVisible();
+    expect(screen.queryByText(/sample result/)).toBeNull();
     expect(screen.getByText("Support")).toBeVisible();
     expect(screen.getByText("Mock")).toBeVisible();
     expect(screen.getByRole("link", { name: "SO-0007" })).toHaveAttribute(
       "href",
       "/order-tracker/SO-0007",
     );
+    expect(
+      screen.getByRole("columnheader", { name: /Order No\./ }),
+    ).toBeVisible();
+    expect(
+      screen.getByRole("columnheader", { name: "Discrepancy" }),
+    ).toBeVisible();
     expect(await axeViolations(view.container)).toEqual([]);
+  });
+
+  it("keeps singular/plural grammar clean on the variance pill", async () => {
+    await i18n.loadNamespaces(["exceptions", "common"]);
+    const oneUnitOff = {
+      ...mismatch,
+      id: "e2",
+      summary: "Item 1001: the packing list says 19, the PO says 20",
+      difference: "-1",
+    };
+    server.use(getExceptionsListMockHandler(queue([oneUnitOff])));
+    renderPage();
+    expect(await screen.findByText("1 unit fewer")).toBeVisible();
+    expect(screen.queryByText(/\bunits\b/)).toBeNull();
+  });
+
+  it("drops the redundant 'than the PO' from an already-worded variance", async () => {
+    await i18n.loadNamespaces(["exceptions", "common"]);
+    const worded = {
+      ...mismatch,
+      id: "e5",
+      summary: "Item I-0202: the packing list says 138, the PO says 153",
+      difference: "15 units fewer than the PO",
+    };
+    server.use(getExceptionsListMockHandler(queue([worded])));
+    renderPage();
+    expect(await screen.findByText("15 units fewer")).toBeVisible();
+    expect(screen.queryByText(/than the PO/)).toBeNull();
+  });
+
+  it("formats the shipping check as the bill of lading's due date", async () => {
+    await i18n.loadNamespaces(["exceptions", "common"]);
+    const awb = {
+      ...mismatch,
+      id: "e3",
+      ruleId: "mock.sample-shipping",
+      ruleLabel: "Shipping document received on time (sample result)",
+      summary: "The bill of lading was due on 2026-11-09 and has not arrived",
+      expected: "2026-11-09",
+      actual: "",
+      difference: "2 days late",
+      tolerance: { label: "Shipping delay (days)", value: "0" },
+    };
+    server.use(getExceptionsListMockHandler(queue([awb])));
+    renderPage();
+    expect(await screen.findByText("Bill of lading")).toBeVisible();
+    expect(screen.getByText("Due 9 Nov 2026")).toBeVisible();
+    expect(screen.getByText("2 days late")).toBeVisible();
+  });
+
+  it("formats the price check as PI against PO, in dollars", async () => {
+    await i18n.loadNamespaces(["exceptions", "common"]);
+    const price = {
+      ...mismatch,
+      id: "e4",
+      ruleId: "mock.sample-price",
+      ruleLabel: "Unit price on the PI against the PO (sample result)",
+      summary: "Item I-0221: the PI shows 92.28, the PO shows 90.78",
+      expected: "90.78",
+      actual: "92.28",
+      difference: "+$1.50 / unit",
+      tolerance: { label: "Unit price difference (USD)", value: "0" },
+    };
+    server.use(getExceptionsListMockHandler(queue([price])));
+    renderPage();
+    expect(await screen.findByText("Item I-0221")).toBeVisible();
+    expect(screen.getByText("PI: $92.28 \u00b7 PO: $90.78")).toBeVisible();
+    expect(screen.getByText("+$1.50 / unit")).toBeVisible();
+  });
+
+  it("sorts the rows on screen by order number when its header is clicked", async () => {
+    await i18n.loadNamespaces(["exceptions", "common"]);
+    const first = { ...mismatch, id: "e6", orderNo: "SO-0009" };
+    const second = { ...mismatch, id: "e7", orderNo: "SO-0002" };
+    server.use(getExceptionsListMockHandler(queue([first, second])));
+    renderPage();
+    await screen.findByRole("link", { name: "SO-0009" });
+    const orderOf = (link: HTMLElement) =>
+      within(link.closest("tr") ?? link).queryByRole("link")?.textContent;
+    const rowsBefore = screen.getAllByRole("row").slice(1);
+    expect(rowsBefore.map((r) => orderOf(r))).toEqual(["SO-0009", "SO-0002"]);
+
+    await userEvent.click(screen.getByRole("button", { name: "Order No." }));
+    await waitFor(() => {
+      const rowsAfter = screen.getAllByRole("row").slice(1);
+      expect(rowsAfter.map((r) => orderOf(r))).toEqual(["SO-0002", "SO-0009"]);
+    });
+  });
+
+  it("narrows the rows on screen to one check from the Check column's own filter", async () => {
+    await i18n.loadNamespaces(["exceptions", "common"]);
+    const quantity = { ...mismatch, id: "e8", orderNo: "SO-0009" };
+    const price = {
+      ...mismatch,
+      id: "e9",
+      orderNo: "SO-0010",
+      ruleLabel: "Unit price on the PI against the PO (sample result)",
+    };
+    server.use(getExceptionsListMockHandler(queue([quantity, price])));
+    renderPage();
+    await screen.findByRole("link", { name: "SO-0009" });
+    expect(screen.getByRole("link", { name: "SO-0010" })).toBeVisible();
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Filter by check" }),
+    );
+    await userEvent.click(
+      await screen.findByRole("menuitemradio", { name: "PI vs PO" }),
+    );
+    await waitFor(() => {
+      expect(screen.queryByRole("link", { name: "SO-0009" })).toBeNull();
+    });
+    expect(screen.getByRole("link", { name: "SO-0010" })).toBeVisible();
   });
 
   it("opens the order when the row itself is clicked, away from its link", async () => {
     await i18n.loadNamespaces(["exceptions", "common"]);
     server.use(getExceptionsListMockHandler(queue([mismatch])));
     renderPage();
-    await userEvent.click(await screen.findByText("-10"));
+    await userEvent.click(await screen.findByText("10 units fewer"));
     // The tab logic loads on first use, so the move arrives a moment later.
     await waitFor(() => {
       expect(screen.getByTestId("where")).toHaveTextContent(

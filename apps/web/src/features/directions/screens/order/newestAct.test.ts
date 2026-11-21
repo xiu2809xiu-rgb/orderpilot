@@ -1,0 +1,196 @@
+import { beforeAll, describe, expect, it } from "vitest";
+import i18n from "@/i18n";
+import { entry } from "./orderPageTestKit";
+import { latestAct, latestWords } from "./newestAct";
+
+beforeAll(async () => {
+  await i18n.loadNamespaces(["directions-orders"]);
+});
+
+const t = i18n.getFixedT("en", "directions-orders");
+const PERSON = (name: string) => ({ kind: "user" as const, name });
+const SYSTEM = { kind: "system" as const, name: "OrderPilot" };
+// One fixed moment for every read: 21 Nov 2026, 12:00 in Singapore.
+const NOW = new Date("2026-11-21T04:00:00.000Z");
+
+describe("latestAct", () => {
+  it("is the newest entry a person made, whatever order the list is in", () => {
+    const old = entry(
+      1,
+      "2026-11-06T08:00:00.000Z",
+      "step.completed",
+      PERSON("Mei Tan"),
+      "Step done: Invoiced",
+    );
+    const fresh = entry(
+      2,
+      "2026-11-19T22:10:00.000Z",
+      "step.completed",
+      PERSON("Hafiz Rahman"),
+      "Step done: Packed",
+    );
+    expect(latestAct([fresh, old], NOW)?.actor.name).toBe("Hafiz Rahman");
+    expect(latestAct([old, fresh], NOW)?.actor.name).toBe("Hafiz Rahman");
+  });
+
+  it("never counts what the system did, however new", () => {
+    const person = entry(
+      1,
+      "2026-11-06T08:00:00.000Z",
+      "step.completed",
+      PERSON("Mei Tan"),
+      "Step done: Invoiced",
+    );
+    const reminder = entry(
+      2,
+      "2026-11-19T10:00:00.000Z",
+      "reminder.sent",
+      SYSTEM,
+      "Reminder to Logistics",
+    );
+    expect(latestAct([person, reminder], NOW)?.actor.name).toBe("Mei Tan");
+  });
+
+  it("is nothing when no person has acted", () => {
+    expect(latestAct([], NOW)).toBeNull();
+    expect(
+      latestAct(
+        [
+          entry(
+            1,
+            "2026-11-06T08:00:00.000Z",
+            "order.received",
+            SYSTEM,
+            "PO received",
+          ),
+        ],
+        NOW,
+      ),
+    ).toBeNull();
+  });
+
+  it("takes the later of two entries made at the same moment", () => {
+    const at = "2026-11-06T08:00:00.000Z";
+    const first = entry(
+      1,
+      at,
+      "step.completed",
+      PERSON("Hafiz Rahman"),
+      "Step done: Packed",
+    );
+    const second = entry(
+      2,
+      at,
+      "step.completed",
+      PERSON("Mei Tan"),
+      "Step done: Invoiced",
+    );
+    expect(latestAct([first, second], NOW)?.actor.name).toBe("Mei Tan");
+  });
+});
+
+describe("an entry that lies ahead of the moment it is read at", () => {
+  // The workflow's sample stamps today's steps at 16:00 Singapore time.
+  const earlier = entry(
+    1,
+    "2026-11-20T08:00:00.000Z",
+    "step.completed",
+    PERSON("Mei Tan"),
+    "Step done: Proforma invoice sent",
+  );
+  const ahead = entry(
+    2,
+    "2026-11-21T08:00:00.000Z",
+    "step.completed",
+    PERSON("Grace Ong"),
+    "Step done: Payment confirmed",
+  );
+
+  it("is not the latest act, so the line never names a moment that has not come", () => {
+    expect(latestAct([earlier, ahead], NOW)?.actor.name).toBe("Mei Tan");
+  });
+
+  it("is the latest act once its moment has come", () => {
+    const later = new Date("2026-11-21T08:00:00.000Z");
+    expect(latestAct([earlier, ahead], later)?.actor.name).toBe("Grace Ong");
+  });
+
+  it("leaves no act when every act is still ahead", () => {
+    expect(latestAct([ahead], NOW)).toBeNull();
+  });
+});
+
+describe("latestWords", () => {
+  it("reads a finished step as a sentence, in Singapore time", () => {
+    // 22:10 UTC is 06:10 the next day in Singapore.
+    const done = entry(
+      1,
+      "2026-11-19T22:10:00.000Z",
+      "step.completed",
+      PERSON("Hafiz Rahman"),
+      "Step done: Packed",
+    );
+    expect(latestWords(t, done)).toBe(
+      "Latest: Hafiz Rahman marked Packed as done, 20 Nov at 06:10",
+    );
+  });
+
+  it("says a payment was confirmed without its amount", () => {
+    const paid = entry(
+      1,
+      "2026-11-04T06:00:00.000Z",
+      "payment.confirmed",
+      PERSON("Grace Ong"),
+      "Deposit of USD 2580.11 confirmed",
+    );
+    const words = latestWords(t, paid);
+    expect(words).toBe("Latest: Grace Ong confirmed a payment, 4 Nov at 14:00");
+    expect(words).not.toContain("2580");
+  });
+
+  it("keeps the workflow's own words for anything else", () => {
+    const other = entry(
+      1,
+      "2026-11-04T06:00:00.000Z",
+      "order.received",
+      PERSON("Mei Tan"),
+      "PO PO-1 received for SO-1",
+    );
+    expect(latestWords(t, other)).toBe(
+      "Latest: PO PO-1 received for SO-1, by Mei Tan, 4 Nov at 14:00",
+    );
+  });
+
+  // Not the "Step done: " form: the workflow's own record names the person and
+  // the command, and the line must show that sentence whole, not parse it.
+  it("shows a sentence in another form whole, with who and when, and says the person once", () => {
+    const summary =
+      "Mei Tan: SEND_PI_COMPLETED on SO-0001, AwaitingPI to AwaitingPayment";
+    const written = entry(
+      1,
+      "2026-11-04T06:00:00.000Z",
+      "step.completed",
+      PERSON("Mei Tan"),
+      summary,
+    );
+    const words = latestWords(t, written);
+    expect(words).toBe(`Latest: ${summary}, 4 Nov at 14:00`);
+    expect(words.match(/Mei Tan/g)).toHaveLength(1);
+  });
+
+  it("adds who when the sentence in another form does not name the person", () => {
+    const words = latestWords(
+      t,
+      entry(
+        1,
+        "2026-11-04T06:00:00.000Z",
+        "step.completed",
+        PERSON("Mei Tan"),
+        "Goods released to the forwarder",
+      ),
+    );
+    expect(words).toBe(
+      "Latest: Goods released to the forwarder, by Mei Tan, 4 Nov at 14:00",
+    );
+  });
+});

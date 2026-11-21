@@ -1,17 +1,23 @@
 import { SearchX } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Link, useParams } from "react-router";
-import { PageHeader, SectionCard, StatePanel } from "@/components/common";
-import { buttonVariants } from "@/components/ui/button";
+import { useParams } from "react-router";
+import {
+  PageHeader,
+  SectionCard,
+  StatePanel,
+  StatusBadge,
+} from "@/components/common";
 import { useWorkflowsSpr } from "@/lib/api/generated/endpoints/workflows/workflows";
 import { ApiError } from "@/lib/api/errors";
 import { hasPermission, useSessionStore } from "@/stores/session";
+import { BackToInbox } from "./BackToInbox";
 import { formatDate } from "./format";
 import { MockBadges } from "./MockBadges";
 import { QueryBoundary } from "./QueryBoundary";
 import { RecordRefLine } from "./RecordRefLine";
 import { SprDecisionForm } from "./SprDecisionForm";
 import { SprFields } from "./SprFields";
+import { SprHistory } from "./SprHistory";
 import { ApproverFacts, SprBasis, SprSummary } from "./SprFacts";
 
 /** The SPR approval page: the request, why this quantity, the approver, and the decision. */
@@ -19,37 +25,55 @@ export default function SprApprovalPage() {
   const { t } = useTranslation("workflows");
   const { recordNo = "" } = useParams();
   const session = useSessionStore((state) => state.session);
+  const canDecide = hasPermission(session, "approvals.decide");
   const query = useWorkflowsSpr(recordNo);
   const spr = query.data?.data;
 
   if (query.error instanceof ApiError && query.error.status === 404) {
     return (
-      <StatePanel
-        icon={SearchX}
-        title={t("spr.notFoundTitle")}
-        description={t("spr.notFoundDescription")}
-      >
-        <Link to="/workflows" className={buttonVariants({ size: "lg" })}>
-          {t("order.backToInbox")}
-        </Link>
-      </StatePanel>
+      <div className="dx-sheet flex flex-col gap-s4">
+        <BackToInbox />
+        <StatePanel
+          icon={SearchX}
+          title={t("spr.notFoundTitle")}
+          description={t("spr.notFoundDescription")}
+        />
+      </div>
     );
   }
 
   return (
-    <div className="space-y-s4">
+    <div className="dx-sheet flex flex-col gap-s4">
+      <BackToInbox />
       <PageHeader
         title={t("spr.heading", { recordNo })}
         description={
           spr
-            ? t("spr.description", {
-                name: spr.requestedBy.name,
-                date: formatDate(spr.requestedAt),
-                orderNo: spr.orderNo ?? "-",
-              })
+            ? t(
+                spr.stage === "suggested"
+                  ? "spr.descriptionSuggested"
+                  : "spr.description",
+                {
+                  name: spr.requestedBy.name,
+                  date: formatDate(spr.requestedAt),
+                  orderNo: spr.orderNo ?? "-",
+                },
+              )
             : undefined
         }
-        meta={<MockBadges mock={query.data?.meta.mock} />}
+        meta={
+          <>
+            {/* The inbox says when it is due; so does the request itself. */}
+            {spr?.due ? (
+              <StatusBadge tone={spr.due.overdue ? "danger" : "neutral"}>
+                {t(spr.due.overdue ? "spr.overdueSince" : "spr.dueOn", {
+                  date: formatDate(spr.due.dueAt),
+                })}
+              </StatusBadge>
+            ) : null}
+            <MockBadges mock={query.data?.meta.mock} />
+          </>
+        }
       />
       <QueryBoundary query={query}>
         {spr ? (
@@ -62,30 +86,38 @@ export default function SprApprovalPage() {
                 </div>
               </SectionCard>
               <SectionCard
-                title={t("spr.fieldsHeading")}
-                description={t("spr.fieldsDescription")}
-              >
-                <SprFields fields={spr.fields} />
-              </SectionCard>
-              <SectionCard
                 title={t("spr.basisHeading")}
                 description={t("spr.basisDescription")}
               >
                 <SprBasis basis={spr.basis} />
               </SectionCard>
+              <SectionCard
+                title={t("spr.fieldsHeading")}
+                description={t("spr.fieldsDescription")}
+              >
+                <SprFields fields={spr.fields} />
+              </SectionCard>
             </div>
             <div className="space-y-s3 self-start">
-              <SectionCard title={t("spr.decisionHeading")}>
-                <SprDecisionForm
-                  spr={spr}
-                  canDecide={hasPermission(session, "approvals.decide")}
-                />
+              <SectionCard
+                title={t(
+                  spr.stage === "suggested"
+                    ? "spr.raise.heading"
+                    : canDecide
+                      ? "spr.decisionHeading"
+                      : "spr.statusHeading",
+                )}
+              >
+                <SprDecisionForm spr={spr} canDecide={canDecide} />
               </SectionCard>
               <SectionCard
                 title={t("spr.approverHeading")}
                 description={t("spr.approverDescription")}
               >
                 <ApproverFacts spr={spr} />
+              </SectionCard>
+              <SectionCard title={t("spr.historyHeading")}>
+                <SprHistory spr={spr} />
               </SectionCard>
             </div>
           </div>

@@ -138,6 +138,38 @@ describe("DataTable with a server", () => {
     expect(screen.getByText("Showing 1 to 23 of 23")).toBeInTheDocument();
   });
 
+  it("opens the last page when the address names one past the end, and never says so in an empty state", async () => {
+    const changes: number[] = [];
+    function PastEnd() {
+      const [query, setQuery] = useState<TableQuery>({
+        ...DEFAULT_QUERY,
+        page: 99,
+      });
+      const { rows, total } = serve(query);
+      return (
+        <DataTable
+          tableId="customers"
+          caption="Customers"
+          columns={columns}
+          rows={rows}
+          total={total}
+          query={query}
+          onQueryChange={(next) => {
+            changes.push(next.page);
+            setQuery(next);
+          }}
+          rowKey={(r) => r.id}
+        />
+      );
+    }
+    render(<PastEnd />);
+    expect(await screen.findByText("Showing 21 to 23 of 23")).toBeVisible();
+    expect(screen.getByText("Page 3 of 3")).toBeVisible();
+    expect(names()).toHaveLength(3);
+    expect(changes).toEqual([3]);
+    expect(screen.queryByText(/Page 99/)).not.toBeInTheDocument();
+  });
+
   it("sorts through the server and announces it in the heading", async () => {
     const user = userEvent.setup();
     render(<Harness />);
@@ -230,6 +262,52 @@ describe("DataTable does not do the server's work", () => {
     });
     expect(names()).toEqual(before);
     expect(screen.getByText("Showing 21 to 30 of 300")).toBeInTheDocument();
+  });
+});
+
+// A list that filters in the browser (the exceptions page does) hands the table
+// the rows it kept, and the total the server gave, which is not the count of
+// those rows. The page correction of an address past the end is for an empty
+// page only: it must never move a person off a page that has rows.
+describe("the page correction on a list that filters in the browser", () => {
+  const kept = ALL.slice(0, 7);
+
+  function renderAt(page: number, total: number, rows: readonly Row[]) {
+    const onQueryChange = vi.fn();
+    render(
+      <DataTable
+        tableId="filtered"
+        caption="Filtered"
+        columns={columns}
+        rows={rows}
+        total={total}
+        query={{ ...DEFAULT_QUERY, page }}
+        onQueryChange={onQueryChange}
+        rowKey={(r) => r.id}
+      />,
+    );
+    return onQueryChange;
+  }
+
+  it("leaves a page with rows alone when the server's total is smaller than the rows on screen", () => {
+    const onQueryChange = renderAt(2, 5, kept);
+    expect(onQueryChange).not.toHaveBeenCalled();
+    expect(names()).toHaveLength(7);
+    expect(screen.queryByRole("table", { busy: true })).toBeNull();
+  });
+
+  it("leaves a page with rows alone when the server's total is larger than the rows on screen", () => {
+    const onQueryChange = renderAt(3, 100, kept);
+    expect(onQueryChange).not.toHaveBeenCalled();
+    expect(names()).toHaveLength(7);
+  });
+
+  it("still opens the last page when the page past the end has no rows at all", () => {
+    const onQueryChange = renderAt(99, 100, []);
+    expect(onQueryChange).toHaveBeenCalledTimes(1);
+    expect(onQueryChange).toHaveBeenCalledWith(
+      expect.objectContaining({ page: 10 }),
+    );
   });
 });
 

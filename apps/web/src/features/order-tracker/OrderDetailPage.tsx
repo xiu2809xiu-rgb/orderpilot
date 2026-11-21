@@ -5,19 +5,21 @@ import type { OrderTimeline } from "@orderpilot/shared";
 import {
   DemoBadge,
   ErrorPanel,
-  LoadingState,
   OperationLog,
   PageHeader,
+  PageHeaderSkeleton,
   PermissionDenied,
+  SectionCardSkeleton,
   StatePanel,
-  StatusBadge,
   type OperationLogRow,
 } from "@/components/common";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ApiError } from "@/lib/api/errors";
 import { useTrackerTimeline } from "@/lib/api/generated/endpoints/tracker/tracker";
 import { isForbidden } from "@/lib/query-status";
 import { CheckResults } from "./CheckResults";
+import { OrderFacts } from "./OrderFacts";
 import { MasterMatches } from "./MasterMatches";
 import { StepChain } from "./StepChain";
 
@@ -39,11 +41,16 @@ function mockLogRows(timeline: OrderTimeline, ip: string): OperationLogRow[] {
 
 export default function OrderDetailPage() {
   const { t } = useTranslation("order-tracker");
-  const { t: tc } = useTranslation("common");
+  const { t: tl } = useTranslation("components");
   const { orderNo = "" } = useParams();
   const timeline = useTrackerTimeline(orderNo);
   const back = (
-    <Button asChild variant="ghost" size="sm">
+    <Button
+      asChild
+      variant="ghost"
+      size="sm"
+      className="-mb-s2 -ml-2 self-start text-muted-foreground pointer-coarse:h-11"
+    >
       <Link to="/order-tracker">
         <ArrowLeft aria-hidden="true" />
         {t("detail.back")}
@@ -52,83 +59,75 @@ export default function OrderDetailPage() {
   );
 
   if (timeline.isPending) {
-    return <LoadingState lines={6} />;
+    return (
+      <Sheet>
+        <div role="status" aria-busy="true" className="contents">
+          <span className="sr-only">{tl("states.loading")}</span>
+          <PageHeaderSkeleton />
+          <Skeleton
+            className="h-24 w-full animate-none rounded-xl"
+            aria-hidden="true"
+          />
+          <SectionCardSkeleton lines={4} />
+          <SectionCardSkeleton lines={4} />
+        </div>
+      </Sheet>
+    );
   }
   if (timeline.isError) {
-    if (isForbidden(timeline.error)) return <PermissionDenied />;
+    if (isForbidden(timeline.error)) {
+      return (
+        <Sheet>
+          {back}
+          <PermissionDenied />
+        </Sheet>
+      );
+    }
     if (
       timeline.error instanceof ApiError &&
       timeline.error.code === "NOT_FOUND"
     ) {
       return (
-        <StatePanel
-          icon={FileQuestion}
-          title={t("detail.notFoundTitle")}
-          description={t("detail.notFoundDescription")}
-        >
+        <Sheet>
           {back}
-        </StatePanel>
+          <StatePanel
+            icon={FileQuestion}
+            title={t("detail.notFoundTitle")}
+            description={t("detail.notFoundDescription")}
+          />
+        </Sheet>
       );
     }
     return (
-      <ErrorPanel
-        error={timeline.error}
-        onRetry={() => void timeline.refetch()}
-      />
+      <Sheet>
+        {back}
+        <ErrorPanel
+          error={timeline.error}
+          onRetry={() => void timeline.refetch()}
+        />
+      </Sheet>
     );
   }
 
   const order = timeline.data.data;
   return (
-    <div className="space-y-s4">
+    <Sheet>
       {back}
       <PageHeader
         title={order.orderNo}
         description={order.customerName}
         meta={<DemoBadge kind="mock" />}
       />
-      <dl className="grid gap-s2 sm:grid-cols-2 lg:grid-cols-4">
-        <Fact label={t("detail.externalDocumentNo")}>
-          <span className="font-mono">{order.externalDocumentNo}</span>
-        </Fact>
-        <Fact label={t("detail.status")}>
-          <StatusBadge>{order.status.label}</StatusBadge>
-        </Fact>
-        <Fact label={t("detail.owner")}>{tc(`roles.${order.ownerRole}`)}</Fact>
-        <Fact label={t("detail.overdue")}>
-          {order.overdue.overdue ? (
-            <StatusBadge tone="danger">
-              {t("list.overdueDays", { count: order.overdue.daysOverdue })}
-            </StatusBadge>
-          ) : (
-            t("list.onTime")
-          )}
-          {order.overdue.reason ? (
-            <span className="block text-sm text-muted-foreground">
-              {order.overdue.reason}
-            </span>
-          ) : null}
-        </Fact>
-      </dl>
+      <OrderFacts order={order} />
       <StepChain steps={order.steps} />
       <CheckResults checks={order.checks} />
       <MasterMatches matches={order.matches} />
       <OperationLog rows={mockLogRows(order, t("detail.log.ip"))} demo />
-    </div>
+    </Sheet>
   );
 }
 
-function Fact({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="space-y-1 rounded-lg border p-s2">
-      <dt className="text-sm text-muted-foreground">{label}</dt>
-      <dd>{children}</dd>
-    </div>
-  );
+/** The column the order page sits in: 72 rem, with its sections 24 px apart. */
+function Sheet({ children }: { children: React.ReactNode }) {
+  return <div className="dx-sheet flex flex-col gap-s3">{children}</div>;
 }

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import {
   DUPLICATE_ORDER_PATH,
+  ORDER_PO_MAX_LENGTH,
   availableStockResponseSchema,
   createSalesOrderSchema,
   existingOrderOf,
@@ -10,6 +11,8 @@ import {
   salesOrderDetailSchema,
   salesOrderListSchema,
   salesOrderQuerySchema,
+  SHIPMENT_BEFORE_ORDER_MESSAGE,
+  shipmentIsBeforeOrder,
 } from "./index.js";
 
 const amount = {
@@ -128,6 +131,15 @@ describe("the order write contract", () => {
     expect(withLine({ quantity: "1", unitPrice: "1.005" })).toBe(false);
     expect(withLine({ quantity: "0.5", unitPrice: "0" })).toBe(true);
   });
+  it("holds a PO number to one shared limit: the limit passes and one more is refused", () => {
+    const withPo = (externalDocumentNo: string) =>
+      createSalesOrderSchema.safeParse({ ...createBody, externalDocumentNo });
+    expect(ORDER_PO_MAX_LENGTH).toBe(35);
+    expect(withPo("P".repeat(ORDER_PO_MAX_LENGTH)).success).toBe(true);
+    expect(withPo("P".repeat(ORDER_PO_MAX_LENGTH + 1)).success).toBe(false);
+    // The limit is on the trimmed text, which is what is stored.
+    expect(withPo(`  ${"P".repeat(ORDER_PO_MAX_LENGTH)}  `).success).toBe(true);
+  });
   it("refuses an order with no lines and a bad date", () => {
     expect(
       createSalesOrderSchema.safeParse({ ...createBody, lines: [] }).success,
@@ -136,6 +148,50 @@ describe("the order write contract", () => {
       createSalesOrderSchema.safeParse({ ...createBody, orderDate: "9/11" })
         .success,
     ).toBe(false);
+  });
+  it("refuses a shipment date before the order date, naming the field", () => {
+    const result = createSalesOrderSchema.safeParse({
+      ...createBody,
+      orderDate: "2026-11-20",
+      shipmentDate: "2020-01-01",
+    });
+    expect(result.success).toBe(false);
+    const issue = result.error?.issues[0];
+    expect(issue?.path).toEqual(["shipmentDate"]);
+    expect(issue?.message).toBe(SHIPMENT_BEFORE_ORDER_MESSAGE);
+  });
+  it("accepts a shipment date on the order date, after it, or none", () => {
+    for (const shipmentDate of ["2026-11-20", "2026-12-01", null]) {
+      expect(
+        createSalesOrderSchema.safeParse({
+          ...createBody,
+          orderDate: "2026-11-20",
+          shipmentDate,
+        }).success,
+        String(shipmentDate),
+      ).toBe(true);
+    }
+  });
+  it("checks a patch that sends both dates, and leaves one date to the order", () => {
+    expect(
+      patchSalesOrderSchema.safeParse({
+        version: 1,
+        orderDate: "2026-11-20",
+        shipmentDate: "2026-11-01",
+      }).success,
+    ).toBe(false);
+    expect(
+      patchSalesOrderSchema.safeParse({
+        version: 1,
+        shipmentDate: "2026-11-01",
+      }).success,
+    ).toBe(true);
+  });
+  it("answers the date question the same way for the form", () => {
+    expect(shipmentIsBeforeOrder("2026-11-20", "2026-11-19")).toBe(true);
+    expect(shipmentIsBeforeOrder("2026-11-20", "2026-11-20")).toBe(false);
+    expect(shipmentIsBeforeOrder("2026-11-20", "")).toBe(false);
+    expect(shipmentIsBeforeOrder("", "2026-11-20")).toBe(false);
   });
   it("keeps exactly the keys a patch sends", () => {
     const parsed = patchSalesOrderSchema.parse({

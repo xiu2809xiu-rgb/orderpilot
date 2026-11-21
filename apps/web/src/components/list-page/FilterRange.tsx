@@ -23,12 +23,13 @@ export function FilterRange({
   const { t } = useTranslation("list-page");
   const base = useId();
   const [from, to] = rangeIds(id);
+  // The word names the field to the eye and the screen reader alike: in the bar
+  // it says which range, and in the popover the group's own heading does.
   const field = (key: string, word: string) => {
     const value = filters[key];
     return (
-      <div className="flex items-center gap-1 text-sm">
-        <label htmlFor={`${base}${key}`} className="text-muted-foreground">
-          <span className="sr-only">{label} </span>
+      <div className="dt-field">
+        <label htmlFor={`${base}${key}`} className="dt-field-label">
           {word}
         </label>
         <Input
@@ -38,7 +39,7 @@ export function FilterRange({
           onChange={(event) => {
             setFilter(key, event.target.value || undefined);
           }}
-          className="h-9 w-40 tabular-nums pointer-coarse:h-11"
+          className="dt-control w-40 tabular-nums"
         />
       </div>
     );
@@ -47,14 +48,18 @@ export function FilterRange({
     <div
       role="group"
       aria-label={label}
-      className={showLabel ? "space-y-1" : "flex flex-wrap items-center gap-2"}
+      className={showLabel ? "dt-field" : undefined}
     >
-      {showLabel ? (
-        <span className="text-xs text-muted-foreground">{label}</span>
-      ) : null}
-      <div className="flex flex-wrap items-center gap-2">
-        {field(from, t("filters.from"))}
-        {field(to, t("filters.to"))}
+      {showLabel ? <span className="dt-field-label">{label}</span> : null}
+      <div className="dt-range">
+        {field(
+          from,
+          showLabel ? t("filters.from") : t("filters.rangeFrom", { label }),
+        )}
+        {field(
+          to,
+          showLabel ? t("filters.to") : t("filters.rangeTo", { label }),
+        )}
       </div>
     </div>
   );

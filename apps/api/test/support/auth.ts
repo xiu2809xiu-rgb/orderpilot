@@ -1,4 +1,10 @@
-import { COOKIES, HEADERS, type Role, type Session } from "@orderpilot/shared";
+import {
+  COOKIES,
+  HEADERS,
+  sessionResponseSchema,
+  type Role,
+  type Session,
+} from "@orderpilot/shared";
 import request from "supertest";
 import { AuditEventRepository } from "../../src/audit/audit-event.repository.js";
 import { TEST_DEMO_PASSWORD } from "./infrastructure.js";
@@ -77,6 +83,30 @@ export async function demoSignIn(t: TestApp, role: Role): Promise<Browser> {
   }
   return browserFrom(
     (res.body as { data: Session }).data,
+    res.headers["set-cookie"],
+  );
+}
+
+/**
+ * The account at the top of the sample approval chain: Management's today, and
+ * a second approver after the role cut (ADR 0058). Written out here, not read
+ * from the source, so a changed source address fails the test that uses it.
+ */
+export const SECOND_APPROVER_EMAIL = "management@example.test";
+
+/** Signs in by the email and password form, with the test password the harness seeds. */
+export async function passwordSignIn(
+  t: TestApp,
+  email: string,
+): Promise<Browser> {
+  const res = await request(t.app.getHttpServer())
+    .post(`${API}/auth/login`)
+    .send({ email, password: TEST_DEMO_PASSWORD });
+  if (res.status !== 200) {
+    throw new Error(`sign-in failed: ${String(res.status)} ${res.text}`);
+  }
+  return browserFrom(
+    sessionResponseSchema.parse(res.body).data,
     res.headers["set-cookie"],
   );
 }

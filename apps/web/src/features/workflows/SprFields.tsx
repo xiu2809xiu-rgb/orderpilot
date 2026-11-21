@@ -1,7 +1,7 @@
 import type { SprField } from "@orderpilot/shared";
-import { Sparkles } from "lucide-react";
+import { Calculator } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/kit/Badge";
 import {
   Table,
   TableBody,
@@ -11,6 +11,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { formatDay, formatQuantity } from "./format";
+
+/** Dates in words and whole quantities, as everywhere else; other values as typed. */
+function shown(field: SprField): string {
+  if (field.key === "quantity") return formatQuantity(field.value);
+  return formatDay(field.value);
+}
 
 /**
  * The SPR's fields with where each value came from. A suggested value carries
@@ -49,15 +56,21 @@ export function SprFields({ fields }: { fields: readonly SprField[] }) {
                   {t("spr.emptyValue")}
                 </span>
               ) : (
-                field.value
+                shown(field)
               )}
             </TableCell>
             <TableCell>
+              {/*
+                A tinted pill in the info colour: marked, without outshouting the decision.
+                A calculator, not the sparkle Spark wears: the value is worked out from
+                stock by a fixed rule, and the sparkle would say an AI chose it.
+              */}
               <Badge
-                variant={field.origin === "suggested" ? "default" : "outline"}
+                radius="full"
+                variant={field.origin === "suggested" ? "info" : "secondary"}
               >
                 {field.origin === "suggested" ? (
-                  <Sparkles aria-hidden="true" />
+                  <Calculator aria-hidden="true" data-icon="calculated" />
                 ) : null}
                 {t(`spr.origin.${field.origin}`)}
               </Badge>

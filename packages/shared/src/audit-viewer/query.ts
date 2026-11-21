@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { pageQuerySchema } from "../envelope.js";
-import { roleSchema } from "../roles.js";
+import { storedRoleSchema } from "../roles.js";
 
 /**
  * An audit event is a refusal when its action ends in one of these. The
@@ -25,7 +25,8 @@ export const auditEventQuerySchema = pageQuerySchema
   .extend({
     actorKind: z.enum(["user", "system", "ai"]).optional(),
     actorUserId: z.uuid().optional(),
-    role: roleSchema.optional(),
+    // A stored role: an old event can name a retired one (ADR 0058).
+    role: storedRoleSchema.optional(),
     /** Matches an action that starts with this text, so "auth." finds every sign-in event. */
     action: z.string().trim().min(1).max(100).optional(),
     entityType: z.string().trim().min(1).max(100).optional(),

@@ -4,13 +4,16 @@ import { useState, type SyntheticEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { ErrorPanel, toast } from "@/components/common";
 import { Button } from "@/components/ui/button";
+import { CONTROL_SKIN } from "@/components/ui/controlSkin";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 import {
   workflowsApprove,
   workflowsReject,
   workflowsUndoDecision,
 } from "@/lib/api/generated/endpoints/workflows/workflows";
 import { formatDateTime } from "./format";
+import { SprRaisePanel } from "./SprRaisePanel";
 
 type Outcome = "approved" | "rejected";
 
@@ -63,8 +66,17 @@ export function SprDecisionForm({
     onError: () => toast.failed(t("spr.toast.failed")),
   });
 
+  if (spr.stage === "suggested") {
+    return spr.raiseTaskId ? (
+      <SprRaisePanel spr={spr} raiseTaskId={spr.raiseTaskId} />
+    ) : (
+      <p role="status" className="text-muted-foreground">
+        {t("spr.raise.others")}
+      </p>
+    );
+  }
   if (spr.decision) {
-    return (
+    const decided = (
       <p role="status" className="font-medium">
         {t("spr.decisionDone", {
           outcome: t(`spr.outcomes.${spr.decision.outcome}`),
@@ -76,6 +88,15 @@ export function SprDecisionForm({
         </span>
       </p>
     );
+    // A rejected SPR goes back to the product manager to correct and raise again.
+    return spr.raiseTaskId ? (
+      <div className="space-y-s3">
+        {decided}
+        <SprRaisePanel spr={spr} raiseTaskId={spr.raiseTaskId} />
+      </div>
+    ) : (
+      decided
+    );
   }
   if (spr.passedTo && !spr.passedTo.youDecide) {
     return (
@@ -85,6 +106,15 @@ export function SprDecisionForm({
           by: spr.passedTo.byName,
           date: formatDateTime(spr.passedTo.at),
         })}
+      </p>
+    );
+  }
+  // Someone who cannot decide, such as the product manager who raised it,
+  // learns where it stands rather than why a sample cannot be decided.
+  if (!canDecide && !spr.passedTo?.youDecide) {
+    return (
+      <p role="status" className="text-muted-foreground">
+        {t("spr.waiting")}
       </p>
     );
   }
@@ -142,7 +172,7 @@ export function SprDecisionForm({
           onChange={(event) => {
             setComment(event.target.value);
           }}
-          className="w-full rounded-md border bg-background px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-ring"
+          className={cn(CONTROL_SKIN, "w-full rounded-md px-3 py-2 text-sm")}
         />
         <p id="spr-comment-hint" className="text-sm text-muted-foreground">
           {t("spr.commentHint")}
@@ -176,6 +206,7 @@ export function SprDecisionForm({
           {t("spr.reject")}
         </Button>
       </div>
+      <p className="text-sm text-muted-foreground">{t("spr.nextStep")}</p>
     </form>
   );
 }

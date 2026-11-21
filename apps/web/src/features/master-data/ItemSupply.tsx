@@ -2,9 +2,9 @@ import { useTranslation } from "react-i18next";
 import type { ItemDetail } from "@orderpilot/shared";
 import { RecordLink, SectionCard, StatusBadge } from "@/components/common";
 import { formatDay, formatQuantity } from "@/lib/format";
-import { hasPermission, useSessionStore } from "@/stores/session";
 import { MaskedMoney } from "./pieces";
 import { RecordTable, type RecordColumn } from "./RecordTable";
+import { SprNumber } from "./SprNumber";
 
 type PurchaseLine = ItemDetail["purchaseLines"][number];
 type Spr = ItemDetail["sprs"][number];
@@ -14,23 +14,6 @@ const SPR_TONE = {
   submitted: "info",
   approved: "success",
 } as const;
-
-/** An SPR's number, as a link for the roles that may open one. */
-function SprNumber({ recordNo }: { recordNo: string | null }) {
-  const session = useSessionStore((state) => state.session);
-  if (!recordNo) return null;
-  if (!hasPermission(session, "spr.read")) {
-    return <span className="font-mono">{recordNo}</span>;
-  }
-  return (
-    <RecordLink
-      to={`/workflows/sprs/${recordNo}`}
-      className="font-mono text-primary underline-offset-4 hover:underline"
-    >
-      {recordNo}
-    </RecordLink>
-  );
-}
 
 /** What is on its way for this item: open purchase orders, then the item's SPRs. */
 export function ItemSupply({ item }: { item: ItemDetail }) {
@@ -91,7 +74,7 @@ export function ItemSupply({ item }: { item: ItemDetail }) {
       header: t("item.sprs.order"),
       cell: (spr) => (
         <RecordLink
-          to={`/order-tracker/${spr.orderNo}`}
+          to={`/orders/${spr.orderNo}`}
           className="font-mono text-primary underline-offset-4 hover:underline"
         >
           {spr.orderNo}

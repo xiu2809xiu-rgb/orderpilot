@@ -5,10 +5,12 @@ import { useTranslation } from "react-i18next";
 import { lookupText, lookupValueSchema } from "@/components/form";
 import { Button } from "@/components/ui/button";
 import { GridContext, type GridContextValue } from "./gridContext";
+import "./lines-grid.css";
 import { LineRow } from "./LineRow";
 import { LinesFooter } from "./LinesFooter";
 import { editableKinds, trackTemplate } from "./lineValues";
-import type { ColumnKind, LineColumn, LinesGridProps } from "./types";
+import { afterItem, headerClass } from "./gridHelpers";
+import type { LineColumn, LinesGridProps } from "./types";
 import { useGridKeys } from "./useGridKeys";
 import { useItemPick } from "./useItemPick";
 import { useItemSearch } from "./useItemSearch";
@@ -16,19 +18,6 @@ import { useLineActions } from "./useLineActions";
 import { useLineTotals } from "./useLineTotals";
 import { usePendingFocus } from "./usePendingFocus";
 import { useStable } from "./useStable";
-
-// Whole class names for Tailwind. Numbers line up on the right, as their cells do.
-function headerClass(kind: ColumnKind): string | undefined {
-  if (kind === "remove") return "sr-only";
-  const numeric =
-    kind === "quantity" || kind === "unitPrice" || kind === "amount";
-  return numeric ? "@lines:text-right" : undefined;
-}
-
-/** Where Enter on an item goes: the quantity, since the pick filled the description. */
-function afterItem(editable: readonly string[]): string | undefined {
-  return editable.find((kind) => kind !== "item" && kind !== "description");
-}
 
 /**
  * A table of order or SPR lines that is typed into, not clicked through. Put it
@@ -81,10 +70,12 @@ export function LinesGrid(props: LinesGridProps) {
     },
   });
   const itemPrice = props.itemPrice ?? "fill";
+  const itemDescription = props.itemDescription ?? "copy";
   const pick = useItemPick({
     name,
     priceMask,
     itemPrice,
+    itemDescription,
     advance,
     advanceTo: afterItem(editable),
     root: rootRef,
@@ -98,6 +89,7 @@ export function LinesGrid(props: LinesGridProps) {
       readOnly,
       priceMask,
       itemPrice,
+      itemDescription,
       shortfallAction: props.shortfallAction,
       pick,
       remove,
@@ -109,6 +101,7 @@ export function LinesGrid(props: LinesGridProps) {
       readOnly,
       priceMask,
       itemPrice,
+      itemDescription,
       props.shortfallAction,
       pick,
       remove,
@@ -132,6 +125,9 @@ export function LinesGrid(props: LinesGridProps) {
         >
           <div
             role="table"
+            data-lines-rich={
+              columns.some((c) => c.kind === "amount") ? "" : undefined
+            }
             aria-label={props.label}
             aria-describedby={readOnly ? undefined : hintId}
             style={
@@ -151,7 +147,7 @@ export function LinesGrid(props: LinesGridProps) {
           >
             <div
               role="row"
-              className="px-0 text-xs font-medium text-muted-foreground @max-lines:sr-only @lines:grid @lines:grid-cols-(--line-tracks-compact) @3xl:grid-cols-(--line-tracks) @lines:gap-x-s1 @lines:border-b @lines:pb-1"
+              className="px-0 text-xs font-medium tracking-wide text-muted-foreground @max-lines:sr-only @lines:grid @lines:grid-cols-(--line-tracks-compact) @3xl:grid-cols-(--line-tracks) @lines:gap-x-s1 @lines:border-b @lines:px-1 @lines:pb-2"
             >
               {columns.map((column) => (
                 <div

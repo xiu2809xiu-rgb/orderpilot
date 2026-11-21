@@ -10,6 +10,7 @@ import type { WorkflowsInboxTasks200DataItemExpectedPayment } from './workflowsI
 import type { WorkflowsInboxTasks200DataItemKind } from './workflowsInboxTasks200DataItemKind.ts';
 import type { WorkflowsInboxTasks200DataItemPriority } from './workflowsInboxTasks200DataItemPriority.ts';
 import type { WorkflowsInboxTasks200DataItemRef } from './workflowsInboxTasks200DataItemRef.ts';
+import type { WorkflowsInboxTasks200DataItemSpr } from './workflowsInboxTasks200DataItemSpr.ts';
 import type { WorkflowsInboxTasks200DataItemStatus } from './workflowsInboxTasks200DataItemStatus.ts';
 
 export type WorkflowsInboxTasks200DataItem = {
@@ -46,5 +47,6 @@ export type WorkflowsInboxTasks200DataItem = {
   priority?: WorkflowsInboxTasks200DataItemPriority;
   /** @minLength 1 */
   assigneeName?: string;
+  spr?: WorkflowsInboxTasks200DataItemSpr;
   expectedPayment?: WorkflowsInboxTasks200DataItemExpectedPayment;
 };

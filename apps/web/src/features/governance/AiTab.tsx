@@ -6,9 +6,11 @@ import {
   CLASSIFICATIONS,
   EmptyState,
   LoadingState,
+  ScrollRegion,
   SectionCard,
   StatusBadge,
 } from "@/components/common";
+import { NativeSelect } from "@/components/common/data-table/Field";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -30,12 +32,11 @@ type Provider = PolicyCheckAiDestinationBody["provider"];
 type Origin = PolicyCheckAiDestinationBody["origin"];
 type Classification = PolicyCheckAiDestinationBody["classification"];
 
-const SELECT =
-  "h-9 w-full rounded-md border border-input bg-background px-2 text-sm";
-
 /** What may go to which provider, and a request to try against the rule. */
 export function AiTab() {
   const { t } = useTranslation("governance");
+  // The badges' own words, so the form and the table name a level alike.
+  const { t: tb } = useTranslation("components");
   const rules = usePolicyAiDestinations();
   const [provider, setProvider] = useState<Provider>("mock");
   const [origin, setOrigin] = useState<Origin>("real");
@@ -65,36 +66,43 @@ export function AiTab() {
             onRetry={() => void rules.refetch()}
           />
         ) : (
-          <Table aria-label={t("ai.rulesLabel")}>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t("ai.provider")}</TableHead>
-                <TableHead>{t("ai.origins")}</TableHead>
-                <TableHead>{t("ai.classifications")}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {list.map((rule) => (
-                <TableRow key={rule.provider}>
-                  <TableCell>{t(`ai.providers.${rule.provider}`)}</TableCell>
-                  <TableCell>
-                    {rule.origins.length === 0
-                      ? t("ai.none")
-                      : rule.origins.map((o) => t(`ai.origin.${o}`)).join(", ")}
-                  </TableCell>
-                  <TableCell>
-                    <span className="flex flex-wrap gap-1">
-                      {rule.classifications.length === 0
-                        ? t("ai.none")
-                        : rule.classifications.map((level) => (
-                            <ClassificationBadge key={level} level={level} />
-                          ))}
-                    </span>
-                  </TableCell>
+          <ScrollRegion
+            label={t("ai.rulesLabel")}
+            className="rounded-none border-0 bg-transparent"
+          >
+            <Table className="dt-table" aria-label={t("ai.rulesLabel")}>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t("ai.provider")}</TableHead>
+                  <TableHead>{t("ai.origins")}</TableHead>
+                  <TableHead>{t("ai.classifications")}</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {list.map((rule) => (
+                  <TableRow key={rule.provider}>
+                    <TableCell>{t(`ai.providers.${rule.provider}`)}</TableCell>
+                    <TableCell>
+                      {rule.origins.length === 0
+                        ? t("ai.none")
+                        : rule.origins
+                            .map((o) => t(`ai.origin.${o}`))
+                            .join(", ")}
+                    </TableCell>
+                    <TableCell>
+                      <span className="flex flex-wrap gap-1">
+                        {rule.classifications.length === 0
+                          ? t("ai.none")
+                          : rule.classifications.map((level) => (
+                              <ClassificationBadge key={level} level={level} />
+                            ))}
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </ScrollRegion>
         )}
       </SectionCard>
       <SectionCard title={t("ai.checkTitle")}>
@@ -107,9 +115,9 @@ export function AiTab() {
         >
           <div className="space-y-1">
             <Label htmlFor="ai-provider">{t("ai.provider")}</Label>
-            <select
+            <NativeSelect
               id="ai-provider"
-              className={SELECT}
+              className="w-full"
               value={provider}
               onChange={(e) => {
                 setProvider(e.target.value as Provider);
@@ -120,13 +128,13 @@ export function AiTab() {
                   {t(`ai.providers.${rule.provider}`)}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
           </div>
           <div className="space-y-1">
             <Label htmlFor="ai-origin">{t("ai.origins")}</Label>
-            <select
+            <NativeSelect
               id="ai-origin"
-              className={SELECT}
+              className="w-full"
               value={origin}
               onChange={(e) => {
                 setOrigin(e.target.value as Origin);
@@ -137,13 +145,13 @@ export function AiTab() {
                   {t(`ai.origin.${o}`)}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
           </div>
           <div className="space-y-1">
             <Label htmlFor="ai-class">{t("ai.classifications")}</Label>
-            <select
+            <NativeSelect
               id="ai-class"
-              className={SELECT}
+              className="w-full"
               value={classification}
               onChange={(e) => {
                 setClassification(e.target.value as Classification);
@@ -151,12 +159,16 @@ export function AiTab() {
             >
               {CLASSIFICATIONS.map((level) => (
                 <option key={level} value={level}>
-                  {level}
+                  {tb(`badges.classification.${level}`)}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
           </div>
-          <Button type="submit" disabled={check.isPending}>
+          <Button
+            type="submit"
+            disabled={check.isPending}
+            className="pointer-coarse:h-11"
+          >
             {check.isPending ? t("ai.checking") : t("ai.check")}
           </Button>
         </form>

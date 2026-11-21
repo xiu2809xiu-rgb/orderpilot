@@ -11,7 +11,9 @@ export type WorkflowsOpenRules200DataItemId = typeof WorkflowsOpenRules200DataIt
 
 export const WorkflowsOpenRules200DataItemId = {
   sprTrigger: 'sprTrigger',
+  approvers: 'approvers',
+  approvalLimits: 'approvalLimits',
+  approverDisagreement: 'approverDisagreement',
+  remarksReply: 'remarksReply',
   piSequence: 'piSequence',
-  approversAndLimits: 'approversAndLimits',
-  delegation: 'delegation',
 } as const;

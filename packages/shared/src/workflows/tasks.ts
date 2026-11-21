@@ -6,6 +6,16 @@ import { recordRefSchema } from "../record-number.js";
 import { roleSchema } from "../roles.js";
 import { mockRecordedSchema, orderNoSchema } from "./common.js";
 
+/** What an SPR would buy and how short the item is, as a task or a reminder shows it. */
+export const taskSprSchema = z.object({
+  itemNo: z.string().min(1),
+  itemDescription: z.string().min(1),
+  quantity: decimalStringSchema,
+  /** Inventory over the 3-month run rate; null when nothing sold. */
+  monthsOfCover: decimalStringSchema.nullable(),
+});
+export type TaskSpr = z.infer<typeof taskSprSchema>;
+
 /**
  * The kinds of task a step can give a role. A starter list for the sales flow:
  * Azri's state machine decides which step creates which task, and adds kinds
@@ -16,6 +26,8 @@ export const TASK_KINDS = [
   "REVIEW_FIELDS",
   "RAISE_SPR",
   "APPROVE_SPR",
+  /** After approval: the product manager places the vendor PO, as Spectra said on 5 Nov. */
+  "PLACE_VENDOR_PO",
   "SEND_PI",
   "CONFIRM_PAYMENT",
   "PACK_ORDER",
@@ -57,6 +69,11 @@ export const workflowTaskSchema = z.object({
   priority: taskPrioritySchema.optional(),
   /** The person in the role who holds the task. */
   assigneeName: z.string().min(1).optional(),
+  /**
+   * On an SPR task: what it would buy and how short the item is, so an approver
+   * can tell the requests apart without opening each one.
+   */
+  spr: taskSprSchema.optional(),
   /** On a payment task: the payment it waits for, so one click can confirm it. */
   expectedPayment: z
     .object({
@@ -104,6 +121,7 @@ export type TasksQuery = z.infer<typeof tasksQuerySchema>;
  */
 export const COMPLETABLE_TASK_KINDS = [
   "RAISE_SPR",
+  "PLACE_VENDOR_PO",
   "SEND_PI",
   "PACK_ORDER",
   "RECOUNT_CARTONS",
@@ -124,13 +142,18 @@ export type TaskActionResult = z.infer<typeof taskActionResultSchema>;
  */
 export const OPEN_RULE_IDS = [
   "sprTrigger",
+  "approvers",
+  "approvalLimits",
+  "approverDisagreement",
+  "remarksReply",
   "piSequence",
-  "approversAndLimits",
-  "delegation",
 ] as const;
+/** Settled at the 5 Nov briefing, or still waiting for Spectra's answer. */
+export const OPEN_RULE_STATUSES = ["confirmed", "open"] as const;
 export const openRuleSchema = z.object({
   id: z.enum(OPEN_RULE_IDS),
   value: z.string().min(1),
+  status: z.enum(OPEN_RULE_STATUSES),
   screen: z.string().min(1).nullable(),
 });
 export type OpenRule = z.infer<typeof openRuleSchema>;

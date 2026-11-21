@@ -7,6 +7,8 @@
  */
 import type { WorkflowsInboxReminders200DataItemEscalatedTo } from './workflowsInboxReminders200DataItemEscalatedTo.ts';
 import type { WorkflowsInboxReminders200DataItemKind } from './workflowsInboxReminders200DataItemKind.ts';
+import type { WorkflowsInboxReminders200DataItemRef } from './workflowsInboxReminders200DataItemRef.ts';
+import type { WorkflowsInboxReminders200DataItemSpr } from './workflowsInboxReminders200DataItemSpr.ts';
 import type { WorkflowsInboxReminders200DataItemStage } from './workflowsInboxReminders200DataItemStage.ts';
 import type { WorkflowsInboxReminders200DataItemToRole } from './workflowsInboxReminders200DataItemToRole.ts';
 
@@ -17,6 +19,9 @@ export type WorkflowsInboxReminders200DataItem = {
   stage: WorkflowsInboxReminders200DataItemStage;
   /** @pattern ^[A-Za-z0-9-]{1,30}$ */
   orderNo: string;
+  /** @nullable */
+  ref?: WorkflowsInboxReminders200DataItemRef;
+  spr?: WorkflowsInboxReminders200DataItemSpr;
   /** @minLength 1 */
   message: string;
   toRole: WorkflowsInboxReminders200DataItemToRole;

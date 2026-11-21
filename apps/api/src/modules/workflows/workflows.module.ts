@@ -17,7 +17,9 @@ import { MockDecisionOverlay } from "./mock/mock-decision-overlay.js";
 import { MockWorkflowActions } from "./mock/mock-workflow-actions.js";
 import { MockWorkflowReadModel } from "./mock-workflow-read-model.js";
 import { OrderWorkflowRepository } from "./order-workflow.repository.js";
+import { RunningTaskActions } from "./running-task-actions.js";
 import { SprApprovalService } from "./spr-approval.service.js";
+import { SprRaiseService } from "./spr-raise.service.js";
 import { SprRecordRepository } from "./spr-record.repository.js";
 import { SprRoutingService } from "./spr-routing.service.js";
 import { OrderWorkflowService } from "./order-workflow.service.js";
@@ -56,6 +58,8 @@ import { WorkflowsService } from "./workflows.service.js";
     OrderWorkflowRepository,
     SprRecordRepository,
     SprApprovalService,
+    SprRaiseService,
+    RunningTaskActions,
     CommandReplayService,
     WorkflowCommandRepository,
     SprRoutingService,

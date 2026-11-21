@@ -27,9 +27,10 @@ export function HandedToYou() {
     <SectionCard
       title={t("handed.title")}
       description={t("handed.description")}
+      work
     >
       <QueryBoundary query={query}>
-        <ul className="space-y-s2">
+        <ul className="divide-y divide-border">
           {tasks.map((task) => (
             <TaskCard
               key={task.id}

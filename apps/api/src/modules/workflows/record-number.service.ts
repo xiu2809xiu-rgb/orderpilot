@@ -9,8 +9,8 @@ import { RecordNumberRepository } from "./record-number.repository.js";
 
 /**
  * Hands out OrderPilot's own record numbers (`SPR-20261102-0001`) with the
- * shared helper. Navision's number is a separate field on the record
- * (`navisionNo`), filled in once Navision has the record.
+ * shared helper. Business Central's number is a separate field on the record
+ * (`navisionNo`), filled in once Business Central has the record.
  */
 @Injectable()
 export class RecordNumberService {

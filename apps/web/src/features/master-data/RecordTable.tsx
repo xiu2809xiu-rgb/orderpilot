@@ -10,10 +10,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import "./record.css";
 
 export interface RecordColumn<Row> {
   id: string;
   header: string;
+  /** Replaces the plain header text, for a head that carries a control. `header` still names the column. */
+  headerContent?: ReactNode;
   cell: (row: Row) => ReactNode;
   kind?: ColumnKind;
   /** Lets a sentence wrap instead of pushing the table wider than its card. */
@@ -48,7 +51,7 @@ export function RecordTable<Row>({
   }
   return (
     <ScrollRegion label={t("table.scroll", { name: caption })}>
-      <Table aria-labelledby={captionId}>
+      <Table aria-labelledby={captionId} className="rec-table">
         <caption id={captionId} className="sr-only">
           {caption}
         </caption>
@@ -59,14 +62,17 @@ export function RecordTable<Row>({
                 key={column.id}
                 className={headClass(column, position === 0)}
               >
-                {column.header}
+                {column.headerContent ?? column.header}
               </TableHead>
             ))}
           </TableRow>
         </TableHeader>
         <TableBody>
           {rows.map((row) => (
-            <TableRow key={rowKey(row)} className="group/row hover:bg-muted">
+            <TableRow
+              key={rowKey(row)}
+              className="group/row hover:bg-transparent"
+            >
               {columns.map((column, position) => (
                 <TableCell
                   key={column.id}

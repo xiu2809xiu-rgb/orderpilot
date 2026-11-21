@@ -12,7 +12,7 @@ import { UserRepository, type UserRecord } from "../users/user.repository.js";
 import type { AuthContext } from "./auth-context.js";
 import { AuthAuditor } from "./auth-auditor.js";
 import type { IssuedCookies } from "./auth-cookies.js";
-import { DEMO_ACCOUNTS, demoEmail } from "./demo-accounts.js";
+import { offeredAccountOf, offeredAccounts } from "./demo-accounts.js";
 import { AccessTokens } from "./domain/access-token.js";
 import { CsrfTokens } from "./domain/csrf-token.js";
 import { PasswordHasher } from "./domain/password-hasher.js";
@@ -58,7 +58,7 @@ export class AuthService {
     return this.config.demoMode
       ? {
           demoMode: true,
-          demoRoles: DEMO_ACCOUNTS.map(({ role, displayName }) => ({
+          demoRoles: offeredAccounts().map(({ role, displayName }) => ({
             role,
             displayName,
           })),
@@ -90,7 +90,8 @@ export class AuthService {
   }
 
   async demoLogin(req: Request, role: Role): Promise<SignedIn> {
-    const user = await this.users.findByEmail(demoEmail(role));
+    const account = offeredAccountOf(role);
+    const user = account ? await this.users.findByEmail(account.email) : null;
     if (user?.disabledAt !== null) {
       await this.refuseLogin(
         req,

@@ -11,6 +11,7 @@ import { Link } from "react-router";
 import { z } from "zod";
 import { RecordLink } from "@/components/common/RecordLink";
 import { Button } from "@/components/ui/button";
+import { orderHref } from "@/features/directions/screens/home/homeLinks";
 import { apiClient } from "@/lib/api/instance";
 import { formatDay } from "@/lib/format";
 import { useSessionStore } from "@/stores/session";
@@ -57,7 +58,7 @@ export function Notifications() {
         <Button
           variant="ghost"
           size="icon"
-          className="relative"
+          className="relative dx-bar-icon"
           aria-label={
             total > 0
               ? t("notifications.titleCount", { count: total, shown })
@@ -77,6 +78,8 @@ export function Notifications() {
       </PopoverTrigger>
       <PopoverContent
         align="end"
+        // Clear of the bar's lower edge: the bar is 56 px and its buttons sit inside it.
+        sideOffset={14}
         collisionPadding={8}
         className="flex max-h-(--radix-popover-content-available-height) w-80 flex-col gap-s1"
       >
@@ -103,7 +106,7 @@ export function Notifications() {
               {reminders.data?.data.map((reminder) => (
                 <li key={reminder.id}>
                   <RecordLink
-                    to={`/workflows/orders/${reminder.orderNo}`}
+                    to={orderHref(reminder.orderNo)}
                     onClick={close}
                     className="block rounded-sm py-1.5 hover:bg-muted focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
                   >

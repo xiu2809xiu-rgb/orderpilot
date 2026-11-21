@@ -10,9 +10,37 @@
     "breadcrumb": "Breadcrumb",
     "search": "Search or jump to",
     "loading": "Loading",
+    "pageTitle": "{{page}} - OrderPilot",
     "close": "Close",
     "mobileNavTitle": "Navigation",
-    "mobileNavDescription": "Choose an area of OrderPilot."
+    "mobileNavDescription": "Choose an area of OrderPilot.",
+    "groups": {
+      "work": "Work",
+      "stock": "Master data",
+      "insights": "Insights",
+      "control": "Control"
+    },
+    "collapsePanel": "Collapse the panel",
+    "expandPanel": "Expand the panel",
+    "upload": "Upload",
+    "uploadHint": "Demo: let Spark read a sample PO",
+    "spark": "Spark",
+    "sparkHint": "Demo: ask Spark about stock or sales",
+    "extras": "Upload and theme",
+    "help": {
+      "label": "Help",
+      "wordsTitle": "What the words mean",
+      "title": "Keyboard shortcuts",
+      "palette": "Search or jump to a page",
+      "search": "Search the list on the page",
+      "new": "Start a new record",
+      "spark": "Open or close Spark",
+      "close": "Close a panel or a menu",
+      "keysSearch": "/",
+      "keysNew": "N",
+      "keysSpark": "Ctrl .",
+      "keysClose": "Esc"
+    }
   },
   "nav": {
     "home": "Home",
@@ -51,11 +79,29 @@
   },
   "palette": {
     "title": "Command palette",
-    "description": "Search for an area or an action.",
-    "placeholder": "Type an area or an action",
+    "description": "Search for an order, customer, vendor, item, page or action.",
+    "placeholder": "Search orders, customers, vendors, items or pages",
     "empty": "Nothing matches.",
+    "emptyRecords": "No order, customer, vendor or item matches \"{{query}}\". Try an order or PO number.",
+    "searching": "Searching orders, customers, vendors and items",
+    "failed": "Could not search the records.",
+    "failedTrace": "Could not search the records. Trace id {{traceId}}.",
+    "retry": "Retry",
+    "resultsCount_one": "{{count}} result",
+    "resultsCount_other": "{{count}} results",
+    "recent": "Opened lately",
     "goTo": "Go to",
+    "demo": "Demo",
+    "void": "Void",
     "actions": "Actions",
+    "groups": {
+      "order": "Orders",
+      "customer": "Customers",
+      "vendor": "Vendors",
+      "item": "Items"
+    },
+    "po": "PO {{po}}",
+    "rowName": "{{kind}} {{no}}",
     "themeLight": "Use the light theme",
     "themeDark": "Use the dark theme",
     "helpLabel": "Keyboard shortcuts",
@@ -75,31 +121,31 @@
     "seeAll": "See all ({{count}})"
   },
   "userMenu": {
-    "label": "Account menu, {{initials}}",
+    "label": "Account menu:",
     "signedInAs": "Signed in as",
     "signOut": "Sign out"
   },
   "demo": {
     "switcher": "Demo role",
-    "switcherHint": "Switch to another role to see its home page.",
-    "current": "Current role"
-  },
-  "login": {
-    "title": "Sign in to OrderPilot",
-    "subtitle": "Sign in to see your tasks.",
-    "email": "Email",
-    "password": "Password",
-    "submit": "Sign in",
-    "submitting": "Signing in",
-    "demoTitle": "Demo sign-in",
-    "demoHint": "Pick a role to look around. One click, no password.",
-    "orEmail": "or sign in with your email",
-    "demoRolesLabel": "Demo roles",
-    "optionsFailed": "The demo sign-in could not be checked. You can still sign in with your email."
-  },
-  "sessionEnded": {
-    "title": "Your session ended",
-    "description": "Sign in again to carry on. This page stays as you left it, and anything you typed is kept."
+    "switcherHint": "Switch to another role. An order on screen stays open for a role that may read orders, and each role keeps its own open records.",
+    "switchAsk": {
+      "title": "Switch role?",
+      "body": "Anything on this page that is not saved may be lost.",
+      "switch": "Switch role",
+      "stay": "Stay here"
+    },
+    "current": "Current role",
+    "jobs": {
+      "SUPPORT": "Takes in the customer's order and sends the proforma invoice",
+      "PRODUCT_MANAGER": "Watches stock and run rate, and raises the request to buy",
+      "APPROVER": "Approves or rejects the request to buy",
+      "FINANCE": "Confirms the customer's payment",
+      "WAREHOUSE": "Packs the goods and checks them against the papers",
+      "LOGISTICS": "Books the forwarder and follows the shipping papers",
+      "MANAGEMENT": "Reads the tracker and the KPIs",
+      "AUDITOR": "Reads the audit trail",
+      "SYSTEM_ADMIN": "Sets up users and roles"
+    }
   },
   "validation": {
     "required": "This field is required.",
@@ -129,18 +175,25 @@
     "notFound": {
       "title": "Page not found",
       "description": "The page you asked for does not exist or has moved.",
-      "action": "Go to home"
+      "action": "Go to home",
+      "addressTitle": "The address you opened",
+      "addressHint": "Check it for a typing slip, or open a place from the panel."
     },
     "forbidden": {
       "title": "You do not have access",
       "description": "Your role does not include this area. If you think it should, ask a system admin.",
-      "action": "Go to home"
+      "action": "Go to home",
+      "sectionTitle": "Your access",
+      "signedInAs": "Signed in as {{name}}, {{role}}.",
+      "notForRole": "This area is not part of the {{role}} role. A system admin can change what a role may open."
     },
     "crash": {
       "title": "Something went wrong",
       "description": "This page hit an error. Quote the trace ID if you ask for help.",
-      "reload": "Reload the page",
-      "home": "Go to home"
+      "reload": "Try again",
+      "home": "Go to home",
+      "sectionTitle": "Reference for support",
+      "reference": "The team can find exactly what happened from this trace ID."
     }
   },
   "settings": {
@@ -148,9 +201,6 @@
     "description": "How OrderPilot looks and who you are signed in as.",
     "appearance": "Appearance",
     "appearanceHint": "Choose a theme. System follows your device.",
-    "language": "Language",
-    "languageHint": "OrderPilot is available in English.",
-    "languageEnglish": "English",
     "account": "Your account",
     "name": "Name",
     "email": "Email",
@@ -158,6 +208,8 @@
     "access": "Your permissions",
     "accessNone": "No permissions are granted to this role yet.",
     "checks": "Service checks",
+    "checkUp": "{{name}}: up",
+    "checkDown": "{{name}}: down",
     "checksHint": "The readiness checks the API runs before it takes traffic.",
     "checksLoading": "Loading the checks.",
     "checksFailed": "The checks could not be loaded. Quote this reference to support:",

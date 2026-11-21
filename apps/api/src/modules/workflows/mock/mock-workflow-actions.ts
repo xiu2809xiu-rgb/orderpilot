@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, Optional } from "@nestjs/common";
 import {
   COMPLETABLE_TASK_KINDS,
   MOCK_RECORDED_MESSAGE,
@@ -18,6 +18,7 @@ import {
   DomainError,
   NotFoundError,
 } from "../../../common/domain-error.js";
+import { RunningTaskActions } from "../running-task-actions.js";
 import { WorkflowReadModel } from "../workflow-read-model.js";
 import { MockDecisionOverlay } from "./mock-decision-overlay.js";
 
@@ -43,7 +44,8 @@ function assertCompletable(task: WorkflowTask): void {
  * result in the `MockDecisionOverlay`, and answers that it was recorded. The
  * audit comes first, so a failed write leaves nothing behind. Only the
  * permission on the route and the inbox the task sits in decide who may act.
- * SPR decisions have left this class for the state machine; the rest follow.
+ * SPR decisions have left this class for the state machine, and so has a task
+ * whose order the machine runs: `RunningTaskActions` takes it. The rest follow.
  */
 @Injectable()
 export class MockWorkflowActions {
@@ -53,6 +55,9 @@ export class MockWorkflowActions {
     @Inject(MockDecisionOverlay) private readonly overlay: MockDecisionOverlay,
     @Inject(WorkflowReadModel) private readonly model: WorkflowReadModel,
     @Inject(AuditService) private readonly audit: AuditService,
+    @Optional()
+    @Inject(RunningTaskActions)
+    private readonly running?: RunningTaskActions,
   ) {}
 
   async completeTask(
@@ -61,6 +66,10 @@ export class MockWorkflowActions {
     info: ActionInfo,
   ): Promise<TaskActionResult> {
     return this.oneAtATime(`task:${taskId}`, async () => {
+      const stored = await this.running?.find(taskId);
+      if (stored && this.running) {
+        return this.running.complete(stored, auth, info);
+      }
       const task = await this.ownTask(taskId, auth, info);
       if (this.overlay.isClosed(taskId)) throw new NotFoundError("Task");
       assertCompletable(task);
@@ -82,6 +91,10 @@ export class MockWorkflowActions {
     info: ActionInfo,
   ): Promise<TaskActionResult> {
     return this.oneAtATime(`task:${taskId}`, async () => {
+      const stored = await this.running?.find(taskId);
+      if (stored && this.running) {
+        return this.running.undo(stored, auth, info);
+      }
       const task = await this.ownTask(taskId, auth, info);
       // A decision or a payment closes its task too. Reopening it here would
       // leave that decision or payment standing with its task back in the inbox.

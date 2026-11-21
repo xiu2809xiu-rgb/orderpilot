@@ -1,5 +1,4 @@
 import { useTranslation } from "react-i18next";
-import { Badge } from "@/components/ui/badge";
 
 /**
  * A tab's name with the count of what needs attention. No badge at zero, so a
@@ -9,12 +8,12 @@ export function TabLabel({ name, count }: { name: string; count: number }) {
   const { t } = useTranslation("document-form");
   return (
     <>
-      {name}
+      <span>{name}</span>
       {count > 0 ? (
         <>
-          <Badge variant="secondary" aria-hidden="true" className="ml-1.5">
+          <span aria-hidden="true" className="df-tab-count numeral">
             {count}
-          </Badge>{" "}
+          </span>{" "}
           <span className="sr-only">{t("tabs.attention", { count })}</span>
         </>
       ) : null}

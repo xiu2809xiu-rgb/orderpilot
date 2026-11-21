@@ -7,7 +7,7 @@
 ### Newest events first. Filters are optional and combine with "and":
 ### actorKind (user, system, ai), actorUserId, role, action (starts with),
 ### entityType, entityId, from and to (ISO times, inclusive), refusalsOnly,
-### search (words in the summary), page and pageSize (1 to 200).
+### search (words in the summary, or a whole trace ID), page and pageSize (1 to 200).
 GET {{baseUrl}}/api/v1/audit/events?pageSize=10
 
 ### Only refusals: a refused sign-in, permission, CSRF check or reused token.

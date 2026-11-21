@@ -1,0 +1,181 @@
+/* The document form in the order page's anatomy: the way back and the head, a
+   bar of actions that stays in view, then cards for the fields, the lines, the
+   attachments and the tabs, 24 px apart (the 8-point rhythm of the order
+   page's own column). */
+.df-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.df-head {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.df-head .df-back {
+  justify-self: start;
+  margin: 0 0 0.25rem -0.5rem;
+  color: var(--muted-foreground);
+}
+
+/* The page's own head takes the bottom space; the sheet's gap spaces the rest. */
+.df-head > header {
+  margin-bottom: 0;
+}
+
+/* The sizes the bar depends on, named once. --df-gutter is the page's own
+   padding (1.5rem, 1rem on a phone, see .dx-main in shell.css): a sticky offset
+   is measured inside that padding, so the bar is lifted by the gutter to sit
+   flush under the top bar. --df-bar-clear is the room a field brought into
+   view by the keyboard keeps below the bar, so it never stops behind it. */
+.df-form {
+  --df-gutter: 1.5rem;
+  --df-bar-pad-y: 0.5rem;
+  --df-bar-pad-x: 0.75rem;
+  --df-bar-clear: 4.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+@media (max-width: 39.99rem) {
+  .df-form {
+    --df-gutter: 1rem;
+  }
+}
+
+/* FormShell spaces its children with a margin; this column spaces them with
+   its gap. Both at once made every gap 48 px. */
+.df-form > * {
+  margin-block: 0;
+}
+
+/* The bar keeps to the top of the scrolling page while the fields move under
+   it, so Save is never a scroll away, and it is held flush under the top bar:
+   with a gap, the fields scrolled through it. It reads as the page's own
+   controls, a pill row like the Orders toolbar.
+   The glass is drawn by a pseudo-element, so that its top corners can square
+   off while the bar is stuck to the top bar and stay round at rest. The
+   border is the pseudo-element's, and the bar's padding adds its width, so the
+   bar does not change size. A browser without scroll-state queries keeps the
+   round corners: only a corner shows. */
+.df-bar {
+  position: sticky;
+  top: calc(-1 * var(--df-gutter));
+  z-index: 20;
+  container-type: scroll-state;
+  isolation: isolate;
+  padding: calc(var(--df-bar-pad-y) + 1px) calc(var(--df-bar-pad-x) + 1px);
+}
+
+.df-bar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border: var(--dx-card-border);
+  border-radius: var(--radius-card);
+  background-color: var(--dx-card-work-bg);
+  box-shadow: var(--dx-card-shadow);
+  backdrop-filter: var(--dx-card-filter);
+}
+
+@container scroll-state(stuck: top) {
+  .df-bar::before {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+}
+
+.df-form :is(input, select, textarea, button, [role="row"], [role="combobox"]) {
+  scroll-margin-top: var(--df-bar-clear);
+}
+
+.df-footer {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 48rem) {
+  .df-footer {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+}
+
+.df-attachment {
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--control-bg);
+  font-size: var(--type-14);
+}
+
+@media (pointer: coarse) {
+  .df-attachment {
+    padding-block: 0.625rem;
+  }
+}
+
+.df-totals {
+  display: grid;
+  min-width: 14rem;
+  gap: 0.25rem;
+  font-size: var(--type-14);
+}
+
+/* The tabs are the order page's: a pill strip, the open tab current. */
+.df-tabs {
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  flex-wrap: nowrap;
+  gap: 0.375rem;
+  overflow-x: auto;
+  padding: 0.25rem;
+  border: 1px solid var(--panel-border);
+  border-radius: 999px;
+  background: var(--panel-strong);
+}
+
+.df-tab {
+  display: inline-flex;
+  height: 2.25rem;
+  align-items: center;
+  gap: 0.5rem;
+  padding-inline: 0.75rem;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted-foreground);
+  font-weight: 500;
+  box-shadow: none;
+  transition: color var(--motion-fast) var(--ease-out);
+}
+
+.df-tab:hover {
+  background: var(--dx-hover-bg);
+  color: var(--foreground);
+}
+
+.df-tab[data-state="active"] {
+  background-color: var(--dx-current-bg);
+  background-image: var(--dx-current-image);
+  box-shadow: var(--dx-current-shadow);
+  color: var(--foreground);
+}
+
+.df-tab-count {
+  font-size: var(--type-12);
+  color: var(--faint-foreground);
+}
+
+.df-tab[data-state="active"] .df-tab-count {
+  color: var(--foreground);
+}
+
+@media (pointer: coarse) {
+  .df-tab {
+    height: 2.75rem;
+  }
+}

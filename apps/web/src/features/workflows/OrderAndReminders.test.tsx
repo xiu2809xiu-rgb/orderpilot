@@ -73,6 +73,7 @@ const FLOW = getWorkflowsOrderFlowResponseMock({
         summary: "PO PO-PK-4121 received for SO-0004",
       },
     ],
+    documents: [],
     payment: {
       prepaymentPercent: "50",
       amountDue: "2500.00",
@@ -133,6 +134,25 @@ describe("an order's steps and timeline", () => {
     expect(useToastStore.getState().items.at(-1)?.undo).toBeTypeOf("function");
   });
 
+  it("puts the payment card before the steps for a role that can confirm, and after them for the rest", async () => {
+    server.use(getWorkflowsOrderFlowMockHandler(FLOW));
+    const finance = openOrder("FINANCE");
+    const pay = await finance.findByRole("heading", { name: "Payment" });
+    const steps = finance.getByRole("heading", { name: "Steps" });
+    // Document order, not only looks: a keyboard reaches the card first too.
+    expect(
+      pay.compareDocumentPosition(steps) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    finance.unmount();
+    const support = openOrder("SUPPORT");
+    const payLate = await support.findByRole("heading", { name: "Payment" });
+    const stepsFirst = support.getByRole("heading", { name: "Steps" });
+    expect(
+      stepsFirst.compareDocumentPosition(payLate) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
   it("hides the payment form from a role that cannot confirm", async () => {
     server.use(getWorkflowsOrderFlowMockHandler(FLOW));
     openOrder("SUPPORT");
@@ -151,7 +171,7 @@ describe("an order's steps and timeline", () => {
       await screen.findByText("This order is not in the sample data"),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "Back to the task inbox" }),
+      screen.getByRole("link", { name: "Back to My tasks" }),
     ).toHaveAttribute("href", "/workflows");
   });
 });
@@ -201,6 +221,50 @@ describe("reminders", () => {
     expect(screen.getByText("Escalated")).toBeInTheDocument();
     expect(screen.getByText("Passed up to Management")).toBeInTheDocument();
     expect(await axeViolations(container)).toEqual([]);
+  });
+
+  it("opens the SPR a reminder is about", async () => {
+    const [first] = reminders.data;
+    if (!first) throw new Error("no reminder");
+    server.use(
+      getWorkflowsMyRemindersMockHandler({
+        ...reminders,
+        data: [
+          {
+            ...first,
+            kind: "TASK_DUE",
+            stage: "sent",
+            orderNo: "SO-0078",
+            message: "Approve or reject the SPR for SO-0078.",
+            toRole: "APPROVER",
+            escalatedTo: null,
+            ref: { recordNo: "SPR-20261109-0003", navisionNo: null },
+            spr: {
+              itemNo: "I-0292",
+              itemDescription: "Vertiv Rack Rail Kit",
+              quantity: "90",
+              monthsOfCover: "0.4",
+            },
+          },
+        ],
+      }),
+    );
+    renderWorkflowPage(<RemindersPage />, {
+      role: "APPROVER",
+      route: "/",
+      path: "/",
+    });
+    expect(
+      await screen.findByRole("link", { name: "SPR-20261109-0003" }),
+    ).toHaveAttribute("href", "/workflows/sprs/SPR-20261109-0003");
+    // What it would buy, as the task row says it.
+    expect(screen.getByText("90 × Vertiv Rack Rail Kit")).toBeInTheDocument();
+    expect(screen.getByText("Under a month of stock")).toBeInTheDocument();
+    expect(
+      screen.getByRole("region", { name: "Reminders for Management approver" }),
+    ).toBeInTheDocument();
+    // The message says it is a due task, so the kind is not repeated.
+    expect(screen.queryByText("Task due")).toBeNull();
   });
 
   it("has an empty state", async () => {
@@ -256,12 +320,27 @@ describe("what has been sent to you", () => {
       await screen.findByRole("region", { name: "Sent to you" }),
     ).toBeInTheDocument();
     expect(screen.getByText("Escalation")).toBeInTheDocument();
-    expect(screen.getByText(/on SO-0005 is overdue/)).toBeInTheDocument();
+    expect(screen.getByText(/for SO-0005 is overdue/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "SO-0005" })).toHaveAttribute(
       "href",
       "/workflows/orders/SO-0005",
     );
     expect(await axeViolations(container)).toEqual([]);
+  });
+
+  // The role's own list already shows what was sent, so this folds away below it.
+  it("folds what was sent below the role's own list", async () => {
+    server.use(getWorkflowsNoticesForMeMockHandler(notices([NOTICE])));
+    open();
+    const summary = await screen.findByText("Show the reminder sent to you");
+    expect(summary.closest("details")).not.toHaveAttribute("open");
+    const list = screen.getByRole("region", {
+      name: "Reminders for Management approver",
+    });
+    const sent = screen.getByRole("region", { name: "Sent to you" });
+    expect(
+      list.compareDocumentPosition(sent) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
   });
 
   it("shows nothing extra when nothing has been sent", async () => {

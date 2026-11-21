@@ -1,63 +1,38 @@
 import { ROLES } from "@orderpilot/shared";
+import { SlidersHorizontal } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { TableFilters } from "@/components/common";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {
+  Field,
+  NativeSelect,
+  ToggleChip,
+} from "@/components/common/data-table/Field";
+import { Button } from "@/components/ui/button";
+import { CommitInput } from "./CommitInput";
 import type { FilterId } from "./auditQuery";
 
 type SetFilter = (id: string, value: string | boolean | undefined) => void;
 
-const SELECT =
-  "h-9 w-full rounded-md border border-input bg-background px-2 text-sm";
+const FIELDS: readonly FilterId[] = [
+  "kind",
+  "role",
+  "actor",
+  "action",
+  "entity",
+  "id",
+  "from",
+  "to",
+];
 
-/** A text box that applies on Enter or when it loses focus, so typing does not refetch each key. */
-function CommitInput({
-  id,
-  label,
-  placeholder,
-  type = "text",
-  value,
-  onCommit,
-}: {
-  id: string;
-  label: string;
-  placeholder?: string;
-  type?: "text" | "date";
-  value: string;
-  onCommit: (value: string) => void;
-}) {
-  const [draft, setDraft] = useState(value);
-  const [seen, setSeen] = useState(value);
-  // The address bar can change the value (a link, Clear filters): follow it.
-  if (value !== seen) {
-    setSeen(value);
-    setDraft(value);
-  }
-  return (
-    <div className="space-y-1">
-      <Label htmlFor={id}>{label}</Label>
-      <Input
-        id={id}
-        type={type}
-        value={draft}
-        placeholder={placeholder}
-        autoComplete="off"
-        onChange={(event) => {
-          setDraft(event.target.value);
-        }}
-        onBlur={() => {
-          if (draft !== value) onCommit(draft);
-        }}
-        onKeyDown={(event) => {
-          if (event.key === "Enter") onCommit(draft);
-        }}
-      />
-    </div>
-  );
-}
-
-/** The audit log's own filters, shown in the table's toolbar. */
+/**
+ * The audit log's own filters, folded behind "More filters" so the trail is
+ * the first thing on the page, and opened by themselves when one is in use,
+ * for example from a link. The search box and its trace ID hint sit outside
+ * the fold, so pasting a trace ID needs no click. (The fold is from Azri's
+ * #270.) The button and the Refusals switch sit in the table's filter row,
+ * drawn as the list pages draw theirs; the fold opens under the row.
+ */
 export function AuditFilters({
   filters,
   setFilter,
@@ -71,6 +46,9 @@ export function AuditFilters({
     const value = filters[id];
     return typeof value === "string" ? value : "";
   };
+  const inUse = FIELDS.filter((id) => text(id) !== "").length;
+  const [open, setOpen] = useState(inUse > 0);
+  const shown = open || inUse > 0;
   const text_input = (
     id: FilterId,
     label: string,
@@ -87,56 +65,85 @@ export function AuditFilters({
     />
   );
   return (
-    <fieldset className="grid w-full grid-cols-1 gap-s2 sm:grid-cols-2 lg:grid-cols-4">
-      <legend className="sr-only">{t("filters.region")}</legend>
-      <div className="space-y-1">
-        <Label htmlFor="audit-filter-kind">{t("filters.kind")}</Label>
-        <select
-          id="audit-filter-kind"
-          className={SELECT}
-          value={text("kind")}
-          onChange={(event) => {
-            setFilter("kind", event.target.value || undefined);
+    <>
+      <div className="dt-toggles">
+        <ToggleChip
+          checked={filters.refusals === true}
+          onCheckedChange={(checked) => {
+            setFilter("refusals", checked);
           }}
         >
-          <option value="">{t("filters.kinds.any")}</option>
-          {(["user", "system", "ai"] as const).map((kind) => (
-            <option key={kind} value={kind}>
-              {t(`filters.kinds.${kind}`)}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="space-y-1">
-        <Label htmlFor="audit-filter-role">{t("filters.role")}</Label>
-        <select
-          id="audit-filter-role"
-          className={SELECT}
-          value={text("role")}
-          onChange={(event) => {
-            setFilter("role", event.target.value || undefined);
+          {t("filters.refusals")}
+        </ToggleChip>
+        <Button
+          variant="outline"
+          size="sm"
+          className="lp-more"
+          aria-expanded={shown}
+          aria-controls={shown ? "audit-more-filters" : undefined}
+          onClick={() => {
+            setOpen(!shown);
           }}
         >
-          <option value="">{t("filters.anyRole")}</option>
-          {ROLES.map((role) => (
-            <option key={role} value={role}>
-              {tc(`roles.${role}`)}
-            </option>
-          ))}
-        </select>
+          <SlidersHorizontal aria-hidden="true" />
+          {/* The words say the count, so the visible text is the whole name. */}
+          {inUse > 0
+            ? t("filters.moreInUse", { count: inUse })
+            : t("filters.more")}
+        </Button>
       </div>
-      {text_input("actor", t("filters.actor"), {
-        placeholder: t("filters.actorHint"),
-      })}
-      {text_input("action", t("filters.action"), {
-        placeholder: t("filters.actionHint"),
-      })}
-      {text_input("entity", t("filters.entity"), {
-        placeholder: t("filters.entityHint"),
-      })}
-      {text_input("id", t("filters.entityId"))}
-      {text_input("from", t("filters.from"), { type: "date" })}
-      {text_input("to", t("filters.to"), { type: "date" })}
-    </fieldset>
+      {shown ? (
+        <fieldset
+          id="audit-more-filters"
+          className="col-span-full grid w-full basis-full grid-cols-1 gap-s2 sm:grid-cols-2 lg:grid-cols-4"
+        >
+          <legend className="sr-only">{t("filters.region")}</legend>
+          <Field label={t("filters.kind")} htmlFor="audit-filter-kind">
+            <NativeSelect
+              id="audit-filter-kind"
+              value={text("kind")}
+              onChange={(event) => {
+                setFilter("kind", event.target.value || undefined);
+              }}
+            >
+              <option value="">{t("filters.kinds.any")}</option>
+              {(["user", "system", "ai"] as const).map((kind) => (
+                <option key={kind} value={kind}>
+                  {t(`filters.kinds.${kind}`)}
+                </option>
+              ))}
+            </NativeSelect>
+          </Field>
+          <Field label={t("filters.role")} htmlFor="audit-filter-role">
+            <NativeSelect
+              id="audit-filter-role"
+              value={text("role")}
+              onChange={(event) => {
+                setFilter("role", event.target.value || undefined);
+              }}
+            >
+              <option value="">{t("filters.anyRole")}</option>
+              {ROLES.map((role) => (
+                <option key={role} value={role}>
+                  {tc(`roles.${role}`)}
+                </option>
+              ))}
+            </NativeSelect>
+          </Field>
+          {text_input("actor", t("filters.actor"), {
+            placeholder: t("filters.actorHint"),
+          })}
+          {text_input("action", t("filters.action"), {
+            placeholder: t("filters.actionHint"),
+          })}
+          {text_input("entity", t("filters.entity"), {
+            placeholder: t("filters.entityHint"),
+          })}
+          {text_input("id", t("filters.entityId"))}
+          {text_input("from", t("filters.from"), { type: "date" })}
+          {text_input("to", t("filters.to"), { type: "date" })}
+        </fieldset>
+      ) : null}
+    </>
   );
 }

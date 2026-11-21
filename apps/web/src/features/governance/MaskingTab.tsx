@@ -7,6 +7,7 @@ import {
   EmptyState,
   LoadingState,
   MaskedValue,
+  ScrollRegion,
   SectionCard,
 } from "@/components/common";
 import {
@@ -65,33 +66,38 @@ export function MaskingTab() {
             {t("masking.openMatrix")}
           </Link>
         </p>
-        <Table aria-label={t("masking.rulesLabel")}>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t("masking.field")}</TableHead>
-              <TableHead>{t("masking.classification")}</TableHead>
-              <TableHead>{t("masking.visibleTo")}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {rules.map((rule) => (
-              <TableRow key={rule.field}>
-                <TableCell>
-                  {rule.label}
-                  <span className="block font-mono text-xs text-muted-foreground">
-                    {rule.field}
-                  </span>
-                </TableCell>
-                <TableCell>
-                  <ClassificationBadge level={rule.classification} />
-                </TableCell>
-                <TableCell>
-                  {rule.visibleTo.map((r) => tc(`roles.${r}`)).join(", ")}
-                </TableCell>
+        <ScrollRegion
+          label={t("masking.rulesLabel")}
+          className="rounded-none border-0 bg-transparent"
+        >
+          <Table className="dt-table" aria-label={t("masking.rulesLabel")}>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("masking.field")}</TableHead>
+                <TableHead>{t("masking.classification")}</TableHead>
+                <TableHead>{t("masking.visibleTo")}</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {rules.map((rule) => (
+                <TableRow key={rule.field}>
+                  <TableCell>
+                    {rule.label}
+                    <span className="block font-mono text-xs text-muted-foreground">
+                      {rule.field}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <ClassificationBadge level={rule.classification} />
+                  </TableCell>
+                  <TableCell>
+                    {rule.visibleTo.map((r) => tc(`roles.${r}`)).join(", ")}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </ScrollRegion>
       </SectionCard>
       <SectionCard
         title={t("masking.recordsLabel")}
@@ -107,43 +113,50 @@ export function MaskingTab() {
             onRetry={() => void sample.refetch()}
           />
         ) : (
-          <Table aria-label={t("masking.recordsLabel")}>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t("masking.customer")}</TableHead>
-                <TableHead>{t("masking.note")}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {records.map((record) => (
-                <TableRow key={record.customerNo}>
-                  <TableCell>
-                    {record.customerName}
-                    <span className="block font-mono text-xs text-muted-foreground">
-                      {record.customerNo}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <span className="inline-flex flex-wrap items-center gap-x-2">
-                      <MaskedValue
-                        masked={record.note.masked}
-                        value={record.note.value ?? undefined}
-                        reason={record.note.reason ?? "role"}
-                        visibleTo={rules[0]?.visibleTo
-                          .map((r) => tc(`roles.${r}`))
-                          .join(", ")}
-                      />
-                      {record.note.masked ? (
-                        <span className="text-xs text-muted-foreground">
-                          {tm(`masked.reasons.${record.note.reason ?? "role"}`)}
-                        </span>
-                      ) : null}
-                    </span>
-                  </TableCell>
+          <ScrollRegion
+            label={t("masking.recordsTableLabel")}
+            className="rounded-none border-0 bg-transparent"
+          >
+            <Table className="dt-table" aria-label={t("masking.recordsLabel")}>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t("masking.customer")}</TableHead>
+                  <TableHead>{t("masking.note")}</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {records.map((record) => (
+                  <TableRow key={record.customerNo}>
+                    <TableCell>
+                      {record.customerName}
+                      <span className="block font-mono text-xs text-muted-foreground">
+                        {record.customerNo}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="inline-flex flex-wrap items-center gap-x-2">
+                        <MaskedValue
+                          masked={record.note.masked}
+                          value={record.note.value ?? undefined}
+                          reason={record.note.reason ?? "role"}
+                          visibleTo={rules[0]?.visibleTo
+                            .map((r) => tc(`roles.${r}`))
+                            .join(", ")}
+                        />
+                        {record.note.masked ? (
+                          <span className="text-xs text-muted-foreground">
+                            {tm(
+                              `masked.reasons.${record.note.reason ?? "role"}`,
+                            )}
+                          </span>
+                        ) : null}
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </ScrollRegion>
         )}
       </SectionCard>
     </div>

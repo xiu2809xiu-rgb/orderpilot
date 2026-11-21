@@ -21,7 +21,7 @@ const SPAN: Record<LineColumn["kind"], string> = {
   quantity: "col-span-1",
   unitPrice: "col-span-1",
   amount: "col-span-2 @lines:col-span-1",
-  availability: "col-span-2 @lines:col-span-1",
+  availability: "col-span-2 @lines:col-span-1 @lines:pl-2",
   remove: "col-span-2 @lines:col-span-1",
 };
 
@@ -70,7 +70,10 @@ export const LineRow = memo(function LineRow({ index }: { index: number }) {
       className={cn(
         "grid grid-cols-2 gap-x-s2 gap-y-s1 rounded-md border bg-card p-s2 outline-none",
         "focus-visible:ring-[3px] focus-visible:ring-ring/50",
-        "@lines:grid-cols-(--line-tracks-compact) @3xl:grid-cols-(--line-tracks) @lines:items-start @lines:gap-x-s1 @lines:rounded-none @lines:border-0 @lines:border-b @lines:bg-transparent @lines:px-0 @lines:py-1",
+        // The line a person is typing in is plain to see, and nothing in it
+        // moves: no transition on a control that is being used.
+        "@lines:focus-within:bg-(--dx-hover-bg) @lines:hover:bg-(--dx-hover-bg) @lines:[&_input]:transition-none",
+        "@lines:grid-cols-(--line-tracks-compact) @3xl:grid-cols-(--line-tracks) @lines:items-start @lines:gap-x-s1 @lines:rounded-none @lines:border-0 @lines:border-b @lines:border-border @lines:bg-transparent @lines:px-1 @lines:py-0.5",
       )}
     >
       {grid.columns.map((column) => (

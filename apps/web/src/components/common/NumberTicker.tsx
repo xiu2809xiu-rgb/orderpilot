@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useOnScreen, useStill } from "@/components/kit/env";
 
 const DURATION_MS = 700;
 
@@ -6,26 +7,35 @@ function decimalsOf(value: number): number {
   return value.toString().split(".")[1]?.length ?? 0;
 }
 
-function prefersReducedMotion(): boolean {
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+/** Thousands are grouped, as the figure reads everywhere else ("2,046"). */
+function grouped(value: number, decimals: number): string {
+  return new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  }).format(value);
 }
 
 /**
- * A number that counts up once when it first appears, the idea of Magic UI's
- * free ticker without its animation library, which would add to the chunk. A
- * person who asks for reduced motion sees the value at once, and a screen
- * reader only ever gets the final value.
+ * A number that counts up once, the first time it is on screen: the idea of
+ * the kit's ticker (components/kit/NumberTicker) without its animation
+ * library, which would add to the entry chunk that this piece belongs to.
+ * Both share the rule for stillness: a person who asks for reduced motion, and
+ * a test, see the final value at once. The figure is tabular so the digits do
+ * not shift while it counts, and a screen reader only ever gets the final
+ * value.
  */
 export function NumberTicker({ value }: { value: number }) {
-  const [shown, setShown] = useState(() =>
-    prefersReducedMotion() ? value : 0,
-  );
+  const ref = useRef<HTMLSpanElement>(null);
+  const still = useStill();
+  const seen = useOnScreen(ref, { once: true });
+  const [shown, setShown] = useState(still ? value : 0);
 
   useEffect(() => {
-    if (prefersReducedMotion()) {
+    if (still) {
       setShown(value);
       return;
     }
+    if (!seen) return;
     let frame = 0;
     const started = performance.now();
     const tick = (now: number) => {
@@ -38,12 +48,14 @@ export function NumberTicker({ value }: { value: number }) {
     return () => {
       cancelAnimationFrame(frame);
     };
-  }, [value]);
+  }, [still, seen, value]);
 
   return (
     <>
-      <span aria-hidden="true">{shown.toFixed(decimalsOf(value))}</span>
-      <span className="sr-only">{value}</span>
+      <span ref={ref} aria-hidden="true" className="numeral">
+        {grouped(shown, decimalsOf(value))}
+      </span>
+      <span className="sr-only">{grouped(value, decimalsOf(value))}</span>
     </>
   );
 }

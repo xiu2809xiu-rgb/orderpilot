@@ -10,6 +10,7 @@ import type { WorkflowsMyTasks200DataItemExpectedPayment } from './workflowsMyTa
 import type { WorkflowsMyTasks200DataItemKind } from './workflowsMyTasks200DataItemKind.ts';
 import type { WorkflowsMyTasks200DataItemPriority } from './workflowsMyTasks200DataItemPriority.ts';
 import type { WorkflowsMyTasks200DataItemRef } from './workflowsMyTasks200DataItemRef.ts';
+import type { WorkflowsMyTasks200DataItemSpr } from './workflowsMyTasks200DataItemSpr.ts';
 import type { WorkflowsMyTasks200DataItemStatus } from './workflowsMyTasks200DataItemStatus.ts';
 
 export type WorkflowsMyTasks200DataItem = {
@@ -46,5 +47,6 @@ export type WorkflowsMyTasks200DataItem = {
   priority?: WorkflowsMyTasks200DataItemPriority;
   /** @minLength 1 */
   assigneeName?: string;
+  spr?: WorkflowsMyTasks200DataItemSpr;
   expectedPayment?: WorkflowsMyTasks200DataItemExpectedPayment;
 };

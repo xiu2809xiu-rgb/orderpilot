@@ -13,13 +13,15 @@
   "aiUsage": {
     "tiles": {
       "calls": "Calls",
-      "tokens": "Tokens in and out",
+      "tokens": "Tokens in",
+      "tokensOut": "{{out}} tokens out",
       "cost": "Cost (USD)",
       "failed": "Failed or refused"
     },
     "byFeature": {
       "title": "Cost per feature",
       "description": "Where the AI spend goes, largest first.",
+      "label": "Calls and cost for each feature",
       "feature": "Feature",
       "calls": "Calls",
       "cost": "Cost (USD)"
@@ -35,7 +37,7 @@
       "cost": "Cost (USD)",
       "latency": "Latency",
       "status": "Status",
-      "trace": "Trace id",
+      "trace": "Trace ID",
       "page": "Page {{page}} of {{pages}}",
       "previous": "Previous page",
       "next": "Next page"
@@ -70,9 +72,9 @@
     },
     "traces": {
       "title": "Recent traces",
-      "description": "The latest requests, by route pattern. Search the trace id in Grafana.",
+      "description": "The latest requests, by route pattern. Search the trace ID in Grafana.",
       "label": "Recent traces",
-      "traceId": "Trace id",
+      "traceId": "Trace ID",
       "route": "Route",
       "duration": "Duration",
       "status": "HTTP status"
@@ -89,14 +91,14 @@
     "routes": {
       "title": "Most viewed screens",
       "description": "Page views by route pattern. No record id ever reaches this table.",
-      "label": "Most viewed screens",
+      "label": "Page views for each screen",
       "route": "Route",
       "views": "Views"
     },
     "roles": {
       "title": "Events by role",
       "description": "The role comes from the session. There is no user id.",
-      "label": "Events by role",
+      "label": "Events for each role",
       "role": "Role",
       "events": "Events"
     },
@@ -127,7 +129,8 @@
     "overridden": "Your browser sends Do Not Track or Global Privacy Control, so nothing is counted, whatever is chosen here.",
     "overriddenYes": "Your saved choice is Allow, but your browser sends Do Not Track or Global Privacy Control, so nothing is counted.",
     "allow": "Allow",
-    "decline": "Do not allow"
+    "decline": "Do not allow",
+    "choiceLabel": "Usage analytics in this browser"
   },
   "denied": "Your role cannot see monitoring data."
 }

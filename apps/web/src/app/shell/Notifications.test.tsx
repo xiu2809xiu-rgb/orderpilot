@@ -48,7 +48,7 @@ describe("the bell", () => {
     fireEvent.click(bell);
     expect(
       await screen.findByRole("link", { name: /Payment due for SO-0011/ }),
-    ).toHaveAttribute("href", "/workflows/orders/SO-0011");
+    ).toHaveAttribute("href", "/orders/SO-0011");
     expect(screen.getAllByRole("link", { name: /Payment due/ })).toHaveLength(
       5,
     );

@@ -1,0 +1,150 @@
+{
+  "title": "Upload and review",
+  "intro": "Add a document, let Spark read it, then confirm what it was not sure of. A person confirms every field Spark was not sure of before the review is finished.",
+  "denied": {
+    "title": "Uploading documents is for Support",
+    "description": "Your role cannot upload documents. Sign in as Support to try it, or open an order to see its documents.",
+    "demoDescription": "Your role cannot upload documents. Switch to Support to try it, or open an order to see its documents.",
+    "switch": "Switch to Support",
+    "failed": "Could not switch. Try the Demo role menu in the top bar."
+  },
+  "preview": "Demo: a file you add stays in your browser and is not stored. Spark reads synthetic sample documents only, and no AI model is connected.",
+  "drop": {
+    "title": "Drop documents here",
+    "or": "or",
+    "choose": "Choose files",
+    "inputLabel": "Documents to upload",
+    "limits": "PDF, PNG, JPEG, XLSX or CSV. Up to {{size}} MB each, up to {{count}} files.",
+    "dragging": "Release to add the files",
+    "demo": "Use the demo purchase order"
+  },
+  "files": {
+    "label": "Files to read",
+    "remove": "Remove {{name}}",
+    "reading": "Reading {{name}} in your browser",
+    "ready": "Ready",
+    "readyNote": "Checked in your browser",
+    "progress": "Progress for {{name}}",
+    "size": "{{size}} KB",
+    "sizeMb": "{{size}} MB",
+    "bytes": "{{size}} B",
+    "sample": "Sample: {{document}}",
+    "noSample": "Not read in this preview",
+    "notRead": "Not read: only the first sample is read"
+  },
+  "refused": {
+    "label": "Files that were not added",
+    "dismiss": "Dismiss the message about {{name}}",
+    "type": "{{name}} is not a PDF, PNG, JPEG, XLSX or CSV file.",
+    "size": "{{name}} is larger than {{size}} MB.",
+    "empty": "{{name}} is empty.",
+    "disguised": "{{name}} says it is {{claimed}} file but its content is not. It was not added.",
+    "tooMany": "Only {{count}} files at a time. {{name}} was not added.",
+    "unreadable": "{{name}} could not be read in your browser.",
+    "duplicate": "{{name}} is already in the list. It was not added twice.",
+    "claimed": {
+      "pdf": "a PDF",
+      "png": "a PNG",
+      "jpg": "a JPEG",
+      "jpeg": "a JPEG",
+      "xlsx": "an XLSX",
+      "csv": "a CSV"
+    }
+  },
+  "start": "Read with Spark",
+  "startNeeds": "Add a file or use the demo purchase order first.",
+  "reading": {
+    "title": "Spark is reading the document",
+    "label": "Reading the document",
+    "done": "Read the document",
+    "steps": {
+      "page": "Looked at the pages",
+      "classify": "Decided it is a customer PO",
+      "fields": "Read {{count}} fields and how sure it is of each"
+    },
+    "toggle": "Show or hide the steps",
+    "seconds": "{{value}} s",
+    "mock": "Mock AI"
+  },
+  "review": {
+    "title": "Review what Spark read",
+    "documentType": "Customer PO",
+    "summary": "{{count}} fields read: {{sure}} above {{threshold}} percent, {{unsure}} for you to approve.",
+    "mock": "Confidence is what Mock AI reports for this synthetic document.",
+    "ring": "Fields to approve that you have confirmed",
+    "again": "Start again",
+    "next": "Next to approve",
+    "pageLabel": "Page {{page}}",
+    "pages": "Pages of the document",
+    "pageImage": "Page {{page}} of purchase order {{number}}, with a box on each field Spark read",
+    "boxes": "Fields on this page",
+    "boxLabel": "{{label}}: {{value}}",
+    "fields": "Fields read",
+    "confidence": "{{percent}} percent sure",
+    "high": "Confident",
+    "medium": "Check",
+    "low": "Unsure",
+    "requires": "Requires approval",
+    "approved": "Confirmed",
+    "edited": "Edited and confirmed",
+    "confirm": "Confirm",
+    "confirmField": "Confirm {{label}}",
+    "edit": "Edit",
+    "editField": "Edit {{label}}",
+    "save": "Save",
+    "cancel": "Cancel",
+    "editLabel": "{{label}}",
+    "select": "Show {{label}} on the page",
+    "finish": "Finish review",
+    "finishedBody": "Nothing was saved and no order was made. This sample belongs to order {{order}} in the sample data.",
+    "openOrder": "Open order {{order}}",
+    "loading": "Loading the demo document",
+    "failed": "The demo document could not be loaded.",
+    "retry": "Try again",
+    "classifiedAs": "Classified as {{type}}",
+    "failedHelp": "Check your connection, then try again.",
+    "done": {
+      "confirmed_one": "{{count}} field confirmed by you",
+      "confirmed_other": "{{count}} fields confirmed by you",
+      "corrected_one": "{{count}} field corrected by you",
+      "corrected_other": "{{count}} fields corrected by you",
+      "reader_one": "{{count}} field read above {{threshold}} percent",
+      "reader_other": "{{count}} fields read above {{threshold}} percent",
+      "none": "no field needed your approval"
+    },
+    "toApprove": "For you to approve",
+    "sure_one": "{{count}} field read above {{threshold}} percent",
+    "sure_other": "{{count}} fields read above {{threshold}} percent",
+    "line": "Line {{number}}",
+    "left_one": "{{count}} field left to approve before you can finish",
+    "left_other": "{{count}} fields left to approve before you can finish",
+    "leftNone": "Nothing left to approve. You can finish the review.",
+    "progress": "Progress of the review",
+    "editHelp": {
+      "text": "Change the value as it should read, then save. Saving confirms it.",
+      "quantity": "A whole or decimal number above zero, such as 1,200 or 2.5. Saving confirms it.",
+      "price": "An amount of money as a number, such as 61.20. Saving confirms it.",
+      "date": "A real date, such as 11 Nov 2026. Saving confirms it."
+    },
+    "editError": {
+      "blank": "This field cannot be blank. It keeps its old value.",
+      "quantity": "Enter a whole or decimal number above zero. It keeps its old value.",
+      "price": "Enter an amount of money as a number, such as 61.20. It keeps its old value.",
+      "date": "Enter a real date, such as 11 Nov 2026. It keeps its old value."
+    },
+    "leave": {
+      "title": "Leave this review?",
+      "body": "Your review is not saved. If you leave, what you confirmed or corrected here is lost.",
+      "stay": "Keep reviewing",
+      "leave": "Leave the review"
+    },
+    "finishedShort": "Review finished"
+  },
+  "add": {
+    "title": "Add documents",
+    "intro": "Each file is checked in your browser: its type, its size and what is really inside it."
+  },
+  "saves": "Nothing is saved and no order is made in this preview.",
+  "startChecking": "Checking your files first.",
+  "startNoSample": "No file added has a sample in this preview. Use the demo purchase order, or add a sample file such as po-4471-26.pdf."
+}

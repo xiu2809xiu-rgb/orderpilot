@@ -1,4 +1,4 @@
-import { ROLES, type Role } from "@orderpilot/shared";
+import { ROLES, TASK_KINDS, type Role } from "@orderpilot/shared";
 import { syntheticDataset } from "@orderpilot/synthetic-data";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { AuditService } from "../../src/audit/audit.service.js";
@@ -688,7 +688,8 @@ describe("reminders and escalations (C-4), with the seeded settings: due in 24 h
       expect(res.status).toBe(200);
       const { data } = res.body as { data: { taskKind: string }[] };
       expect(data.map((s) => s.taskKind)).toContain("APPROVE_SPR");
-      expect(data).toHaveLength(8);
+      expect(data).toHaveLength(TASK_KINDS.length);
+      expect(data.map((s) => s.taskKind)).toContain("PLACE_VENDOR_PO");
     });
 
     it("takes the times and the person to escalate to from the settings, not from code", async () => {

@@ -1,4 +1,5 @@
 import {
+  LOW_STOCK_THRESHOLD,
   addDecimal,
   compareDecimal,
   type ItemAvailability,
@@ -8,17 +9,15 @@ import type {
   MasterDataSalesOrder,
 } from "./master-data-reader.js";
 
-/** Under this much available stock an item counts as low. A sample for the demo. */
-export const LOW_STOCK_THRESHOLD = "25";
-
 const negate = (value: string): string =>
   value.startsWith("-") ? value.slice(1) : `-${value}`;
 
 /**
- * Still something to ship. This is what "open" means on the master data pages,
- * where the web app words it "to ship" for a customer. The tracker's open orders
- * are wider: they also count orders already shipped that wait for an invoice or
- * the AWB, so the two numbers differ on purpose.
+ * Still something to ship. This is what "open" means on the master data pages:
+ * a customer's page counts these as "Open orders" and the customers list heads
+ * the same count "To ship". The tracker's open orders are wider: they also count
+ * orders already shipped that wait for an invoice or the AWB, so the two
+ * numbers differ on purpose.
  */
 export function isOpenOrder(order: MasterDataSalesOrder): boolean {
   return order.lines.some((line) => compareDecimal(line.qtyToShip, "0") > 0);
@@ -71,7 +70,7 @@ export class StockPosition {
 
   get availability(): ItemAvailability {
     if (this.orders.some((order) => this.isShortOn(order))) return "short";
-    return compareDecimal(this.availableStock, LOW_STOCK_THRESHOLD) < 0
+    return compareDecimal(this.availableStock, String(LOW_STOCK_THRESHOLD)) < 0
       ? "low"
       : "ok";
   }

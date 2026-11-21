@@ -15,7 +15,9 @@ const added: (() => void)[] = [];
 
 beforeAll(async () => {
   await i18n.loadNamespaces(
-    allFeatures.map((feature) => feature.namespace).concat("common"),
+    allFeatures
+      .map((feature) => feature.namespace)
+      .concat("common", "record-tabs"),
   );
 });
 
@@ -36,14 +38,14 @@ function open(role: Parameters<typeof sessionFor>[0] = "SYSTEM_ADMIN") {
 }
 
 describe("command palette", () => {
-  it("lists actions above navigation, and does not crash without cmdk's wrapper", async () => {
+  it("lists the pages above the actions, and does not crash without cmdk's wrapper", async () => {
     open();
     await screen.findByRole("combobox");
     const groups = screen.getAllByRole("group");
+    expect(within(must(groups[0])).getByText("Home")).toBeInTheDocument();
     expect(
-      within(must(groups[0])).getByText("Use the dark theme"),
+      within(must(groups[1])).getByText("Use the dark theme"),
     ).toBeInTheDocument();
-    expect(within(must(groups[1])).getByText("Home")).toBeInTheDocument();
   });
 
   it("runs an action a feature registered", async () => {
@@ -83,7 +85,7 @@ describe("command palette", () => {
     ).toBeInTheDocument();
   });
 
-  it("goes to the menu's places and to no planned screen", async () => {
+  it("goes to the side panel's places, in its order, and to no planned screen", async () => {
     open("WAREHOUSE");
     await screen.findByRole("combobox");
     const goTo = within(
@@ -92,12 +94,12 @@ describe("command palette", () => {
     expect(goTo.map((o) => o.textContent)).toEqual([
       "Home",
       "My tasks",
+      // One Orders place: the tracker's list is part of it.
       "Orders",
+      "Exceptions",
       "Customers",
       "Vendors",
       "Items",
-      "Order tracker",
-      "Exceptions",
       "Settings",
     ]);
   });
@@ -116,6 +118,14 @@ describe("command palette", () => {
       "Monitoring",
       "Settings",
     ]);
+  });
+
+  it("says in its box what it searches", async () => {
+    open("SUPPORT");
+    expect(await screen.findByRole("combobox")).toHaveAttribute(
+      "placeholder",
+      "Search orders, customers, vendors, items or pages",
+    );
   });
 
   it("explains the keys in its help", async () => {

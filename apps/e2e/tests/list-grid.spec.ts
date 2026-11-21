@@ -10,6 +10,8 @@ import {
 // record's operation log opens at the foot, and a role that may not read the
 // record is refused by the server (a screen that hides the panel proves
 // nothing). The gallery list is the one screen that declares every feature.
+// P-107: the Orders workspace has the same grid in its own table (it is no
+// longer a ListPage), so the same things are proved there too.
 
 test.describe("The list grid on the gallery list", () => {
   test("a ticked row is counted and opens its operation log", async ({
@@ -85,6 +87,93 @@ test.describe("The list grid on the gallery list", () => {
     page,
   }) => {
     await signInAs(page, "WAREHOUSE");
+    await expectRefused(
+      "WAREHOUSE",
+      "GET",
+      "/operation-log/User/00000000-0000-4000-8000-000000000001",
+    );
+  });
+});
+
+test.describe("The same grid on the Orders workspace", () => {
+  test("a ticked order is counted and opens its operation log", async ({
+    page,
+  }) => {
+    await signInAs(page, "SUPPORT");
+    await page.goto("/orders?source=sample");
+    const rows = page.getByRole("checkbox", { name: /^Select (?!all)/ });
+    await expect(rows.first()).toBeVisible();
+
+    await rows.first().check();
+    await expect(page.getByText("1 selected")).toBeVisible();
+    await expect(page.getByText(/^Operation log: SO-/)).toBeVisible();
+
+    await page.getByRole("button", { name: "Clear selection" }).click();
+    await expect(page.getByText("1 selected")).toHaveCount(0);
+  });
+
+  test("the row menu opens from the keyboard", async ({ page }) => {
+    await signInAs(page, "SUPPORT");
+    await page.goto("/orders?source=sample");
+    const menu = page.getByRole("button", { name: /^Actions for / }).first();
+    await expect(menu).toBeVisible();
+    await menu.focus();
+    await page.keyboard.press("Enter");
+    await expect(
+      page.getByRole("menuitem", { name: "Open order" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("menuitem", { name: "Quick look" }),
+    ).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("menuitem")).toHaveCount(0);
+  });
+
+  test("Quick look from the row menu opens the side peek", async ({ page }) => {
+    await signInAs(page, "SUPPORT");
+    await page.goto("/orders?source=sample");
+    await page
+      .getByRole("button", { name: /^Actions for / })
+      .first()
+      .click();
+    await page.getByRole("menuitem", { name: "Quick look" }).click();
+    await expect(
+      page.getByRole("dialog").getByRole("link", { name: /Open order/ }),
+    ).toBeVisible();
+  });
+
+  test("Export and Print are on the toolbar, and Print streams the orders into a print frame", async ({
+    page,
+  }) => {
+    await signInAs(page, "SUPPORT");
+    await page.goto("/orders?source=sample");
+    await expect(page.getByRole("button", { name: "Export" })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Print", exact: true }),
+    ).toBeVisible();
+    await page.evaluate(() => {
+      const remove = (el: HTMLIFrameElement) => {
+        el.parentNode?.removeChild(el);
+      };
+      HTMLIFrameElement.prototype.remove = function () {
+        const rows = this.contentDocument?.querySelectorAll("tbody tr").length;
+        (window as unknown as { printedRows: number }).printedRows = rows ?? 0;
+        remove(this);
+      };
+    });
+    const attached = page.waitForEvent("frameattached");
+    await page.getByRole("button", { name: "Print", exact: true }).click();
+    expect((await attached).parentFrame()).toBe(page.mainFrame());
+    await expect
+      .poll(() =>
+        page.evaluate(
+          () => (window as unknown as { printedRows?: number }).printedRows,
+        ),
+      )
+      .toBeGreaterThan(0);
+  });
+
+  test("a role that may not read an order's log is refused it by the server", async () => {
     await expectRefused(
       "WAREHOUSE",
       "GET",

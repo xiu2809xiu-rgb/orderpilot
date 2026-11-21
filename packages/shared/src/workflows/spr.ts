@@ -38,10 +38,20 @@ export const sprBasisSchema = z.object({
   qtyOnPurchOrder: decimalStringSchema,
   availableStock: decimalStringSchema,
   shortfall: decimalStringSchema,
+  /** Units sold a month, averaged over the last three months (Spectra, 5 Nov). */
+  runRate3m: decimalStringSchema,
+  /** Inventory over the run rate, in months; null when nothing sold. */
+  monthsOfCover: decimalStringSchema.nullable(),
 });
 export type SprBasis = z.infer<typeof sprBasisSchema>;
 
 export const SPR_DECISIONS = ["approved", "rejected"] as const;
+
+/**
+ * Where an SPR is: suggested from stock and not raised yet, raised and with the
+ * approvers, or decided. Only the product manager raises a suggestion.
+ */
+export const SPR_STAGES = ["suggested", "with-approvers", "decided"] as const;
 
 export const sprDetailSchema = z.object({
   ref: recordRefSchema,
@@ -77,6 +87,14 @@ export const sprDetailSchema = z.object({
       /** True when the person reading is who it waits for. */
       youDecide: z.boolean(),
     })
+    .nullable()
+    .optional(),
+  stage: z.enum(SPR_STAGES).optional(),
+  /** The product manager's Raise task, while the SPR is a suggestion they hold. */
+  raiseTaskId: z.uuid().nullable().optional(),
+  /** When the decision is due, while it waits for one. */
+  due: z
+    .object({ dueAt: z.iso.datetime(), overdue: z.boolean() })
     .nullable()
     .optional(),
   /** False for a sample the workflow does not run, which nobody can decide. */

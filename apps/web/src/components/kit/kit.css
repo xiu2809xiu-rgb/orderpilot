@@ -1,0 +1,207 @@
+/* The keyframes the kit items share. Every moving rule is under
+   prefers-reduced-motion: no-preference, so a still page is the default. */
+@media (prefers-reduced-motion: no-preference) {
+  /* Magic UI / shine-border */
+  .kit-shine {
+    background-size: 300% 300%;
+    animation: kit-shine var(--kit-shine-duration, 14s) linear infinite;
+  }
+
+  @keyframes kit-shine {
+    0% {
+      background-position: 0% 0%;
+    }
+
+    50% {
+      background-position: 100% 100%;
+    }
+
+    100% {
+      background-position: 0% 0%;
+    }
+  }
+  /* Magic UI / animated-shiny-text */
+  .kit-shiny-text {
+    animation: kit-shiny 2.4s ease-in-out infinite;
+  }
+
+  @keyframes kit-shiny {
+    0%,
+    100% {
+      background-position: 100% 0;
+    }
+
+    50% {
+      background-position: -100% 0;
+    }
+  }
+  /* React Bits / GradientText */
+  .kit-gradient-text {
+    background-image: var(--kit-gradient);
+    background-size: 200% 100%;
+    animation: kit-gradient var(--kit-gradient-duration, 8s) ease-in-out
+      infinite alternate;
+  }
+
+  @keyframes kit-gradient {
+    to {
+      background-position: 100% 0;
+    }
+  }
+  /* React Bits / StatusMark, LatticeLoader and ThoughtLine */
+  .kit-spin {
+    animation: kit-spin 1.1s linear infinite;
+    transform-origin: center;
+  }
+
+  @keyframes kit-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  .kit-breathe {
+    animation: kit-breathe 1.6s ease-in-out infinite;
+  }
+
+  @keyframes kit-breathe {
+    50% {
+      opacity: 0.45;
+    }
+  }
+  .kit-lattice-cell {
+    animation: kit-lattice var(--kit-lattice-cycle, 1.2s) ease-in-out infinite;
+    animation-delay: var(--kit-lattice-delay, 0ms);
+  }
+
+  @keyframes kit-lattice {
+    0%,
+    100% {
+      opacity: var(--kit-lattice-idle, 0.15);
+    }
+
+    20%,
+    45% {
+      opacity: 1;
+    }
+
+    65% {
+      opacity: var(--kit-lattice-idle, 0.15);
+    }
+  }
+}
+/* A still page shows the whole border lit, not one frame of the sweep. */
+@media (prefers-reduced-motion: reduce) {
+  .kit-shine {
+    background-image: linear-gradient(
+      var(--kit-shine-colour),
+      var(--kit-shine-colour)
+    ) !important;
+    opacity: 0.6;
+  }
+}
+.kit-shine {
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  padding: var(--kit-shine-width, 1px);
+}
+
+.kit-gradient-text {
+  background-image: var(--kit-gradient);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.kit-flap-tile {
+  position: relative;
+  display: inline-block;
+  width: 0.72em;
+  height: 1.12em;
+  overflow: hidden;
+  background: var(--muted);
+  border-radius: var(--radius-control);
+}
+
+.kit-flap-tile::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 50%;
+  height: 1px;
+  background: var(--border-strong);
+}
+
+.kit-flap-tile[data-narrow] {
+  width: 0.34em;
+  background: none;
+}
+
+.kit-flap-tile[data-narrow]::after {
+  display: none;
+}
+
+.kit-flap-half {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 50%;
+  overflow: hidden;
+}
+
+.kit-flap-top {
+  top: 0;
+}
+
+.kit-flap-bottom {
+  bottom: 0;
+}
+
+.kit-flap-char {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 200%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kit-flap-top .kit-flap-char {
+  top: 0;
+}
+
+.kit-flap-bottom .kit-flap-char {
+  bottom: 0;
+}
+
+.kit-shiny-text {
+  background-image: linear-gradient(
+    100deg,
+    var(--muted-foreground) 0%,
+    var(--muted-foreground) 35%,
+    var(--foreground) 50%,
+    var(--muted-foreground) 65%,
+    var(--muted-foreground) 100%
+  );
+  background-size: 250% 100%;
+  background-position: 100% 0;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+/* React Bits / PromptBar: the border lights up while Spark works. The ring
+   is a still state, so it shows under reduced motion too; the light that runs
+   round it is the border beam, which is not drawn when still. */
+.kit-prompt-bar[data-busy="true"] {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 24%, transparent);
+}
+
+.kit-prompt-bar[data-busy="true"] {
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--ring) 24%, transparent),
+    var(--glow);
+}

@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import { ColumnSettings } from "./ColumnSettings";
 import { ExportMenu, type ExportOptions } from "./ExportMenu";
+import { ToggleChip } from "./Field";
+import { FilterPanel } from "./FilterPanel";
 import { SavedViews } from "./SavedViews";
 import { SearchBox } from "./SearchBox";
 import type {
@@ -32,7 +34,10 @@ interface DataTableToolbarProps<Row> {
   searchDebounceMs: number;
 }
 
-/** Quick search, filters, saved views, column settings and export. */
+/**
+ * Quick search and filters, each with its label in view, and at the far end
+ * the saved views, the column settings and export.
+ */
 export function DataTableToolbar<Row>({
   columns,
   shown,
@@ -48,30 +53,37 @@ export function DataTableToolbar<Row>({
   searchDebounceMs,
 }: DataTableToolbarProps<Row>) {
   return (
-    <div className="flex flex-wrap items-center gap-s1">
-      <SearchBox
-        value={query.search}
-        onSearch={(search) => {
-          change({ search });
-        }}
-        debounceMs={searchDebounceMs}
-      />
-      {toggleFilters.map((filter) => (
-        <label key={filter.id} className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            role="switch"
-            className="size-4 accent-primary"
-            checked={query.filters[filter.id] === true}
-            onChange={(event) => {
-              setFilter(filter.id, event.target.checked);
-            }}
-          />
-          {filter.label}
-        </label>
-      ))}
-      {filterSlot?.({ filters: query.filters, setFilter })}
-      <div className="ml-auto flex flex-wrap items-center gap-2">
+    <div className="dt-toolbar">
+      <div className="dt-filters">
+        <SearchBox
+          value={query.search}
+          onSearch={(search) => {
+            change({ search });
+          }}
+          debounceMs={searchDebounceMs}
+        />
+        {filterSlot || toggleFilters.length > 0 ? (
+          <FilterPanel active={Object.keys(query.filters).length}>
+            {filterSlot?.({ filters: query.filters, setFilter })}
+            {toggleFilters.length > 0 ? (
+              <div className="dt-toggles">
+                {toggleFilters.map((filter) => (
+                  <ToggleChip
+                    key={filter.id}
+                    checked={query.filters[filter.id] === true}
+                    onCheckedChange={(checked) => {
+                      setFilter(filter.id, checked);
+                    }}
+                  >
+                    {filter.label}
+                  </ToggleChip>
+                ))}
+              </div>
+            ) : null}
+          </FilterPanel>
+        ) : null}
+      </div>
+      <div className="dt-tools">
         <SavedViews
           saved={prefs.saved}
           onApply={(view) => {

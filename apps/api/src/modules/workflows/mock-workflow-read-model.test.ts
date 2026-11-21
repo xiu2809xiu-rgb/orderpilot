@@ -85,7 +85,7 @@ describe("the mock read model", () => {
     }
   });
 
-  it("numbers the SPRs the OrderPilot way, with Navision's number beside", async () => {
+  it("numbers the SPRs the OrderPilot way, with Business Central's number beside", async () => {
     const approved = dataset.sprs.find((s) => s.status === "approved");
     const suggested = dataset.sprs.find((s) => s.status === "suggested");
     const spr = await model.sprByRecordNo(approved?.recordNo ?? "");
@@ -111,7 +111,13 @@ describe("the mock read model", () => {
       // the item moves on (its order joins the figures), so only a request
       // still waiting matches the item as it is now.
       const figures = row.status === "approved" ? row.basis : item;
-      expect(spr.basis).toEqual(
+      // The order half follows the formula; the run rate and cover come from the item.
+      const { runRate3m, monthsOfCover, ...shortfall } = spr.basis;
+      expect({ runRate3m, monthsOfCover }).toEqual({
+        runRate3m: item.runRate3m,
+        monthsOfCover: item.monthsOfCover,
+      });
+      expect(shortfall).toEqual(
         SprSuggestion.fromShortfall({
           ordered: row.basis.ordered,
           inventory: figures.inventory,
@@ -130,6 +136,46 @@ describe("the mock read model", () => {
         expect(reminder.toRole).toBe(role);
       }
     }
+  });
+
+  it("says on each SPR task what its SPR would buy", async () => {
+    const tasks = (await model.tasksFor("APPROVER")).filter(
+      (task) => task.kind === "APPROVE_SPR" && task.ref,
+    );
+    expect(tasks.length).toBeGreaterThan(0);
+    for (const task of tasks) {
+      const spr = await model.sprByRecordNo(task.ref?.recordNo ?? "");
+      expect(task.spr, task.id).toEqual({
+        itemNo: spr?.item.no,
+        itemDescription: spr?.item.description,
+        quantity: spr?.quantity,
+        monthsOfCover: spr?.basis.monthsOfCover,
+      });
+    }
+  });
+
+  it("gives a reminder about an SPR the SPR's number, so it opens the SPR", async () => {
+    const tasks = await model.tasksFor("APPROVER");
+    const reminders = await model.remindersFor("APPROVER");
+    const withRef = reminders.filter((reminder) => reminder.ref);
+    expect(withRef.length).toBeGreaterThan(0);
+    for (const reminder of withRef) {
+      const task = tasks.find((t) => t.orderNo === reminder.orderNo && t.ref);
+      expect(reminder.ref).toEqual(task?.ref);
+    }
+  });
+
+  it("says on a reminder about an SPR what the SPR would buy, as its task does", async () => {
+    const tasks = await model.tasksFor("APPROVER");
+    const reminders = await model.remindersFor("APPROVER");
+    const withSpr = reminders.filter((reminder) => reminder.spr);
+    expect(withSpr.length).toBeGreaterThan(0);
+    for (const reminder of withSpr) {
+      const task = tasks.find((t) => t.orderNo === reminder.orderNo && t.spr);
+      expect(reminder.spr, reminder.id).toEqual(task?.spr);
+    }
+    const payments = await model.remindersFor("FINANCE");
+    expect(payments.some((reminder) => reminder.spr)).toBe(false);
   });
 
   it("follows the dataset when the day, and so the set, changes", async () => {
@@ -164,13 +210,25 @@ describe("the service over the mock", () => {
   );
   const sprNo = dataset.sprs[0]?.recordNo ?? "";
 
-  it("adds the approver in the shape of Navision's Approval User Setup", async () => {
+  it("adds the approver in the shape of Business Central's Approval User Setup", async () => {
     const spr = await service.spr(sprNo);
     expect(sprDetailSchema.safeParse(spr).success).toBe(true);
+    // As Spectra said on 5 Nov: no limits, and nobody standing in.
     expect(spr.approver.setup).toMatchObject({
-      purchaseAmountApprovalLimit: "5000.00",
-      unlimitedPurchaseApproval: false,
+      unlimitedPurchaseApproval: true,
+      unlimitedSalesApproval: true,
+      substituteUserId: null,
     });
+    expect(spr.substituteName).toBeNull();
+  });
+
+  it("says when an undecided SPR is due, from its open task", async () => {
+    const task = (await model.tasksFor("APPROVER")).find(
+      (open) => open.kind === "APPROVE_SPR" && open.ref,
+    );
+    const spr = await service.spr(task?.ref?.recordNo ?? "");
+    expect(spr.decision).toBeNull();
+    expect(spr.due).toEqual({ dueAt: task?.dueAt, overdue: task?.overdue });
   });
 
   it("answers every SPR in the contract's shape", async () => {

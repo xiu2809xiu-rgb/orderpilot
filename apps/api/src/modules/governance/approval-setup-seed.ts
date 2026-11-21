@@ -1,6 +1,6 @@
 import type { INestApplicationContext } from "@nestjs/common";
 import type { Role } from "@orderpilot/shared";
-import { demoEmail } from "../../auth/demo-accounts.js";
+import { SECOND_APPROVER_EMAIL, demoEmail } from "../../auth/demo-accounts.js";
 import { UserRepository } from "../../users/user.repository.js";
 import { ApprovalSetupRepository } from "./approval-setup.repository.js";
 import { ApprovalSetupService } from "./approval-setup.service.js";
@@ -25,10 +25,11 @@ const NO_LIMITS = {
 
 /**
  * Area 4's sample approval chain for the demo accounts: the Product Manager's
- * requests go to the approver, who escalates to Management. The numbers are
- * synthetic, the same as area 2's mock, until Spectra confirms its approvers
- * and limits (A-14, A-23). There is no substitute: the demo has one approver,
- * and the Product Manager, who raises the SPRs, must never stand in for them.
+ * requests go to the approver, who escalates to the second approver, who is
+ * Management today. The numbers are synthetic, the same as area 2's mock,
+ * until Spectra confirms its approvers and limits (A-14, A-23). There is no
+ * substitute: the demo has one approver, and the Product Manager, who raises
+ * the SPRs, must never stand in for them.
  *
  * Safe to run again. A row that exists is left alone, so a limit changed since
  * is never put back.
@@ -39,12 +40,14 @@ export async function seedApprovalSetups(
   const users = app.get(UserRepository);
   const idOf = async (role: Role) =>
     (await users.findByEmail(demoEmail(role)))?.id;
-  const [requester, approver, management] = await Promise.all([
+  const [requester, approver, secondApprover] = await Promise.all([
     idOf("PRODUCT_MANAGER"),
     idOf("APPROVER"),
-    idOf("MANAGEMENT"),
+    // By email, named for its place in the chain: this account is Management's
+    // today, and a later step re-roles it (ADR 0058).
+    users.findByEmail(SECOND_APPROVER_EMAIL).then((user) => user?.id),
   ]);
-  if (!requester || !approver || !management) {
+  if (!requester || !approver || !secondApprover) {
     return "skipped: the demo accounts are not there yet";
   }
   const rows: ApprovalSetup[] = [
@@ -52,13 +55,13 @@ export async function seedApprovalSetups(
     {
       ...NO_LIMITS,
       userId: approver,
-      approverId: management,
+      approverId: secondApprover,
       salesAmountApprovalLimit: "20000.00",
       purchaseAmountApprovalLimit: "5000.00",
     },
     {
       ...NO_LIMITS,
-      userId: management,
+      userId: secondApprover,
       unlimitedSalesApproval: true,
       unlimitedPurchaseApproval: true,
     },

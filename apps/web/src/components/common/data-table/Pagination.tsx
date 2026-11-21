@@ -2,6 +2,8 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useId } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { clampPage, pageCount } from "@/lib/paging";
+import { NativeSelect } from "./Field";
 
 interface PaginationProps {
   page: number;
@@ -10,6 +12,8 @@ interface PaginationProps {
   pageSizes: readonly number[];
   onPage: (page: number) => void;
   onPageSize: (pageSize: number) => void;
+  /** Says nothing about the count: the rows have not arrived, or could not. */
+  quiet?: boolean;
 }
 
 /** Page buttons, the page size, and a spoken "Showing 1 to 10 of 42". */
@@ -20,39 +24,46 @@ export function Pagination({
   pageSizes,
   onPage,
   onPageSize,
+  quiet = false,
 }: PaginationProps) {
   const { t } = useTranslation("components");
   const sizeId = useId();
-  const pages = Math.max(1, Math.ceil(total / pageSize));
-  const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
-  const to = Math.min(total, page * pageSize);
+  const pages = pageCount(total, pageSize);
+  // A page past the end is shown as the last one: the screens open that page,
+  // and until they do this never says "Page 99 of 5" or a range that ends
+  // before it starts.
+  const shown = clampPage(page, total, pageSize);
+  const from = total === 0 ? 0 : (shown - 1) * pageSize + 1;
+  const to = Math.min(total, shown * pageSize);
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-s2 text-sm">
+    <div className="dt-foot">
       <p role="status" className="text-muted-foreground" data-numeric>
-        {total === 0
-          ? t("table.rangeNone")
-          : t("table.range", { from, to, total })}
+        {quiet
+          ? ""
+          : total === 0
+            ? t("table.rangeNone")
+            : t("table.range", { from, to, total })}
       </p>
       <div className="flex flex-wrap items-center gap-s2">
         <div className="flex items-center gap-2">
           <label htmlFor={sizeId} className="text-muted-foreground">
             {t("table.pageSize")}
           </label>
-          <select
+          <NativeSelect
+            compact
             id={sizeId}
             value={pageSize}
             onChange={(event) => {
               onPageSize(Number(event.target.value));
             }}
-            className="h-8 rounded-md border border-input bg-background px-2 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none pointer-coarse:h-11"
           >
             {pageSizes.map((size) => (
               <option key={size} value={size}>
                 {size}
               </option>
             ))}
-          </select>
+          </NativeSelect>
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -60,22 +71,22 @@ export function Pagination({
             size="icon-sm"
             className="pointer-coarse:size-11"
             aria-label={t("table.previous")}
-            disabled={page <= 1}
+            disabled={shown <= 1}
             onClick={() => {
-              onPage(page - 1);
+              onPage(shown - 1);
             }}
           >
             <ChevronLeft aria-hidden="true" />
           </Button>
-          <span data-numeric>{t("table.page", { page, pages })}</span>
+          <span data-numeric>{t("table.page", { page: shown, pages })}</span>
           <Button
             variant="outline"
             size="icon-sm"
             className="pointer-coarse:size-11"
             aria-label={t("table.next")}
-            disabled={page >= pages}
+            disabled={shown >= pages}
             onClick={() => {
-              onPage(page + 1);
+              onPage(shown + 1);
             }}
           >
             <ChevronRight aria-hidden="true" />
