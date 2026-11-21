@@ -8,6 +8,7 @@ import { DueTimer } from "@/components/parts/DueTimer";
 import { stepsHref } from "../home/homeLinks";
 import { canComplete, useCompleteTask } from "../home/useCompleteTask";
 import { useDoneToday } from "../home/useDoneToday";
+import { TaskTip } from "../home/TaskTip";
 import { ReviewNotice } from "./ReviewNotice";
 
 /**
@@ -80,31 +81,35 @@ export function OrderAction({
   return (
     <>
       {canComplete(task) ? (
-        <Button
-          className="pointer-coarse:h-11"
-          disabled={completion.isBusy(task)}
-          aria-describedby={recordsId}
-          onClick={() => {
-            completion.complete(task);
-          }}
-        >
-          <Check aria-hidden="true" />
-          {verb}
-        </Button>
-      ) : (
-        <Button asChild className="pointer-coarse:h-11">
-          <Link
-            to={
-              task.ref
-                ? `/workflows/sprs/${encodeURIComponent(task.ref.recordNo)}`
-                : stepsHref(orderNo)
-            }
-            aria-describedby={paying ? recordsId : undefined}
+        <TaskTip hint={records}>
+          <Button
+            className="pointer-coarse:h-11"
+            disabled={completion.isBusy(task)}
+            aria-describedby={recordsId}
+            onClick={() => {
+              completion.complete(task);
+            }}
           >
+            <Check aria-hidden="true" />
             {verb}
-            <ArrowRight aria-hidden="true" />
-          </Link>
-        </Button>
+          </Button>
+        </TaskTip>
+      ) : (
+        <TaskTip hint={records} enabled={paying}>
+          <Button asChild className="pointer-coarse:h-11">
+            <Link
+              to={
+                task.ref
+                  ? `/workflows/sprs/${encodeURIComponent(task.ref.recordNo)}`
+                  : stepsHref(orderNo)
+              }
+              aria-describedby={paying ? recordsId : undefined}
+            >
+              {verb}
+              <ArrowRight aria-hidden="true" />
+            </Link>
+          </Button>
+        </TaskTip>
       )}
       {/* Beside the button, not inside it, so the line describes the button and is not part of its name. */}
       {canComplete(task) || paying ? caption : null}
