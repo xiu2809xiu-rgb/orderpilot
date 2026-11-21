@@ -12,6 +12,7 @@ import { OrderFacts } from "./OrderFacts";
 import { OrderHeader } from "./OrderHeader";
 import { OrderJourneySection } from "./OrderJourneySection";
 import { OrderNotFound } from "./OrderNotFound";
+import { orderTone } from "./orderTone";
 import { statusSentence } from "./statusSentence";
 import { OrderSkeleton } from "./OrderSkeleton";
 import { OrderStatus } from "./OrderStatus";
@@ -137,6 +138,7 @@ export function OrderPage({ orderNo }: { orderNo: string }) {
     step === ALL_DONE
       ? ""
       : statusSentence(t, { detail: found ?? null, checks: events.checks });
+  const tone = orderTone(late, sentence !== "");
 
   return (
     <div className="dx-sheet od-order">
@@ -170,8 +172,8 @@ export function OrderPage({ orderNo }: { orderNo: string }) {
         <OrderJourneySection
           journey={journey}
           late={late}
-          shipmentDate={found?.shipmentDate ?? null}
           refused={trackerRefused}
+          tone={tone}
         />
         <section
           aria-label={t("order.details.title")}

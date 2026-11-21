@@ -135,16 +135,41 @@
 .od-journey-head {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: flex-start;
+  justify-content: space-between;
   gap: 0.25rem 1.25rem;
 }
 
-.od-expected {
+.od-journey-title {
   display: flex;
-  flex: 1 1 24rem;
   flex-direction: column;
   gap: 0.125rem;
+}
+
+.od-journey-subtitle {
+  margin: 0;
+}
+
+/* The rail's scroll region draws the glass card's own border, background and
+   shadow a second time: a box inside the journey card's own box. Switched
+   off here, with more specificity than .sr-region, so the rail reads as
+   part of the one card it is already in, not a card of its own. */
+.od-journey-card .sr-region {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* The ship forecast, right of the title: the date, then its tone pill. */
+.od-ship {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
   min-width: 0;
+  text-align: right;
 }
 
 /* The tabs card holds the tab strip and its panel: no heading, because the strip names it. */

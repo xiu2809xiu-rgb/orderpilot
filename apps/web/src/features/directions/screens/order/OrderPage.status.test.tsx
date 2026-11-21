@@ -242,9 +242,7 @@ describe("the first screen", () => {
     expect(screen.queryByText("Past due")).toBeNull();
     expect(screen.queryByText(/^Since /)).toBeNull();
     expect(screen.queryByText(/later than the order's ship date/)).toBeNull();
-    expect(
-      screen.getByText(/^Expected to ship .+: .*the order's ship date\.$/),
-    ).toBeVisible();
+    expect(screen.getByText(/^Est\. ship /)).toBeVisible();
   });
 
   it("has no Now card: the journey is one row of nine steps", async () => {

@@ -162,10 +162,8 @@
     "sinceToday": "Since today",
     "since_one": "Since {{when}}, {{count}} day",
     "since_other": "Since {{when}}, {{count}} days",
-    "waitingToday": "Here today",
-    "waiting_one": "Waiting {{count}} day",
-    "waiting_other": "Waiting {{count}} days",
-    "waitingUsual": "{{waiting}}, usually {{usual}}",
+    "waitingCompact": "Waiting {{count}}d",
+    "waitingCompactUsual": "{{waiting}} \u00b7 ~{{usual}} avg",
     "sinceUsual": "{{since}}. Usually {{usual}}.",
     "sinceLate": "{{since}}. Past the usual {{usual}}.",
     "by": "By {{when}}",
@@ -220,16 +218,16 @@
       "when": "{{day}} at {{time}}",
       "steps": "All steps"
     },
-    "ship": {
-      "plain": "Expected to ship {{day}}",
-      "after_one": "Expected to ship {{day}}: {{count}} day after the order's ship date",
-      "after_other": "Expected to ship {{day}}: {{count}} days after the order's ship date",
-      "inTime": "Expected to ship {{day}}: in time for the order's ship date",
-      "basis": "From how long each step took on similar orders."
-    },
     "journey": {
       "title": "Journey",
-      "region": "Journey of the order, nine steps"
+      "region": "Journey of the order, nine steps",
+      "subtitle": "Forecast based on similar orders",
+      "estShip": "Est. ship {{day}}",
+      "status": {
+        "onTrack": "On track",
+        "atRisk": "At risk",
+        "delayed": "Delayed"
+      }
     },
     "details": {
       "title": "Order details"

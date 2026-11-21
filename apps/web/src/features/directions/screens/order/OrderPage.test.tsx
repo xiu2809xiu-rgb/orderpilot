@@ -101,7 +101,7 @@ describe("the order page", () => {
     expect(screen.queryByText(/Now, late/)).toBeNull();
     // The current step says how long it has waited and what is usual, in one short line.
     expect(
-      within(nth(steps, 3)).getByText("Waiting 14 days, usually 4 days"),
+      within(nth(steps, 3)).getByText("Waiting 14d \u00b7 ~4d avg"),
     ).toBeVisible();
     // Later: a day the step is expected, worked from the usual times.
     expect(within(nth(steps, 4)).getByText(/^By /)).toBeVisible();
@@ -129,20 +129,21 @@ describe("the order page", () => {
     });
     const now = nth(within(rail).getAllByRole("listitem"), 3);
     expect(
-      await within(now).findByText("Waiting 6 days, usually 4 days"),
+      await within(now).findByText("Waiting 6d \u00b7 ~4d avg"),
     ).toBeVisible();
-    expect(within(now).queryByText(/Waiting 14 days/)).toBeNull();
+    expect(within(now).queryByText(/Waiting 14d/)).toBeNull();
   });
 
-  it("names the expected ship day as what it is and sets it against the order's ship date", async () => {
+  it("names the expected ship day as a compact estimate, with a tone pill beside it", async () => {
     stubApi();
     open(PAID);
+    // The subtitle says the forecast's basis once, for every order.
     expect(
-      await screen.findByText(
-        /^Expected to ship \w{3}, \d{1,2} \w{3}: (\d+ days? after the order.s ship date|in time for the order.s ship date)\.$/,
-      ),
+      await screen.findByText("Forecast based on similar orders"),
     ).toBeVisible();
-    expect(screen.getByText(/^From how long each step took/)).toBeVisible();
+    expect(screen.getByText(/^Est\. ship \w{3}, \d{1,2} \w{3}$/)).toBeVisible();
+    // SO-0001 is overdue, so the journey card reads it as delayed.
+    expect(screen.getByText("Delayed")).toBeVisible();
     // A step the data cannot time says so on the rail, where it is.
     const rail = screen.getByRole("list", { name: "Sales order journey" });
     expect(within(rail).getByText("No usual time")).toBeVisible();
