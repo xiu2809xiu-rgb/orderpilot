@@ -12,12 +12,15 @@ import { latestAct, latestWords } from "./newestAct";
 export function LatestAct({
   orderNo,
   timeline,
+  now = new Date(),
 }: {
   orderNo: string;
   timeline: readonly OrderTimelineEvent[] | undefined;
+  /** The moment the page is read at; only a test passes it. */
+  now?: Date;
 }) {
   const { t } = useTranslation("directions-orders");
-  const entry = timeline ? latestAct(timeline) : null;
+  const entry = timeline ? latestAct(timeline, now) : null;
   if (!entry) return null;
   return (
     <p className="od-latest fs-14 text-muted-foreground">
