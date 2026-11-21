@@ -76,6 +76,7 @@ describe("a role with an inbox that may decide approvals and read the tracker", 
     const pair = screen
       .getByRole("region", { name: "My timeline" })
       .closest("div.lg\\:grid-cols-2");
+    expect(pair).not.toBeNull();
     expect(pair?.contains(section)).toBe(false);
     expect(
       within(section).getByRole("link", { name: "View all (21)" }),
@@ -123,6 +124,20 @@ describe("a role with an inbox that may decide approvals and read the tracker", 
     await waitFor(() => {
       expect(served.calls.length).toBeGreaterThan(before);
     });
+  });
+
+  it("says the role may not read the orders, inside the block, when the server refuses", async () => {
+    serveHome({
+      tasks: [makeTask({ assigneeRole: "APPROVER" })],
+      blockStatus: 403,
+    });
+    renderHome("APPROVER", { permissions: HOLDING.approvals });
+    const section = await screen.findByRole("region", { name: OVERDUE });
+    expect(
+      await within(section).findByRole("heading", {
+        name: "You do not have access to this",
+      }),
+    ).toBeVisible();
   });
 
   it("has no accessibility violation", async () => {
@@ -174,6 +189,7 @@ describe("a role that manages settings and reads the audit trail", () => {
     const pair = screen
       .getByRole("region", { name: "System health" })
       .closest("div.lg\\:grid-cols-2");
+    expect(pair).not.toBeNull();
     expect(pair?.contains(section)).toBe(false);
   });
 
@@ -202,6 +218,27 @@ describe("a role that manages settings and reads the audit trail", () => {
       "trace-home-1",
     );
   });
+
+  it("says the role may not read the actions, inside the block, when the server refuses", async () => {
+    serveHome({ blockStatus: 403 });
+    renderHome("SYSTEM_ADMIN", { permissions: HOLDING.settings });
+    const section = await screen.findByRole("region", { name: REFUSED });
+    expect(
+      await within(section).findByRole("heading", {
+        name: "You do not have access to this",
+      }),
+    ).toBeVisible();
+  });
+
+  it("has no accessibility violation", async () => {
+    serve();
+    const { container } = renderHome("SYSTEM_ADMIN", {
+      permissions: HOLDING.settings,
+    });
+    await screen.findByText("Hafiz Rahman was refused viewing the audit trail");
+    await screen.findByRole("heading", { level: 2, name: "System health" });
+    expect(await axeViolations(container)).toEqual([]);
+  }, 60_000);
 
   it("has no refused block when it may not read the audit trail", async () => {
     const served = serve();
