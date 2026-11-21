@@ -452,6 +452,7 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 | P-75  | Audit log on the template                             | `feat/template-audit`            | Not started                                                                         |
 | P-76  | Governance and monitoring on the templates            | `feat/template-monitoring`       | Not started                                                                         |
 | P-78  | Room in the entry bundle                              | `perf/entry-bundle-room`         | Merged, [#183](https://github.com/xiu2809xiu-rgb/orderpilot/pull/183)               |
+| #344  | Seven roles, step 3: own inbox, then the approvers    | `feat/area2-inbox-escalation`    | This pull request. Own inbox first, and overdue tasks go to the approvers           |
 
 ## Prompt 003: the product pass
 
