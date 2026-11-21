@@ -117,6 +117,10 @@ describe("the actions the policy knows", () => {
     });
   });
 
+  it("routes an SPR with the coordinator's own permission, and no limit (#252)", () => {
+    expect(policyActionOf("spr.route")).toEqual({ permission: "spr.route" });
+  });
+
   it("knows no other action, not even one named after an object's own keys", () => {
     expect(policyActionOf("order.delete")).toBeUndefined();
     expect(policyActionOf("toString")).toBeUndefined();
@@ -187,6 +191,13 @@ describe("the order of the rules (F-4)", () => {
       amount: "999.00",
       approvers,
       now: new Date("2026-11-06T09:00:00.000Z"),
+      // I am the only approver, and I raised it (#252).
+      group: {
+        approvers: [],
+        reason: "the only enabled management approver raised the request",
+      },
+      groupDecides: false,
+      limitsOn: true,
     },
   };
 

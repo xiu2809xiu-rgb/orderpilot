@@ -33,4 +33,5 @@ export const MatrixSetDataScope200DataPermissionsItem = {
   workflowsinboxesany: 'workflows.inboxes.any',
   taskscomplete: 'tasks.complete',
   maskingcustomerNote: 'masking.customerNote',
+  sprroute: 'spr.route',
 } as const;

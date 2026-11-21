@@ -112,6 +112,9 @@ function context(
       amount: "100.00",
       approvers: chain(),
       now: NOW,
+      group: { approvers: [], reason: null },
+      groupDecides: false,
+      limitsOn: true,
       ...approval,
     },
   };
@@ -122,6 +125,20 @@ describe("the approval limit rule", () => {
 
   it("has no objection to an action that needs no approval", () => {
     expect(rule.refusal(plain(APPROVER))).toBeNull();
+  });
+
+  it("has no objection while limits are switched off, whatever the amount (#252)", () => {
+    for (const amount of ["5000.01", "999999999.99"]) {
+      expect(
+        rule.refusal(context(APPROVER, { amount, limitsOn: false })),
+        amount,
+      ).toBeNull();
+    }
+    expect(
+      rule.refusal(
+        context("00000000-0000-4000-8000-000000000999", { limitsOn: false }),
+      ),
+    ).toBeNull();
   });
 
   it("allows an amount under the limit and exactly at it", () => {

@@ -52,6 +52,13 @@ export class AppConfig {
   readonly governance: {
     /** Null means a bank-detail comparison fails closed. */
     readonly bankFingerprintKey: string | null;
+    /**
+     * True only when APPROVER_GROUP is "on": any one of the approver group
+     * decides. Temporary (ADR 0056); off keeps the old chain.
+     */
+    readonly approverGroup: boolean;
+    /** True only when APPROVAL_LIMITS is "on": the group's limits apply. */
+    readonly approvalLimits: boolean;
   };
 
   readonly database: { readonly url: string };
@@ -103,6 +110,8 @@ export class AppConfig {
     };
     this.governance = {
       bankFingerprintKey: env.BANK_FINGERPRINT_KEY ?? null,
+      approverGroup: env.APPROVER_GROUP === "on",
+      approvalLimits: env.APPROVAL_LIMITS === "on",
     };
     this.database = { url: env.DATABASE_URL };
     this.redis = { url: env.REDIS_URL };
