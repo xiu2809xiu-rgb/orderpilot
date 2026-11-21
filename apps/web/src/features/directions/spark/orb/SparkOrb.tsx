@@ -90,6 +90,16 @@ export function SparkOrb({ state, label, className, onEngine }: SparkOrbProps) {
     if (shown !== "webgpu") told.current?.(shown);
   }, [shown, told]);
 
+  // A drawn orb that goes away takes its "painted" and "covered" with it: the
+  // next one, for example after reduced motion is switched off again, starts on
+  // a new canvas, and until it has drawn its first frame the CSS orb is needed.
+  useEffect(() => {
+    return () => {
+      setPainted(null);
+      setCovered(null);
+    };
+  }, [shown]);
+
   const ready = painted === shown;
   const showCss = shown === "still" || covered !== shown;
   const look = webglLook(tokens, state);
