@@ -1,4 +1,8 @@
-import { notifyManager, QueryClient } from "@tanstack/react-query";
+import {
+  defaultScheduler,
+  notifyManager,
+  QueryClient,
+} from "@tanstack/react-query";
 import { ApiError } from "./api/errors";
 
 export function createQueryClient(): QueryClient {
@@ -42,8 +46,7 @@ export function forgetShown(client: QueryClient): void {
     // Not awaited: the page should open at once, and fill as it loads.
     void client.resetQueries();
   } finally {
-    notifyManager.setScheduler((callback) => {
-      setTimeout(callback, 0);
-    });
+    // The library's own default, not a copy of it, so it cannot drift.
+    notifyManager.setScheduler(defaultScheduler);
   }
 }
