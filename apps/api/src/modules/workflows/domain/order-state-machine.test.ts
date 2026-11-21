@@ -105,10 +105,20 @@ const CASES: readonly CommandCase[] = [
     legal: { AwaitingPayment: "Paid" },
   },
   {
+    command: { type: "PAYMENT_UNDONE" },
+    actor: person("FINANCE"),
+    legal: { Paid: "AwaitingPayment" },
+  },
+  {
     command: { type: "PACKING_STARTED" },
     actor: person("WAREHOUSE"),
     facts: { prepaymentDue: null },
     legal: { AwaitingPayment: "Packing", Paid: "Packing" },
+  },
+  {
+    command: { type: "PACKING_UNDONE" },
+    actor: person("WAREHOUSE"),
+    legal: { Packing: "Paid" },
   },
   {
     command: { type: "INVOICED" },
@@ -229,7 +239,7 @@ describe("every status against every event", () => {
 
   it("covers every status and every event in the machine", () => {
     expect(ORDER_STATUSES).toHaveLength(14);
-    expect(every).toHaveLength(14 * 17);
+    expect(every).toHaveLength(14 * 19);
   });
 });
 
@@ -675,6 +685,63 @@ describe("the payment gate", () => {
       ),
     );
     expect(error.code).toBe("CONFLICT");
+  });
+});
+
+describe("undoing a payment or the packing", () => {
+  it("closes the gate again when Finance undoes the payment, and reopens it on a fresh confirmation", () => {
+    const paid = snapshot("Paid", { prepaymentDue: "100.00" });
+
+    const undone = machine.apply(
+      paid,
+      { type: "PAYMENT_UNDONE" },
+      person("FINANCE"),
+      AT,
+    );
+
+    expect(undone.state.status).toBe("AwaitingPayment");
+    const packing = refusal(() =>
+      machine.apply(
+        undone.state,
+        { type: "PACKING_STARTED" },
+        person("WAREHOUSE"),
+        AT,
+      ),
+    );
+    expect(packing.message).toContain("prepayment");
+  });
+
+  it("refuses to take back a payment once the warehouse has started packing", () => {
+    const error = refusal(() =>
+      machine.apply(
+        snapshot("Packing"),
+        { type: "PAYMENT_UNDONE" },
+        person("FINANCE"),
+        AT,
+      ),
+    );
+    expect(error.code).toBe("CONFLICT");
+  });
+
+  it("returns packing to Paid only when a prepayment was confirmed for it", () => {
+    const back = machine.apply(
+      snapshot("Packing", { prepaymentDue: "100.00" }),
+      { type: "PACKING_UNDONE" },
+      person("WAREHOUSE"),
+      AT,
+    );
+    expect(back.state.status).toBe("Paid");
+
+    const error = refusal(() =>
+      machine.apply(
+        snapshot("Packing", { prepaymentDue: null }),
+        { type: "PACKING_UNDONE" },
+        person("WAREHOUSE"),
+        AT,
+      ),
+    );
+    expect(error.code).toBe("CONFLICT");
+    expect(error.message).toContain("no prepayment due");
   });
 });
 

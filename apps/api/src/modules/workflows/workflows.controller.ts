@@ -319,7 +319,7 @@ export class WorkflowsController {
   @orderParam
   @ApiOperation({
     summary:
-      "Confirm a payment, with its type. Kept in the mock overlay, audited",
+      "Confirm a payment, with its type. Audited. On an order the state machine runs it is stored, and once the prepayment is covered the order moves to the warehouse; on a sample it is kept in the mock overlay",
   })
   @ApiBody({ schema: openApiSchema(paymentConfirmationInputSchema) })
   @ApiOkResponse({ schema: openApiSchema(paymentResponseSchema) })

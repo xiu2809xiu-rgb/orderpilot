@@ -1115,7 +1115,7 @@ export function useWorkflowsOrderFlow<TData = Awaited<ReturnType<typeof workflow
 
 
 /**
- * @summary Confirm a payment, with its type. Kept in the mock overlay, audited
+ * @summary Confirm a payment, with its type. Audited. On an order the state machine runs it is stored, and once the prepayment is covered the order moves to the warehouse; on a sample it is kept in the mock overlay
  */
 export const workflowsConfirmPayment = (
     orderNo: string,
@@ -1194,7 +1194,7 @@ export function useWorkflowsConfirmPayment<TData = Awaited<ReturnType<typeof wor
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary Confirm a payment, with its type. Kept in the mock overlay, audited
+ * @summary Confirm a payment, with its type. Audited. On an order the state machine runs it is stored, and once the prepayment is covered the order moves to the warehouse; on a sample it is kept in the mock overlay
  */
 
 export function useWorkflowsConfirmPayment<TData = Awaited<ReturnType<typeof workflowsConfirmPayment>>, TError = ErrorType<unknown>>(
