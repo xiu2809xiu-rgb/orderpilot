@@ -39,10 +39,16 @@ async function perform(task: WorkflowTask): Promise<() => Promise<unknown>> {
 export function useCompleteTask({
   onDone,
   onUndone,
+  offerOrder = true,
 }: {
   onDone: (task: WorkflowTask, at: Date) => void;
   /** Called just before an Undo asks the lists again, so focus can follow the row back. */
   onUndone: (task: WorkflowTask) => void;
+  /**
+   * Whether the toast offers Open order. On Home it does; on the order's own
+   * page the button would lead to the page the person is on and change nothing.
+   */
+  offerOrder?: boolean;
 }) {
   const { t } = useTranslation("home");
   const { t: tNext, i18n } = useTranslation("directions-home");
@@ -66,12 +72,13 @@ export function useCompleteTask({
         : undefined;
       toast.done(t(`needs.done.${task.kind}`, { orderNo: task.orderNo }), {
         description: next,
-        action: task.orderNo
-          ? {
-              label: tNext("needs.openOrder"),
-              to: `/orders/${task.orderNo}`,
-            }
-          : undefined,
+        action:
+          offerOrder && task.orderNo
+            ? {
+                label: tNext("needs.openOrder"),
+                to: `/orders/${task.orderNo}`,
+              }
+            : undefined,
         undo: async () => {
           await undo();
           onUndone(task);

@@ -162,10 +162,8 @@
     "sinceToday": "Since today",
     "since_one": "Since {{when}}, {{count}} day",
     "since_other": "Since {{when}}, {{count}} days",
-    "waitingToday": "Here today",
-    "waiting_one": "Waiting {{count}} day",
-    "waiting_other": "Waiting {{count}} days",
-    "waitingUsual": "{{waiting}}, usually {{usual}}",
+    "waitingCompact": "Waiting {{count}}d",
+    "waitingCompactUsual": "{{waiting}} \u00b7 ~{{usual}} avg",
     "sinceUsual": "{{since}}. Usually {{usual}}.",
     "sinceLate": "{{since}}. Past the usual {{usual}}.",
     "by": "By {{when}}",
@@ -196,40 +194,20 @@
   },
   "order": {
     "back": "Orders",
-    "intro": "{{customer}}, {{number}}",
     "notFoundTitle": "That order was not found",
     "notFoundBody": "There is no order {{order}} for your role. Go back to the list and pick one.",
     "notFoundBack": "Back to Orders",
     "status": {
-      "open": "With {{team}}. Next: {{next}}.",
-      "openWhy": "With {{team}}: {{why}}. Next: {{next}}.",
-      "held": "With {{team}}: {{why}}.",
-      "last": "With {{team}}. This is the last step.",
-      "lastWhy": "With {{team}}: {{why}}. This is the last step.",
-      "done": "Every step is done. Nothing is waiting on this order.",
-      "draft": "A draft that has not been submitted, so no team has it yet.",
-      "void": "Voided. Nothing more happens to this order.",
-      "stage": "{{stage}}.",
-      "stageWhy": "{{stage}}: {{why}}.",
+      "whyOnly": "{{why}}.",
       "why": {
         "check": {
-          "quantity": "the packing list differs from the PO",
-          "price": "the unit price on the PI differs from the PO"
+          "quantity": "The packing list differs from the PO",
+          "price": "The unit price on the PI differs from the PO"
         },
-        "checkOther": "a check did not pass: {{label}}",
+        "checkOther": "A check did not pass: {{label}}",
         "short": "{{quantity}} short on {{item}}",
         "shortMore_one": "{{quantity}} short on {{item}} and {{count}} more item",
         "shortMore_other": "{{quantity}} short on {{item}} and {{count}} more items"
-      },
-      "next": {
-        "stock": "{{team}} checks the stock",
-        "pi": "{{team}} sends the proforma invoice",
-        "payment": "{{team}} confirms the payment",
-        "pack": "{{team}} packs the goods",
-        "documents": "{{team}} makes the invoice and packing list",
-        "forwarder": "{{team}} hands the goods to the forwarder",
-        "customerTold": "{{team}} tells the customer",
-        "awbAndPermit": "{{team}} follows up the AWB/BL and the import permit"
       }
     },
     "latest": {
@@ -240,16 +218,16 @@
       "when": "{{day}} at {{time}}",
       "steps": "All steps"
     },
-    "ship": {
-      "plain": "Expected to ship {{day}}",
-      "after_one": "Expected to ship {{day}}: {{count}} day after the order's ship date",
-      "after_other": "Expected to ship {{day}}: {{count}} days after the order's ship date",
-      "inTime": "Expected to ship {{day}}: in time for the order's ship date",
-      "basis": "From how long each step took on similar orders."
-    },
     "journey": {
       "title": "Journey",
-      "region": "Journey of the order, nine steps"
+      "region": "Journey of the order, nine steps",
+      "subtitle": "Forecast based on similar orders",
+      "estShip": "Est. ship {{day}}",
+      "status": {
+        "onTrack": "On track",
+        "atRisk": "At risk",
+        "delayed": "Delayed"
+      }
     },
     "details": {
       "title": "Order details"
@@ -262,9 +240,10 @@
     },
     "trackerRefused": "The journey comes from the order tracker, which your role cannot read.",
     "facts": {
-      "stage": "Stage",
+      "currentStage": "Current Stage",
       "prepayment": "{{percent}}% prepayment",
-      "hidden": "Hidden: {{reason}}"
+      "hidden": "Hidden: {{reason}}",
+      "viewException": "View exception"
     },
     "tabs": {
       "label": "Order details",

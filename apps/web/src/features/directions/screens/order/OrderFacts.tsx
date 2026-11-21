@@ -1,56 +1,48 @@
 import type { SalesOrderDetail } from "@orderpilot/shared";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { Term, withTerms } from "@/components/common/Term";
 import { formatDay } from "@/lib/format";
 import { Amount } from "../orders/Amount";
-import { ALL_DONE } from "../orders/orderRow";
 
 function Fact({
   label,
   children,
   main = false,
+  labelClassName = "od-fact-label fs-12",
 }: {
   label: ReactNode;
   children: ReactNode;
   /** The figure the eye should land on: set larger. */
   main?: boolean;
+  /** The Value label is styled as the status card's "Current Stage" is. */
+  labelClassName?: string;
 }) {
   return (
     <div className="od-fact" data-main={main || undefined}>
-      <dt className="od-fact-label fs-12">{label}</dt>
+      <dt className={labelClassName}>{label}</dt>
       <dd className="od-fact-value fs-14">{children}</dd>
     </div>
   );
 }
 
 /**
- * The order in six facts, in one row: its stage, the team that holds it, its
- * value (masked for a role that may not see prices, with the reason), the ship
- * date, the order date and the customer's PO. How late it is, if it is, is the
- * status block's to say, once.
+ * The order in four facts, two rows of two: its value (masked for a role
+ * that may not see prices, with the reason), the customer's PO, the order
+ * date and the ship date. The stage and the team that holds it are the
+ * status card's to say, just above; how late it is, if it is, is that
+ * card's to say too, once.
  */
 export function OrderFacts({
   order,
   detail,
-  stageLabel,
-  heldAt,
-  step,
 }: {
   order: { externalDocumentNo: string };
   detail: SalesOrderDetail | undefined;
-  stageLabel: string;
-  heldAt: string;
-  step: number | null;
 }) {
   const { t } = useTranslation("directions-orders");
   return (
     <dl className="od-facts-bar dx-card">
-      <Fact label={t("order.facts.stage")}>{withTerms(stageLabel)}</Fact>
-      <Fact label={<Term word="heldAt">{t("columns.heldAt")}</Term>}>
-        {step === ALL_DONE ? t("cells.done") : heldAt}
-      </Fact>
-      <Fact label={t("columns.value")} main>
+      <Fact label={t("columns.value")} main labelClassName="dx-section-title">
         {detail ? (
           <Amount field={detail.amount} currency={detail.currencyCode} />
         ) : (
@@ -74,16 +66,16 @@ export function OrderFacts({
           </span>
         ) : null}
       </Fact>
-      <Fact label={t("columns.shipDate")}>
-        {detail?.shipmentDate
-          ? formatDay(detail.shipmentDate)
-          : t("cells.notSet")}
+      <Fact label={t("columns.po")}>
+        <span className="numeral">{order.externalDocumentNo}</span>
       </Fact>
       <Fact label={t("columns.orderDate")}>
         {detail ? formatDay(detail.orderDate) : t("cells.notSet")}
       </Fact>
-      <Fact label={withTerms(t("columns.po"))}>
-        <span className="numeral">{order.externalDocumentNo}</span>
+      <Fact label={t("columns.shipDate")}>
+        {detail?.shipmentDate
+          ? formatDay(detail.shipmentDate)
+          : t("cells.notSet")}
       </Fact>
     </dl>
   );

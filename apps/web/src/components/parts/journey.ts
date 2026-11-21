@@ -6,6 +6,15 @@ import {
 export type Flow = "sales" | "purchase";
 export type JourneyState = "done" | "now" | "later";
 
+/**
+ * The order's overall health, for the full rail's colour: critical (red)
+ * when it is overdue, warning (amber) when something holds it but it is not
+ * yet late, normal (teal/emerald) otherwise. Only the order page's full rail
+ * reads this; a list row and the side peek's vertical rail keep their own
+ * plain colour, whatever tone is passed.
+ */
+export type RailTone = "normal" | "warning" | "critical";
+
 export const STEP_IDS: Record<Flow, readonly string[]> = {
   sales: SALES_STEP_IDS,
   purchase: PURCHASE_STEP_IDS,

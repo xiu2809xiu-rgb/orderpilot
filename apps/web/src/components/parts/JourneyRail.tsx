@@ -9,10 +9,17 @@ import {
 import { useTranslation } from "react-i18next";
 import { withTermLabel } from "@/components/common/Term";
 import { cn } from "@/lib/utils";
-import { STEP_IDS, stateOf, type Flow, type JourneyState } from "./journey";
+import {
+  STEP_IDS,
+  stateOf,
+  type Flow,
+  type JourneyState,
+  type RailTone,
+} from "./journey";
 import "./parts.css";
 
 export type RailSize = "row" | "full" | "vertical";
+export type { RailTone };
 
 interface JourneyRailProps {
   flow: Flow;
@@ -22,6 +29,12 @@ interface JourneyRailProps {
   current: number;
   /** The current step has run past its usual time. */
   late?: boolean;
+  /**
+   * The order's health, read only by the full rail: the line into the
+   * current step and its glow take this colour there. A row and the
+   * vertical rail keep their plain colour whatever is passed.
+   */
+  tone?: RailTone;
   /** A line under a step, by position: who and when, waiting since, or expected by. */
   details?: Partial<Record<number, string>>;
   className?: string;
@@ -44,6 +57,7 @@ export function JourneyRail({
   size,
   current,
   late = false,
+  tone = "normal",
   details,
   className,
 }: JourneyRailProps) {
@@ -59,6 +73,9 @@ export function JourneyRail({
       position,
       state,
       lateNow,
+      // The full rail's one gradient segment: the last done step, running
+      // into the current one, coloured by the order's tone.
+      leadsToNow: state === "done" && position === current - 1,
       label: t(`journey.${flow}.${id}`),
       word: t(`journey.state.${lateNow ? "late" : state}`),
       Icon: lateNow ? CircleAlert : ICON[state],
@@ -111,6 +128,7 @@ export function JourneyRail({
     <ol
       className={cn("jr", className)}
       data-size={size}
+      data-tone={tone}
       aria-label={name}
       data-late={late || undefined}
     >
@@ -120,6 +138,7 @@ export function JourneyRail({
           className="jr-step"
           data-state={step.state}
           data-late={step.lateNow || undefined}
+          data-leads-to-now={step.leadsToNow || undefined}
           aria-current={step.state === "now" ? "step" : undefined}
         >
           <span className="jr-mark" aria-hidden="true">
@@ -128,7 +147,11 @@ export function JourneyRail({
           </span>
           <span className="jr-text">
             <span className="jr-label fs-14">
-              <step.Icon className="size-3.5 shrink-0" aria-hidden="true" />
+              {/* The full rail's nine narrow columns need the room more than
+                  the icon: the mark above already carries the step's state. */}
+              {size !== "full" ? (
+                <step.Icon className="size-3.5 shrink-0" aria-hidden="true" />
+              ) : null}
               <span>{withTermLabel(step.label)}</span>
             </span>
             <span className="jr-detail fs-12">

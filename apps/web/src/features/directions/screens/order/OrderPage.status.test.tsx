@@ -77,41 +77,21 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe("the sentence under the title", () => {
-  it("says who has the order and why, from the order's own data, and names no next step for a short order (ADR 0049)", async () => {
+describe("the status card", () => {
+  it("shows the stage and the team that holds it, and says why when a shortage holds it (ADR 0049): Current Stage and Held at never repeat it", async () => {
     stubApi({ specs: [SHORT] });
     open("SO-0082");
-    const sentence = await screen.findByText(/^With Product manager:/);
-    // The stub's line carries no description, so the item is named by its number.
-    expect(sentence).toHaveTextContent(
-      "With Product manager: 707 short on I-0190.",
-    );
-    // It agrees with the page's own facts and never contradicts them.
-    const facts = screen.getByText("Held at").closest("dl");
+    const held = await screen.findByText("Held at");
+    const facts = held.closest("dl");
     if (!facts) throw new Error("no facts");
     expect(within(facts).getByText("Product manager")).toBeVisible();
     expect(within(facts).getByText("Short on stock")).toBeVisible();
+    const sentence = await screen.findByText(/^707 short on/);
+    expect(sentence).not.toHaveTextContent(/With|Next/);
   });
 
-  it("is built from the data and not from one order: another order says another thing", async () => {
-    stubApi();
-    // The kit gives every order a failed quantity check; this one has passed.
-    stubTimeline((timeline) => ({
-      ...timeline,
-      checks: timeline.checks.map((check) => ({
-        ...check,
-        outcome: "pass" as const,
-      })),
-    }));
-    open("SO-0001");
-    expect(
-      await screen.findByText("With Finance. Next: Warehouse packs the goods."),
-    ).toBeVisible();
-  });
-
-  // SO-0041 on the demo data: held at Warehouse by a failed quantity check. The
-  // sentence took the journey's next step and sent the reader to the forwarder.
-  it("says who has an order held by a failed check and why, and names no next step", async () => {
+  // SO-0041 on the demo data: held at Warehouse by a failed quantity check.
+  it("says why a failed check holds the order, naming neither the team nor the step", async () => {
     stubApi({
       specs: [
         {
@@ -136,14 +116,27 @@ describe("the sentence under the title", () => {
       ),
     }));
     open("SO-0041");
-    const sentence = await screen.findByText(/^With Warehouse:/);
-    expect(sentence).toHaveTextContent(
-      "With Warehouse: the packing list differs from the PO.",
-    );
-    expect(sentence).not.toHaveTextContent(/Next|forwarder/);
+    expect(
+      await screen.findByText("The packing list differs from the PO."),
+    ).toBeVisible();
   });
 
-  it("says nothing is waiting on a finished order", async () => {
+  it("says nothing with no shortage and no failed check: Current Stage and Held at already say who has it and on what stage", async () => {
+    stubApi();
+    // The kit gives every order a failed quantity check; this one has passed.
+    stubTimeline((timeline) => ({
+      ...timeline,
+      checks: timeline.checks.map((check) => ({
+        ...check,
+        outcome: "pass" as const,
+      })),
+    }));
+    open("SO-0001");
+    await screen.findByRole("heading", { level: 1, name: "SO-0001" });
+    expect(document.querySelector(".od-status-sentence")).toBeNull();
+  });
+
+  it("shows a finished order's own stage, with nothing more said about it", async () => {
     stubApi({
       specs: [
         {
@@ -154,17 +147,16 @@ describe("the sentence under the title", () => {
       ],
     });
     open("SO-0009");
-    expect(
-      await screen.findByText(
-        "Every step is done. Nothing is waiting on this order.",
-      ),
-    ).toBeVisible();
+    expect(await screen.findByText("Closed")).toBeVisible();
+    expect(document.querySelector(".od-status-sentence")).toBeNull();
   });
 
-  it("falls back to the stage for a role the tracker refuses", async () => {
+  it("falls back to the stage from the Orders API for a role the tracker refuses", async () => {
     stubApi({ trackerForbidden: true });
     open("SO-0001");
-    expect(await screen.findByText("Waiting for payment.")).toBeVisible();
+    const facts = (await screen.findByText("Held at")).closest("dl");
+    if (!facts) throw new Error("no facts");
+    expect(within(facts).getByText("Waiting for payment")).toBeVisible();
   });
 });
 
@@ -250,9 +242,7 @@ describe("the first screen", () => {
     expect(screen.queryByText("Past due")).toBeNull();
     expect(screen.queryByText(/^Since /)).toBeNull();
     expect(screen.queryByText(/later than the order's ship date/)).toBeNull();
-    expect(
-      screen.getByText(/^Expected to ship .+: .*the order's ship date\.$/),
-    ).toBeVisible();
+    expect(screen.getByText(/^Est\. ship /)).toBeVisible();
   });
 
   it("has no Now card: the journey is one row of nine steps", async () => {

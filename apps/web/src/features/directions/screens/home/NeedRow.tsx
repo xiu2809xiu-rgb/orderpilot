@@ -9,6 +9,7 @@ import { DueTimer } from "@/components/parts/DueTimer";
 import { HomeRow } from "./HomeRow";
 import { RecordLinkText } from "./RecordLinkText";
 import { SprDetail } from "./SprDetail";
+import { TaskTip } from "./TaskTip";
 import { TaskAmount } from "./TaskAmount";
 import { stepsHref, useOrderLinks } from "./homeLinks";
 import { canComplete } from "./useCompleteTask";
@@ -98,50 +99,54 @@ export function NeedRow({ task, busy, onComplete }: NeedRowProps) {
       }
       action={
         doIt ? (
-          <Button
-            variant="outline"
-            size="sm"
-            data-task-action
-            data-task-kind={task.kind}
-            data-task-id={task.id}
-            data-order={order ?? undefined}
-            className={`${target} w-full sm:w-auto`}
-            disabled={busy}
-            aria-label={t("needs.actionOn", { action: verb, order: what })}
-            aria-describedby={recordsId}
-            onClick={onComplete}
-          >
-            <Icon aria-hidden="true" />
-            {verb}
-            <span id={recordsId} className="sr-only">
-              {records}
-            </span>
-          </Button>
-        ) : href ? (
-          <Button
-            asChild
-            variant="outline"
-            size="sm"
-            className={`${target} w-full sm:w-auto`}
-          >
-            <Link
-              to={href}
+          <TaskTip hint={records} className="w-full sm:w-auto">
+            <Button
+              variant="outline"
+              size="sm"
               data-task-action
               data-task-kind={task.kind}
               data-task-id={task.id}
               data-order={order ?? undefined}
+              className={`${target} w-full sm:w-auto`}
+              disabled={busy}
               aria-label={t("needs.actionOn", { action: verb, order: what })}
-              aria-describedby={paying ? recordsId : undefined}
+              aria-describedby={recordsId}
+              onClick={onComplete}
             >
+              <Icon aria-hidden="true" />
               {verb}
-              <ArrowRight aria-hidden="true" />
-              {paying ? (
-                <span id={recordsId} className="sr-only">
-                  {records}
-                </span>
-              ) : null}
-            </Link>
-          </Button>
+              <span id={recordsId} className="sr-only">
+                {records}
+              </span>
+            </Button>
+          </TaskTip>
+        ) : href ? (
+          <TaskTip hint={records} enabled={paying} className="w-full sm:w-auto">
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className={`${target} w-full sm:w-auto`}
+            >
+              <Link
+                to={href}
+                data-task-action
+                data-task-kind={task.kind}
+                data-task-id={task.id}
+                data-order={order ?? undefined}
+                aria-label={t("needs.actionOn", { action: verb, order: what })}
+                aria-describedby={paying ? recordsId : undefined}
+              >
+                {verb}
+                <ArrowRight aria-hidden="true" />
+                {paying ? (
+                  <span id={recordsId} className="sr-only">
+                    {records}
+                  </span>
+                ) : null}
+              </Link>
+            </Button>
+          </TaskTip>
         ) : null
       }
     />
