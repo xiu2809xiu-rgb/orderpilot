@@ -2,6 +2,7 @@ import { Inject, Injectable, Optional } from "@nestjs/common";
 import type {
   InboxRole,
   OrderFlow,
+  TaskKind,
   WorkflowReminder,
   WorkflowTask,
 } from "@orderpilot/shared";
@@ -15,6 +16,7 @@ import { MockDecisionOverlay } from "./mock/mock-decision-overlay.js";
 import { buildFlow } from "./mock/mock-flows.js";
 import { buildSprs, type SprRecord } from "./mock/mock-sprs.js";
 import { WorkflowReadModel } from "./workflow-read-model.js";
+import type { RoleTask } from "./workflow-task.repository.js";
 
 interface View {
   readonly dataset: SyntheticDataset;
@@ -23,6 +25,13 @@ interface View {
   readonly orders: ReadonlyMap<string, SyntheticDataset["orders"][number]>;
   readonly customers: ReadonlyMap<string, string>;
 }
+
+/** The kinds of task that are about an SPR, and so open it and say what it buys. */
+const SPR_KINDS: ReadonlySet<TaskKind> = new Set([
+  "RAISE_SPR",
+  "APPROVE_SPR",
+  "PLACE_VENDOR_PO",
+]);
 
 /** What an SPR task would buy, from the SPR it is about. */
 function sprSummaryOf(spr: SprRecord): NonNullable<WorkflowTask["spr"]> {
@@ -131,6 +140,43 @@ export class MockWorkflowReadModel extends WorkflowReadModel {
         this.overlay.paymentsOf(orderNo),
       ),
     );
+  }
+
+  sprByOrder(orderNo: string): Promise<SprRecord | null> {
+    const spr = [...this.view().sprs.values()].find(
+      (entry) => entry.orderNo === orderNo,
+    );
+    return spr ? this.sprByRecordNo(spr.ref.recordNo) : Promise.resolve(null);
+  }
+
+  describe(task: RoleTask, now: Date): Promise<WorkflowTask | null> {
+    const { orders, customers, sprs } = this.view();
+    const order = orders.get(task.orderRef);
+    if (!order) return Promise.resolve(null);
+    const spr = [...sprs.values()].find(
+      (entry) => entry.orderNo === task.orderRef,
+    );
+    const aboutSpr = SPR_KINDS.has(task.kind) && spr !== undefined;
+    const customerNo = order.header.sellToCustomerNo;
+    return Promise.resolve({
+      id: task.id,
+      kind: task.kind,
+      title: task.title,
+      assigneeRole: task.assigneeRole,
+      orderNo: task.orderRef,
+      ref: aboutSpr ? spr.ref : null,
+      status: "OPEN",
+      createdAt: task.createdAt.toISOString(),
+      dueAt: task.dueAt.toISOString(),
+      overdue: task.dueAt < now,
+      customerNo,
+      customerName: customers.get(customerNo) ?? customerNo,
+      // An SPR task's amount is the request's, as for the sample's own tasks.
+      amount: aboutSpr ? spr.amount : order.total,
+      currencyCode: "USD",
+      priority: order.priority,
+      ...(aboutSpr ? { spr: sprSummaryOf(spr) } : {}),
+    });
   }
 
   sprByRecordNo(recordNo: string): Promise<SprRecord | null> {

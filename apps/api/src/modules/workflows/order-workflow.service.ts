@@ -170,6 +170,8 @@ export class OrderWorkflowService {
     actor: OrderActor,
     info: RequestInfo,
     now: Date = new Date(),
+    /** Writes that must commit or roll back with the move, such as a raised SPR's record and tasks. */
+    alongside?: () => Promise<void>,
   ): Promise<OrderTransitionResult> {
     // The signature leaves these out; this keeps a cast from getting past the policy.
     const type: string = command.type;
@@ -180,7 +182,15 @@ export class OrderWorkflowService {
     ) {
       throw new Error(`${type} must go through decideSpr.`);
     }
-    return this.transition(orderRef, command, actor, info, now);
+    return this.transition(
+      orderRef,
+      command,
+      actor,
+      info,
+      now,
+      undefined,
+      alongside,
+    );
   }
 
   /**

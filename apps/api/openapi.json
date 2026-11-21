@@ -934,6 +934,7 @@
                 "REVIEW_FIELDS",
                 "RAISE_SPR",
                 "APPROVE_SPR",
+                "PLACE_VENDOR_PO",
                 "SEND_PI",
                 "CONFIRM_PAYMENT",
                 "PACK_ORDER",
@@ -976,6 +977,7 @@
                               "REVIEW_FIELDS",
                               "RAISE_SPR",
                               "APPROVE_SPR",
+                              "PLACE_VENDOR_PO",
                               "SEND_PI",
                               "CONFIRM_PAYMENT",
                               "PACK_ORDER",
@@ -1228,6 +1230,7 @@
                               "REVIEW_FIELDS",
                               "RAISE_SPR",
                               "APPROVE_SPR",
+                              "PLACE_VENDOR_PO",
                               "SEND_PI",
                               "CONFIRM_PAYMENT",
                               "PACK_ORDER",
@@ -1634,6 +1637,7 @@
                 "REVIEW_FIELDS",
                 "RAISE_SPR",
                 "APPROVE_SPR",
+                "PLACE_VENDOR_PO",
                 "SEND_PI",
                 "CONFIRM_PAYMENT",
                 "PACK_ORDER",
@@ -1685,6 +1689,7 @@
                               "REVIEW_FIELDS",
                               "RAISE_SPR",
                               "APPROVE_SPR",
+                              "PLACE_VENDOR_PO",
                               "SEND_PI",
                               "CONFIRM_PAYMENT",
                               "PACK_ORDER",
@@ -2152,6 +2157,7 @@
                               "REVIEW_FIELDS",
                               "RAISE_SPR",
                               "APPROVE_SPR",
+                              "PLACE_VENDOR_PO",
                               "SEND_PI",
                               "CONFIRM_PAYMENT",
                               "PACK_ORDER",
@@ -2273,6 +2279,7 @@
                               "REVIEW_FIELDS",
                               "RAISE_SPR",
                               "APPROVE_SPR",
+                              "PLACE_VENDOR_PO",
                               "SEND_PI",
                               "CONFIRM_PAYMENT",
                               "PACK_ORDER",
@@ -2414,6 +2421,7 @@
                             "REVIEW_FIELDS",
                             "RAISE_SPR",
                             "APPROVE_SPR",
+                            "PLACE_VENDOR_PO",
                             "SEND_PI",
                             "CONFIRM_PAYMENT",
                             "PACK_ORDER",
@@ -3538,6 +3546,16 @@
                             "youDecide"
                           ],
                           "additionalProperties": false
+                        },
+                        "stage": {
+                          "type": "string",
+                          "enum": ["suggested", "with-approvers", "decided"]
+                        },
+                        "raiseTaskId": {
+                          "nullable": true,
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                         },
                         "due": {
                           "nullable": true,

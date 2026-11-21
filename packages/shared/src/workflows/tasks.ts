@@ -26,6 +26,8 @@ export const TASK_KINDS = [
   "REVIEW_FIELDS",
   "RAISE_SPR",
   "APPROVE_SPR",
+  /** After approval: the product manager places the vendor PO, as Spectra said on 5 Nov. */
+  "PLACE_VENDOR_PO",
   "SEND_PI",
   "CONFIRM_PAYMENT",
   "PACK_ORDER",
@@ -119,6 +121,7 @@ export type TasksQuery = z.infer<typeof tasksQuerySchema>;
  */
 export const COMPLETABLE_TASK_KINDS = [
   "RAISE_SPR",
+  "PLACE_VENDOR_PO",
   "SEND_PI",
   "PACK_ORDER",
   "RECOUNT_CARTONS",

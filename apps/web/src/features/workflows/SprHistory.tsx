@@ -14,14 +14,30 @@ interface Step {
 /**
  * The SPR's approval steps in order, so who asked, who it went to and where
  * the decision stands are on the record itself: requested, sent to the
- * approvers, then the decision or the wait for one.
+ * approvers, then the decision or the wait for one. A suggestion has not been
+ * sent anywhere yet, and a rejected SPR waits for its product manager again.
  */
 export function SprHistory({ spr }: { spr: SprDetail }) {
   const { t } = useTranslation("workflows");
+  const name = spr.requestedBy.name;
+  if (spr.stage === "suggested") {
+    return (
+      <StepList
+        steps={[
+          {
+            key: "suggested",
+            text: t("spr.history.suggested"),
+            at: formatDate(spr.requestedAt),
+          },
+          { key: "toRaise", text: t("spr.history.toRaise", { name }) },
+        ]}
+      />
+    );
+  }
   const steps: Step[] = [
     {
       key: "requested",
-      text: t("spr.history.requested", { name: spr.requestedBy.name }),
+      text: t("spr.history.requested", { name }),
       at: formatDate(spr.requestedAt),
     },
     {
@@ -40,6 +56,12 @@ export function SprHistory({ spr }: { spr: SprDetail }) {
       at: formatDate(spr.decision.at),
       note: spr.decision.comment,
     });
+    if (spr.raiseTaskId) {
+      steps.push({
+        key: "backToRaise",
+        text: t("spr.history.backToRaise", { name }),
+      });
+    }
   } else if (spr.due) {
     steps.push({
       key: "waiting",
@@ -50,6 +72,10 @@ export function SprHistory({ spr }: { spr: SprDetail }) {
     });
   }
 
+  return <StepList steps={steps} />;
+}
+
+function StepList({ steps }: { steps: readonly Step[] }) {
   return (
     <ol className="space-y-s2 border-l border-border pl-s3">
       {steps.map((step) => (

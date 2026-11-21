@@ -685,6 +685,7 @@ export * from './workflowsSpr200DataPassedToAskedOutcome.ts';
 export * from './workflowsSpr200DataRef.ts';
 export * from './workflowsSpr200DataRequestedBy.ts';
 export * from './workflowsSpr200DataRequestedByRole.ts';
+export * from './workflowsSpr200DataStage.ts';
 export * from './workflowsSpr200DataVendor.ts';
 export * from './workflowsSpr200Meta.ts';
 export * from './workflowsUndoDecision200.ts';
