@@ -83,9 +83,11 @@ test.describe("F-9: a refusal read in the audit viewer", () => {
   // The criterion asks for an auditor who sees a masked value. Every masking
   // rule for audit events shows its field to the auditor, so the masked side
   // is the system admin's, and the auditor sees the same value in full
-  // (ADR 0054). Warehouse never holds approvals.decide, so this call can
-  // never reject a real SPR. The reject route keeps it apart from E2E #3's
-  // approve route, which runs at the same time.
+  // (ADR 0059). ADR 0058 changes both halves: its step 4 gives the unmasked
+  // view to the system admin, and its step 5 stops signing in as the auditor.
+  // Warehouse never holds approvals.decide, so this call can never reject a
+  // real SPR. The reject route keeps it apart from E2E #3's approve route,
+  // which runs at the same time.
   const route = "POST /api/v1/workflows/sprs/:recordNo/reject";
   const isOneEvent = (url: string) =>
     /\/api\/v1\/audit\/events\/[0-9a-f-]{36}$/.test(new URL(url).pathname);
