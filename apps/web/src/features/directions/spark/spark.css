@@ -213,7 +213,8 @@
       transparent 100%
     );
     opacity: 0.55;
-    animation: spark-orb-turn 18s linear infinite;
+    /* 18 s and 9 s until 21 Nov, when the drawn orbs went 1.75 times as fast. */
+    animation: spark-orb-turn 10s linear infinite;
   }
   /* The highlight drifts across the face, as light does on glass that moves. */
   .spark-orb-still::after {
@@ -224,7 +225,7 @@
       transparent 36%
     );
     opacity: 0.5;
-    animation: spark-orb-drift 9s ease-in-out infinite alternate;
+    animation: spark-orb-drift 5s ease-in-out infinite alternate;
   }
   .spark-orb-still[data-state="thinking"]::before {
     animation-duration: 6s;
