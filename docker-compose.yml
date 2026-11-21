@@ -48,6 +48,27 @@ x-app-env: &app-env
   METRICS_TOKEN:
   SENTRY_DSN:
   BANK_FINGERPRINT_KEY:
+  # The AI gateway (P-17): the mock unless the .env chooses a provider. Keys
+  # and the rest are passed through as they are, so an unset name stays unset.
+  AI_PROVIDER: ${AI_PROVIDER:-mock}
+  GEMINI_API_KEY:
+  GROQ_API_KEY:
+  AI_BASE_URL:
+  AI_API_KEY:
+  AI_MODEL:
+  AI_VISION_MODEL:
+  AI_STRUCTURED_OUTPUT:
+  AI_TIMEOUT_MS:
+  AI_MAX_ATTEMPTS:
+  AI_MAX_TOOL_STEPS:
+  AI_MAX_IMAGES_PER_REQUEST:
+  AI_MAX_OUTPUT_TOKENS:
+  AI_PRICE_INPUT_USD_PER_MTOK:
+  AI_PRICE_OUTPUT_USD_PER_MTOK:
+  AI_BEDROCK_REGION:
+  AI_BEDROCK_ACCESS_KEY_ID:
+  AI_BEDROCK_SECRET_ACCESS_KEY:
+  AI_BEDROCK_SESSION_TOKEN:
 
 x-api-build: &api-build
   context: .

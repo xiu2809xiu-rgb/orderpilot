@@ -1,31 +1,49 @@
 // Area 1 models: documents and the AI pipeline. Owner: Richie.
 //
 // G-1 (area 4) added AiUsageRecord here, additively, because its AI usage and
-// cost screen reads it. The gateway (P-17) writes it: until then the table is
-// empty and the screen says so.
+// cost screen reads it. The gateway (P-17) writes it, one row per gateway call.
 
-/// One model call: what was asked for, what it cost, how long it took. The
-/// fields follow aiUsageSchema in @orderpilot/shared.
+/// One gateway call: what was asked for, what it cost, how long it took. The
+/// first thirteen fields follow aiUsageSchema in @orderpilot/shared, which area
+/// 4's screen reads. documentId, origin, classification, attempts and
+/// reasonCode are the gateway's own, added by P-17. Metadata only: a prompt,
+/// a document or an answer is never stored here.
 model AiUsageRecord {
-  id            String   @id @default(uuid(7)) @db.Uuid
-  occurredAt    DateTime @db.Timestamptz(3)
+  id             String   @id @default(uuid(7)) @db.Uuid
+  occurredAt     DateTime @db.Timestamptz(3)
   /// The product feature that asked, such as "document-extraction".
-  feature       String
-  provider      String
-  model         String
-  promptVersion String
-  inputTokens   Int
-  outputTokens  Int
-  /// USD, four places like every amount in the app.
-  costUsd       Decimal  @db.Decimal(14, 4)
-  latencyMs     Int
+  feature        String
+  /// The setting's name (mock, gemini, groq, openai-compatible, bedrock).
+  provider       String
+  model          String
+  promptVersion  String
+  inputTokens    Int
+  outputTokens   Int
+  /// USD, four places like every amount in the app. An estimate: tokens times
+  /// the configured prices.
+  costUsd        Decimal  @db.Decimal(14, 4)
+  latencyMs      Int
   /// ok, error, refused or timeout.
-  status        String
+  status         String
   /// The person on whose action the call ran. Null for a background job.
-  userId        String?  @db.Uuid
-  traceId       String
-  createdAt     DateTime @default(now()) @db.Timestamptz(3)
+  userId         String?  @db.Uuid
+  traceId        String
+  createdAt      DateTime @default(now()) @db.Timestamptz(3)
+  /// The document the call read, as text with no foreign key: P-18 owns
+  /// documents, and a usage record must outlive a deleted one.
+  documentId     String?
+  /// What the destination check was asked: where the data came from (synthetic
+  /// or real) and how it is classified.
+  origin         String?
+  classification String?
+  /// Provider requests made for this call (a retry after invalid output adds
+  /// one). Tokens and latency cover all of them.
+  attempts       Int      @default(1)
+  /// A short code for an outcome that is not ok, such as a policy rule id,
+  /// provider-http-429 or invalid-output. Never a message.
+  reasonCode     String?
 
   @@index([occurredAt])
   @@index([feature])
+  @@index([documentId])
 }

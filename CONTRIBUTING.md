@@ -101,6 +101,21 @@ One `.env` at the repository root is enough. Its values are safe for a laptop an
 - **References.** A value may use another, such as `${POSTGRES_PORT}`, so one line moves every URL built from it.
 - **Missing values.** If something required is missing, the API stops and names the file to create.
 
+### Add an AI provider's key
+
+The API answers from the mock, which is offline, until the root `.env` names a real provider. Put the key in with one command, so it is never typed into a chat, a file by hand or a screen:
+
+```sh
+pnpm ai:key
+```
+
+It asks which provider (`gemini`, the default, or `groq`), then the key (in a terminal nothing shows as you type or paste), then the model id. The id has no default because providers rename and retire models often, and the question says where to find the current ones. It then sets `AI_PROVIDER`, the provider's key variable (`GEMINI_API_KEY` or `GROQ_API_KEY`) and `AI_MODEL` in the root `.env`, creating that file from `.env.example` if it is missing, and keeps every other line as it was.
+
+- **It never shows the key.** Not on screen, not in a log, not even in part: in a terminal nothing shows as you type or paste. It can only hide the key where the terminal gives it a real keyboard input, so in a terminal that does not (for example Git Bash without winpty) it refuses with one line and changes nothing. Run it in PowerShell, Windows Terminal or the VS Code terminal. An empty or malformed answer changes nothing, and so does Ctrl+C.
+- **It sends nothing anywhere.** The key is checked by the gateway, not by this command: restart the API (Ctrl+C on `pnpm dev`, then start it again), sign in as System admin and send the probe request in `apps/api/requests/ai.http`. The answer says `ok`, `error` or `timeout` with a reason code, and never a key.
+- **Where it can be overruled.** A variable set in your shell wins over the file, and `apps/api/.env`, if you have one, is read before the root `.env`. The command says so when it sees either.
+- **Only synthetic data may be sent to a real provider,** and a free tier may keep what it is sent.
+
 ### Change a port
 
 The ports are lines in `.env`. Change one line and every URL built from it moves with it.
@@ -201,6 +216,7 @@ Read [`samples/README.md`](samples/README.md) first. `pnpm samples:up` starts a 
 | `pnpm check:licence-key`   | No licence key value and no env file in any tracked file                                                                      |
 | `pnpm check:secrets`       | secretlint over the whole working tree                                                                                        |
 | `pnpm local:setup`         | The whole set-up, safe to repeat after a pull: `.env` if missing, the stack, Prisma client, migrations, shared packages, seed |
+| `pnpm ai:key`              | Asks for an AI provider, its key (hidden) and a model id, and sets them in the root `.env`                                    |
 | `pnpm dev`                 | The API and the web app together, restarting the API when you save a file                                                     |
 | `pnpm stack:up`            | `docker compose up -d --wait` for the four stores only: PostgreSQL, Redis, MinIO and Mailpit, healthy before it returns       |
 | `pnpm stack:down`          | `docker compose down`: stops and removes the containers, keeps the data                                                       |
