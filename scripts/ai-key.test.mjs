@@ -190,7 +190,10 @@ describe("configureAiKey", () => {
 
   it("never prints the key, nor any part of it", async () => {
     await run(["gemini", FAKE_KEY, "m"]);
-    const text = output();
+    // The output names the .env in a temporary folder with a random name,
+    // which could share six letters with the key by chance (it did once in
+    // CI: "op-ai-key-f..." holds "-key-f"). Only the folder is taken out.
+    const text = output().split(root).join("<folder>");
     assert.ok(!text.includes(FAKE_KEY));
     for (let start = 0; start + 6 <= FAKE_KEY.length; start += 1) {
       assert.ok(!text.includes(FAKE_KEY.slice(start, start + 6)));
