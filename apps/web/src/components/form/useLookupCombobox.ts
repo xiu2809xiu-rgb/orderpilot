@@ -166,8 +166,14 @@ export function useLookupCombobox({
       } else if (text.trim() !== "" && state.status === "done") {
         // Nothing is chosen, so say so now, in the field's own words, as leaving
         // the field would: the form's rule runs first, and the generic line is
-        // only the fallback for a form whose rule says nothing about it.
-        void trigger(name).then(flagUnmatched);
+        // only the fallback for a form whose rule says nothing about it. After
+        // this key's other handlers, so that a message a screen has just set
+        // for it (a grid saying no item has that number) is not replaced.
+        setTimeout(() => {
+          if (getFieldState(name).error === undefined) {
+            void trigger(name).then(flagUnmatched);
+          }
+        }, 0);
       }
     } else if (event.key === "Escape") {
       armed.current = false;
