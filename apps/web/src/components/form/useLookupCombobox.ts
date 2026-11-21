@@ -38,7 +38,7 @@ export function useLookupCombobox({
   onPick,
 }: LookupBehaviour) {
   const { t } = useTranslation("form");
-  const { setError, getFieldState } = useFormContext();
+  const { setError, getFieldState, trigger } = useFormContext();
   const listId = useId();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState<string | null>(null);
@@ -163,6 +163,11 @@ export function useLookupCombobox({
       if (hit) pick(hit);
       else if (text.trim() !== "" && state.status === "loading") {
         waiting.current = true;
+      } else if (text.trim() !== "" && state.status === "done") {
+        // Nothing is chosen, so say so now, in the field's own words, as leaving
+        // the field would: the form's rule runs first, and the generic line is
+        // only the fallback for a form whose rule says nothing about it.
+        void trigger(name).then(flagUnmatched);
       }
     } else if (event.key === "Escape") {
       armed.current = false;

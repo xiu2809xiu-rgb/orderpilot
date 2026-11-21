@@ -43,7 +43,8 @@ function announcementKey(state: LookupState) {
 /**
  * The search box of a lookup, on the ARIA combobox pattern. Typing searches;
  * the arrows move through the results of what is typed now; Enter or Tab picks
- * the record the text names, or the highlighted one; Escape closes the list,
+ * the record the text names, or the highlighted one (Enter on text that names
+ * none says so at once, and chooses nothing); Escape closes the list,
  * then puts back what was there before. Leaving with text that names no record
  * leaves the field empty and says so. The list is a popover, so that a grid
  * cell or a short window can neither clip it nor push it off screen.
