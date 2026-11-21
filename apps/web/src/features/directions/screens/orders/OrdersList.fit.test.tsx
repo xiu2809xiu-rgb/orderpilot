@@ -119,6 +119,34 @@ describe("the date range", () => {
     expect(screen.queryByText(/^Ordered /)).toBeNull();
   });
 
+  it("says it on the closed More filters button, tied to it, until the dates are in order", async () => {
+    stubApi();
+    const user = userEvent.setup();
+    open(reversed);
+    await bodyRows();
+    const button = screen.getByRole("button", { name: /More filters/ });
+    // Closed: no popover, and still a word on the control and for a screen reader.
+    expect(screen.queryByLabelText("From")).toBeNull();
+    expect(screen.getByText("Dates not in order")).toBeVisible();
+    expect(button).toHaveAccessibleDescription("Dates not in order");
+    await user.click(button);
+    fireEvent.change(await screen.findByLabelText("From"), {
+      target: { value: "2026-11-01" },
+    });
+    fireEvent.change(screen.getByLabelText("To"), {
+      target: { value: "2026-11-10" },
+    });
+    expect(screen.queryByText("Dates not in order")).toBeNull();
+    expect(button).not.toHaveAccessibleDescription();
+  });
+
+  it("says nothing on the button for a range in order", async () => {
+    stubApi();
+    open("?from=2026-11-01&to=2026-11-10");
+    await bodyRows();
+    expect(screen.queryByText("Dates not in order")).toBeNull();
+  });
+
   it("filters again, and shows the span, once the dates are in order", async () => {
     stubApi();
     const user = userEvent.setup();
@@ -218,12 +246,13 @@ describe("a narrow window", () => {
 });
 
 describe("the held reason in a row", () => {
-  it("says why under the stage, from the row's own data", async () => {
+  it("says nothing about a payment under the stage, which the row's data cannot support", async () => {
     stubApi();
     open("?view=held");
     const rows = await bodyRows();
+    expect(within(nth(rows, 0)).getByText(/Waiting for payment/)).toBeVisible();
     expect(
-      within(nth(rows, 0)).getByText("Payment not confirmed"),
-    ).toBeVisible();
+      within(nth(rows, 0)).queryByText("Payment not confirmed"),
+    ).toBeNull();
   });
 });

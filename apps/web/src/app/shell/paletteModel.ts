@@ -5,11 +5,13 @@ import { useRecordTabs, type RecordTab } from "@/stores/recordTabs";
 import { useSessionStore } from "@/stores/session";
 import {
   actionEntries,
+  demoEntries,
   matching,
   pageEntries,
   recentTabs,
   type PlainEntry,
 } from "./paletteEntries";
+import { useUploadEntry } from "./demoParts";
 import { trimQuery } from "./paletteMatch";
 import {
   MIN_QUERY_LENGTH,
@@ -17,6 +19,7 @@ import {
   type RecordHit,
 } from "./paletteRecords";
 import { usePaletteRecords } from "./paletteSearch";
+import { useSparkPanel } from "./sparkPanel";
 
 export type PaletteRow =
   | { type: "plain"; entry: PlainEntry }
@@ -47,8 +50,23 @@ export function usePaletteModel(raw: string) {
   const tabs = useRecordTabs((state) => state.tabs);
   const query = trimQuery(raw);
   const records = usePaletteRecords(query);
+  // The demo tools of the top bar, offered on the same terms, in their own group.
+  const upload = useUploadEntry();
+  const spark = useSparkPanel();
+  const { available, setOpen } = spark;
 
   const pages = useMemo(() => pageEntries(session, t), [session, t]);
+  const demo = useMemo(
+    () =>
+      demoEntries(t, {
+        upload,
+        spark: available,
+        openSpark: () => {
+          setOpen(true);
+        },
+      }),
+    [t, upload, available, setOpen],
+  );
   const actions = useMemo(
     () => actionEntries(session, t, pages),
     [session, t, pages],
@@ -76,6 +94,7 @@ export function usePaletteModel(raw: string) {
             ]
           : []),
         ...tail("pages", t("palette.goTo"), pages),
+        ...tail("demo", t("palette.demo"), demo),
         ...tail("actions", t("palette.actions"), actions),
       ];
     }
@@ -95,9 +114,10 @@ export function usePaletteModel(raw: string) {
           : [],
       ),
       ...tail("pages", t("palette.goTo"), matching(pages, query)),
+      ...tail("demo", t("palette.demo"), matching(demo, query)),
       ...tail("actions", t("palette.actions"), matching(actions, query)),
     ];
-  }, [query, tabs, pages, actions, records.hits, t]);
+  }, [query, tabs, pages, demo, actions, records.hits, t]);
 
   const count = sections.reduce((sum, section) => sum + section.rows.length, 0);
   const lookedUp = query.length >= MIN_QUERY_LENGTH;

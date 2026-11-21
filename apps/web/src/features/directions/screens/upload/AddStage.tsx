@@ -6,11 +6,13 @@ import { Section } from "@/components/parts/Section";
 import { SAMPLE_SHOWN, sampleFor, type PreviewName } from "./demoDocument";
 import { DropZone } from "./DropZone";
 import { FileRow, type SampleNote } from "./FileRow";
+import { RefusedNotes } from "./RefusedNotes";
 import type { useUploads } from "./useUploads";
 
 /**
- * The first step: the drop zone with its limits, a row for every file with
- * its progress or its refusal, and the one primary button, Read with Spark.
+ * The first step: the drop zone with its limits, a row for every file that was
+ * taken with its progress, a message for every file that was not, and the one
+ * primary button, Read with Spark.
  * The preview reads a sample, not the file: each row says before anything
  * starts whether its file has a sample, and the button reads the first file
  * that has one. With no file to hand, the demo purchase order starts the same
@@ -25,7 +27,7 @@ export function AddStage({
   onRead: (sample: PreviewName) => void;
 }) {
   const { t } = useTranslation("directions-intake");
-  const { rows, add, remove } = uploads;
+  const { rows, refused, add, remove, dismiss } = uploads;
   const list = useRef<HTMLUListElement>(null);
   const zone = useRef<HTMLDivElement>(null);
   // Where focus goes once a removed row is gone: its successor in the list.
@@ -42,7 +44,7 @@ export function AddStage({
   // The button stays off while any file is being checked, so the first sample
   // in the list is also the first one that is ready.
   const sampled = rows.flatMap((row) => {
-    const sample = row.status === "refused" ? null : sampleFor(row.name);
+    const sample = sampleFor(row.name);
     return sample ? [{ id: row.id, sample }] : [];
   });
   const first = sampled[0];
@@ -73,6 +75,14 @@ export function AddStage({
             }}
           />
         </div>
+        <RefusedNotes
+          notes={refused}
+          onDismiss={(id) => {
+            dismiss(id);
+            // The message that had focus is gone: the drop zone is the next place.
+            zone.current?.querySelector("button")?.focus();
+          }}
+        />
         {rows.length > 0 ? (
           <ul
             ref={list}
@@ -83,9 +93,7 @@ export function AddStage({
               <FileRow
                 key={row.id}
                 row={row}
-                sample={
-                  row.status === "refused" ? null : note(row.id, row.name)
-                }
+                sample={note(row.id, row.name)}
                 onRemove={(id) => {
                   setAfter({ index: rows.findIndex((item) => item.id === id) });
                   remove(id);

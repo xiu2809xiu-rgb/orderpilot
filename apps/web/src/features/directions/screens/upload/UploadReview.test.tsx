@@ -10,6 +10,7 @@ import {
   vi,
 } from "vitest";
 import i18n from "@/i18n";
+import { anyFormDirty } from "@/lib/dirty-forms";
 import { must } from "@/test/must";
 import {
   demo,
@@ -189,17 +190,38 @@ describe("editing a field", () => {
   });
 });
 
+describe("a review in progress counts as unsaved input", () => {
+  // Signing out and a change of role ask first through this check.
+  it("holds nothing before a reading", async () => {
+    upload();
+    await screen.findByText("Choose files");
+    expect(anyFormDirty()).toBe(false);
+  });
+
+  it("is unsaved from the reading until the review is finished", async () => {
+    const user = userEvent.setup();
+    await toStoryline(user);
+    expect(anyFormDirty()).toBe(true);
+    await user.click(screen.getByRole("button", { name: "Confirm Quantity" }));
+    await user.click(screen.getByRole("button", { name: "Finish review" }));
+    expect(anyFormDirty()).toBe(false);
+  });
+});
+
 describe("the end of the review", () => {
   it("says one confirmation was one confirmation, with the order the sample belongs to", async () => {
     const user = userEvent.setup();
     await toStoryline(user);
     await user.click(screen.getByRole("button", { name: "Confirm Quantity" }));
     await user.click(screen.getByRole("button", { name: "Finish review" }));
-    // The card that stayed in view says so too.
+    // The card that stayed in view says it is finished, once, and holds no
+    // disabled Finish review after it.
+    expect(screen.getAllByText(/Review finished/)).toHaveLength(1);
     expect(screen.getByText("Review finished")).toBeVisible();
+    expect(screen.queryByRole("button", { name: "Finish review" })).toBeNull();
     expect(
       screen.getByText(
-        "Review finished: 1 field confirmed by you, 15 fields read above 90 percent",
+        "1 field confirmed by you, 15 fields read above 90 percent",
       ),
     ).toBeVisible();
     expect(
@@ -223,7 +245,7 @@ describe("the end of the review", () => {
     await user.click(screen.getByRole("button", { name: "Finish review" }));
     expect(
       screen.getByText(
-        "Review finished: 2 fields corrected by you, 14 fields read above 90 percent",
+        "2 fields corrected by you, 14 fields read above 90 percent",
       ),
     ).toBeVisible();
   });

@@ -214,7 +214,7 @@ describe("the home page of a role with an inbox", () => {
 
   // The money a person confirms must be there whole, in the row, and never
   // behind a sideways scroll or cut off at the edge of a card.
-  it("confirms a payment in one click and shows its part and its whole in the row", async () => {
+  it("shows a payment's part and its whole in the row, and opens its form instead of confirming", async () => {
     const user = userEvent.setup();
     const payment = makeTask({
       kind: "CONFIRM_PAYMENT",
@@ -238,12 +238,17 @@ describe("the home page of a role with an inbox", () => {
     });
     expect(within(needs()).queryByRole("table")).toBeNull();
     expect(needs().querySelector(".overflow-x-auto, [data-scroll]")).toBeNull();
+    expect(
+      within(row).getByRole("link", {
+        name: "Enter payment details for SO-0300",
+      }),
+    ).toHaveAttribute("href", "/workflows/orders/SO-0300");
     await user.click(
-      within(row).getByRole("button", { name: "Confirm for SO-0300" }),
+      within(row).getByRole("link", {
+        name: "Enter payment details for SO-0300",
+      }),
     );
-    await waitFor(() => {
-      expect(served.calls).toContain("POST payment SO-0300");
-    });
+    expect(served.calls).not.toContain("POST payment SO-0300");
   });
 
   it("counts the rest and links to the whole inbox when there are more tasks than rows", async () => {

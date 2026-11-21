@@ -70,7 +70,7 @@ export function SparkTurnView({
           {turn.question}
         </p>
       </div>
-      <div className="flex flex-col gap-3">
+      <div data-spark-answer className="flex flex-col gap-3">
         <ThoughtLine
           working={turn.phase === "thinking"}
           label={t(`thought.${turn.kind}.working`)}

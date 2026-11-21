@@ -128,6 +128,53 @@ describe("master data routes (mock Business Central)", () => {
     expect(vendors.meta).toMatchObject({ total: 1, mock: true });
   });
 
+  it("searches items by their vendor and customers by their country, on the server", async () => {
+    const byVendor = itemListSchema.parse(
+      (
+        await get(
+          "SUPPORT",
+          `${M}/items?search=${encodeURIComponent(vendor.name)}`,
+        )
+      ).body,
+    );
+    expect(byVendor.meta.total).toBeGreaterThan(0);
+    expect(byVendor.data.every((row) => row.vendorNo === vendor.no)).toBe(true);
+
+    const byCountry = customerListSchema.parse(
+      (
+        await get(
+          "SUPPORT",
+          `${M}/customers?search=${encodeURIComponent("Sri Lanka")}&pageSize=200`,
+        )
+      ).body,
+    );
+    const lk = dataset.customers.filter((c) => c.countryRegionCode === "LK");
+    expect(byCountry.data.map((row) => row.no)).toEqual(
+      expect.arrayContaining(lk.map((c) => c.no)),
+    );
+    const byCode = customerListSchema.parse(
+      (await get("SUPPORT", `${M}/customers?search=LK&pageSize=200`)).body,
+    );
+    expect(byCode.data.map((row) => row.no)).toEqual(
+      expect.arrayContaining(lk.map((c) => c.no)),
+    );
+  });
+
+  it("keeps the paging and the masking when it searches by vendor", async () => {
+    const page = itemListSchema.parse(
+      (
+        await get(
+          "WAREHOUSE",
+          `${M}/items?search=${vendor.no}&page=1&pageSize=2`,
+        )
+      ).body,
+    );
+    expect(page.data.length).toBeLessThanOrEqual(2);
+    expect(page.meta).toMatchObject({ page: 1, pageSize: 2 });
+    expect(page.meta.total).toBeGreaterThan(0);
+    expect(page.data.every((row) => row.unitPrice.masked)).toBe(true);
+  });
+
   it("answers the details and the filters against their contracts", async () => {
     const shown = itemResponseSchema.parse(
       (await get("SUPPORT", `${M}/items/${item.no}`)).body,

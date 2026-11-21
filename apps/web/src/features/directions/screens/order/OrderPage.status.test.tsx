@@ -26,6 +26,7 @@ import {
   renderWithToasts,
   step,
   stubFlow,
+  stubTimeline,
   type FlowAnswer,
 } from "./orderPageTestKit";
 
@@ -77,7 +78,7 @@ afterEach(() => {
 });
 
 describe("the status card", () => {
-  it("shows the stage and the team that holds it, and says nothing else: Current Stage and Held at are the page's own facts, with no sentence repeating them", async () => {
+  it("shows the stage and the team that holds it, and says why when a shortage holds it (ADR 0049): Current Stage and Held at never repeat it", async () => {
     stubApi({ specs: [SHORT] });
     open("SO-0082");
     const held = await screen.findByText("Held at");
@@ -85,6 +86,53 @@ describe("the status card", () => {
     if (!facts) throw new Error("no facts");
     expect(within(facts).getByText("Product manager")).toBeVisible();
     expect(within(facts).getByText("Short on stock")).toBeVisible();
+    const sentence = await screen.findByText(/^707 short on/);
+    expect(sentence).not.toHaveTextContent(/With|Next/);
+  });
+
+  // SO-0041 on the demo data: held at Warehouse by a failed quantity check.
+  it("says why a failed check holds the order, naming neither the team nor the step", async () => {
+    stubApi({
+      specs: [
+        {
+          ...first,
+          orderNo: "SO-0041",
+          status: {
+            code: "sample-packing-list-mismatch",
+            label: "Packing list differs from the PO",
+          },
+          ownerRole: "WAREHOUSE",
+          openExceptions: 1,
+        },
+      ],
+    });
+    // The tracker's real rule id for the packing list quantity.
+    stubTimeline((timeline) => ({
+      ...timeline,
+      checks: timeline.checks.map((check) =>
+        check.outcome === "fail"
+          ? { ...check, ruleId: "mock.sample-quantity" }
+          : check,
+      ),
+    }));
+    open("SO-0041");
+    expect(
+      await screen.findByText("The packing list differs from the PO."),
+    ).toBeVisible();
+  });
+
+  it("says nothing with no shortage and no failed check: Current Stage and Held at already say who has it and on what stage", async () => {
+    stubApi();
+    // The kit gives every order a failed quantity check; this one has passed.
+    stubTimeline((timeline) => ({
+      ...timeline,
+      checks: timeline.checks.map((check) => ({
+        ...check,
+        outcome: "pass" as const,
+      })),
+    }));
+    open("SO-0001");
+    await screen.findByRole("heading", { level: 1, name: "SO-0001" });
     expect(document.querySelector(".od-status-sentence")).toBeNull();
   });
 
@@ -172,7 +220,9 @@ describe("the latest act", () => {
       },
     });
     open("SO-0001");
-    const button = await screen.findByRole("button", { name: "Mark sent" });
+    const button = await screen.findByRole("button", {
+      name: "Mark PI as sent",
+    });
     expect(screen.queryByText(/^Latest:/)).toBeNull();
     await user.click(button);
     expect(
@@ -229,7 +279,7 @@ describe("the first screen", () => {
     await user.keyboard("{Enter}");
     expect(
       await screen.findByText(
-        "A sample order of the synthetic demo set. Samples are read only here.",
+        "A sample order of the synthetic demo set. Its details cannot be edited here.",
       ),
     ).toBeVisible();
   });

@@ -20,6 +20,7 @@ import {
 import type { MasterDataItemsParams } from "@/lib/api/generated/model";
 import { ITEM_SORTABLE, itemColumns } from "./itemColumns";
 import { readOnlyActions } from "./listActions";
+import { maskedColumnReason } from "./pieces";
 
 const URL_FILTERS = {
   brand: null,
@@ -56,7 +57,15 @@ export default function ItemsPage() {
   const masked = list.data?.data[0]?.unitPrice.masked;
   if (masked !== undefined && masked !== priceHidden) setPriceHidden(masked);
   const options = useMasterDataFilters().data?.data;
-  const columns = useMemo(() => itemColumns(t, priceHidden), [t, priceHidden]);
+  const rows = list.data?.data;
+  const priceReason = useMemo(
+    () => maskedColumnReason((rows ?? []).map((row) => row.unitPrice)),
+    [rows],
+  );
+  const columns = useMemo(
+    () => itemColumns(t, priceHidden, priceReason),
+    [t, priceHidden, priceReason],
+  );
   const filters = useMemo<ListFilter[]>(
     () => [
       {

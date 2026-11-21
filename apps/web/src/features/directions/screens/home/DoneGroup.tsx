@@ -21,11 +21,12 @@ const TIME = new Intl.DateTimeFormat("en-GB", {
 });
 
 /**
- * What the person finished from this screen today, newest first. Each line
- * says what was done, for which order and when ("Raised the SPR for SO-0082
- * at 06:03") and is the link to that order, so a person who wants to see the
- * result is one click from it. The real tasks API lists only open tasks, so
- * this list lives in the screen and an Undo takes a line out again.
+ * What the person finished today, from this screen or from an order's page,
+ * newest first. Each line says what was done, for which order and when
+ * ("Raised the SPR for SO-0082 at 06:03") and is the link to that order, so a
+ * person who wants to see the result is one click from it. The real tasks API
+ * lists only open tasks, so this list is the browser's own (`doneToday.ts`)
+ * and an Undo takes a line out again.
  */
 export function DoneGroup({ done }: { done: readonly DoneItem[] }) {
   const { t } = useTranslation("directions-home");
@@ -40,17 +41,18 @@ export function DoneGroup({ done }: { done: readonly DoneItem[] }) {
         </p>
       ) : (
         <Timeline value={done.length}>
-          {done.map(({ task, at }, index) => {
-            const what = tHome(`needs.done.${task.kind}`, {
-              orderNo: task.orderNo ?? task.ref?.recordNo ?? "",
-            });
+          {done.map(({ kind, orderNo, customerName, at }, index) => {
+            // Every kind has its words, including two that nothing records now
+            // (a payment, a review): an earlier build may have left such a line
+            // in this browser, and a missing key would print as the key.
+            const what = tHome(`needs.done.${kind}`, { orderNo });
             const line = t("timeline.done.at", {
               what,
               time: TIME.format(at),
             });
             return (
               <TimelineItem
-                key={task.id}
+                key={`${kind}-${orderNo}-${String(at.getTime())}`}
                 step={index + 1}
                 {...enterProps(index, first)}
               >
@@ -58,20 +60,16 @@ export function DoneGroup({ done }: { done: readonly DoneItem[] }) {
                 <TimelineSeparator />
                 <TimelineHeader>
                   <TimelineTitle>
-                    {task.orderNo ? (
-                      <Link
-                        to={links.order(task.orderNo)}
-                        className="text-ring underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-ring"
-                      >
-                        {line}
-                      </Link>
-                    ) : (
-                      line
-                    )}
+                    <Link
+                      to={links.order(orderNo)}
+                      className="text-ring underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-ring"
+                    >
+                      {line}
+                    </Link>
                   </TimelineTitle>
-                  {task.customerName ? (
+                  {customerName ? (
                     <TimelineDate dateTime={undefined}>
-                      {task.customerName}
+                      {customerName}
                     </TimelineDate>
                   ) : null}
                 </TimelineHeader>

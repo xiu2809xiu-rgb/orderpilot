@@ -91,25 +91,34 @@ describe("the upload screen", () => {
     await waitFor(() => {
       expect(within(list).getByText("Ready")).toBeVisible();
     });
+    // Only the file that was taken is in the list.
+    expect(within(list).getAllByRole("listitem")).toHaveLength(1);
+    expect(within(list).queryByText(/invoice.pdf/)).toBeNull();
+    // The others leave a message each, in a place of their own.
+    const notes = await screen.findByRole("list", {
+      name: "Files that were not added",
+    });
     expect(
-      within(list).getByText(
-        /invoice\.pdf says it is a PDF file but its content is not/,
+      within(notes).getByText(
+        /invoice.pdf says it is a PDF file but its content is not/,
       ),
     ).toBeVisible();
     expect(
-      within(list).getByText(
+      within(notes).getByText(
         "setup.exe is not a PDF, PNG, JPEG, XLSX or CSV file.",
       ),
     ).toBeVisible();
-    expect(within(list).getByText("empty.csv is empty.")).toBeVisible();
+    expect(within(notes).getByText("empty.csv is empty.")).toBeVisible();
     // po.pdf is a real PDF but has no sample: nothing here can be read yet.
     expect(
       screen.getByRole("button", { name: "Read with Spark" }),
     ).toBeDisabled();
     await user.click(
-      within(list).getByRole("button", { name: "Remove invoice.pdf" }),
+      within(notes).getByRole("button", {
+        name: "Dismiss the message about invoice.pdf",
+      }),
     );
-    expect(within(list).queryByText(/invoice\.pdf says/)).toBeNull();
+    expect(within(notes).queryByText(/invoice.pdf says/)).toBeNull();
   });
 
   it("refuses a file over the size limit without reading it", async () => {
@@ -315,7 +324,7 @@ describe("the upload screen", () => {
     await user.click(create);
     expect(
       await screen.findByText(
-        "Review finished: 1 field confirmed by you, 1 field corrected by you, 19 fields read above 90 percent",
+        "1 field confirmed by you, 1 field corrected by you, 19 fields read above 90 percent",
       ),
     ).toBeVisible();
     expect(
@@ -326,7 +335,7 @@ describe("the upload screen", () => {
     expect(
       screen.getByRole("link", { name: "Open order SO-0102" }),
     ).toBeVisible();
-    expect(create).toBeDisabled();
+    expect(screen.queryByRole("button", { name: "Finish review" })).toBeNull();
   });
 
   it("says so, with a way to try again, when the demo document cannot be loaded", async () => {
@@ -359,6 +368,22 @@ describe("the upload screen", () => {
       screen.getByRole("button", { name: "Use the demo purchase order" }),
     );
     await screen.findByRole("heading", { name: "Review what Spark read" });
+    expect(await axeViolations(container)).toEqual([]);
+  }, 60_000);
+
+  it("has no accessibility violations with a refused file on screen", async () => {
+    // The input's accept list would drop the file before the page saw it, and
+    // then nothing would be refused for axe to look at.
+    const user = userEvent.setup({ applyAccept: false });
+    const { container } = upload();
+    const input = await screen.findByLabelText("Documents to upload");
+    await user.upload(input, [pdf(), new File(["MZ"], "setup.exe")]);
+    const notes = await screen.findByRole("list", {
+      name: "Files that were not added",
+    });
+    // A list of plain items: the announcement sits inside each, so an item
+    // keeps its role as an item.
+    expect(within(notes).getAllByRole("listitem")).toHaveLength(1);
     expect(await axeViolations(container)).toEqual([]);
   }, 60_000);
 });

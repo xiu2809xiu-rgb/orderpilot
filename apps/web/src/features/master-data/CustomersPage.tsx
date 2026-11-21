@@ -18,6 +18,7 @@ import {
 } from "@/lib/api/generated/endpoints/master-data/master-data";
 import type { MasterDataCustomersParams } from "@/lib/api/generated/model";
 import { readOnlyActions } from "./listActions";
+import { paymentTermsLabel } from "./paymentTerms";
 import { countryName } from "./pieces";
 
 const URL_FILTERS = { country: null, paymentTerms: null };
@@ -62,8 +63,8 @@ function customerColumns(t: TFunction): DataTableColumn<CustomerRow>[] {
     {
       id: "paymentTerms",
       header: t("customers.columns.paymentTerms"),
-      cell: (row) => row.paymentTermsCode,
-      exportValue: (row) => row.paymentTermsCode,
+      cell: (row) => paymentTermsLabel(t, row.paymentTermsCode),
+      exportValue: (row) => paymentTermsLabel(t, row.paymentTermsCode),
     },
     {
       id: "openOrders",
@@ -104,8 +105,6 @@ export default function CustomersPage() {
   const options = useMasterDataFilters().data?.data;
   const columns = useMemo(() => customerColumns(t), [t]);
   const filters = useMemo<ListFilter[]>(() => {
-    const plain = (values: readonly string[] = []) =>
-      values.map((value) => ({ value, label: value }));
     return [
       {
         id: "country",
@@ -120,7 +119,10 @@ export default function CustomersPage() {
         id: "paymentTerms",
         label: t("customers.filters.paymentTerms"),
         allLabel: t("customers.filters.allPaymentTerms"),
-        options: plain(options?.paymentTerms),
+        options: (options?.paymentTerms ?? []).map((code) => ({
+          value: code,
+          label: paymentTermsLabel(t, code),
+        })),
       },
     ];
   }, [t, options]);

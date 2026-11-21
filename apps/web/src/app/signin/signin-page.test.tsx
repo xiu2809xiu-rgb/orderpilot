@@ -256,6 +256,12 @@ describe("the promise", () => {
     expect(steps).toHaveTextContent(
       "Business Central stays the system of record",
     );
+    // What the rules do is what the product does (ADR 0047 and 0049): the
+    // documents agree, and stock covers the order. No limits, no price of its own.
+    expect(steps).toHaveTextContent(
+      "Fixed rules compare quantities, prices and PO references across the documents, and check stock.",
+    );
+    expect(steps).not.toHaveTextContent("approval limits");
   });
 
   it("puts the form first in the keyboard order and the theme switch last", async () => {

@@ -388,12 +388,18 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 | #288  | Home leads with what needs the team                   | `feat/platform-home-next-act`    | This pull request. Needs you first, labelled amounts and honest one-click words     |
 | #286  | The entrance: six teams first, in flow order          | `feat/platform-entrance-flow`    | This pull request. A role change stays on the order's page                          |
 | #285  | The build shown at the proposal presentation          | `feat/platform-proposal-demo`    | This pull request. It brings the 25 commits shown on 17 Nov, with `main` merged in  |
+| #308  | A short trail and a glossary in the shell             | `feat/platform-wayfinding`       | This pull request. The trail, What the words mean in Help, long forms in reach      |
+| #307  | Master data: names, stock words and search            | `fix/area1-master-data-pages`    | This pull request. Names first, stock words, a wider search and plain masks         |
 | #303  | Upload and review: in view, honest, edits checked     | `fix/area1-upload-review`        | This pull request. Progress card in view, the sample named, edits checked           |
 | #306  | The new order form: price, dates, look-alikes         | `fix/area1-new-order-form`       | This pull request. The PO sets the price. It also finishes #278, the tablet grid    |
 | #302  | The Orders list: fit, held reason, last page          | `fix/area1-orders-list-fit`      | This pull request. Fits 1366 by 768 and says why an order is held                   |
 | #301  | The order page says who has it, why and what is next  | `feat/area1-order-page-status`   | This pull request. The sentence, the latest act, the documents and the address      |
+| #314  | The order form: what the review found                 | `fix/area1-order-form-review`    | This pull request. Corrects #306 after a review against the ADRs                    |
 | #312  | The order page review fixes                           | `fix/area1-order-page-review`    | This pull request. Corrections to #298, #301 and #309 found by a review             |
+| #319  | Sign-out forgets what the browser kept                | `fix/platform-sign-out-forgets`  | This pull request. The next person at a tab is not drawn the last one's answers     |
 | #311  | Words and claims corrected after review               | `fix/platform-words-and-claims`  | This pull request. Home, sign-in and Spark say no more than the workflow does       |
+| #322  | The shell, Spark, Upload and form polish              | `fix/platform-shell-polish`      | This pull request. What the final walk found, fixed in the lead's own screens       |
+| #321  | The order thread: Home, Orders, order page            | `fix/area1-order-thread`         | This pull request. True words on review and payment, Done today kept                |
 | #191  | Cut CI minutes before the repository goes private     | `ci/minutes-job-conditions`      | Merged, [#192](https://github.com/xiu2809xiu-rgb/orderpilot/pull/192)               |
 | P-42  | Plan prompt 004                                       | `chore/plan-prompt-004`          | Merged, [#138](https://github.com/xiu2809xiu-rgb/orderpilot/pull/138)               |
 | P-13  | Docker images and the IaC scan                        | `ci/docker`                      | Merged, [#172](https://github.com/xiu2809xiu-rgb/orderpilot/pull/172)               |

@@ -10,7 +10,7 @@ function Fact({
   main = false,
   labelClassName = "od-fact-label fs-12",
 }: {
-  label: string;
+  label: ReactNode;
   children: ReactNode;
   /** The figure the eye should land on: set larger. */
   main?: boolean;

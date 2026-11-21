@@ -44,7 +44,7 @@ function groupOf(entry: MenuEntry): GroupId {
 }
 
 /**
- * The role's menu, regrouped by what people are doing: work, stock and buying,
+ * The role's menu, regrouped by what people are doing: work, master data,
  * insights, control. Every entry the role has is kept, once. A role that has
  * both Orders and the order tracker gets one Orders row, which stays current
  * on the tracker's pages too; a role with only the tracker keeps its row.

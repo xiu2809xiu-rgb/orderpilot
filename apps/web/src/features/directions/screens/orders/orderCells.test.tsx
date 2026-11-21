@@ -44,8 +44,22 @@ describe("the Stage cell", () => {
   });
 
   it("says why a held order is held, from the row", () => {
+    render(
+      <StageCell
+        row={makeRow({ openExceptions: 2 })}
+        today={TODAY}
+        dots={false}
+      />,
+    );
+    expect(screen.getByText("2 open exceptions")).toBeVisible();
+  });
+
+  // The row has the step its status belongs to, not the payment: Finance may
+  // have confirmed it while the status has not moved, so the list says nothing.
+  it("makes no statement about a payment for an order at the payment step", () => {
     render(<StageCell row={makeRow()} today={TODAY} dots={false} />);
-    expect(screen.getByText("Payment not confirmed")).toBeVisible();
+    expect(screen.getByText("Waiting for payment")).toBeVisible();
+    expect(screen.queryByText(/Payment not confirmed/)).toBeNull();
   });
 
   it("says nothing of why for an order that is not held up", () => {

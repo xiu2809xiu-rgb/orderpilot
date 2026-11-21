@@ -11,6 +11,7 @@ import { Link } from "react-router";
 import { z } from "zod";
 import { RecordLink } from "@/components/common/RecordLink";
 import { Button } from "@/components/ui/button";
+import { orderHref } from "@/features/directions/screens/home/homeLinks";
 import { apiClient } from "@/lib/api/instance";
 import { formatDay } from "@/lib/format";
 import { useSessionStore } from "@/stores/session";
@@ -105,7 +106,7 @@ export function Notifications() {
               {reminders.data?.data.map((reminder) => (
                 <li key={reminder.id}>
                   <RecordLink
-                    to={`/workflows/orders/${reminder.orderNo}`}
+                    to={orderHref(reminder.orderNo)}
                     onClick={close}
                     className="block rounded-sm py-1.5 hover:bg-muted focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
                   >

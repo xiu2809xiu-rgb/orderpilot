@@ -4,7 +4,7 @@ import {
   type OrderCaptureState,
   type OrderSource,
 } from "@orderpilot/shared";
-import { SlidersHorizontal } from "lucide-react";
+import { SlidersHorizontal, TriangleAlert } from "lucide-react";
 import { useId } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -45,6 +45,10 @@ export function MoreFilters({
   const { t } = useTranslation("directions-orders");
   const id = useId();
   const count = moreCount(query);
+  // A reversed range is ignored, yet the address still holds both dates: with
+  // the panel closed nothing else would say why the list is not narrowed.
+  const reversed = rangeReversed(query);
+  const warningId = `${id}-dates`;
   const toggle = (key: "stock" | "toConfirm" | "open", label: string) => (
     <div className="flex min-h-9 items-center justify-between gap-4 pointer-coarse:min-h-11">
       {/* The label fills the row, so on a touch screen the whole row is the target. */}
@@ -64,58 +68,73 @@ export function MoreFilters({
     </div>
   );
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="outline" className="od-control">
-          <SlidersHorizontal aria-hidden="true" />
-          {t("filters.more")}
-          {count > 0 ? (
-            <span
-              className="numeral od-count"
-              aria-label={t("filters.moreOn", { count })}
-            >
-              {count}
-            </span>
-          ) : null}
-        </Button>
-      </PopoverTrigger>
-      {/* Radix measures the room under the button: the panel scrolls inside itself rather than run off a short window. */}
-      <PopoverContent
-        align="start"
-        collisionPadding={12}
-        className="w-80 max-h-(--radix-popover-content-available-height) space-y-3 overflow-y-auto"
-      >
-        <div>
-          {toggle("stock", t("filters.stock"))}
-          {toggle("toConfirm", t("filters.toConfirm"))}
-          {toggle("open", t("filters.open"))}
-        </div>
-        <RadioChoice<OrderCaptureState>
-          legend={t("filters.entry")}
-          anyLabel={t("filters.any")}
-          value={query.entry}
-          options={ORDER_CAPTURE_STATES.map((state) => ({
-            value: state,
-            label: t(`entry.${state}`),
-          }))}
-          onChange={(entry) => {
-            onChange({ entry });
-          }}
-        />
-        <RadioChoice<OrderSource>
-          legend={t("filters.source")}
-          anyLabel={t("filters.any")}
-          value={query.source}
-          options={ORDER_SOURCES.map((source) => ({
-            value: source,
-            label: t(`source.${source}`),
-          }))}
-          onChange={(source) => {
-            onChange({ source });
-          }}
-        />
-        <DateRangeField from={query.from} to={query.to} onChange={onChange} />
-      </PopoverContent>
-    </Popover>
+    <span className="inline-flex flex-wrap items-center gap-2">
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            className="od-control"
+            aria-describedby={reversed ? warningId : undefined}
+          >
+            <SlidersHorizontal aria-hidden="true" />
+            {t("filters.more")}
+            {count > 0 ? (
+              <span
+                className="numeral od-count"
+                aria-label={t("filters.moreOn", { count })}
+              >
+                {count}
+              </span>
+            ) : null}
+          </Button>
+        </PopoverTrigger>
+        {/* Radix measures the room under the button: the panel scrolls inside itself rather than run off a short window. */}
+        <PopoverContent
+          align="start"
+          collisionPadding={12}
+          className="w-80 max-h-(--radix-popover-content-available-height) space-y-3 overflow-y-auto"
+        >
+          <div>
+            {toggle("stock", t("filters.stock"))}
+            {toggle("toConfirm", t("filters.toConfirm"))}
+            {toggle("open", t("filters.open"))}
+          </div>
+          <RadioChoice<OrderCaptureState>
+            legend={t("filters.entry")}
+            anyLabel={t("filters.any")}
+            value={query.entry}
+            options={ORDER_CAPTURE_STATES.map((state) => ({
+              value: state,
+              label: t(`entry.${state}`),
+            }))}
+            onChange={(entry) => {
+              onChange({ entry });
+            }}
+          />
+          <RadioChoice<OrderSource>
+            legend={t("filters.source")}
+            anyLabel={t("filters.any")}
+            value={query.source}
+            options={ORDER_SOURCES.map((source) => ({
+              value: source,
+              label: t(`source.${source}`),
+            }))}
+            onChange={(source) => {
+              onChange({ source });
+            }}
+          />
+          <DateRangeField from={query.from} to={query.to} onChange={onChange} />
+        </PopoverContent>
+      </Popover>
+      {reversed ? (
+        <span
+          id={warningId}
+          className="od-range-error fs-12 inline-flex items-center gap-1"
+        >
+          <TriangleAlert aria-hidden="true" className="size-3.5 shrink-0" />
+          {t("filters.datesNotInOrder")}
+        </span>
+      ) : null}
+    </span>
   );
 }

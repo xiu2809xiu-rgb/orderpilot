@@ -1,4 +1,4 @@
-import { QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider, type QueryClient } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import type userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
@@ -37,7 +37,7 @@ export function reduceMotion() {
 }
 
 /** The screen in a data router (the leave guard needs one), with a page to leave for. */
-export function upload() {
+export function upload(client: QueryClient = createQueryClient()) {
   const router = createMemoryRouter(
     [
       { path: "/upload", element: <UploadScreen /> },
@@ -48,7 +48,7 @@ export function upload() {
   return {
     router,
     ...render(
-      <QueryClientProvider client={createQueryClient()}>
+      <QueryClientProvider client={client}>
         <RouterProvider router={router} />
       </QueryClientProvider>,
     ),

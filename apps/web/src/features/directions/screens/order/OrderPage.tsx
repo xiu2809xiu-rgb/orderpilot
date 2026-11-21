@@ -12,10 +12,11 @@ import { OrderFacts } from "./OrderFacts";
 import { OrderHeader } from "./OrderHeader";
 import { OrderJourneySection } from "./OrderJourneySection";
 import { OrderNotFound } from "./OrderNotFound";
+import { statusSentence } from "./statusSentence";
 import { OrderSkeleton } from "./OrderSkeleton";
 import { OrderStatus } from "./OrderStatus";
 import { OrderTabs } from "./OrderTabs";
-import { isUntracked } from "../orders/orderRow";
+import { ALL_DONE, isUntracked } from "../orders/orderRow";
 import { untracked } from "./untracked";
 import { useOrderAction } from "./useOrderAction";
 import { useOrderFlow } from "./useOrderFlow";
@@ -25,12 +26,13 @@ import "./order.css";
 
 /**
  * One order. The first screen answers who has it (its stage and the team
- * that holds it) and the latest act a person made, with the person's own
- * task as the one primary button; then the facts, the journey as one row of
- * nine steps, and the tabs Lines (open first), Documents, Checks and
- * Activity. The tracker gives the events, checks and matches; the Orders API
- * gives the lines and the masked prices; the workflow's record gives the latest
- * act and the documents.
+ * that holds it), why when the data gives a reason (a shortage, or a failed
+ * check), and the latest act a person made, with the person's own task as
+ * the one primary button; then the facts, the journey as one row of nine
+ * steps, and the tabs Lines (open first), Documents, Checks and Activity.
+ * The tracker gives the events, checks and matches; the Orders API gives the
+ * lines and the masked prices; the workflow's record gives the latest act
+ * and the documents.
  */
 export function OrderPage({ orderNo }: { orderNo: string }) {
   const { t } = useTranslation("directions-orders");
@@ -127,6 +129,14 @@ export function OrderPage({ orderNo }: { orderNo: string }) {
     order?.status.label ?? found?.workflowStatus ?? t("cells.notStarted");
   const heldAt = order ? tc(`roles.${order.ownerRole}`) : t("cells.notSet");
   const late = events.overdue.overdue;
+  const step = journey?.current ?? null;
+  // A finished order has nothing left to hold it: a check that once failed,
+  // or a shortage once named, no longer says anything about an order with
+  // every step done.
+  const sentence =
+    step === ALL_DONE
+      ? ""
+      : statusSentence(t, { detail: found ?? null, checks: events.checks });
 
   return (
     <div className="dx-sheet od-order">
@@ -147,11 +157,12 @@ export function OrderPage({ orderNo }: { orderNo: string }) {
       <div className="od-top-row">
         <OrderStatus
           orderNo={orderNo}
+          sentence={sentence}
           overdue={events.overdue}
           timeline={flow.data?.data.timeline}
           stageLabel={stageLabel}
           heldAt={heldAt}
-          step={journey?.current ?? null}
+          step={step}
         />
         <OrderFacts order={events} detail={found} />
       </div>

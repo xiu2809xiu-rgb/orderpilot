@@ -22,7 +22,8 @@ export interface DoneCounts {
  * The end of the review, in the person's terms: what they confirmed and
  * corrected, and what the reader read above the threshold, such as "1 field
  * confirmed by you, 15 fields read above 90 percent". Then, in one sentence,
- * that nothing was saved and which order the sample belongs to.
+ * that nothing was saved and which order the sample belongs to. It does not
+ * say "finished" again: the progress card says it.
  */
 export function ReviewDone({
   counts,
@@ -49,9 +50,8 @@ export function ReviewDone({
   });
   return (
     <Alert variant="success">
-      <AlertTitle>
-        {t("review.finishedTitle", { summary: `${yours}, ${reader}` })}
-      </AlertTitle>
+      {/* The sticky card above already says the review is finished, once. */}
+      <AlertTitle>{`${yours}, ${reader}`}</AlertTitle>
       <AlertDescription>
         {t("review.finishedBody", { order: orderNo })}
       </AlertDescription>

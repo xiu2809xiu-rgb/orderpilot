@@ -15,7 +15,7 @@
     "title": "Sales order {{number}}",
     "newTitle": "New order",
     "newDescription": "Enter a customer's PO as a draft. Nothing is posted to Business Central from here.",
-    "draftDescription": "A draft: entry is not finished and nothing is reserved. Stock figures are from the mock Business Central.",
+    "draftDescription": "A draft: entry is not finished and nothing is reserved. It can be edited or voided here, and it is not in the order journey yet. Stock figures are from the mock Business Central.",
     "formLabel": "Sales order",
     "statusNew": "Not saved yet",
     "tabsEmpty": "Nothing here yet.",
@@ -75,7 +75,7 @@
       "reload": "Reload",
       "readOnlyTitle": "This order is read-only",
       "readOnly": {
-        "sample": "A sample order of the synthetic demo set. Samples are read only here.",
+        "sample": "A sample order of the synthetic demo set. Its details cannot be edited here.",
         "submitted": "This order is submitted. Only a draft can be changed.",
         "void": "This order is void. It cannot be changed.",
         "permission": "Your role may read orders but not change them."

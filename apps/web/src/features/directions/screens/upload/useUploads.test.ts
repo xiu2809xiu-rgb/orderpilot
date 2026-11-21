@@ -56,12 +56,13 @@ describe("the files a person adds", () => {
     act(() => {
       result.current.add([file("six.pdf"), file("seven.pdf")]);
     });
-    const refused = result.current.rows.filter(
-      (row) => row.status === "refused",
-    );
-    expect(result.current.rows).toHaveLength(MAX_FILES + 1);
-    expect(refused).toHaveLength(1);
-    expect(refused[0]).toMatchObject({ name: "seven.pdf", reason: "tooMany" });
+    // The refused file is a message, not a row.
+    expect(result.current.rows).toHaveLength(MAX_FILES);
+    expect(result.current.refused).toHaveLength(1);
+    expect(result.current.refused[0]).toMatchObject({
+      name: "seven.pdf",
+      reason: "tooMany",
+    });
   });
 
   it("gives a place back once when a removed file finishes reading", () => {
@@ -83,9 +84,8 @@ describe("the files a person adds", () => {
         ),
       );
     });
-    expect(
-      result.current.rows.filter((row) => row.status === "refused"),
-    ).toHaveLength(1);
+    expect(result.current.refused).toHaveLength(1);
+    expect(result.current.rows).toHaveLength(MAX_FILES);
   });
 
   it("refuses the same file added twice, naming it, and takes it again once removed", () => {
@@ -96,16 +96,18 @@ describe("the files a person adds", () => {
     act(() => {
       result.current.add([file("po.pdf")]);
     });
-    expect(result.current.rows[1]).toMatchObject({
-      name: "po.pdf",
-      status: "refused",
-      reason: "duplicate",
-    });
+    // The second copy leaves a message and no row.
+    expect(result.current.rows).toHaveLength(1);
+    expect(result.current.refused).toMatchObject([
+      { name: "po.pdf", reason: "duplicate" },
+    ]);
     // A file of the same name but another size is another file.
     act(() => {
       result.current.add([file("po.pdf", "%PDF-1.7 a longer one")]);
     });
-    expect(result.current.rows[2]?.status).toBe("reading");
+    expect(result.current.rows[1]?.status).toBe("reading");
+    // New files start the messages afresh.
+    expect(result.current.refused).toHaveLength(0);
     act(() => {
       result.current.remove(result.current.rows[0]?.id ?? -1);
     });
@@ -113,5 +115,47 @@ describe("the files a person adds", () => {
       result.current.add([file("po.pdf")]);
     });
     expect(result.current.rows.at(-1)?.status).toBe("reading");
+  });
+
+  it("leaves no row for a file that cannot be read, and none for a type it does not take", async () => {
+    const { result } = renderHook(() => useUploads());
+    act(() => {
+      result.current.add([file("broken.pdf"), file("setup.exe")]);
+    });
+    await act(async () => {
+      SlowReader.pending[0]?.fail();
+      await Promise.resolve();
+    });
+    expect(result.current.rows).toHaveLength(0);
+    expect(result.current.refused.map((note) => note.reason)).toEqual([
+      "type",
+      "unreadable",
+    ]);
+  });
+
+  it("says nothing of a file the person removed before its read ended", async () => {
+    const { result } = renderHook(() => useUploads());
+    act(() => {
+      result.current.add([file("gone.pdf")]);
+    });
+    act(() => {
+      result.current.remove(result.current.rows[0]?.id ?? -1);
+    });
+    await act(async () => {
+      SlowReader.pending[0]?.finish("not a pdf at all");
+      await Promise.resolve();
+    });
+    expect(result.current.refused).toHaveLength(0);
+  });
+
+  it("drops a message when it is dismissed", () => {
+    const { result } = renderHook(() => useUploads());
+    act(() => {
+      result.current.add([file("setup.exe")]);
+    });
+    act(() => {
+      result.current.dismiss(result.current.refused[0]?.id ?? -1);
+    });
+    expect(result.current.refused).toHaveLength(0);
   });
 });

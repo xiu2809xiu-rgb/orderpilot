@@ -329,7 +329,13 @@ export function serveHome(api: HomeApi = {}): Served {
 }
 
 /** Renders the home screen as one role, with the toaster the shell would draw. */
-export function renderHome(role: Role) {
+/**
+ * Home as the signed-in role. The browser's copy of Done today lives in
+ * localStorage, which jsdom keeps from one test to the next, so it starts empty
+ * unless a test says it carries on from an earlier screen (`keepDone`).
+ */
+export function renderHome(role: Role, options: { keepDone?: boolean } = {}) {
+  if (!options.keepDone) localStorage.clear();
   useSessionStore.setState({ status: "active", session: sessionFor(role) });
   document.cookie = "op_csrf=csrf-token-1";
   // No retries: a failed request must show its error at once, not after a back-off.

@@ -1,4 +1,4 @@
-import { memo, useRef, type RefObject } from "react";
+import { memo, useCallback, useRef, type RefObject } from "react";
 import { useTranslation } from "react-i18next";
 import { SparkTurnView } from "./SparkTurnView";
 import type { SparkKind, Turn } from "./useSparkChat";
@@ -15,8 +15,9 @@ interface SparkThreadProps {
 
 /**
  * The conversation. The scrolling region stays at the end of it while the
- * newest answer is written in and its parts appear, until the person scrolls
- * up; a new question brings it back. Memoised: typing in the input must not
+ * newest answer is written in and its parts appear, until the start of that
+ * answer would leave the view or the person scrolls up; a new question brings
+ * it back. Memoised: typing in the input must not
  * redraw it.
  */
 export const SparkThread = memo(function SparkThread({
@@ -28,7 +29,15 @@ export const SparkThread = memo(function SparkThread({
 }: SparkThreadProps) {
   const { t } = useTranslation("directions-spark");
   const list = useRef<HTMLOListElement>(null);
-  useStayAtEnd(scroller, list, turns.length);
+  // The newest turn is the last item; its answer carries the marker.
+  const newest = useCallback(
+    () =>
+      list.current?.lastElementChild?.querySelector<HTMLElement>(
+        "[data-spark-answer]",
+      ) ?? null,
+    [],
+  );
+  useStayAtEnd(scroller, list, turns.length, newest);
   return (
     <ol
       ref={list}

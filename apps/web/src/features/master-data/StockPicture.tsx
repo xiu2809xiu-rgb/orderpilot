@@ -82,7 +82,7 @@ export function StockPicture({ item }: { item: ItemDetail }) {
           <CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
           <span>
             <RecordLink
-              to={`/order-tracker/${line.orderNo}`}
+              to={`/orders/${line.orderNo}`}
               className="underline underline-offset-4"
             >
               {line.orderNo}

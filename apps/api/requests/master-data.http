@@ -16,8 +16,11 @@ GET {{baseUrl}}/api/v1/master-data/filters
 ### qtyOnSalesOrder, qtyOnPurchOrder, availableStock or unitPrice.
 GET {{baseUrl}}/api/v1/master-data/items?page=1&pageSize=25&sort=availableStock&direction=asc
 
-### Search covers the number, the description and the part number.
+### Search covers the number, the description and the part number, and the
+### vendor: its number, its name and its own item number.
 GET {{baseUrl}}/api/v1/master-data/items?search=monitor
+###
+GET {{baseUrl}}/api/v1/master-data/items?search=V-0002
 
 ### Filters: brand, category (COMPONENTS, PERIPHERALS, PCS,
 ### ENTERPRISE, SECURITY, NETWORKING), vendor and
@@ -32,8 +35,11 @@ GET {{baseUrl}}/api/v1/master-data/items/I-0004
 ### An unknown number answers the 404 envelope.
 GET {{baseUrl}}/api/v1/master-data/items/I-9999
 
-### Customers: search, country and payment terms.
+### Customers: search, country and payment terms. Search also finds by the
+### country's name, and by its code when the whole search is the code.
 GET {{baseUrl}}/api/v1/master-data/customers?country=IN&sort=overdueOrders&direction=desc
+###
+GET {{baseUrl}}/api/v1/master-data/customers?search=Sri%20Lanka
 ###
 GET {{baseUrl}}/api/v1/master-data/customers?paymentTerms=30%20DAYS&country=MV
 

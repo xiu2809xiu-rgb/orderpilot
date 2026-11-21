@@ -1,4 +1,4 @@
-import { Info, Lock } from "lucide-react";
+import { Info } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,6 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/components/kit/Alert";
-import { EmptyState } from "@/components/parts/EmptyState";
 import { PageHeader } from "@/components/parts/PageHeader";
 import { AddStage } from "./AddStage";
 import { DEMO_NAME, useDemoDocument, type PreviewName } from "./demoDocument";
@@ -18,6 +17,7 @@ import { ReadStage } from "./ReadStage";
 import { ReviewLeaveDialog } from "./ReviewLeaveDialog";
 import { ReviewLeaveGuard } from "./ReviewLeaveGuard";
 import { ReviewStage } from "./ReviewStage";
+import { UploadDenied } from "./UploadDenied";
 import { useStopStrayDrops } from "./useStopStrayDrops";
 import { useUploads } from "./useUploads";
 
@@ -54,20 +54,7 @@ export default function UploadScreen() {
     setStage("review");
   }, []);
 
-  if (!allowed) {
-    return (
-      <div className="dx-sheet">
-        <PageHeader title={t("title")} />
-        <div className="dx-card">
-          <EmptyState
-            icon={Lock}
-            title={t("denied.title")}
-            description={t("denied.description")}
-          />
-        </div>
-      </div>
-    );
-  }
+  if (!allowed) return <UploadDenied />;
 
   return (
     <div className="dx-sheet">
