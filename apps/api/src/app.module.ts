@@ -23,6 +23,8 @@ import { MonitoringModule } from "./modules/monitoring/monitoring.module.js";
 import { OperationLogModule } from "./modules/operation-log/operation-log.module.js";
 import { QueueModule } from "./queue/queue.module.js";
 import { RedisModule } from "./redis/redis.module.js";
+import { SPARK_QUESTION_RATE_LIMIT_KEY } from "./modules/spark/spark-rate-limit.js";
+import { SparkModule } from "./modules/spark/spark.module.js";
 import { StorageModule } from "./storage/storage.module.js";
 import { WorkflowsModule } from "./modules/workflows/workflows.module.js";
 import { SystemModule } from "./system/system.module.js";
@@ -53,6 +55,17 @@ export class AppModule {
                   context.getHandler(),
                 ),
             },
+            {
+              // Only Spark's question route, which pays a model by the token.
+              name: "spark",
+              ttl: 60_000,
+              limit: config.spark.questionsPerMinute,
+              skipIf: (context) =>
+                !Reflect.getMetadata(
+                  SPARK_QUESTION_RATE_LIMIT_KEY,
+                  context.getHandler(),
+                ),
+            },
           ],
         }),
         HealthModule,
@@ -74,6 +87,7 @@ export class AppModule {
         AuditViewerModule,
         OperationLogModule,
         AiModule,
+        SparkModule,
       ],
       // The order is the rule: throttle, then who are you, then is the
       // request really from our page, then may you. Every route is covered;
