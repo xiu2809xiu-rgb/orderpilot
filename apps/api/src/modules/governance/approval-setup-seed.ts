@@ -26,10 +26,10 @@ const NO_LIMITS = {
 /**
  * Area 4's sample approval chain for the demo accounts: the Product Manager's
  * requests go to the approver, who escalates to the second approver, who is
- * Management today. The numbers are
- * synthetic, the same as area 2's mock, until Spectra confirms its approvers
- * and limits (A-14, A-23). There is no substitute: the demo has one approver,
- * and the Product Manager, who raises the SPRs, must never stand in for them.
+ * Management today. The numbers are synthetic, the same as area 2's mock,
+ * until Spectra confirms its approvers and limits (A-14, A-23). There is no
+ * substitute: the demo has one approver, and the Product Manager, who raises
+ * the SPRs, must never stand in for them.
  *
  * Safe to run again. A row that exists is left alone, so a limit changed since
  * is never put back.
