@@ -1,4 +1,12 @@
-import { act, render, screen, waitFor, within } from "@testing-library/react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import {
@@ -17,6 +25,11 @@ import { useSessionStore } from "@/stores/session";
 import { sessionFor } from "@/test/fixtures";
 import { renderApp } from "@/test/render";
 import { SparkPanelProvider, useSparkPanel } from "./sparkPanel";
+
+const prepare = vi.hoisted(() => vi.fn(() => Promise.resolve(null)));
+vi.mock("@/features/directions/spark/orb/orbGpu", () => ({
+  prepareOrbGpu: prepare,
+}));
 
 // The test runner asks for reduced motion, so the answers arrive whole.
 function reduceMotion() {
@@ -77,7 +90,11 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  // Unmount while the globals the provider's cleanup calls are still there.
+  cleanup();
   vi.unstubAllGlobals();
+  vi.unstubAllEnvs();
+  Reflect.deleteProperty(navigator, "gpu");
 });
 
 describe("the Spark button", () => {
@@ -236,5 +253,59 @@ describe("the Spark button in the real top bar", () => {
     await waitFor(() => {
       expect(button).toHaveFocus();
     });
+  });
+});
+
+describe("the orb's graphics program", () => {
+  /** A browser with WebGPU, motion allowed, and an idle moment at once. */
+  function browser() {
+    Object.defineProperty(navigator, "gpu", {
+      value: { requestAdapter: () => Promise.resolve(null) },
+      configurable: true,
+    });
+    vi.stubGlobal("matchMedia", (query: string) => ({
+      matches: false,
+      media: query,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+    }));
+    vi.stubGlobal("requestIdleCallback", (run: () => void) => {
+      run();
+      return 1;
+    });
+    vi.stubGlobal("cancelIdleCallback", () => undefined);
+    prepare.mockClear();
+  }
+
+  it("is prepared before Spark is first opened, where Spark is available", async () => {
+    browser();
+    mount();
+    await vi.dynamicImportSettled();
+    expect(prepare).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it("is prepared for no session that cannot open Spark", async () => {
+    browser();
+    vi.stubEnv("DEV", false);
+    useSessionStore.setState({
+      status: "active",
+      session: { ...sessionFor("SUPPORT"), demo: false },
+    });
+    mount();
+    fireEvent.pointerOver(sparkButton());
+    await vi.dynamicImportSettled();
+    expect(prepare).not.toHaveBeenCalled();
+  });
+
+  it("is prepared when a hand reaches the Spark button", async () => {
+    browser();
+    // No idle moment ever comes, so only the button can ask for it.
+    vi.stubGlobal("requestIdleCallback", () => 1);
+    mount();
+    expect(prepare).not.toHaveBeenCalled();
+    fireEvent.pointerOver(sparkButton());
+    await vi.dynamicImportSettled();
+    expect(prepare).toHaveBeenCalledTimes(1);
   });
 });
