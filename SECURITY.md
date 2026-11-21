@@ -47,5 +47,5 @@ None of these run yet. Until the second one does, Dependabot proposes new versio
 Richie made the repository private on 5 Nov 2026 ([ADR 0040](docs/adr/0040-what-going-private-changed.md)).
 
 - **Stopped:** GitHub secret scanning, push protection, private vulnerability reporting and repository security advisories. GitHub offers them on a personal account's private repository only with paid security products.
-- **Still running:** everything in the table above. gitleaks reads the full history on every pull request and secretlint runs before every commit, so a key is still caught before it reaches `main`. The ruleset stays enforced, because the account is on GitHub Pro.
+- **Still running:** everything in the table above. gitleaks reads the full history on every pull request and secretlint runs before every commit, so a key is still caught before it reaches `main`. The ruleset stays enforced, because the account is on GitHub Pro. A finding that is a made-up value in a test is listed in `.gitleaksignore` by its commit, file, rule and line, with the reason and a date to look again, never by a pattern that would hide a real key.
 - **If the repository goes public again,** for example for the final, switch secret scanning, push protection and private vulnerability reporting back on in the settings, and put the reporting route above back.
