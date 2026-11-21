@@ -54,7 +54,7 @@ export class AppConfig {
     readonly bankFingerprintKey: string | null;
     /**
      * True only when APPROVER_GROUP is "on": any one of the approver group
-     * decides. Temporary (ADR 0055); off keeps the old chain.
+     * decides. Temporary (ADR 0056); off keeps the old chain.
      */
     readonly approverGroup: boolean;
     /** True only when APPROVAL_LIMITS is "on": the group's limits apply. */

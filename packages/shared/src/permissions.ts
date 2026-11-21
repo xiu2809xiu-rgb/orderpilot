@@ -44,7 +44,7 @@ export const PERMISSIONS = [
   // reads its roles from the matrix, so this row shows or hides the note.
   "masking.customerNote",
   // Area 4 (#252): the coordinator routes each SPR to the approver group and
-  // hands it back. Support holds it, and never decides an SPR (ADR 0055).
+  // hands it back. Support holds it, and never decides an SPR (ADR 0056).
   "spr.route",
 ] as const;
 
