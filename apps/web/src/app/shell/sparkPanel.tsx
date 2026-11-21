@@ -9,6 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { usePrepareOrbAhead } from "@/features/directions/spark/orb/prepareAhead";
 import { useSessionStore } from "@/stores/session";
 import { useDemoParts } from "./demoParts";
 
@@ -46,12 +47,15 @@ function isSparkKey(event: KeyboardEvent): boolean {
  * still there when it is opened again. It is keyed by the signed-in person:
  * after a role switch the next person starts with an empty conversation, not
  * with the answers the last one was given. The shortcut works on every page.
+ * The orb's graphics program is prepared ahead while the browser is idle, so
+ * the first open does not wait for it.
  */
 export function SparkPanelProvider({ children }: { children: ReactNode }) {
   const available = useDemoParts();
   const person = useSessionStore((state) => state.session?.user.id);
   const [open, setOpen] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  usePrepareOrbAhead(available);
   const change = useCallback((next: boolean) => {
     if (next) setLoaded(true);
     setOpen(next);

@@ -47,20 +47,24 @@ export function useOrbTokens(): OrbTokens {
 }
 
 /**
- * The colours of the orb in one state. Idle is the accent held low over a deep
- * body; thinking brings the accent up, blends in the information hue and
- * lights the highlights. Both come from the design tokens. The body is a deep tone of the accent in
- * every scheme: the orb is a lit glass, not a patch of the panel.
+ * The colours of the orb in one state. The shader's aurora lights three
+ * curtains in the bands b, c and d over a dark base a, so what a person sees
+ * move is the difference between the bands. Idle keeps them well apart in
+ * lightness and hue (a bright jade, a pale information blue and a deep blend of
+ * the two) so that the slow flow has something to show itself with; thinking
+ * brings the accent up, blends in the information hue and lights the
+ * highlights. Both come from the design tokens. The base is a deep tone of the
+ * accent in every scheme: the orb is a lit glass, not a patch of the panel.
  */
 export function orbColours(tokens: OrbTokens, state: OrbState) {
   const { accent, info, ink } = tokens;
   const body = mix(BLACK, accent, 0.07);
   if (state === "idle") {
     return {
-      a: body,
-      b: mix(body, accent, 0.62),
-      c: mix(accent, info, 0.45),
-      d: mix(body, info, 0.5),
+      a: mix(BLACK, accent, 0.05),
+      b: mix(accent, WHITE, 0.25),
+      c: mix(info, WHITE, 0.15),
+      d: mix(mix(accent, info, 0.5), BLACK, 0.35),
       highlight: mix(accent, WHITE, 0.55),
       shell: mix(accent, WHITE, 0.3),
       canvas: mix(BLACK, accent, 0.05),

@@ -280,3 +280,15 @@ The first screen (the sign-in page or a role's home page) waits for the entry ch
 | A page change keyed by path    | `app/shell/PageRegion.tsx`, `app/shell/pageKey.ts`     | The page region runs its view transition only when the pathname changes, so a filter, a tab, a sort or the side peek in the query string never animates the page |
 | A transition that stands aside | `lib/themeSwitch.ts`, `app/shell/useThemeSwitching.ts` | A theme change owns the view transition for its length, and a page change inside it swaps at once, so neither ends the other early                               |
 | One skin for many controls     | `components/ui/controlSkin.ts`                         | Input, Textarea and SelectTrigger take one rest, hover, focus, read-only, disabled and invalid look from one constant                                            |
+
+## Spark's orb: one GPU program for the page (#326)
+
+The decision is recorded in [ADR 0057](../adr/0057-sparks-orb-is-prepared-once-and-ahead.md).
+
+| Pattern                               | Where                                                   | Why                                                                                                                                                        |
+| ------------------------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| One promise per page                  | `features/directions/spark/orb/orbGpu.ts`               | The device and the compiled program are made once, whoever asks first, so closing and opening Spark costs nothing and the compile never repeats            |
+| Borrow, never own                     | `LiquidOrb.ts`, `useLiquidOrb.ts`                       | An orb frees only its canvas context, buffer and bind group, so several orbs share one device and one going away cannot stop another                       |
+| A placeholder that hands over         | `SparkOrb.tsx`, `spark.css`                             | The CSS orb is there from the first render and the drawn orb fades in over it on its first frame, so there is never an empty square                        |
+| Observer of loss                      | `orbGpu.ts` (`onOrbGpuLoss`)                            | A lost device is forgotten and every orb that borrowed it is told once, so each falls back to WebGL and the page does not try WebGPU again                 |
+| A trigger that stays out of the entry | `spark/orb/prepareAhead.ts`, `app/shell/sparkPanel.tsx` | The entry bundle holds only the scheduling; the GPU module and its shader are fetched at an idle moment, and never in a hidden tab or under reduced motion |
