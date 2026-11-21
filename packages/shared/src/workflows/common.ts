@@ -42,6 +42,9 @@ export const mockRecordedSchema = z.object({
 export const MOCK_RECORDED_MESSAGE =
   "Recorded on mock data. The order's status has not changed, and a restart of the API forgets this.";
 
+/** What a task on an order the state machine runs answers once it is done or undone. */
+export const TASK_RECORDED_MESSAGE = "Recorded. The order has moved on.";
+
 /** What the SPR commands answer, now that a decision moves the order. */
 export const SPR_DECISION_RECORDED_MESSAGE =
   "Recorded. The order has moved on.";
