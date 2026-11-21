@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import { StrictMode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { installFakeGpu, removeFakeGpu } from "./fakeGpu";
@@ -104,6 +104,94 @@ describe("an orb that is never an empty square", () => {
   });
 });
 
+/** An observer the test drives: what is on screen is what the test says. */
+class Driven {
+  static all: Driven[] = [];
+  constructor(private readonly callback: IntersectionObserverCallback) {
+    Driven.all.push(this);
+  }
+  observe() {
+    // Nothing is reported until the test says so.
+  }
+  unobserve() {
+    // Nothing to stop.
+  }
+  disconnect() {
+    // Nothing to stop.
+  }
+  show(on: boolean) {
+    this.callback(
+      [{ isIntersecting: on } as IntersectionObserverEntry],
+      this as unknown as IntersectionObserver,
+    );
+  }
+}
+
+const framesOf = (gpu: ReturnType<typeof installFakeGpu>) =>
+  gpu.devices[0]?.submits.mock.calls.length ?? 0;
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+describe("an orb nobody can see", () => {
+  afterEach(() => {
+    Reflect.deleteProperty(document, "hidden");
+    Driven.all = [];
+  });
+
+  it("draws no frames while it is off screen, and draws once it is on screen", async () => {
+    vi.stubGlobal("IntersectionObserver", Driven);
+    const gpu = installFakeGpu({ compiled: true });
+    show();
+    await waitFor(() => {
+      expect(orb()).toHaveAttribute("data-engine", "webgpu");
+    });
+    await waitFor(() => {
+      expect(gpu.contexts.size).toBe(1);
+    });
+    act(() => {
+      for (const watcher of Driven.all) watcher.show(false);
+    });
+    await wait(80);
+    expect(framesOf(gpu)).toBe(0);
+    act(() => {
+      for (const watcher of Driven.all) watcher.show(true);
+    });
+    await waitFor(() => {
+      expect(framesOf(gpu)).toBeGreaterThan(1);
+    });
+    act(() => {
+      for (const watcher of Driven.all) watcher.show(false);
+    });
+    await wait(40);
+    const stopped = framesOf(gpu);
+    await wait(80);
+    expect(framesOf(gpu)).toBe(stopped);
+  });
+
+  it("draws no frames in a hidden tab, and draws when the tab is shown", async () => {
+    Object.defineProperty(document, "hidden", {
+      value: true,
+      configurable: true,
+    });
+    const gpu = installFakeGpu({ compiled: true });
+    show();
+    await waitFor(() => {
+      expect(gpu.contexts.size).toBe(1);
+    });
+    await wait(80);
+    expect(framesOf(gpu)).toBe(0);
+    Object.defineProperty(document, "hidden", {
+      value: false,
+      configurable: true,
+    });
+    act(() => {
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    await waitFor(() => {
+      expect(framesOf(gpu)).toBeGreaterThan(1);
+    });
+  });
+});
+
 describe("reduced motion", () => {
   it("shows the CSS orb and starts no GPU work", async () => {
     reducedMotion(true);
@@ -176,6 +264,42 @@ describe("what takes over when the GPU does not", () => {
     });
     expect(cssOrb(orb())).not.toBeNull();
     expect(orb()).toHaveAttribute("data-showing", "css");
+  });
+});
+
+describe("two orbs on one page, as the kit page and the upload screen have them", () => {
+  it("share one device and one program, and one going away leaves the other drawing", async () => {
+    const gpu = installFakeGpu({ compiled: true });
+    const told = vi.fn();
+    const both = render(
+      <>
+        <SparkOrb state="idle" label="Spark is ready" onEngine={told} />
+        <SparkOrb state="thinking" label="Spark is working" />
+      </>,
+    );
+    await waitFor(() => {
+      expect(
+        screen.getByRole("img", { name: "Spark is ready" }),
+      ).toHaveAttribute("data-showing", "webgpu");
+      expect(
+        screen.getByRole("img", { name: "Spark is working" }),
+      ).toHaveAttribute("data-showing", "webgpu");
+    });
+    expect(gpu.deviceRequests).toBe(1);
+    expect(gpu.contexts.size).toBe(2);
+    expect(told).toHaveBeenCalledWith("webgpu");
+    both.rerender(<SparkOrb state="thinking" label="Spark is working" />);
+    await waitFor(() => {
+      expect(
+        [...gpu.contexts.values()].filter(
+          (context) => context.unconfigure.mock.calls.length === 1,
+        ),
+      ).toHaveLength(1);
+    });
+    expect(gpu.devices[0]?.destroy).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole("img", { name: "Spark is working" }),
+    ).toHaveAttribute("data-showing", "webgpu");
   });
 });
 

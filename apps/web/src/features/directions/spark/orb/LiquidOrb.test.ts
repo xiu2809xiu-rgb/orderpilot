@@ -108,6 +108,22 @@ describe("what an orb reports", () => {
     orb?.destroy();
   });
 
+  it("clamps the pixel ratio to 2, however sharp the screen", async () => {
+    const { parts } = await borrow();
+    vi.stubGlobal("devicePixelRatio", 3);
+    const canvas = document.createElement("canvas");
+    Object.defineProperty(canvas, "clientWidth", { value: 100 });
+    Object.defineProperty(canvas, "clientHeight", { value: 60 });
+    const orb = LiquidOrb.create(canvas, parts, TOKENS, hooks());
+    orb?.setRunning(true);
+    await vi.waitFor(() => {
+      expect(canvas.width).toBe(200);
+    });
+    expect(canvas.height).toBe(120);
+    orb?.destroy();
+    vi.unstubAllGlobals();
+  });
+
   it("is told of a lost device once, frees what it owns and asks its caller for the fallback", async () => {
     const { gpu, parts } = await borrow();
     const told = hooks();
