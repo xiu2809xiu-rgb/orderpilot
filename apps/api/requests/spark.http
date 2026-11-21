@@ -1,5 +1,6 @@
-### Area 1: Spark's server side (P-95, step 1). No tools yet: every question gets the mock's
-### scripted "I cannot look anything up yet" answer, with AI_PROVIDER unset.
+### Area 1: Spark's server side (P-95, step 1). A question is answered through the AI gateway
+### with three read-only tools that run as the person asking: check_stock, find_orders and
+### get_order. With AI_PROVIDER unset the offline mock answers, from the tool's own result.
 ### Sign in first (requests/auth.http), then paste the op_csrf cookie value below.
 ### Every route needs spark.use: every role but the System admin holds it by default.
 ### Conversations are the caller's own: another person's id answers 404 like an unknown one,
@@ -21,8 +22,12 @@ GET {{baseUrl}}/api/v1/spark/conversations?page=1&pageSize=25
 ### One conversation with its messages.
 GET {{baseUrl}}/api/v1/spark/conversations/{{conversationId}}
 
-### Ask a question (1 to 2000 characters). The answer comes back stored and audited. A failed
-### model call is still 201: read data.answer.status (OK or FAILED) and data.answer.errorCode.
+### Ask a question (1 to 2000 characters). The answer comes back stored and audited, with the
+### steps (each tool the model asked for, and whether it ran, was refused or failed) and the
+### sources (the items and orders the tools returned: what Spark looked at, not proof of the
+### prose). A price or an amount your role may not see is hidden from the model too.
+### A failed model call is still 201: read data.answer.status (OK or FAILED) and
+### data.answer.errorCode. A tool the person may not use is FAILED with errorCode refused.
 ### 409: a question in this conversation is still waiting for its answer.
 ### 429 RATE_LIMITED: too many questions in a minute (SPARK_QUESTIONS_PER_MINUTE) or in a day
 ### (SPARK_QUESTIONS_PER_DAY).
@@ -31,6 +36,14 @@ Content-Type: application/json
 X-CSRF-Token: {{csrf}}
 
 { "question": "How many HP monitors do we have?" }
+
+### More questions the mock answers with a tool: an order, an item, a customer's orders,
+### the orders short of stock. Anything else gets what Spark can do and no step.
+POST {{baseUrl}}/api/v1/spark/conversations/{{conversationId}}/messages
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "question": "What is the state of SO-0001?" }
 
 ### Refused (400): the question takes one field and nothing else.
 POST {{baseUrl}}/api/v1/spark/conversations/{{conversationId}}/messages

@@ -33,7 +33,7 @@ Several features will call a model: extraction and classification (P-18, P-21), 
 
 ## Consequences
 
-- **Spark does not use the gateway yet.** P-95 ([#233](https://github.com/xiu2809xiu-rgb/orderpilot/issues/233)) adds Spark's script and route. Until then no feature sends a model anything but the probe.
+- **Spark's API uses the gateway from P-95 step 1** ([ADR 0060](0060-spark-and-its-read-only-tools.md), which amends this line). The app's Spark still answers from its own scripts until a later step switches it, and no other feature sends a model anything but the probe.
 - **A real provider has been called by no test and no run of this story.** Every test uses the mock or an injected fake server. The Bedrock provider has never reached AWS.
 - **The destination rule is area 4's.** If they change it, the gateway follows, because it adds nothing to the answer and takes nothing away.
 - **The destination check is only as true as the classification and origin the caller declares.** The gateway never reads the documents, so a feature that labels real data as synthetic would pass. Each feature's reviewer checks that its origin and classification are honest.
