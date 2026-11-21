@@ -62,7 +62,6 @@ export function useHomeAccess() {
   const extra = addedBlockOf(block, permissions);
   const overdueShown = block === "overdue" || extra === "overdue";
   return {
-    role,
     block,
     extra,
     tasks: block === "tasks" && has("tasks.complete"),
