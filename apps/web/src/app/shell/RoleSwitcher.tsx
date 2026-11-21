@@ -1,6 +1,6 @@
 import type { Role } from "@orderpilot/shared";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, Route, UserCog } from "lucide-react";
+import { Check, UserCog } from "lucide-react";
 import { lazy, Suspense, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router";
@@ -15,7 +15,6 @@ import {
 } from "./overlays/dropdown-menu";
 import { demoLogin, fetchAuthOptions } from "@/lib/api/auth";
 import { anyFormDirty } from "@/lib/dirty-forms";
-import { useDemoTour } from "@/stores/demoTour";
 import { useSessionStore } from "@/stores/session";
 import { splitDemoRoles, type DemoRole } from "../demoRoles";
 import { announceStay, landingAfterSwitch, startAsNewRole } from "./roleSwitch";
@@ -53,7 +52,7 @@ function RoleItem({
         </span>
       )}
       <span className="flex-1">
-        {/* Team and person share a row: nine roles with their lines must leave room for the tour entry on a 768 px screen. */}
+        {/* Team and person share a row: the roles with their lines must fit the menu on a 768 px screen. */}
         <span className="flex items-baseline gap-2">
           <span>{t(`roles.${entry.role}`)}</span>
           <span className="text-xs text-muted-foreground">
@@ -154,16 +153,6 @@ export function RoleSwitcher() {
               onPick={pick}
             />
           ))}
-          <DropdownMenuSeparator />
-          {/* The tour walks the sales flow across the roles above, on the sample data. */}
-          <DropdownMenuItem
-            onSelect={() => {
-              useDemoTour.getState().start();
-            }}
-          >
-            <Route aria-hidden="true" />
-            {t("tour.start")}
-          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       {askedOnce ? (

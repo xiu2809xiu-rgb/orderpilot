@@ -314,3 +314,12 @@ The decision is recorded in [ADR 0059](../adr/0059-the-ai-gateway-and-the-person
 | Estimate from configuration    | `domain/ai-pricing.ts`                                                          | Cost is tokens times the prices in settings, in whole 1/10,000 USD, with no price table in code that could go stale                                                  |
 | Recorder that never throws     | `ai-usage.tracker.ts`, `ai-usage-record.repository.ts`, `ai-refusal.auditor.ts` | A call that worked does not fail because a cost row could not be saved, and a refusal is audited on its own, outside any business transaction                        |
 | An import allow-list as test   | `ai-imports.test.ts`                                                            | The module may reach only the files it lists, and only `providers/` may import the SDK, so a new reach fails until a person decides it is read-only                  |
+
+## Seven roles: a parallel change (#335)
+
+The decision is recorded in [ADR 0058](../adr/0058-seven-roles-six-teams-and-an-administrator.md).
+
+| Pattern                                     | Where                                                           | Why                                                                                                                                                                                                   |
+| ------------------------------------------- | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Parallel change (expand, migrate, contract) | `packages/shared/src/roles.ts`, and the seven steps of ADR 0058 | The retired values get a wider stored type first, references move off them while they still work, and only then does the role list shrink, so `main` stays green at every step                        |
+| Read wide, write narrow                     | `packages/shared/src/audit.ts`, `apps/api/src/audit/`           | An event read back may name a retired role for ever, because its hash covers the role. A new event names a current one, so once the list shrinks the type checker refuses a write with a retired role |
