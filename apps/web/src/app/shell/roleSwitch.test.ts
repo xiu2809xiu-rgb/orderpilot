@@ -24,27 +24,6 @@ describe("starting as a new role", () => {
     expect(forgetKeptLists).toHaveBeenCalledTimes(1);
   });
 
-  it("asks again for what is on screen, so the old role's list does not stay", async () => {
-    const client = clientForTest();
-    let who = "Priya";
-    const observer = new QueryObserver(client, {
-      queryKey: ["tasks"],
-      queryFn: () => Promise.resolve(`${who}'s tasks`),
-    });
-    const stop = observer.subscribe(() => undefined);
-    await vi.waitFor(() => {
-      expect(observer.getCurrentResult().data).toBe("Priya's tasks");
-    });
-
-    who = "Grace";
-    await startAsNewRole(client);
-
-    await vi.waitFor(() => {
-      expect(observer.getCurrentResult().data).toBe("Grace's tasks");
-    });
-    stop();
-  });
-
   it("drops what was only cached for the old role", async () => {
     const client = clientForTest();
     client.setQueryData(["orders"], "Priya's orders");
@@ -52,26 +31,20 @@ describe("starting as a new role", () => {
     expect(client.getQueryData(["orders"])).toBeUndefined();
   });
 
-  it("does not let an answer that was on its way as the old role arrive afterwards", async () => {
+  it("leaves what is on screen to the sign-in, which asks again once", async () => {
     const client = clientForTest();
-    let answer: (value: string) => void = () => undefined;
     const observer = new QueryObserver(client, {
-      queryKey: ["reminders"],
-      queryFn: () =>
-        new Promise<string>((resolve) => {
-          answer = resolve;
-        }),
+      queryKey: ["tasks"],
+      queryFn: () => Promise.resolve("Priya's tasks"),
     });
     const stop = observer.subscribe(() => undefined);
-    const oldAnswer = answer;
+    await vi.waitFor(() => {
+      expect(observer.getCurrentResult().data).toBe("Priya's tasks");
+    });
 
     await startAsNewRole(client);
-    oldAnswer("Priya's reminders");
-    answer("Grace's reminders");
 
-    await vi.waitFor(() => {
-      expect(observer.getCurrentResult().data).toBe("Grace's reminders");
-    });
+    expect(observer.getCurrentResult().data).toBe("Priya's tasks");
     stop();
   });
 });

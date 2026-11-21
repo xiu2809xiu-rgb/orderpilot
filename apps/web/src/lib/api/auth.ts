@@ -17,19 +17,17 @@ export async function fetchAuthOptions(): Promise<AuthOptions> {
 function begin(session: Session): Session {
   const before = useSessionStore.getState();
   apiClient.markSessionStarted();
-  before.setSession(session);
-  // A session that ended while its page was open leaves that page on screen
-  // under a sign-in form. If someone else signs in there, the page must not
-  // keep what the earlier person was shown. The same person keeps their page.
-  // A change of role from the menu does this itself, once, so it is not
-  // repeated here for a session that is still open.
-  if (
-    before.status === "expired" &&
-    before.session !== null &&
-    before.session.user.id !== session.user.id
-  ) {
-    void forgetShown(queryClient);
+  // Every sign-in answer passes here. When it hands the tab to another person,
+  // whether the earlier session ended while its page was open or is still open
+  // (a change of role from the menu), what that person was shown goes first.
+  // The store is given the new person only afterwards, so no render can pair
+  // the new name with the earlier figures. It waits for the answer, not before:
+  // emptying earlier would let the page ask again as the earlier person. The
+  // same person arriving again (a refresh, the me call) keeps the page.
+  if (before.session !== null && before.session.user.id !== session.user.id) {
+    forgetShown(queryClient);
   }
+  before.setSession(session);
   return session;
 }
 

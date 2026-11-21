@@ -155,19 +155,92 @@ describe("signing in over a session that ended while its page was open", () => {
 });
 
 describe("a sign-in while a session is open", () => {
-  it("is left to the role menu, which resets once: the sign-in itself asks for nothing again", async () => {
+  it("asks once again, as the new person, for what is on screen", async () => {
     stubAuth();
     useSessionStore.getState().setSession(sessionFor("FINANCE"));
     const page = onScreen("on-screen");
     await vi.waitFor(() => {
       expect(page.asked.times).toBe(1);
     });
+    queryClient.setQueryData(["only-kept"], "what Finance was given");
 
     await demoLogin("WAREHOUSE");
+    await vi.waitFor(() => {
+      expect(page.asked.times).toBe(2);
+    });
     await new Promise((resolve) => setTimeout(resolve, 50));
 
-    // Twice would mean every list is asked for twice at each change of role.
-    expect(page.asked.times).toBe(1);
+    // Twice more would mean the role menu resets again on top of the sign-in.
+    expect(page.asked.times).toBe(2);
+    expect(queryClient.getQueryData(["only-kept"])).toBeUndefined();
     page.stop();
+  });
+
+  it("leaves nothing of the earlier person in the cache at the first notification that carries the new one", async () => {
+    stubAuth();
+    const finance = sessionFor("FINANCE");
+    const warehouse = sessionFor("WAREHOUSE");
+    useSessionStore.getState().setSession(finance);
+    const page = onScreen("on-screen");
+    await vi.waitFor(() => {
+      expect(page.asked.times).toBe(1);
+    });
+    queryClient.setQueryData(["vendor", "V-0007"], {
+      accountNo: "000000000007",
+    });
+    // What the cache held at each notification that carried the new person.
+    const held: unknown[][] = [];
+    const stop = useSessionStore.subscribe((state) => {
+      if (state.session?.user.id === warehouse.user.id && held.length === 0) {
+        held.push(
+          queryClient
+            .getQueryCache()
+            .getAll()
+            .map((query) => query.state.data),
+        );
+      }
+    });
+
+    await demoLogin("WAREHOUSE");
+
+    expect(held).toHaveLength(1);
+    expect(held[0]?.filter((data) => data !== undefined)).toEqual([]);
+    stop();
+    page.stop();
+  });
+
+  it("keeps the page for the same person arriving again, as a refresh or the me call does", async () => {
+    stubAuth();
+    useSessionStore.getState().setSession(sessionFor("FINANCE"));
+    const page = onScreen("on-screen");
+    await vi.waitFor(() => {
+      expect(page.asked.times).toBe(1);
+    });
+    queryClient.setQueryData(["only-kept"], "what Finance was given");
+
+    await demoLogin("FINANCE");
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    expect(page.asked.times).toBe(1);
+    expect(queryClient.getQueryData(["only-kept"])).toBe(
+      "what Finance was given",
+    );
+    page.stop();
+  });
+
+  it("does not empty anything before the sign-in has been answered", async () => {
+    stubAuth();
+    useSessionStore.getState().setSession(sessionFor("FINANCE"));
+    queryClient.setQueryData(["only-kept"], "what Finance was given");
+    const fetchMock = vi.mocked(fetch);
+    let seenAtRequest: unknown = "not asked";
+    fetchMock.mockImplementationOnce(() => {
+      seenAtRequest = queryClient.getQueryData(["only-kept"]);
+      return Promise.resolve(json(200, { data: sessionFor("WAREHOUSE") }));
+    });
+
+    await demoLogin("WAREHOUSE");
+
+    expect(seenAtRequest).toBe("what Finance was given");
   });
 });

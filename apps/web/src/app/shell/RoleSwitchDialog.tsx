@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, type RefObject } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,13 +9,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useRestoreFocus } from "@/lib/useRestoreFocus";
 
 interface RoleSwitchDialogProps {
   open: boolean;
   /** Stay as the same person: also what Escape does. */
   onStay: () => void;
   onSwitch: () => void;
+  /**
+   * Where focus goes on every close: the button that opened the menu. The
+   * dialog cannot remember document.activeElement for this, because from the
+   * second ask on that is a menu item that is gone by the time it closes.
+   */
+  returnFocusTo: RefObject<HTMLElement | null>;
 }
 
 /**
@@ -27,10 +32,10 @@ export function RoleSwitchDialog({
   open,
   onStay,
   onSwitch,
+  returnFocusTo,
 }: RoleSwitchDialogProps) {
   const { t } = useTranslation();
   const stay = useRef<HTMLButtonElement>(null);
-  const focus = useRestoreFocus(() => stay.current);
   return (
     <Dialog
       open={open}
@@ -40,8 +45,14 @@ export function RoleSwitchDialog({
     >
       <DialogContent
         showCloseButton={false}
-        onOpenAutoFocus={focus.onOpenAutoFocus}
-        onCloseAutoFocus={focus.onCloseAutoFocus}
+        onOpenAutoFocus={(event) => {
+          event.preventDefault();
+          stay.current?.focus();
+        }}
+        onCloseAutoFocus={(event) => {
+          event.preventDefault();
+          returnFocusTo.current?.focus();
+        }}
       >
         <DialogHeader>
           <DialogTitle>{t("demo.switchAsk.title")}</DialogTitle>

@@ -1,7 +1,6 @@
 import type { Session } from "@orderpilot/shared";
 import type { QueryClient } from "@tanstack/react-query";
 import { forgetKeptLists } from "@/features/orders/orderSearches";
-import { forgetShown } from "@/lib/query";
 import { hasPermission } from "@/stores/session";
 
 // One order's page: /orders/<number>. "new" is the entry form, not an order.
@@ -42,13 +41,15 @@ export function onStay(listener: StayListener): () => void {
 }
 
 /**
- * After a sign-in as another role, nothing the old role was shown may stay on
- * screen. What is on screen is asked for again as the new role and what is
- * only kept is dropped (`forgetShown`, which says why emptying the store
- * alone is not enough).
+ * After a sign-in as another role, what the page kept beside the live queries
+ * goes too: the possible-match lists, which live for a minute, and what the
+ * given client only holds. What is on screen is not touched here. The sign-in
+ * answer empties and asks again before the store holds the new person (`begin`
+ * in `lib/api/auth.ts`), the one place that can promise no render pairs the
+ * new name with the old figures.
  */
-export async function startAsNewRole(client: QueryClient): Promise<void> {
-  // The possible-match lists are kept outside the query cache, for a minute.
+export function startAsNewRole(client: QueryClient): Promise<void> {
   forgetKeptLists();
-  await forgetShown(client);
+  client.removeQueries({ type: "inactive" });
+  return Promise.resolve();
 }
