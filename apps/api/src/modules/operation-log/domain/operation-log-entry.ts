@@ -1,4 +1,4 @@
-import type { AuditEvent, OperationLogEntry } from "@orderpilot/shared";
+import type { StoredAuditEvent, OperationLogEntry } from "@orderpilot/shared";
 import { actorNameOf } from "../../audit/audit-view.js";
 
 /**
@@ -8,7 +8,7 @@ import { actorNameOf } from "../../audit/audit-view.js";
  * the event gains later. "Who" is named as the audit viewer names it.
  */
 export function toOperationLogEntry(
-  event: AuditEvent,
+  event: StoredAuditEvent,
   names: ReadonlyMap<string, string>,
 ): OperationLogEntry {
   return {
@@ -22,7 +22,7 @@ export function toOperationLogEntry(
 }
 
 /** The people who acted in these events, so their names are read in one query. */
-export function actorUserIds(events: readonly AuditEvent[]): string[] {
+export function actorUserIds(events: readonly StoredAuditEvent[]): string[] {
   const ids = new Set<string>();
   for (const event of events) {
     if (event.actor.kind === "user") ids.add(event.actor.userId);

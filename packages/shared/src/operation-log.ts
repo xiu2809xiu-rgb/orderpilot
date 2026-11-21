@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { pageEnvelope, pageQuerySchema } from "./envelope.js";
 import type { Permission } from "./permissions.js";
-import { roleSchema } from "./roles.js";
+import { storedRoleSchema } from "./roles.js";
 
 /**
  * Who may read a record's operation log: whoever may read the record. Each
@@ -63,7 +63,8 @@ export const operationLogEntrySchema = z.object({
   /** The person's name, or the system part or model that acted. */
   actorName: z.string(),
   /** The person's role, or null for the system or a model. */
-  actorRole: roleSchema.nullable(),
+  // A stored role: an old event can name a retired one (ADR 0058).
+  actorRole: storedRoleSchema.nullable(),
   summary: z.string(),
 });
 export type OperationLogEntry = z.infer<typeof operationLogEntrySchema>;

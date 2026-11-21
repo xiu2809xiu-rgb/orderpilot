@@ -292,3 +292,12 @@ The decision is recorded in [ADR 0057](../adr/0057-sparks-orb-is-prepared-once-a
 | A placeholder that hands over         | `SparkOrb.tsx`, `spark.css`                             | The CSS orb is there from the first render and the drawn orb fades in over it on its first frame, so there is never an empty square                        |
 | Observer of loss                      | `orbGpu.ts` (`onOrbGpuLoss`)                            | A lost device is forgotten and every orb that borrowed it is told once, so each falls back to WebGL and the page does not try WebGPU again                 |
 | A trigger that stays out of the entry | `spark/orb/prepareAhead.ts`, `app/shell/sparkPanel.tsx` | The entry bundle holds only the scheduling; the GPU module and its shader are fetched at an idle moment, and never in a hidden tab or under reduced motion |
+
+## Seven roles: a parallel change (#335)
+
+The decision is recorded in [ADR 0058](../adr/0058-seven-roles-six-teams-and-an-administrator.md).
+
+| Pattern                                     | Where                                                           | Why                                                                                                                                                                                                   |
+| ------------------------------------------- | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Parallel change (expand, migrate, contract) | `packages/shared/src/roles.ts`, and the seven steps of ADR 0058 | The retired values get a wider stored type first, references move off them while they still work, and only then does the role list shrink, so `main` stays green at every step                        |
+| Read wide, write narrow                     | `packages/shared/src/audit.ts`, `apps/api/src/audit/`           | An event read back may name a retired role for ever, because its hash covers the role. A new event names a current one, so once the list shrinks the type checker refuses a write with a retired role |
