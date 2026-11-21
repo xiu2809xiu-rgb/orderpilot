@@ -1,5 +1,5 @@
 import { Lock } from "lucide-react";
-import { useEffect, useId, useRef, useState } from "react";
+import { useId } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Tooltip,
@@ -7,6 +7,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { useMaskReveal } from "./useMaskReveal";
 
 interface MaskedValueProps {
   /** Whether the server hid it. */
@@ -34,31 +35,7 @@ export function MaskedValue({
 }: MaskedValueProps) {
   const { t } = useTranslation("directions-parts");
   const reasonId = useId();
-  const button = useRef<HTMLButtonElement>(null);
-  // Hover and focus belong to the tooltip, which closes on a press; the
-  // person's own tap or click is kept apart so it is not lost with it.
-  const [hovered, setHovered] = useState(false);
-  const [pinned, setPinned] = useState(false);
-  useEffect(() => {
-    if (!pinned) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setPinned(false);
-    };
-    const onPress = (event: PointerEvent) => {
-      const target = event.target;
-      if (!(target instanceof Element)) return;
-      // A press on the mask itself is the second tap, which its click handles.
-      if (button.current?.contains(target)) return;
-      if (target.closest("[data-slot=tooltip-content]")) return;
-      setPinned(false);
-    };
-    document.addEventListener("keydown", onKey);
-    document.addEventListener("pointerdown", onPress);
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.removeEventListener("pointerdown", onPress);
-    };
-  }, [pinned]);
+  const reveal = useMaskReveal();
   if (!masked) {
     return <span className={cn("numeral", className)}>{value}</span>;
   }
@@ -66,25 +43,11 @@ export function MaskedValue({
     reason: reason ?? t("masked.defaultReason"),
   });
   return (
-    <Tooltip open={hovered || pinned} onOpenChange={setHovered}>
+    <Tooltip {...reveal.tooltip}>
       <TooltipTrigger asChild>
         <button
-          ref={button}
           type="button"
-          onClick={() => {
-            setPinned((was) => !was);
-          }}
-          onBlur={(event) => {
-            // A reason pinned with Enter must not outlive the mark it explains
-            // once the keyboard has moved on. Only a move to another element
-            // counts: a tap inside the reason, or focus going nowhere, keeps it,
-            // and a press elsewhere is already handled above.
-            const to = event.relatedTarget;
-            if (!(to instanceof Element)) return;
-            if (event.currentTarget.contains(to)) return;
-            if (to.closest("[data-slot=tooltip-content]")) return;
-            setPinned(false);
-          }}
+          {...reveal.trigger}
           aria-describedby={reasonId}
           className={cn(
             "numeral inline-flex min-h-6 cursor-help items-center gap-1 text-muted-foreground",

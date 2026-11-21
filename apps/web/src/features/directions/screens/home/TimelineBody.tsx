@@ -2,7 +2,7 @@ import type { WorkflowTask } from "@orderpilot/shared";
 import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 import { formatDay } from "@/lib/format";
-import { timerParts } from "../../data/timer";
+import { waitParts } from "../../data/timer";
 import type { Usual } from "../../data/estimates";
 import {
   Timeline,
@@ -31,7 +31,8 @@ function OrderLine({ task }: { task: WorkflowTask }) {
 }
 
 function waitedText(t: TFunction<"directions-home">, since: Date, at: Date) {
-  const parts = timerParts(since, at);
+  // Calendar days in Singapore, as the order's page counts them.
+  const parts = waitParts(since, at);
   if (parts.unit === "days") {
     return t("timeline.now.waiting_days", { count: parts.amount });
   }

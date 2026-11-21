@@ -247,9 +247,7 @@ describe("the home screen", () => {
     expect(screen.getByRole("heading", { name: "Now" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Next" })).toBeVisible();
     expect(
-      screen.getByText(
-        "Nothing finished yet today. A task you complete here appears with the time.",
-      ),
+      screen.getByText("Nothing marked done here yet today."),
     ).toBeVisible();
     expect(
       screen.getByText(

@@ -6,8 +6,9 @@ import {
   type Session,
 } from "@orderpilot/shared";
 import { removeDraftsOf } from "@/lib/draft-keys";
-import { forgetShown, queryClient } from "@/lib/query";
+import { queryClient } from "@/lib/query";
 import { useSessionStore } from "@/stores/session";
+import { adoptSession } from "./adopt-session";
 import { apiClient } from "./instance";
 
 export async function fetchAuthOptions(): Promise<AuthOptions> {
@@ -15,21 +16,10 @@ export async function fetchAuthOptions(): Promise<AuthOptions> {
 }
 
 function begin(session: Session): Session {
-  const before = useSessionStore.getState();
   apiClient.markSessionStarted();
-  before.setSession(session);
-  // A session that ended while its page was open leaves that page on screen
-  // under a sign-in form. If someone else signs in there, the page must not
-  // keep what the earlier person was shown. The same person keeps their page.
-  // A change of role from the menu does this itself, once, so it is not
-  // repeated here for a session that is still open.
-  if (
-    before.status === "expired" &&
-    before.session !== null &&
-    before.session.user.id !== session.user.id
-  ) {
-    void forgetShown(queryClient);
-  }
+  // The guard for a different person is in adoptSession, which a silent
+  // refresh goes through as well.
+  adoptSession(session);
   return session;
 }
 

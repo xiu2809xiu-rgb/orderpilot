@@ -26,7 +26,8 @@ const TIME = new Intl.DateTimeFormat("en-GB", {
  * ("Raised the SPR for SO-0082 at 06:03") and is the link to that order, so a
  * person who wants to see the result is one click from it. The real tasks API
  * lists only open tasks, so this list is the browser's own (`doneToday.ts`)
- * and an Undo takes a line out again.
+ * and an Undo takes a line out again. The hint says what is listed and what
+ * is not: a payment and an SPR decision are made on the workflow's own pages.
  */
 export function DoneGroup({ done }: { done: readonly DoneItem[] }) {
   const { t } = useTranslation("directions-home");
@@ -35,6 +36,9 @@ export function DoneGroup({ done }: { done: readonly DoneItem[] }) {
   const links = useOrderLinks();
   return (
     <TimelineGroup title={t("timeline.done.title")}>
+      <p className="fs-12 max-w-prose text-muted-foreground">
+        {t("timeline.done.hint")}
+      </p>
       {done.length === 0 ? (
         <p className="fs-14 max-w-prose text-muted-foreground">
           {t("timeline.done.empty")}

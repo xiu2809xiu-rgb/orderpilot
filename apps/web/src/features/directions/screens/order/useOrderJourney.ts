@@ -18,7 +18,9 @@ import { useOrderFlow } from "./useOrderFlow";
  *
  * How long the order has waited at its step comes from the workflow's record,
  * which the order's page reads anyway: the tracker's sample timeline stamps
- * its newest event with today, so it cannot say. While that record is on its
+ * its newest event with today, so it cannot say. Only a finished step that
+ * lies before the tracker's step counts (`stepBegan`): an act that finishes
+ * the step the order is at, or a later one, must not restart the wait. While that record is on its
  * way no wait is said, so the line never shows one figure and then another.
  * A role that may not read the record, or an order it does not know, keeps
  * the tracker's time.
@@ -34,12 +36,13 @@ export function useOrderJourney(orderNo: string | null) {
   const recordLoading = record.isLoading;
   const journey = useMemo(() => {
     if (!order || !flow.data) return null;
+    const current = stepOfStatus(flow.data.data, order.status.code);
     return buildJourney({
-      current: stepOfStatus(flow.data.data, order.status.code),
+      current,
       events: order.steps,
       stepTimes: STEP_TIMES.sales,
       today: todayInSingapore(),
-      since: recordLoading ? null : stepBegan(recordSteps),
+      since: recordLoading ? null : stepBegan(recordSteps, current),
     });
   }, [order, flow.data, recordSteps, recordLoading]);
   return { timeline, flow, order, journey };

@@ -16,8 +16,8 @@ import type { useNeedFocus } from "./useNeedFocus";
 const SHOWN = 8;
 
 /**
- * The first section of home for a role with an inbox: its open tasks, most
- * urgent first, each with its timer and one action. The rows arrive once when
+ * The first section of home for a role with an inbox: its open tasks, earliest
+ * due first (`byDueTime`), so the longest overdue is first, each with its timer and one action. The rows arrive once when
  * the screen is first seen, then stay still: a list someone works in never
  * moves. Past eight tasks the rest are counted, with a link to the inbox.
  */

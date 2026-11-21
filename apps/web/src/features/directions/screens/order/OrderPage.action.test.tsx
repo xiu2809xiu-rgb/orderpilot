@@ -1,4 +1,4 @@
-import { screen, within } from "@testing-library/react";
+import { act, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
   afterEach,
@@ -9,6 +9,7 @@ import {
   it,
   vi,
 } from "vitest";
+import { useToastStore } from "@/components/common/toast";
 import { useSessionStore } from "@/stores/session";
 import { sessionFor } from "@/test/fixtures";
 import { loadNamespaces, stubApi, taskOn } from "../orders/ordersTestKit";
@@ -27,7 +28,9 @@ const open = (query = "") =>
 
 beforeAll(async () => {
   await loadNamespaces();
-});
+  // The tip of a task button is a lazy chunk: load it before the first test.
+  await import("@/app/shell/HintTipBody");
+}, 60_000);
 
 beforeEach(() => {
   localStorage.clear();
@@ -219,5 +222,86 @@ describe("the same words as Home for the same task", () => {
       await screen.findByRole("link", { name: "Enter payment details" }),
     );
     expect(calls.some((call) => call.startsWith("POST "))).toBe(false);
+  });
+});
+
+describe("the toast after an act made on the order's own page", () => {
+  /** The order API of the kit, and a task that completes when asked to. */
+  function stubWithCompletion(kind: string) {
+    stubApi({ tasks: [taskOn(ORDER, kind)] });
+    const rest = globalThis.fetch;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+        const url = input instanceof Request ? input.url : input.toString();
+        if (url.includes("/complete") || url.includes("/undo")) {
+          return Promise.resolve(
+            new Response(JSON.stringify({ data: {} }), {
+              status: 200,
+              headers: { "Content-Type": "application/json" },
+            }),
+          );
+        }
+        return rest(input, init);
+      }),
+    );
+  }
+
+  it("has Undo, and no Open order for the page the person is on", async () => {
+    const user = userEvent.setup();
+    useToastStore.setState({ items: [] });
+    stubWithCompletion("SEND_PI");
+    open();
+    await user.click(
+      await screen.findByRole("button", { name: "Mark PI as sent" }),
+    );
+    await waitFor(() => {
+      expect(useToastStore.getState().items).toHaveLength(1);
+    });
+    const toast = useToastStore.getState().items[0];
+    expect(toast?.message).toBe("Marked the PI for SO-0001 as sent");
+    expect(toast?.undo).toBeTypeOf("function");
+    expect(toast?.action).toBeUndefined();
+    expect(await screen.findByRole("button", { name: "Undo" })).toBeVisible();
+    expect(screen.queryByRole("link", { name: "Open order" })).toBeNull();
+  });
+});
+
+describe("the tip of the page's task button", () => {
+  const NOTHING = "Records that this is done. OrderPilot sends nothing.";
+
+  it("shows the line on hover and on focus, and Escape puts it away", async () => {
+    const user = userEvent.setup();
+    stubApi({ tasks: [taskOn(ORDER, "SEND_PI")] });
+    open();
+    const button = await screen.findByRole("button", {
+      name: "Mark PI as sent",
+    });
+    await user.hover(button);
+    expect(await screen.findByRole("tooltip")).toHaveTextContent(NOTHING);
+    await user.unhover(button);
+    await waitFor(() => {
+      expect(screen.queryByRole("tooltip")).toBeNull();
+    });
+    act(() => {
+      button.focus();
+    });
+    expect(await screen.findByRole("tooltip")).toHaveTextContent(NOTHING);
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("tooltip")).toBeNull();
+    // A screen reader still hears the line as the description, and once.
+    expect(button).toHaveAccessibleDescription(NOTHING);
+  });
+
+  it("shows what the payment link opens on hover, as it describes it", async () => {
+    const user = userEvent.setup();
+    stubApi({ tasks: [taskOn(ORDER, "CONFIRM_PAYMENT")] });
+    open();
+    await user.hover(
+      await screen.findByRole("link", { name: "Enter payment details" }),
+    );
+    expect(await screen.findByRole("tooltip")).toHaveTextContent(
+      "Opens the form for the amount, the bank reference and the date.",
+    );
   });
 });
