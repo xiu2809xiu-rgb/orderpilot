@@ -43,6 +43,7 @@ describe("the permission groups", () => {
     ["settings.manage", "platform"],
     ["audit.read", "oversight"],
     ["aiUsage.read", "oversight"],
+    ["masking.customerNote", "masking"],
     ["documents.upload", "orders"],
     ["orders.edit", "orders"],
     ["tracker.read", "tracking"],
@@ -76,6 +77,19 @@ describe("the permission groups", () => {
       "platform",
       "other",
     ]);
+  });
+
+  it("offers Masking for the masking rows, not Other (walkthrough gap A11)", () => {
+    const groups = groupsIn(matrix.permissions);
+    expect(groups).toContain("masking");
+    const masking = matrix.permissions.filter((p) => p.startsWith("masking."));
+    expect(masking.length).toBeGreaterThan(0);
+    expect(masking.map(groupOf)).toEqual(masking.map(() => "masking"));
+    expect(
+      run({ group: "masking" }).matrix.permissions.every((p) =>
+        p.startsWith("masking."),
+      ),
+    ).toBe(true);
   });
 });
 

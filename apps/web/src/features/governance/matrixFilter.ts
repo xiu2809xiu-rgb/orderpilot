@@ -3,6 +3,7 @@ import type { MatrixRead200Data } from "@/lib/api/generated/model";
 export const PERMISSION_GROUPS = [
   "platform",
   "oversight",
+  "masking",
   "orders",
   "tracking",
   "approvals",
@@ -18,6 +19,7 @@ const GROUP_BY_PREFIX: ReadonlyMap<string, PermissionGroup> = new Map([
   ["settings", "platform"],
   ["audit", "oversight"],
   ["aiUsage", "oversight"],
+  ["masking", "masking"],
   ["documents", "orders"],
   ["orders", "orders"],
   ["tracker", "tracking"],
