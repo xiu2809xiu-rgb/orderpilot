@@ -12,11 +12,21 @@ const NONE: readonly WorkflowTask[] = [];
  * Earliest due time first, so the longest overdue comes first, which is an
  * order a person can see a reason for on every row. The tasks API sorts overdue
  * first and then by a priority that no page shows, so a task due in a week
- * would stand above one due in three hours. Ties keep the API's order.
+ * would stand above one due in three hours. Ties keep the API's order. A due
+ * time that cannot be read sorts last: a NaN in a comparison would fall back to
+ * the API's order against some tasks and not others, and the sort would be
+ * undefined.
  */
 export function byDueTime(tasks: readonly WorkflowTask[]): WorkflowTask[] {
   return tasks
-    .map((task, index) => ({ task, index, due: Date.parse(task.dueAt) }))
+    .map((task, index) => {
+      const due = Date.parse(task.dueAt);
+      return {
+        task,
+        index,
+        due: Number.isNaN(due) ? Number.POSITIVE_INFINITY : due,
+      };
+    })
     .sort((a, b) => a.due - b.due || a.index - b.index)
     .map(({ task }) => task);
 }

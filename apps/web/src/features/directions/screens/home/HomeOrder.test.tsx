@@ -62,6 +62,17 @@ describe("byDueTime", () => {
   });
 });
 
+describe("byDueTime with a due time that cannot be read", () => {
+  it("sorts that task last, whatever the API's order, so the comparison stays consistent", () => {
+    const unreadable = makeTask({ orderNo: "SO-0706", dueAt: "not a time" });
+    expect(numbers(byDueTime([WEEK, unreadable, SOON]))).toEqual([
+      "SO-0702",
+      "SO-0701",
+      "SO-0706",
+    ]);
+  });
+});
+
 describe("the order of Home's tasks", () => {
   it("lists Needs you by due time, whatever order the API sent", async () => {
     serveHome({ tasks: FROM_API });
