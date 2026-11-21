@@ -100,8 +100,10 @@ describe("the order page", () => {
     expect(within(nth(steps, 3)).getByText(/^Now:/)).toBeInTheDocument();
     expect(screen.queryByText(/Now, late/)).toBeNull();
     // The current step says how long it has waited and what is usual, in one short line.
+    // The sample's events fall at a fixed hour, so the whole days waited depend on
+    // the time the test runs: the shape is checked, not the count.
     expect(
-      within(nth(steps, 3)).getByText("Waiting 14d \u00b7 ~4d avg"),
+      within(nth(steps, 3)).getByText(/^Waiting \d+d \u00b7 ~4d avg$/),
     ).toBeVisible();
     // Later: a day the step is expected, worked from the usual times.
     expect(within(nth(steps, 4)).getByText(/^By /)).toBeVisible();

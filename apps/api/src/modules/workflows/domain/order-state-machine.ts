@@ -41,6 +41,7 @@ export type OrderCommand =
     }
   | { readonly type: "STOCK_CHECKED"; readonly stockCoversOrder: boolean }
   | { readonly type: "SPR_RAISED" }
+  | { readonly type: "SPR_RAISE_WITHDRAWN" }
   | { readonly type: "SPR_APPROVED" }
   | { readonly type: "SPR_REJECTED"; readonly reason: string }
   | { readonly type: "SPR_DECISION_UNDONE" }
@@ -169,6 +170,14 @@ const TRANSITIONS: readonly Transition[] = [
     on: "SPR_RAISED",
     from: ["StockChecked"],
     to: "AwaitingSpr",
+    by: "PRODUCT_MANAGER",
+  },
+  // The product manager takes a raise back before anyone has decided it, as the
+  // Undo after Raise does; a decided SPR is undone through SPR_DECISION_UNDONE.
+  {
+    on: "SPR_RAISE_WITHDRAWN",
+    from: ["AwaitingSpr"],
+    to: "StockChecked",
     by: "PRODUCT_MANAGER",
   },
   {
