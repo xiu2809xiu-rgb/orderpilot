@@ -177,6 +177,13 @@
     0 0 44px color-mix(in srgb, var(--ring) 55%, transparent);
 }
 
+/* Under the WebGPU orb the CSS orb takes that orb's size. The shader draws its
+   disc 72.6% of the holder wide and keeps the rest for its glow, so at 6% the
+   CSS orb was a fifth wider and every hand-over showed the orb shrink. */
+[data-engine="webgpu"] > .spark-orb-still {
+  inset: 13.7%;
+}
+
 .spark-orb-still::before,
 .spark-orb-still::after {
   content: "";
