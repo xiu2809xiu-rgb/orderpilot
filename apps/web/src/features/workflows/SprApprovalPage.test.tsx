@@ -4,6 +4,7 @@ import i18n from "@/i18n";
 import {
   getWorkflowsApproveMockHandler,
   getWorkflowsCompleteTaskMockHandler,
+  getWorkflowsCompleteTaskResponseMock,
   getWorkflowsSprMockHandler,
   getWorkflowsSprResponseMock,
 } from "@/lib/api/generated/endpoints/workflows/workflows.msw";
@@ -391,6 +392,7 @@ describe("the SPR approval page", () => {
         },
       }),
       getWorkflowsCompleteTaskMockHandler({
+        ...getWorkflowsCompleteTaskResponseMock(),
         data: {
           applied: true,
           message: "Recorded. The order has moved on.",
