@@ -402,6 +402,7 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 | #321  | The order thread: Home, Orders, order page            | `fix/area1-order-thread`         | This pull request. True words on review and payment, Done today kept                |
 | #328  | The closing check of the last three merges            | `fix/platform-closing-check`     | This pull request. The role switch, the journey after an act, eight more points     |
 | #326  | The Spark orb: prepared ahead, shown at once          | `fix/platform-spark-orb`         | This pull request. The page is no longer paused, and the idle orb visibly moves     |
+| #333  | Remove the demo tour (#284) from main                 | chore/platform-remove-demo-tour  | This pull request. The tour is off main, and later work stays as it is              |
 | #191  | Cut CI minutes before the repository goes private     | `ci/minutes-job-conditions`      | Merged, [#192](https://github.com/xiu2809xiu-rgb/orderpilot/pull/192)               |
 | P-42  | Plan prompt 004                                       | `chore/plan-prompt-004`          | Merged, [#138](https://github.com/xiu2809xiu-rgb/orderpilot/pull/138)               |
 | P-13  | Docker images and the IaC scan                        | `ci/docker`                      | Merged, [#172](https://github.com/xiu2809xiu-rgb/orderpilot/pull/172)               |
