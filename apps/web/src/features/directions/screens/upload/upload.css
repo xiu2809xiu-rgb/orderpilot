@@ -10,6 +10,17 @@
   --paper-green: #176b3a;
 }
 
+/* A box or a row brought into view, or a field that takes focus, stops below
+   the progress card, which sticks under the top bar (--review-bar is its
+   measured height). The 1.5rem is the shell's gutter above the card: a
+   scroll margin counts from the edge of the scroller, a sticky offset from
+   inside its padding. */
+.dx-box,
+.dx-field,
+.dx-field button {
+  scroll-margin-top: calc(var(--review-bar, 5rem) + 2.5rem);
+}
+
 .dx-box {
   box-sizing: content-box;
   margin: -2px 0 0 -3px;
@@ -43,6 +54,74 @@
 .dx-box:focus-visible {
   outline: 2px solid var(--paper-ink);
   outline-offset: 2px;
+}
+
+/* The review opens with one pass of light down the page. A field's box, and its
+   row in the list, appear as the light reaches it (--read-at is how far down the
+   page the field sits), so the reading is seen once, in order. Only opacity and
+   transform move: every box and row is in place and works from the first frame,
+   and when the light has left nothing here moves again. A person who asked for
+   less motion gets the finished review at once. The light travels at one
+   speed: its lower edge crosses the page (1.16 page heights with its own
+   height) in 1500 ms, which is where the 1293 ms a page comes from. It then
+   runs on at that speed for 250 ms more (1.354 page heights in 1750 ms), so
+   the last row has landed before the pass is called over. */
+.dx-scan {
+  display: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dx-scan {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    width: 100%;
+    height: 16%;
+    border-bottom: 2px solid color-mix(in srgb, var(--primary) 80%, white);
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      color-mix(in srgb, var(--primary) 30%, transparent)
+    );
+    box-shadow: 0 6px 22px color-mix(in srgb, var(--primary) 55%, transparent);
+    pointer-events: none;
+    animation: dx-scan 1750ms linear 150ms both;
+  }
+
+  [data-arriving="true"] .dx-box,
+  [data-arriving="true"] .dx-field {
+    animation: dx-read-row 260ms var(--ease-out, ease-out) both;
+    animation-delay: calc(150ms + var(--read-at, 0) * 1293ms);
+  }
+
+  [data-arriving="true"] .dx-box {
+    animation-name: dx-read-box;
+  }
+
+  @keyframes dx-scan {
+    from {
+      transform: translateY(-100%);
+    }
+
+    to {
+      transform: translateY(746%);
+    }
+  }
+
+  @keyframes dx-read-box {
+    from {
+      opacity: 0;
+      transform: scale(1.14);
+    }
+  }
+
+  @keyframes dx-read-row {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+  }
 }
 
 /* The drop zone on Spectra is glass over the aurora; the others keep a flat frame. */

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { SALES_HISTORY, STOCK_ANSWER } from "../data/index";
 import { classify } from "./useSparkChat";
 import {
+  availableNow,
   grouped,
   millions,
   monthName,
@@ -31,6 +32,17 @@ describe("the stock figures", () => {
       items: [first, { ...first, itemNo: "I-9999" }],
     });
     expect(facts.only).toBeNull();
+  });
+});
+
+describe("what is available now", () => {
+  it("is on hand, less what sales orders hold, and leaves purchase orders out", () => {
+    const item = stockFacts().only;
+    if (!item) throw new Error("no item");
+    expect(availableNow(item)).toBe(item.onHand - item.onSalesOrders);
+    expect(availableNow(item)).toBe(874);
+    // The table's Available column adds the purchase orders; this figure does not.
+    expect(availableNow(item) + item.onPurchaseOrders).toBe(item.available);
   });
 });
 
@@ -86,17 +98,36 @@ describe("the number words", () => {
 });
 
 describe("which scripted answer a question gets", () => {
-  it("sends monitor and stock words to the stock answer", () => {
+  it("sends a question about the HP monitor to the stock answer", () => {
     expect(classify("How many HP monitors do we have?", false)).toBe("stock");
-    expect(classify("what is our stock", true)).toBe("stock");
+    expect(classify("is the hp monitor in stock", true)).toBe("stock");
+    // The item and part numbers name the item too.
+    expect(classify("what is on hand for I-0025", false)).toBe("stock");
+    expect(classify("9ZZ0025AA availability", false)).toBe("stock");
+  });
+
+  it.each([
+    "How many Dell monitors do we have?",
+    "how much stock of Dell laptops?",
+    "hp",
+    "what is our stock",
+    "monitors",
+    "Is there any stock of HP?",
+    "What is holding up PO 4471-26?",
+    "chp monitors",
+  ])("never answers %j with the HP monitor's figures", (question) => {
+    expect(classify(question, true)).toBe("other");
+    expect(classify(question, false)).toBe("other");
   });
 
   it("sends sales words to the trend answer, but only for a role that may read sales", () => {
     expect(classify("how are sales trending", true)).toBe("trend");
     expect(classify("how are sales trending", false)).toBe("other");
+    expect(classify("what is the sales forecast", true)).toBe("trend");
   });
 
-  it("gives anything else the honest answer", () => {
+  it("gives anything else the plain reply", () => {
     expect(classify("hello", true)).toBe("other");
+    expect(classify("", true)).toBe("other");
   });
 });

@@ -5,8 +5,9 @@ import { useTranslation } from "react-i18next";
 import { RecordLink, StatusBadge } from "@/components/common";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { formatAmount, formatDate, formatQuantity, isToday } from "./format";
+import { formatAmount, formatDate, isToday } from "./format";
 import { RecordRefLine } from "./RecordRefLine";
+import { SprLine } from "./SprLine";
 
 function targetOf(task: WorkflowTask): string | null {
   if (task.ref) return `/workflows/sprs/${task.ref.recordNo}`;
@@ -18,31 +19,6 @@ function dueText(task: WorkflowTask, t: TFunction<"workflows">): string {
   return isToday(task.dueAt)
     ? t("task.dueToday")
     : t("task.dueOn", { date: formatDate(task.dueAt) });
-}
-
-/** What an SPR task would buy, flagged when the item has under a month of stock. */
-function SprLine({ spr }: { spr: NonNullable<WorkflowTask["spr"]> }) {
-  const { t } = useTranslation("workflows");
-  const cover = spr.monthsOfCover;
-  return (
-    <>
-      <span className="text-foreground">
-        {t("task.sprLine", {
-          quantity: formatQuantity(spr.quantity),
-          item: spr.itemDescription,
-        })}
-      </span>
-      {cover !== null && Number(cover) < 1 ? (
-        <StatusBadge tone="warning">{t("spr.lowCover")}</StatusBadge>
-      ) : (
-        <span>
-          {cover === null
-            ? t("spr.noSales")
-            : t("task.cover", { months: formatAmount(cover) })}
-        </span>
-      )}
-    </>
-  );
 }
 
 /**

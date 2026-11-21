@@ -1,7 +1,7 @@
-import { EdgeLight } from "./EdgeLight";
+import { ShineBorder } from "@/components/kit/ShineBorder";
 import { SignInCardBody } from "./SignInCardBody";
 
-/** The glass card the form sits on, with a light travelling round its edge. */
+/** The glass card the form sits on, with a slow shine along its edge. */
 export function SignInCard() {
   return (
     <section
@@ -10,7 +10,11 @@ export function SignInCard() {
     >
       <div className="dx-card dx-card-work relative w-full max-w-136 p-5 sm:p-6">
         <SignInCardBody />
-        <EdgeLight />
+        <ShineBorder
+          borderWidth={1.5}
+          duration={12}
+          shineColor={["var(--ring)", "var(--info)"]}
+        />
       </div>
     </section>
   );

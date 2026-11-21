@@ -1969,6 +1969,35 @@
                             "required": ["recordNo", "navisionNo"],
                             "additionalProperties": false
                           },
+                          "spr": {
+                            "type": "object",
+                            "properties": {
+                              "itemNo": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "itemDescription": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "quantity": {
+                                "type": "string",
+                                "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                              },
+                              "monthsOfCover": {
+                                "nullable": true,
+                                "type": "string",
+                                "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                              }
+                            },
+                            "required": [
+                              "itemNo",
+                              "itemDescription",
+                              "quantity",
+                              "monthsOfCover"
+                            ],
+                            "additionalProperties": false
+                          },
                           "message": {
                             "type": "string",
                             "minLength": 1
@@ -2504,6 +2533,35 @@
                               }
                             },
                             "required": ["recordNo", "navisionNo"],
+                            "additionalProperties": false
+                          },
+                          "spr": {
+                            "type": "object",
+                            "properties": {
+                              "itemNo": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "itemDescription": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "quantity": {
+                                "type": "string",
+                                "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                              },
+                              "monthsOfCover": {
+                                "nullable": true,
+                                "type": "string",
+                                "pattern": "^-?\\d{1,15}(\\.\\d{1,4})?$"
+                              }
+                            },
+                            "required": [
+                              "itemNo",
+                              "itemDescription",
+                              "quantity",
+                              "monthsOfCover"
+                            ],
                             "additionalProperties": false
                           },
                           "message": {

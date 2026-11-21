@@ -1,5 +1,6 @@
 import type { TFunction } from "i18next";
 import type { CustomerDetail } from "@orderpilot/shared";
+import { paymentTermsLabel } from "./paymentTerms";
 import { MaskedMoney, countryName, type KeyFact } from "./pieces";
 
 /**
@@ -34,7 +35,7 @@ export function customerFacts(
     {
       id: "terms",
       label: t("customer.paymentTerms"),
-      value: customer.paymentTermsCode,
+      value: paymentTermsLabel(t, customer.paymentTermsCode),
     },
     {
       id: "limit",

@@ -132,5 +132,48 @@
   "filterChips": {
     "label": "Active filters",
     "clear": "Clear filter: {{label}}"
+  },
+  "glossary": {
+    "spr": {
+      "term": "SPR",
+      "long": "Stock purchase requisition",
+      "meaning": "A request to buy stock that a management approver decides."
+    },
+    "po": {
+      "term": "PO",
+      "long": "Purchase order",
+      "meaning": "The document a buyer sends to order goods."
+    },
+    "pi": {
+      "term": "PI",
+      "long": "Proforma invoice",
+      "meaning": "An invoice sent before payment, with the seller's bank details, so the buyer can pay."
+    },
+    "packingList": {
+      "term": "Packing list",
+      "meaning": "The list of what is in each carton of a shipment."
+    },
+    "awb": {
+      "term": "AWB",
+      "long": "Air waybill",
+      "meaning": "The shipping document for goods sent by air. Its number tracks the shipment."
+    },
+    "bl": {
+      "term": "BL",
+      "long": "Bill of lading",
+      "meaning": "The shipping document for goods sent by sea."
+    },
+    "heldAt": {
+      "term": "Held at",
+      "meaning": "The team that has the order now."
+    },
+    "shortOnStock": {
+      "term": "Short on stock",
+      "meaning": "There is less stock than the order asks for, so the order is held."
+    },
+    "businessCentral": {
+      "term": "Business Central",
+      "meaning": "The ERP beside which OrderPilot works. In this demo it is a stand-in."
+    }
   }
 }

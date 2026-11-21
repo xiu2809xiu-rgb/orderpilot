@@ -36,6 +36,12 @@ import {
   toMasterDataSalesOrder,
   listedInMasterData,
 } from "./domain/order-mapping.js";
+import {
+  customerSearchFields,
+  itemSearchFields,
+  matches,
+  vendorSearchFields,
+} from "./domain/search.js";
 import { StockPosition, isOpenOrder } from "./domain/stock-position.js";
 
 export interface MasterDataPage<Row> {
@@ -78,9 +84,6 @@ function paged<Row extends { no: string }>(
     total: rows.length,
   };
 }
-
-const matches = (search: string | undefined, values: readonly string[]) =>
-  !search || values.join(" ").toLowerCase().includes(search.toLowerCase());
 
 const ITEM_SORT: Record<NonNullable<ItemQuery["sort"]>, SortKey<ItemRow>> = {
   no: (row) => row.no,
@@ -248,7 +251,10 @@ export class MasterDataService {
     const rows = items
       .filter(
         (item) =>
-          matches(query.search, [item.no, item.description, item.partNumber]) &&
+          matches(
+            query.search,
+            itemSearchFields(item, names.get(item.vendorNo) ?? ""),
+          ) &&
           (!query.brand || item.brand === query.brand) &&
           (!query.category || item.category === query.category) &&
           (!query.vendor || item.vendorNo === query.vendor),
@@ -380,7 +386,7 @@ export class MasterDataService {
     const rows = customers
       .filter(
         (customer) =>
-          matches(query.search, [customer.no, customer.name]) &&
+          matches(query.search, customerSearchFields(customer)) &&
           (!query.country || customer.countryRegionCode === query.country) &&
           (!query.paymentTerms ||
             customer.paymentTermsCode === query.paymentTerms),
@@ -460,7 +466,7 @@ export class MasterDataService {
       this.reader.purchaseOrders(),
     ]);
     const rows = vendors
-      .filter((vendor) => matches(query.search, [vendor.no, vendor.name]))
+      .filter((vendor) => matches(query.search, vendorSearchFields(vendor)))
       .map((vendor): VendorRow => ({
         no: vendor.no,
         name: vendor.name,

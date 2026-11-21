@@ -7,6 +7,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { withTermLabel } from "@/components/common/Term";
 import { cn } from "@/lib/utils";
 import { STEP_IDS, stateOf, type Flow, type JourneyState } from "./journey";
 import "./parts.css";
@@ -92,7 +93,8 @@ export function JourneyRail({
           {now ? (
             <>
               <now.Icon className="size-3.5 shrink-0" aria-hidden="true" />
-              {now.label}
+              {/* A row of a list has a rail in each row: its words are not tab stops. */}
+              {withTermLabel(now.label, { focusable: false })}
             </>
           ) : (
             <>
@@ -127,7 +129,7 @@ export function JourneyRail({
           <span className="jr-text">
             <span className="jr-label fs-14">
               <step.Icon className="size-3.5 shrink-0" aria-hidden="true" />
-              <span>{step.label}</span>
+              <span>{withTermLabel(step.label)}</span>
             </span>
             <span className="jr-detail fs-12">
               {details?.[step.position] ? (

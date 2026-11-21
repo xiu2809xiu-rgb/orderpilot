@@ -3,6 +3,8 @@
   "description": "Ask Spark about stock and sales. In this demo its answers are scripted.",
   "close": "Close Spark",
   "new": "New conversation",
+  "maximise": "Maximise Spark",
+  "restore": "Restore Spark to its side panel",
   "status": {
     "idle": "Ready",
     "thinking": "Working on it"
@@ -71,8 +73,8 @@
       "itemPart": "Item and part number",
       "onHand": "On hand",
       "sales": "On sales orders",
-      "available": "Available",
-      "po": "On purchase orders"
+      "po": "On purchase orders",
+      "available": "Available"
     },
     "formula": "Available is on hand, minus on sales orders, plus on purchase orders.",
     "sources": "Sources",
@@ -83,7 +85,9 @@
       "subjectLabel": "Subject",
       "subject": "Stock of {{description}}",
       "bodyLabel": "Message",
-      "body": "Hello,\n\nThank you for asking about the {{description}} ({{part}}). We have {{available}} available now and can confirm a shipping date as soon as we receive your purchase order.\n\nKind regards,\nSpectra Innovations",
+      "now": "We can ship {{now}} now.",
+      "due": "A further {{due}} are due on purchase orders.",
+      "body": "Hello,\n\nThank you for asking about the {{description}} ({{part}}). {{stock}} We can confirm a shipping date as soon as we receive your purchase order.\n\nKind regards,\nSpectra Innovations",
       "copy": "Copy draft",
       "copied": "Draft copied",
       "note": "Spark drafts the reply. A person reads it, changes it and sends it from their own mail. Nothing is sent from this preview."
@@ -115,7 +119,9 @@
     "rangeValue": "{{low}} to {{high}}"
   },
   "other": {
-    "answer": "In this preview Spark answers two questions. Pick one.",
-    "noSales": "In this preview Spark answers one question. Your role cannot read sales figures, so the sales question is not offered."
-  }
+    "answer_one": "This is a preview with scripted answers, so Spark cannot answer that one. It can answer this question:",
+    "answer_other": "This is a preview with scripted answers, so Spark cannot answer that one. It can answer these questions:",
+    "noSales": "Sales questions are for roles that may read sales figures."
+  },
+  "scripted": "Scripted preview"
 }

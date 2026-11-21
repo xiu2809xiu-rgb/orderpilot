@@ -9,6 +9,7 @@ import {
   it,
   vi,
 } from "vitest";
+import { todayInSingapore } from "@/lib/format";
 import { useSessionStore } from "@/stores/session";
 import { axeViolations } from "@/test/axe";
 import { sessionFor } from "@/test/fixtures";
@@ -21,6 +22,7 @@ import {
   taskOn,
 } from "../orders/ordersTestKit";
 import { OrderPage } from "./OrderPage";
+import { flowOf, step, stubFlow } from "./orderPageTestKit";
 
 /** Opens an order as its route does: the number from the address, the tab from the query. */
 const open = (orderNo: string, query = "") =>
@@ -55,9 +57,23 @@ describe("the order page", () => {
     expect(within(facts).getByText("Waiting for payment")).toBeVisible();
     expect(within(facts).getByText("Finance")).toBeVisible();
     expect(within(facts).getByText("PO-SO-0001")).toBeVisible();
-    expect(within(facts).getByText("3 d late")).toBeVisible();
+    // Lateness is said once, by the badge under the title, not in the facts.
+    expect(within(facts).queryByText("3 d late")).toBeNull();
+    expect(screen.getAllByText("3 d late")).toHaveLength(1);
     // The read-only order form showed the prepayment, and customers pay before shipping.
     expect(within(facts).getByText("30% prepayment")).toBeVisible();
+  });
+
+  it("explains Held at where it is a heading of the facts", async () => {
+    stubApi();
+    open(PAID);
+    const facts = (await screen.findByText("Stage")).closest("dl");
+    if (!facts) throw new Error("no facts");
+    const term = within(facts).getByText("Held at");
+    expect(term.tagName).toBe("ABBR");
+    expect(term).toHaveAccessibleDescription(
+      "The team that has the order now.",
+    );
   });
 
   it("shows the journey with done, now and later, and who and when for done steps", async () => {
@@ -71,24 +87,57 @@ describe("the order page", () => {
     expect(steps[3]).toHaveAttribute("aria-current", "step");
     // Done: the actor and the day, from the order's own events.
     expect(within(nth(steps, 2)).getByText(/Support, /)).toBeVisible();
-    expect(within(nth(steps, 3)).getByText(/Since /)).toBeVisible();
+    // The badge under the title says how late the order is; the rail's current
+    // step says "Now" and no more, so the page has one lateness figure.
+    expect(within(nth(steps, 3)).getByText(/^Now:/)).toBeInTheDocument();
+    expect(screen.queryByText(/Now, late/)).toBeNull();
+    // The current step says how long it has waited and what is usual, in one short line.
+    expect(
+      within(nth(steps, 3)).getByText("Waiting 14 days, usually 4 days"),
+    ).toBeVisible();
     // Later: a day the step is expected, worked from the usual times.
     expect(within(nth(steps, 4)).getByText(/^By /)).toBeVisible();
   });
 
-  it("sums the journey up in one line and sets it against the order's ship date", async () => {
+  it("counts the wait from the workflow's record, not from the tracker's newest event", async () => {
+    stubApi();
+    // The workflow finished its last step six days ago; the tracker's own
+    // current event is fourteen days old here, and on the sample data it is
+    // always today, which is why the record's time is the one shown.
+    const sixDaysAgo = new Date(
+      Date.parse(`${todayInSingapore()}T12:00:00.000Z`) - 6 * 86_400_000,
+    ).toISOString();
+    stubFlow(() =>
+      flowOf(PAID, {
+        steps: [
+          { ...step("pi-sent", "done"), completedAt: sixDaysAgo },
+          step("payment-confirmed", "current"),
+        ],
+      }),
+    );
+    open(PAID);
+    const rail = await screen.findByRole("list", {
+      name: "Sales order journey",
+    });
+    const now = nth(within(rail).getAllByRole("listitem"), 3);
+    expect(
+      await within(now).findByText("Waiting 6 days, usually 4 days"),
+    ).toBeVisible();
+    expect(within(now).queryByText(/Waiting 14 days/)).toBeNull();
+  });
+
+  it("names the expected ship day as what it is and sets it against the order's ship date", async () => {
     stubApi();
     open(PAID);
     expect(
       await screen.findByText(
-        /^Expected to ship on .+, from how long each step took on similar orders\.$/,
+        /^Expected to ship \w{3}, \d{1,2} \w{3}: (\d+ days? after the order.s ship date|in time for the order.s ship date)\.$/,
       ),
     ).toBeVisible();
-    expect(screen.getByText(/Ship date on the order:/)).toBeVisible();
-    // A step the data cannot time is named, and adds nothing.
-    expect(
-      screen.getByText(/No usual time for Invoice and packing list/),
-    ).toBeVisible();
+    expect(screen.getByText(/^From how long each step took/)).toBeVisible();
+    // A step the data cannot time says so on the rail, where it is.
+    const rail = screen.getByRole("list", { name: "Sales order journey" });
+    expect(within(rail).getByText("No usual time")).toBeVisible();
   });
 
   it("fills the four tabs from the real data", async () => {
@@ -110,7 +159,9 @@ describe("the order page", () => {
     await user.click(within(tabs).getByRole("tab", { name: /^Documents/ }));
     const customerPo = (await screen.findByText("Customer PO")).closest("li");
     if (!customerPo) throw new Error("no document row");
-    expect(within(customerPo).getByText("Differs")).toBeVisible();
+    expect(
+      within(customerPo).getByText("A check found a difference"),
+    ).toBeVisible();
     expect(screen.getByText("Packing list")).toBeVisible();
 
     await user.click(within(tabs).getByRole("tab", { name: /^Checks/ }));
@@ -131,42 +182,44 @@ describe("the order page", () => {
     open(PAID, "?tab=documents");
     expect(
       await screen.findByText(
-        "A document of this order waits for you to confirm it",
+        "A document of this order waits for a person to confirm its fields",
       ),
     ).toBeVisible();
-    expect(screen.getByText(/It does not say which one/)).toBeVisible();
+    expect(screen.getByText(/does not say which one/)).toBeVisible();
   });
 
   it("lists the documents the workflow knows, with the one waiting for a person marked", async () => {
-    stubApi({
-      toConfirm: ["SO-0001"],
-      flowDocuments: [
-        {
-          id: "d1",
-          type: "CUSTOMER_PO",
-          number: "PO-SO-0001",
-          status: "confirmed",
-          receivedAt: "2026-11-02T01:00:00.000Z",
-          dueDate: null,
-        },
-        {
-          id: "d2",
-          type: "PACKING_LIST",
-          number: "PL-77",
-          status: "to-confirm",
-          receivedAt: "2026-11-05T01:00:00.000Z",
-          dueDate: null,
-        },
-        {
-          id: "d3",
-          type: "AWB",
-          number: null,
-          status: "expected",
-          receivedAt: null,
-          dueDate: "2026-11-23",
-        },
-      ],
-    });
+    stubApi({ toConfirm: ["SO-0001"] });
+    stubFlow(() =>
+      flowOf("SO-0001", {
+        documents: [
+          {
+            id: "d1",
+            type: "CUSTOMER_PO",
+            number: "PO-SO-0001",
+            status: "confirmed",
+            receivedAt: "2026-11-02T01:00:00.000Z",
+            dueDate: null,
+          },
+          {
+            id: "d2",
+            type: "PACKING_LIST",
+            number: "PL-77",
+            status: "to-confirm",
+            receivedAt: "2026-11-05T01:00:00.000Z",
+            dueDate: null,
+          },
+          {
+            id: "d3",
+            type: "AWB",
+            number: null,
+            status: "expected",
+            receivedAt: null,
+            dueDate: "2026-11-23",
+          },
+        ],
+      }),
+    );
     open(PAID, "?tab=documents");
     // The workflow answers after the tracker: wait for its number.
     await screen.findByText("PL-77");
@@ -177,29 +230,28 @@ describe("the order page", () => {
     expect(within(packing).getByText("Received 5 Nov 2026")).toBeVisible();
     const awb = screen.getByText("Air waybill").closest("li");
     if (!awb) throw new Error("no AWB row");
-    expect(within(awb).getByText("Expected")).toBeVisible();
-    expect(within(awb).getByText("Due 23 Nov 2026")).toBeVisible();
+    expect(within(awb).getByText("Expected by 23 Nov 2026")).toBeVisible();
     // The alert can name the document now, because the list does.
-    expect(screen.getByText(/It is marked To confirm/)).toBeVisible();
-    expect(screen.queryByText(/It does not say which one/)).toBeNull();
+    expect(screen.getByText(/is marked To confirm/)).toBeVisible();
+    expect(screen.queryByText(/does not say which one/)).toBeNull();
   });
 
   it("makes the person's own task the one primary button, finished here with one click", async () => {
     stubApi({ tasks: [taskOn("SO-0001", "SEND_PI")] });
     open(PAID);
     expect(
-      await screen.findByRole("button", { name: "Mark sent" }),
+      await screen.findByRole("button", { name: "Mark PI as sent" }),
     ).toBeVisible();
-    expect(screen.getAllByRole("button", { name: /Mark sent/ })).toHaveLength(
-      1,
-    );
+    expect(
+      screen.getAllByRole("button", { name: /Mark PI as sent/ }),
+    ).toHaveLength(1);
   });
 
   it("opens the order's own page of the app for a decision, and says when there is no task", async () => {
     stubApi({ tasks: [taskOn("SO-0001", "CONFIRM_PAYMENT")] });
     const view = open(PAID);
     expect(
-      await screen.findByRole("link", { name: /Confirm/ }),
+      await screen.findByRole("link", { name: "Enter payment details" }),
     ).toHaveAttribute("href", "/workflows/orders/SO-0001");
     view.unmount();
     vi.unstubAllGlobals();
@@ -208,6 +260,25 @@ describe("the order page", () => {
     expect(
       await screen.findByText("You have no open task on this order."),
     ).toBeVisible();
+  });
+
+  it("opens the SPR itself for an SPR to decide, with its action in words", async () => {
+    stubApi({
+      tasks: [
+        {
+          ...taskOn("SO-0001", "APPROVE_SPR"),
+          assigneeRole: "APPROVER",
+          ref: { recordNo: "SPR-20261111-0003", navisionNo: null },
+        },
+      ],
+    });
+    open(PAID);
+    expect(await screen.findByRole("link", { name: "Review" })).toHaveAttribute(
+      "href",
+      "/workflows/sprs/SPR-20261111-0003",
+    );
+    // A missing wording would show its key, as it did once.
+    expect(screen.queryByText(/needs\.actions/)).toBeNull();
   });
 
   it("hides every price from a role that may not see them, with the reason", async () => {
@@ -291,8 +362,15 @@ describe("the order page", () => {
   it("says plainly when the order is not found", async () => {
     stubApi();
     open("SO-9999");
-    expect(await screen.findByText("That order was not found")).toBeVisible();
-    expect(screen.getByRole("link", { name: "Orders" })).toBeVisible();
+    expect(
+      await screen.findByRole("heading", {
+        level: 1,
+        name: "That order was not found",
+      }),
+    ).toBeVisible();
+    expect(screen.getByRole("link", { name: "Back to Orders" })).toBeVisible();
+    // A retry would ask the same question and get the same answer.
+    expect(screen.queryByRole("button", { name: "Try again" })).toBeNull();
   });
 
   it("shows the error with its trace id and a way to retry when the order cannot be read", async () => {

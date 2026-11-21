@@ -1,19 +1,17 @@
 import type { SalesOrderDetail } from "@orderpilot/shared";
-import { Clock } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import { Term, withTerms } from "@/components/common/Term";
 import { formatDay } from "@/lib/format";
-import { StatusChip } from "@/components/kit/StatusChip";
 import { Amount } from "../orders/Amount";
 import { ALL_DONE } from "../orders/orderRow";
-import { EntryFact } from "./EntryFact";
 
 function Fact({
   label,
   children,
   main = false,
 }: {
-  label: string;
+  label: ReactNode;
   children: ReactNode;
   /** The figure the eye should land on: set larger. */
   main?: boolean;
@@ -27,10 +25,10 @@ function Fact({
 }
 
 /**
- * The order in six facts: its stage, the team that holds it, its value (masked
- * for a role that may not see prices, with the reason), the ship date, the
- * order date and the customer's PO. Past due says so with a chip and the
- * tracker's own reason.
+ * The order in six facts, in one row: its stage, the team that holds it, its
+ * value (masked for a role that may not see prices, with the reason), the ship
+ * date, the order date and the customer's PO. How late it is, if it is, is the
+ * status block's to say, once.
  */
 export function OrderFacts({
   order,
@@ -38,20 +36,18 @@ export function OrderFacts({
   stageLabel,
   heldAt,
   step,
-  overdue,
 }: {
   order: { externalDocumentNo: string };
   detail: SalesOrderDetail | undefined;
   stageLabel: string;
   heldAt: string;
   step: number | null;
-  overdue: { overdue: boolean; daysOverdue: number; reason: string | null };
 }) {
   const { t } = useTranslation("directions-orders");
   return (
     <dl className="od-facts-bar dx-card">
-      <Fact label={t("order.facts.stage")}>{stageLabel}</Fact>
-      <Fact label={t("columns.heldAt")}>
+      <Fact label={t("order.facts.stage")}>{withTerms(stageLabel)}</Fact>
+      <Fact label={<Term word="heldAt">{t("columns.heldAt")}</Term>}>
         {step === ALL_DONE ? t("cells.done") : heldAt}
       </Fact>
       <Fact label={t("columns.value")} main>
@@ -86,23 +82,9 @@ export function OrderFacts({
       <Fact label={t("columns.orderDate")}>
         {detail ? formatDay(detail.orderDate) : t("cells.notSet")}
       </Fact>
-      <Fact label={t("columns.po")}>
+      <Fact label={withTerms(t("columns.po"))}>
         <span className="numeral">{order.externalDocumentNo}</span>
       </Fact>
-      {detail ? <EntryFact detail={detail} /> : null}
-      {overdue.overdue ? (
-        <div className="od-fact od-fact-wide">
-          <dt className="od-fact-label fs-12">{t("order.facts.pastDue")}</dt>
-          <dd className="od-fact-value fs-14">
-            <StatusChip kind="destructive" icon={Clock}>
-              {t("cells.late", { count: overdue.daysOverdue })}
-            </StatusChip>
-            {overdue.reason ? (
-              <span className="text-muted-foreground"> {overdue.reason}</span>
-            ) : null}
-          </dd>
-        </div>
-      ) : null}
     </dl>
   );
 }

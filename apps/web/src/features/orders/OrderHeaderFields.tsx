@@ -44,7 +44,6 @@ export function OrderHeaderFields({
         {...hint("form.fields.externalDocumentNoHint")}
         {...needed}
         code
-        maxLength={35}
       />
       <DateField
         {...common}

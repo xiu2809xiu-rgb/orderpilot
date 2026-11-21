@@ -17,6 +17,8 @@ interface PasswordFormProps {
   busy: boolean;
   /** The failure, drawn just above the button. */
   alert: ReactNode;
+  /** Runs when a field changes, so a failure from the last attempt can go. */
+  onEdit?: () => void;
 }
 
 /**
@@ -31,6 +33,7 @@ export function PasswordForm({
   onSubmit,
   busy,
   alert,
+  onEdit,
 }: PasswordFormProps) {
   const { t } = useTranslation("signin");
   const [shown, setShown] = useState(false);
@@ -59,6 +62,7 @@ export function PasswordForm({
     <form
       noValidate
       className="flex flex-col gap-4"
+      onChange={onEdit}
       onSubmit={(event) => {
         void form.handleSubmit(onSubmit)(event);
       }}

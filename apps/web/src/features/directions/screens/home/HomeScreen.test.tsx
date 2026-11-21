@@ -1,5 +1,5 @@
 import { QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router";
 import {
@@ -143,9 +143,9 @@ function home() {
         <Routes>
           <Route path="/" element={<HomeScreen />} />
         </Routes>
+        {/* The shell draws the toaster on the real page, inside the router. */}
+        <Toaster />
       </MemoryRouter>
-      {/* The shell draws the toaster on the real page. */}
-      <Toaster />
     </QueryClientProvider>,
   );
 }
@@ -161,6 +161,8 @@ beforeAll(async () => {
 });
 
 beforeEach(() => {
+  // Done today is the browser's own copy, which jsdom keeps between tests.
+  localStorage.clear();
   useSessionStore.setState({
     status: "active",
     session: sessionFor("SUPPORT"),
@@ -202,26 +204,35 @@ describe("the home screen", () => {
     expect(within(nth(rows, 0)).getByText("2 days late")).toBeVisible();
     expect(
       within(nth(rows, 0)).getByRole("button", {
-        name: "Mark sent for SO-0080",
+        name: "Mark PI as sent for SO-0080",
       }),
     ).toBeVisible();
     // A task one click cannot finish opens its order instead.
     expect(
       within(nth(rows, 1)).getByRole("link", {
-        name: "Review for SO-0102",
+        name: "Open order for SO-0102",
       }),
     ).toBeVisible();
   });
 
-  it("has one primary button, New order, and an Upload that opens the upload screen", async () => {
+  it("has one filled button, Upload a PO, and a lighter New order that opens the order form", async () => {
     stubApi();
     home();
     expect(
       await screen.findByRole("link", { name: "New order" }),
     ).toHaveAttribute("href", "/orders/new");
+    const upload = screen.getByRole("link", { name: "Upload a PO" });
+    expect(upload).toHaveAttribute("href", "/upload");
+    expect(upload.className).toContain("bg-primary");
     expect(
-      screen.getByRole("link", { name: "Upload a document" }),
-    ).toHaveAttribute("href", "/upload");
+      screen.getByRole("link", { name: "New order" }).className,
+    ).not.toContain("bg-primary");
+    // Two buttons that look alike get one line saying what each is for.
+    expect(
+      screen.getByText(
+        "Upload a PO for Spark to read, or type a new order in by hand.",
+      ),
+    ).toBeVisible();
   });
 
   it("builds My timeline from the tasks and says where the estimate comes from", async () => {
@@ -319,12 +330,46 @@ describe("the home screen", () => {
     const user = userEvent.setup();
     home();
     await user.click(
-      await screen.findByRole("button", { name: "Mark sent for SO-0080" }),
+      await screen.findByRole("button", {
+        name: "Mark PI as sent for SO-0080",
+      }),
     );
     await waitFor(() => {
       expect(calls).toContain("POST /api/v1/workflows/tasks/t1/complete");
     });
-    expect(await screen.findByText(/^Finished at \d\d:\d\d$/)).toBeVisible();
+    expect(
+      await screen.findByText(
+        /^Marked the PI for SO-0080 as sent at \d\d:\d\d$/,
+      ),
+    ).toBeVisible();
+  });
+
+  it("starts again for the next person: a role switch on Home leaves none of the last one's Done today", async () => {
+    stubApi();
+    const user = userEvent.setup();
+    home();
+    await user.click(
+      await screen.findByRole("button", {
+        name: "Mark PI as sent for SO-0080",
+      }),
+    );
+    expect(
+      await screen.findByText(
+        /^Marked the PI for SO-0080 as sent at \d\d:\d\d$/,
+      ),
+    ).toBeVisible();
+    // The role switcher signs the next person in and stays on this route.
+    act(() => {
+      useSessionStore.setState({
+        status: "active",
+        session: sessionFor("FINANCE"),
+      });
+    });
+    await waitFor(() => {
+      expect(
+        screen.queryByText(/^Marked the PI for SO-0080 as sent at \d\d:\d\d$/),
+      ).toBeNull();
+    });
   });
 
   it("lists no tasks for a role with no inbox, and does not ask for any", async () => {

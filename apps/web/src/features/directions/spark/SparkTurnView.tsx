@@ -4,7 +4,9 @@ import { ShinyText } from "@/components/kit/ShinyText";
 import { ThoughtLine } from "@/components/kit/ThoughtLine";
 import { StockAnswerParts, stockSentence } from "./answers/StockAnswer";
 import { TrendAnswerParts, trendSentence } from "./answers/TrendAnswerParts";
+import { SparkChoices } from "./SparkChoices";
 import { stockFacts, trendFacts } from "./sparkFacts";
+import { suggestionsFor } from "./suggestions";
 import type { SparkKind, Turn } from "./useSparkChat";
 import { useWordStream } from "./useWordStream";
 
@@ -20,9 +22,6 @@ const STEPS: Record<SparkKind, readonly string[]> = {
   trend: ["read", "added", "forecast"],
   other: ["read"],
 };
-
-const CHOICE =
-  "fs-14 min-h-9 border border-border bg-card px-3 text-left outline-none hover:border-ring focus-visible:ring-2 focus-visible:ring-ring pointer-coarse:min-h-11";
 
 /**
  * One exchange: what the person asked, Spark's thought line (what it looked
@@ -44,7 +43,7 @@ export function SparkTurnView({
       ? stockSentence(t, stock)
       : turn.kind === "trend"
         ? trendSentence(t, trend)
-        : t(mayReadSales ? "other.answer" : "other.noSales");
+        : t("other.answer", { count: suggestionsFor(mayReadSales).length });
   const streaming = turn.phase === "streaming";
   const settled = turn.phase === "done" || turn.phase === "stopped";
   const shown = useWordStream(text, streaming, settled, () => {
@@ -71,7 +70,7 @@ export function SparkTurnView({
           {turn.question}
         </p>
       </div>
-      <div className="flex flex-col gap-3">
+      <div data-spark-answer className="flex flex-col gap-3">
         <ThoughtLine
           working={turn.phase === "thinking"}
           label={t(`thought.${turn.kind}.working`)}
@@ -82,6 +81,12 @@ export function SparkTurnView({
         />
         {turn.phase === "thinking" ? null : (
           <>
+            <p
+              className="fs-12 w-fit border border-border px-2 py-0.5 text-muted-foreground"
+              style={{ borderRadius: "var(--radius-control)" }}
+            >
+              {t("scripted")}
+            </p>
             <p className="fs-14 text-foreground">
               <span className="sr-only">{t("thread.spark")}: </span>
               {streaming ? (
@@ -102,30 +107,13 @@ export function SparkTurnView({
               <TrendAnswerParts facts={trend} />
             ) : null}
             {done && turn.kind === "other" ? (
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    onAsk(t("empty.stock"), "stock");
-                  }}
-                  className={CHOICE}
-                  style={{ borderRadius: "var(--radius-control)" }}
-                >
-                  {t("empty.stock")}
-                </button>
-                {mayReadSales ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onAsk(t("empty.trend"), "trend");
-                    }}
-                    className={CHOICE}
-                    style={{ borderRadius: "var(--radius-control)" }}
-                  >
-                    {t("empty.trend")}
-                  </button>
-                ) : null}
-              </div>
+              <SparkChoices mayReadSales={mayReadSales} onAsk={onAsk} />
+            ) : null}
+            {done && turn.kind === "other" && !mayReadSales ? (
+              // Why the sales question is not among the suggestions.
+              <p className="fs-12 text-muted-foreground">
+                {t("other.noSales")}
+              </p>
             ) : null}
           </>
         )}

@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { AnimatedList } from "@/components/kit/AnimatedList";
 import { EmptyState } from "@/components/parts/EmptyState";
-import { Section } from "@/components/parts/Section";
+import { HomeSection } from "./HomeSection";
 import { HomeQuery } from "./HomeQuery";
 import { NeedRow } from "./NeedRow";
 import { RowSkeletons } from "./RowSkeletons";
@@ -35,7 +35,7 @@ export function NeedsYou({
   const hidden = Math.max(0, home.total - shown.length);
 
   return (
-    <Section title={t("needs.title")} work className="min-w-0">
+    <HomeSection title={t("needs.title")} work className="min-w-0">
       <div ref={focus.listRef}>
         <HomeQuery query={home.list} loading={<RowSkeletons />}>
           {shown.length === 0 ? (
@@ -46,7 +46,10 @@ export function NeedsYou({
             />
           ) : (
             <>
-              <AnimatedList className="-my-3 divide-y divide-border">
+              <AnimatedList
+                stagger={0.03}
+                className="-my-3 divide-y divide-border"
+              >
                 {shown.map((task: WorkflowTask, index) => (
                   <NeedRow
                     key={task.id}
@@ -74,6 +77,6 @@ export function NeedsYou({
           )}
         </HomeQuery>
       </div>
-    </Section>
+    </HomeSection>
   );
 }

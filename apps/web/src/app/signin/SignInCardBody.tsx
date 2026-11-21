@@ -7,9 +7,9 @@ import { SignInDemoNote } from "./SignInDemoNote";
 function Title() {
   const { t } = useTranslation("signin");
   return (
-    <h2 id="signin-title" className="fs-20 font-semibold">
+    <h1 id="signin-title" className="fs-20 font-semibold">
       {t("login.title")}
-    </h2>
+    </h1>
   );
 }
 

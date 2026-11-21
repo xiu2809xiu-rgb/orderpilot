@@ -1,14 +1,13 @@
 import type { OrderTimeline, SalesOrderDetail } from "@orderpilot/shared";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router";
-import { useWorkflowsOrderFlow } from "@/lib/api/generated/endpoints/workflows/workflows";
-import { hasPermission, useSessionStore } from "@/stores/session";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ActivityTab } from "./ActivityTab";
 import { ChecksTab } from "./ChecksTab";
 import { DocumentsTab } from "./DocumentsTab";
-import { documentsOf, withFlow } from "./documentsModel";
+import { documentsOf, withFlow, withPending } from "./documentsModel";
 import { LinesTab } from "./LinesTab";
+import { useOrderFlow } from "./useOrderFlow";
 
 const TABS = ["lines", "documents", "checks", "activity"] as const;
 type Tab = (typeof TABS)[number];
@@ -18,8 +17,9 @@ const isTab = (value: string | null): value is Tab =>
 /**
  * Lines, Documents, Checks and Activity, each filled from the real data. The
  * tab is in the address (`tab=checks`), so a link opens the order on it. The
- * count beside a name is what is inside: lines, documents, checks that found a
- * difference (or all checks when none did) and events.
+ * count beside a name is what its panel lists: lines, the documents the order
+ * has (not the ones still to come), every check, and events. The Checks count
+ * turns to an alert when one of them found a difference.
  */
 export function OrderTabs({
   orderNo,
@@ -38,24 +38,26 @@ export function OrderTabs({
   const { t } = useTranslation("directions-orders");
   const [params, setParams] = useSearchParams();
   // The workflow lists the documents received and still expected; a role that may not read it sees the ones the checks read.
-  const mayReadFlow = hasPermission(
-    useSessionStore((state) => state.session),
-    "workflows.read",
+  const flow = useOrderFlow(orderNo, inWorkflow).data?.data;
+  const documents = withPending(
+    withFlow(documentsOf(timeline.checks, { orderNo }), flow?.documents ?? []),
+    flow,
   );
-  const flow = useWorkflowsOrderFlow(orderNo, {
-    query: { enabled: mayReadFlow && inWorkflow, retry: false },
-  });
-  const documents = withFlow(
-    documentsOf(timeline.checks, { orderNo }),
-    flow.data?.data.documents ?? [],
-  );
+  // The demo PDFs print prices, so a role whose prices the server masks on this
+  // page is not offered them, and the Checks tab covers its price checks by the
+  // same test. Until the order has answered nothing is offered or shown.
+  const amount = detail?.amount;
+  const priceMask =
+    amount && !amount.masked && amount.value !== null
+      ? null
+      : t(`mask.${amount?.reason ?? "price"}`);
   const asked = params.get("tab");
   const tab: Tab = isTab(asked) ? asked : "lines";
   const failed = timeline.checks.filter((check) => check.outcome !== "pass");
   const counts: Record<Tab, number> = {
     lines: detail?.lines.length ?? 0,
-    documents: documents.length,
-    checks: failed.length > 0 ? failed.length : timeline.checks.length,
+    documents: documents.filter((row) => !row.pending).length,
+    checks: timeline.checks.length,
     activity: timeline.steps.length,
   };
   return (
@@ -93,10 +95,15 @@ export function OrderTabs({
           orderNo={orderNo}
           externalDocumentNo={timeline.externalDocumentNo}
           toConfirm={toConfirm}
+          priceMask={priceMask}
         />
       </TabsContent>
       <TabsContent value="checks">
-        <ChecksTab checks={timeline.checks} matches={timeline.matches} />
+        <ChecksTab
+          checks={timeline.checks}
+          matches={timeline.matches}
+          priceMask={priceMask}
+        />
       </TabsContent>
       <TabsContent value="activity">
         <ActivityTab orderNo={orderNo} steps={timeline.steps} />

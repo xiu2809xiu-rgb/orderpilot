@@ -3,6 +3,7 @@ import { NestFactory } from "@nestjs/core";
 import type { NestExpressApplication } from "@nestjs/platform-express";
 import { AppModule } from "./app.module.js";
 import { configureApp } from "./bootstrap/configure-app.js";
+import { applyDemoScenario } from "./common/demo-scenario.js";
 import { AppConfig } from "./config/app-config.js";
 import { ConfigError } from "./config/config-error.js";
 import {
@@ -19,6 +20,7 @@ async function bootstrap(): Promise<void> {
     createFile: ROOT_ENV_FILE,
     readFiles: ENV_FILES,
   });
+  applyDemoScenario(config);
 
   // Before anything else runs, so the first request already has a trace id.
   // Both are off at the edge unless configured: see ADRs 0021 and 0022.

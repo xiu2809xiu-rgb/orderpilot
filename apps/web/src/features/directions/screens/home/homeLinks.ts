@@ -6,6 +6,14 @@ export function orderHref(orderNo: string): string {
   return `/orders/${encodeURIComponent(orderNo)}`;
 }
 
+/**
+ * An order's steps page: the page of the workflow area that has the payment
+ * form, where the amount, the bank reference and the date are entered.
+ */
+export function stepsHref(orderNo: string): string {
+  return `/workflows/orders/${encodeURIComponent(orderNo)}`;
+}
+
 const TRACKER_LIST = /^\/order-tracker(?=\?|$)/;
 
 /**
@@ -33,7 +41,7 @@ export function useOrderLinks() {
       order: (orderNo: string): string => {
         const no = encodeURIComponent(orderNo);
         if (orders) return orderHref(orderNo);
-        return tracker ? `/order-tracker/${no}` : `/workflows/orders/${no}`;
+        return tracker ? `/order-tracker/${no}` : stepsHref(orderNo);
       },
       /**
        * The address of a list a feature declared. The tracker's lists lead to

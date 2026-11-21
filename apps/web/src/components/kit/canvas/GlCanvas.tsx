@@ -18,6 +18,8 @@ interface GlCanvasProps {
   redrawKey?: string;
   /** The time a still picture is drawn at: a frame with something in it. */
   stillTime?: number;
+  /** Holds the picture still on request: a person's Pause button. */
+  paused?: boolean;
   /** Shown where WebGL2 is missing (and in tests): plain CSS, no script. */
   fallback: CSSProperties;
   className?: string;
@@ -67,6 +69,7 @@ export function GlCanvas({
   draw,
   redrawKey = "",
   stillTime = 6,
+  paused = false,
   fallback,
   className,
 }: GlCanvasProps) {
@@ -127,7 +130,7 @@ export function GlCanvas({
     render.current?.(time.current);
   }, [redrawKey]);
 
-  const running = onScreen && tabVisible && !reduced && !failed;
+  const running = onScreen && tabVisible && !reduced && !failed && !paused;
   useEffect(() => {
     if (!running) return;
     let frame = 0;

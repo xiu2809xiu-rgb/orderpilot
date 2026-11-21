@@ -1,6 +1,6 @@
 {
   "title": "Orders",
-  "description": "Sales orders: the samples Spectra gave us and the orders entered here. Nothing is ordered from this list.",
+  "description": "Sales orders: the sample orders of the synthetic demo set and the orders entered here. Nothing is ordered from this list.",
   "menu": {
     "orders": "Orders"
   },
@@ -15,7 +15,7 @@
     "title": "Sales order {{number}}",
     "newTitle": "New order",
     "newDescription": "Enter a customer's PO as a draft. Nothing is posted to Business Central from here.",
-    "draftDescription": "A draft: entry is not finished and nothing is reserved. Stock figures are from the mock Business Central.",
+    "draftDescription": "A draft: entry is not finished and nothing is reserved. It can be edited or voided here, and it is not in the order journey yet. Stock figures are from the mock Business Central.",
     "formLabel": "Sales order",
     "statusNew": "Not saved yet",
     "tabsEmpty": "Nothing here yet.",
@@ -36,18 +36,19 @@
       "percentUnit": "%"
     },
     "errors": {
-      "customer": "Choose the customer.",
+      "customer": "Choose the customer from the list.",
       "po": "Enter the customer's PO number.",
-      "poLong": "A PO number has 35 characters at most.",
+      "poLong": "A PO number has {{max}} characters at most, and this one has {{length}}. Shorten it.",
       "orderDate": "Enter the order date.",
       "shipmentDate": "Enter a valid shipment date, or leave it empty.",
+      "shipmentBeforeOrder": "This is before the order date. Choose that day or a later one.",
       "prepayment": "Enter a percentage from 0 to 100, with two decimals at most.",
-      "item": "Choose an item.",
-      "description": "A description has 100 characters at most.",
-      "quantity": "Above zero.",
-      "unitPrice": "A price, such as 12.50.",
+      "item": "Choose an item from the list.",
+      "description": "A description has 100 characters at most. Shorten it.",
+      "quantity": "Enter a quantity above zero.",
+      "unitPrice": "Enter a unit price, for example 12.50.",
       "none": "Add at least one line.",
-      "tooMany": "An order has 200 lines at most."
+      "tooMany": "An order has 200 lines at most. Remove some lines."
     },
     "lines": {
       "tableLabel": "Order lines",
@@ -74,7 +75,7 @@
       "reload": "Reload",
       "readOnlyTitle": "This order is read-only",
       "readOnly": {
-        "sample": "This is a sample order from Spectra. Samples are not edited here.",
+        "sample": "A sample order of the synthetic demo set. Its details cannot be edited here.",
         "submitted": "This order is submitted. Only a draft can be changed.",
         "void": "This order is void. It cannot be changed.",
         "permission": "Your role may read orders but not change them."

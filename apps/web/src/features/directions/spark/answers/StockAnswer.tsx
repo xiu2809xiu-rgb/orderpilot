@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import { badgeVariants } from "@/components/kit/Badge";
 import { cn } from "@/lib/utils";
-import { grouped, type StockFacts } from "../sparkFacts";
+import { availableNow, grouped, type StockFacts } from "../sparkFacts";
 import { DraftReply } from "./DraftReply";
 import { StockTable } from "./StockTable";
 
@@ -66,7 +66,8 @@ export function StockAnswerParts({ facts }: { facts: StockFacts }) {
         <DraftReply
           description={only.description}
           part={only.partNumber}
-          available={grouped(facts.totals.available)}
+          now={availableNow(only)}
+          due={only.onPurchaseOrders}
         />
       ) : null}
     </div>

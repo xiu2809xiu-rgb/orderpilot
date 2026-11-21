@@ -32,6 +32,13 @@ export const ITEM_AVAILABILITIES = ["short", "low", "ok"] as const;
 export const itemAvailabilitySchema = z.enum(ITEM_AVAILABILITIES);
 export type ItemAvailability = z.infer<typeof itemAvailabilitySchema>;
 
+/**
+ * Under this much available stock an item counts as low. A sample for the
+ * demo until Spectra confirms the rule. It lives here so that the API, which
+ * applies it, and the web app, which words it, cannot drift apart.
+ */
+export const LOW_STOCK_THRESHOLD = 25;
+
 const direction = z.enum(["asc", "desc"]).optional();
 const page = z.coerce.number().int().min(1).default(1);
 /** The most rows one page of a master data list holds. */

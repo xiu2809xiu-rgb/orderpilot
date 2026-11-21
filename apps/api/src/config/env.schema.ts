@@ -62,6 +62,8 @@ export const envSchema = z
       .enum(["development", "test", "production"])
       .default("development"),
     DEMO_MODE: booleanFlag.default(false),
+    // The proposal demo's storyline order (PO 4471-26) in the generated data.
+    DEMO_STORYLINE: booleanFlag.default(false),
 
     API_HOST: z.string().min(1).default("127.0.0.1"),
     API_PORT: z.coerce.number().int().min(1).max(65535).default(3000),
