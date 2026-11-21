@@ -403,6 +403,7 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 | #328  | The closing check of the last three merges            | `fix/platform-closing-check`     | This pull request. The role switch, the journey after an act, eight more points     |
 | #326  | The Spark orb: prepared ahead, shown at once          | `fix/platform-spark-orb`         | This pull request. The page is no longer paused, and the idle orb visibly moves     |
 | #334  | The evening clock in the orders test kit              | `test/web-evening-clock`         | This pull request. The order page test passes at any hour of a Singapore day        |
+| #337  | The Spark orb flows faster at idle                    | `fix/platform-orb-idle-speed`    | This pull request. Idle flows 75% faster, measured in Edge before and after         |
 | #191  | Cut CI minutes before the repository goes private     | `ci/minutes-job-conditions`      | Merged, [#192](https://github.com/xiu2809xiu-rgb/orderpilot/pull/192)               |
 | P-42  | Plan prompt 004                                       | `chore/plan-prompt-004`          | Merged, [#138](https://github.com/xiu2809xiu-rgb/orderpilot/pull/138)               |
 | P-13  | Docker images and the IaC scan                        | `ci/docker`                      | Merged, [#172](https://github.com/xiu2809xiu-rgb/orderpilot/pull/172)               |
