@@ -28,8 +28,8 @@ interface NeedRowProps {
  * never confirmed from it: the row opens the form that asks for the amount, the
  * bank reference and the date. The fields read from a PO have no screen of
  * their own for a stored document, so that row only opens the order and says
- * nothing of a review. The action carries the task's kind and id, which the
- * demo tour finds it by.
+ * nothing of a review. The action carries the task's kind, id and order as
+ * data attributes, which the row tests and the keyboard test find it by.
  */
 export function NeedRow({ task, busy, onComplete }: NeedRowProps) {
   const { t } = useTranslation("directions-home");
