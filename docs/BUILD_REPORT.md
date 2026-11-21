@@ -400,6 +400,7 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 | #311  | Words and claims corrected after review               | `fix/platform-words-and-claims`  | This pull request. Home, sign-in and Spark say no more than the workflow does       |
 | #322  | The shell, Spark, Upload and form polish              | `fix/platform-shell-polish`      | This pull request. What the final walk found, fixed in the lead's own screens       |
 | #321  | The order thread: Home, Orders, order page            | `fix/area1-order-thread`         | This pull request. True words on review and payment, Done today kept                |
+| #328  | The closing check of the last three merges            | `fix/platform-closing-check`     | This pull request. The role switch, the journey after an act, eight more points     |
 | #191  | Cut CI minutes before the repository goes private     | `ci/minutes-job-conditions`      | Merged, [#192](https://github.com/xiu2809xiu-rgb/orderpilot/pull/192)               |
 | P-42  | Plan prompt 004                                       | `chore/plan-prompt-004`          | Merged, [#138](https://github.com/xiu2809xiu-rgb/orderpilot/pull/138)               |
 | P-13  | Docker images and the IaC scan                        | `ci/docker`                      | Merged, [#172](https://github.com/xiu2809xiu-rgb/orderpilot/pull/172)               |
