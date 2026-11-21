@@ -111,8 +111,6 @@ Upload (`/upload`) and Spark (the panel opened from the top bar) are demo parts.
 
 The Spark panel works like a window on Windows. Maximise (a square, beside Close) fills the width, edge to edge, and Restore (two squares) puts it back at the side; a double click on its head does the same, as on a title bar. Maximised, the conversation keeps a 72-character measure in the middle. The width grows in 220 ms, at once under reduced motion, and the panel keeps its size when it is closed and opened again. On a phone, where it already fills the screen, the button is hidden (`features/directions/spark/SparkHead.tsx`, `spark.css`).
 
-The demo tour (`features/demo-tour/`), started from the Demo role menu, walks the sales flow on the sample data. A glowing ring in the accent colour lights the one button to press and a card beside it says what it shows; nothing dims, so each page is seen whole. Before another team's step it lights Demo role and asks the presenter to switch. It undoes what it did as it goes, so it can run again at once. The ring breathes slowly to draw the eye, and holds still under reduced motion.
-
 ## Where the code lives today
 
 - Tokens and styles: `apps/web/src/styles/`.
