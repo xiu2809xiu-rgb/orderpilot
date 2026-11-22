@@ -39,11 +39,12 @@ const CELL = "dx-grid-cell flex min-w-0 flex-col gap-6";
 /**
  * Home, for the signed-in role, in the order of the person's day. A role with
  * an inbox has the header (the greeting, one sentence saying how much waits,
- * and the buttons), then "Needs you" across the whole page, because the next
- * act is the reason to open Home; then its timeline beside its numbers, and
- * the measures and the flows where it may read them. A role that may decide
- * approvals and read the tracker has the overdue orders directly below
- * "Needs you", across the page. A role without an inbox
+ * and the buttons), then the overview: its timeline beside its numbers, and
+ * the orders in each step where it may read the tracker. "Needs you" comes
+ * after the overview, across the whole page, and shows five tasks with a link
+ * to the rest. A role that may decide approvals and read the tracker has the
+ * overdue orders directly below "Needs you", across the page. The measures,
+ * the deeper figures, come last, where the role may read them. A role without an inbox
  * has the one list that is its own where the tasks would be, with the quick
  * actions the side panel does not already hold beside it when there are any
  * (a role that manages settings has the health of its services instead,
@@ -88,10 +89,6 @@ export function HomeBody() {
       />
       {access.block === "tasks" ? (
         <div className="dx-grid flex flex-col gap-6">
-          <NeedsYou home={home} completion={completion} focus={focus} />
-          {access.extra ? (
-            <RoleBlock block={access.extra} queries={queries} />
-          ) : null}
           <div className={PAIR}>
             <div className={CELL}>
               <MyTimeline home={home} done={done} />
@@ -100,8 +97,12 @@ export function HomeBody() {
               <YourNumbers />
             </div>
           </div>
-          <Measures />
           <Flows />
+          <NeedsYou home={home} completion={completion} focus={focus} />
+          {access.extra ? (
+            <RoleBlock block={access.extra} queries={queries} />
+          ) : null}
+          <Measures />
           {shortcuts.length > 0 ? (
             <Shortcuts actions={shortcuts} layout="pills" />
           ) : null}
