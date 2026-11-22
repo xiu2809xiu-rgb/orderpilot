@@ -239,6 +239,7 @@ The first screen (the sign-in page or a role's home page) waits for the entry ch
 | Portal print view               | `components/list-page/PrintView.tsx`, `@media print` in `styles/index.css`                    | Print renders every row beside the app and a print rule hides the app, with no print library                                                                                                        | P-44  |
 | Declaration over drawing (form) | `components/document-form/DocumentForm.tsx`, `types.ts`                                       | A document declares its header, lines, status, actions and tabs; the template draws the page and checks each action's permission, so four CRUD screens share one bar                                | P-47  |
 | Registry (shared form actions)  | `components/document-form/registry.ts`, `ExtraActions.tsx`                                    | One registration puts an action in every document form's More menu, as `registerRowMenuItem` does for row menus; P-57 uses both                                                                     | P-47  |
+| Engine behind an adapter        | `components/kit/pixel-toggle/` (`PixelToggle.tsx`, `engine.ts`)                               | The theme switch's springs, canvases and WebGL2 context live in an engine that attaches to a button React owns and makes and removes its own canvases, so a double mount cannot clash. A lazy chunk | #356  |
 
 ## Area 2's state machine (C-2)
 
