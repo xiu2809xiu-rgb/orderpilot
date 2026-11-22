@@ -31,6 +31,33 @@
   max-width: 72rem;
   margin-inline: auto;
 }
+/* The same column for a page of tables and lists, which want the width. */
+.dx-sheet-wide {
+  position: relative;
+  isolation: isolate;
+  max-width: 100rem;
+  margin-inline: auto;
+}
+/* The one stack a page is: its blocks stand --dx-stack apart. A page root
+   carries this class instead of its own space-y or gap, so the rhythm is set in
+   one place. The head's own margin is off here: the stack's gap is the space
+   under it, which --dx-head-gap names for a head that is not in a stack. The
+   doubled class on the selector beats .dx-page-head.ph-head, wherever it loads. */
+.dx-page {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--dx-stack);
+}
+.dx-page > .dx-page-head,
+.dx-page > .dx-page-head.ph-head {
+  margin-bottom: calc(var(--dx-head-gap) - var(--dx-stack));
+}
+/* Side by side, or in a grid of cards. */
+.dx-grid-gap {
+  display: grid;
+  gap: var(--dx-grid-gap);
+}
 
 /* A card. A shadcn Card follows the same variables as .dx-card. */
 .dx-card,
@@ -79,9 +106,23 @@
   color: var(--muted-foreground);
 }
 
+/* A heading inside a card: a group of rows, a metric, a step. 14 / 600 in ink,
+   24 px under whatever came before it and 8 px over its items. */
+.dx-block-title {
+  margin-top: var(--space-3);
+  margin-bottom: var(--space-1);
+  font-size: var(--type-14);
+  line-height: 1.25rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+.dx-block-title:first-child {
+  margin-top: 0;
+}
+
 /* The title of a screen, and the line of context under it. */
 .dx-page-head {
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--dx-head-gap);
 }
 .dx-title {
   font-size: var(--dx-title-size);
@@ -102,14 +143,14 @@
   max-width: 100%;
 }
 .dx-title-context {
-  margin-top: 0.25rem;
+  margin-top: var(--space-1);
   font-variant-numeric: tabular-nums;
   font-size: var(--type-14);
   line-height: 1.25rem;
   color: var(--muted-foreground);
 }
 .dx-page-intro {
-  margin-top: 0.5rem;
+  margin-top: var(--space-1);
 }
 /* The buttons that belong to the whole screen, under its title. */
 .dx-page-actions {
