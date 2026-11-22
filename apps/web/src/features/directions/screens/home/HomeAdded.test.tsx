@@ -65,12 +65,17 @@ describe("a role with an inbox that may decide approvals and read the tracker", 
       await within(section).findByText("Packing list differs from the PO"),
     ).toBeVisible();
     await screen.findByRole("heading", { level: 2, name: "My timeline" });
-    // Needs you, then the overdue orders, then the timeline beside the numbers.
-    expect(headings().slice(0, 4)).toEqual([
-      "Needs you",
-      OVERDUE,
+    await screen.findByRole("heading", {
+      level: 2,
+      name: "Orders in each step",
+    });
+    // The overview first, then Needs you with the overdue orders directly below it.
+    expect(headings().slice(0, 5)).toEqual([
       "My timeline",
       "Your numbers",
+      "Orders in each step",
+      "Needs you",
+      OVERDUE,
     ]);
     // On a row of the page of its own: not inside the pair of the timeline and the numbers.
     const pair = screen
