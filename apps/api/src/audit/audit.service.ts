@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { Inject, Injectable } from "@nestjs/common";
-import type { AuditActor, AuditEvent } from "@orderpilot/shared";
+import type { AuditActor, StoredAuditEvent } from "@orderpilot/shared";
 import { Database } from "../database/database.js";
 import { AuditEventRepository } from "./audit-event.repository.js";
 import {
@@ -39,7 +39,7 @@ export class AuditService {
     private readonly events: AuditEventRepository,
   ) {}
 
-  record(input: AuditInput): Promise<AuditEvent> {
+  record(input: AuditInput): Promise<StoredAuditEvent> {
     return this.database.transaction(async () => {
       await this.events.lockChain();
       const prevHash = await this.events.lastHash();

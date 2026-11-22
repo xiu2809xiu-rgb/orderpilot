@@ -15,8 +15,10 @@ import type { useBlockQueries } from "./useBlockQueries";
 const ALL = "/order-tracker?overdue=true";
 
 /**
- * Management's block: the overdue orders worth the most. Each row says where
- * the order stands, how late it is and what it is worth, and opens the order.
+ * The overdue orders worth the most: the block of a role without an inbox that
+ * neither manages settings nor reads the audit trail, and the one a role that
+ * decides approvals and reads the tracker has below "Needs you". Each row says
+ * where the order stands, how late it is and what it is worth, and opens the order.
  */
 export function OverdueBlock({
   query,

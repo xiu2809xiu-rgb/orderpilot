@@ -37,19 +37,32 @@ export function usualWords(t: TFunction, usual: Usual): string {
   }
 }
 
+/** "1d", "3h" or "<1d": a step's usual time, short enough for the full rail's narrow column. */
+function compactUsual(usual: Usual): string {
+  switch (usual.kind) {
+    case "sameDay":
+      return "<1d";
+    case "hours":
+      return `${String(usual.amount)}h`;
+    case "days":
+      return `${String(usual.amount)}d`;
+  }
+}
+
 /**
- * The short line of the current step on the full rail: "Waiting 4 days,
- * usually 2 days". It says nothing of lateness, which the badge under the
- * title says once, and it leaves out the usual time where the data has none.
+ * The short line of the current step on the full rail: "Waiting 5d · ~1d
+ * avg". It says nothing of lateness, which the badge under the title says
+ * once, and it leaves out the usual time where the data has none. Short
+ * enough to sit on one line in the rail's narrow column.
  */
 function waitingWords(t: TFunction, step: JourneyStepInfo): string {
   const waited = step.waitedDays ?? 0;
-  const waiting =
-    waited === 0
-      ? t("journey.waitingToday")
-      : t("journey.waiting", { count: waited });
+  const waiting = t("journey.waitingCompact", { count: waited });
   return step.usual
-    ? t("journey.waitingUsual", { waiting, usual: usualWords(t, step.usual) })
+    ? t("journey.waitingCompactUsual", {
+        waiting,
+        usual: compactUsual(step.usual),
+      })
     : waiting;
 }
 

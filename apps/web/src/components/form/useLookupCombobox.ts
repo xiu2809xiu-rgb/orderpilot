@@ -38,7 +38,7 @@ export function useLookupCombobox({
   onPick,
 }: LookupBehaviour) {
   const { t } = useTranslation("form");
-  const { setError, getFieldState } = useFormContext();
+  const { setError, getFieldState, trigger } = useFormContext();
   const listId = useId();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState<string | null>(null);
@@ -163,6 +163,17 @@ export function useLookupCombobox({
       if (hit) pick(hit);
       else if (text.trim() !== "" && state.status === "loading") {
         waiting.current = true;
+      } else if (text.trim() !== "" && state.status === "done") {
+        // Nothing is chosen, so say so now, in the field's own words, as leaving
+        // the field would: the form's rule runs first, and the generic line is
+        // only the fallback for a form whose rule says nothing about it. After
+        // this key's other handlers, so that a message a screen has just set
+        // for it (a grid saying no item has that number) is not replaced.
+        setTimeout(() => {
+          if (getFieldState(name).error === undefined) {
+            void trigger(name).then(flagUnmatched);
+          }
+        }, 0);
       }
     } else if (event.key === "Escape") {
       armed.current = false;

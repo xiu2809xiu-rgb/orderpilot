@@ -15,6 +15,8 @@ interface OrbProps {
   thinking?: boolean;
   /** Called once if WebGL2 is missing, so the caller can draw the still orb. */
   onUnavailable?: () => void;
+  /** Called once, after the first frame has been drawn, so the caller can reveal it. */
+  onFirstFrame?: () => void;
   className?: string;
 }
 
@@ -42,6 +44,14 @@ const UNIFORMS = [
   "uTrail",
   "uTilt",
 ] as const;
+
+/**
+ * How fast the orb flows, against the kit's own pace. The WebGPU orb's idle
+ * speed went from 2 to 3.5 when Richie found the idle movement too slow to see
+ * (21 Nov 2026, issue #337), and this orb, which browsers without WebGPU show,
+ * keeps in step with it.
+ */
+export const ORB_PACE = 1.75;
 
 function compile(gl: WebGL2RenderingContext, type: number, source: string) {
   const shader = gl.createShader(type);
@@ -83,6 +93,7 @@ export function Orb({
   ground,
   thinking = false,
   onUnavailable,
+  onFirstFrame,
   className,
 }: OrbProps) {
   const holder = useRef<HTMLDivElement>(null);
@@ -90,6 +101,7 @@ export function Orb({
   const latest = useRef({ colours, ground, thinking });
   const redraw = useRef<(() => void) | null>(null);
   const unavailable = useRef(onUnavailable);
+  const firstFrame = useRef(onFirstFrame);
 
   useEffect(() => {
     latest.current = { colours, ground, thinking };
@@ -97,6 +109,7 @@ export function Orb({
   });
   useEffect(() => {
     unavailable.current = onUnavailable;
+    firstFrame.current = onFirstFrame;
   });
 
   useEffect(() => {
@@ -135,6 +148,12 @@ export function Orb({
     let raf = 0;
     let last = 0;
     let visible = true;
+    let reported = false;
+    const report = () => {
+      if (reported) return;
+      reported = true;
+      firstFrame.current?.();
+    };
 
     const draw = () => {
       const { colours: palette, ground: back } = latest.current;
@@ -178,11 +197,12 @@ export function Orb({
         ((working ? 1 : 0) - state.awake) * (1 - Math.exp(-dt / 0.2));
       state.kick +=
         ((working ? 1.6 : 0) - state.kick) * (1 - Math.exp(-dt / 0.3));
-      const step = dt * (working ? 1.5 : 1);
+      const step = dt * ORB_PACE * (working ? 1.5 : 1);
       state.time += step;
       state.swirl += step * 2 * (1 + state.kick);
       state.orbit -= step;
       draw();
+      report();
       raf = requestAnimationFrame(frame);
     };
     const wake = () => {
@@ -195,6 +215,7 @@ export function Orb({
       canvas.width = Math.max(1, Math.round(holderEl.clientWidth * ratio));
       canvas.height = Math.max(1, Math.round(holderEl.clientHeight * ratio));
       draw();
+      if (reduced) report();
       wake();
     };
     const sizeWatcher = new ResizeObserver(resize);

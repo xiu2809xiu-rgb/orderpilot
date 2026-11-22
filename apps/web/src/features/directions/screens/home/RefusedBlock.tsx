@@ -11,9 +11,11 @@ import type { useBlockQueries } from "./useBlockQueries";
 const ALL = "/audit?refusals=1";
 
 /**
- * The auditor's block: the latest actions the system refused, newest first.
- * Each row says what was refused and who asked, links the event, and opens it
- * in the audit trail, where its hash chain and changes are.
+ * The latest actions the system refused, newest first: the block of a role
+ * that reads the audit trail without managing settings, and the one a role
+ * that manages settings and reads the audit trail has below its rules. Each
+ * row says what was refused and who asked, links the event, and opens it in
+ * the audit trail, where its hash chain and changes are.
  */
 export function RefusedBlock({
   query,

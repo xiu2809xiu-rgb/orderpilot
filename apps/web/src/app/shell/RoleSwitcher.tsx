@@ -1,7 +1,7 @@
 import type { Role } from "@orderpilot/shared";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, Route, UserCog } from "lucide-react";
-import { lazy, Suspense, useState } from "react";
+import { Check, UserCog } from "lucide-react";
+import { lazy, Suspense, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,6 @@ import {
 } from "./overlays/dropdown-menu";
 import { demoLogin, fetchAuthOptions } from "@/lib/api/auth";
 import { anyFormDirty } from "@/lib/dirty-forms";
-import { useDemoTour } from "@/stores/demoTour";
 import { useSessionStore } from "@/stores/session";
 import { splitDemoRoles, type DemoRole } from "../demoRoles";
 import { announceStay, landingAfterSwitch, startAsNewRole } from "./roleSwitch";
@@ -53,7 +52,7 @@ function RoleItem({
         </span>
       )}
       <span className="flex-1">
-        {/* Team and person share a row: nine roles with their lines must leave room for the tour entry on a 768 px screen. */}
+        {/* Team and person share a row: the roles with their lines must fit the menu on a 768 px screen. */}
         <span className="flex items-baseline gap-2">
           <span>{t(`roles.${entry.role}`)}</span>
           <span className="text-xs text-muted-foreground">
@@ -87,6 +86,8 @@ export function RoleSwitcher() {
 
   // The role asked for while the question is open.
   const [asking, setAsking] = useState<Role | null>(null);
+  // The Demo role button: every close of the question returns focus to it.
+  const trigger = useRef<HTMLButtonElement>(null);
   // Loaded on the first ask, then kept so that closing can return focus.
   const [askedOnce, setAskedOnce] = useState(false);
 
@@ -95,10 +96,10 @@ export function RoleSwitcher() {
   async function switchTo(role: Role) {
     if (role === current) return;
     const session = await demoLogin(role);
-    // Another role sees other data: nothing of the old role may stay on screen.
+    // The sign-in has emptied the query cache already; this drops what is kept beside it.
     await startAsNewRole(queryClient);
     const landing = landingAfterSwitch(pathname, session);
-    // Staying put needs no navigation: the reset above already redraws the page.
+    // Staying put needs no navigation: the sign-in's reset already redraws the page.
     if (landing !== pathname) await navigate(landing);
     else announceStay(pathname);
   }
@@ -118,7 +119,12 @@ export function RoleSwitcher() {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className="dx-bar-role">
+          <Button
+            ref={trigger}
+            variant="outline"
+            size="sm"
+            className="dx-bar-role"
+          >
             <UserCog aria-hidden="true" />
             {/* Icon only on a phone, so the trail keeps room for the record number. */}
             <span className="max-sm:sr-only">{t("demo.switcher")}</span>
@@ -147,22 +153,13 @@ export function RoleSwitcher() {
               onPick={pick}
             />
           ))}
-          <DropdownMenuSeparator />
-          {/* The tour walks the sales flow across the roles above, on the sample data. */}
-          <DropdownMenuItem
-            onSelect={() => {
-              useDemoTour.getState().start();
-            }}
-          >
-            <Route aria-hidden="true" />
-            {t("tour.start")}
-          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       {askedOnce ? (
         <Suspense fallback={null}>
           <RoleSwitchDialog
             open={asking !== null}
+            returnFocusTo={trigger}
             onStay={() => {
               setAsking(null);
             }}

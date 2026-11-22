@@ -169,4 +169,37 @@ describe("a change of role over unsaved input", () => {
     });
     forget();
   });
+
+  it("returns focus to the Demo role button on every close, the first ask and the third, by mouse and by keyboard", async () => {
+    const user = userEvent.setup();
+    const forget = registerDirtyForm(() => true);
+    show();
+    const demoRole = await screen.findByRole("button", { name: "Demo role" });
+    const closers: ((
+      user: ReturnType<typeof userEvent.setup>,
+    ) => Promise<void>)[] = [
+      async (u) => {
+        await u.click(screen.getByRole("button", { name: "Stay here" }));
+      },
+      async (u) => {
+        await u.keyboard("{Escape}");
+      },
+      async (u) => {
+        await u.keyboard("{Enter}");
+      },
+    ];
+    for (const close of closers) {
+      await pickFinance(user);
+      await screen.findByRole("dialog", { name: "Switch role?" });
+      await close(user);
+      await waitFor(() => {
+        expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      });
+      await waitFor(() => {
+        expect(demoRole).toHaveFocus();
+      });
+    }
+    expect(asked).toEqual([]);
+    forget();
+  });
 });

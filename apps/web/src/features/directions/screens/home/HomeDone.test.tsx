@@ -1,7 +1,16 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 import { useToastStore } from "@/components/common/toast";
+import { recordFinishedTask } from "@/lib/done-today";
 import { useSessionStore } from "@/stores/session";
 import { sessionFor } from "@/test/fixtures";
 import { OrderAction } from "../order/OrderAction";
@@ -70,7 +79,7 @@ describe("Done today on Home", () => {
     serveHome({ tasks: [] });
     renderHome("APPROVER", { keepDone: true });
     expect(
-      await screen.findByText(/^Nothing finished yet today/),
+      await screen.findByText(/^Nothing marked done here yet today./),
     ).toBeVisible();
     expect(screen.queryByText(SENT)).toBeNull();
   });
@@ -91,7 +100,7 @@ describe("Done today on Home", () => {
     serveHome({ tasks: [] });
     renderHome("SUPPORT", { keepDone: true });
     expect(
-      await screen.findByText(/^Nothing finished yet today/),
+      await screen.findByText(/^Nothing marked done here yet today./),
     ).toBeVisible();
   });
 
@@ -141,5 +150,76 @@ describe("Done today on Home", () => {
 
     renderHome("SUPPORT", { keepDone: true });
     expect(await screen.findByText(SENT)).toBeVisible();
+  });
+});
+
+// A payment and an SPR decision are made on the workflow's own pages, which
+// add the task with one call from outside Home.
+describe("Done today for a task that another area's form finished", () => {
+  // One fixed moment: 21 Nov 2026, 12:00 in Singapore. Only Date is faked, so
+  // the waiting in the test is not.
+  const NOON = new Date("2026-11-21T04:00:00.000Z");
+
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(NOON);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("lists it on Home with the time, for the person who finished it", async () => {
+    useSessionStore.setState({
+      status: "active",
+      session: sessionFor("FINANCE"),
+    });
+    recordFinishedTask(
+      {
+        kind: "CONFIRM_PAYMENT",
+        orderNo: "SO-0062",
+        customerName: "Synthetic Harbour Traders",
+      },
+      NOON,
+    );
+    serveHome({ tasks: [] });
+    renderHome("FINANCE", { keepDone: true });
+    expect(
+      await screen.findByText("Confirmed the payment for SO-0062 at 12:00"),
+    ).toBeVisible();
+    expect(await screen.findByText("Synthetic Harbour Traders")).toBeVisible();
+  });
+
+  it("is not listed for another person, and an anonymous call notes nothing", async () => {
+    useSessionStore.setState({
+      status: "active",
+      session: sessionFor("FINANCE"),
+    });
+    recordFinishedTask({ kind: "CONFIRM_PAYMENT", orderNo: "SO-0062" }, NOON);
+    useSessionStore.setState({ status: "anonymous", session: null });
+    recordFinishedTask({ kind: "CONFIRM_PAYMENT", orderNo: "SO-0063" }, NOON);
+    serveHome({ tasks: [] });
+    renderHome("APPROVER", { keepDone: true });
+    expect(
+      await screen.findByText(/^Nothing marked done here yet today./),
+    ).toBeVisible();
+    expect(localStorage.length).toBe(1);
+  });
+});
+
+describe("what Done today says is listed", () => {
+  it("says that only buttons on Home and on an order's page are listed, and that payments and SPR decisions are not", async () => {
+    serveHome({ tasks: [] });
+    renderHome("FINANCE");
+    expect(
+      await screen.findByText(
+        "A task you finish with a button on Home or on an order's page appears here with the time. Payments and SPR decisions are recorded on their own pages.",
+      ),
+    ).toBeVisible();
+    expect(
+      screen.getByText("Nothing marked done here yet today."),
+    ).toBeVisible();
+    // The old line promised more than the list does.
+    expect(screen.queryByText(/A task you complete here/)).toBeNull();
   });
 });

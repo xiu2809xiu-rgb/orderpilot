@@ -25,6 +25,7 @@
     "done": {
       "REVIEW_FIELDS": "Reviewed {{orderNo}}",
       "RAISE_SPR": "Raised the SPR for {{orderNo}}",
+      "PLACE_VENDOR_PO": "Marked the vendor PO for {{orderNo}} as placed",
       "SEND_PI": "Marked the PI for {{orderNo}} as sent",
       "CONFIRM_PAYMENT": "Confirmed the payment for {{orderNo}}",
       "PACK_ORDER": "Marked {{orderNo}} as packed",

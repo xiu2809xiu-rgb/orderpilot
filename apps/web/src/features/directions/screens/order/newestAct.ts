@@ -18,13 +18,18 @@ const TIME = new Intl.DateTimeFormat("en-GB", {
  * entries (a task created, a reminder sent) are not an act, so they never
  * count. When two entries share a moment the later one in the list wins, so a
  * payment and its step, written together, do not swap places between reads.
+ * An entry dated after `now` has not happened: the workflow's sample stamps
+ * the steps of today at 16:00, so at noon they lie ahead, and a line that said
+ * "Latest" for a moment still to come would be wrong. It is left out.
  */
 export function latestAct(
   timeline: readonly OrderTimelineEvent[],
+  now: Date,
 ): OrderTimelineEvent | null {
   let newest: OrderTimelineEvent | null = null;
   for (const entry of timeline) {
     if (entry.actor.kind !== "user") continue;
+    if (Date.parse(entry.at) > now.getTime()) continue;
     if (!newest || Date.parse(entry.at) >= Date.parse(newest.at)) {
       newest = entry;
     }

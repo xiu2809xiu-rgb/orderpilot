@@ -255,7 +255,9 @@ describe("where focus goes", () => {
   it("opens on the review heading, then goes field by field, then to Finish, then to Open order", async () => {
     const user = userEvent.setup();
     const { heading } = await toReview(user);
-    expect(heading).toHaveFocus();
+    await vi.waitFor(() => {
+      expect(heading).toHaveFocus();
+    });
     await user.click(screen.getByRole("button", { name: "Next to approve" }));
     expect(
       screen.getByRole("button", { name: "Show Ship to on the page" }),

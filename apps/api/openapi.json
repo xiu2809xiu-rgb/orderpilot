@@ -938,6 +938,7 @@
                 "REVIEW_FIELDS",
                 "RAISE_SPR",
                 "APPROVE_SPR",
+                "PLACE_VENDOR_PO",
                 "SEND_PI",
                 "CONFIRM_PAYMENT",
                 "PACK_ORDER",
@@ -980,6 +981,7 @@
                               "REVIEW_FIELDS",
                               "RAISE_SPR",
                               "APPROVE_SPR",
+                              "PLACE_VENDOR_PO",
                               "SEND_PI",
                               "CONFIRM_PAYMENT",
                               "PACK_ORDER",
@@ -1232,6 +1234,7 @@
                               "REVIEW_FIELDS",
                               "RAISE_SPR",
                               "APPROVE_SPR",
+                              "PLACE_VENDOR_PO",
                               "SEND_PI",
                               "CONFIRM_PAYMENT",
                               "PACK_ORDER",
@@ -1638,6 +1641,7 @@
                 "REVIEW_FIELDS",
                 "RAISE_SPR",
                 "APPROVE_SPR",
+                "PLACE_VENDOR_PO",
                 "SEND_PI",
                 "CONFIRM_PAYMENT",
                 "PACK_ORDER",
@@ -1689,6 +1693,7 @@
                               "REVIEW_FIELDS",
                               "RAISE_SPR",
                               "APPROVE_SPR",
+                              "PLACE_VENDOR_PO",
                               "SEND_PI",
                               "CONFIRM_PAYMENT",
                               "PACK_ORDER",
@@ -2156,6 +2161,7 @@
                               "REVIEW_FIELDS",
                               "RAISE_SPR",
                               "APPROVE_SPR",
+                              "PLACE_VENDOR_PO",
                               "SEND_PI",
                               "CONFIRM_PAYMENT",
                               "PACK_ORDER",
@@ -2277,6 +2283,7 @@
                               "REVIEW_FIELDS",
                               "RAISE_SPR",
                               "APPROVE_SPR",
+                              "PLACE_VENDOR_PO",
                               "SEND_PI",
                               "CONFIRM_PAYMENT",
                               "PACK_ORDER",
@@ -2418,6 +2425,7 @@
                             "REVIEW_FIELDS",
                             "RAISE_SPR",
                             "APPROVE_SPR",
+                            "PLACE_VENDOR_PO",
                             "SEND_PI",
                             "CONFIRM_PAYMENT",
                             "PACK_ORDER",
@@ -3542,6 +3550,16 @@
                             "youDecide"
                           ],
                           "additionalProperties": false
+                        },
+                        "stage": {
+                          "type": "string",
+                          "enum": ["suggested", "with-approvers", "decided"]
+                        },
+                        "raiseTaskId": {
+                          "nullable": true,
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
                         },
                         "due": {
                           "nullable": true,
@@ -13105,6 +13123,234 @@
         },
         "summary": "A record's operation log: who did what and when, newest first. Never a field value or an IP address",
         "tags": ["Operation log"]
+      }
+    },
+    "/api/v1/ai/status": {
+      "get": {
+        "operationId": "Ai_getStatus",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "provider": {
+                          "type": "string",
+                          "enum": [
+                            "mock",
+                            "gemini",
+                            "groq",
+                            "openai-compatible",
+                            "bedrock"
+                          ]
+                        },
+                        "kind": {
+                          "type": "string",
+                          "enum": ["mock", "openai-compatible", "bedrock"]
+                        },
+                        "model": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "mock": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["provider", "kind", "model", "mock"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Which AI provider and model the gateway uses. No key, no URL",
+        "tags": ["AI"]
+      }
+    },
+    "/api/v1/ai/probe": {
+      "post": {
+        "operationId": "Ai_probe",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "mode": {
+                    "type": "string",
+                    "enum": ["text", "structured"]
+                  }
+                },
+                "required": ["mode"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "200 whatever the provider did: the outcome is in the body, with a short reason code.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "provider": {
+                          "type": "string",
+                          "enum": [
+                            "mock",
+                            "gemini",
+                            "groq",
+                            "openai-compatible",
+                            "bedrock"
+                          ]
+                        },
+                        "kind": {
+                          "type": "string",
+                          "enum": ["mock", "openai-compatible", "bedrock"]
+                        },
+                        "model": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "mock": {
+                          "type": "boolean"
+                        },
+                        "outcome": {
+                          "type": "string",
+                          "enum": ["ok", "error", "refused", "timeout"]
+                        },
+                        "reasonCode": {
+                          "nullable": true,
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "latencyMs": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "inputTokens": {
+                          "nullable": true,
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "outputTokens": {
+                          "nullable": true,
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "attempts": {
+                          "nullable": true,
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "provider",
+                        "kind",
+                        "model",
+                        "mock",
+                        "outcome",
+                        "reasonCode",
+                        "latencyMs",
+                        "inputTokens",
+                        "outputTokens",
+                        "attempts"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The role lacks settings.manage. Audited.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "VALIDATION_FAILED",
+                            "UNAUTHENTICATED",
+                            "INVALID_CREDENTIALS",
+                            "SESSION_EXPIRED",
+                            "REFRESH_REUSED",
+                            "FORBIDDEN",
+                            "CSRF_INVALID",
+                            "DEMO_MODE_DISABLED",
+                            "NOT_FOUND",
+                            "CONFLICT",
+                            "RATE_LIMITED",
+                            "UPSTREAM_UNAVAILABLE",
+                            "INTERNAL_ERROR"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {
+                          "nullable": true,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "path": {
+                                "type": "string"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "required": ["path", "message"],
+                            "additionalProperties": false
+                          }
+                        },
+                        "traceId": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": ["code", "message", "details", "traceId"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["error"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Send one fixed synthetic prompt through the gateway and report how it went. Audited",
+        "tags": ["AI"]
       }
     },
     "/api/v1/users": {

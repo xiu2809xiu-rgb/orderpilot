@@ -82,6 +82,28 @@ describe("possible matches in a lookup", () => {
     expect(lookup()).toHaveValue("Sagaran");
   });
 
+  it("says at once that nothing was chosen when Enter is pressed on typed text with no row highlighted", async () => {
+    renderInRouter(
+      <KitForm
+        search={answers(NEAR)}
+        defaults={{ ...VALID, customer: null }}
+      />,
+    );
+    const user = await typeInto("Sagaran");
+    await screen.findByRole("option", { name: /Sagarun/ });
+    // Still in the field: nothing has been left, so this is not the blur message.
+    await user.keyboard("{Enter}");
+    expect(
+      await screen.findByText("Choose a customer from the list."),
+    ).toBeVisible();
+    expect(lookup()).toHaveFocus();
+    expect(lookup()).toHaveValue("Sagaran");
+    expect(screen.getByRole("option", { name: /Sagarun/ })).toHaveAttribute(
+      "aria-selected",
+      "false",
+    );
+  });
+
   it("does not stop a real match from being chosen: the only found row still wins", async () => {
     renderInRouter(
       <KitForm

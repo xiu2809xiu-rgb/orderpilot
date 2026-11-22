@@ -17,6 +17,7 @@ const STEP_OF_TASK: Record<WorkflowTask["kind"], SalesStepId> = {
   REVIEW_FIELDS: "poIn",
   RAISE_SPR: "stock",
   APPROVE_SPR: "stock",
+  PLACE_VENDOR_PO: "stock",
   SEND_PI: "pi",
   CONFIRM_PAYMENT: "payment",
   PACK_ORDER: "pack",
@@ -73,8 +74,9 @@ function entryFor(
 }
 
 /**
- * The first task, in the inbox's own order, is the one in hand; the next few
- * follow. `tasks` must be that order: the API sorts the most urgent first.
+ * The first task is the one in hand; the next few follow. `tasks` must be in
+ * the order Home lists them: earliest due first (`byDueTime`), so the longest
+ * overdue is first. The tasks API's own order is not used.
  */
 export function buildTimeline(
   tasks: readonly WorkflowTask[],

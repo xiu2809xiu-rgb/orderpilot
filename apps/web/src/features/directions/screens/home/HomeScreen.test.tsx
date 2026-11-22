@@ -247,9 +247,7 @@ describe("the home screen", () => {
     expect(screen.getByRole("heading", { name: "Now" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Next" })).toBeVisible();
     expect(
-      screen.getByText(
-        "Nothing finished yet today. A task you complete here appears with the time.",
-      ),
+      screen.getByText("Nothing marked done here yet today."),
     ).toBeVisible();
     expect(
       screen.getByText(
@@ -374,6 +372,7 @@ describe("the home screen", () => {
 
   it("lists no tasks for a role with no inbox, and does not ask for any", async () => {
     const calls = stubApi();
+    // Management holds neither settings.manage nor audit.read by default.
     useSessionStore.setState({
       status: "active",
       session: sessionFor("MANAGEMENT"),

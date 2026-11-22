@@ -2,10 +2,11 @@ import { Lock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useMaskReveal } from "../parts/useMaskReveal";
 
 export type MaskReason = "role" | "bankDetails" | "price" | "policy";
 
@@ -20,10 +21,12 @@ interface MaskedValueProps {
 
 /**
  * A value hidden by role, with a reason on request: the same mask as the order
- * page draws (components/parts), as dots and a lock. The reason opens from the
- * lock by pointer, touch or keyboard, and is read out by a screen reader. The
- * server decides what is masked; this only shows it. When masked, `value` is
- * ignored so a hidden number cannot be read from the page.
+ * page draws (components/parts), as dots and a lock, and the same behaviour
+ * (`useMaskReveal`). The reason shows when the lock is hovered or focused; a
+ * click or a tap keeps it, and a second one, Escape or a Tab away puts it
+ * away. A screen reader hears it with the lock. The server decides what is
+ * masked; this only shows it. When masked, `value` is ignored so a hidden
+ * number cannot be read from the page.
  */
 export function MaskedValue({
   value,
@@ -32,6 +35,7 @@ export function MaskedValue({
   visibleTo,
 }: MaskedValueProps) {
   const { t } = useTranslation("components");
+  const reveal = useMaskReveal();
   if (!masked)
     return (
       <span data-numeric className="numeral">
@@ -47,9 +51,10 @@ export function MaskedValue({
       >
         {"•".repeat(6)}
       </span>
-      <Popover>
-        <PopoverTrigger asChild>
+      <Tooltip {...reveal.tooltip}>
+        <TooltipTrigger asChild>
           <Button
+            {...reveal.trigger}
             variant="ghost"
             size="icon"
             // The negative margin keeps the 24 px target without making a
@@ -59,19 +64,15 @@ export function MaskedValue({
           >
             <Lock className="size-3.5" aria-hidden="true" />
           </Button>
-        </PopoverTrigger>
-        <PopoverContent className="space-y-1 text-sm">
+        </TooltipTrigger>
+        <TooltipContent side="top" className="max-w-64 space-y-1 text-left">
           <p className="font-medium">{t("masked.title")}</p>
-          <p className="text-muted-foreground">
-            {t(`masked.reasons.${reason}`)}
-          </p>
+          <p>{t(`masked.reasons.${reason}`)}</p>
           {visibleTo ? (
-            <p className="text-muted-foreground">
-              {t("masked.visibleTo", { who: visibleTo })}
-            </p>
+            <p>{t("masked.visibleTo", { who: visibleTo })}</p>
           ) : null}
-        </PopoverContent>
-      </Popover>
+        </TooltipContent>
+      </Tooltip>
     </span>
   );
 }

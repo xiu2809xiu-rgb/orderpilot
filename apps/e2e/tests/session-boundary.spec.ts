@@ -51,3 +51,63 @@ test("after a sign-out, the next person at the same tab is not shown the earlier
   // The page was asked for as Warehouse, not drawn from what Finance was given.
   expect(askedAsWarehouse.length).toBeGreaterThan(0);
 });
+
+test("through the Demo role menu, the new person is never named over what the earlier person was shown", async ({
+  page,
+}) => {
+  await signInAs(page, "FINANCE", { fresh: true });
+  await page.goto("/");
+  await page.getByRole("link", { name: "Vendors" }).click();
+  await page.getByRole("link", { name: VENDOR }).click();
+  await expect(page.getByText(ACCOUNT_NO, { exact: true })).toBeVisible();
+
+  // Every moment the DOM holds the new person's name in the account menu while
+  // the page's own text still holds the account number. A frame log would miss
+  // a state that lasts less than a frame, a mutation observer does not.
+  await page.evaluate((accountNo) => {
+    const moments: string[] = [];
+    Object.assign(window, { boundaryMoments: moments });
+    const look = () => {
+      const person = document.querySelector(".dx-person")?.textContent ?? "";
+      const main = document.querySelector("main")?.textContent ?? "";
+      if (person.includes("Hafiz Rahman") && main.includes(accountNo)) {
+        moments.push(performance.now().toFixed(0));
+      }
+    };
+    new MutationObserver(look).observe(document.body, {
+      subtree: true,
+      childList: true,
+      characterData: true,
+      attributes: true,
+    });
+  }, ACCOUNT_NO);
+
+  await test.step("Finance becomes Warehouse in the same tab, with no reload", async () => {
+    await page.getByRole("button", { name: "Demo role" }).click();
+    await page.getByRole("menuitem", { name: /Hafiz Rahman/ }).click();
+    await expect(page.locator(".dx-person")).toContainText("Hafiz Rahman");
+    // The change lands Home: a vendor's page is not kept for another role.
+    await expect(page).toHaveURL((url) => url.pathname === "/");
+    // The URL moves before the page does: wait for Home itself.
+    await expect(
+      page.getByRole("heading", {
+        name: /Good (morning|afternoon|evening), Hafiz/,
+      }),
+    ).toBeVisible();
+  });
+
+  const moments = await page.evaluate(
+    () => (window as unknown as { boundaryMoments: string[] }).boundaryMoments,
+  );
+  expect(moments).toEqual([]);
+
+  await test.step("Warehouse opens the same vendor and is told the bank details are hidden", async () => {
+    await page.getByRole("link", { name: "Vendors" }).click();
+    await page.getByRole("link", { name: VENDOR }).click();
+    await expect(
+      page.getByRole("heading", { name: "Bank accounts" }),
+    ).toBeVisible();
+    await expect(page.getByText(MASKED_REASON)).toBeVisible();
+    await expect(page.getByText(ACCOUNT_NO)).toHaveCount(0);
+  });
+});

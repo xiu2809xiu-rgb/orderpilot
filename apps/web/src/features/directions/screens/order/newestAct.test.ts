@@ -10,6 +10,8 @@ beforeAll(async () => {
 const t = i18n.getFixedT("en", "directions-orders");
 const PERSON = (name: string) => ({ kind: "user" as const, name });
 const SYSTEM = { kind: "system" as const, name: "OrderPilot" };
+// One fixed moment for every read: 21 Nov 2026, 12:00 in Singapore.
+const NOW = new Date("2026-11-21T04:00:00.000Z");
 
 describe("latestAct", () => {
   it("is the newest entry a person made, whatever order the list is in", () => {
@@ -27,8 +29,8 @@ describe("latestAct", () => {
       PERSON("Hafiz Rahman"),
       "Step done: Packed",
     );
-    expect(latestAct([fresh, old])?.actor.name).toBe("Hafiz Rahman");
-    expect(latestAct([old, fresh])?.actor.name).toBe("Hafiz Rahman");
+    expect(latestAct([fresh, old], NOW)?.actor.name).toBe("Hafiz Rahman");
+    expect(latestAct([old, fresh], NOW)?.actor.name).toBe("Hafiz Rahman");
   });
 
   it("never counts what the system did, however new", () => {
@@ -46,21 +48,24 @@ describe("latestAct", () => {
       SYSTEM,
       "Reminder to Logistics",
     );
-    expect(latestAct([person, reminder])?.actor.name).toBe("Mei Tan");
+    expect(latestAct([person, reminder], NOW)?.actor.name).toBe("Mei Tan");
   });
 
   it("is nothing when no person has acted", () => {
-    expect(latestAct([])).toBeNull();
+    expect(latestAct([], NOW)).toBeNull();
     expect(
-      latestAct([
-        entry(
-          1,
-          "2026-11-06T08:00:00.000Z",
-          "order.received",
-          SYSTEM,
-          "PO received",
-        ),
-      ]),
+      latestAct(
+        [
+          entry(
+            1,
+            "2026-11-06T08:00:00.000Z",
+            "order.received",
+            SYSTEM,
+            "PO received",
+          ),
+        ],
+        NOW,
+      ),
     ).toBeNull();
   });
 
@@ -80,7 +85,38 @@ describe("latestAct", () => {
       PERSON("Mei Tan"),
       "Step done: Invoiced",
     );
-    expect(latestAct([first, second])?.actor.name).toBe("Mei Tan");
+    expect(latestAct([first, second], NOW)?.actor.name).toBe("Mei Tan");
+  });
+});
+
+describe("an entry that lies ahead of the moment it is read at", () => {
+  // The workflow's sample stamps today's steps at 16:00 Singapore time.
+  const earlier = entry(
+    1,
+    "2026-11-20T08:00:00.000Z",
+    "step.completed",
+    PERSON("Mei Tan"),
+    "Step done: Proforma invoice sent",
+  );
+  const ahead = entry(
+    2,
+    "2026-11-21T08:00:00.000Z",
+    "step.completed",
+    PERSON("Grace Ong"),
+    "Step done: Payment confirmed",
+  );
+
+  it("is not the latest act, so the line never names a moment that has not come", () => {
+    expect(latestAct([earlier, ahead], NOW)?.actor.name).toBe("Mei Tan");
+  });
+
+  it("is the latest act once its moment has come", () => {
+    const later = new Date("2026-11-21T08:00:00.000Z");
+    expect(latestAct([earlier, ahead], later)?.actor.name).toBe("Grace Ong");
+  });
+
+  it("leaves no act when every act is still ahead", () => {
+    expect(latestAct([ahead], NOW)).toBeNull();
   });
 });
 

@@ -1,4 +1,5 @@
 import type { z } from "zod";
+import type { AiProvider } from "@orderpilot/shared";
 import { ConfigError } from "./config-error.js";
 import { envSchema, type Env } from "./env.schema.js";
 
@@ -61,6 +62,41 @@ export class AppConfig {
     readonly approvalLimits: boolean;
   };
 
+  /**
+   * The AI gateway's settings (P-17). The secrets here are for the providers
+   * only: nothing prints this block, and no route returns it.
+   */
+  readonly ai: {
+    /** The AI_PROVIDER setting, which is also what the usage record stores. */
+    readonly provider: Env["AI_PROVIDER"];
+    /** What area 4's data-to-AI policy sees: gemini and groq are openai-compatible. */
+    readonly kind: AiProvider;
+    /** The chosen provider's key. Null for the mock, Bedrock, or a local server with none. */
+    readonly apiKey: string | null;
+    /** Only for openai-compatible. The gemini and groq presets carry their own. */
+    readonly baseUrl: string | null;
+    /** Null only for the mock. */
+    readonly model: string | null;
+    /** Falls back to the model. */
+    readonly visionModel: string | null;
+    readonly structuredOutput: Env["AI_STRUCTURED_OUTPUT"];
+    readonly timeoutMs: number;
+    readonly maxAttempts: number;
+    readonly maxToolSteps: number;
+    readonly maxImagesPerRequest: number;
+    readonly maxOutputTokens: number;
+    /** Decimal strings, USD per million tokens. */
+    readonly priceInputUsdPerMtok: string;
+    readonly priceOutputUsdPerMtok: string;
+    /** Null unless the provider is bedrock. */
+    readonly bedrock: {
+      readonly region: string;
+      readonly accessKeyId: string;
+      readonly secretAccessKey: string;
+      readonly sessionToken: string | null;
+    } | null;
+  };
+
   readonly database: { readonly url: string };
   readonly redis: { readonly url: string };
   readonly workflows: { readonly sweepSeconds: number };
@@ -113,6 +149,7 @@ export class AppConfig {
       approverGroup: env.APPROVER_GROUP === "on",
       approvalLimits: env.APPROVAL_LIMITS === "on",
     };
+    this.ai = aiSettings(env);
     this.database = { url: env.DATABASE_URL };
     this.redis = { url: env.REDIS_URL };
     this.workflows = { sweepSeconds: env.WORKFLOW_SWEEP_SECONDS };
@@ -142,6 +179,54 @@ export class AppConfig {
     }
     return new AppConfig(result.data);
   }
+}
+
+/** The settings of the chosen provider. The schema has already checked that they are there. */
+function aiSettings(env: Env): AppConfig["ai"] {
+  const provider = env.AI_PROVIDER;
+  const apiKeys = {
+    mock: null,
+    gemini: env.GEMINI_API_KEY ?? null,
+    groq: env.GROQ_API_KEY ?? null,
+    "openai-compatible": env.AI_API_KEY ?? null,
+    bedrock: null,
+  } as const;
+  const bedrock =
+    provider === "bedrock" &&
+    env.AI_BEDROCK_REGION !== undefined &&
+    env.AI_BEDROCK_ACCESS_KEY_ID !== undefined &&
+    env.AI_BEDROCK_SECRET_ACCESS_KEY !== undefined
+      ? {
+          region: env.AI_BEDROCK_REGION,
+          accessKeyId: env.AI_BEDROCK_ACCESS_KEY_ID,
+          secretAccessKey: env.AI_BEDROCK_SECRET_ACCESS_KEY,
+          sessionToken: env.AI_BEDROCK_SESSION_TOKEN ?? null,
+        }
+      : null;
+  return {
+    provider,
+    kind:
+      provider === "mock" || provider === "bedrock"
+        ? provider
+        : "openai-compatible",
+    apiKey: apiKeys[provider],
+    baseUrl:
+      provider === "openai-compatible" ? (env.AI_BASE_URL ?? null) : null,
+    model: provider === "mock" ? null : (env.AI_MODEL ?? null),
+    visionModel:
+      provider === "mock"
+        ? null
+        : (env.AI_VISION_MODEL ?? env.AI_MODEL ?? null),
+    structuredOutput: env.AI_STRUCTURED_OUTPUT,
+    timeoutMs: env.AI_TIMEOUT_MS,
+    maxAttempts: env.AI_MAX_ATTEMPTS,
+    maxToolSteps: env.AI_MAX_TOOL_STEPS,
+    maxImagesPerRequest: env.AI_MAX_IMAGES_PER_REQUEST,
+    maxOutputTokens: env.AI_MAX_OUTPUT_TOKENS,
+    priceInputUsdPerMtok: env.AI_PRICE_INPUT_USD_PER_MTOK,
+    priceOutputUsdPerMtok: env.AI_PRICE_OUTPUT_USD_PER_MTOK,
+    bedrock,
+  };
 }
 
 /** Where the values come from, so the error can say which file to create. */

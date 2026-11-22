@@ -156,6 +156,46 @@ describe("the pgvector and Mailpit additions", () => {
   });
 });
 
+describe("the AI gateway settings", () => {
+  it("leave the example on the offline mock, with every key commented out", () => {
+    const raw = parse(example);
+    const lines = example.split("\n");
+    expect(raw.AI_PROVIDER).toBe("mock");
+    for (const name of [
+      "GEMINI_API_KEY",
+      "GROQ_API_KEY",
+      "AI_API_KEY",
+      "AI_BEDROCK_ACCESS_KEY_ID",
+      "AI_BEDROCK_SECRET_ACCESS_KEY",
+      "AI_BEDROCK_SESSION_TOKEN",
+    ]) {
+      expect(raw[name], name).toBeUndefined();
+      expect(lines, name).toContain(`# ${name}=`);
+    }
+    expect(AppConfig.fromEnv(expanded()).ai.provider).toBe("mock");
+  });
+
+  it("say that only synthetic data may be sent", () => {
+    expect(example).toMatch(/ONLY SYNTHETIC DATA MAY BE SENT/);
+    expect(example).toMatch(/free-tier provider may keep and use/);
+  });
+
+  it("pass every AI setting through compose, with the mock as the default", () => {
+    const lines = compose.split("\n");
+    expect(compose).toContain("AI_PROVIDER: ${AI_PROVIDER:-mock}");
+    const names = Object.keys(envSchema.shape).filter(
+      (name) => name.startsWith("AI_") || name.endsWith("_API_KEY"),
+    );
+    expect(names.length).toBeGreaterThan(15);
+    for (const name of names) {
+      expect(
+        lines.some((line) => line.startsWith(`  ${name}:`)),
+        name,
+      ).toBe(true);
+    }
+  });
+});
+
 describe("the database roles", () => {
   it("match the roles in @orderpilot/shared", () => {
     expect(Object.values(Role).sort()).toEqual([...ROLES].sort());

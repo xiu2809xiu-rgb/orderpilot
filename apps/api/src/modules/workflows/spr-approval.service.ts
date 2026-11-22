@@ -26,7 +26,8 @@ import {
   CommandReplayService,
   type KeepAnswer,
 } from "./command-replay.service.js";
-import type { OrderActor } from "./domain/order-state-machine.js";
+import { actorOf } from "./actor-of.js";
+import { PLACE_VENDOR_PO_TITLE, RAISE_SPR_TITLE } from "./spr-raise.service.js";
 import { OrderWorkflowService } from "./order-workflow.service.js";
 import {
   SprRecordRepository,
@@ -43,21 +44,26 @@ export interface CommandOptions {
   readonly now?: Date;
 }
 
-function actorOf(auth: AuthContext): OrderActor {
-  return {
-    kind: "user",
-    userId: auth.user.id,
-    name: auth.user.displayName,
-    role: auth.user.role,
-  };
-}
-
 /**
  * Approving or rejecting an SPR. Area 4's policy says who may decide and up to
  * what limit; the state machine says what the order does next; this decides what
  * happens above a limit. The amount and the requester always come from the SPR's
  * own record, so a request cannot talk its way under a limit.
  */
+/**
+ * Whom a decision hands the SPR back to, and for what: an approval to the
+ * product manager to place the vendor PO, a rejection to correct the SPR and
+ * raise it again.
+ */
+function handBackOf(outcome: Outcome): {
+  kind: "PLACE_VENDOR_PO" | "RAISE_SPR";
+  title: string;
+} {
+  return outcome === "approved"
+    ? { kind: "PLACE_VENDOR_PO", title: PLACE_VENDOR_PO_TITLE }
+    : { kind: "RAISE_SPR", title: RAISE_SPR_TITLE };
+}
+
 @Injectable()
 export class SprApprovalService {
   constructor(
@@ -140,6 +146,8 @@ export class SprApprovalService {
       );
     }
 
+    const handBack = handBackOf(outcome);
+    const handBackDue = await this.tasks.dueFor(handBack.kind, now);
     const decision = {
       outcome,
       by: auth.user.displayName,
@@ -165,6 +173,16 @@ export class SprApprovalService {
       async () => {
         await this.records.save(spr, { decision });
         await this.tasks.setOpen(spr.orderRef, "APPROVE_SPR", false, now);
+        // The decision hands the SPR back to the product manager (Spectra, 5 Nov).
+        await this.tasks.openTask({
+          orderRef: spr.orderRef,
+          kind: handBack.kind,
+          title: handBack.title,
+          assigneeRole: "PRODUCT_MANAGER",
+          recordNo,
+          now,
+          dueAt: handBackDue,
+        });
         await this.audit.record({
           actor: { kind: "user", userId: auth.user.id, role: auth.user.role },
           action: `workflows.spr.${outcome}`,
@@ -226,6 +244,15 @@ export class SprApprovalService {
       async () => {
         await this.records.save(spr, { decision: null });
         await this.tasks.setOpen(spr.orderRef, "APPROVE_SPR", true, now);
+        // Undone, the decision takes back the task it handed on.
+        if (spr.decision) {
+          await this.tasks.setOpen(
+            spr.orderRef,
+            handBackOf(spr.decision.outcome).kind,
+            false,
+            now,
+          );
+        }
         await this.audit.record({
           actor: { kind: "user", userId: auth.user.id, role: auth.user.role },
           action: "workflows.spr.decision-undone",

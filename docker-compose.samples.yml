@@ -15,6 +15,8 @@
 #     out, and web has its default route deleted (see web-seal below): no
 #     document can reach an AI provider or anywhere else, whatever the code or a
 #     .env says. web also cannot resolve an outside name (see its dns below).
+#   - The migrate, api and worker containers get the mock provider and no AI key
+#     or address (see x-no-ai), even after `pnpm ai:key` has filled the root .env.
 #   - Restart web with `pnpm samples:restart-web`, which reseals it. After a
 #     plain `docker restart`, web-seal shows unhealthy: restart web the first way.
 #   - Only the web app has a host port, bound to 127.0.0.1. The stores have none.
@@ -32,6 +34,21 @@ x-sealed-app: &sealed-app
   <<: *sealed
   volumes:
     - ./samples:/samples:ro
+
+# No provider and no key in this stack, whatever the root .env says after
+# `pnpm ai:key`. The network already has no route out, so this is the second
+# lock: with the mock there is nothing to call and no key in the container to
+# leak. An empty value counts as unset in the API's configuration, and the mock
+# needs no key. Compose merges these into the environment the main file sets.
+x-no-ai: &no-ai
+  AI_PROVIDER: mock
+  GEMINI_API_KEY: ""
+  GROQ_API_KEY: ""
+  AI_API_KEY: ""
+  AI_BASE_URL: ""
+  AI_BEDROCK_ACCESS_KEY_ID: ""
+  AI_BEDROCK_SECRET_ACCESS_KEY: ""
+  AI_BEDROCK_SESSION_TOKEN: ""
 
 services:
   postgres:
@@ -58,13 +75,16 @@ services:
     restart: "no"
     networks:
       - sealed
+    environment: *no-ai
   api:
     <<: *sealed-app
     environment:
+      <<: *no-ai
       # The browser signs in from this stack's own port.
       CORS_ORIGINS: http://localhost:${SAMPLES_WEB_PORT:-8081},http://127.0.0.1:${SAMPLES_WEB_PORT:-8081}
   worker:
     <<: *sealed-app
+    environment: *no-ai
   web:
     restart: "no"
     ports: !override

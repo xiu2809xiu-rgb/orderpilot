@@ -14,6 +14,7 @@ import type { WorkflowsSpr200DataItem } from './workflowsSpr200DataItem.ts';
 import type { WorkflowsSpr200DataPassedTo } from './workflowsSpr200DataPassedTo.ts';
 import type { WorkflowsSpr200DataRef } from './workflowsSpr200DataRef.ts';
 import type { WorkflowsSpr200DataRequestedBy } from './workflowsSpr200DataRequestedBy.ts';
+import type { WorkflowsSpr200DataStage } from './workflowsSpr200DataStage.ts';
 import type { WorkflowsSpr200DataVendor } from './workflowsSpr200DataVendor.ts';
 
 export type WorkflowsSpr200Data = {
@@ -54,6 +55,12 @@ export type WorkflowsSpr200Data = {
   escalatesToName: string | null;
   /** @nullable */
   passedTo?: WorkflowsSpr200DataPassedTo;
+  stage?: WorkflowsSpr200DataStage;
+  /**
+     * @nullable
+     * @pattern ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+     */
+  raiseTaskId?: string | null;
   /** @nullable */
   due?: WorkflowsSpr200DataDue;
   decidable?: boolean;

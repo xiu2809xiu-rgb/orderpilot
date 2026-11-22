@@ -18,12 +18,16 @@ import {
 
 /**
  * Which sections the home page draws for each of the nine roles, and what each
- * holds. The old home gave a role its tiles, its list, its quick actions, the
+ * holds. The block a role has besides its main one (the approver's overdue
+ * orders, the administrator's refused actions) is the one its permissions
+ * bring. The old home gave a role its tiles, its list, its quick actions, the
  * trend chart for Management and the flows; every one of those is here, and a
  * section that is not for the role is not drawn at all.
  */
 interface Expected {
   list: string;
+  /** The block added below the main one, for the permissions that bring it. */
+  extra?: string;
   inbox: boolean;
   measures: boolean;
   trend: boolean;
@@ -34,6 +38,7 @@ interface Expected {
 const BY_ROLE: Record<Role, Expected> = {
   SYSTEM_ADMIN: {
     list: "Business rules from Spectra",
+    extra: "Latest refused actions",
     inbox: false,
     measures: false,
     trend: false,
@@ -50,6 +55,7 @@ const BY_ROLE: Record<Role, Expected> = {
   },
   APPROVER: {
     list: "Needs you",
+    extra: "Most overdue, by amount",
     inbox: true,
     measures: false,
     trend: false,
@@ -151,6 +157,9 @@ describe("the home page of each role", () => {
       // The role's own list has settled, so the page is no longer a skeleton.
       await screen.findByRole("heading", { level: 2, name: want.list });
       if (side) await screen.findByRole("heading", { name: side });
+      if (want.extra) {
+        await screen.findByRole("heading", { level: 2, name: want.extra });
+      }
       return view;
     }
 
@@ -161,6 +170,7 @@ describe("the home page of each role", () => {
         await open();
         const expected = new Set([
           want.list,
+          ...(want.extra ? [want.extra] : []),
           "Your numbers",
           ...(side ? [side] : []),
           ...(want.inbox ? ["My timeline"] : []),

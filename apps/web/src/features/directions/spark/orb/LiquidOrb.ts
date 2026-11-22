@@ -2,18 +2,23 @@
 // (the licence text is in LICENSE beside this file). Adapted to OrderPilot: wrapped as a class, the colours
 // come from the design tokens instead of fixed palettes, the particle-ribbon pipelines are left out
 // (Spark uses the aurora style only), the frame loop can be paused, and failures are reported to the caller.
-import shaderSource from "./liquidOrb.wgsl?raw";
 import seeds from "./orbSeeds.json";
 import { orbColours, type OrbState, type OrbTokens } from "./orbPalette";
+import { onOrbGpuLoss, type OrbGpu } from "./orbGpu";
 import {
   BUFFER_UNIFORM_COPY_DST,
-  gpuApi,
   type GpuBindGroup,
   type GpuBuffer,
   type GpuCanvasContext,
-  type GpuDevice,
-  type GpuRenderPipeline,
 } from "./webgpu";
+
+/** What an orb tells its caller. */
+export interface OrbHooks {
+  /** The device was lost or hit an error: draw the WebGL orb instead. Called at most once. */
+  onFail: (reason: string) => void;
+  /** The first frame has been drawn and handed to the screen. Called at most once. */
+  onFirstFrame: () => void;
+}
 
 const SEEDS: Record<OrbState, readonly number[]> = seeds;
 const ACTIVATION_MS = 220;
@@ -52,15 +57,16 @@ function seedOf(state: OrbState, tokens: OrbTokens): Float32Array {
 }
 
 /**
- * The WebGPU liquid orb on one canvas. `create` returns null where the browser
- * has no WebGPU or no adapter, so the caller can draw the WebGL orb instead.
- * It never draws while `setRunning(false)`, so an orb that is off screen or in
+ * The WebGPU liquid orb on one canvas, drawn with the program that orbGpu.ts
+ * prepared for the page. It never draws while `setRunning(false)`, so an orb that is off screen or in
  * a hidden tab costs nothing. The pixel ratio is clamped to 2.
  */
 export class LiquidOrb {
   private frameId = 0;
   private running = false;
   private destroyed = false;
+  private reported = false;
+  private stopListening: () => void = () => undefined;
   private lastFrameAt: number | null = null;
   private motionPhase = 0;
   private state: OrbState = "idle";
@@ -74,13 +80,12 @@ export class LiquidOrb {
 
   private constructor(
     private readonly canvas: HTMLCanvasElement,
-    private readonly device: GpuDevice,
+    private readonly gpu: OrbGpu,
     private readonly context: GpuCanvasContext,
-    private readonly pipeline: GpuRenderPipeline,
     private readonly bindGroup: GpuBindGroup,
     private readonly uniformBuffer: GpuBuffer,
     tokens: OrbTokens,
-    private readonly onFail: (reason: string) => void,
+    private readonly hooks: OrbHooks,
   ) {
     this.tokens = tokens;
     this.from = seedOf("idle", tokens);
@@ -89,47 +94,26 @@ export class LiquidOrb {
     this.values = new Float32Array(this.from);
   }
 
-  static async create(
+  /**
+   * An orb on one canvas, drawn with the page's prepared GPU program. It owns
+   * only what is its own (the canvas's configuration, a uniform buffer and a
+   * bind group) and never the device. It is synchronous on purpose: nothing
+   * can happen between the caller's check that it is still wanted and the
+   * canvas being configured, so a development re-mount cannot make two orbs
+   * configure the one canvas. Returns null if the canvas gives no WebGPU context.
+   */
+  static create(
     canvas: HTMLCanvasElement,
+    gpu: OrbGpu,
     tokens: OrbTokens,
-    onFail: (reason: string) => void,
-  ): Promise<LiquidOrb | null> {
-    const gpu = gpuApi();
-    if (!gpu) return null;
-    const adapter = await gpu.requestAdapter();
-    if (!adapter) return null;
-    const device = await adapter.requestDevice();
+    hooks: OrbHooks,
+  ): LiquidOrb | null {
     const context = canvas.getContext(
       "webgpu",
     ) as unknown as GpuCanvasContext | null;
-    if (!context) {
-      device.destroy();
-      return null;
-    }
-    const format = gpu.getPreferredCanvasFormat();
+    if (!context) return null;
+    const { device, format, pipeline } = gpu;
     context.configure({ device, format, alphaMode: "premultiplied" });
-    const shader = device.createShaderModule({ code: shaderSource });
-    const info = await shader.getCompilationInfo();
-    const errors = info.messages.filter((message) => message.type === "error");
-    if (errors.length > 0) {
-      device.destroy();
-      return null;
-    }
-    const over = {
-      srcFactor: "one",
-      dstFactor: "one-minus-src-alpha",
-      operation: "add",
-    };
-    const pipeline = device.createRenderPipeline({
-      layout: "auto",
-      vertex: { module: shader, entryPoint: "vs_main" },
-      fragment: {
-        module: shader,
-        entryPoint: "fs_main",
-        targets: [{ format, blend: { color: over, alpha: over } }],
-      },
-      primitive: { topology: "triangle-list" },
-    });
     const uniformBuffer = device.createBuffer({
       size: SEEDS.idle.length * 4,
       usage: BUFFER_UNIFORM_COPY_DST,
@@ -140,20 +124,15 @@ export class LiquidOrb {
     });
     const orb = new LiquidOrb(
       canvas,
-      device,
+      gpu,
       context,
-      pipeline,
       bindGroup,
       uniformBuffer,
       tokens,
-      onFail,
+      hooks,
     );
-    void device.lost.then((lost) => {
-      orb.fail(lost.message ?? lost.reason ?? "device lost");
-    });
-    device.addEventListener("uncapturederror", (event) => {
-      event.preventDefault();
-      orb.fail(event.error.message);
+    orb.stopListening = onOrbGpuLoss((reason) => {
+      orb.fail(reason);
     });
     return orb;
   }
@@ -188,20 +167,36 @@ export class LiquidOrb {
     }
   }
 
+  /** Frees what this orb made. The device is the page's, and stays. */
   destroy() {
     if (this.destroyed) return;
     this.destroyed = true;
     this.running = false;
+    this.stopListening();
     cancelAnimationFrame(this.frameId);
     this.uniformBuffer.destroy();
     this.context.unconfigure();
-    this.device.destroy();
   }
 
   private fail(reason: string) {
     if (this.destroyed) return;
     this.destroy();
-    this.onFail(reason);
+    this.hooks.onFail(reason);
+  }
+
+  /** Tells the caller once that the first frame has been drawn and handed to the screen. */
+  private reportFirstFrame() {
+    this.reported = true;
+    // Best effort: a device that goes away while we wait is handled by the loss
+    // path, so the wait itself has nothing to report.
+    void this.gpu.device.queue
+      .onSubmittedWorkDone()
+      .then(() => {
+        requestAnimationFrame(() => {
+          if (!this.destroyed) this.hooks.onFirstFrame();
+        });
+      })
+      .catch(() => undefined);
   }
 
   private progress(now: number) {
@@ -249,8 +244,8 @@ export class LiquidOrb {
       this.values[0] = width;
       this.values[1] = height;
       this.values[2] = this.motionPhase / Math.max(speed, 0.001);
-      this.device.queue.writeBuffer(this.uniformBuffer, 0, this.values);
-      const encoder = this.device.createCommandEncoder();
+      this.gpu.device.queue.writeBuffer(this.uniformBuffer, 0, this.values);
+      const encoder = this.gpu.device.createCommandEncoder();
       const pass = encoder.beginRenderPass({
         colorAttachments: [
           {
@@ -261,11 +256,12 @@ export class LiquidOrb {
           },
         ],
       });
-      pass.setPipeline(this.pipeline);
+      pass.setPipeline(this.gpu.pipeline);
       pass.setBindGroup(0, this.bindGroup);
       pass.draw(3);
       pass.end();
-      this.device.queue.submit([encoder.finish()]);
+      this.gpu.device.queue.submit([encoder.finish()]);
+      if (!this.reported) this.reportFirstFrame();
       this.frameId = requestAnimationFrame(this.frame);
     } catch (error) {
       this.fail(error instanceof Error ? error.message : String(error));

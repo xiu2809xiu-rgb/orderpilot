@@ -34,6 +34,7 @@
       "REVIEW_FIELDS": "Confirm the fields read from the PO",
       "RAISE_SPR": "Raise an SPR",
       "APPROVE_SPR": "Approve the SPR",
+      "PLACE_VENDOR_PO": "Place the vendor PO",
       "SEND_PI": "Send the PI to the customer",
       "CONFIRM_PAYMENT": "Confirm the payment",
       "PACK_ORDER": "Pack the order",
@@ -54,6 +55,7 @@
       "REVIEW_FIELDS": "Open order",
       "RAISE_SPR": "Raise",
       "APPROVE_SPR": "Review",
+      "PLACE_VENDOR_PO": "Mark as placed",
       "SEND_PI": "Mark PI as sent",
       "CONFIRM_PAYMENT": "Enter payment details",
       "PACK_ORDER": "Mark as packed",
@@ -82,7 +84,8 @@
     "summaryNone": "Nothing is waiting, so there is nothing to clear.",
     "done": {
       "title": "Done today",
-      "empty": "Nothing finished yet today. A task you complete here appears with the time.",
+      "hint": "A task you finish with a button on Home or on an order's page appears here with the time. Payments and SPR decisions are recorded on their own pages.",
+      "empty": "Nothing marked done here yet today.",
       "at": "{{what}} at {{time}}"
     },
     "now": {
