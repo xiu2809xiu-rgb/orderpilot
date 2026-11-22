@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { formatLongDay } from "@/lib/format";
+import { opticalStyle } from "@/lib/opticalEdge";
 import { usePrimaryAction, type PrimaryAction } from "./primaryAction";
 import "./page-header.css";
 
@@ -57,9 +58,10 @@ export function PageHeader({
         <Heading
           className={
             headingLevel === 1
-              ? "dx-title"
-              : "fs-20 font-semibold tracking-tight"
+              ? "dx-title optical-start"
+              : "fs-20 optical-start font-semibold tracking-tight"
           }
+          style={opticalStyle(title)}
         >
           {title}
         </Heading>
