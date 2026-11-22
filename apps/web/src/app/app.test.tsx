@@ -416,13 +416,21 @@ describe("accessibility (axe)", () => {
     expect(await violations(container)).toEqual([]);
   });
 
-  it("finds nothing on the not-found page or the settings page", async () => {
-    const first = renderApp("/documents", { session: sessionFor("SUPPORT") });
+  // One page each: the settings page has more to check since #349, and the
+  // two together ran past the 15 s budget on a busy machine.
+  it("finds nothing on the not-found page", async () => {
+    const { container } = renderApp("/documents", {
+      session: sessionFor("SUPPORT"),
+    });
     await screen.findByRole("heading", { name: "Page not found" });
-    expect(await violations(first.container)).toEqual([]);
-    first.unmount();
-    const second = renderApp("/settings", { session: sessionFor("SUPPORT") });
+    expect(await violations(container)).toEqual([]);
+  });
+
+  it("finds nothing on the settings page", async () => {
+    const { container } = renderApp("/settings", {
+      session: sessionFor("SUPPORT"),
+    });
     await screen.findByRole("heading", { name: "Settings" });
-    expect(await violations(second.container)).toEqual([]);
+    expect(await violations(container)).toEqual([]);
   });
 });
