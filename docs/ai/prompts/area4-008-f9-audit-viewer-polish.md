@@ -1,6 +1,6 @@
 # Prompt area4-008: F-9, audit viewer polish
 
-Angelyn's prompts for F-9's first pull request ([#103](https://github.com/xiu2809xiu-rgb/orderpilot/issues/103), criteria 1, 4 and 5), as written, in the order sent. The work paused on 14 Nov for the demo fixes ([area4-006](area4-006-demo-readiness.md)) and resumed on 22 Nov. The result is in [ADR 0059](../../adr/0059-the-audit-filters-offer-what-the-trail-holds.md) and the [area 4 guide](../../team/area-4-controls-security-and-monitoring.md#audit-viewer-polish-f-9).
+Angelyn's prompts for F-9's first pull request ([#103](https://github.com/xiu2809xiu-rgb/orderpilot/issues/103), criteria 1, 4 and 5), as written, in the order sent. The work paused on 14 Nov for the demo fixes ([area4-006](area4-006-demo-readiness.md)) and resumed on 22 Nov. The result is in [ADR 0064](../../adr/0064-the-audit-filters-offer-what-the-trail-holds.md) and the [area 4 guide](../../team/area-4-controls-security-and-monitoring.md#audit-viewer-polish-f-9).
 
 ## 1. The task (13 Nov)
 

@@ -371,7 +371,7 @@ On 14 Nov a walk through the demo as every role, on a Docker build, found nine g
 
 ## Audit viewer polish (F-9)
 
-F-9's criteria 1, 4 and 5, and the walkthrough's gaps A3 and A11, settled in [ADR 0059](../adr/0059-the-audit-filters-offer-what-the-trail-holds.md). Criteria 2 and 3 are still open on #103.
+F-9's criteria 1, 4 and 5, and the walkthrough's gaps A3 and A11, settled in [ADR 0064](../adr/0064-the-audit-filters-offer-what-the-trail-holds.md). Criteria 2 and 3 are still open on #103.
 
 **The person and action pickers.** In the More filters fold, "Person" and "Action" replace the "Person ID" and "Action starts with" boxes. They offer what the trail holds, from `GET /audit/filter-options` (`audit.read`): each person who appears as an actor, by name, and each action name that exists. The options are read only when the fold is open, in `AuditPickers.tsx`, on the shared `FilterLookup`.
 
