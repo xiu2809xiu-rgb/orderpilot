@@ -556,3 +556,9 @@
     min-height: 2.75rem;
   }
 }
+
+/* The applied filters belong to the table under them: in a page stack they sit
+   8 px above it, not a whole stack away. */
+.dx-page > .dt-applied {
+  margin-bottom: calc(var(--space-1) - var(--dx-stack));
+}
