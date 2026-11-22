@@ -35,7 +35,7 @@ export function SettingRow({
   align = "center",
   children,
 }: {
-  label: string;
+  label: ReactNode;
   description?: string;
   control?: ReactNode | ((ids: RowIds) => ReactNode);
   /** A read-only answer, drawn where a control would be. */
