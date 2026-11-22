@@ -77,12 +77,12 @@ describe("the order of Home for a team with tasks", () => {
     const numbers = screen.getByRole("region", { name: "Your numbers" });
     // Needs you is not inside the pair: it stands on a row of the page of its own.
     const pair = timeline.closest("div.lg\\:grid-cols-2");
-    expect(pair).not.toBeNull();
-    expect(pair?.contains(numbers)).toBe(true);
-    expect(pair?.contains(needs)).toBe(false);
+    if (!pair) throw new Error("The timeline is not in a pair");
+    expect(pair.contains(numbers)).toBe(true);
+    expect(pair.contains(needs)).toBe(false);
     // And it comes after the pair in the page.
     expect(
-      pair?.compareDocumentPosition(needs) & Node.DOCUMENT_POSITION_FOLLOWING,
+      pair.compareDocumentPosition(needs) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
   });
 
