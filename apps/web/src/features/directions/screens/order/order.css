@@ -40,8 +40,8 @@
 .od-status {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  padding: 1rem var(--dx-card-pad) 1.125rem;
+  gap: var(--space-2);
+  padding: var(--dx-card-pad);
 }
 
 /* The stage card and the facts card: stacked on a narrow screen, side by
@@ -128,7 +128,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  padding: 0.875rem var(--dx-card-pad) 1rem;
+  padding: var(--dx-card-pad);
 }
 
 .od-journey-head {
@@ -136,7 +136,7 @@
   flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 0.25rem 1.25rem;
+  gap: var(--space-1) var(--space-2);
 }
 
 .od-journey-title {
@@ -188,8 +188,21 @@
 
 /* One row of facts, tighter than the card it replaces, so the lines come into the first screen. */
 .od-order .od-facts-bar .od-fact {
-  padding-block: 0.625rem;
+  padding-block: var(--space-2);
   gap: 0.25rem;
+}
+
+/* The facts text lines up with the card text beside and below it: the first
+   fact, and the second on a row of its own, start a card padding in. */
+.od-order .od-facts-bar .od-fact:first-child,
+.od-order .od-facts-bar .od-fact:nth-child(2) {
+  padding-left: var(--dx-card-pad);
+}
+
+@media (max-width: 39.99rem) {
+  .od-order .od-facts-bar .od-fact {
+    padding-inline: var(--dx-card-pad);
+  }
 }
 
 /* The bar now holds only the value, the PO and the two dates: the stage and
@@ -214,7 +227,7 @@
   grid-column: 1 / -1;
   /* Lines up with the status card's own top padding, so "Value" sits level
      with "Current Stage" when the two cards stand side by side. */
-  padding-top: 1rem;
+  padding-top: var(--dx-card-pad);
 }
 
 .od-order .od-facts-bar .od-fact:not(:first-child) {

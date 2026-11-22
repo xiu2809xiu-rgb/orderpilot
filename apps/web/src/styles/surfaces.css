@@ -69,6 +69,12 @@
   box-shadow: var(--dx-card-shadow);
   backdrop-filter: var(--dx-card-filter);
 }
+/* A tile that sits inside a card takes the control corner, so the two
+   radii nest and do not clash at the corners. */
+.dx-card .dx-card,
+[data-slot="card"] .dx-card {
+  border-radius: var(--radius-control);
+}
 /* A card that holds a table, a grid or a form is as opaque as the design
    allows: text on it must reach 4.5:1 over the brightest part of the ground,
    which the plain glass does not promise. */

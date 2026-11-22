@@ -247,6 +247,28 @@ describe("the values of the design", () => {
     }
   });
 
+  it("sets the page rhythm on the 8-pt grid: card padding, head gap, stack and grid gap", () => {
+    // Each is one of the --space-* tokens, so it is on the grid by being one.
+    const px = (name: string) => {
+      const value = must(light[name]);
+      const ref = /^var\(--(space-\d+)\)$/.exec(value);
+      const size = ref ? light[must(ref[1])] : value;
+      return parseFloat(must(size)) * 16;
+    };
+    expect(px("dx-card-pad")).toBe(24);
+    expect(px("dx-head-gap")).toBe(24);
+    expect(px("dx-stack")).toBe(32);
+    expect(px("dx-grid-gap")).toBe(24);
+    for (const name of [
+      "dx-card-pad",
+      "dx-head-gap",
+      "dx-stack",
+      "dx-grid-gap",
+    ]) {
+      expect(px(name) % 8, name).toBe(0);
+    }
+  });
+
   it("defines radius and an ease-out curve", () => {
     expect(light.radius).toBeDefined();
     expect(light["ease-out"]).toContain("cubic-bezier");
