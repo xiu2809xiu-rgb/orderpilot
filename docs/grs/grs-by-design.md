@@ -27,8 +27,8 @@ Who decides what, and how the decisions stay visible.
 
 - The AI reads, classifies, extracts, explains and drafts. It never approves, buys, posts, releases goods or pays.
 - AI output is a draft until a person confirms it, and each extracted field keeps its confidence and its source.
-- No model output triggers an action (planned: P-17).
-- Every AI call is recorded: the model, tokens, estimated cost, feature, user, document and outcome (planned: P-17, shown by G-1).
+- No model output triggers an action (built in P-17, [ADR 0059](../adr/0059-the-ai-gateway-and-the-person-in-the-loop.md)). The gateway hands a feature text or fields that zod has parsed. A tool a model names is read-only, is checked against the permission policy and runs as the person asking, and the module imports no service that writes.
+- Every AI call is recorded: the model, tokens, estimated cost, feature, user, document and outcome (built in P-17, one usage record per call; shown by G-1, planned).
 
 ### Controls in the product
 
@@ -71,7 +71,7 @@ The owners review their rows at each sprint review, and add a row when a story b
 
 - **Less re-typing.** A document is read once and confirmed once, so staff time goes to checking and deciding, not keying.
 - **Fewer reshipments.** Mismatches caught before goods ship mean fewer wrong shipments, returns and second freight legs, which saves money and the emissions of moving goods twice.
-- **AI only where it helps.** Classification, extraction, explanations and drafts use AI; comparisons, routing and limits are fixed rules, which cost nothing to run. The AI's usage and cost are tracked per document (planned: P-17, G-1), so a feature whose cost outweighs its use can be switched off.
+- **AI only where it helps.** Classification, extraction, explanations and drafts use AI; comparisons, routing and limits are fixed rules, which cost nothing to run. The AI's usage and cost are tracked per document (recorded by P-17, shown by G-1, which is planned), so a feature whose cost outweighs its use can be switched off.
 - **Small by default.** The mock provider is the default in development and demos, and the demo runs on one small server (planned: P-24).
 - **Less paper.** Documents stay digital, from the PO to the AWB/BL.
 - **Social.** The UI meets WCAG 2.2 AA, the warehouse screens work on a tablet, and people keep every decision.

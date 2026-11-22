@@ -64,7 +64,9 @@ describe("the shell around every page", () => {
     expect(
       within(bar).getByRole("button", { name: /^Notifications/ }),
     ).toBeVisible();
-    expect(within(bar).getByRole("button", { name: "Theme" })).toBeVisible();
+    expect(
+      within(bar).getByRole("switch", { name: "Light theme" }),
+    ).toBeVisible();
   });
 
   it("offers Upload only to a role that may upload documents", async () => {

@@ -74,7 +74,7 @@ function FormItem({
     <FormItemContext.Provider value={value}>
       <div
         data-slot="form-item"
-        className={cn("grid content-start gap-1.5", className)}
+        className={cn("grid content-start gap-2", className)}
         {...props}
       />
     </FormItemContext.Provider>
@@ -141,7 +141,7 @@ function FormDescription({ className, ...props }: React.ComponentProps<"p">) {
     <p
       data-slot="form-description"
       id={formDescriptionId}
-      className={cn("text-xs text-(--faint-foreground)", className)}
+      className={cn("-mt-1 text-xs text-(--faint-foreground)", className)}
       {...props}
     />
   );
@@ -155,12 +155,14 @@ function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
       data-slot="form-message"
       id={formMessageId}
       className={cn(
-        "flex items-start gap-1 text-xs text-destructive",
+        "-mt-1 flex items-start gap-1 text-xs text-destructive",
         className,
       )}
       {...props}
     >
-      <CircleAlert className="mt-px size-3 shrink-0" aria-hidden="true" />
+      {/* mt-0.5: a 12 px icon on a 16 px line is centred with 2 px above it
+          ((16 - 12) / 2); it had 1 px. */}
+      <CircleAlert className="mt-0.5 size-3 shrink-0" aria-hidden="true" />
       {error.message}
     </p>
   );

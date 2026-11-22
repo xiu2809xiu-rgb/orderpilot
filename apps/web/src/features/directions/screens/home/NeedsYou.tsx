@@ -13,13 +13,15 @@ import type { useHomeTasks } from "./useHomeTasks";
 import type { useNeedFocus } from "./useNeedFocus";
 
 /** Tasks listed in Needs you; the rest are counted and the inbox holds them. */
-const SHOWN = 8;
+const SHOWN = 5;
 
 /**
- * The first section of home for a role with an inbox: its open tasks, earliest
- * due first (`byDueTime`), so the longest overdue is first, each with its timer and one action. The rows arrive once when
- * the screen is first seen, then stay still: a list someone works in never
- * moves. Past eight tasks the rest are counted, with a link to the inbox.
+ * The work section of home for a role with an inbox, after the overview: its
+ * open tasks, earliest due first (`byDueTime`), so the longest overdue is
+ * first, each with its timer and one action. The rows arrive once when the
+ * screen is first seen, then stay still: a list someone works in never moves.
+ * Past five tasks the rest are counted, with a link to the inbox; five keep
+ * the section from filling the page.
  */
 export function NeedsYou({
   home,

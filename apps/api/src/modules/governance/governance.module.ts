@@ -52,6 +52,6 @@ import { RevokedPermissionRepository } from "./revoked-permission.repository.js"
     MatrixService,
     PolicyService,
   ],
-  exports: [AuthorisationService, BankDetailHoldService],
+  exports: [AuthorisationService, BankDetailHoldService, PolicyService],
 })
 export class GovernanceModule {}

@@ -27,7 +27,7 @@ The named patterns used in the code, where each one lives, and why it earns its 
 | Lazy loading                | `data-table/export/excel.ts`, the gallery route                                    | A large library or a demo page loads only when asked for, so the entry stays small                                        | P-12  |
 | Barrel (one public entry)   | `components/common/index.ts`                                                       | Areas import every common component from one place                                                                        | P-12  |
 | Transactional outbox        | planned                                                                            | Events leave the system only if the business transaction commits                                                          | P-15  |
-| Gateway                     | planned: `LlmGateway`                                                              | One interface over the mock, OpenAI-compatible and Bedrock providers                                                      | P-17  |
+| Gateway                     | `ai/llm-gateway.ts` (see the AI gateway section)                                   | One interface over the mock, OpenAI-compatible and Bedrock providers                                                      | P-17  |
 | Factory and adapter         | planned: `SystemConnector` and the Microsoft Dynamics 365 Business Central adapter | Connectors are chosen by name and hide each system's quirks                                                               | P-20  |
 | Strategy                    | `checks/domain/check-rule.ts` (the rules are planned)                              | Each check rule is a class behind one interface                                                                           | D-1   |
 | Port with a mock adapter    | `checks/domain/order-status-reader.ts`                                             | Area 3 reads order status through one interface; area 2 replaces the mock                                                 | D-1   |
@@ -47,6 +47,9 @@ The named patterns used in the code, where each one lives, and why it earns its 
 | Facade                      | `e2e/src/index.ts`, `checkPage`                                                    | A spec calls four helpers; the axe, console, CSP and layout checks behind them change in one place                        | P-14  |
 | Declared entries            | `features/define.ts` (`MenuEntry`), `features/nav.ts` (`menuFor`)                  | Each feature declares its menu lines and the shell only reads them, so a menu built twice cannot disagree with itself     | P-39  |
 | Registry filter             | `features/registry.ts` (`reachableFeatures`)                                       | One place decides whether a planned feature can be reached, so the menu, routes and palette cannot drift apart            | P-39  |
+| Settings row                | `components/parts/SettingRow.tsx`                                                  | A label, one plain line and a control in one shape, so every settings card reads alike                                    | #349  |
+| Registry (keys)             | `app/shell/shortcutRegistry.ts`                                                    | The handlers, the Help panel and Settings read one list of keys, so what is shown is what works                           | #349  |
+| Shared store                | `app/shell/panelCollapsedStore.ts`, `app/shell/useSignOut.tsx`                     | The bar and Settings change the side panel and sign out through one store and one hook, so they agree                     | #349  |
 
 ## Layers
 
@@ -239,6 +242,7 @@ The first screen (the sign-in page or a role's home page) waits for the entry ch
 | Portal print view               | `components/list-page/PrintView.tsx`, `@media print` in `styles/index.css`                    | Print renders every row beside the app and a print rule hides the app, with no print library                                                                                                        | P-44  |
 | Declaration over drawing (form) | `components/document-form/DocumentForm.tsx`, `types.ts`                                       | A document declares its header, lines, status, actions and tabs; the template draws the page and checks each action's permission, so four CRUD screens share one bar                                | P-47  |
 | Registry (shared form actions)  | `components/document-form/registry.ts`, `ExtraActions.tsx`                                    | One registration puts an action in every document form's More menu, as `registerRowMenuItem` does for row menus; P-57 uses both                                                                     | P-47  |
+| Engine behind an adapter        | `components/kit/pixel-toggle/` (`PixelToggle.tsx`, `engine.ts`)                               | The theme switch's springs, canvases and WebGL2 context live in an engine that attaches to a button React owns and makes and removes its own canvases, so a double mount cannot clash. A lazy chunk | #356  |
 
 ## Area 2's state machine (C-2)
 
@@ -292,6 +296,28 @@ The decision is recorded in [ADR 0057](../adr/0057-sparks-orb-is-prepared-once-a
 | A placeholder that hands over         | `SparkOrb.tsx`, `spark.css`                             | The CSS orb is there from the first render and the drawn orb fades in over it on its first frame, so there is never an empty square                        |
 | Observer of loss                      | `orbGpu.ts` (`onOrbGpuLoss`)                            | A lost device is forgotten and every orb that borrowed it is told once, so each falls back to WebGL and the page does not try WebGPU again                 |
 | A trigger that stays out of the entry | `spark/orb/prepareAhead.ts`, `app/shell/sparkPanel.tsx` | The entry bundle holds only the scheduling; the GPU module and its shader are fetched at an idle moment, and never in a hidden tab or under reduced motion |
+
+## The AI gateway (P-17)
+
+The decision is recorded in [ADR 0059](../adr/0059-the-ai-gateway-and-the-person-in-the-loop.md). Everything is under `apps/api/src/modules/ai/`.
+
+| Pattern                        | Where                                                                           | Why                                                                                                                                                                  |
+| ------------------------------ | ------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Gateway (facade)               | `llm-gateway.ts`                                                                | The one way a feature reaches a model, so the destination check, the fence, the tool loop, the answer check and the usage record cannot be left out by one caller    |
+| Abstract class as a port       | `domain/llm-provider.ts`                                                        | One model request in plain data, with no zod or SDK type across it, so the mock and a real provider are interchangeable and a change of SDK touches the adapters     |
+| Adapter                        | `providers/openai-compatible-llm-provider.ts`, `bedrock-llm-provider.ts`        | Each turns the port's request into an SDK call and the answer back into plain data. Gemini and Groq are presets of the first, and Bedrock loads its package on use   |
+| Adapter over the SDK           | `providers/ai-sdk-translator.ts`                                                | The only file that meets the Vercel AI SDK: its retries are off and no tool has an `execute`, so the gateway, not the SDK, decides what runs and what is tried again |
+| Factory                        | `providers/provider-factory.ts`                                                 | Chooses the provider once at start-up from `AI_PROVIDER`, and an incomplete setting stops the API instead of quietly answering from the mock                         |
+| Test double as the default     | `providers/mock-llm-provider.ts`, `mock-scripts.ts`                             | The mock plays a script a feature registers, is deterministic and offline, and fails loudly for a feature with no script, so a screen never invents an answer        |
+| Port to another area           | `ai-destination.policy.ts`                                                      | The gateway asks area 4's policy whether this data may go to this kind of provider and adds nothing to the answer, so the rules stay theirs                          |
+| Scope of one call              | `ai-call-scope.ts`, `domain/ai-call-meter.ts`                                   | One scope per call holds its meter and clock and writes its one usage record at most once, whichever path ends it, a stream that is stopped early included           |
+| Guard                          | `domain/prompt-guard.ts`, `domain/output-guard.ts`                              | Documents go in a block fenced by a fresh nonce and are told to be data; an answer is text until zod has parsed it, and its extra keys are dropped                   |
+| Bounded loop                   | `domain/tool-loop.ts`, `domain/read-only-tool.ts`                               | A model may only name a read-only tool given to this call, its arguments are parsed by zod, it runs as the person asking, and the rounds are capped                  |
+| Policy asked as the person     | `ai-tool-permission.asker.ts`                                                   | A tool a model requested is not a route, so no guard covers it: the same permission policy is asked about the person the call runs for                               |
+| Retry, random source passed in | `domain/retry-policy.ts`, `domain/provider-requests.ts`                         | Only a failure that may pass is tried again, after a wait the random source of a test can fix, and a timeout is not tried again                                      |
+| Estimate from configuration    | `domain/ai-pricing.ts`                                                          | Cost is tokens times the prices in settings, in whole 1/10,000 USD, with no price table in code that could go stale                                                  |
+| Recorder that never throws     | `ai-usage.tracker.ts`, `ai-usage-record.repository.ts`, `ai-refusal.auditor.ts` | A call that worked does not fail because a cost row could not be saved, and a refusal is audited on its own, outside any business transaction                        |
+| An import allow-list as test   | `ai-imports.test.ts`                                                            | The module may reach only the files it lists, and only `providers/` may import the SDK, so a new reach fails until a person decides it is read-only                  |
 
 ## Seven roles: a parallel change (#335)
 

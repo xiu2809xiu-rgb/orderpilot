@@ -73,3 +73,9 @@
   outline: 2px solid var(--ring);
   outline-offset: 2px;
 }
+
+/* A strip of tabs that is a page's own nav (the workflow pages) belongs to
+   what it leads to: 16 px above it in a page stack, as a Tabs strip is. */
+.dx-page > .tabs-list {
+  margin-bottom: calc(var(--space-2) - var(--dx-stack));
+}

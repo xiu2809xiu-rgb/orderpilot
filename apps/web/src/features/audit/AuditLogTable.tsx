@@ -31,7 +31,7 @@ export function AuditLogTable() {
           : "ready";
 
   return (
-    <div className="space-y-s2">
+    <div className="space-y-s1">
       <p className="text-sm text-muted-foreground">{t("filters.searchHint")}</p>
       {problem ? (
         <p role="alert" className="text-sm text-destructive">
