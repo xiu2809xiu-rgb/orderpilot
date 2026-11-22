@@ -37,7 +37,7 @@ export default function OrderStepsPage() {
 
   if (query.error instanceof ApiError && query.error.status === 404) {
     return (
-      <div className="dx-sheet flex flex-col gap-s4">
+      <div className="dx-sheet dx-page">
         <BackToInbox />
         <StatePanel
           icon={SearchX}
@@ -49,7 +49,7 @@ export default function OrderStepsPage() {
   }
 
   return (
-    <div className="dx-sheet flex flex-col gap-s4">
+    <div className="dx-sheet dx-page">
       <BackToInbox />
       <PageHeader
         title={t("order.heading", { orderNo })}
