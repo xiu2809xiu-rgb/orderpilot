@@ -16,7 +16,7 @@ Story [#364](https://github.com/xiu2809xiu-rgb/orderpilot/issues/364), [ADR 0063
 | `my-tasks-support-1366-light.jpg`                            | My tasks: head 24 px from the tabs, strip 16 px from its list                                                   |
 | `exceptions-support-1366-light.jpg`                          | Exceptions: the applied filter 8 px over its table                                                              |
 | `customer-detail-support-1366-light.jpg`                     | A customer: head to facts 40 px to 24 px, facts labels in the faint tier                                        |
-| `insights-management-1366-light.jpg`                         | Insights: tile titles in ink, 24 px padding and gaps, the fifth tile spans two columns                          |
+| `insights-management-1366-light.jpg`                         | Insights: tile titles in ink, 24 px padding and gaps, five tiles of one width                                   |
 | `settings-account-support-1366-light.jpg`                    | Settings, Account: the same head gap, cards 24 px padded                                                        |
 | `governance-users-1366-light.jpg`                            | Governance, Users: tab strip 16 px from its panel, the table card 24 px padded                                  |
 | `audit-auditor-1366-light.jpg`                               | The audit log: the search hint 8 px over its toolbar                                                            |

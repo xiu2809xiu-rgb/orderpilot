@@ -74,7 +74,7 @@ One set of levels and one rhythm, set in the tokens and the shared parts, so tha
 
 The faint tier is for text on a card or a panel only. On the bare ground it measures 2.6:1 in light and 3.5:1 in dark, below 4.5:1, so a page head, the date line and a hint that sits on the ground stay in the body colour. `tokens.test.ts` measures every faint pair on `--card`, `--panel-strong`, `--popover` and `--secondary`, and the body colour on the ground.
 
-The rhythm is four tokens, all multiples of 8 px, declared in `tokens.css`.
+The rhythm is four tokens, all multiples of 8 px, declared in `tokens.css`. A fifth, `--dx-measure` (72 characters, class `.dx-measure`), is the longest line of prose or small print.
 
 | Token           | Value | Where it applies                                                                                             |
 | --------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
@@ -83,7 +83,7 @@ The rhythm is four tokens, all multiples of 8 px, declared in `tokens.css`.
 | `--dx-stack`    | 32 px | Between the major blocks of a page: sections, stacked cards, the list group and what follows it              |
 | `--dx-grid-gap` | 24 px | Between cards side by side and inside a grid of cards: Home's pair, Insights' grid, the order page's top row |
 
-`.dx-page` is the one page stack: a flex column with `gap: var(--dx-stack)`. A page root carries `dx-sheet dx-page` (72 rem, for a page that reads or a record) or `dx-sheet-wide dx-page` (100 rem, for a page of tables and lists) instead of its own `space-y-*` or `gap-*`. A head inside the stack pulls itself 8 px back, so its space to the first block is the head gap and not the stack. Inside a card, groups are 24 px apart, a block title is 8 px over its items, and a tile that sits in a card has a 12 px corner (`--radius-control`) against the card's 16 px.
+`.dx-page` is the one page stack: a flex column with `gap: var(--dx-stack)`. A page root carries `dx-sheet dx-page` (72 rem, for a page that reads or a record) or `dx-sheet-wide dx-page` (100 rem, for a page of tables and lists) instead of its own `space-y-*` or `gap-*`. A head inside the stack pulls itself 8 px back, so its space to the first block is the head gap and not the stack; a skeleton head (`.dx-skel-head`) does the same, and a back link above a head (`.dx-back`) sits 8 px over it, so a page and its skeleton do not move when the page arrives. Inside a card, groups are 24 px apart, a block title is 8 px over its items, and a tile that sits in a card has a 12 px corner (`--radius-control`) against the card's 16 px.
 
 | Thing                                     | Value                                                            |
 | ----------------------------------------- | ---------------------------------------------------------------- |
