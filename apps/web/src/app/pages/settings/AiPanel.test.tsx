@@ -75,7 +75,31 @@ describe("the AI assistant section", () => {
     expect(await screen.findByText("someone-new")).toBeInTheDocument();
   });
 
-  it("shows what the AI may see, in every state of the status", async () => {
+  it("promises synthetic data only when the mock is in use", async () => {
+    status(MOCK);
+    renderSettings(<AiPanel />);
+    expect(
+      await screen.findByText(
+        "Synthetic demo data only. No real customer or Spectra document is sent to an AI service.",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText("The server's data policy decides what may be sent."),
+    ).toBeNull();
+  });
+
+  it("leaves the synthetic-data promise out for a live provider and says who decides", async () => {
+    status(GEMINI);
+    renderSettings(<AiPanel />);
+    expect(
+      await screen.findByText(
+        "The server's data policy decides what may be sent.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Synthetic demo data only/)).toBeNull();
+  });
+
+  it("makes no promise about the data when the status failed", async () => {
     server.use(
       http.get(STATUS, () =>
         HttpResponse.json(errorBody("INTERNAL_ERROR", "trace-ai-0"), {
@@ -86,9 +110,10 @@ describe("the AI assistant section", () => {
     renderSettings(<AiPanel />);
     expect(
       await screen.findByText(
-        "Synthetic demo data only. No real customer or Spectra document is sent to an AI service.",
+        "The server's data policy decides what may be sent.",
       ),
     ).toBeInTheDocument();
+    expect(screen.queryByText(/Synthetic demo data only/)).toBeNull();
   });
 
   it("shows the trace id of a failed status, and asks again on Try again", async () => {

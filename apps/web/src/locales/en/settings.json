@@ -183,7 +183,8 @@
     },
     "sees": {
       "label": "What it can see",
-      "description": "Synthetic demo data only. No real customer or Spectra document is sent to an AI service."
+      "description": "Synthetic demo data only. No real customer or Spectra document is sent to an AI service.",
+      "descriptionLive": "The server's data policy decides what may be sent."
     },
     "probe": {
       "label": "Test the connection",

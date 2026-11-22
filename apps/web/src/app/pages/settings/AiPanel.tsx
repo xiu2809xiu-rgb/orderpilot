@@ -59,10 +59,18 @@ export function AiPanel() {
             />
           </li>
         )}
-        <SettingRow
-          label={t("ai.sees.label")}
-          description={t("ai.sees.description")}
-        />
+        {status.isPending ? null : (
+          // The synthetic-data promise is true only of the mock. For a live
+          // provider the page cannot read the server's policy, so it says who decides.
+          <SettingRow
+            label={t("ai.sees.label")}
+            description={
+              current?.mock
+                ? t("ai.sees.description")
+                : t("ai.sees.descriptionLive")
+            }
+          />
+        )}
         {canProbe ? <AiProbeRow /> : null}
       </SettingList>
       {canProbe ? (
