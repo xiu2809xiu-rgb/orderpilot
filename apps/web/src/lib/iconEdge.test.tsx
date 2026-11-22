@@ -90,4 +90,25 @@ describe("the Button's data-icon-edge", () => {
       "end",
     );
   });
+
+  it("keeps the base padding when the component beside the label draws no svg", () => {
+    function Count() {
+      return <span>3</span>;
+    }
+    render(
+      <Button>
+        <Count />
+        Records
+      </Button>,
+    );
+    const button = screen.getByRole("button", { name: "3Records" });
+    // iconEdge cannot tell a component that draws an svg from one that does
+    // not, so the rules themselves must apply only with a direct svg child.
+    expect(button.querySelector(":scope > svg")).toBeNull();
+    const edgeClasses = button.className
+      .split(" ")
+      .filter((c) => c.includes("data-[icon-edge"));
+    expect(edgeClasses.length).toBeGreaterThan(0);
+    for (const c of edgeClasses) expect(c.startsWith("has-[>svg]:")).toBe(true);
+  });
 });

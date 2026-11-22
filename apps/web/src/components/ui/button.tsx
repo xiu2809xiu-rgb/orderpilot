@@ -14,14 +14,16 @@ import { Slot } from "radix-ui";
  * button keeps its height and its width. `--optical-icon-end` and
  * `--optical-icon-start` are in styles/tokens.css, and `data-icon-edge` is
  * set by `iconEdge` (lib/iconEdge.ts). The base padding of each size is the
- * one its has-[>svg] class sets.
+ * one its has-[>svg] class sets, so every rule here starts with has-[>svg]:
+ * too: a component that draws no svg (a count, a spinner) next to a label
+ * keeps the base padding instead of losing about 4 px a side.
  */
 const ICON_EDGE = {
   default:
-    "data-[icon-edge=end]:ps-[calc(--spacing(3)+var(--optical-icon-end))] data-[icon-edge=end]:pe-[calc(--spacing(3)-var(--optical-icon-end))] data-[icon-edge=start]:ps-[calc(--spacing(3)-var(--optical-icon-start))] data-[icon-edge=start]:pe-[calc(--spacing(3)+var(--optical-icon-start))]",
-  xs: "data-[icon-edge=end]:ps-[calc(--spacing(1.5)+var(--optical-icon-end))] data-[icon-edge=end]:pe-[calc(--spacing(1.5)-var(--optical-icon-end))] data-[icon-edge=start]:ps-[calc(--spacing(1.5)-var(--optical-icon-start))] data-[icon-edge=start]:pe-[calc(--spacing(1.5)+var(--optical-icon-start))]",
-  sm: "data-[icon-edge=end]:ps-[calc(--spacing(2.5)+var(--optical-icon-end))] data-[icon-edge=end]:pe-[calc(--spacing(2.5)-var(--optical-icon-end))] data-[icon-edge=start]:ps-[calc(--spacing(2.5)-var(--optical-icon-start))] data-[icon-edge=start]:pe-[calc(--spacing(2.5)+var(--optical-icon-start))]",
-  lg: "data-[icon-edge=end]:ps-[calc(--spacing(4)+var(--optical-icon-end))] data-[icon-edge=end]:pe-[calc(--spacing(4)-var(--optical-icon-end))] data-[icon-edge=start]:ps-[calc(--spacing(4)-var(--optical-icon-start))] data-[icon-edge=start]:pe-[calc(--spacing(4)+var(--optical-icon-start))]",
+    "has-[>svg]:data-[icon-edge=end]:ps-[calc(--spacing(3)+var(--optical-icon-end))] has-[>svg]:data-[icon-edge=end]:pe-[calc(--spacing(3)-var(--optical-icon-end))] has-[>svg]:data-[icon-edge=start]:ps-[calc(--spacing(3)-var(--optical-icon-start))] has-[>svg]:data-[icon-edge=start]:pe-[calc(--spacing(3)+var(--optical-icon-start))]",
+  xs: "has-[>svg]:data-[icon-edge=end]:ps-[calc(--spacing(1.5)+var(--optical-icon-end))] has-[>svg]:data-[icon-edge=end]:pe-[calc(--spacing(1.5)-var(--optical-icon-end))] has-[>svg]:data-[icon-edge=start]:ps-[calc(--spacing(1.5)-var(--optical-icon-start))] has-[>svg]:data-[icon-edge=start]:pe-[calc(--spacing(1.5)+var(--optical-icon-start))]",
+  sm: "has-[>svg]:data-[icon-edge=end]:ps-[calc(--spacing(2.5)+var(--optical-icon-end))] has-[>svg]:data-[icon-edge=end]:pe-[calc(--spacing(2.5)-var(--optical-icon-end))] has-[>svg]:data-[icon-edge=start]:ps-[calc(--spacing(2.5)-var(--optical-icon-start))] has-[>svg]:data-[icon-edge=start]:pe-[calc(--spacing(2.5)+var(--optical-icon-start))]",
+  lg: "has-[>svg]:data-[icon-edge=end]:ps-[calc(--spacing(4)+var(--optical-icon-end))] has-[>svg]:data-[icon-edge=end]:pe-[calc(--spacing(4)-var(--optical-icon-end))] has-[>svg]:data-[icon-edge=start]:ps-[calc(--spacing(4)-var(--optical-icon-start))] has-[>svg]:data-[icon-edge=start]:pe-[calc(--spacing(4)+var(--optical-icon-start))]",
 } as const;
 
 const buttonVariants = cva(
