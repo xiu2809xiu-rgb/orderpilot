@@ -1,6 +1,6 @@
 ### Area 4: AI usage, the clickstream and /metrics.
 ### Sign in first (requests/auth.http), then paste the op_csrf cookie value below.
-### AI usage needs aiUsage.read (System admin, Management and Auditor hold it).
+### AI usage needs aiUsage.read (the System admin and the Management approver hold it; Management and Auditor still do until they retire).
 @baseUrl = http://localhost:3000
 @csrf = paste the op_csrf cookie value here after signing in
 @metricsToken = paste METRICS_TOKEN from your .env here

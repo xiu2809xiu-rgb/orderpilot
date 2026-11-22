@@ -37,7 +37,7 @@ const ROLES_SEEN = [
   "FINANCE",
   "SUPPORT",
   "WAREHOUSE",
-  "MANAGEMENT",
+  "PRODUCT_MANAGER",
 ];
 
 const MOCK = { mock: true as const };

@@ -9,7 +9,7 @@
 ### The caller's own task inbox (a role with an inbox). Filter with ?overdue=true, ?priority=high or ?kind=CONFIRM_PAYMENT.
 GET {{baseUrl}}/api/v1/workflows/tasks?page=1&pageSize=25
 
-### Another role's inbox. Needs workflows.inboxes.any (Management and Auditor).
+### Another role's inbox. Needs workflows.inboxes.any (the Management approver; Management and Auditor still hold it until they retire).
 GET {{baseUrl}}/api/v1/workflows/inboxes/WAREHOUSE/tasks
 
 ### Reminders, for the caller's role or another role's.
