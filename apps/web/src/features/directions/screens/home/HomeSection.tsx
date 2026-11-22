@@ -42,7 +42,7 @@ export function HomeSection({
         className="flex min-w-0 flex-1 flex-col rounded-[inherit]"
       >
         <header className="dx-section-head">
-          <h2 id={headingId} className="dx-section-title">
+          <h2 id={headingId} className="dx-section-title text-trim-start">
             {title}
           </h2>
         </header>

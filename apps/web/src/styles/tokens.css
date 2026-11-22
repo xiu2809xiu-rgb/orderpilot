@@ -117,6 +117,28 @@
   --dx-card-pad: 1.25rem;
   --dx-head-rule: 0 solid transparent;
   --dx-head-pb: 0rem;
+  /* Optical alignment (styles/optical.css, docs/design/design-system.md).
+     --optical-keep: 0 lets a card be about 5.6 px shorter and keeps the gap
+     under a title or label as it was; 1 gives the trimmed space back under the
+     text, so a card stays as tall as before but its title sits about 6.3 px
+     further from the body (measured in Edge on 22 Nov). 0 was chosen from the
+     before and after pictures: at 1 the title drifts away from what it heads.
+     --optical-icon-end
+     and --optical-icon-start: how far a button's content is moved, in px,
+     because an arrow after the label and an icon before it leave more empty
+     space on their own side (measured on Geist and Lucide 1.61.0, for a 16 px
+     ArrowRight and Upload; xs is off by about 0.3 px, a leading Plus and a
+     trailing ArrowUpRight by about 0.5 px).
+     --optical-unit: one unit of Lucide's 24-unit box, for nudging an icon. */
+  --optical-keep: 0;
+  /* Space above the capitals in a line box, less 0.5lh: Geist's half-leading is
+     0.5lh - 0.65em (ascent 1005 + descent 295 units), and the ascent sits 295
+     units above the cap height (1005 - 710), so 0.5lh - 0.65em + 0.295em is
+     0.5lh - 0.355em. Kept here so the two rules that use it agree. */
+  --optical-cap-gap: 0.355em;
+  --optical-icon-end: 1.15px;
+  --optical-icon-start: 0.7px;
+  --optical-unit: calc(100% / 24);
   --dx-title-size: var(--type-28);
   --dx-title-weight: 600;
   --dx-title-tracking: -0.02em;
@@ -229,4 +251,24 @@
   --dx-bar-btn-border: rgb(255 255 255 / 0.2);
   --dx-bar-btn-bg: rgb(255 255 255 / 0.06);
   --dx-bar-btn-hover: rgb(46 230 214 / 0.16);
+}
+
+/* The theme tiles on the Settings page draw both themes at once, whatever
+   theme the page itself is in, so these are the two schemes' main values
+   written out once more. They are used for those drawings only. */
+.pv-light {
+  --pv-ground: #f2f9fa;
+  --pv-side: #ffffff;
+  --pv-card: #ffffff;
+  --pv-line: rgb(9 34 57 / 0.16);
+  --pv-text: #0b2239;
+  --pv-accent: #0e7c86;
+}
+.pv-dark {
+  --pv-ground: #06162b;
+  --pv-side: #0a1c30;
+  --pv-card: #0f2a3f;
+  --pv-line: rgb(255 255 255 / 0.18);
+  --pv-text: #f1fbfb;
+  --pv-accent: #2ee6d6;
 }

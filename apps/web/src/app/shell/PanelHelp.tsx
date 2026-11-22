@@ -5,6 +5,8 @@ import { prefetch, useDeferredModule, whenIdle } from "@/lib/deferred";
 import { cn } from "@/lib/utils";
 import { helpWordsModule } from "./helpWordsModule";
 import { Popover, PopoverContent, PopoverTrigger } from "./overlays/popover";
+import { SHORTCUTS } from "./shortcutRegistry";
+import { ShortcutKeys } from "./ShortcutKeys";
 import { useSparkPanel } from "./sparkPanel";
 
 /** Help: the keys that work on every page, in a small panel beside the row. */
@@ -21,15 +23,10 @@ export function PanelHelp({ collapsed }: { collapsed: boolean }) {
       }),
     [],
   );
-  const keys: { keys: string; does: string }[] = [
-    { keys: t("palette.keys"), does: t("shell.help.palette") },
-    { keys: t("shell.help.keysSearch"), does: t("shell.help.search") },
-    { keys: t("shell.help.keysNew"), does: t("shell.help.new") },
-    ...(spark.available
-      ? [{ keys: t("shell.help.keysSpark"), does: t("shell.help.spark") }]
-      : []),
-    { keys: t("shell.help.keysClose"), does: t("shell.help.close") },
-  ];
+  // The same list as Settings draws, cut to the keys worth a glance.
+  const keys = SHORTCUTS.filter(
+    (entry) => entry.quick && (entry.needs !== "spark" || spark.available),
+  );
   return (
     <Popover>
       <PopoverTrigger className="dx-entry">
@@ -47,12 +44,12 @@ export function PanelHelp({ collapsed }: { collapsed: boolean }) {
       >
         <h2 className="fs-14 mb-2 font-semibold">{t("shell.help.title")}</h2>
         <dl className="fs-14 grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-2">
-          {keys.map((row) => (
-            <div key={row.does} className="contents">
+          {keys.map((entry) => (
+            <div key={entry.id} className="contents">
               <dt>
-                <kbd className="dx-kbd">{row.keys}</kbd>
+                <ShortcutKeys entry={entry} />
               </dt>
-              <dd>{row.does}</dd>
+              <dd>{t(`shortcuts.${entry.id}`)}</dd>
             </div>
           ))}
         </dl>

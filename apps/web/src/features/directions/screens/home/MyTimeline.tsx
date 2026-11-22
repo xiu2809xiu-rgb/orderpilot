@@ -41,7 +41,7 @@ export function MyTimeline({
   return (
     <HomeSection title={t("timeline.title")} intro={t("timeline.intro")} work>
       {home.list.isError ? (
-        // Needs you beside it says what failed and offers the retry; saying it twice helps no one.
+        // Needs you, below, says what failed and offers the retry; saying it twice helps no one.
         <p className="fs-14 max-w-prose text-muted-foreground">
           {t("timeline.failed")}
         </p>

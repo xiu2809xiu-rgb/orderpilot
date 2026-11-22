@@ -1,0 +1,109 @@
+/* Optical alignment: things placed so they look aligned to the eye, not only
+   to the grid. Text and icons are not drawn edge to edge in their boxes, so
+   boxes that line up can still look off. Each rule says what it corrects and
+   the measured reason; the numbers are Geist's (units per em 1000, ascender
+   1005, descender 295, cap height 710) and Lucide 1.61.0's, and the whole
+   story is in docs/design/design-system.md.
+
+   Plain rules, no layer, like the rest of the surfaces: they must beat
+   Tailwind's utilities without !important. Every rule is written so that a
+   browser which ignores it looks as it did before. */
+
+/* TEXT: trim the space above the capitals.
+   A line box is taller than the letters in it: above the capitals sits
+   (line height - cap height) / 2, which is 0.5lh - 0.355em, more than the
+   letters need: 6.1 px above a 16 px title, 5.1 px above a 14 px label. On a card that makes the
+   first line sit 4 to 5 px further from the top edge than from the left edge.
+   `text-box` trims it (Chrome and Edge 133 and later, Safari 18.2; Firefox
+   ignores it and keeps today's look, which is why the whole rule sits in
+   @supports). Only the start is trimmed: the end of a line carries the
+   descenders of g, p, q and y, and a gradient-clipped title would lose their
+   fill if the box ended on the baseline.
+
+   The trim shortens the box. --optical-keep (tokens.css) decides what happens
+   next. It is 0: nothing is given back, the body moves up with the ink, the
+   gap under a card title stays as it was, and a card head is 5.6 px shorter
+   (measured in Edge on 22 Nov). At 1 the same amount goes back as padding
+   under the text, 0.5lh - var(--optical-cap-gap), so a card keeps its height
+   (within 0.7 px, measured) but its title sits 6.3 px further from the body.
+
+   Not trimmed: a SectionCard with buttons beside its title, the order page's
+   journey card, the order facts and the status labels.
+
+   Not for a control with a fixed height and centred content (Button, Input,
+   a badge): Geist's ascent minus its cap height equals its descent, so a line
+   box is already centred on the capitals, whatever the line height. Trimming
+   them changes nothing and would shrink a shell whose height comes from its
+   line height. */
+@supports (text-box: trim-start cap alphabetic) {
+  .text-trim-start {
+    text-box: trim-start cap alphabetic;
+    padding-block-end: calc(
+      (0.5lh - var(--optical-cap-gap)) * var(--optical-keep, 1)
+    );
+  }
+
+  /* An icon that sat on the first line of trimmed text (it had mt-0.5, which
+     centres a 16 px icon on a 20 px line) moves up with the letters: the
+     margin it had, less the trim. Without it the icon would end up 5 px below
+     the capitals it belongs to. */
+  .icon-after-trim {
+    margin-top: calc(0.125rem - (0.5lh - var(--optical-cap-gap)));
+  }
+}
+
+/* HEADINGS: start where the content below starts.
+   A letter is drawn inside its box with some space on its left, and at 28 px
+   that space shows: N, M, R and D start 2.2 px in, S 1.5 px, G and O 1.2 px,
+   A 0.5 px, so a title looks indented from the card edge below it. The space
+   differs by letter, so no one offset fits (half the titles start with a
+   stem letter, the rest do not): lib/opticalEdge.ts holds the measured space
+   of every capital and digit and each heading sets --optical-inset to its own
+   first letter's, in em. The margin moves the box, not the letters, so the
+   gradient that fills a title is unaffected. The end margin gives the space
+   back, so what stands beside the heading (a count) does not move. */
+.optical-start {
+  margin-inline-start: var(--optical-inset, 0em);
+  margin-inline-end: calc(var(--optical-inset, 0em) * -1);
+}
+
+/* ICONS: nudge the ones that lean.
+   Lucide draws every icon inside a 24-unit box and centres its bounding box,
+   but the weight of a shape is not at the middle of its box. A chevron's mass
+   is on its open side (1.0 unit from the centre, 0.67 px at 16 px, 0.58 px at
+   14 px), so it looks pushed away from its tip. A triangle, an arrow tray and
+   a padlock are heavy in the lower half (1.5 to 2.5 units), and look low
+   beside a label. Each is moved by the distance it leans: a chevron by the
+   whole 1 unit, the heavy-bottom shapes by 1 unit, half of the lean, so none
+   is over-corrected. transform-box is set because a percentage in translate
+   would otherwise be read against the 24-unit view box and not the drawn
+   size. The rules are keyed on Lucide's own per-icon class
+   (`lucide-<name>`), and optical.test.tsx checks that each class still
+   exists in the pinned lucide-react.
+
+   Icons that turn (a chevron that flips when a section opens) are left out
+   by name: `translate` is applied outside `rotate`, so a nudge meant for a
+   chevron pointing down would push it the wrong way once it points up. The
+   vertical chevrons are only corrected inside a select, where they do not
+   turn. Arrows are left alone: their bounding box is centred, and their
+   heavy head is what makes them read as arrows. */
+.lucide-chevron-right:not([class*="rotate"]),
+.lucide-play {
+  transform-box: border-box;
+  translate: var(--optical-unit) 0;
+}
+.lucide-chevron-left:not([class*="rotate"]) {
+  transform-box: border-box;
+  translate: calc(var(--optical-unit) * -1) 0;
+}
+[data-slot="select-trigger"] .lucide-chevron-down {
+  transform-box: border-box;
+  translate: 0 var(--optical-unit);
+}
+.lucide-triangle-alert,
+.lucide-upload,
+.lucide-download,
+.lucide-lock {
+  transform-box: border-box;
+  translate: 0 calc(var(--optical-unit) * -1);
+}

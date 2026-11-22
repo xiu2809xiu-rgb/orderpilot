@@ -39,21 +39,23 @@ const CELL = "dx-grid-cell flex min-w-0 flex-col gap-6";
 /**
  * Home, for the signed-in role, in the order of the person's day. A role with
  * an inbox has the header (the greeting, one sentence saying how much waits,
- * and the buttons), then "Needs you" across the whole page, because the next
- * act is the reason to open Home; then its timeline beside its numbers, and
- * the measures and the flows where it may read them. A role that may decide
- * approvals and read the tracker has the overdue orders directly below
- * "Needs you", across the page. A role without an inbox
- * has the one list that is its own where the tasks would be, with the quick
- * actions the side panel does not already hold beside it when there are any
- * (a role that manages settings has the health of its services instead,
- * because its menu already holds its places, and below them the refused
- * actions when it may read the audit trail). Which list is whose is decided
- * by permission (`homeAccess.ts`). A section that has nothing for the role
- * is not drawn. Done today is kept in the browser per person (`useDoneToday`),
- * because the real tasks API lists only open tasks: a task finished from this
- * screen or from an order's page is noted with its time, and an Undo takes it
- * out again. HomeScreen starts this component again for the next person.
+ * and the buttons), then the overview: its timeline beside its numbers, and
+ * the orders in each step where it may read the tracker. "Needs you" comes
+ * after the overview, across the whole page, and shows five tasks with a link
+ * to the rest. A role that may decide approvals and read the tracker has the
+ * overdue orders directly below "Needs you", across the page. The measures,
+ * the deeper figures, come last, where the role may read them. A role without
+ * an inbox has the one list that is its own where the tasks would be, with
+ * the quick actions the side panel does not already hold beside it when there
+ * are any (a role that manages settings has the health of its services
+ * instead, because its menu already holds its places, and below them the
+ * refused actions when it may read the audit trail). Which list is whose is
+ * decided by permission (`homeAccess.ts`). A section that has nothing for the
+ * role is not drawn. Done today is kept in the browser per person
+ * (`useDoneToday`), because the real tasks API lists only open tasks: a task
+ * finished from this screen or from an order's page is noted with its time,
+ * and an Undo takes it out again. HomeScreen starts this component again for
+ * the next person.
  */
 export function HomeBody() {
   const { t } = useTranslation("directions-home");
@@ -88,10 +90,6 @@ export function HomeBody() {
       />
       {access.block === "tasks" ? (
         <div className="dx-grid flex flex-col gap-6">
-          <NeedsYou home={home} completion={completion} focus={focus} />
-          {access.extra ? (
-            <RoleBlock block={access.extra} queries={queries} />
-          ) : null}
           <div className={PAIR}>
             <div className={CELL}>
               <MyTimeline home={home} done={done} />
@@ -100,8 +98,12 @@ export function HomeBody() {
               <YourNumbers />
             </div>
           </div>
-          <Measures />
           <Flows />
+          <NeedsYou home={home} completion={completion} focus={focus} />
+          {access.extra ? (
+            <RoleBlock block={access.extra} queries={queries} />
+          ) : null}
+          <Measures />
           {shortcuts.length > 0 ? (
             <Shortcuts actions={shortcuts} layout="pills" />
           ) : null}

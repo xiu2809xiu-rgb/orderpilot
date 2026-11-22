@@ -1,0 +1,117 @@
+/* The section list of the Settings page: a column of links beside the card,
+   and on a phone one row of pills that scrolls inside its own box. The
+   current link is marked as the side panel marks its current entry. */
+.sx-nav {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 0.25rem;
+  margin: -0.25rem;
+  scrollbar-width: none;
+}
+.sx-nav::-webkit-scrollbar {
+  display: none;
+}
+.sx-group {
+  display: flex;
+  gap: 0.5rem;
+}
+.sx-group-label {
+  display: none;
+}
+.sx-link {
+  display: inline-flex;
+  min-height: 2.75rem;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.625rem;
+  padding-inline: 0.875rem;
+  border-radius: var(--dx-entry-radius);
+  color: var(--muted-foreground);
+  font-size: var(--type-14);
+  line-height: 1.25rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition:
+    background-color var(--motion-fast) var(--ease-out),
+    color var(--motion-fast) var(--ease-out);
+}
+.sx-link:hover {
+  background: var(--dx-hover-bg);
+  color: var(--foreground);
+}
+.sx-link:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.sx-link[aria-current="page"] {
+  background-color: var(--dx-current-bg);
+  background-image: var(--dx-current-image);
+  color: var(--dx-current-fg);
+  box-shadow: var(--dx-current-shadow);
+}
+/* The pills run past the edge of a phone with no scrollbar, so the end edge
+   fades to say there is more. The end padding is as wide as the fade, and the
+   scroll padding keeps the current pill out of it, so the pill that is shown
+   is never dimmed. Fixed to the box, not to the content. */
+@media (max-width: 47.99rem) {
+  .sx-nav {
+    padding-inline-end: 2.25rem;
+    scroll-padding-inline: 0.25rem 2.25rem;
+    -webkit-mask-image: linear-gradient(
+      to right,
+      #000 calc(100% - 2rem),
+      transparent
+    );
+    mask-image: linear-gradient(to right, #000 calc(100% - 2rem), transparent);
+  }
+  [dir="rtl"] .sx-nav {
+    -webkit-mask-image: linear-gradient(
+      to left,
+      #000 calc(100% - 2rem),
+      transparent
+    );
+    mask-image: linear-gradient(to left, #000 calc(100% - 2rem), transparent);
+  }
+}
+@media (pointer: fine) {
+  .sx-link {
+    min-height: 2.25rem;
+  }
+}
+@media (min-width: 48rem) {
+  .sx-nav {
+    position: sticky;
+    top: 1rem;
+    flex-direction: column;
+    gap: 1.25rem;
+    overflow: visible;
+    padding: 0;
+    margin: 0;
+    align-self: start;
+  }
+  .sx-group {
+    flex-direction: column;
+    gap: 0.125rem;
+  }
+  .sx-group-label {
+    display: block;
+    margin-bottom: 0.25rem;
+    padding-inline: 0.875rem;
+    color: var(--muted-foreground);
+    font-size: var(--type-12);
+    line-height: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .sx-link {
+    display: flex;
+    width: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sx-link {
+    transition: none;
+  }
+}

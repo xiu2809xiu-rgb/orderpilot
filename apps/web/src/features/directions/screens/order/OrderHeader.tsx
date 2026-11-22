@@ -1,5 +1,6 @@
 import type { SalesOrderDetail } from "@orderpilot/shared";
 import type { ReactNode } from "react";
+import { opticalStyle } from "@/lib/opticalEdge";
 import { EntryBadge } from "./EntryBadge";
 import { EntryMeaning } from "./EntryMeaning";
 
@@ -27,7 +28,9 @@ export function OrderHeader({
   return (
     <header className="dx-page-head">
       <div className="od-title-row">
-        <h1 className="dx-title">{orderNo}</h1>
+        <h1 className="dx-title optical-start" style={opticalStyle(orderNo)}>
+          {orderNo}
+        </h1>
         {detail ? <EntryBadge detail={detail} /> : null}
         <span className="od-title-customer fs-14">
           <span className="text-foreground">{customerName}</span>
