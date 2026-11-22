@@ -9,9 +9,9 @@ export function TimelineGroup({
   children: ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-3">
-      <h3 className="fs-14 font-semibold text-foreground">{title}</h3>
-      {children}
+    <div>
+      <h3 className="dx-block-title">{title}</h3>
+      <div className="flex flex-col gap-2">{children}</div>
     </div>
   );
 }

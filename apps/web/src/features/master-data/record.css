@@ -33,7 +33,7 @@
 .rec-fact dt {
   font-size: var(--type-12);
   line-height: 1rem;
-  color: var(--muted-foreground);
+  color: var(--faint-foreground);
 }
 
 .rec-fact dd {

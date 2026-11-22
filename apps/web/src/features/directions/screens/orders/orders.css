@@ -748,7 +748,7 @@
 }
 
 .od-fact-label {
-  color: var(--muted-foreground);
+  color: var(--faint-foreground);
 }
 
 .od-fact-value {

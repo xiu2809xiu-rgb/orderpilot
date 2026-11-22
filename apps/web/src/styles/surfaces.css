@@ -147,8 +147,9 @@
   width: fit-content;
   max-width: 100%;
 }
+/* The date line binds closer to the title than the intro does: it is part of the name. */
 .dx-title-context {
-  margin-top: var(--space-1);
+  margin-top: 0.25rem;
   font-variant-numeric: tabular-nums;
   font-size: var(--type-14);
   line-height: 1.25rem;
