@@ -47,37 +47,46 @@ describe("the home skeleton", () => {
     },
   );
 
-  it("draws the approver's rows in the order of the page: Needs you, the overdue block, then the pair", () => {
+  const MARKS = "[data-block], [data-extra], [data-pair], [data-flows]";
+  const markOf = (node: Element) =>
+    node.hasAttribute("data-block")
+      ? "needs-you"
+      : node.hasAttribute("data-extra")
+        ? "overdue"
+        : node.hasAttribute("data-flows")
+          ? "flows"
+          : "pair";
+
+  it("draws the approver's rows in the order of the page: the pair, the flows, Needs you, then the overdue block", () => {
     useSessionStore.setState({
       status: "active",
       session: sessionFor("APPROVER"),
     });
     const { container } = render(<HomeSkeleton />);
-    const marks = Array.from(
-      container.querySelectorAll("[data-block], [data-extra], [data-pair]"),
-    ).map((node) =>
-      node.hasAttribute("data-block")
-        ? "needs-you"
-        : node.hasAttribute("data-extra")
-          ? "overdue"
-          : "pair",
-    );
-    expect(marks).toEqual(["needs-you", "overdue", "pair"]);
+    const marks = Array.from(container.querySelectorAll(MARKS)).map(markOf);
+    expect(marks).toEqual(["pair", "flows", "needs-you", "overdue"]);
     // Needs you is one full-width block, not a column of a two-column row.
     const needs = container.querySelector("[data-block]");
     expect(needs?.parentElement?.className).not.toContain("grid");
     expect(container.querySelector("[data-pair]")?.children).toHaveLength(2);
   });
 
-  it("draws an inbox role without an added block as Needs you, then the pair", () => {
+  it("draws an inbox role without an added block as the pair, the flows, then Needs you", () => {
     useSessionStore.setState({
       status: "active",
       session: sessionFor("SUPPORT"),
     });
     const { container } = render(<HomeSkeleton />);
-    const marks = Array.from(
-      container.querySelectorAll("[data-block], [data-extra], [data-pair]"),
-    ).map((node) => (node.hasAttribute("data-block") ? "needs-you" : "pair"));
-    expect(marks).toEqual(["needs-you", "pair"]);
+    const marks = Array.from(container.querySelectorAll(MARKS)).map(markOf);
+    expect(marks).toEqual(["pair", "flows", "needs-you"]);
+  });
+
+  it("draws no flows block for a role without an inbox", () => {
+    useSessionStore.setState({
+      status: "active",
+      session: sessionFor("SYSTEM_ADMIN"),
+    });
+    const { container } = render(<HomeSkeleton />);
+    expect(container.querySelector("[data-flows]")).toBeNull();
   });
 });
