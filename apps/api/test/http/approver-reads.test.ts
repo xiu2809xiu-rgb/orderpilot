@@ -1,3 +1,4 @@
+import { syntheticDataset } from "@orderpilot/synthetic-data";
 import {
   ROLES,
   aiUsageReportSchema,
@@ -9,9 +10,19 @@ import {
 } from "@orderpilot/shared";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { taskListResponseSchema } from "../../src/modules/workflows/workflows.schemas.js";
-import { API, call, demoSignIn, type Browser } from "../support/auth.js";
+import {
+  API,
+  auditCount,
+  call,
+  demoSignIn,
+  type Browser,
+} from "../support/auth.js";
 import { resetTestData } from "../support/reset.js";
 import { createTestApp, type TestApp } from "../support/test-app.js";
+
+const PACK = syntheticDataset().tasks.find(
+  (task) => task.kind === "PACK_ORDER" && task.assigneeRole === "WAREHOUSE",
+);
 
 /**
  * ADR 0058 step 4: the management approver takes the four reads Management
@@ -85,7 +96,7 @@ describe("the management approver's reads", () => {
     }
   });
 
-  it("keeps the administrator out of business data, as before", async () => {
+  it("keeps the administrator out of the business-read routes, as before", async () => {
     for (const path of [
       "/exceptions",
       "/insights/kpis",
@@ -93,5 +104,29 @@ describe("the management approver's reads", () => {
     ]) {
       expect((await get("SYSTEM_ADMIN", path)).status, path).toBe(403);
     }
+  });
+
+  // Reading every inbox is not owning one: the guard compares the task's role
+  // with the caller's own role and never looks at workflows.inboxes.any.
+  it("cannot complete or undo another role's task, though it may read every inbox, and audits each refusal", async () => {
+    if (!PACK) throw new Error("No packing task in the dataset");
+    const before = await auditCount(t, "workflows.task.refused");
+    const done = await call(
+      t,
+      as("APPROVER"),
+      "post",
+      `${API}/workflows/tasks/${PACK.id}/complete`,
+      { csrf: true },
+    );
+    expect(done.status).toBe(403);
+    const undone = await call(
+      t,
+      as("APPROVER"),
+      "post",
+      `${API}/workflows/tasks/${PACK.id}/undo`,
+      { csrf: true },
+    );
+    expect(undone.status).toBe(403);
+    expect(await auditCount(t, "workflows.task.refused")).toBe(before + 2);
   });
 });
