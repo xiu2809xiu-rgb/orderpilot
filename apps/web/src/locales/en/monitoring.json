@@ -120,17 +120,14 @@
     "decline": "No thanks"
   },
   "analyticsSettings": {
-    "title": "Analytics",
-    "hint": "OrderPilot can count which screens are used: the screen, your role and the time. Never your name, your email or anything you type. The choice is kept in this browser.",
-    "current": "Current choice",
+    "title": "Usage data",
+    "label": "Help improve OrderPilot",
+    "hint": "OrderPilot counts which screens are opened, with your role and the time. It never records your name, your email or anything you type.",
     "allowed": "Counting is on",
     "declined": "Counting is off",
     "unset": "Not chosen yet, so nothing is counted",
-    "overridden": "Your browser sends Do Not Track or Global Privacy Control, so nothing is counted, whatever is chosen here.",
-    "overriddenYes": "Your saved choice is Allow, but your browser sends Do Not Track or Global Privacy Control, so nothing is counted.",
-    "allow": "Allow",
-    "decline": "Do not allow",
-    "choiceLabel": "Usage analytics in this browser"
+    "blocked": "Your browser asks websites not to track it (Do Not Track or Global Privacy Control), so OrderPilot counts nothing, whatever this switch says.",
+    "footnote": "Saved on this device. Turning it off also discards anything not yet sent."
   },
   "denied": "Your role cannot see monitoring data."
 }
