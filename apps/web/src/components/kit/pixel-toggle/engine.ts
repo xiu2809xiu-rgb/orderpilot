@@ -21,6 +21,7 @@ import { clamp, mix } from "./palette";
 import { createCanvasRenderer } from "./paint2d";
 import { createPixelParticles, type Pointer } from "./particles";
 import { createClick } from "./sound";
+import { madeByPerson } from "./trust";
 import type { Frame, Layout, Renderer } from "./types";
 
 export interface PixelToggleOptions {
@@ -450,7 +451,7 @@ export function mountPixelToggle(
     const fling =
       browser.performance.now() - at <= 120 && Math.abs(velocity) > 0.6;
     const next = completed ? (fling ? velocity > 0 : position >= 0.5) : checked;
-    change(next, completed ? "drag" : "cancel", event.isTrusted);
+    change(next, completed ? "drag" : "cancel", madeByPerson(event));
   }
   listen(control, "pointerup", finishDrag);
   listen(control, "pointercancel", finishDrag);
@@ -460,7 +461,7 @@ export function mountPixelToggle(
   // that follows a drag (detail 1 or more) is dropped.
   listen(control, "click", (event) => {
     if (event.detail && suppressClick) return;
-    change(!checked, "click", event.isTrusted);
+    change(!checked, "click", madeByPerson(event));
   });
 
   const onVisibility = () => {
