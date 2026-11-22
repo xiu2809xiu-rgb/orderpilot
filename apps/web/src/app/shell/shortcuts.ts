@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { runPrimaryAction } from "@/components/common/primaryAction";
+import { matchesShortcut, shortcut } from "./shortcutRegistry";
 
 const TEXT_INPUT_TYPES = new Set([
   "checkbox",
@@ -56,9 +57,9 @@ export function useGlobalShortcuts() {
       if (event.defaultPrevented || event.isComposing || event.repeat) return;
       if (event.ctrlKey || event.metaKey || event.altKey) return;
       if (isTyping(event.target) || dialogIsOpen()) return;
-      if (event.key === "/") {
+      if (matchesShortcut(shortcut("search"), event)) {
         if (focusQuickSearch()) event.preventDefault();
-      } else if (event.key === "n" || event.key === "N") {
+      } else if (matchesShortcut(shortcut("new"), event)) {
         if (runPrimaryAction()) event.preventDefault();
       }
     }

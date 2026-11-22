@@ -100,3 +100,14 @@ export function todayInSingapore(now = new Date()): string {
 export function formatDay(value: string | Date): string {
   return DAY.format(typeof value === "string" ? new Date(value) : value);
 }
+
+const TIME = new Intl.DateTimeFormat("en-SG", {
+  hour: "numeric",
+  minute: "2-digit",
+  timeZone: "Asia/Singapore",
+});
+
+/** "9:15 am" in Singapore time. */
+export function formatTime(value: string | Date | number): string {
+  return TIME.format(typeof value === "string" ? new Date(value) : value);
+}

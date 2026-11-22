@@ -285,10 +285,10 @@ describe("the side panel", () => {
       within(help).getByRole("heading", { name: "Keyboard shortcuts" }),
     ).toBeVisible();
     for (const does of [
-      "Search or jump to a page",
-      "Search the list on the page",
+      "Search or jump to a page, order or record",
+      "Search the list on this page",
       "Start a new record",
-      "Close a panel or a menu",
+      "Close a panel, menu or dialog",
     ]) {
       expect(within(help).getByText(does)).toBeVisible();
     }

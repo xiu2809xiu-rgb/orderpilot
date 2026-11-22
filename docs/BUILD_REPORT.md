@@ -456,6 +456,7 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 | P-76  | Governance and monitoring on the templates            | `feat/template-monitoring`       | Not started                                                                         |
 | P-78  | Room in the entry bundle                              | `perf/entry-bundle-room`         | Merged, [#183](https://github.com/xiu2809xiu-rgb/orderpilot/pull/183)               |
 | #32   | The AI gateway, with a person in the loop             | `feat/area1-ai-gateway`          | This pull request. One gateway, the mock by default, and a destination check        |
+| #349  | The settings page: sections, rows a user needs        | `feat/area1-settings-page`       | This pull request. A list of sections, one at a time, each a card of plain rows     |
 
 ## Prompt 003: the product pass
 
