@@ -24,7 +24,7 @@ const bankDetailRule = (key: string, label: string): MaskingRule => ({
   label,
   classification: "restricted",
   reason: "bankDetails",
-  visibleTo: UNMASKED_READERS,
+  visibleTo: [...UNMASKED_READERS],
   sample: false,
 });
 
@@ -34,7 +34,7 @@ export const AUDIT_MASKING_RULES: readonly MaskingRule[] = [
     label: "Why a request was refused (sample rule)",
     classification: "confidential",
     reason: "policy",
-    visibleTo: UNMASKED_READERS,
+    visibleTo: [...UNMASKED_READERS],
     sample: true,
   },
   // F-5: even masked to the last four, a bank detail is for the unmasked
