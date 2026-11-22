@@ -9,16 +9,21 @@ export function PageHeader({
   title,
   intro,
   actions,
+  showDate = true,
 }: {
   title: string;
   intro?: string;
+  /** Today's date under the title. A screen that is a form rather than a report leaves it out. */
+  showDate?: boolean;
   /** Buttons that belong to the whole screen, to the right of the title. */
   actions?: ReactNode;
 }) {
   return (
     <header className="dx-page-head">
       <h1 className="dx-title">{title}</h1>
-      <p className="dx-title-context">{formatLongDay(new Date())}</p>
+      {showDate ? (
+        <p className="dx-title-context">{formatLongDay(new Date())}</p>
+      ) : null}
       {intro ? (
         <p className="dx-page-intro fs-14 max-w-prose">{intro}</p>
       ) : null}

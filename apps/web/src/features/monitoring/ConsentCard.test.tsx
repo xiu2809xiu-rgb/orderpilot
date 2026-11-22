@@ -121,11 +121,21 @@ describe("the consent card", () => {
   });
 });
 
-describe("the Analytics section in Settings", () => {
+describe("the Usage data section in Settings", () => {
   async function mountSettings() {
     const { default: Card } = await import("./AnalyticsSettingsCard");
     act(() => {
       render(<Card />);
+    });
+  }
+
+  const usage = () =>
+    screen.getByRole("switch", { name: "Help improve OrderPilot" });
+
+  function blockTracking() {
+    Object.defineProperty(navigator, "doNotTrack", {
+      value: "1",
+      configurable: true,
     });
   }
 
@@ -134,54 +144,62 @@ describe("the Analytics section in Settings", () => {
     expect(screen.getByTestId("analytics-current")).toHaveTextContent(
       "Not chosen yet",
     );
-    await userEvent.click(screen.getByRole("radio", { name: "Allow" }));
+    expect(usage()).toHaveAttribute("aria-checked", "false");
+    await userEvent.click(usage());
     expect(screen.getByTestId("analytics-current")).toHaveTextContent(
       "Counting is on",
     );
-    await userEvent.click(screen.getByRole("radio", { name: "Do not allow" }));
+    expect(usage()).toHaveAttribute("aria-checked", "true");
+    expect(localStorage.getItem("op.analytics.consent")).toBe("granted");
+    await userEvent.click(usage());
     expect(screen.getByTestId("analytics-current")).toHaveTextContent(
       "Counting is off",
     );
+    expect(usage()).toHaveAttribute("aria-checked", "false");
     expect(localStorage.getItem("op.analytics.consent")).toBe("denied");
   });
 
-  it("says so when Do Not Track overrides a saved yes", async () => {
-    localStorage.setItem("op.analytics.consent", "granted");
-    Object.defineProperty(navigator, "doNotTrack", {
-      value: "1",
-      configurable: true,
-    });
+  it("is named and described by its row, and counts only after the switch is on", async () => {
     await mountSettings();
-    expect(screen.getByTestId("analytics-current")).toHaveTextContent(
-      "nothing is counted",
-    );
-    expect(screen.getByTestId("analytics-current")).toHaveTextContent(
-      "saved choice is Allow",
-    );
-    const allow = screen.getByRole("radio", { name: "Allow" });
-    expect(allow).toBeDisabled();
-    // The saved choice still shows as chosen, though it is overridden.
-    expect(allow).toHaveAttribute("aria-checked", "true");
+    expect(usage()).toHaveAccessibleDescription(/never records your name/);
+    await userEvent.click(usage());
+    const { tracker } = await import("./tracker");
+    tracker.track("page_view", "/orders");
+    await tracker.flush();
+    expect(send).toHaveBeenCalledTimes(1);
   });
 
-  it("shows the chosen setting as selected, as the theme choice does", async () => {
+  it("says so when Do Not Track overrides a saved yes, and still lets it be turned off", async () => {
+    localStorage.setItem("op.analytics.consent", "granted");
+    blockTracking();
     await mountSettings();
-    const group = screen.getByRole("radiogroup", {
-      name: "Usage analytics in this browser",
-    });
-    const allow = screen.getByRole("radio", { name: "Allow" });
-    const decline = screen.getByRole("radio", { name: "Do not allow" });
-    expect(group).toContainElement(allow);
-    expect(allow).toHaveAttribute("aria-checked", "false");
-    expect(decline).toHaveAttribute("aria-checked", "false");
-    await userEvent.click(decline);
-    expect(decline).toHaveAttribute("aria-checked", "true");
-    expect(allow).toHaveAttribute("aria-checked", "false");
-    // Marked as chosen, not drawn as a button that asks to be pressed.
-    expect(decline.className).toContain("dx-choice");
-    expect(decline.className).not.toContain("bg-primary");
-    await userEvent.click(allow);
-    expect(allow).toHaveAttribute("aria-checked", "true");
-    expect(decline).toHaveAttribute("aria-checked", "false");
+    expect(
+      screen.getByText(/Your browser asks websites not to track it/),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("analytics-current")).toHaveTextContent(
+      "Counting is off",
+    );
+    // The saved choice still shows as chosen, though it is overridden.
+    expect(usage()).toHaveAttribute("aria-checked", "true");
+    expect(usage()).toBeEnabled();
+    await userEvent.click(usage());
+    expect(localStorage.getItem("op.analytics.consent")).toBe("denied");
+  });
+
+  it("cannot be turned on while the browser asks not to be tracked", async () => {
+    blockTracking();
+    await mountSettings();
+    expect(
+      screen.getByText(/Your browser asks websites not to track it/),
+    ).toBeInTheDocument();
+    expect(usage()).toBeDisabled();
+    expect(usage()).toHaveAttribute("aria-checked", "false");
+  });
+
+  it("does not show the blocked note when nothing blocks counting", async () => {
+    await mountSettings();
+    expect(
+      screen.queryByText(/Your browser asks websites not to track it/),
+    ).toBeNull();
   });
 });

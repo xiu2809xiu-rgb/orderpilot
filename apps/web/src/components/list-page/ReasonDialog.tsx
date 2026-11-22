@@ -4,6 +4,7 @@ import {
 } from "@orderpilot/shared";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { matchesShortcut, shortcut } from "@/app/shell/shortcutRegistry";
 import { toast } from "@/components/common/toast";
 import {
   FormShell,
@@ -85,7 +86,7 @@ export function ReasonDialog({
           form={form}
           leaveGuard={false}
           onKeyDown={(event) => {
-            if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+            if (matchesShortcut(shortcut("confirm"), event)) {
               event.preventDefault();
               void confirm();
             }
