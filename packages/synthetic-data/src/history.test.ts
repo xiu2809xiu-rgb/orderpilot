@@ -49,7 +49,10 @@ describe("the 24 months of history", () => {
     const fresh = createSyntheticDataset();
     const started = performance.now();
     const built = salesHistory(fresh);
-    expect(performance.now() - started).toBeLessThan(300);
+    // About 100 ms on a laptop, but CI's two-core runner took 438 ms on 22 Nov
+    // while the other packages' tests ran beside it. The same bound as the
+    // dataset's own build: it catches a build that grows out of hand, not noise.
+    expect(performance.now() - started).toBeLessThan(1_000);
     expect(salesHistory(fresh)).toBe(built);
   });
 
