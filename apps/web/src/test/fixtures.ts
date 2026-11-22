@@ -119,6 +119,28 @@ export function mockApi(initial: Partial<MockApiState> = {}) {
       case "POST /auth/logout":
         state.session = null;
         return Promise.resolve(json(200, { data: { ok: true } }));
+      // Settings reads these two when a page test opens the AI or System health section.
+      case "GET /ai/status":
+        return Promise.resolve(
+          json(200, {
+            data: {
+              provider: "mock",
+              kind: "mock",
+              model: "mock-extractor",
+              mock: true,
+            },
+          }),
+        );
+      case "GET /system/checks/status":
+        return Promise.resolve(
+          json(200, {
+            data: [
+              { name: "database", status: "up", durationMs: 3 },
+              { name: "redis", status: "up", durationMs: 4 },
+              { name: "storage", status: "up", durationMs: 9 },
+            ],
+          }),
+        );
       default:
         return Promise.resolve(json(404, errorBody("NOT_FOUND")));
     }

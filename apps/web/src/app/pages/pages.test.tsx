@@ -137,6 +137,8 @@ describe("settings", () => {
     expect(
       await screen.findByRole("heading", { level: 2, name: "System health" }),
     ).toBeInTheDocument();
+    // The heading alone is drawn while the checks are still loading.
+    expect(await screen.findByText("Everything is working")).toBeVisible();
   });
 
   it("shows who is signed in and what the role can do in words, never as permission codes", async () => {
