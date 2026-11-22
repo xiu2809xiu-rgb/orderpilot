@@ -4,7 +4,7 @@
    lines. */
 .rec-back {
   align-self: flex-start;
-  margin: 0 0 calc(var(--dx-stack) * -1 + var(--space-1)) -0.5rem;
+  margin-left: -0.5rem;
   color: var(--muted-foreground);
 }
 

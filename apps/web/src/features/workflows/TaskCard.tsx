@@ -76,7 +76,7 @@ export function TaskCard({
             ) : null}
           </div>
           <h3 className="text-xl font-semibold">{task.title}</h3>
-          <p className="flex max-w-[80ch] flex-wrap items-baseline gap-x-4 gap-y-1 text-sm text-muted-foreground">
+          <p className="flex dx-measure flex-wrap items-baseline gap-x-4 gap-y-1 text-sm text-muted-foreground">
             {task.orderNo ? (
               <span>
                 {t("task.order")}{" "}
@@ -104,7 +104,7 @@ export function TaskCard({
             <StatusBadge tone="danger">{t("task.overdue")}</StatusBadge>
           ) : null}
         </div>
-        <p className="flex max-w-[80ch] flex-wrap items-baseline gap-x-3 gap-y-1 text-sm text-muted-foreground">
+        <p className="flex dx-measure flex-wrap items-baseline gap-x-3 gap-y-1 text-sm text-muted-foreground">
           {/* An SPR row says what it buys; the task's title would only repeat "approve the SPR". */}
           {task.spr ? (
             <SprLine spr={task.spr} />

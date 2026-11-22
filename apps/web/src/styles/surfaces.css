@@ -53,6 +53,18 @@
 .dx-page > .dx-page-head.ph-head {
   margin-bottom: calc(var(--dx-head-gap) - var(--dx-stack));
 }
+/* The longest line of prose or of small print: about 72 characters. */
+.dx-measure {
+  max-width: var(--dx-measure);
+}
+/* A skeleton's head block is not a .dx-page-head, so it takes the same pull-back. */
+.dx-page > .dx-skel-head {
+  margin-bottom: calc(var(--dx-head-gap) - var(--dx-stack));
+}
+/* A back link above the head: 8 px over it, so the pair reads as one block. */
+.dx-back {
+  margin-bottom: calc(var(--dx-stack) * -1 + var(--space-1));
+}
 /* The gap between cards side by side and inside a grid of cards. */
 .dx-grid-gap {
   gap: var(--dx-grid-gap);

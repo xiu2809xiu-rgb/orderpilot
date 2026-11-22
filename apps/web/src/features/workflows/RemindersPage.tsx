@@ -50,11 +50,11 @@ function ReminderRow({ reminder }: { reminder: WorkflowReminder }) {
         <p className="font-medium">{reminder.message}</p>
         {/* Its own line, so every row reads the same: the task, what it buys, then its dates. */}
         {reminder.spr ? (
-          <p className="flex max-w-[80ch] flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+          <p className="flex dx-measure flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
             <SprLine spr={reminder.spr} />
           </p>
         ) : null}
-        <p className="flex max-w-[80ch] flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+        <p className="flex dx-measure flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
           {/* A due task says so in its message; the other kinds name themselves. */}
           {reminder.kind === "TASK_DUE" ? null : (
             <span>{t(`reminders.kinds.${reminder.kind}`)}</span>

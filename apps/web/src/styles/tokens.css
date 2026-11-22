@@ -121,6 +121,8 @@
   --dx-head-gap: var(--space-3);
   --dx-stack: var(--space-4);
   --dx-grid-gap: var(--space-3);
+  /* The longest line of prose or small print. */
+  --dx-measure: 72ch;
   --dx-head-rule: 0 solid transparent;
   --dx-head-pb: 0rem;
   /* Optical alignment (styles/optical.css, docs/design/design-system.md).

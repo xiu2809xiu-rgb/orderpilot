@@ -65,7 +65,7 @@
 }
 
 .od-status-sentence {
-  max-width: 72ch;
+  max-width: var(--dx-measure);
 }
 
 /* The stage and the team that holds it, side by side. */

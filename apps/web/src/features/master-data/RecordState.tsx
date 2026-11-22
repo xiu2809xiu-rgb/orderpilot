@@ -22,7 +22,7 @@ export function BackToList({ to, label }: { to: string; label: string }) {
       asChild
       variant="ghost"
       size="sm"
-      className="rec-back pointer-coarse:h-11"
+      className="rec-back dx-back pointer-coarse:h-11"
     >
       <Link to={to}>
         <ArrowLeft aria-hidden="true" />

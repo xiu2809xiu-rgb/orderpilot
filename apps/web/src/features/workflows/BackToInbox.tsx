@@ -11,7 +11,7 @@ export function BackToInbox() {
       asChild
       variant="ghost"
       size="sm"
-      className="-mb-6 -ml-2 self-start pointer-coarse:h-11"
+      className="dx-back -ml-2 self-start pointer-coarse:h-11"
     >
       <Link to="/workflows">
         <ArrowLeft aria-hidden="true" />
