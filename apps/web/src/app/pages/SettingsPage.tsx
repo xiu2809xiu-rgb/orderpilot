@@ -40,7 +40,7 @@ export function SettingsPage() {
   const allowed = section.visible(session);
   const Panel = PANELS[section.id];
   return (
-    <div className="max-w-[60rem]">
+    <div className="dx-sheet dx-page">
       <PageHeader title={t("common:settings.title")} showDate={false} />
       <div className="grid gap-s4 md:grid-cols-[13rem_minmax(0,1fr)] md:gap-s6">
         <SettingsNav session={session} current={allowed ? section.id : null} />

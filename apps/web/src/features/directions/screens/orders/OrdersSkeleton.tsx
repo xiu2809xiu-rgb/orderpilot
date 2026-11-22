@@ -4,7 +4,7 @@ import "./orders.css";
 /** The Orders screen's own shape while its chunk loads: the head, the views, the filters and the rows. */
 export function OrdersSkeleton() {
   return (
-    <div className="od-page flex flex-col gap-5" aria-hidden="true">
+    <div className="od-page flex flex-col gap-6" aria-hidden="true">
       <div className="flex flex-col gap-2">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-4 w-64 max-w-full" />

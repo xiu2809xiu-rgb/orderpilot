@@ -53,8 +53,54 @@ The typeface is Geist (Geist Mono for code), self-hosted from the npm package (`
 
 ## Spacing and radii
 
-- **Spacing** is an 8-pt grid: `--space-1` to `--space-8` are 8, 16, 24, 32, 40, 48 and 64 px (there is no `--space-7`), used in layout as the `s1` to `s8` classes. Tailwind's own 4 px scale stays for fine detail inside controls.
+- **Spacing** is an 8-pt grid: `--space-1` to `--space-8` are 8, 16, 24, 32, 40, 48 and 64 px (there is no `--space-7`), used in layout as the `s1` to `s8` classes. Tailwind's own 4 px scale stays for fine detail inside a line of text or a control (a label over its value, a title over its description): 4 px is the one off-grid step allowed there. `tokens.test.ts` keeps every `--space-*` and the four rhythm tokens below on the grid.
 - **Radii:** `--radius` 14 px, `--radius-control` 12 px, `--radius-card` 16 px and `--radius-pill` 999 px. Tailwind's `rounded-sm` to `rounded-xl` derive from `--radius`.
+
+## Hierarchy and rhythm
+
+One set of levels and one rhythm, set in the tokens and the shared parts, so that a page follows them without choosing. The type scale is unchanged (the seven sizes above); only weight, colour and space tell the levels apart. Colour has three tiers: ink (`--foreground`) for what a person reads or acts on, body (`--muted-foreground`) for the sentence that explains, faint (`--faint-foreground`) for small print.
+
+| Level                | Use                                                            | Size and weight                 | Colour      | Class or part                                           |
+| -------------------- | -------------------------------------------------------------- | ------------------------------- | ----------- | ------------------------------------------------------- |
+| L1 Page title        | The h1                                                         | 28 / 600, gradient              | Teal        | `.dx-title` (`PageHeader`, `HomeHeader`, `OrderHeader`) |
+| L1b Page intro       | The line under the title                                       | 14 / 400, 65 characters at most | Body        | `.dx-page-intro`; the date line `.dx-title-context`     |
+| L2 Card title        | A section card's title                                         | 16 / 600                        | Ink         | `.dx-section-title`, `.sc-title`                        |
+| L2b Card description | Under the card title                                           | 14 / 400, 65 characters at most | Body        | `.sc-description`, `.dx-section-intro`                  |
+| L3 Block title       | A heading inside a card: a group of rows, a metric, a step row | 14 / 600                        | Ink         | `.dx-block-title`                                       |
+| L4 Body              | Rows, cells and sentences                                      | 14 / 400, 500 for the lead item | Ink or body | `text-sm`, `fs-14`                                      |
+| L5 Small print       | A date, a code, a hint, a label above a value                  | 12 / 400                        | Faint       | `.dx-meta`                                              |
+| L6 Numbers           | A KPI, a stock figure, an order value                          | 28 or 20 / 600, tabular         | Ink         | `.numeral`, `fs-28`, `fs-20`                            |
+| L7 Control text      | Buttons, tabs, inputs, chips                                   | As the control sets it          | As set      | The control                                             |
+
+The faint tier is for text on a card or a panel only. On the bare ground it measures 2.6:1 in light and 3.5:1 in dark, below 4.5:1, so a page head, the date line and a hint that sits on the ground stay in the body colour. `tokens.test.ts` measures every faint pair on `--card`, `--panel-strong`, `--popover` and `--secondary`, and the body colour on the ground.
+
+The rhythm is four tokens, all multiples of 8 px, declared in `tokens.css`. A fifth, `--dx-measure` (72 characters, class `.dx-measure`), is the longest line of prose or small print.
+
+| Token           | Value | Where it applies                                                                                             |
+| --------------- | ----- | ------------------------------------------------------------------------------------------------------------ |
+| `--dx-card-pad` | 24 px | The padding of every section card, and the order page's status, journey and details cards                    |
+| `--dx-head-gap` | 24 px | From the page head to the first content, on every page                                                       |
+| `--dx-stack`    | 32 px | Between the major blocks of a page: sections, stacked cards, the list group and what follows it              |
+| `--dx-grid-gap` | 24 px | Between cards side by side and inside a grid of cards: Home's pair, Insights' grid, the order page's top row |
+
+`.dx-page` is the one page stack: a flex column with `gap: var(--dx-stack)`. A page root carries `dx-sheet dx-page` (72 rem, for a page that reads or a record) or `dx-sheet-wide dx-page` (100 rem, for a page of tables and lists) instead of its own `space-y-*` or `gap-*`. A head inside the stack pulls itself 8 px back, so its space to the first block is the head gap and not the stack; a skeleton head (`.dx-skel-head`) does the same, and a back link above a head (`.dx-back`) sits 8 px over it, so a page and its skeleton do not move when the page arrives. Inside a card, groups are 24 px apart, a block title is 8 px over its items, and a tile that sits in a card has a 12 px corner (`--radius-control`) against the card's 16 px.
+
+| Thing                                     | Value                                                            |
+| ----------------------------------------- | ---------------------------------------------------------------- |
+| Page gutter (`.dx-main`)                  | 24 px, 16 px on a phone (unchanged: the table fits depend on it) |
+| Title to date line, title to intro        | 4 px, 8 px                                                       |
+| Card head to body                         | 16 px, with the description 4 px under the title                 |
+| Stat tile padding                         | 16 px (a tile is denser than a card)                             |
+| Label over its value in a fact            | 4 px                                                             |
+| Form: label to control, control to hint   | 8 px, 4 px                                                       |
+| Form: row to row, column to column        | 24 px, 16 px                                                     |
+| Dense bar: control to control, row to row | 8 px                                                             |
+| Dense bar to its table                    | 16 px                                                            |
+| Tab strip to its panel                    | 16 px                                                            |
+| Table rows and cells                      | Unchanged: header 36 px, rows 40 px, `px-3 py-2` cells           |
+| Empty and error panel                     | 48 px over 24 px, 8 px between its parts                         |
+
+Tables keep their density. A table is where more space slows the job, so the breathing room goes around it (the bar above, the card padding, the head gap) and not inside it. Control heights and the 44 px touch targets are unchanged. [ADR 0063](../adr/0063-one-hierarchy-and-one-rhythm.md) records the decision.
 
 ## Optical alignment
 
@@ -131,7 +177,7 @@ Every page has the same anatomy: the header, then the filters and actions, then 
 | A form   | The order page       | `components/document-form` (head, sticky action bar, cards, tabs), `components/lines-grid`, `components/form` and the shared control skin |
 
 - **A list** has the gradient title with a count, the labelled filter row with More filters, the applied filters as pills, one glass work card holding the table (40 px rows, a sticky head, tabular figures) and one foot.
-- **A record and a form** have the back link above the head, the title with its status chip, an action bar, and cards 24 px apart.
+- **A record and a form** have the back link above the head (8 px over it), the title with its status chip, an action bar, and cards one stack (32 px) apart.
 - **The shared states** are drawn by `components/common/states.tsx` and `StatePanel`: loading (a skeleton in the page's own shape: home, list, record, form or settings, shown after 140 ms), empty (naming the next step), failed (with a retry and a trace id), partial and permission denied. The not found, forbidden and crash pages use the same anatomy, inside the shell.
 
 ## The settings pattern

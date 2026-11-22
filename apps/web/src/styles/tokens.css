@@ -114,7 +114,15 @@
   --dx-card-border: 1px solid rgb(14 124 134 / 0.28);
   --dx-card-shadow: inset 0 1px 0 #ffffff, 0 8px 28px rgb(14 124 134 / 0.16);
   --dx-card-filter: blur(18px) saturate(140%);
-  --dx-card-pad: 1.25rem;
+  --dx-card-pad: var(--space-3);
+  /* The page rhythm (docs/design/design-system.md). The head binds to its
+     content at 24 px; major blocks stand 32 px apart; cards side by side and
+     inside a card grid are 24 px apart. All on the 8 px grid. */
+  --dx-head-gap: var(--space-3);
+  --dx-stack: var(--space-4);
+  --dx-grid-gap: var(--space-3);
+  /* The longest line of prose or small print. */
+  --dx-measure: 72ch;
   --dx-head-rule: 0 solid transparent;
   --dx-head-pb: 0rem;
   /* Optical alignment (styles/optical.css, docs/design/design-system.md).

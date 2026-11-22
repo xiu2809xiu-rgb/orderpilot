@@ -31,6 +31,44 @@
   max-width: 72rem;
   margin-inline: auto;
 }
+/* The same column for a page of tables and lists, which want the width. */
+.dx-sheet-wide {
+  position: relative;
+  isolation: isolate;
+  max-width: 100rem;
+  margin-inline: auto;
+}
+/* The one stack a page is: its blocks stand --dx-stack apart. A page root
+   carries this class instead of its own space-y or gap, so the rhythm is set in
+   one place. The head's own margin is off here: the stack's gap is the space
+   under it, which --dx-head-gap names for a head that is not in a stack. The
+   doubled class on the selector beats .dx-page-head.ph-head, wherever it loads. */
+.dx-page {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--dx-stack);
+}
+.dx-page > .dx-page-head,
+.dx-page > .dx-page-head.ph-head {
+  margin-bottom: calc(var(--dx-head-gap) - var(--dx-stack));
+}
+/* The longest line of prose or of small print: about 72 characters. */
+.dx-measure {
+  max-width: var(--dx-measure);
+}
+/* A skeleton's head block is not a .dx-page-head, so it takes the same pull-back. */
+.dx-page > .dx-skel-head {
+  margin-bottom: calc(var(--dx-head-gap) - var(--dx-stack));
+}
+/* A back link above the head: 8 px over it, so the pair reads as one block. */
+.dx-back {
+  margin-bottom: calc(var(--dx-stack) * -1 + var(--space-1));
+}
+/* The gap between cards side by side and inside a grid of cards. */
+.dx-grid-gap {
+  gap: var(--dx-grid-gap);
+}
 
 /* A card. A shadcn Card follows the same variables as .dx-card. */
 .dx-card,
@@ -42,6 +80,12 @@
   border-radius: var(--radius-card);
   box-shadow: var(--dx-card-shadow);
   backdrop-filter: var(--dx-card-filter);
+}
+/* A tile that sits inside a card takes the control corner, so the two
+   radii nest and do not clash at the corners. */
+.dx-card .dx-card,
+[data-slot="card"] .dx-card {
+  border-radius: var(--radius-control);
 }
 /* A card that holds a table, a grid or a form is as opaque as the design
    allows: text on it must reach 4.5:1 over the brightest part of the ground,
@@ -79,9 +123,23 @@
   color: var(--muted-foreground);
 }
 
+/* A heading inside a card: a group of rows, a metric, a step. 14 / 600 in ink,
+   24 px under whatever came before it and 8 px over its items. */
+.dx-block-title {
+  margin-top: var(--space-3);
+  margin-bottom: var(--space-1);
+  font-size: var(--type-14);
+  line-height: 1.25rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+.dx-block-title:first-child {
+  margin-top: 0;
+}
+
 /* The title of a screen, and the line of context under it. */
 .dx-page-head {
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--dx-head-gap);
 }
 .dx-title {
   font-size: var(--dx-title-size);
@@ -101,6 +159,7 @@
   width: fit-content;
   max-width: 100%;
 }
+/* The date line binds closer to the title than the intro does: it is part of the name. */
 .dx-title-context {
   margin-top: 0.25rem;
   font-variant-numeric: tabular-nums;
@@ -109,7 +168,7 @@
   color: var(--muted-foreground);
 }
 .dx-page-intro {
-  margin-top: 0.5rem;
+  margin-top: var(--space-1);
 }
 /* The buttons that belong to the whole screen, under its title. */
 .dx-page-actions {

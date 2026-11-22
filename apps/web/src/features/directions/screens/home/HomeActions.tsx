@@ -30,7 +30,7 @@ export function HomeActions() {
   const newOrderLeads = uploads && !mayUpload;
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-2">
         {mayUpload ? (
           <Button
             asChild

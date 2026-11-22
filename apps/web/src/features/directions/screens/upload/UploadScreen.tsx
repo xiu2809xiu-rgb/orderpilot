@@ -57,10 +57,10 @@ export default function UploadScreen() {
   if (!allowed) return <UploadDenied />;
 
   return (
-    <div className="dx-sheet">
+    <div className="dx-sheet dx-page">
       <ReviewLeaveGuard active={stage !== "add" && !finished} />
       <PageHeader title={t("title")} intro={t("intro")} />
-      <p className="fs-14 mb-6 flex items-start gap-2 text-muted-foreground">
+      <p className="fs-14 flex items-start gap-2 text-muted-foreground">
         <Info aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
         {t("preview")}
       </p>
