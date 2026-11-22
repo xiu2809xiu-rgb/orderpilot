@@ -38,6 +38,7 @@ Every feature traces to at least one of the six module requirements. Each row sa
 | Home lists tasks by due time and tells what a button records                    | `apps/web/src/features/directions/screens/home`                                      | `HomeOrder.test.tsx`, `TaskTip.test.tsx`       | #328      | In review   |
 | The Spark orb is on screen at once and visibly moves                            | `apps/web/src/features/directions/spark/orb`                                         | `SparkOrb.test.tsx`, `spark.spec.ts`           | #326      | In review   |
 | The Spark orb's idle movement is clearly visible                                | `orbSeeds.json`, `components/kit/Orb.tsx`, `spark.css`                               | `orbPalette.test.ts`, `Orb.test.tsx`           | #337      | In review   |
+| Home leads with the overview, and Needs you shows five tasks                    | `apps/web/src/features/directions/screens/home`                                      | `HomeLayout.test.tsx`, `HomeInbox.test.tsx`    | #354      | In review   |
 
 ## M2 GRS by design
 
