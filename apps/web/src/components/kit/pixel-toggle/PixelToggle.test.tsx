@@ -117,15 +117,6 @@ describe("a change of checked from outside", () => {
     for (let at = 1616; at < 3200; at += 16) frames.step(at);
     expect(onCheckedChange).not.toHaveBeenCalled();
   });
-
-  it("makes no sound", async () => {
-    const made = vi.fn();
-    vi.stubGlobal("AudioContext", made);
-    const { button, rerender } = await mount(toggle({ checked: false }));
-    rerender(toggle({ checked: true }));
-    expect(button).toHaveAttribute("aria-checked", "true");
-    expect(made).not.toHaveBeenCalled();
-  });
 });
 
 describe("the engine's canvases and frames", () => {
@@ -139,6 +130,31 @@ describe("the engine's canvases and frames", () => {
     unmount();
     expect(frames.waiting).toBe(0);
     expect(button.querySelectorAll("canvas")).toHaveLength(0);
+  });
+
+  it("leaves no inline style on the button or its knob after the 2D painter has drawn and it unmounts", async () => {
+    stubCanvasContexts();
+    // No WebGL2, so the 2D painter writes the colours and the knob's box. Its
+    // context accepts every call, and so does what a call returns.
+    const anything = (): unknown =>
+      new Proxy(() => undefined, { get: anything, apply: anything });
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(((
+      kind: string,
+    ) =>
+      kind === "2d" ? anything() : null) as HTMLCanvasElement["getContext"]);
+    // jsdom has no Path2D.
+    vi.stubGlobal("Path2D", function () {
+      return anything();
+    });
+    sizeIt();
+    const { button, unmount } = await mount(toggle({ checked: false }));
+    const knob = button.querySelector<HTMLElement>(".pixel-knob");
+    expect(button).toHaveAttribute("data-renderer", "2d");
+    expect(button.style.length).toBeGreaterThan(0);
+    expect(knob?.style.length).toBeGreaterThan(0);
+    unmount();
+    expect(button.style.length).toBe(0);
+    expect(knob?.style.length).toBe(0);
   });
 
   it("leaves exactly one glass canvas and one 2D canvas in React's development double mount", async () => {

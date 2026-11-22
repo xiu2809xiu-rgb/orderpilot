@@ -83,4 +83,8 @@ describe("the palette", () => {
       }
     }
   });
+
+  it("sizes the switch from the bar's --bar-ctl, which the sign-in test sets for its corner", () => {
+    expect(css).toContain("var(--bar-ctl");
+  });
 });
