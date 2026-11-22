@@ -1,0 +1,250 @@
+{
+  "nav": {
+    "label": "Settings sections",
+    "groups": {
+      "you": "You",
+      "app": "OrderPilot"
+    },
+    "sections": {
+      "account": "Account",
+      "appearance": "Appearance",
+      "shortcuts": "Keyboard shortcuts",
+      "privacy": "Privacy",
+      "ai": "AI assistant",
+      "controls": "Controls",
+      "health": "System health"
+    },
+    "showing": "Showing {{section}}",
+    "deniedDescription": "Your role does not include this section. A system admin can change what a role may open."
+  },
+  "account": {
+    "profile": "Profile",
+    "role": "Role",
+    "demoTitle": "Demo account",
+    "demoBody": "This is a demo session with synthetic data. Use the Demo role button in the top bar to try another role.",
+    "managedBy": "Your name and email are set by a system admin.",
+    "roleBlurb": {
+      "SYSTEM_ADMIN": "Sets up and checks OrderPilot. Does not approve, post or pay.",
+      "PRODUCT_MANAGER": "Raises stock purchase requests and follows your brands' orders and stock.",
+      "APPROVER": "Approves or rejects requests within your limit.",
+      "SUPPORT": "Confirms documents, keeps orders current, and prepares proforma invoices, invoices and packing lists.",
+      "WAREHOUSE": "Checks goods against the documents, then packs and releases them.",
+      "FINANCE": "Confirms payments, pays vendors, and clears payment holds with a second approver.",
+      "LOGISTICS": "Arranges forwarders and follows shipping dates, AWB or BL, and import permits.",
+      "MANAGEMENT": "Reads the tracker, dashboards and reports.",
+      "AUDITOR": "Reads the audit trail."
+    },
+    "access": {
+      "title": "What you can do",
+      "intro": "Your role is {{role}}. This is what it lets you do in OrderPilot.",
+      "none": "Your role has no access yet. Ask a system admin to give you one.",
+      "footnote": "Your role is set by a system admin. If you need more access, ask them.",
+      "everyRole": "See what every role can do",
+      "groups": {
+        "orders": { "title": "Orders", "noun": "orders" },
+        "documents": { "title": "Documents", "noun": "documents" },
+        "tracking": { "title": "Tracking" },
+        "tasks": { "title": "Tasks and approvals" },
+        "payments": { "title": "Payments" },
+        "sensitive": { "title": "Sensitive data" },
+        "people": { "title": "People", "noun": "users" },
+        "roles": {
+          "title": "Roles and access",
+          "noun": "what each role can do"
+        },
+        "system": { "title": "System and audit" },
+        "other": { "title": "Other" }
+      },
+      "parts": {
+        "orders": {
+          "read": "view",
+          "create": "create",
+          "edit": "edit draft"
+        },
+        "documents": {
+          "read": "view",
+          "upload": "upload"
+        },
+        "tracker": {
+          "read": "follow orders in the tracker"
+        },
+        "exceptions": {
+          "read": "check exceptions"
+        },
+        "workflows": {
+          "read": "see workflows and tasks",
+          "inboxes": {
+            "any": "look at other roles' task inboxes"
+          }
+        },
+        "spr": {
+          "read": "see stock purchase requests"
+        },
+        "insights": {
+          "read": "see the KPIs"
+        },
+        "tasks": {
+          "complete": "complete tasks assigned to you"
+        },
+        "approvals": {
+          "decide": "approve or reject requests within your limit"
+        },
+        "payments": {
+          "confirm": "confirm that a customer has paid",
+          "post": "post a payment"
+        },
+        "masking": {
+          "customerNote": "see the sample customer note"
+        },
+        "users": {
+          "read": "view",
+          "manage": "add|disable"
+        },
+        "roles": {
+          "read": "view",
+          "manage": "change"
+        },
+        "settings": {
+          "manage": "change system settings"
+        },
+        "aiUsage": {
+          "read": "see AI usage and cost"
+        },
+        "audit": {
+          "read": "read the audit log"
+        }
+      }
+    },
+    "session": {
+      "title": "Session",
+      "label": "Sign out of OrderPilot",
+      "description": "You are signed in as {{name}}. Signing out deletes any unsaved drafts on this device.",
+      "button": "Sign out"
+    }
+  },
+  "appearance": {
+    "theme": {
+      "title": "Theme",
+      "intro": "Choose how OrderPilot looks on this device.",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "Match my device"
+    },
+    "footnote": "Saved on this device.",
+    "layout": {
+      "title": "Layout",
+      "menu": {
+        "label": "Side menu",
+        "description": "Automatic shows the compact menu on narrow windows and the full menu on wide ones.",
+        "auto": "Automatic",
+        "full": "Full",
+        "compact": "Compact"
+      },
+      "tables": {
+        "label": "Saved table layouts",
+        "description": "The columns, their order and the views you saved in lists.",
+        "reset": "Reset",
+        "done": "Saved table layouts reset.",
+        "none": "There were no saved table layouts."
+      },
+      "footnote": "Saved on this device. Other computers keep their own."
+    },
+    "region": {
+      "title": "Region",
+      "intro": "Set for everyone at Spectra.",
+      "times": "Times",
+      "timesValue": "Singapore time",
+      "amounts": "Amounts",
+      "amountsValue": "US dollars"
+    }
+  },
+  "shortcuts": {
+    "everywhere": "Everywhere",
+    "lists": "On lists and forms",
+    "footnote": "Letter keys do nothing while you are typing in a field. Shortcuts cannot be changed."
+  },
+  "privacy": {
+    "usage": "Usage data"
+  },
+  "ai": {
+    "title": "AI assistant",
+    "intro": "The AI reads, explains and drafts. A person confirms before anything is saved, sent or paid.",
+    "model": {
+      "label": "Model in use",
+      "mock": "Scripted sample answers. No real model is used.",
+      "real": "Model {{model}}",
+      "loading": "Loading the AI status"
+    },
+    "providers": {
+      "gemini": "Google Gemini",
+      "groq": "Groq",
+      "openai-compatible": "An OpenAI-compatible service",
+      "bedrock": "Amazon Bedrock"
+    },
+    "sees": {
+      "label": "What it can see",
+      "description": "Synthetic demo data only. No real customer or Spectra document is sent to an AI service."
+    },
+    "probe": {
+      "label": "Test the connection",
+      "description": "Sends one fixed sample question and shows how the AI answered. No document is sent. Each test is recorded in the audit log.",
+      "button": "Send a test request",
+      "sending": "Sending",
+      "ok": "The AI answered in {{ms}} ms.",
+      "okTokens": "The AI answered in {{ms}} ms. It read {{input}} tokens and wrote {{output}}.",
+      "error": "The AI did not answer. Reason: {{code}}.",
+      "refused": "The request was refused before it was sent. Reason: {{code}}.",
+      "timeout": "The AI took too long to answer. Reason: {{code}}.",
+      "failed": "The test could not run. Trace id {{traceId}}.",
+      "footnote": "The provider and model are set on the server, not here."
+    }
+  },
+  "controls": {
+    "title": "Controls",
+    "intro": "Pages for running and checking OrderPilot. You see the ones your role may open.",
+    "open": "Open",
+    "openName": "Open {{name}}",
+    "rows": {
+      "people": {
+        "label": "People",
+        "description": "See everyone who has an account. Admins can disable or enable people."
+      },
+      "roles": {
+        "label": "Roles and access",
+        "description": "See what each role can do."
+      },
+      "audit": {
+        "label": "Audit log",
+        "description": "Every sign-in, change and refused action, in order."
+      },
+      "monitoring": {
+        "label": "Monitoring",
+        "description": "How OrderPilot is running, and what the AI costs."
+      }
+    }
+  },
+  "health": {
+    "title": "System health",
+    "loading": "Checking the services",
+    "allUp": "Everything is working",
+    "someDown_one": "{{count}} service is not answering",
+    "someDown_other": "{{count}} services are not answering",
+    "checkedAt": "Last checked at {{time}} Singapore time.",
+    "again": "Check again",
+    "details": "Show details",
+    "up": "Up, {{ms}} ms",
+    "down": "Down",
+    "names": {
+      "database": "Database",
+      "redis": "Cache and job queue",
+      "storage": "Document storage"
+    },
+    "affects": {
+      "title": "What this affects",
+      "database": "Orders and documents cannot be saved or opened.",
+      "redis": "Background jobs, such as reading uploaded documents, are delayed.",
+      "storage": "Uploaded documents cannot be saved or opened."
+    },
+    "footnote": "The reason for a failure is in the server log."
+  }
+}
