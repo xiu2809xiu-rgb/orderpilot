@@ -20,14 +20,12 @@
    descenders of g, p, q and y, and a gradient-clipped title would lose their
    fill if the box ended on the baseline.
 
-   The trim shortens the box, so the same amount goes back as padding under
-   the text, 0.5lh - var(--optical-cap-gap) (the same number, from Geist's
-   metrics), so a card keeps its height (modelled from the font metrics to
-   within about 0.2 px, not yet measured in a browser; Blink rounds the ascent
-   and the descent to whole pixels). The ink moves up and the body does not, so
-   the gap under a card title or tile label grows by 5 to 6 px.
-   --optical-keep: 0 drops the padding: the gap stays as it was and the card is
-   5 to 6 px shorter.
+   The trim shortens the box. --optical-keep (tokens.css) decides what happens
+   next. It is 0: nothing is given back, the body moves up with the ink, the
+   gap under a card title stays as it was, and a card head is 5.6 px shorter
+   (measured in Edge on 22 Nov). At 1 the same amount goes back as padding
+   under the text, 0.5lh - var(--optical-cap-gap), so a card keeps its height
+   (within 0.7 px, measured) but its title sits 6.3 px further from the body.
 
    Not trimmed: a SectionCard with buttons beside its title, the order page's
    journey card, the order facts and the status labels.

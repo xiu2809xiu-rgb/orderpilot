@@ -54,12 +54,14 @@ describe("the trim", () => {
     expect(css).not.toContain("trim-end");
   });
 
-  it("gives back what it trimmed, so a card keeps its height", () => {
+  it("keeps the gap under a title as it was: the give-back waits on --optical-keep, which is 0", () => {
     // The formatter may wrap the calc, so compare with the white space folded.
     expect(css.replace(/\s+/g, " ")).toContain(
       "padding-block-end: calc( (0.5lh - var(--optical-cap-gap)) * var(--optical-keep, 1) )",
     );
-    expect(read("styles/tokens.css")).toContain("--optical-keep: 1;");
+    // Chosen from the pictures on 22 Nov: at 1 a card keeps its height but its
+    // title drifts about 6 px away from the body it heads.
+    expect(read("styles/tokens.css")).toContain("--optical-keep: 0;");
     expect(read("styles/tokens.css")).toContain("--optical-cap-gap: 0.355em;");
   });
 

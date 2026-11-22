@@ -118,17 +118,19 @@
   --dx-head-rule: 0 solid transparent;
   --dx-head-pb: 0rem;
   /* Optical alignment (styles/optical.css, docs/design/design-system.md).
-     --optical-keep: 1 gives back, as space under the text, what a trimmed
-     first line gave up, so every card stays as tall as before and the gap
-     under a title or label grows about 5 to 6 px; 0 keeps the gap and lets a
-     card be 5 to 6 px shorter. --optical-icon-end
+     --optical-keep: 0 lets a card be about 5.6 px shorter and keeps the gap
+     under a title or label as it was; 1 gives the trimmed space back under the
+     text, so a card stays as tall as before but its title sits about 6.3 px
+     further from the body (measured in Edge on 22 Nov). 0 was chosen from the
+     before and after pictures: at 1 the title drifts away from what it heads.
+     --optical-icon-end
      and --optical-icon-start: how far a button's content is moved, in px,
      because an arrow after the label and an icon before it leave more empty
      space on their own side (measured on Geist and Lucide 1.61.0, for a 16 px
      ArrowRight and Upload; xs is off by about 0.3 px, a leading Plus and a
      trailing ArrowUpRight by about 0.5 px).
      --optical-unit: one unit of Lucide's 24-unit box, for nudging an icon. */
-  --optical-keep: 1;
+  --optical-keep: 0;
   /* Space above the capitals in a line box, less 0.5lh: Geist's half-leading is
      0.5lh - 0.65em (ascent 1005 + descent 295 units), and the ascent sits 295
      units above the cap height (1005 - 710), so 0.5lh - 0.65em + 0.295em is
