@@ -11,8 +11,8 @@
 
 /* TEXT: trim the space above the capitals.
    A line box is taller than the letters in it: above the capitals sits
-   (line height - cap height) / 2 - 0.295 em more than the letters need, 6.1 px
-   above a 16 px title, 5.1 px above a 14 px label. On a card that makes the
+   (line height - cap height) / 2, which is 0.5lh - 0.355em, more than the
+   letters need: 6.1 px above a 16 px title, 5.1 px above a 14 px label. On a card that makes the
    first line sit 4 to 5 px further from the top edge than from the left edge.
    `text-box` trims it (Chrome and Edge 133 and later, Safari 18.2; Firefox
    ignores it and keeps today's look, which is why the whole rule sits in
@@ -21,7 +21,7 @@
    fill if the box ended on the baseline.
 
    The trim shortens the box, so the same amount goes back as padding under
-   the text, 0.5 lh - 0.355 em (the same number, from Geist's metrics), and a
+   the text, 0.5lh - var(--optical-cap-gap) (the same number, from Geist's metrics), and a
    card keeps its height to within a fifth of a pixel (Blink rounds the
    ascent and the descent to whole pixels). --optical-keep: 0 drops the
    padding and lets the card be shorter.
@@ -34,7 +34,9 @@
 @supports (text-box: trim-start cap alphabetic) {
   .text-trim-start {
     text-box: trim-start cap alphabetic;
-    padding-block-end: calc((0.5lh - 0.355em) * var(--optical-keep, 1));
+    padding-block-end: calc(
+      (0.5lh - var(--optical-cap-gap)) * var(--optical-keep, 1)
+    );
   }
 
   /* An icon that sat on the first line of trimmed text (it had mt-0.5, which
@@ -42,7 +44,7 @@
      margin it had, less the trim. Without it the icon would end up 5 px below
      the capitals it belongs to. */
   .icon-after-trim {
-    margin-top: calc(0.125rem - (0.5lh - 0.355em));
+    margin-top: calc(0.125rem - (0.5lh - var(--optical-cap-gap)));
   }
 }
 

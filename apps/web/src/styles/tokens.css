@@ -126,6 +126,11 @@
      space on their own side (measured on Geist and Lucide 1.61.0).
      --optical-unit: one unit of Lucide's 24-unit box, for nudging an icon. */
   --optical-keep: 1;
+  /* Space above the capitals in a line box, less 0.5lh: Geist's half-leading is
+     0.5lh - 0.65em (ascent 1005 + descent 295 units), and the ascent sits 295
+     units above the cap height (1005 - 710), so 0.5lh - 0.65em + 0.295em is
+     0.5lh - 0.355em. Kept here so the two rules that use it agree. */
+  --optical-cap-gap: 0.355em;
   --optical-icon-end: 1.15px;
   --optical-icon-start: 0.7px;
   --optical-unit: calc(100% / 24);

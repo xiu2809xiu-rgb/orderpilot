@@ -55,10 +55,12 @@ describe("the trim", () => {
   });
 
   it("gives back what it trimmed, so a card keeps its height", () => {
-    expect(css).toContain(
-      "padding-block-end: calc((0.5lh - 0.355em) * var(--optical-keep, 1))",
+    // The formatter may wrap the calc, so compare with the white space folded.
+    expect(css.replace(/\s+/g, " ")).toContain(
+      "padding-block-end: calc( (0.5lh - var(--optical-cap-gap)) * var(--optical-keep, 1) )",
     );
     expect(read("styles/tokens.css")).toContain("--optical-keep: 1;");
+    expect(read("styles/tokens.css")).toContain("--optical-cap-gap: 0.355em;");
   });
 
   it("is used by the card heads and the tiles, not by controls", () => {
