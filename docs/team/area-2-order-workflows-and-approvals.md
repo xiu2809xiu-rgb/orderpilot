@@ -162,7 +162,7 @@ C-1 landed these. Every route and screen answers with typed mock data from `@ord
   - `GET /workflows/tasks/handed-to-me`: the SPRs the approval chain has handed to the caller, whatever their role (`workflows.read`).
   - `GET /workflows/reminders/for-me`: the reminders and escalations sent to the caller or their role (`workflows.read`).
   - `GET /workflows/sla-settings` and `PUT /workflows/sla-settings/:taskKind`: the timing of each kind of task (`settings.manage`).
-  - `GET /workflows/inboxes/:role/tasks` and `.../reminders`: any role's inbox (`workflows.inboxes.any`, which Management and Auditor hold).
+  - `GET /workflows/inboxes/:role/tasks` and `.../reminders`: any role's inbox (`workflows.inboxes.any`, which the approver, Management and the Auditor hold; Management and the Auditor retire at step 6).
   - `GET /workflows/orders/:orderNo/flow`: an order's steps, timeline and payment.
   - `POST /workflows/orders/:orderNo/payments`: a payment confirmation with its type (`payments.confirm`).
   - `GET /workflows/sprs/:recordNo`, `POST .../approve` and `POST .../reject` (`spr.read`, `approvals.decide`): the commands validate a comment, check the SPR exists and answer `applied: false`. They change nothing and say so.
@@ -172,7 +172,7 @@ C-1 landed these. Every route and screen answers with typed mock data from `@ord
 - **The SPR pre-fill.** `SprSuggestion` works out available stock (Inventory, minus Qty. on Sales Order, plus Qty. on Purch. Order) and suggests the shortfall. The SPR page marks suggested fields as suggestions, default fields as defaults and typed ones as entered by a person. It is arithmetic only: when to raise an SPR is yours.
 - **Payment type.** The confirmation form and contract carry `prepayment`, `deposit`, `balance` or `full-payment` (area 4's list, imported from the governance contracts). Prepayment is what your payment gate will watch.
 - **Screens** (`apps/web/src/features/workflows`, strings in the lazy `workflows` namespace, generated hooks only):
-  - `/workflows`: the task inbox. Each role sees its own; Management and Auditor pick a role. The warehouse view is a tablet layout with 44 px or larger targets.
+  - `/workflows`: the task inbox. Each role sees its own; the approver, Management and the Auditor pick a role (Management and the Auditor retire at step 6). The warehouse view is a tablet layout with 44 px or larger targets.
   - `/workflows/orders/:orderNo`: steps, timeline and payment, with the confirm-payment form for Finance.
   - `/workflows/sprs/:recordNo`: the SPR approval page. One primary button (Approve), Reject beside it, a required comment, suggested fields marked.
   - `/workflows/reminders`: what is due, who was told, and where it goes if nobody acts.
