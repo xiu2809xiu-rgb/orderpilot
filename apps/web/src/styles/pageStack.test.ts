@@ -39,10 +39,17 @@ describe("the page stack", () => {
     "is the root of %s, in place of its own space-y or gap",
     (file) => {
       const code = read(file);
-      expect(code).toContain("dx-page");
-      // A root that spaces its own children brings back a second rhythm.
-      expect(code).not.toContain('<div className="space-y-s4">');
-      expect(code).not.toContain('"dx-sheet flex flex-col gap-s');
+      // The class as a whole word in a quoted string: dx-page-head and
+      // dx-page-intro are other classes and do not count.
+      const roots = [
+        ...(code.match(/"[^"\n]*"/g) ?? []),
+        ...(code.match(/`[^`]*`/g) ?? []),
+      ].filter((literal) => /(?<![\w-])dx-page(?![\w-])/.test(literal));
+      expect(roots.length).toBeGreaterThan(0);
+      for (const root of roots) {
+        // A root that spaces its own children brings back a second rhythm.
+        expect(root).not.toMatch(/(?<![\w-])(?:space-y-|gap-s)/);
+      }
     },
   );
 });
