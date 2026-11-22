@@ -50,6 +50,30 @@
   color: var(--dx-current-fg);
   box-shadow: var(--dx-current-shadow);
 }
+/* The pills run past the edge of a phone with no scrollbar, so the end edge
+   fades to say there is more. The end padding is as wide as the fade, and the
+   scroll padding keeps the current pill out of it, so the pill that is shown
+   is never dimmed. Fixed to the box, not to the content. */
+@media (max-width: 47.99rem) {
+  .sx-nav {
+    padding-inline-end: 2.25rem;
+    scroll-padding-inline: 0.25rem 2.25rem;
+    -webkit-mask-image: linear-gradient(
+      to right,
+      #000 calc(100% - 2rem),
+      transparent
+    );
+    mask-image: linear-gradient(to right, #000 calc(100% - 2rem), transparent);
+  }
+  [dir="rtl"] .sx-nav {
+    -webkit-mask-image: linear-gradient(
+      to left,
+      #000 calc(100% - 2rem),
+      transparent
+    );
+    mask-image: linear-gradient(to left, #000 calc(100% - 2rem), transparent);
+  }
+}
 @media (pointer: fine) {
   .sx-link {
     min-height: 2.25rem;
