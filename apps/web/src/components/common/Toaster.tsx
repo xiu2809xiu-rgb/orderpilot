@@ -2,6 +2,7 @@ import { CircleAlert, CircleCheck, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
+import { matchesShortcut, shortcut } from "@/app/shell/shortcutRegistry";
 import { isTyping } from "@/app/shell/shortcuts";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -172,10 +173,10 @@ export function Toaster() {
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (event.defaultPrevented || event.repeat) return;
-      if (!(event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey) {
+      if (event.shiftKey) return;
+      if (!matchesShortcut(shortcut("undo"), event) || isTyping(event.target)) {
         return;
       }
-      if (event.key.toLowerCase() !== "z" || isTyping(event.target)) return;
       const latest = useToastStore
         .getState()
         .items.filter((item) => item.undo)

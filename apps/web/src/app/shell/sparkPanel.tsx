@@ -12,6 +12,7 @@ import {
 import { usePrepareOrbAhead } from "@/features/directions/spark/orb/prepareAhead";
 import { useSessionStore } from "@/stores/session";
 import { useDemoParts } from "./demoParts";
+import { matchesShortcut, shortcut } from "./shortcutRegistry";
 
 interface SparkControl {
   open: boolean;
@@ -37,7 +38,7 @@ const SparkPanel = lazy(() => import("@/features/directions/spark/SparkPanel"));
 
 /** Ctrl and a full stop (Command on a Mac): not taken by Ctrl K, `/`, N or the browser. */
 function isSparkKey(event: KeyboardEvent): boolean {
-  return (event.ctrlKey || event.metaKey) && !event.altKey && event.key === ".";
+  return matchesShortcut(shortcut("spark"), event);
 }
 
 /**

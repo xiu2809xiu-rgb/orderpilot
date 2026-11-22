@@ -30,16 +30,21 @@
     "help": {
       "label": "Help",
       "wordsTitle": "What the words mean",
-      "title": "Keyboard shortcuts",
-      "palette": "Search or jump to a page",
-      "search": "Search the list on the page",
-      "new": "Start a new record",
-      "spark": "Open or close Spark",
-      "close": "Close a panel or a menu",
-      "keysSearch": "/",
-      "keysNew": "N",
-      "keysSpark": "Ctrl .",
-      "keysClose": "Esc"
+      "title": "Keyboard shortcuts"
+    }
+  },
+  "shortcuts": {
+    "palette": "Search or jump to a page, order or record",
+    "spark": "Open or close Spark",
+    "close": "Close a panel, menu or dialog",
+    "undo": "Undo the last change that offers Undo",
+    "search": "Search the list on this page",
+    "new": "Start a new record",
+    "save": "Save the form you are editing",
+    "confirm": "Confirm a dialog that asks for a reason",
+    "notes": {
+      "search": "Works on pages that have a search box.",
+      "new": "Works on pages that have a New button."
     }
   },
   "nav": {

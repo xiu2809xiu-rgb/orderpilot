@@ -1,17 +1,13 @@
 import { useEffect, useRef } from "react";
 import type { FieldValues, UseFormReturn } from "react-hook-form";
+import { matchesShortcut, shortcut } from "@/app/shell/shortcutRegistry";
 import { useSaveReason, type SaveOptions } from "./useSaveReason";
 
 const OPEN_DIALOG =
   '[role="dialog"][data-state="open"], [role="alertdialog"][data-state="open"]';
 
 function isSaveKey(event: KeyboardEvent): boolean {
-  return (
-    (event.ctrlKey || event.metaKey) &&
-    !event.altKey &&
-    !event.shiftKey &&
-    event.key.toLowerCase() === "s"
-  );
+  return !event.shiftKey && matchesShortcut(shortcut("save"), event);
 }
 
 /**

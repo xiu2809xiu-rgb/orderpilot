@@ -18,6 +18,7 @@ import { SidePanel } from "./SidePanel";
 import { SparkPanelProvider } from "./sparkPanel";
 import { Topbar } from "./Topbar";
 import { usePageArrival } from "./usePageArrival";
+import { matchesShortcut, shortcut } from "./shortcutRegistry";
 import { usePanelCollapsed } from "./usePanelCollapsed";
 import "./shell.css";
 
@@ -62,7 +63,7 @@ function useScheduledRefresh() {
 function usePaletteShortcut(toggle: () => void) {
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+      if (matchesShortcut(shortcut("palette"), event)) {
         event.preventDefault();
         toggle();
       }
