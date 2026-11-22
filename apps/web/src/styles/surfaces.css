@@ -53,9 +53,8 @@
 .dx-page > .dx-page-head.ph-head {
   margin-bottom: calc(var(--dx-head-gap) - var(--dx-stack));
 }
-/* Side by side, or in a grid of cards. */
+/* The gap between cards side by side and inside a grid of cards. */
 .dx-grid-gap {
-  display: grid;
   gap: var(--dx-grid-gap);
 }
 

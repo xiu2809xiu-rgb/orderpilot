@@ -141,7 +141,7 @@ export function OrderPage({ orderNo }: { orderNo: string }) {
   const tone = orderTone(late, sentence !== "");
 
   return (
-    <div className="dx-sheet od-order">
+    <div className="dx-sheet dx-page od-order">
       <OrderHeader
         orderNo={orderNo}
         customerName={customer}
@@ -168,7 +168,7 @@ export function OrderPage({ orderNo }: { orderNo: string }) {
         />
         <OrderFacts order={events} detail={found} />
       </div>
-      <div className="dx-grid mt-4 flex flex-col gap-4">
+      <div className="dx-grid dx-page">
         <OrderJourneySection
           journey={journey}
           late={late}

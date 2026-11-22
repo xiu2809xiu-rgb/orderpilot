@@ -1,22 +1,11 @@
 /* A record page (customer, vendor, item) in the order page's anatomy: a column
    of its own, the way back and the head, a strip of facts on a card, then
-   sections as cards 24 px apart, with tables drawn as the order page draws its
+   sections as cards one stack apart, with tables drawn as the order page draws its
    lines. */
-.rec-sheet {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
 .rec-back {
   align-self: flex-start;
-  margin: 0 0 -1rem -0.5rem;
+  margin: 0 0 calc(var(--dx-stack) * -1 + var(--space-1)) -0.5rem;
   color: var(--muted-foreground);
-}
-
-/* The head's own bottom space is the sheet's gap. */
-.rec-sheet > header {
-  margin-bottom: 0;
 }
 
 /* The facts: label over value, as on the order page. A long value (an

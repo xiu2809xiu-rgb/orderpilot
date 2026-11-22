@@ -34,7 +34,7 @@ export function BackToList({ to, label }: { to: string; label: string }) {
 
 /** The column a record sits in, the same one the order page has. */
 export function RecordSheet({ children }: { children: ReactNode }) {
-  return <div className="dx-sheet rec-sheet">{children}</div>;
+  return <div className="dx-sheet dx-page rec-sheet">{children}</div>;
 }
 
 /** Shaped like a record's page: its header, its facts, then its sections. */

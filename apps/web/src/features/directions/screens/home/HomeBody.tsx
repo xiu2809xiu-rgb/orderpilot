@@ -33,8 +33,8 @@ function partOfDay(at: Date): "morning" | "afternoon" | "evening" {
   return hour < 18 ? "afternoon" : "evening";
 }
 
-const PAIR = "dx-grid grid items-start gap-6 lg:grid-cols-2";
-const CELL = "dx-grid-cell flex min-w-0 flex-col gap-6";
+const PAIR = "dx-grid dx-grid-gap grid items-start lg:grid-cols-2";
+const CELL = "dx-grid-cell dx-grid-gap flex min-w-0 flex-col";
 
 /**
  * Home, for the signed-in role, in the order of the person's day. A role with
@@ -82,14 +82,14 @@ export function HomeBody() {
   ) : null;
 
   return (
-    <div className="dx-sheet">
+    <div className="dx-sheet dx-page">
       <HomeHeader
         title={t(`greeting.${partOfDay(new Date())}`, { name: first })}
         intro={intro}
         actions={<HomeActions />}
       />
       {access.block === "tasks" ? (
-        <div className="dx-grid flex flex-col gap-6">
+        <div className="dx-grid dx-page">
           <div className={PAIR}>
             <div className={CELL}>
               <MyTimeline home={home} done={done} />
@@ -109,7 +109,7 @@ export function HomeBody() {
           ) : null}
         </div>
       ) : (
-        <div className="dx-grid flex flex-col gap-6">
+        <div className="dx-grid dx-page">
           {beside ? (
             <div className={PAIR}>
               <div className={CELL}>

@@ -49,8 +49,7 @@
 .od-top-row {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: var(--dx-grid-gap);
 }
 
 @media (min-width: 64rem) {
@@ -66,7 +65,7 @@
 }
 
 .od-status-sentence {
-  max-width: 110ch;
+  max-width: 72ch;
 }
 
 /* The stage and the team that holds it, side by side. */

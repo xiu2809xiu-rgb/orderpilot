@@ -17,7 +17,6 @@
   grid-template-columns: minmax(0, 1fr) auto;
   column-gap: 1rem;
   align-items: end;
-  margin-bottom: 1rem;
 }
 
 .od-page .dx-title,
@@ -675,7 +674,6 @@
   grid-template-columns: minmax(0, 1fr) auto;
   column-gap: 1rem;
   align-items: end;
-  margin-bottom: 1rem;
 }
 
 .od-order .dx-title,

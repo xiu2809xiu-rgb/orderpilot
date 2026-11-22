@@ -5,7 +5,7 @@ import { PageHeadBones } from "./PageHeadBones";
 /** Settings while it loads: the head, the list of sections, and two cards at their reading width. */
 export function SettingsShape() {
   return (
-    <div className="max-w-[60rem]" aria-hidden="true">
+    <div className="mx-auto max-w-[60rem]" aria-hidden="true">
       <PageHeadBones intro={false} date={false} />
       <div className="grid gap-s4 md:grid-cols-[13rem_minmax(0,1fr)] md:gap-s6">
         <div className="flex gap-s2 md:flex-col">
