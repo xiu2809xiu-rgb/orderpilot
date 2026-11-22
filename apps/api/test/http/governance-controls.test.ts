@@ -38,6 +38,7 @@ import {
 } from "../../src/auth/decorators.js";
 import { PasswordHasher } from "../../src/auth/domain/password-hasher.js";
 import { PermissionPolicy } from "../../src/auth/permission-policy.js";
+import { RolePermissionRepository } from "../../src/auth/role-permission.repository.js";
 import { requestIdOf } from "../../src/common/request-id.js";
 import { ZodValidationPipe } from "../../src/common/zod-validation.pipe.js";
 import { Database } from "../../src/database/database.js";
@@ -2023,6 +2024,47 @@ describe("the bank-detail hold (F-5)", () => {
         change: true,
         before: "****9901",
         after: "****7702",
+      });
+    });
+
+    describe("a role that may read the trail but is not an unmasked reader", () => {
+      // No default role is both, so the matrix is given the read for the test,
+      // as audit-viewer.test.ts does. WAREHOUSE stands for any role the
+      // administrator might one day grant audit.read to.
+      beforeAll(async () => {
+        await t.app
+          .get(RolePermissionRepository, { strict: false })
+          .grant("WAREHOUSE", "audit.read");
+      });
+      afterAll(async () => {
+        await t.app
+          .get(RolePermissionRepository, { strict: false })
+          .revoke("WAREHOUSE", "audit.read");
+      });
+
+      it("still gets the changed bank detail masked, with a reason, and not even its last four digits", async () => {
+        const { holdId } = await heldVendor();
+        const res = await call(
+          t,
+          as("warehouse"),
+          "get",
+          `${API}/audit/events?entityType=VendorBankHold&entityId=${holdId}`,
+        );
+        expect(res.status).toBe(200);
+        const body = z
+          .object({ data: z.array(auditEventViewSchema) })
+          .parse(res.body);
+        const change = body.data[0]?.changes.find(
+          (c) => c.field === "bankAccountNo",
+        );
+        expect(change).toMatchObject({
+          masked: true,
+          reason: "bankDetails",
+          before: null,
+          after: null,
+        });
+        expect(res.text).not.toContain("9901");
+        expect(res.text).not.toContain("7702");
       });
     });
 
