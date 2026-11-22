@@ -35,7 +35,7 @@ export function Section({
       )}
     >
       <header className="dx-section-head">
-        <h2 id={headingId} className="dx-section-title">
+        <h2 id={headingId} className="dx-section-title text-trim-start">
           {title}
         </h2>
       </header>

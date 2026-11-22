@@ -54,7 +54,12 @@ export function SectionCard({
             id={headingId}
             ref={headingRef}
             tabIndex={headingRef ? -1 : undefined}
-            className="dx-section-title focus-visible:outline-2 focus-visible:outline-ring"
+            className={cn(
+              "dx-section-title focus-visible:outline-2 focus-visible:outline-ring",
+              // With buttons beside it the title is centred on them, and the
+              // trim would lift it off that line.
+              !actions && "text-trim-start",
+            )}
           >
             {title}
           </h2>
