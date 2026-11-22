@@ -540,16 +540,18 @@ describe("governance: the role-permission matrix over HTTP", () => {
         "insights.read",
         "workflows.inboxes.any",
       ] as const;
-      // A database made before this step holds none of the four for the approver.
+      // The administrator revokes one on the matrix, which records it, and
+      // the other three are taken out with no record, as a database made
+      // before this step holds none of the four for the approver.
+      const revoked = cell("APPROVER", "aiUsage.read");
+      expect(
+        (await put("SYSTEM_ADMIN", revoked, { granted: false })).status,
+      ).toBe(200);
       for (const permission of reads)
         await removeQuietly("APPROVER", permission);
       expect((await access("APPROVER")).permissions).not.toContain(
         "insights.read",
       );
-      const revoked = cell("APPROVER", "aiUsage.read");
-      expect(
-        (await put("SYSTEM_ADMIN", revoked, { granted: false })).status,
-      ).toBe(200);
       try {
         await seed();
         const held: readonly string[] = (await access("APPROVER")).permissions;
