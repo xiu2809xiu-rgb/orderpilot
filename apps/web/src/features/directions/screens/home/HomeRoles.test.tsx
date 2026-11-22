@@ -57,8 +57,10 @@ const BY_ROLE: Record<Role, Expected> = {
     list: "Needs you",
     extra: "Most overdue, by amount",
     inbox: true,
-    measures: false,
-    trend: false,
+    // ADR 0058 step 4: the approver took insights.read, so it gets the
+    // measures, and the twelve-week trend that goes with its overdue block.
+    measures: true,
+    trend: true,
     flows: true,
     newOrder: false,
   },
