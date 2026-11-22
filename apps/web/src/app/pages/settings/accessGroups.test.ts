@@ -42,8 +42,9 @@ describe("describeAccess", () => {
       Orders: "View, create and edit draft orders",
       Documents: "View and upload documents",
       Tracking:
-        "Follow orders in the tracker, check exceptions and see workflows and tasks",
-      "Tasks and approvals": "Complete tasks assigned to you",
+        "Follow orders in the tracker, check exceptions, see workflows and tasks and see stock purchase requests",
+      "Tasks and approvals":
+        "Complete tasks assigned to you and route stock purchase requests to the approvers",
       "Sensitive data": "See the sample customer note",
     });
   });
