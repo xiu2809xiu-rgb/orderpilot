@@ -4,14 +4,22 @@ import governance from "@/locales/en/governance.json";
 import settings from "@/locales/en/settings.json";
 import { describeAccess, type Translate } from "./accessGroups";
 
-/** The real locale files, read the way i18next reads them: dotted paths into nested objects. */
+/**
+ * The real locale files, read the way i18next reads them: dotted paths into
+ * nested objects. Own keys only, and a reduce rather than a loop that walks an
+ * object by key: Semgrep's prototype-pollution rule refuses that loop.
+ */
 function lookup(source: unknown, path: string): string | undefined {
-  let node: unknown = source;
-  for (const part of path.split(".")) {
-    if (typeof node !== "object" || node === null) return undefined;
-    node = (node as Record<string, unknown>)[part];
-  }
-  return typeof node === "string" ? node : undefined;
+  const found = path
+    .split(".")
+    .reduce<unknown>(
+      (node, part) =>
+        typeof node === "object" && node !== null && Object.hasOwn(node, part)
+          ? (node as Record<string, unknown>)[part]
+          : undefined,
+      source,
+    );
+  return typeof found === "string" ? found : undefined;
 }
 
 const t: Translate = (key, options) => {
