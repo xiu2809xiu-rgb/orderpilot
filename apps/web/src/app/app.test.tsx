@@ -416,8 +416,8 @@ describe("accessibility (axe)", () => {
     expect(await violations(container)).toEqual([]);
   });
 
-  // One page each: the settings page has more to check since #349, and the
-  // two together ran past the 15 s budget on a busy machine.
+  // One page each, so a slow run on a busy machine does not take both pages
+  // past the 15 s budget of one test.
   it("finds nothing on the not-found page", async () => {
     const { container } = renderApp("/documents", {
       session: sessionFor("SUPPORT"),
