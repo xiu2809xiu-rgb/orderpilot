@@ -12,37 +12,33 @@ import { SpotlightCard } from "@/components/kit/SpotlightCard";
 export function KpiTiles({ measures }: { measures: readonly Kpi[] }) {
   const { t } = useTranslation("insights");
   return (
-    <ul className="grid gap-s2 sm:grid-cols-2 xl:grid-cols-3">
+    <ul className="dx-grid-gap grid sm:grid-cols-2 xl:grid-cols-3">
       {measures.map((kpi) => (
         <li key={kpi.id}>
           <SpotlightCard
             intensity={0.1}
-            className="dx-card flex h-full flex-col gap-2 p-4"
+            className="dx-card flex h-full flex-col gap-4 p-6"
           >
             <div>
-              <h2 className="fs-14 text-muted-foreground">{kpi.label}</h2>
-              <p className="fs-12 text-muted-foreground">{kpi.unit}</p>
+              <h2 className="fs-14 font-semibold text-foreground">
+                {kpi.label}
+              </h2>
+              <p className="dx-meta">{kpi.unit}</p>
             </div>
             <dl className="grid grid-cols-2 gap-s2">
               <div>
-                <dt className="fs-12 text-muted-foreground">
-                  {t("kpi.manual")}
-                </dt>
+                <dt className="dx-meta">{t("kpi.manual")}</dt>
                 <dd className="fs-28 tabular-nums">{kpi.manual}</dd>
               </div>
               <div>
-                <dt className="fs-12 text-muted-foreground">
-                  {t("kpi.withOrderPilot")}
-                </dt>
+                <dt className="dx-meta">{t("kpi.withOrderPilot")}</dt>
                 <dd className="fs-28 tabular-nums">
                   <GradientText>{kpi.withOrderPilot}</GradientText>
                 </dd>
               </div>
             </dl>
             <p className="fs-14 text-muted-foreground">
-              <span className="font-medium text-foreground">
-                {t("kpi.definition")}:
-              </span>{" "}
+              <span className="font-medium">{t("kpi.definition")}:</span>{" "}
               {kpi.definition}
             </p>
           </SpotlightCard>

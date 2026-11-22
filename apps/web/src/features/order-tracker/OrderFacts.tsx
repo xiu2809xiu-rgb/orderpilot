@@ -12,7 +12,7 @@ export function OrderFacts({ order }: { order: OrderTimeline }) {
   return (
     // Each fact is as wide as its own content and the row wraps when it must:
     // equal columns cut a long status chip off at the card's edge.
-    <dl className="dx-card dx-card-work flex flex-wrap gap-x-s6 gap-y-s3 px-5 py-4">
+    <dl className="dx-card dx-card-work flex flex-wrap gap-x-s6 gap-y-s3 px-6 py-4">
       <Fact label={t("detail.externalDocumentNo")}>
         <span className="tabular-nums">{order.externalDocumentNo}</span>
       </Fact>
@@ -48,8 +48,8 @@ function Fact({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-w-0 max-w-full flex-col gap-1.5">
-      <dt className="text-xs text-muted-foreground">{label}</dt>
+    <div className="flex min-w-0 max-w-full flex-col gap-1">
+      <dt className="dx-meta">{label}</dt>
       <dd className="text-sm font-medium">{children}</dd>
     </div>
   );

@@ -28,7 +28,7 @@ export default function InsightsPage() {
   const set = kpis.data?.data;
 
   return (
-    <div className="dx-sheet flex flex-col gap-s3 [&>header]:mb-0">
+    <div className="dx-sheet dx-page">
       <PageHeader
         title={t("title")}
         description={t("description")}

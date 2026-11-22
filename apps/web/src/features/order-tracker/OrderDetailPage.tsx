@@ -127,7 +127,7 @@ export default function OrderDetailPage() {
   );
 }
 
-/** The column the order page sits in: 72 rem, with its sections 24 px apart. */
+/** The column the order page sits in: 72 rem, with its sections one stack apart. */
 function Sheet({ children }: { children: React.ReactNode }) {
-  return <div className="dx-sheet flex flex-col gap-s3">{children}</div>;
+  return <div className="dx-sheet dx-page">{children}</div>;
 }
