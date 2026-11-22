@@ -90,6 +90,10 @@ Every page has the same anatomy: the header, then the filters and actions, then 
 - **A record and a form** have the back link above the head, the title with its status chip, an action bar, and cards 24 px apart.
 - **The shared states** are drawn by `components/common/states.tsx` and `StatePanel`: loading (a skeleton in the page's own shape: home, list, record, form or settings, shown after 140 ms), empty (naming the next step), failed (with a retry and a trace id), partial and permission denied. The not found, forbidden and crash pages use the same anatomy, inside the shell.
 
+## The settings pattern
+
+The Settings page follows the settings of products people already know (GitHub, Linear, Stripe, Vercel). A `<nav>` of sections stands at the left and shows one section at a time, chosen by `?section=`; below 768 px it is one scrolling row of 44 px pills. Each section is a few glass cards, and each card is a list of rows (`components/parts/SettingRow`): a label, one plain line, and the control or the value at the right. A row says only what a person needs to act. There is no Save button, because a choice applies at once and is kept on the device, and a quiet footnote says so. The title has no date. Nothing here is a primary button: Sign out, Reset, Check again and Open are outline buttons. A section the role may not open is not listed, and a stale link to one gets the permission-denied state.
+
 ## The kit
 
 `apps/web/src/components/kit` holds 27 items, one component per file. Each file's header comment names its vendor, the item and its licence, and the item is adapted to the tokens. The gallery at `/gallery/kit` shows them (a demo session or a development build).

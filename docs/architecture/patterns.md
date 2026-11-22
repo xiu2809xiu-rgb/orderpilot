@@ -47,6 +47,9 @@ The named patterns used in the code, where each one lives, and why it earns its 
 | Facade                      | `e2e/src/index.ts`, `checkPage`                                                    | A spec calls four helpers; the axe, console, CSP and layout checks behind them change in one place                        | P-14  |
 | Declared entries            | `features/define.ts` (`MenuEntry`), `features/nav.ts` (`menuFor`)                  | Each feature declares its menu lines and the shell only reads them, so a menu built twice cannot disagree with itself     | P-39  |
 | Registry filter             | `features/registry.ts` (`reachableFeatures`)                                       | One place decides whether a planned feature can be reached, so the menu, routes and palette cannot drift apart            | P-39  |
+| Settings row                | `components/parts/SettingRow.tsx`                                                  | A label, one plain line and a control in one shape, so every settings card reads alike                                    | #349  |
+| Registry (keys)             | `app/shell/shortcutRegistry.ts`                                                    | The handlers, the Help panel and Settings read one list of keys, so what is shown is what works                           | #349  |
+| Shared store                | `app/shell/panelCollapsedStore.ts`, `app/shell/useSignOut.tsx`                     | The bar and Settings change the side panel and sign out through one store and one hook, so they agree                     | #349  |
 
 ## Layers
 
