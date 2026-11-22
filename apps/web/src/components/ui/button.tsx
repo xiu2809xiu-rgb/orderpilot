@@ -1,7 +1,30 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
+import { iconEdge } from "@/lib/iconEdge";
 import { cn } from "@/lib/utils";
 import { Slot } from "radix-ui";
+
+/*
+ * Optical alignment of a button that has an icon beside its label. An arrow
+ * after the label leaves empty space inside its own box (3.3 px at 16 px for
+ * ArrowRight), so the right side looks roomier than the left and the content
+ * sits 1.15 px left of centre; an icon before the label does the same the
+ * other way, 0.7 px. The content is moved by that much: the padding on one
+ * side grows and the padding on the other shrinks by the same amount, so the
+ * button keeps its height and its width. `--optical-icon-end` and
+ * `--optical-icon-start` are in styles/tokens.css, and `data-icon-edge` is
+ * set by `iconEdge` (lib/iconEdge.ts). The base padding of each size is the
+ * one its has-[>svg] class sets, so every rule here starts with has-[>svg]:
+ * too: a component that draws no svg (a count, a spinner) next to a label
+ * keeps the base padding instead of losing about 4 px a side.
+ */
+const ICON_EDGE = {
+  default:
+    "has-[>svg]:data-[icon-edge=end]:ps-[calc(--spacing(3)+var(--optical-icon-end))] has-[>svg]:data-[icon-edge=end]:pe-[calc(--spacing(3)-var(--optical-icon-end))] has-[>svg]:data-[icon-edge=start]:ps-[calc(--spacing(3)-var(--optical-icon-start))] has-[>svg]:data-[icon-edge=start]:pe-[calc(--spacing(3)+var(--optical-icon-start))]",
+  xs: "has-[>svg]:data-[icon-edge=end]:ps-[calc(--spacing(1.5)+var(--optical-icon-end))] has-[>svg]:data-[icon-edge=end]:pe-[calc(--spacing(1.5)-var(--optical-icon-end))] has-[>svg]:data-[icon-edge=start]:ps-[calc(--spacing(1.5)-var(--optical-icon-start))] has-[>svg]:data-[icon-edge=start]:pe-[calc(--spacing(1.5)+var(--optical-icon-start))]",
+  sm: "has-[>svg]:data-[icon-edge=end]:ps-[calc(--spacing(2.5)+var(--optical-icon-end))] has-[>svg]:data-[icon-edge=end]:pe-[calc(--spacing(2.5)-var(--optical-icon-end))] has-[>svg]:data-[icon-edge=start]:ps-[calc(--spacing(2.5)-var(--optical-icon-start))] has-[>svg]:data-[icon-edge=start]:pe-[calc(--spacing(2.5)+var(--optical-icon-start))]",
+  lg: "has-[>svg]:data-[icon-edge=end]:ps-[calc(--spacing(4)+var(--optical-icon-end))] has-[>svg]:data-[icon-edge=end]:pe-[calc(--spacing(4)-var(--optical-icon-end))] has-[>svg]:data-[icon-edge=start]:ps-[calc(--spacing(4)-var(--optical-icon-start))] has-[>svg]:data-[icon-edge=start]:pe-[calc(--spacing(4)+var(--optical-icon-start))]",
+} as const;
 
 const buttonVariants = cva(
   "inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
@@ -23,10 +46,10 @@ const buttonVariants = cva(
         // A coarse pointer (a finger) gets 44 px at least, whatever the size
         // says: the warehouse works on tablets, and a page that sets its own
         // height still cannot make a button smaller than a fingertip.
-        default: "h-9 px-4 py-2 has-[>svg]:px-3 pointer-coarse:min-h-11",
-        xs: "h-6 gap-1 rounded-md px-2 text-xs has-[>svg]:px-1.5 pointer-coarse:min-h-11 [&_svg:not([class*='size-'])]:size-3",
-        sm: "h-8 gap-1.5 rounded-md px-3 has-[>svg]:px-2.5 pointer-coarse:min-h-11",
-        lg: "h-10 rounded-md px-6 has-[>svg]:px-4 pointer-coarse:min-h-11",
+        default: `h-9 px-4 py-2 has-[>svg]:px-3 pointer-coarse:min-h-11 ${ICON_EDGE.default}`,
+        xs: `h-6 gap-1 rounded-md px-2 text-xs has-[>svg]:px-1.5 pointer-coarse:min-h-11 [&_svg:not([class*='size-'])]:size-3 ${ICON_EDGE.xs}`,
+        sm: `h-8 gap-1.5 rounded-md px-3 has-[>svg]:px-2.5 pointer-coarse:min-h-11 ${ICON_EDGE.sm}`,
+        lg: `h-10 rounded-md px-6 has-[>svg]:px-4 pointer-coarse:min-h-11 ${ICON_EDGE.lg}`,
         icon: "size-9 pointer-coarse:size-11",
         "icon-xs":
           "size-6 rounded-md pointer-coarse:size-11 [&_svg:not([class*='size-'])]:size-3",
@@ -58,6 +81,7 @@ function Button({
       data-slot="button"
       data-variant={variant}
       data-size={size}
+      data-icon-edge={iconEdge(props.children, asChild)}
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
     />

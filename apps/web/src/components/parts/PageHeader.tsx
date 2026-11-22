@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { formatLongDay } from "@/lib/format";
+import { opticalStyle } from "@/lib/opticalEdge";
 
 /**
  * The head of every screen: its title, today's date as the line of context, and
@@ -20,7 +21,9 @@ export function PageHeader({
 }) {
   return (
     <header className="dx-page-head">
-      <h1 className="dx-title">{title}</h1>
+      <h1 className="dx-title optical-start" style={opticalStyle(title)}>
+        {title}
+      </h1>
       {showDate ? (
         <p className="dx-title-context">{formatLongDay(new Date())}</p>
       ) : null}

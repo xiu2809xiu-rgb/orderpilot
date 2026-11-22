@@ -47,7 +47,11 @@ function SelectTrigger({
     >
       {children}
       <SelectPrimitive.Icon asChild>
-        <ChevronDown className="size-4 opacity-50" aria-hidden="true" />
+        {/* -me-0.5: the chevron has 4 px of empty box on its right, so its
+            ink ended 16 px from the edge; this matches the data table's
+            selects (14 px) and keeps the trigger's width (an icon's margin
+            comes out of the trigger's padding, not its size). */}
+        <ChevronDown className="-me-0.5 size-4 opacity-50" aria-hidden="true" />
       </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
   );

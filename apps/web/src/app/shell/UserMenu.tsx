@@ -47,7 +47,10 @@ export function UserMenu({ collapsed }: { collapsed: boolean }) {
           </span>
           <ChevronsUpDown
             className={cn(
-              "size-4 shrink-0 text-muted-foreground",
+              // -me-1: the icon's own empty box is 4.7 px wide on its right,
+              // so its ink ended 16.7 px from the edge against the avatar's
+              // 12 px on the left.
+              "-me-1 size-4 shrink-0 text-muted-foreground",
               collapsed && "hidden",
             )}
             aria-hidden="true"

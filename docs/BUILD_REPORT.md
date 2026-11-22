@@ -407,6 +407,7 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 | #334  | The evening clock in the orders test kit              | `test/web-evening-clock`         | This pull request. The order page test passes at any hour of a Singapore day        |
 | #340  | Seven roles, step 2: Home by permission               | `feat/area1-home-by-permission`  | This pull request. Overdue orders under Needs you, refused actions under the rules  |
 | #337  | The Spark orb flows faster at idle                    | `fix/platform-orb-idle-speed`    | This pull request. Idle flows 75% faster, measured in Edge before and after         |
+| #355  | Optical alignment of the shared parts                 | `feat/area1-optical-alignment`   | This pull request. Titles, card heads, icons and buttons look aligned to the eye    |
 | #351  | The order page test checks the exact wait again       | `test/web-exact-wait`            | This pull request. The wait line's count is checked again, not only its shape       |
 | #354  | Home: the overview first, Needs you after             | `feat/area1-home-overview-first` | This pull request. Timeline, numbers and steps above Needs you, now five rows       |
 | #358  | The history build test allows a busy CI runner        | `test/synthetic-history-timing`  | This pull request. The history's time bound matches the dataset's own, 1,000 ms     |
