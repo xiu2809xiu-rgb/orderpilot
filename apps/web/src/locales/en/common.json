@@ -73,6 +73,7 @@
   },
   "theme": {
     "label": "Theme",
+    "switch": "Light theme",
     "light": "Light",
     "dark": "Dark",
     "system": "System"
