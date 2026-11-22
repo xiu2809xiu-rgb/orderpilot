@@ -230,3 +230,23 @@
   --dx-bar-btn-bg: rgb(255 255 255 / 0.06);
   --dx-bar-btn-hover: rgb(46 230 214 / 0.16);
 }
+
+/* The theme tiles on the Settings page draw both themes at once, whatever
+   theme the page itself is in, so these are the two schemes' main values
+   written out once more. They are used for those drawings only. */
+.pv-light {
+  --pv-ground: #f2f9fa;
+  --pv-side: #ffffff;
+  --pv-card: #ffffff;
+  --pv-line: rgb(9 34 57 / 0.16);
+  --pv-text: #0b2239;
+  --pv-accent: #0e7c86;
+}
+.pv-dark {
+  --pv-ground: #06162b;
+  --pv-side: #0a1c30;
+  --pv-card: #0f2a3f;
+  --pv-line: rgb(255 255 255 / 0.18);
+  --pv-text: #f1fbfb;
+  --pv-accent: #2ee6d6;
+}
