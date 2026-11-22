@@ -3,7 +3,7 @@
 Story [#364](https://github.com/xiu2809xiu-rgb/orderpilot/issues/364), [ADR 0063](../../../../adr/0063-one-hierarchy-and-one-rhythm.md). Every sheet puts the page on main (left) beside the same page on this branch (right), as the Docker review build draws it, in Chromium at 1366 x 768 unless the name says otherwise. Synthetic demo data throughout.
 
 - **Before:** main at f2bf64f3 (the survey pictures).
-- **After:** this branch at e2596c4e, built as a Docker image of the branch.
+- **After:** this branch at c5718d01 (the code of the final commit; later commits change only tests and docs), built as a Docker image of the branch.
 
 ## The sheets
 
@@ -22,20 +22,23 @@ Story [#364](https://github.com/xiu2809xiu-rgb/orderpilot/issues/364), [ADR 0063
 | `audit-auditor-1366-light.jpg`                               | The audit log: the search hint 8 px over its toolbar                                                            |
 | `home-support-1366-dark.jpg`, `orders-support-1366-dark.jpg` | Home and Orders in the dark theme                                                                               |
 | `home-support-390-light.jpg`, `orders-support-390-light.jpg` | Home and Orders at 390 px with a touch screen                                                                   |
+| `orders-new-support-1366-light.jpg`                          | New order: the head 24 px over the toolbar, 24 px padded cards                                                  |
+| `orders-new-support-390-light.jpg`                           | New order at 390 px with a touch screen (after only; main was not photographed at this width)                   |
 
 ## What was measured
 
 Head to the first block, in px, at 1366 light, on the main build and on this branch (a Chromium probe over the same pages as the survey; the main build used for this reading was the review site's, 28 hours older than f2bf64f3, and it agrees with the survey's own head gaps):
 
-| Page                                                | Before | After |
-| --------------------------------------------------- | ------ | ----- |
-| Orders, order page, My tasks, Reminders, Exceptions | 16     | 24    |
-| Customers, Vendors, Items lists                     | 16     | 24    |
-| Audit, Governance, Monitoring                       | 16     | 24    |
-| Customer, vendor and item records                   | 40     | 24    |
-| Insights                                            | 40     | 24    |
-| Order steps                                         | 48     | 24    |
-| Home, Upload, Settings (five sections)              | 24     | 24    |
+| Page                                                | Before                                  | After                      |
+| --------------------------------------------------- | --------------------------------------- | -------------------------- |
+| Orders, order page, My tasks, Reminders, Exceptions | 16                                      | 24                         |
+| Customers, Vendors, Items lists                     | 16                                      | 24                         |
+| Audit, Governance, Monitoring                       | 16                                      | 24                         |
+| Customer, vendor and item records                   | 40                                      | 24                         |
+| Insights                                            | 40                                      | 24                         |
+| Order steps                                         | 48                                      | 24                         |
+| Home, Upload, Settings (five sections)              | 24                                      | 24                         |
+| New order (`/orders/new`), 1366 and 390             | about 40 (read from the survey picture) | 24 (measured, both widths) |
 
 Other numbers, from the survey's measuring script run the same way on both builds:
 
