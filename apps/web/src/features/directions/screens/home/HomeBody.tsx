@@ -44,17 +44,18 @@ const CELL = "dx-grid-cell flex min-w-0 flex-col gap-6";
  * after the overview, across the whole page, and shows five tasks with a link
  * to the rest. A role that may decide approvals and read the tracker has the
  * overdue orders directly below "Needs you", across the page. The measures,
- * the deeper figures, come last, where the role may read them. A role without an inbox
- * has the one list that is its own where the tasks would be, with the quick
- * actions the side panel does not already hold beside it when there are any
- * (a role that manages settings has the health of its services instead,
- * because its menu already holds its places, and below them the refused
- * actions when it may read the audit trail). Which list is whose is decided
- * by permission (`homeAccess.ts`). A section that has nothing for the role
- * is not drawn. Done today is kept in the browser per person (`useDoneToday`),
- * because the real tasks API lists only open tasks: a task finished from this
- * screen or from an order's page is noted with its time, and an Undo takes it
- * out again. HomeScreen starts this component again for the next person.
+ * the deeper figures, come last, where the role may read them. A role without
+ * an inbox has the one list that is its own where the tasks would be, with
+ * the quick actions the side panel does not already hold beside it when there
+ * are any (a role that manages settings has the health of its services
+ * instead, because its menu already holds its places, and below them the
+ * refused actions when it may read the audit trail). Which list is whose is
+ * decided by permission (`homeAccess.ts`). A section that has nothing for the
+ * role is not drawn. Done today is kept in the browser per person
+ * (`useDoneToday`), because the real tasks API lists only open tasks: a task
+ * finished from this screen or from an order's page is noted with its time,
+ * and an Undo takes it out again. HomeScreen starts this component again for
+ * the next person.
  */
 export function HomeBody() {
   const { t } = useTranslation("directions-home");

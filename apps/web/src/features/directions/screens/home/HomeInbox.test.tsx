@@ -276,7 +276,7 @@ describe("the home page of a role with an inbox", () => {
     expect(screen.queryByRole("link", { name: /^View all/ })).toBeNull();
   });
 
-  it("moves focus to the row that takes the place of a finished one when more than five wait", async () => {
+  it("keeps focus on the next row when more tasks wait than rows", async () => {
     const user = userEvent.setup();
     const many = Array.from({ length: 7 }, (_, index) =>
       makeTask({ orderNo: `SO-${String(700 + index)}` }),
@@ -286,8 +286,8 @@ describe("the home page of a role with an inbox", () => {
     await user.click(
       await screen.findByRole("button", { name: "Mark as packed for SO-702" }),
     );
-    // The sixth task moves up into the five rows, and the row that took the
-    // finished one's place has the focus.
+    // A guard on the focus rule, not proof of the row count: focus lands on
+    // the next row's action when more tasks wait than are shown.
     const next = await screen.findByRole("button", {
       name: "Mark as packed for SO-703",
     });
