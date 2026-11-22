@@ -47,7 +47,9 @@ export function MyTimeline({
         </p>
       ) : (
         <HomeQuery query={home.list} loading={<RowSkeletons rows={3} />}>
-          <p className="dx-meta mb-6 max-w-prose">{summary}</p>
+          <p className="fs-14 mb-6 max-w-prose text-muted-foreground">
+            {summary}
+          </p>
           <div className="flex flex-col gap-6">
             <DoneGroup done={done} />
             <NowGroup entry={model.now} at={at} />

@@ -12,9 +12,7 @@ import { SpotlightCard } from "@/components/kit/SpotlightCard";
 export function KpiTiles({ measures }: { measures: readonly Kpi[] }) {
   const { t } = useTranslation("insights");
   return (
-    // With five tiles in three columns the last row is a tile and a hole: the
-    // fifth takes the two columns, so the grid has no gap in it.
-    <ul className="dx-grid-gap grid sm:grid-cols-2 xl:grid-cols-3 xl:[&>li:last-child:nth-child(3n+2)]:col-span-2">
+    <ul className="dx-grid-gap grid sm:grid-cols-2 xl:grid-cols-3">
       {measures.map((kpi) => (
         <li key={kpi.id}>
           <SpotlightCard
