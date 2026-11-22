@@ -19,7 +19,8 @@ import {
 /**
  * The order of Home for a team that has tasks, and where the shortcuts went.
  * The feedback on the proposal was that the layout looked nice but was not
- * easy to use: one list first, and nothing said twice.
+ * easy to use: the overview first, then one list of work, and nothing said
+ * twice.
  */
 beforeAll(async () => {
   await loadHomeNamespaces();
@@ -56,7 +57,7 @@ describe("the order of Home for a team with tasks", () => {
       // below Needs you. The five measures, where the role may read them,
       // are the last section.
       const overdue = role === "APPROVER";
-      const measures = names.includes("Spectra's five measures");
+      const measures = sessionFor(role).permissions.includes("insights.read");
       expect(names).toEqual([
         "My timeline",
         "Your numbers",

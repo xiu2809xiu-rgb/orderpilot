@@ -81,7 +81,24 @@ describe("the home skeleton", () => {
     expect(marks).toEqual(["pair", "flows", "needs-you"]);
   });
 
-  it("draws no flows block for a role without an inbox", () => {
+  it("draws no flows block for an inbox role whose session cannot read the tracker", () => {
+    const session = sessionFor("SUPPORT");
+    useSessionStore.setState({
+      status: "active",
+      session: {
+        ...session,
+        permissions: session.permissions.filter(
+          (permission) => permission !== "tracker.read",
+        ),
+      },
+    });
+    const { container } = render(<HomeSkeleton />);
+    const marks = Array.from(container.querySelectorAll(MARKS)).map(markOf);
+    expect(marks).toEqual(["pair", "needs-you"]);
+    expect(container.querySelector("[data-flows]")).toBeNull();
+  });
+
+  it("guard: draws no flows block for a role without an inbox", () => {
     useSessionStore.setState({
       status: "active",
       session: sessionFor("SYSTEM_ADMIN"),
