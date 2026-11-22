@@ -411,6 +411,7 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 | #351  | The order page test checks the exact wait again       | `test/web-exact-wait`            | This pull request. The wait line's count is checked again, not only its shape       |
 | #354  | Home: the overview first, Needs you after             | `feat/area1-home-overview-first` | This pull request. Timeline, numbers and steps above Needs you, now five rows       |
 | #358  | The history build test allows a busy CI runner        | `test/synthetic-history-timing`  | This pull request. The history's time bound matches the dataset's own, 1,000 ms     |
+| #356  | A day-night switch replaces the theme menu            | `feat/area1-pixel-theme-switch`  | This pull request. The pixel toggle in the bar, menu and sign-in corner             |
 | #191  | Cut CI minutes before the repository goes private     | `ci/minutes-job-conditions`      | Merged, [#192](https://github.com/xiu2809xiu-rgb/orderpilot/pull/192)               |
 | P-42  | Plan prompt 004                                       | `chore/plan-prompt-004`          | Merged, [#138](https://github.com/xiu2809xiu-rgb/orderpilot/pull/138)               |
 | P-13  | Docker images and the IaC scan                        | `ci/docker`                      | Merged, [#172](https://github.com/xiu2809xiu-rgb/orderpilot/pull/172)               |

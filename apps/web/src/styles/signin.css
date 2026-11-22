@@ -256,7 +256,3 @@
     --bar-ctl: 2.75rem;
   }
 }
-.signin-theme .dx-bar-icon {
-  width: var(--bar-ctl);
-  height: var(--bar-ctl);
-}
