@@ -9,6 +9,22 @@ export const INSET = 16;
 export const TRAVEL = 248;
 export const KNOB_RADIUS = 69;
 
+/**
+ * A drag starts after the pointer has moved this far, and a drag that ends
+ * this fast is a fling. Both are in CSS pixels, not track units: at the top
+ * bar's 36 px the track is drawn at about 0.13 px per unit, so a threshold in
+ * units (the supplied 3 and 0.6, tuned for a switch drawn at about 0.83 px per
+ * unit) would be under a pixel, and a click with a little wobble would be lost
+ * as a drag. 4 px and 0.5 px per ms match the supplied feel.
+ */
+export const DRAG_SLOP_PX = 4;
+export const FLING_PX_PER_MS = 0.5;
+
+/** A length in CSS pixels as track units, for the track as drawn now (its width in CSS px; 0 when it has no size). */
+export function pxToUnits(px: number, trackWidthPx: number): number {
+  return px / (trackWidthPx / TRACK_WIDTH || 1);
+}
+
 export interface Box {
   x: number;
   y: number;

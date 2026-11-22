@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  DRAG_SLOP_PX,
   INSET,
   KNOB_SIZE,
   TRACK_HEIGHT,
@@ -7,6 +8,7 @@ import {
   TRAVEL,
   cellFill,
   knobGeometry,
+  pxToUnits,
   roundedOutline,
   sampleRibbon,
   snapSpan,
@@ -178,5 +180,16 @@ describe("a glyph cell at the display's density", () => {
 
   it("is never thinner than one pixel, even for a cell far under it", () => {
     expect(snapSpan(3.2, 0.5, 0.1).size).toBe(1);
+  });
+});
+
+describe("pixels as track units", () => {
+  it("makes the 4 px slop about 30 units on the 36 px bar's switch, and 4 units where a unit is a pixel", () => {
+    expect(pxToUnits(DRAG_SLOP_PX, 68.8125)).toBeCloseTo(30.2, 1);
+    expect(pxToUnits(DRAG_SLOP_PX, TRACK_WIDTH)).toBe(4);
+  });
+
+  it("counts a pixel as a unit while the switch has no size", () => {
+    expect(pxToUnits(4, 0)).toBe(4);
   });
 });

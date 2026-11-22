@@ -16,8 +16,16 @@
  */
 import { prefersReducedMotion } from "../env";
 import { createGlassRenderer } from "./glass";
-import { TRACK_WIDTH, TRAVEL, knobGeometry, type Box } from "./geometry";
-import { clamp, mix } from "./palette";
+import {
+  DRAG_SLOP_PX,
+  FLING_PX_PER_MS,
+  TRACK_WIDTH,
+  TRAVEL,
+  knobGeometry,
+  pxToUnits,
+  type Box,
+} from "./geometry";
+import { clamp, mix, paletteVariables } from "./palette";
 import { createCanvasRenderer } from "./paint2d";
 import { createPixelParticles, type Pointer } from "./particles";
 import { createClick } from "./sound";
@@ -398,7 +406,11 @@ export function mountPixelToggle(
         : { ...local, at: browser.performance.now() };
     if (drag) {
       const delta = local.x - drag.startX;
-      if (!drag.active && Math.abs(delta) > 3) {
+      if (
+        !drag.active &&
+        Math.abs(delta) >
+          pxToUnits(DRAG_SLOP_PX, control.getBoundingClientRect().width)
+      ) {
         drag.active = true;
         drag.base = Math.round(phase - position * DAY_ANGLE);
         control.dataset.dragging = "";
@@ -449,7 +461,9 @@ export function mountPixelToggle(
     if (!active) return;
     suppressClick = true;
     const fling =
-      browser.performance.now() - at <= 120 && Math.abs(velocity) > 0.6;
+      browser.performance.now() - at <= 120 &&
+      Math.abs(velocity) >
+        pxToUnits(FLING_PX_PER_MS, control.getBoundingClientRect().width);
     const next = completed ? (fling ? velocity > 0 : position >= 0.5) : checked;
     change(next, completed ? "drag" : "cancel", madeByPerson(event));
   }
@@ -536,6 +550,15 @@ export function mountPixelToggle(
       effectsCanvas.remove();
       delete control.dataset.renderer;
       delete control.dataset.dragging;
+      // The 2D painter wrote these on a button and a knob that React keeps.
+      for (const name of Object.keys(paletteVariables(0))) {
+        control.style.removeProperty(name);
+      }
+      if (knob) {
+        for (const side of ["left", "top", "width", "height"]) {
+          knob.style.removeProperty(side);
+        }
+      }
       click.close();
     },
   };
