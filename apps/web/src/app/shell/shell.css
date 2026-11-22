@@ -331,42 +331,6 @@
   }
 }
 
-/* A small read-only label: a permission, a check. It is not a control, so it
-   has no hover and no pointer. */
-.dx-chip {
-  display: inline-flex;
-  align-items: center;
-  min-height: 1.75rem;
-  padding-inline: 0.625rem;
-  border: 1px solid var(--dx-rule);
-  border-radius: var(--radius-pill);
-  background-color: color-mix(in oklab, var(--foreground) 5%, transparent);
-  color: var(--foreground);
-}
-
-/* The analytics card on the settings page is area 4's and draws itself as a
-   shadcn Card. Here it takes the padding and the type of a Section, so the
-   five sections of the page share one left edge and one rhythm. */
-.dx-settings [data-slot="card"] {
-  gap: 0;
-  padding-block: 0;
-}
-.dx-settings [data-slot="card-header"] {
-  gap: 1rem;
-  padding: var(--dx-card-pad) var(--dx-card-pad) 0;
-}
-.dx-settings [data-slot="card-title"] {
-  font-size: var(--type-16);
-  line-height: 1.5rem;
-}
-.dx-settings [data-slot="card-header"] > p {
-  font-size: var(--type-14);
-  line-height: 1.25rem;
-}
-.dx-settings [data-slot="card-content"] {
-  padding: 1rem var(--dx-card-pad) var(--dx-card-pad);
-}
-
 /* The consent dock: where the analytics card (area 4's) is drawn. The card
    never covers the page or the control that has focus, so it sits below the
    page, and the page is a little shorter while it is there. The dock is a
