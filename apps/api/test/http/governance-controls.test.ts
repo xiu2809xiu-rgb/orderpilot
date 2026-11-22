@@ -1994,7 +1994,7 @@ describe("the bank-detail hold (F-5)", () => {
       },
     );
 
-    it("shows the last four in the audit viewer to the auditor only", async () => {
+    it("shows the last four in the audit viewer to the auditor and the administrator (ADR 0058)", async () => {
       const { holdId } = await heldVendor();
       const changesSeenBy = async (who: string) => {
         const res = await call(
@@ -2017,11 +2017,12 @@ describe("the bank-detail hold (F-5)", () => {
         before: "****9901",
         after: "****7702",
       });
+      // The administrator joined the unmasked readers at ADR 0058 step 4.
       expect(await changesSeenBy("admin")).toMatchObject({
-        masked: true,
-        reason: "bankDetails",
-        before: null,
-        after: null,
+        masked: false,
+        change: true,
+        before: "****9901",
+        after: "****7702",
       });
     });
 

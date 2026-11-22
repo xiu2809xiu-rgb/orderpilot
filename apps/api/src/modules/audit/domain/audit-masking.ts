@@ -2,6 +2,13 @@ import type { AuditChange, MaskingRule, Role } from "@orderpilot/shared";
 import { mask } from "../../governance/domain/masking.js";
 
 /**
+ * Who reads a refusal's reason and the last four digits of a bank detail. ADR
+ * 0058 decision 2 adds the administrator, who reads the trail and still cannot
+ * change it: the audit routes are all GET. The auditor retires at step 6.
+ */
+const UNMASKED_READERS: readonly Role[] = ["AUDITOR", "SYSTEM_ADMIN"];
+
+/**
  * Masking for an event's `changes`, on top of F-1's `mask`. Each top-level key
  * is a field named `<entityType>.<key>`. A rule named `*.<key>` covers that key
  * for every entity type, so one rule can cover "reason" everywhere.
@@ -17,7 +24,7 @@ const bankDetailRule = (key: string, label: string): MaskingRule => ({
   label,
   classification: "restricted",
   reason: "bankDetails",
-  visibleTo: ["AUDITOR"],
+  visibleTo: UNMASKED_READERS,
   sample: false,
 });
 
@@ -27,10 +34,11 @@ export const AUDIT_MASKING_RULES: readonly MaskingRule[] = [
     label: "Why a request was refused (sample rule)",
     classification: "confidential",
     reason: "policy",
-    visibleTo: ["AUDITOR"],
+    visibleTo: UNMASKED_READERS,
     sample: true,
   },
-  // F-5: even masked to the last four, a bank detail is the auditor's to read.
+  // F-5: even masked to the last four, a bank detail is for the unmasked
+  // readers only.
   bankDetailRule("bankAccountNo", "Bank account number, last four"),
   bankDetailRule("swiftCode", "SWIFT code, last four"),
   bankDetailRule("iban", "IBAN, last four"),

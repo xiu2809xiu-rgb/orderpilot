@@ -1,4 +1,4 @@
-import type { MaskingRule } from "@orderpilot/shared";
+import { ROLES, type MaskingRule, type Role } from "@orderpilot/shared";
 import { describe, expect, it } from "vitest";
 import { AUDIT_MASKING_RULES, maskChanges } from "./audit-masking.js";
 
@@ -78,7 +78,7 @@ describe("maskChanges", () => {
   it("applies a wildcard rule to every entity type, and an exact rule only to its own", () => {
     const rules = [...AUDIT_MASKING_RULES, exact];
     const reason = (entityType: string) =>
-      maskChanges(rules, "SYSTEM_ADMIN", entityType, {
+      maskChanges(rules, "WAREHOUSE", entityType, {
         reason: "wrong-password",
       })[0];
     expect(reason("User")?.masked).toBe(true);
@@ -88,11 +88,36 @@ describe("maskChanges", () => {
     ).toBe(false);
   });
 
-  it("shows the sample rule to the auditor only", () => {
-    const seen = (role: "AUDITOR" | "SYSTEM_ADMIN") =>
+  it("shows the sample rule to the auditor and the administrator, and to no one else", () => {
+    const seen = (role: Role) =>
       maskChanges(AUDIT_MASKING_RULES, role, "User", { reason: "x" })[0]
         ?.masked;
     expect(seen("AUDITOR")).toBe(false);
-    expect(seen("SYSTEM_ADMIN")).toBe(true);
+    expect(seen("SYSTEM_ADMIN")).toBe(false);
+    for (const role of ROLES.filter(
+      (r) => r !== "AUDITOR" && r !== "SYSTEM_ADMIN",
+    )) {
+      expect(seen(role), role).toBe(true);
+    }
+  });
+
+  it("shows the last four of a bank detail to the auditor and the administrator only", () => {
+    const seen = (role: Role) =>
+      maskChanges(AUDIT_MASKING_RULES, role, "VendorBankHold", {
+        bankAccountNo: { from: "****9901", to: "****7702" },
+      })[0];
+    for (const role of ["AUDITOR", "SYSTEM_ADMIN"] as const) {
+      expect(seen(role), role).toMatchObject({
+        masked: false,
+        before: "****9901",
+        after: "****7702",
+      });
+    }
+    expect(seen("FINANCE")).toMatchObject({
+      masked: true,
+      reason: "bankDetails",
+      before: null,
+      after: null,
+    });
   });
 });
