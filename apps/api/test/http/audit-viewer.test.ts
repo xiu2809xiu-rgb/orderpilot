@@ -96,7 +96,9 @@ describe("audit viewer: reading the trail over HTTP", () => {
     // ADR 0058 decision 2: the administrator now reads the unmasked trail and
     // also edits users and the matrix, so the one thing it must never do is
     // change the trail. Two checks: the routes the app registers, and a call
-    // with every verb as the administrator.
+    // with every verb as the administrator. Both cover the /audit routes only.
+    // Every other writer of an audit event is covered by the append-only
+    // database trigger and its own test (append-only.test.ts), not by these.
     describe("the administrator can read the trail and never change it", () => {
       // Express's app and its router are functions, so each is read with
       // Reflect.get and only the stack is parsed.
