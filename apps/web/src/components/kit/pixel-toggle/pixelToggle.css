@@ -1,0 +1,121 @@
+/* The Pixel Day-Night Toggle. The button is the track: its height is the
+   bar's control height and its width keeps the switch's own proportions
+   (520 x 272). Every length below is in track units, so that --pt-u (one unit,
+   in CSS px) scales the whole drawing and nothing is scaled by a transform,
+   which would shrink the focus ring too. This sheet alone draws the track and
+   the knob at the right end for the checked state, so nothing jumps when the
+   engine starts; the engine draws over it (data-renderer). The colours are the
+   toggle's own, and palette.ts holds the same values (a test keeps them equal). */
+.pixel-switch {
+  --pt-h: var(--bar-ctl, 2.25rem);
+  --pt-u: calc(var(--pt-h) / 272);
+  /* Night */
+  --pt-track-top: rgba(9, 9, 10, 1);
+  --pt-track-bottom: rgba(13, 13, 14, 1);
+  --pt-track-inset: rgba(0, 0, 0, 1);
+  --pt-track-light: rgba(26, 26, 29, 1);
+  --pt-track-edge: rgba(36, 36, 38, 1);
+  --pt-track-shadow: rgba(0, 0, 0, 1);
+  --pt-knob-top: rgba(83, 83, 91, 0.5);
+  --pt-knob-bottom: rgba(40, 40, 49, 0.42);
+  --pt-knob-rim: rgba(255, 255, 255, 0.27);
+  --pt-knob-shadow: rgba(0, 0, 0, 0.44);
+
+  position: relative;
+  display: block;
+  flex: none;
+  box-sizing: border-box;
+  height: var(--pt-h);
+  aspect-ratio: 520 / 272;
+  padding: 0;
+  border: 0;
+  border-radius: calc(86 * var(--pt-u));
+  background: linear-gradient(
+    180deg,
+    var(--pt-track-top),
+    var(--pt-track-bottom)
+  );
+  box-shadow:
+    inset 0 calc(12 * var(--pt-u)) calc(24 * var(--pt-u)) var(--pt-track-inset),
+    inset 0 calc(-2 * var(--pt-u)) calc(4 * var(--pt-u)) var(--pt-track-light),
+    0 calc(1.5 * var(--pt-u)) 0 var(--pt-track-edge),
+    0 calc(26 * var(--pt-u)) calc(46 * var(--pt-u)) calc(-20 * var(--pt-u))
+      var(--pt-track-shadow);
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pixel-switch[aria-checked="true"] {
+  /* Day */
+  --pt-track-top: rgba(222, 222, 221, 1);
+  --pt-track-bottom: rgba(235, 235, 234, 1);
+  --pt-track-inset: rgba(189, 189, 186, 1);
+  --pt-track-light: rgba(255, 255, 255, 1);
+  --pt-track-edge: rgba(243, 243, 242, 1);
+  --pt-track-shadow: rgba(157, 155, 150, 1);
+  --pt-knob-top: rgba(255, 255, 255, 0.94);
+  --pt-knob-bottom: rgba(238, 237, 233, 0.88);
+  --pt-knob-rim: rgba(255, 255, 255, 0.62);
+  --pt-knob-shadow: rgba(124, 123, 119, 0.35);
+}
+
+.pixel-switch[data-dragging] {
+  cursor: grabbing;
+}
+
+.pixel-switch > * {
+  pointer-events: none;
+}
+
+/* The knob at rest: 16 units in from the night end, or 248 units further on
+   the day end. The engine takes over its box once it runs. */
+.pixel-knob {
+  position: absolute;
+  top: calc(16 * var(--pt-u));
+  left: calc(16 * var(--pt-u));
+  display: block;
+  width: calc(240 * var(--pt-u));
+  height: calc(240 * var(--pt-u));
+  border-radius: calc(69 * var(--pt-u));
+  background: linear-gradient(
+    180deg,
+    var(--pt-knob-top),
+    var(--pt-knob-bottom)
+  );
+  box-shadow:
+    inset 0 0 0 max(0.5px, calc(1 * var(--pt-u))) var(--pt-knob-rim),
+    inset 0 0 calc(5 * var(--pt-u)) #ffffff2e,
+    0 calc(16 * var(--pt-u)) calc(22 * var(--pt-u)) calc(-9 * var(--pt-u))
+      var(--pt-knob-shadow),
+    0 calc(4 * var(--pt-u)) calc(9 * var(--pt-u)) var(--pt-knob-shadow);
+}
+
+.pixel-switch[aria-checked="true"] .pixel-knob {
+  left: calc(264 * var(--pt-u));
+}
+
+/* The engine's canvases are placed and sized by the engine, which also adds
+   the room each needs for the light and shadow it throws past the track. */
+.pixel-glass,
+.pixel-effects {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+}
+
+.pixel-glass[hidden],
+.pixel-effects[hidden] {
+  display: none;
+}
+
+/* The glass renderer draws the track and the knob itself. */
+.pixel-switch[data-renderer="glass"] {
+  background: transparent;
+  box-shadow: none;
+}
+
+.pixel-switch[data-renderer="glass"] .pixel-knob {
+  visibility: hidden;
+}
