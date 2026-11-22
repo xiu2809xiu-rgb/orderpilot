@@ -78,7 +78,8 @@
           }
         },
         "spr": {
-          "read": "see stock purchase requests"
+          "read": "see stock purchase requests",
+          "route": "route stock purchase requests to the approvers"
         },
         "insights": {
           "read": "see the KPIs"

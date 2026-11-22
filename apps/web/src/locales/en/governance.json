@@ -139,7 +139,8 @@
       }
     },
     "spr": {
-      "read": "Read stock purchase requests"
+      "read": "Read stock purchase requisitions",
+      "route": "Route a stock purchase requisition"
     },
     "tasks": {
       "complete": "Complete a task"

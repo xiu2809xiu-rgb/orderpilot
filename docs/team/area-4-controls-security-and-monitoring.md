@@ -29,7 +29,7 @@ How area 4 meets the others ([How the areas connect](../../CLAUDE.md#how-the-are
 
 - **The policy is enforced on the server.** Every endpoint that acts calls it, through area 1's guard (planned: P-10). Hiding a button is never the control.
 - **One shape for every decision:** allowed or refused, the rule that decided, and a reason a person can read. A refusal returns the standard error envelope `{ error: { code, message, details, traceId } }` and is audited.
-- **Approval limits and delegation** follow the shape of Navision's Approval User Setup (User ID, Approver ID, Sales and Purchase Amount Approval Limits, Unlimited flags, Substitute), shared with area 2 ([domain notes](../research/domain-notes.md)).
+- **Approval limits and delegation** follow the shape of Business Central's Approval User Setup (User ID, Approver ID, Sales and Purchase Amount Approval Limits, Unlimited flags, Substitute), shared with area 2 ([domain notes](../research/domain-notes.md)).
 - **Bank details are compared with the Vendor Bank Account on record** (Bank Account No., SWIFT Code, IBAN). Any difference holds the payment. Area 2's state machine shows the hold and blocks the payment until it is cleared.
 - **AI destinations:** area 1's gateway asks area 4's policy whether a piece of data may go to a provider. The default is synthetic data only.
 
@@ -70,7 +70,7 @@ F-1 and G-1 have landed. F-2 fills in its item when it does.
   - **Masking** in `apps/api/src/modules/governance/domain/masking.ts`: `mask(rules, role, field, value)` returns a `MaskedField` whose value is `null` for a role the rule does not list, so the value never reaches the browser. One neutral sample rule, `sample.customerNote`, shown on the Masking tab through P-12's `MaskedValue` with the reason. `GET /governance/masking/sample`.
   - **Classification and the AI rule:** the four levels and the mask reasons are in `packages/shared/src/governance/classification.ts`. `decideAiDestination` (`domain/ai-destination-policy.ts`) answers what data may go to which provider; the default is synthetic data only. `GET /governance/ai-destinations`, `POST /governance/ai-destinations/check`: P-17's gateway calls the second.
   - **How a refusal looks:** the standard error envelope with a trace id (403 `FORBIDDEN`, a generic message; the reason goes to the audit trail), drawn by `RefusalPanel`. The Refusals tab shows both. `PolicyRequest` and `PolicyDecision` in `governance/decision.ts` are the shape for your policy.
-  - **Contracts only, no table and no rule:** approval limits and a substitute in the shape of Navision's Approval User Setup (`governance/approval.ts`), and the payment type, prepayment among them, for payment confirmation (`governance/payment.ts`, for C-1's payment step to record).
+  - **Contracts only, no table and no rule:** approval limits and a substitute in the shape of Business Central's Approval User Setup (`governance/approval.ts`), and the payment type, prepayment among them, for payment confirmation (`governance/payment.ts`, for C-1's payment step to record).
   - **Data scope:** `RoleDataScope` in `governance.prisma` holds `all`, `brands` or `own` per role. It is stored and shown. Nothing filters a list by it yet.
   - **Routes and requests:** `apps/api/src/modules/governance/` (controllers, services, `domain/` with its own unit tests), `apps/api/requests/governance.http`, generated hooks in `apps/web/src/lib/api/generated/endpoints/governance`. Component tests use MSW and `test/http/governance.test.ts` runs against the real database.
   - **`it.todo` tests** in `apps/api/test/http/governance-controls.test.ts`, named by control: approval limits, no self-approval, the bank-detail hold, masking for each role, a direct API call being refused (E2E #3), and payment confirmation.
@@ -115,7 +115,7 @@ F-3 brings the first real policy ([ADR 0041](../adr/0041-the-authorisation-polic
   - The rules are `system-admin`, `permission`, `approval-route` and `approval-limit`, in that order, and the first refusal wins.
   - The guard runs the first two through `GovernancePermissionPolicy`.
   - An area runs all four through `AuthorisationService.enforce`.
-- **The approval setup table**, `ApprovalUserSetup`: Navision's Approval User Setup plus `awayFrom` and `awayUntil`.
+- **The approval setup table**, `ApprovalUserSetup`: Business Central's Approval User Setup plus `awayFrom` and `awayUntil`.
   - Every change goes through `ApprovalSetupService.save`, which audits the before and after.
   - `seedApprovalSetups` writes the sample chain.
 - **Tests:** a unit test beside each rule, and `apps/api/test/http/governance-controls.test.ts` against the real database, through a stand-in route that only the test app registers.
@@ -157,6 +157,8 @@ await this.authorisation.enforce(
 
 ### The absence and escalation rule (Q-6)
 
+**Replaced by [the approver group](#the-approver-group-252) once `APPROVER_GROUP` is on.** Until area 2's #251 turns it on, this is still the rule, unchanged, and #280 removes it afterwards.
+
 An open rule, configuration until Spectra answers [Q-6](../client/questions-for-client.md) (A-23, A-24):
 
 1. The requester's approver (their Approver ID) decides.
@@ -191,11 +193,12 @@ F-4 adds three rules to the same chain ([ADR 0044](../adr/0044-no-self-approval-
 
 **The duties kept apart**, configuration until Spectra confirms them:
 
-| Earlier duty                | Rules out, on the same record                                            |
-| --------------------------- | ------------------------------------------------------------------------ |
-| `spr.raise` (the requester) | `spr.approve`                                                            |
-| `vendor-payment.approve`    | `payment-hold.clear`                                                     |
-| `vendor-bank.change`        | `payment-hold.clear`, `vendor-payment.approve`, `vendor-payment.release` |
+| Earlier duty                        | Rules out, on the same record                                            |
+| ----------------------------------- | ------------------------------------------------------------------------ |
+| `spr.raise` (the requester)         | `spr.approve`                                                            |
+| `spr.route` (the coordinator, #252) | `spr.approve`                                                            |
+| `vendor-payment.approve`            | `payment-hold.clear`                                                     |
+| `vendor-bank.change`                | `payment-hold.clear`, `vendor-payment.approve`, `vendor-payment.release` |
 
 Confirming a customer's payment (`customer-payment.confirm`) and paying a vendor (`vendor-payment.approve`, `vendor-payment.release`) are separate actions, and the customer's payment sits in no pair.
 
@@ -285,6 +288,61 @@ await authorisation.enforce(
 - **Area 2 and P-104:** call `enforce` with the stored `vendorNo`, and show `openHoldsFor`.
 - **`payments.post`** is held by no role, so vendor payments are refused for everyone until P-104's permission is decided.
 - **Events** wait for the bus (P-15).
+
+## The approver group (#252)
+
+Spectra's process: a coordinator, a Support user, routes each SPR to three management approvers, any one of whom decides, and hands it back ([ADR 0056](../adr/0056-the-approver-group-replaces-the-approval-chain.md)).
+
+- **The group** is every enabled user with the `APPROVER` role except the requester. Absence moves nothing, and Management is not in it.
+- **Limits** are switchable, with none set: `APPROVAL_LIMITS=off|on`, off by default. While they are on, only the approvers whose own limit covers the amount may decide.
+- **The coordinator** holds `spr.route`, with `spr.read`, and never decides: Support has no `approvals.decide`, and whoever routed an SPR may not decide it. There is no coordinator role, so Support is an assumption until Spectra answers Q-50.
+- **A temporary switch, `APPROVER_GROUP=off|on`, off by default.** While it is off, the old chain above decides, unchanged. #251 turns it on, and #280 then removes the switch, the old chain, `deciderFor`, substitutes and away dates.
+- **Code:** `domain/approver-group.ts` (the group, a pure function), `ApprovalRouteRule` (both paths), `AuthorisationService.approversFor`, and the `spr.route` action with its duties pair.
+- **Tests:** `approver-group.test.ts`, `approval-route.test.ts`, and three blocks in `test/http/governance-controls.test.ts`: the group, the group with its limits on, and the coordinator. F-3's block also proves that the switch off keeps the old chain.
+
+### How area 2 uses it
+
+Area 2 routes, records the decision and refuses a second one. Area 4 says who may decide, and refuses who may not.
+
+```ts
+// 1. Before routing: the coordinator asks the policy; area 2 stores who routed it.
+await authorisation.enforce(
+  {
+    actor: { userId: auth.user.id, role: auth.user.role },
+    action: "spr.route",
+    resource: { type: "Spr", id: spr.recordNo },
+    requesterUserId: spr.raisedByUserId,
+  },
+  { ip: req.ip ?? null, traceId: requestIdOf(req) },
+);
+
+// 2. Whom to route to: each is { userId, displayName }, never an email.
+const { approvers, reason } = await authorisation.approversFor({
+  requester: spr.raisedByUserId,
+  action: "spr.approve",
+  amount: spr.amount,
+});
+// An empty list comes with a reason to show. Otherwise each approver gets the task.
+
+// 3. A decision: any one of them may make it, and the first one closes the SPR.
+await authorisation.enforce(
+  {
+    actor: { userId: auth.user.id, role: auth.user.role },
+    action: "spr.approve",
+    resource: { type: "Spr", id: spr.recordNo },
+    amount: spr.amount,
+    requesterUserId: spr.raisedByUserId,
+    earlierDuties: { "spr.route": spr.routedByUserId },
+  },
+  { ip: req.ip ?? null, traceId: requestIdOf(req) },
+);
+```
+
+- **Take the requester, who routed it and the amount from area 2's stored SPR,** never from the request body.
+- **A second decision** on an SPR already decided is area 2's 409, audited on area 2's side. Area 4's policy is not asked.
+- **`deciderFor` is deprecated.** It still works, and still decides who may approve while `APPROVER_GROUP` is off. Area 2 stops calling it in #251: `spr-routing.service.ts`, `spr-approval.service.ts` and `workflows.service.ts`.
+- **Turning the group on** is #251's, because it changes who may decide, so area 2's tests for the old chain change with it.
+- **Until #251,** a request the old chain escalates to Management while the approver is away is decided by Management only while the group is off. Once it is on, Management decides no SPR.
 
 ## Finding and undoing on the matrix (F-8)
 
