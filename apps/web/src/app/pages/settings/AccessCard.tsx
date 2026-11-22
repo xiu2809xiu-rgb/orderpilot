@@ -50,7 +50,9 @@ export function AccessCard() {
           </Link>
         </Button>
       ) : null}
-      <SettingFootnote>{t("account.access.footnote")}</SettingFootnote>
+      {session.user.role === "SYSTEM_ADMIN" ? null : (
+        <SettingFootnote>{t("account.access.footnote")}</SettingFootnote>
+      )}
     </Section>
   );
 }

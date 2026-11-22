@@ -48,6 +48,15 @@ describe("the account section", () => {
     ).toBeNull();
   });
 
+  it("does not tell the system admin to ask a system admin for more access", () => {
+    renderSettings(<AccountPanel />, { role: "SYSTEM_ADMIN" });
+    expect(
+      screen.queryByText(
+        "Your role is set by a system admin. If you need more access, ask them.",
+      ),
+    ).toBeNull();
+  });
+
   it("shows no demo note outside a demo session", () => {
     renderSettings(<AccountPanel />, { role: "SUPPORT" });
     become({
