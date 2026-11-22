@@ -48,7 +48,7 @@
   min-height: 0;
   flex: 1;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: var(--space-2);
 }
 
 .od-foot {
@@ -67,7 +67,7 @@
   flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: var(--space-1);
 }
 
 /* Export and Print sit in a fieldset only to be disabled together: it draws as nothing. */
@@ -175,7 +175,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  gap: 0.75rem;
+  gap: var(--space-1);
 }
 
 /* The filter panel is only a wrapper on a wide screen, and a disclosure on a phone. */
@@ -267,7 +267,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.375rem;
+  gap: var(--space-1);
   list-style: none;
 }
 
