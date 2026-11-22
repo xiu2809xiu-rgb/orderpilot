@@ -351,9 +351,14 @@
   padding-block: 0.25rem 0.75rem;
 }
 
+/* The count pill is centred on the title, not set on its baseline: the pill is
+   centred on its own capitals, 5.00 px above its baseline, and the 16 px
+   title's capitals are 5.68 px above theirs, so on a shared baseline the pill
+   sat 0.68 px low. Both are centred on their capitals, so centring them on
+   each other lines them up. */
 .dx-sh-title {
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
   gap: 0.5rem;
   font-size: var(--type-16);
   line-height: 1.5rem;
