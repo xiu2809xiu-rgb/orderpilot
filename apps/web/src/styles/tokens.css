@@ -117,6 +117,18 @@
   --dx-card-pad: 1.25rem;
   --dx-head-rule: 0 solid transparent;
   --dx-head-pb: 0rem;
+  /* Optical alignment (styles/optical.css, docs/design/design-system.md).
+     --optical-keep: 1 gives back, as space under the text, what a trimmed
+     first line gave up, so every card stays as tall as before; 0 lets a card
+     be as short as the trim makes it (about 5 to 6 px). --optical-icon-end
+     and --optical-icon-start: how far a button's content is moved, in px,
+     because an arrow after the label and an icon before it leave more empty
+     space on their own side (measured on Geist and Lucide 1.61.0).
+     --optical-unit: one unit of Lucide's 24-unit box, for nudging an icon. */
+  --optical-keep: 1;
+  --optical-icon-end: 1.15px;
+  --optical-icon-start: 0.7px;
+  --optical-unit: calc(100% / 24);
   --dx-title-size: var(--type-28);
   --dx-title-weight: 600;
   --dx-title-tracking: -0.02em;
