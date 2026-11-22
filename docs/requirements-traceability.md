@@ -40,6 +40,7 @@ Every feature traces to at least one of the six module requirements. Each row sa
 | The Spark orb's idle movement is clearly visible                                | `orbSeeds.json`, `components/kit/Orb.tsx`, `spark.css`                               | `orbPalette.test.ts`, `Orb.test.tsx`           | #337      | In review   |
 | Home leads with the overview, and Needs you shows five tasks                    | `apps/web/src/features/directions/screens/home`                                      | `HomeLayout.test.tsx`, `HomeInbox.test.tsx`    | #354      | In review   |
 | The settings page: a section list, one section at a time, plain rows            | `apps/web/src/app/pages/settings`, `apps/web/src/app/shell/shortcutRegistry.ts`      | `SettingsNav.test.tsx`, `HealthPanel.test.tsx` | #349      | In review   |
+| Text, icons and headings in the shared parts look aligned to the eye            | `apps/web/src/styles/optical.css`, `lib/opticalEdge.ts`                              | `optical.test.tsx`, `opticalEdge.test.ts`      | #355      | In review   |
 
 ## M2 GRS by design
 

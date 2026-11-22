@@ -160,7 +160,9 @@ function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
       )}
       {...props}
     >
-      <CircleAlert className="mt-px size-3 shrink-0" aria-hidden="true" />
+      {/* mt-0.5: a 12 px icon on a 16 px line is centred with 2 px above it
+          ((16 - 12) / 2); it had 1 px. */}
+      <CircleAlert className="mt-0.5 size-3 shrink-0" aria-hidden="true" />
       {error.message}
     </p>
   );
