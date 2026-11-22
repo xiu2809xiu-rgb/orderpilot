@@ -70,6 +70,10 @@ function textPairs(): [string, string[]][] {
   for (const s of ["card", "panel-strong", "popover", "secondary"]) {
     pairs.push(["faint-foreground", [s]]);
   }
+  // A table row is drawn selected or hovered over the work panel, and the
+  // stage rail's second line and the small print sit on it in the faint tier.
+  pairs.push(["faint-foreground", ["accent", "panel-strong"]]);
+  pairs.push(["faint-foreground", ["dx-hover-bg", "panel-strong"]]);
   pairs.push(["primary-foreground", ["primary"]]);
   pairs.push(["destructive-foreground", ["destructive"]]);
   pairs.push(["accent-foreground", ["accent", "card"]]);
