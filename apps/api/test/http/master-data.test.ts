@@ -386,6 +386,11 @@ describe("master data routes (mock Business Central)", () => {
       expect(support).not.toContain(`"${item.unitCost}"`);
       const finance = JSON.stringify((await get("FINANCE", path)).body);
       expect(finance).toContain(`"${item.unitCost}"`);
+      // ADR 0058 step 4: the approver sees cost, as Management does.
+      for (const role of ["APPROVER", "MANAGEMENT"] as const) {
+        const body = JSON.stringify((await get(role, path)).body);
+        expect(body, role).toContain(`"${item.unitCost}"`);
+      }
 
       const warehouse = JSON.stringify((await get("WAREHOUSE", path)).body);
       expect(warehouse).not.toContain(`"${item.unitPrice}"`);

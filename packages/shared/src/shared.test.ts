@@ -3,6 +3,7 @@ import {
   API_BASE_PATH,
   CONFIGURABLE_DOCUMENT_TYPES,
   COOKIES,
+  DEFAULT_ROLE_PERMISSIONS,
   DEMO_PERSONAS,
   DOCUMENT_STAGES,
   DOCUMENT_TYPES,
@@ -46,6 +47,30 @@ describe("roles and permissions", () => {
   });
   it("has unique permissions", () => {
     expect(new Set(PERMISSIONS).size).toBe(PERMISSIONS.length);
+  });
+  it("gives the approver every permission Management has, and the administrator no business read (ADR 0058 step 4)", () => {
+    // Retiring Management at step 6 must remove no power from the roles that stay.
+    const approver: readonly string[] = DEFAULT_ROLE_PERMISSIONS.APPROVER;
+    for (const permission of DEFAULT_ROLE_PERMISSIONS.MANAGEMENT) {
+      expect(approver, permission).toContain(permission);
+    }
+    for (const permission of [
+      "exceptions.read",
+      "insights.read",
+      "aiUsage.read",
+      "workflows.inboxes.any",
+    ] as const) {
+      expect(approver, permission).toContain(permission);
+    }
+    for (const permission of [
+      "orders.read",
+      "exceptions.read",
+      "insights.read",
+      "tracker.read",
+      "workflows.inboxes.any",
+    ] as const) {
+      expect(DEFAULT_ROLE_PERMISSIONS.SYSTEM_ADMIN).not.toContain(permission);
+    }
   });
 });
 
