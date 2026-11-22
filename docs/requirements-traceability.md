@@ -38,6 +38,7 @@ Every feature traces to at least one of the six module requirements. Each row sa
 | Home lists tasks by due time and tells what a button records                    | `apps/web/src/features/directions/screens/home`                                      | `HomeOrder.test.tsx`, `TaskTip.test.tsx`       | #328      | In review   |
 | The Spark orb is on screen at once and visibly moves                            | `apps/web/src/features/directions/spark/orb`                                         | `SparkOrb.test.tsx`, `spark.spec.ts`           | #326      | In review   |
 | The Spark orb's idle movement is clearly visible                                | `orbSeeds.json`, `components/kit/Orb.tsx`, `spark.css`                               | `orbPalette.test.ts`, `Orb.test.tsx`           | #337      | In review   |
+| Text, icons and headings in the shared parts look aligned to the eye            | `apps/web/src/styles/optical.css`, `lib/opticalEdge.ts`                              | `optical.test.tsx`, `opticalEdge.test.ts`      | #355      | In review   |
 
 ## M2 GRS by design
 
