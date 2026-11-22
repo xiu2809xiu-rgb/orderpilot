@@ -380,6 +380,11 @@ describe("a question and its answer, with a provider the test controls", () => {
       const second = ask(t, support, id, "Question B").then((r) => r);
       await fake.waitEntered();
       // The loser is refused while the winner is still inside the provider.
+      // The provider stays held until that refusal has come back: opened any
+      // sooner, the winner could finish first, and a question arriving after
+      // an answer is a new question, rightly let through (seen once in CI).
+      const refused = await Promise.race([first, second]);
+      expect(refused.status).toBe(409);
       fake.open();
       const [a, b] = await Promise.all([first, second]);
       expect([a.status, b.status].sort()).toEqual([201, 409]);
