@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import "@/i18n";
 import { ApiError } from "@/lib/api/errors";
+import { formatLongDay } from "@/lib/format";
 import { sessionFor } from "@/test/fixtures";
 import { renderApp } from "@/test/render";
 import { InShellContext } from "../shell/inShell";
@@ -75,17 +76,38 @@ describe("the crash view", () => {
 });
 
 describe("settings", () => {
-  it("is three sections for a role that does not manage settings", async () => {
+  const sectionNames = (nav: HTMLElement) =>
+    within(nav)
+      .getAllByRole("link")
+      .map((link) => link.textContent);
+
+  it("lists five sections for a role that does not manage settings, under a title with no date", async () => {
     renderApp("/settings", { session: sessionFor("FINANCE") });
-    await screen.findByRole("heading", { name: "Settings" });
-    for (const name of ["Appearance", "Your account"]) {
-      expect(await screen.findByRole("heading", { name })).toBeInTheDocument();
-    }
-    // The analytics card is area 4's and titles itself without a heading.
-    expect(await screen.findByText("Analytics")).toBeInTheDocument();
-    // Service names mean nothing without their status, which only an admin may run.
+    const title = await screen.findByRole("heading", {
+      level: 1,
+      name: "Settings",
+    });
+    expect(title).toBeInTheDocument();
+    const nav = await screen.findByRole("navigation", {
+      name: "Settings sections",
+    });
+    expect(sectionNames(nav)).toEqual([
+      "Account",
+      "Appearance",
+      "Keyboard shortcuts",
+      "Privacy",
+      "AI assistant",
+    ]);
+    // Neither is for this role: the section is not listed rather than listed and refused.
     expect(
-      screen.queryByRole("heading", { name: "Service checks" }),
+      within(nav).queryByRole("link", { name: "Controls" }),
+    ).not.toBeInTheDocument();
+    expect(
+      within(nav).queryByRole("link", { name: "System health" }),
+    ).not.toBeInTheDocument();
+    // A settings page is not a report: no date under the title.
+    expect(
+      screen.queryByText(formatLongDay(new Date())),
     ).not.toBeInTheDocument();
     // English is the only language, so there is no card that offers one.
     expect(
@@ -93,33 +115,63 @@ describe("settings", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("adds the service checks for a role that manages settings", async () => {
-    renderApp("/settings", { session: sessionFor("SYSTEM_ADMIN") });
+  it("adds Controls and System health for a role that manages settings", async () => {
+    renderApp("/settings?section=health", {
+      session: sessionFor("SYSTEM_ADMIN"),
+    });
+    const nav = await screen.findByRole("navigation", {
+      name: "Settings sections",
+    });
+    expect(sectionNames(nav)).toEqual([
+      "Account",
+      "Appearance",
+      "Keyboard shortcuts",
+      "Privacy",
+      "AI assistant",
+      "Controls",
+      "System health",
+    ]);
     expect(
-      await screen.findByRole("heading", { name: "Service checks" }),
+      within(nav).getByRole("link", { name: "System health" }),
+    ).toHaveAttribute("aria-current", "page");
+    expect(
+      await screen.findByRole("heading", { level: 2, name: "System health" }),
     ).toBeInTheDocument();
   });
 
-  it("shows who is signed in and the role's permissions in words, with the code on hover", async () => {
+  it("shows who is signed in and what the role can do in words, never as permission codes", async () => {
     const session = sessionFor("FINANCE");
     renderApp("/settings", { session });
-    const account = (
-      await screen.findByRole("heading", { name: "Your account" })
+    const profile = (
+      await screen.findByRole("heading", { name: "Profile" })
     ).closest("section");
-    expect(account).not.toBeNull();
-    if (!account) return;
-    expect(within(account).getByText(session.user.email)).toBeInTheDocument();
+    expect(profile).not.toBeNull();
+    if (!profile) return;
+    expect(within(profile).getByText(session.user.email)).toBeInTheDocument();
+    const access = (
+      await screen.findByRole("heading", { name: "What you can do" })
+    ).closest("section");
+    expect(access).not.toBeNull();
+    if (!access) return;
+    expect(within(access).getByText("Payments")).toBeInTheDocument();
+    expect(
+      within(access).getByText("Confirm that a customer has paid"),
+    ).toBeInTheDocument();
     const code = session.permissions.find((p) => p === "orders.read") ?? "";
     expect(code).not.toBe("");
-    const chip = await within(account).findByText("Read orders");
-    expect(chip).toHaveAttribute("title", code);
-    expect(within(account).queryByText(code)).not.toBeInTheDocument();
+    expect(document.body).not.toHaveTextContent(code);
+    expect(document.querySelector(`[title="${code}"]`)).toBeNull();
   });
 
   it("moves the theme with the arrow keys, as a radio group does", async () => {
     const user = userEvent.setup();
-    renderApp("/settings", { session: sessionFor("SUPPORT") });
+    renderApp("/settings?section=appearance", {
+      session: sessionFor("SUPPORT"),
+    });
     await screen.findByRole("heading", { name: "Settings" });
+    expect(
+      await screen.findByRole("radio", { name: "Match my device" }),
+    ).toBeInTheDocument();
     await user.click(screen.getByRole("radio", { name: "Light" }));
     await user.keyboard("{ArrowRight}");
     const dark = screen.getByRole("radio", { name: "Dark" });

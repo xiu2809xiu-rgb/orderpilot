@@ -202,23 +202,7 @@
     }
   },
   "settings": {
-    "title": "Settings",
-    "description": "How OrderPilot looks and who you are signed in as.",
-    "appearance": "Appearance",
-    "appearanceHint": "Choose a theme. System follows your device.",
-    "account": "Your account",
-    "name": "Name",
-    "email": "Email",
-    "role": "Role",
-    "access": "Your permissions",
-    "accessNone": "No permissions are granted to this role yet.",
-    "checks": "Service checks",
-    "checkUp": "{{name}}: up",
-    "checkDown": "{{name}}: down",
-    "checksHint": "The readiness checks the API runs before it takes traffic.",
-    "checksLoading": "Loading the checks.",
-    "checksFailed": "The checks could not be loaded. Quote this reference to support:",
-    "checksNone": "No checks are registered yet."
+    "title": "Settings"
   },
   "quickActions": {
     "inbox": "Open my inbox",

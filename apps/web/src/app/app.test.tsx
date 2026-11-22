@@ -233,9 +233,11 @@ describe("signed in", () => {
 
   it("switches the theme and remembers it", async () => {
     const user = userEvent.setup();
-    renderApp("/settings", { session: sessionFor("SUPPORT") });
+    renderApp("/settings?section=appearance", {
+      session: sessionFor("SUPPORT"),
+    });
     await screen.findByRole("heading", { name: "Settings" });
-    await user.click(screen.getByRole("radio", { name: "Dark" }));
+    await user.click(await screen.findByRole("radio", { name: "Dark" }));
     expect(document.documentElement).toHaveClass("dark");
     expect(localStorage.getItem("op-theme")).toBe("dark");
     await user.click(screen.getByRole("radio", { name: "Light" }));
