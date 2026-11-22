@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { calendarDaysBetween, formatDay, formatMoney } from "./format";
+import {
+  calendarDaysBetween,
+  formatDay,
+  formatMoney,
+  formatTime,
+} from "./format";
 
 describe("formatMoney", () => {
   it("groups thousands and keeps two decimals", () => {
@@ -65,5 +70,14 @@ describe("calendarDaysBetween", () => {
         new Date("2026-11-12T17:00:00.000Z"),
       ),
     ).toBe(1);
+  });
+});
+
+describe("formatTime", () => {
+  it("shows the hour and minute in Singapore time", () => {
+    // 01:15 UTC is 9:15 am in Singapore.
+    expect(formatTime(new Date("2026-11-02T01:15:00Z"))).toMatch(
+      /^9:15\s?am$/i,
+    );
   });
 });
