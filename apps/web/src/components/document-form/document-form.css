@@ -1,13 +1,7 @@
 /* The document form in the order page's anatomy: the way back and the head, a
    bar of actions that stays in view, then cards for the fields, the lines, the
-   attachments and the tabs, 24 px apart (the 8-point rhythm of the order
+   attachments and the tabs, one stack apart (the 8-point rhythm of the order
    page's own column). */
-.df-sheet {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
 .df-head {
   display: grid;
   gap: 0.25rem;
@@ -19,9 +13,12 @@
   color: var(--muted-foreground);
 }
 
-/* The page's own head takes the bottom space; the sheet's gap spaces the rest. */
-.df-head > header {
-  margin-bottom: 0;
+/* The head sits in the stack inside .df-head, so it takes the same negative
+   margin a head has in a .dx-page: the stack's gap less the head gap is what
+   is left under it. */
+.df-head > .dx-page-head,
+.df-head > .dx-page-head.ph-head {
+  margin-bottom: calc(var(--dx-head-gap) - var(--dx-stack));
 }
 
 /* The sizes the bar depends on, named once. --df-gutter is the page's own
@@ -36,7 +33,7 @@
   --df-bar-clear: 4.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--dx-stack);
 }
 
 @media (max-width: 39.99rem) {

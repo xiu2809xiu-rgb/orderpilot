@@ -24,8 +24,7 @@ export function MatrixTab() {
   const session = useSessionStore((state) => state.session);
   const canManage = hasPermission(session, "roles.manage");
   const matrix = useMatrixRead();
-  const { busy, failure, setPermission, setDataScope, copyRole } =
-    useMatrixChanges();
+  const { busy, failure, setPermission, copyRole } = useMatrixChanges();
   const { filters, setFilters } = useMatrixFilters();
 
   if (matrix.isPending) return <LoadingState />;
@@ -115,17 +114,9 @@ export function MatrixTab() {
         ) : (
           <MatrixTable
             matrix={visible.matrix}
-            showDataScope={visible.showDataScope}
             canManage={canManage}
             busy={busy}
             onToggle={setPermission}
-            onScope={(role, dataScope) => {
-              setDataScope(
-                role,
-                dataScope,
-                data.roles.find((access) => access.role === role)?.dataScope,
-              );
-            }}
           />
         )}
       </div>

@@ -17,14 +17,26 @@ export const FILTER_IDS = [
   "action",
   "from",
   "to",
+  "around",
 ] as const;
 export type FilterId = (typeof FILTER_IDS)[number] | "refusals";
 
 const UUID =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
+const WHOLE = /^\d+$/;
 
-export type FilterProblem = "actor" | "range" | "date" | null;
+export type FilterProblem = "actor" | "range" | "date" | "around" | null;
+
+/**
+ * The sequence the list is centred on (F-9's events around a break), or null.
+ * The server refuses anything but a whole number above zero, so the page says
+ * why here instead of showing the server's 400.
+ */
+function sequenceOf(value: string): number | null {
+  const sequence = WHOLE.test(value) ? Number(value) : Number.NaN;
+  return Number.isSafeInteger(sequence) && sequence >= 1 ? sequence : null;
+}
 
 export interface ListRequest {
   params: AuditViewerListParams;
@@ -75,6 +87,12 @@ export function toListRequest(query: TableQuery): ListRequest {
   if (actor) {
     if (UUID.test(actor)) params.actorUserId = actor;
     else problem = "actor";
+  }
+  const around = text("around");
+  if (around) {
+    const sequence = sequenceOf(around);
+    if (sequence === null) problem ??= "around";
+    else params.around = sequence;
   }
   const start = from ? startOf(from) : null;
   const end = to ? endOf(to) : null;

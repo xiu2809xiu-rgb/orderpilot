@@ -33,7 +33,7 @@ export function OrderJourneySection({
           <h2 id={headingId} className="dx-section-title">
             {t("order.journey.title")}
           </h2>
-          <p className="od-journey-subtitle fs-12 text-muted-foreground">
+          <p className="od-journey-subtitle dx-meta">
             {t("order.journey.subtitle")}
           </p>
         </div>

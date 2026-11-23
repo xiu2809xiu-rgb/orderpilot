@@ -4,6 +4,7 @@
 @import "./tokens.css";
 @import "./type.css";
 @import "./surfaces.css";
+@import "./optical.css";
 @import "./chrome.css";
 @import "./motion.css";
 @import "./page-wipe.css";
@@ -125,7 +126,7 @@
 
 /* Prose never runs past about 72 characters: max-w-prose is wider in Geist. */
 .measure {
-  max-width: 72ch;
+  max-width: var(--dx-measure);
 }
 
 .boot-splash {

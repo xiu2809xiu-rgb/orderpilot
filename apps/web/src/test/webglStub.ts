@@ -46,3 +46,23 @@ export function manualFrames() {
     },
   };
 }
+
+/**
+ * Like `stubWebgl2`, and a 2D context that accepts every call too. The pixel
+ * toggle's glass renderer draws its glyph mask with a 2D context, so it needs
+ * both to come up in jsdom. `kinds` records which contexts were asked for.
+ */
+export function stubCanvasContexts() {
+  const answer = () => new Proxy({}, { get: () => vi.fn(() => ({})) });
+  const gl = answer() as unknown as WebGL2RenderingContext;
+  const ctx = answer() as unknown as CanvasRenderingContext2D;
+  const kinds: string[] = [];
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(
+    function (kind: string) {
+      kinds.push(kind);
+      if (kind === "webgl2") return gl;
+      return kind === "2d" ? ctx : null;
+    } as HTMLCanvasElement["getContext"],
+  );
+  return { gl, ctx, kinds };
+}

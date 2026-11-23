@@ -251,17 +251,49 @@ describe("the home page of a role with an inbox", () => {
     expect(served.calls).not.toContain("POST payment SO-0300");
   });
 
-  it("counts the rest and links to the whole inbox when there are more tasks than rows", async () => {
+  it("shows five rows, counts the rest and links to the whole inbox when there are more tasks than rows", async () => {
     const many = Array.from({ length: 11 }, (_, index) =>
       makeTask({ orderNo: `SO-${String(500 + index)}` }),
     );
     serveHome({ tasks: many });
     renderHome("WAREHOUSE");
-    expect(await screen.findByText("3 more waiting")).toBeVisible();
+    expect(await screen.findByText("6 more waiting")).toBeVisible();
     expect(
       screen.getByRole("link", { name: "View all 11 tasks" }),
     ).toHaveAttribute("href", "/workflows");
-    expect(within(needs()).getAllByRole("listitem")).toHaveLength(8);
+    expect(within(needs()).getAllByRole("listitem")).toHaveLength(5);
+  });
+
+  it("lists all five rows with no link to the inbox when exactly five wait", async () => {
+    const five = Array.from({ length: 5 }, (_, index) =>
+      makeTask({ orderNo: `SO-${String(600 + index)}` }),
+    );
+    serveHome({ tasks: five });
+    renderHome("WAREHOUSE");
+    await screen.findAllByRole("button", { name: /^Mark as packed for/ });
+    expect(within(needs()).getAllByRole("listitem")).toHaveLength(5);
+    expect(screen.queryByText(/more waiting/)).toBeNull();
+    expect(screen.queryByRole("link", { name: /^View all/ })).toBeNull();
+  });
+
+  it("keeps focus on the next row when more tasks wait than rows", async () => {
+    const user = userEvent.setup();
+    const many = Array.from({ length: 7 }, (_, index) =>
+      makeTask({ orderNo: `SO-${String(700 + index)}` }),
+    );
+    serveHome({ tasks: many });
+    renderHome("WAREHOUSE");
+    await user.click(
+      await screen.findByRole("button", { name: "Mark as packed for SO-702" }),
+    );
+    // A guard on the focus rule, not proof of the row count: focus lands on
+    // the next row's action when more tasks wait than are shown.
+    const next = await screen.findByRole("button", {
+      name: "Mark as packed for SO-703",
+    });
+    await waitFor(() => {
+      expect(next).toHaveFocus();
+    });
   });
 
   it("has no link to the inbox when every task is already listed", async () => {

@@ -26,6 +26,7 @@ describe("the duties kept apart", () => {
   it("holds the pairs F-4 names, the bank-detail change against payments, and F-5's two people", () => {
     expect(SEGREGATED_DUTIES).toEqual([
       { earlier: "spr.raise", later: ["spr.approve"] },
+      { earlier: "spr.route", later: ["spr.approve"] },
       { earlier: "vendor-payment.approve", later: ["payment-hold.clear"] },
       {
         earlier: "vendor-bank.change",
@@ -98,6 +99,18 @@ describe("the segregation-of-duties rule", () => {
     expect(rule.refusal(context("spr.approve", undefined, ME))).not.toBeNull();
     expect(
       rule.refusal(context("spr.approve", undefined, SOMEONE_ELSE)),
+    ).toBeNull();
+  });
+
+  it("refuses the coordinator who routed an SPR its approval (#252)", () => {
+    const raisedBy = "00000000-0000-4000-8000-000000000003";
+    expect(
+      rule.refusal(context("spr.approve", { "spr.route": ME }, raisedBy)),
+    ).not.toBeNull();
+    expect(
+      rule.refusal(
+        context("spr.approve", { "spr.route": SOMEONE_ELSE }, raisedBy),
+      ),
     ).toBeNull();
   });
 

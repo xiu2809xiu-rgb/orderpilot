@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { auditEventQuerySchema, isRefusalAction } from "./index.js";
+import {
+  auditEventQuerySchema,
+  auditFilterOptionsSchema,
+  isRefusalAction,
+} from "./index.js";
 
 describe("isRefusalAction", () => {
   it("knows the refusals the auth layer writes", () => {
@@ -25,5 +29,52 @@ describe("auditEventQuerySchema", () => {
     expect(auditEventQuerySchema.safeParse({ refusalsOnly: "1" }).success).toBe(
       false,
     );
+  });
+});
+
+describe("the events around a sequence (F-9)", () => {
+  it("takes the sequence to centre the list on", () => {
+    expect(auditEventQuerySchema.parse({ around: "1234" })).toMatchObject({
+      around: 1234,
+    });
+  });
+
+  it("rejects a sequence that is not a positive whole number", () => {
+    for (const around of ["0", "-3", "1.5", "abc", ""]) {
+      expect(auditEventQuerySchema.safeParse({ around }).success, around).toBe(
+        false,
+      );
+    }
+  });
+});
+
+describe("the people and actions the filters offer (F-9)", () => {
+  const person = {
+    id: "0194f3a0-0000-7000-8000-0000000000aa",
+    name: "Farah Finance",
+  };
+
+  it("holds each person's id and name, and the action names", () => {
+    expect(
+      auditFilterOptionsSchema.parse({
+        people: [person],
+        actions: ["auth.permission.refused"],
+      }),
+    ).toEqual({ people: [person], actions: ["auth.permission.refused"] });
+  });
+
+  it("refuses a person with an email, or anything else beside the name", () => {
+    for (const extra of [
+      { email: "farah@example.test" },
+      { role: "FINANCE" },
+    ]) {
+      expect(
+        auditFilterOptionsSchema.safeParse({
+          people: [{ ...person, ...extra }],
+          actions: [],
+        }).success,
+        Object.keys(extra).join(),
+      ).toBe(false);
+    }
   });
 });

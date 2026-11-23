@@ -1,3 +1,4 @@
+import { AI_PROVIDER_SETTINGS } from "@orderpilot/shared";
 import { z } from "zod";
 
 /** Where the API runs. Separate from NODE_ENV: a demo stack runs in production mode. */
@@ -35,6 +36,87 @@ function isOrigin(value: string): boolean {
     return false;
   }
 }
+
+/**
+ * An empty or blank value counts as unset. Compose passes a bare name through
+ * as an empty string, and a person who blanks a line in .env means "off".
+ */
+function unsetWhenEmpty(value: unknown): unknown {
+  return typeof value === "string" && value.trim() === "" ? undefined : value;
+}
+
+const optionalText = z.preprocess(
+  unsetWhenEmpty,
+  z.string().trim().min(1).optional(),
+);
+
+/** A key for a model provider. Long enough to be real is not checked: providers differ. */
+const optionalSecret = z.preprocess(
+  unsetWhenEmpty,
+  z.string().trim().min(1).max(4096).optional(),
+);
+
+function boundedInt(min: number, max: number, fallback: number) {
+  return z.preprocess(
+    unsetWhenEmpty,
+    z.coerce.number().int().min(min).max(max).default(fallback),
+  );
+}
+
+/** A price in USD per million tokens, as a decimal string so no float is involved. */
+const priceText = z.preprocess(
+  unsetWhenEmpty,
+  z
+    .string()
+    .trim()
+    .regex(/^\d{1,6}(\.\d{1,6})?$/, "Must be a plain decimal such as 0.15")
+    .default("0"),
+);
+
+/** Where an OpenAI-compatible provider is reached: http or https, and no key in the URL. */
+const baseUrlText = z.preprocess(
+  unsetWhenEmpty,
+  z
+    .string()
+    .trim()
+    .refine(isPlainHttpUrl, {
+      message:
+        "Must be an http or https URL such as https://host/v1, with no user name or password in it",
+    })
+    .optional(),
+);
+
+function isPlainHttpUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return (
+      (url.protocol === "http:" || url.protocol === "https:") &&
+      url.username === "" &&
+      url.password === ""
+    );
+  } catch {
+    return false;
+  }
+}
+
+/** localhost and the loopback addresses: nothing leaves the machine, so http is fine there. */
+function isLoopbackHost(hostname: string): boolean {
+  return (
+    hostname === "localhost" ||
+    hostname === "[::1]" ||
+    /^127\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname)
+  );
+}
+
+/** The values of AI_PROVIDER: the shared tuple is the one source. */
+export const AI_PROVIDER_NAMES = AI_PROVIDER_SETTINGS;
+
+/** How a provider is asked for JSON. zod validates the answer whichever is used. */
+export const AI_STRUCTURED_OUTPUTS = [
+  "json_schema",
+  "json_object",
+  "prompt",
+] as const;
 
 /**
  * The JWT secret the API falls back to outside production, and the value
@@ -169,6 +251,51 @@ export const envSchema = z
     // secret: rotating that must not make every vendor look changed. Without
     // it a comparison fails closed.
     BANK_FINGERPRINT_KEY: z.string().min(32).optional(),
+
+    // Temporary (ADR 0056): "on" lets any one of the approver group decide an
+    // approval (#252). "off" keeps today's chain, its substitutes and its limits
+    // exactly as they were, until area 2 routes with the group (#251) and turns
+    // it on. A follow-up removes the switch and the old chain.
+    APPROVER_GROUP: z.enum(["off", "on"]).default("off"),
+    // The approver group's approval limits are switchable, with none set,
+    // until Spectra confirms them (ADR 0049, ADR 0056). They count only while
+    // APPROVER_GROUP is on: the old chain always applies its limits. Only "on"
+    // turns them on; any other value is refused, so a typo cannot switch them.
+    APPROVAL_LIMITS: z.enum(["off", "on"]).default("off"),
+    // The AI gateway (P-17). The default is the offline mock: no key, no
+    // network. Only synthetic data may be sent to any other provider, and a
+    // free-tier provider may keep and use what it is sent.
+    AI_PROVIDER: z.preprocess(
+      unsetWhenEmpty,
+      z.enum(AI_PROVIDER_NAMES).default("mock"),
+    ),
+    GEMINI_API_KEY: optionalSecret,
+    GROQ_API_KEY: optionalSecret,
+    // For openai-compatible only: OpenRouter, NVIDIA NIM, Ollama and the like.
+    // The gemini and groq presets know their own addresses.
+    AI_BASE_URL: baseUrlText,
+    AI_API_KEY: optionalSecret,
+    // No model id has a default: ids change faster than releases do.
+    AI_MODEL: optionalText,
+    AI_VISION_MODEL: optionalText,
+    AI_STRUCTURED_OUTPUT: z.preprocess(
+      unsetWhenEmpty,
+      z.enum(AI_STRUCTURED_OUTPUTS).default("json_schema"),
+    ),
+    AI_TIMEOUT_MS: boundedInt(1000, 300_000, 60_000),
+    AI_MAX_ATTEMPTS: boundedInt(1, 5, 3),
+    AI_MAX_TOOL_STEPS: boundedInt(1, 10, 5),
+    AI_MAX_IMAGES_PER_REQUEST: boundedInt(1, 10, 3),
+    AI_MAX_OUTPUT_TOKENS: boundedInt(1, 131_072, 4096),
+    // Prices drift, so they are configuration and the cost is an estimate.
+    AI_PRICE_INPUT_USD_PER_MTOK: priceText,
+    AI_PRICE_OUTPUT_USD_PER_MTOK: priceText,
+    // Bedrock reads no ambient credentials: AppConfig is the only reader of
+    // the environment.
+    AI_BEDROCK_REGION: optionalText,
+    AI_BEDROCK_ACCESS_KEY_ID: optionalSecret,
+    AI_BEDROCK_SECRET_ACCESS_KEY: optionalSecret,
+    AI_BEDROCK_SESSION_TOKEN: optionalSecret,
   })
   .superRefine((env, ctx) => {
     if (env.APP_ENV !== "local" && !env.COOKIE_SECURE) {
@@ -199,6 +326,7 @@ export const envSchema = z
           "Set your own bank fingerprint key unless APP_ENV is local: this one is public",
       });
     }
+    requireAiSettings(env, ctx);
     if (env.APP_ENV !== "production") return;
     if (env.DEMO_PASSWORD !== undefined) {
       ctx.addIssue({
@@ -224,3 +352,54 @@ export const envSchema = z
   });
 
 export type Env = z.output<typeof envSchema>;
+
+/**
+ * A chosen provider needs its own settings. Each message names the variable
+ * and the file to put it in, and never a value: a key may be what is wrong.
+ */
+function requireAiSettings(env: Env, ctx: z.core.$RefinementCtx): void {
+  const need = (name: keyof typeof env, why: string): void => {
+    if (env[name] !== undefined) return;
+    ctx.addIssue({
+      code: "custom",
+      path: [name],
+      message: `Set it in the root .env file: ${why}`,
+    });
+  };
+  switch (env.AI_PROVIDER) {
+    case "mock":
+      return;
+    case "gemini":
+      need("GEMINI_API_KEY", "AI_PROVIDER is gemini");
+      need("AI_MODEL", "AI_PROVIDER is gemini and no model id is assumed");
+      return;
+    case "groq":
+      need("GROQ_API_KEY", "AI_PROVIDER is groq");
+      need("AI_MODEL", "AI_PROVIDER is groq and no model id is assumed");
+      return;
+    case "openai-compatible":
+      need("AI_BASE_URL", "AI_PROVIDER is openai-compatible");
+      need(
+        "AI_MODEL",
+        "AI_PROVIDER is openai-compatible and no model id is assumed",
+      );
+      if (env.APP_ENV === "production" && env.AI_BASE_URL !== undefined) {
+        const url = new URL(env.AI_BASE_URL);
+        if (url.protocol !== "https:" && !isLoopbackHost(url.hostname)) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["AI_BASE_URL"],
+            message:
+              "Production must reach the provider over https, unless it runs on this machine",
+          });
+        }
+      }
+      return;
+    case "bedrock":
+      need("AI_BEDROCK_REGION", "AI_PROVIDER is bedrock");
+      need("AI_BEDROCK_ACCESS_KEY_ID", "AI_PROVIDER is bedrock");
+      need("AI_BEDROCK_SECRET_ACCESS_KEY", "AI_PROVIDER is bedrock");
+      need("AI_MODEL", "AI_PROVIDER is bedrock and no model id is assumed");
+      return;
+  }
+}

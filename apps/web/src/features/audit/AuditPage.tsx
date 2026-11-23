@@ -10,7 +10,7 @@ export default function AuditPage() {
   const { t } = useTranslation("audit");
   const { eventId, openEvent } = useAuditQuery();
   return (
-    <div className="space-y-s3">
+    <div className="dx-sheet-wide dx-page">
       <PageHeader
         title={t("title")}
         description={t("description")}

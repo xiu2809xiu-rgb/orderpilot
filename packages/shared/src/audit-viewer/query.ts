@@ -36,6 +36,16 @@ export const auditEventQuerySchema = pageQuerySchema
     refusalsOnly: flagSchema.optional(),
     /** Words in the summary, ignoring case. */
     search: z.string().trim().min(1).max(100).optional(),
+    /**
+     * Centres the list on this sequence: the events five sequences either
+     * side of it, such as where a chain check found a break (F-9).
+     */
+    around: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(Number.MAX_SAFE_INTEGER)
+      .optional(),
   })
   .refine((query) => !query.from || !query.to || query.from <= query.to, {
     message: "The start of the range must not be after its end",

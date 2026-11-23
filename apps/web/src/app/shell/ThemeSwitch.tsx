@@ -1,49 +1,27 @@
-import { Moon, Sun } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from "./overlays/dropdown-menu";
-import { useThemeStore, type ThemePreference } from "@/lib/theme";
+import { PixelToggle } from "@/components/kit/pixel-toggle/PixelToggle";
+import { useThemeStore } from "@/lib/theme";
+import { useIsDark } from "@/lib/useIsDark";
 
-const CHOICES: ThemePreference[] = ["light", "dark", "system"];
-
+/**
+ * The theme switch: on is the light theme (the sun), off is the dark one (the
+ * moon). It shows the theme that is on the page, so under "system" it shows
+ * what the device gives, and follows a change made in Settings, in the palette
+ * or on the device without a sound and without choosing again. A person who
+ * uses it chooses Light or Dark; "system" stays in Settings, Appearance, and
+ * the new theme opens from the switch (setPreference reads the press).
+ */
 export function ThemeSwitch() {
   const { t } = useTranslation();
-  const preference = useThemeStore((state) => state.preference);
+  const dark = useIsDark();
   const setPreference = useThemeStore((state) => state.setPreference);
-
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="dx-bar-icon"
-          aria-label={t("theme.label")}
-        >
-          <Sun className="size-4 dark:hidden" aria-hidden="true" />
-          <Moon className="hidden size-4 dark:block" aria-hidden="true" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" sideOffset={14}>
-        <DropdownMenuRadioGroup
-          value={preference}
-          onValueChange={(value) => {
-            setPreference(value as ThemePreference);
-          }}
-        >
-          {CHOICES.map((choice) => (
-            <DropdownMenuRadioItem key={choice} value={choice}>
-              {t(`theme.${choice}`)}
-            </DropdownMenuRadioItem>
-          ))}
-        </DropdownMenuRadioGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <PixelToggle
+      checked={!dark}
+      label={t("theme.switch")}
+      onCheckedChange={(day) => {
+        setPreference(day ? "light" : "dark");
+      }}
+    />
   );
 }

@@ -127,7 +127,9 @@ describe("the menu of a narrow window", () => {
     expect(
       within(extras).getByRole("link", { name: "Upload" }),
     ).toHaveAttribute("href", "/upload");
-    expect(within(extras).getByRole("button", { name: "Theme" })).toBeVisible();
+    expect(
+      within(extras).getByRole("switch", { name: "Light theme" }),
+    ).toBeVisible();
   });
 
   it("has no Upload for a role that may not upload, and still the theme", async () => {
@@ -138,21 +140,24 @@ describe("the menu of a narrow window", () => {
     );
     const menu = await screen.findByRole("dialog", { name: "Navigation" });
     expect(within(menu).queryByRole("link", { name: "Upload" })).toBeNull();
-    expect(within(menu).getByRole("button", { name: "Theme" })).toBeVisible();
+    expect(
+      within(menu).getByRole("switch", { name: "Light theme" }),
+    ).toBeVisible();
   });
 
-  it("changes the theme from the menu", async () => {
+  it("changes the theme from the switch in the menu", async () => {
     const user = userEvent.setup();
     await open();
     await user.click(
       screen.getByRole("button", { name: "Open navigation menu" }),
     );
     const menu = await screen.findByRole("dialog", { name: "Navigation" });
-    await user.click(within(menu).getByRole("button", { name: "Theme" }));
-    await user.click(
-      await screen.findByRole("menuitemradio", { name: "Dark" }),
-    );
+    // On in the light theme: switching it off is Dark.
+    const theme = within(menu).getByRole("switch", { name: "Light theme" });
+    expect(theme).toHaveAttribute("aria-checked", "true");
+    await user.click(theme);
     expect(document.documentElement).toHaveClass("dark");
+    expect(theme).toHaveAttribute("aria-checked", "false");
   });
 
   it(

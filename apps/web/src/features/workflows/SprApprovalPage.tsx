@@ -31,7 +31,7 @@ export default function SprApprovalPage() {
 
   if (query.error instanceof ApiError && query.error.status === 404) {
     return (
-      <div className="dx-sheet flex flex-col gap-s4">
+      <div className="dx-sheet dx-page">
         <BackToInbox />
         <StatePanel
           icon={SearchX}
@@ -43,7 +43,7 @@ export default function SprApprovalPage() {
   }
 
   return (
-    <div className="dx-sheet flex flex-col gap-s4">
+    <div className="dx-sheet dx-page">
       <BackToInbox />
       <PageHeader
         title={t("spr.heading", { recordNo })}

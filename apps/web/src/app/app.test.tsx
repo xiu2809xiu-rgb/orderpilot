@@ -233,9 +233,11 @@ describe("signed in", () => {
 
   it("switches the theme and remembers it", async () => {
     const user = userEvent.setup();
-    renderApp("/settings", { session: sessionFor("SUPPORT") });
+    renderApp("/settings?section=appearance", {
+      session: sessionFor("SUPPORT"),
+    });
     await screen.findByRole("heading", { name: "Settings" });
-    await user.click(screen.getByRole("radio", { name: "Dark" }));
+    await user.click(await screen.findByRole("radio", { name: "Dark" }));
     expect(document.documentElement).toHaveClass("dark");
     expect(localStorage.getItem("op-theme")).toBe("dark");
     await user.click(screen.getByRole("radio", { name: "Light" }));
@@ -414,13 +416,21 @@ describe("accessibility (axe)", () => {
     expect(await violations(container)).toEqual([]);
   });
 
-  it("finds nothing on the not-found page or the settings page", async () => {
-    const first = renderApp("/documents", { session: sessionFor("SUPPORT") });
+  // One page each, so a slow run on a busy machine does not take both pages
+  // past the 15 s budget of one test.
+  it("finds nothing on the not-found page", async () => {
+    const { container } = renderApp("/documents", {
+      session: sessionFor("SUPPORT"),
+    });
     await screen.findByRole("heading", { name: "Page not found" });
-    expect(await violations(first.container)).toEqual([]);
-    first.unmount();
-    const second = renderApp("/settings", { session: sessionFor("SUPPORT") });
+    expect(await violations(container)).toEqual([]);
+  });
+
+  it("finds nothing on the settings page", async () => {
+    const { container } = renderApp("/settings", {
+      session: sessionFor("SUPPORT"),
+    });
     await screen.findByRole("heading", { name: "Settings" });
-    expect(await violations(second.container)).toEqual([]);
+    expect(await violations(container)).toEqual([]);
   });
 });

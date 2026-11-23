@@ -6,9 +6,10 @@ import {
 import { ValidationFailedError } from "../../../common/domain-error.js";
 
 /**
- * One row of the approval setup: Navision's Approval User Setup, plus when the
- * user is away, which Navision does not record. The absence lives in area 4's
- * own shape, so the shared contract keeps Navision's fields one to one.
+ * One row of the approval setup: Business Central's Approval User Setup, plus
+ * when the user is away, which Business Central does not record. The absence
+ * lives in area 4's own shape, so the shared contract keeps Business Central's
+ * fields one to one.
  */
 export interface ApprovalSetup extends ApprovalUserSetup {
   /** Away from this moment. Null while present. */

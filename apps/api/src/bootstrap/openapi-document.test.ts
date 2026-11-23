@@ -25,10 +25,13 @@ describe("the OpenAPI document (what orval reads)", () => {
   it("is built with no database, Redis or .env, from the real routes", async () => {
     const document = await documentOf();
     expect(Object.keys(document.paths).sort()).toEqual([
+      "/api/v1/ai/probe",
+      "/api/v1/ai/status",
       "/api/v1/analytics/clickstream",
       "/api/v1/audit/chain",
       "/api/v1/audit/events",
       "/api/v1/audit/events/{id}",
+      "/api/v1/audit/filter-options",
       "/api/v1/auth/demo-login",
       "/api/v1/auth/login",
       "/api/v1/auth/logout",

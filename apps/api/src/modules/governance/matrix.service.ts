@@ -136,7 +136,11 @@ export class MatrixService {
     });
   }
 
-  /** Makes `toRole` hold what `fromRole` holds, with the same data scope. */
+  /**
+   * Makes `toRole` hold the permissions `fromRole` holds. Its data scope stays
+   * as it was: no list reads the scope yet, so a copy that changed it would
+   * change something nobody can see (#268, ADR 0065).
+   */
   copyRole(
     body: CopyRoleBody,
     actor: AuthContext,
@@ -144,11 +148,9 @@ export class MatrixService {
   ): Promise<RoleAccess> {
     return this.database.transaction(async () => {
       const { fromRole, toRole } = body;
-      const [source, target, scope, before] = await Promise.all([
+      const [source, target] = await Promise.all([
         this.permissions.permissionsOf(fromRole),
         this.permissions.permissionsOf(toRole),
-        this.scopes.get(fromRole),
-        this.scopes.get(toRole),
       ]);
       const plan = planCopy(fromRole, toRole, source, target);
       for (const permission of plan.grant) {
@@ -157,7 +159,6 @@ export class MatrixService {
       for (const permission of plan.revoke) {
         await this.revoke(toRole, permission);
       }
-      await this.scopes.set(toRole, scope);
       await this.audit.record({
         actor: { kind: "user", userId: actor.user.id, role: actor.user.role },
         action: "governance.role.copied",
@@ -169,7 +170,6 @@ export class MatrixService {
           toRole,
           granted: plan.grant,
           revoked: plan.revoke,
-          dataScope: { from: before, to: scope },
         },
         ip: info.ip,
         traceId: info.traceId,
