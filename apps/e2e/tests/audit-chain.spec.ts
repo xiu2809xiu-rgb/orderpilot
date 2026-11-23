@@ -1,5 +1,5 @@
-import type { AuditChainCheck } from "@orderpilot/shared";
-import { checkPage, expect, signInAs, test } from "../src/index.js";
+import type { AuditChainCheck, AuditEventView } from "@orderpilot/shared";
+import { apiUrl, checkPage, expect, signInAs, test } from "../src/index.js";
 
 // F-10. The system admin, as in F-9's tests: ADR 0058 retires the auditor.
 // jsdom has no WebGL, so only a real browser shows that the shader compiles
@@ -32,5 +32,51 @@ test.describe("F-10: the picture of the chain check", () => {
     for (const number of shown) expect(sent).toContain(number);
 
     await checkPage(page);
+  });
+
+  test("opens the event a break is at from the red block, as Open event N does", async ({
+    page,
+  }) => {
+    await signInAs(page, "SYSTEM_ADMIN");
+    // The real trail verifies, so the break is staged on its two newest events.
+    const newest = (
+      (await (
+        await page.request.get(apiUrl("/audit/events?pageSize=2"))
+      ).json()) as { data: AuditEventView[] }
+    ).data;
+    const [broken, before] = newest;
+    if (!broken || !before) throw new Error("The trail needs two events");
+    await page.route("**/api/v1/audit/chain", (route) =>
+      route.fulfill({
+        json: {
+          data: {
+            ok: false,
+            checked: 1,
+            verifiedThrough: before.sequence,
+            brokenAtSequence: broken.sequence,
+            brokenAtEventId: broken.id,
+            problem: "hash-mismatch",
+            checkedAt: new Date().toISOString(),
+          },
+        },
+      }),
+    );
+    await page.goto("/audit");
+    await page.getByRole("button", { name: "Check the chain" }).click();
+
+    const open = page.getByRole("link", {
+      name: `Open event ${String(broken.sequence)}`,
+    });
+    const block = page.locator("[data-chain-break]");
+    await expect(block).toHaveAttribute(
+      "href",
+      (await open.getAttribute("href")) ?? "",
+    );
+    await expect(block).toHaveAttribute("tabindex", "-1");
+    // A real click on the canvas's spot lands on the link, not the canvas.
+    await block.click();
+    await expect(page.getByRole("dialog")).toContainText(
+      `Event ${String(broken.sequence)}`,
+    );
   });
 });
