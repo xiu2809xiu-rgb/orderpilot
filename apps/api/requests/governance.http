@@ -24,14 +24,15 @@ X-CSRF-Token: {{csrf}}
 
 { "granted": true }
 
-### Which records a role may see: all, brands or own. Stored and shown; not enforced yet.
+### Which records a role may see: all, brands or own. Stored only: no list reads it
+### yet, so the matrix screen does not offer it (#268, ADR 0065).
 PUT {{baseUrl}}/api/v1/governance/matrix/PRODUCT_MANAGER/data-scope
 Content-Type: application/json
 X-CSRF-Token: {{csrf}}
 
 { "dataScope": "brands" }
 
-### Make one role hold exactly what another holds, with its data scope.
+### Make one role hold exactly the permissions another holds. Its data scope stays as it was.
 POST {{baseUrl}}/api/v1/governance/matrix/copy
 Content-Type: application/json
 X-CSRF-Token: {{csrf}}

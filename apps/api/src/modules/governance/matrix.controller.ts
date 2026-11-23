@@ -131,7 +131,8 @@ export class MatrixController {
   @HttpCode(200)
   @RequirePermission("roles.manage")
   @ApiOperation({
-    summary: "Copy a role's permissions and data scope to another role",
+    summary:
+      "Copy a role's permissions to another role. The target's data scope stays as it was",
   })
   @ApiBody({ schema: openApiSchema(copyRoleBodySchema) })
   @ApiOkResponse({ schema: openApiSchema(roleAccessResponseSchema) })
