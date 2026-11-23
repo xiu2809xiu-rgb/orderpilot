@@ -63,8 +63,6 @@ export const NO_MATRIX_FILTERS: MatrixFilters = {
 
 export interface FilteredMatrix {
   readonly matrix: MatrixRead200Data;
-  /** The data scope is per role, so it goes when the rows are being narrowed. */
-  readonly showDataScope: boolean;
 }
 
 /** What the matrix shows for these filters. The server's answer is left whole. */
@@ -84,8 +82,5 @@ export function filterMatrix(
     filters.role === ""
       ? matrix.roles
       : matrix.roles.filter((access) => access.role === filters.role);
-  return {
-    matrix: { ...matrix, permissions, roles },
-    showDataScope: words === "" && filters.group === "",
-  };
+  return { matrix: { ...matrix, permissions, roles } };
 }

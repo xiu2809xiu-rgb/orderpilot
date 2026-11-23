@@ -23,7 +23,8 @@ interface CopyRoleDialogProps {
 }
 
 /**
- * Copies one role's permissions and data scope onto another. A copy replaces
+ * Copies one role's permissions onto another, and leaves the target's data
+ * scope as it was, as no list reads it yet (#268). A copy replaces
  * what the target held and has no Undo, so a second step says so first.
  */
 export function CopyRoleDialog({ roles, busy, onCopy }: CopyRoleDialogProps) {
