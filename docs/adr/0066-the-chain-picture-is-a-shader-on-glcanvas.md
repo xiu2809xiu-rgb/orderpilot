@@ -23,13 +23,13 @@ Three ways to draw them were weighed, measured as lazy chunks with React left ou
 | three.js 0.187.0                      | 136 KB  | MIT                           |
 | React Three Fiber 9.8.2 with three.js | 252 KB  | MIT                           |
 | The same with drei and postprocessing | 306 KB  | MIT, with postprocessing Zlib |
-| A fragment shader on the GlCanvas kit | 3.84 KB | Ours; the kit is already here |
+| A fragment shader on the GlCanvas kit | 4.01 KB | Ours; the kit is already here |
 
 The GlCanvas kit (`components/kit/canvas/GlCanvas.tsx`, Richie's) already draws the sign-in stage's shaders. It caps the pixel ratio at 2, pauses off screen and in a hidden tab, draws one still frame under reduced motion, falls back to CSS without WebGL2, and frees its context on unmount.
 
 ## Decision
 
-1. **Direction A, drawn by one fragment shader on GlCanvas.** The blocks are rounded boxes found by ray marching, joined by thin links. There is no new dependency, and the picture is its own lazy chunk of 3.84 KB gzip. The initial JS stays at 228.3 KB.
+1. **Direction A, drawn by one fragment shader on GlCanvas.** The blocks are rounded boxes found by ray marching, joined by thin links. There is no new dependency, and the picture is its own lazy chunk of 4.01 KB gzip. The initial JS stays at 228.3 KB.
 2. **The camera is orthographic, one unit per slot.** Block _i_ sits exactly in slot _i_, so the numbers are HTML under the canvas, placed by `slotCentre`, with no projection. Seven blocks fit from 640 px wide, four below.
 3. **It draws only what the check returns** (`chainModel.ts`):
    - The only numbers are the newest verified sequence and the break. The blocks between them are not numbered.
