@@ -662,6 +662,28 @@ describe("a broken chain and the events around it (F-9)", () => {
     expect(await axeViolations(container)).toEqual([]);
   });
 
+  it("opens the same event from the red block, for a mouse, out of the tab order (F-10)", async () => {
+    server.use(
+      getAuditViewerGetMockHandler({
+        data: event({ sequence: 9, id: BROKEN }),
+      }),
+    );
+    const { user, container } = await checkTheChain();
+    const block = await waitFor(() => {
+      const found = container.querySelector("[data-chain-break]");
+      if (!(found instanceof HTMLElement)) throw new Error("No red block yet");
+      return found;
+    });
+    const link = screen.getByRole("link", { name: "Open event 9" });
+    expect(block.getAttribute("href")).toBe(link.getAttribute("href"));
+    expect(block).toHaveAttribute("tabindex", "-1");
+    expect(block.closest("[aria-hidden='true']")).not.toBeNull();
+    // Axe again, now the picture and its click target are on the page.
+    expect(await axeViolations(container)).toEqual([]);
+    await user.click(block);
+    expect(await screen.findByRole("dialog")).toHaveTextContent("Event 9");
+  });
+
   it("marks the event the list is centred on, and the chip clears it", async () => {
     const user = userEvent.setup();
     renderAt("/audit?around=9");

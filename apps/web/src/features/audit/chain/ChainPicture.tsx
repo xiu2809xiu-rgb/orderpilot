@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router";
 import { GlCanvas } from "@/components/kit/canvas/GlCanvas";
 import { useTokenRgb } from "@/components/kit/canvas/useTokenRgb";
 import { prefersReducedMotion } from "@/components/kit/env";
@@ -46,8 +47,16 @@ function useSettling(travelling: boolean): boolean {
  * picture under reduced motion, and plain CSS without WebGL2. The only numbers
  * are the ones the check returned, under their blocks.
  */
-export function ChainPicture({ picture }: { picture: ChainModel }) {
+export function ChainPicture({
+  picture,
+  brokenLink,
+}: {
+  picture: ChainModel;
+  /** Where the red block goes when clicked: the same event as "Open event N". */
+  brokenLink?: { to: string; label: string } | undefined;
+}) {
   const { blocks, slots, earlier, travelling } = picture;
+  const breaks = blocks.at(-1)?.state === "broken";
   const [accent, bad, ink, ground] = useTokenRgb(TOKENS);
   const [still] = useState(prefersReducedMotion);
   const settling = useSettling(travelling);
@@ -107,6 +116,22 @@ export function ChainPicture({ picture }: { picture: ChainModel }) {
             gl.uniform3fv(uniform("uGround"), ground ?? [1, 1, 1]);
           }}
         />
+        {brokenLink && breaks ? (
+          // For a mouse only. The keyboard and a screen reader have "Open
+          // event N" under the picture, so this one is out of the tab order.
+          <Link
+            to={brokenLink.to}
+            tabIndex={-1}
+            title={brokenLink.label}
+            aria-label={brokenLink.label}
+            data-chain-break=""
+            className="absolute inset-y-0 rounded-md transition-colors duration-200 ease-out hover:bg-destructive/5"
+            style={{
+              left: `${String((slotCentre(blocks.length - 1, blocks.length, slots) - 0.5 / slots) * 100)}%`,
+              width: `${String(100 / slots)}%`,
+            }}
+          />
+        ) : null}
       </div>
       <div className="relative h-5 text-xs text-muted-foreground tabular-nums">
         {blocks.map((block, index) =>

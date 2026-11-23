@@ -23,6 +23,15 @@ const ChainPicture = lazy(async () => ({
 /** Seven blocks fit across from a small tablet up, four on a phone. */
 const WIDE = "(min-width: 640px)";
 
+/** The event a chain breaks at, opened over its neighbours (F-9). */
+function brokenEventPath(sequence: number, eventId: string): string {
+  const query = new URLSearchParams({
+    event: eventId,
+    around: String(sequence),
+  });
+  return `/audit?${query.toString()}`;
+}
+
 /**
  * Where a break is (F-9): the event itself, opened over the events around
  * it, and those events alone. Both drop the other filters, so the break is
@@ -40,10 +49,7 @@ function BreakLinks({
   return (
     <p className="flex flex-wrap gap-x-s2 text-sm">
       {eventId ? (
-        <Link
-          className={LINK}
-          to={`/audit?${new URLSearchParams({ event: eventId, around }).toString()}`}
-        >
+        <Link className={LINK} to={brokenEventPath(sequence, eventId)}>
           {t("chain.openBroken", { n: sequence })}
         </Link>
       ) : null}
@@ -74,6 +80,14 @@ export function ChainCheckCard() {
         ? { kind: "checked", result }
         : { kind: "never" };
   const picture = chainModel(knowledge, wide ? 7 : 4);
+  // The red block opens the same event as "Open event N", for a mouse.
+  const brokenLink =
+    result && !result.ok && result.brokenAtSequence && result.brokenAtEventId
+      ? {
+          to: brokenEventPath(result.brokenAtSequence, result.brokenAtEventId),
+          label: t("chain.openBroken", { n: result.brokenAtSequence }),
+        }
+      : undefined;
 
   return (
     <SectionCard
@@ -91,7 +105,7 @@ export function ChainCheckCard() {
     >
       {picture.blocks.length > 0 ? (
         <Suspense fallback={<div aria-hidden="true" className="h-33" />}>
-          <ChainPicture picture={picture} />
+          <ChainPicture picture={picture} brokenLink={brokenLink} />
         </Suspense>
       ) : null}
       <div aria-live="polite" className="space-y-s1">

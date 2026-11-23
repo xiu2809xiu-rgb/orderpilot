@@ -1,5 +1,6 @@
 import type { AuditChainCheck } from "@orderpilot/shared";
 import { act, render } from "@testing-library/react";
+import { MemoryRouter } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { manualFrames } from "@/test/webglStub";
 import { ChainPicture } from "./ChainPicture";
@@ -144,6 +145,43 @@ describe("the picture of the chain check (F-10)", () => {
     expect(frames.waiting).toBe(0);
     // One still frame is drawn, with everything settled.
     expect(values.get("uSettle")).toBe(1);
+  });
+
+  it("puts a click target on the red block only, out of the tab order", () => {
+    const link = { to: "/audit?event=x&around=1222", label: "Open event 1222" };
+    const { container } = render(
+      <MemoryRouter>
+        <ChainPicture
+          picture={picture({ kind: "checked", result: BROKEN })}
+          brokenLink={link}
+        />
+      </MemoryRouter>,
+    );
+    const block = container.querySelector("[data-chain-break]");
+    expect(block).toHaveAttribute("href", link.to);
+    expect(block).toHaveAttribute("tabindex", "-1");
+    expect(block).toHaveAttribute("title", "Open event 1222");
+    // Over the last of seven slots.
+    expect(parseFloat((block as HTMLElement).style.left)).toBeCloseTo(
+      (6 / 7) * 100,
+    );
+  });
+
+  it("offers no click target while the chain verifies, or while it is checked again", () => {
+    const link = { to: "/audit?event=x&around=1222", label: "Open event 1222" };
+    for (const knowledge of [
+      { kind: "checking" },
+      {
+        kind: "checked",
+        result: { ...BROKEN, ok: true, brokenAtSequence: null },
+      },
+    ] as const) {
+      const { container, unmount } = render(
+        <ChainPicture picture={picture(knowledge)} brokenLink={link} />,
+      );
+      expect(container.querySelector("[data-chain-break]")).toBeNull();
+      unmount();
+    }
   });
 
   it("asks for no frames before any check", () => {
