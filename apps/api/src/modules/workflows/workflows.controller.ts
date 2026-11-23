@@ -302,7 +302,10 @@ export class WorkflowsController {
   @Get("orders/:orderNo/flow")
   @RequirePermission("workflows.read")
   @orderParam
-  @ApiOperation({ summary: "An order's steps and timeline (mock data)" })
+  @ApiOperation({
+    summary:
+      "An order's steps and timeline. On an order the state machine runs, its status and payments are real (meta.mock false); a sample's are mock",
+  })
   @ApiOkResponse({ schema: openApiSchema(orderFlowResponseSchema) })
   async orderFlow(
     @Param(new ZodValidationPipe(orderParamsSchema))
@@ -310,7 +313,11 @@ export class WorkflowsController {
       orderNo: string;
     },
   ) {
-    return { data: await this.workflows.flow(params.orderNo), meta: MOCK };
+    const data = await this.workflows.flow(params.orderNo);
+    return {
+      data,
+      meta: { mock: !(await this.workflows.runsOnMachine(params.orderNo)) },
+    };
   }
 
   @Post("orders/:orderNo/payments")

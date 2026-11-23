@@ -228,6 +228,7 @@ model PaymentConfirmation {
 
   instance WorkflowInstance @relation(fields: [instanceId], references: [id])
 
+  @@unique([orderRef, paymentType, reference])
   @@index([instanceId])
   @@index([orderRef])
   @@index([paymentType, confirmedAt])

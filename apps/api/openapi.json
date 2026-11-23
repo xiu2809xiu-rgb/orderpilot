@@ -3009,8 +3009,7 @@
                       "type": "object",
                       "properties": {
                         "mock": {
-                          "type": "boolean",
-                          "enum": [true]
+                          "type": "boolean"
                         }
                       },
                       "required": ["mock"],
@@ -3024,7 +3023,7 @@
             }
           }
         },
-        "summary": "An order's steps and timeline (mock data)",
+        "summary": "An order's steps and timeline. On an order the state machine runs, its status and payments are real (meta.mock false); a sample's are mock",
         "tags": ["Workflows"]
       }
     },

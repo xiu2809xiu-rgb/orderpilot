@@ -7,7 +7,13 @@ import {
   orderFlowResponseSchema,
   paymentResponseSchema,
 } from "../../src/modules/workflows/workflows.schemas.js";
-import { API, call, demoSignIn, type Browser } from "../support/auth.js";
+import {
+  API,
+  auditCount,
+  call,
+  demoSignIn,
+  type Browser,
+} from "../support/auth.js";
 import { resetTestData } from "../support/reset.js";
 import { createTestApp, type TestApp } from "../support/test-app.js";
 
@@ -72,17 +78,27 @@ describe("the payment thread (#290): Finance's confirmation reaches the warehous
     (await tasksOf(role)).find(
       (task) => task.orderNo === orderNo && task.kind === kind,
     );
-  const pay = (orderNo: string, amount: string, role: Role = "FINANCE") =>
+  const pay = (
+    orderNo: string,
+    amount: string,
+    role: Role = "FINANCE",
+    extra: {
+      reference?: string;
+      currencyCode?: string;
+      paymentType?: string;
+    } = {},
+  ) =>
     call(t, as(role), "post", `${W}/orders/${orderNo}/payments`, {
       csrf: true,
       body: {
-        paymentType: "prepayment",
+        paymentType: extra.paymentType ?? "prepayment",
         amount,
-        currencyCode: "USD",
-        reference: `TT-${orderNo}-${amount}`,
+        currencyCode: extra.currencyCode ?? "USD",
+        reference: extra.reference ?? `TT-${orderNo}-${amount}`,
         paidOn: DATA.asOf,
       },
     });
+  const refusals = () => auditCount(t, "workflows.payment.refused");
   const paymentIdOf = (res: { body: unknown }) =>
     paymentResponseSchema.parse(res.body).data.paymentId;
   const undoPay = (orderNo: string, paymentId: string) =>
@@ -159,24 +175,143 @@ describe("the payment thread (#290): Finance's confirmation reaches the warehous
     );
   });
 
-  it("keeps the order waiting until the payments together cover the prepayment", async () => {
+  it("keeps the order waiting until unequal payments together cover the prepayment, showing what is left", async () => {
     const { orderNo, amount } = awaiting();
-    const half = (Number(amount) / 2).toFixed(2);
-    const rest = (Number(amount) - Number(half)).toFixed(2);
+    const first = (Number(amount) * 0.4).toFixed(2);
+    const rest = (Number(amount) - Number(first)).toFixed(2);
 
-    expect((await pay(orderNo, half)).status).toBe(200);
+    expect((await pay(orderNo, first)).status).toBe(200);
     expect(await statusOf(orderNo)).toBe("AwaitingPayment");
     expect(await taskFor("WAREHOUSE", orderNo, "PACK_ORDER")).toBeUndefined();
+    expect((await flowOf(orderNo)).payment.amountDue).toBe(rest);
 
     expect((await pay(orderNo, rest)).status).toBe(200);
     expect(await statusOf(orderNo)).toBe("Paid");
     expect(await taskFor("WAREHOUSE", orderNo, "PACK_ORDER")).toBeDefined();
   });
 
-  it("refuses the same confirmation twice", async () => {
+  it("takes two equal instalments under different bank references as two payments", async () => {
     const { orderNo, amount } = awaiting();
-    expect((await pay(orderNo, amount)).status).toBe(200);
-    expect((await pay(orderNo, amount)).status).toBe(409);
+    const part = (Math.floor((Number(amount) * 100) / 3) / 100).toFixed(2);
+    const last = (Number(amount) - 2 * Number(part)).toFixed(2);
+
+    expect(
+      (await pay(orderNo, part, "FINANCE", { reference: "TT-A" })).status,
+    ).toBe(200);
+    expect(
+      (await pay(orderNo, part, "FINANCE", { reference: "TT-B" })).status,
+    ).toBe(200);
+    expect(await statusOf(orderNo)).toBe("AwaitingPayment");
+    expect(
+      (await pay(orderNo, last, "FINANCE", { reference: "TT-C" })).status,
+    ).toBe(200);
+    expect(await statusOf(orderNo)).toBe("Paid");
+  });
+
+  it("refuses the same transfer twice, by its bank reference, and audits the refusal", async () => {
+    const { orderNo, amount } = awaiting();
+    const half = (Number(amount) / 2).toFixed(2);
+    expect(
+      (await pay(orderNo, half, "FINANCE", { reference: "TT-SAME" })).status,
+    ).toBe(200);
+    const refused = await refusals();
+
+    const again = await pay(orderNo, "10.00", "FINANCE", {
+      reference: "tt-same ",
+    });
+
+    expect(again.status).toBe(409);
+    expect(await refusals()).toBe(refused + 1);
+  });
+
+  it("refuses the right amount in the wrong currency, leaves the order waiting, and audits it", async () => {
+    const { orderNo, amount } = awaiting();
+    const refused = await refusals();
+
+    const res = await pay(orderNo, amount, "FINANCE", { currencyCode: "INR" });
+
+    expect(res.status).toBe(409);
+    expect(await statusOf(orderNo)).toBe("AwaitingPayment");
+    expect(await taskFor("WAREHOUSE", orderNo, "PACK_ORDER")).toBeUndefined();
+    expect(await refusals()).toBe(refused + 1);
+  });
+
+  it("keeps a deposit on a running order without opening the gate, and takes it back", async () => {
+    const { orderNo, amount } = awaiting();
+    const res = await pay(orderNo, amount, "FINANCE", {
+      paymentType: "deposit",
+    });
+    expect(res.status).toBe(200);
+    expect(await statusOf(orderNo)).toBe("AwaitingPayment");
+    expect(await taskFor("WAREHOUSE", orderNo, "PACK_ORDER")).toBeUndefined();
+
+    expect((await undoPay(orderNo, paymentIdOf(res))).status).toBe(200);
+    expect(await statusOf(orderNo)).toBe("AwaitingPayment");
+  });
+
+  it("takes back a payment kept before the order reached the gate", async () => {
+    if (!SHORT) throw new Error("No short order in the dataset");
+    const orderNo = SHORT.header.no;
+    const res = await pay(orderNo, "999999.00", "FINANCE", {
+      paymentType: "full-payment",
+    });
+    expect(res.status).toBe(200);
+    expect(await statusOf(orderNo)).toBe("StockChecked");
+
+    expect((await undoPay(orderNo, paymentIdOf(res))).status).toBe(200);
+    expect(await statusOf(orderNo)).toBe("StockChecked");
+  });
+
+  it("answers 401 with no session, 400 for a bad body and 404, audited, for an unknown payment", async () => {
+    const { orderNo } = awaiting();
+    const body = {
+      paymentType: "prepayment",
+      currencyCode: "USD",
+      reference: "X",
+      paidOn: DATA.asOf,
+    };
+    const signedOut = await call(
+      t,
+      null,
+      "post",
+      `${W}/orders/${orderNo}/payments`,
+      {
+        body: { ...body, amount: "1.00" },
+      },
+    );
+    expect(signedOut.status).toBe(401);
+
+    const bad = await call(
+      t,
+      as("FINANCE"),
+      "post",
+      `${W}/orders/${orderNo}/payments`,
+      {
+        csrf: true,
+        body: { ...body, amount: "-5" },
+      },
+    );
+    expect(bad.status).toBe(400);
+
+    const refused = await refusals();
+    const unknown = await undoPay(
+      orderNo,
+      "99999999-9999-4999-8999-999999999999",
+    );
+    expect(unknown.status).toBe(404);
+    expect(await refusals()).toBe(refused + 1);
+    expect(await statusOf(orderNo)).toBe("AwaitingPayment");
+  });
+
+  it("says a running order's flow is not mock, and a sample's is", async () => {
+    const { orderNo } = awaiting();
+    const flowMeta = async (no: string) =>
+      (await call(t, as("FINANCE"), "get", `${W}/orders/${no}/flow`)).body as {
+        meta: { mock: boolean };
+      };
+    expect((await flowMeta(orderNo)).meta.mock).toBe(false);
+    if (!DEPOSIT_ONLY) throw new Error("No deposit-only order in the dataset");
+    expect((await flowMeta(DEPOSIT_ONLY.header.no)).meta.mock).toBe(true);
   });
 
   it("takes the warehouse's task away when Finance undoes the payment, and gives Finance its task back", async () => {
@@ -213,8 +348,10 @@ describe("the payment thread (#290): Finance's confirmation reaches the warehous
     });
     expect(await taskFor("WAREHOUSE", orderNo, "PACK_ORDER")).toBeUndefined();
     // The goods are being packed against that money, so it cannot be taken back.
+    const refused = await refusals();
     expect((await undoPay(orderNo, paymentId)).status).toBe(409);
     expect(await statusOf(orderNo)).toBe("Packing");
+    expect(await refusals()).toBe(refused + 1);
 
     expect((await act("WAREHOUSE", packing.id, "undo")).status).toBe(200);
     expect(await statusOf(orderNo)).toBe("Paid");

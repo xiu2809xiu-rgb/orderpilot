@@ -212,6 +212,11 @@ export class WorkflowsService {
     );
   }
 
+  /** True for an order the state machine runs: its status and payments are not mock. */
+  async runsOnMachine(orderNo: string): Promise<boolean> {
+    return Boolean(await this.orders?.statusOf(orderNo));
+  }
+
   /** On an order the state machine runs, the machine says where it stands and whose move it is. */
   async flow(orderNo: string): Promise<OrderFlow> {
     const flow = await this.model.flowOf(orderNo);
@@ -219,7 +224,8 @@ export class WorkflowsService {
     const view = await this.orders?.statusOf(orderNo);
     if (!view) return flow;
     const payments = (await this.payments?.forOrder(orderNo)) ?? [];
-    return runningFlowOf(flow, view, payments);
+    const due = (await this.orders?.prepaymentDueOf(orderNo)) ?? null;
+    return runningFlowOf(flow, view, payments, due);
   }
 
   async spr(recordNo: string, viewerUserId?: string): Promise<SprDetail> {

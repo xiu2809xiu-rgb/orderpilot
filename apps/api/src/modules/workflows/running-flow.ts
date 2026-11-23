@@ -1,5 +1,7 @@
 import {
   ROLE_LABELS,
+  compareDecimal,
+  subtractDecimal,
   type OrderFlow,
   type OrderStep,
   type OrderTimelineEvent,
@@ -8,6 +10,7 @@ import {
 import { stepLabel } from "./domain/sales-flow.js";
 import { mockId } from "./mock/fixtures.js";
 import type { OrderStatusView } from "./order-workflow.service.js";
+import { gateTotal } from "./domain/payment-gate.js";
 
 /** How a payment type reads at the start of a sentence, as the sample flow words it. */
 const PAYMENT_WORDS: Record<PaymentRecord["paymentType"], string> = {
@@ -29,6 +32,8 @@ export function runningFlowOf(
   sample: OrderFlow,
   view: OrderStatusView,
   payments: readonly PaymentRecord[],
+  /** The prepayment the machine's gate waits for, or null when none is due. */
+  prepaymentDue: string | null,
 ): OrderFlow {
   const since = view.since.toISOString();
   const currentIndex =
@@ -51,7 +56,6 @@ export function runningFlowOf(
     return { ...step, state: "upcoming", completedAt: null, overdue: false };
   });
   const current = steps[currentIndex];
-  const waitingForMoney = view.status === "AwaitingPayment";
   const confirmations = [...sample.payment.confirmations, ...payments];
 
   return {
@@ -59,11 +63,22 @@ export function runningFlowOf(
     steps,
     payment: {
       ...sample.payment,
-      amountDue: waitingForMoney ? sample.payment.amountDue : null,
+      amountDue: stillDue(view, prepaymentDue, payments),
       confirmations,
     },
     timeline: timelineOf(sample, steps, current, payments, since),
   };
+}
+
+/** What is left of the prepayment while the order waits for it: the due, less what the gate has counted. */
+function stillDue(
+  view: OrderStatusView,
+  prepaymentDue: string | null,
+  payments: readonly PaymentRecord[],
+): string | null {
+  if (view.status !== "AwaitingPayment" || prepaymentDue === null) return null;
+  const left = subtractDecimal(prepaymentDue, gateTotal(payments));
+  return compareDecimal(left, "0") > 0 ? left : null;
 }
 
 /**

@@ -1023,7 +1023,7 @@ export function useWorkflowsInboxReminders<TData = Awaited<ReturnType<typeof wor
 
 
 /**
- * @summary An order's steps and timeline (mock data)
+ * @summary An order's steps and timeline. On an order the state machine runs, its status and payments are real (meta.mock false); a sample's are mock
  */
 export const workflowsOrderFlow = (
     orderNo: string,
@@ -1094,7 +1094,7 @@ export function useWorkflowsOrderFlow<TData = Awaited<ReturnType<typeof workflow
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary An order's steps and timeline (mock data)
+ * @summary An order's steps and timeline. On an order the state machine runs, its status and payments are real (meta.mock false); a sample's are mock
  */
 
 export function useWorkflowsOrderFlow<TData = Awaited<ReturnType<typeof workflowsOrderFlow>>, TError = ErrorType<unknown>>(

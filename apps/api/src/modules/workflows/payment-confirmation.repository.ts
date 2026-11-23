@@ -5,7 +5,13 @@ import type {
   PaymentType,
 } from "@orderpilot/shared";
 import { Database } from "../../database/database.js";
-import { PaymentType as StoredPaymentType } from "../../generated/prisma/client.js";
+import {
+  Prisma,
+  PaymentType as StoredPaymentType,
+} from "../../generated/prisma/client.js";
+
+/** The order already holds a confirmation of that type under that bank reference. */
+export class DuplicatePaymentError extends Error {}
 
 const STORED: Record<PaymentType, StoredPaymentType> = {
   prepayment: StoredPaymentType.PREPAYMENT,
@@ -43,20 +49,31 @@ export class PaymentConfirmationRepository {
       select: { id: true },
     });
     if (!instance) throw new Error(`No workflow for ${payment.orderRef}`);
-    const row = await client.paymentConfirmation.create({
-      data: {
-        instanceId: instance.id,
-        orderRef: payment.orderRef,
-        paymentType: STORED[payment.paymentType],
-        amount: payment.amount,
-        currencyCode: payment.currencyCode,
-        reference: payment.reference,
-        paidOn: new Date(`${payment.paidOn}T00:00:00.000Z`),
-        confirmedByUserId: payment.confirmedByUserId,
-        confirmedAt: payment.confirmedAt,
-      },
-      select: { id: true },
-    });
+    const row = await client.paymentConfirmation
+      .create({
+        data: {
+          instanceId: instance.id,
+          orderRef: payment.orderRef,
+          paymentType: STORED[payment.paymentType],
+          amount: payment.amount,
+          currencyCode: payment.currencyCode,
+          reference: payment.reference,
+          paidOn: new Date(`${payment.paidOn}T00:00:00.000Z`),
+          confirmedByUserId: payment.confirmedByUserId,
+          confirmedAt: payment.confirmedAt,
+        },
+        select: { id: true },
+      })
+      .catch((error: unknown) => {
+        // The unique key on the order, type and reference: a confirmation that raced in.
+        if (
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === "P2002"
+        ) {
+          throw new DuplicatePaymentError();
+        }
+        throw error;
+      });
     return row.id;
   }
 
