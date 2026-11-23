@@ -33,6 +33,7 @@ import {
   pageQuerySchema,
   orderParamsSchema,
   paymentConfirmationInputSchema,
+  piReissueInputSchema,
   paymentUndoParamsSchema,
   remindersQuerySchema,
   sprDecisionInputSchema,
@@ -42,6 +43,7 @@ import {
   type InboxRole,
   type PageQuery,
   type PaymentConfirmationInput,
+  type PiReissueInput,
   type RemindersQuery,
   type SprDecisionInput,
   type TasksQuery,
@@ -63,6 +65,7 @@ import {
   orderFlowResponseSchema,
   paymentResponseSchema,
   paymentUndoResponseSchema,
+  piReissueResponseSchema,
   reminderListResponseSchema,
   sprDecisionResponseSchema,
   sprDecisionUndoResponseSchema,
@@ -74,6 +77,7 @@ import {
   taskSlaResponseSchema,
   taskListResponseSchema,
 } from "./workflows.schemas.js";
+import { PiIssueService } from "./pi-issue.service.js";
 import { SprApprovalService } from "./spr-approval.service.js";
 import { TaskSlaService } from "./task-sla.service.js";
 import { WorkflowsService } from "./workflows.service.js";
@@ -141,6 +145,7 @@ export class WorkflowsController {
     @Inject(MockWorkflowActions) private readonly actions: MockWorkflowActions,
     @Inject(SprApprovalService) private readonly sprs: SprApprovalService,
     @Inject(TaskSlaService) private readonly slas: TaskSlaService,
+    @Inject(PiIssueService) private readonly pis: PiIssueService,
   ) {}
 
   @Get("tasks")
@@ -371,6 +376,33 @@ export class WorkflowsController {
         infoOf(req),
       ),
       meta: MOCK,
+    };
+  }
+
+  @Post("orders/:orderNo/pi/reissue")
+  @HttpCode(200)
+  @RequirePermission("orders.edit")
+  @orderParam
+  @ApiOperation({
+    summary:
+      "Reverse the PI that went out and issue it again, with a reason (#251). Only while the order waits for a payment none has been confirmed against. Audited",
+  })
+  @ApiBody({ schema: openApiSchema(piReissueInputSchema) })
+  @ApiOkResponse({ schema: openApiSchema(piReissueResponseSchema) })
+  async reissuePi(
+    @Param(new ZodValidationPipe(orderParamsSchema))
+    params: { orderNo: string },
+    @Body(new ZodValidationPipe(piReissueInputSchema)) body: PiReissueInput,
+    @Auth() auth: AuthContext,
+    @Req() req: Request,
+  ) {
+    return {
+      data: await this.pis.reissue(
+        params.orderNo,
+        body.reason,
+        auth,
+        infoOf(req),
+      ),
     };
   }
 

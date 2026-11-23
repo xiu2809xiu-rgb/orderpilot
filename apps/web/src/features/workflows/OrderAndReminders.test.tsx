@@ -39,6 +39,8 @@ const NOTICE = {
 const FLOW = getWorkflowsOrderFlowResponseMock({
   meta: { mock: true },
   data: {
+    // No PI sent: set here, not left to the generated mock.
+    pi: null,
     order: {
       no: "SO-0004",
       sellToCustomerNo: "C-0004",

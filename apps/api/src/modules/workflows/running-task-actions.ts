@@ -15,6 +15,7 @@ import {
 import type { RequestInfo } from "../governance/authorisation.service.js";
 import { actorOf } from "./actor-of.js";
 import { OrderWorkflowService } from "./order-workflow.service.js";
+import { PiIssueService } from "./pi-issue.service.js";
 import { SprRaiseService } from "./spr-raise.service.js";
 import type { StoredTask } from "./workflow-task.repository.js";
 import { WorkflowTaskRepository } from "./workflow-task.repository.js";
@@ -37,6 +38,7 @@ export class RunningTaskActions {
     @Inject(AuditService) private readonly audit: AuditService,
     @Inject(OrderWorkflowService)
     private readonly workflow: OrderWorkflowService,
+    @Inject(PiIssueService) private readonly pis: PiIssueService,
   ) {}
 
   /** The task when its order runs on the machine; null hands it back to the mock. */
@@ -55,6 +57,8 @@ export class RunningTaskActions {
     if (!task.open) throw new NotFoundError("Task");
     if (task.kind === "RAISE_SPR") {
       await this.raises.raise(task, auth, info, now);
+    } else if (task.kind === "SEND_PI") {
+      await this.pis.send(task, auth, info, now);
     } else if (task.kind === "PACK_ORDER") {
       await this.workflow.apply(
         task.orderRef,
@@ -88,6 +92,8 @@ export class RunningTaskActions {
     if (task.open) throw new NotFoundError("A completed task");
     if (task.kind === "RAISE_SPR") {
       await this.raises.withdraw(task, auth, info, now);
+    } else if (task.kind === "SEND_PI") {
+      await this.pis.unsend(task, auth, info, now);
     } else if (task.kind === "PACK_ORDER") {
       await this.workflow.apply(
         task.orderRef,
@@ -146,6 +152,7 @@ export class RunningTaskActions {
 /** The kinds a person finishes by marking them done; the rest on their own screens. */
 const DONE_HERE: ReadonlySet<string> = new Set([
   "RAISE_SPR",
+  "SEND_PI",
   "PLACE_VENDOR_PO",
   "PACK_ORDER",
 ]);

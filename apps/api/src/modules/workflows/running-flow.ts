@@ -3,6 +3,7 @@ import {
   compareDecimal,
   subtractDecimal,
   type OrderFlow,
+  type OrderPi,
   type OrderStep,
   type OrderTimelineEvent,
   type PaymentRecord,
@@ -34,6 +35,8 @@ export function runningFlowOf(
   payments: readonly PaymentRecord[],
   /** The prepayment the machine's gate waits for, or null when none is due. */
   prepaymentDue: string | null,
+  /** The PI once it has been sent, without whether it may be reissued. */
+  pi: Omit<OrderPi, "reissuable"> | null = null,
 ): OrderFlow {
   const since = view.since.toISOString();
   const currentIndex =
@@ -67,6 +70,14 @@ export function runningFlowOf(
       confirmations,
     },
     timeline: timelineOf(sample, steps, current, payments, since),
+    // Reverse and reissue only while the order waits for a payment none has been confirmed against.
+    pi: pi
+      ? {
+          ...pi,
+          reissuable:
+            view.status === "AwaitingPayment" && payments.length === 0,
+        }
+      : null,
   };
 }
 

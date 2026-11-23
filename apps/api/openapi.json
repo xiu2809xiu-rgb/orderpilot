@@ -2998,6 +2998,70 @@
                             ],
                             "additionalProperties": false
                           }
+                        },
+                        "pi": {
+                          "nullable": true,
+                          "type": "object",
+                          "properties": {
+                            "recordNo": {
+                              "type": "string",
+                              "pattern": "^(SPR|PI|EXC|SO)-\\d{8}-\\d{4,}$"
+                            },
+                            "issue": {
+                              "type": "integer",
+                              "minimum": 1,
+                              "maximum": 9007199254740991
+                            },
+                            "sentAt": {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            },
+                            "sentBy": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "reversals": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "issue": {
+                                    "type": "integer",
+                                    "minimum": 1,
+                                    "maximum": 9007199254740991
+                                  },
+                                  "reason": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "at": {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                                  },
+                                  "by": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  }
+                                },
+                                "required": ["issue", "reason", "at", "by"],
+                                "additionalProperties": false
+                              }
+                            },
+                            "reissuable": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "recordNo",
+                            "issue",
+                            "sentAt",
+                            "sentBy",
+                            "reversals",
+                            "reissuable"
+                          ],
+                          "additionalProperties": false
                         }
                       },
                       "required": [
@@ -3236,6 +3300,92 @@
           }
         },
         "summary": "Undo a payment confirmation. Audited",
+        "tags": ["Workflows"]
+      }
+    },
+    "/api/v1/workflows/orders/{orderNo}/pi/reissue": {
+      "post": {
+        "operationId": "Workflows_reissuePi",
+        "parameters": [
+          {
+            "name": "orderNo",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "example": "SO-0003"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 500
+                  }
+                },
+                "required": ["reason"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "applied": {
+                          "type": "boolean",
+                          "enum": [true]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "orderNo": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9-]{1,30}$"
+                        },
+                        "recordNo": {
+                          "type": "string",
+                          "pattern": "^(SPR|PI|EXC|SO)-\\d{8}-\\d{4,}$"
+                        },
+                        "issue": {
+                          "type": "integer",
+                          "minimum": 2,
+                          "maximum": 9007199254740991
+                        }
+                      },
+                      "required": [
+                        "applied",
+                        "message",
+                        "orderNo",
+                        "recordNo",
+                        "issue"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Reverse the PI that went out and issue it again, with a reason (#251). Only while the order waits for a payment none has been confirmed against. Audited",
         "tags": ["Workflows"]
       }
     },

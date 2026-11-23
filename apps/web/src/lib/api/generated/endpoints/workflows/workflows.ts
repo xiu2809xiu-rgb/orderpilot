@@ -43,6 +43,8 @@ import type {
   WorkflowsNoticesForMeParams,
   WorkflowsOpenRules200,
   WorkflowsOrderFlow200,
+  WorkflowsReissuePi200,
+  WorkflowsReissuePiBody,
   WorkflowsReject200,
   WorkflowsRejectBody,
   WorkflowsSlaSettings200,
@@ -1303,6 +1305,107 @@ export function useWorkflowsUndoPayment<TData = Awaited<ReturnType<typeof workfl
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getWorkflowsUndoPaymentQueryOptions(orderNo,paymentId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary Reverse the PI that went out and issue it again, with a reason (#251). Only while the order waits for a payment none has been confirmed against. Audited
+ */
+export const workflowsReissuePi = (
+    orderNo: string,
+    workflowsReissuePiBody: WorkflowsReissuePiBody,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<WorkflowsReissuePi200>(
+      {url: `/api/v1/workflows/orders/${orderNo}/pi/reissue`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: workflowsReissuePiBody, signal
+    },
+      );
+    }
+
+
+
+
+export const getWorkflowsReissuePiQueryKey = (orderNo: string,
+    workflowsReissuePiBody?: WorkflowsReissuePiBody,) => {
+    return [
+    'POST', `/api/v1/workflows/orders/${orderNo}/pi/reissue`, workflowsReissuePiBody
+    ] as const;
+    }
+
+
+export const getWorkflowsReissuePiQueryOptions = <TData = Awaited<ReturnType<typeof workflowsReissuePi>>, TError = ErrorType<unknown>>(orderNo: string,
+    workflowsReissuePiBody: WorkflowsReissuePiBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsReissuePi>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getWorkflowsReissuePiQueryKey(orderNo,workflowsReissuePiBody);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof workflowsReissuePi>>> = ({ signal }) => workflowsReissuePi(orderNo,workflowsReissuePiBody, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: orderNo !== null && orderNo !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof workflowsReissuePi>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type WorkflowsReissuePiQueryResult = NonNullable<Awaited<ReturnType<typeof workflowsReissuePi>>>
+export type WorkflowsReissuePiQueryError = ErrorType<unknown>
+
+
+export function useWorkflowsReissuePi<TData = Awaited<ReturnType<typeof workflowsReissuePi>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    workflowsReissuePiBody: WorkflowsReissuePiBody, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsReissuePi>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof workflowsReissuePi>>,
+          TError,
+          Awaited<ReturnType<typeof workflowsReissuePi>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useWorkflowsReissuePi<TData = Awaited<ReturnType<typeof workflowsReissuePi>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    workflowsReissuePiBody: WorkflowsReissuePiBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsReissuePi>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof workflowsReissuePi>>,
+          TError,
+          Awaited<ReturnType<typeof workflowsReissuePi>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useWorkflowsReissuePi<TData = Awaited<ReturnType<typeof workflowsReissuePi>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    workflowsReissuePiBody: WorkflowsReissuePiBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsReissuePi>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Reverse the PI that went out and issue it again, with a reason (#251). Only while the order waits for a payment none has been confirmed against. Audited
+ */
+
+export function useWorkflowsReissuePi<TData = Awaited<ReturnType<typeof workflowsReissuePi>>, TError = ErrorType<unknown>>(
+ orderNo: string,
+    workflowsReissuePiBody: WorkflowsReissuePiBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof workflowsReissuePi>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getWorkflowsReissuePiQueryOptions(orderNo,workflowsReissuePiBody,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

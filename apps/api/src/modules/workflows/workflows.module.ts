@@ -18,6 +18,8 @@ import { MockWorkflowActions } from "./mock/mock-workflow-actions.js";
 import { MockWorkflowReadModel } from "./mock-workflow-read-model.js";
 import { OrderWorkflowRepository } from "./order-workflow.repository.js";
 import { PaymentConfirmationRepository } from "./payment-confirmation.repository.js";
+import { PiIssueService } from "./pi-issue.service.js";
+import { PiRecordRepository } from "./pi-record.repository.js";
 import { RunningPayments } from "./running-payments.js";
 import { RunningTaskActions } from "./running-task-actions.js";
 import { SprApprovalService } from "./spr-approval.service.js";
@@ -63,6 +65,8 @@ import { WorkflowsService } from "./workflows.service.js";
     SprRaiseService,
     RunningTaskActions,
     PaymentConfirmationRepository,
+    PiRecordRepository,
+    PiIssueService,
     RunningPayments,
     CommandReplayService,
     WorkflowCommandRepository,

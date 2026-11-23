@@ -105,6 +105,11 @@ const CASES: readonly CommandCase[] = [
     legal: { AwaitingPayment: "Paid" },
   },
   {
+    command: { type: "PI_SEND_UNDONE" },
+    actor: person("SUPPORT"),
+    legal: { AwaitingPayment: "StockChecked" },
+  },
+  {
     command: { type: "PAYMENT_UNDONE" },
     actor: person("FINANCE"),
     legal: { Paid: "AwaitingPayment" },
@@ -239,7 +244,7 @@ describe("every status against every event", () => {
 
   it("covers every status and every event in the machine", () => {
     expect(ORDER_STATUSES).toHaveLength(14);
-    expect(every).toHaveLength(14 * 19);
+    expect(every).toHaveLength(14 * 20);
   });
 });
 
@@ -723,7 +728,7 @@ describe("undoing a payment or the packing", () => {
     expect(error.code).toBe("CONFLICT");
   });
 
-  it("returns packing to Paid only when a prepayment was confirmed for it", () => {
+  it("returns packing to Paid, or to waiting for payment when no prepayment was due", () => {
     const back = machine.apply(
       snapshot("Packing", { prepaymentDue: "100.00" }),
       { type: "PACKING_UNDONE" },
@@ -732,16 +737,31 @@ describe("undoing a payment or the packing", () => {
     );
     expect(back.state.status).toBe("Paid");
 
-    const error = refusal(() =>
-      machine.apply(
-        snapshot("Packing", { prepaymentDue: null }),
-        { type: "PACKING_UNDONE" },
-        person("WAREHOUSE"),
-        AT,
-      ),
+    const noPrepayment = machine.apply(
+      snapshot("Packing", { prepaymentDue: null }),
+      { type: "PACKING_UNDONE" },
+      person("WAREHOUSE"),
+      AT,
     );
-    expect(error.code).toBe("CONFLICT");
-    expect(error.message).toContain("no prepayment due");
+    expect(noPrepayment.state.status).toBe("AwaitingPayment");
+  });
+
+  it("takes a PI back to where it was sent from: the stock check, or the approved SPR of a short order", () => {
+    const covered = machine.apply(
+      snapshot("AwaitingPayment", { stockCoversOrder: true }),
+      { type: "PI_SEND_UNDONE" },
+      person("SUPPORT"),
+      AT,
+    );
+    expect(covered.state.status).toBe("StockChecked");
+
+    const short = machine.apply(
+      snapshot("AwaitingPayment", { stockCoversOrder: false }),
+      { type: "PI_SEND_UNDONE" },
+      person("SUPPORT"),
+      AT,
+    );
+    expect(short.state.status).toBe("SprApproved");
   });
 });
 

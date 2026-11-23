@@ -46,6 +46,7 @@ export type OrderCommand =
   | { readonly type: "SPR_REJECTED"; readonly reason: string }
   | { readonly type: "SPR_DECISION_UNDONE" }
   | { readonly type: "PI_SENT" }
+  | { readonly type: "PI_SEND_UNDONE" }
   | {
       readonly type: "PAYMENT_CONFIRMED";
       readonly paymentType: PaymentType;
@@ -215,6 +216,14 @@ const TRANSITIONS: readonly Transition[] = [
     to: "Paid",
     by: "FINANCE",
   },
+  // Undo after Support marks the PI sent, while nothing has followed it. A PI
+  // that really went out wrong is fixed by reverse and reissue instead (#251).
+  {
+    on: "PI_SEND_UNDONE",
+    from: ["AwaitingPayment"],
+    to: "StockChecked",
+    by: "SUPPORT",
+  },
   // Undo after Finance confirms; only until the warehouse has started packing.
   {
     on: "PAYMENT_UNDONE",
@@ -229,6 +238,7 @@ const TRANSITIONS: readonly Transition[] = [
     by: "WAREHOUSE",
   },
   // Undo after the warehouse marks it packed; only until Support has invoiced it.
+  // Back to Paid, or to waiting for payment when no prepayment was due.
   {
     on: "PACKING_UNDONE",
     from: ["Packing"],
@@ -496,11 +506,6 @@ export class OrderStateMachine {
           state.prepaymentDue !== null
           ? "the prepayment must be confirmed by Finance first."
           : null;
-      // Back to Paid is only true of an order a prepayment was confirmed for.
-      case "PACKING_UNDONE":
-        return state.prepaymentDue === null
-          ? "it was packed with no prepayment due, so there is no payment to go back to."
-          : null;
       case "SPR_REJECTED":
         return command.reason.trim() ? null : "say why it was rejected.";
       case "HOLD_RAISED":
@@ -574,6 +579,18 @@ function nextState(
     }
     case "CANCELLED":
       return { ...state, status: "Cancelled", holds: [], resumeTo: null };
+    // Back to where the PI was sent from: a short order had its SPR approved.
+    case "PI_SEND_UNDONE":
+      return {
+        ...state,
+        status:
+          state.stockCoversOrder === false ? "SprApproved" : "StockChecked",
+      };
+    case "PACKING_UNDONE":
+      return {
+        ...state,
+        status: state.prepaymentDue === null ? "AwaitingPayment" : "Paid",
+      };
     default:
       return {
         ...state,
