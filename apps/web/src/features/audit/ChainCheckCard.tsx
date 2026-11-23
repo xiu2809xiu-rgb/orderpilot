@@ -1,5 +1,6 @@
 import { Link2, Link2Off } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router";
 import {
   ErrorPanel,
   RelativeTime,
@@ -8,6 +9,39 @@ import {
 } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { useAuditViewerChain } from "@/lib/api/generated/endpoints/audit/audit";
+
+const LINK = "text-primary underline-offset-4 hover:underline";
+
+/**
+ * Where a break is (F-9): the event itself, opened over the events around
+ * it, and those events alone. Both drop the other filters, so the break is
+ * in the list whatever view the check was run from.
+ */
+function BreakLinks({
+  sequence,
+  eventId,
+}: {
+  sequence: number;
+  eventId?: string | null;
+}) {
+  const { t } = useTranslation("audit");
+  const around = String(sequence);
+  return (
+    <p className="flex flex-wrap gap-x-s2 text-sm">
+      {eventId ? (
+        <Link
+          className={LINK}
+          to={`/audit?${new URLSearchParams({ event: eventId, around }).toString()}`}
+        >
+          {t("chain.openBroken", { n: sequence })}
+        </Link>
+      ) : null}
+      <Link className={LINK} to={`/audit?around=${around}`}>
+        {t("chain.seeAround")}
+      </Link>
+    </p>
+  );
+}
 
 /**
  * The chain check. It reads the whole trail, so it runs when asked, not on
@@ -72,6 +106,12 @@ export function ChainCheckCard() {
                 through: result.verifiedThrough ?? 0,
               })}
             </p>
+            {result.brokenAtSequence ? (
+              <BreakLinks
+                sequence={result.brokenAtSequence}
+                eventId={result.brokenAtEventId}
+              />
+            ) : null}
           </div>
         ) : null}
         {result ? (

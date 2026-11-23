@@ -67,7 +67,8 @@ export function FilterLookup({
             <ChevronsUpDown aria-hidden="true" className="opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent align="start" className="w-72 p-0">
+        {/* The popover is a dialog, and axe asks every dialog for a name. */}
+        <PopoverContent align="start" className="w-72 p-0" aria-labelledby={id}>
           <Command>
             <CommandInput placeholder={t("filters.lookupSearch", { label })} />
             <CommandList>

@@ -71,3 +71,18 @@ export const auditChainCheckResponseSchema = dataEnvelope(
 
 /** The path of the one-event route. */
 export const auditEventParamsSchema = z.object({ id: z.uuid() });
+
+/**
+ * What the audit filters offer (F-9): each person who appears in the trail,
+ * by the id the filter sends and the name it shows, and each action name that
+ * exists. Strict, so an email or any other detail of a person cannot ride
+ * along.
+ */
+export const auditFilterOptionsSchema = z.strictObject({
+  people: z.array(z.strictObject({ id: z.uuid(), name: z.string().min(1) })),
+  actions: z.array(z.string().min(1)),
+});
+export type AuditFilterOptions = z.infer<typeof auditFilterOptionsSchema>;
+export const auditFilterOptionsResponseSchema = dataEnvelope(
+  auditFilterOptionsSchema,
+);

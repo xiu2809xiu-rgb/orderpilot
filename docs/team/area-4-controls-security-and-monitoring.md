@@ -356,7 +356,7 @@ await authorisation.enforce(
 
 **Copying a role has no Undo,** because nothing keeps the target's old rows. A second step says so before anything is sent, and the audit trail keeps the change.
 
-**E2E #3 in a browser** is in `apps/e2e/tests/governance.spec.ts`. A script calls the SPR approval route as Warehouse, with no page involved, and gets the 403 envelope with its trace ID. The auditor then opens the audit viewer, filtered to that route and role, and the newest row's details must show that trace ID. A refusal's record is the route pattern, not the SPR number, so the trace ID is what proves the row is this call's. This covers the direct call and its audit row. The self-approval and masking steps of E2E #3 are not in it.
+**E2E #3 in a browser** is in `apps/e2e/tests/governance.spec.ts`. A script calls the SPR approval route as Warehouse, with no page involved, and gets the 403 envelope with its trace ID. The auditor then opens the audit viewer, filtered to that route and role, and the newest row's details must show that trace ID. A refusal's record is the route pattern, not the SPR number, so the trace ID is what proves the row is this call's. This covers the direct call and its audit row. F-9 adds the masking step, a refusal read as the system admin and as the auditor ([Audit viewer polish](#audit-viewer-polish-f-9)). The self-approval step of E2E #3 is not in it.
 
 ## What's yours to build
 
@@ -368,7 +368,7 @@ await authorisation.enforce(
 
 **What F-2 deliberately leaves to you,** and what is queued:
 
-- **F-9: audit viewer polish** (backlog): a picker for the actor and the action, saved views, a chain check that runs in the background, a link to the broken event, and a browser test.
+- **F-9: audit viewer polish:** the pickers for the person and the action, the link to the broken event, and the browser test are built ([below](#audit-viewer-polish-f-9)). Saved views on the server and a chain check that runs in the background are still to come.
 - Export, retention, anchoring and scheduled verification, and the dashboards: see the deeper work below. None is started, so none is half-done.
 
 **What F-1 deliberately leaves to you** (nothing below is written, so none of it is half-done):
@@ -426,6 +426,22 @@ On 14 Nov a walk through the demo as every role, on a Docker build, found nine g
 - **Monitoring** keeps its tab in the address bar (`?tab=`) and, after #270, opens on Observability, listed first. The AI use tile and the See AI use quick action open `?tab=aiUsage`. The clickstream names roles as the rest of the app does.
 - **Settings:** the analytics choice is a radio group that marks the chosen setting, as the Appearance choice does.
 - **Wording:** the AI tab's classifications use the badges' words, and "trace ID" is written the same way in every Area 4 text, which `wording.test.ts` checks.
+
+## Audit viewer polish (F-9)
+
+F-9's criteria 1, 4 and 5, and the walkthrough's gaps A3 and A11, settled in [ADR 0064](../adr/0064-the-audit-filters-offer-what-the-trail-holds.md). Criteria 2 and 3 are still open on #103.
+
+**The person and action pickers.** In the More filters fold, "Person" and "Action" replace the "Person ID" and "Action starts with" boxes. They offer what the trail holds, from `GET /audit/filter-options` (`audit.read`): each person who appears as an actor, by name, and each action name that exists. The options are read only when the fold is open, in `AuditPickers.tsx`, on the shared `FilterLookup`.
+
+- **Names only.** The server sends an ID and a name, never an email. The address bar keeps the ID, so a link opens the same view, but the screen never shows it: "Loading the name" while the names load, "Someone not in the trail" for a person who is not.
+- **The action is still a prefix on the server.** A picked name finds itself, and an older link's prefix shows as "Starts with auth.".
+- **When the options fail to load,** the fold shows the error with its trace ID and Try again, in place of the pickers. The list itself still loads.
+
+**A broken chain and the events around it.** `around=<sequence>` on the list returns the events within five sequences either side (`AROUND_RADIUS`), with the other filters. When the chain check finds a break, `ChainCheckCard.tsx` links to "Open event N", which opens the event over its neighbours, and to "Show the events around it". The centred row is marked Centre, a chip clears it, and a sequence that is not a whole number above zero is not sent: `auditQuery.ts` says why.
+
+**The fifth criterion in a browser** is in `governance.spec.ts`. A script refuses a Warehouse call to the SPR reject route. The system admin filters to refusals with the pickers, opens the newest, and sees the reason masked with "Why is this hidden?". The auditor opens the same view and sees it in full. The criterion asks for an auditor who sees a masked value, but every masking rule for audit events shows its field to the auditor, so the masked side is the system admin's. [ADR 0058](../adr/0058-seven-roles-six-teams-and-an-administrator.md) changes both halves: its step 4 gives the unmasked view to the system admin, and its step 5 stops signing in as the auditor. No masking rule is added for an SPR's amount, because whoever reads the trail needs the amounts.
+
+**The matrix filter** lists `masking.customerNote` under its own group, Masking, instead of Other (`matrixFilter.ts`).
 
 ## Options to consider, not built
 
