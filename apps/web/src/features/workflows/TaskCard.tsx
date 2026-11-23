@@ -3,16 +3,30 @@ import type { TFunction } from "i18next";
 import { ArrowRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { RecordLink, StatusBadge } from "@/components/common";
+import {
+  stepsHref,
+  useOrderLinks,
+} from "@/features/directions/screens/home/homeLinks";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { formatAmount, formatDate, isToday } from "./format";
 import { RecordRefLine } from "./RecordRefLine";
 import { SprLine } from "./SprLine";
 
-function targetOf(task: WorkflowTask): string | null {
+/**
+ * Where a task leads, as from Home (#290): an SPR task to the SPR, a payment
+ * to the steps page that holds the payment form, and the rest to the order's
+ * own page, or the nearest page the role may open.
+ */
+function targetOf(
+  task: WorkflowTask,
+  orderPage: (orderNo: string) => string,
+): string | null {
   if (task.ref) return `/workflows/sprs/${task.ref.recordNo}`;
-  if (task.orderNo) return `/workflows/orders/${task.orderNo}`;
-  return null;
+  if (!task.orderNo) return null;
+  return task.kind === "CONFIRM_PAYMENT"
+    ? stepsHref(task.orderNo)
+    : orderPage(task.orderNo);
 }
 
 function dueText(task: WorkflowTask, t: TFunction<"workflows">): string {
@@ -26,7 +40,8 @@ function dueText(task: WorkflowTask, t: TFunction<"workflows">): string {
  * the rest. At a desk it is one compact row in a list, led by what tells tasks
  * apart (the customer and the amount), with a quiet action, so a long inbox
  * fits on a screen and no row shouts. `touch` is the warehouse's tablet
- * layout: a taller row with bigger text and a full width action, every target 44 px.
+ * layout: the same row with bigger text, every target 44 px. A task is worded
+ * as Home words it.
  */
 export function TaskCard({
   task,
@@ -42,7 +57,11 @@ export function TaskCard({
   canOpen?: boolean;
 }) {
   const { t } = useTranslation("workflows");
-  const target = targetOf(task);
+  const { t: tHome } = useTranslation("directions-home");
+  const links = useOrderLinks();
+  const target = targetOf(task, links.order);
+  // Worded as Home words it, so one task reads the same on both pages (#290).
+  const what = tHome(`needs.kind.${task.kind}`);
   const action =
     target && canOpen ? (
       <RecordLink
@@ -53,39 +72,46 @@ export function TaskCard({
               // would leave no primary action on the page.
               cn(
                 buttonVariants({ variant: "outline", size: "lg" }),
-                "min-h-14 w-full text-base",
+                "min-h-11 w-full shrink-0 text-base sm:w-auto",
               )
             : cn(buttonVariants({ variant: "outline" }), "min-h-11 shrink-0"),
         )}
       >
-        {task.ref ? t("task.openRequest") : t("task.openOrder")}
+        {task.ref
+          ? t("task.openRequest")
+          : task.kind === "CONFIRM_PAYMENT"
+            ? tHome("needs.actions.CONFIRM_PAYMENT")
+            : t("task.openOrder")}
         <ArrowRight aria-hidden="true" />
       </RecordLink>
     ) : null;
 
   if (touch) {
+    // Two or three to a screen was too few for the warehouse floor (#290): one
+    // row led by the customer, as at a desk, with bigger text and 44 px targets.
     return (
-      <li className="flex flex-col gap-s2 py-s4">
-        <div className="min-w-0 space-y-2">
+      <li className="flex flex-col gap-s2 py-s3 sm:flex-row sm:items-center sm:gap-s3">
+        <div className="min-w-0 flex-1 space-y-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-              {t(`task.kinds.${task.kind}`)}
-            </span>
+            <h3 className="text-lg font-semibold">
+              {task.customerName ?? what}
+            </h3>
             {task.overdue ? (
               <StatusBadge tone="danger">{t("task.overdue")}</StatusBadge>
             ) : null}
           </div>
-          <h3 className="text-xl font-semibold">{task.title}</h3>
-          <p className="flex dx-measure flex-wrap items-baseline gap-x-4 gap-y-1 text-sm text-muted-foreground">
+          <p className="flex dx-measure flex-wrap items-baseline gap-x-4 gap-y-1 text-base text-muted-foreground">
+            {task.customerName ? (
+              <span className="text-foreground">{what}</span>
+            ) : null}
             {task.orderNo ? (
-              <span>
-                {t("task.order")}{" "}
-                <span data-numeric className="font-mono text-foreground">
-                  {task.orderNo}
-                </span>
+              <span data-numeric className="font-mono text-foreground">
+                {task.orderNo}
               </span>
             ) : null}
-            <span>{dueText(task, t)}</span>
+            <span className={cn(task.overdue && "text-destructive")}>
+              {dueText(task, t)}
+            </span>
           </p>
           {task.ref ? <RecordRefLine value={task.ref} /> : null}
           {note ? <p className="text-sm">{note}</p> : null}
@@ -99,7 +125,7 @@ export function TaskCard({
     <li className="flex flex-col gap-s2 py-s2 sm:flex-row sm:items-center">
       <div className="min-w-0 flex-1 space-y-1">
         <div className="flex flex-wrap items-center gap-2">
-          <h3 className="font-semibold">{task.customerName ?? task.title}</h3>
+          <h3 className="font-semibold">{task.customerName ?? what}</h3>
           {task.overdue ? (
             <StatusBadge tone="danger">{t("task.overdue")}</StatusBadge>
           ) : null}
@@ -109,7 +135,7 @@ export function TaskCard({
           {task.spr ? (
             <SprLine spr={task.spr} />
           ) : task.customerName ? (
-            <span>{task.title}</span>
+            <span>{what}</span>
           ) : null}
           {task.orderNo ? (
             <span data-numeric className="font-mono text-foreground">

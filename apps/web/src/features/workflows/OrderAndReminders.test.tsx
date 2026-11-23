@@ -92,7 +92,7 @@ function openOrder(role: "FINANCE" | "SUPPORT") {
 
 describe("an order's steps and timeline", () => {
   beforeAll(async () => {
-    await i18n.loadNamespaces("workflows");
+    await i18n.loadNamespaces(["workflows", "directions-home"]);
   });
 
   it("shows the steps, the current one marked, the timeline and the payment", async () => {
@@ -182,7 +182,7 @@ describe("reminders", () => {
   });
 
   beforeAll(async () => {
-    await i18n.loadNamespaces("workflows");
+    await i18n.loadNamespaces(["workflows", "directions-home"]);
   });
 
   const reminders = getWorkflowsMyRemindersResponseMock({
@@ -292,7 +292,7 @@ describe("reminders", () => {
 
 describe("what has been sent to you", () => {
   beforeAll(async () => {
-    await i18n.loadNamespaces("workflows");
+    await i18n.loadNamespaces(["workflows", "directions-home"]);
   });
 
   beforeEach(() => {
@@ -323,7 +323,7 @@ describe("what has been sent to you", () => {
     expect(screen.getByText(/for SO-0005 is overdue/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "SO-0005" })).toHaveAttribute(
       "href",
-      "/workflows/orders/SO-0005",
+      "/orders/SO-0005",
     );
     expect(await axeViolations(container)).toEqual([]);
   });

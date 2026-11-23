@@ -12,6 +12,7 @@ import {
   useWorkflowsInboxReminders,
   useWorkflowsMyReminders,
 } from "@/lib/api/generated/endpoints/workflows/workflows";
+import { useOrderLinks } from "@/features/directions/screens/home/homeLinks";
 import { formatDate } from "./format";
 import { MockBadges } from "./MockBadges";
 import { RemindersForYou } from "./RemindersForYou";
@@ -30,20 +31,24 @@ const TONES = {
 const LINK =
   "inline-flex items-center font-mono text-primary underline-offset-4 hover:underline pointer-coarse:min-h-11";
 
-/** A reminder opens the record it is about, such as its SPR, and else its order. */
-function targetOf(reminder: WorkflowReminder): { to: string; label: string } {
+/** A reminder opens the record it is about, such as its SPR, and else its order's page, as Home does. */
+function targetOf(
+  reminder: WorkflowReminder,
+  orderPage: (orderNo: string) => string,
+): { to: string; label: string } {
   return reminder.ref
     ? {
         to: `/workflows/sprs/${reminder.ref.recordNo}`,
         label: reminder.ref.recordNo,
       }
-    : { to: `/workflows/orders/${reminder.orderNo}`, label: reminder.orderNo };
+    : { to: orderPage(reminder.orderNo), label: reminder.orderNo };
 }
 
 /** One reminder in one compact row: what it is about, its dates, and its stage. */
 function ReminderRow({ reminder }: { reminder: WorkflowReminder }) {
   const { t } = useTranslation(["workflows", "common"]);
-  const target = targetOf(reminder);
+  const links = useOrderLinks();
+  const target = targetOf(reminder, links.order);
   return (
     <li className="flex flex-col gap-1 py-s2 sm:flex-row sm:items-center sm:gap-s3">
       <div className="min-w-0 flex-1 space-y-1">
