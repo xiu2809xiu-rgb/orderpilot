@@ -372,7 +372,7 @@ export function useMatrixSetDataScope<TData = Awaited<ReturnType<typeof matrixSe
 
 
 /**
- * @summary Copy a role's permissions and data scope to another role
+ * @summary Copy a role's permissions to another role. The target's data scope stays as it was
  */
 export const matrixCopy = (
     matrixCopyBody: MatrixCopyBody,
@@ -445,7 +445,7 @@ export function useMatrixCopy<TData = Awaited<ReturnType<typeof matrixCopy>>, TE
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary Copy a role's permissions and data scope to another role
+ * @summary Copy a role's permissions to another role. The target's data scope stays as it was
  */
 
 export function useMatrixCopy<TData = Awaited<ReturnType<typeof matrixCopy>>, TError = ErrorType<MatrixCopy403>>(
