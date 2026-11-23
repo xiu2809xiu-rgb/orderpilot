@@ -64,14 +64,14 @@ sequenceDiagram
 F-1 and G-1 have landed. F-2 fills in its item when it does.
 
 - **From F-1, access policy and masking** (landed, [ADR 0024](../adr/0024-governance-base.md)):
-  - **The matrix screen** at `/governance` (`apps/web/src/features/governance/`): a switch per role and permission over the real `RolePermission` table, a data scope per role, "Copy a role", and the users tab (disable and enable, never delete, on P-10's routes). Changes are saved at once and audited. Reading needs `roles.read`, changing needs `roles.manage`; an auditor can read and cannot change.
+  - **The matrix screen** at `/governance` (`apps/web/src/features/governance/`): a switch per role and permission over the real `RolePermission` table, "Copy a role", and the users tab (disable and enable, never delete, on P-10's routes). Changes are saved at once and audited. Reading needs `roles.read`, changing needs `roles.manage`; an auditor can read and cannot change.
   - **The system admin never approves, posts or pays.** `NEVER_FOR_SYSTEM_ADMIN` and `LOCKED_CELLS` in `packages/shared/src/governance/matrix.ts`; the default matrix leaves the three permissions off and the server refuses to grant them (409). `roles.manage` is locked on.
   - **New permissions** in `packages/shared/src/permissions.ts`: `roles.read`, `approvals.decide`, `payments.confirm`, `payments.post`. Who holds the last three is a sample (Approver decides, Finance confirms and posts): settle it in your policy.
   - **Masking** in `apps/api/src/modules/governance/domain/masking.ts`: `mask(rules, role, field, value)` returns a `MaskedField` whose value is `null` for a role the rule does not list, so the value never reaches the browser. One neutral sample rule, `sample.customerNote`, shown on the Masking tab through P-12's `MaskedValue` with the reason. `GET /governance/masking/sample`.
   - **Classification and the AI rule:** the four levels and the mask reasons are in `packages/shared/src/governance/classification.ts`. `decideAiDestination` (`domain/ai-destination-policy.ts`) answers what data may go to which provider; the default is synthetic data only. `GET /governance/ai-destinations`, `POST /governance/ai-destinations/check`: P-17's gateway calls the second.
   - **How a refusal looks:** the standard error envelope with a trace id (403 `FORBIDDEN`, a generic message; the reason goes to the audit trail), drawn by `RefusalPanel`. The Refusals tab shows both. `PolicyRequest` and `PolicyDecision` in `governance/decision.ts` are the shape for your policy.
   - **Contracts only, no table and no rule:** approval limits and a substitute in the shape of Business Central's Approval User Setup (`governance/approval.ts`), and the payment type, prepayment among them, for payment confirmation (`governance/payment.ts`, for C-1's payment step to record).
-  - **Data scope:** `RoleDataScope` in `governance.prisma` holds `all`, `brands` or `own` per role. It is stored and shown. Nothing filters a list by it yet.
+  - **Data scope:** `RoleDataScope` in `governance.prisma` holds `all`, `brands` or `own` per role. It is stored, and no longer shown on the matrix: nothing filters a list by it yet ([ADR 0065](../adr/0065-the-data-scope-stays-off-the-matrix.md)).
   - **Routes and requests:** `apps/api/src/modules/governance/` (controllers, services, `domain/` with its own unit tests), `apps/api/requests/governance.http`, generated hooks in `apps/web/src/lib/api/generated/endpoints/governance`. Component tests use MSW and `test/http/governance.test.ts` runs against the real database.
   - **`it.todo` tests** in `apps/api/test/http/governance-controls.test.ts`, named by control: approval limits, no self-approval, the bank-detail hold, masking for each role, a direct API call being refused (E2E #3), and payment confirmation.
 - **From F-2, the audit viewer:** the audit log viewer over the real hash chain, with filters and a chain check; the audit trail at the foot of every detail page (with P-12's audit link); and `it.todo` tests for export and retention.
@@ -349,10 +349,10 @@ await authorisation.enforce(
 **Search and filters.** The matrix has a search box, a role filter and a permission group filter, in `MatrixFilterBar.tsx`, on the shared `SearchBox`, `FilterSelect` and `FilterChips`. The filtering is one pure function, `filterMatrix` in `matrixFilter.ts`, which searches a permission's label and key.
 
 - The filters live in the address bar (`q`, `role`, `group`), so a view can be shared.
-- A role filter leaves one column and a group filter leaves those rows. The data scope row goes while the rows are being narrowed.
+- A role filter leaves one column and a group filter leaves those rows.
 - The groups go by the word before the first dot of a permission's name. One nobody has grouped is listed under Other.
 
-**Undo.** A switch or a data scope change ends with a toast that offers Undo, for 10 seconds or with Ctrl+Z. Undo is the same save as the change, so a refusal shows its trace ID and the switches wait for it. On the server it is one more change with its own audit row, and the row of the change it reverses stays.
+**Undo.** A switch ends with a toast that offers Undo, for 10 seconds or with Ctrl+Z. Undo is the same save as the change, so a refusal shows its trace ID and the switches wait for it. On the server it is one more change with its own audit row, and the row of the change it reverses stays.
 
 **Copying a role has no Undo,** because nothing keeps the target's old rows. A second step says so before anything is sent, and the audit trail keeps the change.
 
@@ -442,6 +442,15 @@ F-9's criteria 1, 4 and 5, and the walkthrough's gaps A3 and A11, settled in [AD
 **The fifth criterion in a browser** is in `governance.spec.ts`. A script refuses a Warehouse call to the SPR reject route. The system admin filters to refusals with the pickers, opens the newest, and sees the reason masked with "Why is this hidden?". The auditor opens the same view and sees it in full. The criterion asks for an auditor who sees a masked value, but every masking rule for audit events shows its field to the auditor, so the masked side is the system admin's. [ADR 0058](../adr/0058-seven-roles-six-teams-and-an-administrator.md) changes both halves: its step 4 gives the unmasked view to the system admin, and its step 5 stops signing in as the auditor. No masking rule is added for an SPR's amount, because whoever reads the trail needs the amounts.
 
 **The matrix filter** lists `masking.customerNote` under its own group, Masking, instead of Other (`matrixFilter.ts`).
+
+## The data scope off the matrix (#268)
+
+The matrix no longer shows the data scope, and Copy a role leaves the target's scope as it was ([ADR 0065](../adr/0065-the-data-scope-stays-off-the-matrix.md)). No list reads the scope yet, so a control for it changed nothing a person could see.
+
+- **What stays:** `RoleDataScope`, its defaults, the scope in the matrix's read, and `PUT /governance/matrix/:role/data-scope`, so enforcing the scope later needs no migration.
+- **What a copy records:** the permissions granted and revoked, and no scope.
+- **Enforcing it** is a story of its own: it needs brand ownership (Q-17) and a filter in each area's lists, and brings the selector back with it.
+- **Tests:** `GovernancePage.test.tsx` ("offers no data scope control", and the copy dialog's words) and `test/http/governance.test.ts` ("leaves the target's data scope as it was").
 
 ## Options to consider, not built
 
