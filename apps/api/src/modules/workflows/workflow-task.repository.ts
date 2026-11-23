@@ -21,6 +21,8 @@ export interface OpenTask {
   readonly assigneeRole: Role;
   readonly createdAt: Date;
   readonly dueAt: Date;
+  /** The record it is about, such as the SPR. */
+  readonly recordNo: string | null;
 }
 
 /** Only orders the state machine runs. A seeded sample has no facts, and its due dates are fixtures. */
@@ -88,6 +90,7 @@ export class WorkflowTaskRepository {
         assigneeRole: true,
         createdAt: true,
         dueAt: true,
+        recordNo: true,
         instance: { select: { orderRef: true, status: true } },
       },
     });
@@ -105,6 +108,7 @@ export class WorkflowTaskRepository {
               assigneeRole: row.assigneeRole,
               createdAt: row.createdAt,
               dueAt: row.dueAt,
+              recordNo: row.recordNo,
             },
           ]
         : [];
