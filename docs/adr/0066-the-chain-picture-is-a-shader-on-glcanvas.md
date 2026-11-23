@@ -39,7 +39,8 @@ The GlCanvas kit (`components/kit/canvas/GlCanvas.tsx`, Richie's) already draws 
    - An empty trail draws nothing.
 4. **It moves only while a check runs, and for under a second after.** That is the time the blocks take to light up, left to right. Otherwise it rests. Under reduced motion it is a still picture.
 5. **The words stay the result.** The picture is `aria-hidden`. A screen reader hears the badge and the sentence, as before. F-10 adds one sentence to a broken chain: "The check stops at the first break, so the events after it are not checked."
-6. **Its colours are tokens,** read by the kit's `useTokenRgb`: the primary and destructive colours, the foreground, and the page background. The card's colour is not used: the build writes its see-through value as an 8-digit hex, which the kit cannot read, so the glass came out grey.
+6. **A click on the red block opens the broken event,** the same link as F-9's "Open event N", built by one helper. It is for a mouse only: it sits in the hidden picture, out of the tab order, and the keyboard and a screen reader use "Open event N" under the picture.
+7. **Its colours are tokens,** read by the kit's `useTokenRgb`: the primary and destructive colours, the foreground, and the page background. The card's colour is not used: the build writes its see-through value as an 8-digit hex, which the kit cannot read, so the glass came out grey.
 
 ## Alternatives considered
 
@@ -52,4 +53,4 @@ The GlCanvas kit (`components/kit/canvas/GlCanvas.tsx`, Richie's) already draws 
 - Area 4 keeps a shader. jsdom cannot compile one, so the browser test (`audit-chain.spec.ts`) is the check that it compiles and links: it was seen failing with a syntax error put in the shader.
 - When F-9's third criterion (a check in the background, with progress) is built, the looping light can follow the real progress.
 - The kit's colour reader does not read an 8-digit hex. That is Richie's to decide. This picture avoids it by reading the page background.
-- The broken screenshots are a staged answer on the two newest real events, because the real trail verifies.
+- The broken screenshots, and the browser test of the red block's click, use a staged answer on the two newest real events, because the real trail verifies.

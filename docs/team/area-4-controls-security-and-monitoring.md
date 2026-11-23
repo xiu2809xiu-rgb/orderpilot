@@ -466,11 +466,12 @@ The chain check card draws the chain above its words: glass blocks in a row, lit
   - Nothing is drawn after a break, because the check stops there.
   - A running check shows a looping light, not a count, because the check reports no progress.
 - **Motion:** only while checking, and while the blocks light after it; a still picture under reduced motion; plain CSS without WebGL2. The picture is `aria-hidden`, and the words stay the result.
+- **The red block** opens the broken event when clicked, the same link as "Open event N" (`brokenEventPath` in `ChainCheckCard.tsx`). It is for a mouse only, out of the tab order: the keyboard and a screen reader use "Open event N".
 - **Tests:**
   - `chainModel.test.ts`: every state, and no number the check did not send.
   - `ChainPicture.test.tsx`: the uniforms on a recording WebGL stub, and that it rests when not checking.
   - `AuditPage.test.tsx`: the numbers on the card.
-  - `apps/e2e/tests/audit-chain.spec.ts`: as the system admin, a real canvas, so the shader compiles, and `checkPage`.
+  - `apps/e2e/tests/audit-chain.spec.ts`: as the system admin, a real canvas, so the shader compiles, and `checkPage`; and a click on the red block, on a staged break, opens the event.
 
 ## Options to consider, not built
 

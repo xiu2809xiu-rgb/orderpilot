@@ -90,3 +90,25 @@ Thanks. Answers and next steps, in this order:
 Same rules as before. Commit as you go, don't push, and commit before
 switching branches.
 ```
+
+## 5. The red block's click, the board and the pull request text
+
+```text
+For #368, I'll read your draft and post it myself. One change to it first: instead of a separate PR to flip
+APPROVER_GROUP's default, say I'll remove the switch in #280 after #368
+merges. Check who #280 is assigned to and tell me.
+
+F-10 (#370):
+- Yes, add the mouse-only click on the red block, using the same link
+  as "Open event N". Keep the link as the keyboard and screen-reader
+  way.
+- Add #370 to the board in the current sprint, as In progress.
+- Prepare the PR text, and say the broken state in the screenshots is
+  staged. Don't push yet.
+
+#275: since nothing is pushed, can each owner's changes be tidied into
+one commit each, with no rename-then-undo in Richie's files? Make a
+backup branch first, and ask me before any reset or rebase.
+
+Commit everything and leave the folder clean.
+```
