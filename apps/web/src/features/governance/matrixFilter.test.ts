@@ -94,11 +94,10 @@ describe("the permission groups", () => {
 });
 
 describe("filtering the matrix", () => {
-  it("changes nothing with no filters, and shows the data scope", () => {
+  it("changes nothing with no filters", () => {
     const result = run({});
     expect(result.matrix.permissions).toEqual([...PERMISSIONS]);
     expect(rolesOf(result)).toEqual([...ROLES]);
-    expect(result.showDataScope).toBe(true);
   });
 
   it("finds a permission by its label, ignoring case", () => {
@@ -122,17 +121,15 @@ describe("filtering the matrix", () => {
   it("treats a search of only spaces as no search", () => {
     const result = run({ search: "   " });
     expect(result.matrix.permissions).toEqual([...PERMISSIONS]);
-    expect(result.showDataScope).toBe(true);
   });
 
-  it("leaves one role's column and every row for a role filter, with the data scope", () => {
+  it("leaves one role's column and every row for a role filter", () => {
     const result = run({ role: "FINANCE" });
     expect(rolesOf(result)).toEqual(["FINANCE"]);
     expect(result.matrix.permissions).toEqual([...PERMISSIONS]);
-    expect(result.showDataScope).toBe(true);
   });
 
-  it("leaves one group's rows and every role for a group filter, without the data scope", () => {
+  it("leaves one group's rows and every role for a group filter", () => {
     const result = run({ group: "approvals" });
     expect(result.matrix.permissions).toEqual([
       "approvals.decide",
@@ -140,11 +137,6 @@ describe("filtering the matrix", () => {
       "payments.post",
     ]);
     expect(rolesOf(result)).toEqual([...ROLES]);
-    expect(result.showDataScope).toBe(false);
-  });
-
-  it("hides the data scope while searching", () => {
-    expect(run({ search: "draft" }).showDataScope).toBe(false);
   });
 
   it("applies the search, the role and the group together", () => {
