@@ -6,7 +6,9 @@ import { cn } from "@/lib/utils";
 import { slotCentre, type BlockState, type ChainModel } from "./chainModel";
 import { CHAIN_FRAGMENT, MAX_BLOCKS } from "./chainShader";
 
-const TOKENS = ["--primary", "--destructive", "--foreground", "--card"];
+// The glass is tinted from the page's ground, not the card's: the build writes
+// the card's see-through colour as an 8-digit hex, which the kit cannot read.
+const TOKENS = ["--primary", "--destructive", "--foreground", "--background"];
 const CODE: Record<BlockState, number> = { waiting: 0, verified: 1, broken: 2 };
 /** How long the blocks take to light after a check, left to right. */
 const SETTLE_SECONDS = 0.7;
