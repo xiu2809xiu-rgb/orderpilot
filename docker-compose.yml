@@ -30,6 +30,9 @@ x-app-env: &app-env
   # minute from one address (apps/e2e, ci.yml). Everyone else keeps the defaults.
   RATE_LIMIT_MAX_REQUESTS: ${RATE_LIMIT_MAX_REQUESTS:-300}
   AUTH_RATE_LIMIT_MAX_REQUESTS: ${AUTH_RATE_LIMIT_MAX_REQUESTS:-20}
+  # Any one of the approver group decides an SPR (ADR 0056, #251); limits stay off.
+  APPROVER_GROUP: ${APPROVER_GROUP:-on}
+  APPROVAL_LIMITS: ${APPROVAL_LIMITS:-off}
   # nginx in the web container is the one proxy in front of the API.
   TRUST_PROXY_HOPS: 1
   CORS_ORIGINS: http://localhost:${STACK_WEB_PORT:-8080},http://127.0.0.1:${STACK_WEB_PORT:-8080}

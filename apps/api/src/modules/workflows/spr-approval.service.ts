@@ -2,10 +2,8 @@ import { Inject, Injectable } from "@nestjs/common";
 import {
   SPR_DECISION_RECORDED_MESSAGE,
   SPR_DECISION_UNDONE_MESSAGE,
-  SPR_PASSED_ON_MESSAGE,
   sprDecisionResultSchema,
   sprDecisionUndoResultSchema,
-  type PolicyRequest,
   type SprDecisionResult,
   type SprDecisionUndoResult,
 } from "@orderpilot/shared";
@@ -16,12 +14,7 @@ import {
   DomainError,
   NotFoundError,
 } from "../../common/domain-error.js";
-import { Database } from "../../database/database.js";
-import { UserRepository } from "../../users/user.repository.js";
-import {
-  AuthorisationService,
-  type RequestInfo,
-} from "../governance/authorisation.service.js";
+import type { RequestInfo } from "../governance/authorisation.service.js";
 import {
   CommandReplayService,
   type KeepAnswer,
@@ -45,12 +38,6 @@ export interface CommandOptions {
 }
 
 /**
- * Approving or rejecting an SPR. Area 4's policy says who may decide and up to
- * what limit; the state machine says what the order does next; this decides what
- * happens above a limit. The amount and the requester always come from the SPR's
- * own record, so a request cannot talk its way under a limit.
- */
-/**
  * Whom a decision hands the SPR back to, and for what: an approval to the
  * product manager to place the vendor PO, a rejection to correct the SPR and
  * raise it again.
@@ -64,6 +51,14 @@ function handBackOf(outcome: Outcome): {
     : { kind: "RAISE_SPR", title: RAISE_SPR_TITLE };
 }
 
+/**
+ * Approving or rejecting an SPR. Area 4's policy says who may decide: any one of
+ * the approver group, never the requester, and within their limit while limits
+ * are on (ADR 0056). The state machine says what the order does next. The
+ * amount and the requester always come from the SPR's own record, so a request
+ * cannot talk its way under a limit. Nothing is passed on: above someone's limit
+ * the policy refuses, and another approver decides.
+ */
 @Injectable()
 export class SprApprovalService {
   constructor(
@@ -71,10 +66,6 @@ export class SprApprovalService {
     @Inject(WorkflowReadModel) private readonly model: WorkflowReadModel,
     @Inject(OrderWorkflowService)
     private readonly workflow: OrderWorkflowService,
-    @Inject(AuthorisationService)
-    private readonly policy: AuthorisationService,
-    @Inject(UserRepository) private readonly users: UserRepository,
-    @Inject(Database) private readonly database: Database,
     @Inject(AuditService) private readonly audit: AuditService,
     @Inject(WorkflowTaskRepository)
     private readonly tasks: WorkflowTaskRepository,
@@ -126,25 +117,6 @@ export class SprApprovalService {
       );
     }
     await this.refuseTheRequester(recordNo, spr, auth, info);
-
-    const verdict = await this.policy.decide(
-      this.requestOf(recordNo, spr, auth),
-      now,
-    );
-    // A rejection passes on too: someone with no authority over this amount
-    // should not be the one to end it, and the decision stays with whoever has.
-    if (verdict.outcome === "refused" && verdict.rule === "approval-limit") {
-      return this.passOn(
-        recordNo,
-        spr,
-        outcome,
-        comment,
-        auth,
-        info,
-        now,
-        keep,
-      );
-    }
 
     const handBack = handBackOf(outcome);
     const handBackDue = await this.tasks.dueFor(handBack.kind, now);
@@ -277,9 +249,9 @@ export class SprApprovalService {
   }
 
   /**
-   * Passing an SPR up the chain makes each person the "requester" of the next
-   * step in area 4's chain, so the original requester would no longer be what
-   * its route rule compares. They must never decide it, so that is checked here.
+   * The requester never decides their own SPR. Area 4's group leaves them out
+   * as well; this refuses it first, with area 2's own audit row, so an undo is
+   * covered by the same rule.
    */
   private async refuseTheRequester(
     recordNo: string,
@@ -301,96 +273,12 @@ export class SprApprovalService {
     throw new DomainError("FORBIDDEN", "You do not have access to this.");
   }
 
-  /** Sends the SPR to the next person on the chain, and says who that is. */
-  private async passOn(
-    recordNo: string,
-    spr: StoredSpr,
-    outcome: Outcome,
-    comment: string,
-    auth: AuthContext,
-    info: RequestInfo,
-    now: Date,
-    keep: KeepAnswer<SprDecisionResult>,
-  ): Promise<SprDecisionResult> {
-    const status = await this.workflow.statusOf(spr.orderRef);
-    if (status?.status !== "AwaitingSpr") {
-      throw new ConflictError(
-        "This order is not waiting for an SPR decision, so it cannot be passed on.",
-      );
-    }
-    const requester = spr.passedOn?.byUserId ?? spr.requesterUserId;
-    // A substitute stands in for the absent approver, so the chain goes on from
-    // that approver. The substitute's own approver was never on this chain.
-    const decider = await this.policy.deciderFor(requester, now);
-    const from =
-      decider.kind === "substitute" ? decider.standsInFor : auth.user.id;
-    const next = await this.policy.deciderFor(from, now);
-    if (
-      next.kind === "none" ||
-      next.userId === spr.requesterUserId ||
-      next.userId === auth.user.id
-    ) {
-      throw new ConflictError(
-        "This is above your limit, and nobody above you can take it.",
-      );
-    }
-    const names = await this.users.namesByIds([next.userId]);
-    const toName = names.get(next.userId) ?? next.userId;
-    const answer: SprDecisionResult = {
-      applied: true,
-      message: SPR_PASSED_ON_MESSAGE,
-      recordNo,
-      outcome,
-      comment,
-      passedToName: toName,
-    };
-    await this.database.transaction(async () => {
-      await this.records.save(spr, {
-        passedOn: {
-          byUserId: from,
-          byName: auth.user.displayName,
-          toName,
-          outcome,
-          comment,
-          at: now.toISOString(),
-        },
-      });
-      await this.audit.record({
-        actor: { kind: "user", userId: auth.user.id, role: auth.user.role },
-        action: "workflows.spr.passed-on",
-        entityType: "Spr",
-        entityId: recordNo,
-        summary: `${auth.user.displayName} passed ${recordNo} on to ${toName}, above their limit`,
-        changes: { toUserId: next.userId, kind: next.kind, outcome, comment },
-        ip: info.ip,
-        traceId: info.traceId,
-      });
-      await keep(answer);
-    });
-    return answer;
-  }
-
-  /** The chain follows from the last hand-off: the passer, or the absent approver they stood in for. */
+  /** What area 4's policy judges: the SPR's own amount and the person who raised it. */
   private factsOf(recordNo: string, spr: StoredSpr) {
     return {
       recordNo,
       amount: spr.amount,
-      requesterUserId: spr.passedOn?.byUserId ?? spr.requesterUserId,
-    };
-  }
-
-  private requestOf(
-    recordNo: string,
-    spr: StoredSpr,
-    auth: AuthContext,
-  ): PolicyRequest {
-    const facts = this.factsOf(recordNo, spr);
-    return {
-      actor: { userId: auth.user.id, role: auth.user.role },
-      action: "spr.approve",
-      resource: { type: "Spr", id: recordNo },
-      amount: facts.amount,
-      requesterUserId: facts.requesterUserId,
+      requesterUserId: spr.requesterUserId,
     };
   }
 }

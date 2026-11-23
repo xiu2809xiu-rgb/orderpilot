@@ -11,7 +11,6 @@ import type { DocumentConfigRepository } from "./document-config.repository.js";
 import { SprSuggestion } from "./domain/spr-suggestion.js";
 import { MockApprovalPolicy } from "./mock/mock-approval-policy.js";
 import { MockWorkflowReadModel } from "./mock-workflow-read-model.js";
-import type { AuthorisationService } from "../governance/authorisation.service.js";
 import type { SprRecordRepository } from "./spr-record.repository.js";
 import type { SprRoutingService } from "./spr-routing.service.js";
 import { WorkflowsService } from "./workflows.service.js";
@@ -203,9 +202,8 @@ describe("the service over the mock", () => {
       findByOrder: () => Promise.resolve(null),
       settled: () => Promise.resolve(new Set<string>()),
     } as unknown as SprRecordRepository,
-    {} as unknown as AuthorisationService,
     {
-      handovers: () => Promise.resolve(new Map()),
+      groupOf: () => Promise.resolve({ approvers: [], reason: null }),
     } as unknown as SprRoutingService,
   );
   const sprNo = dataset.sprs[0]?.recordNo ?? "";

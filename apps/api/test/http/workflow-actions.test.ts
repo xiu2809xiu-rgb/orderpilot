@@ -54,7 +54,8 @@ describe("acting on the mock tasks", () => {
   const sessions = new Map<Role, Browser>();
   beforeAll(async () => {
     await resetTestData();
-    t = await createTestApp();
+    // Area 2 routes SPRs with the approver group (ADR 0056, #251).
+    t = await createTestApp({ APPROVER_GROUP: "on" });
     for (const role of ROLES) sessions.set(role, await demoSignIn(t, role));
   });
   afterAll(async () => {

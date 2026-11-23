@@ -159,18 +159,14 @@ export class WorkflowsController {
   @RequirePermission("workflows.read")
   @ApiOperation({
     summary:
-      "The SPRs the approval chain has handed to the caller, whatever their role (tasks from mock data, the routing is real)",
+      "The SPRs handed to the caller. Empty under the approver group (ADR 0056), where an SPR stays with all the approvers; the route goes with its screen (#251)",
   })
   @openApiQuery(pageQuerySchema)
   @ApiOkResponse({ schema: openApiSchema(handedTaskListResponseSchema) })
   async handedToMe(
-    @Auth() auth: AuthContext,
     @Query(new ZodValidationPipe(pageQuerySchema)) query: PageQuery,
   ) {
-    const page = await this.workflows.handedTo(
-      { userId: auth.user.id, role: auth.user.role },
-      query,
-    );
+    const page = await this.workflows.handedTo(query);
     return { data: page.items, meta: { ...page.meta, ...MOCK } };
   }
 
@@ -377,10 +373,9 @@ export class WorkflowsController {
   @ApiOkResponse({ schema: openApiSchema(sprResponseSchema) })
   async spr(
     @Param(new ZodValidationPipe(sprParamsSchema)) params: { recordNo: string },
-    @Auth() auth: AuthContext,
   ) {
     return {
-      data: await this.workflows.spr(params.recordNo, auth.user.id),
+      data: await this.workflows.spr(params.recordNo),
       meta: MOCK,
     };
   }

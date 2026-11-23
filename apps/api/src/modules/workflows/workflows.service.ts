@@ -7,19 +7,17 @@ import type {
   OrderFlow,
   PageMeta,
   PageQuery,
-  PolicyRequest,
   SprDetail,
   TasksQuery,
   WorkflowReminder,
   WorkflowTask,
 } from "@orderpilot/shared";
 import { NotFoundError } from "../../common/domain-error.js";
-import { AuthorisationService } from "../governance/authorisation.service.js";
 import { ApprovalPolicy } from "./domain/approval-policy.js";
 import { DocumentConfigRepository } from "./document-config.repository.js";
 import { mockOpenRules } from "./mock/mock-open-rules.js";
 import { SprRecordRepository } from "./spr-record.repository.js";
-import { SprRoutingService, type SprHandover } from "./spr-routing.service.js";
+import { SprRoutingService } from "./spr-routing.service.js";
 import { WorkflowReadModel } from "./workflow-read-model.js";
 import { WorkflowTaskRepository } from "./workflow-task.repository.js";
 
@@ -61,8 +59,6 @@ export class WorkflowsService {
     private readonly config: DocumentConfigRepository,
     @Inject(SprRecordRepository)
     private readonly sprRecords: SprRecordRepository,
-    @Inject(AuthorisationService)
-    private readonly policy: AuthorisationService,
     @Inject(SprRoutingService) private readonly routing: SprRoutingService,
     @Optional()
     @Inject(WorkflowTaskRepository)
@@ -81,59 +77,18 @@ export class WorkflowsService {
     return paged(shown.sort(byUrgency), query);
   }
 
-  /** The SPRs the approval chain has handed to this person, whatever their role. */
-  async handedTo(
-    actor: PolicyRequest["actor"],
-    query: PageQuery,
-  ): Promise<Page<HandedTask>> {
-    const handovers = await this.routing.handovers();
-    const tasks = await this.model.tasksFor("APPROVER");
-    const mine = tasks.flatMap((task) => {
-      const handover =
-        task.kind === "APPROVE_SPR" && task.orderNo
-          ? handovers.get(task.orderNo)
-          : undefined;
-      return handover?.userId === actor.userId ? [{ task, handover }] : [];
-    });
-    const handed = await Promise.all(
-      mine.map(async ({ task, handover }) => ({
-        ...task,
-        // It names the role's approver, who no longer holds this.
-        assigneeName: undefined,
-        handedOver: {
-          reason: handover.reason,
-          fromName: handover.fromName,
-          canAct: await this.canAct(actor, task, handover),
-        },
-      })),
-    );
-    return paged(handed.sort(byUrgency), query);
-  }
-
   /**
-   * Asked of area 4's policy, so the screen never offers what it would refuse
-   * outright. Above their limit still counts: deciding then tries to pass it on.
+   * The SPRs handed to this person, whatever their role. Under the approver
+   * group (ADR 0056) nothing is handed to anyone: an SPR stays with the whole
+   * group until one decides. The route goes once its screen does (#251).
    */
-  private async canAct(
-    actor: PolicyRequest["actor"],
-    task: WorkflowTask,
-    handover: SprHandover,
-  ): Promise<boolean> {
-    if (!handover.canOpen) return false;
-    const verdict = await this.policy.decide({
-      actor,
-      action: "spr.approve",
-      resource: { type: "Spr", id: task.ref?.recordNo ?? task.id },
-      amount: handover.amount,
-      requesterUserId: handover.chainStart,
-    });
-    return verdict.outcome !== "refused" || verdict.rule === "approval-limit";
+  handedTo(query: PageQuery): Promise<Page<HandedTask>> {
+    return Promise.resolve(paged([], query));
   }
 
   /**
    * The inbox reads from the mock until a story binds a real read model, but a
-   * decided SPR is real and must not come back after a restart, and one handed
-   * on is someone else's now.
+   * decided SPR is real and must not come back after a restart.
    */
   private async openTasks(role: InboxRole): Promise<WorkflowTask[]> {
     const tasks = await this.model.tasksFor(role);
@@ -179,11 +134,7 @@ export class WorkflowsService {
     orders: readonly string[],
   ): Promise<ReadonlySet<string>> {
     if (orders.length === 0) return new Set();
-    const [settled, handovers] = await Promise.all([
-      this.sprRecords.settled(orders),
-      this.routing.handovers(),
-    ]);
-    return new Set([...settled, ...handovers.keys()]);
+    return this.sprRecords.settled(orders);
   }
 
   async reminders(
@@ -209,7 +160,7 @@ export class WorkflowsService {
     return flow;
   }
 
-  async spr(recordNo: string, viewerUserId?: string): Promise<SprDetail> {
+  async spr(recordNo: string): Promise<SprDetail> {
     const record = await this.model.sprByRecordNo(recordNo);
     if (!record)
       throw new NotFoundError(`Stock purchase requisition ${recordNo}`);
@@ -218,9 +169,7 @@ export class WorkflowsService {
     const stored = record.orderNo
       ? await this.sprRecords.findByOrder(record.orderNo)
       : null;
-    const next = stored?.passedOn
-      ? await this.policy.deciderFor(stored.passedOn.byUserId)
-      : null;
+    const group = stored ? await this.routing.groupOf(stored) : undefined;
     const decision = stored ? stored.decision : record.decision;
     // The open task says when the decision is due; a decided SPR has none.
     const task = decision
@@ -248,19 +197,19 @@ export class WorkflowsService {
       raiseTaskId: raiseTask?.id ?? null,
       due: task ? { dueAt: task.dueAt, overdue: task.overdue } : null,
       decidable: stored !== null,
-      passedTo: stored?.passedOn
+      // Nothing passes on under the approver group (ADR 0056).
+      passedTo: null,
+      ...(group
         ? {
-            name: stored.passedOn.toName,
-            byName: stored.passedOn.byName,
-            at: stored.passedOn.at,
-            askedOutcome: stored.passedOn.outcome,
-            comment: stored.passedOn.comment,
-            youDecide:
-              next !== null &&
-              next.kind !== "none" &&
-              next.userId === viewerUserId,
+            approverGroup: {
+              approvers: group.approvers.map(({ userId, displayName }) => ({
+                userId,
+                displayName,
+              })),
+              reason: group.reason ?? null,
+            },
           }
-        : null,
+        : {}),
       approver: { displayName: approver.displayName, setup: approver.setup },
       substituteName: approver.substituteName,
       escalatesToName: approver.escalatesToName,

@@ -71,6 +71,20 @@ function spr(decision: null | { outcome: "approved"; by: string }) {
       substituteName: "Prakash Menon",
       escalatesToName: "Sophia Chen",
       passedTo: null,
+      // Set here, not left to the generated mock: who in the group can decide it.
+      approverGroup: {
+        approvers: [
+          {
+            userId: "00000000-0000-4000-8000-000000000390",
+            displayName: "Anita Rao",
+          },
+          {
+            userId: "00000000-0000-4000-8000-000000000391",
+            displayName: "Wei Ling Tan",
+          },
+        ],
+        reason: null,
+      },
       decidable: true,
       stage: decision ? ("decided" as const) : ("with-approvers" as const),
       raiseTaskId: null,
@@ -162,6 +176,8 @@ describe("the SPR approval page", () => {
     );
     expect(screen.getAllByText("98").length).toBeGreaterThan(0);
     expect(screen.queryByText("98.00")).toBeNull();
+    // The group as area 4 answers it for this SPR, by name.
+    expect(screen.getByText("Anita Rao, Wei Ling Tan")).toBeInTheDocument();
     // A person, by name: the setup's raw approver id means nothing to staff.
     expect(screen.getByText("Sophia Chen")).toBeInTheDocument();
     expect(screen.queryByText(/00000000-0000/)).toBeNull();

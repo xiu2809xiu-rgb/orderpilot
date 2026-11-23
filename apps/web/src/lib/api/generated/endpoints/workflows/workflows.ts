@@ -167,7 +167,7 @@ export function useWorkflowsMyTasks<TData = Awaited<ReturnType<typeof workflowsM
 
 
 /**
- * @summary The SPRs the approval chain has handed to the caller, whatever their role (tasks from mock data, the routing is real)
+ * @summary The SPRs handed to the caller. Empty under the approver group (ADR 0056), where an SPR stays with all the approvers; the route goes with its screen (#251)
  */
 export const workflowsHandedToMe = (
     params?: WorkflowsHandedToMeParams,
@@ -239,7 +239,7 @@ export function useWorkflowsHandedToMe<TData = Awaited<ReturnType<typeof workflo
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary The SPRs the approval chain has handed to the caller, whatever their role (tasks from mock data, the routing is real)
+ * @summary The SPRs handed to the caller. Empty under the approver group (ADR 0056), where an SPR stays with all the approvers; the route goes with its screen (#251)
  */
 
 export function useWorkflowsHandedToMe<TData = Awaited<ReturnType<typeof workflowsHandedToMe>>, TError = ErrorType<unknown>>(

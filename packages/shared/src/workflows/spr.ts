@@ -89,6 +89,19 @@ export const sprDetailSchema = z.object({
     })
     .nullable()
     .optional(),
+  /**
+   * Who may decide it: the approver group, any one of whom decides (ADR 0056).
+   * Each is an id and a name only. `reason` says why the list is empty. Absent
+   * for a sample the workflow does not run.
+   */
+  approverGroup: z
+    .object({
+      approvers: z.array(
+        z.object({ userId: z.uuid(), displayName: z.string().min(1) }),
+      ),
+      reason: z.string().nullable(),
+    })
+    .optional(),
   stage: z.enum(SPR_STAGES).optional(),
   /** The product manager's Raise task, while the SPR is a suggestion they hold. */
   raiseTaskId: z.uuid().nullable().optional(),

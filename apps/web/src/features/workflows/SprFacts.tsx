@@ -148,6 +148,16 @@ export function ApproverFacts({ spr }: { spr: SprDetail }) {
   return (
     <dl className="grid gap-s2 sm:grid-cols-2">
       <Fact label={t("spr.decidedBy")}>{t("spr.anyOfThree")}</Fact>
+      {/* Who is in the group for this SPR: everyone but the requester, as area 4 answers it. */}
+      {spr.approverGroup ? (
+        <Fact label={t("spr.groupNow")}>
+          {spr.approverGroup.approvers.length > 0
+            ? spr.approverGroup.approvers
+                .map((approver) => approver.displayName)
+                .join(", ")
+            : t("spr.groupNobody", { reason: spr.approverGroup.reason ?? "" })}
+        </Fact>
+      ) : null}
       {noLimits ? (
         <Fact label={t("spr.limits")}>{t("spr.noLimits")}</Fact>
       ) : (

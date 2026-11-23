@@ -1456,7 +1456,7 @@
             }
           }
         },
-        "summary": "The SPRs the approval chain has handed to the caller, whatever their role (tasks from mock data, the routing is real)",
+        "summary": "The SPRs handed to the caller. Empty under the approver group (ADR 0056), where an SPR stays with all the approvers; the route goes with its screen (#251)",
         "tags": ["Workflows"]
       }
     },
@@ -3549,6 +3549,36 @@
                             "comment",
                             "youDecide"
                           ],
+                          "additionalProperties": false
+                        },
+                        "approverGroup": {
+                          "type": "object",
+                          "properties": {
+                            "approvers": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "userId": {
+                                    "type": "string",
+                                    "format": "uuid",
+                                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                                  },
+                                  "displayName": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  }
+                                },
+                                "required": ["userId", "displayName"],
+                                "additionalProperties": false
+                              }
+                            },
+                            "reason": {
+                              "nullable": true,
+                              "type": "string"
+                            }
+                          },
+                          "required": ["approvers", "reason"],
                           "additionalProperties": false
                         },
                         "stage": {

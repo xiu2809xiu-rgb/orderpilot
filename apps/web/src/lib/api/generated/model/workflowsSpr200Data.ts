@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.0.0
  */
 import type { WorkflowsSpr200DataApprover } from './workflowsSpr200DataApprover.ts';
+import type { WorkflowsSpr200DataApproverGroup } from './workflowsSpr200DataApproverGroup.ts';
 import type { WorkflowsSpr200DataBasis } from './workflowsSpr200DataBasis.ts';
 import type { WorkflowsSpr200DataDecision } from './workflowsSpr200DataDecision.ts';
 import type { WorkflowsSpr200DataDue } from './workflowsSpr200DataDue.ts';
@@ -55,6 +56,7 @@ export type WorkflowsSpr200Data = {
   escalatesToName: string | null;
   /** @nullable */
   passedTo?: WorkflowsSpr200DataPassedTo;
+  approverGroup?: WorkflowsSpr200DataApproverGroup;
   stage?: WorkflowsSpr200DataStage;
   /**
      * @nullable

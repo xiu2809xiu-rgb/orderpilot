@@ -4,7 +4,6 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { AuditService } from "../../src/audit/audit.service.js";
 import { demoEmail } from "../../src/auth/demo-accounts.js";
 import { Database } from "../../src/database/database.js";
-import { ApprovalSetupRepository } from "../../src/modules/governance/approval-setup.repository.js";
 import { TaskSweepService } from "../../src/modules/workflows/task-sweep.service.js";
 import { WorkflowTaskRepository } from "../../src/modules/workflows/workflow-task.repository.js";
 import {
@@ -106,7 +105,8 @@ describe("reminders and escalations (C-4), with the seeded settings: due in 24 h
 
   beforeAll(async () => {
     await resetTestData();
-    t = await createTestApp();
+    // Area 2 routes SPRs with the approver group (ADR 0056, #251).
+    t = await createTestApp({ APPROVER_GROUP: "on" });
     database = t.app.get(Database);
     for (const role of ROLES) sessions.set(role, await demoSignIn(t, role));
     const rows = await database.client.workflowInstance.findMany({
@@ -221,34 +221,6 @@ describe("reminders and escalations (C-4), with the seeded settings: due in 24 h
       await sweep(task.at(48));
 
       expect(await noticesOf(task.taskId)).toEqual([]);
-    });
-
-    it("keeps the task open when the SPR is passed on above a limit, and reminds the next person", async () => {
-      const task = await openTask();
-      const record = await database.client.workflowRecord.findFirstOrThrow({
-        where: { recordType: "SPR", instance: { orderRef: task.spr.orderNo } },
-      });
-      await database.client.workflowRecord.update({
-        where: { id: record.id },
-        data: { data: { ...(record.data as object), amount: "9000.00" } },
-      });
-      const res = await call(
-        t,
-        as("APPROVER"),
-        "post",
-        `${W}/sprs/${task.spr.recordNo}/approve`,
-        { csrf: true, body: { comment: "Above me" } },
-      );
-      expect(res.status).toBe(200);
-
-      await sweep(task.at(20));
-
-      expect(await noticesOf(task.taskId)).toMatchObject([
-        {
-          recipientRole: "MANAGEMENT",
-          recipientUserId: await idOf("MANAGEMENT"),
-        },
-      ]);
     });
 
     it("tells nobody that nobody acted while the order is on hold, when nobody can", async () => {
@@ -385,37 +357,6 @@ describe("reminders and escalations (C-4), with the seeded settings: due in 24 h
       expect(await noticesOf(task.taskId)).toHaveLength(1);
     });
 
-    it("reminds whoever holds the SPR, personally, and not the absent approver", async () => {
-      const task = await openTask();
-      const management = await idOf("MANAGEMENT");
-      const setups = t.app.get(ApprovalSetupRepository);
-      const approver = await idOf("APPROVER");
-      const before = await setups.find(approver);
-      if (!before) throw new Error("The approver has no setup");
-
-      await setups.save({
-        ...before,
-        substituteUserId: management,
-        awayFrom: task.at(-1),
-        awayUntil: task.at(100),
-      });
-      try {
-        await sweep(task.at(20));
-      } finally {
-        await setups.save(before);
-      }
-
-      const [notice] = await noticesOf(task.taskId);
-      expect(notice).toMatchObject({
-        recipientRole: "MANAGEMENT",
-        recipientUserId: management,
-      });
-      const ids = async (role: Role) =>
-        (await noticesFor(role)).data.map((n) => n.id);
-      expect(await ids("MANAGEMENT")).toContain(notice?.id);
-      expect(await ids("APPROVER")).not.toContain(notice?.id);
-    });
-
     it("keeps a personal notice from everyone else in that person's role", async () => {
       const task = await openTask();
       const notice = await database.client.workflowNotification.create({
@@ -440,33 +381,6 @@ describe("reminders and escalations (C-4), with the seeded settings: due in 24 h
       const ids = (await noticesFor("APPROVER")).data.map((n) => n.id);
 
       expect(ids).not.toContain(notice.id);
-    });
-
-    it("reminds a new holder once as well, when the SPR moves on after a reminder", async () => {
-      const task = await openTask();
-      const management = await idOf("MANAGEMENT");
-      const setups = t.app.get(ApprovalSetupRepository);
-      const approver = await idOf("APPROVER");
-      const before = await setups.find(approver);
-      if (!before) throw new Error("The approver has no setup");
-      await sweep(task.at(20));
-
-      await setups.save({
-        ...before,
-        substituteUserId: management,
-        awayFrom: task.at(-1),
-        awayUntil: task.at(100),
-      });
-      try {
-        await sweep(task.at(21));
-        await sweep(task.at(22));
-      } finally {
-        await setups.save(before);
-      }
-
-      expect(
-        (await noticesOf(task.taskId)).map((n) => n.recipientRole),
-      ).toEqual(["APPROVER", "MANAGEMENT"]);
     });
 
     it("leaves alone a task on a sample order the machine does not run", async () => {

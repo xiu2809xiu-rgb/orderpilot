@@ -210,6 +210,8 @@
     "approverDescription": "As Spectra described it on 5 Nov: a coordinator routes each SPR, and any one of three management approvers decides.",
     "decidedBy": "Decided by",
     "anyOfThree": "Any one of three management approvers",
+    "groupNow": "Can decide this one",
+    "groupNobody": "Nobody yet: {{reason}}",
     "limits": "Limits",
     "noLimits": "None set",
     "statusHeading": "Decision",
