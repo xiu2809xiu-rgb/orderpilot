@@ -318,6 +318,36 @@ describe("AuditPage", () => {
     expect(
       await screen.findByText("Verified up to sequence 57"),
     ).toBeInTheDocument();
+    // The picture (F-10) numbers only what the check sent: 40 events checked
+    // up to 57 says nothing about the numbers in between.
+    await waitFor(() => {
+      expect(pictureText()).toBe("57");
+    });
+  });
+
+  it("draws no chain for an empty trail", async () => {
+    server.use(
+      getAuditViewerChainMockHandler({
+        data: {
+          ok: true,
+          checked: 0,
+          verifiedThrough: null,
+          brokenAtSequence: null,
+          brokenAtEventId: null,
+          problem: null,
+          checkedAt: new Date().toISOString(),
+        },
+      }),
+    );
+    const user = userEvent.setup();
+    renderAt();
+    await user.click(
+      await screen.findByRole("button", { name: "Check the chain" }),
+    );
+    expect(
+      await screen.findByText("Nothing to verify yet: the trail is empty."),
+    ).toBeInTheDocument();
+    expect(pictureText()).toBeNull();
   });
 
   it("reports where a broken chain breaks", async () => {
@@ -341,10 +371,18 @@ describe("AuditPage", () => {
     );
     expect(await screen.findByText("Broken at sequence 9")).toBeInTheDocument();
     expect(screen.getByRole("alert")).toHaveTextContent(
-      "Events up to sequence 8 still verify.",
+      "Events up to sequence 8 still verify. The check stops at the first break, so the events after it are not checked.",
     );
+    await waitFor(() => {
+      expect(pictureText()).toBe("89");
+    });
   });
 });
+
+/** The numbers under the chain picture, or null when there is no picture. */
+function pictureText(): string | null {
+  return document.querySelector("[data-chain-picture]")?.textContent ?? null;
+}
 
 describe("EntityOperationLog", () => {
   beforeAll(async () => {
