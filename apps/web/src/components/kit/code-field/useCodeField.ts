@@ -5,7 +5,7 @@ import {
   useState,
   type ChangeEvent,
   type ClipboardEvent,
-  type PointerEvent,
+  type MouseEvent,
   type Ref,
 } from "react";
 import { prefersReducedMotion } from "../env";
@@ -110,7 +110,10 @@ export function useCodeField({
     if (node) setActive(activeCell(node.value, node.selectionStart));
   };
 
-  const onPointerUp = (event: PointerEvent<HTMLInputElement>) => {
+  // On click, not pointerup: a finger puts the caret where it touched only after
+  // pointerup, so a handler on pointerup lost to it and the ring jumped to the wrong
+  // cell on a phone. Click comes after both the mouse and the touch placed the caret.
+  const onClick = (event: MouseEvent<HTMLInputElement>) => {
     const node = event.currentTarget;
     if (!editable) return;
     const box = node.getBoundingClientRect();
@@ -131,7 +134,7 @@ export function useCodeField({
     inputProps: {
       onChange: onInput,
       onPaste,
-      onPointerUp,
+      onClick,
       onKeyUp: followCaret,
       onSelect: followCaret,
       onFocus: () => {

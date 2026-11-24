@@ -203,9 +203,9 @@ describe("typing", () => {
       new DOMRect(0, 0, 240, 56),
     );
     render(<Harness initial="123" />);
-    fireEvent.pointerUp(input(), { clientX: 70 });
+    fireEvent.click(input(), { clientX: 70 });
     expect(ring()?.style.getPropertyValue("--cf-i")).toBe("1");
-    fireEvent.pointerUp(input(), { clientX: 230 });
+    fireEvent.click(input(), { clientX: 230 });
     expect(ring()?.style.getPropertyValue("--cf-i")).toBe("3");
   });
 
@@ -216,7 +216,7 @@ describe("typing", () => {
     const onChange = vi.fn();
     render(<Harness initial="123456" onChange={onChange} />);
     input().focus();
-    fireEvent.pointerUp(input(), { clientX: 70 });
+    fireEvent.click(input(), { clientX: 70 });
     expect([input().selectionStart, input().selectionEnd]).toEqual([1, 2]);
     await userEvent.setup().keyboard("9");
     expect(onChange).toHaveBeenLastCalledWith("193456");
