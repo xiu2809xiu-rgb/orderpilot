@@ -6,12 +6,14 @@ import { QueueModule } from "../../queue/queue.module.js";
 import { UsersModule } from "../../users/users.module.js";
 import { GovernanceModule } from "../governance/governance.module.js";
 import { CommandReplayService } from "./command-replay.service.js";
+import { ApprovalOverdueNotifier } from "./domain/approval-overdue-notifier.js";
 import { ApprovalPolicy } from "./domain/approval-policy.js";
 import {
   DEFAULT_ORDER_FLOW_RULES,
   ORDER_FLOW_RULES,
 } from "./domain/order-state-machine.js";
 import { DocumentConfigRepository } from "./document-config.repository.js";
+import { LogApprovalOverdueNotifier } from "./mock/log-approval-overdue-notifier.js";
 import { MockApprovalPolicy } from "./mock/mock-approval-policy.js";
 import { MockDecisionOverlay } from "./mock/mock-decision-overlay.js";
 import { MockWorkflowActions } from "./mock/mock-workflow-actions.js";
@@ -76,6 +78,11 @@ import { WorkflowsService } from "./workflows.service.js";
     { provide: ORDER_FLOW_RULES, useValue: DEFAULT_ORDER_FLOW_RULES },
     { provide: WorkflowReadModel, useClass: MockWorkflowReadModel },
     { provide: ApprovalPolicy, useClass: MockApprovalPolicy },
+    // P-100 swaps this for the mail sender, to Mailpit only (#251, point 3).
+    {
+      provide: ApprovalOverdueNotifier,
+      useClass: LogApprovalOverdueNotifier,
+    },
   ],
   exports: [
     RecordNumberService,

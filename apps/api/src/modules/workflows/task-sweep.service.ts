@@ -3,8 +3,11 @@ import type { NoticeKind, Role } from "@orderpilot/shared";
 import { AuditService } from "../../audit/audit.service.js";
 import { RolePermissionRepository } from "../../auth/role-permission.repository.js";
 import { Database } from "../../database/database.js";
+import { AuthorisationService } from "../governance/authorisation.service.js";
+import { ApprovalOverdueNotifier } from "./domain/approval-overdue-notifier.js";
 import { noticesDue, scheduleOf } from "./domain/task-schedule.js";
 import { OrderWorkflowRepository } from "./order-workflow.repository.js";
+import { SprRecordRepository } from "./spr-record.repository.js";
 import { SprRoutingService } from "./spr-routing.service.js";
 import { WorkflowNoticeRepository } from "./workflow-notice.repository.js";
 import {
@@ -42,6 +45,11 @@ export class TaskSweepService {
     @Inject(AuditService) private readonly audit: AuditService,
     @Inject(RolePermissionRepository)
     private readonly matrix: RolePermissionRepository,
+    @Inject(SprRecordRepository) private readonly sprs: SprRecordRepository,
+    @Inject(AuthorisationService)
+    private readonly policy: AuthorisationService,
+    @Inject(ApprovalOverdueNotifier)
+    private readonly overdue: ApprovalOverdueNotifier,
   ) {}
 
   /**
@@ -94,6 +102,11 @@ export class TaskSweepService {
                   { role: sla.escalateToRole, userId: null },
                   now,
                   `task:${task.id}:escalation`,
+                  // Spectra's 24-hour rule: the whole approver group is emailed.
+                  task.kind === "APPROVE_SPR"
+                    ? () =>
+                        this.emailTheGroup(task, `task:${task.id}:escalation`)
+                    : undefined,
                 ),
             ]
           : []),
@@ -122,6 +135,8 @@ export class TaskSweepService {
     to: Recipient,
     now: Date,
     key: string,
+    /** Done in the same transaction, only when the notice is new. */
+    alongside?: () => Promise<void>,
   ): Promise<void> {
     const verb = VERB[kind];
     await this.database.transaction(async () => {
@@ -153,6 +168,7 @@ export class TaskSweepService {
         toRole: to.role,
         toUserId: to.userId,
       });
+      await alongside?.();
     });
   }
 
@@ -167,11 +183,46 @@ export class TaskSweepService {
     to: Recipient,
     now: Date,
     key: string,
+    alongside?: () => Promise<void>,
   ): Promise<void> {
     if (!(await this.matrix.has(to.role, "workflows.read"))) {
       throw new Error(`${to.role} cannot see tasks, so nobody would be told`);
     }
-    await this.notify(task, kind, to, now, key);
+    await this.notify(task, kind, to, now, key, alongside);
+  }
+
+  /**
+   * Hands the overdue SPR to the email port, with everyone who may decide it
+   * (#251, point 3). Inside the escalation's transaction: a failure rolls the
+   * notice back, and the next sweep tries again with the same key.
+   */
+  private async emailTheGroup(task: OpenTask, key: string): Promise<void> {
+    const spr = await this.sprs.findByOrder(task.orderRef);
+    if (!spr) return;
+    const group = await this.policy.approversFor({
+      requester: spr.requesterUserId,
+      action: "spr.approve",
+      amount: spr.amount,
+    });
+    if (group.approvers.length === 0) {
+      // Nobody to email is worth knowing about, but must not jam the reminder.
+      this.logger.warn(
+        { taskId: task.id, reason: group.reason },
+        "An overdue SPR has nobody in the approver group to email",
+      );
+      return;
+    }
+    await this.overdue.notify({
+      key,
+      taskId: task.id,
+      orderRef: task.orderRef,
+      recordNo: task.recordNo,
+      dueAt: task.dueAt.toISOString(),
+      approvers: group.approvers.map(({ userId, displayName }) => ({
+        userId,
+        displayName,
+      })),
+    });
   }
 
   /** No notice: this is for the tracker's overdue flag, and the escalation tells people. */
