@@ -79,7 +79,10 @@ export function ScrollRegion({
       className={cn("sr-region overflow-auto", className)}
     >
       {children}
-      <span ref={edgesRef} className="sr-edges" aria-hidden="true" />
+      <span ref={edgesRef} className="sr-edges" aria-hidden="true">
+        <span className="sr-edge sr-edge-start" />
+        <span className="sr-edge sr-edge-end" />
+      </span>
     </div>
   );
 }

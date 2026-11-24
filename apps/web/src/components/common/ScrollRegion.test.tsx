@@ -219,7 +219,10 @@ describe("ScrollRegion", () => {
       const rail = must(region.lastElementChild);
       expect(rail).toHaveClass("sr-edges");
       expect(rail).toHaveAttribute("aria-hidden", "true");
-      expect(rail).toBeEmptyDOMElement();
+      expect(rail.textContent).toBe("");
+      expect(Array.from(rail.children).map((frame) => frame.className)).toEqual(
+        ["sr-edge sr-edge-start", "sr-edge sr-edge-end"],
+      );
     });
 
     it("adds no tab stop and no name of its own", () => {

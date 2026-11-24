@@ -30,12 +30,13 @@
 /* ---- The edge marks: which side has more ----
    A scroll box has no visible scrollbar on a tablet or a phone, so a wide
    table gives no sign that columns lie past its edge. The marks are drawn by
-   `.sr-edges`, a rail placed last inside the box (ScrollRegion.tsx sizes it to
-   the whole scroll area and sets --sr-client-w and --sr-client-h to the size
-   of the visible box). The rail holds two frames, its ::before (the left mark)
-   and its ::after (the right mark). Each is `sticky` at the top left, as large
-   as the visible box, so the browser keeps it over the visible box for the
-   whole scroll range, with no scroll handler to lag behind a finger.
+   `.sr-edges`, a rail placed last inside the box. ScrollRegion.tsx sizes the
+   rail to the whole scroll area and sets --sr-client-w and --sr-client-h to
+   the size of the visible box. The rail holds two frames, one for each side.
+   Each frame is `sticky` at the top left and as large as the visible box, so
+   the browser keeps it over the visible box for the whole scroll range, with
+   no scroll handler to lag behind a finger. The mark is the frame's
+   background: a strip --sr-mark wide at its left or right edge.
    The rail is absolute, so it is no flex or grid item and takes no room, and
    it takes no click. A background or an inset shadow on the box itself would
    be painted under a heading row or a card and hidden by it. */
@@ -48,9 +49,7 @@
   pointer-events: none;
 }
 
-.sr-edges::before,
-.sr-edges::after {
-  content: "";
+.sr-edge {
   display: block;
   position: sticky;
   top: 0;
@@ -65,53 +64,51 @@
   transition: opacity var(--motion-fast) var(--ease-out);
 }
 
-/* The right frame sits over the left one: it steps back by its own height. */
-.sr-edges::after {
+/* The two frames are drawn in the same place: the second steps back by its own height. */
+.sr-edge + .sr-edge {
   margin-top: calc(-1 * var(--sr-client-h, 0px));
 }
 
 /* The left mark is under every frozen column (a pinned first column is z-1 in
    a data table and z-10 in the access matrix), so a frozen column is never
-   shaded. The right mark is over a pinned row menu (z-1) so the mark is not
-   hidden by it, and under every heading cell (z-10 and z-20), so a heading
+   shaded. The right mark is over a pinned row menu (z-1), so that menu does
+   not hide it, and under every heading cell (z-10 and z-20), so a heading
    row is never shaded. */
-.sr-edges::before {
+.sr-edge-start {
   z-index: 0;
   background-image: linear-gradient(to right, var(--sr-edge), transparent);
   background-position: left top;
 }
 
-.sr-edges::after {
+.sr-edge-end {
   z-index: 5;
   background-image: linear-gradient(to left, var(--sr-edge), transparent);
   background-position: right top;
 }
 
-.sr-region[data-more-start] > .sr-edges::before,
-.sr-region[data-more-end] > .sr-edges::after {
+.sr-region[data-more-start] > .sr-edges > .sr-edge-start,
+.sr-region[data-more-end] > .sr-edges > .sr-edge-end {
   opacity: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sr-edges::before,
-  .sr-edges::after {
+  .sr-edge {
     transition: none;
   }
 }
 
-/* A plain line in the system's own text colour: gradients are not drawn in
+/* A plain line in the system colour for text: gradients are not drawn in
    forced colours. */
 @media (forced-colors: active) {
-  .sr-edges::before,
-  .sr-edges::after {
+  .sr-edge {
     background-image: none;
   }
 
-  .sr-edges::before {
+  .sr-edge-start {
     border-left: 1px solid CanvasText;
   }
 
-  .sr-edges::after {
+  .sr-edge-end {
     border-right: 1px solid CanvasText;
   }
 }
