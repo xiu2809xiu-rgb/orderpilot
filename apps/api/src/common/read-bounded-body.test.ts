@@ -3,6 +3,7 @@ import {
   BodyCutOffError,
   BodyTimeoutError,
   BodyTooLargeError,
+  MAX_BODY_CHUNKS,
   readBoundedBody,
 } from "./read-bounded-body.js";
 
@@ -68,6 +69,22 @@ describe("readBoundedBody", () => {
     await expect(
       readBoundedBody(source, { ...LIMITS, declaredLength: 100 }),
     ).rejects.toBeInstanceOf(BodyTooLargeError);
+  });
+
+  it("refuses a body sent as thousands of tiny chunks, after the chunk cap", async () => {
+    let pulled = 0;
+    const source = (async function* () {
+      for (let i = 0; i < 262_144; i += 1) {
+        pulled += 1;
+        yield Buffer.alloc(1, 7);
+        await Promise.resolve();
+      }
+    })();
+    await expect(
+      readBoundedBody(source, { maxBytes: 262_144, timeoutMs: 15_000 }),
+    ).rejects.toBeInstanceOf(BodyTooLargeError);
+    // The cap is hit on the pull after the 4,096th chunk was kept.
+    expect(pulled).toBe(MAX_BODY_CHUNKS + 1);
   });
 
   it("accepts a body of exactly the limit", async () => {

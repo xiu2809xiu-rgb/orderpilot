@@ -27,6 +27,14 @@ export class BodyTimeoutError extends Error {
   }
 }
 
+/**
+ * A real 256 KB body arrives in a few dozen chunks. Many more than this is a
+ * client sending tiny chunks to make the server hold one Buffer, and one
+ * reaction on the deadline promise, for each (a body of 1-byte chunks costs
+ * over 100 MB of heap), so it is refused as too large.
+ */
+export const MAX_BODY_CHUNKS = 4096;
+
 export interface BoundedBodyOptions {
   readonly maxBytes: number;
   /** The whole read, not the gap between chunks. */
@@ -81,6 +89,7 @@ export async function readBoundedBody(
       if (!(chunk instanceof Uint8Array)) throw new BodyCutOffError();
       total += chunk.length;
       if (total > maxBytes) throw new BodyTooLargeError();
+      if (chunks.length >= MAX_BODY_CHUNKS) throw new BodyTooLargeError();
       chunks.push(chunk);
     }
   } finally {
