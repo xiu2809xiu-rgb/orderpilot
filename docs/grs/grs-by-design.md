@@ -44,6 +44,7 @@ Who decides what, and how the decisions stay visible.
 | Synthetic data only, labelled                                           | Real data leaking through demos or tests | Every story    |
 | Two-step sign-in: a code from an authenticator app, used once           | A stolen password signing in alone       | #380           |
 | A person approves every profile picture before it is shown              | An unsuitable picture shown to staff     | In review      |
+| Availability is information only: no rule or reminder reads it          | Staff routed or judged by a set label    | #385           |
 
 ### GRS in the UI
 

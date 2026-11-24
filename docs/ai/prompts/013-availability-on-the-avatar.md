@@ -1,0 +1,17 @@
+# Prompt 013: availability on the avatar
+
+Richie's message of 24 Nov 2026, late in the evening, quoted as he typed it. The part about the OTP field and the theme button is explained in ADR 0068 and ADR 0062; this prompt file is about its last sentence.
+
+```text
+I came across a free, open-source UI component website called Leibox (similar to React Bits), which has its component code available publicly. Both the OTP field and the theme button I used earlier actually came from Leibox. [...] please browse through all the components on Leibox and identify any that would fit naturally and elevate the UI, layout, and UX of OrderPilot. For instance, I'd love for you to implement the Avatar Status Picker component from Leibox into our site.
+```
+
+## What came of it
+
+- The Avatar Status Picker became a person's availability: Available, Focusing or Do not disturb, set from the avatar in the side panel and from the profile card in Settings. The word is "availability" and never "status", which already means an order's status, and "Available" and not "Online", because OrderPilot cannot know that anyone is online.
+- It is information for colleagues and nothing else. No reminder, escalation, 24-hour rule or approval reads it, and two source scans (one in the API, one in the web app) fail when code outside the feature names the table, the shared names, the route or the generated client. A choice falls back to Available 12 hours later, worked out when it is read.
+- The component is OrderPilot's own build from a written description of the original: its proportions, its spring feel, a caption that follows the choice, a flash of light after a pick and its keyboard model. No source, markup, picture, font, colour or glyph drawing was copied. LeiBox's own record says no separate licence was supplied or verified for the original, so ADR 0070 and the part's header credit the designer and LeiBox, say that no licence was stated, and say that this is a private prototype for a school module. Asking them before anything goes public is Richie's to decide and has not been done.
+- The story was designed first and the design was reviewed against the code before any build. The API half was built first, with its safety tests each seen failing against deliberately broken code and restored byte for byte. The screens followed: the dot, the data hooks, the picker, the side panel, the profile card, the Demo role menu, a dot on any avatar, the web half of the isolation test and an end-to-end spec.
+- Two decisions are Angelyn's and are asked on the pull request: a change is not written to the audit trail, with the reasons and the case for the other choice in the ADR, and the three routes carry no permission and sit outside her matrix. The sign-in options now carry the demo accounts' ids in demo mode, which is a file she co-owns.
+- The builder ran no browser and no Docker. The growth of the pill out of its trigger, the caption's glide, the pick pulse, the sheen, the touch geometry and the end-to-end run are the lead's step after the build, in Edge on a Docker build.
+- Left for the team: the approver group on a waiting SPR (area 2), who holds a task or a stuck step (area 3) and the Users tab (area 4) can each show someone's availability with the dot and the lookup this story builds. None of them may read it to change a rule.

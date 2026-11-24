@@ -78,6 +78,9 @@ Each row is a case some test must cover. The story is the one that brings the te
 | A17 | A JPEG with metadata, trailing bytes or a false size is uploaded                           | Cleaned or refused: only the picture's own parts are stored               | Unit              | In review: #381     |
 | A18 | A pending picture is asked for by someone else, or by anyone after a take-down             | Visible to its owner and the reviewers only; 404 after a take-down        | API               | In review: #381     |
 | A19 | A reviewer tries to review their own picture, or two reviewers decide together             | 403 and an audit row; for two reviewers, one decision and one 409         | API               | In review: #381     |
+| A20 | A choice of Focusing or Do not disturb ends after 12 hours                                 | Available from exactly the 12th hour, worked out on read                  | Unit and API      | In review: #385     |
+| A21 | The lookup of people by id is asked with known, unknown, disabled and expired ids          | Every id answered alike; only the id, the value and the time are held     | API               | In review: #385     |
+| A22 | Code outside the availability feature reads availability                                   | A source scan fails on a stray import or a relation include               | Unit              | In review: #385     |
 
 ### Order workflows and approvals (area 2)
 
