@@ -1,6 +1,6 @@
-import type { Role } from "@orderpilot/shared";
+import type { PersonAvailability, Role } from "@orderpilot/shared";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, UserCog } from "lucide-react";
+import { UserCog } from "lucide-react";
 import { lazy, Suspense, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router";
@@ -8,67 +8,22 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./overlays/dropdown-menu";
 import { demoLogin, fetchAuthOptions } from "@/lib/api/auth";
 import { anyFormDirty } from "@/lib/dirty-forms";
+import { useAvailabilityOf } from "@/lib/useAvailabilityOf";
 import { useSessionStore } from "@/stores/session";
 import { splitDemoRoles, type DemoRole } from "../demoRoles";
+import { RoleItem } from "./RoleItem";
 import { announceStay, landingAfterSwitch, startAsNewRole } from "./roleSwitch";
 
 // Only needed when someone switches over unsaved input.
 const RoleSwitchDialog = lazy(() =>
   import("./RoleSwitchDialog").then((m) => ({ default: m.RoleSwitchDialog })),
 );
-
-/** One role in the menu: its number when it has one, the team, the person and what the team does. */
-function RoleItem({
-  entry,
-  step,
-  current,
-  onPick,
-}: {
-  entry: DemoRole;
-  step?: number;
-  current: boolean;
-  onPick: (role: Role) => void;
-}) {
-  const { t } = useTranslation();
-  return (
-    <DropdownMenuItem
-      onSelect={() => {
-        onPick(entry.role);
-      }}
-    >
-      {step === undefined ? null : (
-        <span
-          aria-hidden="true"
-          className="fs-12 grid size-5 shrink-0 place-items-center self-start rounded-full bg-accent font-semibold text-accent-foreground tabular-nums"
-        >
-          {step}
-        </span>
-      )}
-      <span className="flex-1">
-        {/* Team and person share a row: the roles with their lines must fit the menu on a 768 px screen. */}
-        <span className="flex items-baseline gap-2">
-          <span>{t(`roles.${entry.role}`)}</span>
-          <span className="text-xs text-muted-foreground">
-            {entry.displayName}
-          </span>
-        </span>
-        <span className="block text-xs text-muted-foreground">
-          {t(`demo.jobs.${entry.role}`)}
-        </span>
-      </span>
-      {current ? (
-        <Check className="size-4" aria-label={t("demo.current")} />
-      ) : null}
-    </DropdownMenuItem>
-  );
-}
 
 /** Shown only when GET /auth/options says demo mode is on. */
 export function RoleSwitcher() {
@@ -82,6 +37,16 @@ export function RoleSwitcher() {
     queryFn: fetchAuthOptions,
     staleTime: 5 * 60_000,
     retry: false,
+  });
+
+  // Each offered account's availability, so the menu can say who is Focusing
+  // or on Do not disturb. Only accounts the server named by id are asked about.
+  const ids =
+    options.data?.demoRoles.flatMap((entry) =>
+      entry.userId ? [entry.userId] : [],
+    ) ?? [];
+  const availability = useAvailabilityOf(ids, {
+    enabled: options.data?.demoMode === true,
   });
 
   // The role asked for while the question is open.
@@ -114,10 +79,26 @@ export function RoleSwitcher() {
   }
 
   const { flow, more } = splitDemoRoles(options.data.demoRoles);
+  const shown = (entry: DemoRole): PersonAvailability | undefined => {
+    const value = entry.userId
+      ? availability.byId.get(entry.userId.toLowerCase())?.value
+      : undefined;
+    return value === "FOCUSING" || value === "DO_NOT_DISTURB"
+      ? value
+      : undefined;
+  };
 
   return (
     <>
-      <DropdownMenu>
+      <DropdownMenu
+        onOpenChange={(open) => {
+          // What it shows is read when it is seen: the options are kept for 5
+          // minutes, and after a reseed their ids would all answer Available.
+          if (!open) return;
+          void options.refetch();
+          void availability.refetch();
+        }}
+      >
         <DropdownMenuTrigger asChild>
           <Button
             ref={trigger}
@@ -141,6 +122,7 @@ export function RoleSwitcher() {
               entry={entry}
               step={entry.step}
               current={entry.role === current}
+              availability={shown(entry)}
               onPick={pick}
             />
           ))}
@@ -150,6 +132,7 @@ export function RoleSwitcher() {
               key={entry.role}
               entry={entry}
               current={entry.role === current}
+              availability={shown(entry)}
               onPick={pick}
             />
           ))}

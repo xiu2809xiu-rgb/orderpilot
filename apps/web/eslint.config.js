@@ -18,7 +18,7 @@ const entryFiles = [
   "src/zod-setup.ts",
   "src/app/{App,RootLayout,router,guards,Splash,Logo}.tsx",
   "src/app/pages/{CrashPage,ForbiddenPage}.tsx",
-  "src/app/shell/{AppShell,Sidebar,Topbar,Breadcrumbs,Notifications,RoleSwitcher,ThemeSwitch,UserMenu}.tsx",
+  "src/app/shell/{AppShell,Sidebar,Topbar,Breadcrumbs,Notifications,RoleSwitcher,RoleItem,ThemeSwitch,UserMenu}.tsx",
   "src/app/shell/shortcuts.ts",
   "src/stores/*.ts",
   "src/features/{registry,nav,define}.ts",
