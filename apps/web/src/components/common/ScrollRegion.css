@@ -9,10 +9,122 @@
   border-radius: var(--radius-card);
   background: var(--dx-card-work-bg);
   box-shadow: var(--dx-card-shadow);
+  /* How far an edge mark reaches in from the edge (see the marks below). At
+     1rem and black at 6% the mark was no more than 3 levels of 255 beyond its
+     first 8 px on the light card, too faint to notice on a tablet; 2rem
+     spreads the same strongest colour over a band a person can see, and the
+     contrast test is about that colour, so it does not move. */
+  --sr-mark: 2rem;
+  /* The mark's strongest colour, at the edge. In light it is a neutral shadow,
+     not the teal: a teal tint darkens the card but leaves teal link text as it
+     was, so the link loses contrast against its ground, while a neutral dark
+     mark darkens both and the ratio barely moves. No token is plain black (the
+     shadow tokens are lists, not colours), so the keyword is used. A dark mark
+     does not show on a dark card, so dark keeps the teal light below.
+     ScrollRegion.contrast.test.ts reads this value and the dark one, and keeps
+     the text under the mark at 4.5:1 (one named exception, set out there). */
+  --sr-edge: color-mix(in srgb, black 6%, transparent);
+}
+
+.dark .sr-region {
+  --sr-edge: color-mix(in srgb, var(--primary) 12%, transparent);
 }
 
 /* The card's own box shadow would swallow a ring drawn with one, so focus is an outline. */
 .sr-region:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: -2px;
+}
+
+/* ---- The edge marks: which side has more ----
+   A scroll box has no visible scrollbar on a tablet or a phone, so a wide
+   table gives no sign that columns lie past its edge. The marks are drawn by
+   `.sr-edges`, a rail placed last inside the box. ScrollRegion.tsx sizes the
+   rail to the whole scroll area and sets --sr-client-w and --sr-client-h to
+   the size of the visible box. The rail holds two frames, one for each side.
+   Each frame is `sticky` at the top left and as large as the visible box, so
+   the browser keeps it over the visible box for the whole scroll range, with
+   no scroll handler to lag behind a finger. The mark is the frame's
+   background: a strip --sr-mark wide at its left or right edge.
+   The rail is absolute, so it is no flex or grid item and takes no room, and
+   it takes no click. A background or an inset shadow on the box itself would
+   be painted under a heading row or a card and hidden by it. */
+.sr-edges {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.sr-edge {
+  display: block;
+  position: sticky;
+  /* Back by the box's own padding, since a browser pins a sticky box inside it. */
+  top: calc(-1 * var(--sr-pad-top, 0px));
+  left: calc(-1 * var(--sr-pad-left, 0px));
+  box-sizing: border-box;
+  width: var(--sr-client-w, 0px);
+  height: var(--sr-client-h, 0px);
+  background-repeat: no-repeat;
+  background-size: var(--sr-mark) 100%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-fast) var(--ease-out);
+}
+
+/* The two frames are drawn in the same place: the second steps back by its own height. */
+.sr-edge + .sr-edge {
+  margin-top: calc(-1 * var(--sr-client-h, 0px));
+}
+
+/* The left mark is under every frozen column (a pinned first column is z-1 in
+   a data table and z-10 in the access matrix), so a frozen column is never
+   shaded. The right mark is over a pinned row menu (z-1), so that menu does
+   not hide it, and under every heading cell (z-10 and z-20), so a heading
+   row is never shaded. */
+.sr-edge-start {
+  z-index: 0;
+  background-image: linear-gradient(to right, var(--sr-edge), transparent);
+  background-position: left top;
+}
+
+.sr-edge-end {
+  z-index: 5;
+  background-image: linear-gradient(to left, var(--sr-edge), transparent);
+  background-position: right top;
+}
+
+.sr-region[data-more-start] > .sr-edges > .sr-edge-start,
+.sr-region[data-more-end] > .sr-edges > .sr-edge-end {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sr-edge {
+    transition: none;
+  }
+}
+
+/* A plain line in the system colour for text: gradients are not drawn in
+   forced colours. */
+@media (forced-colors: active) {
+  .sr-edge {
+    background-image: none;
+  }
+
+  .sr-edge-start {
+    border-left: 1px solid CanvasText;
+  }
+
+  .sr-edge-end {
+    border-right: 1px solid CanvasText;
+  }
+}
+
+@media print {
+  .sr-edges {
+    display: none;
+  }
 }
