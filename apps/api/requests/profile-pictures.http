@@ -1,0 +1,28 @@
+### Area 1: profile pictures a person approves (ADR 0068).
+### Sign in first (requests/auth.http), then paste the op_csrf cookie value below.
+### Any signed-in person may use the routes about their own picture. The upload is
+### a raw JPEG body, Content-Type image/jpeg, at most 256 KB, square, 128 to 512
+### pixels a side. The server removes EXIF, GPS and every comment, and cuts
+### whatever follows the end marker. A refusal carries its code in
+### details[0].message (not_jpeg, damaged, not_square, wrong_size, ...).
+@baseUrl = http://localhost:3000
+@csrf = paste the op_csrf cookie value here after signing in
+@pictureId = paste a picture id from the answer to GET mine
+
+### What you have: the approved picture, the one waiting for review, the last
+### decision against you, and how many uploads you have left in 24 hours.
+GET {{baseUrl}}/api/v1/profile-pictures/mine
+
+### Send a picture for review. The body is the file itself, a checked-in flat
+### colour square made in code. A new upload replaces your pending picture.
+### The AI check does not run under today's data rule: pending.ai.status says so.
+PUT {{baseUrl}}/api/v1/profile-pictures/mine
+Content-Type: image/jpeg
+X-CSRF-Token: {{csrf}}
+
+< ../test/fixtures/profile-picture-flat-256.jpg
+
+### Take back your own picture, waiting or approved. Taking back a picture that is
+### already gone answers the same way and changes nothing.
+POST {{baseUrl}}/api/v1/profile-pictures/{{pictureId}}/withdraw
+X-CSRF-Token: {{csrf}}

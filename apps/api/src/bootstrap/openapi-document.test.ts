@@ -67,6 +67,8 @@ describe("the OpenAPI document (what orval reads)", () => {
       "/api/v1/orders",
       "/api/v1/orders/{orderNo}",
       "/api/v1/orders/{orderNo}/void",
+      "/api/v1/profile-pictures/mine",
+      "/api/v1/profile-pictures/{id}/withdraw",
       "/api/v1/system/checks",
       "/api/v1/system/checks/status",
       "/api/v1/tracker/flow",

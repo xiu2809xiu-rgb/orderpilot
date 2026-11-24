@@ -11,6 +11,16 @@ export const PICTURE_CHECK_FEATURE = "profile-picture-check";
 export const PICTURE_CHECK_PROMPT_VERSION = "profile-picture-check/1";
 
 /**
+ * What the call says about its data. Origin is "real" because a person chose
+ * the file and nothing proves it is synthetic: it is never labelled synthetic
+ * to get past the data rule. Confidential because an unreviewed staff photo is
+ * personal data that most roles do not see until a person approves it. Area 4
+ * is asked to confirm the level (ADR 0068).
+ */
+export const PICTURE_CHECK_CLASSIFICATION = "confidential";
+export const PICTURE_CHECK_ORIGIN = "real";
+
+/**
  * Fixed and trusted. The picture goes to the model as data, and the gateway
  * does not fence an image, so these words are what says it is not an order.
  */
