@@ -11,6 +11,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { Database } from "../../src/database/database.js";
 import { PermissionPolicy } from "../../src/auth/permission-policy.js";
 import { LlmProvider } from "../../src/modules/ai/domain/llm-provider.js";
+import { SAMPLE_RULES } from "../../src/modules/governance/domain/masking.js";
 import { SalesOrder } from "../../src/modules/orders/domain/sales-order.js";
 import { SalesOrderRepository } from "../../src/modules/orders/sales-order.repository.js";
 import { unfenced } from "../../src/modules/spark/spark-mock-answers.js";
@@ -359,7 +360,22 @@ describe("what Spark's tools hand the model, by role", () => {
     expect(found.size).toBeGreaterThan(0);
   });
 
-  for (const role of ["WAREHOUSE", "LOGISTICS"] as const) {
+  // The roles the masking rule for a selling price hides it from, read from the
+  // rule itself and not written out here: the lists move with the matrix (ADR
+  // 0058), and a role added to one must be searched too.
+  const priceRule = SAMPLE_RULES.find(
+    (rule) => rule.field === "item.unitPrice",
+  );
+  const rolesWithoutPrices = ASKERS.filter(
+    (role) => !priceRule?.visibleTo.includes(role),
+  );
+
+  it("searches for the roles the item.unitPrice rule hides prices from", () => {
+    expect(priceRule).toBeDefined();
+    expect(rolesWithoutPrices.length).toBeGreaterThan(0);
+  });
+
+  for (const role of rolesWithoutPrices) {
     it(`finds no price anywhere, at any depth, in what any tool handed the model for ${role}, and says why it is hidden`, async () => {
       const prices = await knownPrices();
       // Confirm the premise from the routes: this role does not see prices.
