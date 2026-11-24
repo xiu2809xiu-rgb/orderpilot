@@ -55,8 +55,8 @@ export function PictureCard() {
               // The owner may see a picture that waits for review: this is
               // their own card, and the only place that draws a pending one.
               pictureId={shown?.id}
-              className="size-20"
-              textClassName="fs-20"
+              className="size-16"
+              textClassName="fs-18"
               onImageStatus={setImageStatus}
             />
             <PictureStatus

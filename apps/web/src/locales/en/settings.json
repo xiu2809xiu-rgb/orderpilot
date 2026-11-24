@@ -140,6 +140,19 @@
       "MANAGEMENT": "Reads the tracker, dashboards and reports.",
       "AUDITOR": "Reads the audit trail."
     },
+    "availability": {
+      "label": "Availability",
+      "description": "It changes nothing else: reminders, approvals and deadlines still reach you. It goes back to Available after {{hours}} hours.",
+      "change": "Change availability",
+      "until": "{{value}}, until about {{time}}",
+      "saving": "Saving",
+      "loading": "Loading your availability",
+      "refusedTitle": "Your availability was not changed",
+      "fellBack": "It went back to Available after {{hours}} hours.",
+      "demoShared": "This is a shared demo account. Everyone who signs in as this role sees this availability and can change it.",
+      "demoSeen": "In this demo, the Demo role menu in the top bar shows it to the other accounts.",
+      "footnote": "Saved on the server, not on this device. It applies at once."
+    },
     "picture": {
       "title": "Profile picture",
       "intro": "Add a picture of yourself. A reviewer approves every picture first.",
