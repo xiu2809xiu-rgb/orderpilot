@@ -249,6 +249,51 @@ describe("governance: the administrator widening its own role (#383)", () => {
       }
     });
 
+    it("refuses a copy that would give the administrator's role either, audits it, and tells no one", async () => {
+      // The auditor with the administrator's own four is a source a copy onto
+      // the administrator accepts (see the copy notice above), so the only
+      // cell this copy breaks is the new lock.
+      const extra = [
+        "roles.manage",
+        "users.read",
+        "users.manage",
+        "settings.manage",
+      ];
+      const permissionsOf = (role: Role) =>
+        t.app.get(RolePermissionRepository).permissionsOf(role);
+      for (const permission of ["spr.route", "documents.upload"] as const) {
+        const given = [...extra, permission];
+        for (const p of given) {
+          expect((await set("AUDITOR", p, true)).status).toBe(200);
+        }
+        const before = await permissionsOf("SYSTEM_ADMIN");
+        const told = await noticeCount();
+        try {
+          expect(
+            (await copy("AUDITOR", "SYSTEM_ADMIN")).status,
+            permission,
+          ).toBe(409);
+          const refused = (await auditEvents(t))
+            .filter((e) => e.action === "governance.role.copy.refused")
+            .at(-1);
+          expect(refused?.changes, permission).toMatchObject({
+            fromRole: "AUDITOR",
+            toRole: "SYSTEM_ADMIN",
+            rule: "locked-cell",
+            permission,
+            lock: "never",
+          });
+          expect(await holds("SYSTEM_ADMIN", permission)).toBe(false);
+          expect(await noticeCount(), permission).toBe(told);
+        } finally {
+          for (const p of await permissionsOf("SYSTEM_ADMIN")) {
+            if (!before.includes(p)) await set("SYSTEM_ADMIN", p, false);
+          }
+          for (const p of given) await set("AUDITOR", p, false);
+        }
+      }
+    });
+
     it("keeps approvals.decide on for the approver role, on one cell and in a copy", async () => {
       expect((await set("APPROVER", "approvals.decide", false)).status).toBe(
         409,
