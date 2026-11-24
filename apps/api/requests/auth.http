@@ -44,6 +44,27 @@ X-CSRF-Token: {{csrf}}
 POST {{baseUrl}}/api/v1/auth/logout
 X-CSRF-Token: {{csrf}}
 
+### Two-step sign-in. A person who turned on two-step verification gets no session
+### from the login request above: it answers 401 TWO_STEP_REQUIRED and sets a short
+### cookie (op_two_step, five minutes, sent by the client to the verify URL only).
+### Finish with a six-digit code from the authenticator app, or one recovery code.
+### The client sends the challenge cookie for you. Exactly one of code and
+### recoveryCode. Errors: 422 TWO_STEP_CODE_INVALID (the first four wrong codes),
+### 401 TWO_STEP_CHALLENGE_ENDED (no challenge, expired, or the fifth wrong code:
+### sign in again), 429 TWO_STEP_LOCKED (wait the Retry-After seconds, or use a
+### recovery code). No CSRF header: like login it has no CSRF cookie yet, so it
+### takes only JSON from our own origin.
+POST {{baseUrl}}/api/v1/auth/two-step/verify
+Content-Type: application/json
+
+{ "code": "123456" }
+
+### The same step with a recovery code. Each one works once.
+POST {{baseUrl}}/api/v1/auth/two-step/verify
+Content-Type: application/json
+
+{ "recoveryCode": "ABCDE-FGHJK-LMNPQ" }
+
 ### Users. Reading needs users.read, changing needs users.manage (SYSTEM_ADMIN
 ### holds both). Another role gets 403 FORBIDDEN, and the refusal is audited.
 GET {{baseUrl}}/api/v1/users?page=1&pageSize=25

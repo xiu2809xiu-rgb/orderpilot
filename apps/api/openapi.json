@@ -508,7 +508,7 @@
             }
           }
         },
-        "summary": "Sign in with an email and a password",
+        "summary": "Sign in with an email and a password. With two-step on it answers 401 TWO_STEP_REQUIRED and a challenge cookie instead of a session",
         "tags": ["Auth"]
       }
     },
@@ -756,6 +756,157 @@
           }
         },
         "summary": "The signed-in user, their permissions and expiry",
+        "tags": ["Auth"]
+      }
+    },
+    "/api/v1/auth/two-step/verify": {
+      "post": {
+        "operationId": "TwoStep_verify",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "pattern": "^\\d{6}$"
+                  },
+                  "recoveryCode": {
+                    "type": "string",
+                    "minLength": 10,
+                    "maxLength": 40
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "user": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "format": "uuid",
+                              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                            },
+                            "displayName": {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            "email": {
+                              "type": "string",
+                              "format": "email",
+                              "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                            },
+                            "role": {
+                              "type": "string",
+                              "enum": [
+                                "SYSTEM_ADMIN",
+                                "PRODUCT_MANAGER",
+                                "APPROVER",
+                                "SUPPORT",
+                                "WAREHOUSE",
+                                "FINANCE",
+                                "LOGISTICS",
+                                "MANAGEMENT",
+                                "AUDITOR"
+                              ]
+                            }
+                          },
+                          "required": ["id", "displayName", "email", "role"],
+                          "additionalProperties": false
+                        },
+                        "permissions": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": [
+                              "users.read",
+                              "users.manage",
+                              "roles.read",
+                              "roles.manage",
+                              "settings.manage",
+                              "audit.read",
+                              "aiUsage.read",
+                              "documents.read",
+                              "documents.upload",
+                              "orders.read",
+                              "orders.create",
+                              "orders.edit",
+                              "tracker.read",
+                              "exceptions.read",
+                              "insights.read",
+                              "approvals.decide",
+                              "payments.confirm",
+                              "payments.post",
+                              "workflows.read",
+                              "spr.read",
+                              "workflows.inboxes.any",
+                              "tasks.complete",
+                              "masking.customerNote",
+                              "spr.route"
+                            ]
+                          }
+                        },
+                        "expiresAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                        },
+                        "demo": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["user", "permissions", "expiresAt", "demo"],
+                      "additionalProperties": false
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "method": {
+                          "type": "string",
+                          "enum": ["code", "recovery-code"]
+                        },
+                        "recoveryCodesLeft": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        "lockedRecently": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "method",
+                        "recoveryCodesLeft",
+                        "lockedRecently"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data", "meta"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Finish a password sign-in with a code from the authenticator app or a recovery code. The challenge cookie is the credential",
         "tags": ["Auth"]
       }
     },

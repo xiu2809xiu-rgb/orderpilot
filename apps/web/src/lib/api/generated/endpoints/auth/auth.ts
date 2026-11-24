@@ -28,7 +28,9 @@ import type {
   AuthOptions200,
   AuthRefresh200,
   DemoAuthDemoLogin200,
-  DemoAuthDemoLoginBody
+  DemoAuthDemoLoginBody,
+  TwoStepVerify200,
+  TwoStepVerifyBody
 } from '../../model';
 
 import { apiMutator } from '../../../mutator.ts';
@@ -145,7 +147,7 @@ export function useAuthOptions<TData = Awaited<ReturnType<typeof authOptions>>, 
 
 
 /**
- * @summary Sign in with an email and a password
+ * @summary Sign in with an email and a password. With two-step on it answers 401 TWO_STEP_REQUIRED and a challenge cookie instead of a session
  */
 export const authLogin = (
     authLoginBody: AuthLoginBody,
@@ -218,7 +220,7 @@ export function useAuthLogin<TData = Awaited<ReturnType<typeof authLogin>>, TErr
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary Sign in with an email and a password
+ * @summary Sign in with an email and a password. With two-step on it answers 401 TWO_STEP_REQUIRED and a challenge cookie instead of a session
  */
 
 export function useAuthLogin<TData = Awaited<ReturnType<typeof authLogin>>, TError = ErrorType<unknown>>(
@@ -503,6 +505,100 @@ export function useAuthMe<TData = Awaited<ReturnType<typeof authMe>>, TError = E
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getAuthMeQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary Finish a password sign-in with a code from the authenticator app or a recovery code. The challenge cookie is the credential
+ */
+export const twoStepVerify = (
+    twoStepVerifyBody: TwoStepVerifyBody,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<TwoStepVerify200>(
+      {url: `/api/v1/auth/two-step/verify`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: twoStepVerifyBody, signal
+    },
+      );
+    }
+
+
+
+
+export const getTwoStepVerifyQueryKey = (twoStepVerifyBody?: TwoStepVerifyBody,) => {
+    return [
+    'POST', `/api/v1/auth/two-step/verify`, twoStepVerifyBody
+    ] as const;
+    }
+
+
+export const getTwoStepVerifyQueryOptions = <TData = Awaited<ReturnType<typeof twoStepVerify>>, TError = ErrorType<unknown>>(twoStepVerifyBody: TwoStepVerifyBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof twoStepVerify>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getTwoStepVerifyQueryKey(twoStepVerifyBody);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof twoStepVerify>>> = ({ signal }) => twoStepVerify(twoStepVerifyBody, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof twoStepVerify>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type TwoStepVerifyQueryResult = NonNullable<Awaited<ReturnType<typeof twoStepVerify>>>
+export type TwoStepVerifyQueryError = ErrorType<unknown>
+
+
+export function useTwoStepVerify<TData = Awaited<ReturnType<typeof twoStepVerify>>, TError = ErrorType<unknown>>(
+ twoStepVerifyBody: TwoStepVerifyBody, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof twoStepVerify>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof twoStepVerify>>,
+          TError,
+          Awaited<ReturnType<typeof twoStepVerify>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTwoStepVerify<TData = Awaited<ReturnType<typeof twoStepVerify>>, TError = ErrorType<unknown>>(
+ twoStepVerifyBody: TwoStepVerifyBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof twoStepVerify>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof twoStepVerify>>,
+          TError,
+          Awaited<ReturnType<typeof twoStepVerify>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTwoStepVerify<TData = Awaited<ReturnType<typeof twoStepVerify>>, TError = ErrorType<unknown>>(
+ twoStepVerifyBody: TwoStepVerifyBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof twoStepVerify>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Finish a password sign-in with a code from the authenticator app or a recovery code. The challenge cookie is the credential
+ */
+
+export function useTwoStepVerify<TData = Awaited<ReturnType<typeof twoStepVerify>>, TError = ErrorType<unknown>>(
+ twoStepVerifyBody: TwoStepVerifyBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof twoStepVerify>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getTwoStepVerifyQueryOptions(twoStepVerifyBody,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
