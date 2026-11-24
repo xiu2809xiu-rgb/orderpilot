@@ -34,6 +34,7 @@ model User {
   updatedAt    DateTime  @updatedAt @db.Timestamptz(3)
 
   refreshTokens RefreshToken[]
+  twoStep       TwoStepSecret?
 
   @@index([role])
 }
@@ -53,7 +54,8 @@ model RefreshToken {
   replacedByTokenId String?   @unique @db.Uuid
   /// Set when the token, or its whole family, is no longer valid.
   revokedAt         DateTime? @db.Timestamptz(3)
-  /// Why: "logout", "reuse-detected", "user-disabled", "password-changed".
+  /// Why: "logout", "reuse-detected", "user-disabled", "password-changed",
+  /// "two-step-enabled", "two-step-reset".
   revokedReason     String?
   createdAt         DateTime  @default(now()) @db.Timestamptz(3)
   ip                String?
@@ -68,6 +70,90 @@ model RefreshToken {
   @@index([familyId])
   @@index([userId])
   @@index([expiresAt])
+}
+
+enum TwoStepStatus {
+  /// A secret was made and shown; no code has confirmed it. Guards nothing.
+  PENDING
+  ACTIVE
+}
+
+/// How a second step reaches the person. Only the authenticator app exists.
+/// A later channel is a new value and a new "send" route; the sign-in flow
+/// (challenge, then verify) does not change.
+enum TwoStepChannel {
+  AUTHENTICATOR
+}
+
+/// One person's two-step verification, pending or active. No row means off.
+/// Its own table so the ciphertext rides along on no User read (the auth guard
+/// reads the user on every request). Deleting the row (turn off, reset) deletes
+/// the person's challenges and recovery codes with it.
+model TwoStepSecret {
+  id               String        @id @default(uuid(7)) @db.Uuid
+  userId           String        @unique @db.Uuid
+  status           TwoStepStatus
+  /// "v1.<nonce>.<ciphertext>.<tag>" in base64url: AES-256-GCM under a key
+  /// derived from JWT_SECRET, with the user id as associated data. Never logged,
+  /// never in an audit row, never in an error.
+  secretCipher     String
+  /// The last TOTP step (Unix seconds / 30) a code was accepted for. Null until
+  /// one was. A code for this step or an earlier one is refused: it works once.
+  lastStep         Int?
+  /// While PENDING: when the setup lapses (10 minutes). Null once ACTIVE.
+  pendingExpiresAt DateTime?     @db.Timestamptz(3)
+  enabledAt        DateTime?     @db.Timestamptz(3)
+  /// The newest (at most) ten wrong-code times, oldest first. The tenth wrong
+  /// code inside 15 minutes locks the six-digit entry. Cleared by a success.
+  failedAt         DateTime[]    @db.Timestamptz(3)
+  /// While set and in the future, six-digit codes are refused (recovery codes
+  /// are not).
+  lockedUntil      DateTime?     @db.Timestamptz(3)
+  /// Locks since the last success. The third and later one lasts 24 hours.
+  locksInARow      Int           @default(0)
+  /// When a lock was last placed. Unlike the three fields above, a success and a
+  /// setup restart keep it, so the owner can be told about a lock they did not
+  /// see. The status route shows it for 7 days. Gone with the row.
+  lastLockedAt     DateTime?     @db.Timestamptz(3)
+  createdAt        DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime      @updatedAt @db.Timestamptz(3)
+
+  user          User               @relation(fields: [userId], references: [id])
+  challenges    TwoStepChallenge[]
+  recoveryCodes RecoveryCode[]
+}
+
+/// One password sign-in waiting for its second step. The browser holds an opaque
+/// token in the op_two_step cookie; only its SHA-256 is stored here, as for a
+/// refresh token. Several may be live for one person (two tabs).
+model TwoStepChallenge {
+  id         String         @id @default(uuid(7)) @db.Uuid
+  userId     String         @db.Uuid
+  tokenHash  String         @unique
+  channel    TwoStepChannel @default(AUTHENTICATOR)
+  expiresAt  DateTime       @db.Timestamptz(3)
+  /// Wrong tries on this challenge. The fifth ends it.
+  wrongTries Int            @default(0)
+  createdAt  DateTime       @default(now()) @db.Timestamptz(3)
+
+  twoStep TwoStepSecret @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+/// One single-use recovery code. Only the SHA-256 of the normalised code is kept.
+model RecoveryCode {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  userId    String    @db.Uuid
+  codeHash  String
+  usedAt    DateTime? @db.Timestamptz(3)
+  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+
+  twoStep TwoStepSecret @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  /// The lookup is by person and hash; this also covers "how many are left".
+  @@unique([userId, codeHash])
 }
 
 /// Which role holds which permission. The names come from @orderpilot/shared;
