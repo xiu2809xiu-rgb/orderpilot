@@ -55,9 +55,13 @@ describe("the account menu's avatar", () => {
       approved: { id: APPROVED_ID, decidedAt: NOON },
     });
     renderMenu();
-    const image = await within(trigger()).findByRole("presentation", {
-      hidden: true,
-    });
+    // The first test of the file also pays for loading the menu and the client,
+    // which takes longer than 5 seconds while the whole suite runs at once.
+    const image = await within(trigger()).findByRole(
+      "presentation",
+      { hidden: true },
+      { timeout: 15_000 },
+    );
     expect(image).toHaveAttribute(
       "src",
       `/api/v1/profile-pictures/${APPROVED_ID}/image`,
