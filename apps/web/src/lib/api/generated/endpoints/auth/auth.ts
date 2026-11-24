@@ -64,7 +64,7 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
 };
 
 /**
- * @summary What the sign-in page offers
+ * @summary What the sign-in page offers. In demo mode each demo account also carries its id
  */
 export const authOptions = (
 
@@ -135,7 +135,7 @@ export function useAuthOptions<TData = Awaited<ReturnType<typeof authOptions>>, 
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary What the sign-in page offers
+ * @summary What the sign-in page offers. In demo mode each demo account also carries its id
  */
 
 export function useAuthOptions<TData = Awaited<ReturnType<typeof authOptions>>, TError = ErrorType<unknown>>(
