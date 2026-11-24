@@ -21,6 +21,7 @@ import {
 import {
   API,
   TEST_DEMO_PASSWORD,
+  auditCount,
   auditEvents,
   call,
   demoSignIn,
@@ -386,17 +387,28 @@ describe("the guards", () => {
       }
     });
 
-    it("does not let an administrator disable themselves", async () => {
+    it("does not let an administrator disable themselves, and audits the refusal (#276)", async () => {
       const admin = as("SYSTEM_ADMIN");
-      const res = await call(
-        t,
-        admin,
-        "post",
-        `${API}/users/${admin.session.user.id}/disable`,
-        { csrf: true },
-      );
+      const id = admin.session.user.id;
+      const before = await auditCount(t, "user.disable.refused");
+      const res = await call(t, admin, "post", `${API}/users/${id}/disable`, {
+        csrf: true,
+      });
       expect(res.status).toBe(409);
       expect(codeOf(res.body)).toBe("CONFLICT");
+      // Every refusal is recorded, though nothing changed.
+      const refused = (await auditEvents(t)).filter(
+        (e) => e.action === "user.disable.refused",
+      );
+      expect(refused).toHaveLength(before + 1);
+      expect(refused.at(-1)).toMatchObject({
+        actor: { kind: "user", userId: id, role: "SYSTEM_ADMIN" },
+        entityType: "User",
+        entityId: id,
+        changes: { rule: "no-self-disable" },
+      });
+      const me = await call(t, admin, "get", `${API}/users/${id}`);
+      expect(me.body).toMatchObject({ data: { id, disabled: false } });
     });
 
     it("keeps the user and their audit trail: nothing is ever deleted", async () => {

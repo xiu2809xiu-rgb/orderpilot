@@ -473,6 +473,17 @@ The chain check card draws the chain above its words: glass blocks in a row, lit
   - `AuditPage.test.tsx`: the numbers on the card.
   - `apps/e2e/tests/audit-chain.spec.ts`: as the system admin, a real canvas, so the shader compiles, and `checkPage`; and a click on the red block, on a staged break, opens the event.
 
+## The governance pages' findings (#276)
+
+Four findings from the walk of 15 Nov as the system administrator and the auditor.
+
+- **Your own row on the Users tab** has no Disable, since the server refuses it: someone else has to lock an administrator out. A "You" badge marks the row, and History stays. A refused change says the server's own reason and its trace ID in the toast; the panel above the table is for an access refusal only. The row's buttons are in `UserRowActions.tsx`, and the toggle in `useUserToggle.ts`.
+- **The refusal is audited:** an administrator who tries to disable themselves leaves a `user.disable.refused` row, with the rule `no-self-disable`, written before the transaction so it stays (`users.service.ts`).
+- **Copy a role** opens with no roles chosen, and Copy stays off until two different roles are. It says what the target gains and loses, from the matrix the page holds (`copyChange.ts`, `CopyChangeNote.tsx`), and the confirmation says it again. A copy that would change nothing says so.
+- **The Refusals tab** fits a phone: each sample column may shrink, the JSON scrolls in its own box, and the sample trace ID wraps.
+- **The audit log at 1440 px** fitted its card already, since #272. Its browser test now also checks that the side panel is open.
+- **Tests:** `UsersTab.test.tsx`, `CopyRoleDialog.test.tsx`, `copyChange.test.ts`, `test/http/auth-guards.test.ts` (the audited refusal), and two browser tests in `governance.spec.ts`. The Refusals test measures the main panel itself, because `checkPage` measures only the document (#376).
+
 ## Options to consider, not built
 
 Tools that may suit this area. None is installed, pinned or built ([ADR 0020](../adr/0020-options-left-to-the-owners.md)). If you adopt one, bring its ADR, an exact pinned version and a row in the traceability matrix with that story.
