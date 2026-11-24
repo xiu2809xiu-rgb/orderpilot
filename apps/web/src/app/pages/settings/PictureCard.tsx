@@ -8,9 +8,9 @@ import { Section } from "@/components/parts/Section";
 import { SettingFootnote } from "@/components/parts/SettingRow";
 import { UserAvatar, type ImageStatus } from "@/components/parts/UserAvatar";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { myPictureKey, useMyPicture } from "@/lib/useMyPicture";
 import { hasPermission, useSessionStore } from "@/stores/session";
+import { PictureCardLoading } from "./PictureCardLoading";
 import { PictureChooser } from "./PictureChooser";
 import { PictureStatus } from "./PictureStatus";
 import { usePictureUpload } from "./usePictureUpload";
@@ -134,17 +134,4 @@ export function PictureCard() {
       </Button>
     );
   }
-}
-
-function PictureCardLoading({ label }: { label: string }) {
-  return (
-    <div role="status" aria-busy="true" className="flex items-start gap-s4">
-      <span className="sr-only">{label}</span>
-      <Skeleton className="size-20 rounded-full" aria-hidden="true" />
-      <div className="flex flex-1 flex-col gap-s2">
-        <Skeleton className="h-4 w-3/4" aria-hidden="true" />
-        <Skeleton className="h-4 w-1/2" aria-hidden="true" />
-      </div>
-    </div>
-  );
 }

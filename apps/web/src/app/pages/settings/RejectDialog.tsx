@@ -2,7 +2,6 @@ import { useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { ZodError } from "zod";
 import {
-  PICTURE_NOTE_MAX,
   PICTURE_REJECTION_REASONS,
   PICTURE_TAKE_DOWN_REASONS,
   pictureRejectRequestSchema,
@@ -20,9 +19,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Textarea } from "@/components/ui/textarea";
+import { RejectNoteField } from "./RejectNoteField";
+import { RejectReasonList } from "./RejectReasonList";
 import type { DecisionOutcome } from "./useReviewActions";
 
 export type DecisionKind = "reject" | "takeDown";
@@ -114,69 +112,29 @@ export function RejectDialog({
             {t(`pictures.dialog.${kind}.body`, { name })}
           </DialogDescription>
         </DialogHeader>
-        <div className="flex flex-col gap-s2">
-          <p id={`${id}-reason`} className="fs-14 font-medium">
-            {t("pictures.dialog.reason")}
-          </p>
-          <RadioGroup
-            ref={reasonGroup}
-            value={reason}
-            aria-labelledby={`${id}-reason`}
-            aria-required="true"
-            aria-invalid={problem === "reason"}
-            aria-describedby={
-              problem === "reason" ? `${id}-problem` : undefined
-            }
-            onValueChange={(next) => {
-              setReason(next);
-              setProblem(null);
-            }}
-            className="gap-s1"
-          >
-            {reasons.map((code) => (
-              <div
-                key={code}
-                className="flex min-h-9 items-start gap-s2 pointer-coarse:min-h-11"
-              >
-                <RadioGroupItem
-                  id={`${id}-${code}`}
-                  value={code}
-                  className="mt-1 size-4 shrink-0 rounded-full border border-input data-[state=checked]:border-4 data-[state=checked]:border-ring pointer-coarse:mt-3"
-                />
-                <Label
-                  htmlFor={`${id}-${code}`}
-                  className="fs-14 flex-1 cursor-pointer items-start py-1 leading-snug font-normal pointer-coarse:py-3"
-                >
-                  {t(`pictures.reasons.${code}`)}
-                </Label>
-              </div>
-            ))}
-          </RadioGroup>
-        </div>
-        <div className="flex flex-col gap-s1">
-          <Label htmlFor={`${id}-note`}>
-            {noteNeeded
-              ? t("pictures.dialog.noteRequired")
-              : t("pictures.dialog.note")}
-          </Label>
-          <Textarea
-            ref={noteField}
-            id={`${id}-note`}
-            rows={3}
-            maxLength={PICTURE_NOTE_MAX}
-            value={note}
-            aria-required={noteNeeded ? "true" : undefined}
-            aria-invalid={problem === "note"}
-            aria-describedby={`${id}-hint${problem === "note" ? ` ${id}-problem` : ""}`}
-            onChange={(event) => {
-              setNote(event.target.value);
-              if (problem === "note") setProblem(null);
-            }}
-          />
-          <p id={`${id}-hint`} className="fs-14 text-muted-foreground">
-            {t("pictures.dialog.noteHint", { name })}
-          </p>
-        </div>
+        <RejectReasonList
+          id={id}
+          reasons={reasons}
+          reason={reason}
+          invalid={problem === "reason"}
+          groupRef={reasonGroup}
+          onReason={(next) => {
+            setReason(next);
+            setProblem(null);
+          }}
+        />
+        <RejectNoteField
+          id={id}
+          name={name}
+          note={note}
+          required={noteNeeded}
+          invalid={problem === "note"}
+          fieldRef={noteField}
+          onNote={(next) => {
+            setNote(next);
+            if (problem === "note") setProblem(null);
+          }}
+        />
         {problem ? (
           <p
             id={`${id}-problem`}

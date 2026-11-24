@@ -10,7 +10,6 @@ import {
 } from "@/components/common/states";
 import { Pagination } from "@/components/common/data-table/Pagination";
 import { Section } from "@/components/parts/Section";
-import { Skeleton } from "@/components/ui/skeleton";
 import { ApiError } from "@/lib/api/errors";
 import {
   getPictureReviewListQueryKey,
@@ -20,6 +19,7 @@ import { clampPage } from "@/lib/paging";
 import { useListCount } from "@/lib/useListCount";
 import type { DecisionKind } from "./RejectDialog";
 import { ReviewRow } from "./ReviewRow";
+import { ReviewSkeleton } from "./ReviewSkeleton";
 import { ReviewTabs } from "./ReviewTabs";
 import { useDecisionFocus } from "./useDecisionFocus";
 import { useReviewActions, WAITING_COUNT_API } from "./useReviewActions";
@@ -179,25 +179,6 @@ export function PictureReviewPanel() {
           />
         </Suspense>
       ) : null}
-    </div>
-  );
-}
-
-function ReviewSkeleton() {
-  const { t } = useTranslation("components");
-  return (
-    <div role="status" aria-busy="true" className="flex flex-col gap-s4">
-      <span className="sr-only">{t("states.loading")}</span>
-      {[0, 1, 2].map((row) => (
-        <div key={row} className="flex gap-s4" aria-hidden="true">
-          <Skeleton className="size-32 shrink-0" />
-          <div className="flex flex-1 flex-col gap-s2">
-            <Skeleton className="h-5 w-1/3" />
-            <Skeleton className="h-4 w-1/2" />
-            <Skeleton className="h-4 w-2/3" />
-          </div>
-        </div>
-      ))}
     </div>
   );
 }
