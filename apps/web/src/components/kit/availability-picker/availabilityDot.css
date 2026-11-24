@@ -1,0 +1,227 @@
+/* The availability dot, the button that carries it, and the ring skin. Colours
+   are the app's tokens, so light and dark need nothing of their own. Every
+   moving rule is under prefers-reduced-motion: no-preference. The pill, the
+   orbs and the caption are in availabilityPicker.css, which loads with the
+   picker; this sheet is in the first screen, so it stays small. */
+
+.ap-dot {
+  --ap-tone: var(--success);
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  box-sizing: border-box;
+  inline-size: 14px;
+  block-size: 14px;
+  border-radius: var(--radius-pill);
+  background: var(--ap-tone);
+  /* There is no --success-foreground: this one is white in light and near
+     black in dark, and every tone passes 4.5:1 against it in both
+     (availabilityTones.test.ts measures it). */
+  color: var(--destructive-foreground);
+  /* The rim lifts the dot off whatever is behind it. */
+  box-shadow: 0 0 0 2px var(--popover);
+}
+.ap-dot[data-value="AVAILABLE"] {
+  --ap-tone: var(--success);
+}
+.ap-dot[data-value="FOCUSING"] {
+  --ap-tone: var(--warning);
+}
+.ap-dot[data-value="DO_NOT_DISTURB"] {
+  --ap-tone: var(--destructive);
+}
+.ap-mark {
+  inline-size: 72%;
+  block-size: 72%;
+}
+
+/* The button. A fine pointer gets the 24 px of WCAG 2.5.8; a finger gets 44. */
+.ap-trigger {
+  --ap-tone: var(--success);
+  position: relative;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  inline-size: 24px;
+  block-size: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  transition:
+    scale var(--motion-fast) var(--ease-out),
+    opacity var(--motion-fast) var(--ease-out);
+}
+.ap-trigger[data-value="AVAILABLE"] {
+  --ap-tone: var(--success);
+}
+.ap-trigger[data-value="FOCUSING"] {
+  --ap-tone: var(--warning);
+}
+.ap-trigger[data-value="DO_NOT_DISTURB"] {
+  --ap-tone: var(--destructive);
+}
+.ap-trigger[data-skin="ring"] {
+  inline-size: 32px;
+  block-size: 32px;
+}
+.ap-face {
+  position: relative;
+  display: grid;
+  place-items: center;
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: var(--radius-pill);
+  transition: opacity var(--motion-fast) var(--ease-out);
+}
+/* The pill covers the trigger while it is open, and grows out of it. */
+.ap-trigger[aria-expanded="true"] .ap-face {
+  opacity: 0;
+}
+.ap-trigger[aria-busy="true"] {
+  opacity: 0.7;
+  cursor: progress;
+}
+.ap-trigger:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+@media (hover: hover) {
+  .ap-trigger:hover {
+    scale: 1.15;
+  }
+  .ap-trigger[data-skin="ring"]:hover {
+    scale: 1.06;
+  }
+}
+.ap-trigger:active {
+  scale: 0.94;
+}
+
+/* The ring skin: a glass ring around a larger dot, so the glass reads even on
+   an avatar that is only initials. The fill is the tone over the popover. */
+.ap-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-pill);
+  background: color-mix(
+    in srgb,
+    var(--ap-tone) 24%,
+    color-mix(in srgb, var(--popover) 55%, transparent)
+  );
+  border: 1px solid color-mix(in srgb, var(--ap-tone) 55%, transparent);
+  backdrop-filter: blur(12px) saturate(160%);
+}
+.ap-trigger[data-skin="ring"] .ap-dot {
+  inline-size: 22px;
+  block-size: 22px;
+  box-shadow: none;
+}
+
+/* A flash of light across the dot after a pick, and a ring that pulses out of it. */
+.ap-sheen {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  pointer-events: none;
+}
+.ap-sheen::before {
+  content: "";
+  position: absolute;
+  inset-block: -20%;
+  inset-inline-start: -70%;
+  inline-size: 60%;
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    rgb(255 255 255 / 0.55) 50%,
+    transparent 100%
+  );
+  opacity: 0;
+}
+.ap-pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-pill);
+  pointer-events: none;
+}
+
+/* A touch screen: the box is 44 px. A parent may place the dot inside it
+   (shell.css does, so that the box leaves the account button its avatar). */
+@media (pointer: coarse) {
+  .ap-trigger {
+    inline-size: 44px;
+    block-size: 44px;
+  }
+  .ap-trigger .ap-face {
+    position: absolute;
+    inline-size: 14px;
+    block-size: 14px;
+    inset-inline-start: var(--ap-dot-x, 50%);
+    inset-block-start: var(--ap-dot-y, 50%);
+    translate: -50% -50%;
+  }
+  .ap-trigger[data-skin="ring"] {
+    inline-size: 44px;
+    block-size: 44px;
+  }
+  .ap-trigger[data-skin="ring"] .ap-face {
+    inline-size: 32px;
+    block-size: 32px;
+    inset-inline-start: 50%;
+    inset-block-start: 50%;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ap-sheen::before {
+    animation: ap-sheen var(--motion-slow) var(--ease-out) both;
+  }
+  .ap-pulse {
+    animation: ap-pulse var(--motion-slow) var(--ease-out) both;
+  }
+}
+@keyframes ap-sheen {
+  from {
+    translate: 0 0;
+    opacity: 1;
+  }
+  to {
+    translate: 330% 0;
+    opacity: 0;
+  }
+}
+@keyframes ap-pulse {
+  from {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--ap-tone) 50%, transparent);
+    opacity: 1;
+  }
+  to {
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--ap-tone) 0%, transparent);
+    opacity: 0;
+  }
+}
+
+/* Forced colours: the shape is what remains, so each part says it in system colours. */
+@media (forced-colors: active) {
+  .ap-dot {
+    forced-color-adjust: none;
+    background: ButtonFace;
+    color: ButtonText;
+    border: 2px solid ButtonText;
+    box-shadow: none;
+  }
+  .ap-ring {
+    forced-color-adjust: none;
+    background: Canvas;
+    border: 1px solid CanvasText;
+    backdrop-filter: none;
+  }
+  .ap-trigger:focus-visible {
+    outline: 3px solid Highlight;
+  }
+}

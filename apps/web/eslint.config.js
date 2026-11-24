@@ -26,6 +26,9 @@ const entryFiles = [
   "src/features/*/routes.tsx",
   "src/lib/api/{auth,client,instance,cookies}.ts",
   "src/lib/{query,theme,utils,deferred}.ts",
+  // Availability: the dot and the data hooks are in the shell (ADR 0070).
+  "src/components/kit/availability-picker/{tones.ts,AvailabilityDot.tsx,AvailabilityTrigger.tsx,AvailabilityControl.tsx}",
+  "src/lib/{useAvailability,useAvailabilityOf,useExpiryTimer}.ts",
 ];
 const lazyUi = [
   "alert-dialog",
