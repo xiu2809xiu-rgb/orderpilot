@@ -50,6 +50,19 @@ export function ScrollRegion({
       } else {
         element.removeAttribute("tabindex");
       }
+      // A browser measures a sticky box from the edge of the scroll box's
+      // content, not of its padding: left alone, a padded box (the order
+      // peek) would draw the marks that far inside and push the right one out
+      // of view. The frames start that far back, to sit on the padding edge.
+      const { paddingTop, paddingLeft } = getComputedStyle(element);
+      element.style.setProperty(
+        "--sr-pad-top",
+        `${String(Number.parseFloat(paddingTop) || 0)}px`,
+      );
+      element.style.setProperty(
+        "--sr-pad-left",
+        `${String(Number.parseFloat(paddingLeft) || 0)}px`,
+      );
       edges.style.width = `${String(scrollWidth)}px`;
       edges.style.height = `${String(scrollHeight)}px`;
       element.style.setProperty("--sr-client-w", `${String(clientWidth)}px`);

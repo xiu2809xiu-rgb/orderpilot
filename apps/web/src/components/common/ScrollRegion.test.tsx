@@ -149,6 +149,29 @@ describe("ScrollRegion", () => {
       expect(region.style.getPropertyValue("--sr-client-w")).toBe("300px");
     });
 
+    it("passes the box's own padding to the frames, which a browser pins inside it", () => {
+      setWidths(900, 300);
+      render(
+        <ScrollRegion label="Padded">
+          <table />
+        </ScrollRegion>,
+      );
+      const region = screen.getByRole("region", { name: "Padded" });
+      // The padding is a class in the app; an inline style is the same to getComputedStyle.
+      expect(region.style.getPropertyValue("--sr-pad-top")).toBe("0px");
+      expect(region.style.getPropertyValue("--sr-pad-left")).toBe("0px");
+    });
+
+    it("reads a padded box's padding again after it changes", () => {
+      const resized = captureResizes();
+      setWidths(900, 300);
+      const region = renderWide("Padded again");
+      region.style.padding = "20px 24px";
+      resized();
+      expect(region.style.getPropertyValue("--sr-pad-top")).toBe("20px");
+      expect(region.style.getPropertyValue("--sr-pad-left")).toBe("24px");
+    });
+
     it("measures the content, not its own rail, after the content shrinks", () => {
       // A real browser counts an absolute child in the scroll area: a rail
       // left at its old size would hold the area open at 900 px.

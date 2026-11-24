@@ -9,8 +9,12 @@
   border-radius: var(--radius-card);
   background: var(--dx-card-work-bg);
   box-shadow: var(--dx-card-shadow);
-  /* How far an edge mark reaches in from the edge (see the marks below). */
-  --sr-mark: 1rem;
+  /* How far an edge mark reaches in from the edge (see the marks below). At
+     1rem and black at 6% the mark was no more than 3 levels of 255 beyond its
+     first 8 px on the light card, too faint to notice on a tablet; 2rem
+     spreads the same strongest colour over a band a person can see, and the
+     contrast test is about that colour, so it does not move. */
+  --sr-mark: 2rem;
   /* The mark's strongest colour, at the edge. In light it is a neutral shadow,
      not the teal: a teal tint darkens the card but leaves teal link text as it
      was, so the link loses contrast against its ground, while a neutral dark
@@ -57,8 +61,9 @@
 .sr-edge {
   display: block;
   position: sticky;
-  top: 0;
-  left: 0;
+  /* Back by the box's own padding, since a browser pins a sticky box inside it. */
+  top: calc(-1 * var(--sr-pad-top, 0px));
+  left: calc(-1 * var(--sr-pad-left, 0px));
   box-sizing: border-box;
   width: var(--sr-client-w, 0px);
   height: var(--sr-client-h, 0px);

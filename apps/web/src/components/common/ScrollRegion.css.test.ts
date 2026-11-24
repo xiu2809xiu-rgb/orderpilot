@@ -48,10 +48,19 @@ describe("the edge marks' style sheet", () => {
   it("pins each frame over the visible box with sticky, so no scroll handler moves it", () => {
     const frame = declarations(".sr-edge");
     expect(frame.get("position")).toBe("sticky");
-    expect(frame.get("top")).toBe("0");
-    expect(frame.get("left")).toBe("0");
+    // Back by the scroll box's padding, or a padded box (the order peek)
+    // would draw the marks that far inside its visible edge.
+    expect(frame.get("top")).toContain("--sr-pad-top");
+    expect(frame.get("left")).toContain("--sr-pad-left");
     expect(frame.get("width")).toContain("--sr-client-w");
     expect(frame.get("height")).toContain("--sr-client-h");
+  });
+
+  it("makes the mark a band wide enough to see, 2rem or more", () => {
+    // At 1rem the light mark was about 8 px of visible shadow: too faint to
+    // notice. The colour is held by the contrast test, so width is the lever.
+    const mark = /--sr-mark:\s*([\d.]+)rem;/.exec(css);
+    expect(Number(must(mark)[1])).toBeGreaterThanOrEqual(2);
   });
 
   it("puts the left mark under the pinned columns and the right mark over a pinned row menu", () => {

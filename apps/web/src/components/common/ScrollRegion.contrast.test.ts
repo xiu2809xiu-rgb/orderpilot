@@ -104,7 +104,7 @@ const CARDS = [
 // The one pair that cannot keep 4.5:1. Link text on the plain card in light is
 // 4.50:1 before any mark, so there is no headroom: any mark over it is under
 // 4.5. This is a TOLERANCE, not a pass of the rule. It reaches only the
-// outermost pixels of the 16 px band (the gradient is linear and fades to
+// outermost pixels of the 32 px band (the gradient is linear and fades to
 // nothing), and only while a link sits at the very edge of a scrolled box
 // that has no pinned cell over it. The floor is the real figure at the chosen
 // strength (4.35) less a margin of 0.02.

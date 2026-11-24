@@ -11,14 +11,14 @@ import { expect, signInAs, test } from "../src/index.js";
 //
 // The marks are `.sr-edge-start` and `.sr-edge-end`, two frames inside the
 // `.sr-edges` rail that ScrollRegion puts last in the box. Each frame is as
-// large as the visible box and pinned over it; the mark is a 16 px strip at
+// large as the visible box and pinned over it; the mark is a 32 px strip at
 // its left or right edge. The spec reads the frames' boxes and their computed
 // style, never a screenshot.
 
 const TABLET = { width: 820, height: 1180 };
 const BOARD = "/orders?view=stage&source=sample";
-/** --sr-mark in ScrollRegion.css: 1rem. */
-const MARK_PX = 16;
+/** --sr-mark in ScrollRegion.css: 2rem. */
+const MARK_PX = 32;
 /** Sub-pixel layout and a rounded scrollWidth: one pixel is the same place. */
 const SLACK_PX = 1;
 
@@ -169,7 +169,7 @@ test.describe("Scroll areas show which side has more: the Orders board at tablet
     const r = await read(region);
     expect(r.scrollLeft).toBeLessThanOrEqual(SLACK_PX);
     expectFramesOnVisibleBox(r);
-    // The mark is a strip of 1 rem at the frame's own edge, so it is drawn at
+    // The mark is a strip of 2 rem at the frame's own edge, so it is drawn at
     // the right edge of the region and not inside the cards.
     expect(r.end.backgroundSize).toBe(`${String(MARK_PX)}px 100%`);
     expect(r.end.backgroundImage).toContain("linear-gradient");
@@ -363,6 +363,53 @@ test.describe("Scroll areas show which side has more: a box that is tall and wid
       expect(r.scrollTop, "scrolled down").toBeGreaterThan(0);
       expect(r.scrollLeft, "scrolled across").toBeGreaterThan(0);
       expectFramesOnVisibleBox(r);
+    }
+  });
+});
+
+test.describe("Scroll areas show which side has more: a box with padding", () => {
+  test.use({ viewport: { width: 820, height: 600 } });
+
+  // The order peek's scroll box has padding (1.25rem 1.5rem). A browser pins a
+  // sticky box inside that padding, so without the script's correction the
+  // marks sit a padding's width inside the box and the right one is pushed out
+  // of view. The peek rarely scrolls sideways, so a wide block is added to it.
+  test("the marks stay on the visible box of a padded scroll box", async ({
+    page,
+  }) => {
+    const board = await openBoard(page);
+    await board.locator("[data-peek-opener]").first().click();
+    const region = page.getByRole("region", { name: "Order summary" });
+    await expect(region).toBeVisible();
+    await region.evaluate((el) => {
+      const wide = document.createElement("div");
+      wide.style.cssText = "width:1400px;height:20px";
+      el.firstElementChild?.after(wide);
+    });
+    const before = await read(region);
+    expect(before.maxLeft, "the peek must scroll across").toBeGreaterThan(
+      MARK_PX * 2,
+    );
+    expect(before.maxTop, "the peek must scroll down").toBeGreaterThan(
+      MARK_PX * 2,
+    );
+    for (const [across, down] of [
+      [0, 0],
+      [0.5, 0],
+      [0.5, 0.5],
+      [1, 1],
+    ] as const) {
+      await scrollToFraction(region, across, down);
+      await expect
+        .poll(async () => {
+          const r = await read(region);
+          return (
+            Math.abs(r.end.box.left - r.visible.left) <= SLACK_PX &&
+            Math.abs(r.end.box.top - r.visible.top) <= SLACK_PX
+          );
+        })
+        .toBe(true);
+      expectFramesOnVisibleBox(await read(region));
     }
   });
 });
