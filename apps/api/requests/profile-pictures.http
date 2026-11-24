@@ -35,3 +35,32 @@ X-CSRF-Token: {{csrf}}
 ### If-None-Match answers 304 only while the picture is still visible.
 GET {{baseUrl}}/api/v1/profile-pictures/{{pictureId}}/image
 If-None-Match: "paste the ETag of the last answer"
+
+### Review (users.manage: the System admin today). Reviewing a picture is user
+### administration, as disabling a user is: it is not an approval of any SPR,
+### payment or bank detail. The lists never hold your own pictures.
+### Pending pictures first (status=PENDING, the default), or the approved ones.
+GET {{baseUrl}}/api/v1/profile-pictures?status=PENDING&page=1&pageSize=25
+
+### Approve one. An earlier approved picture of that person steps aside. Your own
+### picture is refused with 403 (details[0].message own_picture) and audited. A
+### picture the owner replaced or withdrew answers 409 (replaced, removed_by_owner).
+POST {{baseUrl}}/api/v1/profile-pictures/{{pictureId}}/approve
+X-CSRF-Token: {{csrf}}
+
+### Reject one with a reason from the list: not_suitable, offensive, not_clear,
+### not_you, personal_information or other. "other" needs a note (140 characters).
+### The owner reads both, and the picture is deleted.
+POST {{baseUrl}}/api/v1/profile-pictures/{{pictureId}}/reject
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "reasonCode": "not_clear", "note": "Too dark to see who is in it." }
+
+### Take down an approved picture later. The same reasons, and "reported".
+### Only an approved picture can be taken down (409 not_approved otherwise).
+POST {{baseUrl}}/api/v1/profile-pictures/{{pictureId}}/take-down
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "reasonCode": "reported", "note": "Reported by a colleague." }

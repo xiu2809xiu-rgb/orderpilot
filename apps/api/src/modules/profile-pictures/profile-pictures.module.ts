@@ -24,7 +24,9 @@ import {
 import { PictureClock, SystemPictureClock } from "./picture-clock.js";
 import { PictureImageService } from "./picture-image.service.js";
 import { PictureOwnerService } from "./picture-owner.service.js";
+import { PictureReviewController } from "./picture-review.controller.js";
 import { PictureReviewers } from "./picture-reviewers.js";
+import { PictureReviewService } from "./picture-review.service.js";
 import { PictureStore } from "./picture-store.js";
 import { PictureUploadGuard } from "./picture-upload-guard.js";
 import { PictureUploadService } from "./picture-upload.service.js";
@@ -45,7 +47,7 @@ import { ProfilePictureRepository } from "./profile-picture.repository.js";
  */
 @Module({
   imports: [AuditModule, UsersModule, AiModule],
-  controllers: [ProfilePicturesController],
+  controllers: [ProfilePicturesController, PictureReviewController],
   providers: [
     // Stateless, so a second instance beside AuthModule's is harmless.
     RolePermissionRepository,
@@ -61,6 +63,7 @@ import { ProfilePictureRepository } from "./profile-picture.repository.js";
     PictureUploadService,
     PictureReviewers,
     PictureImageService,
+    PictureReviewService,
   ],
 })
 export class ProfilePicturesModule
