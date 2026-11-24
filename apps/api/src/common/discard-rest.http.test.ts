@@ -98,7 +98,8 @@ describe("discardRest on a real request after readBoundedBody", () => {
   it("reads and drops what is left, up to its budget, after the 413 went out", async () => {
     const trial = await runTrial();
     expect(trial.status).toBe(413);
-    // Before the fix the paused stream was never read: 0 bytes after the 413.
+    // Before the fix the stream stayed paused: the one block already on its way
+    // was read (about 64 KB), and then nothing.
     expect(trial.readAfterRefusal).toBeGreaterThan(DISCARD_BUDGET);
   }, 20_000);
 });
