@@ -35,7 +35,7 @@ type Step = "start" | "scan" | "codes";
  * for a demo session), the QR code and the first code, then the ten recovery
  * codes. The setup key and the codes live in this component's state only. The
  * card mounts the dialog while it is open, so closing it drops them, and
- * nothing is written to the query or mutation cache (ADR 0067). The last step
+ * nothing is written to the query or mutation cache (ADR 0068). The last step
  * cannot be closed until the box is ticked and Done is pressed.
  */
 export function TwoStepSetupDialog({ onClose }: { onClose: () => void }) {

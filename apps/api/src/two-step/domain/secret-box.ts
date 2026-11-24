@@ -13,7 +13,7 @@ const TAG_BYTES = 16;
 /**
  * The sealing key: HKDF-SHA256 from the one secret the API already has, under a
  * fixed label, so no new variable is needed. Rotating JWT_SECRET therefore
- * makes every sealed secret unreadable (ADR 0067 says what people do then).
+ * makes every sealed secret unreadable (ADR 0068 says what people do then).
  */
 export function deriveKey(secret: string): Buffer {
   return Buffer.from(hkdfSync("sha256", secret, Buffer.alloc(0), LABEL, 32));

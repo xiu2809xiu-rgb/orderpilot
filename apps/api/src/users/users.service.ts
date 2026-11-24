@@ -119,7 +119,7 @@ export class UsersService {
    * This is user administration, like disabling: it gives the administrator no
    * permission to approve, pay or post. It does let an administrator who knows
    * a person's password sign in as them with no second step, so every reset is
-   * audited and shows in the person's own history (ADR 0067).
+   * audited and shows in the person's own history (ADR 0068).
    */
   async resetTwoStep(
     id: string,

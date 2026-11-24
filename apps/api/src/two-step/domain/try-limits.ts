@@ -24,7 +24,7 @@ const SECOND = 1000;
  * The counters as pure functions of the state and the time. They are the rules
  * that bound someone who knows the password and guesses codes: ten wrong
  * codes inside 15 minutes lock six-digit entry, across every sign-in of the
- * person, and the third lock in a row lasts 24 hours (ADR 0067, section 2.3).
+ * person, and the third lock in a row lasts 24 hours (ADR 0068, section 2.3).
  */
 export function isLocked(state: TryState, now: Date): boolean {
   return state.lockedUntil !== null && state.lockedUntil > now;

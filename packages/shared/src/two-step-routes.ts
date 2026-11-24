@@ -1,4 +1,4 @@
-// The two-step verification contract (ADR 0067): the API implements it, the
+// The two-step verification contract (ADR 0068): the API implements it, the
 // web app calls it by hand with apiClient.call. Paths are relative to
 // API_BASE_PATH. The sign-in step (verify) is the only public route; the rest
 // need a session. A secret (a setup key, a recovery code) is only ever in the
@@ -40,7 +40,7 @@ export const twoStepStatusSchema = z.object({
   hasPassword: z.boolean(),
   /** The server's DEMO_MODE: the card mentions the demo buttons only where they exist. */
   demoSignInSkips: z.boolean(),
-  /** True for a demo session whose role holds users.manage: setup is refused (ADR 0067). */
+  /** True for a demo session whose role holds users.manage: setup is refused (ADR 0068). */
   demoAdminBlocked: z.boolean(),
   enabledAt: z.iso.datetime().nullable(),
   /** Null while off. */

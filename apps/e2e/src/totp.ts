@@ -53,7 +53,7 @@ export function codeAt(key: string, step: number): string {
  * that is never behind the clock. The server takes the current step and one
  * either side, each only once, so this needs no sleeping: the second code of a
  * flow is simply the step after the first. A third code would fall outside the
- * window if no time had passed, so a flow uses at most two (ADR 0067).
+ * window if no time had passed, so a flow uses at most two (ADR 0068).
  */
 export function nextStep(last: number | null, now: Date): number {
   const current = stepOf(now);

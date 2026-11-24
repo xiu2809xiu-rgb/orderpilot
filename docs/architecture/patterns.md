@@ -330,7 +330,7 @@ The decision is recorded in [ADR 0058](../adr/0058-seven-roles-six-teams-and-an-
 
 ## Two-step sign-in (#380)
 
-The decision is recorded in [ADR 0067](../adr/0067-two-step-sign-in-with-an-authenticator-app.md).
+The decision is recorded in [ADR 0068](../adr/0068-two-step-sign-in-with-an-authenticator-app.md).
 
 | Pattern                                | Where                                                          | Why                                                                                                                                              |
 | -------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |

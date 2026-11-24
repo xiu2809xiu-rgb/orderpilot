@@ -1,4 +1,4 @@
-// Kit: "OTP Input Verification" design by bestsaasdesigns (https://x.com/bestsaasdesigns/status/2111020282551132539), bundle supplied 24 Nov 2026, no licence stated. A port, not the bundle: no GSAP, no shadow root, no embedded font, no icons carried. Adapted to OrderPilot's tokens.
+// Kit: "OTP Input Verification" design by bestsaasdesigns (https://x.com/bestsaasdesigns/status/2111020282551132539), as re-made in a bundle by LeiBox (https://leibox.pantoria.cn, otp-verification), supplied 24 Nov 2026, no licence stated. A port, not the bundle: no GSAP, no shadow root, no embedded font, no icons carried. Adapted to OrderPilot's tokens.
 import { Check, LoaderCircle } from "lucide-react";
 import { useId, type Ref } from "react";
 import { cn } from "@/lib/utils";

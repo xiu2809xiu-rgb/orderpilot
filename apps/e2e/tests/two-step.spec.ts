@@ -8,7 +8,7 @@ import { csrfToken, demoSignIn } from "../src/session.js";
 import { codeAt, nextStep, stepOf } from "../src/totp.js";
 
 // Two-step sign-in, from the Settings card to the sign-in page and back (ADR
-// 0067). It runs on the Management account, signed in by PASSWORD through the
+// 0068). It runs on the Management account, signed in by PASSWORD through the
 // page, because the demo role buttons skip the second step by design. The
 // account is a base record, so CI has it.
 //

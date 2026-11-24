@@ -44,7 +44,7 @@ None of these run yet. Until the second one does, Dependabot proposes new versio
 
 ## Two-step sign-in
 
-A person can turn on two-step verification in Settings, Account ([ADR 0067](docs/adr/0067-two-step-sign-in-with-an-authenticator-app.md)). It adds a six-digit code from an authenticator app after the email and password. What it does and does not guard:
+A person can turn on two-step verification in Settings, Account ([ADR 0068](docs/adr/0068-two-step-sign-in-with-an-authenticator-app.md)). It adds a six-digit code from an authenticator app after the email and password. What it does and does not guard:
 
 - **It guards the email and password sign-in only.** The demo role buttons skip it, so a shared demo account is never locked by one visitor's phone. A demo session cannot turn it on for an account whose role can manage users.
 - **A code works once, one step either side of the clock.** Five wrong codes end a sign-in. Ten wrong codes in 15 minutes lock the code entry, and the third lock in a row lasts 24 hours. A recovery code still works during a lock.

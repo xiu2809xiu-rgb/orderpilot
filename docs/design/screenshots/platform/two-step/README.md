@@ -1,6 +1,6 @@
 # Two-step sign-in: pictures
 
-Pictures for the two-step sign-in story (#380, [ADR 0067](../../../../adr/0067-two-step-sign-in-with-an-authenticator-app.md)). Each one comes in light and dark, named `<name>-light.png` and `<name>-dark.png`.
+Pictures for the two-step sign-in story (#380, [ADR 0068](../../../../adr/0068-two-step-sign-in-with-an-authenticator-app.md)). Each one comes in light and dark, named `<name>-light.png` and `<name>-dark.png`.
 
 ## How they were taken
 
@@ -26,4 +26,4 @@ Pictures for the two-step sign-in story (#380, [ADR 0067](../../../../adr/0067-t
 
 ## Build
 
-Taken on 25 Nov 2026 from commit `0558977c` of the branch `feat/area1-two-step-sign-in`. The commits after it change documents only.
+Taken on 25 Nov 2026 from commit `0558977c` of the branch `feat/area1-two-step-sign-in`. The commits after it change documents and four things no picture here shows: the recovery-code mode (its focus, its words and its status line), the note when fewer than six digits are entered, a digit typed into the middle of a full code, and the page when the second step fails to load.

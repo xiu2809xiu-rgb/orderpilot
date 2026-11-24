@@ -15,7 +15,7 @@ export const ERROR_CODES = [
   "RATE_LIMITED",
   "UPSTREAM_UNAVAILABLE",
   "INTERNAL_ERROR",
-  // Two-step sign-in (ADR 0067). Appended: the web derives its status-to-code
+  // Two-step sign-in (ADR 0068). Appended: the web derives its status-to-code
   // fallback from this order, so the first code declared for a status wins.
   "TWO_STEP_REQUIRED",
   "TWO_STEP_CHALLENGE_ENDED",

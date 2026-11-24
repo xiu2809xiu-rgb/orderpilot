@@ -1,5 +1,5 @@
 /**
- * Every number of the two-step rules in one place (ADR 0067). Seconds unless
+ * Every number of the two-step rules in one place (ADR 0068). Seconds unless
  * the name says otherwise.
  */
 export const TWO_STEP_RULES = {

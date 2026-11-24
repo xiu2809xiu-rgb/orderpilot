@@ -9,7 +9,7 @@ import { apiClient } from "./instance";
 
 // By hand with apiClient.call, not generated hooks: every generated POST is a
 // query with `enabled: false`, and the sign-in step needs the route in
-// NO_REFRESH by its relative path (ADR 0067). These calls never touch the
+// NO_REFRESH by its relative path (ADR 0068). These calls never touch the
 // query cache, so a setup key or a recovery code is held by nothing but the
 // component that asked for it.
 

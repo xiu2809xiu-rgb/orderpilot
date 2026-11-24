@@ -1,4 +1,4 @@
-# ADR 0067: Two-step sign-in with an authenticator app
+# ADR 0068: Two-step sign-in with an authenticator app
 
 - **Status:** Proposed. Sessions and the sign-in page are area 1's, so Richie accepts or declines it in review. Angelyn co-owns the auth code and is asked to review it.
 - **Date:** 2026-11-24
@@ -8,7 +8,7 @@
 
 Richie asked on 24 Nov 2026 for a one-time code at sign-in, and attached a React bundle, "OTP Input Verification": a pill that unfolds into six cells, folds to "Verifying", then shakes red or turns green.
 
-The bundle is design material, not a part we can drop in. It needs `gsap` 3.12.7, which the app does not have. It imports a constants file (`OTP_MOTION`, `OTP_REPLAY`) that it does not contain, so its timings are not given. It mounts in a shadow root, embeds a font, is light-only, and checks the code against a hard-coded "123456". It states no licence of its own. Its source is a design post by bestsaasdesigns (https://x.com/bestsaasdesigns/status/2111020282551132539).
+The bundle is design material, not a part we can drop in. It needs `gsap` 3.12.7, which the app does not have. It imports a constants file (`OTP_MOTION`, `OTP_REPLAY`) that it does not contain, so its timings are not given. It mounts in a shadow root, embeds a font, is light-only, and checks the code against a hard-coded "123456". It states no licence of its own. Its source is a design post by bestsaasdesigns (https://x.com/bestsaasdesigns/status/2111020282551132539). The bundle itself is LeiBox's re-make of that design (https://leibox.pantoria.cn, its `otp-verification` entry), as Richie said on 24 Nov. LeiBox's record assigns no licence and asks that the source notices and the design reference be kept; the collection calls itself "for learning use only".
 
 Where does the code come from? Nothing in the API sends email. The demo accounts' addresses end in `@example.test` and cannot receive any. [ADR 0018](0018-mailpit-for-development-email.md) keeps mail inside Mailpit, and real email is out of scope. An authenticator app works on a real phone with no service behind it.
 
