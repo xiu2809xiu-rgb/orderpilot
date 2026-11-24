@@ -145,11 +145,13 @@ export function ApproverFacts({ spr }: { spr: SprDetail }) {
         : t("spr.noLimit");
   const noLimits =
     setup.unlimitedSalesApproval && setup.unlimitedPurchaseApproval;
-  return (
-    <dl className="grid gap-s2 sm:grid-cols-2">
-      <Fact label={t("spr.decidedBy")}>{t("spr.anyOfThree")}</Fact>
-      {/* Who is in the group for this SPR: everyone but the requester, as area 4 answers it. */}
-      {spr.approverGroup ? (
+  // Under the approver group, area 4's answer is the whole truth: who can decide
+  // this one, already narrowed by any limits. The sample's single approver setup,
+  // substitute and escalation describe the old chain, so they are left out.
+  if (spr.approverGroup) {
+    return (
+      <dl className="grid gap-s2 sm:grid-cols-2">
+        <Fact label={t("spr.decidedBy")}>{t("spr.anyOfThree")}</Fact>
         <Fact label={t("spr.groupNow")}>
           {spr.approverGroup.approvers.length > 0
             ? spr.approverGroup.approvers
@@ -157,7 +159,12 @@ export function ApproverFacts({ spr }: { spr: SprDetail }) {
                 .join(", ")
             : t("spr.groupNobody", { reason: spr.approverGroup.reason ?? "" })}
         </Fact>
-      ) : null}
+      </dl>
+    );
+  }
+  return (
+    <dl className="grid gap-s2 sm:grid-cols-2">
+      <Fact label={t("spr.decidedBy")}>{t("spr.anyOfThree")}</Fact>
       {noLimits ? (
         <Fact label={t("spr.limits")}>{t("spr.noLimits")}</Fact>
       ) : (

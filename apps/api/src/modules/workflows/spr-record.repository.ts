@@ -18,6 +18,8 @@ const sprDataSchema = z.object({
     .object({
       outcome: z.enum(SPR_DECISIONS),
       by: z.string().min(1),
+      /** Who decided, so only they may undo it. Optional: older rows have none. */
+      byUserId: z.uuid().optional(),
       comment: z.string(),
       at: z.iso.datetime(),
     })

@@ -8,6 +8,7 @@ import {
   type SprDecisionUndoResult,
 } from "@orderpilot/shared";
 import { AuditService } from "../../audit/audit.service.js";
+import { AppConfig } from "../../config/app-config.js";
 import type { AuthContext } from "../../auth/auth-context.js";
 import {
   ConflictError,
@@ -26,6 +27,7 @@ import {
   SprRecordRepository,
   type StoredSpr,
 } from "./spr-record.repository.js";
+import { SprRoutingService } from "./spr-routing.service.js";
 import { WorkflowReadModel } from "./workflow-read-model.js";
 import { WorkflowTaskRepository } from "./workflow-task.repository.js";
 
@@ -71,6 +73,8 @@ export class SprApprovalService {
     private readonly tasks: WorkflowTaskRepository,
     @Inject(CommandReplayService)
     private readonly replay: CommandReplayService,
+    @Inject(SprRoutingService) private readonly routing: SprRoutingService,
+    @Inject(AppConfig) private readonly config: AppConfig,
   ) {}
 
   /** Sent again with the same key, it answers as it did the first time and does nothing. */
@@ -111,18 +115,34 @@ export class SprApprovalService {
         "This request is a sample that the workflow does not run, so it cannot be decided.",
       );
     }
+    // Under the group a second decision is the normal case, so its refusal is
+    // audited on area 2's side (ADR 0056, point 7).
     if (spr.decision) {
-      throw new ConflictError(
-        "This request already has a decision. Undo it to decide again.",
+      throw await this.refused(
+        recordNo,
+        auth,
+        info,
+        "already-decided",
+        new ConflictError(
+          "This request already has a decision. Undo it to decide again.",
+        ),
       );
     }
     await this.refuseTheRequester(recordNo, spr, auth, info);
+    // Who could decide it at this moment, kept with the decision so an audit
+    // pack can say why this person could (Angelyn, #368).
+    const group = await this.routing.groupOf(spr);
+    const judgedAgainst = {
+      approverIds: group.approvers.map((approver) => approver.userId),
+      limitsOn: this.config.governance.approvalLimits,
+    };
 
     const handBack = handBackOf(outcome);
     const handBackDue = await this.tasks.dueFor(handBack.kind, now);
     const decision = {
       outcome,
       by: auth.user.displayName,
+      byUserId: auth.user.id,
       comment,
       at: now.toISOString(),
     };
@@ -161,7 +181,7 @@ export class SprApprovalService {
           entityType: "Spr",
           entityId: recordNo,
           summary: `${auth.user.displayName} ${outcome} ${recordNo}`,
-          changes: { outcome, comment },
+          changes: { outcome, comment, group: judgedAgainst },
           ip: info.ip,
           traceId: info.traceId,
         });
@@ -201,6 +221,24 @@ export class SprApprovalService {
     const spr = await this.storedOf(recordNo);
     if (!spr?.decision) throw new NotFoundError(`A decision on ${recordNo}`);
     await this.refuseTheRequester(recordNo, spr, auth, info);
+    // Only the person who decided may take it back: otherwise another approver
+    // could undo it and decide the other way, past "the first decision closes it".
+    const decider = spr.decision.byUserId;
+    const isDecider = decider
+      ? decider === auth.user.id
+      : spr.decision.by === auth.user.displayName;
+    if (!isDecider) {
+      throw await this.refused(
+        recordNo,
+        auth,
+        info,
+        "not-the-decider",
+        new DomainError(
+          "FORBIDDEN",
+          "Only the person who decided this request can undo it.",
+        ),
+      );
+    }
     const answer: SprDecisionUndoResult = {
       applied: true,
       message: SPR_DECISION_UNDONE_MESSAGE,
@@ -271,6 +309,27 @@ export class SprApprovalService {
       traceId: info.traceId,
     });
     throw new DomainError("FORBIDDEN", "You do not have access to this.");
+  }
+
+  /** Audits a refusal on area 2's side, by its rule, and hands back the error to throw. */
+  private async refused(
+    recordNo: string,
+    auth: AuthContext,
+    info: RequestInfo,
+    rule: string,
+    error: DomainError,
+  ): Promise<DomainError> {
+    await this.audit.record({
+      actor: { kind: "user", userId: auth.user.id, role: auth.user.role },
+      action: "workflows.spr.refused",
+      entityType: "Spr",
+      entityId: recordNo,
+      summary: `${auth.user.displayName} was refused on ${recordNo}: ${error.message}`,
+      changes: { rule },
+      ip: info.ip,
+      traceId: info.traceId,
+    });
+    return error;
   }
 
   /** What area 4's policy judges: the SPR's own amount and the person who raised it. */
