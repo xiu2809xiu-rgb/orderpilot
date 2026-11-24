@@ -42,6 +42,10 @@ None of these run yet. Until the second one does, Dependabot proposes new versio
 
 [Security testing](docs/security/security-testing.md) says what runs where and how we triage findings.
 
+## Uploads
+
+One route accepts a file today: a profile picture (ADR 0068). It takes one JPEG as the raw request body, at most 256 KB, only from a signed-in person, behind the CSRF check, with a limit of ten uploads in 24 hours and one in flight per person. The server sniffs the bytes, refuses anything that is not a baseline or progressive JPEG of the right shape, removes every metadata segment and cuts everything after the end marker before it stores one byte. A person approves each picture before it is shown, and a pending picture is shown only to its owner and the reviewers. Document upload (PDF, PNG, JPEG, XLSX and CSV, with type sniffing and a zip-bomb guard) is still planned for P-18 and does not exist yet.
+
 ## Since the repository went private
 
 Richie made the repository private on 5 Nov 2026 ([ADR 0040](docs/adr/0040-what-going-private-changed.md)).

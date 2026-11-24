@@ -71,6 +71,9 @@ Each row is a case some test must cover. The story is the one that brings the te
 | A10 | A customer or item name looks like an existing one but the Business Central number differs | Shown as a possible match, never merged by name                           | Unit              | Planned: P-19, P-20 |
 | A11 | Business Central (the mock) is down, slow or returns an error                              | Retried with backoff, then reported; no partial write                     | Contract          | Planned: P-20       |
 | A12 | A write-back to Business Central is requested                                              | Shown as a preview, and sent only after a person approves                 | Integration       | Planned: P-20       |
+| A13 | A JPEG with metadata, trailing bytes or a false size is uploaded                           | Cleaned or refused: only the picture's own parts are stored               | Unit              | In review: #381     |
+| A14 | A pending picture is asked for by someone else, or by anyone after a take-down             | Visible to its owner and the reviewers only; 404 after a take-down        | API               | In review: #381     |
+| A15 | A reviewer tries to review their own picture, or two reviewers decide together             | 403 and an audit row; for two reviewers, one decision and one 409         | API               | In review: #381     |
 
 ### Order workflows and approvals (area 2)
 
