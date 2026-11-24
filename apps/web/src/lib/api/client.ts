@@ -26,6 +26,8 @@ export interface RouteLike<
   csrf: boolean;
   request: Req;
   response: Res;
+  /** Set when the body is raw bytes, such as a picture: the one content type the route takes. */
+  rawContentType?: string;
 }
 
 export interface ApiClientOptions {
@@ -110,11 +112,28 @@ export class ApiClient {
     return this.#sessionStarted || this.#readCookie(COOKIES.csrf) !== undefined;
   }
 
-  async call<Req extends z.ZodType | null, Res extends z.ZodType>(
+  call<Req extends z.ZodType | null, Res extends z.ZodType>(
     route: RouteLike<Req, Res>,
     ...args: CallArgs<Req>
   ): Promise<z.output<Res>> {
-    const body: unknown = args[0];
+    return this.#callWith(route, args[0]);
+  }
+
+  /**
+   * Sends raw bytes as the body, with the content type the route names. It
+   * takes the same road as `call`: the same blob goes again after a refresh.
+   */
+  upload<Res extends z.ZodType>(
+    route: RouteLike<null, Res> & { rawContentType: string },
+    body: Blob,
+  ): Promise<z.output<Res>> {
+    return this.#callWith(route, body);
+  }
+
+  async #callWith<Req extends z.ZodType | null, Res extends z.ZodType>(
+    route: RouteLike<Req, Res>,
+    body: unknown,
+  ): Promise<z.output<Res>> {
     try {
       return await this.#send(route, body);
     } catch (error) {
@@ -191,7 +210,7 @@ export class ApiClient {
       Accept: "application/json",
       [HEADERS.requestId]: requestId,
     };
-    let payload: string | undefined;
+    let payload: string | Blob | undefined;
     if (route.request) {
       const parsed = route.request.safeParse(body);
       if (!parsed.success) {
@@ -203,6 +222,9 @@ export class ApiClient {
       }
       headers["Content-Type"] = "application/json";
       payload = JSON.stringify(parsed.data);
+    } else if (route.rawContentType && body instanceof Blob) {
+      headers["Content-Type"] = route.rawContentType;
+      payload = body;
     }
     if (route.csrf || route.method !== "GET") {
       const token = this.#readCookie(COOKIES.csrf);
