@@ -1,9 +1,10 @@
 import { Check, Copy, Download } from "lucide-react";
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 // The file, not the barrel: the barrel pulls in the whole data table.
 import { downloadFile } from "@/components/common/data-table/export/download";
 
@@ -23,11 +24,24 @@ export function RecoveryCodesView({ codes, onDone }: RecoveryCodesViewProps) {
   const [saved, setSaved] = useState(false);
   const [copy, setCopy] = useState<"idle" | "copied" | "failed">("idle");
   const savedId = useId();
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(
+    () => () => {
+      clearTimeout(timer.current);
+    },
+    [],
+  );
 
   async function copyAll() {
+    clearTimeout(timer.current);
     try {
       await navigator.clipboard.writeText(codes.join("\n"));
       setCopy("copied");
+      // The tick goes back to the icon, as on the other copy buttons. A failure
+      // stays, written out, until the next try: two seconds is too short to read it.
+      timer.current = setTimeout(() => {
+        setCopy("idle");
+      }, 2_000);
     } catch {
       setCopy("failed");
     }
@@ -70,12 +84,15 @@ export function RecoveryCodesView({ codes, onDone }: RecoveryCodesViewProps) {
           {t("account.twoStep.recoveryView.download")}
         </Button>
       </div>
-      <span role="status" className="sr-only">
+      <p
+        role="status"
+        className={cn(copy === "failed" ? "fs-14 text-destructive" : "sr-only")}
+      >
         {copy === "copied" ? t("account.twoStep.recoveryView.copied") : null}
         {copy === "failed"
           ? t("account.twoStep.recoveryView.copyFailed")
           : null}
-      </span>
+      </p>
       <div className="flex items-center gap-2 pointer-coarse:min-h-11">
         <Checkbox
           id={savedId}
