@@ -4,14 +4,12 @@ import { toast } from "@/components/common";
 import {
   getMatrixReadQueryKey,
   matrixCopy,
-  matrixSetDataScope,
   matrixSetPermission,
 } from "@/lib/api/generated/endpoints/governance/governance";
 import type { MatrixCopyBody } from "@/lib/api/generated/model";
 
 type Role = MatrixCopyBody["fromRole"];
 type Permission = Parameters<typeof matrixSetPermission>[1];
-type Scope = Parameters<typeof matrixSetDataScope>[1]["dataScope"];
 
 /** The changes the matrix screen can make, each ending with a toast. */
 export function useMatrixChanges() {
@@ -24,11 +22,6 @@ export function useMatrixChanges() {
   const toggle = useMutation({
     mutationFn: (v: { role: Role; permission: Permission; granted: boolean }) =>
       matrixSetPermission(v.role, v.permission, { granted: v.granted }),
-    onSettled: refresh,
-  });
-  const scope = useMutation({
-    mutationFn: (v: { role: Role; dataScope: Scope }) =>
-      matrixSetDataScope(v.role, { dataScope: v.dataScope }),
     onSettled: refresh,
   });
   const copy = useMutation({
@@ -73,34 +66,10 @@ export function useMatrixChanges() {
     );
   }
 
-  function setDataScope(role: Role, dataScope: Scope, before?: Scope) {
-    scope.mutate(
-      { role, dataScope },
-      {
-        onSuccess: () =>
-          toast.done(
-            t("matrix.toast.scope", {
-              role: tc(`roles.${role}`),
-              scope: t(`matrix.scopes.${dataScope}`),
-            }),
-            before
-              ? {
-                  undo: async () => {
-                    await scope.mutateAsync({ role, dataScope: before });
-                  },
-                }
-              : {},
-          ),
-        onError: () => toast.failed(t("matrix.toast.failed")),
-      },
-    );
-  }
-
   return {
-    busy: toggle.isPending || scope.isPending || copy.isPending,
-    failure: toggle.error ?? scope.error ?? copy.error,
+    busy: toggle.isPending || copy.isPending,
+    failure: toggle.error ?? copy.error,
     setPermission,
-    setDataScope,
     copyRole: (body: MatrixCopyBody) => copy.mutateAsync(body),
   };
 }

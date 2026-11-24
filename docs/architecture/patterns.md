@@ -47,6 +47,9 @@ The named patterns used in the code, where each one lives, and why it earns its 
 | Facade                      | `e2e/src/index.ts`, `checkPage`                                                    | A spec calls four helpers; the axe, console, CSP and layout checks behind them change in one place                        | P-14  |
 | Declared entries            | `features/define.ts` (`MenuEntry`), `features/nav.ts` (`menuFor`)                  | Each feature declares its menu lines and the shell only reads them, so a menu built twice cannot disagree with itself     | P-39  |
 | Registry filter             | `features/registry.ts` (`reachableFeatures`)                                       | One place decides whether a planned feature can be reached, so the menu, routes and palette cannot drift apart            | P-39  |
+| Settings row                | `components/parts/SettingRow.tsx`                                                  | A label, one plain line and a control in one shape, so every settings card reads alike                                    | #349  |
+| Registry (keys)             | `app/shell/shortcutRegistry.ts`                                                    | The handlers, the Help panel and Settings read one list of keys, so what is shown is what works                           | #349  |
+| Shared store                | `app/shell/panelCollapsedStore.ts`, `app/shell/useSignOut.tsx`                     | The bar and Settings change the side panel and sign out through one store and one hook, so they agree                     | #349  |
 
 ## Layers
 
@@ -239,6 +242,7 @@ The first screen (the sign-in page or a role's home page) waits for the entry ch
 | Portal print view               | `components/list-page/PrintView.tsx`, `@media print` in `styles/index.css`                    | Print renders every row beside the app and a print rule hides the app, with no print library                                                                                                        | P-44  |
 | Declaration over drawing (form) | `components/document-form/DocumentForm.tsx`, `types.ts`                                       | A document declares its header, lines, status, actions and tabs; the template draws the page and checks each action's permission, so four CRUD screens share one bar                                | P-47  |
 | Registry (shared form actions)  | `components/document-form/registry.ts`, `ExtraActions.tsx`                                    | One registration puts an action in every document form's More menu, as `registerRowMenuItem` does for row menus; P-57 uses both                                                                     | P-47  |
+| Engine behind an adapter        | `components/kit/pixel-toggle/` (`PixelToggle.tsx`, `engine.ts`)                               | The theme switch's springs, canvases and WebGL2 context live in an engine that attaches to a button React owns and makes and removes its own canvases, so a double mount cannot clash. A lazy chunk | #356  |
 
 ## Area 2's state machine (C-2)
 

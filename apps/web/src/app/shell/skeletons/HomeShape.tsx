@@ -15,11 +15,11 @@ export function HomeShape() {
         <Bone className="h-10 w-32 rounded-full" />
         <Bone className="h-10 w-40 rounded-full" />
       </div>
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
+      <div className="dx-grid-gap grid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
         <CardBones lines={7} />
         <CardBones lines={7} />
       </div>
-      <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="mt-8 grid grid-cols-2 gap-2 lg:grid-cols-4">
         {Array.from({ length: 4 }, (_, index) => (
           <Bone key={index} className="dx-card h-24 rounded-2xl" />
         ))}

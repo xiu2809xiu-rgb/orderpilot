@@ -29,7 +29,7 @@ How area 4 meets the others ([How the areas connect](../../CLAUDE.md#how-the-are
 
 - **The policy is enforced on the server.** Every endpoint that acts calls it, through area 1's guard (planned: P-10). Hiding a button is never the control.
 - **One shape for every decision:** allowed or refused, the rule that decided, and a reason a person can read. A refusal returns the standard error envelope `{ error: { code, message, details, traceId } }` and is audited.
-- **Approval limits and delegation** follow the shape of Navision's Approval User Setup (User ID, Approver ID, Sales and Purchase Amount Approval Limits, Unlimited flags, Substitute), shared with area 2 ([domain notes](../research/domain-notes.md)).
+- **Approval limits and delegation** follow the shape of Business Central's Approval User Setup (User ID, Approver ID, Sales and Purchase Amount Approval Limits, Unlimited flags, Substitute), shared with area 2 ([domain notes](../research/domain-notes.md)).
 - **Bank details are compared with the Vendor Bank Account on record** (Bank Account No., SWIFT Code, IBAN). Any difference holds the payment. Area 2's state machine shows the hold and blocks the payment until it is cleared.
 - **AI destinations:** area 1's gateway asks area 4's policy whether a piece of data may go to a provider. The default is synthetic data only.
 
@@ -64,19 +64,19 @@ sequenceDiagram
 F-1 and G-1 have landed. F-2 fills in its item when it does.
 
 - **From F-1, access policy and masking** (landed, [ADR 0024](../adr/0024-governance-base.md)):
-  - **The matrix screen** at `/governance` (`apps/web/src/features/governance/`): a switch per role and permission over the real `RolePermission` table, a data scope per role, "Copy a role", and the users tab (disable and enable, never delete, on P-10's routes). Changes are saved at once and audited. Reading needs `roles.read`, changing needs `roles.manage`; an auditor can read and cannot change.
+  - **The matrix screen** at `/governance` (`apps/web/src/features/governance/`): a switch per role and permission over the real `RolePermission` table, "Copy a role", and the users tab (disable and enable, never delete, on P-10's routes). Changes are saved at once and audited. Reading needs `roles.read`, changing needs `roles.manage`; an auditor can read and cannot change.
   - **The system admin never approves, posts or pays.** `NEVER_FOR_SYSTEM_ADMIN` and `LOCKED_CELLS` in `packages/shared/src/governance/matrix.ts`; the default matrix leaves the three permissions off and the server refuses to grant them (409). `roles.manage` is locked on.
   - **New permissions** in `packages/shared/src/permissions.ts`: `roles.read`, `approvals.decide`, `payments.confirm`, `payments.post`. Who holds the last three is a sample (Approver decides, Finance confirms and posts): settle it in your policy.
   - **Masking** in `apps/api/src/modules/governance/domain/masking.ts`: `mask(rules, role, field, value)` returns a `MaskedField` whose value is `null` for a role the rule does not list, so the value never reaches the browser. One neutral sample rule, `sample.customerNote`, shown on the Masking tab through P-12's `MaskedValue` with the reason. `GET /governance/masking/sample`.
   - **Classification and the AI rule:** the four levels and the mask reasons are in `packages/shared/src/governance/classification.ts`. `decideAiDestination` (`domain/ai-destination-policy.ts`) answers what data may go to which provider; the default is synthetic data only. `GET /governance/ai-destinations`, `POST /governance/ai-destinations/check`: P-17's gateway calls the second.
   - **How a refusal looks:** the standard error envelope with a trace id (403 `FORBIDDEN`, a generic message; the reason goes to the audit trail), drawn by `RefusalPanel`. The Refusals tab shows both. `PolicyRequest` and `PolicyDecision` in `governance/decision.ts` are the shape for your policy.
-  - **Contracts only, no table and no rule:** approval limits and a substitute in the shape of Navision's Approval User Setup (`governance/approval.ts`), and the payment type, prepayment among them, for payment confirmation (`governance/payment.ts`, for C-1's payment step to record).
-  - **Data scope:** `RoleDataScope` in `governance.prisma` holds `all`, `brands` or `own` per role. It is stored and shown. Nothing filters a list by it yet.
+  - **Contracts only, no table and no rule:** approval limits and a substitute in the shape of Business Central's Approval User Setup (`governance/approval.ts`), and the payment type, prepayment among them, for payment confirmation (`governance/payment.ts`, for C-1's payment step to record).
+  - **Data scope:** `RoleDataScope` in `governance.prisma` holds `all`, `brands` or `own` per role. It is stored, and no longer shown on the matrix: nothing filters a list by it yet ([ADR 0065](../adr/0065-the-data-scope-stays-off-the-matrix.md)).
   - **Routes and requests:** `apps/api/src/modules/governance/` (controllers, services, `domain/` with its own unit tests), `apps/api/requests/governance.http`, generated hooks in `apps/web/src/lib/api/generated/endpoints/governance`. Component tests use MSW and `test/http/governance.test.ts` runs against the real database.
   - **`it.todo` tests** in `apps/api/test/http/governance-controls.test.ts`, named by control: approval limits, no self-approval, the bank-detail hold, masking for each role, a direct API call being refused (E2E #3), and payment confirmation.
 - **From F-2, the audit viewer:** the audit log viewer over the real hash chain, with filters and a chain check; the audit trail at the foot of every detail page (with P-12's audit link); and `it.todo` tests for export and retention.
 - **From G-1, monitoring** (landed, [ADR 0021](../adr/0021-otel-lgtm-observability-profile.md), [0022](../adr/0022-sentry-for-errors.md) and [0028](../adr/0028-metrics-endpoint-protection-and-clickstream.md)):
-  - **The screens** at `/monitoring` (`apps/web/src/features/monitoring/`), in three tabs. _AI usage and cost_ reads the real `AiUsageRecord` table (`GET /monitoring/ai-usage`, needs `aiUsage.read`): totals, cost per feature and the latest calls, with an honest empty state until P-17's gateway writes records. _Observability_ and _Clickstream_ show labelled mock data (`GET /monitoring/observability`, `GET /monitoring/clickstream`, both `meta.mock: true`, with the Mock badge) and carry `it.todo` tests in `MonitoringPage.test.tsx`.
+  - **The screens** at `/monitoring` (`apps/web/src/features/monitoring/`), in three tabs. _AI usage and cost_ reads the real `AiUsageRecord` table (`GET /monitoring/ai-usage`, needs `aiUsage.read`): totals, cost per feature and the latest calls, with an honest empty state until P-17's gateway writes records. _Observability_ and _Clickstream_ show labelled mock data (`GET /monitoring/observability`, `GET /monitoring/clickstream`, both `meta.mock: true`, with the Mock badge) and carry `it.todo` tests in `MonitoringPage.test.tsx`. Because that data is made up, the Observability tab raises no alert from it, and says its statuses and trace IDs are samples (#369). G-1's real health brings the alert back, on live data only.
   - **Telemetry** in `apps/api/src/telemetry/`: OpenTelemetry traces and metrics for every request under the service name `orderpilot-api`, sent over OTLP only when `OTEL_EXPORTER_OTLP_ENDPOINT` is set. A log line carries the request id and the trace id; the span carries the request id as `orderpilot.request_id`.
   - **`/metrics`** with prom-client (`modules/monitoring/metrics.controller.ts`): bearer token `METRICS_TOKEN`, and a 404 when none is set.
   - **The clickstream:** `POST /analytics/clickstream` (any signed-in role, 30 batches a minute, 20 events a batch) stores role, route pattern, event name and time in `ClickstreamEvent` (`analytics.prisma`), and nothing that names a person. In the web app, `AnalyticsTracker.ts` is the class (batching, consent, Do Not Track, Global Privacy Control, route patterns), `AnalyticsRoot.tsx` shows the consent banner and records one page view per screen, and `tracker.ts` is the one instance.
@@ -115,7 +115,7 @@ F-3 brings the first real policy ([ADR 0041](../adr/0041-the-authorisation-polic
   - The rules are `system-admin`, `permission`, `approval-route` and `approval-limit`, in that order, and the first refusal wins.
   - The guard runs the first two through `GovernancePermissionPolicy`.
   - An area runs all four through `AuthorisationService.enforce`.
-- **The approval setup table**, `ApprovalUserSetup`: Navision's Approval User Setup plus `awayFrom` and `awayUntil`.
+- **The approval setup table**, `ApprovalUserSetup`: Business Central's Approval User Setup plus `awayFrom` and `awayUntil`.
   - Every change goes through `ApprovalSetupService.save`, which audits the before and after.
   - `seedApprovalSetups` writes the sample chain.
 - **Tests:** a unit test beside each rule, and `apps/api/test/http/governance-controls.test.ts` against the real database, through a stand-in route that only the test app registers.
@@ -157,6 +157,8 @@ await this.authorisation.enforce(
 
 ### The absence and escalation rule (Q-6)
 
+**Replaced by [the approver group](#the-approver-group-252) once `APPROVER_GROUP` is on.** Until area 2's #251 turns it on, this is still the rule, unchanged, and #280 removes it afterwards.
+
 An open rule, configuration until Spectra answers [Q-6](../client/questions-for-client.md) (A-23, A-24):
 
 1. The requester's approver (their Approver ID) decides.
@@ -191,11 +193,12 @@ F-4 adds three rules to the same chain ([ADR 0044](../adr/0044-no-self-approval-
 
 **The duties kept apart**, configuration until Spectra confirms them:
 
-| Earlier duty                | Rules out, on the same record                                            |
-| --------------------------- | ------------------------------------------------------------------------ |
-| `spr.raise` (the requester) | `spr.approve`                                                            |
-| `vendor-payment.approve`    | `payment-hold.clear`                                                     |
-| `vendor-bank.change`        | `payment-hold.clear`, `vendor-payment.approve`, `vendor-payment.release` |
+| Earlier duty                        | Rules out, on the same record                                            |
+| ----------------------------------- | ------------------------------------------------------------------------ |
+| `spr.raise` (the requester)         | `spr.approve`                                                            |
+| `spr.route` (the coordinator, #252) | `spr.approve`                                                            |
+| `vendor-payment.approve`            | `payment-hold.clear`                                                     |
+| `vendor-bank.change`                | `payment-hold.clear`, `vendor-payment.approve`, `vendor-payment.release` |
 
 Confirming a customer's payment (`customer-payment.confirm`) and paying a vendor (`vendor-payment.approve`, `vendor-payment.release`) are separate actions, and the customer's payment sits in no pair.
 
@@ -286,19 +289,74 @@ await authorisation.enforce(
 - **`payments.post`** is held by no role, so vendor payments are refused for everyone until P-104's permission is decided.
 - **Events** wait for the bus (P-15).
 
+## The approver group (#252)
+
+Spectra's process: a coordinator, a Support user, routes each SPR to three management approvers, any one of whom decides, and hands it back ([ADR 0056](../adr/0056-the-approver-group-replaces-the-approval-chain.md)).
+
+- **The group** is every enabled user with the `APPROVER` role except the requester. Absence moves nothing, and Management is not in it.
+- **Limits** are switchable, with none set: `APPROVAL_LIMITS=off|on`, off by default. While they are on, only the approvers whose own limit covers the amount may decide.
+- **The coordinator** holds `spr.route`, with `spr.read`, and never decides: Support has no `approvals.decide`, and whoever routed an SPR may not decide it. There is no coordinator role, so Support is an assumption until Spectra answers Q-50.
+- **A temporary switch, `APPROVER_GROUP=off|on`, off by default.** While it is off, the old chain above decides, unchanged. #251 turns it on, and #280 then removes the switch, the old chain, `deciderFor`, substitutes and away dates.
+- **Code:** `domain/approver-group.ts` (the group, a pure function), `ApprovalRouteRule` (both paths), `AuthorisationService.approversFor`, and the `spr.route` action with its duties pair.
+- **Tests:** `approver-group.test.ts`, `approval-route.test.ts`, and three blocks in `test/http/governance-controls.test.ts`: the group, the group with its limits on, and the coordinator. F-3's block also proves that the switch off keeps the old chain.
+
+### How area 2 uses it
+
+Area 2 routes, records the decision and refuses a second one. Area 4 says who may decide, and refuses who may not.
+
+```ts
+// 1. Before routing: the coordinator asks the policy; area 2 stores who routed it.
+await authorisation.enforce(
+  {
+    actor: { userId: auth.user.id, role: auth.user.role },
+    action: "spr.route",
+    resource: { type: "Spr", id: spr.recordNo },
+    requesterUserId: spr.raisedByUserId,
+  },
+  { ip: req.ip ?? null, traceId: requestIdOf(req) },
+);
+
+// 2. Whom to route to: each is { userId, displayName }, never an email.
+const { approvers, reason } = await authorisation.approversFor({
+  requester: spr.raisedByUserId,
+  action: "spr.approve",
+  amount: spr.amount,
+});
+// An empty list comes with a reason to show. Otherwise each approver gets the task.
+
+// 3. A decision: any one of them may make it, and the first one closes the SPR.
+await authorisation.enforce(
+  {
+    actor: { userId: auth.user.id, role: auth.user.role },
+    action: "spr.approve",
+    resource: { type: "Spr", id: spr.recordNo },
+    amount: spr.amount,
+    requesterUserId: spr.raisedByUserId,
+    earlierDuties: { "spr.route": spr.routedByUserId },
+  },
+  { ip: req.ip ?? null, traceId: requestIdOf(req) },
+);
+```
+
+- **Take the requester, who routed it and the amount from area 2's stored SPR,** never from the request body.
+- **A second decision** on an SPR already decided is area 2's 409, audited on area 2's side. Area 4's policy is not asked.
+- **`deciderFor` is deprecated.** It still works, and still decides who may approve while `APPROVER_GROUP` is off. Area 2 stops calling it in #251: `spr-routing.service.ts`, `spr-approval.service.ts` and `workflows.service.ts`.
+- **Turning the group on** is #251's, because it changes who may decide, so area 2's tests for the old chain change with it.
+- **Until #251,** a request the old chain escalates to Management while the approver is away is decided by Management only while the group is off. Once it is on, Management decides no SPR.
+
 ## Finding and undoing on the matrix (F-8)
 
 **Search and filters.** The matrix has a search box, a role filter and a permission group filter, in `MatrixFilterBar.tsx`, on the shared `SearchBox`, `FilterSelect` and `FilterChips`. The filtering is one pure function, `filterMatrix` in `matrixFilter.ts`, which searches a permission's label and key.
 
 - The filters live in the address bar (`q`, `role`, `group`), so a view can be shared.
-- A role filter leaves one column and a group filter leaves those rows. The data scope row goes while the rows are being narrowed.
+- A role filter leaves one column and a group filter leaves those rows.
 - The groups go by the word before the first dot of a permission's name. One nobody has grouped is listed under Other.
 
-**Undo.** A switch or a data scope change ends with a toast that offers Undo, for 10 seconds or with Ctrl+Z. Undo is the same save as the change, so a refusal shows its trace ID and the switches wait for it. On the server it is one more change with its own audit row, and the row of the change it reverses stays.
+**Undo.** A switch ends with a toast that offers Undo, for 10 seconds or with Ctrl+Z. Undo is the same save as the change, so a refusal shows its trace ID and the switches wait for it. On the server it is one more change with its own audit row, and the row of the change it reverses stays.
 
 **Copying a role has no Undo,** because nothing keeps the target's old rows. A second step says so before anything is sent, and the audit trail keeps the change.
 
-**E2E #3 in a browser** is in `apps/e2e/tests/governance.spec.ts`. A script calls the SPR approval route as Warehouse, with no page involved, and gets the 403 envelope with its trace ID. The auditor then opens the audit viewer, filtered to that route and role, and the newest row's details must show that trace ID. A refusal's record is the route pattern, not the SPR number, so the trace ID is what proves the row is this call's. This covers the direct call and its audit row. The self-approval and masking steps of E2E #3 are not in it.
+**E2E #3 in a browser** is in `apps/e2e/tests/governance.spec.ts`. A script calls the SPR approval route as Warehouse, with no page involved, and gets the 403 envelope with its trace ID. The auditor then opens the audit viewer, filtered to that route and role, and the newest row's details must show that trace ID. A refusal's record is the route pattern, not the SPR number, so the trace ID is what proves the row is this call's. This covers the direct call and its audit row. F-9 adds the masking step, a refusal read as the system admin and as the auditor ([Audit viewer polish](#audit-viewer-polish-f-9)). The self-approval step of E2E #3 is not in it.
 
 ## What's yours to build
 
@@ -310,7 +368,8 @@ await authorisation.enforce(
 
 **What F-2 deliberately leaves to you,** and what is queued:
 
-- **F-9: audit viewer polish** (backlog): a picker for the actor and the action, saved views, a chain check that runs in the background, a link to the broken event, and a browser test.
+- **F-9: audit viewer polish:** the pickers for the person and the action, the link to the broken event, and the browser test are built ([below](#audit-viewer-polish-f-9)). Saved views on the server and a chain check that runs in the background are still to come.
+- **F-10: a picture of the hash chain** on the chain check card is built ([below](#the-chain-picture-f-10)).
 - Export, retention, anchoring and scheduled verification, and the dashboards: see the deeper work below. None is started, so none is half-done.
 
 **What F-1 deliberately leaves to you** (nothing below is written, so none of it is half-done):
@@ -368,6 +427,62 @@ On 14 Nov a walk through the demo as every role, on a Docker build, found nine g
 - **Monitoring** keeps its tab in the address bar (`?tab=`) and, after #270, opens on Observability, listed first. The AI use tile and the See AI use quick action open `?tab=aiUsage`. The clickstream names roles as the rest of the app does.
 - **Settings:** the analytics choice is a radio group that marks the chosen setting, as the Appearance choice does.
 - **Wording:** the AI tab's classifications use the badges' words, and "trace ID" is written the same way in every Area 4 text, which `wording.test.ts` checks.
+
+## Audit viewer polish (F-9)
+
+F-9's criteria 1, 4 and 5, and the walkthrough's gaps A3 and A11, settled in [ADR 0064](../adr/0064-the-audit-filters-offer-what-the-trail-holds.md). Criteria 2 and 3 are still open on #103.
+
+**The person and action pickers.** In the More filters fold, "Person" and "Action" replace the "Person ID" and "Action starts with" boxes. They offer what the trail holds, from `GET /audit/filter-options` (`audit.read`): each person who appears as an actor, by name, and each action name that exists. The options are read only when the fold is open, in `AuditPickers.tsx`, on the shared `FilterLookup`.
+
+- **Names only.** The server sends an ID and a name, never an email. The address bar keeps the ID, so a link opens the same view, but the screen never shows it: "Loading the name" while the names load, "Someone not in the trail" for a person who is not.
+- **The action is still a prefix on the server.** A picked name finds itself, and an older link's prefix shows as "Starts with auth.".
+- **When the options fail to load,** the fold shows the error with its trace ID and Try again, in place of the pickers. The list itself still loads.
+
+**A broken chain and the events around it.** `around=<sequence>` on the list returns the events within five sequences either side (`AROUND_RADIUS`), with the other filters. When the chain check finds a break, `ChainCheckCard.tsx` links to "Open event N", which opens the event over its neighbours, and to "Show the events around it". The centred row is marked Centre, a chip clears it, and a sequence that is not a whole number above zero is not sent: `auditQuery.ts` says why.
+
+**The fifth criterion in a browser** is in `governance.spec.ts`. A script refuses a Warehouse call to the SPR reject route. The system admin filters to refusals with the pickers, opens the newest, and sees the reason masked with "Why is this hidden?". The auditor opens the same view and sees it in full. The criterion asks for an auditor who sees a masked value, but every masking rule for audit events shows its field to the auditor, so the masked side is the system admin's. [ADR 0058](../adr/0058-seven-roles-six-teams-and-an-administrator.md) changes both halves: its step 4 gives the unmasked view to the system admin, and its step 5 stops signing in as the auditor. No masking rule is added for an SPR's amount, because whoever reads the trail needs the amounts.
+
+**The matrix filter** lists `masking.customerNote` under its own group, Masking, instead of Other (`matrixFilter.ts`).
+
+## The data scope off the matrix (#268)
+
+The matrix no longer shows the data scope, and Copy a role leaves the target's scope as it was ([ADR 0065](../adr/0065-the-data-scope-stays-off-the-matrix.md)). No list reads the scope yet, so a control for it changed nothing a person could see.
+
+- **What stays:** `RoleDataScope`, its defaults, the scope in the matrix's read, and `PUT /governance/matrix/:role/data-scope`, so enforcing the scope later needs no migration.
+- **What a copy records:** the permissions granted and revoked, and no scope.
+- **Enforcing it** is a story of its own: it needs brand ownership (Q-17) and a filter in each area's lists, and brings the selector back with it.
+- **Tests:** `GovernancePage.test.tsx` ("offers no data scope control", and the copy dialog's words) and `test/http/governance.test.ts` ("leaves the target's data scope as it was").
+
+## The chain picture (F-10)
+
+The chain check card draws the chain above its words: glass blocks in a row, lit when they verify, with the break tilted and red and its link snapped ([ADR 0066](../adr/0066-the-chain-picture-is-a-shader-on-glcanvas.md)).
+
+- **Where:** `apps/web/src/features/audit/chain/`.
+  - `chainModel.ts` turns what the check returned into blocks.
+  - `chainShader.ts` is the fragment shader.
+  - `ChainPicture.tsx` puts it on the kit's `GlCanvas`, with the numbers under it. `ChainCheckCard.tsx` loads it as a lazy chunk.
+- **Only what the check returns:**
+  - The only numbers are the newest verified sequence and the break, because sequence numbers can have gaps.
+  - Nothing is drawn after a break, because the check stops there.
+  - A running check shows a looping light, not a count, because the check reports no progress.
+- **Motion:** only while checking, and while the blocks light after it; a still picture under reduced motion; plain CSS without WebGL2. The picture is `aria-hidden`, and the words stay the result.
+- **The red block** opens the broken event when clicked, the same link as "Open event N" (`brokenEventPath` in `ChainCheckCard.tsx`). It is for a mouse only, out of the tab order: the keyboard and a screen reader use "Open event N".
+- **Tests:**
+  - `chainModel.test.ts`: every state, and no number the check did not send.
+  - `ChainPicture.test.tsx`: the uniforms on a recording WebGL stub, and that it rests when not checking.
+  - `AuditPage.test.tsx`: the numbers on the card.
+  - `apps/e2e/tests/audit-chain.spec.ts`: as the system admin, a real canvas, so the shader compiles, and `checkPage`; and a click on the red block, on a staged break, opens the event.
+
+## The governance pages' findings (#276)
+
+Four findings from the walk of 15 Nov as the system administrator and the auditor.
+
+- **Your own row on the Users tab** has no Disable, since the server refuses it: someone else has to lock an administrator out. A "You" badge marks the row, and History stays. A refused change says the server's own reason and its trace ID in the toast; the panel above the table is for an access refusal only. The row's buttons are in `UserRowActions.tsx`, and the toggle in `useUserToggle.ts`.
+- **The refusal is audited:** an administrator who tries to disable themselves leaves a `user.disable.refused` row, with the rule `no-self-disable`, written before the transaction so it stays (`users.service.ts`).
+- **Copy a role** opens with no roles chosen, and Copy stays off until two different roles are. It says what the target gains and loses, from the matrix the page holds (`copyChange.ts`, `CopyChangeNote.tsx`), and the confirmation says it again. A copy that would change nothing says so.
+- **The Refusals tab** fits a phone: each sample column may shrink, the JSON scrolls in its own box, and the sample trace ID wraps.
+- **The audit log at 1440 px** fitted its card already, since #272. Its browser test now also checks that the side panel is open.
+- **Tests:** `UsersTab.test.tsx`, `CopyRoleDialog.test.tsx`, `copyChange.test.ts`, `test/http/auth-guards.test.ts` (the audited refusal), and two browser tests in `governance.spec.ts`. The Refusals test measures the main panel itself, because `checkPage` measures only the document (#376).
 
 ## Options to consider, not built
 

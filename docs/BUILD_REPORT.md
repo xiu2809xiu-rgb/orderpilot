@@ -407,6 +407,12 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 | #334  | The evening clock in the orders test kit              | `test/web-evening-clock`         | This pull request. The order page test passes at any hour of a Singapore day        |
 | #340  | Seven roles, step 2: Home by permission               | `feat/area1-home-by-permission`  | This pull request. Overdue orders under Needs you, refused actions under the rules  |
 | #337  | The Spark orb flows faster at idle                    | `fix/platform-orb-idle-speed`    | This pull request. Idle flows 75% faster, measured in Edge before and after         |
+| #355  | Optical alignment of the shared parts                 | `feat/area1-optical-alignment`   | This pull request. Titles, card heads, icons and buttons look aligned to the eye    |
+| #351  | The order page test checks the exact wait again       | `test/web-exact-wait`            | This pull request. The wait line's count is checked again, not only its shape       |
+| #354  | Home: the overview first, Needs you after             | `feat/area1-home-overview-first` | This pull request. Timeline, numbers and steps above Needs you, now five rows       |
+| #358  | The history build test allows a busy CI runner        | `test/synthetic-history-timing`  | This pull request. The history's time bound matches the dataset's own, 1,000 ms     |
+| #356  | A day-night switch replaces the theme menu            | `feat/area1-pixel-theme-switch`  | This pull request. The pixel toggle in the bar, menu and sign-in corner             |
+| #364  | Visual hierarchy and breathing room                   | `feat/area1-visual-hierarchy`    | This pull request. One rhythm in four tokens, one page stack, card padding of 24 px |
 | #191  | Cut CI minutes before the repository goes private     | `ci/minutes-job-conditions`      | Merged, [#192](https://github.com/xiu2809xiu-rgb/orderpilot/pull/192)               |
 | P-42  | Plan prompt 004                                       | `chore/plan-prompt-004`          | Merged, [#138](https://github.com/xiu2809xiu-rgb/orderpilot/pull/138)               |
 | P-13  | Docker images and the IaC scan                        | `ci/docker`                      | Merged, [#172](https://github.com/xiu2809xiu-rgb/orderpilot/pull/172)               |
@@ -453,6 +459,7 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 | P-76  | Governance and monitoring on the templates            | `feat/template-monitoring`       | Not started                                                                         |
 | P-78  | Room in the entry bundle                              | `perf/entry-bundle-room`         | Merged, [#183](https://github.com/xiu2809xiu-rgb/orderpilot/pull/183)               |
 | #32   | The AI gateway, with a person in the loop             | `feat/area1-ai-gateway`          | This pull request. One gateway, the mock by default, and a destination check        |
+| #349  | The settings page: sections, rows a user needs        | `feat/area1-settings-page`       | This pull request. A list of sections, one at a time, each a card of plain rows     |
 | #345  | Spark, step 1: the API core                           | `feat/area1-spark-api-core`      | This pull request. Conversations, a permission and three read-only tools, API only  |
 
 ## Prompt 003: the product pass

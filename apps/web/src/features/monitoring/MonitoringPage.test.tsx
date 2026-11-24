@@ -107,41 +107,68 @@ describe("MonitoringPage", () => {
     ).toBeVisible();
   });
 
-  it("labels observability as mock data and flags a degraded service", async () => {
-    server.use(
-      getAiUsageReportMockHandler(usage(1)),
-      getOverviewObservabilityMockHandler({
-        data: {
-          services: [
-            {
-              name: "orderpilot-api",
-              status: "degraded",
-              p95Ms: 420,
-              errorRate: "2.5",
-              requestsPerMinute: 31,
-            },
-          ],
-          recentTraces: [
-            {
-              traceId: "abc123",
-              route: "/api/v1/orders/:id",
-              durationMs: 88,
-              status: 200,
-            },
-          ],
-        },
-        meta: { mock: true },
-      }),
-    );
-    renderPage();
+  /** The mock report with one degraded service, as the API's own mock has. */
+  function degradedReport() {
+    return getOverviewObservabilityMockHandler({
+      data: {
+        services: [
+          {
+            name: "orderpilot-worker",
+            status: "degraded",
+            p95Ms: 420,
+            errorRate: "2.5",
+            requestsPerMinute: 31,
+          },
+        ],
+        recentTraces: [
+          {
+            traceId: "abc123",
+            route: "/api/v1/orders/:id",
+            durationMs: 88,
+            status: 200,
+          },
+        ],
+      },
+      meta: { mock: true },
+    });
+  }
+
+  async function openObservability() {
+    server.use(getAiUsageReportMockHandler(usage(1)), degradedReport());
+    const view = renderPage();
     await userEvent.click(
       await screen.findByRole("tab", { name: "Observability" }),
     );
-    expect(await screen.findByText("Mock")).toBeVisible();
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "orderpilot-api is degraded",
+    await screen.findByText("Mock");
+    return view;
+  }
+
+  it("shows a sample degraded status as a sample, never as an alert (#369)", async () => {
+    await openObservability();
+    // The report is mock data, so nothing on it is raised as a real alert.
+    expect(screen.queryByRole("status")).toBeNull();
+    expect(screen.queryByText(/is degraded/)).toBeNull();
+    // The sample status stays in the table, under a note that says it is one.
+    const services = screen.getByRole("region", { name: "Services" });
+    expect(within(services).getByText("Degraded")).toBeVisible();
+    expect(services).toHaveTextContent(
+      "Sample statuses, to show the layout. Nothing here is measured yet.",
     );
-    expect(screen.getByText("/api/v1/orders/:id")).toBeVisible();
+  });
+
+  it("says its trace IDs are samples, and sends no one to look them up (#369)", async () => {
+    await openObservability();
+    const traces = screen.getByRole("region", { name: "Recent traces" });
+    expect(traces).toHaveTextContent(
+      "Sample requests by route. Their trace IDs are made up, so they can't be looked up yet.",
+    );
+    expect(within(traces).getByText("/api/v1/orders/:id")).toBeVisible();
+    expect(screen.queryByText(/Grafana/)).toBeNull();
+  });
+
+  it("has no axe violations on the Observability tab with a degraded sample", async () => {
+    const { container } = await openObservability();
+    expect(await axeViolations(container)).toEqual([]);
   });
 
   it("labels the clickstream summary as mock data and shows this browser's choice", async () => {

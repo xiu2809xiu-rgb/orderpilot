@@ -5,7 +5,7 @@ import type { AuthContext } from "../auth/auth-context.js";
 import type { Page } from "../common/repository.js";
 import { Database } from "../database/database.js";
 import { RefreshTokenRepository } from "../sessions/refresh-token.repository.js";
-import { assertNotSelf } from "./domain/user-rules.js";
+import { assertNotSelf, isSelf } from "./domain/user-rules.js";
 import { UserRepository, type UserRecord } from "./user.repository.js";
 import type { UserView } from "./users.schemas.js";
 
@@ -50,11 +50,14 @@ export class UsersService {
    * its audit event. Their access token stops at its next request, because the
    * auth guard reads the user each time. Disabling twice changes nothing.
    */
-  disable(
+  async disable(
     id: string,
     actor: AuthContext,
     info: RequestInfo,
   ): Promise<UserView> {
+    // Every refusal is recorded (#276). Outside the transaction, so the record
+    // stays although the refusal rolls the change back.
+    if (isSelf(actor.user.id, id)) await this.recordSelfDisable(actor, info);
     return this.database.transaction(async () => {
       assertNotSelf(actor.user.id, id);
       const user = await this.users.getById(id);
@@ -80,6 +83,22 @@ export class UsersService {
         traceId: info.traceId,
       });
       return toView(updated);
+    });
+  }
+
+  private async recordSelfDisable(
+    actor: AuthContext,
+    info: RequestInfo,
+  ): Promise<void> {
+    await this.audit.record({
+      actor: { kind: "user", userId: actor.user.id, role: actor.user.role },
+      action: "user.disable.refused",
+      entityType: "User",
+      entityId: actor.user.id,
+      summary: `${actor.user.displayName} was refused disabling their own account`,
+      changes: { rule: "no-self-disable" },
+      ip: info.ip,
+      traceId: info.traceId,
     });
   }
 

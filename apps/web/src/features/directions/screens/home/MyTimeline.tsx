@@ -41,19 +41,21 @@ export function MyTimeline({
   return (
     <HomeSection title={t("timeline.title")} intro={t("timeline.intro")} work>
       {home.list.isError ? (
-        // Needs you beside it says what failed and offers the retry; saying it twice helps no one.
+        // Needs you, below, says what failed and offers the retry; saying it twice helps no one.
         <p className="fs-14 max-w-prose text-muted-foreground">
           {t("timeline.failed")}
         </p>
       ) : (
         <HomeQuery query={home.list} loading={<RowSkeletons rows={3} />}>
-          <p className="fs-14 mb-5 max-w-prose text-foreground">{summary}</p>
+          <p className="fs-14 mb-6 max-w-prose text-muted-foreground">
+            {summary}
+          </p>
           <div className="flex flex-col gap-6">
             <DoneGroup done={done} />
             <NowGroup entry={model.now} at={at} />
             <NextGroup entries={model.next} />
           </div>
-          <p className="fs-12 mt-6 text-muted-foreground">
+          <p className="dx-meta mt-6">
             {t("timeline.basis", { orders: STEP_TIMES.orders })}
           </p>
         </HomeQuery>

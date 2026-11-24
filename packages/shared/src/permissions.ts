@@ -43,6 +43,9 @@ export const PERMISSIONS = [
   // Area 4 (F-8): who sees the masking sample's customer note. The sample rule
   // reads its roles from the matrix, so this row shows or hides the note.
   "masking.customerNote",
+  // Area 4 (#252): the coordinator routes each SPR to the approver group and
+  // hands it back. Support holds it, and never decides an SPR (ADR 0056).
+  "spr.route",
   // P-95: asking Spark. Spark's tools are read-only and run as the person
   // asking, so this only opens the conversation: what an answer may show is
   // still decided by the permission each tool needs. The system admin does not
@@ -104,6 +107,9 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "workflows.read",
     "tasks.complete",
     "masking.customerNote",
+    // The coordinator: Support routes each SPR, so it reads them (#252).
+    "spr.read",
+    "spr.route",
     "spark.use",
   ],
   WAREHOUSE: [

@@ -10,10 +10,10 @@ export function InsightsSkeleton() {
       <span className="sr-only">{t("states.loading")}</span>
       <div
         aria-hidden="true"
-        className="grid gap-s2 sm:grid-cols-2 xl:grid-cols-3"
+        className="dx-grid-gap grid sm:grid-cols-2 xl:grid-cols-3"
       >
         {Array.from({ length: 5 }, (_, index) => (
-          <Skeleton key={index} className="h-40 animate-none rounded-xl" />
+          <Skeleton key={index} className="h-56 animate-none rounded-xl" />
         ))}
       </div>
       <SectionCardSkeleton lines={4} />
