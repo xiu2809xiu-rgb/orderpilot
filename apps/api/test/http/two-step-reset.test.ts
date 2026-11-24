@@ -159,7 +159,7 @@ describe("an administrator resets two-step", () => {
     expect((await call(t, session, "get", `${API}/auth/me`)).status).toBe(200);
   });
 
-  it("drops a setup nobody confirmed and leaves the sessions alone", async () => {
+  it("drops a setup nobody confirmed, audits it and leaves the sessions alone", async () => {
     const session = await passwordSignIn(t, targetEmail);
     await t.app
       .get(TwoStepRepository)
@@ -170,7 +170,12 @@ describe("an administrator resets two-step", () => {
 
     expect(res.body).toEqual({ data: { wasOn: false, sessionsEnded: 0 } });
     expect(await stateOfTarget()).toBeNull();
-    expect((await events("user.two-step-reset")).length).toBe(before);
+    const written = await events("user.two-step-reset");
+    expect(written.length).toBe(before + 1);
+    expect(written.at(-1)?.changes).toEqual({
+      wasOn: false,
+      pendingRemoved: true,
+    });
     expect((await call(t, session, "get", `${API}/auth/me`)).status).toBe(200);
   });
 

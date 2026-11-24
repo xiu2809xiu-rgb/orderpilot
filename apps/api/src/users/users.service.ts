@@ -112,8 +112,9 @@ export class UsersService {
    * Takes another person's two-step verification away, for someone who lost the
    * phone and the recovery codes, and ends every session of theirs (demo ones
    * too) so nothing opened before the reset stays open. A person with no
-   * two-step, or only a setup nobody confirmed, has nothing to reset: that is
-   * not an error and changes no session. Never one's own.
+   * two-step has nothing to reset: that is a 200 with no audit row and no
+   * session change. A setup nobody confirmed is removed and audited, but ends no
+   * session. Never one's own.
    *
    * This is user administration, like disabling: it gives the administrator no
    * permission to approve, pay or post. It does let an administrator who knows
@@ -135,8 +136,23 @@ export class UsersService {
       const row = await this.twoStep.lockForUse(id);
       if (row === null) return { wasOn: false, sessionsEnded: 0 };
       if (row.status !== "ACTIVE") {
-        // A pending setup guards nothing: drop it and leave the sessions alone.
+        // A pending setup guards nothing, so the sessions stay. It is still
+        // one person changing another's account, so it is audited.
         await this.twoStep.deleteForUser(id);
+        await this.audit.record({
+          actor: {
+            kind: "user",
+            userId: actor.user.id,
+            role: actor.user.role,
+          },
+          action: "user.two-step-reset",
+          entityType: "User",
+          entityId: id,
+          summary: "A pending two-step setup was removed by an administrator",
+          changes: { wasOn: false, pendingRemoved: true },
+          ip: info.ip,
+          traceId: info.traceId,
+        });
         return { wasOn: false, sessionsEnded: 0 };
       }
       // The row's challenges, recovery codes and lock go with it.
