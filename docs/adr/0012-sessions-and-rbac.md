@@ -48,3 +48,5 @@ Every area needs to know who is calling and what that person may do, and the pan
 - **`argon2` (node-gyp) or bcrypt.** The first needs a reviewed build script; bcrypt truncates at 72 bytes and is not memory-hard.
 - **A plain double-submit cookie.** Easier, but a planted cookie defeats it. The signature costs five lines.
 - **`@UseGuards` on each controller.** A forgotten one is open. A global guard that refuses the unmarked is closed by default.
+
+Amended by ADR 0068: the verify route is also `@SkipCsrf()`, and the strict rate limit of item 10 now also covers the five two-step routes (`setup`, `enable`, `disable`, `recovery-codes` and `verify`).

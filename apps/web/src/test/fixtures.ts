@@ -110,6 +110,21 @@ export function mockApi(initial: Partial<MockApiState> = {}) {
         state.session = sessionFor("SUPPORT");
         return Promise.resolve(json(200, { data: state.session }));
       }
+      // The Settings account card asks for it; "off" keeps every older test as it was.
+      case "GET /auth/two-step":
+        return Promise.resolve(
+          json(200, {
+            data: {
+              state: "off",
+              hasPassword: true,
+              demoSignInSkips: state.demoMode,
+              demoAdminBlocked: false,
+              enabledAt: null,
+              recoveryCodesLeft: null,
+              lastLockedAt: null,
+            },
+          }),
+        );
       case "POST /auth/refresh":
         return Promise.resolve(
           state.refreshWorks && state.session

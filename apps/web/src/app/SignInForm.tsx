@@ -5,12 +5,15 @@ import { useTranslation } from "react-i18next";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { demoLogin, login } from "@/lib/api/auth";
+import { ApiError } from "@/lib/api/errors";
 import { describeError } from "@/lib/errors";
 import { DemoRoles } from "./signin/DemoRoles";
 import { PasswordForm } from "./signin/PasswordForm";
 import { RolesPlaceholder } from "./signin/RolesPlaceholder";
 import { SignInFailure, type Failure } from "./signin/SignInFailure";
+import { SecondStepSlot } from "./signin/SecondStepSlot";
 import { useAuthOptions } from "./signin/useAuthOptions";
+import { useSecondStep } from "./signin/useSecondStep";
 import "./signin/preloadWords";
 
 interface SignInFormProps {
@@ -47,6 +50,15 @@ export function SignInForm({
   const [busy, setBusy] = useState(false);
   const [pending, setPending] = useState<Role | null>(null);
   const options = useAuthOptions();
+  const step = useSecondStep({
+    onSignedIn,
+    onOpened: () => {
+      setFailure(null);
+    },
+    onClosed: (ended) => {
+      if (ended) setFailure({ ...ended, from: "password" });
+    },
+  });
 
   async function run(action: () => Promise<Session>, role: Role | null) {
     setFailure(null);
@@ -57,6 +69,14 @@ export function SignInForm({
       const session = await action();
       onSignedIn?.(session);
     } catch (error) {
+      if (
+        role === null &&
+        error instanceof ApiError &&
+        error.code === "TWO_STEP_REQUIRED"
+      ) {
+        step.openStep();
+        return;
+      }
       setFailure({
         ...describeError(error, tCommon),
         from: role ? "role" : "password",
@@ -79,64 +99,78 @@ export function SignInForm({
 
   return (
     <div className="flex flex-col gap-3">
-      {options.isPending ? <RolesPlaceholder /> : null}
-      {demo ? (
-        <DemoRoles
-          roles={demo.demoRoles}
-          headingId={`${idPrefix}-demo`}
-          disabled={busy}
-          pending={pending}
-          onPick={(role) => {
-            void run(() => demoLogin(role), role);
+      <div className="flex flex-col gap-3" hidden={step.open}>
+        {options.isPending ? <RolesPlaceholder /> : null}
+        {demo ? (
+          <DemoRoles
+            roles={demo.demoRoles}
+            headingId={`${idPrefix}-demo`}
+            disabled={busy}
+            pending={pending}
+            onPick={(role) => {
+              void run(() => demoLogin(role), role);
+            }}
+          />
+        ) : null}
+        {failure && !inForm ? failureNode : null}
+        {options.isError ? (
+          <p className="fs-14 text-muted-foreground">
+            {t("login.optionsFailed")}
+          </p>
+        ) : null}
+        <div className="flex flex-col gap-3">
+          {demo ? (
+            <button
+              type="button"
+              aria-expanded={formShown}
+              aria-controls={formId}
+              onClick={() => {
+                setEmailOpen(!formShown);
+              }}
+              className="signin-toggle"
+            >
+              <ChevronDown
+                aria-hidden="true"
+                className={cn("size-4", formShown && "rotate-180")}
+              />
+              {t("login.emailToggle")}
+            </button>
+          ) : options.isPending ? (
+            // Holds the toggle's room, so the card keeps its height when it arrives.
+            <Skeleton aria-hidden="true" className="h-9 w-40" />
+          ) : null}
+          <div
+            id={formId}
+            hidden={!formShown}
+            onFocusCapture={() => {
+              setEmailOpen(true);
+            }}
+          >
+            <PasswordForm
+              defaultEmail={defaultEmail}
+              idPrefix={idPrefix}
+              busy={busy}
+              alert={inForm ? failureNode : null}
+              onEdit={() => {
+                setFailure(null);
+              }}
+              clearPasswordSignal={step.clearSignal}
+              focusPasswordSignal={step.focusSignal}
+              onSubmit={(values) => run(() => login(values), null)}
+            />
+          </div>
+        </div>
+      </div>
+      {step.open ? (
+        <SecondStepSlot
+          idPrefix={idPrefix}
+          onVerified={step.verified}
+          onEnded={step.closeStep}
+          onBack={() => {
+            step.closeStep(null);
           }}
         />
       ) : null}
-      {failure && !inForm ? failureNode : null}
-      {options.isError ? (
-        <p className="fs-14 text-muted-foreground">
-          {t("login.optionsFailed")}
-        </p>
-      ) : null}
-      <div className="flex flex-col gap-3">
-        {demo ? (
-          <button
-            type="button"
-            aria-expanded={formShown}
-            aria-controls={formId}
-            onClick={() => {
-              setEmailOpen(!formShown);
-            }}
-            className="signin-toggle"
-          >
-            <ChevronDown
-              aria-hidden="true"
-              className={cn("size-4", formShown && "rotate-180")}
-            />
-            {t("login.emailToggle")}
-          </button>
-        ) : options.isPending ? (
-          // Holds the toggle's room, so the card keeps its height when it arrives.
-          <Skeleton aria-hidden="true" className="h-9 w-40" />
-        ) : null}
-        <div
-          id={formId}
-          hidden={!formShown}
-          onFocusCapture={() => {
-            setEmailOpen(true);
-          }}
-        >
-          <PasswordForm
-            defaultEmail={defaultEmail}
-            idPrefix={idPrefix}
-            busy={busy}
-            alert={inForm ? failureNode : null}
-            onEdit={() => {
-              setFailure(null);
-            }}
-            onSubmit={(values) => run(() => login(values), null)}
-          />
-        </div>
-      </div>
       <p role="status" className="sr-only">
         {pending ? t("login.submitting") : ""}
       </p>

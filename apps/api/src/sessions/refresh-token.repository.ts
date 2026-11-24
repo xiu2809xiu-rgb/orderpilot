@@ -91,6 +91,30 @@ export class RefreshTokenRepository {
     return result.count;
   }
 
+  /**
+   * Revokes the live password sign-ins of a user other than `keepFamilyId`.
+   * Demo sign-ins are left: they skip the second step by decision, and a shared
+   * demo account has many visitors in it, so one visitor must not sign out the
+   * rest. Returns how many tokens it revoked.
+   */
+  async revokeOthersOfUser(
+    userId: string,
+    keepFamilyId: string,
+    reason: string,
+    at: Date,
+  ): Promise<number> {
+    const result = await this.database.client.refreshToken.updateMany({
+      where: {
+        userId,
+        revokedAt: null,
+        demo: false,
+        familyId: { not: keepFamilyId },
+      },
+      data: { revokedAt: at, revokedReason: reason },
+    });
+    return result.count;
+  }
+
   /** Revokes every live token of a user, on every device. */
   async revokeAllForUser(
     userId: string,

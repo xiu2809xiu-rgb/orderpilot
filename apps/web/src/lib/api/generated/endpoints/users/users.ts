@@ -25,7 +25,8 @@ import type {
   UsersEnable200,
   UsersGet200,
   UsersList200,
-  UsersListParams
+  UsersListParams,
+  UsersResetTwoStep200
 } from '../../model';
 
 import { apiMutator } from '../../../mutator.ts';
@@ -407,6 +408,98 @@ export function useUsersEnable<TData = Awaited<ReturnType<typeof usersEnable>>, 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getUsersEnableQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary Reset another person's two-step verification and end all their sessions. Never your own
+ */
+export const usersResetTwoStep = (
+    id: string,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<UsersResetTwoStep200>(
+      {url: `/api/v1/users/${id}/two-step/reset`, method: 'POST', signal
+    },
+      );
+    }
+
+
+
+
+export const getUsersResetTwoStepQueryKey = (id: string,) => {
+    return [
+    'POST', `/api/v1/users/${id}/two-step/reset`
+    ] as const;
+    }
+
+
+export const getUsersResetTwoStepQueryOptions = <TData = Awaited<ReturnType<typeof usersResetTwoStep>>, TError = ErrorType<unknown>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersResetTwoStep>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getUsersResetTwoStepQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof usersResetTwoStep>>> = ({ signal }) => usersResetTwoStep(id, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof usersResetTwoStep>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type UsersResetTwoStepQueryResult = NonNullable<Awaited<ReturnType<typeof usersResetTwoStep>>>
+export type UsersResetTwoStepQueryError = ErrorType<unknown>
+
+
+export function useUsersResetTwoStep<TData = Awaited<ReturnType<typeof usersResetTwoStep>>, TError = ErrorType<unknown>>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersResetTwoStep>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof usersResetTwoStep>>,
+          TError,
+          Awaited<ReturnType<typeof usersResetTwoStep>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useUsersResetTwoStep<TData = Awaited<ReturnType<typeof usersResetTwoStep>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersResetTwoStep>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof usersResetTwoStep>>,
+          TError,
+          Awaited<ReturnType<typeof usersResetTwoStep>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useUsersResetTwoStep<TData = Awaited<ReturnType<typeof usersResetTwoStep>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersResetTwoStep>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Reset another person's two-step verification and end all their sessions. Never your own
+ */
+
+export function useUsersResetTwoStep<TData = Awaited<ReturnType<typeof usersResetTwoStep>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersResetTwoStep>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getUsersResetTwoStepQueryOptions(id,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

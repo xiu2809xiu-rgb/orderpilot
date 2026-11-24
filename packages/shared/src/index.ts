@@ -20,4 +20,5 @@ export * from "./permissions.js";
 export * from "./profile-pictures.js";
 export * from "./record-number.js";
 export * from "./roles.js";
+export * from "./two-step-routes.js";
 export * from "./workflows/index.js";

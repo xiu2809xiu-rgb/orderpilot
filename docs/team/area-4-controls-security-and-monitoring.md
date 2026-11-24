@@ -281,6 +281,7 @@ await authorisation.enforce(
 - **A rejected verification** keeps the hold and records why. A later verification can supersede it.
 - **A refused reason** (blank, missing, or holding an account number) is a 400 that names the field. It is audited as `governance.policy.refused` under the rule `hold-reason`, without its text.
 - **"needs a different Finance user"** shows on a hold when nobody except the person who changed the details could verify it. Adding or enabling a Finance user clears it.
+- **A step on a hold that is already closed** is refused by the policy with a 403 and audited as `governance.policy.refused` under the rule `hold-verification` ("this bank-detail hold is already closed"). The service's own 409, "This hold changed while you were working on it", is reached only when the hold closes or gains a verification between that check and the transaction: a race, which is not audited (#378).
 
 ### Still to come for the hold
 
@@ -355,6 +356,8 @@ await authorisation.enforce(
 **Undo.** A switch ends with a toast that offers Undo, for 10 seconds or with Ctrl+Z. Undo is the same save as the change, so a refusal shows its trace ID and the switches wait for it. On the server it is one more change with its own audit row, and the row of the change it reverses stays.
 
 **Copying a role has no Undo,** because nothing keeps the target's old rows. A second step says so before anything is sent, and the audit trail keeps the change.
+
+**The matrix's own refusals are audited (#378).** A locked cell (the system admin never approves, posts or pays, and always keeps `roles.manage`) and a copy of a role onto itself still answer 409 with the same words, and now leave a row: `governance.permission.refused` for one cell, `governance.role.copy.refused` for a copy, each with its `rule` (`locked-cell` or `same-role`) and, for a locked cell, the permission and its `lock`. The rules throw `MatrixRuleRefusedError` (`matrix-rules.ts`), and `matrix.service.ts` records it after the transaction has rolled back, so the row stays. Tests: `governance-domain.test.ts` and `test/http/governance.test.ts`.
 
 **E2E #3 in a browser** is in `apps/e2e/tests/governance.spec.ts`. A script calls the SPR approval route as Warehouse, with no page involved, and gets the 403 envelope with its trace ID. The auditor then opens the audit viewer, filtered to that route and role, and the newest row's details must show that trace ID. A refusal's record is the route pattern, not the SPR number, so the trace ID is what proves the row is this call's. This covers the direct call and its audit row. F-9 adds the masking step, a refusal read as the system admin and as the auditor ([Audit viewer polish](#audit-viewer-polish-f-9)). The self-approval step of E2E #3 is not in it.
 

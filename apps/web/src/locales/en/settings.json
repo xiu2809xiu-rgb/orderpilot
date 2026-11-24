@@ -290,6 +290,82 @@
       "label": "Sign out of OrderPilot",
       "description": "You are signed in as {{name}}. Signing out deletes any unsaved drafts on this device.",
       "button": "Sign out"
+    },
+    "twoStep": {
+      "title": "Two-step verification",
+      "row": {
+        "label": "Authenticator app",
+        "descriptionOff": "Ask for a 6-digit code from your phone when you sign in with your email and password.",
+        "descriptionOn": "A 6-digit code from your phone is asked for each time you sign in with your email and password."
+      },
+      "state": {
+        "off": "Off",
+        "on": "On"
+      },
+      "since": "On since {{date}}",
+      "turnOn": "Turn on",
+      "turnOff": "Turn off",
+      "recovery": {
+        "label": "Recovery codes",
+        "left_one": "{{count}} code left",
+        "left_other": "{{count}} codes left",
+        "low": "Only {{count}} left. Make new codes soon.",
+        "make": "New recovery codes"
+      },
+      "footnote": "Saved on the server, not on this device. It applies at once.",
+      "demoSkips": "The demo role buttons skip this step, so a shared demo account is never locked.",
+      "noPassword": "This account has no password, so there is no email and password sign-in for two-step to protect.",
+      "demoAdmin": "A demo session cannot turn on two-step verification for this account, because only an administrator could undo it and an administrator cannot reset their own.",
+      "recentLock": "Too many wrong codes were entered for your account on {{date}}. If that was not you, someone may know your password.",
+      "loading": "Checking two-step verification",
+      "turnedOn": "Two-step verification is on",
+      "turnedOff": "Two-step verification is off",
+      "setup": {
+        "title": "Turn on two-step verification",
+        "demoWarning": "This is a shared demo account. Two-step will apply to the email and password sign-in of this account for everyone who uses it.",
+        "continue": "Continue",
+        "restart": "Start again",
+        "scanTitle": "Scan the code",
+        "scanBody": "In your authenticator app, add an account and scan this code.",
+        "qrTitle": "QR code for your authenticator app",
+        "keyLabel": "Or type this key",
+        "keyCopy": "setup key",
+        "expires": "This setup ends in {{minutes}} minutes.",
+        "codeLabel": "Then enter the 6-digit code it shows",
+        "cancel": "Cancel",
+        "preparing": "Preparing your key"
+      },
+      "password": {
+        "label": "Password",
+        "show": "Show password",
+        "help": "Enter your password to continue.",
+        "required": "Enter your password."
+      },
+      "recoveryView": {
+        "title": "Save your recovery codes",
+        "body": "If you lose your phone, each of these codes lets you sign in once. They are shown only now.",
+        "listLabel": "Recovery codes",
+        "copy": "Copy codes",
+        "copied": "Recovery codes copied",
+        "copyFailed": "The codes could not be copied. Select them and copy by hand.",
+        "download": "Download as text file",
+        "fileTitle": "OrderPilot recovery codes",
+        "fileNote": "Each code works once.",
+        "saved": "I have saved these codes",
+        "done": "Done"
+      },
+      "disable": {
+        "title": "Turn off two-step verification",
+        "body": "Enter a code from your app, or a recovery code, to confirm.",
+        "submit": "Turn off",
+        "cancel": "Cancel"
+      },
+      "regenerate": {
+        "title": "Make new recovery codes",
+        "body": "Enter a code from your app. The old recovery codes stop working.",
+        "submit": "Make new codes",
+        "cancel": "Cancel"
+      }
     }
   },
   "appearance": {

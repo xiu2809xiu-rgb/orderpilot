@@ -9,13 +9,58 @@ import { DomainError } from "../../../common/domain-error.js";
 import { decideAiDestination } from "./ai-destination-policy.js";
 import { SAMPLE_RULES, mask, sampleNoteRule } from "./masking.js";
 import {
+  MatrixRuleRefusedError,
   assertCanGrant,
   assertCanRevoke,
   pairsToSeed,
   planCopy,
 } from "./matrix-rules.js";
 
+/** The refusal a rule threw, so a test can read which rule it names. */
+function refusalOf(attempt: () => unknown): unknown {
+  try {
+    attempt();
+  } catch (error) {
+    return error instanceof MatrixRuleRefusedError ? error.refusal : error;
+  }
+  return null;
+}
+
 describe("matrix rules", () => {
+  it("names the rule that refused, for the audit row (#378)", () => {
+    expect(
+      refusalOf(() => {
+        assertCanGrant("SYSTEM_ADMIN", "payments.post");
+      }),
+    ).toEqual({
+      rule: "locked-cell",
+      permission: "payments.post",
+      lock: "never",
+    });
+    expect(
+      refusalOf(() => {
+        assertCanRevoke("SYSTEM_ADMIN", "roles.manage");
+      }),
+    ).toEqual({
+      rule: "locked-cell",
+      permission: "roles.manage",
+      lock: "always",
+    });
+    expect(refusalOf(() => planCopy("FINANCE", "FINANCE", [], []))).toEqual({
+      rule: "same-role",
+    });
+    expect(
+      refusalOf(() =>
+        planCopy(
+          "FINANCE",
+          "SYSTEM_ADMIN",
+          ["payments.post"],
+          ["roles.manage"],
+        ),
+      ),
+    ).toMatchObject({ rule: "locked-cell", lock: "never" });
+  });
+
   it("refuses to grant the system admin a right to approve, post or pay", () => {
     for (const permission of [
       "approvals.decide",
