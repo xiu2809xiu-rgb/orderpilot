@@ -9,7 +9,7 @@ import {
   type Ref,
 } from "react";
 import { prefersReducedMotion } from "../env";
-import { activeCell, cellAtPoint, sanitizeDigits } from "./digits";
+import { activeCell, cellAtPoint, sanitizeDigits, typedOver } from "./digits";
 
 export type CodeFieldState = "input" | "verifying" | "error" | "success";
 
@@ -94,7 +94,16 @@ export function useCodeField({
   const onInput = (event: ChangeEvent<HTMLInputElement>) => {
     if (!editable) return;
     const node = event.currentTarget;
-    receive(node.value, node.selectionStart);
+    const caret = node.selectionStart;
+    const raw = typedOver(value, node.value, caret);
+    receive(raw, caret);
+    // React writes the value back and the browser moves the caret to the end:
+    // put it after the digit that was typed, so the next one goes beside it.
+    if (raw !== node.value && caret !== null) {
+      queueMicrotask(() => {
+        if (node.isConnected) node.setSelectionRange(caret, caret);
+      });
+    }
   };
 
   const onPaste = (event: ClipboardEvent<HTMLInputElement>) => {

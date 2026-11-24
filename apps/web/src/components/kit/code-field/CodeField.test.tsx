@@ -223,6 +223,60 @@ describe("typing", () => {
   });
 });
 
+describe("typing into a full code", () => {
+  async function typeAt(caret: number, key: string) {
+    const onChange = vi.fn();
+    const onComplete = vi.fn();
+    render(
+      <Harness initial="123456" onChange={onChange} onComplete={onComplete} />,
+    );
+    const user = userEvent.setup();
+    input().focus();
+    input().setSelectionRange(caret, caret);
+    await user.keyboard(key);
+    return { onChange, onComplete };
+  }
+
+  it("replaces the digit under the caret when the caret is in the middle, and keeps the caret beside it", async () => {
+    const { onChange, onComplete } = await typeAt(2, "9");
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(onChange).toHaveBeenCalledWith("129456");
+    expect(onComplete).toHaveBeenCalledWith("129456");
+    expect(input().value).toBe("129456");
+    expect(digits()).toEqual(["1", "2", "9", "4", "5", "6"]);
+    expect([input().selectionStart, input().selectionEnd]).toEqual([3, 3]);
+  });
+
+  it("replaces the first digit when the caret is at the start", async () => {
+    const { onChange } = await typeAt(0, "9");
+    expect(onChange).toHaveBeenCalledWith("923456");
+    expect(input().value).toBe("923456");
+  });
+
+  it("changes nothing when the caret is at the end", async () => {
+    const { onChange, onComplete } = await typeAt(6, "9");
+    expect(onChange).not.toHaveBeenCalled();
+    expect(onComplete).not.toHaveBeenCalled();
+    expect(input().value).toBe("123456");
+  });
+
+  it("ignores a letter typed in the middle", async () => {
+    const { onChange } = await typeAt(2, "x");
+    expect(onChange).not.toHaveBeenCalled();
+    expect(input().value).toBe("123456");
+  });
+
+  it("takes a paste over a full code as the new code", async () => {
+    const onChange = vi.fn();
+    render(<Harness initial="123456" onChange={onChange} />);
+    const user = userEvent.setup();
+    await user.click(input());
+    await user.paste("654321");
+    expect(onChange).toHaveBeenLastCalledWith("654321");
+    expect(input().value).toBe("654321");
+  });
+});
+
 describe("pasting", () => {
   it("pastes the first six digits and ignores everything else", async () => {
     const onChange = vi.fn();

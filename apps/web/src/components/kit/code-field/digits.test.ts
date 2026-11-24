@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { activeCell, cellAtPoint, sanitizeDigits } from "./digits";
+import { activeCell, cellAtPoint, sanitizeDigits, typedOver } from "./digits";
 
 describe("sanitizeDigits", () => {
   it("keeps digits and the first six", () => {
@@ -49,5 +49,23 @@ describe("cellAtPoint", () => {
   it("falls back to the first empty cell where there is no layout", () => {
     expect(cellAtPoint(50, 0, 0, 3)).toBe(3);
     expect(cellAtPoint(50, 0, 0, 6)).toBe(5);
+  });
+});
+
+describe("typedOver", () => {
+  it("replaces the digit under the caret when one digit was inserted into a full code", () => {
+    expect(typedOver("123456", "1293456", 3)).toBe("129456");
+    expect(typedOver("123456", "9123456", 1)).toBe("923456");
+  });
+
+  it("leaves a keystroke after the sixth digit, a letter and a short code as they came", () => {
+    expect(typedOver("123456", "1234569", 7)).toBe("1234569");
+    expect(typedOver("123456", "12x3456", 3)).toBe("12x3456");
+    expect(typedOver("12345", "123945", 4)).toBe("123945");
+  });
+
+  it("leaves an autofill or a paste of several characters as it came", () => {
+    expect(typedOver("123456", "123 4567", 4)).toBe("123 4567");
+    expect(typedOver("123456", "1234567", null)).toBe("1234567");
   });
 });

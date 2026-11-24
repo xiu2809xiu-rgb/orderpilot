@@ -25,3 +25,25 @@ export function cellAtPoint(
   const raw = Math.floor(((x - left) / width) * CODE_LENGTH);
   return Math.max(0, Math.min(raw, filled, CODE_LENGTH - 1));
 }
+
+/**
+ * What the input holds after a keystroke. A digit typed into the middle of a
+ * full code makes the browser insert it, which would push the last digit out
+ * and give a code nobody typed; it replaces the digit under the caret
+ * instead. Typing after the sixth digit, a letter, an autofill and anything
+ * that is not one inserted character are left as they came.
+ */
+export function typedOver(
+  value: string,
+  raw: string,
+  caret: number | null,
+): string {
+  if (value.length !== CODE_LENGTH || raw.length !== value.length + 1) {
+    return raw;
+  }
+  if (caret === null || caret < 1 || caret > value.length) return raw;
+  const typed = raw.charAt(caret - 1);
+  const without = raw.slice(0, caret - 1) + raw.slice(caret);
+  if (!/^\d$/.test(typed) || without !== value) return raw;
+  return value.slice(0, caret - 1) + typed + value.slice(caret);
+}
