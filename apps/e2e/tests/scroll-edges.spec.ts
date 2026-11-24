@@ -373,7 +373,7 @@ test.describe("Scroll areas show which side has more: a box with padding", () =>
   // The order peek's scroll box has padding (1.25rem 1.5rem). A browser pins a
   // sticky box inside that padding, so without the script's correction the
   // marks sit a padding's width inside the box and the right one is pushed out
-  // of view. The peek rarely scrolls sideways, so a wide block is added to it.
+  // of view. The peek rarely scrolls sideways, so its content is made wide.
   test("the marks stay on the visible box of a padded scroll box", async ({
     page,
   }) => {
@@ -382,9 +382,12 @@ test.describe("Scroll areas show which side has more: a box with padding", () =>
     const region = page.getByRole("region", { name: "Order summary" });
     await expect(region).toBeVisible();
     await region.evaluate((el) => {
-      const wide = document.createElement("div");
-      wide.style.cssText = "width:1400px;height:20px";
-      el.firstElementChild?.after(wide);
+      // The first child is what the size observer watches, so widening it (and
+      // not a sibling) makes the region measure itself again, as a real wide
+      // table would.
+      if (el.firstElementChild instanceof HTMLElement) {
+        el.firstElementChild.style.minWidth = "1400px";
+      }
     });
     const before = await read(region);
     expect(before.maxLeft, "the peek must scroll across").toBeGreaterThan(
