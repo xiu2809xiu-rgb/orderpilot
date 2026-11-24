@@ -938,6 +938,39 @@ describe("no self-approval and segregation of duties (F-4)", () => {
         });
       }
     });
+
+    it("never lets the system admin route an SPR or take in a document, even with a row in the table (#383)", async () => {
+      const database = t.app.get(Database).client;
+      for (const permission of ["spr.route", "documents.upload"]) {
+        await database.rolePermission.create({
+          data: { role: "SYSTEM_ADMIN", permission },
+        });
+      }
+      try {
+        expect((await act("SYSTEM_ADMIN", "spr.route")).status).toBe(403);
+        expect((await lastRefusal())?.changes).toMatchObject({
+          rule: "system-admin",
+        });
+        // No route checks documents.upload yet (uploads come with P-18), so
+        // ask the guard's policy directly, as the guard would.
+        const admin = as("SYSTEM_ADMIN").session.user;
+        const decision = await t.app.get(PermissionPolicy).decide({
+          user: admin,
+          permission: "documents.upload",
+          method: "POST",
+          path: "/documents",
+          params: {},
+        });
+        expect(decision.allowed).toBe(false);
+      } finally {
+        await database.rolePermission.deleteMany({
+          where: {
+            role: "SYSTEM_ADMIN",
+            permission: { in: ["spr.route", "documents.upload"] },
+          },
+        });
+      }
+    });
   });
 
   describe("nobody changes their own approval setup", () => {

@@ -90,3 +90,34 @@ Content-Type: application/json
 X-CSRF-Token: {{csrf}}
 
 { "resolution": "keep-stored-details", "reason": "The vendor denies the change, so the PI is not genuine." }
+
+### #383: the administrator widening its own role. Sign in as the system admin.
+### A grant to the administrator's own role writes a notice for the approvers.
+PUT {{baseUrl}}/api/v1/governance/matrix/SYSTEM_ADMIN/permissions/orders.read
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "granted": true }
+
+### Locked since #383: the administrator never routes an SPR or takes in a document (409, audited).
+PUT {{baseUrl}}/api/v1/governance/matrix/SYSTEM_ADMIN/permissions/spr.route
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "granted": true }
+
+### Locked since #383: the approver role always keeps approvals.decide (409, audited).
+PUT {{baseUrl}}/api/v1/governance/matrix/APPROVER/permissions/approvals.decide
+Content-Type: application/json
+X-CSRF-Token: {{csrf}}
+
+{ "granted": false }
+
+### Sign in as a management approver (approvals.decide). The notices, newest first, with meta.unread.
+GET {{baseUrl}}/api/v1/governance/notices?pageSize=5
+
+@noticeId = 00000000-0000-7000-8000-000000000000
+
+### Marks one notice read for the person asking, once, and records it.
+POST {{baseUrl}}/api/v1/governance/notices/{{noticeId}}/read
+X-CSRF-Token: {{csrf}}
