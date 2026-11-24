@@ -94,5 +94,5 @@ X-CSRF-Token: {{csrf}}
   "dueAfterMinutes": 1440,
   "remindBeforeMinutes": 240,
   "escalateAfterMinutes": 0,
-  "escalateToRole": "APPROVER"
+  "escalateToRole": "MANAGEMENT"
 }
