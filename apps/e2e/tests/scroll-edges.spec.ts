@@ -318,18 +318,30 @@ test.describe("Scroll areas show which side has more: the Orders board at tablet
 });
 
 test.describe("Scroll areas show which side has more: a box that is tall and wide", () => {
-  // The board's columns are taller than a 560 px page leaves for it, so the
-  // box scrolls down as well as across.
-  test.use({ viewport: { width: 820, height: 560 } });
+  // The board never scrolls down at tablet width: it is as tall as its columns
+  // and the page scrolls instead (the cards are not cut). The component
+  // gallery's "Orders" table is a box with a max height and more columns than
+  // 820 px holds, so it scrolls both ways, on data that never changes.
+  test.use({ viewport: { width: 820, height: 480 } });
 
   test("the marks stay on the visible box while the content scrolls down and across", async ({
     page,
   }) => {
-    const region = await openBoard(page);
+    await signInAs(page, "SUPPORT");
+    await page.goto("/gallery");
+    const region = page.getByRole("region", {
+      name: "Orders, scrollable table",
+      exact: true,
+    });
+    await expect(region.getByRole("columnheader").first()).toBeVisible();
     const before = await read(region);
     expect(
       before.maxTop,
-      "the board must scroll down at 560 px high or this proves nothing",
+      "the table must scroll down at 480 px high or this proves nothing",
+    ).toBeGreaterThan(MARK_PX * 2);
+    expect(
+      before.maxLeft,
+      "the table must scroll across at 820 px or this proves nothing",
     ).toBeGreaterThan(MARK_PX * 2);
 
     for (const [across, down] of [
