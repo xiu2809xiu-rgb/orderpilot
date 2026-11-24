@@ -81,17 +81,28 @@ export class TwoStepSignInService {
     req: Request,
     user: UserRecord,
   ): Promise<IssuedChallenge | null> {
+    // A cheap read first, so a person without two-step costs no transaction.
+    // It is only a hint: the transaction below decides, under the lock.
     const state = await this.secrets.stateOf(user.id);
     // A pending setup guards nothing.
     if (state?.status !== "ACTIVE") return null;
     const now = this.clock.now();
     const token = newChallengeToken();
-    // The order is a rule. The insert takes a key-share lock on the person's
-    // two-step row, which a verify holding that row for update conflicts with.
-    // The audit write takes the global chain lock. Writing the audit row first
-    // would hold the chain lock while waiting for the row, and a verify holds
-    // the row while waiting for the chain lock: a deadlock.
-    await this.database.transaction(async () => {
+    // The order is a rule, and it is the order the verify route uses: the
+    // person's row first, then the challenge, then (inside the audit write)
+    // the chain.
+    // - The row first. Deleting an expired challenge before taking the row
+    //   made a login hold that challenge while waiting for the row, and a
+    //   verify of it holds the row while waiting for the challenge: a deadlock.
+    //   Under the lock the state is also read again, so a turn-off or a reset
+    //   between the hint and here ends in a plain session, not a failed insert.
+    // - The insert before the audit row. The audit write takes the global chain
+    //   lock. Writing the audit row first would hold the chain lock while
+    //   waiting for the row, and a verify holds the row while waiting for the
+    //   chain lock: a deadlock.
+    const issued = await this.database.transaction(async () => {
+      const row = await this.secrets.lockForUse(user.id);
+      if (row?.status !== "ACTIVE") return false;
       await this.challenges.deleteExpiredOf(user.id, now);
       await this.challenges.create({
         userId: user.id,
@@ -110,8 +121,11 @@ export class TwoStepSignInService {
         ip: req.ip ?? null,
         traceId: requestIdOf(req),
       });
+      return true;
     });
-    return { token, ttlSeconds: TWO_STEP_RULES.challengeSeconds };
+    return issued
+      ? { token, ttlSeconds: TWO_STEP_RULES.challengeSeconds }
+      : null;
   }
 
   /**

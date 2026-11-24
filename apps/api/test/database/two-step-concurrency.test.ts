@@ -1,14 +1,17 @@
 import pg from "pg";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { AuditEventRepository } from "../../src/audit/audit-event.repository.js";
 import { Clock } from "../../src/common/clock.js";
 import { Database } from "../../src/database/database.js";
+import { TwoStepChallengeRepository } from "../../src/two-step/two-step-challenge.repository.js";
+import { TwoStepRepository } from "../../src/two-step/two-step.repository.js";
 import { emailForRole } from "../support/auth.js";
 import { resetTestData, testConfig } from "../support/reset.js";
 import { createTestApp, type TestApp } from "../support/test-app.js";
 import {
   FIXED_NOW,
   TestClock,
+  challengeTokenOf,
   codeAt,
   enableTwoStep,
   errorCodeOf,
@@ -128,4 +131,65 @@ describe("two-step concurrency", () => {
       expect(verifyRes.status, `verify of pair ${String(pair)}`).toBe(200);
     }
   }, 120_000);
+  it("finishes a login and a verify of an expired challenge for one person", async () => {
+    const account = await enableTwoStep(t, email);
+    const clock = t.app.get<TestClock>(Clock);
+    const challenges = t.app.get(TwoStepChallengeRepository);
+    const token = await startChallenge(t, email);
+    clock.advance(6 * 60_000);
+
+    // Stop the login right after it has deleted the expired challenge, as a
+    // slow server would. In the wrong order it then holds the challenge while
+    // the verify holds the person's row, and each waits for the other.
+    const gate = deferred();
+    const deleted = deferred();
+    const real = challenges.deleteExpiredOf.bind(challenges);
+    const spy = vi
+      .spyOn(challenges, "deleteExpiredOf")
+      .mockImplementation(async (userId, before) => {
+        const count = await real(userId, before);
+        deleted.resolve();
+        await gate.promise;
+        return count;
+      });
+    try {
+      const login = passwordLogin(t, email).then((res) => res);
+      await deleted.promise;
+      const verify = verifyWith(t, token, {
+        code: codeAt(account.secret, FIXED_NOW),
+      }).then((res) => res);
+      await sleep(700);
+      gate.resolve();
+
+      const [loginRes, verifyRes] = await Promise.all([login, verify]);
+      expect(loginRes.status).toBe(401);
+      expect(errorCodeOf(loginRes)).toBe("TWO_STEP_REQUIRED");
+      expect(verifyRes.status).toBe(401);
+      expect(errorCodeOf(verifyRes)).toBe("TWO_STEP_CHALLENGE_ENDED");
+    } finally {
+      gate.resolve();
+      spy.mockRestore();
+      clock.set(FIXED_NOW);
+    }
+  }, 60_000);
+
+  it("gives a plain session when two-step is turned off between a login's first read and its transaction", async () => {
+    await enableTwoStep(t, email);
+    const secrets = t.app.get(TwoStepRepository);
+    const real = secrets.stateOf.bind(secrets);
+    const spy = vi
+      .spyOn(secrets, "stateOf")
+      .mockImplementationOnce(async (userId) => {
+        const state = await real(userId);
+        await secrets.deleteForUser(userId);
+        return state;
+      });
+    try {
+      const res = await passwordLogin(t, email);
+      expect(res.status).toBe(200);
+      expect(challengeTokenOf(res)).toBeNull();
+    } finally {
+      spy.mockRestore();
+    }
+  });
 });
