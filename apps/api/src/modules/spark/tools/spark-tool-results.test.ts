@@ -176,6 +176,10 @@ describe("what find_orders hands the model", () => {
       total: 1,
     });
     if (!result.found) throw new Error("expected a hit");
+    // The top level is pinned as well as the rows: the deep scan in
+    // spark-tools.test.ts matches whole values only, so a price under a new key
+    // is stopped here and not there.
+    expect(keysOf(result)).toEqual(["found", "matched", "orders"]);
     expect(keysOf(result.orders[0] ?? {})).toEqual([
       "amount",
       "captureState",
@@ -224,6 +228,7 @@ describe("what get_order hands the model", () => {
   it("names the fields of the order and of each line", () => {
     const { result, sources } = orderOutputOf(orderDetail(2));
     if (!result.found) throw new Error("expected a hit");
+    expect(keysOf(result)).toEqual(["found", "order"]);
     expect(keysOf(result.order)).toEqual([
       "amount",
       "captureState",
