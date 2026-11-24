@@ -1,4 +1,8 @@
-import { profilePictureImagePath } from "@orderpilot/shared";
+import {
+  profilePictureImagePath,
+  type PersonAvailability,
+} from "@orderpilot/shared";
+import { AvailabilityDot } from "@/components/kit/availability-picker/AvailabilityDot";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { initials } from "@/lib/initials";
 import { cn } from "@/lib/utils";
@@ -19,6 +23,16 @@ interface UserAvatarProps {
   textClassName?: string;
   /** Tells the caller when the picture loaded or failed, so a card can say so in words. */
   onImageStatus?: (status: ImageStatus) => void;
+  /**
+   * Someone's availability, read-only, from a lookup (ADR 0070). `label` is the
+   * words for assistive technology, such as "Availability: Do not disturb";
+   * the caller supplies them, so the part holds none. Only Focusing and Do not
+   * disturb are drawn: Available is the default, and a mark beside every name
+   * would say that the person is ready, which OrderPilot cannot know.
+   */
+  availability?: { value: PersonAvailability; label: string } | null;
+  /** Draw Available too. Only for the person's own avatar. */
+  showAvailable?: boolean;
 }
 
 /**
@@ -31,8 +45,10 @@ export function UserAvatar({
   className,
   textClassName,
   onImageStatus,
+  availability,
+  showAvailable = false,
 }: UserAvatarProps) {
-  return (
+  const avatar = (
     <Avatar className={cn("shrink-0", className)} aria-hidden="true">
       {pictureId ? (
         <AvatarImage
@@ -50,5 +66,30 @@ export function UserAvatar({
         {initials(name)}
       </AvatarFallback>
     </Avatar>
+  );
+  const shown =
+    availability && (availability.value !== "AVAILABLE" || showAvailable)
+      ? availability
+      : null;
+  if (!shown) return avatar;
+  // The dot is outside Radix's Avatar, which clips to its circle, and the
+  // words are outside its aria-hidden root, so a screen reader reads them.
+  return (
+    <span
+      className="relative inline-flex shrink-0"
+      data-availability={shown.value}
+    >
+      {avatar}
+      <AvailabilityDot
+        value={shown.value}
+        className="absolute top-[18%] left-[82%] -translate-x-1/2 -translate-y-1/2"
+        style={{
+          inlineSize: "clamp(14px, 36%, 24px)",
+          blockSize: "auto",
+          aspectRatio: "1",
+        }}
+      />
+      <span className="sr-only">{shown.label}</span>
+    </span>
   );
 }

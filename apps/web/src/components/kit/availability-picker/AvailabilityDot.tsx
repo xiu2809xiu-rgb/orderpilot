@@ -5,6 +5,7 @@
 // a flash of light after a pick, the keyboard model): no source, markup, picture, font, colour or glyph drawing was
 // copied. A private prototype for a school module. Adapted to OrderPilot's tokens.
 import type { PersonAvailability } from "@orderpilot/shared";
+import type { CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 import { availabilityLook } from "./tones";
 import "./availabilityDot.css";
@@ -17,14 +18,18 @@ import "./availabilityDot.css";
 export function AvailabilityDot({
   value,
   className,
+  style,
 }: {
   value: PersonAvailability;
   className?: string;
+  /** For a size that follows its parent. The sheet is outside Tailwind's layers, so a utility class would lose to it. */
+  style?: CSSProperties;
 }) {
   const Mark = availabilityLook[value].mark;
   return (
     <span
       className={cn("ap-dot", className)}
+      style={style}
       data-value={value}
       aria-hidden="true"
     >
