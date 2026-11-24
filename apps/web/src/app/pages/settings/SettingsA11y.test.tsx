@@ -14,6 +14,10 @@ const CASES: [Role, string, string][] = [
   ["SYSTEM_ADMIN", "ai", "Mock AI"],
   ["SYSTEM_ADMIN", "controls", "Roles and access"],
   ["SYSTEM_ADMIN", "health", "Everything is working"],
+  // The fake API of renderApp has no picture routes, so this is the section in
+  // its error state. PictureReviewPanel.test.tsx runs axe on its rows, its
+  // empty state and its dialogs.
+  ["SYSTEM_ADMIN", "pictures", "This could not be loaded"],
 ];
 
 describe("every settings section", () => {

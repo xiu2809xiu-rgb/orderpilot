@@ -8,6 +8,7 @@ import { AiPanel } from "./settings/AiPanel";
 import { AppearancePanel } from "./settings/AppearancePanel";
 import { ControlsPanel } from "./settings/ControlsPanel";
 import { HealthPanel } from "./settings/HealthPanel";
+import { PictureReviewPanel } from "./settings/PictureReviewPanel";
 import { PrivacyPanel } from "./settings/PrivacyPanel";
 import type { SectionId } from "./settings/sections";
 import { SettingsNav } from "./settings/SettingsNav";
@@ -22,6 +23,7 @@ const PANELS: Record<SectionId, ComponentType> = {
   ai: AiPanel,
   controls: ControlsPanel,
   health: HealthPanel,
+  pictures: PictureReviewPanel,
 };
 
 /**

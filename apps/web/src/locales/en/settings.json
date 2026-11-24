@@ -12,7 +12,8 @@
       "privacy": "Privacy",
       "ai": "AI assistant",
       "controls": "Controls",
-      "health": "System health"
+      "health": "System health",
+      "pictures": "Profile pictures"
     },
     "showing": "Showing {{section}}",
     "deniedDescription": "Your role does not include this section. A system admin can change what a role may open."
@@ -26,6 +27,100 @@
       "personal_information": "It shows personal or confidential information, such as a document or a screen.",
       "other": "Another reason: see the note.",
       "reported": "It was reported to a reviewer."
+    },
+    "title": "Profile pictures",
+    "intro": "Approve or reject each picture before it replaces its owner's initials. You do not see your own here, and you cannot review it.",
+    "tabs": {
+      "label": "Show",
+      "PENDING": "Waiting for review",
+      "APPROVED": "Approved"
+    },
+    "showing": "Showing {{tab}}",
+    "empty": {
+      "PENDING": {
+        "title": "Nothing is waiting for review",
+        "description": "New pictures appear here when someone sends one."
+      },
+      "APPROVED": {
+        "title": "No approved pictures",
+        "description": "Approved pictures appear here, so you can take one down later."
+      }
+    },
+    "row": {
+      "alt": "Profile picture sent by {{name}}",
+      "asAvatar": "As an avatar",
+      "sent": "Sent {{when}}",
+      "failed": "This picture could not be loaded."
+    },
+    "ai": {
+      "CHECKED": {
+        "LOOKS_FINE": "AI check: looks fine. The AI decided nothing.",
+        "NEEDS_A_CLOSER_LOOK": "AI check: needs a closer look. The AI decided nothing."
+      },
+      "concerns": "Concerns: {{list}}",
+      "NOT_ALLOWED": {
+        "synthetic-data-only": "Not checked by AI: only synthetic data may go to an AI tool.",
+        "classification-not-allowed": "Not checked by AI: this kind of data may not go to an AI tool.",
+        "no-rule-for-provider": "Not checked by AI: no data rule covers the AI tool in use.",
+        "policy-unavailable": "Not checked by AI: the data rule could not be read.",
+        "other": "Not checked by AI: the data rules do not allow it."
+      },
+      "NOT_RUN": {
+        "timeout": "Not checked by AI: the AI did not answer in time.",
+        "failed": "Not checked by AI: the check failed.",
+        "mock": "Not checked by AI: only a scripted test answer came back, so nothing was examined.",
+        "other": "Not checked by AI: the check did not run."
+      },
+      "note": "What the AI said: {{note}}",
+      "concern": {
+        "nudity_or_sexual_content": "nudity or sexual content",
+        "violence_or_gore": "violence or gore",
+        "hateful_symbol_or_text": "a hateful symbol or text",
+        "offensive_gesture": "an offensive gesture",
+        "weapon": "a weapon",
+        "drugs_or_alcohol": "drugs or alcohol",
+        "personal_documents_visible": "a personal document is visible",
+        "unusable_image": "the image is blank, dark or blurred",
+        "other": "something else"
+      }
+    },
+    "approve": "Approve",
+    "approveFor": "Approve picture from {{name}}",
+    "reject": "Reject",
+    "rejectFor": "Reject picture from {{name}}",
+    "takeDown": "Take down",
+    "takeDownFor": "Take down picture from {{name}}",
+    "done": {
+      "approved": "Approved the picture from {{name}}",
+      "rejected": "Rejected the picture from {{name}}",
+      "takenDown": "Took down the picture from {{name}}"
+    },
+    "dialog": {
+      "reject": {
+        "title": "Reject this picture?",
+        "body": "{{name}} will read the reason you choose. The picture is deleted."
+      },
+      "takeDown": {
+        "title": "Take this picture down?",
+        "body": "{{name}} will read the reason you choose. Their initials show again and the picture is deleted."
+      },
+      "reason": "Reason",
+      "note": "Note (optional)",
+      "noteRequired": "Note (needed for this reason)",
+      "noteHint": "Up to 140 characters. {{name}} will read it.",
+      "chooseReason": "Choose a reason.",
+      "needNote": "Add a short note for this reason.",
+      "cancel": "Cancel",
+      "confirmReject": "Reject picture",
+      "confirmTakeDown": "Take picture down"
+    },
+    "refusals": {
+      "own_picture": "You cannot review your own picture. Another administrator has to.",
+      "already_approved": "This picture was already approved.",
+      "already_rejected": "This picture was already rejected.",
+      "removed_by_owner": "The person removed this picture.",
+      "replaced": "The person sent a newer picture. The list has been refreshed.",
+      "not_approved": "This picture is no longer approved."
     }
   },
   "account": {
