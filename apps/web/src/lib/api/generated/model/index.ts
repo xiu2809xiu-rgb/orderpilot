@@ -590,6 +590,8 @@ export * from './usersList200Meta.ts';
 export * from './usersListActive.ts';
 export * from './usersListParams.ts';
 export * from './usersListRole.ts';
+export * from './usersResetTwoStep200.ts';
+export * from './usersResetTwoStep200Data.ts';
 export * from './workflowsApprove200.ts';
 export * from './workflowsApprove200Data.ts';
 export * from './workflowsApprove200DataOutcome.ts';

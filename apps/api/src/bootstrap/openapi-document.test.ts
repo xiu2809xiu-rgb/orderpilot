@@ -82,6 +82,7 @@ describe("the OpenAPI document (what orval reads)", () => {
       "/api/v1/users/{id}",
       "/api/v1/users/{id}/disable",
       "/api/v1/users/{id}/enable",
+      "/api/v1/users/{id}/two-step/reset",
       "/api/v1/workflows/document-config",
       "/api/v1/workflows/inboxes/{role}/reminders",
       "/api/v1/workflows/inboxes/{role}/tasks",

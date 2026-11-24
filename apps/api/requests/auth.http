@@ -126,3 +126,11 @@ X-CSRF-Token: {{csrf}}
 ### Enable them again.
 POST {{baseUrl}}/api/v1/users/00000000-0000-7000-8000-000000000000/enable
 X-CSRF-Token: {{csrf}}
+
+### Reset another person's two-step verification (users.manage, SYSTEM_ADMIN holds it),
+### for someone who lost the phone and the recovery codes. It removes the second
+### step, ends ALL of that person's sessions (demo ones too) and is audited as
+### user.two-step-reset. Answers wasOn and sessionsEnded. A person with no two-step
+### is a harmless no-op. Never your own: 409 CONFLICT, and the refusal is audited.
+POST {{baseUrl}}/api/v1/users/00000000-0000-7000-8000-000000000000/two-step/reset
+X-CSRF-Token: {{csrf}}
