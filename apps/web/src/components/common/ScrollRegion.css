@@ -9,10 +9,115 @@
   border-radius: var(--radius-card);
   background: var(--dx-card-work-bg);
   box-shadow: var(--dx-card-shadow);
+  /* How far an edge mark reaches in from the edge (see the marks below). */
+  --sr-mark: 1rem;
+  /* The mark's strongest colour, at the edge, from the teal of the theme.
+     ScrollRegion.contrast.test.ts reads this value and the dark one below
+     and keeps the text under the mark at 4.5:1. */
+  --sr-edge: color-mix(in srgb, var(--primary) 11%, transparent);
+}
+
+.dark .sr-region {
+  --sr-edge: color-mix(in srgb, var(--primary) 12%, transparent);
 }
 
 /* The card's own box shadow would swallow a ring drawn with one, so focus is an outline. */
 .sr-region:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: -2px;
+}
+
+/* ---- The edge marks: which side has more ----
+   A scroll box has no visible scrollbar on a tablet or a phone, so a wide
+   table gives no sign that columns lie past its edge. The marks are drawn by
+   `.sr-edges`, a rail placed last inside the box (ScrollRegion.tsx sizes it to
+   the whole scroll area and sets --sr-client-w and --sr-client-h to the size
+   of the visible box). The rail holds two frames, its ::before (the left mark)
+   and its ::after (the right mark). Each is `sticky` at the top left, as large
+   as the visible box, so the browser keeps it over the visible box for the
+   whole scroll range, with no scroll handler to lag behind a finger.
+   The rail is absolute, so it is no flex or grid item and takes no room, and
+   it takes no click. A background or an inset shadow on the box itself would
+   be painted under a heading row or a card and hidden by it. */
+.sr-edges {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.sr-edges::before,
+.sr-edges::after {
+  content: "";
+  display: block;
+  position: sticky;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  width: var(--sr-client-w, 0px);
+  height: var(--sr-client-h, 0px);
+  background-repeat: no-repeat;
+  background-size: var(--sr-mark) 100%;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-fast) var(--ease-out);
+}
+
+/* The right frame sits over the left one: it steps back by its own height. */
+.sr-edges::after {
+  margin-top: calc(-1 * var(--sr-client-h, 0px));
+}
+
+/* The left mark is under every frozen column (a pinned first column is z-1 in
+   a data table and z-10 in the access matrix), so a frozen column is never
+   shaded. The right mark is over a pinned row menu (z-1) so the mark is not
+   hidden by it, and under every heading cell (z-10 and z-20), so a heading
+   row is never shaded. */
+.sr-edges::before {
+  z-index: 0;
+  background-image: linear-gradient(to right, var(--sr-edge), transparent);
+  background-position: left top;
+}
+
+.sr-edges::after {
+  z-index: 5;
+  background-image: linear-gradient(to left, var(--sr-edge), transparent);
+  background-position: right top;
+}
+
+.sr-region[data-more-start] > .sr-edges::before,
+.sr-region[data-more-end] > .sr-edges::after {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sr-edges::before,
+  .sr-edges::after {
+    transition: none;
+  }
+}
+
+/* A plain line in the system's own text colour: gradients are not drawn in
+   forced colours. */
+@media (forced-colors: active) {
+  .sr-edges::before,
+  .sr-edges::after {
+    background-image: none;
+  }
+
+  .sr-edges::before {
+    border-left: 1px solid CanvasText;
+  }
+
+  .sr-edges::after {
+    border-right: 1px solid CanvasText;
+  }
+}
+
+@media print {
+  .sr-edges {
+    display: none;
+  }
 }
