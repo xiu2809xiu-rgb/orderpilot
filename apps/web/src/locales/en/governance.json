@@ -68,6 +68,7 @@
       "description": "Makes the target hold exactly the permissions the source holds. A copy that would break a locked cell is refused, so copying onto the system admin only works from a role that never approves, posts or pays.",
       "from": "Copy from",
       "to": "Copy to",
+      "choose": "Choose a role",
       "submit": "Copy",
       "confirmTitle": "Replace what {{to}} holds?",
       "confirmDescription": "{{to}} will hold exactly the permissions {{from}} holds. This can't be undone. The audit log keeps the change.",
@@ -75,6 +76,14 @@
       "back": "Back",
       "cancel": "Cancel",
       "same": "Pick two different roles.",
+      "change": {
+        "both": "{{to}} gains {{gains}} and loses {{loses}}.",
+        "gains": "{{to}} gains {{gains}}.",
+        "loses": "{{to}} loses {{loses}}.",
+        "none": "{{to}} already holds exactly these permissions, so a copy changes nothing."
+      },
+      "count_one": "{{count}} permission",
+      "count_other": "{{count}} permissions",
       "done": "Copied."
     }
   },

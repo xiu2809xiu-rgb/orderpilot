@@ -13,11 +13,14 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import type { MatrixCopyBody } from "@/lib/api/generated/model";
+import { copyChange } from "./copyChange";
+import { CopyChangeNote } from "./CopyChangeNote";
 
 type Role = MatrixCopyBody["fromRole"];
 
 interface CopyRoleDialogProps {
-  roles: readonly Role[];
+  /** Each role with what it holds, as the matrix has it. */
+  roles: readonly { role: Role; permissions: readonly string[] }[];
   busy: boolean;
   onCopy: (body: MatrixCopyBody) => Promise<unknown>;
 }
@@ -25,16 +28,26 @@ interface CopyRoleDialogProps {
 /**
  * Copies one role's permissions onto another, and leaves the target's data
  * scope as it was, as no list reads it yet (#268). A copy replaces
- * what the target held and has no Undo, so a second step says so first.
+ * what the target held and has no Undo, so a second step says so first. It
+ * opens with no roles chosen, so no click can overwrite a role by default,
+ * and says how many permissions the target gains and loses (#276).
  */
 export function CopyRoleDialog({ roles, busy, onCopy }: CopyRoleDialogProps) {
   const { t } = useTranslation("governance");
   const { t: tc } = useTranslation();
   const [open, setOpen] = useState(false);
   const [confirming, setConfirming] = useState(false);
-  const [fromRole, setFromRole] = useState<Role>(roles[0] ?? "APPROVER");
-  const [toRole, setToRole] = useState<Role>(roles[1] ?? "SUPPORT");
-  const same = fromRole === toRole;
+  const [fromRole, setFromRole] = useState<Role | "">("");
+  const [toRole, setToRole] = useState<Role | "">("");
+  const same = fromRole !== "" && fromRole === toRole;
+  const held = (role: Role | "") =>
+    roles.find((access) => access.role === role)?.permissions ?? [];
+  const change =
+    fromRole && toRole && !same
+      ? copyChange(held(fromRole), held(toRole))
+      : null;
+  const changes = change !== null && change.gains + change.loses > 0;
+  const toName = toRole ? tc(`roles.${toRole}`) : "";
   const stepFocus = useRef<HTMLButtonElement>(null);
   const stepChanged = useRef(false);
 
@@ -53,10 +66,14 @@ export function CopyRoleDialog({ roles, busy, onCopy }: CopyRoleDialogProps) {
 
   function changeOpen(next: boolean) {
     setOpen(next);
-    if (!next) setConfirming(false);
+    if (next) return;
+    setConfirming(false);
+    setFromRole("");
+    setToRole("");
   }
 
   async function submit() {
+    if (!fromRole || !toRole) return;
     try {
       await onCopy({ fromRole, toRole });
     } catch {
@@ -75,15 +92,16 @@ export function CopyRoleDialog({ roles, busy, onCopy }: CopyRoleDialogProps) {
           <>
             <DialogHeader>
               <DialogTitle>
-                {t("matrix.copy.confirmTitle", { to: tc(`roles.${toRole}`) })}
+                {t("matrix.copy.confirmTitle", { to: toName })}
               </DialogTitle>
               <DialogDescription>
                 {t("matrix.copy.confirmDescription", {
-                  from: tc(`roles.${fromRole}`),
-                  to: tc(`roles.${toRole}`),
+                  from: fromRole ? tc(`roles.${fromRole}`) : "",
+                  to: toName,
                 })}
               </DialogDescription>
             </DialogHeader>
+            {change ? <CopyChangeNote change={change} to={toName} /> : null}
             <DialogFooter>
               <Button
                 ref={stepFocus}
@@ -126,7 +144,10 @@ export function CopyRoleDialog({ roles, busy, onCopy }: CopyRoleDialogProps) {
                       set(event.target.value as Role);
                     }}
                   >
-                    {roles.map((role) => (
+                    <option value="" disabled>
+                      {t("matrix.copy.choose")}
+                    </option>
+                    {roles.map(({ role }) => (
                       <option key={role} value={role}>
                         {tc(`roles.${role}`)}
                       </option>
@@ -140,6 +161,7 @@ export function CopyRoleDialog({ roles, busy, onCopy }: CopyRoleDialogProps) {
                 {t("matrix.copy.same")}
               </p>
             ) : null}
+            {change ? <CopyChangeNote change={change} to={toName} /> : null}
             <DialogFooter>
               <Button
                 variant="outline"
@@ -151,7 +173,7 @@ export function CopyRoleDialog({ roles, busy, onCopy }: CopyRoleDialogProps) {
               </Button>
               <Button
                 ref={stepFocus}
-                disabled={same || busy}
+                disabled={!changes || busy}
                 onClick={() => {
                   goToStep(true);
                 }}
