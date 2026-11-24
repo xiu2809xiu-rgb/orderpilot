@@ -2,6 +2,7 @@ import {
   COOKIES,
   ERROR_HTTP_STATUS,
   HEADERS,
+  TWO_STEP_VERIFY_PATH,
   apiPath,
   authRoutes,
   errorEnvelopeSchema,
@@ -50,6 +51,8 @@ const NO_REFRESH = new Set<string>([
   authRoutes.login.path,
   authRoutes.refresh.path,
   authRoutes.logout.path,
+  // A wrong code or an ended challenge is a 401 that must never be resent.
+  TWO_STEP_VERIFY_PATH,
 ]);
 
 const STATUS_TO_CODE: Record<number, ErrorCode> = Object.fromEntries(
@@ -232,7 +235,14 @@ export class ApiClient {
     const text = await response.text();
     const json: unknown = parseJson(text);
 
-    if (!response.ok) throw toApiError(response.status, json, traceId);
+    if (!response.ok) {
+      throw toApiError(
+        response.status,
+        json,
+        traceId,
+        retryAfterOf(response.headers.get("Retry-After")),
+      );
+    }
 
     const result = route.response.safeParse(json);
     if (!result.success) {
@@ -255,7 +265,18 @@ function parseJson(text: string): unknown {
   }
 }
 
-function toApiError(status: number, json: unknown, traceId: string): ApiError {
+/** Whole seconds from a Retry-After header; a date or anything else is not used. */
+function retryAfterOf(header: string | null): number | null {
+  if (header === null || !/^\d{1,9}$/.test(header.trim())) return null;
+  return Number(header.trim());
+}
+
+function toApiError(
+  status: number,
+  json: unknown,
+  traceId: string,
+  retryAfterSeconds: number | null,
+): ApiError {
   const envelope = errorEnvelopeSchema.safeParse(json);
   if (envelope.success) {
     const { code, message, details } = envelope.data.error;
@@ -265,6 +286,8 @@ function toApiError(status: number, json: unknown, traceId: string): ApiError {
       status,
       envelope.data.error.traceId,
       details ?? [],
+      true,
+      retryAfterSeconds,
     );
   }
   // Not our envelope (a proxy page, say): keep the status and the trace id.
