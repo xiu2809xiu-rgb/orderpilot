@@ -3,6 +3,7 @@ import { AuditModule } from "../audit/audit.module.js";
 import { AppConfig } from "../config/app-config.js";
 import { GovernancePermissionPolicy } from "../modules/governance/governance-permission-policy.js";
 import { SessionsModule } from "../sessions/sessions.module.js";
+import { TwoStepStoreModule } from "../two-step/two-step-store.module.js";
 import { UsersModule } from "../users/users.module.js";
 import { AuthAuditor } from "./auth-auditor.js";
 import { AuthCookies } from "./auth-cookies.js";
@@ -29,7 +30,7 @@ export class AuthModule {
   static register(config: AppConfig): DynamicModule {
     return {
       module: AuthModule,
-      imports: [AuditModule, UsersModule, SessionsModule],
+      imports: [AuditModule, UsersModule, SessionsModule, TwoStepStoreModule],
       controllers: config.demoMode
         ? [AuthController, DemoAuthController]
         : [AuthController],
