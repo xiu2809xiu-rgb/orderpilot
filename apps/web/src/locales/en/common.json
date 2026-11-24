@@ -131,6 +131,26 @@
     "signedInAs": "Signed in as",
     "signOut": "Sign out"
   },
+  "availability": {
+    "trigger": "Your availability: {{value}}. Change",
+    "values": {
+      "AVAILABLE": "Available",
+      "FOCUSING": "Focusing",
+      "DO_NOT_DISTURB": "Do not disturb"
+    },
+    "dotLabel": "Availability: {{value}}",
+    "saving": "Saving your availability",
+    "set": {
+      "AVAILABLE": "You are available",
+      "FOCUSING": "Focusing for {{hours}} hours. Reminders and approvals still reach you.",
+      "DO_NOT_DISTURB": "Do not disturb for {{hours}} hours. Reminders and approvals still reach you."
+    },
+    "failed": "Your availability was not changed",
+    "menu": {
+      "label": "Your availability",
+      "hint": "Reminders and approvals still reach you. It goes back to Available after {{hours}} hours."
+    }
+  },
   "demo": {
     "switcher": "Demo role",
     "switcherHint": "Switch to another role. An order on screen stays open for a role that may read orders, and each role keeps its own open records.",

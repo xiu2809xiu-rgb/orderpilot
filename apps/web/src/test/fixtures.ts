@@ -125,6 +125,22 @@ export function mockApi(initial: Partial<MockApiState> = {}) {
             },
           }),
         );
+      // The shell asks for the person's availability: Available, so no test sees a 404 here.
+      case "GET /availability/mine":
+        return Promise.resolve(
+          json(200, {
+            data: { value: "AVAILABLE", setAt: null, expiresAt: null },
+          }),
+        );
+      case "GET /availability":
+        return Promise.resolve(
+          json(200, {
+            data: (url.searchParams.get("ids") ?? "")
+              .split(",")
+              .filter((id) => id !== "")
+              .map((userId) => ({ userId, value: "AVAILABLE", setAt: null })),
+          }),
+        );
       case "POST /auth/refresh":
         return Promise.resolve(
           state.refreshWorks && state.session
