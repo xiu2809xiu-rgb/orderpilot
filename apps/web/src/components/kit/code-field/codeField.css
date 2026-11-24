@@ -250,6 +250,11 @@
     border-color: Highlight;
   }
 
+  /* The shell's transparent edge is forced to a visible colour; Canvas hides it again. */
+  .cf[data-state="input"] .cf-shell {
+    border-color: Canvas;
+  }
+
   .cf-input {
     forced-color-adjust: none;
   }
