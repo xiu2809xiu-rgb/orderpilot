@@ -1,0 +1,274 @@
+/* The availability pill: three orbs and a caption, in a glass box that grows
+   out of its trigger. Colours are the app's tokens. The pill is in a portal, so
+   nothing clips it. Every movement is scale, translate or opacity; the pill's
+   own size is never animated, and its backdrop blur is switched on only after
+   the growth has ended (data-settled), because a blurred box that scales is
+   repainted each frame. The growth is the one spring, written as a linear()
+   easing by pickerMotion.ts and handed in as --ap-spring and --ap-grow. */
+
+.ap-pill {
+  /* From the trigger's box to the pill's: 24 by 24 against 164 by 94. */
+  --ap-from-x: calc(24 / 164);
+  --ap-from-y: calc(24 / 94);
+  position: relative;
+  z-index: 50;
+  box-sizing: border-box;
+  inline-size: 164px;
+  block-size: 94px;
+  border: 1px solid var(--border-strong);
+  border-radius: 28px;
+  background: color-mix(in srgb, var(--popover) 78%, transparent);
+  color: var(--foreground);
+  box-shadow:
+    var(--shadow-pop),
+    inset 0 1px 0 rgb(255 255 255 / 0.5);
+  transform-origin: var(--radix-dropdown-menu-content-transform-origin);
+  outline: none;
+}
+.dark .ap-pill {
+  box-shadow:
+    var(--shadow-pop),
+    inset 0 1px 0 rgb(255 255 255 / 0.12);
+}
+.ap-pill[data-skin="ring"] {
+  --ap-from-x: calc(32 / 164);
+  --ap-from-y: calc(32 / 94);
+}
+.ap-pill[data-settled] {
+  backdrop-filter: blur(12px) saturate(160%);
+}
+
+.ap-orbs {
+  display: grid;
+  grid-template-columns: repeat(3, 44px);
+  gap: 8px;
+  padding: 8px 8px 0;
+}
+.ap-item {
+  --ap-tone: var(--success);
+  position: relative;
+  display: grid;
+  place-items: center;
+  align-content: start;
+  box-sizing: border-box;
+  inline-size: 44px;
+  block-size: 44px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  outline: none;
+  transition: scale var(--motion-fast) var(--ease-out);
+}
+.ap-item[data-value="AVAILABLE"] {
+  --ap-tone: var(--success);
+}
+.ap-item[data-value="FOCUSING"] {
+  --ap-tone: var(--warning);
+}
+.ap-item[data-value="DO_NOT_DISTURB"] {
+  --ap-tone: var(--destructive);
+}
+.ap-item[data-highlighted] {
+  scale: 1.06;
+}
+.ap-item:active {
+  scale: 0.94;
+}
+/* The app's ring is outside the orb at an offset of 4 px, and the checked
+   mark is inside it, so the two are never the same circle. */
+.ap-item:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 4px;
+}
+.ap-orb {
+  display: grid;
+  place-items: center;
+  inline-size: 44px;
+  block-size: 44px;
+  border-radius: var(--radius-pill);
+  background: var(--ap-tone);
+  /* White in light and near black in dark, and 4.5:1 on every tone in both:
+     availabilityTones.test.ts measures it. */
+  color: var(--destructive-foreground);
+}
+.ap-orb svg {
+  inline-size: 20px;
+  block-size: 20px;
+}
+.ap-item[aria-checked="true"] .ap-orb {
+  box-shadow: inset 0 0 0 2px var(--foreground);
+}
+
+/* On a fine pointer the words are clipped, not removed, so each item keeps its
+   name; the caption shows them. */
+.ap-label {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.ap-chip {
+  position: absolute;
+  inset-block-start: 58px;
+  inset-inline-start: 0;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  inline-size: calc(var(--ap-chip-w, 72) * 1px);
+  block-size: 28px;
+  translate: calc(var(--ap-chip-x, 0) * 1px) 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--popover) 90%, transparent);
+  color: var(--foreground);
+  font-size: var(--type-12);
+  line-height: 1rem;
+  white-space: nowrap;
+}
+.ap-measure {
+  position: absolute;
+  display: flex;
+  gap: 1rem;
+  visibility: hidden;
+  pointer-events: none;
+  font-size: var(--type-12);
+  line-height: 1rem;
+  white-space: nowrap;
+}
+
+/* A finger, or no hover: the words go under the orbs and every box is 44 px or more. */
+@media (pointer: coarse), (hover: none) {
+  .ap-pill {
+    --ap-from-x: calc(44 / 264);
+    --ap-from-y: calc(44 / 96);
+    inline-size: min(264px, calc(100vw - 16px));
+    block-size: 96px;
+  }
+  .ap-pill[data-skin="ring"] {
+    --ap-from-x: calc(44 / 264);
+    --ap-from-y: calc(44 / 96);
+  }
+  .ap-orbs {
+    grid-template-columns: repeat(3, 80px);
+    gap: 4px;
+    padding: 8px;
+  }
+  .ap-item {
+    inline-size: 80px;
+    block-size: 80px;
+    gap: 4px;
+  }
+  .ap-label {
+    position: static;
+    inline-size: auto;
+    block-size: 32px;
+    clip-path: none;
+    overflow: visible;
+    text-align: center;
+    white-space: normal;
+    font-size: var(--type-12);
+    line-height: 1rem;
+  }
+  .ap-chip,
+  .ap-measure {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ap-pill[data-state="open"] {
+    animation: ap-grow var(--ap-grow, 400ms) var(--ap-spring, ease-out) both;
+  }
+  .ap-pill[data-state="closed"] {
+    animation: ap-fold var(--motion-fast) var(--ease-out) both;
+  }
+  .ap-pill[data-state="open"] .ap-item {
+    animation: ap-orb-in var(--motion-fast) var(--ease-out) both;
+    animation-delay: calc(var(--ap-i, 0) * 30ms);
+  }
+  .ap-chip-text {
+    animation: ap-text-in var(--motion-fast) var(--ease-out) both;
+  }
+}
+@keyframes ap-grow {
+  from {
+    scale: var(--ap-from-x) var(--ap-from-y);
+    opacity: 0;
+  }
+  to {
+    scale: 1 1;
+    opacity: 1;
+  }
+}
+@keyframes ap-fold {
+  from {
+    scale: 1 1;
+    opacity: 1;
+  }
+  to {
+    scale: var(--ap-from-x) var(--ap-from-y);
+    opacity: 0;
+  }
+}
+@keyframes ap-orb-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes ap-text-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Reduced motion: nothing moves, and the state still changes. The global rule
+   cuts durations to nothing, but an animation still waits out its delay, so the
+   part says it itself. The glass is drawn at once, since no growth precedes it. */
+@media (prefers-reduced-motion: reduce) {
+  .ap-pill,
+  .ap-pill .ap-item,
+  .ap-chip-text {
+    animation: none;
+  }
+  .ap-pill {
+    backdrop-filter: blur(12px) saturate(160%);
+  }
+}
+
+/* Forced colours: the shape is what remains. */
+@media (forced-colors: active) {
+  .ap-pill {
+    background: Canvas;
+    border: 1px solid CanvasText;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+  .ap-orb {
+    forced-color-adjust: none;
+    background: ButtonFace;
+    color: ButtonText;
+    border: 2px solid ButtonText;
+    box-shadow: none;
+  }
+  .ap-item[aria-checked="true"] .ap-orb {
+    background: Highlight;
+    color: HighlightText;
+    box-shadow: none;
+  }
+  .ap-item:focus-visible {
+    outline: 3px solid Highlight;
+  }
+  .ap-chip {
+    background: Canvas;
+    color: CanvasText;
+    border: 1px solid CanvasText;
+  }
+}

@@ -31,6 +31,8 @@ export interface AvailabilityPickerProps {
   busy?: boolean;
   /** The parent raises it after a pick, to play the pulse and the sheen. */
   pulse?: number;
+  /** Where focus goes when the menu closes. Call preventDefault and move it to hand it over; by default it returns to the trigger. */
+  onCloseAutoFocus?: (event: Event) => void;
   /** The parent's positioning of the trigger. */
   className?: string;
 }
