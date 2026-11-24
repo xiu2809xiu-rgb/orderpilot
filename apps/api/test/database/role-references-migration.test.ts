@@ -80,7 +80,10 @@ describe("the migration that moves stored role references to the approvers (#344
           escalateToRole,
         },
       });
+    // Spectra's 24-hour rule: the SPR approval keeps escalating to Management
+    // until the role cut (step 6), so its row must survive this migration.
     await sla("APPROVE_SPR", "MANAGEMENT");
+    await sla("CONFIRM_PAYMENT", "MANAGEMENT");
     await sla("SEND_PI", "AUDITOR");
     await sla("PACK_ORDER", "FINANCE");
     await sla("RAISE_SPR", "APPROVER");
@@ -89,12 +92,14 @@ describe("the migration that moves stored role references to the approvers (#344
       recipientRole: "MANAGEMENT" | "AUDITOR" | "SUPPORT",
       message: string,
       recipientUserId?: string,
+      taskId?: string,
     ) =>
       prisma.workflowNotification.create({
         data: {
           kind: "ESCALATION",
           recipientRole,
           recipientUserId,
+          taskId,
           message,
           scheduledFor: now,
         },
@@ -120,11 +125,15 @@ describe("the migration that moves stored role references to the approvers (#344
         status: "sample-open",
       },
     });
-    const task = (assigneeRole: "MANAGEMENT" | "SUPPORT", title: string) =>
+    const task = (
+      assigneeRole: "MANAGEMENT" | "SUPPORT" | "APPROVER",
+      title: string,
+      kind = "SEND_PI",
+    ) =>
       prisma.workflowTask.create({
         data: {
           instanceId: instance.id,
-          kind: "SEND_PI",
+          kind,
           title,
           assigneeRole,
           dueAt: now,
@@ -132,6 +141,32 @@ describe("the migration that moves stored role references to the approvers (#344
       });
     const managementTask = await task("MANAGEMENT", "held by Management");
     const supportTask = await task("SUPPORT", "held by Support");
+    const approvalTask = await task(
+      "APPROVER",
+      "an SPR approval",
+      "APPROVE_SPR",
+    );
+
+    // The escalations of an SPR approval task were sent to Management by Spectra's
+    // 24-hour rule and stay that way. The same notice for any other task moves.
+    const sprManagementNotice = await notice(
+      "MANAGEMENT",
+      "an SPR approval, to Management",
+      undefined,
+      approvalTask.id,
+    );
+    const sprAuditorNotice = await notice(
+      "AUDITOR",
+      "an SPR approval, to the auditor",
+      undefined,
+      approvalTask.id,
+    );
+    const taskManagementNotice = await notice(
+      "MANAGEMENT",
+      "a Send PI task, to Management",
+      undefined,
+      managementTask.id,
+    );
 
     const exception = (fixBy: "MANAGEMENT" | "AUDITOR" | "SUPPORT") =>
       prisma.checkException.create({
@@ -182,7 +217,7 @@ describe("the migration that moves stored role references to the approvers (#344
         "WorkflowTaskSla",
         "escalateToRole",
         "taskKind",
-        "APPROVE_SPR",
+        "CONFIRM_PAYMENT",
       ),
       await roleOf("WorkflowTaskSla", "escalateToRole", "taskKind", "SEND_PI"),
       await roleOf(
@@ -197,11 +232,17 @@ describe("the migration that moves stored role references to the approvers (#344
         "id",
         auditorNotice.id,
       ),
+      await roleOf(
+        "WorkflowNotification",
+        "recipientRole",
+        "id",
+        taskManagementNotice.id,
+      ),
       await roleOf("WorkflowTask", "assigneeRole", "id", managementTask.id),
       await roleOf("CheckException", "fixBy", "id", managementException.id),
       await roleOf("CheckException", "fixBy", "id", auditorException.id),
     ];
-    expect(moved).toEqual(Array(7).fill("APPROVER"));
+    expect(moved).toEqual(Array(8).fill("APPROVER"));
 
     const { rows: personRows } = await client.query<{
       role: string;
@@ -213,6 +254,24 @@ describe("the migration that moves stored role references to the approvers (#344
     expect(personRows).toEqual([{ role: "APPROVER", person: NAMED_PERSON }]);
 
     const kept = [
+      await roleOf(
+        "WorkflowTaskSla",
+        "escalateToRole",
+        "taskKind",
+        "APPROVE_SPR",
+      ),
+      await roleOf(
+        "WorkflowNotification",
+        "recipientRole",
+        "id",
+        sprManagementNotice.id,
+      ),
+      await roleOf(
+        "WorkflowNotification",
+        "recipientRole",
+        "id",
+        sprAuditorNotice.id,
+      ),
       await roleOf(
         "WorkflowTaskSla",
         "escalateToRole",
@@ -235,6 +294,9 @@ describe("the migration that moves stored role references to the approvers (#344
       await roleOf("CheckException", "fixBy", "id", supportException.id),
     ];
     expect(kept).toEqual([
+      "MANAGEMENT",
+      "MANAGEMENT",
+      "AUDITOR",
       "FINANCE",
       "APPROVER",
       "SUPPORT",
@@ -262,7 +324,7 @@ describe("the migration that moves stored role references to the approvers (#344
         "taskKind",
         "APPROVE_SPR",
       ),
-    ).toBe("APPROVER");
+    ).toBe("MANAGEMENT");
   });
 
   it("is safe on an empty database", async () => {

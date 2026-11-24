@@ -8,15 +8,24 @@
 -- role its actor held, because its hash covers it, and a click-stream row keeps
 -- the role it was recorded with.
 
+-- The one exception is the SPR approval (Spectra's 24-hour rule): it keeps
+-- escalating to Management until step 6 makes that account an approver, so its
+-- SLA row and the escalations already sent for an SPR approval task stay as they
+-- are.
+
 -- Who is told when a task is overdue. The default was MANAGEMENT.
 UPDATE "WorkflowTaskSla"
 SET "escalateToRole" = 'APPROVER'
-WHERE "escalateToRole" IN ('MANAGEMENT', 'AUDITOR');
+WHERE "escalateToRole" IN ('MANAGEMENT', 'AUDITOR')
+  AND "taskKind" <> 'APPROVE_SPR';
 
--- Reminders and escalations already addressed to a role.
+-- Reminders and escalations already addressed to a role, except those sent for
+-- an SPR approval task.
 UPDATE "WorkflowNotification"
 SET "recipientRole" = 'APPROVER'
-WHERE "recipientRole" IN ('MANAGEMENT', 'AUDITOR');
+WHERE "recipientRole" IN ('MANAGEMENT', 'AUDITOR')
+  AND ("taskId" IS NULL
+    OR "taskId" NOT IN (SELECT "id" FROM "WorkflowTask" WHERE "kind" = 'APPROVE_SPR'));
 
 -- A safety net: tasks come from the roles that have an inbox, so none should match.
 UPDATE "WorkflowTask"
