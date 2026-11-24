@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { expect, request, type Page } from "@playwright/test";
 import { errorEnvelopeSchema, HEADERS, type Role } from "@orderpilot/shared";
 import { apiUrl, ORIGIN } from "./env.js";
-import { csrfToken, sessionFor } from "./session.js";
+import { csrfToken, sessionFor, type StoredSession } from "./session.js";
 
 export type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
@@ -17,14 +17,16 @@ export type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
  * validation failure in disguise.
  *
  * Returns the trace id, so a test can find this refusal in the audit viewer.
+ * `held` is a session the spec already holds, used instead of the stored one.
  */
 export async function expectRefused(
   role: Role,
   method: Method,
   route: string,
   body?: unknown,
+  held?: StoredSession,
 ): Promise<string> {
-  const session = await sessionFor(role);
+  const session = held ?? (await sessionFor(role));
   const api = await request.newContext({ storageState: session });
   const requestId = `e2e-${randomUUID()}`;
   try {
