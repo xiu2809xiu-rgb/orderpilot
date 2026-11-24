@@ -369,6 +369,7 @@ await authorisation.enforce(
 **What F-2 deliberately leaves to you,** and what is queued:
 
 - **F-9: audit viewer polish:** the pickers for the person and the action, the link to the broken event, and the browser test are built ([below](#audit-viewer-polish-f-9)). Saved views on the server and a chain check that runs in the background are still to come.
+- **F-10: a picture of the hash chain** on the chain check card is built ([below](#the-chain-picture-f-10)).
 - Export, retention, anchoring and scheduled verification, and the dashboards: see the deeper work below. None is started, so none is half-done.
 
 **What F-1 deliberately leaves to you** (nothing below is written, so none of it is half-done):
@@ -451,6 +452,26 @@ The matrix no longer shows the data scope, and Copy a role leaves the target's s
 - **What a copy records:** the permissions granted and revoked, and no scope.
 - **Enforcing it** is a story of its own: it needs brand ownership (Q-17) and a filter in each area's lists, and brings the selector back with it.
 - **Tests:** `GovernancePage.test.tsx` ("offers no data scope control", and the copy dialog's words) and `test/http/governance.test.ts` ("leaves the target's data scope as it was").
+
+## The chain picture (F-10)
+
+The chain check card draws the chain above its words: glass blocks in a row, lit when they verify, with the break tilted and red and its link snapped ([ADR 0066](../adr/0066-the-chain-picture-is-a-shader-on-glcanvas.md)).
+
+- **Where:** `apps/web/src/features/audit/chain/`.
+  - `chainModel.ts` turns what the check returned into blocks.
+  - `chainShader.ts` is the fragment shader.
+  - `ChainPicture.tsx` puts it on the kit's `GlCanvas`, with the numbers under it. `ChainCheckCard.tsx` loads it as a lazy chunk.
+- **Only what the check returns:**
+  - The only numbers are the newest verified sequence and the break, because sequence numbers can have gaps.
+  - Nothing is drawn after a break, because the check stops there.
+  - A running check shows a looping light, not a count, because the check reports no progress.
+- **Motion:** only while checking, and while the blocks light after it; a still picture under reduced motion; plain CSS without WebGL2. The picture is `aria-hidden`, and the words stay the result.
+- **The red block** opens the broken event when clicked, the same link as "Open event N" (`brokenEventPath` in `ChainCheckCard.tsx`). It is for a mouse only, out of the tab order: the keyboard and a screen reader use "Open event N".
+- **Tests:**
+  - `chainModel.test.ts`: every state, and no number the check did not send.
+  - `ChainPicture.test.tsx`: the uniforms on a recording WebGL stub, and that it rests when not checking.
+  - `AuditPage.test.tsx`: the numbers on the card.
+  - `apps/e2e/tests/audit-chain.spec.ts`: as the system admin, a real canvas, so the shader compiles, and `checkPage`; and a click on the red block, on a staged break, opens the event.
 
 ## Options to consider, not built
 
