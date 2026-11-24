@@ -71,8 +71,10 @@ x-app-env: &app-env
   AI_BEDROCK_SESSION_TOKEN:
   # Spark (P-95): what the stored data is, and its question limits. The origin
   # must reach the container, or "real" in the .env would be ignored and Spark
-  # would declare real data synthetic. The limits are passed as they are.
-  DATA_ORIGIN: ${DATA_ORIGIN:-synthetic}
+  # would declare real data synthetic. It is passed as it is, with no default
+  # here: unset is synthetic away from production, and APP_ENV=production
+  # refuses to start without it. The limits are passed as they are.
+  DATA_ORIGIN:
   SPARK_QUESTIONS_PER_MINUTE:
   SPARK_QUESTIONS_PER_DAY:
 

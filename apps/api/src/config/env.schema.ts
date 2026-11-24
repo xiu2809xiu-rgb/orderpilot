@@ -299,12 +299,11 @@ export const envSchema = z
 
     // What the stored data is (P-95). Spark tells the destination check from
     // this, so it is the one switch between "synthetic" and a deployment that
-    // holds a real customer's data. Anything but these two words is refused at
-    // start-up, and Spark itself treats anything it cannot read as real.
-    DATA_ORIGIN: z.preprocess(
-      unsetWhenEmpty,
-      z.enum(DATA_ORIGINS).default("synthetic"),
-    ),
+    // holds a real customer's data. Unset or blank is left undefined here, and
+    // AppConfig reads it as synthetic anywhere but production, where the rule
+    // below requires it. Any other word than the two is refused at start-up,
+    // and only Spark itself treats a value it cannot read as real.
+    DATA_ORIGIN: z.preprocess(unsetWhenEmpty, z.enum(DATA_ORIGINS).optional()),
     // Spark's cost limits: questions a person may ask in a minute, and in a day.
     SPARK_QUESTIONS_PER_MINUTE: boundedInt(1, 10_000, 6),
     SPARK_QUESTIONS_PER_DAY: boundedInt(1, 100_000, 100),
@@ -352,6 +351,16 @@ export const envSchema = z
         code: "custom",
         path: ["DEMO_MODE"],
         message: "Demo mode must be false when APP_ENV is production",
+      });
+    }
+    // An unset line reads as synthetic everywhere else, so a deployment that
+    // holds real data and forgot it would tell the policy its data is synthetic.
+    if (env.DATA_ORIGIN === undefined) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["DATA_ORIGIN"],
+        message:
+          "Set DATA_ORIGIN to synthetic or real when APP_ENV is production",
       });
     }
     if (env.CORS_ORIGINS.some((origin) => origin.startsWith("http://"))) {

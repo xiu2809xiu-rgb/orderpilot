@@ -13,6 +13,7 @@ const PRODUCTION = {
   APP_ENV: "production",
   CORS_ORIGINS: "https://app.example.com",
   JWT_SECRET: "a-long-random-secret-for-this-test-only-0123456789",
+  DATA_ORIGIN: "synthetic",
 };
 
 describe("BANK_FINGERPRINT_KEY", () => {

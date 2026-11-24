@@ -98,8 +98,9 @@ export class AppConfig {
   };
 
   /**
-   * What the stored data is: "synthetic" unless DATA_ORIGIN says "real". Spark
-   * declares it to the AI destination check, so it must be true.
+   * What the stored data is: DATA_ORIGIN, and "synthetic" when it is unset or
+   * blank, which APP_ENV=production refuses. Spark declares it to the AI
+   * destination check, so it must be true.
    */
   readonly dataOrigin: DataOrigin;
 
@@ -161,7 +162,7 @@ export class AppConfig {
       approvalLimits: env.APPROVAL_LIMITS === "on",
     };
     this.ai = aiSettings(env);
-    this.dataOrigin = env.DATA_ORIGIN;
+    this.dataOrigin = env.DATA_ORIGIN ?? "synthetic";
     this.spark = {
       questionsPerMinute: env.SPARK_QUESTIONS_PER_MINUTE,
       questionsPerDay: env.SPARK_QUESTIONS_PER_DAY,

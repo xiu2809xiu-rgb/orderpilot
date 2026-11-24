@@ -271,6 +271,7 @@ describe("AI settings in production", () => {
     APP_ENV: "production",
     CORS_ORIGINS: "https://app.example.com",
     JWT_SECRET: "a-long-random-secret-for-this-test-only-0123456789",
+    DATA_ORIGIN: "synthetic",
     AI_PROVIDER: "openai-compatible",
     AI_MODEL: "model-c",
   });
