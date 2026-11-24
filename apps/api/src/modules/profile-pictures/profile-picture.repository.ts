@@ -101,7 +101,9 @@ export class ProfilePictureRepository {
   /**
    * Stored uploads since a moment (rows created strictly after it), whatever
    * became of them. A demo session is counted by its own sign-in, not by the
-   * account every visitor of the role shares.
+   * account every visitor of the role shares, and a password session counts
+   * only the rows with no sign-in family, so demo visitors' uploads never
+   * lock a person who signed in with a password.
    */
   countSince(
     userId: string,
@@ -112,7 +114,7 @@ export class ProfilePictureRepository {
       where: {
         userId,
         createdAt: { gt: since },
-        ...(sessionFamilyId === null ? {} : { sessionFamilyId }),
+        sessionFamilyId,
       },
     });
   }

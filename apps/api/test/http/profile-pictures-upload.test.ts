@@ -586,6 +586,17 @@ describe("the limit of uploads in 24 hours", () => {
     expect((await mineOf(t, b)).uploads.used).toBe(1);
   });
 
+  it("does not count demo visitors' uploads against a password session of the same account", async () => {
+    const demo = await demoSignIn(t, "SUPPORT");
+    for (let i = 0; i < 10; i += 1) {
+      expect((await send(demo, 128 + 8 * i)).status).toBe(200);
+    }
+    const password = await passwordSignIn(t, await emailForRole("SUPPORT"));
+    expect((await mineOf(t, password)).uploads).toEqual({ used: 0, limit: 10 });
+    expect((await send(password, 240)).status).toBe(200);
+    expect((await mineOf(t, password)).uploads.used).toBe(1);
+  });
+
   it("stamps a demo upload with its session family and a normal upload with none", async () => {
     const demo = await demoSignIn(t, "MANAGEMENT");
     await send(demo, 128);
