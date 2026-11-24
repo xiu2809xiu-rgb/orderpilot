@@ -1,4 +1,4 @@
-# ADR 0070: Scroll areas mark the side that has more, from frames pinned inside the box
+# ADR 0071: Scroll areas mark the side that has more, from frames pinned inside the box
 
 - **Status:** Proposed. `ScrollRegion` is a shared part of area 1, so Richie accepts or declines it in review. About twenty tables and boards of areas 1, 2, 3 and 4 gain the mark with no change in their files, and their owners are asked to look at their screens on the pull request.
 - **Date:** 2026-11-25

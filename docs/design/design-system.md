@@ -156,7 +156,7 @@ No control changed size. Fixed heights stay, a padding-sized part has its paddin
 
 ## Scroll areas mark the side that has more
 
-[`ScrollRegion`](../../apps/web/src/components/common/ScrollRegion.tsx) is the one scroll area behind the tables and boards, and it shows which side of itself has more ([ADR 0070](../adr/0070-scroll-areas-mark-the-side-that-has-more.md)).
+[`ScrollRegion`](../../apps/web/src/components/common/ScrollRegion.tsx) is the one scroll area behind the tables and boards, and it shows which side of itself has more ([ADR 0071](../adr/0071-scroll-areas-mark-the-side-that-has-more.md)).
 
 - **What the mark means.** A quiet strip, 32 px wide, on the left or right edge of the visible box says that more content lies that way. It is on the right at the start, on both edges in the middle and on the left at the end, and it is not drawn at all when everything fits. It follows the scroll position and a change of size with no reload. Only left and right are marked: a tall area already shows a cut row and keeps its heading in view.
 - **Padded boxes.** A browser pins a sticky box inside a scroll box's padding, so the script reads the padding and moves the frames back by it. A scroll box with padding (the order peek) keeps its marks on its visible edge. Seen in Edge; a tablet browser is not yet checked.
