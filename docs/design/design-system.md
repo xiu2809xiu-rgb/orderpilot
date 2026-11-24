@@ -154,6 +154,15 @@ No control changed size. Fixed heights stay, a padding-sized part has its paddin
 - **Reduced motion:** the theme change and the page change are instant, the page's name does not glide, and the kit's moving items hold a still frame.
 - Tables and forms never animate while they are in use.
 
+## Scroll areas mark the side that has more
+
+[`ScrollRegion`](../../apps/web/src/components/common/ScrollRegion.tsx) is the one scroll area behind the tables and boards, and it shows which side of itself has more ([ADR 0067](../adr/0067-scroll-areas-mark-the-side-that-has-more.md)).
+
+- **What the mark means.** A quiet strip, 16 px wide, on the left or right edge of the visible box says that more content lies that way. It is on the right at the start, on both edges in the middle and on the left at the end, and it is not drawn at all when everything fits. It follows the scroll position and a change of size with no reload. Only left and right are marked: a tall area already shows a cut row and keeps its heading in view.
+- **Where it comes from.** Nothing is set by a page. Each `ScrollRegion` draws its own mark, so every table and board gains it, and a page does not choose, move or hide it. The colour is `--sr-edge` in `ScrollRegion.css`, the theme's teal at 11% in light and 12% in dark, fading to nothing. A test blends it over the work card and the plain card and keeps the foreground and muted text at 4.5:1 or more under its strongest point.
+- **What it is not.** It takes no click and no tab stop, and a screen reader skips it. It is never a mask: a frozen first column is drawn over it, and a pinned heading row is not shaded. It does not animate the table: the mark itself fades in over `--motion-fast`, and not at all under reduced motion. In forced colours it is a 1 px line in the system text colour, and in print it is not drawn.
+- **The stacking order a pinned cell keeps.** The left mark is `z-index: 0`, the right mark `z-index: 5`. A frozen column is `z-1` or more, so it covers the left mark. A pinned heading cell is `z-10` or more, so it covers both. A pinned row menu at `z-1` sits under the right mark, so it does not hide it. A new pinned cell follows the same order.
+
 ## The shell
 
 The shell is `apps/web/src/app/shell/`. It is one screen tall: the panel and the top bar stand still, and only `main` scrolls.

@@ -1,0 +1,28 @@
+# ADR 0067: Scroll areas mark the side that has more, from frames pinned inside the box
+
+- **Status:** Proposed. `ScrollRegion` is a shared part of area 1, so Richie accepts or declines it in review. About twenty tables and boards of areas 1, 2, 3 and 4 gain the mark with no change in their files, and their owners are asked to look at their screens on the pull request.
+- **Date:** 2026-11-25
+- **Story:** [#384](https://github.com/xiu2809xiu-rgb/orderpilot/issues/384)
+
+## Context
+
+On a tablet or a phone, and wherever scrollbars hide themselves, a wide table or the Orders "By stage" board gives no sign that more columns lie to the left or the right. The board is nine columns and Done at 15.5 rem each, far wider than a tablet, and a held or overdue order in a column nobody scrolled to can be missed. `ScrollRegion` is the one scroll area every such page uses.
+
+The mark has to meet four limits. It must not change the outside of `ScrollRegion` (one element, its props, its `className`, its role and its tab stop rule), because no caller may change. It must stay at the edge of the visible box while the content scrolls, and must not lag behind a finger. It must take no click and be no mask over the content. And it must sit under a frozen first column, so that a frozen column is never shaded.
+
+## Decision
+
+1. **A rail and two frames, last inside the scroll box.** `ScrollRegion` renders one more child after its content: `span.sr-edges`, `aria-hidden`, absolute at the box's origin, `pointer-events: none`, and as large as the whole scroll area (its width and height are set by script). Being absolute, it is no flex or grid item and takes no room. Being last, it leaves `firstElementChild` as the content, which the size observer already watches.
+2. **Each mark is a frame the browser keeps over the visible box.** The rail holds two `span.sr-edge` frames, sticky at the top left and as large as the visible box (`--sr-client-w` by `--sr-client-h`, set on the box by the same script). Because the rail is as large as the scroll area, the browser holds each frame over the visible box for the whole scroll range in both directions, so there is no scroll handler to lag. The mark is the frame's background: a 16 px strip at its left or right edge, from the theme's teal at 11% (light) or 12% (dark) to transparent.
+3. **Two frames, not one, because the marks need different stacking.** A frame that is sticky is its own stacking context, so one frame could not put its left mark under a frozen column and its right mark over a pinned row menu. The start frame is `z-index: 0` and the end frame `z-index: 5`. The pinned cells in the code today are: first column `z-1` in the data table and `z-10` in the access matrix, the row menu and checkbox `z-1`, and heading cells `z-10` and `z-20`. So a frozen column covers the left mark, a pinned heading row is never shaded, and a pinned row menu does not hide the right mark. A new pinned cell keeps that order: a frozen column at `z-1` or more, a heading at `z-10` or more.
+4. **The script measures, then syncs.** `measure()` collapses the rail and the two variables to 0, reads `scrollWidth`, `scrollHeight`, `clientWidth` and `clientHeight`, then sets the rail to the scroll size and the variables to the client size. Left in place, the rail and the frames would hold the scroll area open after the content shrinks or the window narrows. `sync()` sets `data-more-start` when `scrollLeft > 1` and `data-more-end` when `scrollLeft + clientWidth < scrollWidth - 1`. `measure()` then `sync()` run on mount and from the size observer, and `sync()` alone on a passive `scroll` listener. The rule is a pure function, `moreSides` in `scrollEdges.ts`, tested without a layout.
+5. **Quiet, and proved.** A mark is invisible until its attribute is on the box, then fades in over `--motion-fast` with `--ease-out`, and does not fade under reduced motion. In forced colours it is a 1 px line in `CanvasText`. In print the rail is not shown. A test reads the colour from the style sheet and the tokens, blends it over each card it can sit on, and keeps the foreground and muted text at 4.5:1 or more in light and in dark.
+6. **Left and right only.** A tall area already shows a cut row, and a heading row that stays in view.
+
+## Consequences
+
+- Every `ScrollRegion` gains one child element and a few lines of script. The entry chunk grows by the amount `pnpm budget` reports in the pull request.
+- The rail and the frames are counted in the scroll area by a browser, so the script must collapse them before it reads a size. Two unit tests fail without that, and the end-to-end spec checks the frames against the visible box at three scroll positions.
+- A caller that lays out its own pinned cells above z-index 5 on the right edge would hide the right mark under them. None does today: the pinned cells above are the ones listed.
+- Fractional zoom can leave a sub-pixel sliver, which the 1 px slack in the rule absorbs.
+- Not decided here: top and bottom marks, and a mark on any scroll area that is not a `ScrollRegion`. The side panel has its own fade above and below (`useScrollEdges`), and stays as it is.
