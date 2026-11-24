@@ -7,7 +7,13 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { Clock } from "../../src/common/clock.js";
 import { decodeBase32 } from "../../src/two-step/domain/base32.js";
 import { TwoStepRepository } from "../../src/two-step/two-step.repository.js";
-import { API, call, demoSignIn, emailForRole } from "../support/auth.js";
+import {
+  API,
+  auditEvents,
+  call,
+  demoSignIn,
+  emailForRole,
+} from "../support/auth.js";
 import { resetTestData } from "../support/reset.js";
 import { createTestApp, type TestApp } from "../support/test-app.js";
 import {
@@ -281,5 +287,43 @@ describe("two-step limits", () => {
     expect((await read()).lastLockedAt).toBe(FIXED_NOW.toISOString());
     clock.advance(7 * DAY);
     expect((await read()).lastLockedAt).toBeNull();
+  });
+});
+
+describe("two-step limits, the sampling of refusals", () => {
+  let t: TestApp;
+  let email: string;
+
+  beforeAll(async () => {
+    await resetTestData();
+    t = await createTestApp({}, [], (b) =>
+      b.overrideProvider(Clock).useValue(new TestClock()),
+    );
+    email = await emailForRole("FINANCE");
+  });
+  afterAll(async () => {
+    await t.close();
+  });
+
+  it("keeps an anonymous refusal from hiding a known account's still-locked, and writes that one once a minute", async () => {
+    const account = await enableTwoStep(t, email);
+    for (let round = 0; round < 2; round += 1) {
+      const token = await startChallenge(t, email);
+      await wrongTries(t, token, account, FIXED_NOW, 5);
+    }
+    const token = await startChallenge(t, email);
+    const right = { code: codeAt(account.secret, FIXED_NOW) };
+
+    // One address, one minute: an anonymous post first, then two refusals of
+    // the locked account.
+    await verifyWith(t, null, right);
+    await verifyWith(t, token, right);
+    await verifyWith(t, token, right);
+
+    const reasons = (await auditEvents(t))
+      .filter((e) => e.action === "auth.two-step.refused")
+      .map((e) => (e.changes as { reason: string }).reason)
+      .filter((reason) => ["no-challenge", "still-locked"].includes(reason));
+    expect(reasons.sort()).toEqual(["no-challenge", "still-locked"]);
   });
 });

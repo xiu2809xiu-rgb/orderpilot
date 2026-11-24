@@ -21,6 +21,12 @@ export interface Refusal {
    * are in the request log only.
    */
   readonly sampled?: boolean;
+  /**
+   * Splits the sampling key further than client and action, so one reason
+   * cannot hide another (an anonymous junk post must not suppress the refusal
+   * of a known account). Only for a caller that sets `sampled`.
+   */
+  readonly sampleBy?: string;
 }
 
 const SAMPLE_WINDOW_MS = 60_000;
@@ -49,7 +55,11 @@ export class AuthAuditor {
   constructor(@Inject(AuditService) private readonly audit: AuditService) {}
 
   async refused(req: Request, refusal: Refusal): Promise<void> {
-    if (refusal.sampled && !this.shouldSample(req, refusal.action)) return;
+    if (
+      refusal.sampled &&
+      !this.shouldSample(req, refusal.action, refusal.sampleBy)
+    )
+      return;
     const actor: AuditActor = refusal.user
       ? { kind: "user", userId: refusal.user.id, role: refusal.user.role }
       : { kind: "system", name: "auth" };
@@ -72,9 +82,13 @@ export class AuthAuditor {
     }
   }
 
-  private shouldSample(req: Request, action: string): boolean {
+  private shouldSample(
+    req: Request,
+    action: string,
+    sampleBy: string | undefined,
+  ): boolean {
     const now = Date.now();
-    const key = `${req.ip ?? "?"}|${action}`;
+    const key = `${req.ip ?? "?"}|${action}|${sampleBy ?? ""}`;
     const last = this.lastSampled.get(key);
     if (last !== undefined && now - last < SAMPLE_WINDOW_MS) return false;
     if (this.lastSampled.size >= SAMPLE_MAX_KEYS) this.lastSampled.clear();

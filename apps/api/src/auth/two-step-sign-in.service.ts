@@ -246,7 +246,9 @@ export class TwoStepSignInService {
       summary: SIGN_IN_REFUSAL,
       changes: { via: "sign-in" },
       ...(user ? { user, entity: { type: "User", id: user.id } } : {}),
-      ...(sampled ? { sampled: true } : {}),
+      // The reason is in the key: an anonymous "no-challenge" must not hide the
+      // "still-locked" of a person who proved their password.
+      ...(sampled ? { sampled: true, sampleBy: reason } : {}),
     });
   }
 }
