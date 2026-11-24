@@ -16,13 +16,14 @@ import {
   pictureReviewList,
 } from "@/lib/api/generated/endpoints/profile-pictures/profile-pictures";
 import { clampPage } from "@/lib/paging";
+import { WAITING_COUNT_API } from "@/lib/pictures/waitingCount";
 import { useListCount } from "@/lib/useListCount";
 import type { DecisionKind } from "./RejectDialog";
 import { ReviewRow } from "./ReviewRow";
 import { ReviewSkeleton } from "./ReviewSkeleton";
 import { ReviewTabs } from "./ReviewTabs";
 import { useDecisionFocus } from "./useDecisionFocus";
-import { useReviewActions, WAITING_COUNT_API } from "./useReviewActions";
+import { useReviewActions } from "./useReviewActions";
 
 // Only needed when a reviewer gives a reason.
 const RejectDialog = lazy(() =>
