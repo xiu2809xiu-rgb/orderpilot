@@ -57,7 +57,8 @@
       "verified": "Verified",
       "statusVerifying": "Verifying code",
       "statusVerified": "Code verified",
-      "statusWrong": "That code did not work."
+      "statusWrong": "That code did not work.",
+      "short": "Enter all 6 digits."
     },
     "submit": "Verify",
     "useRecovery": "Use a recovery code instead",
@@ -65,10 +66,14 @@
     "recovery": {
       "label": "Recovery code",
       "hint": "Each recovery code works once, for example ABCDE-FGHJK-LMNPQ.",
-      "required": "Enter one of your recovery codes."
+      "required": "Enter one of your recovery codes.",
+      "wrong": "That recovery code did not work. Check it and try again.",
+      "verifying": "Verifying recovery code",
+      "verified": "Recovery code verified"
     },
     "back": "Back to sign in",
     "loading": "Loading the second step",
+    "loadFailed": "The second step could not be loaded. Check your connection, go back and sign in again.",
     "lockedIn_one": "Too many wrong codes. Try again in {{count}} minute, or use a recovery code.",
     "lockedIn_other": "Too many wrong codes. Try again in {{count}} minutes, or use a recovery code.",
     "lockedInHours_one": "Too many wrong codes. Try again in {{count}} hour, or use a recovery code.",

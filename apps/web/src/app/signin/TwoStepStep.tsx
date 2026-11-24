@@ -4,13 +4,16 @@ import { useTranslation } from "react-i18next";
 import { CodeField } from "@/components/kit/code-field/CodeField";
 import { Button } from "@/components/ui/button";
 import { verifyTwoStep } from "@/lib/api/two-step";
+import { ShortCodeNote } from "../two-step/ShortCodeNote";
 import { useCodeFieldLabels } from "../two-step/useCodeFieldLabels";
+import { useShortCode } from "../two-step/useShortCode";
 import { useCodeAttempt, type FailureKind } from "../two-step/useCodeAttempt";
 import {
   describeTwoStepFailure,
   isChallengeEnded,
   isWrongCode,
   type TwoStepFailure,
+  type TwoStepMode,
 } from "../two-step/twoStepFailure";
 import { RecoveryCodeField } from "./RecoveryCodeField";
 import { TwoStepAlert } from "./TwoStepAlert";
@@ -23,8 +26,6 @@ interface TwoStepStepProps {
   onEnded: (failure: TwoStepFailure) => void;
   onBack: () => void;
 }
-
-type Mode = "app" | "recovery";
 
 /**
  * The second step of a sign-in: the six-digit code from the authenticator app,
@@ -43,10 +44,11 @@ export function TwoStepStep({
   const { t: tCommon } = useTranslation();
   const labels = useCodeFieldLabels();
   const alertId = useId();
-  const [mode, setMode] = useState<Mode>("app");
+  const [mode, setMode] = useState<TwoStepMode>("app");
   const [recovery, setRecovery] = useState("");
   const [emptyRecovery, setEmptyRecovery] = useState(false);
   const [failure, setFailure] = useState<TwoStepFailure | null>(null);
+  const short = useShortCode();
   const modeRef = useRef(mode);
   modeRef.current = mode;
 
@@ -57,7 +59,12 @@ export function TwoStepStep({
       ),
     onDone: onVerified,
     onFail: (error): FailureKind => {
-      const described = describeTwoStepFailure(error, tCommon, t);
+      const described = describeTwoStepFailure(
+        error,
+        tCommon,
+        t,
+        modeRef.current,
+      );
       if (isChallengeEnded(error)) {
         onEnded(described);
         return "plain";
@@ -75,6 +82,7 @@ export function TwoStepStep({
     if (attempt.busy || attempt.state !== "input") return;
     if (mode === "app") {
       if (attempt.value.length === 6) attempt.run(attempt.value);
+      else short.show();
       return;
     }
     if (recovery.trim() === "") {
@@ -107,10 +115,12 @@ export function TwoStepStep({
           value={attempt.value}
           state={attempt.state}
           focusOnMount
-          describedBy={failure ? alertId : undefined}
+          inputRef={short.inputRef}
+          describedBy={short.describedBy(failure ? alertId : undefined)}
           labels={labels}
           onChange={(next) => {
             setFailure(null);
+            short.clear();
             attempt.setValue(next);
           }}
           onComplete={(code) => {
@@ -121,7 +131,8 @@ export function TwoStepStep({
         <RecoveryCodeField
           id={`${idPrefix}-recovery`}
           value={recovery}
-          disabled={attempt.busy}
+          busy={attempt.busy}
+          state={attempt.state}
           error={emptyRecovery ? t("twoStep.recovery.required") : undefined}
           describedBy={failure ? alertId : undefined}
           onChange={(next) => {
@@ -131,6 +142,9 @@ export function TwoStepStep({
           }}
         />
       )}
+      {mode === "app" && short.short ? (
+        <ShortCodeNote id={short.noteId} />
+      ) : null}
       {failure ? <TwoStepAlert failure={failure} id={alertId} /> : null}
       <Button
         type="submit"
@@ -148,6 +162,7 @@ export function TwoStepStep({
           onClick={() => {
             setFailure(null);
             setEmptyRecovery(false);
+            short.clear();
             attempt.reset();
             setMode(mode === "app" ? "recovery" : "app");
           }}

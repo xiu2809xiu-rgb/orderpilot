@@ -403,3 +403,143 @@ describe("the second step of the sign-in form", () => {
     expect(await axeViolations(container)).toEqual([]);
   });
 });
+
+const recoveryInput = () => screen.getByLabelText("Recovery code");
+
+async function reachRecovery(user: User) {
+  await reachSecondStep(user);
+  await user.click(
+    screen.getByRole("button", { name: "Use a recovery code instead" }),
+  );
+}
+
+describe("the recovery-code mode of the second step", () => {
+  it("keeps the input focused and read-only, not disabled, while a try is checked, and says it is verifying", async () => {
+    const api = twoStepApi([
+      { ok: false, status: 422, code: "TWO_STEP_CODE_INVALID" },
+    ]);
+    vi.stubGlobal("fetch", api.fetch);
+    const user = userEvent.setup();
+    renderForm();
+    await reachRecovery(user);
+    await user.type(recoveryInput(), "ABCDE-FGHJK-LMNPQ{Enter}");
+
+    const status = await screen.findByText("Verifying recovery code");
+    expect(status).toHaveAttribute("role", "status");
+    expect(status).toBeVisible();
+    expect(recoveryInput()).toHaveAttribute("readonly");
+    expect(recoveryInput()).toHaveAttribute("aria-readonly", "true");
+    expect(recoveryInput()).not.toBeDisabled();
+    expect(recoveryInput()).toHaveFocus();
+
+    await screen.findByRole("alert");
+    await waitFor(() => {
+      expect(recoveryInput()).not.toHaveAttribute("readonly");
+    });
+    expect(recoveryInput()).toHaveFocus();
+    expect(screen.queryByText("Verifying recovery code")).toBeNull();
+  });
+
+  it("gives a wrong recovery code words of its own, not the advice about the next code and the clock", async () => {
+    vi.stubGlobal(
+      "fetch",
+      twoStepApi([{ ok: false, status: 422, code: "TWO_STEP_CODE_INVALID" }])
+        .fetch,
+    );
+    const user = userEvent.setup();
+    renderForm();
+    await reachRecovery(user);
+    await user.type(recoveryInput(), "ABCDE-FGHJK-LMNPQ{Enter}");
+
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent(
+      "That recovery code did not work. Check it and try again.",
+    );
+    expect(alert).not.toHaveTextContent("clock");
+    expect(alert).not.toHaveTextContent("next code");
+    expect(recoveryInput()).toHaveValue("ABCDE-FGHJK-LMNPQ");
+  });
+
+  it("says when the recovery code was verified, during the green hold", async () => {
+    vi.stubGlobal(
+      "fetch",
+      twoStepApi([{ ok: true, method: "recovery-code", left: 3 }]).fetch,
+    );
+    const user = userEvent.setup();
+    renderForm();
+    await reachRecovery(user);
+    await user.type(recoveryInput(), "ABCDE-FGHJK-LMNPQ{Enter}");
+
+    const status = await screen.findByText("Recovery code verified");
+    expect(status).toHaveAttribute("role", "status");
+    expect(recoveryInput()).toHaveAttribute("readonly");
+  });
+});
+
+describe("a code of fewer than six digits", () => {
+  it("is told so at the field with focus back in it, and sends nothing", async () => {
+    const api = twoStepApi([]);
+    vi.stubGlobal("fetch", api.fetch);
+    const user = userEvent.setup();
+    renderForm();
+    await reachSecondStep(user);
+    await user.type(codeInput(), "123");
+    await user.click(screen.getByRole("button", { name: "Verify" }));
+
+    const note = screen.getByText("Enter all 6 digits.");
+    expect(note).toBeVisible();
+    expect(note.id).not.toBe("");
+    expect(codeInput().getAttribute("aria-describedby")).toContain(note.id);
+    expect(codeInput()).toHaveFocus();
+    expect(screen.queryByRole("alert")).toBeNull();
+    expect(api.sent).toEqual([]);
+
+    await user.type(codeInput(), "4");
+    expect(screen.queryByText("Enter all 6 digits.")).toBeNull();
+  });
+
+  it("is told so for an empty field on Enter", async () => {
+    vi.stubGlobal("fetch", twoStepApi([]).fetch);
+    const user = userEvent.setup();
+    renderForm();
+    await reachSecondStep(user);
+    await user.keyboard("{Enter}");
+    expect(screen.getByText("Enter all 6 digits.")).toBeVisible();
+    expect(codeInput()).toHaveFocus();
+  });
+});
+
+describe("typing into the middle of a full code that can be edited again", () => {
+  it("replaces the digit under the caret and sends that code, not a shifted one", async () => {
+    const api = twoStepApi([{ ok: true }]);
+    let first = true;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+        const url = input instanceof Request ? input.url : input.toString();
+        if (first && url.includes("/two-step/verify")) {
+          first = false;
+          return Promise.reject(new TypeError("offline"));
+        }
+        return api.fetch(input, init);
+      }),
+    );
+    const user = userEvent.setup();
+    renderForm();
+    await reachSecondStep(user);
+    await user.type(codeInput(), "123456");
+    await screen.findByRole("alert");
+    expect(codeInput()).toHaveValue("123456");
+
+    const real = screen.getByLabelText<HTMLInputElement>("6-digit code", {
+      selector: "input",
+    });
+    real.focus();
+    real.setSelectionRange(2, 2);
+    await user.keyboard("9");
+
+    await waitFor(() => {
+      expect(api.sent).toEqual([{ code: "129456" }]);
+    });
+  });
+});

@@ -166,3 +166,64 @@ describe("the turn-off dialog", () => {
     ).toBeInTheDocument();
   });
 });
+
+describe("the turn-off dialog, recovery-code mode and a short code", () => {
+  async function openRecovery(user: User) {
+    await open(user, true);
+    await user.click(
+      within_().getByRole("button", { name: "Use a recovery code instead" }),
+    );
+  }
+  const recoveryInput = () => within_().getByLabelText("Recovery code");
+
+  it("keeps the recovery input focused and read-only while checked, says it is verifying, and gives a wrong code words of its own", async () => {
+    const user = userEvent.setup();
+    await openRecovery(user);
+    record("/disable", () => refusal("TWO_STEP_CODE_INVALID", 422));
+    await user.type(recoveryInput(), "TESTA-TESTB-TSTC1{Enter}");
+
+    const status = await within_().findByText("Verifying recovery code");
+    expect(status).toHaveAttribute("role", "status");
+    expect(recoveryInput()).toHaveAttribute("readonly");
+    expect(recoveryInput()).toHaveAttribute("aria-readonly", "true");
+    expect(recoveryInput()).not.toBeDisabled();
+    expect(recoveryInput()).toHaveFocus();
+
+    const alert = await within_().findByRole("alert");
+    expect(alert).toHaveTextContent(
+      "That recovery code did not work. Check it and try again.",
+    );
+    expect(alert).not.toHaveTextContent("clock");
+    await waitFor(() => {
+      expect(recoveryInput()).not.toHaveAttribute("readonly");
+    });
+    expect(recoveryInput()).toHaveFocus();
+  });
+
+  it("says when the recovery code was verified", async () => {
+    const user = userEvent.setup();
+    await openRecovery(user);
+    record("/disable", () => json({ data: OFF }));
+    await user.type(recoveryInput(), "TESTA-TESTB-TSTC1{Enter}");
+    expect(
+      await within_().findByText("Recovery code verified"),
+    ).toHaveAttribute("role", "status");
+  });
+
+  it("tells a code of fewer than six digits so at the field, with focus in it and no alert", async () => {
+    const user = userEvent.setup();
+    await open(user, true);
+    const bodies = record("/disable", () => json({ data: OFF }));
+    await user.type(codeInput(), "123");
+    await user.click(turnOff());
+
+    const note = within_().getByText("Enter all 6 digits.");
+    expect(note).toBeVisible();
+    expect(codeInput().getAttribute("aria-describedby")).toContain(note.id);
+    expect(codeInput()).toHaveFocus();
+    expect(within_().queryByRole("alert")).toBeNull();
+    expect(bodies).toEqual([]);
+    await user.type(codeInput(), "4");
+    expect(within_().queryByText("Enter all 6 digits.")).toBeNull();
+  });
+});

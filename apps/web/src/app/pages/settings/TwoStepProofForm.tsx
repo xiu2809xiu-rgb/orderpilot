@@ -7,7 +7,9 @@ import {
   isWrongCode,
   type TwoStepFailure,
 } from "@/app/two-step/twoStepFailure";
+import { ShortCodeNote } from "@/app/two-step/ShortCodeNote";
 import { useCodeFieldLabels } from "@/app/two-step/useCodeFieldLabels";
+import { useShortCode } from "@/app/two-step/useShortCode";
 import {
   useCodeAttempt,
   type FailureKind,
@@ -46,6 +48,7 @@ export function TwoStepProofForm<T>({
   const [passwordFocus, setPasswordFocus] = useState(0);
   const [needs, setNeeds] = useState<"password" | "recovery" | null>(null);
   const [failure, setFailure] = useState<TwoStepFailure | null>(null);
+  const short = useShortCode();
   const live = useRef({ recoveryMode, password });
   live.current = { recoveryMode, password };
 
@@ -57,7 +60,12 @@ export function TwoStepProofForm<T>({
       ),
     onDone,
     onFail: (error): FailureKind => {
-      const described = describeTwoStepFailure(error, tCommon, tSignin);
+      const described = describeTwoStepFailure(
+        error,
+        tCommon,
+        tSignin,
+        live.current.recoveryMode ? "recovery" : "app",
+      );
       if (error instanceof ApiError && error.code === "TWO_STEP_SETUP_ENDED") {
         onSetupEnded?.(described);
         return "plain";
@@ -95,6 +103,7 @@ export function TwoStepProofForm<T>({
     if (attempt.busy || attempt.state !== "input") return;
     if (!recoveryMode) {
       if (attempt.value.length === 6) start(attempt.value);
+      else short.show();
     } else if (recovery.trim() === "") {
       setNeeds("recovery");
     } else {
@@ -132,7 +141,8 @@ export function TwoStepProofForm<T>({
         <RecoveryCodeField
           id={`${idPrefix}-recovery`}
           value={recovery}
-          disabled={attempt.busy}
+          busy={attempt.busy}
+          state={attempt.state}
           error={
             needs === "recovery"
               ? tSignin("twoStep.recovery.required")
@@ -151,15 +161,20 @@ export function TwoStepProofForm<T>({
           value={attempt.value}
           state={attempt.state}
           focusOnMount={!needsPassword}
-          describedBy={failure ? alertId : undefined}
+          inputRef={short.inputRef}
+          describedBy={short.describedBy(failure ? alertId : undefined)}
           labels={labels}
           onChange={(next) => {
             setFailure(null);
+            short.clear();
             attempt.setValue(next);
           }}
           onComplete={start}
         />
       )}
+      {!recoveryMode && short.short ? (
+        <ShortCodeNote id={short.noteId} />
+      ) : null}
       {failure ? <TwoStepAlert failure={failure} id={alertId} /> : null}
       <ProofFormButtons
         busy={attempt.busy}
@@ -174,6 +189,7 @@ export function TwoStepProofForm<T>({
         onToggle={() => {
           setFailure(null);
           setNeeds(null);
+          short.clear();
           attempt.reset();
           setRecoveryMode((now) => !now);
         }}
