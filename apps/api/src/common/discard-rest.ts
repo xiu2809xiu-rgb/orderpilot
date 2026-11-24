@@ -14,8 +14,16 @@ export interface DiscardOptions {
  * connection until the server's own long timeout. So the rest is read and
  * discarded, within a byte budget and a time budget, and the connection is
  * dropped only if either runs out.
+ *
+ * `readBoundedBody` reads a request through its async iterator and never
+ * returns it, so that iterator's `readable` listener is still on the request,
+ * and a stream with one stays paused whatever `resume()` and a `data` listener
+ * say. Removing the `readable` listeners is what lets the rest flow. Closing
+ * the iterator instead would destroy the request at once, which is the reset
+ * this function exists to avoid.
  */
 export function discardRest(request: Readable, options: DiscardOptions): void {
+  request.removeAllListeners("readable");
   let seen = 0;
   const timer = setTimeout(() => {
     request.destroy();
