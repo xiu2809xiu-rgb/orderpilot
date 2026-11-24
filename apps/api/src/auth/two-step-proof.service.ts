@@ -29,6 +29,8 @@ export type ProofOutcome =
   | {
       readonly kind: "ok";
       readonly method: "code" | "recovery-code";
+      /** The step a code was accepted for; null for a recovery code. */
+      readonly step: number | null;
       /** How many recovery codes are unused after this proof. */
       readonly recoveryCodesLeft: number;
     }
@@ -97,6 +99,7 @@ export class TwoStepProofService {
       return {
         kind: "ok",
         method: "code",
+        step: verdict.step,
         recoveryCodesLeft: await this.recoveryCodes.countUnused(row.userId),
       };
     }
@@ -135,6 +138,7 @@ export class TwoStepProofService {
     return {
       kind: "ok",
       method: "recovery-code",
+      step: null,
       recoveryCodesLeft: await this.recoveryCodes.countUnused(row.userId),
     };
   }

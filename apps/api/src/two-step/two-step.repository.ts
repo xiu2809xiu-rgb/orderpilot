@@ -86,7 +86,7 @@ export class TwoStepRepository {
   }
 
   /** The first right code switches it on. */
-  async activate(userId: string, step: number, at: Date): Promise<void> {
+  async activate(userId: string, step: number | null, at: Date): Promise<void> {
     await this.database.client.twoStepSecret.update({
       where: { userId },
       data: {

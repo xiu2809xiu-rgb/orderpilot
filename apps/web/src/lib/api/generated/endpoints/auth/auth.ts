@@ -29,6 +29,15 @@ import type {
   AuthRefresh200,
   DemoAuthDemoLogin200,
   DemoAuthDemoLoginBody,
+  TwoStepDisable200,
+  TwoStepDisableBody,
+  TwoStepEnable200,
+  TwoStepEnableBody,
+  TwoStepNewCodes200,
+  TwoStepNewCodesBody,
+  TwoStepSetup200,
+  TwoStepSetupBody,
+  TwoStepStatus200,
   TwoStepVerify200,
   TwoStepVerifyBody
 } from '../../model';
@@ -505,6 +514,474 @@ export function useAuthMe<TData = Awaited<ReturnType<typeof authMe>>, TError = E
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getAuthMeQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary Whether two-step verification is on, for the account card
+ */
+export const twoStepStatus = (
+
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<TwoStepStatus200>(
+      {url: `/api/v1/auth/two-step`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getTwoStepStatusQueryKey = () => {
+    return [
+    `/api/v1/auth/two-step`
+    ] as const;
+    }
+
+
+export const getTwoStepStatusQueryOptions = <TData = Awaited<ReturnType<typeof twoStepStatus>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof twoStepStatus>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getTwoStepStatusQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof twoStepStatus>>> = ({ signal }) => twoStepStatus(signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof twoStepStatus>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type TwoStepStatusQueryResult = NonNullable<Awaited<ReturnType<typeof twoStepStatus>>>
+export type TwoStepStatusQueryError = ErrorType<unknown>
+
+
+export function useTwoStepStatus<TData = Awaited<ReturnType<typeof twoStepStatus>>, TError = ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof twoStepStatus>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof twoStepStatus>>,
+          TError,
+          Awaited<ReturnType<typeof twoStepStatus>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTwoStepStatus<TData = Awaited<ReturnType<typeof twoStepStatus>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof twoStepStatus>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof twoStepStatus>>,
+          TError,
+          Awaited<ReturnType<typeof twoStepStatus>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTwoStepStatus<TData = Awaited<ReturnType<typeof twoStepStatus>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof twoStepStatus>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Whether two-step verification is on, for the account card
+ */
+
+export function useTwoStepStatus<TData = Awaited<ReturnType<typeof twoStepStatus>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof twoStepStatus>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getTwoStepStatusQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary Start turning two-step on: a new secret and its setup key. Needs the password of a password session
+ */
+export const twoStepSetup = (
+    twoStepSetupBody: TwoStepSetupBody,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<TwoStepSetup200>(
+      {url: `/api/v1/auth/two-step/setup`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: twoStepSetupBody, signal
+    },
+      );
+    }
+
+
+
+
+export const getTwoStepSetupQueryKey = (twoStepSetupBody?: TwoStepSetupBody,) => {
+    return [
+    'POST', `/api/v1/auth/two-step/setup`, twoStepSetupBody
+    ] as const;
+    }
+
+
+export const getTwoStepSetupQueryOptions = <TData = Awaited<ReturnType<typeof twoStepSetup>>, TError = ErrorType<unknown>>(twoStepSetupBody: TwoStepSetupBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof twoStepSetup>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getTwoStepSetupQueryKey(twoStepSetupBody);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof twoStepSetup>>> = ({ signal }) => twoStepSetup(twoStepSetupBody, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof twoStepSetup>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type TwoStepSetupQueryResult = NonNullable<Awaited<ReturnType<typeof twoStepSetup>>>
+export type TwoStepSetupQueryError = ErrorType<unknown>
+
+
+export function useTwoStepSetup<TData = Awaited<ReturnType<typeof twoStepSetup>>, TError = ErrorType<unknown>>(
+ twoStepSetupBody: TwoStepSetupBody, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof twoStepSetup>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof twoStepSetup>>,
+          TError,
+          Awaited<ReturnType<typeof twoStepSetup>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTwoStepSetup<TData = Awaited<ReturnType<typeof twoStepSetup>>, TError = ErrorType<unknown>>(
+ twoStepSetupBody: TwoStepSetupBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof twoStepSetup>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof twoStepSetup>>,
+          TError,
+          Awaited<ReturnType<typeof twoStepSetup>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTwoStepSetup<TData = Awaited<ReturnType<typeof twoStepSetup>>, TError = ErrorType<unknown>>(
+ twoStepSetupBody: TwoStepSetupBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof twoStepSetup>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Start turning two-step on: a new secret and its setup key. Needs the password of a password session
+ */
+
+export function useTwoStepSetup<TData = Awaited<ReturnType<typeof twoStepSetup>>, TError = ErrorType<unknown>>(
+ twoStepSetupBody: TwoStepSetupBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof twoStepSetup>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getTwoStepSetupQueryOptions(twoStepSetupBody,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary Confirm the setup with the first code. Switches two-step on and shows ten recovery codes once
+ */
+export const twoStepEnable = (
+    twoStepEnableBody: TwoStepEnableBody,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<TwoStepEnable200>(
+      {url: `/api/v1/auth/two-step/enable`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: twoStepEnableBody, signal
+    },
+      );
+    }
+
+
+
+
+export const getTwoStepEnableQueryKey = (twoStepEnableBody?: TwoStepEnableBody,) => {
+    return [
+    'POST', `/api/v1/auth/two-step/enable`, twoStepEnableBody
+    ] as const;
+    }
+
+
+export const getTwoStepEnableQueryOptions = <TData = Awaited<ReturnType<typeof twoStepEnable>>, TError = ErrorType<unknown>>(twoStepEnableBody: TwoStepEnableBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof twoStepEnable>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getTwoStepEnableQueryKey(twoStepEnableBody);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof twoStepEnable>>> = ({ signal }) => twoStepEnable(twoStepEnableBody, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof twoStepEnable>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type TwoStepEnableQueryResult = NonNullable<Awaited<ReturnType<typeof twoStepEnable>>>
+export type TwoStepEnableQueryError = ErrorType<unknown>
+
+
+export function useTwoStepEnable<TData = Awaited<ReturnType<typeof twoStepEnable>>, TError = ErrorType<unknown>>(
+ twoStepEnableBody: TwoStepEnableBody, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof twoStepEnable>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof twoStepEnable>>,
+          TError,
+          Awaited<ReturnType<typeof twoStepEnable>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTwoStepEnable<TData = Awaited<ReturnType<typeof twoStepEnable>>, TError = ErrorType<unknown>>(
+ twoStepEnableBody: TwoStepEnableBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof twoStepEnable>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof twoStepEnable>>,
+          TError,
+          Awaited<ReturnType<typeof twoStepEnable>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTwoStepEnable<TData = Awaited<ReturnType<typeof twoStepEnable>>, TError = ErrorType<unknown>>(
+ twoStepEnableBody: TwoStepEnableBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof twoStepEnable>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Confirm the setup with the first code. Switches two-step on and shows ten recovery codes once
+ */
+
+export function useTwoStepEnable<TData = Awaited<ReturnType<typeof twoStepEnable>>, TError = ErrorType<unknown>>(
+ twoStepEnableBody: TwoStepEnableBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof twoStepEnable>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getTwoStepEnableQueryOptions(twoStepEnableBody,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary Turn two-step off. Needs a current code or a recovery code, and the password of a password session
+ */
+export const twoStepDisable = (
+    twoStepDisableBody: TwoStepDisableBody,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<TwoStepDisable200>(
+      {url: `/api/v1/auth/two-step/disable`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: twoStepDisableBody, signal
+    },
+      );
+    }
+
+
+
+
+export const getTwoStepDisableQueryKey = (twoStepDisableBody?: TwoStepDisableBody,) => {
+    return [
+    'POST', `/api/v1/auth/two-step/disable`, twoStepDisableBody
+    ] as const;
+    }
+
+
+export const getTwoStepDisableQueryOptions = <TData = Awaited<ReturnType<typeof twoStepDisable>>, TError = ErrorType<unknown>>(twoStepDisableBody: TwoStepDisableBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof twoStepDisable>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getTwoStepDisableQueryKey(twoStepDisableBody);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof twoStepDisable>>> = ({ signal }) => twoStepDisable(twoStepDisableBody, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof twoStepDisable>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type TwoStepDisableQueryResult = NonNullable<Awaited<ReturnType<typeof twoStepDisable>>>
+export type TwoStepDisableQueryError = ErrorType<unknown>
+
+
+export function useTwoStepDisable<TData = Awaited<ReturnType<typeof twoStepDisable>>, TError = ErrorType<unknown>>(
+ twoStepDisableBody: TwoStepDisableBody, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof twoStepDisable>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof twoStepDisable>>,
+          TError,
+          Awaited<ReturnType<typeof twoStepDisable>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTwoStepDisable<TData = Awaited<ReturnType<typeof twoStepDisable>>, TError = ErrorType<unknown>>(
+ twoStepDisableBody: TwoStepDisableBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof twoStepDisable>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof twoStepDisable>>,
+          TError,
+          Awaited<ReturnType<typeof twoStepDisable>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTwoStepDisable<TData = Awaited<ReturnType<typeof twoStepDisable>>, TError = ErrorType<unknown>>(
+ twoStepDisableBody: TwoStepDisableBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof twoStepDisable>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Turn two-step off. Needs a current code or a recovery code, and the password of a password session
+ */
+
+export function useTwoStepDisable<TData = Awaited<ReturnType<typeof twoStepDisable>>, TError = ErrorType<unknown>>(
+ twoStepDisableBody: TwoStepDisableBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof twoStepDisable>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getTwoStepDisableQueryOptions(twoStepDisableBody,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary Make ten new recovery codes. Needs a current code. The old codes stop working
+ */
+export const twoStepNewCodes = (
+    twoStepNewCodesBody: TwoStepNewCodesBody,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<TwoStepNewCodes200>(
+      {url: `/api/v1/auth/two-step/recovery-codes`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: twoStepNewCodesBody, signal
+    },
+      );
+    }
+
+
+
+
+export const getTwoStepNewCodesQueryKey = (twoStepNewCodesBody?: TwoStepNewCodesBody,) => {
+    return [
+    'POST', `/api/v1/auth/two-step/recovery-codes`, twoStepNewCodesBody
+    ] as const;
+    }
+
+
+export const getTwoStepNewCodesQueryOptions = <TData = Awaited<ReturnType<typeof twoStepNewCodes>>, TError = ErrorType<unknown>>(twoStepNewCodesBody: TwoStepNewCodesBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof twoStepNewCodes>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getTwoStepNewCodesQueryKey(twoStepNewCodesBody);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof twoStepNewCodes>>> = ({ signal }) => twoStepNewCodes(twoStepNewCodesBody, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof twoStepNewCodes>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type TwoStepNewCodesQueryResult = NonNullable<Awaited<ReturnType<typeof twoStepNewCodes>>>
+export type TwoStepNewCodesQueryError = ErrorType<unknown>
+
+
+export function useTwoStepNewCodes<TData = Awaited<ReturnType<typeof twoStepNewCodes>>, TError = ErrorType<unknown>>(
+ twoStepNewCodesBody: TwoStepNewCodesBody, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof twoStepNewCodes>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof twoStepNewCodes>>,
+          TError,
+          Awaited<ReturnType<typeof twoStepNewCodes>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTwoStepNewCodes<TData = Awaited<ReturnType<typeof twoStepNewCodes>>, TError = ErrorType<unknown>>(
+ twoStepNewCodesBody: TwoStepNewCodesBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof twoStepNewCodes>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof twoStepNewCodes>>,
+          TError,
+          Awaited<ReturnType<typeof twoStepNewCodes>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useTwoStepNewCodes<TData = Awaited<ReturnType<typeof twoStepNewCodes>>, TError = ErrorType<unknown>>(
+ twoStepNewCodesBody: TwoStepNewCodesBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof twoStepNewCodes>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Make ten new recovery codes. Needs a current code. The old codes stop working
+ */
+
+export function useTwoStepNewCodes<TData = Awaited<ReturnType<typeof twoStepNewCodes>>, TError = ErrorType<unknown>>(
+ twoStepNewCodesBody: TwoStepNewCodesBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof twoStepNewCodes>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getTwoStepNewCodesQueryOptions(twoStepNewCodesBody,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

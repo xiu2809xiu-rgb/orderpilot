@@ -22,6 +22,7 @@ import { PermissionsGuard } from "./guards/permissions.guard.js";
 import { PermissionPolicy } from "./permission-policy.js";
 import { RolePermissionRepository } from "./role-permission.repository.js";
 import { TwoStepProofService } from "./two-step-proof.service.js";
+import { TwoStepSettingsService } from "./two-step-settings.service.js";
 import { TwoStepSignInService } from "./two-step-sign-in.service.js";
 import { TwoStepController } from "./two-step.controller.js";
 
@@ -57,6 +58,7 @@ export class AuthModule {
         },
         TwoStepProofService,
         TwoStepSignInService,
+        TwoStepSettingsService,
         {
           provide: AccessTokens,
           useFactory: (c: AppConfig) =>

@@ -123,7 +123,7 @@ export async function enableTwoStep(
   const secret = options.secret ?? RFC_SEED;
   const at = options.at ?? FIXED_NOW;
   await secrets.deleteForUser(user.id);
-  const box = options.box ?? t.app.get(SecretBox);
+  const box: SecretBox = options.box ?? t.app.get(SecretBox);
   await secrets.startSetup(user.id, box.seal(secret, user.id), at);
   await secrets.activate(user.id, stepOf(at) - 5, at);
   const raw = generateRecoveryCodes(10);

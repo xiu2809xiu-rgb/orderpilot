@@ -1,8 +1,22 @@
+import {
+  recoveryCodesResponseSchema,
+  twoStepSetupResponseSchema,
+} from "@orderpilot/shared";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { Clock } from "../../src/common/clock.js";
-import { encodeBase32 } from "../../src/two-step/domain/base32.js";
+import {
+  decodeBase32,
+  encodeBase32,
+} from "../../src/two-step/domain/base32.js";
 import { normaliseRecoveryCode } from "../../src/two-step/domain/recovery-codes.js";
-import { auditEvents, emailForRole } from "../support/auth.js";
+import {
+  API,
+  TEST_DEMO_PASSWORD,
+  auditEvents,
+  call,
+  emailForRole,
+  passwordSignIn,
+} from "../support/auth.js";
 import { resetTestData } from "../support/reset.js";
 import { createTestApp, type TestApp } from "../support/test-app.js";
 import {
@@ -68,5 +82,47 @@ describe("two-step secrecy", () => {
         expect(text).not.toContain(`"${code}"`);
       }
     }
+  });
+
+  it("keeps the setup key, the recovery codes and the password out of the trail and the logs", async () => {
+    const email = await emailForRole("WAREHOUSE");
+    const browser = await passwordSignIn(t, email);
+    const post = (path: string, body: object) =>
+      call(t, browser, "post", `${API}/auth/two-step/${path}`, {
+        csrf: true,
+        body,
+      });
+
+    const setup = await post("setup", { password: TEST_DEMO_PASSWORD });
+    const { setupKey } = twoStepSetupResponseSchema.parse(setup.body).data;
+    const secret = decodeBase32(setupKey) ?? Buffer.alloc(0);
+    const code = codeAt(secret, FIXED_NOW);
+    const enable = await post("enable", { code });
+    const { recoveryCodes } = recoveryCodesResponseSchema.parse(
+      enable.body,
+    ).data;
+    await post("disable", {
+      password: TEST_DEMO_PASSWORD,
+      recoveryCode: recoveryCodes[0],
+    });
+
+    const trail = JSON.stringify(await auditEvents(t));
+    const logs = JSON.stringify(t.logLines());
+    for (const text of [trail, logs]) {
+      for (const secretText of [
+        setupKey,
+        secret.toString("hex"),
+        TEST_DEMO_PASSWORD,
+        ...recoveryCodes,
+        ...recoveryCodes.map((c) => normaliseRecoveryCode(c) ?? ""),
+      ]) {
+        expect(text).not.toContain(secretText);
+      }
+      expect(text).not.toContain(`"${code}"`);
+    }
+    // The three answers that carry a secret are marked not to be cached.
+    expect(setup.headers["cache-control"]).toBe("no-store");
+    expect(enable.headers["cache-control"]).toBe("no-store");
+    expect(trail).toContain("auth.two-step.setup-started");
   });
 });

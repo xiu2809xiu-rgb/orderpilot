@@ -1,18 +1,25 @@
-import { twoStepVerifyResponseSchema } from "@orderpilot/shared";
+import {
+  twoStepSetupResponseSchema,
+  twoStepStatusResponseSchema,
+  twoStepVerifyResponseSchema,
+} from "@orderpilot/shared";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { Clock } from "../../src/common/clock.js";
+import { decodeBase32 } from "../../src/two-step/domain/base32.js";
 import { TwoStepRepository } from "../../src/two-step/two-step.repository.js";
-import { emailForRole } from "../support/auth.js";
+import { API, call, demoSignIn, emailForRole } from "../support/auth.js";
 import { resetTestData } from "../support/reset.js";
 import { createTestApp, type TestApp } from "../support/test-app.js";
 import {
   FIXED_NOW,
   TestClock,
+  clearTwoStep,
   codeAt,
   enableTwoStep,
   errorCodeOf,
   startChallenge,
   verifyWith,
+  wrongCodeAt,
   wrongTries,
   type TwoStepAccount,
 } from "../support/two-step.js";
@@ -181,5 +188,98 @@ describe("two-step limits", () => {
     expect(
       twoStepVerifyResponseSchema.parse(afterWeek.body).meta.lockedRecently,
     ).toBe(false);
+  });
+
+  it("gives the same count to the settings routes", async () => {
+    // Five wrong codes at sign-in, five more at the turn-off route: ten in all.
+    await wrongTries(
+      t,
+      await startChallenge(t, email),
+      account,
+      clock.now(),
+      5,
+    );
+    const demo = await demoSignIn(t, "PRODUCT_MANAGER");
+    const disable = (body: object) =>
+      call(t, demo, "post", `${API}/auth/two-step/disable`, {
+        csrf: true,
+        body,
+      });
+    for (let n = 0; n < 5; n += 1) {
+      const wrong = await disable({
+        code: wrongCodeAt(account.secret, clock.now()),
+      });
+      expect(wrong.status).toBe(422);
+    }
+
+    const right = codeAt(account.secret, clock.now());
+    const atSignIn = await verifyWith(t, await startChallenge(t, email), {
+      code: right,
+    });
+    const atDisable = await disable({ code: right });
+    const atNewCodes = await call(
+      t,
+      demo,
+      "post",
+      `${API}/auth/two-step/recovery-codes`,
+      {
+        csrf: true,
+        body: { code: right },
+      },
+    );
+
+    for (const res of [atSignIn, atDisable, atNewCodes]) {
+      expect(res.status).toBe(429);
+      expect(errorCodeOf(res)).toBe("TWO_STEP_LOCKED");
+      expect(res.headers["retry-after"]).toBe("900");
+      expect(
+        (res.body as { error: { details: unknown } }).error.details,
+      ).toBeNull();
+    }
+    expect((await stateOfAccount())?.lockedUntil).not.toBeNull();
+  });
+
+  it("counts wrong confirm codes toward the lock", async () => {
+    const other = await emailForRole("WAREHOUSE");
+    await clearTwoStep(t, other);
+    const demo = await demoSignIn(t, "WAREHOUSE");
+    const setup = await call(t, demo, "post", `${API}/auth/two-step/setup`, {
+      csrf: true,
+      body: {},
+    });
+    expect(setup.status).toBe(200);
+    const pending =
+      decodeBase32(
+        twoStepSetupResponseSchema.parse(setup.body).data.setupKey,
+      ) ?? Buffer.alloc(0);
+    const enable = (code: string) =>
+      call(t, demo, "post", `${API}/auth/two-step/enable`, {
+        csrf: true,
+        body: { code },
+      });
+    for (let n = 0; n < 10; n += 1) {
+      expect((await enable(wrongCodeAt(pending, clock.now()))).status).toBe(
+        422,
+      );
+    }
+
+    const locked = await enable("123456");
+
+    expect(locked.status).toBe(429);
+    expect(locked.headers["retry-after"]).toBe("900");
+    await clearTwoStep(t, other);
+  });
+
+  it("shows the owner a recent lock in the status for seven days", async () => {
+    await lockOut();
+    const demo = await demoSignIn(t, "PRODUCT_MANAGER");
+    const read = async () =>
+      twoStepStatusResponseSchema.parse(
+        (await call(t, demo, "get", `${API}/auth/two-step`)).body,
+      ).data;
+
+    expect((await read()).lastLockedAt).toBe(FIXED_NOW.toISOString());
+    clock.advance(7 * DAY);
+    expect((await read()).lastLockedAt).toBeNull();
   });
 });

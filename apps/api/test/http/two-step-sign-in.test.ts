@@ -11,6 +11,7 @@ import {
   API,
   TEST_DEMO_PASSWORD,
   auditEvents,
+  browserFrom,
   call,
   demoSignIn,
   emailForRole,
@@ -510,6 +511,20 @@ describe("two-step sign-in, a secret that cannot be opened", () => {
       recoveryCode: account.recoveryCodes[0],
     });
     expect(recovery.status).toBe(200);
+    // And it can turn two-step off with another recovery code, then start again.
+    const browser = browserFrom(
+      twoStepVerifyResponseSchema.parse(recovery.body).data,
+      recovery.headers["set-cookie"],
+    );
+    const off = await call(t, browser, "post", `${API}/auth/two-step/disable`, {
+      csrf: true,
+      body: {
+        password: TEST_DEMO_PASSWORD,
+        recoveryCode: account.recoveryCodes[1],
+      },
+    });
+    expect(off.status).toBe(200);
+    expect((await passwordLogin(t, email)).status).toBe(200);
   });
 });
 
