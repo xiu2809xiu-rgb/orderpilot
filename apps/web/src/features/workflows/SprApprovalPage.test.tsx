@@ -97,7 +97,7 @@ function open(role: "APPROVER" | "PRODUCT_MANAGER") {
 
 describe("the SPR approval page", () => {
   beforeAll(async () => {
-    await i18n.loadNamespaces("workflows");
+    await i18n.loadNamespaces(["workflows", "directions-home"]);
   });
 
   it("marks the suggested fields and shows both numbers, the stock basis and the approver", async () => {
@@ -112,7 +112,7 @@ describe("the SPR approval page", () => {
     ).toHaveAttribute("href", "/master-data/vendors/V-0001");
     expect(screen.getByRole("link", { name: "SO-0003" })).toHaveAttribute(
       "href",
-      "/workflows/orders/SO-0003",
+      "/orders/SO-0003",
     );
     // jsdom has no layout: the class is what makes each record link a 44 px
     // target under a coarse pointer.

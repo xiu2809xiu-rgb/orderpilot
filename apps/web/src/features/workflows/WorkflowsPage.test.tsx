@@ -70,7 +70,7 @@ function open(role: "APPROVER" | "WAREHOUSE" | "MANAGEMENT", route = "/") {
 
 describe("the task inbox", () => {
   beforeAll(async () => {
-    await i18n.loadNamespaces("workflows");
+    await i18n.loadNamespaces(["workflows", "directions-home"]);
   });
 
   beforeEach(() => {
@@ -80,18 +80,18 @@ describe("the task inbox", () => {
   it("lists the caller's tasks with both record numbers and the mock labels", async () => {
     server.use(getWorkflowsMyTasksMockHandler(page([SPR_TASK, TASK])));
     const { container } = open("APPROVER");
+    expect(await screen.findByText("Approve the SPR")).toBeInTheDocument();
+    // Worded as Home words the task, not with the sample data's own title (#290).
     expect(
-      await screen.findByText(
-        "Approve or reject the stock purchase requisition",
-      ),
-    ).toBeInTheDocument();
+      screen.queryByText("Approve or reject the stock purchase requisition"),
+    ).toBeNull();
     expect(screen.getByText("SPR-20261102-0002")).toBeInTheDocument();
     // A compact row: no "none yet" filler while Business Central has no number.
     expect(screen.queryByText(/none yet/)).toBeNull();
     expect(screen.getByText("Mock")).toBeInTheDocument();
     expect(screen.getByText("Synthetic demo data")).toBeInTheDocument();
     expect(screen.getByText("Overdue")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Open request/ })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /Review/ })).toHaveAttribute(
       "href",
       "/workflows/sprs/SPR-20261102-0002",
     );
@@ -119,7 +119,7 @@ describe("the task inbox", () => {
     expect(screen.getByText("USD 4,867.02")).toBeInTheDocument();
     expect(screen.getByText("SPR-1001")).toBeInTheDocument();
     // No row shouts: the page keeps its one primary action for itself.
-    expect(screen.getByRole("link", { name: /Open request/ })).not.toHaveClass(
+    expect(screen.getByRole("link", { name: /Review/ })).not.toHaveClass(
       "bg-primary",
     );
   });
@@ -171,7 +171,7 @@ describe("the task inbox", () => {
         "Rachel Goh passed this on to you, because it is above their limit.",
       ),
     ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Open request/ })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /Review/ })).toHaveAttribute(
       "href",
       "/workflows/sprs/SPR-20261102-0002",
     );
@@ -230,14 +230,14 @@ describe("the task inbox", () => {
       await screen.findByText(/Your role cannot open or decide this yet/),
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole("link", { name: /Open request/ }),
+      screen.queryByRole("link", { name: /Review/ }),
     ).not.toBeInTheDocument();
   });
 
   it("shows nothing extra when nothing has been handed over", async () => {
     server.use(getWorkflowsMyTasksMockHandler(page([TASK])));
     open("APPROVER");
-    await screen.findByText("Add the air waybill");
+    await screen.findByText("Add the shipping documents");
     expect(screen.queryByText("Waiting for you")).not.toBeInTheDocument();
   });
 
@@ -254,14 +254,36 @@ describe("the task inbox", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "trace-handed-1",
     );
-    expect(await screen.findByText("Add the air waybill")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Add the shipping documents"),
+    ).toBeInTheDocument();
+  });
+
+  it("opens an order's own page, as Home does, and a payment's form on the steps page (#290)", async () => {
+    const PAY = {
+      ...TASK,
+      id: "00000000-0000-4000-8000-000000000003",
+      kind: "CONFIRM_PAYMENT",
+      title: "Confirm the prepayment",
+      assigneeRole: "FINANCE",
+      orderNo: "SO-0009",
+    } as const;
+    server.use(getWorkflowsMyTasksMockHandler(page([TASK, PAY])));
+    open("APPROVER");
+    expect(
+      await screen.findByRole("link", { name: /Open order/ }),
+    ).toHaveAttribute("href", "/orders/SO-0008");
+    expect(
+      screen.getByRole("link", { name: /Enter payment details/ }),
+    ).toHaveAttribute("href", "/workflows/orders/SO-0009");
   });
 
   it("gives the warehouse big touch targets", async () => {
     server.use(getWorkflowsMyTasksMockHandler(page([TASK])));
     open("WAREHOUSE");
     const action = await screen.findByRole("link", { name: /Open order/ });
-    expect(action.className).toContain("min-h-14");
+    // 44 px, and full width on a narrow tablet so it is easy to hit.
+    expect(action.className).toContain("min-h-11");
     expect(action.className).toContain("w-full");
     // Bigger, not louder: the page keeps its one primary action for itself.
     expect(action).not.toHaveClass("bg-primary");
@@ -276,11 +298,13 @@ describe("the task inbox", () => {
       ),
     );
     open("APPROVER");
-    await screen.findByText("Add the air waybill");
+    await screen.findByText("Add the shipping documents");
     fireEvent.click(screen.getByRole("switch", { name: "Overdue only" }));
     expect(await screen.findByText("No tasks waiting")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Show all tasks" }));
-    expect(await screen.findByText("Add the air waybill")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Add the shipping documents"),
+    ).toBeInTheDocument();
   });
 
   it("shows the error with its trace id and retries", async () => {
@@ -298,7 +322,9 @@ describe("the task inbox", () => {
     open("APPROVER");
     expect(await screen.findByRole("alert")).toHaveTextContent("trace-inbox-1");
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
-    expect(await screen.findByText("Add the air waybill")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Add the shipping documents"),
+    ).toBeInTheDocument();
   });
 
   it("shows permission denied when the server refuses", async () => {
@@ -330,7 +356,7 @@ describe("the task inbox", () => {
       }),
     );
     open("MANAGEMENT", "/?role=LOGISTICS");
-    await screen.findByText("Add the air waybill");
+    await screen.findByText("Add the shipping documents");
     const group = screen.getByRole("group", { name: "Show the inbox of" });
     fireEvent.click(within(group).getByRole("button", { name: "Warehouse" }));
     await screen.findByText("Tasks for Warehouse");

@@ -1,6 +1,7 @@
 import type { SprDetail } from "@orderpilot/shared";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import { useOrderLinks } from "@/features/directions/screens/home/homeLinks";
 import { RecordLink, StatusBadge } from "@/components/common";
 import { cn } from "@/lib/utils";
 import { formatAmount, formatQuantity } from "./format";
@@ -29,6 +30,7 @@ function money(amount: string, currency: string): string {
 /** The request itself: vendor, item, quantity and amount, each record a link. */
 export function SprSummary({ spr }: { spr: SprDetail }) {
   const { t } = useTranslation("workflows");
+  const links = useOrderLinks();
   return (
     <dl className="grid gap-s2 sm:grid-cols-2">
       <Fact label={t("spr.vendor")}>
@@ -54,7 +56,7 @@ export function SprSummary({ spr }: { spr: SprDetail }) {
       {spr.orderNo ? (
         <Fact label={t("spr.order")}>
           <RecordLink
-            to={`/workflows/orders/${spr.orderNo}`}
+            to={links.order(spr.orderNo)}
             className={cn(LINK, "font-mono")}
           >
             {spr.orderNo}

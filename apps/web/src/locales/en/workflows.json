@@ -51,7 +51,7 @@
     "navision": "Business Central",
     "navisionNone": "none yet",
     "openOrder": "Open order",
-    "openRequest": "Open request",
+    "openRequest": "Review",
     "kinds": {
       "REVIEW_FIELDS": "Review fields",
       "RAISE_SPR": "Raise SPR",

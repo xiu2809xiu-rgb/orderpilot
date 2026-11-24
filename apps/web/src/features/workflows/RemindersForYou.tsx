@@ -3,6 +3,7 @@ import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { RecordLink, SectionCard, StatusBadge } from "@/components/common";
 import { useWorkflowsNoticesForMe } from "@/lib/api/generated/endpoints/workflows/workflows";
+import { useOrderLinks } from "@/features/directions/screens/home/homeLinks";
 import { formatDate, formatDateTime } from "./format";
 import { QueryBoundary } from "./QueryBoundary";
 
@@ -13,6 +14,7 @@ const TONES = { REMINDER: "info", ESCALATION: "danger" } as const;
 
 function NoticeRow({ notice }: { notice: WorkflowNotice }) {
   const { t } = useTranslation("workflows");
+  const links = useOrderLinks();
   return (
     <li className="flex flex-col gap-1 py-s2 sm:flex-row sm:items-center sm:gap-s3">
       <div className="min-w-0 flex-1 space-y-1">
@@ -24,7 +26,7 @@ function NoticeRow({ notice }: { notice: WorkflowNotice }) {
         </p>
         <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
           <RecordLink
-            to={`/workflows/orders/${notice.orderNo}`}
+            to={links.order(notice.orderNo)}
             className="inline-flex items-center font-mono text-primary underline-offset-4 hover:underline pointer-coarse:min-h-11"
           >
             {notice.orderNo}
