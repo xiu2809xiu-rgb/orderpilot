@@ -114,8 +114,12 @@ describe("the pill's sheet", () => {
 describe("the dot's sheet", () => {
   it("makes a 44 px box on a coarse pointer", () => {
     const block = atRule(dot, "@media (pointer: coarse)");
-    expect(block).toContain("inline-size: 44px");
-    expect(block).toContain("block-size: 44px");
+    expect(block).toMatch(
+      /\.ap-trigger\s*{\s*inline-size: 44px;\s*block-size: 44px;/,
+    );
+    expect(block).toMatch(
+      /\.ap-trigger\[data-skin="ring"\]\s*{\s*inline-size: 44px;\s*block-size: 44px;/,
+    );
   });
 
   it("keeps the 24 px of WCAG 2.5.8 on a fine pointer", () => {
