@@ -65,7 +65,7 @@ F-1 and G-1 have landed. F-2 fills in its item when it does.
 
 - **From F-1, access policy and masking** (landed, [ADR 0024](../adr/0024-governance-base.md)):
   - **The matrix screen** at `/governance` (`apps/web/src/features/governance/`): a switch per role and permission over the real `RolePermission` table, "Copy a role", and the users tab (disable and enable, never delete, on P-10's routes). Changes are saved at once and audited. Reading needs `roles.read`, changing needs `roles.manage`; an auditor can read and cannot change.
-  - **The system admin never approves, posts or pays.** `NEVER_FOR_SYSTEM_ADMIN` and `LOCKED_CELLS` in `packages/shared/src/governance/matrix.ts`; the default matrix leaves the three permissions off and the server refuses to grant them (409). `roles.manage` is locked on.
+  - **The system admin never does the work itself.** `NEVER_FOR_SYSTEM_ADMIN` and `LOCKED_CELLS` in `packages/shared/src/governance/matrix.ts`; the default matrix leaves those permissions off and the server refuses to grant them (409). `roles.manage` is locked on. F-1 locked three (approve, confirm and post a payment); the list has grown since, to eight with #383 ([The administrator's own role](#the-administrators-own-role-383)).
   - **New permissions** in `packages/shared/src/permissions.ts`: `roles.read`, `approvals.decide`, `payments.confirm`, `payments.post`. Who holds the last three is a sample (Approver decides, Finance confirms and posts): settle it in your policy.
   - **Masking** in `apps/api/src/modules/governance/domain/masking.ts`: `mask(rules, role, field, value)` returns a `MaskedField` whose value is `null` for a role the rule does not list, so the value never reaches the browser. One neutral sample rule, `sample.customerNote`, shown on the Masking tab through P-12's `MaskedValue` with the reason. `GET /governance/masking/sample`.
   - **Classification and the AI rule:** the four levels and the mask reasons are in `packages/shared/src/governance/classification.ts`. `decideAiDestination` (`domain/ai-destination-policy.ts`) answers what data may go to which provider; the default is synthetic data only. `GET /governance/ai-destinations`, `POST /governance/ai-destinations/check`: P-17's gateway calls the second.
@@ -357,7 +357,7 @@ await authorisation.enforce(
 
 **Copying a role has no Undo,** because nothing keeps the target's old rows. A second step says so before anything is sent, and the audit trail keeps the change.
 
-**The matrix's own refusals are audited (#378).** A locked cell (the system admin never approves, posts or pays, and always keeps `roles.manage`) and a copy of a role onto itself still answer 409 with the same words, and now leave a row: `governance.permission.refused` for one cell, `governance.role.copy.refused` for a copy, each with its `rule` (`locked-cell` or `same-role`) and, for a locked cell, the permission and its `lock`. The rules throw `MatrixRuleRefusedError` (`matrix-rules.ts`), and `matrix.service.ts` records it after the transaction has rolled back, so the row stays. Tests: `governance-domain.test.ts` and `test/http/governance.test.ts`.
+**The matrix's own refusals are audited (#378).** A locked cell (one the system admin never holds, or one a role always keeps, such as the system admin's `roles.manage`) and a copy of a role onto itself still answer 409 with the same words, and now leave a row: `governance.permission.refused` for one cell, `governance.role.copy.refused` for a copy, each with its `rule` (`locked-cell` or `same-role`) and, for a locked cell, the permission and its `lock`. The rules throw `MatrixRuleRefusedError` (`matrix-rules.ts`), and `matrix.service.ts` records it after the transaction has rolled back, so the row stays. Tests: `governance-domain.test.ts` and `test/http/governance.test.ts`.
 
 **E2E #3 in a browser** is in `apps/e2e/tests/governance.spec.ts`. A script calls the SPR approval route as Warehouse, with no page involved, and gets the 403 envelope with its trace ID. The auditor then opens the audit viewer, filtered to that route and role, and the newest row's details must show that trace ID. A refusal's record is the route pattern, not the SPR number, so the trace ID is what proves the row is this call's. This covers the direct call and its audit row. F-9 adds the masking step, a refusal read as the system admin and as the auditor ([Audit viewer polish](#audit-viewer-polish-f-9)). The self-approval step of E2E #3 is not in it.
 
@@ -486,6 +486,21 @@ Four findings from the walk of 15 Nov as the system administrator and the audito
 - **The Refusals tab** fits a phone: each sample column may shrink, the JSON scrolls in its own box, and the sample trace ID wraps.
 - **The audit log at 1440 px** fitted its card already, since #272. Its browser test now also checks that the side panel is open.
 - **Tests:** `UsersTab.test.tsx`, `CopyRoleDialog.test.tsx`, `copyChange.test.ts`, `test/http/auth-guards.test.ts` (the audited refusal), and two browser tests in `governance.spec.ts`. The Refusals test measures the main panel itself, because `checkPage` measures only the document (#376).
+
+## The administrator's own role (#383)
+
+The system admin can change its own role, and from ADR 0058's step 6 it is the only role that reads the trail of that change. So the approvers are told, and two actions are locked ([ADR 0067](../adr/0067-the-approvers-are-told-what-the-administrator-gives-itself.md)).
+
+- **Two more locks:** the system admin never holds `spr.route` or `documents.upload`. The same list drives the matrix's refusal (409, audited), the permissions guard and the policy's system admin rule, so a row put in the table another way is still refused.
+- **The approvers are told.** When the System admin role gains a permission on one cell, or anything in a copy onto it, a `GovernanceNotice` is written in the same transaction, and the grant's audit row names it (`noticeId`). A revocation, another role, or a grant already held writes nothing.
+  - **Who reads them:** only `approvals.decide` holders, at `GET /governance/notices` and `POST /governance/notices/:id/read`. The system admin never holds it.
+  - **Read state** is per person, and marking one read is audited once (`governance.notice.read`).
+  - **On screen:** the bell adds the unread notices to its count and lists them first, each with "Mark as read". The section is `features/governance/notices/AdminNotices.tsx`, and the bell calls `useAdminNotices` only for a role that decides approvals.
+- **The approver keeps `approvals.decide`,** locked on, so the administrator cannot take it away to hide its notices. A copy onto the approver role from a role without it is refused too.
+- **The seed repairs a broken lock:** a never-cell held, or an always-cell missing, from a script or an older database. Each repair has its own audit row by the seed, and a second run records nothing (`repairLockedCells` in `role-permission-seed.ts`, `lockRepairs` in `matrix-rules.ts`).
+- **No route changes an account's role.** The Users tab only disables and enables. A test pins this, so a story that adds a role change has to think about the notice.
+- **Code:** `governance-notice.repository.ts`, `governance-notice.service.ts`, `governance-notice.controller.ts`, and `tellApprovers` in `matrix.service.ts`. The contract is `packages/shared/src/governance/notices.ts`.
+- **Tests:** `test/http/governance-admin-notices.test.ts` (nine cases, including a grant that does not commit and leaves no notice), `governance-controls.test.ts` (the two locks at the guard and the policy), `governance-domain.test.ts` (the lock repairs), `AdminNotices.test.tsx` and `Notifications.test.tsx`.
 
 ## Options to consider, not built
 
