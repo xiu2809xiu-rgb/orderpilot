@@ -80,6 +80,22 @@ export class UserRepository extends BaseRepository<UserRecord, string> {
     return new Map(rows.map((row) => [row.id, row.displayName]));
   }
 
+  /**
+   * The ids of the enabled accounts with these addresses, by address, in one
+   * query that reads two columns. An unknown or disabled address is left out.
+   */
+  async idsByEmails(emails: readonly string[]): Promise<Map<string, string>> {
+    if (emails.length === 0) return new Map();
+    const rows = await this.database.client.user.findMany({
+      where: {
+        email: { in: emails.map((email) => email.toLowerCase()) },
+        disabledAt: null,
+      },
+      select: { id: true, email: true },
+    });
+    return new Map(rows.map((row) => [row.email, row.id]));
+  }
+
   async create(user: NewUser): Promise<UserRecord> {
     const row = await this.database.client.user.create({
       data: { ...user, email: user.email.toLowerCase() },

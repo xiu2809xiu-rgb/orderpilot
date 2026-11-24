@@ -7,6 +7,8 @@
 @demoPassword = orderpilot-demo-password
 
 ### What the sign-in page offers. Public. With DEMO_MODE=false, demoRoles is empty.
+### In demo mode each entry also carries the account's userId (ADR 0070), which
+### GET /availability?ids= takes; outside demo mode there is no id.
 GET {{baseUrl}}/api/v1/auth/options
 
 ### Demo sign-in as one of the nine roles. Only with DEMO_MODE=true: otherwise this

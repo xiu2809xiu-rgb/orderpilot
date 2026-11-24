@@ -78,17 +78,29 @@ export class AuthService {
     private readonly twoStep: TwoStepSignInService,
   ) {}
 
-  /** What the sign-in page needs to know. */
-  options(): AuthOptions {
-    return this.config.demoMode
-      ? {
-          demoMode: true,
-          demoRoles: offeredAccounts().map(({ role, displayName }) => ({
-            role,
-            displayName,
-          })),
-        }
-      : { demoMode: false, demoRoles: [] };
+  /**
+   * What the sign-in page needs to know. In demo mode each offered account
+   * also carries its id, so the Demo role menu can ask for that account's
+   * availability (ADR 0070). It adds nothing a visitor cannot get: anyone can
+   * already sign in as any of them and read the id from the session. Outside
+   * demo mode there are no accounts to offer and no id. An account that is not
+   * seeded, or is disabled, is offered without one.
+   */
+  async options(): Promise<AuthOptions> {
+    if (!this.config.demoMode) return { demoMode: false, demoRoles: [] };
+    const offered = offeredAccounts();
+    const ids = await this.users.idsByEmails(
+      offered.map((account) => account.email),
+    );
+    return {
+      demoMode: true,
+      demoRoles: offered.map(({ role, displayName, email }) => {
+        const userId = ids.get(email.toLowerCase());
+        return userId === undefined
+          ? { role, displayName }
+          : { role, displayName, userId };
+      }),
+    };
   }
 
   async login(

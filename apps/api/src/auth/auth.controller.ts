@@ -45,10 +45,13 @@ export class AuthController {
 
   @Get("options")
   @Public()
-  @ApiOperation({ summary: "What the sign-in page offers" })
+  @ApiOperation({
+    summary:
+      "What the sign-in page offers. In demo mode each demo account also carries its id",
+  })
   @ApiOkResponse({ schema: openApiSchema(authRoutes.options.response) })
-  options() {
-    return { data: this.auth.options() };
+  async options() {
+    return { data: await this.auth.options() };
   }
 
   @Post("login")
