@@ -1,4 +1,4 @@
-import { act, screen } from "@testing-library/react";
+import { act, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeAll, describe, expect, it } from "vitest";
 import { useSessionStore } from "@/stores/session";
@@ -8,10 +8,12 @@ import { sessionFor } from "@/test/fixtures";
 import { PictureCard } from "./PictureCard";
 import {
   answerMine,
+  APPROVED_ID,
   approvedPicture,
   emptyPicture,
   failMine,
   NOON,
+  PENDING_ID,
   pendingPicture,
 } from "./pictureTestKit";
 import { loadSettingsWords, renderSettings } from "./settingsTestKit";
@@ -223,15 +225,115 @@ describe("the profile picture card", () => {
     ).toBeInTheDocument();
   });
 
-  it("has no accessibility violations in any of its states", async () => {
+  it("draws a waiting picture to its owner, and an approved one when nothing waits", async () => {
+    stubImage("load");
     answerMine(pendingPicture());
-    const { container, unmount } = renderSettings(<PictureCard />);
+    const first = renderSettings(<PictureCard />);
     await screen.findByText("Waiting for review");
-    expect(await axeViolations(container)).toEqual([]);
-    unmount();
-    answerMine(emptyPicture());
-    const second = renderSettings(<PictureCard />);
-    await screen.findByText(/You have no profile picture/);
-    expect(await axeViolations(second.container)).toEqual([]);
+    await waitFor(() => {
+      expect(document.querySelector("img")?.getAttribute("src")).toMatch(
+        new RegExp(`/${PENDING_ID}/image$`),
+      );
+    });
+    first.unmount();
+    answerMine(approvedPicture());
+    renderSettings(<PictureCard />);
+    await screen.findByText(/Approved on/);
+    await waitFor(() => {
+      expect(document.querySelector("img")?.getAttribute("src")).toMatch(
+        new RegExp(`/${APPROVED_ID}/image$`),
+      );
+    });
   });
+
+  it("draws the waiting picture, not the approved one, while a new one waits", async () => {
+    stubImage("load");
+    answerMine({ ...approvedPicture(), pending: pendingPicture().pending });
+    renderSettings(<PictureCard />);
+    await screen.findByText("Waiting for review");
+    await waitFor(() => {
+      expect(document.querySelector("img")?.getAttribute("src")).toMatch(
+        new RegExp(`/${PENDING_ID}/image$`),
+      );
+    });
+  });
+
+  // Each answer the route can give is a state of the card. The preview and the
+  // refusal need a chosen file, and PictureChooser.test.tsx checks those two.
+  it.each([
+    [
+      "empty",
+      () => {
+        answerMine(emptyPicture());
+      },
+      /You have no profile picture/,
+    ],
+    [
+      "waiting",
+      () => {
+        answerMine(pendingPicture());
+      },
+      /Waiting for review/,
+    ],
+    [
+      "approved",
+      () => {
+        answerMine(approvedPicture());
+      },
+      /Approved on/,
+    ],
+    [
+      "rejected",
+      () => {
+        answerMine({
+          ...emptyPicture(1),
+          notice: {
+            kind: "REJECTED",
+            reasonCode: "not_clear",
+            note: "Please face the camera",
+            decidedAt: NOON,
+          },
+        });
+      },
+      /Your last picture was not approved/,
+    ],
+    [
+      "taken down",
+      () => {
+        answerMine({
+          ...emptyPicture(1),
+          notice: {
+            kind: "TAKEN_DOWN",
+            reasonCode: "reported",
+            note: null,
+            decidedAt: NOON,
+          },
+        });
+      },
+      /A reviewer took your picture down/,
+    ],
+    [
+      "limit reached",
+      () => {
+        answerMine(emptyPicture(10));
+      },
+      /You have used all 10 uploads/,
+    ],
+    [
+      "error",
+      () => {
+        failMine();
+      },
+      /trace-picture-card/,
+    ],
+  ] as const)(
+    "has no accessibility violations when it is %s",
+    async (_state, serve, expected) => {
+      stubImage("load");
+      serve();
+      const { container } = renderSettings(<PictureCard />);
+      await screen.findByText(expected);
+      expect(await axeViolations(container)).toEqual([]);
+    },
+  );
 });

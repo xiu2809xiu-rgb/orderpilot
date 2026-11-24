@@ -391,7 +391,7 @@ describe("the list in Settings", () => {
     });
     expect(
       await screen.findByRole("link", {
-        name: /^Profile picturess*2s*waiting$/,
+        name: /^Profile pictures\s*2\s*waiting$/,
       }),
     ).toHaveAttribute("aria-current", "page");
     await userEvent.setup().click(
@@ -401,7 +401,7 @@ describe("the list in Settings", () => {
     );
     expect(
       await screen.findByRole("link", {
-        name: /^Profile picturess*1s*waiting$/,
+        name: /^Profile pictures\s*1\s*waiting$/,
       }),
     ).toBeInTheDocument();
   });

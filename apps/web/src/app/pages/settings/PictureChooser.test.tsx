@@ -6,6 +6,7 @@ import type * as PrepareModule from "@/lib/pictures/prepare-picture";
 import { useToastStore } from "@/components/common/toast";
 import { PictureChoiceError } from "@/lib/pictures/prepare-picture";
 import { stubImage } from "@/test/fakeImage";
+import { axeViolations } from "@/test/axe";
 import { errorBody } from "@/test/fixtures";
 import { server } from "@/test/server";
 import { PictureCard } from "./PictureCard";
@@ -352,5 +353,30 @@ describe("taking a picture back", () => {
     await user.click(await screen.findByRole("button", { name: "Remove" }));
     expect(await screen.findByRole("alert")).toBeInTheDocument();
     expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+});
+
+// The card's own states are checked in PictureCard.test.tsx: these two need a chosen file.
+describe("the chooser's accessibility", () => {
+  it("has no violations while a preview waits to be sent", async () => {
+    stubImage("load");
+    answerMine(emptyPicture());
+    const { container } = renderSettings(<PictureCard />);
+    await chooseAFile();
+    await screen.findByRole("button", { name: "Send for review" });
+    expect(await axeViolations(container)).toEqual([]);
+  });
+
+  it("has no violations when the server refused the picture", async () => {
+    stubImage("load");
+    answerMine(emptyPicture());
+    refuseUpload(400, "rejected_before", "trace-axe");
+    const { container } = renderSettings(<PictureCard />);
+    const user = await chooseAFile();
+    await user.click(
+      await screen.findByRole("button", { name: "Send for review" }),
+    );
+    await screen.findByText("trace-axe");
+    expect(await axeViolations(container)).toEqual([]);
   });
 });

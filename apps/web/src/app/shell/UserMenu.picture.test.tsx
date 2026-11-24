@@ -1,8 +1,9 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
 import { MemoryRouter } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { myPictureKey } from "@/lib/useMyPicture";
 import { useSessionStore } from "@/stores/session";
 import { stubImage } from "@/test/fakeImage";
 import { sessionFor } from "@/test/fixtures";
@@ -17,25 +18,48 @@ const NOON = "2026-11-24T04:00:00.000Z";
 const empty = { approved: null, pending: null, notice: null };
 const uploads = { used: 1, limit: 10 };
 
+/** Set inside the handlers: a test that looks for the absence of a picture must know the route was read. */
+let answered = 0;
+
+beforeEach(() => {
+  answered = 0;
+});
+
 function mine(data: object) {
   server.use(
-    http.get(MINE, () => HttpResponse.json({ data: { ...data, uploads } })),
+    http.get(MINE, () => {
+      answered += 1;
+      return HttpResponse.json({ data: { ...data, uploads } });
+    }),
   );
 }
 
 function renderMenu() {
   useSessionStore.getState().setSession(sessionFor("SUPPORT"));
-  return render(
-    <QueryClientProvider
-      client={
-        new QueryClient({ defaultOptions: { queries: { retry: false } } })
-      }
-    >
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  render(
+    <QueryClientProvider client={client}>
       <MemoryRouter>
         <UserMenu collapsed={false} />
       </MemoryRouter>
     </QueryClientProvider>,
   );
+  return client;
+}
+
+/** Waits until the route was answered and the query settled, then lets a stubbed image load or not. */
+async function settled(client: QueryClient, status: "success" | "error") {
+  const userId = useSessionStore.getState().session?.user.id ?? "";
+  await waitFor(() => {
+    expect(answered).toBeGreaterThan(0);
+    expect(client.getQueryState(myPictureKey(userId))?.status).toBe(status);
+  });
+  // The stubbed image answers in a microtask: a macrotask later it has been drawn or never will be.
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
 }
 
 const trigger = () => screen.getByRole("button", { name: /^Account menu/ });
@@ -77,17 +101,17 @@ describe("the account menu's avatar", () => {
         ai: { status: "NOT_ALLOWED" },
       },
     });
-    renderMenu();
-    // Wait for the answer to have been read, then look for any image.
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    const client = renderMenu();
+    await settled(client, "success");
     expect(document.querySelector("img")).toBeNull();
     expect(within(trigger()).getByText("MT")).toBeInTheDocument();
   });
 
   it("keeps the initials when the route fails", async () => {
     server.use(
-      http.get(MINE, () =>
-        HttpResponse.json(
+      http.get(MINE, () => {
+        answered += 1;
+        return HttpResponse.json(
           {
             error: {
               code: "INTERNAL_ERROR",
@@ -97,11 +121,12 @@ describe("the account menu's avatar", () => {
             },
           },
           { status: 500 },
-        ),
-      ),
+        );
+      }),
     );
-    renderMenu();
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    const client = renderMenu();
+    await settled(client, "error");
     expect(document.querySelector("img")).toBeNull();
+    expect(within(trigger()).getByText("MT")).toBeInTheDocument();
   });
 });
