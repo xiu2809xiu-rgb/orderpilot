@@ -17,6 +17,7 @@ export * from "./operation-log.js";
 export * from "./order.js";
 export * from "./orders.js";
 export * from "./permissions.js";
+export * from "./person-availability.js";
 export * from "./record-number.js";
 export * from "./roles.js";
 export * from "./two-step-routes.js";

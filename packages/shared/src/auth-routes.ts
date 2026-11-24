@@ -49,7 +49,14 @@ export const authOptionsSchema = z.object({
   demoMode: z.boolean(),
   // Empty when demoMode is false.
   demoRoles: z.array(
-    z.object({ role: roleSchema, displayName: z.string().min(1) }),
+    z.object({
+      role: roleSchema,
+      displayName: z.string().min(1),
+      // Only in demo mode, and only for an account that is seeded: it lets the
+      // Demo role menu ask for that account's availability (ADR 0070). Optional
+      // so a page's fixtures and an unseeded account stay valid.
+      userId: z.uuid().optional(),
+    }),
   ),
 });
 export type AuthOptions = z.infer<typeof authOptionsSchema>;
