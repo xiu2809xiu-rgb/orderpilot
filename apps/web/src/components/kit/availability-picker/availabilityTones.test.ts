@@ -17,7 +17,8 @@ const tokensCss = readFileSync(
   path.join(here, "../../../styles/tokens.css"),
   "utf8",
 );
-const dotCss = readFileSync(path.join(here, "availabilityDot.css"), "utf8");
+const read = (file: string) => readFileSync(path.join(here, file), "utf8");
+const dotCss = read("availabilityDot.css");
 
 /** The custom properties declared in one selector's block. */
 function block(source: string, selector: string): Tokens {
@@ -44,6 +45,16 @@ describe("the three availabilities", () => {
 
   it("lists the values in the order of the pill", () => {
     expect([...AVAILABILITY_ORDER]).toEqual([...PERSON_AVAILABILITIES]);
+  });
+
+  it("draws every mark in the colour that is measured below, on a dot and on an orb", () => {
+    const orb = read("availabilityPicker.css");
+    expect(dotCss).toMatch(
+      /\.ap-dot\s*{[^}]*color: var\(--destructive-foreground\)/s,
+    );
+    expect(orb).toMatch(
+      /\.ap-orb\s*{[^}]*color: var\(--destructive-foreground\)/s,
+    );
   });
 
   it("paints each tone in the sheet from the token of that name", () => {
