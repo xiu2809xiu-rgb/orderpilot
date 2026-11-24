@@ -1,7 +1,6 @@
 import { ChevronsUpDown, LogOut, Settings } from "lucide-react";
-import { lazy, Suspense, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -11,22 +10,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./overlays/dropdown-menu";
-import { logout } from "@/lib/api/auth";
-import { anyFormDirty } from "@/lib/dirty-forms";
+import { initials } from "@/lib/initials";
 import { cn } from "@/lib/utils";
 import { useSessionStore } from "@/stores/session";
-// Only needed when someone signs out over unsaved changes.
-const SignOutDialog = lazy(() =>
-  import("./SignOutDialog").then((m) => ({ default: m.SignOutDialog })),
-);
-
-function initials(name: string): string {
-  return name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part.charAt(0).toUpperCase())
-    .join("");
-}
+import { useSignOut } from "./useSignOut";
 
 /**
  * Who is signed in, at the foot of the side panel. The row opens the account
@@ -34,17 +21,9 @@ function initials(name: string): string {
  */
 export function UserMenu({ collapsed }: { collapsed: boolean }) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const user = useSessionStore((state) => state.session?.user);
-  const [asking, setAsking] = useState(false);
-  // Loaded on the first ask, then kept so that closing can return focus.
-  const [askedOnce, setAskedOnce] = useState(false);
+  const { requestSignOut, dialog } = useSignOut();
   if (!user) return null;
-
-  function signOut() {
-    setAsking(false);
-    void logout().then(() => navigate("/login"));
-  }
 
   return (
     <>
@@ -68,7 +47,10 @@ export function UserMenu({ collapsed }: { collapsed: boolean }) {
           </span>
           <ChevronsUpDown
             className={cn(
-              "size-4 shrink-0 text-muted-foreground",
+              // -me-1: the icon's own empty box is 4.7 px wide on its right,
+              // so its ink ended 16.7 px from the edge against the avatar's
+              // 12 px on the left.
+              "-me-1 size-4 shrink-0 text-muted-foreground",
               collapsed && "hidden",
             )}
             aria-hidden="true"
@@ -97,31 +79,13 @@ export function UserMenu({ collapsed }: { collapsed: boolean }) {
               {t("nav.settings")}
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem
-            onSelect={() => {
-              // Signing out deletes the drafts here, so changes get asked about.
-              if (anyFormDirty()) {
-                setAskedOnce(true);
-                setAsking(true);
-              } else signOut();
-            }}
-          >
+          <DropdownMenuItem onSelect={requestSignOut}>
             <LogOut aria-hidden="true" />
             {t("userMenu.signOut")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      {askedOnce ? (
-        <Suspense fallback={null}>
-          <SignOutDialog
-            open={asking}
-            onKeep={() => {
-              setAsking(false);
-            }}
-            onSignOut={signOut}
-          />
-        </Suspense>
-      ) : null}
+      {dialog}
     </>
   );
 }

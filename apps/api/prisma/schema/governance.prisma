@@ -25,13 +25,13 @@ model RevokedRolePermission {
   @@id([role, permission])
 }
 
-/// One user's approval setup, in the shape of Navision's Approval User Setup
-/// (packages/shared governance/approval.ts), plus when they are away, which
-/// Navision does not record. Configuration until Spectra confirms its
-/// approvers and limits (A-14). User ids are plain columns, as in the other
-/// areas' tables. The migration adds CHECKs Prisma cannot express: nobody is
-/// their own substitute, an absence starts before it ends, limits are not
-/// below zero.
+/// One user's approval setup, in the shape of Business Central's Approval User
+/// Setup (packages/shared governance/approval.ts), plus when they are away,
+/// which Business Central does not record. Configuration until Spectra
+/// confirms its approvers and limits (A-14). User ids are plain columns, as in
+/// the other areas' tables. The migration adds CHECKs Prisma cannot express:
+/// nobody is their own substitute, an absence starts before it ends, limits are
+/// not below zero.
 model ApprovalUserSetup {
   userId                      String    @id @db.Uuid
   /// Who approves what this user raises, and whom this user escalates to.

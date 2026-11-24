@@ -483,7 +483,8 @@
                               "spr.read",
                               "workflows.inboxes.any",
                               "tasks.complete",
-                              "masking.customerNote"
+                              "masking.customerNote",
+                              "spr.route"
                             ]
                           }
                         },
@@ -588,7 +589,8 @@
                               "spr.read",
                               "workflows.inboxes.any",
                               "tasks.complete",
-                              "masking.customerNote"
+                              "masking.customerNote",
+                              "spr.route"
                             ]
                           }
                         },
@@ -728,7 +730,8 @@
                               "spr.read",
                               "workflows.inboxes.any",
                               "tasks.complete",
-                              "masking.customerNote"
+                              "masking.customerNote",
+                              "spr.route"
                             ]
                           }
                         },
@@ -861,7 +864,8 @@
                               "spr.read",
                               "workflows.inboxes.any",
                               "tasks.complete",
-                              "masking.customerNote"
+                              "masking.customerNote",
+                              "spr.route"
                             ]
                           }
                         },
@@ -8998,7 +9002,8 @@
                               "spr.read",
                               "workflows.inboxes.any",
                               "tasks.complete",
-                              "masking.customerNote"
+                              "masking.customerNote",
+                              "spr.route"
                             ]
                           }
                         },
@@ -9048,7 +9053,8 @@
                                     "spr.read",
                                     "workflows.inboxes.any",
                                     "tasks.complete",
-                                    "masking.customerNote"
+                                    "masking.customerNote",
+                                    "spr.route"
                                   ]
                                 }
                               },
@@ -9105,7 +9111,8 @@
                                   "spr.read",
                                   "workflows.inboxes.any",
                                   "tasks.complete",
-                                  "masking.customerNote"
+                                  "masking.customerNote",
+                                  "spr.route"
                                 ]
                               },
                               "kind": {
@@ -9250,7 +9257,8 @@
                 "spr.read",
                 "workflows.inboxes.any",
                 "tasks.complete",
-                "masking.customerNote"
+                "masking.customerNote",
+                "spr.route"
               ]
             }
           },
@@ -9343,7 +9351,8 @@
                               "spr.read",
                               "workflows.inboxes.any",
                               "tasks.complete",
-                              "masking.customerNote"
+                              "masking.customerNote",
+                              "spr.route"
                             ]
                           }
                         },
@@ -9524,7 +9533,8 @@
                               "spr.read",
                               "workflows.inboxes.any",
                               "tasks.complete",
-                              "masking.customerNote"
+                              "masking.customerNote",
+                              "spr.route"
                             ]
                           }
                         },
@@ -9709,7 +9719,8 @@
                               "spr.read",
                               "workflows.inboxes.any",
                               "tasks.complete",
-                              "masking.customerNote"
+                              "masking.customerNote",
+                              "spr.route"
                             ]
                           }
                         },
@@ -9792,7 +9803,7 @@
             }
           }
         },
-        "summary": "Copy a role's permissions and data scope to another role",
+        "summary": "Copy a role's permissions to another role. The target's data scope stays as it was",
         "tags": ["Governance"]
       }
     },
@@ -12508,6 +12519,16 @@
               "minLength": 1,
               "maxLength": 100
             }
+          },
+          {
+            "name": "around",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            }
           }
         ],
         "responses": {
@@ -12704,6 +12725,63 @@
           }
         },
         "summary": "Audit events, newest first, a page at a time and filtered",
+        "tags": ["Audit"]
+      }
+    },
+    "/api/v1/audit/filter-options": {
+      "get": {
+        "operationId": "AuditViewer_filterOptions",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "people": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "format": "uuid",
+                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                              },
+                              "name": {
+                                "type": "string",
+                                "minLength": 1
+                              }
+                            },
+                            "required": ["id", "name"],
+                            "additionalProperties": false
+                          }
+                        },
+                        "actions": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        }
+                      },
+                      "required": ["people", "actions"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "The people in the trail by name, never by email, and the action names that exist, for the filters",
         "tags": ["Audit"]
       }
     },

@@ -19,7 +19,8 @@ import {
 /**
  * The order of Home for a team that has tasks, and where the shortcuts went.
  * The feedback on the proposal was that the layout looked nice but was not
- * easy to use: one list first, and nothing said twice.
+ * easy to use: the overview first, then one list of work, and nothing said
+ * twice.
  */
 beforeAll(async () => {
   await loadHomeNamespaces();
@@ -40,10 +41,11 @@ function serve(role: Role) {
 
 describe("the order of Home for a team with tasks", () => {
   it.each(INBOX_ROLES)(
-    "puts Needs you first, then the timeline and the numbers, then the flows (%s)",
+    "puts the timeline and the numbers first, then the flows, then Needs you, then the measures (%s)",
     async (role) => {
       serve(role);
       renderHome(role);
+      await screen.findByRole("heading", { level: 2, name: "Needs you" });
       await screen.findByRole("heading", {
         level: 2,
         name: "Orders in each step",
@@ -52,25 +54,22 @@ describe("the order of Home for a team with tasks", () => {
         .getAllByRole("heading", { level: 2 })
         .map((heading) => heading.textContent);
       // Of the inbox roles only the approver has the overdue orders, directly
-      // below Needs you.
+      // below Needs you. The five measures, where the role may read them,
+      // are the last section.
       const overdue = role === "APPROVER";
-      expect(names.slice(0, overdue ? 4 : 3)).toEqual([
-        "Needs you",
-        ...(overdue ? ["Most overdue, by amount"] : []),
+      const measures = sessionFor(role).permissions.includes("insights.read");
+      expect(names).toEqual([
         "My timeline",
         "Your numbers",
+        "Orders in each step",
+        "Needs you",
+        ...(overdue ? ["Most overdue, by amount"] : []),
+        ...(measures ? ["Spectra's five measures"] : []),
       ]);
-      expect(names.at(-1)).toBe("Orders in each step");
-      // The five measures, where the role may read them, come between.
-      const measures = names.indexOf("Spectra's five measures");
-      if (measures >= 0) {
-        expect(measures).toBeGreaterThan(2);
-        expect(measures).toBeLessThan(names.length - 1);
-      }
     },
   );
 
-  it("gives Needs you the whole width and sets the timeline beside the numbers", async () => {
+  it("gives Needs you the whole width below the timeline beside the numbers", async () => {
     serve("SUPPORT");
     renderHome("SUPPORT");
     await screen.findByRole("heading", { level: 2, name: "My timeline" });
@@ -79,9 +78,13 @@ describe("the order of Home for a team with tasks", () => {
     const numbers = screen.getByRole("region", { name: "Your numbers" });
     // Needs you is not inside the pair: it stands on a row of the page of its own.
     const pair = timeline.closest("div.lg\\:grid-cols-2");
-    expect(pair).not.toBeNull();
-    expect(pair?.contains(numbers)).toBe(true);
-    expect(pair?.contains(needs)).toBe(false);
+    if (!pair) throw new Error("The timeline is not in a pair");
+    expect(pair.contains(numbers)).toBe(true);
+    expect(pair.contains(needs)).toBe(false);
+    // And it comes after the pair in the page.
+    expect(
+      pair.compareDocumentPosition(needs) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
   });
 
   it("says how many wait once, in the sentence under the greeting", async () => {

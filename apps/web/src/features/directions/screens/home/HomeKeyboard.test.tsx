@@ -67,6 +67,27 @@ describe("the keyboard on Home's task rows", () => {
     expect(stops.filter((stop) => stop?.tagName === "ABBR")).toEqual([]);
   });
 
+  it("reaches the orders in each step with Tab before the first task of Needs you", async () => {
+    serveHome({ tasks });
+    renderHome("PRODUCT_MANAGER");
+    await waitFor(() => {
+      expect(actions()).toHaveLength(3);
+    });
+    const flows = await screen.findByRole("region", {
+      name: "Orders in each step",
+    });
+    await waitFor(() => {
+      expect(flows.querySelector("a[href]")).not.toBeNull();
+    });
+    const first = actions()[0];
+    const step = flows.querySelector("a[href]");
+    if (!first || !step) throw new Error("Missing a control");
+    // The tab order is the order of the page, so the overview comes first.
+    expect(
+      step.compareDocumentPosition(first) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
   it("keeps the long form of a term in a row's description and on hover", async () => {
     const user = userEvent.setup();
     serveHome({ tasks: [tasks[1] ?? makeTask()] });

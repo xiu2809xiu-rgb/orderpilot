@@ -6,7 +6,10 @@ import type { PolicyContext, PolicyRule } from "./authorisation-policy.js";
  * twice and disagree.
  */
 export type EarlierDuty =
-  "vendor-payment.approve" | "vendor-bank.change" | "payment-hold.verify";
+  | "vendor-payment.approve"
+  | "vendor-bank.change"
+  | "payment-hold.verify"
+  | "spr.route";
 
 /** Who did each earlier duty on the record, by user id. */
 export type EarlierDuties = Readonly<Partial<Record<EarlierDuty, string>>>;
@@ -22,10 +25,13 @@ interface DutyPair {
  * raising and approving an SPR, approving a vendor payment and clearing its
  * hold, and changing a vendor's bank details against paying that vendor. F-5
  * adds the two people a hold needs: whoever changed the details does neither
- * step, and whoever verified a hold does not also clear it.
+ * step, and whoever verified a hold does not also clear it. #252 adds the
+ * coordinator: whoever routed an SPR never decides it, even through a role
+ * that holds approvals.decide.
  */
 export const SEGREGATED_DUTIES: readonly DutyPair[] = [
   { earlier: "spr.raise", later: ["spr.approve"] },
+  { earlier: "spr.route", later: ["spr.approve"] },
   { earlier: "vendor-payment.approve", later: ["payment-hold.clear"] },
   {
     earlier: "vendor-bank.change",

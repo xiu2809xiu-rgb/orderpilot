@@ -1,7 +1,6 @@
 import { Lock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { ScrollRegion } from "@/components/common";
-import { NativeSelect } from "@/components/common/data-table/Field";
 import { Switch } from "@/components/ui/switch";
 import {
   Table,
@@ -15,31 +14,29 @@ import type { MatrixRead200Data } from "@/lib/api/generated/model";
 
 type Role = MatrixRead200Data["roles"][number]["role"];
 type Permission = MatrixRead200Data["permissions"][number];
-type Scope = MatrixRead200Data["roles"][number]["dataScope"];
 
 // The solid background of a pinned cell comes from the shared .dt-table rules,
 // so what scrolls under the first column never shows through.
 const ROW_HEAD =
   "sticky left-0 z-10 w-56 min-w-56 font-normal whitespace-normal";
-const SCOPES: readonly Scope[] = ["all", "brands", "own"];
 
 interface MatrixTableProps {
   matrix: MatrixRead200Data;
-  showDataScope: boolean;
   canManage: boolean;
   busy: boolean;
   onToggle: (role: Role, permission: Permission, granted: boolean) => void;
-  onScope: (role: Role, scope: Scope) => void;
 }
 
-/** Permissions down the side, roles across the top, one switch per cell. */
+/**
+ * Permissions down the side, roles across the top, one switch per cell. The
+ * stored data scope is not shown: no list reads it yet, and a control that
+ * changes nothing reads as broken (#268, ADR 0065).
+ */
 export function MatrixTable({
   matrix,
-  showDataScope,
   canManage,
   busy,
   onToggle,
-  onScope,
 }: MatrixTableProps) {
   const { t } = useTranslation("governance");
   const { t: tc } = useTranslation();
@@ -114,36 +111,6 @@ export function MatrixTable({
                 })}
               </TableRow>
             ))}
-            {showDataScope ? (
-              <TableRow>
-                <TableHead scope="row" className={ROW_HEAD}>
-                  {t("matrix.dataScope")}
-                  <span className="block text-xs text-muted-foreground">
-                    {t("matrix.dataScopeHint")}
-                  </span>
-                </TableHead>
-                {matrix.roles.map(({ role, dataScope }) => (
-                  <TableCell key={role} className="text-center">
-                    <NativeSelect
-                      compact
-                      className="has-disabled:opacity-50"
-                      value={dataScope}
-                      disabled={!canManage || busy}
-                      aria-label={`${t("matrix.dataScope")}: ${tc(`roles.${role}`)}`}
-                      onChange={(event) => {
-                        onScope(role, event.target.value as Scope);
-                      }}
-                    >
-                      {SCOPES.map((scope) => (
-                        <option key={scope} value={scope}>
-                          {t(`matrix.scopes.${scope}`)}
-                        </option>
-                      ))}
-                    </NativeSelect>
-                  </TableCell>
-                ))}
-              </TableRow>
-            ) : null}
           </TableBody>
         </Table>
       </ScrollRegion>

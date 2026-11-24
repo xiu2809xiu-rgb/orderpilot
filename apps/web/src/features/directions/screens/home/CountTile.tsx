@@ -39,7 +39,7 @@ export function CountTile({ cue }: { cue: FeatureCue }) {
   if (count.isPending) {
     return (
       <div className={TILE} aria-busy="true">
-        <span className={LABEL}>{label}</span>
+        <span className={`${LABEL} text-trim-start`}>{label}</span>
         <Skeleton
           className="h-9 w-16 animate-none"
           role="status"
@@ -51,7 +51,7 @@ export function CountTile({ cue }: { cue: FeatureCue }) {
   if (count.isError) {
     return (
       <div className={TILE}>
-        <span className={LABEL}>{label}</span>
+        <span className={`${LABEL} text-trim-start`}>{label}</span>
         <div className="flex flex-col items-start gap-1">
           <span className="fs-14 text-foreground">
             {t("tiles.unavailable")}
@@ -84,9 +84,9 @@ export function CountTile({ cue }: { cue: FeatureCue }) {
         className="group flex h-full min-h-24 flex-col justify-between gap-2 p-4 transition-colors hover:bg-(--dx-hover-bg) focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
       >
         <span className={`${LABEL} flex items-start justify-between gap-2`}>
-          {label}
+          <span className="text-trim-start">{label}</span>
           <ArrowUpRight
-            className="mt-0.5 size-4 shrink-0 transition-colors group-hover:text-foreground"
+            className="icon-after-trim mt-0.5 size-4 shrink-0 transition-colors group-hover:text-foreground"
             aria-hidden="true"
           />
         </span>

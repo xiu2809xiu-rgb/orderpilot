@@ -9,7 +9,6 @@
   grid-template-columns: minmax(0, 1fr) auto;
   column-gap: 1rem;
   align-items: end;
-  margin-bottom: 1rem;
 }
 
 .ph-head > .ph-title,
@@ -33,7 +32,7 @@
 }
 
 .ph-head > .dx-page-intro {
-  margin-top: 0.25rem;
+  margin-top: var(--space-1);
   color: var(--muted-foreground);
 }
 

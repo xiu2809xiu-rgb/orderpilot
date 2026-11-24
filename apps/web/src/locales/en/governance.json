@@ -19,7 +19,6 @@
     "toast": {
       "granted": "{{permission}} granted to {{role}}",
       "revoked": "{{permission}} taken from {{role}}",
-      "scope": "{{role}} now sees {{scope}}",
       "copied": "Permissions of {{from}} copied to {{to}}",
       "failed": "The change was not saved"
     },
@@ -40,6 +39,7 @@
     "groups": {
       "platform": "Platform setup",
       "oversight": "Audit and AI cost",
+      "masking": "Masking",
       "orders": "Documents, orders",
       "tracking": "Tracking and KPIs",
       "approvals": "Approvals, payments",
@@ -51,13 +51,6 @@
     "tableLabel": "Permissions by role",
     "scrollHint": "Scroll sideways to see every role.",
     "permission": "Permission",
-    "dataScope": "Data scope",
-    "dataScopeHint": "Which records a role may see. It is recorded here, and no list is filtered by it.",
-    "scopes": {
-      "all": "All records",
-      "brands": "Own brands",
-      "own": "Own records"
-    },
     "locked": {
       "never": "Cannot be granted: {{reason}}",
       "always": "Cannot be revoked: {{reason}}"
@@ -72,16 +65,25 @@
     "copy": {
       "open": "Copy a role",
       "title": "Copy a role's permissions",
-      "description": "Makes the target hold exactly what the source holds, with the same data scope. A copy that would break a locked cell is refused, so copying onto the system admin only works from a role that never approves, posts or pays.",
+      "description": "Makes the target hold exactly the permissions the source holds. A copy that would break a locked cell is refused, so copying onto the system admin only works from a role that never approves, posts or pays.",
       "from": "Copy from",
       "to": "Copy to",
+      "choose": "Choose a role",
       "submit": "Copy",
       "confirmTitle": "Replace what {{to}} holds?",
-      "confirmDescription": "{{to}} will hold exactly what {{from}} holds, with the same data scope. This can't be undone. The audit log keeps the change.",
+      "confirmDescription": "{{to}} will hold exactly the permissions {{from}} holds. This can't be undone. The audit log keeps the change.",
       "confirm": "Copy and replace",
       "back": "Back",
       "cancel": "Cancel",
       "same": "Pick two different roles.",
+      "change": {
+        "both": "{{to}} gains {{gains}} and loses {{loses}}.",
+        "gains": "{{to}} gains {{gains}}.",
+        "loses": "{{to}} loses {{loses}}.",
+        "none": "{{to}} already holds exactly these permissions, so a copy changes nothing."
+      },
+      "count_one": "{{count}} permission",
+      "count_other": "{{count}} permissions",
       "done": "Copied."
     }
   },
@@ -138,7 +140,8 @@
       }
     },
     "spr": {
-      "read": "Read stock purchase requests"
+      "read": "Read stock purchase requisitions",
+      "route": "Route a stock purchase requisition"
     },
     "tasks": {
       "complete": "Complete a task"
@@ -148,6 +151,7 @@
     "title": "Users",
     "description": "Users are disabled, never deleted, so the audit trail keeps its names.",
     "tableLabel": "Users",
+    "listLabel": "User list",
     "name": "Name",
     "email": "Email",
     "role": "Role",
@@ -159,10 +163,12 @@
     "toast": {
       "disabled": "{{name}} disabled",
       "enabled": "{{name}} enabled",
-      "failed": "The change was not saved"
+      "failed": "The change was not saved",
+      "reason": "{{reason}} Trace ID: {{traceId}}"
     },
     "disableFor": "Disable {{name}}",
     "enableFor": "Enable {{name}}",
+    "you": "You",
     "emptyTitle": "No users yet",
     "emptyDescription": "Users appear here once they exist.",
     "failed": "Could not change that user.",

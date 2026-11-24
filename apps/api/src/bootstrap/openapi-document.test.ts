@@ -31,6 +31,7 @@ describe("the OpenAPI document (what orval reads)", () => {
       "/api/v1/audit/chain",
       "/api/v1/audit/events",
       "/api/v1/audit/events/{id}",
+      "/api/v1/audit/filter-options",
       "/api/v1/auth/demo-login",
       "/api/v1/auth/login",
       "/api/v1/auth/logout",

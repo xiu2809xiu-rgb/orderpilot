@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { BlurFade } from "@/components/kit/BlurFade";
 import { formatLongDay } from "@/lib/format";
+import { opticalStyle } from "@/lib/opticalEdge";
 
 /**
  * The head of Home: the same markup as the shared PageHeader, so it looks and
@@ -22,7 +23,9 @@ export function HomeHeader({
   return (
     <header className="dx-page-head">
       <BlurFade offset={8} blur={4}>
-        <h1 className="dx-title">{title}</h1>
+        <h1 className="dx-title optical-start" style={opticalStyle(title)}>
+          {title}
+        </h1>
         <p className="dx-title-context">{formatLongDay(new Date())}</p>
       </BlurFade>
       {intro ? (

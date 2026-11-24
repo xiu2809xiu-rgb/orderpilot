@@ -4,6 +4,7 @@ import type {
   PolicyRequest,
 } from "@orderpilot/shared";
 import type { Approver } from "./approval-setup.js";
+import type { ApproverGroup } from "./approver-group.js";
 import type { HoldClearanceFacts, VendorHoldFacts } from "./bank-hold-rules.js";
 import type { LimitKind } from "./policy-actions.js";
 import type { EarlierDuties } from "./segregation-of-duties.js";
@@ -40,6 +41,21 @@ export interface ApprovalFacts {
   /** The setups the rules may need, by user id. */
   readonly approvers: ReadonlyMap<string, Approver>;
   readonly now: Date;
+  /**
+   * Who may decide (#252): every enabled approver except the requester, with
+   * no limit applied, so a refusal for the amount names the limit rule.
+   */
+  readonly group: ApproverGroup;
+  /**
+   * Whether the approver group decides (APPROVER_GROUP, temporary, off by
+   * default). While it is off, the old chain decides, as before #252.
+   */
+  readonly groupDecides: boolean;
+  /**
+   * Whether approval limits apply: always under the old chain, and under the
+   * group only while APPROVAL_LIMITS is on.
+   */
+  readonly limitsOn: boolean;
 }
 
 /** One rule in the chain. Each rule is one reason a request may be refused. */

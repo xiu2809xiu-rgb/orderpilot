@@ -586,7 +586,7 @@ The web app never hand-writes a call to the API. It uses hooks and mock handlers
 
 3. Run `pnpm api:generate`. It rewrites `apps/api/openapi.json` and `apps/web/src/lib/api/generated/`.
 4. Commit the result with the route. CI runs `pnpm api:check` and fails if the generated files are out of date.
-5. In the web app, import the hook (`useSystemChecks`) from `@/lib/api/generated/endpoints/<tag>/<tag>`. In a test, add the generated handler with `server.use(getSystemChecksMockHandler(...))` from `@/test/server`. `ServiceChecksCard` and its test are the example.
+5. In the web app, import the hook (`useSystemChecks`) from `@/lib/api/generated/endpoints/<tag>/<tag>`. In a test, add the generated handler with `server.use(getSystemChecksMockHandler(...))` from `@/test/server`. `useServiceHealth` and `HealthPanel.test.tsx` (the system health section of the settings page) are the example.
 
 Never edit the generated folder by hand.
 

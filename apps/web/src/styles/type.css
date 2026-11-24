@@ -38,3 +38,11 @@
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
+
+/* Small print: a date, a code, a hint, a label above a value. The faint tier of
+   the three text colours; it is never the only signal for a status. */
+.dx-meta {
+  font-size: var(--type-12);
+  line-height: 1rem;
+  color: var(--faint-foreground);
+}

@@ -57,7 +57,6 @@ function renderPage(address = "/governance") {
 }
 
 const CELL_PUT = "*/api/v1/governance/matrix/:role/permissions/:permission";
-const SCOPE_PUT = "*/api/v1/governance/matrix/:role/data-scope";
 
 /** Every permission's row, by the name it reads under. */
 const rowNames = () =>
@@ -100,6 +99,18 @@ describe("GovernancePage", () => {
       screen.getByText("Scroll sideways to see every role."),
     ).toBeVisible();
     expect(await axeViolations(container)).toEqual([]);
+  });
+
+  it("offers no data scope control, as no list reads it (#268)", async () => {
+    signIn("SYSTEM_ADMIN");
+    renderPage();
+    await screen.findByRole("table", { name: "Permissions by role" });
+    expect(
+      screen.queryAllByRole("combobox", { name: /^Data scope/ }),
+    ).toHaveLength(0);
+    expect(screen.queryByText("Data scope")).toBeNull();
+    expect(screen.queryByText(/no list is filtered by it/)).toBeNull();
+    expect(rowNames()).toHaveLength(PERMISSIONS.length);
   });
 
   it("locks the cells the system admin must never hold", async () => {
@@ -260,6 +271,32 @@ describe("GovernancePage", () => {
       });
     });
 
+    it("says what a copy replaces, and leaves the data scope out of it (#268)", async () => {
+      signIn("SYSTEM_ADMIN");
+      answerCopy();
+      renderPage();
+      await userEvent.click(
+        await screen.findByRole("button", { name: "Copy a role" }),
+      );
+      expect(await screen.findByRole("dialog")).not.toHaveTextContent(
+        /data scope/i,
+      );
+      await userEvent.selectOptions(
+        screen.getByLabelText("Copy from"),
+        "FINANCE",
+      );
+      await userEvent.selectOptions(
+        screen.getByLabelText("Copy to"),
+        "LOGISTICS",
+      );
+      await userEvent.click(screen.getByRole("button", { name: "Copy" }));
+      const confirm = await screen.findByRole("dialog", {
+        name: "Replace what Logistics holds?",
+      });
+      expect(confirm).toHaveTextContent("Finance");
+      expect(confirm).not.toHaveTextContent(/data scope/i);
+    });
+
     it("sends nothing when the person goes back or cancels", async () => {
       signIn("SYSTEM_ADMIN");
       const copies = answerCopy();
@@ -354,7 +391,7 @@ describe("GovernancePage", () => {
       });
     });
 
-    it("shows only the chosen role's column, and keeps its data scope", async () => {
+    it("shows only the chosen role's column, with every row", async () => {
       signIn("SYSTEM_ADMIN");
       renderPage();
       await userEvent.selectOptions(
@@ -362,10 +399,7 @@ describe("GovernancePage", () => {
         "FINANCE",
       );
       expect(columnNames()).toEqual(["Permission", "Finance"]);
-      expect(rowNames().length).toBe(PERMISSIONS.length + 1);
-      expect(
-        screen.getByRole("combobox", { name: "Data scope: Finance" }),
-      ).toBeVisible();
+      expect(rowNames().length).toBe(PERMISSIONS.length);
       expect(
         screen.queryByRole("switch", {
           name: "Read orders for Warehouse",
@@ -373,7 +407,7 @@ describe("GovernancePage", () => {
       ).toBeNull();
     });
 
-    it("shows only the chosen group's rows, without the data scope", async () => {
+    it("shows only the chosen group's rows", async () => {
       signIn("SYSTEM_ADMIN");
       renderPage();
       await userEvent.selectOptions(
@@ -385,9 +419,6 @@ describe("GovernancePage", () => {
         "Confirm a paymentpayments.confirm",
         "Post a paymentpayments.post",
       ]);
-      expect(
-        screen.queryByRole("combobox", { name: "Data scope: Finance" }),
-      ).toBeNull();
     });
 
     it("keeps the filters in the address bar, beside the tab", async () => {
@@ -416,7 +447,7 @@ describe("GovernancePage", () => {
       signIn("SYSTEM_ADMIN");
       renderPage("/governance?tab=matrix&role=NOBODY&group=nothing");
       await waitFor(() => {
-        expect(rowNames().length).toBe(PERMISSIONS.length + 1);
+        expect(rowNames().length).toBe(PERMISSIONS.length);
       });
       expect(columnNames().length).toBe(ROLES.length + 1);
     });
@@ -431,7 +462,7 @@ describe("GovernancePage", () => {
         screen.getByRole("button", { name: "Clear filters" }),
       );
       await waitFor(() => {
-        expect(rowNames().length).toBe(PERMISSIONS.length + 1);
+        expect(rowNames().length).toBe(PERMISSIONS.length);
       });
       expect(await searchBox()).toHaveValue("");
     });
@@ -531,24 +562,6 @@ describe("GovernancePage", () => {
       });
     });
 
-    it("reverses a data scope through the same save", async () => {
-      signIn("SYSTEM_ADMIN");
-      const sent = answerPuts(SCOPE_PUT);
-      renderPage();
-      await userEvent.selectOptions(
-        await screen.findByRole("combobox", { name: "Data scope: Finance" }),
-        "own",
-      );
-      await userEvent.click(
-        await screen.findByRole("button", { name: "Undo" }),
-      );
-      expect(await screen.findByText("Undone")).toBeInTheDocument();
-      expect(sent.map((call) => call.body)).toEqual([
-        { dataScope: "own" },
-        { dataScope: "all" },
-      ]);
-    });
-
     it("shows a refused Undo with its trace id", async () => {
       signIn("SYSTEM_ADMIN");
       let puts = 0;
@@ -570,32 +583,6 @@ describe("GovernancePage", () => {
       const alert = await screen.findByRole("alert");
       expect(alert).toHaveTextContent("You do not have access");
       expect(alert).toHaveTextContent("trace-undo-1");
-    });
-
-    it("shows a refused Undo of a data scope with its trace id", async () => {
-      signIn("SYSTEM_ADMIN");
-      let puts = 0;
-      server.use(
-        http.put(SCOPE_PUT, () => {
-          puts += 1;
-          return puts === 1
-            ? HttpResponse.json({ data: matrix.roles[0] })
-            : HttpResponse.json(errorBody("FORBIDDEN", "trace-undo-2"), {
-                status: 403,
-              });
-        }),
-      );
-      renderPage();
-      await userEvent.selectOptions(
-        await screen.findByRole("combobox", { name: "Data scope: Finance" }),
-        "own",
-      );
-      await userEvent.click(
-        await screen.findByRole("button", { name: "Undo" }),
-      );
-      expect(await screen.findByRole("alert")).toHaveTextContent(
-        "trace-undo-2",
-      );
     });
 
     it("holds the switches while an Undo is saving", async () => {

@@ -11,13 +11,13 @@
 
 /* What follows the list (the operation log) sits as far from it as the list's own rows do. */
 .lp-page > .dt + * {
-  margin-top: 0.75rem;
+  margin-top: var(--space-2);
 }
 
 .lp-toolbar {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: var(--space-1);
 }
 
 .lp-top {
@@ -25,7 +25,7 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: var(--space-1);
 }
 
 .lp-top > .lp-bar {
@@ -83,7 +83,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  gap: 0.75rem;
+  gap: var(--space-1);
 }
 
 .lp-more {

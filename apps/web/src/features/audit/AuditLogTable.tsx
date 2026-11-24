@@ -14,8 +14,8 @@ import { toListRequest, useAuditQuery } from "./auditQuery";
 export function AuditLogTable() {
   const { t } = useTranslation("audit");
   const { query, setQuery, openEvent } = useAuditQuery();
-  const columns = useAuditColumns(openEvent);
   const { params, problem } = toListRequest(query);
+  const columns = useAuditColumns(openEvent, params.around);
   const list = useAuditViewerList(params, { query: { enabled: !problem } });
 
   const forbidden =
@@ -31,7 +31,7 @@ export function AuditLogTable() {
           : "ready";
 
   return (
-    <div className="space-y-s2">
+    <div className="space-y-s1">
       <p className="text-sm text-muted-foreground">{t("filters.searchHint")}</p>
       {problem ? (
         <p role="alert" className="text-sm text-destructive">

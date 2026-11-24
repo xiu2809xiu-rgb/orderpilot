@@ -106,4 +106,7 @@ model AuditEvent {
   @@index([entityType, entityId])
   @@index([actorUserId])
   @@index([occurredAt])
+  // The action filter offers the names that exist (F-9): this index holds them,
+  // so the list is read from it, not from every event.
+  @@index([action])
 }

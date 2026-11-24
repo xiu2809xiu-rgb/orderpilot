@@ -272,7 +272,7 @@ describe("governance: the role-permission matrix over HTTP", () => {
   });
 
   describe("copying a role", () => {
-    it("makes the target hold what the source holds, with its data scope", async () => {
+    it("makes the target hold the permissions the source holds", async () => {
       const res = await post("SYSTEM_ADMIN", `${MATRIX}/copy`, {
         fromRole: "SUPPORT",
         toRole: "LOGISTICS",
@@ -283,11 +283,29 @@ describe("governance: the role-permission matrix over HTTP", () => {
         await access("LOGISTICS"),
       ];
       expect(new Set(target.permissions)).toEqual(new Set(source.permissions));
-      expect(target.dataScope).toBe(source.dataScope);
       const events = (await auditEvents(t)).filter(
         (e) => e.action === "governance.role.copied",
       );
       expect(events).toHaveLength(1);
+    });
+
+    it("leaves the target's data scope as it was, as no list reads it (#268)", async () => {
+      const before = (await access("LOGISTICS")).dataScope;
+      const source = (await access("PRODUCT_MANAGER")).dataScope;
+      expect(source, "the two scopes differ, so a copy would show").not.toBe(
+        before,
+      );
+      const res = await post("SYSTEM_ADMIN", `${MATRIX}/copy`, {
+        fromRole: "PRODUCT_MANAGER",
+        toRole: "LOGISTICS",
+      });
+      expect(res.status).toBe(200);
+      expect((await access("LOGISTICS")).dataScope).toBe(before);
+      const copied = (await auditEvents(t)).filter(
+        (e) =>
+          e.action === "governance.role.copied" && e.entityId === "LOGISTICS",
+      );
+      expect(copied.at(-1)?.changes).not.toHaveProperty("dataScope");
     });
 
     it("refuses a copy onto itself, and a copy that would break a locked cell", async () => {

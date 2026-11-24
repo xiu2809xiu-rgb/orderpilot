@@ -12,7 +12,7 @@ export function CardBones({
   return (
     <div
       aria-hidden="true"
-      className={cn("dx-card flex flex-col gap-4 p-5", className)}
+      className={cn("dx-card flex flex-col gap-4 p-6", className)}
     >
       <Bone className="h-5 w-40" />
       <div className="flex flex-col gap-3">

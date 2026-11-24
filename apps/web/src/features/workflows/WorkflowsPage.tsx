@@ -69,7 +69,7 @@ export default function WorkflowsPage() {
   const roleName = role ? t(`roles.${role}`, { ns: "common" }) : "";
 
   return (
-    <div className="space-y-s4">
+    <div className="dx-sheet-wide dx-page">
       <PageHeader
         // One name for one page: the sidebar's "My tasks", unless the person looks at other roles.
         title={t(other ? "inbox.heading" : "inbox.myHeading")}

@@ -37,7 +37,7 @@ const NONE: readonly never[] = [];
 
 /** A page is a column of its own; a form drawn inside another page (a demo) is not. */
 const sheetClass = (headingLevel: 1 | 2 | undefined) =>
-  headingLevel === 2 ? "df-sheet" : "df-sheet dx-sheet";
+  headingLevel === 2 ? "df-sheet dx-page" : "df-sheet dx-sheet dx-page";
 
 export interface DocumentFormProps<T extends FieldValues, O, R> {
   /** Names this form for the shared actions and for the draft's owner. */

@@ -1,9 +1,16 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeAll, describe, expect, it } from "vitest";
 import { axeViolations } from "@/test/axe";
 import { errorBody } from "@/test/fixtures";
 import { renderApp } from "@/test/render";
+
+const signinCss = readFileSync(
+  path.join(import.meta.dirname, "..", "..", "styles", "signin.css"),
+  "utf8",
+);
 
 // The home page is a lazy route. Loading it here keeps its first import, which
 // is slow on a busy machine, out of the five seconds a test waits for the page.
@@ -208,8 +215,13 @@ describe("the sign-in page with demo mode on", () => {
   it("draws the theme control in a box that gives it the app bar's two sizes", async () => {
     renderApp("/login", { demoMode: true });
     await sixTeams();
-    const theme = screen.getByRole("button", { name: "Theme" });
+    const theme = screen.getByRole("switch", { name: "Light theme" });
     expect(theme.closest(".signin-theme")).not.toBeNull();
+    // jsdom does not lay out CSS, so the two sizes are read from the sheet:
+    // the switch is as tall as the bar's controls, 36 px and 44 px on touch.
+    const rule = signinCss.slice(signinCss.indexOf(".signin-theme {"));
+    expect(rule).toContain("--bar-ctl: 2.25rem;");
+    expect(rule).toContain("--bar-ctl: 2.75rem;");
   });
 });
 
@@ -275,7 +287,7 @@ describe("the promise", () => {
     ).toHaveFocus();
     await user.tab();
     expect(email).toHaveFocus();
-    const theme = screen.getByRole("button", { name: "Theme" });
+    const theme = screen.getByRole("switch", { name: "Light theme" });
     expect(
       email.compareDocumentPosition(theme) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();

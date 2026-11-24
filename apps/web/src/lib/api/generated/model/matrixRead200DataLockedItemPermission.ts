@@ -33,4 +33,5 @@ export const MatrixRead200DataLockedItemPermission = {
   workflowsinboxesany: 'workflows.inboxes.any',
   taskscomplete: 'tasks.complete',
   maskingcustomerNote: 'masking.customerNote',
+  sprroute: 'spr.route',
 } as const;
