@@ -1,5 +1,5 @@
 import { ImageUp } from "lucide-react";
-import { useEffect, useRef, type ReactNode, type Ref } from "react";
+import { useEffect, useRef, type ReactNode, type RefObject } from "react";
 import { useTranslation } from "react-i18next";
 import { Alert, AlertDescription } from "@/components/kit/Alert";
 import { Button } from "@/components/ui/button";
@@ -16,13 +16,15 @@ interface PictureChooserProps {
   limit: number;
   /** The button that takes the picture back, drawn beside the choose button. */
   removeAction?: ReactNode;
-  chooseRef: Ref<HTMLButtonElement>;
+  chooseRef: RefObject<HTMLButtonElement | null>;
 }
 
 /**
  * The choose button, the preview and the send button. The file field is
  * hidden and a real button opens it, so the whole flow is reached with Tab,
- * Enter and Space. When a preview appears, focus moves to its heading.
+ * Enter and Space. When a preview appears, focus moves to its heading, and
+ * when it goes away after a send, to the choose button (or to the note that
+ * says why it is off), because the focused send button left with it.
  */
 export function PictureChooser({
   upload,
@@ -35,12 +37,20 @@ export function PictureChooser({
   const { t } = useTranslation("settings");
   const input = useRef<HTMLInputElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
+  const limitNote = useRef<HTMLParagraphElement>(null);
+  const hadPreview = useRef(false);
   const busy = upload.phase === "preparing" || upload.phase === "sending";
   const hasPreview = upload.prepared !== null;
 
   useEffect(() => {
     if (hasPreview) heading.current?.focus();
-  }, [hasPreview]);
+    else if (hadPreview.current) {
+      // The last allowed upload turns the choose button off: a disabled button cannot hold focus.
+      if (chooseRef.current?.disabled === false) chooseRef.current.focus();
+      else limitNote.current?.focus();
+    }
+    hadPreview.current = hasPreview;
+  }, [hasPreview, chooseRef]);
 
   return (
     <div className="flex flex-col gap-s3">
@@ -77,7 +87,11 @@ export function PictureChooser({
         {removeAction}
       </div>
       {limitReached ? (
-        <p className="fs-14 text-muted-foreground">
+        <p
+          ref={limitNote}
+          tabIndex={-1}
+          className="fs-14 text-muted-foreground outline-none"
+        >
           {t("account.picture.limitReached", { limit })}
         </p>
       ) : null}

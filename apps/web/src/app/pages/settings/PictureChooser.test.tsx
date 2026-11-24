@@ -130,6 +130,32 @@ describe("choosing and sending a picture", () => {
         name: "This is what the reviewer will see",
       }),
     ).toBeNull();
+    // The send button left with the preview: focus must not fall to the page.
+    expect(
+      screen.getByRole("button", { name: /Choose another/ }),
+    ).toHaveFocus();
+  });
+
+  it("puts focus on the note when the last upload of the day turned choosing off", async () => {
+    stubImage("load");
+    answerMine(emptyPicture(9));
+    server.use(
+      http.put(MINE, () =>
+        HttpResponse.json({
+          data: { ...pendingPicture(), uploads: { used: 10, limit: 10 } },
+        }),
+      ),
+    );
+    renderSettings(<PictureCard />);
+    const user = await chooseAFile();
+    await user.click(
+      await screen.findByRole("button", { name: "Send for review" }),
+    );
+    expect(
+      await screen.findByText(
+        "You have used all 10 uploads for now. Try again later.",
+      ),
+    ).toHaveFocus();
   });
 
   it("has one primary button while a preview waits to be sent", async () => {
