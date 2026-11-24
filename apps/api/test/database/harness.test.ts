@@ -100,11 +100,14 @@ describe("the test harness", () => {
       "seed approval setups",
       "seed synthetic data",
       "seed workflows",
+      "seed migration markers",
     ]);
     expect(lines.join("\n")).toContain(
       "Synthetic demo data: 64 customers, 12 vendors, 300 items, 120 orders",
     );
     expect(lines[1]).toContain("started already");
+    // A fresh database has no marker, so the step writes no event: the count of 13 holds.
+    expect(lines.at(-1)).toContain("0 migration changes recorded");
   });
 
   it("renames a demo persona whose stored name is out of date, with an audit event, and only that one", async () => {
