@@ -80,7 +80,8 @@ describe("the SPR thread (#251, #290): raised, sent to the approvers, decided an
 
   beforeAll(async () => {
     await resetTestData();
-    t = await createTestApp();
+    // Area 2 routes SPRs with the approver group (ADR 0056, #251).
+    t = await createTestApp({ APPROVER_GROUP: "on" });
     for (const role of ROLES) sessions.set(role, await demoSignIn(t, role));
   });
   afterAll(async () => {

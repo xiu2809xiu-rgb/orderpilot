@@ -3,7 +3,6 @@ import {
   IDEMPOTENCY_KEY_REUSED_MESSAGE,
   ROLES,
   SPR_DECISION_RECORDED_MESSAGE,
-  SPR_PASSED_ON_MESSAGE,
   errorEnvelopeSchema,
   type Role,
 } from "@orderpilot/shared";
@@ -11,12 +10,10 @@ import { syntheticDataset } from "@orderpilot/synthetic-data";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { demoEmail } from "../../src/auth/demo-accounts.js";
 import { Database } from "../../src/database/database.js";
-import { ApprovalSetupRepository } from "../../src/modules/governance/approval-setup.repository.js";
 import { OrderWorkflowService } from "../../src/modules/workflows/order-workflow.service.js";
 import { SprRecordRepository } from "../../src/modules/workflows/spr-record.repository.js";
 import { WorkflowCommandRepository } from "../../src/modules/workflows/workflow-command.repository.js";
 import {
-  handedTaskListResponseSchema,
   sprDecisionResponseSchema,
   sprResponseSchema,
 } from "../../src/modules/workflows/workflows.schemas.js";
@@ -33,7 +30,6 @@ import { resetTestData } from "../support/reset.js";
 import { createTestApp, type TestApp } from "../support/test-app.js";
 
 const W = `${API}/workflows`;
-const MANAGEMENT_APPROVES = `${API}/governance/matrix/MANAGEMENT/permissions/approvals.decide`;
 
 const PENDING = syntheticDataset().sprs.filter((s) => s.status === "submitted");
 const SUGGESTED = syntheticDataset().sprs.find((s) => s.status === "suggested");
@@ -110,46 +106,10 @@ describe("SPR approval within limits (C-3), on the real state machine and area 4
     return spr;
   }
 
-  const approver = async () =>
-    t.app.get(ApprovalSetupRepository).find(await idOf("APPROVER"));
-
-  /** Changes the approver's setup for one test, and always puts it back. */
-  async function withApprover(
-    changes: object,
-    work: () => Promise<void>,
-  ): Promise<void> {
-    const before = await approver();
-    if (!before) throw new Error("The approver has no setup");
-    const setups = t.app.get(ApprovalSetupRepository);
-    await setups.save({ ...before, ...changes });
-    try {
-      await work();
-    } finally {
-      await setups.save(before);
-    }
-  }
-
-  /**
-   * Management holds approvals.decide in the default matrix (ADR 0041), so a
-   * test of a role that cannot decide takes the permission away for itself.
-   */
-  async function withoutManagementDeciding(work: () => Promise<void>) {
-    const grant = (granted: boolean) =>
-      call(t, as("SYSTEM_ADMIN"), "put", MANAGEMENT_APPROVES, {
-        csrf: true,
-        body: { granted },
-      });
-    expect((await grant(false)).status).toBe(200);
-    try {
-      await work();
-    } finally {
-      await grant(true);
-    }
-  }
-
   beforeAll(async () => {
     await resetTestData();
-    t = await createTestApp();
+    // Area 2 routes SPRs with the approver group (ADR 0056, #251).
+    t = await createTestApp({ APPROVER_GROUP: "on" });
     database = t.app.get(Database);
     for (const role of ROLES) sessions.set(role, await demoSignIn(t, role));
   });
@@ -157,7 +117,7 @@ describe("SPR approval within limits (C-3), on the real state machine and area 4
     await t.close();
   });
 
-  it("approves an SPR whose amount is within the approver's purchase limit", async () => {
+  it("approves an SPR, moving the order on", async () => {
     const spr = await pendingSpr("4999.99");
     expect(await statusOf(spr.orderNo)).toBe("AwaitingSpr");
 
@@ -170,15 +130,6 @@ describe("SPR approval within limits (C-3), on the real state machine and area 4
       message: SPR_DECISION_RECORDED_MESSAGE,
       outcome: "approved",
     });
-    expect(await statusOf(spr.orderNo)).toBe("SprApproved");
-  });
-
-  it("approves exactly at the limit", async () => {
-    const spr = await pendingSpr("5000.00");
-
-    const res = await decide("APPROVER", spr.recordNo, "approve");
-
-    expect(res.status).toBe(200);
     expect(await statusOf(spr.orderNo)).toBe("SprApproved");
   });
 
@@ -209,7 +160,7 @@ describe("SPR approval within limits (C-3), on the real state machine and area 4
     ).toContain("workflow.transition");
   });
 
-  it("rejects within the limit, returning the order to the stock check", async () => {
+  it("rejects an SPR, returning the order to the stock check", async () => {
     const spr = await pendingSpr("100.00");
 
     const res = await decide(
@@ -240,153 +191,6 @@ describe("SPR approval within limits (C-3), on the real state machine and area 4
     const again = await decide("APPROVER", spr.recordNo, "reject", "Too dear");
     expect(again.status).toBe(200);
     expect(await statusOf(spr.orderNo)).toBe("StockChecked");
-  });
-
-  it("sends an SPR above the approver's limit to the next approver, and never approves it below", async () => {
-    const spr = await pendingSpr("5000.01");
-
-    const res = await decide("APPROVER", spr.recordNo, "approve");
-
-    expect(res.status).toBe(200);
-    const body = sprDecisionResponseSchema.parse(res.body);
-    expect(body.data.message).toBe(SPR_PASSED_ON_MESSAGE);
-    const names = await t.app
-      .get(UserRepository)
-      .namesByIds([await idOf("MANAGEMENT")]);
-    expect(body.data.passedToName).toBe(names.get(await idOf("MANAGEMENT")));
-    expect(await statusOf(spr.orderNo)).toBe("AwaitingSpr");
-
-    const shown = await call(
-      t,
-      as("APPROVER"),
-      "get",
-      `${W}/sprs/${spr.recordNo}`,
-    );
-    const detail = sprResponseSchema.parse(shown.body).data;
-    expect(detail.decision).toBeNull();
-    expect(detail.passedTo?.name).toBe(body.data.passedToName);
-
-    // It is out of their hands now: asking again is refused, not passed on again.
-    const again = await decide("APPROVER", spr.recordNo, "approve");
-    expect(again.status).toBe(403);
-    expect(await statusOf(spr.orderNo)).toBe("AwaitingSpr");
-
-    const decided = await decide("MANAGEMENT", spr.recordNo, "approve");
-    expect(decided.status).toBe(200);
-    expect(await statusOf(spr.orderNo)).toBe("SprApproved");
-  });
-
-  it("passes on a rejection above the limit too, for someone with authority to decide", async () => {
-    const spr = await pendingSpr("9000.00");
-
-    const res = await decide("APPROVER", spr.recordNo, "reject", "Too dear");
-
-    expect(sprDecisionResponseSchema.parse(res.body).data.message).toBe(
-      SPR_PASSED_ON_MESSAGE,
-    );
-    expect(await statusOf(spr.orderNo)).toBe("AwaitingSpr");
-    const row = await database.client.workflowRecord.findUniqueOrThrow({
-      where: { recordNo: spr.recordNo },
-    });
-    // Nothing was decided, but what they asked for and why is not lost.
-    expect(row.data).toMatchObject({
-      decision: null,
-      passedOn: { outcome: "rejected", comment: "Too dear" },
-    });
-  });
-
-  it("says plainly when nobody above can take it, and changes nothing", async () => {
-    const spr = await pendingSpr("9000.00");
-
-    await withApprover({ approverId: null }, async () => {
-      const res = await decide("APPROVER", spr.recordNo, "approve");
-      expect(res.status).toBe(409);
-    });
-
-    const shown = await call(
-      t,
-      as("APPROVER"),
-      "get",
-      `${W}/sprs/${spr.recordNo}`,
-    );
-    expect(sprResponseSchema.parse(shown.body).data.passedTo).toBeNull();
-  });
-
-  it("will not pass an SPR on to the person who raised it", async () => {
-    // Management raised it, and it has already come along the chain to the approver,
-    // whose own next step is Management.
-    const spr = await pendingSpr("9000.00", {
-      requesterUserId: await idOf("MANAGEMENT"),
-      passedOn: {
-        byUserId: await idOf("PRODUCT_MANAGER"),
-        byName: "Test Product Manager",
-        toName: "Test Approver",
-        outcome: "approved",
-        comment: "Over my limit",
-        at: new Date().toISOString(),
-      },
-    });
-
-    const res = await decide("APPROVER", spr.recordNo, "approve");
-
-    expect(res.status).toBe(409);
-    expect(await statusOf(spr.orderNo)).toBe("AwaitingSpr");
-  });
-
-  it("will not pass a substitute's SPR back to the substitute", async () => {
-    const spr = await pendingSpr("9000.00");
-    const management = await idOf("MANAGEMENT");
-    const setups = t.app.get(ApprovalSetupRepository);
-    const own = await setups.find(management);
-    if (!own) throw new Error("Management has no setup");
-
-    // Management stands in for the approver, and is also who the approver escalates to.
-    await setups.save({ ...own, unlimitedPurchaseApproval: false });
-    try {
-      await withApprover(
-        {
-          substituteUserId: management,
-          awayFrom: new Date(Date.now() - 60_000),
-          awayUntil: new Date(Date.now() + 3_600_000),
-        },
-        async () => {
-          const res = await decide("MANAGEMENT", spr.recordNo, "approve");
-          expect(res.status).toBe(409);
-        },
-      );
-    } finally {
-      await setups.save(own);
-    }
-    expect(await statusOf(spr.orderNo)).toBe("AwaitingSpr");
-  });
-
-  it("shows the next person what was asked and why", async () => {
-    const spr = await pendingSpr("9000.00");
-    await decide("APPROVER", spr.recordNo, "reject", "Too dear");
-
-    const res = await call(
-      t,
-      as("MANAGEMENT"),
-      "get",
-      `${W}/sprs/${spr.recordNo}`,
-    );
-
-    expect(sprResponseSchema.parse(res.body).data.passedTo).toMatchObject({
-      askedOutcome: "rejected",
-      comment: "Too dear",
-    });
-  });
-
-  it("tells the person it was passed to that they decide, and nobody else", async () => {
-    const spr = await pendingSpr("9000.00");
-    await decide("APPROVER", spr.recordNo, "approve");
-    const seen = async (role: Role) => {
-      const res = await call(t, as(role), "get", `${W}/sprs/${spr.recordNo}`);
-      return sprResponseSchema.parse(res.body).data.passedTo?.youDecide;
-    };
-
-    expect(await seen("APPROVER")).toBe(false);
-    expect(await seen("MANAGEMENT")).toBe(true);
   });
 
   it("finds an SPR through its order after the dataset's numbers have moved to a new day", async () => {
@@ -424,22 +228,13 @@ describe("SPR approval within limits (C-3), on the real state machine and area 4
     const row = await database.client.workflowRecord.findUniqueOrThrow({
       where: { recordNo: spr.recordNo },
     });
-    // With the SPR passed along, the route rule follows the passer and would allow
-    // this, so only the check on the original requester can stop it.
+    // The approver is made the requester after deciding: they may not undo it.
     await database.client.workflowRecord.update({
       where: { recordNo: spr.recordNo },
       data: {
         data: {
           ...(row.data as object),
           requesterUserId: await idOf("APPROVER"),
-          passedOn: {
-            byUserId: await idOf("PRODUCT_MANAGER"),
-            byName: "Test Product Manager",
-            toName: "Test Approver",
-            outcome: "approved",
-            comment: "Over my limit",
-            at: new Date().toISOString(),
-          },
         },
       },
     });
@@ -456,22 +251,6 @@ describe("SPR approval within limits (C-3), on the real state machine and area 4
     expect(await statusOf(spr.orderNo)).toBe("SprApproved");
   });
 
-  it("will not pass on an SPR whose order is no longer waiting for a decision", async () => {
-    const spr = await pendingSpr("9000.00");
-    await database.client.workflowInstance.updateMany({
-      where: { orderRef: spr.orderNo },
-      data: { status: "OnHold" },
-    });
-
-    const res = await decide("APPROVER", spr.recordNo, "approve");
-
-    expect(res.status).toBe(409);
-    const row = await database.client.workflowRecord.findUniqueOrThrow({
-      where: { recordNo: spr.recordNo },
-    });
-    expect(row.data).toMatchObject({ passedOn: null });
-  });
-
   it("does not overwrite a newer change from a stale read", async () => {
     const spr = await pendingSpr("100.00");
     const records = t.app.get(SprRecordRepository);
@@ -486,19 +265,7 @@ describe("SPR approval within limits (C-3), on the real state machine and area 4
     expect((await records.findByOrder(spr.orderNo))?.amount).toBe("200.00");
   });
 
-  it("stops at Management while its role cannot decide (ADR 0041)", async () => {
-    const spr = await pendingSpr("9000.00");
-    await decide("APPROVER", spr.recordNo, "approve");
-
-    await withoutManagementDeciding(async () => {
-      const res = await decide("MANAGEMENT", spr.recordNo, "approve");
-
-      expect(res.status).toBe(403);
-      expect(await statusOf(spr.orderNo)).toBe("AwaitingSpr");
-    });
-  });
-
-  it("takes an SPR it passed on out of the approver's inbox", async () => {
+  it("takes a decided SPR out of the approver's inbox", async () => {
     const spr = await pendingSpr("9000.00");
     const task = syntheticDataset().tasks.find(
       (entry) =>
@@ -521,39 +288,14 @@ describe("SPR approval within limits (C-3), on the real state machine and area 4
     expect(await inbox()).not.toContain(task?.id);
   });
 
-  it("accepts any amount from an approver with unlimited purchase approval", async () => {
+  it("accepts any amount while approval limits are off (ADR 0056)", async () => {
     const spr = await pendingSpr("999999.00");
 
-    await withApprover({ unlimitedPurchaseApproval: true }, async () => {
-      const res = await decide("APPROVER", spr.recordNo, "approve");
-      expect(res.status).toBe(200);
-      expect(sprDecisionResponseSchema.parse(res.body).data.message).toBe(
-        SPR_DECISION_RECORDED_MESSAGE,
-      );
-    });
-    expect(await statusOf(spr.orderNo)).toBe("SprApproved");
-  });
+    const res = await decide("APPROVER", spr.recordNo, "approve");
 
-  it("passes the SPR to the substitute while the approver is away", async () => {
-    const spr = await pendingSpr("100.00");
-    const management = await idOf("MANAGEMENT");
-
-    // With no Approver ID, only the substitute branch of the chain can name them.
-    await withApprover(
-      {
-        approverId: null,
-        substituteUserId: management,
-        awayFrom: new Date(Date.now() - 60_000),
-        awayUntil: new Date(Date.now() + 3_600_000),
-      },
-      async () => {
-        const absent = await decide("APPROVER", spr.recordNo, "approve");
-        expect(absent.status).toBe(403);
-        expect(await statusOf(spr.orderNo)).toBe("AwaitingSpr");
-
-        const res = await decide("MANAGEMENT", spr.recordNo, "approve");
-        expect(res.status).toBe(200);
-      },
+    expect(res.status).toBe(200);
+    expect(sprDecisionResponseSchema.parse(res.body).data.message).toBe(
+      SPR_DECISION_RECORDED_MESSAGE,
     );
     expect(await statusOf(spr.orderNo)).toBe("SprApproved");
   });
@@ -597,359 +339,6 @@ describe("SPR approval within limits (C-3), on the real state machine and area 4
     const res = await decide("APPROVER", SUGGESTED.recordNo, "approve");
 
     expect(res.status).toBe(409);
-  });
-
-  describe("who receives an SPR", () => {
-    const handedTo = async (role: Role, query = "pageSize=100") => {
-      const res = await call(
-        t,
-        as(role),
-        "get",
-        `${W}/tasks/handed-to-me?${query}`,
-      );
-      expect(res.status).toBe(200);
-      return handedTaskListResponseSchema.parse(res.body);
-    };
-    const handedFor = async (role: Role, recordNo: string) =>
-      (await handedTo(role)).data.find(
-        (task) => task.ref?.recordNo === recordNo,
-      );
-    const approverInbox = async () => {
-      const res = await call(
-        t,
-        as("APPROVER"),
-        "get",
-        `${W}/tasks?kind=APPROVE_SPR&pageSize=100`,
-      );
-      return (
-        res.body as { data: { ref: { recordNo: string } | null }[] }
-      ).data.map((task) => task.ref?.recordNo);
-    };
-    /** An SPR the approver's inbox really shows, so a later absence means something. */
-    const waiting = async (amount: string) => {
-      const spr = await pendingSpr(amount);
-      expect(await approverInbox()).toContain(spr.recordNo);
-      return spr;
-    };
-    const away = {
-      awayFrom: new Date(Date.now() - 60_000),
-      awayUntil: new Date(Date.now() + 3_600_000),
-    };
-
-    it("gives the SPR to the substitute while the approver is away, and back when they return", async () => {
-      const spr = await waiting("100.00");
-      const management = await idOf("MANAGEMENT");
-      expect(await approverInbox()).toContain(spr.recordNo);
-      expect(await handedFor("MANAGEMENT", spr.recordNo)).toBeUndefined();
-
-      await withApprover(
-        { substituteUserId: management, ...away },
-        async () => {
-          expect(await approverInbox()).not.toContain(spr.recordNo);
-          expect(await handedFor("MANAGEMENT", spr.recordNo)).toMatchObject({
-            kind: "APPROVE_SPR",
-            orderNo: spr.orderNo,
-            handedOver: { reason: "substitute", fromName: "Rachel Goh" },
-          });
-        },
-      );
-
-      expect(await approverInbox()).toContain(spr.recordNo);
-      expect(await handedFor("MANAGEMENT", spr.recordNo)).toBeUndefined();
-    });
-
-    it("gives it to the person the approver escalates to when there is no substitute", async () => {
-      const spr = await waiting("100.00");
-
-      await withApprover({ substituteUserId: null, ...away }, async () => {
-        expect(await approverInbox()).not.toContain(spr.recordNo);
-        expect(await handedFor("MANAGEMENT", spr.recordNo)).toMatchObject({
-          handedOver: { reason: "escalated", fromName: "Rachel Goh" },
-        });
-      });
-    });
-
-    it("gives an SPR above the limit to the next approver, saying who passed it on", async () => {
-      const spr = await waiting("9000.00");
-
-      await decide("APPROVER", spr.recordNo, "approve");
-
-      expect(await approverInbox()).not.toContain(spr.recordNo);
-      expect(await handedFor("MANAGEMENT", spr.recordNo)).toMatchObject({
-        handedOver: { reason: "passed-on", fromName: "Rachel Goh" },
-      });
-    });
-
-    it("takes the task away once the person it went to has decided", async () => {
-      const spr = await waiting("9000.00");
-      await decide("APPROVER", spr.recordNo, "approve");
-
-      expect((await decide("MANAGEMENT", spr.recordNo, "approve")).status).toBe(
-        200,
-      );
-
-      expect(await handedFor("MANAGEMENT", spr.recordNo)).toBeUndefined();
-      expect(await approverInbox()).not.toContain(spr.recordNo);
-    });
-
-    it("says whether the person can act, as area 4's policy would answer", async () => {
-      const spr = await waiting("9000.00");
-      await decide("APPROVER", spr.recordNo, "approve");
-
-      await withoutManagementDeciding(async () => {
-        expect(await handedFor("MANAGEMENT", spr.recordNo)).toMatchObject({
-          handedOver: { canAct: false },
-        });
-      });
-      expect(await handedFor("MANAGEMENT", spr.recordNo)).toMatchObject({
-        handedOver: { canAct: true },
-      });
-    });
-
-    it("lets a substitute with the permission really decide what they received", async () => {
-      const spr = await waiting("100.00");
-
-      await withApprover(
-        { substituteUserId: await idOf("MANAGEMENT"), ...away },
-        async () => {
-          expect(await handedFor("MANAGEMENT", spr.recordNo)).toMatchObject({
-            handedOver: { canAct: true },
-          });
-          const res = await decide("MANAGEMENT", spr.recordNo, "approve");
-          expect(res.status).toBe(200);
-          expect(await handedFor("MANAGEMENT", spr.recordNo)).toBeUndefined();
-        },
-      );
-      expect(await statusOf(spr.orderNo)).toBe("SprApproved");
-    });
-
-    it("tells a substitute whose role cannot decide, rather than leaving a dead task", async () => {
-      const spr = await waiting("100.00");
-
-      await withApprover(
-        { substituteUserId: await idOf("MANAGEMENT"), ...away },
-        () =>
-          withoutManagementDeciding(async () => {
-            expect(await handedFor("MANAGEMENT", spr.recordNo)).toMatchObject({
-              handedOver: { reason: "substitute", canAct: false },
-            });
-          }),
-      );
-    });
-
-    it("counts a person above their own limit as able to act, because deciding tries to pass it on", async () => {
-      const spr = await waiting("9000.00");
-      const management = await idOf("MANAGEMENT");
-      const setups = t.app.get(ApprovalSetupRepository);
-      const own = await setups.find(management);
-      if (!own) throw new Error("Management has no setup");
-      await decide("APPROVER", spr.recordNo, "approve");
-
-      await setups.save({
-        ...own,
-        unlimitedPurchaseApproval: false,
-        purchaseAmountApprovalLimit: "1.00",
-      });
-      try {
-        expect(await handedFor("MANAGEMENT", spr.recordNo)).toMatchObject({
-          handedOver: { canAct: true },
-        });
-      } finally {
-        await setups.save(own);
-      }
-    });
-
-    it("brings a passed-on SPR back to the approver when nobody above can act", async () => {
-      const spr = await waiting("9000.00");
-      const management = await idOf("MANAGEMENT");
-      const setups = t.app.get(ApprovalSetupRepository);
-      const own = await setups.find(management);
-      if (!own) throw new Error("Management has no setup");
-      await decide("APPROVER", spr.recordNo, "approve");
-      expect(await approverInbox()).not.toContain(spr.recordNo);
-
-      await setups.save({ ...own, ...away });
-      try {
-        expect(await approverInbox()).toContain(spr.recordNo);
-        expect(await handedFor("MANAGEMENT", spr.recordNo)).toBeUndefined();
-      } finally {
-        await setups.save(own);
-      }
-    });
-
-    it("leaves an SPR in sight when the person named cannot see tasks at all", async () => {
-      const spr = await waiting("100.00");
-      const admin = await idOf("SYSTEM_ADMIN");
-      const setups = t.app.get(ApprovalSetupRepository);
-      const row = {
-        userId: admin,
-        approverId: null,
-        salesAmountApprovalLimit: "0.00",
-        purchaseAmountApprovalLimit: "0.00",
-        unlimitedSalesApproval: false,
-        unlimitedPurchaseApproval: false,
-        substituteUserId: null,
-        awayFrom: null,
-        awayUntil: null,
-      };
-      await setups.save(row);
-      try {
-        await withApprover({ substituteUserId: admin, ...away }, async () => {
-          expect(await approverInbox()).toContain(spr.recordNo);
-        });
-      } finally {
-        await database.client.approvalUserSetup.delete({
-          where: { userId: admin },
-        });
-      }
-    });
-
-    it("hands an SPR to a named approver in another role, whose inbox would never show it", async () => {
-      const raisedBy = await idOf("APPROVER");
-      const spr = await pendingSpr("100.00", { requesterUserId: raisedBy });
-
-      expect(await approverInbox()).not.toContain(spr.recordNo);
-      expect(await handedFor("MANAGEMENT", spr.recordNo)).toMatchObject({
-        handedOver: { reason: "named", fromName: "Rachel Goh" },
-      });
-    });
-
-    it("keeps a passed-on SPR away from the approver while its order is on hold", async () => {
-      const spr = await waiting("9000.00");
-      await decide("APPROVER", spr.recordNo, "approve");
-      await database.client.workflowInstance.updateMany({
-        where: { orderRef: spr.orderNo },
-        data: { status: "OnHold" },
-      });
-
-      expect(await approverInbox()).not.toContain(spr.recordNo);
-    });
-
-    it("does not bring back a decided SPR when the approver goes away", async () => {
-      const spr = await waiting("100.00");
-      await decide("APPROVER", spr.recordNo, "approve");
-
-      await withApprover(
-        { substituteUserId: await idOf("MANAGEMENT"), ...away },
-        async () => {
-          expect(await handedFor("MANAGEMENT", spr.recordNo)).toBeUndefined();
-        },
-      );
-    });
-
-    it("does not hand over an SPR that has a decision, even if its order still reads as waiting", async () => {
-      const spr = await pendingSpr("100.00", {
-        decision: {
-          outcome: "approved",
-          by: "Rachel Goh",
-          comment: "Recorded",
-          at: new Date().toISOString(),
-        },
-      });
-
-      await withApprover(
-        { substituteUserId: await idOf("MANAGEMENT"), ...away },
-        async () => {
-          expect(await handedFor("MANAGEMENT", spr.recordNo)).toBeUndefined();
-        },
-      );
-    });
-
-    it("stops reminding the approver about an SPR that has left them, until it comes back", async () => {
-      const reminded = async () => {
-        const res = await call(
-          t,
-          as("APPROVER"),
-          "get",
-          `${W}/reminders?pageSize=100`,
-        );
-        return (res.body as { data: { orderNo: string }[] }).data.map(
-          (reminder) => reminder.orderNo,
-        );
-      };
-      let spr = await waiting("100.00");
-      for (let tried = 1; !(await reminded()).includes(spr.orderNo); tried++) {
-        if (tried > PENDING.length) {
-          throw new Error("No pending SPR has a reminder to the approver");
-        }
-        spr = await waiting("100.00");
-      }
-
-      await withApprover(
-        { substituteUserId: await idOf("MANAGEMENT"), ...away },
-        async () => {
-          expect(await reminded()).not.toContain(spr.orderNo);
-        },
-      );
-
-      expect(await reminded()).toContain(spr.orderNo);
-    });
-
-    it("never hands an SPR to the person who raised it, and leaves it visible instead", async () => {
-      const spr = await waiting("100.00");
-
-      await withApprover(
-        {
-          substituteUserId: await idOf("PRODUCT_MANAGER"),
-          approverId: null,
-          ...away,
-        },
-        async () => {
-          expect(
-            await handedFor("PRODUCT_MANAGER", spr.recordNo),
-          ).toBeUndefined();
-          expect(await approverInbox()).toContain(spr.recordNo);
-        },
-      );
-    });
-
-    it("leaves an SPR in the approver's inbox when nobody on the chain can act", async () => {
-      const spr = await waiting("100.00");
-
-      await withApprover(
-        { substituteUserId: null, approverId: null, ...away },
-        async () => {
-          expect(await approverInbox()).toContain(spr.recordNo);
-          expect(await handedFor("MANAGEMENT", spr.recordNo)).toBeUndefined();
-        },
-      );
-    });
-
-    it("hands over nothing for an order no longer waiting for a decision", async () => {
-      const spr = await waiting("100.00");
-      await database.client.workflowInstance.updateMany({
-        where: { orderRef: spr.orderNo },
-        data: { status: "OnHold" },
-      });
-
-      await withApprover(
-        { substituteUserId: await idOf("MANAGEMENT"), ...away },
-        async () => {
-          expect(await handedFor("MANAGEMENT", spr.recordNo)).toBeUndefined();
-        },
-      );
-    });
-
-    it("shows nobody else's handed tasks, and pages the list", async () => {
-      const first = await waiting("9000.00");
-      const second = await waiting("9000.00");
-      await decide("APPROVER", first.recordNo, "approve");
-      await decide("APPROVER", second.recordNo, "approve");
-
-      expect(await handedFor("SUPPORT", first.recordNo)).toBeUndefined();
-      expect(await handedFor("MANAGEMENT", first.recordNo)).toBeDefined();
-      expect(await handedFor("MANAGEMENT", second.recordNo)).toBeDefined();
-      const page = await handedTo("MANAGEMENT", "page=1&pageSize=1");
-      expect(page.data).toHaveLength(1);
-      expect(page.meta.total).toBeGreaterThanOrEqual(2);
-      expect(page.meta.mock).toBe(true);
-    });
-
-    it("needs a signed-in caller", async () => {
-      expect(
-        (await call(t, null, "get", `${W}/tasks/handed-to-me`)).status,
-      ).toBe(401);
-    });
   });
 
   describe("retries with an idempotency key", () => {
@@ -1060,25 +449,6 @@ describe("SPR approval within limits (C-3), on the real state machine and area 4
       expect(await refusals()).toBe(refused);
     });
 
-    it("passes an SPR on once when the same key arrives twice at the same moment", async () => {
-      const spr = await pendingSpr("9000.00");
-      const key = freshKey();
-      const audits = await audited("workflows.spr.passed-on", spr.recordNo);
-      const refused = await refusals();
-
-      const [a, b] = await Promise.all([
-        sendWith(key, "APPROVER", spr.recordNo, "approve"),
-        sendWith(key, "APPROVER", spr.recordNo, "approve"),
-      ]);
-
-      expect([a.status, b.status]).toEqual([200, 200]);
-      expect(b.body).toEqual(a.body);
-      expect(
-        (await audited("workflows.spr.passed-on", spr.recordNo)) - audits,
-      ).toBe(1);
-      expect(await refusals()).toBe(refused);
-    });
-
     it("undoes once when the same key arrives twice at the same moment", async () => {
       const spr = await pendingSpr("100.00");
       await decide("APPROVER", spr.recordNo, "approve");
@@ -1135,19 +505,16 @@ describe("SPR approval within limits (C-3), on the real state machine and area 4
     });
 
     it("keeps each person's keys apart, even for the same request", async () => {
-      const spr = await pendingSpr("9000.00");
+      const spr = await pendingSpr("100.00");
       const key = freshKey();
-      const passed = await sendWith(key, "APPROVER", spr.recordNo, "approve");
-      expect(sprDecisionResponseSchema.parse(passed.body).data.message).toBe(
-        SPR_PASSED_ON_MESSAGE,
-      );
+      const decided = await sendWith(key, "APPROVER", spr.recordNo, "approve");
+      expect(decided.status).toBe(200);
 
+      // Not a replay of the approver's 200: Management's own request runs, and
+      // is refused, because the SPR already has a decision.
       const res = await sendWith(key, "MANAGEMENT", spr.recordNo, "approve");
 
-      expect(res.status).toBe(200);
-      expect(sprDecisionResponseSchema.parse(res.body).data.message).toBe(
-        SPR_DECISION_RECORDED_MESSAGE,
-      );
+      expect(res.status).toBe(409);
       expect(await statusOf(spr.orderNo)).toBe("SprApproved");
     });
 
@@ -1162,25 +529,6 @@ describe("SPR approval within limits (C-3), on the real state machine and area 4
       expect(second.status).toBe(200);
       expect(second.body).toEqual(first.body);
       expect(await statusOf(spr.orderNo)).toBe("StockChecked");
-    });
-
-    it("passes an SPR on once above the limit, however often it is sent", async () => {
-      const spr = await pendingSpr("9000.00");
-      const key = freshKey();
-      const audits = await audited("workflows.spr.passed-on", spr.recordNo);
-
-      const first = await sendWith(key, "APPROVER", spr.recordNo, "approve");
-      const second = await sendWith(key, "APPROVER", spr.recordNo, "approve");
-
-      expect(first.status).toBe(200);
-      expect(second.status).toBe(200);
-      expect(sprDecisionResponseSchema.parse(second.body).data.message).toBe(
-        SPR_PASSED_ON_MESSAGE,
-      );
-      expect(second.body).toEqual(first.body);
-      expect(
-        (await audited("workflows.spr.passed-on", spr.recordNo)) - audits,
-      ).toBe(1);
     });
 
     it("undoes once, however often the undo is sent", async () => {

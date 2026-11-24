@@ -25,9 +25,16 @@ export default function SprApprovalPage() {
   const { t } = useTranslation("workflows");
   const { recordNo = "" } = useParams();
   const session = useSessionStore((state) => state.session);
-  const canDecide = hasPermission(session, "approvals.decide");
   const query = useWorkflowsSpr(recordNo);
   const spr = query.data?.data;
+  // Under the approver group only its members may decide; anyone else who holds
+  // the permission, such as Management, reads where it stands (#368).
+  const inGroup =
+    !spr?.approverGroup ||
+    spr.approverGroup.approvers.some(
+      (approver) => approver.userId === session?.user.id,
+    );
+  const canDecide = hasPermission(session, "approvals.decide") && inGroup;
 
   if (query.error instanceof ApiError && query.error.status === 404) {
     return (

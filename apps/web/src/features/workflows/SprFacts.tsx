@@ -145,6 +145,23 @@ export function ApproverFacts({ spr }: { spr: SprDetail }) {
         : t("spr.noLimit");
   const noLimits =
     setup.unlimitedSalesApproval && setup.unlimitedPurchaseApproval;
+  // Under the approver group, area 4's answer is the whole truth: who can decide
+  // this one, already narrowed by any limits. The sample's single approver setup,
+  // substitute and escalation describe the old chain, so they are left out.
+  if (spr.approverGroup) {
+    return (
+      <dl className="grid gap-s2 sm:grid-cols-2">
+        <Fact label={t("spr.decidedBy")}>{t("spr.anyOfThree")}</Fact>
+        <Fact label={t("spr.groupNow")}>
+          {spr.approverGroup.approvers.length > 0
+            ? spr.approverGroup.approvers
+                .map((approver) => approver.displayName)
+                .join(", ")
+            : t("spr.groupNobody", { reason: spr.approverGroup.reason ?? "" })}
+        </Fact>
+      </dl>
+    );
+  }
   return (
     <dl className="grid gap-s2 sm:grid-cols-2">
       <Fact label={t("spr.decidedBy")}>{t("spr.anyOfThree")}</Fact>

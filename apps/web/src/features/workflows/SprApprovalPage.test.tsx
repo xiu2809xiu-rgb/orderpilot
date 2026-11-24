@@ -10,6 +10,7 @@ import {
 } from "@/lib/api/generated/endpoints/workflows/workflows.msw";
 import { axeViolations } from "@/test/axe";
 import { useToastStore } from "@/components/common/toast";
+import { sessionFor } from "@/test/fixtures";
 import { server } from "@/test/server";
 import { renderWorkflowPage } from "./render";
 import SprApprovalPage from "./SprApprovalPage";
@@ -68,9 +69,25 @@ function spr(decision: null | { outcome: "approved"; by: string }) {
           substituteUserId: "00000000-0000-4000-8000-000000000387",
         },
       },
-      substituteName: "Prakash Menon",
-      escalatesToName: "Sophia Chen",
+      // As the real API answers: nobody stands in and nobody is escalated to.
+      substituteName: null,
+      escalatesToName: null,
       passedTo: null,
+      // Set here, not left to the generated mock: who in the group can decide it.
+      approverGroup: {
+        approvers: [
+          {
+            // The signed-in approver, so the form is theirs to use.
+            userId: sessionFor("APPROVER").user.id,
+            displayName: "Anita Rao",
+          },
+          {
+            userId: "00000000-0000-4000-8000-000000000391",
+            displayName: "Wei Ling Tan",
+          },
+        ],
+        reason: null,
+      },
       decidable: true,
       stage: decision ? ("decided" as const) : ("with-approvers" as const),
       raiseTaskId: null,
@@ -87,7 +104,7 @@ function spr(decision: null | { outcome: "approved"; by: string }) {
   };
 }
 
-function open(role: "APPROVER" | "PRODUCT_MANAGER") {
+function open(role: "APPROVER" | "PRODUCT_MANAGER" | "MANAGEMENT") {
   return renderWorkflowPage(<SprApprovalPage />, {
     role,
     route: "/sprs/SPR-20261102-0001",
@@ -145,7 +162,8 @@ describe("the SPR approval page", () => {
     expect(
       screen.getByText("Shortfall (suggested quantity)"),
     ).toBeInTheDocument();
-    expect(screen.getByText("Limited: USD 5,000.00")).toBeInTheDocument();
+    // Under the group, area 4's list is the answer: no single setup's limit.
+    expect(screen.queryByText(/Limited/)).toBeNull();
     // Spectra's figures for raising an SPR, and pieces without decimals.
     expect(
       screen.getByText("Sold a month (3-month average)"),
@@ -162,8 +180,11 @@ describe("the SPR approval page", () => {
     );
     expect(screen.getAllByText("98").length).toBeGreaterThan(0);
     expect(screen.queryByText("98.00")).toBeNull();
-    // A person, by name: the setup's raw approver id means nothing to staff.
-    expect(screen.getByText("Sophia Chen")).toBeInTheDocument();
+    // The group as area 4 answers it for this SPR, by name.
+    expect(screen.getByText("Anita Rao, Wei Ling Tan")).toBeInTheDocument();
+    expect(screen.queryByText("Substitute")).toBeNull();
+    expect(screen.queryByText("Escalates to")).toBeNull();
+    // People, by name: a raw user id means nothing to staff.
     expect(screen.queryByText(/00000000-0000/)).toBeNull();
     expect(await axeViolations(container)).toEqual([]);
   });
@@ -349,7 +370,16 @@ describe("the SPR approval page", () => {
     expect(screen.queryByText(/sample from the demo data/)).toBeNull();
   });
 
-  it("shows the briefing's rule, and no limit or stand-in that the setup does not hold", async () => {
+  it("offers no decision to someone outside the group, such as Management, and says where it stands", async () => {
+    server.use(getWorkflowsSprMockHandler(spr(null)));
+    open("MANAGEMENT");
+    expect(
+      await screen.findByText(/Waiting for a management approver/),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Approve" })).toBeNull();
+  });
+
+  it("on a sample, with no group, shows the briefing's rule and no limit or stand-in the setup does not hold", async () => {
     const base = spr(null);
     server.use(
       getWorkflowsSprMockHandler({
@@ -367,6 +397,7 @@ describe("the SPR approval page", () => {
           },
           substituteName: null,
           escalatesToName: null,
+          approverGroup: undefined,
         },
       }),
     );

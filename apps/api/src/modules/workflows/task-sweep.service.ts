@@ -5,7 +5,6 @@ import { RolePermissionRepository } from "../../auth/role-permission.repository.
 import { Database } from "../../database/database.js";
 import { noticesDue, scheduleOf } from "./domain/task-schedule.js";
 import { OrderWorkflowRepository } from "./order-workflow.repository.js";
-import { SprRoutingService } from "./spr-routing.service.js";
 import { WorkflowNoticeRepository } from "./workflow-notice.repository.js";
 import {
   WorkflowTaskRepository,
@@ -37,7 +36,6 @@ export class TaskSweepService {
     private readonly notices: WorkflowNoticeRepository,
     @Inject(OrderWorkflowRepository)
     private readonly orders: OrderWorkflowRepository,
-    @Inject(SprRoutingService) private readonly routing: SprRoutingService,
     @Inject(Database) private readonly database: Database,
     @Inject(AuditService) private readonly audit: AuditService,
     @Inject(RolePermissionRepository)
@@ -49,10 +47,9 @@ export class TaskSweepService {
    * and is retried, and the retry finds what already went.
    */
   async sweep(now: Date = new Date()): Promise<void> {
-    const [tasks, slas, handovers] = await Promise.all([
+    const [tasks, slas] = await Promise.all([
       this.tasks.open(),
       this.tasks.slas(),
-      this.routing.handovers(now),
     ]);
     const slaOf = new Map(slas.map((sla) => [sla.taskKind, sla]));
     let failed = 0;
@@ -64,23 +61,19 @@ export class TaskSweepService {
         continue;
       }
       const due = noticesDue(scheduleOf(task.createdAt, sla), now);
-      const handover =
-        task.kind === "APPROVE_SPR" ? handovers.get(task.orderRef) : undefined;
-      const owner: Recipient = handover
-        ? { role: handover.role, userId: handover.userId }
-        : { role: task.assigneeRole, userId: null };
+      // The task's own role: an SPR stays with the whole approver group (ADR 0056).
+      const owner: Recipient = { role: task.assigneeRole, userId: null };
       // One at a time: each is its own transaction on the audit trail's chain.
       const steps = [
         ...(due.remind
           ? [
               () =>
-                // Per person: when the SPR moves on, its new holder is told too.
                 this.notify(
                   task,
                   "REMINDER",
                   owner,
                   now,
-                  `task:${task.id}:reminder:${owner.userId ?? owner.role}`,
+                  `task:${task.id}:reminder:${owner.role}`,
                 ),
             ]
           : []),

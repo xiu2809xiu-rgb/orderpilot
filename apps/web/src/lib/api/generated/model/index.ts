@@ -690,6 +690,8 @@ export * from './workflowsSlaSettings200DataItemTaskKind.ts';
 export * from './workflowsSpr200.ts';
 export * from './workflowsSpr200Data.ts';
 export * from './workflowsSpr200DataApprover.ts';
+export * from './workflowsSpr200DataApproverGroup.ts';
+export * from './workflowsSpr200DataApproverGroupApproversItem.ts';
 export * from './workflowsSpr200DataApproverSetup.ts';
 export * from './workflowsSpr200DataBasis.ts';
 export * from './workflowsSpr200DataDecision.ts';
