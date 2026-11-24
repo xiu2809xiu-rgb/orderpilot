@@ -327,3 +327,16 @@ The decision is recorded in [ADR 0058](../adr/0058-seven-roles-six-teams-and-an-
 | ------------------------------------------- | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Parallel change (expand, migrate, contract) | `packages/shared/src/roles.ts`, and the seven steps of ADR 0058 | The retired values get a wider stored type first, references move off them while they still work, and only then does the role list shrink, so `main` stays green at every step                        |
 | Read wide, write narrow                     | `packages/shared/src/audit.ts`, `apps/api/src/audit/`           | An event read back may name a retired role for ever, because its hash covers the role. A new event names a current one, so once the list shrinks the type checker refuses a write with a retired role |
+
+## Two-step sign-in (#380)
+
+The decision is recorded in [ADR 0067](../adr/0067-two-step-sign-in-with-an-authenticator-app.md).
+
+| Pattern                                | Where                                                          | Why                                                                                                                                              |
+| -------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Clock as a port                        | `apps/api/src/common/clock.ts`                                 | Every rule takes the moment as an argument, and a test passes one fixed moment, so no test sleeps and none depends on the hour it runs           |
+| Sealed value with bound context        | `apps/api/src/two-step/domain/secret-box.ts`                   | The secret is sealed with the person's id as associated data, so a ciphertext copied to another person's row cannot be opened                    |
+| Outcome returned, thrown after save    | `apps/api/src/auth/two-step-sign-in.service.ts`                | A wrong code must be counted and audited even though the call fails, so the service returns the outcome, commits, and only then throws the error |
+| Row lock to serialise a counter        | `apps/api/src/two-step/two-step.repository.ts`                 | Two codes at once for one person queue on the person's own row, so a code cannot be used twice and the tries cannot be counted short             |
+| Challenge, then verify, with a channel | `apps/api/src/two-step/two-step-challenge.repository.ts`       | A sign-in that needs a second step is a stored challenge with a channel column, so another channel can join without changing the flow            |
+| Controlled field, parent owns timers   | `components/kit/code-field/`, `app/two-step/useCodeAttempt.ts` | The field draws the state it is given and times nothing. The hook holds the three waits, so they hold under reduced motion and in jsdom          |
