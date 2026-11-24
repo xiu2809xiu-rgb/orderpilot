@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { CodeField } from "@/components/kit/code-field/CodeField";
 import { Button } from "@/components/ui/button";
 import { verifyTwoStep } from "@/lib/api/two-step";
+import { useCodeFieldLabels } from "../two-step/useCodeFieldLabels";
 import { useCodeAttempt, type FailureKind } from "../two-step/useCodeAttempt";
 import {
   describeTwoStepFailure,
@@ -40,6 +41,7 @@ export function TwoStepStep({
 }: TwoStepStepProps) {
   const { t } = useTranslation("signin");
   const { t: tCommon } = useTranslation();
+  const labels = useCodeFieldLabels();
   const alertId = useId();
   const [mode, setMode] = useState<Mode>("app");
   const [recovery, setRecovery] = useState("");
@@ -106,16 +108,7 @@ export function TwoStepStep({
           state={attempt.state}
           focusOnMount
           describedBy={failure ? alertId : undefined}
-          labels={{
-            group: t("twoStep.field.group"),
-            input: t("twoStep.field.input"),
-            hint: t("twoStep.field.hint"),
-            verifying: t("twoStep.field.verifying"),
-            verified: t("twoStep.field.verified"),
-            statusVerifying: t("twoStep.field.statusVerifying"),
-            statusVerified: t("twoStep.field.statusVerified"),
-            statusWrong: t("twoStep.field.statusWrong"),
-          }}
+          labels={labels}
           onChange={(next) => {
             setFailure(null);
             attempt.setValue(next);

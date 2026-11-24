@@ -15,6 +15,9 @@ import { SignInForm } from "../SignInForm";
 
 beforeAll(async () => {
   await i18n.loadNamespaces(["signin", "common"]);
+  // The step is a lazy chunk: warm it, so the first test is not the one that
+  // pays for loading the code field and its styles.
+  await import("./TwoStepStep");
 });
 
 afterEach(() => {

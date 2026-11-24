@@ -1,19 +1,19 @@
-import type { Role, Session, TwoStepVerifyResponse } from "@orderpilot/shared";
+import type { Role, Session } from "@orderpilot/shared";
 import { ChevronDown } from "lucide-react";
 import { lazy, Suspense, useId, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { toast } from "@/components/common/toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { demoLogin, finishSignIn, login } from "@/lib/api/auth";
+import { demoLogin, login } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/errors";
 import { describeError } from "@/lib/errors";
 import { DemoRoles } from "./signin/DemoRoles";
 import { PasswordForm } from "./signin/PasswordForm";
 import { RolesPlaceholder } from "./signin/RolesPlaceholder";
 import { SignInFailure, type Failure } from "./signin/SignInFailure";
+import { TwoStepFallback } from "./signin/TwoStepFallback";
 import { useAuthOptions } from "./signin/useAuthOptions";
-import type { TwoStepFailure } from "./two-step/twoStepFailure";
+import { useSecondStep } from "./signin/useSecondStep";
 import "./signin/preloadWords";
 
 // The second step, its field and their styles load only when a password
@@ -28,17 +28,6 @@ interface SignInFormProps {
   onSignedIn?: (session: Session) => void;
   /** Makes the field ids unique when the form is on screen twice. */
   idPrefix?: string;
-}
-
-/** Holds the field's place while the step's chunk arrives, so the card does not jump. */
-function TwoStepFallback({ label }: { label: string }) {
-  return (
-    <div role="status" className="flex flex-col gap-4">
-      <span className="sr-only">{label}</span>
-      <Skeleton aria-hidden="true" className="h-7 w-2/5" />
-      <Skeleton aria-hidden="true" className="h-14 w-full" />
-    </div>
-  );
 }
 
 /**
@@ -67,37 +56,15 @@ export function SignInForm({
   const [busy, setBusy] = useState(false);
   const [pending, setPending] = useState<Role | null>(null);
   const options = useAuthOptions();
-  // The second step of a password sign-in is open. Everything else stays
-  // mounted and is only hidden, so the email keeps its place for "Back".
-  const [challenge, setChallenge] = useState(false);
-  const [clearSignal, setClearSignal] = useState(0);
-  const [focusSignal, setFocusSignal] = useState(0);
-
-  function openChallenge() {
-    setFailure(null);
-    setClearSignal((n) => n + 1);
-    setChallenge(true);
-  }
-
-  function closeChallenge(ended: TwoStepFailure | null) {
-    setChallenge(false);
-    setFocusSignal((n) => n + 1);
-    if (ended) setFailure({ ...ended, from: "password" });
-  }
-
-  function verified(response: TwoStepVerifyResponse) {
-    const session = finishSignIn(response.data);
-    const { method, recoveryCodesLeft, lockedRecently } = response.meta;
-    if (method === "recovery-code") {
-      toast.done(
-        recoveryCodesLeft === 0
-          ? t("twoStep.recoveryUsedLast")
-          : t("twoStep.recoveryUsed", { count: recoveryCodesLeft }),
-      );
-    }
-    if (lockedRecently) toast.done(t("twoStep.recentLock"));
-    onSignedIn?.(session);
-  }
+  const step = useSecondStep({
+    onSignedIn,
+    onOpened: () => {
+      setFailure(null);
+    },
+    onClosed: (ended) => {
+      if (ended) setFailure({ ...ended, from: "password" });
+    },
+  });
 
   async function run(action: () => Promise<Session>, role: Role | null) {
     setFailure(null);
@@ -113,7 +80,7 @@ export function SignInForm({
         error instanceof ApiError &&
         error.code === "TWO_STEP_REQUIRED"
       ) {
-        openChallenge();
+        step.openStep();
         return;
       }
       setFailure({
@@ -138,7 +105,7 @@ export function SignInForm({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-col gap-3" hidden={challenge}>
+      <div className="flex flex-col gap-3" hidden={step.open}>
         {options.isPending ? <RolesPlaceholder /> : null}
         {demo ? (
           <DemoRoles
@@ -193,21 +160,21 @@ export function SignInForm({
               onEdit={() => {
                 setFailure(null);
               }}
-              clearPasswordSignal={clearSignal}
-              focusPasswordSignal={focusSignal}
+              clearPasswordSignal={step.clearSignal}
+              focusPasswordSignal={step.focusSignal}
               onSubmit={(values) => run(() => login(values), null)}
             />
           </div>
         </div>
       </div>
-      {challenge ? (
+      {step.open ? (
         <Suspense fallback={<TwoStepFallback label={t("twoStep.loading")} />}>
           <TwoStepStep
             idPrefix={idPrefix}
-            onVerified={verified}
-            onEnded={closeChallenge}
+            onVerified={step.verified}
+            onEnded={step.closeStep}
             onBack={() => {
-              closeChallenge(null);
+              step.closeStep(null);
             }}
           />
         </Suspense>
