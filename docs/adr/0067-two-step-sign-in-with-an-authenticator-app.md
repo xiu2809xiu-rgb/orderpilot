@@ -47,9 +47,13 @@ Where does the code come from? Nothing in the API sends email. The demo accounts
 
 - Six error codes join the contract and every generated error enum gains them: a large mechanical diff in generated files.
 - The entry chunk grows by a path string, a few error texts and a few lines (the pull request has the measured budget).
-- Four new tables: `TwoStepSecret`, `TwoStepChallenge` and `RecoveryCode`, with enums for the status and the channel.
+- Three new tables: `TwoStepSecret`, `TwoStepChallenge` and `RecoveryCode`, with enums for the status and the channel.
 - An unreadable secret after `JWT_SECRET` changed has no screen of its own: a recovery code signs in and turns two-step off, and the person sets it up again.
 - A demo visitor can lock a shared account's password sign-in, except for an account whose role holds `users.manage`. The demo stack's reset from its template clears the others.
+- A demo session also spends the lock counter of an account that already has two-step on: ten wrong codes sent from a demo session to the turn-off or the new-codes dialog lock that account's six-digit entry like any others. Recovery codes and the demo role buttons still work, so the harm is a password sign-in that needs a recovery code for a while.
+- In demo mode the System admin's demo button can reset anyone else's two-step, with no password. Demo mode cannot start in production (ADR 0012, item 9), so this exists only on the demo and review stacks.
+- The failure count starts afresh after a lock is placed, so ten more wrong codes are needed for the next lock, and the third lock in a row lasts 24 hours.
+- A wrong recovery code counts against its challenge (five end the sign-in) and not toward the lock. A recovery code is 75 bits and works once, so guessing one has no reach, while a lock on the person's six-digit entry is something a stranger who knows the password could use to keep the owner out; a recovery code must stay the way in during a lock.
 - A run of the end-to-end spec that is killed between turning two-step on and off is healed by the next run, from a git-ignored state file. A run killed with that file wiped needs a database reset.
 
 **Not built:** making two-step compulsory for a role, "remember this device", codes by email or SMS, passkeys, a notice to a person that their two-step was reset, the Governance button, an operator reset script. The last three are follow-up issues.
