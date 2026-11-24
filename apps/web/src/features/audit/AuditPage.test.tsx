@@ -318,6 +318,36 @@ describe("AuditPage", () => {
     expect(
       await screen.findByText("Verified up to sequence 57"),
     ).toBeInTheDocument();
+    // The picture (F-10) numbers only what the check sent: 40 events checked
+    // up to 57 says nothing about the numbers in between.
+    await waitFor(() => {
+      expect(pictureText()).toBe("57");
+    });
+  });
+
+  it("draws no chain for an empty trail", async () => {
+    server.use(
+      getAuditViewerChainMockHandler({
+        data: {
+          ok: true,
+          checked: 0,
+          verifiedThrough: null,
+          brokenAtSequence: null,
+          brokenAtEventId: null,
+          problem: null,
+          checkedAt: new Date().toISOString(),
+        },
+      }),
+    );
+    const user = userEvent.setup();
+    renderAt();
+    await user.click(
+      await screen.findByRole("button", { name: "Check the chain" }),
+    );
+    expect(
+      await screen.findByText("Nothing to verify yet: the trail is empty."),
+    ).toBeInTheDocument();
+    expect(pictureText()).toBeNull();
   });
 
   it("reports where a broken chain breaks", async () => {
@@ -341,10 +371,18 @@ describe("AuditPage", () => {
     );
     expect(await screen.findByText("Broken at sequence 9")).toBeInTheDocument();
     expect(screen.getByRole("alert")).toHaveTextContent(
-      "Events up to sequence 8 still verify.",
+      "Events up to sequence 8 still verify. The check stops at the first break, so the events after it are not checked.",
     );
+    await waitFor(() => {
+      expect(pictureText()).toBe("89");
+    });
   });
 });
+
+/** The numbers under the chain picture, or null when there is no picture. */
+function pictureText(): string | null {
+  return document.querySelector("[data-chain-picture]")?.textContent ?? null;
+}
 
 describe("EntityOperationLog", () => {
   beforeAll(async () => {
@@ -622,6 +660,28 @@ describe("a broken chain and the events around it (F-9)", () => {
   it("has no axe violations when the chain is broken", async () => {
     const { container } = await checkTheChain();
     expect(await axeViolations(container)).toEqual([]);
+  });
+
+  it("opens the same event from the red block, for a mouse, out of the tab order (F-10)", async () => {
+    server.use(
+      getAuditViewerGetMockHandler({
+        data: event({ sequence: 9, id: BROKEN }),
+      }),
+    );
+    const { user, container } = await checkTheChain();
+    const block = await waitFor(() => {
+      const found = container.querySelector("[data-chain-break]");
+      if (!(found instanceof HTMLElement)) throw new Error("No red block yet");
+      return found;
+    });
+    const link = screen.getByRole("link", { name: "Open event 9" });
+    expect(block.getAttribute("href")).toBe(link.getAttribute("href"));
+    expect(block).toHaveAttribute("tabindex", "-1");
+    expect(block.closest("[aria-hidden='true']")).not.toBeNull();
+    // Axe again, now the picture and its click target are on the page.
+    expect(await axeViolations(container)).toEqual([]);
+    await user.click(block);
+    expect(await screen.findByRole("dialog")).toHaveTextContent("Event 9");
   });
 
   it("marks the event the list is centred on, and the chip clears it", async () => {

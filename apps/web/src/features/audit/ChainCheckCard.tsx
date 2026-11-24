@@ -1,4 +1,5 @@
 import { Link2, Link2Off } from "lucide-react";
+import { lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import {
@@ -9,8 +10,27 @@ import {
 } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import { useAuditViewerChain } from "@/lib/api/generated/endpoints/audit/audit";
+import { useMediaQuery } from "@/lib/useMediaQuery";
+import { chainModel, type ChainKnowledge } from "./chain/chainModel";
 
 const LINK = "text-primary underline-offset-4 hover:underline";
+
+// The picture is a shader: its own chunk, so the audit page does not wait for it.
+const ChainPicture = lazy(async () => ({
+  default: (await import("./chain/ChainPicture")).ChainPicture,
+}));
+
+/** Seven blocks fit across from a small tablet up, four on a phone. */
+const WIDE = "(min-width: 640px)";
+
+/** The event a chain breaks at, opened over its neighbours (F-9). */
+function brokenEventPath(sequence: number, eventId: string): string {
+  const query = new URLSearchParams({
+    event: eventId,
+    around: String(sequence),
+  });
+  return `/audit?${query.toString()}`;
+}
 
 /**
  * Where a break is (F-9): the event itself, opened over the events around
@@ -29,10 +49,7 @@ function BreakLinks({
   return (
     <p className="flex flex-wrap gap-x-s2 text-sm">
       {eventId ? (
-        <Link
-          className={LINK}
-          to={`/audit?${new URLSearchParams({ event: eventId, around }).toString()}`}
-        >
+        <Link className={LINK} to={brokenEventPath(sequence, eventId)}>
           {t("chain.openBroken", { n: sequence })}
         </Link>
       ) : null}
@@ -54,6 +71,23 @@ export function ChainCheckCard() {
     query: { enabled: false, staleTime: 0, gcTime: 0, retry: false },
   });
   const result = check.data?.data;
+  const wide = useMediaQuery(WIDE);
+  const knowledge: ChainKnowledge = check.isFetching
+    ? { kind: "checking" }
+    : check.isError
+      ? { kind: "failed" }
+      : result
+        ? { kind: "checked", result }
+        : { kind: "never" };
+  const picture = chainModel(knowledge, wide ? 7 : 4);
+  // The red block opens the same event as "Open event N", for a mouse.
+  const brokenLink =
+    result && !result.ok && result.brokenAtSequence && result.brokenAtEventId
+      ? {
+          to: brokenEventPath(result.brokenAtSequence, result.brokenAtEventId),
+          label: t("chain.openBroken", { n: result.brokenAtSequence }),
+        }
+      : undefined;
 
   return (
     <SectionCard
@@ -69,6 +103,11 @@ export function ChainCheckCard() {
         </Button>
       }
     >
+      {picture.blocks.length > 0 ? (
+        <Suspense fallback={<div aria-hidden="true" className="h-33" />}>
+          <ChainPicture picture={picture} brokenLink={brokenLink} />
+        </Suspense>
+      ) : null}
       <div aria-live="polite" className="space-y-s1">
         {check.isError ? (
           <ErrorPanel
@@ -104,7 +143,8 @@ export function ChainCheckCard() {
                   ? t(`chain.problems.${result.problem}`)
                   : "",
                 through: result.verifiedThrough ?? 0,
-              })}
+              })}{" "}
+              {t("chain.stopsAtBreak")}
             </p>
             {result.brokenAtSequence ? (
               <BreakLinks

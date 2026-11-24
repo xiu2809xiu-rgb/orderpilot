@@ -95,6 +95,7 @@
     "okDetail": "{{count}} events checked. None has been changed, removed or reordered.",
     "broken": "Broken at sequence {{n}}",
     "brokenDetail": "{{problem}} Events up to sequence {{through}} still verify.",
+    "stopsAtBreak": "The check stops at the first break, so the events after it are not checked.",
     "problems": {
       "hash-mismatch": "The event no longer matches its own hash.",
       "prevHash-mismatch": "The event does not follow the one before it."

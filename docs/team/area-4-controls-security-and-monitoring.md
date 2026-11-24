@@ -76,7 +76,7 @@ F-1 and G-1 have landed. F-2 fills in its item when it does.
   - **`it.todo` tests** in `apps/api/test/http/governance-controls.test.ts`, named by control: approval limits, no self-approval, the bank-detail hold, masking for each role, a direct API call being refused (E2E #3), and payment confirmation.
 - **From F-2, the audit viewer:** the audit log viewer over the real hash chain, with filters and a chain check; the audit trail at the foot of every detail page (with P-12's audit link); and `it.todo` tests for export and retention.
 - **From G-1, monitoring** (landed, [ADR 0021](../adr/0021-otel-lgtm-observability-profile.md), [0022](../adr/0022-sentry-for-errors.md) and [0028](../adr/0028-metrics-endpoint-protection-and-clickstream.md)):
-  - **The screens** at `/monitoring` (`apps/web/src/features/monitoring/`), in three tabs. _AI usage and cost_ reads the real `AiUsageRecord` table (`GET /monitoring/ai-usage`, needs `aiUsage.read`): totals, cost per feature and the latest calls, with an honest empty state until P-17's gateway writes records. _Observability_ and _Clickstream_ show labelled mock data (`GET /monitoring/observability`, `GET /monitoring/clickstream`, both `meta.mock: true`, with the Mock badge) and carry `it.todo` tests in `MonitoringPage.test.tsx`.
+  - **The screens** at `/monitoring` (`apps/web/src/features/monitoring/`), in three tabs. _AI usage and cost_ reads the real `AiUsageRecord` table (`GET /monitoring/ai-usage`, needs `aiUsage.read`): totals, cost per feature and the latest calls, with an honest empty state until P-17's gateway writes records. _Observability_ and _Clickstream_ show labelled mock data (`GET /monitoring/observability`, `GET /monitoring/clickstream`, both `meta.mock: true`, with the Mock badge) and carry `it.todo` tests in `MonitoringPage.test.tsx`. Because that data is made up, the Observability tab raises no alert from it, and says its statuses and trace IDs are samples (#369). G-1's real health brings the alert back, on live data only.
   - **Telemetry** in `apps/api/src/telemetry/`: OpenTelemetry traces and metrics for every request under the service name `orderpilot-api`, sent over OTLP only when `OTEL_EXPORTER_OTLP_ENDPOINT` is set. A log line carries the request id and the trace id; the span carries the request id as `orderpilot.request_id`.
   - **`/metrics`** with prom-client (`modules/monitoring/metrics.controller.ts`): bearer token `METRICS_TOKEN`, and a 404 when none is set.
   - **The clickstream:** `POST /analytics/clickstream` (any signed-in role, 30 batches a minute, 20 events a batch) stores role, route pattern, event name and time in `ClickstreamEvent` (`analytics.prisma`), and nothing that names a person. In the web app, `AnalyticsTracker.ts` is the class (batching, consent, Do Not Track, Global Privacy Control, route patterns), `AnalyticsRoot.tsx` shows the consent banner and records one page view per screen, and `tracker.ts` is the one instance.
@@ -281,6 +281,7 @@ await authorisation.enforce(
 - **A rejected verification** keeps the hold and records why. A later verification can supersede it.
 - **A refused reason** (blank, missing, or holding an account number) is a 400 that names the field. It is audited as `governance.policy.refused` under the rule `hold-reason`, without its text.
 - **"needs a different Finance user"** shows on a hold when nobody except the person who changed the details could verify it. Adding or enabling a Finance user clears it.
+- **A step on a hold that is already closed** is refused by the policy with a 403 and audited as `governance.policy.refused` under the rule `hold-verification` ("this bank-detail hold is already closed"). The service's own 409, "This hold changed while you were working on it", is reached only when the hold closes or gains a verification between that check and the transaction: a race, which is not audited (#378).
 
 ### Still to come for the hold
 
@@ -356,6 +357,8 @@ await authorisation.enforce(
 
 **Copying a role has no Undo,** because nothing keeps the target's old rows. A second step says so before anything is sent, and the audit trail keeps the change.
 
+**The matrix's own refusals are audited (#378).** A locked cell (the system admin never approves, posts or pays, and always keeps `roles.manage`) and a copy of a role onto itself still answer 409 with the same words, and now leave a row: `governance.permission.refused` for one cell, `governance.role.copy.refused` for a copy, each with its `rule` (`locked-cell` or `same-role`) and, for a locked cell, the permission and its `lock`. The rules throw `MatrixRuleRefusedError` (`matrix-rules.ts`), and `matrix.service.ts` records it after the transaction has rolled back, so the row stays. Tests: `governance-domain.test.ts` and `test/http/governance.test.ts`.
+
 **E2E #3 in a browser** is in `apps/e2e/tests/governance.spec.ts`. A script calls the SPR approval route as Warehouse, with no page involved, and gets the 403 envelope with its trace ID. The auditor then opens the audit viewer, filtered to that route and role, and the newest row's details must show that trace ID. A refusal's record is the route pattern, not the SPR number, so the trace ID is what proves the row is this call's. This covers the direct call and its audit row. F-9 adds the masking step, a refusal read as the system admin and as the auditor ([Audit viewer polish](#audit-viewer-polish-f-9)). The self-approval step of E2E #3 is not in it.
 
 ## What's yours to build
@@ -369,6 +372,7 @@ await authorisation.enforce(
 **What F-2 deliberately leaves to you,** and what is queued:
 
 - **F-9: audit viewer polish:** the pickers for the person and the action, the link to the broken event, and the browser test are built ([below](#audit-viewer-polish-f-9)). Saved views on the server and a chain check that runs in the background are still to come.
+- **F-10: a picture of the hash chain** on the chain check card is built ([below](#the-chain-picture-f-10)).
 - Export, retention, anchoring and scheduled verification, and the dashboards: see the deeper work below. None is started, so none is half-done.
 
 **What F-1 deliberately leaves to you** (nothing below is written, so none of it is half-done):
@@ -451,6 +455,37 @@ The matrix no longer shows the data scope, and Copy a role leaves the target's s
 - **What a copy records:** the permissions granted and revoked, and no scope.
 - **Enforcing it** is a story of its own: it needs brand ownership (Q-17) and a filter in each area's lists, and brings the selector back with it.
 - **Tests:** `GovernancePage.test.tsx` ("offers no data scope control", and the copy dialog's words) and `test/http/governance.test.ts` ("leaves the target's data scope as it was").
+
+## The chain picture (F-10)
+
+The chain check card draws the chain above its words: glass blocks in a row, lit when they verify, with the break tilted and red and its link snapped ([ADR 0066](../adr/0066-the-chain-picture-is-a-shader-on-glcanvas.md)).
+
+- **Where:** `apps/web/src/features/audit/chain/`.
+  - `chainModel.ts` turns what the check returned into blocks.
+  - `chainShader.ts` is the fragment shader.
+  - `ChainPicture.tsx` puts it on the kit's `GlCanvas`, with the numbers under it. `ChainCheckCard.tsx` loads it as a lazy chunk.
+- **Only what the check returns:**
+  - The only numbers are the newest verified sequence and the break, because sequence numbers can have gaps.
+  - Nothing is drawn after a break, because the check stops there.
+  - A running check shows a looping light, not a count, because the check reports no progress.
+- **Motion:** only while checking, and while the blocks light after it; a still picture under reduced motion; plain CSS without WebGL2. The picture is `aria-hidden`, and the words stay the result.
+- **The red block** opens the broken event when clicked, the same link as "Open event N" (`brokenEventPath` in `ChainCheckCard.tsx`). It is for a mouse only, out of the tab order: the keyboard and a screen reader use "Open event N".
+- **Tests:**
+  - `chainModel.test.ts`: every state, and no number the check did not send.
+  - `ChainPicture.test.tsx`: the uniforms on a recording WebGL stub, and that it rests when not checking.
+  - `AuditPage.test.tsx`: the numbers on the card.
+  - `apps/e2e/tests/audit-chain.spec.ts`: as the system admin, a real canvas, so the shader compiles, and `checkPage`; and a click on the red block, on a staged break, opens the event.
+
+## The governance pages' findings (#276)
+
+Four findings from the walk of 15 Nov as the system administrator and the auditor.
+
+- **Your own row on the Users tab** has no Disable, since the server refuses it: someone else has to lock an administrator out. A "You" badge marks the row, and History stays. A refused change says the server's own reason and its trace ID in the toast; the panel above the table is for an access refusal only. The row's buttons are in `UserRowActions.tsx`, and the toggle in `useUserToggle.ts`.
+- **The refusal is audited:** an administrator who tries to disable themselves leaves a `user.disable.refused` row, with the rule `no-self-disable`, written before the transaction so it stays (`users.service.ts`).
+- **Copy a role** opens with no roles chosen, and Copy stays off until two different roles are. It says what the target gains and loses, from the matrix the page holds (`copyChange.ts`, `CopyChangeNote.tsx`), and the confirmation says it again. A copy that would change nothing says so.
+- **The Refusals tab** fits a phone: each sample column may shrink, the JSON scrolls in its own box, and the sample trace ID wraps.
+- **The audit log at 1440 px** fitted its card already, since #272. Its browser test now also checks that the side panel is open.
+- **Tests:** `UsersTab.test.tsx`, `CopyRoleDialog.test.tsx`, `copyChange.test.ts`, `test/http/auth-guards.test.ts` (the audited refusal), and two browser tests in `governance.spec.ts`. The Refusals test measures the main panel itself, because `checkPage` measures only the document (#376).
 
 ## Options to consider, not built
 

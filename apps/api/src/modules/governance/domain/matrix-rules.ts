@@ -17,14 +17,48 @@ function lockOf(role: Role, permission: Permission, kind: "never" | "always") {
   );
 }
 
+/** Which rule of the matrix refused, and on what: what the audit row names. */
+export type MatrixRefusal =
+  | {
+      readonly rule: "locked-cell";
+      readonly permission: Permission;
+      readonly lock: "never" | "always";
+    }
+  | { readonly rule: "same-role" };
+
+/**
+ * A rule of the matrix said no. It answers 409 as any conflict does, and
+ * carries the rule, so the service can record the refusal (#378).
+ */
+export class MatrixRuleRefusedError extends ConflictError {
+  constructor(
+    message: string,
+    readonly refusal: MatrixRefusal,
+  ) {
+    super(message);
+  }
+}
+
 export function assertCanGrant(role: Role, permission: Permission): void {
   const lock = lockOf(role, permission, "never");
-  if (lock) throw new ConflictError(lock.reason);
+  if (lock) {
+    throw new MatrixRuleRefusedError(lock.reason, {
+      rule: "locked-cell",
+      permission,
+      lock: "never",
+    });
+  }
 }
 
 export function assertCanRevoke(role: Role, permission: Permission): void {
   const lock = lockOf(role, permission, "always");
-  if (lock) throw new ConflictError(lock.reason);
+  if (lock) {
+    throw new MatrixRuleRefusedError(lock.reason, {
+      rule: "locked-cell",
+      permission,
+      lock: "always",
+    });
+  }
 }
 
 export interface CopyPlan {
@@ -44,7 +78,10 @@ export function planCopy(
   target: readonly Permission[],
 ): CopyPlan {
   if (fromRole === toRole) {
-    throw new ConflictError("Choose two different roles to copy between.");
+    throw new MatrixRuleRefusedError(
+      "Choose two different roles to copy between.",
+      { rule: "same-role" },
+    );
   }
   const wanted = new Set(source);
   const held = new Set(target);

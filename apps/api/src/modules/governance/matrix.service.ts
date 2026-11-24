@@ -18,6 +18,7 @@ import { Database } from "../../database/database.js";
 import type { RequestInfo } from "../../users/users.service.js";
 import { DataScopeRepository } from "./data-scope.repository.js";
 import {
+  MatrixRuleRefusedError,
   assertCanGrant,
   assertCanRevoke,
   planCopy,
@@ -76,7 +77,36 @@ export class MatrixService {
     return { role, permissions: held, dataScope };
   }
 
-  setPermission(
+  async setPermission(
+    role: Role,
+    permission: Permission,
+    granted: boolean,
+    actor: AuthContext,
+    info: RequestInfo,
+  ): Promise<RoleAccess> {
+    try {
+      return await this.changePermission(
+        role,
+        permission,
+        granted,
+        actor,
+        info,
+      );
+    } catch (error) {
+      if (error instanceof MatrixRuleRefusedError) {
+        await this.recordRefusal(actor, info, {
+          action: "governance.permission.refused",
+          entityType: "RolePermission",
+          entityId: `${role}:${permission}`,
+          summary: `${actor.user.displayName} was refused ${granted ? "granting" : "revoking"} ${permission} ${granted ? "to" : "from"} ${ROLE_LABELS[role]}`,
+          changes: { role, permission, granted, ...error.refusal },
+        });
+      }
+      throw error;
+    }
+  }
+
+  private changePermission(
     role: Role,
     permission: Permission,
     granted: boolean,
@@ -141,7 +171,52 @@ export class MatrixService {
    * as it was: no list reads the scope yet, so a copy that changed it would
    * change something nobody can see (#268, ADR 0065).
    */
-  copyRole(
+  async copyRole(
+    body: CopyRoleBody,
+    actor: AuthContext,
+    info: RequestInfo,
+  ): Promise<RoleAccess> {
+    try {
+      return await this.copyInTransaction(body, actor, info);
+    } catch (error) {
+      if (error instanceof MatrixRuleRefusedError) {
+        const { fromRole, toRole } = body;
+        await this.recordRefusal(actor, info, {
+          action: "governance.role.copy.refused",
+          entityType: "Role",
+          entityId: toRole,
+          summary: `${actor.user.displayName} was refused copying the access of ${ROLE_LABELS[fromRole]} to ${ROLE_LABELS[toRole]}`,
+          changes: { fromRole, toRole, ...error.refusal },
+        });
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * A refusal of one of the matrix's rules, recorded after the transaction
+   * has rolled back, so the row stays although nothing changed (#378).
+   */
+  private recordRefusal(
+    actor: AuthContext,
+    info: RequestInfo,
+    event: {
+      action: string;
+      entityType: string;
+      entityId: string;
+      summary: string;
+      changes: Record<string, unknown>;
+    },
+  ): Promise<unknown> {
+    return this.audit.record({
+      ...event,
+      actor: { kind: "user", userId: actor.user.id, role: actor.user.role },
+      ip: info.ip,
+      traceId: info.traceId,
+    });
+  }
+
+  private copyInTransaction(
     body: CopyRoleBody,
     actor: AuthContext,
     info: RequestInfo,

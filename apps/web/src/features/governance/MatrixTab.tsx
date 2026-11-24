@@ -61,11 +61,7 @@ export function MatrixTab() {
       description={t("matrix.description")}
       actions={
         canManage ? (
-          <CopyRoleDialog
-            roles={data.roles.map((access) => access.role)}
-            busy={busy}
-            onCopy={copyRole}
-          />
+          <CopyRoleDialog roles={data.roles} busy={busy} onCopy={copyRole} />
         ) : null
       }
     >

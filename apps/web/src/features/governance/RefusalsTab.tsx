@@ -28,8 +28,11 @@ export function RefusalsTab() {
       description={t("refusals.description")}
       actions={<Badge variant="outline">{t("refusals.sample")}</Badge>}
     >
+      {/* Each column may shrink below its widest line (#276): the JSON scrolls
+          in its own box, and the sample trace ID wraps, so a phone does not
+          scroll sideways. */}
       <div className="grid gap-s3 md:grid-cols-2">
-        <div className="space-y-2">
+        <div className="min-w-0 space-y-2 [&_.st-trace_code]:break-all">
           <h3 className="text-sm font-medium">{t("refusals.exampleLabel")}</h3>
           <StatePanel
             variant="inline"
@@ -41,7 +44,7 @@ export function RefusalsTab() {
             traceId={SAMPLE_TRACE_ID}
           />
         </div>
-        <div className="space-y-2">
+        <div className="min-w-0 space-y-2">
           <h3 className="text-sm font-medium">{t("refusals.envelopeLabel")}</h3>
           <ScrollRegion label={t("refusals.envelopeLabel")}>
             <pre className="overflow-x-auto rounded-lg bg-muted p-s2 font-mono text-xs">{`HTTP 403

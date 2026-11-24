@@ -3,7 +3,6 @@ import {
   DemoBadge,
   ErrorPanel,
   LoadingState,
-  PartialNotice,
   ScrollRegion,
   SectionCard,
   StatusBadge,
@@ -25,7 +24,12 @@ const STATUS_TONE: Record<string, StatusTone> = {
   down: "danger",
 };
 
-/** Service health and recent traces. Mock data until the real dashboards (Sprints 13 to 15). */
+/**
+ * Service health and recent traces. Mock data until the real dashboards
+ * (Sprints 13 to 15). The report can only be mock today (`meta.mock: true`), so
+ * nothing on it is raised as an alert: a made-up "degraded" would read as a
+ * real incident (#369). G-1's real health brings the alert back, on live data.
+ */
 export function ObservabilityTab() {
   const { t } = useTranslation("monitoring");
   const query = useOverviewObservability();
@@ -37,9 +41,6 @@ export function ObservabilityTab() {
     );
   }
   const { services, recentTraces } = query.data.data;
-  const degraded = services
-    .filter((service) => service.status !== "healthy")
-    .map((service) => service.name);
 
   return (
     <div className="space-y-s3">
@@ -49,13 +50,6 @@ export function ObservabilityTab() {
           {t("observability.mockNote")}
         </p>
       </div>
-      {degraded.length > 0 ? (
-        <PartialNotice
-          description={t("observability.partial", {
-            names: degraded.join(", "),
-          })}
-        />
-      ) : null}
       <SectionCard
         title={t("observability.services.title")}
         description={t("observability.services.description")}

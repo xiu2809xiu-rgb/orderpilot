@@ -170,6 +170,11 @@ test.describe("The audit log at the demo's screen width", () => {
   test("fits its card at 1440 px, with Details in view", async ({ page }) => {
     await signInAs(page, "AUDITOR");
     await page.goto("/audit?refusals=1");
+    // #276 asks for this with the side panel open, as it is by default.
+    await expect(page.locator("[data-collapsed]")).toHaveAttribute(
+      "data-collapsed",
+      "false",
+    );
     const details = page
       .getByRole("button", { name: /^Details of event/ })
       .first();
@@ -186,5 +191,24 @@ test.describe("The audit log at the demo's screen width", () => {
     expect((button?.x ?? 0) + (button?.width ?? 0)).toBeLessThanOrEqual(
       card ?? 0,
     );
+  });
+});
+
+test.describe("The Refusals tab on a phone (#276)", () => {
+  test("fits 390 px: its main panel does not scroll sideways", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await signInAs(page, "SYSTEM_ADMIN");
+    await page.goto("/governance?tab=refusals");
+    await expect(page.getByText(/"code": "FORBIDDEN"/)).toBeVisible();
+    // The shell scrolls inside its main panel, so the document's own width
+    // says nothing here: checkPage measures only the document. Measure the
+    // panel itself.
+    const fit = await page.locator("main").evaluate((main) => ({
+      scroll: main.scrollWidth,
+      client: main.clientWidth,
+    }));
+    expect(fit.scroll).toBeLessThanOrEqual(fit.client);
   });
 });
