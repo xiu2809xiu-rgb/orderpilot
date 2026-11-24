@@ -16,6 +16,9 @@ const MIGRATION_SQL = readFileSync(
   "utf8",
 );
 
+// The marker names its migration by folder, so the test pins that name too.
+const MIGRATION = "20261122090000_workflows_move_role_references_to_approver";
+
 const ACTOR = "00000000-0000-4000-8000-0000000000a1";
 const NAMED_PERSON = "00000000-0000-4000-8000-0000000000b2";
 
@@ -34,6 +37,22 @@ describe("the migration that moves stored role references to the approvers (#344
   async function clickRows(): Promise<unknown[]> {
     const { rows } = await client.query<Record<string, unknown>>(
       'SELECT * FROM "ClickstreamEvent" ORDER BY id',
+    );
+    return rows;
+  }
+
+  interface MarkerRow {
+    migration: string;
+    action: string;
+    entityType: string;
+    entityId: string;
+    changes: unknown;
+    auditedAt: Date | null;
+  }
+
+  async function markers(): Promise<MarkerRow[]> {
+    const { rows } = await client.query<MarkerRow>(
+      'SELECT "migration", "action", "entityType", "entityId", "changes", "auditedAt" FROM "MigrationMarker" ORDER BY "entityId"',
     );
     return rows;
   }
@@ -310,6 +329,25 @@ describe("the migration that moves stored role references to the approvers (#344
       "AUDITOR",
     ]);
 
+    // One marker for each SLA row that moved, with its old and new role, so the
+    // seed can record what the route would have: workflows.sla.changed. None for
+    // the APPROVE_SPR row, which stays, and none for the notices, which are data.
+    const markerOf = (entityId: string, before: string) => ({
+      migration: MIGRATION,
+      action: "workflows.sla.changed",
+      entityType: "WorkflowTaskSla",
+      entityId,
+      changes: {
+        before: { escalateToRole: before },
+        after: { escalateToRole: "APPROVER" },
+      },
+      auditedAt: null,
+    });
+    expect(await markers()).toEqual([
+      markerOf("CONFIRM_PAYMENT", "MANAGEMENT"),
+      markerOf("SEND_PI", "AUDITOR"),
+    ]);
+
     // Row for row, the audit trail and the click stream are what they were. The
     // audit equality cannot fail on its own: the append-only trigger would refuse
     // an UPDATE of an AuditEvent first, so it is a second guard, not the only one.
@@ -320,9 +358,21 @@ describe("the migration that moves stored role references to the approvers (#344
       ok: true,
     });
 
-    // Safe to run twice: a moved row no longer matches.
+    // Safe to run twice: a moved row no longer matches, so no marker is added.
     await client.query(MIGRATION_SQL);
     expect(await auditRows()).toEqual(auditBefore);
+    expect(await markers()).toHaveLength(2);
+
+    // A row put back and moved again keeps its first marker: the key is the
+    // migration, the kind of record and its id, and the insert skips a clash.
+    await client.query(
+      'UPDATE "WorkflowTaskSla" SET "escalateToRole" = \'AUDITOR\' WHERE "taskKind" = \'CONFIRM_PAYMENT\'',
+    );
+    await client.query(MIGRATION_SQL);
+    expect(await markers()).toEqual([
+      markerOf("CONFIRM_PAYMENT", "MANAGEMENT"),
+      markerOf("SEND_PI", "AUDITOR"),
+    ]);
     expect(
       await roleOf(
         "WorkflowTaskSla",
@@ -340,5 +390,7 @@ describe("the migration that moves stored role references to the approvers (#344
       'SELECT count(*) AS n FROM "WorkflowTaskSla"',
     );
     expect(rows[0]?.n).toBe("0");
+    // No rows to move, so no marker and, later, no audit event.
+    expect(await markers()).toEqual([]);
   });
 });

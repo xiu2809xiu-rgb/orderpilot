@@ -21,6 +21,26 @@
 -- its SLA row and the escalations already sent for an SPR approval task stay as
 -- they are.
 
+-- Who is told when a task is overdue is a control setting, and the same change
+-- through the route writes a workflows.sla.changed event. A migration cannot write
+-- one, so each row it moves leaves a marker first, with the old and the new role,
+-- and the seed records the event (ADR 0058, decision 8). A fresh database has no
+-- rows here yet, so it leaves none. The notices below are data, not a setting, and
+-- leave no marker.
+INSERT INTO "MigrationMarker" ("migration", "action", "entityType", "entityId", "changes")
+SELECT '20261122090000_workflows_move_role_references_to_approver',
+       'workflows.sla.changed',
+       'WorkflowTaskSla',
+       "taskKind",
+       jsonb_build_object(
+         'before', jsonb_build_object('escalateToRole', "escalateToRole"::text),
+         'after', jsonb_build_object('escalateToRole', 'APPROVER')
+       )
+FROM "WorkflowTaskSla"
+WHERE "escalateToRole" IN ('MANAGEMENT', 'AUDITOR')
+  AND "taskKind" <> 'APPROVE_SPR'
+ON CONFLICT DO NOTHING;
+
 -- Who is told when a task is overdue. The default was MANAGEMENT.
 UPDATE "WorkflowTaskSla"
 SET "escalateToRole" = 'APPROVER'
