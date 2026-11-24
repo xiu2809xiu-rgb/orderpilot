@@ -500,7 +500,7 @@ The system admin can change its own role, and from ADR 0058's step 6 it is the o
 - **The seed repairs a broken lock:** a never-cell held, or an always-cell missing, from a script or an older database. Each repair has its own audit row by the seed, and a second run records nothing (`repairLockedCells` in `role-permission-seed.ts`, `lockRepairs` in `matrix-rules.ts`).
 - **No route changes an account's role.** The Users tab only disables and enables. A test pins this, so a story that adds a role change has to think about the notice.
 - **Code:** `governance-notice.repository.ts`, `governance-notice.service.ts`, `governance-notice.controller.ts`, and `tellApprovers` in `matrix.service.ts`. The contract is `packages/shared/src/governance/notices.ts`.
-- **Tests:** `test/http/governance-admin-notices.test.ts` (nine cases, including a grant that does not commit and leaves no notice), `governance-controls.test.ts` (the two locks at the guard and the policy), `governance-domain.test.ts` (the lock repairs), `AdminNotices.test.tsx` and `Notifications.test.tsx`.
+- **Tests:** `test/http/governance-admin-notices.test.ts` (ten cases, including a grant that does not commit and leaves no notice, and a copy refused by each new lock), `governance-controls.test.ts` (the two locks at the guard and the policy), `governance-domain.test.ts` (the lock repairs), `AdminNotices.test.tsx` and `Notifications.test.tsx`.
 
 ## Options to consider, not built
 
