@@ -9181,7 +9181,13 @@
                             "CONFLICT",
                             "RATE_LIMITED",
                             "UPSTREAM_UNAVAILABLE",
-                            "INTERNAL_ERROR"
+                            "INTERNAL_ERROR",
+                            "TWO_STEP_REQUIRED",
+                            "TWO_STEP_CHALLENGE_ENDED",
+                            "TWO_STEP_CODE_INVALID",
+                            "TWO_STEP_LOCKED",
+                            "TWO_STEP_SETUP_ENDED",
+                            "PASSWORD_INCORRECT"
                           ]
                         },
                         "message": {
@@ -9396,7 +9402,13 @@
                             "CONFLICT",
                             "RATE_LIMITED",
                             "UPSTREAM_UNAVAILABLE",
-                            "INTERNAL_ERROR"
+                            "INTERNAL_ERROR",
+                            "TWO_STEP_REQUIRED",
+                            "TWO_STEP_CHALLENGE_ENDED",
+                            "TWO_STEP_CODE_INVALID",
+                            "TWO_STEP_LOCKED",
+                            "TWO_STEP_SETUP_ENDED",
+                            "PASSWORD_INCORRECT"
                           ]
                         },
                         "message": {
@@ -9578,7 +9590,13 @@
                             "CONFLICT",
                             "RATE_LIMITED",
                             "UPSTREAM_UNAVAILABLE",
-                            "INTERNAL_ERROR"
+                            "INTERNAL_ERROR",
+                            "TWO_STEP_REQUIRED",
+                            "TWO_STEP_CHALLENGE_ENDED",
+                            "TWO_STEP_CODE_INVALID",
+                            "TWO_STEP_LOCKED",
+                            "TWO_STEP_SETUP_ENDED",
+                            "PASSWORD_INCORRECT"
                           ]
                         },
                         "message": {
@@ -9764,7 +9782,13 @@
                             "CONFLICT",
                             "RATE_LIMITED",
                             "UPSTREAM_UNAVAILABLE",
-                            "INTERNAL_ERROR"
+                            "INTERNAL_ERROR",
+                            "TWO_STEP_REQUIRED",
+                            "TWO_STEP_CHALLENGE_ENDED",
+                            "TWO_STEP_CODE_INVALID",
+                            "TWO_STEP_LOCKED",
+                            "TWO_STEP_SETUP_ENDED",
+                            "PASSWORD_INCORRECT"
                           ]
                         },
                         "message": {
@@ -10540,7 +10564,13 @@
                             "CONFLICT",
                             "RATE_LIMITED",
                             "UPSTREAM_UNAVAILABLE",
-                            "INTERNAL_ERROR"
+                            "INTERNAL_ERROR",
+                            "TWO_STEP_REQUIRED",
+                            "TWO_STEP_CHALLENGE_ENDED",
+                            "TWO_STEP_CODE_INVALID",
+                            "TWO_STEP_LOCKED",
+                            "TWO_STEP_SETUP_ENDED",
+                            "PASSWORD_INCORRECT"
                           ]
                         },
                         "message": {
@@ -10958,7 +10988,13 @@
                             "CONFLICT",
                             "RATE_LIMITED",
                             "UPSTREAM_UNAVAILABLE",
-                            "INTERNAL_ERROR"
+                            "INTERNAL_ERROR",
+                            "TWO_STEP_REQUIRED",
+                            "TWO_STEP_CHALLENGE_ENDED",
+                            "TWO_STEP_CODE_INVALID",
+                            "TWO_STEP_LOCKED",
+                            "TWO_STEP_SETUP_ENDED",
+                            "PASSWORD_INCORRECT"
                           ]
                         },
                         "message": {
@@ -11412,7 +11448,13 @@
                             "CONFLICT",
                             "RATE_LIMITED",
                             "UPSTREAM_UNAVAILABLE",
-                            "INTERNAL_ERROR"
+                            "INTERNAL_ERROR",
+                            "TWO_STEP_REQUIRED",
+                            "TWO_STEP_CHALLENGE_ENDED",
+                            "TWO_STEP_CODE_INVALID",
+                            "TWO_STEP_LOCKED",
+                            "TWO_STEP_SETUP_ENDED",
+                            "PASSWORD_INCORRECT"
                           ]
                         },
                         "message": {
@@ -11853,7 +11895,13 @@
                             "CONFLICT",
                             "RATE_LIMITED",
                             "UPSTREAM_UNAVAILABLE",
-                            "INTERNAL_ERROR"
+                            "INTERNAL_ERROR",
+                            "TWO_STEP_REQUIRED",
+                            "TWO_STEP_CHALLENGE_ENDED",
+                            "TWO_STEP_CODE_INVALID",
+                            "TWO_STEP_LOCKED",
+                            "TWO_STEP_SETUP_ENDED",
+                            "PASSWORD_INCORRECT"
                           ]
                         },
                         "message": {
@@ -13377,7 +13425,13 @@
                             "CONFLICT",
                             "RATE_LIMITED",
                             "UPSTREAM_UNAVAILABLE",
-                            "INTERNAL_ERROR"
+                            "INTERNAL_ERROR",
+                            "TWO_STEP_REQUIRED",
+                            "TWO_STEP_CHALLENGE_ENDED",
+                            "TWO_STEP_CODE_INVALID",
+                            "TWO_STEP_LOCKED",
+                            "TWO_STEP_SETUP_ENDED",
+                            "PASSWORD_INCORRECT"
                           ]
                         },
                         "message": {

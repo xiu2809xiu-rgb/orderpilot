@@ -15,6 +15,14 @@ export const ERROR_CODES = [
   "RATE_LIMITED",
   "UPSTREAM_UNAVAILABLE",
   "INTERNAL_ERROR",
+  // Two-step sign-in (ADR 0067). Appended: the web derives its status-to-code
+  // fallback from this order, so the first code declared for a status wins.
+  "TWO_STEP_REQUIRED",
+  "TWO_STEP_CHALLENGE_ENDED",
+  "TWO_STEP_CODE_INVALID",
+  "TWO_STEP_LOCKED",
+  "TWO_STEP_SETUP_ENDED",
+  "PASSWORD_INCORRECT",
 ] as const;
 
 export const errorCodeSchema = z.enum(ERROR_CODES);
@@ -35,6 +43,12 @@ export const ERROR_HTTP_STATUS: Record<ErrorCode, number> = {
   RATE_LIMITED: 429,
   UPSTREAM_UNAVAILABLE: 503,
   INTERNAL_ERROR: 500,
+  TWO_STEP_REQUIRED: 401,
+  TWO_STEP_CHALLENGE_ENDED: 401,
+  TWO_STEP_CODE_INVALID: 422,
+  TWO_STEP_LOCKED: 429,
+  TWO_STEP_SETUP_ENDED: 409,
+  PASSWORD_INCORRECT: 422,
 };
 
 /** One problem with one field, listed in `details` for VALIDATION_FAILED. */

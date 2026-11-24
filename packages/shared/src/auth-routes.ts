@@ -14,10 +14,18 @@ export const COOKIES = {
   refresh: "op_refresh",
   /** Readable by script, so the web app can copy it into the header. */
   csrf: "op_csrf",
+  /** httpOnly, five minutes, sent only to the two-step verify path. */
+  twoStep: "op_two_step",
 } as const;
 
 /** The refresh cookie's Path attribute. */
 export const REFRESH_COOKIE_PATH = `${API_BASE_PATH}/auth`;
+
+/** The sign-in challenge cookie's Path: exactly the verify route, so no other route sees it. */
+export const TWO_STEP_COOKIE_PATH = `${API_BASE_PATH}/auth/two-step/verify`;
+
+/** The verify route's path, relative to API_BASE_PATH, as a plain string for the web client. */
+export const TWO_STEP_VERIFY_PATH = "/auth/two-step/verify";
 
 export const HEADERS = {
   csrf: "X-CSRF-Token",
