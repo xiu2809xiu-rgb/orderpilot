@@ -39,6 +39,7 @@ interface Frame {
   borderLeftWidth: string;
   borderRightWidth: string;
   transitionDuration: string;
+  transitionProperty: string;
 }
 
 interface Reading {
@@ -76,6 +77,7 @@ function read(region: Locator): Promise<Reading> {
         borderLeftWidth: css.borderLeftWidth,
         borderRightWidth: css.borderRightWidth,
         transitionDuration: css.transitionDuration,
+        transitionProperty: css.transitionProperty,
       };
     };
     const rail = el.querySelector(":scope > .sr-edges");
@@ -423,7 +425,10 @@ test.describe("Scroll areas show which side has more: other ways of looking", ()
   }) => {
     const region = await openBoard(page);
     await page.emulateMedia({ reducedMotion: "reduce" });
-    expect((await read(region)).end.transitionDuration).toBe("0s");
+    // The global reduced-motion rule in index.css sets every duration to
+    // 0.01ms with !important, so the duration is never "0s" here. What shows
+    // that this rule's own `transition: none` holds is the property.
+    expect((await read(region)).end.transitionProperty).toBe("none");
     await page.emulateMedia({ reducedMotion: "no-preference" });
     expect((await read(region)).end.transitionDuration).toBe("0.16s");
   });
