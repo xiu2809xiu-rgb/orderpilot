@@ -58,7 +58,7 @@ function notAllowed(rule: string): PictureCheckOutcome {
  *
  * A call that is not answered in time is abandoned, not cancelled: the gateway
  * has no signal to pass, so on a real provider the picture is still sent and
- * billed, and its late answer is thrown away (ADR 0068, follow-up 2).
+ * billed, and its late answer is thrown away (ADR 0069, follow-up 2).
  */
 @Injectable()
 export class PictureCheckService {

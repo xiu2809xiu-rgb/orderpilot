@@ -40,7 +40,7 @@ type Outcome =
 /**
  * What a reviewer does: lists the pictures waiting or approved, approves,
  * rejects, takes down. Reviewing a picture is user administration, as
- * disabling a user is (ADR 0068): the person who does it still approves no
+ * disabling a user is (ADR 0069): the person who does it still approves no
  * SPR, payment or bank detail. Each decision locks the owner's row, reads the
  * picture again under the lock, asks the rules, changes, and audits, in one
  * transaction, so two reviewers deciding at once take turns and the second is

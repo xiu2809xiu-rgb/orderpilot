@@ -330,7 +330,7 @@ The decision is recorded in [ADR 0058](../adr/0058-seven-roles-six-teams-and-an-
 
 ## Profile pictures (#381)
 
-The decision is recorded in [ADR 0068](../adr/0068-profile-pictures-a-person-approves.md). The API is under `apps/api/src/modules/profile-pictures/`.
+The decision is recorded in [ADR 0069](../adr/0069-profile-pictures-a-person-approves.md). The API is under `apps/api/src/modules/profile-pictures/`.
 
 | Pattern                                                | Where                                                               | Why                                                                                                                               |
 | ------------------------------------------------------ | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |

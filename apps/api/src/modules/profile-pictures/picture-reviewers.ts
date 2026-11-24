@@ -3,7 +3,7 @@ import { PermissionPolicy } from "../../auth/permission-policy.js";
 import type { PictureActor } from "./picture-types.js";
 
 /**
- * Who reviews pictures: whoever holds `users.manage` (ADR 0068). Reviewing a
+ * Who reviews pictures: whoever holds `users.manage` (ADR 0069). Reviewing a
  * picture is user administration, as disabling a user is. There is no
  * permission of its own: area 4's matrix decides, through the same policy the
  * route guard asks, so this class holds no rule.

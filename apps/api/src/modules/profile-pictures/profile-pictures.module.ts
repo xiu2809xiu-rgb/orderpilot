@@ -34,7 +34,7 @@ import { ProfilePicturesController } from "./profile-pictures.controller.js";
 import { ProfilePictureRepository } from "./profile-picture.repository.js";
 
 /**
- * Area 1, the platform: profile pictures a person approves (ADR 0068). Fixed
+ * Area 1, the platform: profile pictures a person approves (ADR 0069). Fixed
  * rules refuse a bad file, an AI check describes the picture when the data rule
  * allows one, and a person approves or rejects it.
  *

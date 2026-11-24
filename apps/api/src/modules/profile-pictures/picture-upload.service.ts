@@ -39,7 +39,7 @@ type Stored =
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 /**
- * The upload use case (ADR 0068), in the order that spends the least first:
+ * The upload use case (ADR 0069), in the order that spends the least first:
  * clean the bytes, refuse what is cheap to refuse (one upload in flight, the
  * cap, a file just rejected), ask the AI, write the object, then one
  * transaction that takes the owner's lock, checks the cap again, retires any

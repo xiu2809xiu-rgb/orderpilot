@@ -17,7 +17,7 @@ export interface PictureViewer {
 }
 
 /**
- * Who may see a picture's bytes (ADR 0068). An approved picture goes to any
+ * Who may see a picture's bytes (ADR 0069). An approved picture goes to any
  * signed-in person. A pending one goes only to the reviewers and to its owner,
  * and in a demo session, where every visitor of a role is one account, its
  * owner is the sign-in that sent it. A rejected or removed picture has no

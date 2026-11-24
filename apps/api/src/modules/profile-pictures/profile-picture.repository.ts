@@ -18,7 +18,7 @@ type RowWithOwner = PictureRow & { user: { disabledAt: Date | null } };
 
 const WITH_OWNER = { user: { select: { disabledAt: true } } } as const;
 
-/** A disabled person's pictures are left alone, not deleted, and shown to nobody (ADR 0068). */
+/** A disabled person's pictures are left alone, not deleted, and shown to nobody (ADR 0069). */
 const OWNER_ENABLED = { user: { disabledAt: null } } as const;
 
 export interface Removal {

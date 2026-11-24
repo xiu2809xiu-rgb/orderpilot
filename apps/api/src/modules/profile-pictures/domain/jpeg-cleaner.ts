@@ -1,6 +1,6 @@
 import { PROFILE_PICTURE_LIMITS } from "@orderpilot/shared";
 
-// A JPEG cleaner that rewrites a file from its allowed parts (ADR 0068).
+// A JPEG cleaner that rewrites a file from its allowed parts (ADR 0069).
 //
 // It walks the file segment by segment, using each segment's own length, so a
 // picture nested inside an APP1 thumbnail is never mistaken for the frame. It

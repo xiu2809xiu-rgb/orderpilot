@@ -1,7 +1,7 @@
 // Reads a request body up to a size and a time limit. It is a helper and not a
 // body parser on purpose: the guards run before a controller's handler, so
 // nothing is read for a caller who is refused, which a parser registered for
-// the whole app could not promise (ADR 0068).
+// the whole app could not promise (ADR 0069).
 
 /** The body is larger than the limit: by its declared length, or by the bytes that arrived. */
 export class BodyTooLargeError extends Error {

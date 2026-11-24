@@ -15,7 +15,7 @@ export const PICTURE_CHECK_PROMPT_VERSION = "profile-picture-check/1";
  * the file and nothing proves it is synthetic: it is never labelled synthetic
  * to get past the data rule. Confidential because an unreviewed staff photo is
  * personal data that most roles do not see until a person approves it. Area 4
- * is asked to confirm the level (ADR 0068).
+ * is asked to confirm the level (ADR 0069).
  */
 export const PICTURE_CHECK_CLASSIFICATION = "confidential";
 export const PICTURE_CHECK_ORIGIN = "real";

@@ -32,7 +32,7 @@ import { PictureReviewService } from "./picture-review.service.js";
 /**
  * Reviewing profile pictures: whoever holds `users.manage`, which is user
  * administration and not an approval of any SPR, payment or bank detail
- * (ADR 0068). Each decision names its picture in the path. Moves data and
+ * (ADR 0069). Each decision names its picture in the path. Moves data and
  * status only: the rules are in PictureReviewRules.
  */
 @ApiTags("Profile pictures")

@@ -1,4 +1,4 @@
-# ADR 0068: Profile pictures a person approves
+# ADR 0069: Profile pictures a person approves
 
 - **Status:** Proposed. The upload, the AI step and the account screens are area 1's and the destination rule is area 4's, so Richie accepts or declines it in review.
 - **Date:** 2026-11-25

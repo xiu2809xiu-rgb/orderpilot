@@ -3,7 +3,7 @@ import { apiPath } from "./auth-routes.js";
 import { pageEnvelope, pageQuerySchema, dataEnvelope } from "./envelope.js";
 import { userRefSchema } from "./identity.js";
 
-// Profile pictures a person approves (ADR 0068). The browser prepares a small
+// Profile pictures a person approves (ADR 0069). The browser prepares a small
 // square JPEG; the server checks it again, cleans it and keeps it for review.
 // Fixed rules refuse a bad file, an AI check (only when the data rule allows
 // one) tells the reviewer what it sees, and a person approves or rejects.

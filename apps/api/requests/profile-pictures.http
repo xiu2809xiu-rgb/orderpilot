@@ -1,4 +1,4 @@
-### Area 1: profile pictures a person approves (ADR 0068).
+### Area 1: profile pictures a person approves (ADR 0069).
 ### Sign in first (requests/auth.http), then paste the op_csrf cookie value below.
 ### Any signed-in person may use the routes about their own picture. The upload is
 ### a raw JPEG body, Content-Type image/jpeg, at most 256 KB, square, 128 to 512

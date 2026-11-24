@@ -6,7 +6,7 @@ const HOLD_MS = 30_000;
 
 /**
  * One upload in flight per person, held in Redis before the AI call and the
- * storage write (ADR 0068). A transaction lock cannot do this job: it ends
+ * storage write (ADR 0069). A transaction lock cannot do this job: it ends
  * with its transaction, and the AI call has to happen outside one. The guard
  * limits cost, not safety: when Redis cannot be reached the upload goes on
  * unguarded and the class of the failure is logged, because the owner lock and

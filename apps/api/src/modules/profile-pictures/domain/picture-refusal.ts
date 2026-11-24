@@ -51,7 +51,7 @@ const MESSAGE: Record<PictureRefusal, string> = {
 
 /**
  * A picture was refused. `details[0].message` is the machine code from
- * `PICTURE_REFUSALS` (ADR 0068): the web turns it into its own words, so the
+ * `PICTURE_REFUSALS` (ADR 0069): the web turns it into its own words, so the
  * envelope's `message` can stay English for the people who read logs.
  */
 export class PictureRefusalError extends DomainError {
