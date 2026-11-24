@@ -131,6 +131,22 @@ describe("two-step concurrency", () => {
       expect(verifyRes.status, `verify of pair ${String(pair)}`).toBe(200);
     }
   }, 120_000);
+  it("lets only one of two simultaneous verifies with the same recovery code through", async () => {
+    const account = await enableTwoStep(t, email);
+    const first = await startChallenge(t, email);
+    const second = await startChallenge(t, email);
+    const recoveryCode = account.recoveryCodes[0];
+
+    const answers = await Promise.all([
+      verifyWith(t, first, { recoveryCode }),
+      verifyWith(t, second, { recoveryCode }),
+    ]);
+
+    expect(answers.map((r) => r.status).sort()).toEqual([200, 422]);
+    const refused = answers.find((r) => r.status === 422);
+    expect(refused ? errorCodeOf(refused) : "").toBe("TWO_STEP_CODE_INVALID");
+  });
+
   it("finishes a login and a verify of an expired challenge for one person", async () => {
     const account = await enableTwoStep(t, email);
     const clock = t.app.get<TestClock>(Clock);
