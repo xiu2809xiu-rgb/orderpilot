@@ -14,6 +14,7 @@ import { HealthModule } from "./health/health.module.js";
 import { AiModule } from "./modules/ai/ai.module.js";
 import { AnalyticsModule } from "./modules/analytics/analytics.module.js";
 import { AuditViewerModule } from "./modules/audit/audit-viewer.module.js";
+import { AvailabilityModule } from "./modules/availability/availability.module.js";
 import { ChecksModule } from "./modules/checks/checks.module.js";
 import { InsightsModule } from "./modules/insights/insights.module.js";
 import { GovernanceModule } from "./modules/governance/governance.module.js";
@@ -73,6 +74,7 @@ export class AppModule {
         AnalyticsModule,
         AuditViewerModule,
         OperationLogModule,
+        AvailabilityModule,
         AiModule,
       ],
       // The order is the rule: throttle, then who are you, then is the

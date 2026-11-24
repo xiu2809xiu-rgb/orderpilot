@@ -44,6 +44,8 @@ describe("the OpenAPI document (what orval reads)", () => {
       "/api/v1/auth/two-step/recovery-codes",
       "/api/v1/auth/two-step/setup",
       "/api/v1/auth/two-step/verify",
+      "/api/v1/availability",
+      "/api/v1/availability/mine",
       "/api/v1/exceptions",
       "/api/v1/governance/ai-destinations",
       "/api/v1/governance/ai-destinations/check",
