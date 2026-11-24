@@ -33,8 +33,11 @@ model User {
   createdAt    DateTime  @default(now()) @db.Timestamptz(3)
   updatedAt    DateTime  @updatedAt @db.Timestamptz(3)
 
-  refreshTokens RefreshToken[]
-  twoStep       TwoStepSecret?
+  refreshTokens      RefreshToken[]
+  twoStep            TwoStepSecret?
+  /// Named so a search for it, and the isolation test, cannot mistake it for
+  /// stock cover (ITEM_AVAILABILITIES). No rule may read this relation.
+  personAvailability UserAvailability?
 
   @@index([role])
 }
@@ -154,6 +157,30 @@ model RecoveryCode {
 
   /// The lookup is by person and hash; this also covers "how many are left".
   @@unique([userId, codeHash])
+}
+
+/// The two states that differ from the default. No row means Available.
+enum UserAvailabilityState {
+  FOCUSING
+  DO_NOT_DISTURB
+}
+
+/// One person's availability, while it is not Available (ADR 0070). Information
+/// for colleagues and nothing else: no rule, reminder or approval reads it. A row
+/// is live for 12 hours after setAt; that is worked out when it is read, and an
+/// expired row is deleted by the next write by anyone. Setting Available deletes
+/// the row, so nothing is kept of when a person was not available.
+model UserAvailability {
+  /// The primary key is the one-row-per-person rule.
+  userId String                @id @db.Uuid
+  state  UserAvailabilityState
+  /// Set by the server's clock, never by the client.
+  setAt  DateTime              @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id])
+
+  /// The delete of expired rows in each write finds them by this.
+  @@index([setAt])
 }
 
 /// Which role holds which permission. The names come from @orderpilot/shared;
