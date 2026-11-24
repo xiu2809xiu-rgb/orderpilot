@@ -64,7 +64,7 @@ describe("the migration that moves stored role references to the approvers (#344
     await resetTestData();
   });
 
-  it("moves Management and auditor references to APPROVER, leaves the rest, and never touches an audit event or a click-stream row", async () => {
+  it("moves Management and auditor references to APPROVER, leaves the rest (a task and a check exception included), and never touches an audit event or a click-stream row", async () => {
     const prisma = db.client;
     const now = new Date("2026-11-22T02:00:00.000Z");
     const sla = (
@@ -238,11 +238,8 @@ describe("the migration that moves stored role references to the approvers (#344
         "id",
         taskManagementNotice.id,
       ),
-      await roleOf("WorkflowTask", "assigneeRole", "id", managementTask.id),
-      await roleOf("CheckException", "fixBy", "id", managementException.id),
-      await roleOf("CheckException", "fixBy", "id", auditorException.id),
     ];
-    expect(moved).toEqual(Array(8).fill("APPROVER"));
+    expect(moved).toEqual(Array(5).fill("APPROVER"));
 
     const { rows: personRows } = await client.query<{
       role: string;
@@ -292,6 +289,12 @@ describe("the migration that moves stored role references to the approvers (#344
       ),
       await roleOf("WorkflowTask", "assigneeRole", "id", supportTask.id),
       await roleOf("CheckException", "fixBy", "id", supportException.id),
+      // A task or an exception that names a retired role is left as it is. Moving
+      // it would hand the work to the approvers in silence, and an approver can
+      // complete a task in its own inbox. Step 6's CHECK constraints refuse it.
+      await roleOf("WorkflowTask", "assigneeRole", "id", managementTask.id),
+      await roleOf("CheckException", "fixBy", "id", managementException.id),
+      await roleOf("CheckException", "fixBy", "id", auditorException.id),
     ];
     expect(kept).toEqual([
       "MANAGEMENT",
@@ -302,6 +305,9 @@ describe("the migration that moves stored role references to the approvers (#344
       "SUPPORT",
       "SUPPORT",
       "SUPPORT",
+      "MANAGEMENT",
+      "MANAGEMENT",
+      "AUDITOR",
     ]);
 
     // Row for row, the audit trail and the click stream are what they were. The
