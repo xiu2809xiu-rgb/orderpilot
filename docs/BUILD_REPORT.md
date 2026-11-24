@@ -406,7 +406,7 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 | #333  | Remove the demo tour (#284) from main                 | `chore/platform-remove-tour`     | This pull request. The tour is off main, and later work stays as it is              |
 | #334  | The evening clock in the orders test kit              | `test/web-evening-clock`         | This pull request. The order page test passes at any hour of a Singapore day        |
 | #340  | Seven roles, step 2: Home by permission               | `feat/area1-home-by-permission`  | This pull request. Overdue orders under Needs you, refused actions under the rules  |
-| #344  | Seven roles, step 3: own inbox, then the approvers    | `feat/area2-inbox-escalation`    | This pull request. Own inbox first, and overdue tasks go to the approvers           |
+| #344  | Seven roles, step 3: own inbox, then the approvers    | `feat/area2-inbox-escalation`    | This pull request. Own inbox first, overdue to the approvers, SPR to Management     |
 | #337  | The Spark orb flows faster at idle                    | `fix/platform-orb-idle-speed`    | This pull request. Idle flows 75% faster, measured in Edge before and after         |
 | #355  | Optical alignment of the shared parts                 | `feat/area1-optical-alignment`   | This pull request. Titles, card heads, icons and buttons look aligned to the eye    |
 | #351  | The order page test checks the exact wait again       | `test/web-exact-wait`            | This pull request. The wait line's count is checked again, not only its shape       |
