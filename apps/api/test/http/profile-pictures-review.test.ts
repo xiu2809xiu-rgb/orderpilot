@@ -57,6 +57,7 @@ describe("reviewing profile pictures", () => {
         .overrideProvider(PictureCheckService)
         .useValue({ check: () => Promise.resolve(NOT_CHECKED) }),
     );
+    reviewer = await demoSignIn(t, "SYSTEM_ADMIN");
   });
   afterAll(async () => {
     await t.close();
@@ -92,7 +93,6 @@ describe("reviewing profile pictures", () => {
   }
 
   it("lists pending pictures oldest first for a holder of users.manage, with the owner and the AI line, and never a hash", async () => {
-    reviewer = await as("SYSTEM_ADMIN");
     const first = await sent(await as("PRODUCT_MANAGER"));
     const second = await sent(await as("SUPPORT"), 160);
     const res = await list(reviewer);
@@ -171,26 +171,24 @@ describe("reviewing profile pictures", () => {
   });
 
   it("refuses to review your own picture, audits it, and changes nothing", async () => {
-    const own = (await pictureRows(t)).find(
-      (r) => r.userId === reviewer.session.user.id && r.status === "PENDING",
-    );
+    const own = await sent(reviewer, 168);
     const before = (await events("profile-picture.review.refused")).length;
     for (const [action, body] of [
       ["approve", undefined],
       ["reject", { reasonCode: "not_clear" }],
     ] as const) {
-      const res = await act(reviewer, own?.id ?? "", action, body);
+      const res = await act(reviewer, own.id, action, body);
       expect(res.status, action).toBe(403);
       expect((res.body as Envelope).error?.code).toBe("FORBIDDEN");
       expect(refusalOf(res.body)).toBe("own_picture");
     }
-    expect((await pictureRows(t)).find((r) => r.id === own?.id)?.status).toBe(
+    expect((await pictureRows(t)).find((r) => r.id === own.id)?.status).toBe(
       "PENDING",
     );
     const refused = await events("profile-picture.review.refused");
     expect(refused.length).toBe(before + 2);
     expect(refused.at(-1)?.changes).toMatchObject({
-      pictureId: own?.id,
+      pictureId: own.id,
       attempted: "reject",
       reasonCode: "own_picture",
       outcome: "refused",
@@ -200,23 +198,23 @@ describe("reviewing profile pictures", () => {
     });
     // Take down is refused the same way, after an administrator approved it elsewhere.
     await prismaOf(t).profilePicture.update({
-      where: { id: own?.id ?? "" },
+      where: { id: own.id },
       data: {
         status: "APPROVED",
         decidedAt: new Date(),
-        decidedById: own?.userId ?? "",
+        decidedById: own.userId,
       },
     });
-    const down = await act(reviewer, own?.id ?? "", "take-down", {
+    const down = await act(reviewer, own.id, "take-down", {
       reasonCode: "reported",
     });
     expect(down.status).toBe(403);
     expect(refusalOf(down.body)).toBe("own_picture");
-    expect((await pictureRows(t)).find((r) => r.id === own?.id)?.status).toBe(
+    expect((await pictureRows(t)).find((r) => r.id === own.id)?.status).toBe(
       "APPROVED",
     );
     await prismaOf(t).profilePicture.update({
-      where: { id: own?.id ?? "" },
+      where: { id: own.id },
       data: { status: "REMOVED", removal: "WITHDRAWN", removedAt: new Date() },
     });
   });
