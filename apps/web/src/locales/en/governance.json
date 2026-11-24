@@ -142,6 +142,7 @@
     "title": "Users",
     "description": "Users are disabled, never deleted, so the audit trail keeps its names.",
     "tableLabel": "Users",
+    "listLabel": "User list",
     "name": "Name",
     "email": "Email",
     "role": "Role",
@@ -153,10 +154,12 @@
     "toast": {
       "disabled": "{{name}} disabled",
       "enabled": "{{name}} enabled",
-      "failed": "The change was not saved"
+      "failed": "The change was not saved",
+      "reason": "{{reason}} Trace ID: {{traceId}}"
     },
     "disableFor": "Disable {{name}}",
     "enableFor": "Enable {{name}}",
+    "you": "You",
     "emptyTitle": "No users yet",
     "emptyDescription": "Users appear here once they exist.",
     "failed": "Could not change that user.",
