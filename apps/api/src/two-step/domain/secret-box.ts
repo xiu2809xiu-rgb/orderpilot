@@ -29,7 +29,9 @@ export class SecretBox {
 
   seal(plain: Buffer, userId: string): string {
     const nonce = randomBytes(NONCE_BYTES);
-    const cipher = createCipheriv("aes-256-gcm", this.key, nonce);
+    const cipher = createCipheriv("aes-256-gcm", this.key, nonce, {
+      authTagLength: TAG_BYTES,
+    });
     cipher.setAAD(Buffer.from(userId));
     const body = Buffer.concat([cipher.update(plain), cipher.final()]);
     return [
@@ -56,7 +58,9 @@ export class SecretBox {
     const tag = Buffer.from(tagText, "base64url");
     if (nonce.length !== NONCE_BYTES || tag.length !== TAG_BYTES) return null;
     try {
-      const decipher = createDecipheriv("aes-256-gcm", this.key, nonce);
+      const decipher = createDecipheriv("aes-256-gcm", this.key, nonce, {
+        authTagLength: TAG_BYTES,
+      });
       decipher.setAAD(Buffer.from(userId));
       decipher.setAuthTag(tag);
       return Buffer.concat([
