@@ -176,8 +176,15 @@ describe("useAvailability", () => {
   });
 
   it("puts the previous value back on a refusal, keeps it, and says so with the trace id", async () => {
+    // The read that follows a settled change fails, so only the rollback can restore the value.
+    let reads = 0;
     server.use(
-      http.get(MINE, () => HttpResponse.json({ data: focusing })),
+      http.get(MINE, () => {
+        reads += 1;
+        return reads === 1
+          ? HttpResponse.json({ data: focusing })
+          : HttpResponse.json(errorBody("INTERNAL_ERROR"), { status: 500 });
+      }),
       http.put(MINE, () =>
         HttpResponse.json(errorBody("FORBIDDEN", "trace-refused-1"), {
           status: 403,
@@ -193,6 +200,9 @@ describe("useAvailability", () => {
     });
     await waitFor(() => {
       expect(result.current.refused).not.toBeNull();
+    });
+    await waitFor(() => {
+      expect(reads).toBeGreaterThan(1);
     });
     expect(result.current.value).toBe("FOCUSING");
     const failed = toasts().find((item) => item.kind === "error");
