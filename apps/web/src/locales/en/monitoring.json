@@ -57,7 +57,7 @@
   "observability": {
     "services": {
       "title": "Services",
-      "description": "Health of what the app runs on.",
+      "description": "Sample statuses, to show the layout. Nothing here is measured yet.",
       "label": "Service health",
       "name": "Service",
       "status": "Status",
@@ -72,14 +72,13 @@
     },
     "traces": {
       "title": "Recent traces",
-      "description": "The latest requests, by route pattern. Search the trace ID in Grafana.",
-      "label": "Recent traces",
+      "description": "Sample requests by route. Their trace IDs are made up, so they can't be looked up yet.",
+      "label": "Trace list",
       "traceId": "Trace ID",
       "route": "Route",
       "duration": "Duration",
       "status": "HTTP status"
     },
-    "partial": "{{names}} is degraded, so the figures for it may be incomplete.",
     "mockNote": "These figures are made up. The real dashboards, budgets and alerts are built in Weeks 14 to 16."
   },
   "clickstream": {
