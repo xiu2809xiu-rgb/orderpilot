@@ -6,7 +6,9 @@ import type { DataOrigin } from "@orderpilot/shared";
  * says it, and it fails closed: only the exact word "synthetic" is synthetic.
  * Anything else, an unreadable setting, an unknown word or no answer at all,
  * is real, and the policy then refuses every provider it does not trust with
- * real data.
+ * real data. AppConfig has already read an unset or blank DATA_ORIGIN as
+ * synthetic (and APP_ENV=production refuses to start without the line), so
+ * the setting that reaches this function is a word, or nothing readable.
  *
  * The question a person types goes to the provider too, and it is not
  * synthetic just because the orders are. The same switch covers it: a
