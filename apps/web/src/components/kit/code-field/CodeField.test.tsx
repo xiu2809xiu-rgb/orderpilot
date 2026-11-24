@@ -275,6 +275,35 @@ describe("typing into a full code", () => {
     expect(onChange).toHaveBeenLastCalledWith("654321");
     expect(input().value).toBe("654321");
   });
+
+  it("cuts a paste of seven digits over a full code to its first six, and completes once", async () => {
+    const onChange = vi.fn();
+    const onComplete = vi.fn();
+    render(
+      <Harness initial="123456" onChange={onChange} onComplete={onComplete} />,
+    );
+    const user = userEvent.setup();
+    await user.click(input());
+    await user.paste("7654321");
+    expect(onChange).toHaveBeenLastCalledWith("765432");
+    expect(onComplete).toHaveBeenCalledTimes(1);
+    expect(onComplete).toHaveBeenCalledWith("765432");
+    expect(input().value).toBe("765432");
+  });
+
+  it("takes a code the browser fills in over a full code whole, and completes once", () => {
+    const onChange = vi.fn();
+    const onComplete = vi.fn();
+    render(
+      <Harness initial="123456" onChange={onChange} onComplete={onComplete} />,
+    );
+    // An autofill sets the whole value at once, with no caret to type at.
+    fireEvent.change(input(), { target: { value: "654321" } });
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(onChange).toHaveBeenCalledWith("654321");
+    expect(onComplete).toHaveBeenCalledTimes(1);
+    expect(onComplete).toHaveBeenCalledWith("654321");
+  });
 });
 
 describe("pasting", () => {
