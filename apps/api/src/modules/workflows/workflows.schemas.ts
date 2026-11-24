@@ -8,6 +8,7 @@ import {
   paymentResultSchema,
   paymentUndoResultSchema,
   piReissueResultSchema,
+  salesApprovalResultSchema,
   sprDecisionResultSchema,
   sprDecisionUndoResultSchema,
   sprDetailSchema,
@@ -41,6 +42,9 @@ export const sprDecisionResponseSchema = dataEnvelope(sprDecisionResultSchema);
 export const paymentResponseSchema = mockEnvelope(paymentResultSchema);
 export const paymentUndoResponseSchema = mockEnvelope(paymentUndoResultSchema);
 export const piReissueResponseSchema = dataEnvelope(piReissueResultSchema);
+export const salesApprovalResponseSchema = dataEnvelope(
+  salesApprovalResultSchema,
+);
 export const sprDecisionUndoResponseSchema = dataEnvelope(
   sprDecisionUndoResultSchema,
 );

@@ -19,6 +19,7 @@ import type {
 
 import type {
   WorkflowsApprove200,
+  WorkflowsApproveSale200,
   WorkflowsChangeSla200,
   WorkflowsCompleteTask200,
   WorkflowsConfirmPayment200,
@@ -37,6 +38,7 @@ import type {
   WorkflowsSpr200,
   WorkflowsUndoDecision200,
   WorkflowsUndoPayment200,
+  WorkflowsUndoSaleApproval200,
   WorkflowsUndoTask200
 } from '../../model';
 
@@ -68,6 +70,10 @@ export const getWorkflowsConfirmPaymentResponseMock = (overrideResponse: Partial
 export const getWorkflowsUndoPaymentResponseMock = (overrideResponse: Partial<Extract<WorkflowsUndoPayment200, object>> = {}): WorkflowsUndoPayment200 => ({data: {applied: faker.helpers.arrayElement([true] as const), message: faker.string.alpha({length: {min: 10, max: 20}}), orderNo: faker.helpers.fromRegExp("^[A-Za-z0-9-]{1,30}$"), paymentId: faker.string.uuid()}, meta: {mock: faker.helpers.arrayElement([true] as const)}, ...overrideResponse})
 
 export const getWorkflowsReissuePiResponseMock = (overrideResponse: Partial<Extract<WorkflowsReissuePi200, object>> = {}): WorkflowsReissuePi200 => ({data: {applied: faker.helpers.arrayElement([true] as const), message: faker.string.alpha({length: {min: 10, max: 20}}), orderNo: faker.helpers.fromRegExp("^[A-Za-z0-9-]{1,30}$"), recordNo: faker.helpers.fromRegExp("^(SPR|PI|EXC|SO)-\\d{8}-\\d{4,}$"), issue: faker.number.int({min: 2, max: 9007199254740991})}, ...overrideResponse})
+
+export const getWorkflowsApproveSaleResponseMock = (overrideResponse: Partial<Extract<WorkflowsApproveSale200, object>> = {}): WorkflowsApproveSale200 => ({data: {applied: faker.helpers.arrayElement([true] as const), message: faker.string.alpha({length: {min: 10, max: 20}}), orderNo: faker.helpers.fromRegExp("^[A-Za-z0-9-]{1,30}$"), approved: faker.datatype.boolean()}, ...overrideResponse})
+
+export const getWorkflowsUndoSaleApprovalResponseMock = (overrideResponse: Partial<Extract<WorkflowsUndoSaleApproval200, object>> = {}): WorkflowsUndoSaleApproval200 => ({data: {applied: faker.helpers.arrayElement([true] as const), message: faker.string.alpha({length: {min: 10, max: 20}}), orderNo: faker.helpers.fromRegExp("^[A-Za-z0-9-]{1,30}$"), approved: faker.datatype.boolean()}, ...overrideResponse})
 
 export const getWorkflowsSprResponseMock = (overrideResponse: Partial<Extract<WorkflowsSpr200, object>> = {}): WorkflowsSpr200 => ({data: {ref: {recordNo: faker.helpers.fromRegExp("^(SPR|PI|EXC|SO)-\\d{8}-\\d{4,}$"), navisionNo: faker.helpers.arrayElement([faker.string.alpha({length: {min: 1, max: 20}}), null])}, orderNo: faker.helpers.arrayElement([faker.helpers.fromRegExp("^[A-Za-z0-9-]{1,30}$"), null]), requestedBy: {name: faker.string.alpha({length: {min: 1, max: 20}}), role: faker.helpers.arrayElement(['SYSTEM_ADMIN','PRODUCT_MANAGER','APPROVER','SUPPORT','WAREHOUSE','FINANCE','LOGISTICS','MANAGEMENT','AUDITOR'] as const)}, requestedAt: faker.date.past().toISOString().slice(0, 19) + 'Z', vendor: {no: faker.string.alpha({length: {min: 1, max: 20}}), name: faker.string.alpha({length: {min: 1, max: 20}})}, item: {no: faker.string.alpha({length: {min: 1, max: 20}}), description: faker.string.alpha({length: {min: 1, max: 20}})}, quantity: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), unitCost: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), amount: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), currencyCode: faker.string.alpha({length: {min: 3, max: 3}}), basis: {ordered: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), inventory: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), qtyOnSalesOrder: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), qtyOnPurchOrder: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), availableStock: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), shortfall: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), runRate3m: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), monthsOfCover: faker.helpers.arrayElement([faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), null])}, fields: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({key: faker.string.alpha({length: {min: 1, max: 20}}), label: faker.string.alpha({length: {min: 1, max: 20}}), value: faker.string.alpha({length: {min: 10, max: 20}}), origin: faker.helpers.arrayElement(['suggested','default','person'] as const), required: faker.datatype.boolean()})), approver: {displayName: faker.string.alpha({length: {min: 1, max: 20}}), setup: {userId: faker.string.uuid(), approverId: faker.helpers.arrayElement([faker.string.uuid(), null]), salesAmountApprovalLimit: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), purchaseAmountApprovalLimit: faker.helpers.fromRegExp("^-?\\d{1,15}(\\.\\d{1,4})?$"), unlimitedSalesApproval: faker.datatype.boolean(), unlimitedPurchaseApproval: faker.datatype.boolean(), substituteUserId: faker.helpers.arrayElement([faker.string.uuid(), null])}}, substituteName: faker.helpers.arrayElement([faker.string.alpha({length: {min: 1, max: 20}}), null]), escalatesToName: faker.helpers.arrayElement([faker.string.alpha({length: {min: 1, max: 20}}), null]), passedTo: faker.helpers.arrayElement([{name: faker.string.alpha({length: {min: 1, max: 20}}), byName: faker.string.alpha({length: {min: 1, max: 20}}), at: faker.date.past().toISOString().slice(0, 19) + 'Z', askedOutcome: faker.helpers.arrayElement(['approved','rejected'] as const), comment: faker.string.alpha({length: {min: 10, max: 20}}), youDecide: faker.datatype.boolean()},null,]), stage: faker.helpers.arrayElement([faker.helpers.arrayElement(['suggested','with-approvers','decided'] as const), undefined]), raiseTaskId: faker.helpers.arrayElement([faker.string.uuid(), null]), due: faker.helpers.arrayElement([{dueAt: faker.date.past().toISOString().slice(0, 19) + 'Z', overdue: faker.datatype.boolean()},null,]), decidable: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), decision: faker.helpers.arrayElement([{outcome: faker.helpers.arrayElement(['approved','rejected'] as const), by: faker.string.alpha({length: {min: 1, max: 20}}), comment: faker.string.alpha({length: {min: 10, max: 20}}), at: faker.date.past().toISOString().slice(0, 19) + 'Z'},null,])}, meta: {mock: faker.helpers.arrayElement([true] as const)}, ...overrideResponse})
 
@@ -250,6 +256,30 @@ export const getWorkflowsReissuePiMockHandler = (overrideResponse?: WorkflowsRei
   }, options)
 }
 
+export const getWorkflowsApproveSaleMockHandler = (overrideResponse?: WorkflowsApproveSale200 | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<WorkflowsApproveSale200> | WorkflowsApproveSale200), options?: RequestHandlerOptions) => {
+  return http.post('*/api/v1/workflows/orders/:orderNo/sales-approval', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getWorkflowsApproveSaleResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
+export const getWorkflowsUndoSaleApprovalMockHandler = (overrideResponse?: WorkflowsUndoSaleApproval200 | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<WorkflowsUndoSaleApproval200> | WorkflowsUndoSaleApproval200), options?: RequestHandlerOptions) => {
+  return http.post('*/api/v1/workflows/orders/:orderNo/sales-approval/undo', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getWorkflowsUndoSaleApprovalResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
+
 export const getWorkflowsSprMockHandler = (overrideResponse?: WorkflowsSpr200 | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<WorkflowsSpr200> | WorkflowsSpr200), options?: RequestHandlerOptions) => {
   return http.get('*/api/v1/workflows/sprs/:recordNo', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
 
@@ -336,6 +366,8 @@ export const getWorkflowsMock = () => [
   getWorkflowsConfirmPaymentMockHandler(),
   getWorkflowsUndoPaymentMockHandler(),
   getWorkflowsReissuePiMockHandler(),
+  getWorkflowsApproveSaleMockHandler(),
+  getWorkflowsUndoSaleApprovalMockHandler(),
   getWorkflowsSprMockHandler(),
   getWorkflowsApproveMockHandler(),
   getWorkflowsRejectMockHandler(),

@@ -84,6 +84,8 @@ describe("the OpenAPI document (what orval reads)", () => {
       "/api/v1/workflows/orders/{orderNo}/payments",
       "/api/v1/workflows/orders/{orderNo}/payments/{paymentId}/undo",
       "/api/v1/workflows/orders/{orderNo}/pi/reissue",
+      "/api/v1/workflows/orders/{orderNo}/sales-approval",
+      "/api/v1/workflows/orders/{orderNo}/sales-approval/undo",
       "/api/v1/workflows/reminders",
       "/api/v1/workflows/reminders/for-me",
       "/api/v1/workflows/sla-settings",

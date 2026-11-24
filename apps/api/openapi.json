@@ -3389,6 +3389,135 @@
         "tags": ["Workflows"]
       }
     },
+    "/api/v1/workflows/orders/{orderNo}/sales-approval": {
+      "post": {
+        "operationId": "Workflows_approveSale",
+        "parameters": [
+          {
+            "name": "orderNo",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "example": "SO-0003"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 500
+                  }
+                },
+                "required": ["comment"],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "applied": {
+                          "type": "boolean",
+                          "enum": [true]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "orderNo": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9-]{1,30}$"
+                        },
+                        "approved": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["applied", "message", "orderNo", "approved"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Approve a sales order before its PI, while SALES_APPROVAL is on (#251, off by default). Area 4's policy says who may; never the person who raised it. Audited",
+        "tags": ["Workflows"]
+      }
+    },
+    "/api/v1/workflows/orders/{orderNo}/sales-approval/undo": {
+      "post": {
+        "operationId": "Workflows_undoSaleApproval",
+        "parameters": [
+          {
+            "name": "orderNo",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string",
+              "example": "SO-0003"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "applied": {
+                          "type": "boolean",
+                          "enum": [true]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "orderNo": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9-]{1,30}$"
+                        },
+                        "approved": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": ["applied", "message", "orderNo", "approved"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["data"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        },
+        "summary": "Undo a sales approval; only its approver may. Audited",
+        "tags": ["Workflows"]
+      }
+    },
     "/api/v1/workflows/sprs/{recordNo}": {
       "get": {
         "operationId": "Workflows_spr",

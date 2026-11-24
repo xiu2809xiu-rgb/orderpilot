@@ -32,6 +32,18 @@ export interface OrderSnapshot {
   readonly resumeTo: OrderStatus | null;
   /** When it entered this status, as an ISO time. A second hold on a held order is not a new status. */
   readonly enteredAt: string;
+  /** Whether a sales approval was given, while the rule asks for one; absent otherwise. */
+  readonly salesApproved?: boolean;
+  /** Who gave it, so only they may undo it. */
+  readonly salesApprovedByUserId?: string;
+  /**
+   * Who raised the order: the person who started its workflow. A sales
+   * approval needs it, so the requester never approves their own. Absent on
+   * the seeded samples, which nobody raised.
+   */
+  readonly raisedByUserId?: string;
+  /** The order's total, what a sales limit is set against, when it was given at the start. */
+  readonly orderTotal?: string;
 }
 
 export type OrderCommand =
@@ -45,6 +57,8 @@ export type OrderCommand =
   | { readonly type: "SPR_APPROVED" }
   | { readonly type: "SPR_REJECTED"; readonly reason: string }
   | { readonly type: "SPR_DECISION_UNDONE" }
+  | { readonly type: "SALES_APPROVED"; readonly byUserId: string }
+  | { readonly type: "SALES_APPROVAL_UNDONE" }
   | { readonly type: "PI_SENT" }
   | { readonly type: "PI_SEND_UNDONE" }
   | {
@@ -110,10 +124,16 @@ export function holdKeyOf(hold: {
 export interface OrderFlowRules {
   /** A shortfall must go through an approved SPR before the PI can be sent. */
   readonly sprRequiredOnShortfall: boolean;
+  /**
+   * A sales order waits for a management approver before its PI goes out.
+   * Spectra has none today (A-19), so it is off unless SALES_APPROVAL is on.
+   */
+  readonly salesApprovalRequired: boolean;
 }
 
 export const DEFAULT_ORDER_FLOW_RULES: OrderFlowRules = {
   sprRequiredOnShortfall: true,
+  salesApprovalRequired: false,
 };
 
 /** The injection token for the rules, so a setting can replace the default. */
@@ -202,6 +222,20 @@ const TRANSITIONS: readonly Transition[] = [
     on: "SPR_DECISION_UNDONE",
     from: ["SprApproved", "StockChecked"],
     to: "AwaitingSpr",
+    by: POLICY,
+  },
+  // A sales approval, only while the rule asks for one: the order stays where
+  // it is, and its PI may then go out. Who may approve is area 4's policy.
+  {
+    on: "SALES_APPROVED",
+    from: ["StockChecked", "SprApproved"],
+    to: RESUME,
+    by: POLICY,
+  },
+  {
+    on: "SALES_APPROVAL_UNDONE",
+    from: ["StockChecked", "SprApproved"],
+    to: RESUME,
     by: POLICY,
   },
   {
@@ -330,6 +364,14 @@ export function waitingOnOf(
   if (status === "AwaitingPayment" && state.prepaymentDue === null) {
     return { step: "packed", role: "WAREHOUSE" };
   }
+  // Ready for its PI, but waiting for the sales approval the rule asks for.
+  if (
+    rules.salesApprovalRequired &&
+    !state.salesApproved &&
+    (status === "StockChecked" || status === "SprApproved")
+  ) {
+    return { step: "pi-sent", role: "APPROVER" };
+  }
   return WAITING_ON[status];
 }
 
@@ -384,7 +426,11 @@ export class OrderStateMachine {
   start(
     actor: OrderActor,
     at: Date,
-    facts: { readonly prepaymentDue: string | null },
+    facts: {
+      readonly prepaymentDue: string | null;
+      /** The order's total, for a sales limit; optional. */
+      readonly total?: string;
+    },
   ): OrderTransitionResult {
     if (actor.kind === "user" && actor.role !== "SUPPORT") {
       throw new DomainError("FORBIDDEN", "You may not start an order.");
@@ -406,6 +452,9 @@ export class OrderStateMachine {
       holds: [],
       resumeTo: null,
       enteredAt: at.toISOString(),
+      // Whoever starts the workflow raised the order (#251, point 9).
+      ...(actor.kind === "user" ? { raisedByUserId: actor.userId } : {}),
+      ...(facts.total === undefined ? {} : { orderTotal: facts.total }),
     };
     return {
       state,
@@ -494,11 +543,23 @@ export class OrderStateMachine {
           ? null
           : "a person must confirm every uncertain field first.";
       case "PI_SENT":
-        return state.status === "StockChecked" &&
+        if (
+          state.status === "StockChecked" &&
           this.rules.sprRequiredOnShortfall &&
           !state.stockCoversOrder
-          ? "the stock is short, so an SPR must be approved first."
+        ) {
+          return "the stock is short, so an SPR must be approved first.";
+        }
+        return this.rules.salesApprovalRequired && !state.salesApproved
+          ? "a sales approval is needed first."
           : null;
+      case "SALES_APPROVED":
+        if (!this.rules.salesApprovalRequired) {
+          return "no sales approval is asked for.";
+        }
+        return state.salesApproved ? "it is already approved." : null;
+      case "SALES_APPROVAL_UNDONE":
+        return state.salesApproved ? null : "it has no sales approval to undo.";
       case "PAYMENT_CONFIRMED":
         return refusalOfPayment(state, command.paymentType, command.amount);
       case "PACKING_STARTED":
@@ -579,6 +640,18 @@ function nextState(
     }
     case "CANCELLED":
       return { ...state, status: "Cancelled", holds: [], resumeTo: null };
+    case "SALES_APPROVED":
+      return {
+        ...state,
+        salesApproved: true,
+        salesApprovedByUserId: command.byUserId,
+      };
+    case "SALES_APPROVAL_UNDONE": {
+      // The approver goes with the approval, so the next one is recorded afresh.
+      const rest = { ...state };
+      delete rest.salesApprovedByUserId;
+      return { ...rest, salesApproved: false };
+    }
     // Back to where the PI was sent from: a short order had its SPR approved.
     case "PI_SEND_UNDONE":
       return {

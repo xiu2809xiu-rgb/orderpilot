@@ -34,6 +34,7 @@ import {
   orderParamsSchema,
   paymentConfirmationInputSchema,
   piReissueInputSchema,
+  salesApprovalInputSchema,
   paymentUndoParamsSchema,
   remindersQuerySchema,
   sprDecisionInputSchema,
@@ -44,6 +45,7 @@ import {
   type PageQuery,
   type PaymentConfirmationInput,
   type PiReissueInput,
+  type SalesApprovalInput,
   type RemindersQuery,
   type SprDecisionInput,
   type TasksQuery,
@@ -66,6 +68,7 @@ import {
   paymentResponseSchema,
   paymentUndoResponseSchema,
   piReissueResponseSchema,
+  salesApprovalResponseSchema,
   reminderListResponseSchema,
   sprDecisionResponseSchema,
   sprDecisionUndoResponseSchema,
@@ -78,6 +81,7 @@ import {
   taskListResponseSchema,
 } from "./workflows.schemas.js";
 import { PiIssueService } from "./pi-issue.service.js";
+import { SalesApprovalService } from "./sales-approval.service.js";
 import { SprApprovalService } from "./spr-approval.service.js";
 import { TaskSlaService } from "./task-sla.service.js";
 import { WorkflowsService } from "./workflows.service.js";
@@ -146,6 +150,8 @@ export class WorkflowsController {
     @Inject(SprApprovalService) private readonly sprs: SprApprovalService,
     @Inject(TaskSlaService) private readonly slas: TaskSlaService,
     @Inject(PiIssueService) private readonly pis: PiIssueService,
+    @Inject(SalesApprovalService)
+    private readonly sales: SalesApprovalService,
   ) {}
 
   @Get("tasks")
@@ -403,6 +409,53 @@ export class WorkflowsController {
         auth,
         infoOf(req),
       ),
+    };
+  }
+
+  @Post("orders/:orderNo/sales-approval")
+  @HttpCode(200)
+  @RequirePermission("approvals.decide")
+  @orderParam
+  @ApiOperation({
+    summary:
+      "Approve a sales order before its PI, while SALES_APPROVAL is on (#251, off by default). Area 4's policy says who may; never the person who raised it. Audited",
+  })
+  @ApiBody({ schema: openApiSchema(salesApprovalInputSchema) })
+  @ApiOkResponse({ schema: openApiSchema(salesApprovalResponseSchema) })
+  async approveSale(
+    @Param(new ZodValidationPipe(orderParamsSchema))
+    params: { orderNo: string },
+    @Body(new ZodValidationPipe(salesApprovalInputSchema))
+    body: SalesApprovalInput,
+    @Auth() auth: AuthContext,
+    @Req() req: Request,
+  ) {
+    return {
+      data: await this.sales.approve(
+        params.orderNo,
+        body.comment,
+        auth,
+        infoOf(req),
+      ),
+    };
+  }
+
+  @Post("orders/:orderNo/sales-approval/undo")
+  @HttpCode(200)
+  @RequirePermission("approvals.decide")
+  @orderParam
+  @ApiOperation({
+    summary: "Undo a sales approval; only its approver may. Audited",
+  })
+  @ApiOkResponse({ schema: openApiSchema(salesApprovalResponseSchema) })
+  async undoSaleApproval(
+    @Param(new ZodValidationPipe(orderParamsSchema))
+    params: { orderNo: string },
+    @Auth() auth: AuthContext,
+    @Req() req: Request,
+  ) {
+    return {
+      data: await this.sales.undo(params.orderNo, auth, infoOf(req)),
     };
   }
 

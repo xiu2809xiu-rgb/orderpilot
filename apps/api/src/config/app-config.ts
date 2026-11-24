@@ -99,7 +99,11 @@ export class AppConfig {
 
   readonly database: { readonly url: string };
   readonly redis: { readonly url: string };
-  readonly workflows: { readonly sweepSeconds: number };
+  readonly workflows: {
+    readonly sweepSeconds: number;
+    /** True only when SALES_APPROVAL is "on": a sales order waits for an approver before its PI. */
+    readonly salesApproval: boolean;
+  };
 
   readonly storage: {
     /** Null means AWS S3 itself. */
@@ -152,7 +156,10 @@ export class AppConfig {
     this.ai = aiSettings(env);
     this.database = { url: env.DATABASE_URL };
     this.redis = { url: env.REDIS_URL };
-    this.workflows = { sweepSeconds: env.WORKFLOW_SWEEP_SECONDS };
+    this.workflows = {
+      sweepSeconds: env.WORKFLOW_SWEEP_SECONDS,
+      salesApproval: env.SALES_APPROVAL === "on",
+    };
     this.storage = {
       endpoint: env.S3_ENDPOINT ?? null,
       region: env.S3_REGION,
