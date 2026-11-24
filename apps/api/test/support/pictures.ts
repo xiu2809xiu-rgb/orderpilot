@@ -182,3 +182,32 @@ export function gatedCheck() {
     },
   };
 }
+
+/** `GET /profile-pictures/:id/image` as one browser, or with no session. */
+export function getImage(
+  t: TestApp,
+  browser: Browser | null,
+  id: string,
+  headers: Readonly<Record<string, string>> = {},
+): request.Test {
+  const path = `${API}/profile-pictures/${id}/image`;
+  const req = request(t.app.getHttpServer())
+    .get(path)
+    .buffer(true)
+    .parse((res, done) => {
+      const chunks: Buffer[] = [];
+      res.on("data", (chunk: Buffer) => chunks.push(chunk));
+      res.on("end", () => {
+        const body = Buffer.concat(chunks);
+        // The picture is bytes; an error is the JSON envelope; a 304 has no body.
+        if (String(res.headers["content-type"]).startsWith("image/jpeg")) {
+          done(null, body);
+        } else {
+          done(null, body.length > 0 ? JSON.parse(body.toString()) : {});
+        }
+      });
+    });
+  if (browser) req.set("Cookie", browser.cookieHeader(path));
+  for (const [name, value] of Object.entries(headers)) req.set(name, value);
+  return req;
+}

@@ -26,3 +26,12 @@ X-CSRF-Token: {{csrf}}
 ### already gone answers the same way and changes nothing.
 POST {{baseUrl}}/api/v1/profile-pictures/{{pictureId}}/withdraw
 X-CSRF-Token: {{csrf}}
+
+### The bytes of one picture. Any signed-in person may ask for an approved one. A
+### pending one is shown only to its owner (in a demo session, the sign-in that
+### sent it) and to whoever holds users.manage; anyone else, and a rejected,
+### removed or taken-down picture, gets 404. The answer is private and revalidated
+### every time: the ETag is the picture's SHA-256, so a repeat with
+### If-None-Match answers 304 only while the picture is still visible.
+GET {{baseUrl}}/api/v1/profile-pictures/{{pictureId}}/image
+If-None-Match: "paste the ETag of the last answer"

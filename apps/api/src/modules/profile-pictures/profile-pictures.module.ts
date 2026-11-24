@@ -22,7 +22,9 @@ import {
   PictureCheckService,
 } from "./picture-check.service.js";
 import { PictureClock, SystemPictureClock } from "./picture-clock.js";
+import { PictureImageService } from "./picture-image.service.js";
 import { PictureOwnerService } from "./picture-owner.service.js";
+import { PictureReviewers } from "./picture-reviewers.js";
 import { PictureStore } from "./picture-store.js";
 import { PictureUploadGuard } from "./picture-upload-guard.js";
 import { PictureUploadService } from "./picture-upload.service.js";
@@ -57,6 +59,8 @@ import { ProfilePictureRepository } from "./profile-picture.repository.js";
     PictureCheckService,
     PictureOwnerService,
     PictureUploadService,
+    PictureReviewers,
+    PictureImageService,
   ],
 })
 export class ProfilePicturesModule

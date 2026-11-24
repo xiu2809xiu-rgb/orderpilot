@@ -8,6 +8,7 @@ import {
   Post,
   Put,
   Req,
+  Res,
 } from "@nestjs/common";
 import {
   ApiExcludeEndpoint,
@@ -19,7 +20,7 @@ import {
   PROFILE_PICTURE_LIMITS,
   myPictureResponseSchema,
 } from "@orderpilot/shared";
-import type { Request } from "express";
+import type { Request, Response } from "express";
 import type { AuthContext } from "../../auth/auth-context.js";
 import { Auth, Authenticated } from "../../auth/decorators.js";
 import { openApiSchema } from "../../common/openapi.js";
@@ -31,6 +32,7 @@ import {
 import { PictureRefusalError } from "./domain/picture-refusal.js";
 import { actorOf, requestOf } from "./picture-actor.js";
 import { pictureIdDoc, pictureIdParams } from "./picture-params.js";
+import { PictureImageService } from "./picture-image.service.js";
 import { PictureOwnerService } from "./picture-owner.service.js";
 import { PictureUploadService } from "./picture-upload.service.js";
 
@@ -64,6 +66,7 @@ export class ProfilePicturesController {
     @Inject(PictureOwnerService) private readonly owner: PictureOwnerService,
     @Inject(PictureUploadService)
     private readonly uploads: PictureUploadService,
+    @Inject(PictureImageService) private readonly images: PictureImageService,
   ) {}
 
   @Get("mine")
@@ -118,6 +121,45 @@ export class ProfilePicturesController {
     return {
       data: await this.uploads.upload({ actor, bytes, request }),
     };
+  }
+
+  /**
+   * The bytes of one picture. The answer is revalidated every time (`private,
+   * no-cache` and the SHA-256 as a strong ETag), so a take-down is seen at the
+   * next request and not after a cache runs out. The content type is fixed,
+   * never the object's or the request's. Not in the OpenAPI document: it is
+   * binary, and nothing proves how a generated client would read it.
+   */
+  @Get(":id/image")
+  @Authenticated()
+  @pictureIdDoc
+  @ApiExcludeEndpoint()
+  async image(
+    @Param(pictureIdParams) params: { id: string },
+    @Auth() auth: AuthContext,
+    @Req() req: Request,
+    @Res() res: Response,
+  ): Promise<void> {
+    const served = await this.images.serve(
+      actorOf(auth),
+      params.id,
+      req.headers["if-none-match"],
+      requestOf(req),
+    );
+    res.setHeader("Content-Type", "image/jpeg");
+    res.setHeader("Cache-Control", "private, no-cache");
+    res.setHeader("ETag", served.etag);
+    // Helmet says same-site: the web and the API share an origin through /api.
+    res.setHeader("Cross-Origin-Resource-Policy", "same-origin");
+    res.setHeader(
+      "Content-Disposition",
+      'inline; filename="profile-picture.jpg"',
+    );
+    if (served.kind === "not-modified") {
+      res.status(304).end();
+      return;
+    }
+    res.status(200).send(served.bytes);
   }
 
   @Post(":id/withdraw")
