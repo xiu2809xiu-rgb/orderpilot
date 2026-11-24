@@ -42,6 +42,17 @@ describe("SecretBox", () => {
     ).toBeNull();
   });
 
+  // A GCM tag cut short is still the start of the right tag, and a shorter tag
+  // is easier to forge. Only the whole 16 bytes may open the box.
+  it("refuses a tag cut shorter than 16 bytes, though it is the start of the right one", () => {
+    const [version, nonce, body, tag] = box.seal(plain, alice).split(".");
+    const whole = Buffer.from(tag ?? "", "base64url");
+    for (const bytes of [4, 8, 12, 15]) {
+      const cut = whole.subarray(0, bytes).toString("base64url");
+      expect(box.open([version, nonce, body, cut].join("."), alice)).toBeNull();
+    }
+  });
+
   it("refuses text that is not the v1 format", () => {
     expect(box.open("", alice)).toBeNull();
     expect(box.open("v2.a.b.c", alice)).toBeNull();

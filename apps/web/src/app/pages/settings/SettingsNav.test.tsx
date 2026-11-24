@@ -46,12 +46,16 @@ describe("the section list", () => {
       return found;
     };
     expect(await names("FINANCE")).not.toContain("Controls");
+    expect(await names("FINANCE")).not.toContain("Profile pictures");
     const auditor = await names("AUDITOR");
     expect(auditor).toContain("Controls");
     expect(auditor).not.toContain("System health");
+    // Reviewing pictures is user administration: only a holder of users.manage sees it.
+    expect(auditor).not.toContain("Profile pictures");
     const admin = await names("SYSTEM_ADMIN");
     expect(admin).toContain("Controls");
     expect(admin).toContain("System health");
+    expect(admin).toContain("Profile pictures");
   });
 
   it("says a role may not open a section it follows a stale link to, and keeps the list", async () => {

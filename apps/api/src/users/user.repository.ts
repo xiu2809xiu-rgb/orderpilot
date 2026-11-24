@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import type { UserListQuery, Role } from "@orderpilot/shared";
+import type { Role, UserListQuery, UserRef } from "@orderpilot/shared";
 import { BaseRepository, type Page } from "../common/repository.js";
 import { Database } from "../database/database.js";
 import type { Prisma, User as UserRow } from "../generated/prisma/client.js";
@@ -94,6 +94,20 @@ export class UserRepository extends BaseRepository<UserRecord, string> {
       select: { id: true, email: true },
     });
     return new Map(rows.map((row) => [row.email, row.id]));
+  }
+
+  /**
+   * People by id as references: id, display name, email and role, and nothing
+   * else. It selects those four columns only, because a UserRecord carries the
+   * password hash and no hash may leave the auth layer for another module.
+   * Unknown ids are left out.
+   */
+  async findRefsByIds(ids: readonly string[]): Promise<UserRef[]> {
+    if (ids.length === 0) return [];
+    return this.database.client.user.findMany({
+      where: { id: { in: [...ids] } },
+      select: { id: true, displayName: true, email: true, role: true },
+    });
   }
 
   async create(user: NewUser): Promise<UserRecord> {

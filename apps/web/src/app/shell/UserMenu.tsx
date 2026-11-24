@@ -1,7 +1,7 @@
 import { ChevronsUpDown, LogOut, Settings } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/parts/UserAvatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./overlays/dropdown-menu";
-import { initials } from "@/lib/initials";
+import { useMyPicture } from "@/lib/useMyPicture";
 import { cn } from "@/lib/utils";
 import { useSessionStore } from "@/stores/session";
 import { useSignOut } from "./useSignOut";
@@ -23,17 +23,21 @@ export function UserMenu({ collapsed }: { collapsed: boolean }) {
   const { t } = useTranslation();
   const user = useSessionStore((state) => state.session?.user);
   const { requestSignOut, dialog } = useSignOut();
+  // Only the approved picture: one that waits for review is for its owner's
+  // card and the reviewers, never the menu.
+  const { picture } = useMyPicture();
   if (!user) return null;
 
   return (
     <>
       <DropdownMenu>
         <DropdownMenuTrigger className="dx-entry dx-person">
-          <Avatar className="size-8 shrink-0" aria-hidden="true">
-            <AvatarFallback className="fs-12 bg-accent font-semibold text-accent-foreground">
-              {initials(user.displayName)}
-            </AvatarFallback>
-          </Avatar>
+          <UserAvatar
+            name={user.displayName}
+            pictureId={picture?.approved?.id}
+            className="size-8"
+            textClassName="fs-12"
+          />
           {/* The name and the role are the visible text, so they are part of
               the button's name too (WCAG 2.5.3, label in name). */}
           <span className={cn("min-w-0 flex-1", collapsed && "sr-only")}>

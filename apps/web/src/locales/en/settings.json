@@ -12,10 +12,116 @@
       "privacy": "Privacy",
       "ai": "AI assistant",
       "controls": "Controls",
-      "health": "System health"
+      "health": "System health",
+      "pictures": "Profile pictures"
     },
     "showing": "Showing {{section}}",
     "deniedDescription": "Your role does not include this section. A system admin can change what a role may open."
+  },
+  "pictures": {
+    "reasons": {
+      "not_suitable": "It is not suitable for a workplace.",
+      "offensive": "It contains something offensive or threatening.",
+      "not_clear": "It is too dark, blurred or small to see who is in it.",
+      "not_you": "It does not show the person whose account it is.",
+      "personal_information": "It shows personal or confidential information, such as a document or a screen.",
+      "other": "Another reason: see the note.",
+      "reported": "It was reported to a reviewer."
+    },
+    "title": "Profile pictures",
+    "intro": "Approve or reject each picture before it replaces its owner's initials. You do not see your own here, and you cannot review it.",
+    "tabs": {
+      "label": "Show",
+      "PENDING": "Waiting for review",
+      "APPROVED": "Approved"
+    },
+    "showing": "Showing {{tab}}",
+    "empty": {
+      "PENDING": {
+        "title": "Nothing is waiting for review",
+        "description": "New pictures appear here when someone sends one."
+      },
+      "APPROVED": {
+        "title": "No approved pictures",
+        "description": "Approved pictures appear here, so you can take one down later."
+      }
+    },
+    "row": {
+      "alt": "Profile picture sent by {{name}}",
+      "asAvatar": "As an avatar",
+      "sent": "Sent {{when}}",
+      "failed": "This picture could not be loaded."
+    },
+    "ai": {
+      "CHECKED": {
+        "LOOKS_FINE": "AI check: looks fine. The AI decided nothing.",
+        "NEEDS_A_CLOSER_LOOK": "AI check: needs a closer look. The AI decided nothing."
+      },
+      "concerns": "Concerns: {{list}}",
+      "NOT_ALLOWED": {
+        "synthetic-data-only": "Not checked by AI: only synthetic data may go to an AI tool.",
+        "classification-not-allowed": "Not checked by AI: this kind of data may not go to an AI tool.",
+        "no-rule-for-provider": "Not checked by AI: no data rule covers the AI tool in use.",
+        "policy-unavailable": "Not checked by AI: the data rule could not be read.",
+        "other": "Not checked by AI: the data rules do not allow it."
+      },
+      "NOT_RUN": {
+        "timeout": "Not checked by AI: the AI did not answer in time.",
+        "failed": "Not checked by AI: the check failed.",
+        "mock": "Not checked by AI: only a scripted test answer came back, so nothing was examined.",
+        "other": "Not checked by AI: the check did not run."
+      },
+      "note": "What the AI said: {{note}}",
+      "concern": {
+        "nudity_or_sexual_content": "nudity or sexual content",
+        "violence_or_gore": "violence or gore",
+        "hateful_symbol_or_text": "a hateful symbol or text",
+        "offensive_gesture": "an offensive gesture",
+        "weapon": "a weapon",
+        "drugs_or_alcohol": "drugs or alcohol",
+        "personal_documents_visible": "a personal document is visible",
+        "unusable_image": "the image is blank, dark or blurred",
+        "other": "something else"
+      }
+    },
+    "approve": "Approve",
+    "approveFor": "Approve picture from {{name}}",
+    "reject": "Reject",
+    "rejectFor": "Reject picture from {{name}}",
+    "takeDown": "Take down",
+    "takeDownFor": "Take down picture from {{name}}",
+    "done": {
+      "approved": "Approved the picture from {{name}}",
+      "rejected": "Rejected the picture from {{name}}",
+      "takenDown": "Took down the picture from {{name}}"
+    },
+    "dialog": {
+      "reject": {
+        "title": "Reject this picture?",
+        "body": "{{name}} will read the reason you choose. The picture is deleted."
+      },
+      "takeDown": {
+        "title": "Take this picture down?",
+        "body": "{{name}} will read the reason you choose. Their initials show again and the picture is deleted."
+      },
+      "reason": "Reason",
+      "note": "Note (optional)",
+      "noteRequired": "Note (needed for this reason)",
+      "noteHint": "Up to 140 characters. {{name}} will read it.",
+      "chooseReason": "Choose a reason.",
+      "needNote": "Add a short note for this reason.",
+      "cancel": "Cancel",
+      "confirmReject": "Reject picture",
+      "confirmTakeDown": "Take picture down"
+    },
+    "refusals": {
+      "own_picture": "You cannot review your own picture. Another administrator has to.",
+      "already_approved": "This picture was already approved.",
+      "already_rejected": "This picture was already rejected.",
+      "removed_by_owner": "The person removed this picture.",
+      "replaced": "The person sent a newer picture. The list has been refreshed.",
+      "not_approved": "This picture is no longer approved."
+    }
   },
   "account": {
     "profile": "Profile",
@@ -33,6 +139,69 @@
       "LOGISTICS": "Arranges forwarders and follows shipping dates, AWB or BL, and import permits.",
       "MANAGEMENT": "Reads the tracker, dashboards and reports.",
       "AUDITOR": "Reads the audit trail."
+    },
+    "picture": {
+      "title": "Profile picture",
+      "intro": "Add a picture of yourself. A reviewer approves every picture first.",
+      "loading": "Loading your profile picture",
+      "none": "You have no profile picture. Your initials show instead.",
+      "approved": "Approved on {{date}}. It replaces your initials in your menu and on this card. Other pages do not show it yet.",
+      "pendingTitle": "Waiting for review",
+      "pendingBody": "Only you and the reviewers can see this picture until a reviewer approves it.",
+      "pendingOwnReviewer": "You may review pictures, but not your own. Another administrator has to review this one.",
+      "ai": {
+        "CHECKED": "An AI tool looked at it and told the reviewer what it saw. It decided nothing.",
+        "NOT_ALLOWED": "No AI tool looked at it: the data rules do not allow that today.",
+        "NOT_RUN": "No AI tool looked at it: the check did not complete."
+      },
+      "demoNote": "This is a shared demo account. A picture you send waits for review and only you and the reviewers can see it. Once it is approved, everyone who signs in as this role sees it.",
+      "notice": {
+        "REJECTED": "Your last picture was not approved",
+        "TAKEN_DOWN": "A reviewer took your picture down",
+        "deleted": "The picture was deleted. Choose another one when you are ready.",
+        "note": "Note from the reviewer: {{note}}"
+      },
+      "choose": "Choose a picture",
+      "chooseAnother": "Choose another",
+      "preparing": "Preparing your picture",
+      "previewTitle": "This is what the reviewer will see",
+      "previewBody": "It was cropped to a square and shrunk on your device. Camera details such as where it was taken were left out.",
+      "previewAlt": "Preview of your cropped picture",
+      "send": "Send for review",
+      "sending": "Sending",
+      "sent": "Sent for review",
+      "remove": "Remove picture",
+      "removeTitle": "Remove your profile picture?",
+      "removeBody": "Your initials will show instead. You can send a new picture later.",
+      "removeBodyWaiting": "This picture will not be reviewed. You can send a new one later.",
+      "removeConfirm": "Remove",
+      "removeKeep": "Keep it",
+      "removed": "Picture removed",
+      "left_one": "You can send {{count}} more picture in the next 24 hours.",
+      "left_other": "You can send {{count}} more pictures in the next 24 hours.",
+      "limitReached": "You have used all {{limit}} uploads for now. Try again later.",
+      "footnote": "A reviewer is a person. An AI tool may describe the picture to the reviewer when the data rules allow it. It never approves or rejects.",
+      "loadFailed": "The picture could not be shown.",
+      "choiceErrors": {
+        "not_an_image": "Choose a PNG, JPEG or WebP picture.",
+        "too_small": "Choose a picture at least 128 pixels wide and high.",
+        "too_large_file": "Choose a picture smaller than 10 MB.",
+        "cannot_read": "This file could not be read as a picture."
+      },
+      "refusals": {
+        "wrong_type": "Send the picture as a JPEG.",
+        "empty": "No picture was sent.",
+        "not_jpeg": "This file is not a JPEG picture.",
+        "damaged": "This picture file is damaged or incomplete.",
+        "unsupported": "This kind of JPEG is not supported. Save it as a standard JPEG and try again.",
+        "not_square": "The picture must be square.",
+        "wrong_size": "The picture must be between 128 and 512 pixels wide.",
+        "cut_off": "The upload was cut off. Try again.",
+        "too_big": "This picture is larger than 256 KB. Choose a smaller one.",
+        "upload_limit": "You have sent {{limit}} pictures in the last 24 hours. Try again later.",
+        "upload_busy": "Another picture of yours is still being sent. Wait a moment and try again.",
+        "rejected_before": "A reviewer did not approve this picture before. Choose a different one."
+      }
     },
     "access": {
       "title": "What you can do",

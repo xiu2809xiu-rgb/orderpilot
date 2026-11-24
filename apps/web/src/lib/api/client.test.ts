@@ -1,4 +1,4 @@
-import { authRoutes, HEADERS } from "@orderpilot/shared";
+import { authRoutes, HEADERS, pictureRoutes } from "@orderpilot/shared";
 import { describe, expect, it, vi } from "vitest";
 import { errorBody, sessionFor } from "@/test/fixtures";
 import { ApiClient } from "./client";
@@ -219,5 +219,84 @@ describe("ApiClient refresh", () => {
     );
     await client.call(authRoutes.me);
     expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+});
+
+describe("ApiClient raw bodies", () => {
+  const mine = {
+    approved: null,
+    pending: null,
+    notice: null,
+    uploads: { used: 1, limit: 10 },
+  };
+  const bytes = new Blob([new Uint8Array([0xff, 0xd8, 0xff, 0xd9])], {
+    type: "image/jpeg",
+  });
+
+  function sentBody(fetchMock: ReturnType<typeof vi.fn>, call = 0) {
+    const calls = fetchMock.mock.calls as unknown as [string, RequestInit][];
+    return calls[call]?.[1].body;
+  }
+
+  it("sends the blob as it is, with its own content type and the CSRF header", async () => {
+    const { client, fetchMock } = setup([() => reply(200, { data: mine })], {
+      op_csrf: "tok-raw",
+    });
+    const result = await client.upload(pictureRoutes.upload, bytes);
+    expect(result.data.uploads.used).toBe(1);
+    expect(sentBody(fetchMock)).toBe(bytes);
+    const headers = sentHeaders(fetchMock);
+    expect(headers["Content-Type"]).toBe("image/jpeg");
+    expect(headers[HEADERS.csrf]).toBe("tok-raw");
+  });
+
+  it("sends the same blob again after a refresh", async () => {
+    const { client, fetchMock } = setup(
+      [
+        () => reply(401, errorBody("SESSION_EXPIRED")),
+        () => reply(200, { data: session }),
+        () => reply(200, { data: mine }),
+      ],
+      { op_csrf: "tok" },
+    );
+    client.markSessionStarted();
+    await client.upload(pictureRoutes.upload, bytes);
+    const paths = (fetchMock.mock.calls as unknown as [string][]).map(
+      ([url]) => url,
+    );
+    expect(paths).toEqual([
+      "/api/v1/profile-pictures/mine",
+      "/api/v1/auth/refresh",
+      "/api/v1/profile-pictures/mine",
+    ]);
+    expect(sentBody(fetchMock, 0)).toBe(bytes);
+    expect(sentBody(fetchMock, 2)).toBe(bytes);
+  });
+
+  it("still throws a typed error that carries the picture's refusal code and the trace id", async () => {
+    const body = {
+      error: {
+        code: "VALIDATION_FAILED",
+        message: "The picture must be square.",
+        details: [{ path: "picture", message: "not_square" }],
+        traceId: "trace-picture-1",
+      },
+    };
+    const { client } = setup([() => reply(400, body)], { op_csrf: "tok" });
+    const error = await client
+      .upload(pictureRoutes.upload, bytes)
+      .catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(ApiError);
+    expect(error).toMatchObject({
+      status: 400,
+      traceId: "trace-picture-1",
+      details: [{ path: "picture", message: "not_square" }],
+    });
+  });
+
+  it("sends no body at all when a route that takes raw bytes is called without any", async () => {
+    const { client, fetchMock } = setup([() => reply(200, { data: mine })]);
+    await client.call(pictureRoutes.mine);
+    expect(sentBody(fetchMock)).toBeUndefined();
   });
 });

@@ -340,3 +340,17 @@ The decision is recorded in [ADR 0068](../adr/0068-two-step-sign-in-with-an-auth
 | Row lock to serialise a counter        | `apps/api/src/two-step/two-step.repository.ts`                 | Two codes at once for one person queue on the person's own row, so a code cannot be used twice and the tries cannot be counted short             |
 | Challenge, then verify, with a channel | `apps/api/src/two-step/two-step-challenge.repository.ts`       | A sign-in that needs a second step is a stored challenge with a channel column, so another channel can join without changing the flow            |
 | Controlled field, parent owns timers   | `components/kit/code-field/`, `app/two-step/useCodeAttempt.ts` | The field draws the state it is given and times nothing. The hook holds the three waits, so they hold under reduced motion and in jsdom          |
+
+## Profile pictures (#381)
+
+The decision is recorded in [ADR 0069](../adr/0069-profile-pictures-a-person-approves.md). The API is under `apps/api/src/modules/profile-pictures/`.
+
+| Pattern                                                | Where                                                               | Why                                                                                                                               |
+| ------------------------------------------------------ | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| A cleaner that rewrites from allowed parts             | `domain/jpeg-cleaner.ts`                                            | The stored file is built from the segments the walk checked, so metadata and trailing bytes cannot ride along. It repairs nothing |
+| A bounded body reader                                  | `apps/api/src/common/read-bounded-body.ts`, `discard-rest.ts`       | The size limit holds for chunked and lying bodies, and the reader runs after the guards, so a refused caller costs nothing        |
+| An owner-row lock for one person's state               | `profile-picture.repository.ts`                                     | Upload, withdraw and every decision take turns on one person, and two reviewers at once give one decision and one 409             |
+| An ask-first method on a gateway                       | `LlmGateway.mayReceive` in `apps/api/src/modules/ai/llm-gateway.ts` | A feature learns whether the data rule allows a call without writing an audit row, and nothing is sent when it does not           |
+| A deadline race around a call that cannot be cancelled | `domain/deadline.ts`                                                | A slow check never holds an upload for more than five seconds, and its late answer is thrown away                                 |
+| Delete after commit, with a sweep                      | `picture-store.ts`                                                  | A rollback never destroys a live picture, and a failed delete is retried and audited                                              |
+| A one-in-flight guard kept in Redis                    | `picture-upload-guard.ts`                                           | A second upload of one person is refused before any AI call or storage write, and a Redis outage lets the upload go on            |

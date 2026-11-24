@@ -11,6 +11,7 @@ export * from './master-data/master-data.ts';
 export * from './monitoring/monitoring.ts';
 export * from './operation-log/operation-log.ts';
 export * from './orders/orders.ts';
+export * from './profile-pictures/profile-pictures.ts';
 export * from './system/system.ts';
 export * from './tracker/tracker.ts';
 export * from './users/users.ts';

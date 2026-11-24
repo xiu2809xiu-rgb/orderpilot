@@ -75,6 +75,9 @@ Each row is a case some test must cover. The story is the one that brings the te
 | A14 | Five wrong codes end a sign-in; ten in 15 minutes lock the code entry                      | A recovery code still works; the third lock in a row lasts 24 hours       | API               | Today               |
 | A15 | Turning two-step off needs a password and a proof                                          | A session cookie alone is refused                                         | API               | Today               |
 | A16 | An administrator resets another person's two-step                                          | Never one's own; every session of that person ends                        | API               | Today               |
+| A17 | A JPEG with metadata, trailing bytes or a false size is uploaded                           | Cleaned or refused: only the picture's own parts are stored               | Unit              | In review: #381     |
+| A18 | A pending picture is asked for by someone else, or by anyone after a take-down             | Visible to its owner and the reviewers only; 404 after a take-down        | API               | In review: #381     |
+| A19 | A reviewer tries to review their own picture, or two reviewers decide together             | 403 and an audit row; for two reviewers, one decision and one 409         | API               | In review: #381     |
 
 ### Order workflows and approvals (area 2)
 

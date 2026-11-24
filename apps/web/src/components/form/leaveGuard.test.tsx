@@ -171,11 +171,12 @@ describe("leaving a form", () => {
 
 describe("signing out over a form", () => {
   function withMenu() {
+    // The menu asks for the signed-in person's picture, so it needs a query client.
     return renderInRouter(
-      <>
+      <QueryClientProvider client={new QueryClient()}>
         <UserMenu collapsed={false} />
         <KitForm />
-      </>,
+      </QueryClientProvider>,
       <h1>Sign in</h1>,
     );
   }
