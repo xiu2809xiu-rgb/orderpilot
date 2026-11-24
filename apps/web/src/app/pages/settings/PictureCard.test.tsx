@@ -1,10 +1,12 @@
 import { act, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { HttpResponse, http } from "msw";
 import { beforeAll, describe, expect, it } from "vitest";
 import { useSessionStore } from "@/stores/session";
 import { axeViolations } from "@/test/axe";
 import { stubImage } from "@/test/fakeImage";
 import { sessionFor } from "@/test/fixtures";
+import { server } from "@/test/server";
 import { PictureCard } from "./PictureCard";
 import {
   answerMine,
@@ -213,6 +215,27 @@ describe("the profile picture card", () => {
     expect(
       await screen.findByText("The picture could not be shown."),
     ).toBeInTheDocument();
+  });
+
+  it("drops 'could not be shown' once the picture that failed is taken back", async () => {
+    stubImage("fail");
+    answerMine(approvedPicture());
+    server.use(
+      http.post(`*/api/v1/profile-pictures/${APPROVED_ID}/withdraw`, () =>
+        HttpResponse.json({ data: emptyPicture(1) }),
+      ),
+    );
+    renderSettings(<PictureCard />);
+    const user = userEvent.setup();
+    await screen.findByText("The picture could not be shown.");
+    await user.click(screen.getByRole("button", { name: "Remove picture" }));
+    await user.click(await screen.findByRole("button", { name: "Remove" }));
+    expect(
+      await screen.findByText(
+        "You have no profile picture. Your initials show instead.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("The picture could not be shown.")).toBeNull();
   });
 
   it("says in the footnote that an AI tool never approves or rejects", async () => {

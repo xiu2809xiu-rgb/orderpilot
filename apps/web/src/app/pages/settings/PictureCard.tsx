@@ -39,6 +39,7 @@ export function PictureCard() {
   const chooseRef = useRef<HTMLButtonElement>(null);
   const removeRef = useRef<HTMLButtonElement>(null);
   if (!session) return null;
+  const shown = picture ? (picture.pending ?? picture.approved) : null;
 
   return (
     <Section
@@ -53,7 +54,7 @@ export function PictureCard() {
               name={session.user.displayName}
               // The owner may see a picture that waits for review: this is
               // their own card, and the only place that draws a pending one.
-              pictureId={picture.pending?.id ?? picture.approved?.id}
+              pictureId={shown?.id}
               className="size-20"
               textClassName="fs-20"
               onImageStatus={setImageStatus}
@@ -61,7 +62,9 @@ export function PictureCard() {
             <PictureStatus
               picture={picture}
               canReview={hasPermission(session, "users.manage")}
-              imageFailed={imageStatus === "error"}
+              // The avatar reports nothing when it unmounts, so a failure
+              // outlives the picture it was about unless it is read only while one is shown.
+              imageFailed={shown !== null && imageStatus === "error"}
             />
           </div>
           <PictureChooser
