@@ -152,7 +152,7 @@
       "ai": {
         "CHECKED": "An AI tool looked at it and told the reviewer what it saw. It decided nothing.",
         "NOT_ALLOWED": "No AI tool looked at it: the data rules do not allow that today.",
-        "NOT_RUN": "No AI tool looked at it: the check did not finish in time."
+        "NOT_RUN": "No AI tool looked at it: the check did not complete."
       },
       "demoNote": "This is a shared demo account. A picture you send waits for review and only you and the reviewers can see it. Once it is approved, everyone who signs in as this role sees it.",
       "notice": {

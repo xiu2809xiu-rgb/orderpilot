@@ -84,7 +84,7 @@ describe("the profile picture card", () => {
       "NOT_ALLOWED",
       "No AI tool looked at it: the data rules do not allow that today.",
     ],
-    ["NOT_RUN", "No AI tool looked at it: the check did not finish in time."],
+    ["NOT_RUN", "No AI tool looked at it: the check did not complete."],
   ] as const)(
     "tells the owner a waiting picture is waiting, and for AI status %s whether a tool looked",
     async (status, sentence) => {
