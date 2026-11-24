@@ -246,9 +246,13 @@ export class TwoStepSignInService {
       summary: SIGN_IN_REFUSAL,
       changes: { via: "sign-in" },
       ...(user ? { user, entity: { type: "User", id: user.id } } : {}),
-      // The reason is in the key: an anonymous "no-challenge" must not hide the
-      // "still-locked" of a person who proved their password.
-      ...(sampled ? { sampled: true, sampleBy: reason } : {}),
+      // A known account has a key of its own: an anonymous "no-challenge" must
+      // not hide the "still-locked" of a person who proved their password. The
+      // anonymous reasons share one key, so junk cannot flood the trail by
+      // varying the reason.
+      ...(sampled
+        ? { sampled: true, sampleBy: user ? "account" : "anonymous" }
+        : {}),
     });
   }
 }
