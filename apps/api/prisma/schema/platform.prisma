@@ -33,7 +33,8 @@ model User {
   createdAt    DateTime  @default(now()) @db.Timestamptz(3)
   updatedAt    DateTime  @updatedAt @db.Timestamptz(3)
 
-  refreshTokens RefreshToken[]
+  refreshTokens   RefreshToken[]
+  profilePictures ProfilePicture[]
 
   @@index([role])
 }
@@ -68,6 +69,91 @@ model RefreshToken {
   @@index([familyId])
   @@index([userId])
   @@index([expiresAt])
+}
+
+enum ProfilePictureStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  REMOVED
+}
+
+/// Why a REMOVED picture ended. Null in every other status.
+enum ProfilePictureRemoval {
+  WITHDRAWN
+  REPLACED_BY_UPLOAD
+  REPLACED_BY_APPROVAL
+  TAKEN_DOWN
+}
+
+/// What became of the AI check. CHECKED: a real model answered. NOT_ALLOWED:
+/// the data rule refused, nothing was sent. NOT_RUN: allowed but no usable
+/// answer came (timeout, failure, or only the mock answered).
+enum ProfilePictureAiStatus {
+  CHECKED
+  NOT_ALLOWED
+  NOT_RUN
+}
+
+enum ProfilePictureAiVerdict {
+  LOOKS_FINE
+  NEEDS_A_CLOSER_LOOK
+}
+
+/// One profile picture a person sent. A row is kept for ever (who, when, why
+/// and the hash); the picture itself is kept only while it is PENDING or
+/// APPROVED. A person has at most one PENDING and one APPROVED row, held by two
+/// partial unique indexes in the migration.
+model ProfilePicture {
+  id              String                   @id @default(uuid(7)) @db.Uuid
+  userId          String                   @db.Uuid
+  status          ProfilePictureStatus     @default(PENDING)
+  /// Set when status is REMOVED, and only then.
+  removal         ProfilePictureRemoval?
+  /// Where the cleaned JPEG is stored: profile-pictures/<userId>/<random uuid>.jpg
+  objectKey       String                   @unique
+  /// Set when the stored object has been deleted. A REJECTED or REMOVED row
+  /// with this still null is waiting for the sweep.
+  objectDeletedAt DateTime?                @db.Timestamptz(3)
+  /// Size of the cleaned file, not of what was received.
+  byteSize        Int
+  /// SHA-256 of the cleaned file, 64 lower case hex characters. It is also the ETag.
+  sha256          String
+  /// Pixels on each side (the picture is square).
+  width           Int
+  progressive     Boolean
+  aiStatus        ProfilePictureAiStatus
+  /// The policy rule id when NOT_ALLOWED; "timeout", "failed" or "mock" when
+  /// NOT_RUN; else null.
+  aiWhy           String?
+  aiVerdict       ProfilePictureAiVerdict?
+  /// Codes from PICTURE_CONCERNS in @orderpilot/shared. Empty unless the AI named some.
+  aiConcerns      String[]
+  /// The model's note, at most 200 characters. Shown to reviewers as text only.
+  aiNote          String?
+  createdAt       DateTime                 @default(now()) @db.Timestamptz(3)
+  /// Set only when the upload came from a demo session: that sign-in's family
+  /// (AuthContext.sessionId). A PENDING row with it is shown only to that
+  /// session and to reviewers. Null for every normal account.
+  sessionFamilyId String?                  @db.Uuid
+  /// The reviewer who approved or rejected it. No relation: the audit trail
+  /// keeps the name, and a disabled reviewer must not block anything.
+  decidedById     String?                  @db.Uuid
+  decidedAt       DateTime?                @db.Timestamptz(3)
+  /// From PICTURE_REJECTION_REASONS (REJECTED) or PICTURE_TAKE_DOWN_REASONS (TAKEN_DOWN).
+  reasonCode      String?
+  /// The reviewer's note to the owner, at most 140 characters.
+  reasonNote      String?
+  removedAt       DateTime?                @db.Timestamptz(3)
+  /// Who ended it: the owner (WITHDRAWN), the actor of the upload or approval
+  /// that replaced it, or the reviewer who took it down.
+  removedById     String?                  @db.Uuid
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+  @@index([userId, createdAt])
 }
 
 /// Which role holds which permission. The names come from @orderpilot/shared;
