@@ -235,7 +235,9 @@ test.describe("Scroll areas show which side has more: the Orders board at tablet
           box.left -
           el.clientLeft +
           el.scrollLeft;
-        const target = right - el.clientWidth + past;
+        // The column's right edge, at this scroll position, is `past` px
+        // beyond the visible box's right edge.
+        const target = right - el.clientWidth - past;
         if (target > 0 && target <= el.scrollWidth - el.clientWidth) {
           el.scrollTo({ left: target, top: 0, behavior: "instant" });
           return opener.getAttribute("data-peek-opener");
