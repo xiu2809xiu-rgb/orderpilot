@@ -18,7 +18,7 @@ import {
 import { RecoveryCodeField } from "./RecoveryCodeField";
 import { TwoStepAlert } from "./TwoStepAlert";
 
-interface TwoStepStepProps {
+export interface TwoStepStepProps {
   idPrefix: string;
   /** The code was right and the green hold is over. The parent adopts the session. */
   onVerified: (response: TwoStepVerifyResponse) => void;

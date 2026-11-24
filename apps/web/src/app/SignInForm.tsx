@@ -1,6 +1,6 @@
 import type { Role, Session } from "@orderpilot/shared";
 import { ChevronDown } from "lucide-react";
-import { lazy, Suspense, useId, useState } from "react";
+import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -11,16 +11,10 @@ import { DemoRoles } from "./signin/DemoRoles";
 import { PasswordForm } from "./signin/PasswordForm";
 import { RolesPlaceholder } from "./signin/RolesPlaceholder";
 import { SignInFailure, type Failure } from "./signin/SignInFailure";
-import { TwoStepFallback } from "./signin/TwoStepFallback";
+import { SecondStepSlot } from "./signin/SecondStepSlot";
 import { useAuthOptions } from "./signin/useAuthOptions";
 import { useSecondStep } from "./signin/useSecondStep";
 import "./signin/preloadWords";
-
-// The second step, its field and their styles load only when a password
-// sign-in asks for one: the sign-in page's first load stays small.
-const TwoStepStep = lazy(() =>
-  import("./signin/TwoStepStep").then((m) => ({ default: m.TwoStepStep })),
-);
 
 interface SignInFormProps {
   /** Prefills the email, such as the person whose session just ended. */
@@ -168,16 +162,14 @@ export function SignInForm({
         </div>
       </div>
       {step.open ? (
-        <Suspense fallback={<TwoStepFallback label={t("twoStep.loading")} />}>
-          <TwoStepStep
-            idPrefix={idPrefix}
-            onVerified={step.verified}
-            onEnded={step.closeStep}
-            onBack={() => {
-              step.closeStep(null);
-            }}
-          />
-        </Suspense>
+        <SecondStepSlot
+          idPrefix={idPrefix}
+          onVerified={step.verified}
+          onEnded={step.closeStep}
+          onBack={() => {
+            step.closeStep(null);
+          }}
+        />
       ) : null}
       <p role="status" className="sr-only">
         {pending ? t("login.submitting") : ""}
