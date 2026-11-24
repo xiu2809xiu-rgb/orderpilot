@@ -55,7 +55,7 @@ export function PictureCard() {
               // their own card, and the only place that draws a pending one.
               pictureId={picture.pending?.id ?? picture.approved?.id}
               className="size-20"
-              textClassName="fs-24"
+              textClassName="fs-20"
               onImageStatus={setImageStatus}
             />
             <PictureStatus

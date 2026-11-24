@@ -12,7 +12,7 @@ export type ImageStatus = "idle" | "loading" | "loaded" | "error";
 
 interface UserAvatarProps {
   name: string;
-  /** The id of an approved picture. Never pass a pending one: only its owner and the reviewers may see that. */
+  /** The id of an approved picture. Pass a pending one only where the viewer is its owner or a reviewer: the server answers 404 to anyone else. */
   pictureId?: string | null;
   className?: string;
   /** The size of the initials. */
