@@ -30,6 +30,7 @@ const ALLOWED_FILES = new Set([
   "app/pages/settings/AvailabilityRefused.tsx",
   "components/parts/UserAvatar.tsx",
   "test/fixtures.ts",
+  "test/server.ts",
 ]);
 const ALLOWED_FOLDERS = [
   "components/kit/availability-picker/",
