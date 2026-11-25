@@ -2,16 +2,16 @@
 
 Rendered from [`scripts/github/data/backlog.json`](../../scripts/github/data/backlog.json) by `node scripts/github/render-docs.mjs`. Change the data, not this file. The same data seeds the issues. The board shows where each story stands.
 
-There are 9 epics and 156 stories. Estimates are story points: a first guess, for the team to change at planning.
+There are 9 epics and 158 stories. Estimates are story points: a first guess, for the team to change at planning.
 
 ## Epics
 
 | Epic   | Title                             | Area                                    | Stories | Points |
 | ------ | --------------------------------- | --------------------------------------- | ------- | ------ |
-| Epic P | The platform base                 | `area: 1 document AI and integration`   | 93      | 531    |
+| Epic P | The platform base                 | `area: 1 document AI and integration`   | 94      | 532    |
 | Epic A | Document intake and AI extraction | `area: 1 document AI and integration`   | 8       | 55     |
 | Epic B | Master data and Business Central  | `area: 1 document AI and integration`   | 7       | 35     |
-| Epic C | Order workflows and approvals     | `area: 2 order workflows and approvals` | 9       | 50     |
+| Epic C | Order workflows and approvals     | `area: 2 order workflows and approvals` | 10      | 55     |
 | Epic D | Checks, the tracker and insights  | `area: 3 checks tracker and insights`   | 5       | 31     |
 | Epic E | AI with a person in the loop      | `area: 1 document AI and integration`   | 13      | 73     |
 | Epic F | Financial controls and governance | `area: 4 controls and monitoring`       | 10      | 43     |
@@ -98,7 +98,7 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | P-47  | Document form                                                      | must     | 8      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-48  | Lines grid                                                         | must     | 8      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-49  | New order and draft editing                                        | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
-| P-50  | Submit, cancel and copy an order                                   | must     | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
+| P-50  | Cancel and copy an order                                           | must     | 3      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | P-51  | The one order page                                                 | must     | 8      | `area: 1 document AI and integration`   | M3 AI-assisted coding, M4 best practices                       |
 | P-52  | Demo documents                                                     | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | P-53  | Mock AI and the review fields                                      | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
@@ -147,7 +147,7 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | P-86  | Synthetic data from the briefing                                   | must     | 13     | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | P-87  | Drafts that a person sends                                         | must     | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | P-88  | Customer check on intake and the new-customer card                 | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
-| P-89  | PO versions                                                        | must     | 5      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-89  | PO versions                                                        | must     | 8      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-90  | The short-stock revision request                                   | must     | 3      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | P-91  | The compare screen                                                 | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | P-92  | Document cabinet: filing and search                                | must     | 8      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
@@ -162,6 +162,8 @@ Whoever is free pulls the next ready story from the top: Must, then Should, then
 | P-101 | Vendor POs                                                         | must     | 5      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | P-106 | Three visual directions                                            | must     | 8      | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-107 | Roll the picked direction onto the shell and templates             | must     | 8      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-113 | The PO version contract                                            | must     | 2      | `area: 1 document AI and integration`   | M4 best practices                                              |
+| P-114 | Submit an order                                                    | must     | 3      | `area: 1 document AI and integration`   | M2 GRS by design, M4 best practices                            |
 | C-5   | Area 2 polish left out of the base                                 | should   | 3      | `area: 2 order workflows and approvals` | M4 best practices                                              |
 | P-23  | The 3D order constellation                                         | should   | 13     | `area: 1 document AI and integration`   | M4 best practices                                              |
 | P-29  | A unit coverage threshold on domain logic                          | should   | 2      | `area: 1 document AI and integration`   | M4 best practices                                              |
@@ -1292,21 +1294,20 @@ Acceptance criteria:
 - A Playwright test: an allowed role creates, edits and voids a record, and a role without the permission sees no button and gets a 403 from the server.
 - Check: prompt 003 section 4, for every role it touches, at 1440 by 900 and 390 by 844.
 
-### P-50: Submit, cancel and copy an order
+### P-50: Cancel and copy an order
 
-The rest of an order's life on area 1's side. Prompt 004 section 4.
+The rest of an order's life on area 1's side, after P-114's submit. Prompt 004 section 4.
 
 - **Area:** `area: 1 document AI and integration`
 - **Priority:** must
-- **Estimate:** 5 points
+- **Estimate:** 3 points
 - **Requirements:** M2 GRS by design, M4 best practices
 - **Branch:** `feat/order-actions`
-- **Planned for:** Sprint 02 (W3)
-- **Depends on:** P-49
+- **Planned for:** Sprint 07 (W8)
+- **Depends on:** P-49, P-114
 
 Acceptance criteria:
 
-- Submit moves the order's capture state and calls an `OrderHandoff` port, bound to a mock. Azri binds it after C-2, and no transition rule is written here.
 - A submitted order then appears in the tracker and the home page's flow, from a fixture state named as a fixture.
 - Cancel asks for a reason, works on a draft or a submitted order, sample orders included, and hard-deletes nothing.
 - Copy opens a new draft from any order.
@@ -1322,7 +1323,7 @@ One page for an order, with each area's section in its owner's folder. Prompt 00
 - **Estimate:** 8 points
 - **Requirements:** M3 AI-assisted coding, M4 best practices
 - **Branch:** `feat/one-order-page`
-- **Planned for:** Sprint 02 (W3)
+- **Planned for:** Sprint 07 (W8)
 - **Depends on:** P-50
 
 Acceptance criteria:
@@ -2208,6 +2209,28 @@ Acceptance criteria:
 - Reduced motion shows the final value at once.
 - Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark, with a short capture of the motion.
 
+### P-114: Submit an order
+
+A draft becomes a submitted order and is handed to the workflow. The first half of P-50, and what P-89 revises.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 3 points
+- **Requirements:** M2 GRS by design, M4 best practices
+- **Branch:** `feat/area1-order-submit`
+- **Planned for:** Sprint 06 (W7)
+- **Depends on:** P-49, P-113
+
+Acceptance criteria:
+
+- Submit moves a draft's capture state to submitted, guarded on the edit token, and calls `OrderHandoff.submitted` inside the same transaction. No transition rule is written here.
+- A refusal from the workflow's side leaves the order a draft, and the person sees its words.
+- A submitted order's page says so. It says plainly when the order is not in the workflow yet, and never reads as approved.
+- Submit is audited, with no price in the trail.
+- `.http` requests and API tests for 401, 403, 404, a stale edit token and a second submit.
+- The Playwright test from P-49 covers Submit.
+- Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark.
+
 ## Epic A: Document intake and AI extraction
 
 Email or upload; classification; extraction with a confidence score and a source link per field; layout mappings that AI proposes and a person approves; the document cabinet and audit packs.
@@ -2603,19 +2626,19 @@ A revised PO is the next version of the same order, shown with its differences.
 
 - **Area:** `area: 1 document AI and integration`
 - **Priority:** must
-- **Estimate:** 5 points
+- **Estimate:** 8 points
 - **Requirements:** M4 best practices
 - **Branch:** `feat/area1-po-versions`
-- **Planned for:** Sprint 06 (W7)
-- **Depends on:** P-49, P-51, P-55, P-107
+- **Planned for:** Sprint 06 (W7) and Sprint 07 (W8)
+- **Depends on:** P-49, P-107, P-113, P-114
 
 Acceptance criteria:
 
-- A PO with the same customer and PO number becomes the next version of that order only when a person confirms it revises the existing order. Otherwise the 409 stays the answer to a re-sent PO, and an ADR amends ADR 0047's duplicate rule.
+- A PO with the same customer and PO number as a submitted order becomes that order's next PO version only when a person confirms it revises the order. Otherwise the 409 stays the answer to a re-sent PO, and an ADR amends ADR 0047's duplicate rule.
 - The order page lists every version and shows the differences between two, field by field and line by line.
 - An earlier version stays readable and marked superseded, and nothing is deleted.
-- The version number has its own name, because `version` in `packages/shared/src/orders.ts` is already the edit token.
-- Each check result shows which version it ran on.
+- The version number is `poVersionNo` (P-113), because `version` in `packages/shared/src/orders.ts` is already the edit token.
+- A check result can hold the PO version it ran on. Until area 3's engine runs on a stored order it holds none, and the page says so.
 - `.http` requests and API tests for 401, 403, 404, validation and a third version.
 - Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark.
 
@@ -2680,6 +2703,27 @@ Acceptance criteria:
 - The vendor's usual lead time shows beside the dates.
 - `.http` requests and API tests for 401, 403, 404 and validation.
 - Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark.
+
+### P-113: The PO version contract
+
+The name of the PO version number, and the one port through which an order made on the form is handed to the workflow. Area 2 builds against it before P-89 exists.
+
+- **Area:** `area: 1 document AI and integration`
+- **Priority:** must
+- **Estimate:** 2 points
+- **Requirements:** M4 best practices
+- **Branch:** `feat/area1-po-version-contract`
+- **Planned for:** Sprint 05 (W6)
+- **Depends on:** P-49
+
+Acceptance criteria:
+
+- An ADR names the PO version number `poVersionNo` (`version` stays the edit token) and fixes the `OrderHandoff` contract: its two calls, what each hands over and what it leaves out, that a call runs inside area 1's transaction, that a refusal rolls the write back, that a repeated call is safe, and what an order with no workflow answers. It says the calls are made by P-114 and by P-89, and that ADR 0047's duplicate rule is amended only when P-89 merges.
+- `OrderHandoff` is an abstract class in `apps/api/src/modules/orders/domain/` with `submitted` and `poVersionConfirmed`, each taking a typed fact.
+- A stand-in is bound in `OrdersModule`. It changes no status and says so in its log line.
+- A contract test that any implementation can run: a repeated call is safe, an order with no workflow answers "nothing to do" and does not throw, and a refusal is a `DomainError`. It runs against the stand-in.
+- Azri is asked to review the port and the ADR.
+- Nothing is claimed as built beyond the port and its stand-in: no table, no route, no shared schema, and no caller yet.
 
 ## Epic D: Checks, the tracker and insights
 
