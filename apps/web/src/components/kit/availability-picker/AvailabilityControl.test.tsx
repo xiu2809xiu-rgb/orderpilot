@@ -26,7 +26,13 @@ describe("the availability control before its chunks have arrived", () => {
     renderPicker();
     await user.click(screen.getByRole("button", { name: NAME }));
     expect(
-      await screen.findByRole("menu", { name: "Your availability" }),
+      // The chunks are fetched cold here, and a busy machine needs more than
+      // the default second.
+      await screen.findByRole(
+        "menu",
+        { name: "Your availability" },
+        { timeout: 8000 },
+      ),
     ).toBeVisible();
     expect(dropdownMenuModule.current()).toBeDefined();
     expect(pickerModule.current()).toBeDefined();

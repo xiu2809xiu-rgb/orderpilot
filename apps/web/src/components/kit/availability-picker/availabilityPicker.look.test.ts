@@ -63,8 +63,13 @@ describe("the pill's sheet", () => {
 
   it("has a coarse-pointer block with 44 px boxes and the words under the orbs", () => {
     const block = atRule(picker, "@media (pointer: coarse), (hover: none)");
-    expect(block).toContain("44");
-    expect(block).toContain("80px");
+    // Every box an item can have on a finger is 44 px or more: the orb is 44
+    // and the item is the orb with its words.
+    const item = must(/\.ap-item\s*{([^}]*)}/.exec(block))[1] ?? "";
+    for (const size of item.matchAll(/(?:inline|block)-size: (\d+)px/g)) {
+      expect(Number(size[1])).toBeGreaterThanOrEqual(44);
+    }
+    expect(item).toContain("80px");
     expect(block).toContain("min(264px, calc(100vw - 16px))");
     expect(block).toMatch(/\.ap-chip,\s*\.ap-measure\s*{\s*display: none/);
   });
@@ -120,6 +125,12 @@ describe("the dot's sheet", () => {
     expect(block).toMatch(
       /\.ap-trigger\[data-skin="ring"\]\s*{\s*inline-size: 44px;\s*block-size: 44px;/,
     );
+  });
+
+  it("sets no position on the dot or the button, so a caller's absolute utility is not beaten by this unlayered sheet", () => {
+    for (const rule of [/\.ap-dot\s*{([^}]*)}/, /\.ap-trigger\s*{([^}]*)}/]) {
+      expect(must(rule.exec(dot))[1]).not.toMatch(/\bposition:/);
+    }
   });
 
   it("keeps the 24 px of WCAG 2.5.8 on a fine pointer", () => {
