@@ -52,6 +52,16 @@ describe("UserAvatar with an availability", () => {
     },
   );
 
+  it("puts the dot's centre 90 percent across and 10 percent down, which clears two initials", () => {
+    const { container } = render(
+      <UserAvatar name="Mei Tan" className="size-8" availability={dnd} />,
+    );
+    const dot = must(container.querySelector(".ap-dot"));
+    expect(dot).toHaveClass("top-[10%]", "left-[90%]");
+    expect(dot).not.toHaveClass("top-[18%]");
+    expect(dot).not.toHaveClass("left-[82%]");
+  });
+
   it("puts the words outside the aria-hidden avatar as screen-reader-only text", () => {
     const { container } = render(
       <UserAvatar name="Mei Tan" className="size-8" availability={dnd} />,

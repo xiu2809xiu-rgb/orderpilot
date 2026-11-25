@@ -82,7 +82,7 @@ export function UserAvatar({
       {avatar}
       <AvailabilityDot
         value={shown.value}
-        className="absolute top-[18%] left-[82%] -translate-x-1/2 -translate-y-1/2"
+        className="absolute top-[10%] left-[90%] -translate-x-1/2 -translate-y-1/2"
         style={{
           inlineSize: "clamp(14px, 36%, 24px)",
           blockSize: "auto",

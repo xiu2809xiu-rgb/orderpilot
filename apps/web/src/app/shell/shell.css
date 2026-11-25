@@ -124,20 +124,23 @@
 /* The signed-in person's row. The availability button is laid over the corner
    of the avatar: a sibling of the account menu's button, never inside it. The
    avatar is 2 rem in a 3 rem row, so its top is 0.5 rem, and the dot's centre
-   is 82 percent across it and 18 percent down. */
+   is 90 percent across it and 10 percent down: further out, a dot centred at
+   82 and 18 covered the top of the second initial, and this one clears two
+   initials and still overlaps the avatar's circle. In the rail the avatar is
+   centred, so the same place is 0.40 of its width from the middle. */
 .dx-person-row {
   position: relative;
 }
 .dx-person-dot {
   --av: 2rem;
   position: absolute;
-  inset-inline-start: calc(var(--dx-entry-pad) + var(--av) * 0.82);
-  top: calc((3rem - var(--av)) / 2 + var(--av) * 0.18);
+  inset-inline-start: calc(var(--dx-entry-pad) + var(--av) * 0.9);
+  top: calc((3rem - var(--av)) / 2 + var(--av) * 0.1);
   translate: -50% -50%;
 }
 /* In the 64 px rail the avatar is centred. */
 .dx-rail .dx-person-dot {
-  inset-inline-start: calc(50% + var(--av) * 0.32);
+  inset-inline-start: calc(50% + var(--av) * 0.4);
 }
 /* The row keeps its hover while the pointer is on the dot. */
 .dx-person-row:has(.dx-person-dot:hover) .dx-person {
@@ -161,8 +164,8 @@
      46 by 48 px. Settings carries the control. */
   .dx-rail .dx-person-dot {
     pointer-events: none;
-    inset-inline-start: calc(50% + var(--av) * 0.32);
-    top: calc((3rem - var(--av)) / 2 + var(--av) * 0.18);
+    inset-inline-start: calc(50% + var(--av) * 0.4);
+    top: calc((3rem - var(--av)) / 2 + var(--av) * 0.1);
     translate: -50% -50%;
     inline-size: 24px;
     block-size: 24px;

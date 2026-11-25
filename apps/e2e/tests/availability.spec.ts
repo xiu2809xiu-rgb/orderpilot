@@ -359,6 +359,92 @@ test("the caption follows the choice", async ({ page }) => {
   await expect(chip).toHaveText("Focusing");
 });
 
+interface Ink {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+}
+
+/**
+ * The box of the initials' glyphs, not the text's line box: the line box is
+ * taller than the letters (it holds the font's ascent and descent), so a dot
+ * that clears the letters would still "reach" it. The text's own box gives the
+ * baseline and the left edge; the canvas gives how far the glyphs reach from
+ * them.
+ */
+async function initialsInk(avatar: Locator): Promise<Ink> {
+  return avatar.evaluate(async (root) => {
+    await document.fonts.ready;
+    const holder = root.querySelector('[data-slot="avatar-fallback"]');
+    const text = holder?.textContent.trim() ?? "";
+    const node = holder?.firstChild;
+    if (!holder || !node || text === "") throw new Error("no initials");
+    const range = document.createRange();
+    range.selectNodeContents(holder);
+    const line = range.getBoundingClientRect();
+    const style = getComputedStyle(holder);
+    const context = document.createElement("canvas").getContext("2d");
+    if (!context) throw new Error("no canvas");
+    context.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+    const m = context.measureText(text);
+    const baseline = line.top + m.fontBoundingBoxAscent;
+    return {
+      left: line.left - m.actualBoundingBoxLeft,
+      right: line.left + m.actualBoundingBoxRight,
+      top: baseline - m.actualBoundingBoxAscent,
+      bottom: baseline + m.actualBoundingBoxDescent,
+    };
+  });
+}
+
+/** The shortest distance from a point to a box. */
+function distanceTo(box: Ink, x: number, y: number): number {
+  const dx = Math.max(box.left - x, 0, x - box.right);
+  const dy = Math.max(box.top - y, 0, y - box.bottom);
+  return Math.hypot(dx, dy);
+}
+
+test("the dot on the account avatar clears the initials in the open panel and in the rail, and still overlaps the avatar", async ({
+  page,
+}) => {
+  await signIn(page, SETTER);
+  await page.goto("/");
+  const avatar = page
+    .getByRole("button", { name: /^Account menu/ })
+    .locator('[data-slot="avatar"]');
+  const check = async (where: string): Promise<void> => {
+    const ink = await initialsInk(avatar);
+    const dotBox = await dot(page).locator(".ap-dot").boundingBox();
+    const avatarBox = await avatar.boundingBox();
+    expect(dotBox, `the dot has a box ${where}`).not.toBeNull();
+    expect(avatarBox, `the avatar has a box ${where}`).not.toBeNull();
+    if (!dotBox || !avatarBox) return;
+    // The dot's circle with its 2 px rim.
+    const x = dotBox.x + dotBox.width / 2;
+    const y = dotBox.y + dotBox.height / 2;
+    const radius = dotBox.width / 2 + 2;
+    expect(
+      distanceTo(ink, x, y),
+      `the dot and its rim clear the initials ${where}`,
+    ).toBeGreaterThan(radius);
+    // It still sits on the avatar's circle: the two circles overlap.
+    const across = Math.hypot(
+      x - (avatarBox.x + avatarBox.width / 2),
+      y - (avatarBox.y + avatarBox.height / 2),
+    );
+    expect(across, `the dot still overlaps the avatar ${where}`).toBeLessThan(
+      avatarBox.width / 2 + radius,
+    );
+  };
+  await expect(dot(page)).toBeVisible();
+  await check("in the open panel");
+  await page.getByRole("button", { name: "Collapse the panel" }).click();
+  await expect(dot(page)).toBeVisible();
+  await check("in the rail");
+  await page.getByRole("button", { name: "Expand the panel" }).click();
+});
+
 test("reduced motion removes the pill's animation", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await signIn(page, SETTER);

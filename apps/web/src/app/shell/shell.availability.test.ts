@@ -34,11 +34,20 @@ function rule(block: string, selector: string): string {
 }
 
 describe("the availability button's place in the side panel", () => {
-  it("is centred on the avatar's corner for a mouse: 82 percent across and 18 percent down", () => {
+  it("is centred on the avatar's corner for a mouse: 90 percent across and 10 percent down, which clears two initials", () => {
     const base = /\.dx-person-dot\s*{([^}]*)}/.exec(css)?.[1] ?? "";
-    expect(base).toContain("var(--av) * 0.82");
-    expect(base).toContain("var(--av) * 0.18");
+    expect(base).toContain("var(--av) * 0.9)");
+    expect(base).toContain("var(--av) * 0.1)");
     expect(base).toContain("translate: -50% -50%");
+  });
+
+  it("is 0.40 of the avatar's width from the middle in the rail, for a mouse and for a finger", () => {
+    const base = rule(css, ".dx-rail .dx-person-dot");
+    expect(base).toContain("calc(50% + var(--av) * 0.4)");
+    const coarse = atRule(css, "@media (pointer: coarse)", ".dx-person-dot");
+    const rail = rule(coarse, ".dx-rail .dx-person-dot");
+    expect(rail).toContain("calc(50% + var(--av) * 0.4)");
+    expect(rail).toContain("var(--av) * 0.1)");
   });
 
   it("leaves the avatar's centre to the account button for a finger: a 44 px box that starts 8 px inside the avatar's right edge", () => {
