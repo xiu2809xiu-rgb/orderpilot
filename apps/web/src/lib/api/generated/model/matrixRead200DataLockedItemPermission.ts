@@ -34,4 +34,5 @@ export const MatrixRead200DataLockedItemPermission = {
   taskscomplete: 'tasks.complete',
   maskingcustomerNote: 'masking.customerNote',
   sprroute: 'spr.route',
+  sparkuse: 'spark.use',
 } as const;

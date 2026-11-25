@@ -154,6 +154,7 @@ describe("production safety rules key off APP_ENV", () => {
     APP_ENV: "production",
     CORS_ORIGINS: "https://app.example.com",
     JWT_SECRET: "a-long-random-secret-for-this-test-only-0123456789",
+    DATA_ORIGIN: "synthetic",
   });
 
   it("refuses the public default JWT secret on a demo stack, and allows it locally", () => {
@@ -206,6 +207,35 @@ describe("production safety rules key off APP_ENV", () => {
     expect(
       messageFor({ ...production, CORS_ORIGINS: "http://app.example.com" }),
     ).toContain("https");
+  });
+
+  it("requires DATA_ORIGIN when APP_ENV is production, so an unset line never reads as synthetic", () => {
+    const withoutOrigin = Object.fromEntries(
+      Object.entries(production).filter(([name]) => name !== "DATA_ORIGIN"),
+    );
+    expect(messageFor(withoutOrigin)).toContain("DATA_ORIGIN");
+    expect(messageFor({ ...withoutOrigin, DATA_ORIGIN: "" })).toContain(
+      "DATA_ORIGIN",
+    );
+    expect(messageFor({ ...withoutOrigin, DATA_ORIGIN: "  " })).toContain(
+      "DATA_ORIGIN",
+    );
+    expect(AppConfig.fromEnv(production).dataOrigin).toBe("synthetic");
+    expect(
+      AppConfig.fromEnv({ ...production, DATA_ORIGIN: "real" }).dataOrigin,
+    ).toBe("real");
+  });
+
+  it("does not require DATA_ORIGIN away from production", () => {
+    expect(() => AppConfig.fromEnv(valid)).not.toThrow();
+    expect(() =>
+      AppConfig.fromEnv({
+        ...valid,
+        APP_ENV: "demo",
+        COOKIE_SECURE: "true",
+        JWT_SECRET: "a-long-random-secret-for-this-test-only-0123456789",
+      }),
+    ).not.toThrow();
   });
 
   it("does not treat NODE_ENV=production as APP_ENV=production", () => {

@@ -58,6 +58,13 @@ const GROUPS: readonly GroupDef[] = [
     ],
   },
   {
+    id: "spark",
+    style: "phrases",
+    // Asking Spark only opens the conversation: what an answer shows is still
+    // decided by the permission each of its tools needs (ADR 0060).
+    permissions: ["spark.use"],
+  },
+  {
     id: "payments",
     style: "phrases",
     permissions: ["payments.confirm", "payments.post"],

@@ -42,7 +42,8 @@ interface RequestInfo {
 /**
  * The two AI routes. Neither forwards free text to a model: the status reads
  * the settings' public face, and the probe sends one fixed prompt of ours.
- * A feature that needs a model adds its own route in its own story.
+ * A feature that needs a model adds its own route in its own story, as
+ * Spark's does.
  */
 @ApiTags("AI")
 @Controller("ai")

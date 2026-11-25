@@ -109,6 +109,7 @@ describe("Swagger", () => {
       DEMO_PASSWORD: undefined,
       COOKIE_SECURE: "true",
       JWT_SECRET: "a-long-random-secret-for-this-test-only-0123456789",
+      DATA_ORIGIN: "synthetic",
     });
     try {
       const res = await request(prod.app.getHttpServer()).get("/api/docs");

@@ -170,7 +170,7 @@ export function useMatrixRead<TData = Awaited<ReturnType<typeof matrixRead>>, TE
  */
 export const matrixSetPermission = (
     role: 'SYSTEM_ADMIN' | 'PRODUCT_MANAGER' | 'APPROVER' | 'SUPPORT' | 'WAREHOUSE' | 'FINANCE' | 'LOGISTICS' | 'MANAGEMENT' | 'AUDITOR',
-    permission: 'users.read' | 'users.manage' | 'roles.read' | 'roles.manage' | 'settings.manage' | 'audit.read' | 'aiUsage.read' | 'documents.read' | 'documents.upload' | 'orders.read' | 'orders.create' | 'orders.edit' | 'tracker.read' | 'exceptions.read' | 'insights.read' | 'approvals.decide' | 'payments.confirm' | 'payments.post' | 'workflows.read' | 'spr.read' | 'workflows.inboxes.any' | 'tasks.complete' | 'masking.customerNote' | 'spr.route',
+    permission: 'users.read' | 'users.manage' | 'roles.read' | 'roles.manage' | 'settings.manage' | 'audit.read' | 'aiUsage.read' | 'documents.read' | 'documents.upload' | 'orders.read' | 'orders.create' | 'orders.edit' | 'tracker.read' | 'exceptions.read' | 'insights.read' | 'approvals.decide' | 'payments.confirm' | 'payments.post' | 'workflows.read' | 'spr.read' | 'workflows.inboxes.any' | 'tasks.complete' | 'masking.customerNote' | 'spr.route' | 'spark.use',
     matrixSetPermissionBody: MatrixSetPermissionBody,
  signal?: AbortSignal
 ) => {
@@ -188,7 +188,7 @@ export const matrixSetPermission = (
 
 
 export const getMatrixSetPermissionQueryKey = (role: 'SYSTEM_ADMIN' | 'PRODUCT_MANAGER' | 'APPROVER' | 'SUPPORT' | 'WAREHOUSE' | 'FINANCE' | 'LOGISTICS' | 'MANAGEMENT' | 'AUDITOR',
-    permission: 'users.read' | 'users.manage' | 'roles.read' | 'roles.manage' | 'settings.manage' | 'audit.read' | 'aiUsage.read' | 'documents.read' | 'documents.upload' | 'orders.read' | 'orders.create' | 'orders.edit' | 'tracker.read' | 'exceptions.read' | 'insights.read' | 'approvals.decide' | 'payments.confirm' | 'payments.post' | 'workflows.read' | 'spr.read' | 'workflows.inboxes.any' | 'tasks.complete' | 'masking.customerNote' | 'spr.route',
+    permission: 'users.read' | 'users.manage' | 'roles.read' | 'roles.manage' | 'settings.manage' | 'audit.read' | 'aiUsage.read' | 'documents.read' | 'documents.upload' | 'orders.read' | 'orders.create' | 'orders.edit' | 'tracker.read' | 'exceptions.read' | 'insights.read' | 'approvals.decide' | 'payments.confirm' | 'payments.post' | 'workflows.read' | 'spr.read' | 'workflows.inboxes.any' | 'tasks.complete' | 'masking.customerNote' | 'spr.route' | 'spark.use',
     matrixSetPermissionBody?: MatrixSetPermissionBody,) => {
     return [
     'PUT', `/api/v1/governance/matrix/${role}/permissions/${permission}`, matrixSetPermissionBody
@@ -197,7 +197,7 @@ export const getMatrixSetPermissionQueryKey = (role: 'SYSTEM_ADMIN' | 'PRODUCT_M
 
 
 export const getMatrixSetPermissionQueryOptions = <TData = Awaited<ReturnType<typeof matrixSetPermission>>, TError = ErrorType<MatrixSetPermission403>>(role: 'SYSTEM_ADMIN' | 'PRODUCT_MANAGER' | 'APPROVER' | 'SUPPORT' | 'WAREHOUSE' | 'FINANCE' | 'LOGISTICS' | 'MANAGEMENT' | 'AUDITOR',
-    permission: 'users.read' | 'users.manage' | 'roles.read' | 'roles.manage' | 'settings.manage' | 'audit.read' | 'aiUsage.read' | 'documents.read' | 'documents.upload' | 'orders.read' | 'orders.create' | 'orders.edit' | 'tracker.read' | 'exceptions.read' | 'insights.read' | 'approvals.decide' | 'payments.confirm' | 'payments.post' | 'workflows.read' | 'spr.read' | 'workflows.inboxes.any' | 'tasks.complete' | 'masking.customerNote' | 'spr.route',
+    permission: 'users.read' | 'users.manage' | 'roles.read' | 'roles.manage' | 'settings.manage' | 'audit.read' | 'aiUsage.read' | 'documents.read' | 'documents.upload' | 'orders.read' | 'orders.create' | 'orders.edit' | 'tracker.read' | 'exceptions.read' | 'insights.read' | 'approvals.decide' | 'payments.confirm' | 'payments.post' | 'workflows.read' | 'spr.read' | 'workflows.inboxes.any' | 'tasks.complete' | 'masking.customerNote' | 'spr.route' | 'spark.use',
     matrixSetPermissionBody: MatrixSetPermissionBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof matrixSetPermission>>, TError, TData>>, }
 ) => {
 
@@ -222,7 +222,7 @@ export type MatrixSetPermissionQueryError = ErrorType<MatrixSetPermission403>
 
 export function useMatrixSetPermission<TData = Awaited<ReturnType<typeof matrixSetPermission>>, TError = ErrorType<MatrixSetPermission403>>(
  role: 'SYSTEM_ADMIN' | 'PRODUCT_MANAGER' | 'APPROVER' | 'SUPPORT' | 'WAREHOUSE' | 'FINANCE' | 'LOGISTICS' | 'MANAGEMENT' | 'AUDITOR',
-    permission: 'users.read' | 'users.manage' | 'roles.read' | 'roles.manage' | 'settings.manage' | 'audit.read' | 'aiUsage.read' | 'documents.read' | 'documents.upload' | 'orders.read' | 'orders.create' | 'orders.edit' | 'tracker.read' | 'exceptions.read' | 'insights.read' | 'approvals.decide' | 'payments.confirm' | 'payments.post' | 'workflows.read' | 'spr.read' | 'workflows.inboxes.any' | 'tasks.complete' | 'masking.customerNote' | 'spr.route',
+    permission: 'users.read' | 'users.manage' | 'roles.read' | 'roles.manage' | 'settings.manage' | 'audit.read' | 'aiUsage.read' | 'documents.read' | 'documents.upload' | 'orders.read' | 'orders.create' | 'orders.edit' | 'tracker.read' | 'exceptions.read' | 'insights.read' | 'approvals.decide' | 'payments.confirm' | 'payments.post' | 'workflows.read' | 'spr.read' | 'workflows.inboxes.any' | 'tasks.complete' | 'masking.customerNote' | 'spr.route' | 'spark.use',
     matrixSetPermissionBody: MatrixSetPermissionBody, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof matrixSetPermission>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof matrixSetPermission>>,
@@ -234,7 +234,7 @@ export function useMatrixSetPermission<TData = Awaited<ReturnType<typeof matrixS
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useMatrixSetPermission<TData = Awaited<ReturnType<typeof matrixSetPermission>>, TError = ErrorType<MatrixSetPermission403>>(
  role: 'SYSTEM_ADMIN' | 'PRODUCT_MANAGER' | 'APPROVER' | 'SUPPORT' | 'WAREHOUSE' | 'FINANCE' | 'LOGISTICS' | 'MANAGEMENT' | 'AUDITOR',
-    permission: 'users.read' | 'users.manage' | 'roles.read' | 'roles.manage' | 'settings.manage' | 'audit.read' | 'aiUsage.read' | 'documents.read' | 'documents.upload' | 'orders.read' | 'orders.create' | 'orders.edit' | 'tracker.read' | 'exceptions.read' | 'insights.read' | 'approvals.decide' | 'payments.confirm' | 'payments.post' | 'workflows.read' | 'spr.read' | 'workflows.inboxes.any' | 'tasks.complete' | 'masking.customerNote' | 'spr.route',
+    permission: 'users.read' | 'users.manage' | 'roles.read' | 'roles.manage' | 'settings.manage' | 'audit.read' | 'aiUsage.read' | 'documents.read' | 'documents.upload' | 'orders.read' | 'orders.create' | 'orders.edit' | 'tracker.read' | 'exceptions.read' | 'insights.read' | 'approvals.decide' | 'payments.confirm' | 'payments.post' | 'workflows.read' | 'spr.read' | 'workflows.inboxes.any' | 'tasks.complete' | 'masking.customerNote' | 'spr.route' | 'spark.use',
     matrixSetPermissionBody: MatrixSetPermissionBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof matrixSetPermission>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof matrixSetPermission>>,
@@ -246,7 +246,7 @@ export function useMatrixSetPermission<TData = Awaited<ReturnType<typeof matrixS
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useMatrixSetPermission<TData = Awaited<ReturnType<typeof matrixSetPermission>>, TError = ErrorType<MatrixSetPermission403>>(
  role: 'SYSTEM_ADMIN' | 'PRODUCT_MANAGER' | 'APPROVER' | 'SUPPORT' | 'WAREHOUSE' | 'FINANCE' | 'LOGISTICS' | 'MANAGEMENT' | 'AUDITOR',
-    permission: 'users.read' | 'users.manage' | 'roles.read' | 'roles.manage' | 'settings.manage' | 'audit.read' | 'aiUsage.read' | 'documents.read' | 'documents.upload' | 'orders.read' | 'orders.create' | 'orders.edit' | 'tracker.read' | 'exceptions.read' | 'insights.read' | 'approvals.decide' | 'payments.confirm' | 'payments.post' | 'workflows.read' | 'spr.read' | 'workflows.inboxes.any' | 'tasks.complete' | 'masking.customerNote' | 'spr.route',
+    permission: 'users.read' | 'users.manage' | 'roles.read' | 'roles.manage' | 'settings.manage' | 'audit.read' | 'aiUsage.read' | 'documents.read' | 'documents.upload' | 'orders.read' | 'orders.create' | 'orders.edit' | 'tracker.read' | 'exceptions.read' | 'insights.read' | 'approvals.decide' | 'payments.confirm' | 'payments.post' | 'workflows.read' | 'spr.read' | 'workflows.inboxes.any' | 'tasks.complete' | 'masking.customerNote' | 'spr.route' | 'spark.use',
     matrixSetPermissionBody: MatrixSetPermissionBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof matrixSetPermission>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
@@ -256,7 +256,7 @@ export function useMatrixSetPermission<TData = Awaited<ReturnType<typeof matrixS
 
 export function useMatrixSetPermission<TData = Awaited<ReturnType<typeof matrixSetPermission>>, TError = ErrorType<MatrixSetPermission403>>(
  role: 'SYSTEM_ADMIN' | 'PRODUCT_MANAGER' | 'APPROVER' | 'SUPPORT' | 'WAREHOUSE' | 'FINANCE' | 'LOGISTICS' | 'MANAGEMENT' | 'AUDITOR',
-    permission: 'users.read' | 'users.manage' | 'roles.read' | 'roles.manage' | 'settings.manage' | 'audit.read' | 'aiUsage.read' | 'documents.read' | 'documents.upload' | 'orders.read' | 'orders.create' | 'orders.edit' | 'tracker.read' | 'exceptions.read' | 'insights.read' | 'approvals.decide' | 'payments.confirm' | 'payments.post' | 'workflows.read' | 'spr.read' | 'workflows.inboxes.any' | 'tasks.complete' | 'masking.customerNote' | 'spr.route',
+    permission: 'users.read' | 'users.manage' | 'roles.read' | 'roles.manage' | 'settings.manage' | 'audit.read' | 'aiUsage.read' | 'documents.read' | 'documents.upload' | 'orders.read' | 'orders.create' | 'orders.edit' | 'tracker.read' | 'exceptions.read' | 'insights.read' | 'approvals.decide' | 'payments.confirm' | 'payments.post' | 'workflows.read' | 'spr.read' | 'workflows.inboxes.any' | 'tasks.complete' | 'masking.customerNote' | 'spr.route' | 'spark.use',
     matrixSetPermissionBody: MatrixSetPermissionBody, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof matrixSetPermission>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {

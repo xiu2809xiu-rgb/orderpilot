@@ -45,6 +45,7 @@
         "documents": { "title": "Documents", "noun": "documents" },
         "tracking": { "title": "Tracking" },
         "tasks": { "title": "Tasks and approvals" },
+        "spark": { "title": "Spark" },
         "payments": { "title": "Payments" },
         "sensitive": { "title": "Sensitive data" },
         "people": { "title": "People", "noun": "users" },
@@ -83,6 +84,9 @@
         },
         "insights": {
           "read": "see the KPIs"
+        },
+        "spark": {
+          "use": "ask Spark about stock and orders"
         },
         "tasks": {
           "complete": "complete tasks assigned to you"

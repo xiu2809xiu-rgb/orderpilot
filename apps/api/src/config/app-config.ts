@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import type { AiProvider } from "@orderpilot/shared";
+import type { AiProvider, DataOrigin } from "@orderpilot/shared";
 import { ConfigError } from "./config-error.js";
 import { envSchema, type Env } from "./env.schema.js";
 
@@ -97,6 +97,18 @@ export class AppConfig {
     } | null;
   };
 
+  /**
+   * What the stored data is: DATA_ORIGIN, and "synthetic" when it is unset or
+   * blank, which APP_ENV=production refuses. Spark declares it to the AI
+   * destination check, so it must be true.
+   */
+  readonly dataOrigin: DataOrigin;
+
+  readonly spark: {
+    readonly questionsPerMinute: number;
+    readonly questionsPerDay: number;
+  };
+
   readonly database: { readonly url: string };
   readonly redis: { readonly url: string };
   readonly workflows: {
@@ -154,6 +166,11 @@ export class AppConfig {
       approvalLimits: env.APPROVAL_LIMITS === "on",
     };
     this.ai = aiSettings(env);
+    this.dataOrigin = env.DATA_ORIGIN ?? "synthetic";
+    this.spark = {
+      questionsPerMinute: env.SPARK_QUESTIONS_PER_MINUTE,
+      questionsPerDay: env.SPARK_QUESTIONS_PER_DAY,
+    };
     this.database = { url: env.DATABASE_URL };
     this.redis = { url: env.REDIS_URL };
     this.workflows = {

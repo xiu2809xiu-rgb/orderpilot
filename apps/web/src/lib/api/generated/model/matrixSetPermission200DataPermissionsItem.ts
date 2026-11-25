@@ -34,4 +34,5 @@ export const MatrixSetPermission200DataPermissionsItem = {
   taskscomplete: 'tasks.complete',
   maskingcustomerNote: 'masking.customerNote',
   sprroute: 'spr.route',
+  sparkuse: 'spark.use',
 } as const;

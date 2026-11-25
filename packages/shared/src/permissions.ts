@@ -46,6 +46,11 @@ export const PERMISSIONS = [
   // Area 4 (#252): the coordinator routes each SPR to the approver group and
   // hands it back. Support holds it, and never decides an SPR (ADR 0056).
   "spr.route",
+  // P-95: asking Spark. Spark's tools are read-only and run as the person
+  // asking, so this only opens the conversation: what an answer may show is
+  // still decided by the permission each tool needs. The system admin does not
+  // hold it by default, as it reads no orders either.
+  "spark.use",
 ] as const;
 
 export const permissionSchema = z.enum(PERMISSIONS);
@@ -78,6 +83,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "spr.read",
     "tasks.complete",
     "masking.customerNote",
+    "spark.use",
   ],
   APPROVER: [
     "orders.read",
@@ -88,6 +94,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "approvals.decide",
     "tasks.complete",
     "masking.customerNote",
+    "spark.use",
   ],
   SUPPORT: [
     "orders.read",
@@ -103,6 +110,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     // The coordinator: Support routes each SPR, so it reads them (#252).
     "spr.read",
     "spr.route",
+    "spark.use",
   ],
   WAREHOUSE: [
     "orders.read",
@@ -111,6 +119,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "exceptions.read",
     "workflows.read",
     "tasks.complete",
+    "spark.use",
   ],
   FINANCE: [
     "orders.read",
@@ -120,6 +129,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "workflows.read",
     "payments.confirm",
     "tasks.complete",
+    "spark.use",
   ],
   LOGISTICS: [
     "orders.read",
@@ -128,6 +138,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "exceptions.read",
     "workflows.read",
     "tasks.complete",
+    "spark.use",
   ],
   MANAGEMENT: [
     "orders.read",
@@ -141,6 +152,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "approvals.decide",
     "workflows.inboxes.any",
     "masking.customerNote",
+    "spark.use",
   ],
   AUDITOR: [
     "orders.read",
@@ -154,5 +166,6 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "spr.read",
     "workflows.inboxes.any",
     "masking.customerNote",
+    "spark.use",
   ],
 };

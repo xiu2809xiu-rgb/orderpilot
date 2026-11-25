@@ -37,7 +37,9 @@ import { LlmProviderFactory } from "./providers/provider-factory.js";
  * model, and the mock's script registry, so that a feature registers its mock
  * script at start-up. The provider, the tracker and the policy adapters are
  * not exported: nothing a feature could use to reach a provider around the
- * gateway leaves this module.
+ * gateway leaves this module. AiStatusService is exported because it only
+ * reads: it copies the provider's name, model and mock flag, so a feature can
+ * say which one answered, and it holds no key and no address.
  *
  * It is a plain module, not a dynamic one. The tool check asks the permission
  * policy, but importing AuthModule.register(config) here would make Nest build
@@ -101,6 +103,6 @@ import { LlmProviderFactory } from "./providers/provider-factory.js";
     AiStatusService,
     AiProbeService,
   ],
-  exports: [LlmGateway, MockScriptRegistry],
+  exports: [LlmGateway, MockScriptRegistry, AiStatusService],
 })
 export class AiModule {}

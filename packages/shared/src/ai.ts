@@ -1,6 +1,7 @@
 // The contract of the two AI routes (P-17): what is configured, and a probe that
-// checks a provider end to end. The gateway's own calls are not a contract here:
-// no route forwards free text to a model.
+// checks a provider end to end. The gateway's own calls are not a contract here.
+// Neither route forwards free text to a model; Spark's route does, and its
+// contract is in spark.ts.
 
 import { z } from "zod";
 import { AI_USAGE_STATUSES } from "./audit.js";

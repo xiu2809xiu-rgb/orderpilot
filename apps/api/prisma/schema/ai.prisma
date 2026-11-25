@@ -46,4 +46,79 @@ model AiUsageRecord {
   @@index([occurredAt])
   @@index([feature])
   @@index([documentId])
+  /// Spark joins an answer to its usage record by this id (P-95).
+  @@index([traceId])
+}
+
+/// Who wrote a Spark message.
+enum SparkMessageRole {
+  USER
+  ASSISTANT
+}
+
+/// How an answer ended. A question has no status of its own: a question with
+/// no answer after it is the one pending.
+enum SparkMessageStatus {
+  OK
+  FAILED
+  STOPPED
+}
+
+/// A person's thread with Spark (P-95). It belongs to one person; in a demo
+/// session, where everyone of a role signs in as one user, it also belongs to
+/// that session, so nobody reads another tester's questions. Archived, never
+/// deleted: the stored text can be compared with the hash in the audit trail.
+model SparkConversation {
+  id         String         @id @default(uuid(7)) @db.Uuid
+  /// The person, as a plain id: no relation into another area's table.
+  userId     String         @db.Uuid
+  /// The sign-in session of a demo sign-in. Null for a real one.
+  sessionId  String?
+  /// Null until the first question gives it one.
+  title      String?
+  createdAt  DateTime       @default(now()) @db.Timestamptz(3)
+  updatedAt  DateTime       @default(now()) @db.Timestamptz(3)
+  archivedAt DateTime?      @db.Timestamptz(3)
+  messages   SparkMessage[]
+
+  @@index([userId, updatedAt])
+}
+
+/// One turn of a conversation. Written once and never updated, so a stored
+/// answer is what was audited.
+model SparkMessage {
+  id             String             @id @default(uuid(7)) @db.Uuid
+  conversationId String             @db.Uuid
+  conversation   SparkConversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  /// 1, 2, 3 ... within the conversation. The unique key below is what lets
+  /// only one of two questions that arrive together be stored.
+  seq            Int
+  role           SparkMessageRole
+  /// OK for a question.
+  status         SparkMessageStatus @default(OK)
+  content        String
+  /// What the tools looked at, built by the server from their results, as JSON.
+  sources        Json               @default("[]")
+  /// The tools that ran or were refused, as JSON.
+  steps          Json               @default("[]")
+  /// The role the person held when the message was written. A role's rights can
+  /// change after an answer was stored.
+  actorRole      String
+  /// The AI_PROVIDER setting and the model that answered. Null on a question
+  /// and on an answer no provider gave.
+  provider       String?
+  model          String?
+  mock           Boolean?
+  /// Null when the call failed before it reported any.
+  inputTokens    Int?
+  outputTokens   Int?
+  finishReason   String?
+  /// A short code for a failed or stopped answer, never a message.
+  errorCode      String?
+  /// The trace id of the gateway call, which is also the usage record's: the
+  /// request id and this message's id, so a caller cannot reuse another's.
+  traceId        String
+  createdAt      DateTime           @default(now()) @db.Timestamptz(3)
+
+  @@unique([conversationId, seq])
 }

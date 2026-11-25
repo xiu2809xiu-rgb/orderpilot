@@ -34,4 +34,5 @@ export const GovernanceNoticeList200DataItemPermissionsItem = {
   taskscomplete: 'tasks.complete',
   maskingcustomerNote: 'masking.customerNote',
   sprroute: 'spr.route',
+  sparkuse: 'spark.use',
 } as const;

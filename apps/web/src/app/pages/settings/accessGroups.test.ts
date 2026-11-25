@@ -45,6 +45,7 @@ describe("describeAccess", () => {
         "Follow orders in the tracker, check exceptions, see workflows and tasks and see stock purchase requests",
       "Tasks and approvals":
         "Complete tasks assigned to you and route stock purchase requests to the approvers",
+      Spark: "Ask Spark about stock and orders",
       "Sensitive data": "See the sample customer note",
     });
   });

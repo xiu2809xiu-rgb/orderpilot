@@ -319,6 +319,21 @@ The decision is recorded in [ADR 0059](../adr/0059-the-ai-gateway-and-the-person
 | Recorder that never throws     | `ai-usage.tracker.ts`, `ai-usage-record.repository.ts`, `ai-refusal.auditor.ts` | A call that worked does not fail because a cost row could not be saved, and a refusal is audited on its own, outside any business transaction                        |
 | An import allow-list as test   | `ai-imports.test.ts`                                                            | The module may reach only the files it lists, and only `providers/` may import the SDK, so a new reach fails until a person decides it is read-only                  |
 
+## Spark's server side: a run and a tool factory (P-95)
+
+The decision is recorded in [ADR 0060](../adr/0060-spark-and-its-read-only-tools.md). Everything is under `apps/api/src/modules/spark/`.
+
+| Pattern                | Where                                           | Why                                                                                                                                                                                                   |
+| ---------------------- | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Run collector          | `spark-run.ts`                                  | One object for one question gathers what its tools looked at and what the gateway says each tool call did, so the answer's sources and steps are built by the server and never from the model's words |
+| Tool factory           | `spark-toolset.ts`, `tools/*.tool.ts`           | Each question gets tools made for it and bound to its own run, so what one person's question read cannot land in another's answer, and a tool has no way to write: `defineReadOnlyTool` has none      |
+| Projection by naming   | `tools/spark-tool-results.ts`                   | A tool's result lists the fields it keeps one by one and never spreads a service's row, so a field added to a service later reaches a model only when a reviewer sees it added                        |
+| Two transactions       | `spark.service.ts`                              | The gateway refuses to run inside a transaction, so the question and the answer are stored apart. A question with no answer after it is the pending state, held by a unique key                       |
+| Server-built history   | `domain/spark-history.ts`                       | An earlier answer goes back to the model only as a sentence the server writes, so text that came out of a record cannot return as the assistant's own voice                                           |
+| Fails closed           | `domain/spark-origin.ts`                        | Inside Spark only the exact word `synthetic` is synthetic, so a setting nobody can read counts as real data and the destination check refuses (the config reads an unset line as synthetic)           |
+| Script from the result | `spark.mock-script.ts`, `spark-mock-answers.ts` | The offline mock reads the last user message and the tool result through its own zod schema and builds its sentence from it, so no figure is written in the script                                    |
+| An import allow-list   | `spark-imports.test.ts`                         | The module may reach only the files it lists, and the orders module exports its reader and never its writer                                                                                           |
+
 ## Seven roles: a parallel change (#335)
 
 The decision is recorded in [ADR 0058](../adr/0058-seven-roles-six-teams-and-an-administrator.md).
