@@ -61,6 +61,31 @@ describe("picking with the pointer", () => {
     expect(screen.getByRole("menu")).toBeVisible();
   });
 
+  it("picks nothing for the click that follows a finger's tap on the trigger, which lands on the choice under the finger", async () => {
+    const onPick = vi.fn();
+    renderPicker({ onPick });
+    await open();
+    // A tap presses and releases the trigger; the click that the browser sends
+    // after it is made by a pointer (detail 1) and lands on a choice that the
+    // finger never pressed.
+    fireEvent.click(item("Focusing"), { detail: 1 });
+    expect(onPick).not.toHaveBeenCalled();
+    expect(screen.getByRole("menu")).toBeVisible();
+  });
+
+  it("picks, once, for a finger's tap on a choice, whose pointerleave comes before its click", async () => {
+    const onPick = vi.fn();
+    renderPicker({ onPick });
+    await open();
+    const dnd = item("Do not disturb");
+    fireEvent.pointerDown(dnd, { pointerType: "touch" });
+    fireEvent.pointerUp(dnd, { pointerType: "touch" });
+    fireEvent.pointerLeave(dnd, { pointerType: "touch" });
+    fireEvent.click(dnd, { detail: 1 });
+    expect(onPick).toHaveBeenCalledTimes(1);
+    expect(onPick).toHaveBeenCalledWith("DO_NOT_DISTURB");
+  });
+
   it("still picks with Enter and with Space", async () => {
     const user = userEvent.setup();
     const onPick = vi.fn();
