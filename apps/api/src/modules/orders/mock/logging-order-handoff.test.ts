@@ -27,13 +27,20 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describeOrderHandoffContract("the logging stand-in", () => ({
-  handoff: new LoggingOrderHandoff(),
-  freshOrderNo: () => {
-    next += 1;
-    return `SO-20261126-${String(next).padStart(4, "0")}`;
-  },
-}));
+describeOrderHandoffContract(
+  "the logging stand-in",
+  () => ({
+    handoff: new LoggingOrderHandoff(),
+    freshOrderNo: () => {
+      next += 1;
+      return `SO-20261126-${String(next).padStart(4, "0")}`;
+    },
+    standIn: true,
+    // The stand-in starts nothing, and the contract holds it to that.
+    hasWorkflow: () => Promise.resolve(false),
+  }),
+  ["hasWorkflow"],
+);
 
 describe("LoggingOrderHandoff", () => {
   it("changes nothing, and writes one line that says so, for a submitted order", async () => {
