@@ -10,12 +10,14 @@
  * tokens.css by pickerMotion.test.ts and must equal it; the sheets use the
  * tokens by name, so the numbers here are for the tests, the spring and the
  * parts' own geometry. UI motion stays between 150 and 250 ms (CLAUDE.md
- * section 8); the one spring, which grows the pill and glides the caption, is
+ * section 8); the springs, which grow the pill and glide the caption, are
  * spatial movement and may run longer.
  */
 export const pickerMotion = {
-  /** The pill grows out of its trigger, and the caption glides, on the token spring (--spring-stiffness, --spring-damping). */
+  /** The caption glides, and a touch pill grows, on the calm token spring (--spring-stiffness, --spring-damping). */
   spring: { stiffness: 260, damping: 28 },
+  /** The pill grows out of its trigger on a fine pointer, and settles a little past its size (--spring-pop-stiffness, --spring-pop-damping). */
+  pop: { stiffness: 400, damping: 28 },
   /** The pill folds back into its trigger (--motion-fast). */
   foldMs: 160,
   /** Each orb fades in (--motion-fast), one after another. */
@@ -41,7 +43,19 @@ export const pillGeometry = {
   fine: { width: 166, height: 96 },
   coarse: { width: 266, height: 98 },
   chip: { height: 28, minWidth: 72, padX: 24, inset: 4 },
+  /** The trigger's box that the pill grows out of: the dot, the ring, and a finger's 44 px. */
+  trigger: { dot: 24, ring: 32, touch: 44 },
 } as const;
+
+/**
+ * How far the pill keeps from the screen's edge, in CSS px: Radix's
+ * `collisionPadding`, and the 16 px the touch pill leaves in a narrow screen.
+ * The pop spring carries the growing box past its size by a few px, and that
+ * must stay inside this gap: pickerMotion.test.ts holds it for the fine pill
+ * and shows the touch pill would pass it, which is why a touch pill keeps the
+ * calm spring.
+ */
+export const PILL_EDGE_GAP = 8;
 
 /** The step response of a spring with unit mass, from rest to 1. */
 export function springStep(
@@ -88,17 +102,19 @@ export function springEasing(stiffness: number, damping: number): string {
   return `linear(0, ${points.join(", ")})`;
 }
 
-/** How long the growth runs, in ms: the time the token spring needs to settle. */
-export const GROW_MS = Math.round(
-  settleSeconds(pickerMotion.spring.stiffness, pickerMotion.spring.damping) *
-    1000,
-);
+function growth(spring: { stiffness: number; damping: number }) {
+  return {
+    // The time the spring needs to settle.
+    ms: Math.round(settleSeconds(spring.stiffness, spring.damping) * 1000),
+    easing: springEasing(spring.stiffness, spring.damping),
+  };
+}
 
-/** The easing the sheet reads as --ap-spring. */
-export const GROW_EASING = springEasing(
-  pickerMotion.spring.stiffness,
-  pickerMotion.spring.damping,
-);
+/** The growth of the pill on a fine pointer, on the pop spring: its duration in ms and the easing the sheet reads as --ap-spring. */
+export const GROW_FINE = growth(pickerMotion.pop);
+
+/** The growth of the touch pill, on the calm token spring. */
+export const GROW_COARSE = growth(pickerMotion.spring);
 
 /**
  * Where the caption sits under the active orb: its left edge and width, in CSS

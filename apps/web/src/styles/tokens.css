@@ -100,6 +100,11 @@
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
   --spring-stiffness: 260;
   --spring-damping: 28;
+  /* A surface that grows out of its trigger and settles a little past its size
+     (about 4.6 percent over, at its peak after about 220 ms). The calm pair
+     above is for everything that must not pass its box. */
+  --spring-pop-stiffness: 400;
+  --spring-pop-damping: 28;
 
   /* Structure. Spectra works on glass over the aurora: cards blur what is
      behind them, 16 px corners, a highlight along the top edge and a faint

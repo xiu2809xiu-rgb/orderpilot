@@ -3,8 +3,9 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { must } from "@/test/must";
 import {
-  GROW_EASING,
-  GROW_MS,
+  GROW_COARSE,
+  GROW_FINE,
+  PILL_EDGE_GAP,
   chipPlace,
   pickerMotion,
   pillGeometry,
@@ -38,6 +39,8 @@ describe("the picker's motion", () => {
   it("equals the tokens it names", () => {
     expect(pickerMotion.spring.stiffness).toBe(declared("spring-stiffness"));
     expect(pickerMotion.spring.damping).toBe(declared("spring-damping"));
+    expect(pickerMotion.pop.stiffness).toBe(declared("spring-pop-stiffness"));
+    expect(pickerMotion.pop.damping).toBe(declared("spring-pop-damping"));
     expect(pickerMotion.foldMs).toBe(declared("motion-fast"));
     expect(pickerMotion.orbMs).toBe(declared("motion-fast"));
     expect(pickerMotion.chipTextMs).toBe(declared("motion-fast"));
@@ -106,8 +109,8 @@ describe("the spring", () => {
   it("starts at rest and ends at 1", () => {
     expect(springStep(stiffness, damping, 0)).toBe(0);
     expect(springStep(stiffness, damping, 5)).toBeCloseTo(1, 6);
-    expect(GROW_EASING.endsWith(", 1)")).toBe(true);
-    expect(GROW_EASING.startsWith("linear(0, ")).toBe(true);
+    expect(GROW_COARSE.easing.endsWith(", 1)")).toBe(true);
+    expect(GROW_COARSE.easing.startsWith("linear(0, ")).toBe(true);
   });
 
   it("overshoots by 0.41 percent and no more", () => {
@@ -127,7 +130,7 @@ describe("the spring", () => {
 
   it("runs the growth for the time the spring needs to settle", () => {
     expect(settleSeconds(stiffness, damping)).toBeCloseTo(0.31, 2);
-    expect(GROW_MS).toBe(310);
+    expect(GROW_COARSE.ms).toBe(310);
   });
 
   it("writes the spring as a linear() easing of 33 points between 0 and 1.01", () => {
@@ -138,6 +141,87 @@ describe("the spring", () => {
     expect(points).toHaveLength(33);
     expect(Math.max(...points)).toBeLessThan(1.01);
     expect(Math.min(...points)).toBeGreaterThanOrEqual(0);
+  });
+});
+
+/** The highest the spring goes above 1, as a fraction. */
+function overshoot(spring: { stiffness: number; damping: number }): number {
+  let top = 0;
+  for (let t = 0; t < 2; t += 0.001) {
+    top = Math.max(top, springStep(spring.stiffness, spring.damping, t));
+  }
+  return top - 1;
+}
+
+/** How far a box that grows from `from` to `size` px passes its size at the spring's peak. */
+function passesBy(
+  spring: { stiffness: number; damping: number },
+  from: number,
+  size: number,
+): number {
+  return overshoot(spring) * (size - from);
+}
+
+describe("the pop spring, which grows the pill on a fine pointer", () => {
+  const { pop, spring } = pickerMotion;
+  const { fine, coarse, trigger } = pillGeometry;
+
+  it("overshoots between 4 and 5 percent, which the calm spring does not", () => {
+    expect(overshoot(pop)).toBeGreaterThan(0.04);
+    expect(overshoot(pop)).toBeLessThan(0.05);
+    expect(overshoot(spring)).toBeLessThan(0.005);
+  });
+
+  it("peaks at about 220 ms and is inside half a percent by 350 ms", () => {
+    let top = 0;
+    let at = 0;
+    for (let t = 0; t < 1; t += 0.001) {
+      const value = springStep(pop.stiffness, pop.damping, t);
+      if (value > top) {
+        top = value;
+        at = t;
+      }
+    }
+    expect(at).toBeGreaterThan(0.21);
+    expect(at).toBeLessThan(0.23);
+    expect(settleSeconds(pop.stiffness, pop.damping)).toBeCloseTo(0.35, 2);
+    expect(GROW_FINE.ms).toBe(350);
+  });
+
+  it("writes its easing so that it ends at exactly 1 and holds a sample above 1", () => {
+    const body = must(/^linear\((.*)\)$/.exec(GROW_FINE.easing))[1];
+    const points = must(body).split(", ").map(Number);
+    expect(points.at(-1)).toBe(1);
+    expect(Math.max(...points)).toBeGreaterThan(1);
+    expect(Math.max(...points)).toBeLessThan(1.05);
+  });
+
+  it("is the growth of the fine pill, and the touch pill keeps the calm spring", () => {
+    expect(GROW_FINE.easing).toBe(springEasing(pop.stiffness, pop.damping));
+    expect(GROW_COARSE.easing).toBe(
+      springEasing(spring.stiffness, spring.damping),
+    );
+    expect(GROW_COARSE.easing).not.toBe(GROW_FINE.easing);
+  });
+
+  it("keeps the fine pill's peak inside the 8 px the menu keeps from the screen's edge", () => {
+    expect(PILL_EDGE_GAP).toBe(8);
+    for (const from of [trigger.dot, trigger.ring]) {
+      expect(passesBy(pop, from, fine.width)).toBeLessThan(PILL_EDGE_GAP);
+    }
+  });
+
+  it("would carry the touch pill past that edge, which is why it keeps the calm spring", () => {
+    expect(passesBy(pop, trigger.touch, coarse.width)).toBeGreaterThan(
+      PILL_EDGE_GAP,
+    );
+    expect(passesBy(spring, trigger.touch, coarse.width)).toBeLessThan(
+      PILL_EDGE_GAP,
+    );
+  });
+
+  it("is told to Radix as the same gap that the touch pill's width leaves on each side", () => {
+    expect(pickerCss).toContain(`calc(100vw - ${String(2 * PILL_EDGE_GAP)}px)`);
   });
 });
 

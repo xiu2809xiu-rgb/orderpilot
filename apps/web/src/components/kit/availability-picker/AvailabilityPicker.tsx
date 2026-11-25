@@ -14,7 +14,12 @@ import {
 } from "react";
 import { useMediaQuery } from "@/lib/useMediaQuery";
 import { PickerPill } from "./PickerPill";
-import { GROW_EASING, GROW_MS } from "./pickerMotion";
+import {
+  GROW_COARSE,
+  GROW_FINE,
+  PILL_EDGE_GAP,
+  pillGeometry,
+} from "./pickerMotion";
 import type { AvailabilityPickerProps } from "./types";
 import "./availabilityPicker.css";
 
@@ -36,10 +41,14 @@ export type PickerContentProps = Pick<
 /** A finger, or a screen with no hover: the words go under the orbs and the boxes are 44 px. */
 export const COARSE = "(pointer: coarse), (hover: none)";
 
-const growth = {
-  "--ap-spring": GROW_EASING,
-  "--ap-grow": `${String(GROW_MS)}ms`,
-} as CSSProperties;
+function growth(spring: typeof GROW_FINE) {
+  return {
+    "--ap-spring": spring.easing,
+    "--ap-grow": `${String(spring.ms)}ms`,
+  } as CSSProperties;
+}
+const fineGrowth = growth(GROW_FINE);
+const coarseGrowth = growth(GROW_COARSE);
 
 /** On open the checked item has focus, by mouse and by keyboard. Radix would focus the content. */
 function focusChecked(event: Event) {
@@ -126,18 +135,19 @@ export function AvailabilityPicker({
     setSettled(false);
   }, []);
   // The pill's near corner lies over its trigger, so it can grow out of it.
-  const sideOffset = coarse ? -44 : skin === "ring" ? -32 : -24;
+  const { trigger } = pillGeometry;
+  const sideOffset = -(coarse ? trigger.touch : trigger[skin]);
   return (
     <MenuPrimitive.Portal>
       <MenuPrimitive.Content
         className="ap-pill"
         data-skin={skin}
         data-settled={settled ? "" : undefined}
-        style={growth}
+        style={coarse ? coarseGrowth : fineGrowth}
         side={side}
         align={align}
         sideOffset={sideOffset}
-        collisionPadding={8}
+        collisionPadding={PILL_EDGE_GAP}
         loop
         aria-label={labels.menu}
         // Radix names the menu by its trigger, which holds the old value.
