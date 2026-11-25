@@ -2,7 +2,11 @@ import type { GovernanceNotice } from "@orderpilot/shared";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useId } from "react";
 import { useTranslation } from "react-i18next";
+// Not the common barrel: the bell is in the entry chunk, and the barrel would
+// bring every shared component in with it (34.6 KB gzip over the budget).
+import { toast } from "@/components/common/toast";
 import { Button } from "@/components/ui/button";
+import { ApiError } from "@/lib/api/errors";
 import { formatDayTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import {
@@ -16,6 +20,8 @@ import {
  * it (#383, ADR 0067): who gave it, which permissions in the matrix's own
  * words, and when. Each approver marks a notice read for themselves. Drawn in
  * the bell for a session that decides approvals; nothing when there is none.
+ * A mark that fails says the server's own reason and its trace ID, as a
+ * refused change on the Users tab does (#276), and the notice stays unread.
  */
 export function AdminNotices() {
   const { t, i18n } = useTranslation("governance");
@@ -25,6 +31,18 @@ export function AdminNotices() {
   const client = useQueryClient();
   const mark = useMutation({
     mutationFn: markNoticeRead,
+    onError: (error) =>
+      toast.failed(
+        t("notices.markReadFailed"),
+        error instanceof ApiError
+          ? {
+              description: t("notices.reason", {
+                reason: error.message,
+                traceId: error.traceId,
+              }),
+            }
+          : {},
+      ),
     onSettled: () => client.invalidateQueries({ queryKey: ADMIN_NOTICES_KEY }),
   });
 

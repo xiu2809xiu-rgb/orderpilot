@@ -245,6 +245,8 @@
     "copied": "{{name}} copied {{from}} onto the System admin role, which gained {{permissions}}.",
     "markRead": "Mark as read",
     "markReadFor": "Mark as read: {{text}}",
+    "markReadFailed": "The notice was not marked read",
+    "reason": "{{reason}} Trace ID: {{traceId}}",
     "failed": "Could not load what the administrator's role gained."
   }
 }

@@ -3,6 +3,7 @@ import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import i18n from "i18next";
 import { HttpResponse, http } from "msw";
 import { beforeAll, describe, expect, it } from "vitest";
+import { useToastStore } from "@/components/common/toast";
 import { renderWorkflowPage } from "@/features/workflows/render";
 import { axeViolations } from "@/test/axe";
 import { server } from "@/test/server";
@@ -96,6 +97,41 @@ describe("what the administrator's role gained, as the approvers see it (#383)",
       expect(
         screen.queryByRole("button", { name: /^Mark as read/ }),
       ).toBeNull();
+    });
+  });
+
+  it("says why a notice could not be marked read, with the trace ID, and keeps it unread", async () => {
+    serve([notice()]);
+    server.use(
+      http.post(`${NOTICES}/:id/read`, () =>
+        HttpResponse.json(
+          {
+            error: {
+              code: "NOT_FOUND",
+              message: "Notice was not found.",
+              details: null,
+              traceId: "trace-notices-2",
+            },
+          },
+          { status: 404 },
+        ),
+      ),
+    );
+    render();
+    fireEvent.click(
+      await screen.findByRole("button", { name: /^Mark as read/ }),
+    );
+    await waitFor(() => {
+      expect(useToastStore.getState().items.at(-1)).toMatchObject({
+        kind: "error",
+        message: "The notice was not marked read",
+        description: "Notice was not found. Trace ID: trace-notices-2",
+      });
+    });
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: /^Mark as read/ }),
+      ).toBeEnabled();
     });
   });
 
