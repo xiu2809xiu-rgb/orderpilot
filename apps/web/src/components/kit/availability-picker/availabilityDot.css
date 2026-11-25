@@ -77,6 +77,9 @@
   inline-size: 100%;
   block-size: 100%;
   border-radius: var(--radius-pill);
+  /* The ring is positioned and the dot is not, so the ring would paint over the
+     dot and wash it out. Its own stacking context lets the ring sit under it. */
+  isolation: isolate;
   transition: opacity var(--motion-fast) var(--ease-out);
 }
 /* The pill covers the trigger while it is open, and grows out of it. The face
@@ -109,6 +112,7 @@
    an avatar that is only initials. The fill is the tone over the popover. */
 .ap-ring {
   position: absolute;
+  z-index: -1;
   inset: 0;
   border-radius: var(--radius-pill);
   background: color-mix(

@@ -149,6 +149,11 @@ describe("the dot's sheet", () => {
     }
   });
 
+  it("paints the ring under the dot: the ring is positioned and the dot is not, so it needs a stacking context of the face and a negative z-index", () => {
+    expect(dot).toMatch(/\.ap-face\s*{[^}]*isolation: isolate/s);
+    expect(dot).toMatch(/\.ap-ring\s*{[^}]*z-index: -1/s);
+  });
+
   it("keeps the 24 px of WCAG 2.5.8 on a fine pointer", () => {
     expect(dot).toMatch(
       /\.ap-trigger\s*{[^}]*inline-size: 24px;[^}]*block-size: 24px/s,
