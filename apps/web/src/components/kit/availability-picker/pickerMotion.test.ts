@@ -44,6 +44,7 @@ describe("the picker's motion", () => {
     expect(pickerMotion.foldMs).toBe(declared("motion-fast"));
     expect(pickerMotion.orbMs).toBe(declared("motion-fast"));
     expect(pickerMotion.chipTextMs).toBe(declared("motion-fast"));
+    expect(pickerMotion.chipLeaveMs).toBe(declared("motion-fast"));
     expect(pickerMotion.pickMs).toBe(declared("motion-slow"));
   });
 

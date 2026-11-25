@@ -129,6 +129,10 @@
   line-height: 1rem;
   white-space: nowrap;
 }
+/* The old and the new word share the capsule's one cell, each centred. */
+.ap-chip-text {
+  grid-area: 1 / 1;
+}
 .ap-measure {
   position: absolute;
   display: flex;
@@ -200,6 +204,11 @@
   .ap-chip-text {
     animation: ap-text-in var(--motion-fast) var(--ease-out) 60ms both;
   }
+  /* The word that is leaving fades out where it stands, and is gone when the
+     fade ends (CaptionWords removes it). */
+  .ap-chip-text[data-leaving] {
+    animation: ap-text-out var(--motion-fast) var(--ease-out) both;
+  }
 }
 @keyframes ap-grow {
   from {
@@ -241,6 +250,14 @@
   }
   to {
     opacity: 1;
+  }
+}
+@keyframes ap-text-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
   }
 }
 

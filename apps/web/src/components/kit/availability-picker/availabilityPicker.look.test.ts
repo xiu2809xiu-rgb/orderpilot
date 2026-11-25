@@ -81,6 +81,7 @@ describe("the pill's sheet", () => {
       "ap-fold",
       "ap-orb-in",
       "ap-text-in",
+      "ap-text-out",
     ]) {
       const block = atRule(picker, `@keyframes ${name}`);
       const properties = [...block.matchAll(/([a-z-]+):/g)].map((m) => m[1]);
@@ -114,6 +115,14 @@ describe("the pill's sheet", () => {
     expect(picker).toMatch(
       /animation: ap-text-in var\(--motion-fast\) var\(--ease-out\) 60ms both/,
     );
+  });
+
+  it("fades the leaving caption word out where it stands, over the same time the new one takes", () => {
+    expect(picker).toMatch(
+      /\.ap-chip-text\[data-leaving\]\s*{\s*animation: ap-text-out var\(--motion-fast\) var\(--ease-out\) both/,
+    );
+    // Both words share the capsule's one cell, so each is centred in it.
+    expect(picker).toMatch(/\.ap-chip-text\s*{\s*grid-area: 1 \/ 1/);
   });
 
   it("starts the growth at the transform origin Radix gives the pill", () => {

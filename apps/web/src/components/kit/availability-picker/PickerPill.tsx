@@ -10,6 +10,7 @@ import {
 } from "@orderpilot/shared";
 import { DropdownMenu as MenuPrimitive } from "radix-ui";
 import { useLayoutEffect, useRef, useState, type FocusEvent } from "react";
+import { CaptionWords } from "./CaptionWords";
 import { PickerOrb } from "./PickerOrb";
 import { chipPlace } from "./pickerMotion";
 import { AVAILABILITY_ORDER } from "./tones";
@@ -98,9 +99,7 @@ export function PickerPill({
       </MenuPrimitive.RadioGroup>
       {/* The words are in the items, so the caption is for the eye only. */}
       <span ref={chip} className="ap-chip" aria-hidden="true">
-        <span key={active} className="ap-chip-text">
-          {labels.options[active]}
-        </span>
+        <CaptionWords stop={active} text={labels.options[active]} />
       </span>
       <span ref={measure} className="ap-measure" aria-hidden="true">
         {AVAILABILITY_ORDER.map((option) => (

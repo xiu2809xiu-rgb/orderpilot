@@ -27,6 +27,8 @@ export const pickerMotion = {
   pickMs: 250,
   /** A new caption word fades in (--motion-fast). */
   chipTextMs: 160,
+  /** The old caption word fades out as the new one fades in (--motion-fast). */
+  chipLeaveMs: 160,
 } as const;
 
 /**
