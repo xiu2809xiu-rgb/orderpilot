@@ -6,7 +6,7 @@
 // copied. A private prototype for a school module. Adapted to OrderPilot's tokens.
 import type { PersonAvailability } from "@orderpilot/shared";
 import { DropdownMenu as MenuPrimitive } from "radix-ui";
-import type { CSSProperties } from "react";
+import { useRef, type CSSProperties, type PointerEvent } from "react";
 import { availabilityLook } from "./tones";
 
 /** One choice: a round orb with its mark, and its words. On a fine pointer the words are for assistive technology and the caption shows them; on a touch screen they sit under the orb. */
@@ -22,14 +22,37 @@ export function PickerOrb({
   onPick: (next: PersonAvailability) => void;
 }) {
   const Mark = availabilityLook[value].mark;
+  // Radix opens the menu on pointerdown, and the pill grows out of the
+  // trigger, so the pointer is soon over a choice that it never pressed.
+  // Radix's item answers a pointerup it has no pointerdown for by clicking
+  // itself (react-menu 2.2.1), which would pick the first choice on a plain
+  // click of the trigger. A choice is picked by a press and a release on it,
+  // or by the keyboard, never by a release alone.
+  const pressed = useRef(false);
+  const release = (event: PointerEvent<HTMLElement>) => {
+    // preventDefault makes Radix's composed handler skip its own click().
+    if (!pressed.current) event.preventDefault();
+    pressed.current = false;
+  };
   return (
     <MenuPrimitive.RadioItem
       value={value}
       data-value={value}
       className="ap-item"
       style={{ "--ap-i": index } as CSSProperties}
+      onPointerDown={() => {
+        pressed.current = true;
+      }}
+      onPointerUp={release}
+      onPointerLeave={() => {
+        pressed.current = false;
+      }}
+      onPointerCancel={() => {
+        pressed.current = false;
+      }}
       // A repeat of the current value is a pick too: it renews the 12 hours.
       onSelect={() => {
+        pressed.current = false;
         onPick(value);
       }}
     >
