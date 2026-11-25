@@ -110,14 +110,14 @@ describe("availability on the profile card", () => {
     serverHolding(free);
     const user = userEvent.setup();
     renderSettings(<ProfileCard />);
-    const trigger = await ring();
-    await user.click(trigger);
+    await user.click(await ring());
     await screen.findByRole("menu");
     await user.keyboard("{Escape}");
     await waitFor(() => {
       expect(screen.queryByRole("menu")).toBeNull();
     });
-    expect(trigger).toHaveFocus();
+    // Looked up again: a button held across the waits above could be a stand-in that has left the page.
+    expect(await ring()).toHaveFocus();
     expect(change()).not.toHaveFocus();
   });
 
