@@ -31,11 +31,21 @@ const ON_A_RUNNING_ORDER = { instance: { facts: { not: Prisma.DbNull } } };
  * decide, so telling them "nobody has acted" would be false. Later steps add a
  * row here as the machine starts creating their tasks.
  */
-const ACTIONABLE_IN: Partial<Record<TaskKind, OrderStatus>> = {
-  RAISE_SPR: "StockChecked",
-  APPROVE_SPR: "AwaitingSpr",
-  PLACE_VENDOR_PO: "SprApproved",
+const ACTIONABLE_IN: Partial<Record<TaskKind, readonly OrderStatus[]>> = {
+  RAISE_SPR: ["StockChecked"],
+  APPROVE_SPR: ["AwaitingSpr"],
+  PLACE_VENDOR_PO: ["SprApproved"],
+  SEND_PI: ["StockChecked", "SprApproved"],
+  CONFIRM_PAYMENT: ["AwaitingPayment"],
+  // Paid once the prepayment is in, or still waiting when none was due.
+  PACK_ORDER: ["Paid", "AwaitingPayment"],
 };
+
+/** Whether a task of this kind can be acted on while its order is in this status. */
+function actionableIn(kind: TaskKind, status: string): boolean {
+  const statuses: readonly string[] | undefined = ACTIONABLE_IN[kind];
+  return !statuses || statuses.includes(status);
+}
 
 /** One task on an order the state machine runs, read by its id. */
 export interface StoredTask {
@@ -93,8 +103,7 @@ export class WorkflowTaskRepository {
     });
     return rows.flatMap((row) => {
       const kind = taskKindSchema.safeParse(row.kind);
-      const actionable = kind.success && ACTIONABLE_IN[kind.data];
-      return kind.success && (!actionable || actionable === row.instance.status)
+      return kind.success && actionableIn(kind.data, row.instance.status)
         ? [
             {
               id: row.id,
@@ -223,7 +232,6 @@ export class WorkflowTaskRepository {
     return rows.flatMap((row) => {
       const kind = taskKindSchema.safeParse(row.kind);
       if (!kind.success) return [];
-      const actionable = ACTIONABLE_IN[kind.data];
       return [
         {
           id: row.id,
@@ -235,7 +243,7 @@ export class WorkflowTaskRepository {
           dueAt: row.dueAt,
           open:
             row.status === "OPEN" &&
-            (!actionable || actionable === row.instance.status),
+            actionableIn(kind.data, row.instance.status),
         },
       ];
     });

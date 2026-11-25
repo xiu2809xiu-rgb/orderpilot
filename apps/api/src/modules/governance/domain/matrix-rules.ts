@@ -17,14 +17,48 @@ function lockOf(role: Role, permission: Permission, kind: "never" | "always") {
   );
 }
 
+/** Which rule of the matrix refused, and on what: what the audit row names. */
+export type MatrixRefusal =
+  | {
+      readonly rule: "locked-cell";
+      readonly permission: Permission;
+      readonly lock: "never" | "always";
+    }
+  | { readonly rule: "same-role" };
+
+/**
+ * A rule of the matrix said no. It answers 409 as any conflict does, and
+ * carries the rule, so the service can record the refusal (#378).
+ */
+export class MatrixRuleRefusedError extends ConflictError {
+  constructor(
+    message: string,
+    readonly refusal: MatrixRefusal,
+  ) {
+    super(message);
+  }
+}
+
 export function assertCanGrant(role: Role, permission: Permission): void {
   const lock = lockOf(role, permission, "never");
-  if (lock) throw new ConflictError(lock.reason);
+  if (lock) {
+    throw new MatrixRuleRefusedError(lock.reason, {
+      rule: "locked-cell",
+      permission,
+      lock: "never",
+    });
+  }
 }
 
 export function assertCanRevoke(role: Role, permission: Permission): void {
   const lock = lockOf(role, permission, "always");
-  if (lock) throw new ConflictError(lock.reason);
+  if (lock) {
+    throw new MatrixRuleRefusedError(lock.reason, {
+      rule: "locked-cell",
+      permission,
+      lock: "always",
+    });
+  }
 }
 
 export interface CopyPlan {
@@ -44,7 +78,10 @@ export function planCopy(
   target: readonly Permission[],
 ): CopyPlan {
   if (fromRole === toRole) {
-    throw new ConflictError("Choose two different roles to copy between.");
+    throw new MatrixRuleRefusedError(
+      "Choose two different roles to copy between.",
+      { rule: "same-role" },
+    );
   }
   const wanted = new Set(source);
   const held = new Set(target);
@@ -74,4 +111,37 @@ export function pairsToSeed(
       .filter((permission) => !out.has(`${role}:${permission}`))
       .map((permission) => ({ role, permission })),
   );
+}
+
+/** A role-permission pair, as the table holds it. */
+export interface RolePermissionPair {
+  readonly role: Role;
+  readonly permission: string;
+}
+
+/**
+ * What the table breaks of the locked cells (#383): a pair held where a lock
+ * says never, and a pair missing where a lock says always. The matrix never
+ * lets either happen, but a row put in or taken out another way (a script, an
+ * older database) can, so the seed repairs them and records each repair.
+ */
+export function lockRepairs(held: readonly RolePermissionPair[]): {
+  remove: { role: Role; permission: Permission }[];
+  restore: { role: Role; permission: Permission }[];
+} {
+  const has = new Set(held.map((pair) => `${pair.role}:${pair.permission}`));
+  const pair = (cell: (typeof LOCKED_CELLS)[number]) => ({
+    role: cell.role,
+    permission: cell.permission,
+  });
+  return {
+    remove: LOCKED_CELLS.filter(
+      (cell) =>
+        cell.kind === "never" && has.has(`${cell.role}:${cell.permission}`),
+    ).map(pair),
+    restore: LOCKED_CELLS.filter(
+      (cell) =>
+        cell.kind === "always" && !has.has(`${cell.role}:${cell.permission}`),
+    ).map(pair),
+  };
 }

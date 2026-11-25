@@ -32,6 +32,17 @@ describe("the default matrix", () => {
     }
   });
 
+  it("lets Support alone route an SPR, read it to do so, and never decide one (#252)", () => {
+    const routers = ROLES.filter((role) =>
+      (DEFAULT_ROLE_PERMISSIONS[role] as readonly string[]).includes(
+        "spr.route",
+      ),
+    );
+    expect(routers).toEqual(["SUPPORT"]);
+    expect(DEFAULT_ROLE_PERMISSIONS.SUPPORT).toContain("spr.read");
+    expect(DEFAULT_ROLE_PERMISSIONS.SUPPORT).not.toContain("approvals.decide");
+  });
+
   it("keeps the permission that edits the matrix on the system admin", () => {
     for (const permission of ALWAYS_FOR_SYSTEM_ADMIN) {
       expect(DEFAULT_ROLE_PERMISSIONS.SYSTEM_ADMIN).toContain(permission);

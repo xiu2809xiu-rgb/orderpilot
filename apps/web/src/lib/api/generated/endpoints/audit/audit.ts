@@ -22,6 +22,7 @@ import type {
 
 import type {
   AuditViewerChain200,
+  AuditViewerFilterOptions200,
   AuditViewerGet200,
   AuditViewerList200,
   AuditViewerListParams
@@ -130,6 +131,98 @@ export function useAuditViewerList<TData = Awaited<ReturnType<typeof auditViewer
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getAuditViewerListQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary The people in the trail by name, never by email, and the action names that exist, for the filters
+ */
+export const auditViewerFilterOptions = (
+
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<AuditViewerFilterOptions200>(
+      {url: `/api/v1/audit/filter-options`, method: 'GET', signal
+    },
+      );
+    }
+
+
+
+
+export const getAuditViewerFilterOptionsQueryKey = () => {
+    return [
+    `/api/v1/audit/filter-options`
+    ] as const;
+    }
+
+
+export const getAuditViewerFilterOptionsQueryOptions = <TData = Awaited<ReturnType<typeof auditViewerFilterOptions>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof auditViewerFilterOptions>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAuditViewerFilterOptionsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof auditViewerFilterOptions>>> = ({ signal }) => auditViewerFilterOptions(signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof auditViewerFilterOptions>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type AuditViewerFilterOptionsQueryResult = NonNullable<Awaited<ReturnType<typeof auditViewerFilterOptions>>>
+export type AuditViewerFilterOptionsQueryError = ErrorType<unknown>
+
+
+export function useAuditViewerFilterOptions<TData = Awaited<ReturnType<typeof auditViewerFilterOptions>>, TError = ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof auditViewerFilterOptions>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof auditViewerFilterOptions>>,
+          TError,
+          Awaited<ReturnType<typeof auditViewerFilterOptions>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAuditViewerFilterOptions<TData = Awaited<ReturnType<typeof auditViewerFilterOptions>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof auditViewerFilterOptions>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof auditViewerFilterOptions>>,
+          TError,
+          Awaited<ReturnType<typeof auditViewerFilterOptions>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAuditViewerFilterOptions<TData = Awaited<ReturnType<typeof auditViewerFilterOptions>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof auditViewerFilterOptions>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary The people in the trail by name, never by email, and the action names that exist, for the filters
+ */
+
+export function useAuditViewerFilterOptions<TData = Awaited<ReturnType<typeof auditViewerFilterOptions>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof auditViewerFilterOptions>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getAuditViewerFilterOptionsQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

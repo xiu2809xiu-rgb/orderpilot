@@ -190,12 +190,18 @@ describe("governance: the role-permission matrix over HTTP", () => {
       expect(await count()).toBe(before);
     });
 
-    it("refuses to give the system admin a right to approve, post or pay", async () => {
-      for (const permission of [
+    /** The refusals of one action recorded since `from` events, newest last (#378). */
+    const refusalsSince = async (from: number, action: string) =>
+      (await auditEvents(t)).slice(from).filter((e) => e.action === action);
+
+    it("refuses to give the system admin a right to approve, post or pay, and audits each refusal", async () => {
+      const from = (await auditEvents(t)).length;
+      const permissions = [
         "approvals.decide",
         "payments.confirm",
         "payments.post",
-      ]) {
+      ];
+      for (const permission of permissions) {
         const res = await put(
           "SYSTEM_ADMIN",
           `${MATRIX}/SYSTEM_ADMIN/permissions/${permission}`,
@@ -203,15 +209,47 @@ describe("governance: the role-permission matrix over HTTP", () => {
         );
         expect(res.status, permission).toBe(409);
       }
+      const refused = await refusalsSince(
+        from,
+        "governance.permission.refused",
+      );
+      expect(refused).toHaveLength(permissions.length);
+      refused.forEach((event, index) => {
+        expect(event).toMatchObject({
+          actor: { kind: "user", role: "SYSTEM_ADMIN" },
+          entityType: "RolePermission",
+          entityId: `SYSTEM_ADMIN:${String(permissions[index])}`,
+          changes: {
+            role: "SYSTEM_ADMIN",
+            permission: permissions[index],
+            granted: true,
+            rule: "locked-cell",
+            lock: "never",
+          },
+        });
+      });
     });
 
-    it("refuses to take roles.manage from the system admin", async () => {
+    it("refuses to take roles.manage from the system admin, and audits the refusal", async () => {
+      const from = (await auditEvents(t)).length;
       const res = await put(
         "SYSTEM_ADMIN",
         `${MATRIX}/SYSTEM_ADMIN/permissions/roles.manage`,
         { granted: false },
       );
       expect(res.status).toBe(409);
+      const refused = await refusalsSince(
+        from,
+        "governance.permission.refused",
+      );
+      expect(refused).toHaveLength(1);
+      expect(refused[0]?.changes).toMatchObject({
+        role: "SYSTEM_ADMIN",
+        permission: "roles.manage",
+        granted: false,
+        rule: "locked-cell",
+        lock: "always",
+      });
     });
 
     it("rejects a permission or role the platform does not know", async () => {
@@ -272,7 +310,7 @@ describe("governance: the role-permission matrix over HTTP", () => {
   });
 
   describe("copying a role", () => {
-    it("makes the target hold what the source holds, with its data scope", async () => {
+    it("makes the target hold the permissions the source holds", async () => {
       const res = await post("SYSTEM_ADMIN", `${MATRIX}/copy`, {
         fromRole: "SUPPORT",
         toRole: "LOGISTICS",
@@ -283,14 +321,33 @@ describe("governance: the role-permission matrix over HTTP", () => {
         await access("LOGISTICS"),
       ];
       expect(new Set(target.permissions)).toEqual(new Set(source.permissions));
-      expect(target.dataScope).toBe(source.dataScope);
       const events = (await auditEvents(t)).filter(
         (e) => e.action === "governance.role.copied",
       );
       expect(events).toHaveLength(1);
     });
 
-    it("refuses a copy onto itself, and a copy that would break a locked cell", async () => {
+    it("leaves the target's data scope as it was, as no list reads it (#268)", async () => {
+      const before = (await access("LOGISTICS")).dataScope;
+      const source = (await access("PRODUCT_MANAGER")).dataScope;
+      expect(source, "the two scopes differ, so a copy would show").not.toBe(
+        before,
+      );
+      const res = await post("SYSTEM_ADMIN", `${MATRIX}/copy`, {
+        fromRole: "PRODUCT_MANAGER",
+        toRole: "LOGISTICS",
+      });
+      expect(res.status).toBe(200);
+      expect((await access("LOGISTICS")).dataScope).toBe(before);
+      const copied = (await auditEvents(t)).filter(
+        (e) =>
+          e.action === "governance.role.copied" && e.entityId === "LOGISTICS",
+      );
+      expect(copied.at(-1)?.changes).not.toHaveProperty("dataScope");
+    });
+
+    it("refuses a copy onto itself, and a copy that would break a locked cell, and audits both", async () => {
+      const from = (await auditEvents(t)).length;
       const same = await post("SYSTEM_ADMIN", `${MATRIX}/copy`, {
         fromRole: "FINANCE",
         toRole: "FINANCE",
@@ -301,6 +358,25 @@ describe("governance: the role-permission matrix over HTTP", () => {
         toRole: "SYSTEM_ADMIN",
       });
       expect(onAdmin.status).toBe(409);
+      const refused = (await auditEvents(t))
+        .slice(from)
+        .filter((e) => e.action === "governance.role.copy.refused");
+      expect(refused).toHaveLength(2);
+      expect(refused[0]).toMatchObject({
+        entityType: "Role",
+        entityId: "FINANCE",
+        changes: { fromRole: "FINANCE", toRole: "FINANCE", rule: "same-role" },
+      });
+      expect(refused[1]).toMatchObject({
+        entityType: "Role",
+        entityId: "SYSTEM_ADMIN",
+        changes: {
+          fromRole: "FINANCE",
+          toRole: "SYSTEM_ADMIN",
+          rule: "locked-cell",
+          lock: "never",
+        },
+      });
       expect((await access("SYSTEM_ADMIN")).permissions).toContain(
         "roles.manage",
       );

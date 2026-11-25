@@ -252,6 +252,20 @@ export const envSchema = z
     // it a comparison fails closed.
     BANK_FINGERPRINT_KEY: z.string().min(32).optional(),
 
+    // Temporary (ADR 0056): "on" lets any one of the approver group decide an
+    // approval (#252). "off" keeps today's chain, its substitutes and its limits
+    // exactly as they were, until area 2 routes with the group (#251) and turns
+    // it on. A follow-up removes the switch and the old chain.
+    APPROVER_GROUP: z.enum(["off", "on"]).default("off"),
+    // The approver group's approval limits are switchable, with none set,
+    // until Spectra confirms them (ADR 0049, ADR 0056). They count only while
+    // APPROVER_GROUP is on: the old chain always applies its limits. Only "on"
+    // turns them on; any other value is refused, so a typo cannot switch them.
+    APPROVAL_LIMITS: z.enum(["off", "on"]).default("off"),
+    // Spectra has no approval on the sales side today (A-19, #251 point 9), so
+    // a sales order waits for no approver before its PI goes out. "on" makes it
+    // wait for one; any other value is refused.
+    SALES_APPROVAL: z.enum(["off", "on"]).default("off"),
     // The AI gateway (P-17). The default is the offline mock: no key, no
     // network. Only synthetic data may be sent to any other provider, and a
     // free-tier provider may keep and use what it is sent.

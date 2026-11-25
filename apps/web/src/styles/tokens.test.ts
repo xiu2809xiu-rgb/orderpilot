@@ -70,6 +70,10 @@ function textPairs(): [string, string[]][] {
   for (const s of ["card", "panel-strong", "popover", "secondary"]) {
     pairs.push(["faint-foreground", [s]]);
   }
+  // A table row is drawn selected or hovered over the work panel, and the
+  // stage rail's second line and the small print sit on it in the faint tier.
+  pairs.push(["faint-foreground", ["accent", "panel-strong"]]);
+  pairs.push(["faint-foreground", ["dx-hover-bg", "panel-strong"]]);
   pairs.push(["primary-foreground", ["primary"]]);
   pairs.push(["destructive-foreground", ["destructive"]]);
   pairs.push(["accent-foreground", ["accent", "card"]]);
@@ -244,6 +248,28 @@ describe("the values of the design", () => {
     expect(spaces.length).toBeGreaterThan(0);
     for (const [name, value] of spaces) {
       expect((parseFloat(value) * 16) % 8, name).toBe(0);
+    }
+  });
+
+  it("sets the page rhythm on the 8-pt grid: card padding, head gap, stack and grid gap", () => {
+    // Each is one of the --space-* tokens, so it is on the grid by being one.
+    const px = (name: string) => {
+      const value = must(light[name]);
+      const ref = /^var\(--(space-\d+)\)$/.exec(value);
+      const size = ref ? light[must(ref[1])] : value;
+      return parseFloat(must(size)) * 16;
+    };
+    expect(px("dx-card-pad")).toBe(24);
+    expect(px("dx-head-gap")).toBe(24);
+    expect(px("dx-stack")).toBe(32);
+    expect(px("dx-grid-gap")).toBe(24);
+    for (const name of [
+      "dx-card-pad",
+      "dx-head-gap",
+      "dx-stack",
+      "dx-grid-gap",
+    ]) {
+      expect(px(name) % 8, name).toBe(0);
     }
   });
 

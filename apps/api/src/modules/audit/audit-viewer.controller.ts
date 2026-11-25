@@ -11,6 +11,7 @@ import {
   auditEventParamsSchema,
   auditEventQuerySchema,
   auditEventResponseSchema,
+  auditFilterOptionsResponseSchema,
   type AuditEventQuery,
 } from "@orderpilot/shared";
 import type { AuthContext } from "../../auth/auth-context.js";
@@ -44,6 +45,17 @@ export class AuditViewerController {
   ) {
     const page = await this.viewer.list(query, auth.user.role);
     return { data: page.items, meta: page.meta };
+  }
+
+  @Get("filter-options")
+  @RequirePermission("audit.read")
+  @ApiOperation({
+    summary:
+      "The people in the trail by name, never by email, and the action names that exist, for the filters",
+  })
+  @ApiOkResponse({ schema: openApiSchema(auditFilterOptionsResponseSchema) })
+  async filterOptions() {
+    return { data: await this.viewer.filterOptions() };
   }
 
   @Get("chain")

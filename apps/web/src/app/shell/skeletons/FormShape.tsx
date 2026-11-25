@@ -16,9 +16,9 @@ export function FormShape() {
   return (
     <div className="dx-sheet" aria-hidden="true">
       <PageHeadBones />
-      <div className="dx-card dx-card-work mb-6 flex flex-col gap-5 p-5">
+      <div className="dx-card dx-card-work mb-8 flex flex-col gap-4 p-6">
         <Bone className="h-5 w-40" />
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid gap-6 sm:grid-cols-2">
           {Array.from({ length: 6 }, (_, index) => (
             <Field key={index} />
           ))}

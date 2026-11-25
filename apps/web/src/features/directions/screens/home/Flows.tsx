@@ -73,8 +73,8 @@ export function Flows() {
         loading={<Skeleton className="h-28" aria-hidden="true" />}
       >
         <div className="flex flex-col gap-6">
-          <div className="flex flex-col gap-2">
-            <h3 className="fs-14 font-semibold">{t("flows.sales")}</h3>
+          <div className="flex flex-col">
+            <h3 className="dx-block-title">{t("flows.sales")}</h3>
             <FlowRow
               label={tParts("journey.flows.sales")}
               labels={labels}
@@ -82,14 +82,14 @@ export function Flows() {
             />
           </div>
           {withPurchase ? (
-            <div className="flex flex-col gap-2">
-              <h3 className="fs-14 font-semibold">{t("flows.purchase")}</h3>
+            <div className="flex flex-col">
+              <h3 className="dx-block-title">{t("flows.purchase")}</h3>
               <FlowRow
                 label={tParts("journey.flows.purchase")}
                 labels={labels}
                 cells={purchase}
               />
-              <p className="fs-14 text-muted-foreground">
+              <p className="fs-14 mt-2 text-muted-foreground">
                 {t("flows.purchaseNote")}
               </p>
             </div>

@@ -8,6 +8,7 @@
 import type { WorkflowsOrderFlow200DataDocumentsItem } from './workflowsOrderFlow200DataDocumentsItem.ts';
 import type { WorkflowsOrderFlow200DataOrder } from './workflowsOrderFlow200DataOrder.ts';
 import type { WorkflowsOrderFlow200DataPayment } from './workflowsOrderFlow200DataPayment.ts';
+import type { WorkflowsOrderFlow200DataPi } from './workflowsOrderFlow200DataPi.ts';
 import type { WorkflowsOrderFlow200DataStepsItem } from './workflowsOrderFlow200DataStepsItem.ts';
 import type { WorkflowsOrderFlow200DataTimelineItem } from './workflowsOrderFlow200DataTimelineItem.ts';
 
@@ -17,4 +18,6 @@ export type WorkflowsOrderFlow200Data = {
   timeline: WorkflowsOrderFlow200DataTimelineItem[];
   payment: WorkflowsOrderFlow200DataPayment;
   documents: WorkflowsOrderFlow200DataDocumentsItem[];
+  /** @nullable */
+  pi?: WorkflowsOrderFlow200DataPi;
 };

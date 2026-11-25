@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger } from "@nestjs/common";
 import type { PolicyDecision, PolicyRequest } from "@orderpilot/shared";
 import { AuditService } from "../../audit/audit.service.js";
 import { RolePermissionRepository } from "../../auth/role-permission.repository.js";
+import { AppConfig } from "../../config/app-config.js";
 import { DomainError } from "../../common/domain-error.js";
 import { Database } from "../../database/database.js";
 import { UserRepository } from "../../users/user.repository.js";
@@ -13,6 +14,11 @@ import {
 import { deciderFor, type Decider } from "./domain/approval-route.js";
 import type { ApprovalSetup, Approver } from "./domain/approval-setup.js";
 import {
+  approverGroup,
+  type ApproverGroup,
+  type GroupCandidate,
+} from "./domain/approver-group.js";
+import {
   isHoldStep,
   isVendorPayment,
   type HoldClearanceFacts,
@@ -21,7 +27,7 @@ import {
   type VerificationAttempt,
 } from "./domain/bank-hold-rules.js";
 import { ACTION_POLICY } from "./domain/policies.js";
-import { policyActionOf } from "./domain/policy-actions.js";
+import { policyActionOf, type LimitKind } from "./domain/policy-actions.js";
 import type { EarlierDuties } from "./domain/segregation-of-duties.js";
 
 /**
@@ -63,6 +69,9 @@ export interface RequestInfo {
  * which record, for how much and raised by whom (F-1's PolicyRequest). It
  * gathers the facts the rules need and leaves every decision to them.
  */
+/** The group handed to the rules while the old chain decides: never read. */
+const NOBODY_YET: ApproverGroup = { approvers: [], reason: null };
+
 @Injectable()
 export class AuthorisationService {
   private readonly logger = new Logger(AuthorisationService.name);
@@ -76,6 +85,7 @@ export class AuthorisationService {
     @Inject(UserRepository) private readonly users: UserRepository,
     @Inject(AuditService) private readonly audit: AuditService,
     @Inject(BankHoldRepository) private readonly holds: BankHoldRepository,
+    @Inject(AppConfig) private readonly config: AppConfig,
   ) {}
 
   /** The decision on one action, without acting on it. */
@@ -103,12 +113,24 @@ export class AuthorisationService {
       };
     }
     const { limit } = action;
-    const [roleHoldsPermission, approvers, payment, holdStep] =
+    const groupDecides = this.config.governance.approverGroup;
+    const [roleHoldsPermission, approvers, group, payment, holdStep] =
       await Promise.all([
         this.matrix.has(request.actor.role, action.permission),
         limit
           ? this.approversAround(request.requesterUserId, request.actor.userId)
           : undefined,
+        // Who may decide, with no limit applied: a refusal for the amount is
+        // the limit rule's, so it names its own rule. Read only while the
+        // group decides; the old chain needs none of it.
+        limit && groupDecides
+          ? this.groupFor({
+              requesterUserId: request.requesterUserId,
+              limit,
+              amount: request.amount,
+              limitsOn: false,
+            })
+          : NOBODY_YET,
         isVendorPayment(request.action)
           ? this.vendorPaymentFacts(request.vendorNo)
           : undefined,
@@ -131,7 +153,17 @@ export class AuthorisationService {
       requesterUserId: request.requesterUserId,
       earlierDuties,
       ...(limit && approvers
-        ? { approval: { limit, amount: request.amount, approvers, now } }
+        ? {
+            approval: {
+              limit,
+              amount: request.amount,
+              approvers,
+              now,
+              group,
+              groupDecides,
+              limitsOn: this.limitsApply(),
+            },
+          }
         : {}),
       ...(payment ? { vendorHold: payment.facts } : {}),
       ...(holdStep ? { holdClearance: holdStep.facts } : {}),
@@ -239,7 +271,47 @@ export class AuthorisationService {
     );
   }
 
-  /** Who should receive a request raised by `requesterUserId`, for area 2 to route it. */
+  /**
+   * The approvers who may decide a request (#252): every enabled management
+   * approver except the requester and, while limits are on, only those whose
+   * own limit covers the amount. Each is an id and a name, never an email.
+   * `reason` is set only when nobody may decide. Area 2 routes an SPR to all
+   * of them, and the first decision closes it.
+   */
+  async approversFor(question: {
+    readonly requester: string;
+    readonly action: string;
+    readonly amount: string | undefined;
+  }): Promise<ApproverGroup> {
+    const limit = policyActionOf(question.action)?.limit;
+    if (!limit) {
+      return { approvers: [], reason: `${question.action} is not an approval` };
+    }
+    return this.groupFor({
+      requesterUserId: question.requester,
+      limit,
+      amount: question.amount,
+      limitsOn: this.limitsApply(),
+    });
+  }
+
+  /**
+   * Whether approval limits apply: always under the old chain, as before
+   * #252, and under the group only while APPROVAL_LIMITS is on.
+   */
+  private limitsApply(): boolean {
+    const { approverGroup, approvalLimits } = this.config.governance;
+    return approverGroup ? approvalLimits : true;
+  }
+
+  /**
+   * Who should receive a request raised by `requesterUserId`, along the old
+   * approval chain.
+   *
+   * Deprecated since #252: route with `approversFor`. While APPROVER_GROUP is
+   * off this chain still decides who may approve, unchanged; area 2 turns the
+   * group on when it moves (#251), and the follow-up removes this.
+   */
   async deciderFor(
     requesterUserId: string,
     now: Date = new Date(),
@@ -249,6 +321,50 @@ export class AuthorisationService {
       await this.approversAround(requesterUserId),
       now,
     );
+  }
+
+  /**
+   * The approver group for one request. Every user with the APPROVER role is
+   * read, a page at a time: the group is small (three at Spectra). Setups are
+   * read only while limits apply, and only the id, name and enabled state of
+   * each user go on: never an email or a password hash.
+   */
+  private async groupFor(question: {
+    readonly requesterUserId: string | undefined;
+    readonly limit: LimitKind | undefined;
+    readonly amount: string | undefined;
+    readonly limitsOn: boolean;
+  }): Promise<ApproverGroup> {
+    const people: { id: string; displayName: string; disabled: boolean }[] = [];
+    for (let page = 1; ; page += 1) {
+      const found = await this.users.list({
+        role: "APPROVER",
+        page,
+        pageSize: 200,
+      });
+      for (const user of found.items) {
+        people.push({
+          id: user.id,
+          displayName: user.displayName,
+          disabled: user.disabledAt !== null,
+        });
+      }
+      if (people.length >= found.meta.total || found.items.length === 0) break;
+    }
+    const setups = question.limitsOn
+      ? new Map(
+          (await this.setups.findMany(people.map((each) => each.id))).map(
+            (setup) => [setup.userId, setup],
+          ),
+        )
+      : new Map<string, ApprovalSetup>();
+    const candidates: GroupCandidate[] = people.map((each) => ({
+      userId: each.id,
+      displayName: each.displayName,
+      disabled: each.disabled,
+      setup: setups.get(each.id) ?? null,
+    }));
+    return approverGroup(candidates, question);
   }
 
   /**

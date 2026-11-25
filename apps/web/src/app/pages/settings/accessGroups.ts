@@ -50,6 +50,9 @@ const GROUPS: readonly GroupDef[] = [
     style: "phrases",
     permissions: [
       "tasks.complete",
+      // Before the decision, as the work goes: the coordinator routes an SPR
+      // to the approvers, and one of them decides it (#252).
+      "spr.route",
       "approvals.decide",
       "workflows.inboxes.any",
     ],

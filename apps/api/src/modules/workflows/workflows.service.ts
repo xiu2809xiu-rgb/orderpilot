@@ -18,6 +18,10 @@ import { AuthorisationService } from "../governance/authorisation.service.js";
 import { ApprovalPolicy } from "./domain/approval-policy.js";
 import { DocumentConfigRepository } from "./document-config.repository.js";
 import { mockOpenRules } from "./mock/mock-open-rules.js";
+import { OrderWorkflowService } from "./order-workflow.service.js";
+import { PaymentConfirmationRepository } from "./payment-confirmation.repository.js";
+import { PiRecordRepository } from "./pi-record.repository.js";
+import { runningFlowOf } from "./running-flow.js";
 import { SprRecordRepository } from "./spr-record.repository.js";
 import { SprRoutingService, type SprHandover } from "./spr-routing.service.js";
 import { WorkflowReadModel } from "./workflow-read-model.js";
@@ -67,6 +71,15 @@ export class WorkflowsService {
     @Optional()
     @Inject(WorkflowTaskRepository)
     private readonly storedTasks?: WorkflowTaskRepository,
+    @Optional()
+    @Inject(OrderWorkflowService)
+    private readonly orders?: OrderWorkflowService,
+    @Optional()
+    @Inject(PaymentConfirmationRepository)
+    private readonly payments?: PaymentConfirmationRepository,
+    @Optional()
+    @Inject(PiRecordRepository)
+    private readonly pis?: PiRecordRepository,
   ) {}
 
   /** A role's tasks, filtered and paged on the server so a long inbox stays quick. */
@@ -203,10 +216,30 @@ export class WorkflowsService {
     );
   }
 
+  /** True for an order the state machine runs: its status and payments are not mock. */
+  async runsOnMachine(orderNo: string): Promise<boolean> {
+    return Boolean(await this.orders?.statusOf(orderNo));
+  }
+
+  /** On an order the state machine runs, the machine says where it stands and whose move it is. */
   async flow(orderNo: string): Promise<OrderFlow> {
     const flow = await this.model.flowOf(orderNo);
     if (!flow) throw new NotFoundError(`Order ${orderNo}`);
-    return flow;
+    const view = await this.orders?.statusOf(orderNo);
+    if (!view) return flow;
+    const payments = (await this.payments?.forOrder(orderNo)) ?? [];
+    const due = (await this.orders?.prepaymentDueOf(orderNo)) ?? null;
+    const sent = (await this.pis?.sentOf(orderNo)) ?? null;
+    const pi = sent
+      ? {
+          recordNo: sent.recordNo,
+          issue: sent.issue,
+          sentAt: sent.sentAt,
+          sentBy: sent.sentBy,
+          reversals: sent.reversals,
+        }
+      : null;
+    return runningFlowOf(flow, view, payments, due, pi);
   }
 
   async spr(recordNo: string, viewerUserId?: string): Promise<SprDetail> {

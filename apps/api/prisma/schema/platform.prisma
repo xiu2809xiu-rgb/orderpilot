@@ -106,4 +106,37 @@ model AuditEvent {
   @@index([entityType, entityId])
   @@index([actorUserId])
   @@index([occurredAt])
+  // The action filter offers the names that exist (F-9): this index holds them,
+  // so the list is read from it, not from every event.
+  @@index([action])
+}
+
+/// What a data migration changed that the audit trail must hear about. A
+/// migration runs before the seed and cannot write an audit event (the writer
+/// is application code, and each event's hash covers the one before it), so it
+/// leaves a marker here instead. The seed records one event per marker that has
+/// no auditedAt, stamps it in the same transaction, and a second run finds
+/// every marker stamped. A fresh database has no rows when the migration runs,
+/// so it gets no marker and no event (ADR 0058, decision 8).
+///
+/// The key is the migration's name, the kind of record and its id, so a migration
+/// that runs twice leaves one marker. The row is data about a change, never a
+/// secret: `changes` holds the before and the after of one setting.
+model MigrationMarker {
+  /// The migration's folder name, such as 20261122090000_workflows_move_role_references_to_approver.
+  migration  String
+  /// The audit action to record, as area.verb: "workflows.sla.changed".
+  action     String
+  /// What the audit event calls the record, as its writer elsewhere does.
+  entityType String
+  entityId   String
+  /// { before, after }. Never a secret, a token or a whole document.
+  changes    Json
+  createdAt  DateTime  @default(now()) @db.Timestamptz(3)
+  /// Null until the seed has recorded the event.
+  auditedAt  DateTime? @db.Timestamptz(3)
+
+  @@id([migration, entityType, entityId])
+  // The seed asks for the markers not yet recorded.
+  @@index([auditedAt])
 }

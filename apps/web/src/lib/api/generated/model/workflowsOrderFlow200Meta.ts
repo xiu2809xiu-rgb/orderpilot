@@ -7,5 +7,5 @@
  */
 
 export type WorkflowsOrderFlow200Meta = {
-  mock: true;
+  mock: boolean;
 };

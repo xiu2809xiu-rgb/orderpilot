@@ -2,13 +2,14 @@ import { ROLES } from "@orderpilot/shared";
 import { SlidersHorizontal } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { TableFilters } from "@/components/common";
+import { FilterChips, type TableFilters } from "@/components/common";
 import {
   Field,
   NativeSelect,
   ToggleChip,
 } from "@/components/common/data-table/Field";
 import { Button } from "@/components/ui/button";
+import { AuditPickers } from "./AuditPickers";
 import { CommitInput } from "./CommitInput";
 import type { FilterId } from "./auditQuery";
 
@@ -31,7 +32,9 @@ const FIELDS: readonly FilterId[] = [
  * for example from a link. The search box and its trace ID hint sit outside
  * the fold, so pasting a trace ID needs no click. (The fold is from Azri's
  * #270.) The button and the Refusals switch sit in the table's filter row,
- * drawn as the list pages draw theirs; the fold opens under the row.
+ * drawn as the list pages draw theirs; the fold opens under the row. The
+ * events around a sequence come from a link, such as the chain check's, so
+ * they show as a chip to clear, not as a field in the fold.
  */
 export function AuditFilters({
   filters,
@@ -47,6 +50,7 @@ export function AuditFilters({
     return typeof value === "string" ? value : "";
   };
   const inUse = FIELDS.filter((id) => text(id) !== "").length;
+  const around = text("around");
   const [open, setOpen] = useState(inUse > 0);
   const shown = open || inUse > 0;
   const text_input = (
@@ -92,12 +96,30 @@ export function AuditFilters({
             : t("filters.more")}
         </Button>
       </div>
+      <FilterChips
+        chips={
+          around === ""
+            ? []
+            : [{ id: "around", label: t("filters.around", { n: around }) }]
+        }
+        filters={filters}
+        onChange={() => {
+          setFilter("around", undefined);
+        }}
+      />
       {shown ? (
         <fieldset
           id="audit-more-filters"
           className="col-span-full grid w-full basis-full grid-cols-1 gap-s2 sm:grid-cols-2 lg:grid-cols-4"
         >
           <legend className="sr-only">{t("filters.region")}</legend>
+          {/* First, so that when their options fail to load, the error sits
+              above the other fields instead of splitting them in two. */}
+          <AuditPickers
+            actor={text("actor")}
+            action={text("action")}
+            setFilter={setFilter}
+          />
           <Field label={t("filters.kind")} htmlFor="audit-filter-kind">
             <NativeSelect
               id="audit-filter-kind"
@@ -130,12 +152,6 @@ export function AuditFilters({
               ))}
             </NativeSelect>
           </Field>
-          {text_input("actor", t("filters.actor"), {
-            placeholder: t("filters.actorHint"),
-          })}
-          {text_input("action", t("filters.action"), {
-            placeholder: t("filters.actionHint"),
-          })}
           {text_input("entity", t("filters.entity"), {
             placeholder: t("filters.entityHint"),
           })}

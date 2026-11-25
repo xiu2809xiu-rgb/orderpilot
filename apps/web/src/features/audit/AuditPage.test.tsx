@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import i18n from "i18next";
-import { HttpResponse, http } from "msw";
+import { HttpResponse, delay, http } from "msw";
 import { MemoryRouter } from "react-router";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import {
@@ -80,6 +80,27 @@ function renderAt(path = "/audit", client = createQueryClient()) {
   );
 }
 
+const FARAH = "0194f3a0-0000-7000-8000-0000000000aa";
+const WEI = "0194f3a0-0000-7000-8000-0000000000bb";
+const OPTIONS = {
+  people: [
+    { id: FARAH, name: "Farah Finance" },
+    { id: WEI, name: "Wei Warehouse" },
+  ],
+  actions: [
+    "auth.permission.refused",
+    "auth.signin.succeeded",
+    "governance.permission.granted",
+  ],
+};
+
+/** `GET /audit/filter-options`: the people and actions the pickers offer. */
+function optionsHandler(body: object = OPTIONS) {
+  return http.get("*/api/v1/audit/filter-options", () =>
+    HttpResponse.json({ data: body }),
+  );
+}
+
 const page = (rows: AuditViewerList200DataItem[], total = rows.length) => ({
   data: rows,
   meta: { page: 1, pageSize: 25, total },
@@ -91,7 +112,10 @@ describe("AuditPage", () => {
   });
   beforeEach(() => {
     signIn("AUDITOR");
-    server.use(getAuditViewerListMockHandler(page([event()])));
+    server.use(
+      getAuditViewerListMockHandler(page([event()])),
+      optionsHandler(),
+    );
   });
 
   it("lists events with the synthetic label, no export, and no axe violations", async () => {
@@ -294,6 +318,36 @@ describe("AuditPage", () => {
     expect(
       await screen.findByText("Verified up to sequence 57"),
     ).toBeInTheDocument();
+    // The picture (F-10) numbers only what the check sent: 40 events checked
+    // up to 57 says nothing about the numbers in between.
+    await waitFor(() => {
+      expect(pictureText()).toBe("57");
+    });
+  });
+
+  it("draws no chain for an empty trail", async () => {
+    server.use(
+      getAuditViewerChainMockHandler({
+        data: {
+          ok: true,
+          checked: 0,
+          verifiedThrough: null,
+          brokenAtSequence: null,
+          brokenAtEventId: null,
+          problem: null,
+          checkedAt: new Date().toISOString(),
+        },
+      }),
+    );
+    const user = userEvent.setup();
+    renderAt();
+    await user.click(
+      await screen.findByRole("button", { name: "Check the chain" }),
+    );
+    expect(
+      await screen.findByText("Nothing to verify yet: the trail is empty."),
+    ).toBeInTheDocument();
+    expect(pictureText()).toBeNull();
   });
 
   it("reports where a broken chain breaks", async () => {
@@ -317,10 +371,18 @@ describe("AuditPage", () => {
     );
     expect(await screen.findByText("Broken at sequence 9")).toBeInTheDocument();
     expect(screen.getByRole("alert")).toHaveTextContent(
-      "Events up to sequence 8 still verify.",
+      "Events up to sequence 8 still verify. The check stops at the first break, so the events after it are not checked.",
     );
+    await waitFor(() => {
+      expect(pictureText()).toBe("89");
+    });
   });
 });
+
+/** The numbers under the chain picture, or null when there is no picture. */
+function pictureText(): string | null {
+  return document.querySelector("[data-chain-picture]")?.textContent ?? null;
+}
 
 describe("EntityOperationLog", () => {
   beforeAll(async () => {
@@ -360,6 +422,332 @@ describe("EntityOperationLog", () => {
     signIn("FINANCE");
     const { container } = renderLog();
     expect(container).toBeEmptyDOMElement();
+  });
+});
+
+/**
+ * The pickers sit behind More filters (#270), which opens by itself only when
+ * a filter is in use. The F-9 blocks sign in as the system admin: any role
+ * with audit.read would do, and the auditor is retired by ADR 0058.
+ */
+async function openMoreFilters(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(await screen.findByRole("button", { name: "More filters" }));
+}
+
+describe("the person and action pickers (F-9)", () => {
+  beforeAll(async () => {
+    await i18n.loadNamespaces(["audit", "list-page", "components"]);
+  });
+  const seen: URL[] = [];
+  beforeEach(() => {
+    signIn("SYSTEM_ADMIN");
+    seen.length = 0;
+    server.use(
+      getAuditViewerListMockHandler((info) => {
+        seen.push(new URL(info.request.url));
+        return page([event()]);
+      }),
+      optionsHandler(),
+    );
+  });
+
+  it("picks a person by name, sends their id, and asks for no pasted id", async () => {
+    const user = userEvent.setup();
+    renderAt();
+    await screen.findByText("Farah Finance");
+    await openMoreFilters(user);
+    expect(screen.queryByPlaceholderText("Paste a user ID")).toBeNull();
+    expect(screen.queryByLabelText("Person ID")).toBeNull();
+    await user.click(await screen.findByRole("combobox", { name: "Person" }));
+    await user.click(
+      await screen.findByRole("option", { name: "Wei Warehouse" }),
+    );
+    await waitFor(() => {
+      expect(seen.at(-1)?.searchParams.get("actorUserId")).toBe(WEI);
+    });
+  });
+
+  it("shows names only, even when the server sends more", async () => {
+    server.use(
+      optionsHandler({
+        ...OPTIONS,
+        people: [{ id: WEI, name: "Wei Warehouse", email: "wei@example.test" }],
+      }),
+    );
+    const user = userEvent.setup();
+    const { baseElement } = renderAt();
+    await openMoreFilters(user);
+    await user.click(await screen.findByRole("combobox", { name: "Person" }));
+    expect(
+      await screen.findByRole("option", { name: "Wei Warehouse" }),
+    ).toBeInTheDocument();
+    expect(baseElement.textContent).not.toContain("@example.test");
+  });
+
+  it("names the person a link filters by", async () => {
+    renderAt(`/audit?actor=${WEI}`);
+    await waitFor(() => {
+      expect(
+        screen.getByRole("combobox", { name: "Person" }),
+      ).toHaveTextContent("Wei Warehouse");
+    });
+    expect(seen.at(-1)?.searchParams.get("actorUserId")).toBe(WEI);
+  });
+
+  it("never shows a person's id, even while the names load", async () => {
+    server.use(
+      http.get("*/api/v1/audit/filter-options", async () => {
+        await delay("infinite");
+        return HttpResponse.json({ data: OPTIONS });
+      }),
+    );
+    renderAt(`/audit?actor=${WEI}`);
+    const picker = await screen.findByRole("combobox", { name: "Person" });
+    expect(picker).not.toHaveTextContent(WEI);
+  });
+
+  it("picks an action that exists, and sends it", async () => {
+    const user = userEvent.setup();
+    renderAt();
+    await screen.findByText("Farah Finance");
+    await openMoreFilters(user);
+    await user.click(await screen.findByRole("combobox", { name: "Action" }));
+    for (const action of OPTIONS.actions) {
+      expect(
+        await screen.findByRole("option", { name: action }),
+      ).toBeInTheDocument();
+    }
+    await user.click(
+      screen.getByRole("option", { name: "governance.permission.granted" }),
+    );
+    await waitFor(() => {
+      expect(seen.at(-1)?.searchParams.get("action")).toBe(
+        "governance.permission.granted",
+      );
+    });
+  });
+
+  it("keeps an action prefix from an older link", async () => {
+    renderAt("/audit?action=auth.");
+    await waitFor(() => {
+      expect(
+        screen.getByRole("combobox", { name: "Action" }),
+      ).toHaveTextContent("Starts with auth.");
+    });
+    expect(seen.at(-1)?.searchParams.get("action")).toBe("auth.");
+  });
+
+  it("says so when the people and actions cannot load, with a trace id, and retries", async () => {
+    let calls = 0;
+    server.use(
+      http.get("*/api/v1/audit/filter-options", () => {
+        calls += 1;
+        return calls === 1
+          ? HttpResponse.json(errorBody("INTERNAL_ERROR", "trace-opt"), {
+              status: 500,
+            })
+          : HttpResponse.json({ data: OPTIONS });
+      }),
+    );
+    const user = userEvent.setup();
+    renderAt(
+      "/audit",
+      new QueryClient({ defaultOptions: { queries: { retry: false } } }),
+    );
+    await openMoreFilters(user);
+    expect(await screen.findByText(/trace-opt/)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /try again/i }));
+    await user.click(await screen.findByRole("combobox", { name: "Person" }));
+    expect(
+      await screen.findByRole("option", { name: "Wei Warehouse" }),
+    ).toBeInTheDocument();
+  });
+
+  it("counts the pickers as filters in use", async () => {
+    renderAt(`/audit?actor=${WEI}&action=auth.`);
+    const more = await screen.findByRole("button", {
+      name: "More filters (2 in use)",
+    });
+    expect(more).toHaveAttribute("aria-expanded", "true");
+  });
+
+  it("has no axe violations with a picker open", async () => {
+    const user = userEvent.setup();
+    const { baseElement } = renderAt();
+    await openMoreFilters(user);
+    await user.click(await screen.findByRole("combobox", { name: "Person" }));
+    await screen.findByRole("option", { name: "Wei Warehouse" });
+    expect(await axeViolations(baseElement)).toEqual([]);
+  });
+});
+
+describe("a broken chain and the events around it (F-9)", () => {
+  beforeAll(async () => {
+    await i18n.loadNamespaces(["audit", "list-page", "components"]);
+  });
+  const BROKEN = "0194f3a0-0000-7000-8000-000000000009";
+  const seen: URL[] = [];
+  beforeEach(() => {
+    signIn("SYSTEM_ADMIN");
+    seen.length = 0;
+    server.use(
+      getAuditViewerListMockHandler((info) => {
+        seen.push(new URL(info.request.url));
+        return page([
+          event({ sequence: 10, id: "0194f3a0-0000-7000-8000-000000000010" }),
+          event({ sequence: 9, id: BROKEN }),
+          event({ sequence: 8, id: "0194f3a0-0000-7000-8000-000000000008" }),
+        ]);
+      }),
+      optionsHandler(),
+      getAuditViewerChainMockHandler({
+        data: {
+          ok: false,
+          checked: 9,
+          verifiedThrough: 8,
+          brokenAtSequence: 9,
+          brokenAtEventId: BROKEN,
+          problem: "hash-mismatch",
+          checkedAt: new Date().toISOString(),
+        },
+      }),
+    );
+  });
+
+  async function checkTheChain() {
+    const user = userEvent.setup();
+    const view = renderAt();
+    await user.click(
+      await screen.findByRole("button", { name: "Check the chain" }),
+    );
+    await screen.findByText("Broken at sequence 9");
+    return { user, ...view };
+  }
+
+  it("links to the event it breaks at, and to the events around it", async () => {
+    await checkTheChain();
+    const open = screen.getByRole("link", { name: "Open event 9" });
+    const href = new URL(open.getAttribute("href") ?? "", "http://x");
+    expect(href.searchParams.get("event")).toBe(BROKEN);
+    expect(href.searchParams.get("around")).toBe("9");
+    const around = screen.getByRole("link", {
+      name: "Show the events around it",
+    });
+    expect(around).toHaveAttribute("href", "/audit?around=9");
+  });
+
+  it("follows the link to the events around the break", async () => {
+    const { user } = await checkTheChain();
+    await user.click(
+      screen.getByRole("link", { name: "Show the events around it" }),
+    );
+    await waitFor(() => {
+      expect(seen.at(-1)?.searchParams.get("around")).toBe("9");
+    });
+  });
+
+  it("opens the event it breaks at from the link", async () => {
+    server.use(
+      getAuditViewerGetMockHandler({
+        data: event({ sequence: 9, id: BROKEN }),
+      }),
+    );
+    const { user } = await checkTheChain();
+    await user.click(screen.getByRole("link", { name: "Open event 9" }));
+    expect(await screen.findByRole("dialog")).toHaveTextContent("Event 9");
+  });
+
+  it("has no axe violations when the chain is broken", async () => {
+    const { container } = await checkTheChain();
+    expect(await axeViolations(container)).toEqual([]);
+  });
+
+  it("opens the same event from the red block, for a mouse, out of the tab order (F-10)", async () => {
+    server.use(
+      getAuditViewerGetMockHandler({
+        data: event({ sequence: 9, id: BROKEN }),
+      }),
+    );
+    const { user, container } = await checkTheChain();
+    const block = await waitFor(() => {
+      const found = container.querySelector("[data-chain-break]");
+      if (!(found instanceof HTMLElement)) throw new Error("No red block yet");
+      return found;
+    });
+    const link = screen.getByRole("link", { name: "Open event 9" });
+    expect(block.getAttribute("href")).toBe(link.getAttribute("href"));
+    expect(block).toHaveAttribute("tabindex", "-1");
+    expect(block.closest("[aria-hidden='true']")).not.toBeNull();
+    // Axe again, now the picture and its click target are on the page.
+    expect(await axeViolations(container)).toEqual([]);
+    await user.click(block);
+    expect(await screen.findByRole("dialog")).toHaveTextContent("Event 9");
+  });
+
+  it("marks the event the list is centred on, and the chip clears it", async () => {
+    const user = userEvent.setup();
+    renderAt("/audit?around=9");
+    await waitFor(() => {
+      expect(seen.at(-1)?.searchParams.get("around")).toBe("9");
+    });
+    const row = (
+      await screen.findByRole("button", { name: "Details of event 9" })
+    ).closest("tr");
+    expect(row).not.toBeNull();
+    expect(within(row as HTMLElement).getByText("Centre")).toBeInTheDocument();
+    await user.click(
+      screen.getByRole("button", {
+        name: "Clear filter: Around sequence 9",
+      }),
+    );
+    await waitFor(() => {
+      expect(seen.at(-1)?.searchParams.has("around")).toBe(false);
+    });
+  });
+
+  it("does not fetch a sequence that is not a whole number, and says so", async () => {
+    renderAt("/audit?around=abc");
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "sequence is not a whole number",
+    );
+    expect(seen).toHaveLength(0);
+  });
+
+  it("keeps the events around a sequence when another filter changes", async () => {
+    const user = userEvent.setup();
+    renderAt("/audit?around=9");
+    await screen.findByRole("button", { name: "Details of event 9" });
+    await user.click(screen.getByRole("switch", { name: "Refusals only" }));
+    await waitFor(() => {
+      expect(seen.at(-1)?.searchParams.get("refusalsOnly")).toBe("true");
+    });
+    expect(seen.at(-1)?.searchParams.get("around")).toBe("9");
+  });
+
+  it("offers no break links while the chain verifies", async () => {
+    server.use(
+      getAuditViewerChainMockHandler({
+        data: {
+          ok: true,
+          checked: 10,
+          verifiedThrough: 10,
+          brokenAtSequence: null,
+          brokenAtEventId: null,
+          problem: null,
+          checkedAt: new Date().toISOString(),
+        },
+      }),
+    );
+    const user = userEvent.setup();
+    renderAt();
+    await user.click(
+      await screen.findByRole("button", { name: "Check the chain" }),
+    );
+    await screen.findByText("Verified up to sequence 10");
+    expect(screen.queryByRole("link", { name: /^Open event/ })).toBeNull();
+    expect(
+      screen.queryByRole("link", { name: "Show the events around it" }),
+    ).toBeNull();
   });
 });
 

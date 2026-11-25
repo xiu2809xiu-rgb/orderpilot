@@ -25,13 +25,49 @@ model RevokedRolePermission {
   @@id([role, permission])
 }
 
-/// One user's approval setup, in the shape of Navision's Approval User Setup
-/// (packages/shared governance/approval.ts), plus when they are away, which
-/// Navision does not record. Configuration until Spectra confirms its
-/// approvers and limits (A-14). User ids are plain columns, as in the other
-/// areas' tables. The migration adds CHECKs Prisma cannot express: nobody is
-/// their own substitute, an absence starts before it ends, limits are not
-/// below zero.
+/// A notice to the management approvers that the administrator's role gained
+/// permissions (#383, ADR 0067). The administrator can widen its own role alone
+/// and reads the trail where that is recorded, so the people who decide
+/// approvals are told. Written in the same transaction as the grant and its
+/// audit event, so a grant never exists without its notice.
+model GovernanceNotice {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  /// "admin-role-widened", the only kind so far.
+  kind        String
+  actorUserId String   @db.Uuid
+  /// A name, never an email.
+  actorName   String
+  /// What the administrator's role gained, in the matrix's order.
+  permissions String[]
+  /// The role a copy came from; null for one cell.
+  fromRole    Role?
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+
+  reads GovernanceNoticeRead[]
+
+  /// Newest first, as the bell reads them.
+  @@index([createdAt])
+}
+
+/// Who has read a governance notice. Each approver marks their own.
+model GovernanceNoticeRead {
+  noticeId String   @db.Uuid
+  userId   String   @db.Uuid
+  readAt   DateTime @default(now()) @db.Timestamptz(3)
+
+  notice GovernanceNotice @relation(fields: [noticeId], references: [id])
+
+  @@id([noticeId, userId])
+  @@index([userId])
+}
+
+/// One user's approval setup, in the shape of Business Central's Approval User
+/// Setup (packages/shared governance/approval.ts), plus when they are away,
+/// which Business Central does not record. Configuration until Spectra
+/// confirms its approvers and limits (A-14). User ids are plain columns, as in
+/// the other areas' tables. The migration adds CHECKs Prisma cannot express:
+/// nobody is their own substitute, an absence starts before it ends, limits are
+/// not below zero.
 model ApprovalUserSetup {
   userId                      String    @id @db.Uuid
   /// Who approves what this user raises, and whom this user escalates to.

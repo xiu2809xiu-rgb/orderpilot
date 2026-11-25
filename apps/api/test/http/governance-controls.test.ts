@@ -41,6 +41,7 @@ import { PermissionPolicy } from "../../src/auth/permission-policy.js";
 import { RolePermissionRepository } from "../../src/auth/role-permission.repository.js";
 import { requestIdOf } from "../../src/common/request-id.js";
 import { ZodValidationPipe } from "../../src/common/zod-validation.pipe.js";
+import { AppConfig } from "../../src/config/app-config.js";
 import { Database } from "../../src/database/database.js";
 import { seedApprovalSetups } from "../../src/modules/governance/approval-setup-seed.js";
 import { ApprovalSetupRepository } from "../../src/modules/governance/approval-setup.repository.js";
@@ -88,6 +89,7 @@ const standInBodySchema = z.object({
   action: z.string().min(1),
   amount: decimalStringSchema.optional(),
   requesterUserId: z.uuid().optional(),
+  earlierDuties: z.object({ "spr.route": z.uuid().optional() }).optional(),
 });
 type StandInBody = z.infer<typeof standInBodySchema>;
 
@@ -120,10 +122,46 @@ class StandInApprovalController {
         resource: { type: "Spr", id: recordNo },
         amount: body.amount,
         requesterUserId: body.requesterUserId,
+        earlierDuties: body.earlierDuties,
       },
       { ip: req.ip ?? null, traceId: requestIdOf(req) },
     );
     return { data: { approved: recordNo } };
+  }
+}
+
+const standInRouteSchema = z.object({ requesterUserId: z.uuid().optional() });
+type StandInRoute = z.infer<typeof standInRouteSchema>;
+
+/**
+ * Stands in for area 2's routing of an SPR (#251) until it asks the policy: the
+ * guard checks spr.route, then the route asks the policy before it acts.
+ * Registered only in this file's test app, never in production code.
+ */
+@Controller("test-only/sprs")
+class StandInRouteController {
+  constructor(@Inject(ModuleRef) private readonly modules: ModuleRef) {}
+
+  @Post(":recordNo/route")
+  @HttpCode(200)
+  @RequirePermission("spr.route")
+  async route(
+    @Param("recordNo") recordNo: string,
+    @Body(new ZodValidationPipe(standInRouteSchema)) body: StandInRoute,
+    @Auth() auth: AuthContext,
+    @Req() req: Request,
+  ) {
+    const policy = this.modules.get(AuthorisationService, { strict: false });
+    await policy.enforce(
+      {
+        actor: { userId: auth.user.id, role: auth.user.role },
+        action: "spr.route",
+        resource: { type: "Spr", id: recordNo },
+        requesterUserId: body.requesterUserId,
+      },
+      { ip: req.ip ?? null, traceId: requestIdOf(req) },
+    );
+    return { data: { routed: recordNo } };
   }
 }
 
@@ -481,6 +519,29 @@ describe("approval limits (F-3)", () => {
     expect(
       (await approve("SECOND_APPROVER", "spr.approve", "100.00")).status,
     ).toBe(403);
+  });
+
+  it("keeps the old chain, its substitutes and its limits while APPROVER_GROUP is off (#252)", async () => {
+    expect(t.app.get(AppConfig).governance.approverGroup).toBe(false);
+    // The chain names the approver: the second approver may not decide.
+    expect(
+      (await approve("SECOND_APPROVER", "spr.approve", "100.00")).status,
+    ).toBe(403);
+    expect((await lastRefusal())?.changes).toMatchObject({
+      rule: "approval-route",
+    });
+    // Limits apply under the old chain, whatever APPROVAL_LIMITS says.
+    expect((await approve("APPROVER", "spr.approve", "5000.01")).status).toBe(
+      403,
+    );
+    expect((await lastRefusal())?.changes).toMatchObject({
+      rule: "approval-limit",
+    });
+    // And the substitute decides while the approver is away.
+    await change(idOf("approver"), awayNow());
+    expect(
+      (await approve("SECOND_APPROVER", "spr.approve", "100.00")).status,
+    ).toBe(200);
   });
 
   it("names who should receive a request, for area 2 to route it", async () => {
@@ -875,6 +936,39 @@ describe("no self-approval and segregation of duties (F-4)", () => {
         expect((await act("SYSTEM_ADMIN", action)).status, action).toBe(403);
         expect((await lastRefusal())?.changes, action).toMatchObject({
           rule: "system-admin",
+        });
+      }
+    });
+
+    it("never lets the system admin route an SPR or take in a document, even with a row in the table (#383)", async () => {
+      const database = t.app.get(Database).client;
+      for (const permission of ["spr.route", "documents.upload"]) {
+        await database.rolePermission.create({
+          data: { role: "SYSTEM_ADMIN", permission },
+        });
+      }
+      try {
+        expect((await act("SYSTEM_ADMIN", "spr.route")).status).toBe(403);
+        expect((await lastRefusal())?.changes).toMatchObject({
+          rule: "system-admin",
+        });
+        // No route checks documents.upload yet (uploads come with P-18), so
+        // ask the guard's policy directly, as the guard would.
+        const admin = as("SYSTEM_ADMIN").session.user;
+        const decision = await t.app.get(PermissionPolicy).decide({
+          user: admin,
+          permission: "documents.upload",
+          method: "POST",
+          path: "/documents",
+          params: {},
+        });
+        expect(decision.allowed).toBe(false);
+      } finally {
+        await database.rolePermission.deleteMany({
+          where: {
+            role: "SYSTEM_ADMIN",
+            permission: { in: ["spr.route", "documents.upload"] },
+          },
         });
       }
     });
@@ -2285,4 +2379,344 @@ describe("a direct API call being refused (E2E #3)", () => {
 describe("payment confirmation (F-1 with C-1)", () => {
   it.todo("records the payment type, prepayment among them");
   it.todo("lets a prepayment release the payment gate for its order only");
+});
+
+describe("the approver group, with APPROVER_GROUP on (#252)", () => {
+  let t: TestApp;
+  const ids = new Map<string, string>();
+  const sessions = new Map<string, Browser>();
+  const id = (who: string): string => {
+    const found = ids.get(who);
+    if (!found) throw new Error(`no user for ${who}`);
+    return found;
+  };
+  const as = (who: string): Browser => {
+    const found = sessions.get(who);
+    if (!found) throw new Error(`no session for ${who}`);
+    return found;
+  };
+  // Two more approvers, made only in the test database: the demo seed has one.
+  const MORE_APPROVERS = [
+    ["second", "approver.group.second@example.test", "Bea Second"],
+    ["third", "approver.group.third@example.test", "Cyd Third"],
+  ] as const;
+
+  beforeAll(async () => {
+    await resetTestData();
+    // The group decides; its limits stay as they are by default: off.
+    t = await createTestApp(
+      { APPROVER_GROUP: "on" },
+      [StandInApprovalController, StandInRouteController],
+      (builder) =>
+        builder
+          .overrideProvider(PermissionPolicy)
+          .useClass(GovernancePermissionPolicy),
+    );
+    const users = t.app.get(UserRepository);
+    const hasher = t.app.get(PasswordHasher);
+    for (const [who, role] of [
+      ["requester", "PRODUCT_MANAGER"],
+      ["first", "APPROVER"],
+      ["management", "MANAGEMENT"],
+      ["support", "SUPPORT"],
+      ["warehouse", "WAREHOUSE"],
+    ] as const) {
+      const user = await users.findByEmail(await emailForRole(role));
+      if (!user) throw new Error(`no demo user for ${role}`);
+      ids.set(who, user.id);
+      sessions.set(who, await demoSignIn(t, role));
+    }
+    for (const [who, email, name] of MORE_APPROVERS) {
+      const user = await users.create({
+        email,
+        displayName: name,
+        role: "APPROVER",
+        passwordHash: await hasher.hash(TEST_DEMO_PASSWORD),
+      });
+      ids.set(who, user.id);
+      sessions.set(who, await passwordSignIn(t, email));
+    }
+  });
+  afterAll(async () => {
+    await t.close();
+  });
+
+  const approveSpr = (
+    who: string,
+    recordNo: string,
+    body: Record<string, unknown> = {},
+  ) =>
+    call(t, as(who), "post", STAND_IN(recordNo), {
+      csrf: true,
+      body: {
+        action: "spr.approve",
+        amount: "100.00",
+        requesterUserId: id("requester"),
+        ...body,
+      },
+    });
+  const route = (who: string, recordNo: string) =>
+    call(t, as(who), "post", `${API}/test-only/sprs/${recordNo}/route`, {
+      csrf: true,
+      body: { requesterUserId: id("requester") },
+    });
+  const lastRefusal = async () =>
+    (await auditEvents(t))
+      .filter((event) => event.action === "governance.policy.refused")
+      .at(-1);
+  const approversFor = (requester: string, amount = "100.00") =>
+    t.app.get(AuthorisationService).approversFor({
+      requester: id(requester),
+      action: "spr.approve",
+      amount,
+    });
+  const whileDisabled = async (who: string[], work: () => Promise<void>) => {
+    const users = t.app.get(UserRepository);
+    for (const each of who) await users.setDisabledAt(id(each), new Date());
+    try {
+      await work();
+    } finally {
+      for (const each of who) await users.setDisabledAt(id(each), null);
+    }
+  };
+
+  describe("any one of the approvers decides", () => {
+    it("lets each of the three approvers decide", async () => {
+      for (const [n, who] of ["first", "second", "third"].entries()) {
+        expect(
+          (await approveSpr(who, `SPR-GROUP-000${String(n + 1)}`)).status,
+          who,
+        ).toBe(200);
+      }
+    });
+
+    it("never lets the requester decide, even when they are an approver", async () => {
+      const raised = { requesterUserId: id("second") };
+      expect(
+        (await approveSpr("second", "SPR-GROUP-0004", raised)).status,
+      ).toBe(403);
+      expect((await lastRefusal())?.changes).toMatchObject({
+        rule: "no-self-approval",
+      });
+      expect((await approveSpr("third", "SPR-GROUP-0004", raised)).status).toBe(
+        200,
+      );
+    });
+
+    it("leaves Management out while limits are off, and says why in the trail (ADR 0056)", async () => {
+      expect((await approveSpr("management", "SPR-GROUP-0005")).status).toBe(
+        403,
+      );
+      expect((await lastRefusal())?.changes).toMatchObject({
+        rule: "approval-route",
+        reason:
+          "only a management approver who did not raise the request may decide it",
+      });
+    });
+
+    it("applies no limit while limits are off", async () => {
+      const huge = { amount: "999999999.99" };
+      expect((await approveSpr("first", "SPR-GROUP-0006", huge)).status).toBe(
+        200,
+      );
+    });
+  });
+
+  describe("approversFor, for area 2 to route an SPR", () => {
+    it("names every enabled approver except the requester, by id and name only, sorted by name", async () => {
+      const group = await approversFor("requester");
+      expect(group.reason).toBeNull();
+      expect(group.approvers.map((each) => each.userId).sort()).toEqual(
+        [id("first"), id("second"), id("third")].sort(),
+      );
+      const names = group.approvers.map((each) => each.displayName);
+      expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b)));
+      for (const approver of group.approvers) {
+        expect(Object.keys(approver).sort()).toEqual(["displayName", "userId"]);
+      }
+      expect(JSON.stringify(group)).not.toContain("@");
+    });
+
+    it("leaves out the requester and a disabled approver", async () => {
+      await whileDisabled(["third"], async () => {
+        const group = await approversFor("second");
+        expect(group.approvers.map((each) => each.userId)).toEqual([
+          id("first"),
+        ]);
+      });
+    });
+
+    it("gives a reason only when nobody is left", async () => {
+      await whileDisabled(["second", "third"], async () => {
+        expect(await approversFor("first")).toEqual({
+          approvers: [],
+          reason: "the only enabled management approver raised the request",
+        });
+      });
+    });
+  });
+
+  describe("the coordinator routes, and never approves", () => {
+    it("lets Support route an SPR", async () => {
+      expect((await route("support", "SPR-GROUP-0010")).status).toBe(200);
+    });
+
+    it("refuses a role without spr.route at the guard, and audits the refusal", async () => {
+      expect((await route("warehouse", "SPR-GROUP-0011")).status).toBe(403);
+      const refusal = (await auditEvents(t))
+        .filter((event) => event.action === "auth.permission.refused")
+        .at(-1);
+      expect(refusal?.changes).toMatchObject({ permission: "spr.route" });
+    });
+
+    it("refuses the coordinator the approval itself, at the guard", async () => {
+      expect((await approveSpr("support", "SPR-GROUP-0012")).status).toBe(403);
+      // The guard refuses, before the policy: Support never holds approvals.decide.
+      const refusal = (await auditEvents(t))
+        .filter((event) => event.action === "auth.permission.refused")
+        .at(-1);
+      expect(refusal?.changes).toMatchObject({
+        permission: "approvals.decide",
+      });
+      expect(refusal?.actor).toMatchObject({ userId: id("support") });
+    });
+
+    it("refuses an approver the approval of an SPR they routed, and lets another approver decide it", async () => {
+      const routed = { earlierDuties: { "spr.route": id("first") } };
+      expect((await approveSpr("first", "SPR-GROUP-0013", routed)).status).toBe(
+        403,
+      );
+      expect((await lastRefusal())?.changes).toMatchObject({
+        rule: "segregation-of-duties",
+      });
+      expect(
+        (await approveSpr("second", "SPR-GROUP-0013", routed)).status,
+      ).toBe(200);
+    });
+  });
+});
+
+describe("the approver group with its limits on (#252)", () => {
+  let t: TestApp;
+  const ids = new Map<string, string>();
+  const sessions = new Map<string, Browser>();
+  const id = (who: string): string => {
+    const found = ids.get(who);
+    if (!found) throw new Error(`no user for ${who}`);
+    return found;
+  };
+  const as = (who: string): Browser => {
+    const found = sessions.get(who);
+    if (!found) throw new Error(`no session for ${who}`);
+    return found;
+  };
+  /** A purchase limit for one approver, saved as an approval setup. */
+  const limitOf = async (who: string, limit: Partial<ApprovalSetup>) =>
+    t.app.get(ApprovalSetupService).save(
+      {
+        userId: id(who),
+        approverId: null,
+        salesAmountApprovalLimit: "0.00",
+        purchaseAmountApprovalLimit: "0.00",
+        unlimitedSalesApproval: false,
+        unlimitedPurchaseApproval: false,
+        substituteUserId: null,
+        awayFrom: null,
+        awayUntil: null,
+        ...limit,
+      },
+      BY_THE_TEST,
+    );
+
+  beforeAll(async () => {
+    await resetTestData();
+    t = await createTestApp(
+      { APPROVER_GROUP: "on", APPROVAL_LIMITS: "on" },
+      [StandInApprovalController],
+      (builder) =>
+        builder
+          .overrideProvider(PermissionPolicy)
+          .useClass(GovernancePermissionPolicy),
+    );
+    const users = t.app.get(UserRepository);
+    const hasher = t.app.get(PasswordHasher);
+    for (const [who, role] of [
+      ["requester", "PRODUCT_MANAGER"],
+      ["first", "APPROVER"],
+    ] as const) {
+      const user = await users.findByEmail(await emailForRole(role));
+      if (!user) throw new Error(`no demo user for ${role}`);
+      ids.set(who, user.id);
+      sessions.set(who, await demoSignIn(t, role));
+    }
+    for (const [who, email, name] of [
+      ["second", "approver.limits.second@example.test", "Bea Second"],
+      ["third", "approver.limits.third@example.test", "Cyd Third"],
+    ] as const) {
+      const user = await users.create({
+        email,
+        displayName: name,
+        role: "APPROVER",
+        passwordHash: await hasher.hash(TEST_DEMO_PASSWORD),
+      });
+      ids.set(who, user.id);
+      sessions.set(who, await passwordSignIn(t, email));
+    }
+    await limitOf("first", { purchaseAmountApprovalLimit: "5000.00" });
+    await limitOf("second", { purchaseAmountApprovalLimit: "3000.00" });
+    await limitOf("third", { unlimitedPurchaseApproval: true });
+  });
+  afterAll(async () => {
+    await t.close();
+  });
+
+  const approversFor = (amount: string) =>
+    t.app.get(AuthorisationService).approversFor({
+      requester: id("requester"),
+      action: "spr.approve",
+      amount,
+    });
+  const covering = async (amount: string) =>
+    (await approversFor(amount)).approvers.map((each) => each.userId).sort();
+
+  it("names only the approvers whose limit covers the amount", async () => {
+    expect(await covering("2000.00")).toEqual(
+      [id("first"), id("second"), id("third")].sort(),
+    );
+    expect(await covering("4000.00")).toEqual(
+      [id("first"), id("third")].sort(),
+    );
+    expect(await covering("9000.00")).toEqual([id("third")]);
+  });
+
+  it("says the amount is over every limit when nobody's covers it", async () => {
+    const users = t.app.get(UserRepository);
+    await users.setDisabledAt(id("third"), new Date());
+    try {
+      expect(await approversFor("9000.00")).toEqual({
+        approvers: [],
+        reason: "the amount is over every approver's purchase approval limit",
+      });
+    } finally {
+      await users.setDisabledAt(id("third"), null);
+    }
+  });
+
+  it("refuses an approver above their own limit by the limit rule, and lets one whose limit covers it decide", async () => {
+    const approve = (who: string) =>
+      call(t, as(who), "post", STAND_IN("SPR-LIMITS-0001"), {
+        csrf: true,
+        body: {
+          action: "spr.approve",
+          amount: "4000.00",
+          requesterUserId: id("requester"),
+        },
+      });
+    expect((await approve("second")).status).toBe(403);
+    const refusal = (await auditEvents(t))
+      .filter((event) => event.action === "governance.policy.refused")
+      .at(-1);
+    expect(refusal?.changes).toMatchObject({ rule: "approval-limit" });
+    expect((await approve("first")).status).toBe(200);
+  });
 });

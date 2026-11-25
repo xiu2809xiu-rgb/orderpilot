@@ -17,7 +17,9 @@ import { RolePermissionRepository } from "../../auth/role-permission.repository.
 import { Database } from "../../database/database.js";
 import type { RequestInfo } from "../../users/users.service.js";
 import { DataScopeRepository } from "./data-scope.repository.js";
+import { GovernanceNoticeRepository } from "./governance-notice.repository.js";
 import {
+  MatrixRuleRefusedError,
   assertCanGrant,
   assertCanRevoke,
   planCopy,
@@ -41,11 +43,31 @@ export class MatrixService {
     @Inject(DataScopeRepository) private readonly scopes: DataScopeRepository,
     @Inject(AuditService) private readonly audit: AuditService,
     @Inject(Database) private readonly database: Database,
+    @Inject(GovernanceNoticeRepository)
+    private readonly notices: GovernanceNoticeRepository,
   ) {}
 
   private async grant(role: Role, permission: Permission): Promise<void> {
     await this.permissions.grant(role, permission);
     await this.revoked.forget(role, permission);
+  }
+
+  /**
+   * Tells the management approvers what the administrator's role gained
+   * (#383). Called inside the change's transaction, before its audit event,
+   * so a grant never commits without its notice.
+   */
+  private tellApprovers(
+    actor: AuthContext,
+    permissions: readonly Permission[],
+    fromRole: Role | null,
+  ): Promise<{ id: string }> {
+    return this.notices.create({
+      actorUserId: actor.user.id,
+      actorName: actor.user.displayName,
+      permissions,
+      fromRole,
+    });
   }
 
   private async revoke(role: Role, permission: Permission): Promise<void> {
@@ -76,7 +98,36 @@ export class MatrixService {
     return { role, permissions: held, dataScope };
   }
 
-  setPermission(
+  async setPermission(
+    role: Role,
+    permission: Permission,
+    granted: boolean,
+    actor: AuthContext,
+    info: RequestInfo,
+  ): Promise<RoleAccess> {
+    try {
+      return await this.changePermission(
+        role,
+        permission,
+        granted,
+        actor,
+        info,
+      );
+    } catch (error) {
+      if (error instanceof MatrixRuleRefusedError) {
+        await this.recordRefusal(actor, info, {
+          action: "governance.permission.refused",
+          entityType: "RolePermission",
+          entityId: `${role}:${permission}`,
+          summary: `${actor.user.displayName} was refused ${granted ? "granting" : "revoking"} ${permission} ${granted ? "to" : "from"} ${ROLE_LABELS[role]}`,
+          changes: { role, permission, granted, ...error.refusal },
+        });
+      }
+      throw error;
+    }
+  }
+
+  private changePermission(
     role: Role,
     permission: Permission,
     granted: boolean,
@@ -90,6 +141,10 @@ export class MatrixService {
       if (already !== granted) {
         if (granted) await this.grant(role, permission);
         else await this.revoke(role, permission);
+        const notice =
+          granted && role === "SYSTEM_ADMIN"
+            ? await this.tellApprovers(actor, [permission], null)
+            : null;
         await this.audit.record({
           actor: { kind: "user", userId: actor.user.id, role: actor.user.role },
           action: granted
@@ -102,6 +157,7 @@ export class MatrixService {
             role,
             permission,
             granted: { from: already, to: granted },
+            ...(notice ? { noticeId: notice.id } : {}),
           },
           ip: info.ip,
           traceId: info.traceId,
@@ -136,19 +192,66 @@ export class MatrixService {
     });
   }
 
-  /** Makes `toRole` hold what `fromRole` holds, with the same data scope. */
-  copyRole(
+  /**
+   * Makes `toRole` hold the permissions `fromRole` holds. Its data scope stays
+   * as it was: no list reads the scope yet, so a copy that changed it would
+   * change something nobody can see (#268, ADR 0065).
+   */
+  async copyRole(
+    body: CopyRoleBody,
+    actor: AuthContext,
+    info: RequestInfo,
+  ): Promise<RoleAccess> {
+    try {
+      return await this.copyInTransaction(body, actor, info);
+    } catch (error) {
+      if (error instanceof MatrixRuleRefusedError) {
+        const { fromRole, toRole } = body;
+        await this.recordRefusal(actor, info, {
+          action: "governance.role.copy.refused",
+          entityType: "Role",
+          entityId: toRole,
+          summary: `${actor.user.displayName} was refused copying the access of ${ROLE_LABELS[fromRole]} to ${ROLE_LABELS[toRole]}`,
+          changes: { fromRole, toRole, ...error.refusal },
+        });
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * A refusal of one of the matrix's rules, recorded after the transaction
+   * has rolled back, so the row stays although nothing changed (#378).
+   */
+  private recordRefusal(
+    actor: AuthContext,
+    info: RequestInfo,
+    event: {
+      action: string;
+      entityType: string;
+      entityId: string;
+      summary: string;
+      changes: Record<string, unknown>;
+    },
+  ): Promise<unknown> {
+    return this.audit.record({
+      ...event,
+      actor: { kind: "user", userId: actor.user.id, role: actor.user.role },
+      ip: info.ip,
+      traceId: info.traceId,
+    });
+  }
+
+  private copyInTransaction(
     body: CopyRoleBody,
     actor: AuthContext,
     info: RequestInfo,
   ): Promise<RoleAccess> {
     return this.database.transaction(async () => {
       const { fromRole, toRole } = body;
-      const [source, target, scope, before] = await Promise.all([
+      const [source, target] = await Promise.all([
         this.permissions.permissionsOf(fromRole),
         this.permissions.permissionsOf(toRole),
-        this.scopes.get(fromRole),
-        this.scopes.get(toRole),
       ]);
       const plan = planCopy(fromRole, toRole, source, target);
       for (const permission of plan.grant) {
@@ -157,7 +260,10 @@ export class MatrixService {
       for (const permission of plan.revoke) {
         await this.revoke(toRole, permission);
       }
-      await this.scopes.set(toRole, scope);
+      const notice =
+        toRole === "SYSTEM_ADMIN" && plan.grant.length > 0
+          ? await this.tellApprovers(actor, plan.grant, fromRole)
+          : null;
       await this.audit.record({
         actor: { kind: "user", userId: actor.user.id, role: actor.user.role },
         action: "governance.role.copied",
@@ -169,7 +275,7 @@ export class MatrixService {
           toRole,
           granted: plan.grant,
           revoked: plan.revoke,
-          dataScope: { from: before, to: scope },
+          ...(notice ? { noticeId: notice.id } : {}),
         },
         ip: info.ip,
         traceId: info.traceId,

@@ -26,6 +26,7 @@ const ATTEMPT: Readonly<Record<Permission, string>> = {
   "payments.post": "posting a payment",
   "workflows.read": "viewing the workflows",
   "spr.read": "viewing an SPR",
+  "spr.route": "routing an SPR to the approvers",
   "workflows.inboxes.any": "viewing another role's inbox",
   "tasks.complete": "acting on a task",
   "masking.customerNote": "seeing the sample customer note",

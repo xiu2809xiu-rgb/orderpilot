@@ -36,9 +36,7 @@ export function DoneGroup({ done }: { done: readonly DoneItem[] }) {
   const links = useOrderLinks();
   return (
     <TimelineGroup title={t("timeline.done.title")}>
-      <p className="fs-12 max-w-prose text-muted-foreground">
-        {t("timeline.done.hint")}
-      </p>
+      <p className="dx-meta max-w-prose">{t("timeline.done.hint")}</p>
       {done.length === 0 ? (
         <p className="fs-14 max-w-prose text-muted-foreground">
           {t("timeline.done.empty")}

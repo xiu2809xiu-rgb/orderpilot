@@ -3,6 +3,7 @@ import type {
   AuditChainCheck,
   AuditEventQuery,
   AuditEventView,
+  AuditFilterOptions,
   PageMeta,
   Role,
 } from "@orderpilot/shared";
@@ -16,6 +17,7 @@ import { NotFoundError } from "../../common/domain-error.js";
 import { UserRepository } from "../../users/user.repository.js";
 import { toEventView } from "./audit-view.js";
 import { AUDIT_MASKING_RULES } from "./domain/audit-masking.js";
+import { aroundRange, peopleFrom } from "./domain/filter-options.js";
 
 /**
  * The audit viewer. It only reads, through P-9's repository and service:
@@ -46,6 +48,20 @@ export class AuditViewerService {
     const [view] = await this.toViews([record], role);
     if (!view) throw new NotFoundError("Audit event");
     return view;
+  }
+
+  /**
+   * What the filters offer: each person in the trail by name (never by
+   * email), and each action name that exists. Both are read from the
+   * database's indexes, not from every event.
+   */
+  async filterOptions(): Promise<AuditFilterOptions> {
+    const [ids, actions] = await Promise.all([
+      this.events.actorUserIds(),
+      this.events.actionNames(),
+    ]);
+    const names = await this.users.namesByIds(ids);
+    return { people: peopleFrom(ids, names), actions };
   }
 
   /**
@@ -109,5 +125,13 @@ function toSearch(query: AuditEventQuery): AuditSearch {
     ...(query.to ? { to: new Date(query.to) } : {}),
     ...(query.refusalsOnly ? { refusalsOnly: true } : {}),
     ...(query.search ? { search: query.search } : {}),
+    ...(query.around === undefined ? {} : aroundSearch(query.around)),
   };
+}
+
+function aroundSearch(
+  sequence: number,
+): Pick<AuditSearch, "sequenceFrom" | "sequenceTo"> {
+  const { from, to } = aroundRange(sequence);
+  return { sequenceFrom: from, sequenceTo: to };
 }

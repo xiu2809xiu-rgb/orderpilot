@@ -75,4 +75,63 @@ describe("the bell", () => {
     ).toBeInTheDocument();
     expect(asked).toBe(false);
   });
+
+  it("adds the approver's unread governance notices to the count, and lists them (#383)", async () => {
+    server.use(
+      http.get("*/api/v1/workflows/reminders", () =>
+        HttpResponse.json({
+          data: [1, 2].map(reminder),
+          meta: { page: 1, pageSize: 5, total: 2, mock: true },
+        }),
+      ),
+      http.get("*/api/v1/governance/notices", () =>
+        HttpResponse.json({
+          data: [
+            {
+              id: "00000000-0000-7000-8000-000000000383",
+              kind: "admin-role-widened",
+              actorName: "Daniel Koh",
+              permissions: ["orders.read"],
+              fromRole: null,
+              createdAt: "2026-11-24T10:42:00.000Z",
+              read: false,
+            },
+          ],
+          meta: { page: 1, pageSize: 5, total: 1, unread: 1 },
+        }),
+      ),
+    );
+    open("APPROVER");
+    const bell = await screen.findByRole("button", {
+      name: "Notifications: 2 reminders, 1 notice",
+    });
+    fireEvent.click(bell);
+    expect(
+      await screen.findByText(
+        "Daniel Koh gave the System admin role Read orders.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("asks nothing about governance for a role that does not decide approvals (#383)", async () => {
+    let asked = false;
+    server.use(
+      http.get("*/api/v1/workflows/reminders", () =>
+        HttpResponse.json({
+          data: [],
+          meta: { page: 1, pageSize: 5, total: 0, mock: true },
+        }),
+      ),
+      http.get("*/api/v1/governance/notices", () => {
+        asked = true;
+        return HttpResponse.json({});
+      }),
+    );
+    open("FINANCE");
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Notifications" }),
+    );
+    expect(await screen.findByText("No reminders right now.")).toBeVisible();
+    expect(asked).toBe(false);
+  });
 });

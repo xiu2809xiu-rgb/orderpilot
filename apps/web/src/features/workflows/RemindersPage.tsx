@@ -50,11 +50,11 @@ function ReminderRow({ reminder }: { reminder: WorkflowReminder }) {
         <p className="font-medium">{reminder.message}</p>
         {/* Its own line, so every row reads the same: the task, what it buys, then its dates. */}
         {reminder.spr ? (
-          <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+          <p className="flex dx-measure flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
             <SprLine spr={reminder.spr} />
           </p>
         ) : null}
-        <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+        <p className="flex dx-measure flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
           {/* A due task says so in its message; the other kinds name themselves. */}
           {reminder.kind === "TASK_DUE" ? null : (
             <span>{t(`reminders.kinds.${reminder.kind}`)}</span>
@@ -100,19 +100,19 @@ function ReminderRow({ reminder }: { reminder: WorkflowReminder }) {
  */
 export default function RemindersPage() {
   const { t } = useTranslation(["workflows", "common"]);
-  const { role, mayPick, setRole } = useInboxRole();
+  const { role, mayPick, other, setRole } = useInboxRole();
   const mine = useWorkflowsMyReminders(undefined, {
-    query: { enabled: !mayPick && role !== undefined },
+    query: { enabled: !other && role !== undefined },
   });
   const theirs = useWorkflowsInboxReminders(role ?? "SUPPORT", undefined, {
-    query: { enabled: mayPick },
+    query: { enabled: other },
   });
-  const query = mayPick ? theirs : mine;
+  const query = other ? theirs : mine;
   const reminders = query.data?.data ?? [];
   const hasList = role !== undefined;
 
   return (
-    <div className="space-y-s4">
+    <div className="dx-sheet-wide dx-page">
       <PageHeader
         title={t("reminders.heading")}
         description={t("reminders.description")}

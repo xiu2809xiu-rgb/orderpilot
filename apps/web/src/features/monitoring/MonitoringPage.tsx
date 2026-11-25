@@ -28,7 +28,7 @@ export default function MonitoringPage() {
     ? (asked ?? "observability")
     : "observability";
   return (
-    <div className="space-y-s4">
+    <div className="dx-sheet-wide dx-page">
       <PageHeader title={t("title")} description={t("description")} />
       <Tabs
         value={tab}

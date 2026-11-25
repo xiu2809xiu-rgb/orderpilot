@@ -53,6 +53,13 @@ export class AppConfig {
   readonly governance: {
     /** Null means a bank-detail comparison fails closed. */
     readonly bankFingerprintKey: string | null;
+    /**
+     * True only when APPROVER_GROUP is "on": any one of the approver group
+     * decides. Temporary (ADR 0056); off keeps the old chain.
+     */
+    readonly approverGroup: boolean;
+    /** True only when APPROVAL_LIMITS is "on": the group's limits apply. */
+    readonly approvalLimits: boolean;
   };
 
   /**
@@ -92,7 +99,11 @@ export class AppConfig {
 
   readonly database: { readonly url: string };
   readonly redis: { readonly url: string };
-  readonly workflows: { readonly sweepSeconds: number };
+  readonly workflows: {
+    readonly sweepSeconds: number;
+    /** True only when SALES_APPROVAL is "on": a sales order waits for an approver before its PI. */
+    readonly salesApproval: boolean;
+  };
 
   readonly storage: {
     /** Null means AWS S3 itself. */
@@ -139,11 +150,16 @@ export class AppConfig {
     };
     this.governance = {
       bankFingerprintKey: env.BANK_FINGERPRINT_KEY ?? null,
+      approverGroup: env.APPROVER_GROUP === "on",
+      approvalLimits: env.APPROVAL_LIMITS === "on",
     };
     this.ai = aiSettings(env);
     this.database = { url: env.DATABASE_URL };
     this.redis = { url: env.REDIS_URL };
-    this.workflows = { sweepSeconds: env.WORKFLOW_SWEEP_SECONDS };
+    this.workflows = {
+      sweepSeconds: env.WORKFLOW_SWEEP_SECONDS,
+      salesApproval: env.SALES_APPROVAL === "on",
+    };
     this.storage = {
       endpoint: env.S3_ENDPOINT ?? null,
       region: env.S3_REGION,
