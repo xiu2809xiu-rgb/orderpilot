@@ -1,3 +1,4 @@
+import { AppConfig } from "../../config/app-config.js";
 import { Module } from "@nestjs/common";
 import { AuditModule } from "../../audit/audit.module.js";
 import { RolePermissionRepository } from "../../auth/role-permission.repository.js";
@@ -17,6 +18,11 @@ import { MockDecisionOverlay } from "./mock/mock-decision-overlay.js";
 import { MockWorkflowActions } from "./mock/mock-workflow-actions.js";
 import { MockWorkflowReadModel } from "./mock-workflow-read-model.js";
 import { OrderWorkflowRepository } from "./order-workflow.repository.js";
+import { PaymentConfirmationRepository } from "./payment-confirmation.repository.js";
+import { PiIssueService } from "./pi-issue.service.js";
+import { SalesApprovalService } from "./sales-approval.service.js";
+import { PiRecordRepository } from "./pi-record.repository.js";
+import { RunningPayments } from "./running-payments.js";
 import { RunningTaskActions } from "./running-task-actions.js";
 import { SprApprovalService } from "./spr-approval.service.js";
 import { SprRaiseService } from "./spr-raise.service.js";
@@ -60,6 +66,11 @@ import { WorkflowsService } from "./workflows.service.js";
     SprApprovalService,
     SprRaiseService,
     RunningTaskActions,
+    PaymentConfirmationRepository,
+    PiRecordRepository,
+    PiIssueService,
+    SalesApprovalService,
+    RunningPayments,
     CommandReplayService,
     WorkflowCommandRepository,
     SprRoutingService,
@@ -73,7 +84,15 @@ import { WorkflowsService } from "./workflows.service.js";
     OrderWorkflowService,
     WorkflowOrderStatusReader,
     WorkflowCheckReporter,
-    { provide: ORDER_FLOW_RULES, useValue: DEFAULT_ORDER_FLOW_RULES },
+    // The open rules are settings (A-21): a sales approval only while SALES_APPROVAL is on.
+    {
+      provide: ORDER_FLOW_RULES,
+      inject: [AppConfig],
+      useFactory: (config: AppConfig) => ({
+        ...DEFAULT_ORDER_FLOW_RULES,
+        salesApprovalRequired: config.workflows.salesApproval,
+      }),
+    },
     { provide: WorkflowReadModel, useClass: MockWorkflowReadModel },
     { provide: ApprovalPolicy, useClass: MockApprovalPolicy },
   ],

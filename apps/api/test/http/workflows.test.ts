@@ -121,7 +121,7 @@ describe("the area 2 routes", () => {
   });
 
   describe("an order's steps and timeline", () => {
-    it("returns the steps, the timeline and the payment, as mock", async () => {
+    it("returns the steps, the timeline and the payment, not as mock once the state machine runs the order", async () => {
       const res = await call(
         t,
         as("FINANCE"),
@@ -130,7 +130,8 @@ describe("the area 2 routes", () => {
       );
       expect(res.status).toBe(200);
       const body = orderFlowResponseSchema.parse(res.body);
-      expect(body.meta.mock).toBe(true);
+      // A prepayment order runs on the machine (#290), so its status is real.
+      expect(body.meta.mock).toBe(false);
       expect(body.data.payment.prepaymentPercent).toBe(
         waiting.header.prepaymentPercent,
       );

@@ -4,6 +4,7 @@ import { documentTypeSchema } from "../order.js";
 import { roleSchema } from "../roles.js";
 import { orderNoSchema } from "./common.js";
 import { paymentRecordSchema } from "./payment.js";
+import { orderPiSchema } from "./pi.js";
 
 /**
  * A step on the way an order takes. `state` says where the order is on that
@@ -86,6 +87,8 @@ export const orderFlowSchema = z.object({
   timeline: z.array(orderTimelineEventSchema),
   payment: orderPaymentSchema,
   documents: z.array(orderFlowDocumentSchema),
+  /** The PI once it has been sent, on an order the state machine runs. */
+  pi: orderPiSchema.nullable().optional(),
 });
 export type OrderFlow = z.infer<typeof orderFlowSchema>;
 

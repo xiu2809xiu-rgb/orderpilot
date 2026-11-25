@@ -35,8 +35,12 @@ const NOTICE = {
   sentAt: "2026-11-02T05:00:00.000Z",
 } as const;
 
+// A sample's flow, so `meta.mock` is set, not left to the generated mock's coin toss.
 const FLOW = getWorkflowsOrderFlowResponseMock({
+  meta: { mock: true },
   data: {
+    // No PI sent: set here, not left to the generated mock.
+    pi: null,
     order: {
       no: "SO-0004",
       sellToCustomerNo: "C-0004",
