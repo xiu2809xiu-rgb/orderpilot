@@ -37,7 +37,7 @@ This story is the part area 2 needs first. It fixes the name of the number and t
   - `OrderStateMachine.start` refuses a user actor who is not Support, so a Product Manager's submit starts the workflow as a system actor, and the machine then sets no `raisedByUserId`. The fact carries the person so that area 2 can keep it another way. The sales approval refuses an order without a `raisedByUserId` as "requester-unknown" (`sales-approval.service.ts`), so the start must take it from `submittedBy.userId`.
   - `OrderWorkflowRepository.insert` refuses a second start with a unique key. Inside an open transaction Postgres aborts the whole transaction on that error, so the implementation must read `statusOf` first and answer `none`, not rely on the conflict.
   - `AuthorisationService.enforce` throws inside a transaction, so a move that asks area 4's policy first cannot run inside this call. `apply` asks no policy.
-  - A refusal's own audit row (`workflow.transition.refused`) joins the open transaction and is rolled back with area 1's write, so a refused handoff leaves no such row. Whether the refusal is audited is decided in the submit story, where the edge of the transaction is.
+  - A refusal's own audit row (`workflow.transition.refused`) joins the open transaction and is rolled back with area 1's write, so a refused handoff leaves no such row. Whether the refusal is audited is decided in the submit story, where the edge of the transaction is. _Amended by [ADR 0073](0073-submitting-an-order.md): one `order.submit.refused` row is written after the rollback._
 
 ## Alternatives considered
 
