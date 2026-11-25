@@ -2,6 +2,7 @@ import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { loadPicker, renderPicker } from "./availabilityTestKit";
+import { OPEN_GUARD_MS } from "./PickerOrb";
 
 loadPicker();
 
@@ -22,6 +23,12 @@ async function open() {
   await screen.findByRole("menu");
 }
 
+/** Opens, and waits until a press on a choice counts (OPEN_GUARD_MS). */
+async function openAndWait() {
+  await open();
+  await new Promise((resolve) => setTimeout(resolve, OPEN_GUARD_MS + 20));
+}
+
 describe("picking with the pointer", () => {
   it("does nothing for a release on a choice that was not pressed, and the menu stays open", async () => {
     const onPick = vi.fn();
@@ -36,7 +43,7 @@ describe("picking with the pointer", () => {
   it("picks, once, for a press and a release on the same choice", async () => {
     const onPick = vi.fn();
     renderPicker({ onPick });
-    await open();
+    await openAndWait();
     const focusing = item("Focusing");
     fireEvent.pointerDown(focusing);
     fireEvent.pointerUp(focusing);
@@ -76,7 +83,7 @@ describe("picking with the pointer", () => {
   it("picks, once, for a finger's tap on a choice, whose pointerleave comes before its click", async () => {
     const onPick = vi.fn();
     renderPicker({ onPick });
-    await open();
+    await openAndWait();
     const dnd = item("Do not disturb");
     fireEvent.pointerDown(dnd, { pointerType: "touch" });
     fireEvent.pointerUp(dnd, { pointerType: "touch" });
@@ -84,6 +91,29 @@ describe("picking with the pointer", () => {
     fireEvent.click(dnd, { detail: 1 });
     expect(onPick).toHaveBeenCalledTimes(1);
     expect(onPick).toHaveBeenCalledWith("DO_NOT_DISTURB");
+  });
+
+  it("ignores a press within a quarter of a second of the pill's appearing, which is the second click of a double click", async () => {
+    const onPick = vi.fn();
+    renderPicker({ onPick });
+    await open();
+    const first = item("Available");
+    const now = vi.spyOn(performance, "now");
+    const start = performance.now();
+    // The pill has been in the page for 100 ms: too soon to be a choice.
+    now.mockReturnValue(start + 100);
+    fireEvent.pointerDown(first);
+    fireEvent.pointerUp(first);
+    fireEvent.click(first, { detail: 1 });
+    expect(onPick).not.toHaveBeenCalled();
+    expect(screen.getByRole("menu")).toBeVisible();
+    // Later it is a pick.
+    now.mockReturnValue(start + 400);
+    fireEvent.pointerDown(first);
+    fireEvent.pointerUp(first);
+    fireEvent.click(first, { detail: 1 });
+    expect(onPick).toHaveBeenCalledTimes(1);
+    now.mockRestore();
   });
 
   it("still picks with Enter and with Space", async () => {

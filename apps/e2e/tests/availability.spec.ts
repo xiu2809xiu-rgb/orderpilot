@@ -82,6 +82,17 @@ const pill = (page: Page): Locator =>
 const choice = (page: Page, name: string): Locator =>
   pill(page).getByRole("menuitemradio", { name });
 
+/**
+ * A press on a choice counts once the pill has been in the page for a quarter
+ * of a second (the second click of a double click would otherwise land on the
+ * first choice), which no hand is faster than and a script is.
+ */
+async function pickByMouse(page: Page, name: string): Promise<void> {
+  await expect(pill(page)).toBeVisible();
+  await page.waitForTimeout(300);
+  await choice(page, name).click();
+}
+
 /** The pill lies inside the viewport with room to spare. */
 async function expectInsideViewport(page: Page, spare = 8): Promise<void> {
   // Radix draws the menu off screen (a box at y below zero) until it has
@@ -118,7 +129,7 @@ test("a person sets their availability from the avatar and it survives a reload"
   await dot(page).click();
   await expect(pill(page)).toBeVisible();
   await expect(pill(page).getByRole("menuitemradio")).toHaveCount(3);
-  await choice(page, "Do not disturb").click();
+  await pickByMouse(page, "Do not disturb");
   await expect(
     page.getByText(
       "Do not disturb for 12 hours. Reminders and approvals still reach you.",
@@ -152,7 +163,7 @@ test("it is set back, and the colleague sees no words on that row", async ({
   await signIn(page, SETTER);
   await page.goto("/");
   await dot(page, "Do not disturb").click();
-  await choice(page, "Available").click();
+  await pickByMouse(page, "Available");
   await expect(dot(page)).toBeVisible();
   const { context, page: other } = await asLooker(browser);
   try {
@@ -237,6 +248,39 @@ test("a press and a release of the mouse on the ring or the dot opens the menu a
       await page.keyboard.press("Escape");
       await expect(pill(page)).toHaveCount(0);
     }
+  } finally {
+    await putBack();
+  }
+});
+
+test("a double click on the ring opens the menu and picks nothing", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await signIn(page, SETTER);
+  expect(
+    (
+      await call(SETTER, "PUT", "/availability/mine", {
+        value: "DO_NOT_DISTURB",
+      })
+    ).status,
+  ).toBe(200);
+  try {
+    await page.goto("/settings?section=account");
+    const ring = page.locator('.ap-trigger[data-skin="ring"]');
+    await expect(ring).toBeVisible();
+    const box = await ring.boundingBox();
+    expect(box, "the ring has a box").not.toBeNull();
+    if (!box) return;
+    // The pill opens over the ring, so the second click lands on its first choice.
+    await page.mouse.dblclick(box.x + box.width / 2, box.y + box.height / 2, {
+      delay: 40,
+    });
+    await page.waitForTimeout(900);
+    const { body } = await call(SETTER, "GET", "/availability/mine");
+    expect(myAvailabilityResponseSchema.parse(body).data.value).toBe(
+      "DO_NOT_DISTURB",
+    );
   } finally {
     await putBack();
   }

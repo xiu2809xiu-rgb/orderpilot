@@ -198,7 +198,7 @@
   /* The caption's box is still catching up with a longer word when it changes,
      so the new word waits for it, and never spills out of its outline. */
   .ap-chip-text {
-    animation: ap-text-in var(--motion-fast) var(--ease-out) 90ms both;
+    animation: ap-text-in var(--motion-fast) var(--ease-out) 60ms both;
   }
 }
 @keyframes ap-grow {

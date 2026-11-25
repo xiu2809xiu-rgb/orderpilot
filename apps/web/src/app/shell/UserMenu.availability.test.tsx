@@ -1,3 +1,4 @@
+import { OPEN_GUARD_MS } from "@/components/kit/availability-picker/PickerOrb";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -163,6 +164,8 @@ describe("the availability button in the side panel", () => {
       await screen.findByRole("button", { name: /^Your availability: / }),
     );
     await screen.findByRole("menu");
+    // A press counts once the pill has been in the page for OPEN_GUARD_MS.
+    await new Promise((resolve) => setTimeout(resolve, OPEN_GUARD_MS + 20));
     await user.click(
       within(screen.getByRole("menu")).getByRole("menuitemradio", {
         name: "Do not disturb",

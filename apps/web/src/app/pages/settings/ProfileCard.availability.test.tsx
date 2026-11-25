@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { loadPicker } from "@/components/kit/availability-picker/availabilityTestKit";
+import { OPEN_GUARD_MS } from "@/components/kit/availability-picker/PickerOrb";
 import { apiClient } from "@/lib/api/instance";
 import { must } from "@/test/must";
 import { server } from "@/test/server";
@@ -91,6 +92,8 @@ describe("availability on the profile card", () => {
     const menu = await screen.findByRole("menu", { name: "Your availability" });
     expect(menu).toHaveAttribute("data-side", "bottom");
     expect(change()).toHaveAttribute("aria-expanded", "true");
+    // A press counts once the pill has been in the page for OPEN_GUARD_MS.
+    await new Promise((resolve) => setTimeout(resolve, OPEN_GUARD_MS + 20));
     await user.click(
       within(menu).getByRole("menuitemradio", { name: "Do not disturb" }),
     );
@@ -143,6 +146,7 @@ describe("availability on the profile card", () => {
     await ring();
     await user.click(change());
     const menu = await screen.findByRole("menu");
+    await new Promise((resolve) => setTimeout(resolve, OPEN_GUARD_MS + 20));
     await user.click(
       within(menu).getByRole("menuitemradio", { name: "Focusing" }),
     );

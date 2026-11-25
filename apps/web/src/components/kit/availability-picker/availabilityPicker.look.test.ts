@@ -112,7 +112,7 @@ describe("the pill's sheet", () => {
 
   it("holds each new caption word back until the caption's box has caught up with it", () => {
     expect(picker).toMatch(
-      /animation: ap-text-in var\(--motion-fast\) var\(--ease-out\) 90ms both/,
+      /animation: ap-text-in var\(--motion-fast\) var\(--ease-out\) 60ms both/,
     );
   });
 

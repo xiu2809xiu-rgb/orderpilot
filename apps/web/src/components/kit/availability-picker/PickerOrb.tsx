@@ -14,6 +14,13 @@ import {
 } from "react";
 import { availabilityLook } from "./tones";
 
+/**
+ * A press on a choice within this long of the pill's appearing is not a pick.
+ * The pill opens over its trigger, so a second click of a double click lands
+ * on the first choice; a person has not yet seen the choices by then.
+ */
+export const OPEN_GUARD_MS = 250;
+
 /** One choice: a round orb with its mark, and its words. On a fine pointer the words are for assistive technology and the caption shows them; on a touch screen they sit under the orb. */
 export function PickerOrb({
   value,
@@ -34,6 +41,7 @@ export function PickerOrb({
   // click of the trigger. A choice is picked by a press and a release on it,
   // or by the keyboard, never by a release alone.
   const pressed = useRef(false);
+  const shownAt = useRef(performance.now());
   // A finger is the same, one step later: it opens the menu on the press, the
   // browser sends a click to whatever lies under the finger after the release,
   // and by then the pill has grown there. A click that a pointer made (detail
@@ -54,6 +62,7 @@ export function PickerOrb({
       className="ap-item"
       style={{ "--ap-i": index } as CSSProperties}
       onPointerDown={() => {
+        if (performance.now() - shownAt.current < OPEN_GUARD_MS) return;
         pressed.current = true;
         armed.current = true;
       }}

@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { must } from "@/test/must";
 import { loadPicker, renderPicker } from "./availabilityTestKit";
+import { OPEN_GUARD_MS } from "./PickerOrb";
 
 loadPicker();
 
@@ -130,6 +131,8 @@ describe("the availability picker", () => {
     renderPicker({ onPick });
     await user.click(trigger());
     await screen.findByRole("menu");
+    // A press counts once the pill has been in the page for OPEN_GUARD_MS.
+    await new Promise((resolve) => setTimeout(resolve, OPEN_GUARD_MS + 20));
     await user.click(item("Do not disturb"));
     expect(onPick).toHaveBeenCalledWith("DO_NOT_DISTURB");
   });
