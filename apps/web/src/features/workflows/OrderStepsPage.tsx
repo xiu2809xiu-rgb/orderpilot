@@ -9,6 +9,7 @@ import { BackToInbox } from "./BackToInbox";
 import { formatDate } from "./format";
 import { MockBadges } from "./MockBadges";
 import { PaymentPanel } from "./PaymentPanel";
+import { PiPanel } from "./PiPanel";
 import { QueryBoundary } from "./QueryBoundary";
 import { StepList } from "./StepList";
 import { Timeline } from "./Timeline";
@@ -78,6 +79,18 @@ export default function OrderStepsPage() {
               >
                 <StepList steps={flow.steps} />
               </SectionCard>
+              {flow.pi ? (
+                <SectionCard
+                  title={t("pi.heading")}
+                  description={t("pi.description")}
+                >
+                  <PiPanel
+                    orderNo={flow.order.no}
+                    pi={flow.pi}
+                    canReissue={hasPermission(session, "orders.edit")}
+                  />
+                </SectionCard>
+              ) : null}
               <SectionCard title={t("order.timelineHeading")}>
                 <Timeline events={flow.timeline} />
               </SectionCard>

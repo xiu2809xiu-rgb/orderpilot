@@ -33,6 +33,8 @@ import {
   pageQuerySchema,
   orderParamsSchema,
   paymentConfirmationInputSchema,
+  piReissueInputSchema,
+  salesApprovalInputSchema,
   paymentUndoParamsSchema,
   remindersQuerySchema,
   sprDecisionInputSchema,
@@ -42,6 +44,8 @@ import {
   type InboxRole,
   type PageQuery,
   type PaymentConfirmationInput,
+  type PiReissueInput,
+  type SalesApprovalInput,
   type RemindersQuery,
   type SprDecisionInput,
   type TasksQuery,
@@ -63,6 +67,8 @@ import {
   orderFlowResponseSchema,
   paymentResponseSchema,
   paymentUndoResponseSchema,
+  piReissueResponseSchema,
+  salesApprovalResponseSchema,
   reminderListResponseSchema,
   sprDecisionResponseSchema,
   sprDecisionUndoResponseSchema,
@@ -74,6 +80,8 @@ import {
   taskSlaResponseSchema,
   taskListResponseSchema,
 } from "./workflows.schemas.js";
+import { PiIssueService } from "./pi-issue.service.js";
+import { SalesApprovalService } from "./sales-approval.service.js";
 import { SprApprovalService } from "./spr-approval.service.js";
 import { TaskSlaService } from "./task-sla.service.js";
 import { WorkflowsService } from "./workflows.service.js";
@@ -141,6 +149,9 @@ export class WorkflowsController {
     @Inject(MockWorkflowActions) private readonly actions: MockWorkflowActions,
     @Inject(SprApprovalService) private readonly sprs: SprApprovalService,
     @Inject(TaskSlaService) private readonly slas: TaskSlaService,
+    @Inject(PiIssueService) private readonly pis: PiIssueService,
+    @Inject(SalesApprovalService)
+    private readonly sales: SalesApprovalService,
   ) {}
 
   @Get("tasks")
@@ -302,7 +313,10 @@ export class WorkflowsController {
   @Get("orders/:orderNo/flow")
   @RequirePermission("workflows.read")
   @orderParam
-  @ApiOperation({ summary: "An order's steps and timeline (mock data)" })
+  @ApiOperation({
+    summary:
+      "An order's steps and timeline. On an order the state machine runs, its status and payments are real (meta.mock false); a sample's are mock",
+  })
   @ApiOkResponse({ schema: openApiSchema(orderFlowResponseSchema) })
   async orderFlow(
     @Param(new ZodValidationPipe(orderParamsSchema))
@@ -310,7 +324,11 @@ export class WorkflowsController {
       orderNo: string;
     },
   ) {
-    return { data: await this.workflows.flow(params.orderNo), meta: MOCK };
+    const data = await this.workflows.flow(params.orderNo);
+    return {
+      data,
+      meta: { mock: !(await this.workflows.runsOnMachine(params.orderNo)) },
+    };
   }
 
   @Post("orders/:orderNo/payments")
@@ -319,7 +337,7 @@ export class WorkflowsController {
   @orderParam
   @ApiOperation({
     summary:
-      "Confirm a payment, with its type. Kept in the mock overlay, audited",
+      "Confirm a payment, with its type. Audited. On an order the state machine runs it is stored, and once the prepayment is covered the order moves to the warehouse; on a sample it is kept in the mock overlay",
   })
   @ApiBody({ schema: openApiSchema(paymentConfirmationInputSchema) })
   @ApiOkResponse({ schema: openApiSchema(paymentResponseSchema) })
@@ -364,6 +382,80 @@ export class WorkflowsController {
         infoOf(req),
       ),
       meta: MOCK,
+    };
+  }
+
+  @Post("orders/:orderNo/pi/reissue")
+  @HttpCode(200)
+  @RequirePermission("orders.edit")
+  @orderParam
+  @ApiOperation({
+    summary:
+      "Reverse the PI that went out and issue it again, with a reason (#251). Only while the order waits for a payment none has been confirmed against. Audited",
+  })
+  @ApiBody({ schema: openApiSchema(piReissueInputSchema) })
+  @ApiOkResponse({ schema: openApiSchema(piReissueResponseSchema) })
+  async reissuePi(
+    @Param(new ZodValidationPipe(orderParamsSchema))
+    params: { orderNo: string },
+    @Body(new ZodValidationPipe(piReissueInputSchema)) body: PiReissueInput,
+    @Auth() auth: AuthContext,
+    @Req() req: Request,
+  ) {
+    return {
+      data: await this.pis.reissue(
+        params.orderNo,
+        body.reason,
+        auth,
+        infoOf(req),
+      ),
+    };
+  }
+
+  @Post("orders/:orderNo/sales-approval")
+  @HttpCode(200)
+  @RequirePermission("approvals.decide")
+  @orderParam
+  @ApiOperation({
+    summary:
+      "Approve a sales order before its PI, while SALES_APPROVAL is on (#251, off by default). Area 4's policy says who may; never the person who raised it. Audited",
+  })
+  @ApiBody({ schema: openApiSchema(salesApprovalInputSchema) })
+  @ApiOkResponse({ schema: openApiSchema(salesApprovalResponseSchema) })
+  async approveSale(
+    @Param(new ZodValidationPipe(orderParamsSchema))
+    params: { orderNo: string },
+    @Body(new ZodValidationPipe(salesApprovalInputSchema))
+    body: SalesApprovalInput,
+    @Auth() auth: AuthContext,
+    @Req() req: Request,
+  ) {
+    return {
+      data: await this.sales.approve(
+        params.orderNo,
+        body.comment,
+        auth,
+        infoOf(req),
+      ),
+    };
+  }
+
+  @Post("orders/:orderNo/sales-approval/undo")
+  @HttpCode(200)
+  @RequirePermission("approvals.decide")
+  @orderParam
+  @ApiOperation({
+    summary: "Undo a sales approval; only its approver may. Audited",
+  })
+  @ApiOkResponse({ schema: openApiSchema(salesApprovalResponseSchema) })
+  async undoSaleApproval(
+    @Param(new ZodValidationPipe(orderParamsSchema))
+    params: { orderNo: string },
+    @Auth() auth: AuthContext,
+    @Req() req: Request,
+  ) {
+    return {
+      data: await this.sales.undo(params.orderNo, auth, infoOf(req)),
     };
   }
 
