@@ -23,6 +23,8 @@ export interface AvailabilityTriggerProps extends Omit<
   busy?: boolean;
   /** Raised by the parent after a pick: plays the pulse and the sheen once. */
   pulse?: number;
+  /** The pill is in the page and covers the face. Set by the part that draws the pill, never by the menu's state alone. */
+  pillOpen?: boolean;
 }
 
 /**
@@ -37,6 +39,7 @@ export function AvailabilityTrigger({
   skin = "dot",
   busy = false,
   pulse = 0,
+  pillOpen = false,
   className,
   ...rest
 }: AvailabilityTriggerProps) {
@@ -51,6 +54,7 @@ export function AvailabilityTrigger({
       data-value={value}
       aria-label={label}
       aria-busy={busy || undefined}
+      data-pill-open={pillOpen ? "" : undefined}
     >
       <span className="ap-face" aria-hidden="true">
         {skin === "ring" ? <span className="ap-ring" /> : null}

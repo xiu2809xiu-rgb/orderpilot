@@ -27,7 +27,11 @@ export type PickerContentProps = Pick<
   | "side"
   | "align"
   | "onCloseAutoFocus"
-> & { descriptionId: string };
+> & {
+  descriptionId: string;
+  /** Told once the pill is in the page and once it has left, so the trigger fades its face only while the pill covers it. */
+  onPresent: (present: boolean) => void;
+};
 
 /** A finger, or a screen with no hover: the words go under the orbs and the boxes are 44 px. */
 export const COARSE = "(pointer: coarse), (hover: none)";
@@ -80,8 +84,20 @@ function sideways(event: KeyboardEvent<HTMLDivElement>) {
  * opening would start with the blur already on. (A ref callback cannot do
  * this: Radix composes its refs afresh on every render.)
  */
-function Appears({ onAppear }: { onAppear: () => void }) {
+function Appears({
+  onAppear,
+  onPresent,
+}: {
+  onAppear: () => void;
+  onPresent: (present: boolean) => void;
+}) {
   useEffect(onAppear, [onAppear]);
+  useEffect(() => {
+    onPresent(true);
+    return () => {
+      onPresent(false);
+    };
+  }, [onPresent]);
   return null;
 }
 
@@ -100,6 +116,7 @@ export function AvailabilityPicker({
   side = "top",
   align = "start",
   descriptionId,
+  onPresent,
   onCloseAutoFocus,
 }: PickerContentProps) {
   const coarse = useMediaQuery(COARSE);
@@ -150,7 +167,7 @@ export function AvailabilityPicker({
           }
         }}
       >
-        <Appears onAppear={restart} />
+        <Appears onAppear={restart} onPresent={onPresent} />
         <PickerPill value={value} onChange={onChange} labels={labels} />
       </MenuPrimitive.Content>
     </MenuPrimitive.Portal>

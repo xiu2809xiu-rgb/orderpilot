@@ -4,7 +4,7 @@
 // own build from a written description of the behaviour (proportions, spring feel, a caption that follows the choice,
 // a flash of light after a pick, the keyboard model): no source, markup, picture, font, colour or glyph drawing was
 // copied. A private prototype for a school module. Adapted to OrderPilot's tokens.
-import { useEffect, useId, type SyntheticEvent } from "react";
+import { useEffect, useId, useState, type SyntheticEvent } from "react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -50,6 +50,9 @@ export function AvailabilityControl({
   className,
 }: AvailabilityPickerProps) {
   const descriptionId = useId();
+  // The pill may arrive late, or never (a slow or failed chunk): the trigger
+  // fades its face only while the pill is in the page to cover it.
+  const [pillOpen, setPillOpen] = useState(false);
   const menuReady = useDeferredModule(dropdownMenuModule) !== undefined;
 
   useEffect(
@@ -95,6 +98,7 @@ export function AvailabilityControl({
             skin={skin}
             busy={busy}
             pulse={pulse}
+            pillOpen={pillOpen}
             className={className}
           />
         </DropdownMenuTrigger>
@@ -107,6 +111,7 @@ export function AvailabilityControl({
             side={side}
             align={align}
             descriptionId={descriptionId}
+            onPresent={setPillOpen}
             onCloseAutoFocus={onCloseAutoFocus}
           />
         ) : null}

@@ -79,8 +79,10 @@
   border-radius: var(--radius-pill);
   transition: opacity var(--motion-fast) var(--ease-out);
 }
-/* The pill covers the trigger while it is open, and grows out of it. */
-.ap-trigger[aria-expanded="true"] .ap-face {
+/* The pill covers the trigger while it is open, and grows out of it. The face
+   fades only once the pill is in the page (data-pill-open, set by the part that
+   draws it): a slow or failed chunk must never leave the trigger blank. */
+.ap-trigger[aria-expanded="true"][data-pill-open] .ap-face {
   opacity: 0;
 }
 .ap-trigger[aria-busy="true"] {
