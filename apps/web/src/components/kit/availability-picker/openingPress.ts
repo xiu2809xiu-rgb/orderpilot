@@ -38,6 +38,11 @@ export function recordOpeningPress(event: PressPoint): void {
   };
 }
 
+/** The control calls this when it leaves the page: a press must not outlive the trigger it was made on. */
+export function forgetOpeningPress(): void {
+  opening = null;
+}
+
 export function repeatsOpeningPress(event: PressPoint): boolean {
   if (!opening || performance.now() - opening.at >= REPEAT_WINDOW_MS) {
     return false;

@@ -25,7 +25,7 @@ import {
   whenIdle,
 } from "@/lib/deferred";
 import { AvailabilityTrigger } from "./AvailabilityTrigger";
-import { recordOpeningPress } from "./openingPress";
+import { forgetOpeningPress, recordOpeningPress } from "./openingPress";
 import type { AvailabilityPickerProps } from "./types";
 
 // The pill, its orbs and its caption load after the first paint, on idle, and
@@ -95,6 +95,10 @@ export function AvailabilityControl({
       }),
     [],
   );
+  // The opening press is kept in a module, so it must go when the control does:
+  // a later control on the same page, or a test's next render, would otherwise
+  // see a press that its own trigger never took.
+  useEffect(() => forgetOpeningPress, []);
 
   // While a save is in flight a press does nothing. A handler that stops the
   // default also stops Radix and the stand-in from opening the menu.
