@@ -92,7 +92,7 @@ describe("the glass of the pill", () => {
     }
   };
 
-  it("is switched on when the growth ends and is off again on the next opening", async () => {
+  it("marks the pill as settled when the growth ends, and clears it on the next opening", async () => {
     const user = userEvent.setup();
     renderPicker();
     await open(user);
@@ -107,7 +107,7 @@ describe("the glass of the pill", () => {
     expect(pill()).not.toHaveAttribute("data-settled");
   });
 
-  it("is switched off when the fold starts, so the blur does not scale", async () => {
+  it("clears the mark when the fold starts", async () => {
     const user = userEvent.setup();
     renderPicker();
     await open(user);

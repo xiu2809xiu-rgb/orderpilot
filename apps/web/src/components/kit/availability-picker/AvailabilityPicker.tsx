@@ -148,7 +148,7 @@ export function AvailabilityPicker({
         onCloseAutoFocus={onCloseAutoFocus}
         onKeyDown={sideways}
         onAnimationStart={(event) => {
-          // The fold scales the box again, so the blur goes off for it too.
+          // The fold scales the box again: the pill is no longer settled.
           if (
             event.target === event.currentTarget &&
             event.animationName === "ap-fold"
@@ -157,8 +157,7 @@ export function AvailabilityPicker({
           }
         }}
         onAnimationEnd={(event) => {
-          // The glass blur is switched on once the growth is over: a blurred
-          // box that scales is repainted each frame.
+          // The growth is over: tests and the end-to-end spec measure from here.
           if (
             event.target === event.currentTarget &&
             event.animationName === "ap-grow"

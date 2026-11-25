@@ -75,7 +75,13 @@ describe("the pill's sheet", () => {
   });
 
   it("animates only scale and opacity in the pill's keyframes", () => {
-    for (const name of ["ap-grow", "ap-fold", "ap-orb-in", "ap-text-in"]) {
+    for (const name of [
+      "ap-grow",
+      "ap-fade",
+      "ap-fold",
+      "ap-orb-in",
+      "ap-text-in",
+    ]) {
       const block = atRule(picker, `@keyframes ${name}`);
       const properties = [...block.matchAll(/([a-z-]+):/g)].map((m) => m[1]);
       const allowed = new Set(["scale", "opacity"]);
@@ -94,10 +100,20 @@ describe("the pill's sheet", () => {
     );
   });
 
-  it("switches the glass on after the growth, and at once under reduced motion", () => {
-    expect(picker).toMatch(/\.ap-pill\[data-settled\]\s*{\s*backdrop-filter/);
-    const reduce = atRule(picker, "@media (prefers-reduced-motion: reduce)");
-    expect(reduce).toContain("backdrop-filter");
+  it("has the glass on from the first frame and fades the box in on its own quick animation, so the page's words never show through a growing box", () => {
+    expect(picker).toMatch(/\.ap-pill\s*{[^}]*backdrop-filter: blur\(12px\)/);
+    expect(picker).not.toMatch(
+      /\.ap-pill\[data-settled\]\s*{\s*backdrop-filter/,
+    );
+    // The growth keyframes move the size only: the opacity has its own.
+    expect(atRule(picker, "@keyframes ap-grow")).not.toContain("opacity");
+    expect(picker).toMatch(/ap-fade var\(--motion-fast\)/);
+  });
+
+  it("holds each new caption word back until the caption's box has caught up with it", () => {
+    expect(picker).toMatch(
+      /animation: ap-text-in var\(--motion-fast\) var\(--ease-out\) 90ms both/,
+    );
   });
 
   it("starts the growth at the transform origin Radix gives the pill", () => {

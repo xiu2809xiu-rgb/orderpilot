@@ -49,7 +49,7 @@ describe("the picker's motion", () => {
     expect(pickerCss).toMatch(/animation: ap-orb-in var\(--motion-fast\)/);
     expect(pickerCss).toMatch(/animation: ap-text-in var\(--motion-fast\)/);
     expect(pickerCss).toMatch(
-      /animation: ap-grow var\(--ap-grow, \d+ms\) var\(--ap-spring/,
+      /animation:\s*ap-grow var\(--ap-grow, \d+ms\) var\(--ap-spring[^;]*ap-fade var\(--motion-fast\)/,
     );
     expect(dotCss).toMatch(/animation: ap-sheen var\(--motion-slow\)/);
     expect(dotCss).toMatch(/animation: ap-pulse var\(--motion-slow\)/);

@@ -1,10 +1,11 @@
 /* The availability pill: three orbs and a caption, in a glass box that grows
    out of its trigger. Colours are the app's tokens. The pill is in a portal, so
    nothing clips it. Every movement is scale, translate or opacity; the pill's
-   own size is never animated, and its backdrop blur is switched on only after
-   the growth has ended (data-settled), because a blurred box that scales is
-   repainted each frame. The growth is the one spring, written as a linear()
-   easing by pickerMotion.ts and handed in as --ap-spring and --ap-grow. */
+   own size is never animated, and its backdrop blur is on from the first frame
+   (switched on after the growth, the page's words showed through the box and
+   then vanished with a jolt). The growth is the one spring, written as a
+   linear() easing by pickerMotion.ts and handed in as --ap-spring and
+   --ap-grow; data-settled marks the end of it. */
 
 .ap-pill {
   /* From the trigger's box to the pill's: 24 by 24 against 166 by 96. */
@@ -23,6 +24,9 @@
   box-shadow:
     var(--shadow-pop),
     inset 0 1px 0 rgb(255 255 255 / 0.5);
+  /* The glass is on from the first frame: switched on after the growth, it made
+     the page's words show through the growing box and then vanish with a jolt. */
+  backdrop-filter: blur(12px) saturate(160%);
   transform-origin: var(--radix-dropdown-menu-content-transform-origin);
   outline: none;
 }
@@ -34,9 +38,6 @@
 .ap-pill[data-skin="ring"] {
   --ap-from-x: calc(32 / 166);
   --ap-from-y: calc(32 / 96);
-}
-.ap-pill[data-settled] {
-  backdrop-filter: blur(12px) saturate(160%);
 }
 
 .ap-orbs {
@@ -180,8 +181,12 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  /* The size grows on the spring; the pill is solid long before it has
+     finished growing, so the page does not show through the box. */
   .ap-pill[data-state="open"] {
-    animation: ap-grow var(--ap-grow, 400ms) var(--ap-spring, ease-out) both;
+    animation:
+      ap-grow var(--ap-grow, 400ms) var(--ap-spring, ease-out) both,
+      ap-fade var(--motion-fast) var(--ease-out) both;
   }
   .ap-pill[data-state="closed"] {
     animation: ap-fold var(--motion-fast) var(--ease-out) both;
@@ -190,17 +195,25 @@
     animation: ap-orb-in var(--motion-fast) var(--ease-out) both;
     animation-delay: calc(var(--ap-i, 0) * 30ms);
   }
+  /* The caption's box is still catching up with a longer word when it changes,
+     so the new word waits for it, and never spills out of its outline. */
   .ap-chip-text {
-    animation: ap-text-in var(--motion-fast) var(--ease-out) both;
+    animation: ap-text-in var(--motion-fast) var(--ease-out) 90ms both;
   }
 }
 @keyframes ap-grow {
   from {
     scale: var(--ap-from-x) var(--ap-from-y);
-    opacity: 0;
   }
   to {
     scale: 1 1;
+  }
+}
+@keyframes ap-fade {
+  from {
+    opacity: 0;
+  }
+  to {
     opacity: 1;
   }
 }
@@ -239,9 +252,6 @@
   .ap-pill .ap-item,
   .ap-chip-text {
     animation: none;
-  }
-  .ap-pill {
-    backdrop-filter: blur(12px) saturate(160%);
   }
 }
 

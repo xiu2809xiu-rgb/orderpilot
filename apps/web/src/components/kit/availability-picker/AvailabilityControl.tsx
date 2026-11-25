@@ -73,8 +73,11 @@ export function AvailabilityControl({
       event.preventDefault();
     }
   };
+  // On hover and focus the spring library is fetched too, so the first
+  // opening does not stall on loading it.
   const warm = () => {
     prefetch(pickerModule);
+    void import("./useChipSpring").then((spring) => spring.loadSpring());
   };
 
   return (
