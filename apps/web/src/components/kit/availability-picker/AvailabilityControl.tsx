@@ -9,6 +9,7 @@ import {
   useEffectEvent,
   useId,
   useState,
+  type PointerEvent,
   type SyntheticEvent,
 } from "react";
 import {
@@ -24,6 +25,7 @@ import {
   whenIdle,
 } from "@/lib/deferred";
 import { AvailabilityTrigger } from "./AvailabilityTrigger";
+import { recordOpeningPress } from "./openingPress";
 import type { AvailabilityPickerProps } from "./types";
 
 // The pill, its orbs and its caption load after the first paint, on idle, and
@@ -99,6 +101,15 @@ export function AvailabilityControl({
   const hold = (event: SyntheticEvent) => {
     if (busy) event.preventDefault();
   };
+  // The press that opens the menu is kept, for the pill's choices to tell a
+  // slow second click from a pick (openingPress.ts). A press that Radix will
+  // not turn into an opening (a save in flight, a press while the menu is
+  // open, another button, the control key) is not an opening press.
+  const press = (event: PointerEvent<HTMLElement>) => {
+    hold(event);
+    if (busy || isOpen || event.button !== 0 || event.ctrlKey) return;
+    recordOpeningPress(event);
+  };
   const holdKey = (event: SyntheticEvent & { key?: string }) => {
     if (busy && event.key && OPENING_KEYS.includes(event.key)) {
       event.preventDefault();
@@ -116,7 +127,7 @@ export function AvailabilityControl({
       <DropdownMenu open={isOpen} onOpenChange={change}>
         <DropdownMenuTrigger
           asChild
-          onPointerDown={hold}
+          onPointerDown={press}
           onClick={hold}
           onKeyDown={holdKey}
           onPointerEnter={warm}

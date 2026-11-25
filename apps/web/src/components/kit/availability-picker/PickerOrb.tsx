@@ -12,6 +12,7 @@ import {
   type MouseEvent,
   type PointerEvent,
 } from "react";
+import { repeatsOpeningPress } from "./openingPress";
 import { availabilityLook } from "./tones";
 
 /**
@@ -71,8 +72,10 @@ export function PickerOrb({
       data-value={value}
       className="ap-item"
       style={{ "--ap-i": index } as CSSProperties}
-      onPointerDown={() => {
+      onPointerDown={(event: PointerEvent<HTMLElement>) => {
         if (performance.now() - shownAt.current < OPEN_GUARD_MS) return;
+        // The opening press said again, at its place, is no choice either.
+        if (repeatsOpeningPress(event)) return;
         pressed.current = true;
         armed.current = true;
       }}

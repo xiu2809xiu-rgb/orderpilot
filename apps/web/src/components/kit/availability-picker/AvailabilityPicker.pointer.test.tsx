@@ -1,7 +1,8 @@
 import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { loadPicker, renderPicker } from "./availabilityTestKit";
+import { REPEAT_REACH_PX, REPEAT_WINDOW_MS } from "./openingPress";
 import { OPENING_CLICK_MS, OPEN_GUARD_MS } from "./PickerOrb";
 
 loadPicker();
@@ -152,5 +153,188 @@ describe("picking with the pointer", () => {
     await user.keyboard("{ArrowRight} ");
     expect(onPick).toHaveBeenCalledTimes(2);
     expect(onPick).toHaveBeenLastCalledWith("DO_NOT_DISTURB");
+  });
+});
+
+// The opening press said again (openingPress.ts). The clock is held, so that
+// "400 ms later" is exact; each test starts a long way after the last one, so
+// that the press kept by an earlier test has expired by its own time.
+describe("a press that repeats the opening press", () => {
+  let epoch = 1_000_000;
+  const clock = () => {
+    epoch += 100_000;
+    const now = vi.spyOn(performance, "now").mockReturnValue(epoch);
+    return (ms: number) => now.mockReturnValue(epoch + ms);
+  };
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  const press = (target: Element, x: number, y: number, type = "mouse") => ({
+    target,
+    x,
+    y,
+    type,
+  });
+  /** A press, a release and the click that follows, as a pointer sends them. */
+  const tap = (at: ReturnType<typeof press>) => {
+    const init = {
+      clientX: at.x,
+      clientY: at.y,
+      pointerType: at.type,
+    };
+    fireEvent.pointerDown(at.target, init);
+    fireEvent.pointerUp(at.target, init);
+    fireEvent.click(at.target, { ...init, detail: 1 });
+  };
+  const openByPress = (x: number, y: number, type = "mouse") => {
+    fireEvent.pointerDown(trigger(), {
+      button: 0,
+      clientX: x,
+      clientY: y,
+      pointerType: type,
+    });
+  };
+
+  it("picks nothing at the same place 400 ms after the opening press, and the menu stays open", async () => {
+    const onPick = vi.fn();
+    renderPicker({ onPick });
+    const goTo = clock();
+    openByPress(100, 100);
+    await screen.findByRole("menu");
+    goTo(400);
+    tap(press(item("Available"), 100, 100));
+    expect(onPick).not.toHaveBeenCalled();
+    expect(screen.getByRole("menu")).toBeVisible();
+  });
+
+  it("picks once at a place 60 px away 400 ms after the opening press", async () => {
+    const onPick = vi.fn();
+    renderPicker({ onPick });
+    const goTo = clock();
+    openByPress(100, 100);
+    await screen.findByRole("menu");
+    goTo(400);
+    tap(press(item("Available"), 160, 100));
+    expect(onPick).toHaveBeenCalledTimes(1);
+  });
+
+  it("picks once at the same place 600 ms after the opening press", async () => {
+    const onPick = vi.fn();
+    renderPicker({ onPick });
+    const goTo = clock();
+    openByPress(100, 100);
+    await screen.findByRole("menu");
+    goTo(REPEAT_WINDOW_MS + 100);
+    tap(press(item("Available"), 100, 100));
+    expect(onPick).toHaveBeenCalledTimes(1);
+  });
+
+  it("picks once 400 ms after a keyboard opening, wherever the press is", async () => {
+    const onPick = vi.fn();
+    renderPicker({ onPick });
+    const goTo = clock();
+    await open();
+    goTo(400);
+    tap(press(item("Available"), 0, 0));
+    expect(onPick).toHaveBeenCalledTimes(1);
+  });
+
+  it("holds back a finger's second tap 15 px from the first, and not one 60 px away", async () => {
+    const onPick = vi.fn();
+    renderPicker({ onPick });
+    const goTo = clock();
+    openByPress(100, 100, "touch");
+    await screen.findByRole("menu");
+    goTo(400);
+    expect(15).toBeLessThanOrEqual(REPEAT_REACH_PX.touch);
+    tap(press(item("Available"), 115, 100, "touch"));
+    expect(onPick).not.toHaveBeenCalled();
+    expect(screen.getByRole("menu")).toBeVisible();
+    tap(press(item("Available"), 160, 100, "touch"));
+    expect(onPick).toHaveBeenCalledTimes(1);
+  });
+
+  it("holds back a mouse 6 px from the opening press and not 15 px, which is more than a hand's tremor", async () => {
+    const onPick = vi.fn();
+    renderPicker({ onPick });
+    const goTo = clock();
+    openByPress(100, 100);
+    await screen.findByRole("menu");
+    goTo(400);
+    tap(press(item("Available"), 106, 100));
+    expect(onPick).not.toHaveBeenCalled();
+    tap(press(item("Available"), 115, 100));
+    expect(onPick).toHaveBeenCalledTimes(1);
+  });
+
+  it("holds nothing back when the pill is opened by the keyboard a second after an opening press", async () => {
+    const onPick = vi.fn();
+    renderPicker({ onPick });
+    const goTo = clock();
+    openByPress(100, 100);
+    await screen.findByRole("menu");
+    fireEvent.keyDown(screen.getByRole("menu"), { key: "Escape" });
+    await waitFor(() => {
+      expect(screen.queryByRole("menu")).toBeNull();
+    });
+    goTo(1000);
+    await open();
+    goTo(1000 + 400);
+    tap(press(item("Available"), 100, 100));
+    expect(onPick).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not keep a press that the control held because a save is in flight", async () => {
+    const onPick = vi.fn();
+    const view = renderPicker({ onPick, busy: true });
+    const goTo = clock();
+    openByPress(100, 100);
+    expect(screen.queryByRole("menu")).toBeNull();
+    view.unmount();
+    renderPicker({ onPick });
+    goTo(100);
+    await open();
+    goTo(400);
+    tap(press(item("Available"), 100, 100));
+    expect(onPick).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not keep a press with the control key, which Radix does not turn into an opening", async () => {
+    const onPick = vi.fn();
+    renderPicker({ onPick });
+    const goTo = clock();
+    fireEvent.pointerDown(trigger(), {
+      button: 0,
+      ctrlKey: true,
+      clientX: 100,
+      clientY: 100,
+    });
+    expect(screen.queryByRole("menu")).toBeNull();
+    goTo(50);
+    await open();
+    goTo(400);
+    tap(press(item("Available"), 100, 100));
+    expect(onPick).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not keep a press that closes the menu, which Radix does not turn into an opening", async () => {
+    const onPick = vi.fn();
+    renderPicker({ onPick });
+    const goTo = clock();
+    await open();
+    // The menu is open, and its trigger is hidden from the tree: this press closes it.
+    fireEvent.pointerDown(
+      screen.getByRole("button", { name: /^Your availability/, hidden: true }),
+      { button: 0, clientX: 100, clientY: 100 },
+    );
+    await waitFor(() => {
+      expect(screen.queryByRole("menu")).toBeNull();
+    });
+    goTo(50);
+    await open();
+    goTo(400);
+    tap(press(item("Available"), 100, 100));
+    expect(onPick).toHaveBeenCalledTimes(1);
   });
 });
