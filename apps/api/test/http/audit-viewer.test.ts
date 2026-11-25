@@ -17,6 +17,7 @@ import { createTestApp, type TestApp } from "../support/test-app.js";
 
 const EVENTS = `${API}/audit/events`;
 const CHAIN = `${API}/audit/chain`;
+const FILTER_OPTIONS = `${API}/audit/filter-options`;
 
 describe("audit viewer: reading the trail over HTTP", () => {
   let t: TestApp;
@@ -135,7 +136,7 @@ describe("audit viewer: reading the trail over HTTP", () => {
         const routes = registeredRoutes();
         const audit = routes.filter((r) => r.path.includes("/audit"));
         expect(audit.map((r) => r.path).sort()).toEqual(
-          [EVENTS, `${EVENTS}/:id`, CHAIN].sort(),
+          [EVENTS, `${EVENTS}/:id`, CHAIN, FILTER_OPTIONS].sort(),
         );
         for (const route of audit) {
           const verbs = Object.entries(route.methods)
@@ -149,12 +150,12 @@ describe("audit viewer: reading the trail over HTTP", () => {
         ).toBe(true);
       });
 
-      it("refuses every write verb on the list, one event and the chain, with the CSRF token sent", async () => {
+      it("refuses every write verb on the list, one event, the chain and the filter options, with the CSRF token sent", async () => {
         const admin = as("SYSTEM_ADMIN");
         const server = t.app.getHttpServer();
         const id = (await list("SYSTEM_ADMIN")).body.data[0]?.id ?? "x";
         const before = await list("SYSTEM_ADMIN", "?pageSize=200");
-        for (const path of [EVENTS, `${EVENTS}/${id}`, CHAIN]) {
+        for (const path of [EVENTS, `${EVENTS}/${id}`, CHAIN, FILTER_OPTIONS]) {
           for (const verb of ["post", "put", "patch"] as const) {
             const res = await call(t, admin, verb, path, {
               csrf: true,
