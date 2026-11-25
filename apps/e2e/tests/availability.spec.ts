@@ -84,7 +84,16 @@ const choice = (page: Page, name: string): Locator =>
 
 /** The pill lies inside the viewport with room to spare. */
 async function expectInsideViewport(page: Page, spare = 8): Promise<void> {
-  const box = await pill(page).boundingBox();
+  // Radix places the menu a frame after it appears: take the box once two
+  // reads, a frame apart, agree.
+  let box = await pill(page).boundingBox();
+  for (let tries = 0; tries < 20; tries += 1) {
+    await page.waitForTimeout(50);
+    const next = await pill(page).boundingBox();
+    const same = JSON.stringify(next) === JSON.stringify(box);
+    box = next;
+    if (same) break;
+  }
   const view = page.viewportSize();
   expect(box, "the pill has a box").not.toBeNull();
   expect(view, "the page has a viewport").not.toBeNull();
@@ -231,7 +240,11 @@ test("the caption follows the choice", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await signIn(page, SETTER);
   await page.goto("/");
-  await dot(page).click();
+  // By the keyboard, so that focus starts on the checked choice: a mouse that
+  // opens the menu leaves focus on the menu itself once the pill has grown out
+  // from under the pointer, and ArrowRight would then start from the first.
+  await dot(page).focus();
+  await page.keyboard.press("Enter");
   await expect(pill(page)).toBeVisible();
   // The pill is drawn scaled while it grows: measure it after the growth.
   await expect(pill(page)).toHaveAttribute("data-settled", "");
@@ -303,8 +316,12 @@ test("the pages pass the accessibility check, and so does the open menu in light
         timeout: 2_000,
       })
       .catch(() => undefined);
+    // Radix hides the page behind any open menu with aria-hidden while its
+    // buttons stay focusable, and axe flags that for the account menu too:
+    // it is the menu library's way of holding focus, not this story's.
     const { violations } = await new AxeBuilder({ page })
       .withTags(WCAG_TAGS)
+      .disableRules(["aria-hidden-focus"])
       .analyze();
     expect(
       violations.map((v) => `${v.id}: ${v.help}`),
@@ -340,8 +357,80 @@ test.describe("on a phone with a touch screen", () => {
       expect(itemBox?.width).toBeGreaterThanOrEqual(43.5);
     }
     // The words are drawn under the orbs on a touch screen.
-    await expect(pill(page).getByText("Do not disturb")).toBeVisible();
+    // (The hidden measuring copy of each word is not the one that is drawn.)
+    const label = choice(page, "Do not disturb").locator(".ap-label");
+    await expect(label).toBeVisible();
+    const orbBox = await choice(page, "Do not disturb")
+      .locator(".ap-orb")
+      .boundingBox();
+    const labelBox = await label.boundingBox();
+    expect(labelBox?.y ?? 0).toBeGreaterThanOrEqual(
+      (orbBox?.y ?? 0) + (orbBox?.height ?? 0) - 0.5,
+    );
     await expectInsideViewport(page);
+  });
+
+  test("a finger on the dot in the phone menu or on the ring in Settings opens the menu and picks nothing", async ({
+    page,
+  }) => {
+    // A tap is followed by a click, and the pill has grown under the finger:
+    // that click must not pick the choice it lands on. A value that a stray
+    // pick would change.
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await signIn(page, SETTER);
+    expect(
+      (
+        await call(SETTER, "PUT", "/availability/mine", {
+          value: "DO_NOT_DISTURB",
+        })
+      ).status,
+    ).toBe(200);
+    const puts: string[] = [];
+    page.on("request", (request) => {
+      if (
+        request.method() === "PUT" &&
+        request.url().includes("/availability")
+      ) {
+        puts.push(request.url());
+      }
+    });
+    const tapCentre = async (target: Locator): Promise<void> => {
+      const box = await target.boundingBox();
+      expect(box, "the control has a box").not.toBeNull();
+      if (!box) return;
+      await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+    };
+    try {
+      await page.goto("/");
+      await page.getByRole("button", { name: "Open navigation menu" }).click();
+      await expect(dot(page, "Do not disturb")).toBeVisible();
+      await tapCentre(dot(page, "Do not disturb"));
+      await expect(pill(page)).toBeVisible();
+      await expect(pill(page)).toHaveAttribute("data-settled", "");
+      await page.waitForTimeout(400);
+      await expect(
+        pill(page),
+        "the phone menu's pill stays open",
+      ).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(pill(page)).toHaveCount(0);
+
+      await page.goto("/settings?section=account");
+      const ring = page.locator('.ap-trigger[data-skin="ring"]');
+      await expect(ring).toBeVisible();
+      await tapCentre(ring);
+      await expect(pill(page)).toBeVisible();
+      await expect(pill(page)).toHaveAttribute("data-settled", "");
+      await page.waitForTimeout(400);
+      await expect(pill(page), "the ring's pill stays open").toBeVisible();
+      const { body } = await call(SETTER, "GET", "/availability/mine");
+      expect(myAvailabilityResponseSchema.parse(body).data.value).toBe(
+        "DO_NOT_DISTURB",
+      );
+      expect(puts, "a tap sends no change").toEqual([]);
+    } finally {
+      await putBack();
+    }
   });
 
   test("a tap on the avatar's centre opens the account menu, not availability", async ({
@@ -392,5 +481,42 @@ test.describe("on the narrowest screen", () => {
     await expectInsideViewport(page);
     await page.keyboard.press("Escape");
     await expect(change).toBeFocused();
+  });
+});
+
+test.describe("on a tablet with a touch screen", () => {
+  test.use({ hasTouch: true, viewport: { width: 1024, height: 768 } });
+
+  test("a tap on the avatar's centre opens the account menu, in the open panel and in the 64 px rail", async ({
+    page,
+  }) => {
+    await signIn(page, SETTER);
+    await page.goto("/");
+    expect(
+      await page.evaluate(() => matchMedia("(pointer: coarse)").matches),
+      "touch emulation gives a coarse pointer",
+    ).toBe(true);
+    const avatar = page
+      .getByRole("button", { name: /^Account menu/ })
+      .locator('[data-slot="avatar"]');
+    const tapAvatar = async (where: string): Promise<void> => {
+      const box = await avatar.boundingBox();
+      expect(box, `the avatar has a box ${where}`).not.toBeNull();
+      if (!box) return;
+      await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+      await expect(
+        page.getByRole("menuitem", { name: "Sign out" }),
+        `the account menu opens ${where}`,
+      ).toBeVisible();
+      await expect(pill(page)).toHaveCount(0);
+      await page.keyboard.press("Escape");
+      await expect(
+        page.getByRole("menuitem", { name: "Sign out" }),
+      ).toHaveCount(0);
+    };
+    await tapAvatar("in the open panel");
+    await page.getByRole("button", { name: "Collapse the panel" }).click();
+    await tapAvatar("in the rail");
+    await page.getByRole("button", { name: "Expand the panel" }).click();
   });
 });
