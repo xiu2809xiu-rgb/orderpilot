@@ -91,6 +91,28 @@ describe("the availability picker", () => {
     expect(item("Focusing")).toHaveFocus();
   });
 
+  it("starts from the ends when the focus is on the menu itself: Left goes to the last choice, Right to the first", async () => {
+    const user = userEvent.setup();
+    renderPicker({ start: "FOCUSING" });
+    await openWithKeyboard(user);
+    await waitFor(() => {
+      expect(item("Focusing")).toHaveFocus();
+    });
+    // As after a mouse opening: the pointer rests on an item and leaves it, and
+    // Radix puts the focus on the menu itself.
+    const toMenu = () => {
+      fireEvent.pointerMove(item("Focusing"), { pointerType: "mouse" });
+      fireEvent.pointerLeave(item("Focusing"), { pointerType: "mouse" });
+      expect(menu()).toHaveFocus();
+    };
+    toMenu();
+    await user.keyboard("{ArrowLeft}");
+    expect(item("Do not disturb")).toHaveFocus();
+    toMenu();
+    await user.keyboard("{ArrowRight}");
+    expect(item("Available")).toHaveFocus();
+  });
+
   it("jumps with Home and End", async () => {
     const user = userEvent.setup();
     renderPicker({ start: "FOCUSING" });

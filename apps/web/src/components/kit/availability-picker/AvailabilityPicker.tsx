@@ -84,7 +84,10 @@ function sideways(event: KeyboardEvent<HTMLDivElement>) {
   event.preventDefault();
   const at = items.findIndex((item) => item === document.activeElement);
   const step = event.key === "ArrowRight" ? 1 : -1;
-  items[(at + step + items.length) % items.length]?.focus();
+  // Focus on the menu itself (Radix puts it there when the pointer leaves an
+  // item) is no item: the pair starts from its ends, as Down and Up do.
+  const next = at < 0 ? (step > 0 ? 0 : items.length - 1) : at + step;
+  items[(next + items.length) % items.length]?.focus();
 }
 
 /**
