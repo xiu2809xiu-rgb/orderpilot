@@ -65,7 +65,7 @@
     "copy": {
       "open": "Copy a role",
       "title": "Copy a role's permissions",
-      "description": "Makes the target hold exactly the permissions the source holds. A copy that would break a locked cell is refused, so copying onto the system admin only works from a role that never approves, posts or pays.",
+      "description": "Makes the target hold exactly the permissions the source holds. A copy that would break a locked cell is refused: copying onto the system admin only works from a role that does none of the work itself, and a copy onto the management approver cannot take away deciding approvals.",
       "from": "Copy from",
       "to": "Copy to",
       "choose": "Choose a role",
@@ -240,5 +240,14 @@
   },
   "badges": {
     "mock": "The masking sample uses synthetic customers."
+  },
+  "notices": {
+    "heading": "The administrator's role",
+    "label": "What the administrator's role gained",
+    "widened": "{{name}} gave the System admin role {{permissions}}.",
+    "copied": "{{name}} copied {{from}} onto the System admin role, which gained {{permissions}}.",
+    "markRead": "Mark as read",
+    "markReadFor": "Mark as read: {{text}}",
+    "failed": "Could not load what the administrator's role gained."
   }
 }

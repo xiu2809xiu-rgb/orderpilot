@@ -275,5 +275,25 @@
       "done": "{{ref}} raised and sent to the approvers",
       "failed": "The SPR was not raised. Reload the page and try again."
     }
+  },
+  "pi": {
+    "heading": "Pro forma invoice",
+    "description": "An issued PI is fixed only by reverse and reissue, with a reason that is kept.",
+    "issue": "issue {{issue}}",
+    "sent": "Sent {{date}} by {{name}}",
+    "historyLabel": "Reversals",
+    "reversed": "Issue {{issue}} reversed by {{name}} on {{date}}",
+    "start": "Reverse and reissue",
+    "reason": "Why it is reversed",
+    "reasonHint": "Kept with the PI and in the audit trail. Issue {{issue}} replaces it, and this cannot be undone.",
+    "reasonRequired": "Say why before reversing it.",
+    "confirm": "Reverse and send issue {{issue}}",
+    "sending": "Reissuing",
+    "cancel": "Cancel",
+    "locked": "A payment or the packing has followed this PI, so it is not reissued here.",
+    "toast": {
+      "reissued": "{{recordNo}} reissued as issue {{issue}}",
+      "failed": "The PI was not reissued. Reload the page and try again."
+    }
   }
 }

@@ -9,13 +9,115 @@ import { DomainError } from "../../../common/domain-error.js";
 import { decideAiDestination } from "./ai-destination-policy.js";
 import { SAMPLE_RULES, mask, sampleNoteRule } from "./masking.js";
 import {
+  MatrixRuleRefusedError,
   assertCanGrant,
   assertCanRevoke,
+  lockRepairs,
   pairsToSeed,
   planCopy,
 } from "./matrix-rules.js";
 
+/** The refusal a rule threw, so a test can read which rule it names. */
+function refusalOf(attempt: () => unknown): unknown {
+  try {
+    attempt();
+  } catch (error) {
+    return error instanceof MatrixRuleRefusedError ? error.refusal : error;
+  }
+  return null;
+}
+
 describe("matrix rules", () => {
+  it("never lets the system admin route an SPR or take in a document (#383)", () => {
+    for (const permission of ["spr.route", "documents.upload"] as const) {
+      expect(
+        refusalOf(() => {
+          assertCanGrant("SYSTEM_ADMIN", permission);
+        }),
+      ).toEqual({ rule: "locked-cell", permission, lock: "never" });
+      expect(() => {
+        assertCanGrant("SUPPORT", permission);
+      }).not.toThrow();
+    }
+  });
+
+  it("keeps approvals.decide on for the approver role, so no one can silence the approvers (#383)", () => {
+    expect(
+      refusalOf(() => {
+        assertCanRevoke("APPROVER", "approvals.decide");
+      }),
+    ).toEqual({
+      rule: "locked-cell",
+      permission: "approvals.decide",
+      lock: "always",
+    });
+    expect(() => {
+      assertCanRevoke("MANAGEMENT", "approvals.decide");
+    }).not.toThrow();
+    // A copy onto the approver role from one without it would take it away.
+    expect(
+      refusalOf(() =>
+        planCopy("FINANCE", "APPROVER", ["orders.read"], ["approvals.decide"]),
+      ),
+    ).toMatchObject({ rule: "locked-cell", lock: "always" });
+  });
+
+  it("says which locked cells the table breaks, so the seed can repair them (#383)", () => {
+    expect(
+      lockRepairs([
+        { role: "SYSTEM_ADMIN", permission: "documents.upload" },
+        { role: "SYSTEM_ADMIN", permission: "users.read" },
+        { role: "SUPPORT", permission: "spr.route" },
+      ]),
+    ).toEqual({
+      remove: [{ role: "SYSTEM_ADMIN", permission: "documents.upload" }],
+      restore: [
+        { role: "SYSTEM_ADMIN", permission: "roles.manage" },
+        { role: "APPROVER", permission: "approvals.decide" },
+      ],
+    });
+    expect(
+      lockRepairs([
+        { role: "SYSTEM_ADMIN", permission: "roles.manage" },
+        { role: "APPROVER", permission: "approvals.decide" },
+      ]),
+    ).toEqual({ remove: [], restore: [] });
+  });
+
+  it("names the rule that refused, for the audit row (#378)", () => {
+    expect(
+      refusalOf(() => {
+        assertCanGrant("SYSTEM_ADMIN", "payments.post");
+      }),
+    ).toEqual({
+      rule: "locked-cell",
+      permission: "payments.post",
+      lock: "never",
+    });
+    expect(
+      refusalOf(() => {
+        assertCanRevoke("SYSTEM_ADMIN", "roles.manage");
+      }),
+    ).toEqual({
+      rule: "locked-cell",
+      permission: "roles.manage",
+      lock: "always",
+    });
+    expect(refusalOf(() => planCopy("FINANCE", "FINANCE", [], []))).toEqual({
+      rule: "same-role",
+    });
+    expect(
+      refusalOf(() =>
+        planCopy(
+          "FINANCE",
+          "SYSTEM_ADMIN",
+          ["payments.post"],
+          ["roles.manage"],
+        ),
+      ),
+    ).toMatchObject({ rule: "locked-cell", lock: "never" });
+  });
+
   it("refuses to grant the system admin a right to approve, post or pay", () => {
     for (const permission of [
       "approvals.decide",

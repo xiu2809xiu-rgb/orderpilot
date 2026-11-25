@@ -12,6 +12,9 @@ import { BankHoldVerifiers } from "./bank-hold-verifiers.js";
 import { BankHoldController } from "./bank-hold.controller.js";
 import { BankHoldRepository } from "./bank-hold.repository.js";
 import { DataScopeRepository } from "./data-scope.repository.js";
+import { GovernanceNoticeController } from "./governance-notice.controller.js";
+import { GovernanceNoticeRepository } from "./governance-notice.repository.js";
+import { GovernanceNoticeService } from "./governance-notice.service.js";
 import { BankFingerprinter } from "./domain/bank-details.js";
 import { MatrixController } from "./matrix.controller.js";
 import { MatrixService } from "./matrix.service.js";
@@ -30,7 +33,12 @@ import { RevokedPermissionRepository } from "./revoked-permission.repository.js"
  */
 @Module({
   imports: [AuditModule, UsersModule],
-  controllers: [MatrixController, PolicyController, BankHoldController],
+  controllers: [
+    MatrixController,
+    PolicyController,
+    BankHoldController,
+    GovernanceNoticeController,
+  ],
   providers: [
     // Stateless, so a second instance beside AuthModule's is harmless.
     RolePermissionRepository,
@@ -49,6 +57,8 @@ import { RevokedPermissionRepository } from "./revoked-permission.repository.js"
     BankDetailHoldService,
     BankHoldClearanceService,
     RevokedPermissionRepository,
+    GovernanceNoticeRepository,
+    GovernanceNoticeService,
     MatrixService,
     PolicyService,
   ],

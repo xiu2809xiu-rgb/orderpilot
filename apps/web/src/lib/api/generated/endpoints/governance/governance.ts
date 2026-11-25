@@ -32,6 +32,9 @@ import type {
   BankHoldRecordVerification200,
   BankHoldRecordVerification403,
   BankHoldRecordVerificationBody,
+  GovernanceNoticeList200,
+  GovernanceNoticeListParams,
+  GovernanceNoticeRead200,
   MatrixCopy200,
   MatrixCopy403,
   MatrixCopyBody,
@@ -1119,6 +1122,191 @@ export function useBankHoldClear<TData = Awaited<ReturnType<typeof bankHoldClear
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getBankHoldClearQueryOptions(id,bankHoldClearBody,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary What the administrator's role gained, newest first, for the management approvers
+ */
+export const governanceNoticeList = (
+    params?: GovernanceNoticeListParams,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<GovernanceNoticeList200>(
+      {url: `/api/v1/governance/notices`, method: 'GET',
+        params, signal
+    },
+      );
+    }
+
+
+
+
+export const getGovernanceNoticeListQueryKey = (params?: GovernanceNoticeListParams,) => {
+    return [
+    `/api/v1/governance/notices`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGovernanceNoticeListQueryOptions = <TData = Awaited<ReturnType<typeof governanceNoticeList>>, TError = ErrorType<unknown>>(params?: GovernanceNoticeListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof governanceNoticeList>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGovernanceNoticeListQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof governanceNoticeList>>> = ({ signal }) => governanceNoticeList(params, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof governanceNoticeList>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GovernanceNoticeListQueryResult = NonNullable<Awaited<ReturnType<typeof governanceNoticeList>>>
+export type GovernanceNoticeListQueryError = ErrorType<unknown>
+
+
+export function useGovernanceNoticeList<TData = Awaited<ReturnType<typeof governanceNoticeList>>, TError = ErrorType<unknown>>(
+ params: undefined |  GovernanceNoticeListParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof governanceNoticeList>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof governanceNoticeList>>,
+          TError,
+          Awaited<ReturnType<typeof governanceNoticeList>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGovernanceNoticeList<TData = Awaited<ReturnType<typeof governanceNoticeList>>, TError = ErrorType<unknown>>(
+ params?: GovernanceNoticeListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof governanceNoticeList>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof governanceNoticeList>>,
+          TError,
+          Awaited<ReturnType<typeof governanceNoticeList>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGovernanceNoticeList<TData = Awaited<ReturnType<typeof governanceNoticeList>>, TError = ErrorType<unknown>>(
+ params?: GovernanceNoticeListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof governanceNoticeList>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary What the administrator's role gained, newest first, for the management approvers
+ */
+
+export function useGovernanceNoticeList<TData = Awaited<ReturnType<typeof governanceNoticeList>>, TError = ErrorType<unknown>>(
+ params?: GovernanceNoticeListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof governanceNoticeList>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGovernanceNoticeListQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+/**
+ * @summary Mark a notice read, for the person asking
+ */
+export const governanceNoticeRead = (
+    id: string,
+ signal?: AbortSignal
+) => {
+
+
+      return apiMutator<GovernanceNoticeRead200>(
+      {url: `/api/v1/governance/notices/${id}/read`, method: 'POST', signal
+    },
+      );
+    }
+
+
+
+
+export const getGovernanceNoticeReadQueryKey = (id: string,) => {
+    return [
+    'POST', `/api/v1/governance/notices/${id}/read`
+    ] as const;
+    }
+
+
+export const getGovernanceNoticeReadQueryOptions = <TData = Awaited<ReturnType<typeof governanceNoticeRead>>, TError = ErrorType<unknown>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof governanceNoticeRead>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGovernanceNoticeReadQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof governanceNoticeRead>>> = ({ signal }) => governanceNoticeRead(id, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof governanceNoticeRead>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GovernanceNoticeReadQueryResult = NonNullable<Awaited<ReturnType<typeof governanceNoticeRead>>>
+export type GovernanceNoticeReadQueryError = ErrorType<unknown>
+
+
+export function useGovernanceNoticeRead<TData = Awaited<ReturnType<typeof governanceNoticeRead>>, TError = ErrorType<unknown>>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof governanceNoticeRead>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof governanceNoticeRead>>,
+          TError,
+          Awaited<ReturnType<typeof governanceNoticeRead>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGovernanceNoticeRead<TData = Awaited<ReturnType<typeof governanceNoticeRead>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof governanceNoticeRead>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof governanceNoticeRead>>,
+          TError,
+          Awaited<ReturnType<typeof governanceNoticeRead>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGovernanceNoticeRead<TData = Awaited<ReturnType<typeof governanceNoticeRead>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof governanceNoticeRead>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Mark a notice read, for the person asking
+ */
+
+export function useGovernanceNoticeRead<TData = Awaited<ReturnType<typeof governanceNoticeRead>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof governanceNoticeRead>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGovernanceNoticeReadQueryOptions(id,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

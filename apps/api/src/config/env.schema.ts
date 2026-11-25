@@ -262,6 +262,10 @@ export const envSchema = z
     // APPROVER_GROUP is on: the old chain always applies its limits. Only "on"
     // turns them on; any other value is refused, so a typo cannot switch them.
     APPROVAL_LIMITS: z.enum(["off", "on"]).default("off"),
+    // Spectra has no approval on the sales side today (A-19, #251 point 9), so
+    // a sales order waits for no approver before its PI goes out. "on" makes it
+    // wait for one; any other value is refused.
+    SALES_APPROVAL: z.enum(["off", "on"]).default("off"),
     // The AI gateway (P-17). The default is the offline mock: no key, no
     // network. Only synthetic data may be sent to any other provider, and a
     // free-tier provider may keep and use what it is sent.
