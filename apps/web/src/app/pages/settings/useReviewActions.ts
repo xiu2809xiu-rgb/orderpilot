@@ -14,11 +14,8 @@ import {
   pictureReviewTakeDown,
 } from "@/lib/api/generated/endpoints/profile-pictures/profile-pictures";
 import { describeError } from "@/lib/errors";
+import { WAITING_COUNT_KEY } from "@/lib/pictures/waitingCount";
 import { refusalOf } from "./pictureRefusal";
-
-/** The Settings list reads its waiting count from this query. */
-export const WAITING_COUNT_API = "/profile-pictures?status=PENDING";
-export const WAITING_COUNT_KEY = ["list-count", WAITING_COUNT_API] as const;
 
 /** The refusals a decision can meet, each with a sentence of its own. */
 const DECISION_REFUSALS = [

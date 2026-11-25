@@ -36,6 +36,10 @@ type SprDecision = Extract<
   OrderCommand,
   { type: "SPR_APPROVED" | "SPR_REJECTED" | "SPR_DECISION_UNDONE" }
 >;
+type SalesDecision = Extract<
+  OrderCommand,
+  { type: "SALES_APPROVED" | "SALES_APPROVAL_UNDONE" }
+>;
 
 /**
  * What area 4's policy needs to judge an SPR decision. The caller must take the
@@ -94,7 +98,7 @@ export class OrderWorkflowService {
 
   async start(
     orderRef: string,
-    facts: { readonly prepaymentDue: string | null },
+    facts: { readonly prepaymentDue: string | null; readonly total?: string },
     actor: OrderActor,
     info: RequestInfo,
     now: Date = new Date(),
@@ -106,7 +110,7 @@ export class OrderWorkflowService {
 
   private async startDecision(
     orderRef: string,
-    facts: { readonly prepaymentDue: string | null },
+    facts: { readonly prepaymentDue: string | null; readonly total?: string },
     actor: OrderActor,
     info: RequestInfo,
     now: Date,
@@ -166,7 +170,7 @@ export class OrderWorkflowService {
    */
   async apply(
     orderRef: string,
-    command: Exclude<OrderCommand, SprDecision>,
+    command: Exclude<OrderCommand, SprDecision | SalesDecision>,
     actor: OrderActor,
     info: RequestInfo,
     now: Date = new Date(),
@@ -181,6 +185,9 @@ export class OrderWorkflowService {
       type === "SPR_DECISION_UNDONE"
     ) {
       throw new Error(`${type} must go through decideSpr.`);
+    }
+    if (type === "SALES_APPROVED" || type === "SALES_APPROVAL_UNDONE") {
+      throw new Error(`${type} must go through decideSale.`);
     }
     return this.transition(
       orderRef,
@@ -233,10 +240,64 @@ export class OrderWorkflowService {
     );
   }
 
+  /**
+   * Approves a sales order, or undoes it, once area 4's policy has allowed it
+   * (`sales-order.approve`, against the sales limit): an approver in the group,
+   * never the person who raised the order (#251, point 9).
+   */
+  decideSale(
+    orderRef: string,
+    decision: SalesDecision,
+    sale: {
+      readonly amount: string | undefined;
+      readonly requesterUserId: string;
+    },
+    actor: OrderActor,
+    info: RequestInfo,
+    now: Date = new Date(),
+    /** Writes that must commit or roll back with the move. */
+    alongside?: () => Promise<void>,
+  ): Promise<OrderTransitionResult> {
+    const askPolicy = async () => {
+      if (actor.kind !== "user") return;
+      await this.policy.enforce(
+        {
+          actor: { userId: actor.userId, role: actor.role },
+          action: "sales-order.approve",
+          resource: { type: "SalesOrder", id: orderRef },
+          ...(sale.amount === undefined ? {} : { amount: sale.amount }),
+          requesterUserId: sale.requesterUserId,
+        },
+        info,
+        now,
+      );
+    };
+    return this.transition(
+      orderRef,
+      decision,
+      actor,
+      info,
+      now,
+      askPolicy,
+      alongside,
+    );
+  }
+
+  /** The order's facts as the machine holds them; null for one it does not run. */
+  async snapshotOf(orderRef: string): Promise<OrderSnapshot | null> {
+    return (await this.repository.find(orderRef))?.state ?? null;
+  }
+
   /** Null for an order with no workflow, and for a sample the machine never ran. */
   async statusOf(orderRef: string): Promise<OrderStatusView | null> {
     const stored = await this.repository.find(orderRef);
     return stored ? this.viewOf(orderRef, stored) : null;
+  }
+
+  /** The prepayment the order's gate waits for; null with none due, or for an order the machine does not run. */
+  async prepaymentDueOf(orderRef: string): Promise<string | null> {
+    const stored = await this.repository.find(orderRef);
+    return stored?.state?.prepaymentDue ?? null;
   }
 
   /** The orders the machine runs, by number. Others are simply absent. */

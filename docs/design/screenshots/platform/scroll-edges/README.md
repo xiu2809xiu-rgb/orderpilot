@@ -1,0 +1,16 @@
+# Scroll edge marks screenshots
+
+Taken on 25 Nov 2026 from a Docker build of this branch (the review site, web and API images built from commit bbc001e5), on the synthetic demo data. The commits after it change only the end-to-end spec and these pictures, so the web app in the build is the one at the head of the branch.
+
+How they were taken: the installed Microsoft Edge, headless, with motion on, a touch screen and a window of 820 by 1180 px (a tablet held upright), signed in as Support through the demo sign-in. The page was scrolled with `scrollTo` and, after 600 ms for the fade, the page was cut from 70 px above the scroll box down to 620 px tall.
+
+| File                          | Page and state                                  | What it shows                                                                                                                                                                                                |
+| ----------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `board-start-light.png`       | Orders, By stage, light, scrolled to the start  | A soft shadow on the right edge only: the third column is cut by it, and nothing marks the left edge.                                                                                                        |
+| `board-start-dark.png`        | Orders, By stage, dark, scrolled to the start   | The same in dark: a teal glow on the right edge only.                                                                                                                                                        |
+| `board-middle-light.png`      | Orders, By stage, light, scrolled to the middle | A shadow on both edges, because there are columns to either side.                                                                                                                                            |
+| `board-middle-dark.png`       | Orders, By stage, dark, scrolled to the middle  | A teal glow on both edges.                                                                                                                                                                                   |
+| `wide-table-middle-light.png` | Exceptions queue, light, scrolled to the middle | A wide table (the queue is 1141 px wide in a 694 px box). The right mark is drawn over the last column. The left mark is under the pinned first column, which is never shaded, so only the right mark shows. |
+| `wide-table-middle-dark.png`  | Exceptions queue, dark, scrolled to the middle  | The same in dark: a teal glow on the right edge, the pinned Order No. column untouched.                                                                                                                      |
+
+The strip is 32 px wide. In light it is black at 6% at the edge, in dark the theme's teal at 12%, and in both it fades to nothing. At 16 px (the first build) the light mark changed the card by 14 levels of 255 at the very edge and by 3 or less past 13 px, which a person would not notice, so the band was widened and the strength was not changed.

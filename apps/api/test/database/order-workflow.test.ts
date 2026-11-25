@@ -87,6 +87,12 @@ describe("the order workflow, against the real database and area 4's real policy
     ) {
       throw new Error("An SPR decision goes through decideSpr");
     }
+    if (
+      command.type === "SALES_APPROVED" ||
+      command.type === "SALES_APPROVAL_UNDONE"
+    ) {
+      throw new Error("A sales approval goes through decideSale");
+    }
     return workflow.apply(ref, command, actor, INFO, tick());
   }
 

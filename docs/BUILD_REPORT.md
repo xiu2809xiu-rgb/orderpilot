@@ -413,6 +413,7 @@ Why it is slower than planned: every builder stopped at a usage limit several ti
 | #358  | The history build test allows a busy CI runner        | `test/synthetic-history-timing`  | This pull request. The history's time bound matches the dataset's own, 1,000 ms     |
 | #356  | A day-night switch replaces the theme menu            | `feat/area1-pixel-theme-switch`  | This pull request. The pixel toggle in the bar, menu and sign-in corner             |
 | #364  | Visual hierarchy and breathing room                   | `feat/area1-visual-hierarchy`    | This pull request. One rhythm in four tokens, one page stack, card padding of 24 px |
+| #384  | Scroll areas show which side has more                 | `feat/area1-scroll-edge-hint`    | This pull request. A quiet mark on each side of a scroll area that has more         |
 | #381  | Profile pictures a person approves                    | `feat/area1-profile-pictures`    | This pull request. Upload, review and show a picture; the AI check waits for area 4 |
 | #385  | Availability on the avatar                            | `feat/area1-availability`        | This pull request. Set it on your avatar; the Demo role menu shows it               |
 | #191  | Cut CI minutes before the repository goes private     | `ci/minutes-job-conditions`      | Merged, [#192](https://github.com/xiu2809xiu-rgb/orderpilot/pull/192)               |

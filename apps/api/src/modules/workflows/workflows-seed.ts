@@ -16,7 +16,7 @@ import {
   STARTER_SALES_STEPS,
 } from "./domain/sales-flow.js";
 import { scheduleOf } from "./domain/task-schedule.js";
-import { mockId } from "./mock/fixtures.js";
+import { isoAt, mockId } from "./mock/fixtures.js";
 import { MOCK_CURRENT_STEP } from "./mock/mock-flows.js";
 
 /**
@@ -163,6 +163,8 @@ export async function seedWorkflows(client: DbClient): Promise<string> {
   });
   await seedOrdersAwaitingSpr(client, dataset, instanceIds);
   await seedOrdersShortOfStock(client, dataset, instanceIds);
+  await seedOrdersAwaitingPayment(client, dataset, instanceIds);
+  await seedOrdersPiToSend(client, dataset, instanceIds);
 
   await client.workflowTaskSla.createMany({
     data: DEFAULT_TASK_SLAS.map((sla) => ({ ...sla })),
@@ -324,6 +326,117 @@ async function seedOrdersShortOfStock(
       data: {
         createdAt: now,
         dueAt: raiseSprSla ? scheduleOf(now, raiseSprSla).dueAt : now,
+      },
+    });
+  }
+}
+
+/**
+ * Puts the orders waiting for a prepayment on the state machine, so that
+ * Finance's confirmation really opens the gate and gives the warehouse its task
+ * (#290). An order whose only expected payment is a deposit stays a sample: a
+ * deposit never opens the gate. A label someone has already moved on is left
+ * alone, so a second run changes nothing.
+ */
+async function seedOrdersAwaitingPayment(
+  client: DbClient,
+  dataset: ReturnType<typeof syntheticDataset>,
+  instanceIds: ReadonlyMap<string, string>,
+): Promise<void> {
+  const now = new Date();
+  const confirmSla = DEFAULT_TASK_SLAS.find(
+    (sla) => sla.taskKind === "CONFIRM_PAYMENT",
+  );
+  for (const order of dataset.orders) {
+    const instanceId = instanceIds.get(order.header.no);
+    const prepaymentDue = prepaymentOf(order);
+    const expectsPrepayment = dataset.payments.some(
+      (payment) =>
+        payment.orderNo === order.header.no &&
+        payment.status === "expected" &&
+        (payment.paymentType === "prepayment" ||
+          payment.paymentType === "full-payment"),
+    );
+    if (
+      order.sampleScreenState !== "sample-awaiting-payment" ||
+      !instanceId ||
+      prepaymentDue === null ||
+      !expectsPrepayment
+    ) {
+      continue;
+    }
+    const moved = await client.workflowInstance.updateMany({
+      where: { id: instanceId, status: "sample-awaiting-payment" },
+      data: {
+        status: "AwaitingPayment",
+        currentStep: "payment-confirmed",
+        facts: {
+          prepaymentDue,
+          stockCoversOrder: true,
+          holds: [],
+          resumeTo: null,
+          enteredAt: isoAt(order.step.enteredOn, 9),
+        },
+      },
+    });
+    if (moved.count === 0) continue;
+    // Its clock starts now, so the demo's dated fixtures do not arrive overdue.
+    await client.workflowTask.updateMany({
+      where: { instanceId, kind: "CONFIRM_PAYMENT" },
+      data: {
+        createdAt: now,
+        dueAt: confirmSla ? scheduleOf(now, confirmSla).dueAt : now,
+      },
+    });
+  }
+}
+
+/**
+ * Puts the orders whose PI Support has still to send on the state machine, so
+ * that sending it really moves the order and gives the next team its task, and
+ * a PI that went out can be reversed and reissued (#251, point 6). Only those
+ * with no prepayment due and enough stock: a short order would first need an
+ * approved SPR, and a deposit never opens the payment gate. A label someone has
+ * already moved on is left alone, so a second run changes nothing.
+ */
+async function seedOrdersPiToSend(
+  client: DbClient,
+  dataset: ReturnType<typeof syntheticDataset>,
+  instanceIds: ReadonlyMap<string, string>,
+): Promise<void> {
+  const now = new Date();
+  const sendPiSla = DEFAULT_TASK_SLAS.find((sla) => sla.taskKind === "SEND_PI");
+  for (const order of dataset.orders) {
+    const instanceId = instanceIds.get(order.header.no);
+    if (
+      order.sampleScreenState !== "sample-pi-to-send" ||
+      !instanceId ||
+      order.stockShortfall !== null ||
+      prepaymentOf(order) !== null
+    ) {
+      continue;
+    }
+    const moved = await client.workflowInstance.updateMany({
+      where: { id: instanceId, status: "sample-pi-to-send" },
+      data: {
+        status: "StockChecked",
+        currentStep: "pi-sent",
+        facts: {
+          prepaymentDue: null,
+          stockCoversOrder: true,
+          holds: [],
+          resumeTo: null,
+          enteredAt: isoAt(order.step.enteredOn, 9),
+        },
+      },
+    });
+    if (moved.count === 0) continue;
+    // Its clock starts now, so the demo's dated fixtures do not arrive overdue.
+    await client.workflowTask.updateMany({
+      where: { instanceId, kind: "SEND_PI" },
+      data: {
+        createdAt: now,
+        dueAt: sendPiSla ? scheduleOf(now, sendPiSla).dueAt : now,
       },
     });
   }

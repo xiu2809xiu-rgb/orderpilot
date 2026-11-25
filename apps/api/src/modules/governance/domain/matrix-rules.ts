@@ -112,3 +112,36 @@ export function pairsToSeed(
       .map((permission) => ({ role, permission })),
   );
 }
+
+/** A role-permission pair, as the table holds it. */
+export interface RolePermissionPair {
+  readonly role: Role;
+  readonly permission: string;
+}
+
+/**
+ * What the table breaks of the locked cells (#383): a pair held where a lock
+ * says never, and a pair missing where a lock says always. The matrix never
+ * lets either happen, but a row put in or taken out another way (a script, an
+ * older database) can, so the seed repairs them and records each repair.
+ */
+export function lockRepairs(held: readonly RolePermissionPair[]): {
+  remove: { role: Role; permission: Permission }[];
+  restore: { role: Role; permission: Permission }[];
+} {
+  const has = new Set(held.map((pair) => `${pair.role}:${pair.permission}`));
+  const pair = (cell: (typeof LOCKED_CELLS)[number]) => ({
+    role: cell.role,
+    permission: cell.permission,
+  });
+  return {
+    remove: LOCKED_CELLS.filter(
+      (cell) =>
+        cell.kind === "never" && has.has(`${cell.role}:${cell.permission}`),
+    ).map(pair),
+    restore: LOCKED_CELLS.filter(
+      (cell) =>
+        cell.kind === "always" && !has.has(`${cell.role}:${cell.permission}`),
+    ).map(pair),
+  };
+}

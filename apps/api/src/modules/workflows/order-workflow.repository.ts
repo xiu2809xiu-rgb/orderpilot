@@ -17,6 +17,12 @@ const factsSchema = z.object({
   holds: z.array(z.string().min(1)),
   resumeTo: orderStatusSchema.nullable(),
   enteredAt: z.iso.datetime(),
+  /** Set once a sales approval is given, while the rule asks for one (#251, point 9). */
+  salesApproved: z.boolean().optional(),
+  salesApprovedByUserId: z.uuid().optional(),
+  /** Who started the workflow, so raised the order; absent on the seeded samples. */
+  raisedByUserId: z.uuid().optional(),
+  orderTotal: decimalStringSchema.optional(),
 });
 
 export interface StoredOrder {
@@ -206,5 +212,15 @@ function factsOf(state: OrderSnapshot): Prisma.InputJsonObject {
     holds: [...state.holds],
     resumeTo: state.resumeTo,
     enteredAt: state.enteredAt,
+    ...(state.salesApproved === undefined
+      ? {}
+      : { salesApproved: state.salesApproved }),
+    ...(state.salesApprovedByUserId === undefined
+      ? {}
+      : { salesApprovedByUserId: state.salesApprovedByUserId }),
+    ...(state.raisedByUserId === undefined
+      ? {}
+      : { raisedByUserId: state.raisedByUserId }),
+    ...(state.orderTotal === undefined ? {} : { orderTotal: state.orderTotal }),
   };
 }

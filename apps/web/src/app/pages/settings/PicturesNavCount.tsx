@@ -1,6 +1,6 @@
 import { MenuCount } from "@/app/shell/MenuCount";
+import { WAITING_COUNT_API } from "@/lib/pictures/waitingCount";
 import { useListCount } from "@/lib/useListCount";
-import { WAITING_COUNT_API } from "./useReviewActions";
 
 /**
  * How many pictures wait for this reviewer, beside the "Profile pictures"
