@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { must } from "@/test/must";
 import { loadPicker, renderPicker } from "./availabilityTestKit";
-import { chipPlace, pickerMotion } from "./pickerMotion";
+import { chipPlace, pickerMotion, pillGeometry } from "./pickerMotion";
 
 // The spring is motion's; this file replaces it to see what the caption asks
 // of it. jsdom has no IntersectionObserver, so the kit's own check makes every
@@ -44,6 +44,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  vi.restoreAllMocks();
 });
 
 const chip = () => must(document.querySelector<HTMLElement>(".ap-chip"));
@@ -93,6 +94,21 @@ describe("the caption that follows the choice", () => {
     expect(values).toEqual({ "--ap-chip-x": place.x, "--ap-chip-w": place.w });
     expect(options).toEqual({ type: "spring", ...pickerMotion.spring });
     expect(chip()).toHaveTextContent("Focusing");
+  });
+
+  it("fits the caption to the layout width of its word, not to the width it is drawn at while the pill grows", async () => {
+    // A scaled pill draws its words at a fraction of their width.
+    vi.spyOn(HTMLElement.prototype, "offsetWidth", "get").mockReturnValue(100);
+    vi.spyOn(Element.prototype, "getBoundingClientRect").mockReturnValue(
+      new DOMRect(0, 0, 10, 10),
+    );
+    const user = userEvent.setup();
+    renderPicker();
+    await open(user);
+    expect(chip().style.getPropertyValue("--ap-chip-w")).toBe(
+      String(chipPlace(0, 100).w),
+    );
+    expect(chipPlace(0, 100).w).toBe(100 + pillGeometry.chip.padX);
   });
 
   it("does not glide when the pill first appears", async () => {

@@ -46,7 +46,9 @@ function useWordWidths(labels: AvailabilityPickerLabels) {
       for (const word of root.querySelectorAll<HTMLElement>("[data-name]")) {
         const parsed = personAvailabilitySchema.safeParse(word.dataset.name);
         if (parsed.success) {
-          next[parsed.data] = word.getBoundingClientRect().width;
+          // The layout width: the pill is drawn scaled while it grows, and a
+          // drawn width would be a fraction of the word.
+          next[parsed.data] = word.offsetWidth;
         }
       }
       setWidths(next);
