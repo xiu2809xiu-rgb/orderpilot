@@ -120,7 +120,7 @@
     "title": "Notifications",
     "titleCount_one": "Notifications: {{shown}} reminder",
     "titleCount_other": "Notifications: {{shown}} reminders",
-    "titleWithNotices": "Notifications: {{reminders}}, {{notices}}",
+    "titleWithNotices": "Notifications: {{shown}} ({{reminders}}, {{notices}})",
     "reminderCount_one": "{{count}} reminder",
     "reminderCount_other": "{{count}} reminders",
     "noticeCount_one": "{{count}} notice",

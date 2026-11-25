@@ -73,6 +73,7 @@ export function Notifications() {
           aria-label={
             unread > 0
               ? t("notifications.titleWithNotices", {
+                  shown,
                   reminders: t("notifications.reminderCount", { count: total }),
                   notices: t("notifications.noticeCount", { count: unread }),
                 })
