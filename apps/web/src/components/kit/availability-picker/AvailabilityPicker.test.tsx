@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { must } from "@/test/must";
 import { loadPicker, renderPicker } from "./availabilityTestKit";
-import { OPEN_GUARD_MS } from "./PickerOrb";
+import { REPEAT_WINDOW_MS } from "./openingPress";
 
 loadPicker();
 
@@ -153,8 +153,10 @@ describe("the availability picker", () => {
     renderPicker({ onPick });
     await user.click(trigger());
     await screen.findByRole("menu");
-    // A press counts once the pill has been in the page for OPEN_GUARD_MS.
-    await new Promise((resolve) => setTimeout(resolve, OPEN_GUARD_MS + 20));
+    // jsdom puts every click on one point, so this pick is a press at the
+    // opening press's place, which counts once REPEAT_WINDOW_MS has passed. In
+    // a browser a choice lies somewhere else and the quarter second is enough.
+    await new Promise((resolve) => setTimeout(resolve, REPEAT_WINDOW_MS + 20));
     await user.click(item("Do not disturb"));
     expect(onPick).toHaveBeenCalledWith("DO_NOT_DISTURB");
   });
