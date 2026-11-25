@@ -170,19 +170,91 @@ test("the keyboard walk: Tab to the button, Enter, ArrowRight, Enter", async ({
   await putBack();
 });
 
+test("a press and a release of the mouse on the ring or the dot opens the menu and picks nothing", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await signIn(page, SETTER);
+  // A value that a stray pick of the first choice would change.
+  expect(
+    (
+      await call(SETTER, "PUT", "/availability/mine", {
+        value: "DO_NOT_DISTURB",
+      })
+    ).status,
+  ).toBe(200);
+  const puts: string[] = [];
+  page.on("request", (request) => {
+    if (request.method() === "PUT" && request.url().includes("/availability")) {
+      puts.push(request.url());
+    }
+  });
+  try {
+    for (const [route, trigger] of [
+      [
+        "/settings?section=account",
+        page.locator('.ap-trigger[data-skin="ring"]'),
+      ],
+      ["/", page.locator(".dx-person-dot")],
+    ] as const) {
+      await page.goto(route);
+      await expect(trigger).toBeVisible();
+      const box = await trigger.boundingBox();
+      expect(box, "the control has a box").not.toBeNull();
+      if (!box) return;
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+      // A real click: the pill opens on the press and the release comes
+      // while it is still growing, over whatever it has grown under the pointer.
+      await page.mouse.down();
+      await page.waitForTimeout(120);
+      await page.mouse.up();
+      await expect(
+        pill(page),
+        `the menu stays open from ${route}`,
+      ).toBeVisible();
+      await expect(pill(page)).toHaveAttribute("data-settled", "");
+      await expect(pill(page).getByRole("menuitemradio")).toHaveCount(3);
+      const { body } = await call(SETTER, "GET", "/availability/mine");
+      expect(myAvailabilityResponseSchema.parse(body).data.value).toBe(
+        "DO_NOT_DISTURB",
+      );
+      expect(puts, `no change is sent from ${route}`).toEqual([]);
+      await page.keyboard.press("Escape");
+      await expect(pill(page)).toHaveCount(0);
+    }
+  } finally {
+    await putBack();
+  }
+});
+
 test("the caption follows the choice", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await signIn(page, SETTER);
   await page.goto("/");
   await dot(page).click();
   await expect(pill(page)).toBeVisible();
+  // The pill is drawn scaled while it grows: measure it after the growth.
+  await expect(pill(page)).toHaveAttribute("data-settled", "");
   const chip = pill(page).locator(".ap-chip");
   await expect(chip).toBeVisible();
-  const before = await chip.boundingBox();
+  const centreOf = async (target: Locator): Promise<number> => {
+    const box = await target.boundingBox();
+    return box ? box.x + box.width / 2 : Number.NaN;
+  };
+  // The first caption is held 4 px inside the pill, so it is not centred under
+  // the first choice; the second is, and that is where it must arrive.
   await page.keyboard.press("ArrowRight");
+  await expect(choice(page, "Focusing")).toBeFocused();
+  // The caption glides on a spring: it arrives under the second choice.
   await expect
-    .poll(async () => (await chip.boundingBox())?.x ?? 0)
-    .not.toBe(before?.x);
+    .poll(
+      async () =>
+        Math.abs(
+          (await centreOf(chip)) - (await centreOf(choice(page, "Focusing"))),
+        ),
+      { timeout: 3_000 },
+    )
+    .toBeLessThan(3);
   await expect(chip).toHaveText("Focusing");
 });
 
