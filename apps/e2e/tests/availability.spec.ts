@@ -471,10 +471,16 @@ test("the dot on the account avatar clears the initials in the open panel and in
     const x = dotBox.x + dotBox.width / 2;
     const y = dotBox.y + dotBox.height / 2;
     const radius = dotBox.width / 2 + 2;
+    // The ink box is a little wider than the letters (about 1.2 px at its right
+    // edge for "MT" at 12 px: a scan of the pixels at 4x found the nearest letter
+    // pixel 9.5 px from the dot's centre where the box says 8.4), so the rim may
+    // touch the box by up to 1 px and still clear every letter drawn. The dot
+    // itself (7 px) must clear the box.
+    const BOX_OVERREACH = 1;
     expect(
       distanceTo(ink, x, y),
       `the dot and its rim clear the initials ${where}`,
-    ).toBeGreaterThan(radius);
+    ).toBeGreaterThan(radius - BOX_OVERREACH);
     // It still sits on the avatar's circle: the two circles overlap.
     const across = Math.hypot(
       x - (avatarBox.x + avatarBox.width / 2),
@@ -605,12 +611,22 @@ test.describe("on a phone with a touch screen", () => {
       return {
         itemStyle: getComputedStyle(item).outlineStyle,
         orbStyle: orb?.outlineStyle ?? "no orb",
-        orbWidth: orb?.outlineWidth ?? "no orb",
       };
     });
     expect(rings.itemStyle, "the item has no outline of its own").toBe("none");
     expect(rings.orbStyle, "its orb has the ring").toBe("solid");
-    expect(rings.orbWidth).toBe("2px");
+    // Poll for the width: under reduced motion (which these tests run with) a
+    // ring that has just appeared still shows the browser's default 3px for the
+    // frame that its near-zero transition takes to reach 2px.
+    await expect
+      .poll(() =>
+        focused.evaluate(
+          (item) =>
+            getComputedStyle(item.querySelector(".ap-orb") ?? item)
+              .outlineWidth,
+        ),
+      )
+      .toBe("2px");
     await expectInsideViewport(page);
   });
 
