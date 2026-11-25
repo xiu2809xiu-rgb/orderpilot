@@ -68,8 +68,13 @@ export function AvailabilityRow({
           variant="outline"
           aria-haspopup="menu"
           aria-expanded={open}
-          disabled={status !== "ready" || saving}
-          onClick={onChange}
+          // Off only while the value is being read. While a save is in flight
+          // it stays focusable and a press does nothing, as the ring does:
+          // the menu hands focus back to this button when it closes, and a
+          // disabled button would let it fall to the page.
+          disabled={status !== "ready"}
+          aria-busy={saving || undefined}
+          onClick={saving ? undefined : onChange}
         >
           {t("account.availability.change")}
         </Button>

@@ -114,10 +114,14 @@ describe("the Availability row", () => {
     ).toBeInTheDocument();
   });
 
-  it("is saving: the new value, Saving beside it, and the button off", () => {
-    row({ value: "FOCUSING", expiresAt: ENDS, saving: true });
+  it("is saving: the new value, Saving beside it, and the button busy but not off, so a press does nothing", async () => {
+    const onChange = vi.fn();
+    row({ value: "FOCUSING", expiresAt: ENDS, saving: true }, { onChange });
     expect(screen.getByText("Saving")).toBeInTheDocument();
-    expect(button()).toBeDisabled();
+    expect(button()).toHaveAttribute("aria-busy", "true");
+    expect(button()).toBeEnabled();
+    await userEvent.setup().click(button());
+    expect(onChange).not.toHaveBeenCalled();
   });
 
   it("is refused: an alert with the message, the trace id and Try again for the last change", async () => {
