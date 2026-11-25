@@ -49,4 +49,6 @@ Thanks, good work.
 4. Tell me when the checks are green.
 ```
 
-#379 had merged on 24 Nov, before the branch was cut, so #386 holds none of its commits. Rerunning the end-to-end tests against a stack that had unread notices found that the bell's name left out the number on its badge, which axe refuses (label in name). That was fixed in the same pull request.
+#379 had merged on 24 Nov, before the branch was cut, so #386 holds none of its commits. Rerunning the end-to-end tests against a stack that had unread notices found that the bell's name left out the number on its badge, which axe refuses (label in name), and that was fixed too.
+
+#386 had already been merged, so the toast and the bell's name could not go into it. Asked how they should reach main, she chose a new issue and pull request: [#400](https://github.com/xiu2809xiu-rgb/orderpilot/issues/400).
