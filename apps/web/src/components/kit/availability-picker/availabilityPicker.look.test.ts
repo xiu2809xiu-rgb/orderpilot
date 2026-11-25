@@ -70,7 +70,7 @@ describe("the pill's sheet", () => {
       expect(Number(size[1])).toBeGreaterThanOrEqual(44);
     }
     expect(item).toContain("80px");
-    expect(block).toContain("min(264px, calc(100vw - 16px))");
+    expect(block).toContain("min(266px, calc(100vw - 16px))");
     expect(block).toMatch(/\.ap-chip,\s*\.ap-measure\s*{\s*display: none/);
   });
 

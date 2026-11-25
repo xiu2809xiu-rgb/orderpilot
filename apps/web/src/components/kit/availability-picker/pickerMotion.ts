@@ -27,13 +27,19 @@ export const pickerMotion = {
   chipTextMs: 160,
 } as const;
 
-/** The pill's boxes in CSS px: a fine pointer gets a caption, a finger gets words under the orbs. */
+/**
+ * The pill's border boxes in CSS px: a fine pointer gets a caption, a finger
+ * gets words under the orbs. Each box is its content (164 by 94, and 264 by 96)
+ * and the 1 px border on each side; a box that left the border out would sit
+ * the orbs 2 px off-centre.
+ */
 export const pillGeometry = {
   orb: 44,
   pad: 8,
   gap: 8,
-  fine: { width: 164, height: 94 },
-  coarse: { width: 264, height: 96 },
+  border: 1,
+  fine: { width: 166, height: 96 },
+  coarse: { width: 266, height: 98 },
   chip: { height: 28, minWidth: 72, padX: 24, inset: 4 },
 } as const;
 
@@ -94,11 +100,15 @@ export const GROW_EASING = springEasing(
   pickerMotion.spring.damping,
 );
 
-/** Where the caption sits under the active orb: its left edge and width, in CSS px. */
+/**
+ * Where the caption sits under the active orb: its left edge and width, in CSS
+ * px, from the pill's padding edge (the caption is positioned inside the
+ * border, so `pillWidth` is the padding-box width, 164 by default).
+ */
 export function chipPlace(
   index: number,
   wordWidth: number,
-  pillWidth: number = pillGeometry.fine.width,
+  pillWidth: number = pillGeometry.fine.width - 2 * pillGeometry.border,
 ): { x: number; w: number } {
   const { orb, pad, gap, chip } = pillGeometry;
   const w = Math.max(chip.minWidth, Math.ceil(wordWidth) + chip.padX);

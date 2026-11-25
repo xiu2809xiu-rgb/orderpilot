@@ -141,8 +141,56 @@ describe("the spring", () => {
   });
 });
 
+describe("the pill's boxes", () => {
+  const { orb, pad, gap, border, fine, coarse } = pillGeometry;
+
+  it("hold their content and the border, so the orbs sit in the middle", () => {
+    // Three 44 px orbs, two gaps and the padding on each side.
+    expect(fine.width - 2 * border).toBe(3 * orb + 2 * gap + 2 * pad);
+    // Three 80 px choices, two 4 px gaps and the padding.
+    expect(coarse.width - 2 * border).toBe(3 * 80 + 2 * 4 + 2 * pad);
+    expect(coarse.height - 2 * border).toBe(pad + 80 + pad);
+    expect(fine.height - 2 * border).toBe(
+      pad + orb + 6 + pillGeometry.chip.height + pad,
+    );
+  });
+
+  it("are the sizes the sheet draws, on a fine pointer and on a finger", () => {
+    const fineBox = must(/^\.ap-pill\s*{([^}]*)}/m.exec(pickerCss))[1] ?? "";
+    expect(fineBox).toContain(`inline-size: ${String(fine.width)}px`);
+    expect(fineBox).toContain(`block-size: ${String(fine.height)}px`);
+    expect(fineBox).toContain("border: 1px solid");
+    const touch = must(
+      /@media \(pointer: coarse\)[^{]*{([\s\S]*)/.exec(pickerCss),
+    )[1];
+    expect(touch).toContain(
+      `inline-size: min(${String(coarse.width)}px, calc(100vw - 16px))`,
+    );
+    expect(touch).toContain(`block-size: ${String(coarse.height)}px`);
+  });
+
+  it("grow from the trigger's box by a ratio of the border box", () => {
+    expect(pickerCss).toContain(
+      `--ap-from-x: calc(24 / ${String(fine.width)})`,
+    );
+    expect(pickerCss).toContain(
+      `--ap-from-y: calc(24 / ${String(fine.height)})`,
+    );
+    expect(pickerCss).toContain(
+      `--ap-from-x: calc(32 / ${String(fine.width)})`,
+    );
+    expect(pickerCss).toContain(
+      `--ap-from-x: calc(44 / ${String(coarse.width)})`,
+    );
+    expect(pickerCss).toContain(
+      `--ap-from-y: calc(44 / ${String(coarse.height)})`,
+    );
+  });
+});
+
 describe("the caption's place", () => {
-  const { width } = pillGeometry.fine;
+  // The caption is placed inside the border.
+  const width = pillGeometry.fine.width - 2 * pillGeometry.border;
 
   it("is as wide as its word plus 24 px, and at least 72", () => {
     expect(chipPlace(0, 40).w).toBe(72);
