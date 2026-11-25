@@ -4,7 +4,13 @@
 // own build from a written description of the behaviour (proportions, spring feel, a caption that follows the choice,
 // a flash of light after a pick, the keyboard model): no source, markup, picture, font, colour or glyph drawing was
 // copied. A private prototype for a school module. Adapted to OrderPilot's tokens.
-import { useEffect, useId, useState, type SyntheticEvent } from "react";
+import {
+  useEffect,
+  useEffectEvent,
+  useId,
+  useState,
+  type SyntheticEvent,
+} from "react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -55,6 +61,31 @@ export function AvailabilityControl({
   const [pillOpen, setPillOpen] = useState(false);
   const menuReady = useDeferredModule(dropdownMenuModule) !== undefined;
 
+  // The control keeps the open state itself when no parent does, so it can
+  // close a menu whose pill never came.
+  const [ownOpen, setOwnOpen] = useState(defaultOpen ?? false);
+  const isOpen = open ?? ownOpen;
+  const change = (next: boolean) => {
+    if (open === undefined) setOwnOpen(next);
+    onOpenChange?.(next);
+  };
+  const giveUp = useEffectEvent(() => {
+    change(false);
+  });
+  // Asking again also retries a chunk that failed: the module forgets a failure.
+  // Nothing is said, as with the shell's other deferred menus: a failed chunk
+  // closes the menu and the next press tries again.
+  useEffect(() => {
+    if (!isOpen) return;
+    let live = true;
+    pickerModule.load().catch(() => {
+      if (live) giveUp();
+    });
+    return () => {
+      live = false;
+    };
+  }, [isOpen]);
+
   useEffect(
     () =>
       whenIdle(() => {
@@ -82,11 +113,7 @@ export function AvailabilityControl({
 
   return (
     <>
-      <DropdownMenu
-        open={open}
-        defaultOpen={defaultOpen}
-        onOpenChange={onOpenChange}
-      >
+      <DropdownMenu open={isOpen} onOpenChange={change}>
         <DropdownMenuTrigger
           asChild
           onPointerDown={hold}
