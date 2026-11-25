@@ -1499,18 +1499,17 @@
     },
     {
       "key": "P-50",
-      "title": "Submit, cancel and copy an order",
+      "title": "Cancel and copy an order",
       "epic": "P",
       "area": "area: 1 document AI and integration",
       "priority": "must",
-      "estimate": 5,
+      "estimate": 3,
       "reqs": ["M2", "M4"],
       "branch": "feat/order-actions",
-      "sprints": [2],
-      "dependsOn": ["P-49"],
-      "summary": "The rest of an order's life on area 1's side. Prompt 004 section 4.",
+      "sprints": [7],
+      "dependsOn": ["P-49", "P-114"],
+      "summary": "The rest of an order's life on area 1's side, after P-114's submit. Prompt 004 section 4.",
       "acceptance": [
-        "Submit moves the order's capture state and calls an `OrderHandoff` port, bound to a mock. Azri binds it after C-2, and no transition rule is written here.",
         "A submitted order then appears in the tracker and the home page's flow, from a fixture state named as a fixture.",
         "Cancel asks for a reason, works on a draft or a submitted order, sample orders included, and hard-deletes nothing.",
         "Copy opens a new draft from any order.",
@@ -1527,7 +1526,7 @@
       "estimate": 8,
       "reqs": ["M3", "M4"],
       "branch": "feat/one-order-page",
-      "sprints": [2],
+      "sprints": [7],
       "dependsOn": ["P-50"],
       "summary": "One page for an order, with each area's section in its owner's folder. Prompt 003 item 6, on prompt 004's document form.",
       "acceptance": [
@@ -2800,18 +2799,18 @@
       "epic": "C",
       "area": "area: 1 document AI and integration",
       "priority": "must",
-      "estimate": 5,
+      "estimate": 8,
       "reqs": ["M4"],
       "branch": "feat/area1-po-versions",
-      "sprints": [6],
-      "dependsOn": ["P-49", "P-51", "P-55", "P-107"],
+      "sprints": [6, 7],
+      "dependsOn": ["P-49", "P-107", "P-113", "P-114"],
       "summary": "A revised PO is the next version of the same order, shown with its differences.",
       "acceptance": [
-        "A PO with the same customer and PO number becomes the next version of that order only when a person confirms it revises the existing order. Otherwise the 409 stays the answer to a re-sent PO, and an ADR amends ADR 0047's duplicate rule.",
+        "A PO with the same customer and PO number as a submitted order becomes that order's next PO version only when a person confirms it revises the order. Otherwise the 409 stays the answer to a re-sent PO, and an ADR amends ADR 0047's duplicate rule.",
         "The order page lists every version and shows the differences between two, field by field and line by line.",
         "An earlier version stays readable and marked superseded, and nothing is deleted.",
-        "The version number has its own name, because `version` in `packages/shared/src/orders.ts` is already the edit token.",
-        "Each check result shows which version it ran on.",
+        "The version number is `poVersionNo` (P-113), because `version` in `packages/shared/src/orders.ts` is already the edit token.",
+        "A check result can hold the PO version it ran on. Until area 3's engine runs on a stored order it holds none, and the page says so.",
         "`.http` requests and API tests for 401, 403, 404, validation and a third version.",
         "Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark."
       ]
@@ -3285,6 +3284,49 @@
         "Each empty state has a simple illustration of our own and its next action.",
         "Reduced motion shows the final value at once.",
         "Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark, with a short capture of the motion."
+      ]
+    },
+    {
+      "key": "P-113",
+      "title": "The PO version contract",
+      "epic": "C",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 2,
+      "reqs": ["M4"],
+      "branch": "feat/area1-po-version-contract",
+      "sprints": [5],
+      "dependsOn": ["P-49"],
+      "summary": "The name of the PO version number, and the one port through which an order made on the form is handed to the workflow. Area 2 builds against it before P-89 exists.",
+      "acceptance": [
+        "An ADR names the PO version number `poVersionNo` (`version` stays the edit token) and fixes the `OrderHandoff` contract: its two calls, what each hands over and what it leaves out, that a call runs inside area 1's transaction, that a refusal rolls the write back, that a repeated call is safe, and what an order with no workflow answers. It says the calls are made by P-114 and by P-89, and that ADR 0047's duplicate rule is amended only when P-89 merges.",
+        "`OrderHandoff` is an abstract class in `apps/api/src/modules/orders/domain/` with `submitted` and `poVersionConfirmed`, each taking a typed fact.",
+        "A stand-in is bound in `OrdersModule`. It changes no status and says so in its log line.",
+        "A contract test that any implementation can run: a repeated call is safe, an order with no workflow answers \"nothing to do\" and does not throw, and a refusal is a `DomainError`. It runs against the stand-in.",
+        "Azri is asked to review the port and the ADR.",
+        "Nothing is claimed as built beyond the port and its stand-in: no table, no route, no shared schema, and no caller yet."
+      ]
+    },
+    {
+      "key": "P-114",
+      "title": "Submit an order",
+      "epic": "P",
+      "area": "area: 1 document AI and integration",
+      "priority": "must",
+      "estimate": 3,
+      "reqs": ["M2", "M4"],
+      "branch": "feat/area1-order-submit",
+      "sprints": [6],
+      "dependsOn": ["P-49", "P-113"],
+      "summary": "A draft becomes a submitted order and is handed to the workflow. The first half of P-50, and what P-89 revises.",
+      "acceptance": [
+        "Submit moves a draft's capture state to submitted, guarded on the edit token, and calls `OrderHandoff.submitted` inside the same transaction. No transition rule is written here.",
+        "A refusal from the workflow's side leaves the order a draft, and the person sees its words.",
+        "A submitted order's page says so. It says plainly when the order is not in the workflow yet, and never reads as approved.",
+        "Submit is audited, with no price in the trail.",
+        "`.http` requests and API tests for 401, 403, 404, a stale edit token and a second submit.",
+        "The Playwright test from P-49 covers Submit.",
+        "Check: prompt 003 section 4 and prompt 006 section 6, for every role it touches, at 1440 by 900 and 390 by 844, in light and dark."
       ]
     }
   ]
