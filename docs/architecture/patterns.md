@@ -275,6 +275,7 @@ The first screen (the sign-in page or a role's home page) waits for the entry ch
 | Lookup by number          | `master-data/item-lookup.ts`                                                        | Orders ask master data for items by Business Central number, as they do for customers, and never match on a name                                                                                                            |
 | One formula for stock     | `master-data/master-data.service.ts` (`availableStock`)                             | The figure beside an order line is built from the same `StockPosition` as the item page, so the two cannot disagree                                                                                                         |
 | A leaf that polls         | `apps/web/src/features/orders/LineAvailability.tsx`                                 | It draws nothing and writes only changed figures into the form without marking it changed, so a refresh never re-renders the lines being typed in                                                                           |
+| Consumer-declared port    | `orders/domain/order-handoff.ts`, `orders/mock/logging-order-handoff.ts`            | Area 1 declares the call it needs from area 2 and binds a stand-in that logs and changes nothing; area 2 swaps its class in with one line, and `order-handoff.contract.ts` is the test it runs                              |
 
 ## The shell: the panel, the page change and the theme (P-107)
 
