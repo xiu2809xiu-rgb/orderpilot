@@ -291,34 +291,81 @@ test("a press and a release of the mouse on the ring or the dot opens the menu a
   }
 });
 
-test("a double click on the ring opens the menu and picks nothing", async ({
+test("a double click on the ring opens the menu and picks nothing, at every gap up to the system's double-click time, and a press after a pause picks", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await signIn(page, SETTER);
-  expect(
-    (
-      await call(SETTER, "PUT", "/availability/mine", {
-        value: "DO_NOT_DISTURB",
-      })
-    ).status,
-  ).toBe(200);
-  try {
+  const puts: string[] = [];
+  page.on("request", (request) => {
+    if (request.method() === "PUT" && request.url().includes("/availability")) {
+      puts.push(request.url());
+    }
+  });
+  const fromDoNotDisturb = async (): Promise<Locator> => {
+    // A value that a stray pick of the first choice would change.
+    expect(
+      (
+        await call(SETTER, "PUT", "/availability/mine", {
+          value: "DO_NOT_DISTURB",
+        })
+      ).status,
+    ).toBe(200);
+    puts.length = 0;
     await page.goto("/settings?section=account");
     const ring = page.locator('.ap-trigger[data-skin="ring"]');
     await expect(ring).toBeVisible();
+    return ring;
+  };
+  const centreOf = async (ring: Locator) => {
     const box = await ring.boundingBox();
     expect(box, "the ring has a box").not.toBeNull();
-    if (!box) return;
-    // The pill opens over the ring, so the second click lands on its first choice.
-    await page.mouse.dblclick(box.x + box.width / 2, box.y + box.height / 2, {
-      delay: 40,
-    });
-    await page.waitForTimeout(900);
+    return box
+      ? { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+      : { x: 0, y: 0 };
+  };
+  const mine = async () => {
     const { body } = await call(SETTER, "GET", "/availability/mine");
-    expect(myAvailabilityResponseSchema.parse(body).data.value).toBe(
-      "DO_NOT_DISTURB",
-    );
+    return myAvailabilityResponseSchema.parse(body).data.value;
+  };
+  try {
+    // The pill opens over the ring, so the second click lands on its first
+    // choice. The quarter second stops a fast double click; the opening press
+    // said again at its place stops a slower one, up to 500 ms.
+    for (const gap of [60, 200, 320, 440]) {
+      const ring = await fromDoNotDisturb();
+      const { x, y } = await centreOf(ring);
+      await page.mouse.move(x, y);
+      await page.mouse.down();
+      await page.mouse.up();
+      await page.waitForTimeout(gap);
+      await page.mouse.down();
+      await page.mouse.up();
+      await page.waitForTimeout(900);
+      expect(
+        await mine(),
+        `still Do not disturb after a gap of ${String(gap)} ms`,
+      ).toBe("DO_NOT_DISTURB");
+      expect(
+        puts,
+        `no change is sent after a gap of ${String(gap)} ms`,
+      ).toEqual([]);
+    }
+    // A person who waits has chosen: one press to open, a pause, one press
+    // and release at the same point picks the first choice.
+    const ring = await fromDoNotDisturb();
+    const { x, y } = await centreOf(ring);
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.up();
+    await expect(pill(page)).toBeVisible();
+    await page.waitForTimeout(700);
+    await page.mouse.down();
+    await page.mouse.up();
+    await expect
+      .poll(mine, { message: "Available is picked" })
+      .toBe("AVAILABLE");
+    expect(puts, "one change is sent").toHaveLength(1);
   } finally {
     await putBack();
   }
