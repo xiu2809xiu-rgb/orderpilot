@@ -12,9 +12,11 @@ import { z } from "zod";
 import { RecordLink } from "@/components/common/RecordLink";
 import { Button } from "@/components/ui/button";
 import { orderHref } from "@/features/directions/screens/home/homeLinks";
+import { AdminNotices } from "@/features/governance/notices/AdminNotices";
+import { useAdminNotices } from "@/features/governance/notices/useAdminNotices";
 import { apiClient } from "@/lib/api/instance";
 import { formatDay } from "@/lib/format";
-import { useSessionStore } from "@/stores/session";
+import { hasPermission, useSessionStore } from "@/stores/session";
 import { Popover, PopoverContent, PopoverTrigger } from "./overlays/popover";
 
 const NEXT = 5;
@@ -35,19 +37,28 @@ async function nextReminders(signal: AbortSignal) {
   return remindersSchema.parse(body);
 }
 
-/** The role's reminders: a count on the bell and the next five in its popover. */
+/**
+ * The role's reminders: a count on the bell and the next five in its popover.
+ * For a person who decides approvals, also what the administrator's role
+ * gained (#383), counted while unread.
+ */
 export function Notifications() {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const role = useSessionStore((state) => state.session?.user.role);
+  const session = useSessionStore((state) => state.session);
+  const role = session?.user.role;
   const hasInbox = INBOX_ROLES.some((inbox) => inbox === role);
+  const decides = hasPermission(session, "approvals.decide");
   const reminders = useQuery({
     queryKey: ["bell-reminders"],
     queryFn: ({ signal }) => nextReminders(signal),
     enabled: hasInbox,
   });
+  const notices = useAdminNotices(decides);
   const total = reminders.data?.meta.total ?? 0;
-  const shown = total > 99 ? "99+" : String(total);
+  const unread = notices.data?.meta.unread ?? 0;
+  const badge = total + unread;
+  const shown = badge > 99 ? "99+" : String(badge);
   const close = () => {
     setOpen(false);
   };
@@ -60,13 +71,18 @@ export function Notifications() {
           size="icon"
           className="relative dx-bar-icon"
           aria-label={
-            total > 0
-              ? t("notifications.titleCount", { count: total, shown })
-              : t("notifications.title")
+            unread > 0
+              ? t("notifications.titleWithNotices", {
+                  reminders: t("notifications.reminderCount", { count: total }),
+                  notices: t("notifications.noticeCount", { count: unread }),
+                })
+              : total > 0
+                ? t("notifications.titleCount", { count: total, shown })
+                : t("notifications.title")
           }
         >
           <Bell className="size-4" aria-hidden="true" />
-          {total > 0 ? (
+          {badge > 0 ? (
             <span
               aria-hidden="true"
               className="absolute -top-0.5 -right-0.5 min-w-4 rounded-full bg-primary px-1 text-center text-xs leading-4 font-medium text-primary-foreground tabular-nums"
@@ -86,6 +102,7 @@ export function Notifications() {
         <h2 className="shrink-0 text-sm font-medium">
           {t("notifications.title")}
         </h2>
+        {decides ? <AdminNotices /> : null}
         {!hasInbox ? (
           <p className="text-sm text-muted-foreground">
             {t("notifications.noInbox")}

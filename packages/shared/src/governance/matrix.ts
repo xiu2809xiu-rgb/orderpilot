@@ -28,7 +28,11 @@ export const DEFAULT_DATA_SCOPES: Record<Role, DataScope> = {
   AUDITOR: "all",
 };
 
-/** The system admin configures the platform and never approves, posts or pays. */
+/**
+ * The system admin configures the platform and never does the work itself.
+ * Routing an SPR and taking in a document joined the list in #383: an
+ * administrator could otherwise give them to its own role alone.
+ */
 export const NEVER_FOR_SYSTEM_ADMIN = [
   "approvals.decide",
   "payments.confirm",
@@ -36,6 +40,8 @@ export const NEVER_FOR_SYSTEM_ADMIN = [
   "tasks.complete",
   "orders.create",
   "orders.edit",
+  "spr.route",
+  "documents.upload",
 ] as const satisfies readonly Permission[];
 
 /** Kept on the system admin role, so the matrix can always be edited. */
@@ -59,7 +65,7 @@ export const LOCKED_CELLS: readonly LockedCell[] = [
     permission,
     kind: "never",
     reason:
-      "The system admin configures the platform and never approves, posts or pays.",
+      "The system admin configures the platform and never does the work itself: approving, paying, routing an SPR, taking in a document or entering an order.",
   })),
   ...ALWAYS_FOR_SYSTEM_ADMIN.map((permission): LockedCell => ({
     role: "SYSTEM_ADMIN",
@@ -67,6 +73,16 @@ export const LOCKED_CELLS: readonly LockedCell[] = [
     kind: "always",
     reason: "Without it nobody could edit the matrix again.",
   })),
+  // #383: a management approver decides approvals, and reads the notices of
+  // what the administrator gives its own role. Taking it away would stop every
+  // approval and silence the people who are told.
+  {
+    role: "APPROVER",
+    permission: "approvals.decide",
+    kind: "always",
+    reason:
+      "A management approver decides approvals, and is told what the administrator gives its own role.",
+  },
 ];
 
 export const roleAccessSchema = z.object({

@@ -50,6 +50,8 @@ describe("the OpenAPI document (what orval reads)", () => {
       "/api/v1/governance/matrix/copy",
       "/api/v1/governance/matrix/{role}/data-scope",
       "/api/v1/governance/matrix/{role}/permissions/{permission}",
+      "/api/v1/governance/notices",
+      "/api/v1/governance/notices/{id}/read",
       "/api/v1/insights/kpis",
       "/api/v1/master-data/available-stock",
       "/api/v1/master-data/customers",
