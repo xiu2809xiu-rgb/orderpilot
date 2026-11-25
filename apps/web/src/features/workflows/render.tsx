@@ -1,4 +1,4 @@
-import type { Role } from "@orderpilot/shared";
+import type { Permission, Role } from "@orderpilot/shared";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render } from "@testing-library/react";
 import { Suspense, type ReactElement } from "react";
@@ -12,9 +12,21 @@ import { sessionFor } from "@/test/fixtures";
  */
 export function renderWorkflowPage(
   element: ReactElement,
-  options: { role: Role; route: string; path: string },
+  options: {
+    role: Role;
+    route: string;
+    path: string;
+    /** Permissions held on top of the role's own, to try a session no role has yet. */
+    extraPermissions?: readonly Permission[];
+  },
 ) {
-  useSessionStore.getState().setSession(sessionFor(options.role));
+  const session = sessionFor(options.role);
+  useSessionStore.getState().setSession({
+    ...session,
+    permissions: [
+      ...new Set([...session.permissions, ...(options.extraPermissions ?? [])]),
+    ],
+  });
   document.cookie = "op_csrf=csrf-token-1";
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },

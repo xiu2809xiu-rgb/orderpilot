@@ -190,8 +190,9 @@ function reminderFor(
 
 /**
  * Reminders for the tasks that are due tomorrow or late: scheduled before the
- * due day, sent once it has passed, and escalated to management when a task
- * is three days late. The days are fixtures, not the reminders story's rules.
+ * due day, sent once it has passed, and escalated to the management approvers
+ * when a task is three days late. The days are fixtures, not the reminders
+ * story's rules.
  */
 export function makeReminders(
   tasks: readonly SampleTask[],
@@ -219,7 +220,7 @@ export function makeReminders(
         1,
       ),
       escalatesAt: escalated ? null : atHour(addDays(dueOn, 3), 1),
-      escalatedTo: escalated ? "MANAGEMENT" : null,
+      escalatedTo: escalated ? "APPROVER" : null,
     });
   }
   return reminders;

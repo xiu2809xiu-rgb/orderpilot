@@ -337,4 +337,42 @@ describe("the task inbox", () => {
     expect(asked).toContain("LOGISTICS");
     expect(asked).toContain("WAREHOUSE");
   });
+
+  // The picker is an extra choice for a role that has an inbox of its own and may
+  // also read the others: it must not take the person away from their own tasks.
+  it("opens its own inbox first for a role that holds an inbox and may read any", async () => {
+    const asked: string[] = [];
+    server.use(
+      getWorkflowsMyTasksMockHandler(page([SPR_TASK])),
+      getWorkflowsInboxTasksMockHandler(({ params }) => {
+        asked.push(String(params.role));
+        return getWorkflowsInboxTasksResponseMock({
+          data: [TASK] as never,
+          meta: { page: 1, pageSize: 25, total: 1, mock: true },
+        });
+      }),
+    );
+    renderWorkflowPage(<WorkflowsPage />, {
+      role: "APPROVER",
+      route: "/",
+      path: "/",
+      extraPermissions: ["workflows.inboxes.any"],
+    });
+    expect(
+      await screen.findByText(
+        "Approve or reject the stock purchase requisition",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "My tasks" }),
+    ).toBeInTheDocument();
+    expect(asked).toEqual([]);
+    const group = screen.getByRole("group", { name: "Show the inbox of" });
+    expect(
+      within(group).getByRole("button", { name: "Management approver" }),
+    ).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(within(group).getByRole("button", { name: "Logistics" }));
+    expect(await screen.findByText("Add the air waybill")).toBeInTheDocument();
+    expect(asked).toEqual(["LOGISTICS"]);
+  });
 });
